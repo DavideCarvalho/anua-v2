@@ -1,0 +1,19 @@
+import type { HttpContext } from '@adonisjs/core/http'
+import GamificationEvent from '#models/gamification_event'
+
+export default class ShowGamificationEventController {
+  async handle({ params, response }: HttpContext) {
+    const event = await GamificationEvent.query()
+      .where('id', params.id)
+      .preload('student', (studentQuery) => {
+        studentQuery.preload('user')
+      })
+      .first()
+
+    if (!event) {
+      return response.notFound({ message: 'Gamification event not found' })
+    }
+
+    return response.ok(event)
+  }
+}

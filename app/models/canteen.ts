@@ -1,0 +1,45 @@
+import { DateTime } from 'luxon'
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import School from './school.js'
+import User from './user.js'
+import CanteenItem from './canteen_item.js'
+import CanteenPurchase from './canteen_purchase.js'
+import CanteenMeal from './canteen_meal.js'
+import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
+
+export default class Canteen extends BaseModel {
+  @column({ isPrimary: true })
+  declare id: string
+
+  @column()
+  declare schoolId: string
+
+  @column()
+  declare responsibleUserId: string
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+
+  // Relationships
+  @belongsTo(() => School)
+  declare school: BelongsTo<typeof School>
+
+  @belongsTo(() => User, { foreignKey: 'responsibleUserId' })
+  declare responsibleUser: BelongsTo<typeof User>
+
+  @hasMany(() => CanteenItem)
+  declare items: HasMany<typeof CanteenItem>
+
+  @hasMany(() => CanteenPurchase)
+  declare purchases: HasMany<typeof CanteenPurchase>
+
+  @hasMany(() => CanteenMeal)
+  declare meals: HasMany<typeof CanteenMeal>
+
+  @hasMany(() => CanteenMonthlyTransfer)
+  declare monthlyTransfers: HasMany<typeof CanteenMonthlyTransfer>
+}
