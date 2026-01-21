@@ -2,7 +2,6 @@
 FROM node:22-alpine AS builder
 
 # Build time environment variables (needed for AdonisJS build)
-# These will NOT be present at runtime - Cloud Run will inject the real values
 ARG NODE_ENV=production
 ARG PORT=3333
 ARG APP_KEY=placeholder_key_for_build_only
@@ -16,7 +15,6 @@ ARG DB_PASSWORD=postgres
 ARG DB_DATABASE=anua_v2
 ARG TZ=UTC
 
-# Set as ENV for the build steps
 ENV NODE_ENV=${NODE_ENV} \
     PORT=${PORT} \
     APP_KEY=${APP_KEY} \
@@ -32,11 +30,14 @@ ENV NODE_ENV=${NODE_ENV} \
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# Install pnpm
+RUN npm i -g pnpm
 
-# Install dependencies
-RUN npm ci
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+
+# Install ALL dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -54,14 +55,16 @@ ENV TZ=UTC
 
 WORKDIR /app
 
+# Install pnpm
+RUN npm i -g pnpm
+
 # Copy built application
 COPY --from=builder /app/build ./
 
 # Install production dependencies only
-RUN npm ci --omit=dev
+RUN pnpm install --prod --frozen-lockfile
 
 # Expose the port
 EXPOSE 3333
 
-# Start the server (migrations are run via Cloud Run Job)
 CMD ["node", "bin/server.js"]
