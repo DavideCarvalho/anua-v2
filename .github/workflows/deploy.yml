@@ -10,7 +10,6 @@ env:
   PROJECT_ID: anua-480822
   REGION: southamerica-east1
   SERVICE_NAME: production-anua-v2-api
-  MIGRATE_JOB_NAME: production-anua-v2-migrate
   REGISTRY: southamerica-east1-docker.pkg.dev
   REPOSITORY: anua-v2-docker
   IMAGE_NAME: api
@@ -52,20 +51,6 @@ jobs:
         run: |
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Run database migrations
-        run: |
-          gcloud run jobs update ${{ env.MIGRATE_JOB_NAME }} \
-            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --region=${{ env.REGION }} \
-            --set-env-vars="NODE_ENV=production,TZ=UTC,LOG_LEVEL=info,SESSION_DRIVER=cookie,DB_HOST=34.39.158.54,DB_PORT=5432,DB_USER=app_user,DB_DATABASE=school_super_app" \
-            --set-secrets="APP_KEY=production-anua-v2-app-key:latest,DB_PASSWORD=production-anua-v2-db-password:latest" \
-            --quiet
-
-          gcloud run jobs execute ${{ env.MIGRATE_JOB_NAME }} \
-            --region=${{ env.REGION }} \
-            --wait \
-            --quiet
 
       - name: Deploy to Cloud Run
         run: |
