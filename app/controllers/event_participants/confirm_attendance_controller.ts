@@ -4,7 +4,7 @@ import EventParticipant from '#models/event_participant'
 
 export default class ConfirmAttendanceController {
   async handle({ params, response }: HttpContext) {
-    const { eventId, participantId } = params
+    const { eventId, userId } = params
 
     const event = await Event.find(eventId)
 
@@ -21,7 +21,7 @@ export default class ConfirmAttendanceController {
 
     const participant = await EventParticipant.query()
       .where('eventId', eventId)
-      .where('participantId', participantId)
+      .where('userId', userId)
       .first()
 
     if (!participant) {
@@ -30,7 +30,7 @@ export default class ConfirmAttendanceController {
 
     participant.status = 'ATTENDED'
     await participant.save()
-    await participant.load('participant')
+    await participant.load('user')
 
     return response.ok(participant)
   }

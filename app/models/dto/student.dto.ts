@@ -13,8 +13,6 @@ export default class StudentDto extends BaseModelDto {
   declare canteenLimit: number | null
   declare balance: number
   declare enrollmentStatus: string
-  declare createdAt: string
-  declare updatedAt: string
   declare user?: UserDto
 
   constructor(student?: Student) {
@@ -23,7 +21,8 @@ export default class StudentDto extends BaseModelDto {
     if (!student) return
 
     this.id = student.id
-    this.discountPercentage = student.discountPercentage
+    // Note: Model uses descountPercentage (typo in DB)
+    this.discountPercentage = student.descountPercentage
     this.monthlyPaymentAmount = student.monthlyPaymentAmount
     this.isSelfResponsible = student.isSelfResponsible
     this.paymentDate = student.paymentDate
@@ -32,8 +31,7 @@ export default class StudentDto extends BaseModelDto {
     this.canteenLimit = student.canteenLimit
     this.balance = student.balance
     this.enrollmentStatus = student.enrollmentStatus
-    this.createdAt = student.createdAt.toISO()!
-    this.updatedAt = student.updatedAt.toISO()!
+    // Note: Student model doesn't have createdAt/updatedAt - they come from User
     this.user = student.user ? new UserDto(student.user) : undefined
   }
 }

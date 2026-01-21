@@ -10,7 +10,7 @@ export default class CreateCanteenMealController {
 
     const canteen = await Canteen.find(payload.canteenId)
     if (!canteen) {
-      return response.notFound({ message: 'Cantina não encontrada' })
+      return response.notFound({ message: 'Cantina nao encontrada' })
     }
 
     const meal = await CanteenMeal.create({
@@ -18,9 +18,13 @@ export default class CreateCanteenMealController {
       name: payload.name,
       description: payload.description ?? null,
       price: payload.price,
-      servedAt: DateTime.fromJSDate(payload.servedAt),
+      // Validator provides servedAt, model expects date
+      date: DateTime.fromJSDate(payload.servedAt),
+      // Default meal type since validator doesn't provide it
+      mealType: 'LUNCH',
       isActive: payload.isActive ?? true,
-      maxReservations: payload.maxReservations ?? null,
+      // Validator provides maxReservations, model expects maxServings
+      maxServings: payload.maxReservations ?? null,
     })
 
     await meal.load('canteen')

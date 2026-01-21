@@ -44,7 +44,8 @@ export class ContractDto extends BaseModelDto {
     this.description = instance.description
     this.endDate = instance.endDate ? instance.endDate.toISO() : null
     this.enrollmentValue = instance.enrollmentValue
-    this.amount = instance.amount
+    // Note: Model uses ammount (typo in DB)
+    this.amount = instance.ammount
     this.docusealTemplateId = instance.docusealTemplateId
     this.paymentType = instance.paymentType
     this.enrollmentValueInstallments = instance.enrollmentValueInstallments

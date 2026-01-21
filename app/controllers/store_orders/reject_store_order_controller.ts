@@ -20,7 +20,8 @@ export default class RejectStoreOrderController {
     }
 
     order.status = 'REJECTED'
-    order.rejectionReason = payload.reason
+    // Model uses cancellationReason, not rejectionReason
+    order.cancellationReason = payload.reason
 
     await order.save()
 

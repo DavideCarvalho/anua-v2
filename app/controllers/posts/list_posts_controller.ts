@@ -4,40 +4,31 @@ import { listPostsValidator } from '#validators/post'
 
 export default class ListPostsController {
   async handle({ request, response }: HttpContext) {
-    const {
-      schoolId,
-      classId,
-      authorId,
-      type,
-      visibility,
-      page = 1,
-      limit = 20,
-    } = await request.validateUsing(listPostsValidator)
+    const data = await request.validateUsing(listPostsValidator)
+    const page = data.page ?? 1
+    const limit = data.limit ?? 20
 
     const query = Post.query()
-      .preload('author')
+      .preload('user')
       .preload('school')
       .withCount('likes')
       .withCount('comments')
 
-    if (schoolId) {
-      query.where('schoolId', schoolId)
+    if (data.schoolId) {
+      query.where('schoolId', data.schoolId)
     }
 
-    if (classId) {
-      query.where('classId', classId)
+    // Validator provides authorId, model uses userId
+    if (data.authorId) {
+      query.where('userId', data.authorId)
     }
 
-    if (authorId) {
-      query.where('authorId', authorId)
+    if (data.type) {
+      query.where('type', data.type)
     }
 
-    if (type) {
-      query.where('type', type)
-    }
-
-    if (visibility) {
-      query.where('visibility', visibility)
+    if (data.visibility) {
+      query.where('visibility', data.visibility)
     }
 
     const posts = await query

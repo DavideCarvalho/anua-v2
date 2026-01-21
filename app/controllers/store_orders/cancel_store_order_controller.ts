@@ -25,7 +25,7 @@ export default class CancelStoreOrderController {
     }
 
     order.status = 'CANCELED'
-    order.cancelledAt = DateTime.now()
+    order.canceledAt = DateTime.now()
 
     await order.save()
 

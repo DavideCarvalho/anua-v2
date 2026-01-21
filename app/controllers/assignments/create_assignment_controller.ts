@@ -1,27 +1,58 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
+import TeacherHasClass from '#models/teacher_has_class'
+import AcademicPeriod from '#models/academic_period'
+import Class_ from '#models/class'
 import { createAssignmentValidator } from '#validators/assignment'
 
 export default class CreateAssignmentController {
   async handle({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createAssignmentValidator)
 
+    // Find the TeacherHasClass record that links teacher, class, and subject
+    const teacherHasClass = await TeacherHasClass.query()
+      .where('teacherId', payload.teacherId)
+      .where('classId', payload.classId)
+      .where('subjectId', payload.subjectId)
+      .first()
+
+    if (!teacherHasClass) {
+      return response.notFound({
+        message: 'Teacher-class-subject association not found',
+      })
+    }
+
+    // Get the school from the class to find the active academic period
+    const classRecord = await Class_.find(payload.classId)
+    if (!classRecord) {
+      return response.notFound({ message: 'Class not found' })
+    }
+
+    // Find active academic period for this school
+    const academicPeriod = await AcademicPeriod.query()
+      .where('schoolId', classRecord.schoolId)
+      .where('isActive', true)
+      .first()
+
+    if (!academicPeriod) {
+      return response.notFound({ message: 'No active academic period found' })
+    }
+
     const assignment = await Assignment.create({
-      title: payload.title,
+      name: payload.title,
       description: payload.description,
-      instructions: payload.instructions,
-      maxScore: payload.maxScore,
-      status: payload.status || 'DRAFT',
+      grade: payload.maxScore ?? 100,
       dueDate: DateTime.fromJSDate(payload.dueDate),
-      classId: payload.classId,
-      subjectId: payload.subjectId,
-      teacherId: payload.teacherId,
+      teacherHasClassId: teacherHasClass.id,
+      academicPeriodId: academicPeriod.id,
     })
 
-    await assignment.load('class')
-    await assignment.load('subject')
-    await assignment.load('teacher')
+    await assignment.load('teacherHasClass', (query) => {
+      query.preload('class')
+      query.preload('subject')
+      query.preload('teacher')
+    })
 
     return response.created(assignment)
   }

@@ -14,14 +14,14 @@ export default class UpdateCommentController {
     }
 
     // Only author can update their comment
-    if (comment.authorId !== auth.user!.id) {
+    if (comment.userId !== auth.user!.id) {
       return response.forbidden({ message: 'You can only edit your own comments' })
     }
 
-    comment.content = data.content
+    comment.comment = data.content
     await comment.save()
 
-    await comment.load('author')
+    await comment.load('user')
 
     return response.ok(comment)
   }

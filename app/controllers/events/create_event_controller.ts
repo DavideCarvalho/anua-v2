@@ -16,15 +16,25 @@ export default class CreateEventController {
       type: data.type,
       schoolId: data.schoolId,
       maxParticipants: data.maxParticipants,
-      additionalCostAmount: data.additionalCostAmount,
-      additionalCostDescription: data.additionalCostDescription,
-      startsAt: DateTime.fromJSDate(data.startsAt),
-      endsAt: data.endsAt ? DateTime.fromJSDate(data.endsAt) : null,
+      // Validator provides startsAt, model expects startDate
+      startDate: DateTime.fromJSDate(data.startsAt),
+      // Validator provides endsAt, model expects endDate
+      endDate: data.endsAt ? DateTime.fromJSDate(data.endsAt) : null,
       organizerId: auth.user!.id,
+      createdBy: auth.user!.id,
       status: 'DRAFT',
       visibility: data.visibility ?? 'SCHOOL_ONLY',
       requiresParentalConsent: data.requiresParentalConsent ?? false,
-      hasAdditionalCosts: data.hasAdditionalCosts ?? false,
+      // Use default values for fields not in validator
+      priority: 'NORMAL',
+      isAllDay: false,
+      isOnline: false,
+      isExternal: false,
+      requiresRegistration: false,
+      allowComments: true,
+      sendNotifications: true,
+      isRecurring: false,
+      currentParticipants: 0,
     })
 
     await event.load('organizer')

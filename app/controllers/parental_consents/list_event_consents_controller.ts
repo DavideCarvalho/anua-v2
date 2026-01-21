@@ -41,10 +41,9 @@ export default class ListEventConsentsController {
       studentId: consent.studentId,
       responsibleId: consent.responsibleId,
       status: consent.status,
-      notes: consent.notes,
-      requestedAt: consent.requestedAt?.toISO(),
-      approvedAt: consent.approvedAt?.toISO(),
-      deniedAt: consent.deniedAt?.toISO(),
+      approvalNotes: consent.approvalNotes,
+      denialReason: consent.denialReason,
+      respondedAt: consent.respondedAt?.toISO(),
       expiresAt: consent.expiresAt?.toISO(),
       student: {
         id: consent.student.id,
@@ -62,7 +61,7 @@ export default class ListEventConsentsController {
       event: {
         id: event.id,
         title: event.title,
-        startsAt: event.startsAt?.toISO(),
+        startDate: event.startDate?.toISO(),
       },
       stats,
       consents: formattedConsents,

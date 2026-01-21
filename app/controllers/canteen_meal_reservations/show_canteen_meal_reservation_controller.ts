@@ -6,11 +6,11 @@ export default class ShowCanteenMealReservationController {
     const reservation = await CanteenMealReservation.query()
       .where('id', params.id)
       .preload('meal', (mealQuery) => mealQuery.preload('canteen'))
-      .preload('user')
+      .preload('student')
       .first()
 
     if (!reservation) {
-      return response.notFound({ message: 'Reserva não encontrada' })
+      return response.notFound({ message: 'Reserva nao encontrada' })
     }
 
     return response.ok(reservation)

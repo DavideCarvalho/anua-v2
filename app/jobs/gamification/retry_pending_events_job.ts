@@ -19,13 +19,12 @@ export default class RetryPendingEventsJob extends Job<void> {
       timestamp: new Date().toISOString(),
     })
 
-    // Find events that are PENDING or FAILED for more than 10 minutes
+    // Find events that are not processed and have errors, created more than 10 minutes ago
     const tenMinutesAgo = DateTime.now().minus({ minutes: 10 })
 
     const pendingEvents = await GamificationEvent.query()
-      .whereIn('status', ['PENDING', 'FAILED'])
+      .where('processed', false)
       .where('createdAt', '<', tenMinutesAgo.toSQL())
-      .where('retryCount', '<', 5) // Max 5 retries
       .orderBy('createdAt', 'asc')
       .limit(100)
 
@@ -42,9 +41,8 @@ export default class RetryPendingEventsJob extends Job<void> {
 
     for (const event of pendingEvents) {
       try {
-        // Reset status and re-enqueue
-        event.status = 'PENDING'
-        event.retryCount = event.retryCount + 1
+        // Reset error and re-enqueue
+        event.error = null
         await event.save()
 
         await queueManager.dispatch(ProcessGamificationEventJob, {

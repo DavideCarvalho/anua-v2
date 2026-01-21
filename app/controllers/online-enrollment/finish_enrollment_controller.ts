@@ -10,7 +10,7 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import Scholarship from '#models/scholarship'
 import db from '@adonisjs/lucid/services/db'
 import { finishEnrollmentValidator } from '#validators/enrollment'
-import { nanoid } from 'nanoid'
+import { v7 as uuidv7 } from 'uuid'
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 
@@ -30,15 +30,15 @@ export default class FinishEnrollmentController {
       if (!studentUser) {
         studentUser = await User.create(
           {
-            id: nanoid(12),
+            id: uuidv7(),
             name: data.student.name,
-            slug: data.student.email?.split('@')[0] || nanoid(8),
+            slug: data.student.email?.split('@')[0] || uuidv7().slice(0, 8),
             email: data.student.email,
             phone: data.student.phone || null,
             documentNumber: data.student.document,
             documentType: data.student.documentType,
             birthDate: data.student.birthDate ? DateTime.fromISO(data.student.birthDate) : null,
-            password: await hash.make(nanoid(16)), // Random password, will need to reset
+            password: await hash.make(uuidv7()), // Random password, will need to reset
             active: true,
             whatsappContact: false,
             grossSalary: 0,
@@ -54,7 +54,7 @@ export default class FinishEnrollmentController {
         student = await Student.create(
           {
             id: studentUser.id,
-            discountPercentage: 0,
+            descountPercentage: 0,
             monthlyPaymentAmount: 0,
             isSelfResponsible: data.student.isSelfResponsible,
             balance: 0,
@@ -74,7 +74,7 @@ export default class FinishEnrollmentController {
 
       if (!existingSchoolLink) {
         await trx.insertQuery().table('"UserHasSchool"').insert({
-          id: nanoid(12),
+          id: uuidv7(),
           userId: studentUser.id,
           schoolId: data.schoolId,
           createdAt: DateTime.now().toSQL(),
@@ -100,7 +100,7 @@ export default class FinishEnrollmentController {
       await StudentHasLevel.create(
         {
           studentId: student.id,
-          levelAssignedToCourseAcademicPeriodId: nanoid(12), // Would need proper lookup
+          levelAssignedToCourseAcademicPeriodId: uuidv7(), // Would need proper lookup
           academicPeriodId: data.academicPeriodId,
           levelId: data.levelId,
           contractId: data.contractId || null,
@@ -116,7 +116,7 @@ export default class FinishEnrollmentController {
       // 6. Create student address
       await StudentAddress.create(
         {
-          id: nanoid(12),
+          id: uuidv7(),
           studentId: student.id,
           street: data.address.street,
           number: data.address.number,
@@ -135,7 +135,7 @@ export default class FinishEnrollmentController {
       if (data.medicalInfo) {
         const medicalInfo = await StudentMedicalInfo.create(
           {
-            id: nanoid(12),
+            id: uuidv7(),
             studentId: student.id,
             conditions: data.medicalInfo.conditions || null,
           },
@@ -147,7 +147,7 @@ export default class FinishEnrollmentController {
           for (const med of data.medicalInfo.medications) {
             await StudentMedication.create(
               {
-                id: nanoid(12),
+                id: uuidv7(),
                 medicalInfoId: medicalInfo.id,
                 name: med.name,
                 dosage: med.dosage,
@@ -165,7 +165,7 @@ export default class FinishEnrollmentController {
         const contact = data.emergencyContacts[i]
         await StudentEmergencyContact.create(
           {
-            id: nanoid(12),
+            id: uuidv7(),
             studentId: student.id,
             name: contact.name,
             phone: contact.phone,
@@ -187,9 +187,9 @@ export default class FinishEnrollmentController {
         if (!responsibleUser) {
           responsibleUser = await User.create(
             {
-              id: nanoid(12),
+              id: uuidv7(),
               name: responsible.name,
-              slug: responsible.email?.split('@')[0] || nanoid(8),
+              slug: responsible.email?.split('@')[0] || uuidv7().slice(0, 8),
               email: responsible.email,
               phone: responsible.phone,
               documentNumber: responsible.document,
@@ -197,7 +197,7 @@ export default class FinishEnrollmentController {
               birthDate: responsible.birthDate
                 ? DateTime.fromISO(responsible.birthDate)
                 : null,
-              password: await hash.make(nanoid(16)),
+              password: await hash.make(uuidv7()),
               active: true,
               whatsappContact: false,
               grossSalary: 0,
@@ -215,7 +215,7 @@ export default class FinishEnrollmentController {
 
           if (!existingLink) {
             await trx.insertQuery().table('"UserHasSchool"').insert({
-              id: nanoid(12),
+              id: uuidv7(),
               userId: responsibleUser.id,
               schoolId: data.schoolId,
               createdAt: DateTime.now().toSQL(),
@@ -227,7 +227,7 @@ export default class FinishEnrollmentController {
         // Link responsible to student
         await StudentHasResponsible.create(
           {
-            id: nanoid(12),
+            id: uuidv7(),
             studentId: student.id,
             responsibleId: responsibleUser.id,
             isPedagogical: responsible.isPedagogical,

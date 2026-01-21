@@ -38,10 +38,11 @@ export default class StoreStudentController {
       )
 
       // Create student with same ID
+      // Note: Model uses descountPercentage (typo in DB)
       const student = await Student.create(
         {
           id: user.id,
-          discountPercentage: data.discountPercentage ?? 0,
+          descountPercentage: data.discountPercentage ?? 0,
           monthlyPaymentAmount: data.monthlyPaymentAmount ?? 0,
           isSelfResponsible: data.isSelfResponsible ?? false,
           paymentDate: data.paymentDate,

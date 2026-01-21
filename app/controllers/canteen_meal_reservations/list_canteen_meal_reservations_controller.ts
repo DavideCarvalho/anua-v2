@@ -11,15 +11,17 @@ export default class ListCanteenMealReservationsController {
 
     const query = CanteenMealReservation.query()
       .preload('meal', (mealQuery) => mealQuery.preload('canteen'))
-      .preload('user')
+      .preload('student')
       .orderBy('createdAt', 'desc')
 
+    // Validator provides canteenMealId, model expects mealId
     if (payload.canteenMealId) {
-      query.where('canteenMealId', payload.canteenMealId)
+      query.where('mealId', payload.canteenMealId)
     }
 
+    // Validator provides userId, model expects studentId
     if (payload.userId) {
-      query.where('userId', payload.userId)
+      query.where('studentId', payload.userId)
     }
 
     if (payload.status) {

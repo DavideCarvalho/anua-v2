@@ -2,8 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import EventParentalConsent from '#models/event_parental_consent'
 import Event from '#models/event'
 import Student from '#models/student'
-import { DateTime } from 'luxon'
-import { nanoid } from 'nanoid'
+import { v7 as uuidv7 } from 'uuid'
 import db from '@adonisjs/lucid/services/db'
 import { requestConsentValidator } from '#validators/consent'
 
@@ -48,13 +47,13 @@ export default class RequestConsentController {
     }
 
     const consent = await EventParentalConsent.create({
-      id: nanoid(12),
+      id: uuidv7(),
       eventId,
       studentId,
       responsibleId,
       status: 'PENDING',
-      requestedAt: DateTime.now(),
-      expiresAt: event.startsAt,
+      expiresAt: event.startDate,
+      reminderCount: 0,
     })
 
     await consent.load('event')
@@ -67,7 +66,7 @@ export default class RequestConsentController {
       studentId: consent.studentId,
       responsibleId: consent.responsibleId,
       status: consent.status,
-      requestedAt: consent.requestedAt?.toISO(),
+      createdAt: consent.createdAt?.toISO(),
       expiresAt: consent.expiresAt?.toISO(),
     })
   }

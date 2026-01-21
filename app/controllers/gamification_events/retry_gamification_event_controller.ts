@@ -1,5 +1,4 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import GamificationEvent from '#models/gamification_event'
 import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
@@ -12,20 +11,18 @@ export default class RetryGamificationEventController {
       return response.notFound({ message: 'Gamification event not found' })
     }
 
-    // Only allow retry for FAILED events
-    if (event.status !== 'FAILED') {
+    // Only allow retry for events with errors (not processed and has error)
+    if (event.processed || !event.error) {
       return response.badRequest({
         message: 'Only failed events can be retried',
-        currentStatus: event.status,
+        processed: event.processed,
       })
     }
 
-    // Reset status to PENDING for reprocessing
-    event.status = 'PENDING'
+    // Reset for reprocessing
+    event.processed = false
     event.processedAt = null
-    event.errorMessage = null
-    event.retryCount = (event.retryCount ?? 0) + 1
-    event.updatedAt = DateTime.now()
+    event.error = null
 
     await event.save()
 

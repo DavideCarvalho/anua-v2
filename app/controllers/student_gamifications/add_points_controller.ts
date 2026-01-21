@@ -2,7 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
 import GamificationEvent from '#models/gamification_event'
 import { addPointsValidator } from '#validators/gamification'
-import { DateTime } from 'luxon'
 
 function calculateLevel(totalPoints: number): { level: number; progress: number } {
   // Each level requires levelNumber * 100 points
@@ -30,7 +29,7 @@ export default class AddPointsController {
     }
 
     // Calculate new total points
-    const newTotalPoints = gamification.points + payload.points
+    const newTotalPoints = gamification.totalPoints + payload.points
     if (newTotalPoints < 0) {
       return response.badRequest({ message: 'Insufficient points for this operation' })
     }
@@ -39,7 +38,7 @@ export default class AddPointsController {
     const { level: newLevel, progress: newProgress } = calculateLevel(newTotalPoints)
 
     // Check if level changed for event type
-    const leveledUp = newLevel > gamification.level
+    const leveledUp = newLevel > gamification.currentLevel
 
     // Determine event type based on transaction type
     const eventType = payload.points >= 0 ? 'POINTS_MANUAL_ADD' : 'POINTS_MANUAL_REMOVE'
@@ -47,54 +46,25 @@ export default class AddPointsController {
     // Create a GamificationEvent record (point transaction)
     await GamificationEvent.create({
       studentId: gamification.studentId,
-      eventType: eventType,
+      type: eventType,
       entityType: 'Manual',
       entityId: gamification.id,
-      status: 'PROCESSED',
-      retryCount: 0,
-      pointsChange: payload.points,
-      description: payload.reason,
+      processed: true,
       metadata: {
         type: payload.type,
+        reason: payload.reason,
         relatedEntityType: payload.relatedEntityType ?? null,
         relatedEntityId: payload.relatedEntityId ?? null,
-        previousPoints: gamification.points,
+        previousPoints: gamification.totalPoints,
         newPoints: newTotalPoints,
-        previousLevel: gamification.level,
+        previousLevel: gamification.currentLevel,
         newLevel: newLevel,
       },
     })
 
-    // Update streak logic
-    const today = DateTime.now().startOf('day')
-    const lastActivity = gamification.lastActivityDate
-      ? DateTime.fromJSDate(gamification.lastActivityDate.toJSDate()).startOf('day')
-      : null
-
-    let newStreakDays = gamification.streakDays
-
-    if (lastActivity) {
-      const daysDiff = today.diff(lastActivity, 'days').days
-
-      if (daysDiff === 1) {
-        // Consecutive day, increment streak
-        newStreakDays += 1
-      } else if (daysDiff > 1) {
-        // Streak broken, reset to 1
-        newStreakDays = 1
-      }
-      // If daysDiff === 0, same day, keep streak unchanged
-    } else {
-      // First activity
-      newStreakDays = 1
-    }
-
     // Update the gamification record
-    gamification.points = newTotalPoints
-    gamification.level = newLevel
-    gamification.experience = newProgress
-    gamification.streakDays = newStreakDays
-    gamification.lastActivityDate = today
+    gamification.totalPoints = newTotalPoints
+    gamification.currentLevel = newLevel
     await gamification.save()
 
     await gamification.load('student', (studentQuery) => {

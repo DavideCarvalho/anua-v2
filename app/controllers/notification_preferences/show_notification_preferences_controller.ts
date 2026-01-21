@@ -5,16 +5,18 @@ export default class ShowNotificationPreferencesController {
   async handle({ response, auth }: HttpContext) {
     const preferences = await NotificationPreference.query()
       .where('userId', auth.user!.id)
-      .orderBy('type')
-      .orderBy('channel')
+      .orderBy('notificationType')
 
-    // Group preferences by type
+    // Group preferences by notification type with all channels
     const grouped = preferences.reduce(
       (acc, pref) => {
-        if (!acc[pref.type]) {
-          acc[pref.type] = {}
+        acc[pref.notificationType] = {
+          inApp: pref.enableInApp,
+          email: pref.enableEmail,
+          push: pref.enablePush,
+          sms: pref.enableSms,
+          whatsApp: pref.enableWhatsApp,
         }
-        acc[pref.type][pref.channel] = pref.enabled
         return acc
       },
       {} as Record<string, Record<string, boolean>>

@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Attendance from '#models/attendance'
+import StudentHasAttendance from '#models/student_has_attendance'
 import StudentHasResponsible from '#models/student_has_responsible'
 
 export default class GetStudentAttendanceController {
@@ -25,32 +25,33 @@ export default class GetStudentAttendanceController {
       })
     }
 
-    // Get attendance records
-    const attendances = await Attendance.query()
+    // Get attendance records from StudentHasAttendance which links to Attendance and CalendarSlot
+    const attendances = await StudentHasAttendance.query()
       .where('studentId', studentId)
-      .preload('classSchedule', (query) => {
-        query.preload('subject')
+      .preload('attendance', (query) => {
+        query.preload('calendarSlot')
       })
-      .orderBy('date', 'desc')
+      .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
     // Calculate attendance stats
-    const stats = await Attendance.query()
+    const stats = await StudentHasAttendance.query()
       .where('studentId', studentId)
       .select('status')
       .count('* as count')
       .groupBy('status')
 
     const statsMap: Record<string, number> = {}
-    stats.forEach((row: any) => {
+    stats.forEach((row: StudentHasAttendance) => {
       statsMap[row.status] = Number(row.$extras.count)
     })
 
+    // Map model status values (PRESENT, ABSENT, LATE, EXCUSED)
     const totalClasses =
       (statsMap['PRESENT'] || 0) +
       (statsMap['ABSENT'] || 0) +
       (statsMap['LATE'] || 0) +
-      (statsMap['JUSTIFIED'] || 0)
+      (statsMap['EXCUSED'] || 0)
 
     const presentCount = (statsMap['PRESENT'] || 0) + (statsMap['LATE'] || 0)
     const attendanceRate = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0
@@ -58,10 +59,9 @@ export default class GetStudentAttendanceController {
     return response.ok({
       data: attendances.all().map((a) => ({
         id: a.id,
-        date: a.createdAt,
+        date: a.attendance?.date?.toISO() || a.createdAt.toISO(),
         status: a.status,
         justification: a.justification,
-        subject: a.classSchedule?.subject?.name || null,
       })),
       meta: attendances.getMeta(),
       summary: {
@@ -69,7 +69,7 @@ export default class GetStudentAttendanceController {
         presentCount: statsMap['PRESENT'] || 0,
         absentCount: statsMap['ABSENT'] || 0,
         lateCount: statsMap['LATE'] || 0,
-        justifiedCount: statsMap['JUSTIFIED'] || 0,
+        excusedCount: statsMap['EXCUSED'] || 0,
         attendanceRate,
       },
     })

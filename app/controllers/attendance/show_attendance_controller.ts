@@ -5,8 +5,7 @@ export default class ShowAttendanceController {
   async handle({ params, response }: HttpContext) {
     const attendance = await Attendance.query()
       .where('id', params.id)
-      .preload('student')
-      .preload('classSchedule')
+      .preload('calendarSlot')
       .first()
 
     if (!attendance) {

@@ -2,11 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
 import { updateParticipantStatusValidator } from '#validators/event'
-import { DateTime } from 'luxon'
 
 export default class UpdateParticipantStatusController {
   async handle({ params, request, response }: HttpContext) {
-    const { eventId, participantId } = params
+    const { eventId, userId } = params
     const data = await request.validateUsing(updateParticipantStatusValidator)
 
     const event = await Event.find(eventId)
@@ -17,7 +16,7 @@ export default class UpdateParticipantStatusController {
 
     const participant = await EventParticipant.query()
       .where('eventId', eventId)
-      .where('participantId', participantId)
+      .where('userId', userId)
       .first()
 
     if (!participant) {
@@ -25,17 +24,10 @@ export default class UpdateParticipantStatusController {
     }
 
     participant.status = data.status
-
-    // Track parental consent
-    if (data.parentalConsent !== undefined) {
-      participant.parentalConsent = data.parentalConsent
-      if (data.parentalConsent) {
-        participant.parentalConsentGivenAt = DateTime.now()
-      }
-    }
+    // Validator doesn't provide notes, removed the update
 
     await participant.save()
-    await participant.load('participant')
+    await participant.load('user')
 
     return response.ok(participant)
   }

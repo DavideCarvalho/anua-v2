@@ -13,7 +13,7 @@ export default class GetPointsRankingController {
       .preload('student', (studentQuery) => {
         studentQuery.preload('user')
       })
-      .orderBy('points', 'desc')
+      .orderBy('totalPoints', 'desc')
       .limit(limit)
 
     // Filter by school
@@ -42,9 +42,8 @@ export default class GetPointsRankingController {
       rank: index + 1,
       studentId: gamification.studentId,
       student: gamification.student,
-      points: gamification.points,
-      level: gamification.level,
-      streakDays: gamification.streakDays,
+      totalPoints: gamification.totalPoints,
+      currentLevel: gamification.currentLevel,
     }))
 
     return response.ok({

@@ -27,7 +27,8 @@ export default class UpdateExamGradeController {
       studentId: payload.studentId,
       score: payload.score,
       feedback: payload.feedback,
-      absent: payload.absent || false,
+      // Validator provides absent (true = absent), model has attended (true = attended)
+      attended: payload.absent !== true,
     })
 
     await grade.save()

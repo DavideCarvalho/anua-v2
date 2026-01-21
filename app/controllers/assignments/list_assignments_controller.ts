@@ -8,28 +8,30 @@ export default class ListAssignmentsController {
     const classId = request.input('classId')
     const subjectId = request.input('subjectId')
     const teacherId = request.input('teacherId')
-    const status = request.input('status')
+    const academicPeriodId = request.input('academicPeriodId')
 
     const query = Assignment.query()
-      .preload('class')
-      .preload('subject')
-      .preload('teacher')
+      .preload('teacherHasClass', (query) => {
+        query.preload('class')
+        query.preload('subject')
+        query.preload('teacher')
+      })
       .orderBy('dueDate', 'desc')
 
     if (classId) {
-      query.where('classId', classId)
+      query.whereHas('teacherHasClass', (q) => q.where('classId', classId))
     }
 
     if (subjectId) {
-      query.where('subjectId', subjectId)
+      query.whereHas('teacherHasClass', (q) => q.where('subjectId', subjectId))
     }
 
     if (teacherId) {
-      query.where('teacherId', teacherId)
+      query.whereHas('teacherHasClass', (q) => q.where('teacherId', teacherId))
     }
 
-    if (status) {
-      query.where('status', status)
+    if (academicPeriodId) {
+      query.where('academicPeriodId', academicPeriodId)
     }
 
     const assignments = await query.paginate(page, limit)

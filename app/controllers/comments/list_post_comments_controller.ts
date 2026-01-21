@@ -14,16 +14,11 @@ export default class ListPostCommentsController {
       return response.notFound({ message: 'Post not found' })
     }
 
-    // Get top-level comments with replies
+    // Get comments for the post
     const comments = await Comment.query()
-      .where('postId', postId)
-      .whereNull('parentCommentId')
-      .preload('author')
-      .preload('replies', (query) => {
-        query.preload('author').withCount('likes').orderBy('createdAt', 'asc')
-      })
+      .where('postId', post.id)
+      .preload('user')
       .withCount('likes')
-      .withCount('replies')
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 

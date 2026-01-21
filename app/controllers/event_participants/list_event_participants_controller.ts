@@ -16,7 +16,7 @@ export default class ListEventParticipantsController {
 
     const query = EventParticipant.query()
       .where('eventId', eventId)
-      .preload('participant')
+      .preload('user')
 
     if (status) {
       query.where('status', status)

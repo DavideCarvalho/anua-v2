@@ -25,7 +25,7 @@ export default class ListPendingConsentsController {
       eventId: consent.eventId,
       studentId: consent.studentId,
       status: consent.status,
-      requestedAt: consent.requestedAt?.toISO(),
+      createdAt: consent.createdAt?.toISO(),
       expiresAt: consent.expiresAt?.toISO(),
       event: {
         id: consent.event.id,
@@ -33,11 +33,9 @@ export default class ListPendingConsentsController {
         description: consent.event.description,
         location: consent.event.location,
         type: consent.event.type,
-        startsAt: consent.event.startsAt?.toISO(),
-        endsAt: consent.event.endsAt?.toISO(),
+        startDate: consent.event.startDate?.toISO(),
+        endDate: consent.event.endDate?.toISO(),
         requiresParentalConsent: consent.event.requiresParentalConsent,
-        hasAdditionalCosts: consent.event.hasAdditionalCosts,
-        additionalCostAmount: consent.event.additionalCostAmount,
         school: {
           id: consent.event.school.id,
           name: consent.event.school.name,

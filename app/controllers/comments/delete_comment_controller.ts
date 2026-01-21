@@ -12,12 +12,9 @@ export default class DeleteCommentController {
     }
 
     // Only author can delete their comment
-    if (comment.authorId !== auth.user!.id) {
+    if (comment.userId !== auth.user!.id) {
       return response.forbidden({ message: 'You can only delete your own comments' })
     }
-
-    // Delete all replies first
-    await Comment.query().where('parentCommentId', id).delete()
 
     // Delete the comment
     await comment.delete()

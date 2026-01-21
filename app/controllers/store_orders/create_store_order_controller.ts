@@ -54,20 +54,29 @@ export default class CreateStoreOrderController {
     const order = await StoreOrder.create({
       studentId: payload.studentId,
       schoolId: payload.schoolId,
-      totalPointsCost,
-      pointsCost: totalPointsCost,
+      totalPoints: totalPointsCost,
+      totalPrice: totalPointsCost,
+      totalMoney: 0,
       status: 'PENDING_APPROVAL',
-      notes: payload.notes ?? null,
+      studentNotes: payload.notes ?? null,
     })
 
     // Create order items
+    // StoreOrderItem uses orderId not storeOrderId, and requires additional fields
     for (const item of orderItems) {
+      const storeItem = storeItemMap.get(item.storeItemId)!
       await StoreOrderItem.create({
-        storeOrderId: order.id,
+        orderId: order.id,
         storeItemId: item.storeItemId,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        totalPrice: item.totalPrice,
+        paymentMode: 'POINTS',
+        pointsToMoneyRate: 1,
+        pointsPaid: item.totalPrice,
+        moneyPaid: 0,
+        itemName: storeItem.name,
+        itemDescription: storeItem.description,
+        itemImageUrl: storeItem.imageUrl,
       })
     }
 

@@ -7,9 +7,11 @@ export default class ShowAssignmentController {
 
     const assignment = await Assignment.query()
       .where('id', id)
-      .preload('class')
-      .preload('subject')
-      .preload('teacher')
+      .preload('teacherHasClass', (query) => {
+        query.preload('class')
+        query.preload('subject')
+        query.preload('teacher')
+      })
       .preload('submissions', (query) => {
         query.preload('student')
       })

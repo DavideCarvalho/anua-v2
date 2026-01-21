@@ -10,7 +10,7 @@ export default class ShowEventController {
       .preload('organizer')
       .preload('school')
       .preload('participants', (query) => {
-        query.preload('participant')
+        query.preload('user')
       })
       .withCount('participants')
       .first()

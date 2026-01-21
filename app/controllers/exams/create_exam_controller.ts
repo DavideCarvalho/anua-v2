@@ -2,10 +2,28 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { createExamValidator } from '#validators/exam'
 import Exam from '#models/exam'
+import Class_ from '#models/class'
+import AcademicPeriod from '#models/academic_period'
 
 export default class CreateExamController {
   async handle({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createExamValidator)
+
+    // Get the school from the class
+    const classRecord = await Class_.find(payload.classId)
+    if (!classRecord) {
+      return response.notFound({ message: 'Class not found' })
+    }
+
+    // Find active academic period for this school
+    const academicPeriod = await AcademicPeriod.query()
+      .where('schoolId', classRecord.schoolId)
+      .where('isActive', true)
+      .first()
+
+    if (!academicPeriod) {
+      return response.notFound({ message: 'No active academic period found' })
+    }
 
     const exam = await Exam.create({
       title: payload.title,
@@ -14,11 +32,15 @@ export default class CreateExamController {
       maxScore: payload.maxScore,
       type: payload.type,
       status: payload.status || 'SCHEDULED',
-      scheduledDate: DateTime.fromJSDate(payload.scheduledDate),
-      durationMinutes: payload.durationMinutes,
+      // Validator provides scheduledDate, model expects examDate
+      examDate: DateTime.fromJSDate(payload.scheduledDate),
       classId: payload.classId,
       subjectId: payload.subjectId,
       teacherId: payload.teacherId,
+      // Use derived values for fields not in validator
+      schoolId: classRecord.schoolId,
+      academicPeriodId: academicPeriod.id,
+      weight: 1,
     })
 
     await exam.load('class')

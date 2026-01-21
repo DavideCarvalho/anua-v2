@@ -9,16 +9,18 @@ export default class UpdateCanteenMealController {
 
     const meal = await CanteenMeal.find(params.id)
     if (!meal) {
-      return response.notFound({ message: 'Refeição não encontrada' })
+      return response.notFound({ message: 'Refeicao nao encontrada' })
     }
 
     meal.merge({
       name: payload.name ?? meal.name,
       description: payload.description ?? meal.description,
       price: payload.price ?? meal.price,
-      servedAt: payload.servedAt ? DateTime.fromJSDate(payload.servedAt) : meal.servedAt,
+      // Validator provides servedAt, model expects date
+      date: payload.servedAt ? DateTime.fromJSDate(payload.servedAt) : meal.date,
       isActive: payload.isActive ?? meal.isActive,
-      maxReservations: payload.maxReservations ?? meal.maxReservations,
+      // Validator provides maxReservations, model expects maxServings
+      maxServings: payload.maxReservations ?? meal.maxServings,
     })
 
     await meal.save()

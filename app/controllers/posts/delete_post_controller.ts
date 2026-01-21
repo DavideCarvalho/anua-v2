@@ -12,7 +12,7 @@ export default class DeletePostController {
     }
 
     // Only author can delete their post (or admin - could add role check here)
-    if (post.authorId !== auth.user!.id) {
+    if (post.userId !== auth.user!.id) {
       return response.forbidden({ message: 'You can only delete your own posts' })
     }
 

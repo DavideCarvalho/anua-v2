@@ -17,19 +17,13 @@ export default class UpdateAssignmentController {
     const updateData: Record<string, unknown> = {}
 
     if (payload.title !== undefined) {
-      updateData.title = payload.title
+      updateData.name = payload.title
     }
     if (payload.description !== undefined) {
       updateData.description = payload.description
     }
-    if (payload.instructions !== undefined) {
-      updateData.instructions = payload.instructions
-    }
     if (payload.maxScore !== undefined) {
-      updateData.maxScore = payload.maxScore
-    }
-    if (payload.status !== undefined) {
-      updateData.status = payload.status
+      updateData.grade = payload.maxScore
     }
     if (payload.dueDate !== undefined) {
       updateData.dueDate = DateTime.fromJSDate(payload.dueDate)
@@ -38,9 +32,11 @@ export default class UpdateAssignmentController {
     assignment.merge(updateData)
     await assignment.save()
 
-    await assignment.load('class')
-    await assignment.load('subject')
-    await assignment.load('teacher')
+    await assignment.load('teacherHasClass', (query) => {
+      query.preload('class')
+      query.preload('subject')
+      query.preload('teacher')
+    })
 
     return response.ok(assignment)
   }

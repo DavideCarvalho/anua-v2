@@ -10,11 +10,11 @@ export default class CreateGamificationEventController {
 
     const event = await GamificationEvent.create({
       studentId: payload.studentId,
-      eventType: payload.type,
+      type: payload.type,
       entityType: payload.entityType,
       entityId: payload.entityId,
-      metadata: payload.metadata ?? null,
-      status: 'PENDING',
+      metadata: payload.metadata ?? {},
+      processed: false,
     })
 
     // Enqueue job for processing

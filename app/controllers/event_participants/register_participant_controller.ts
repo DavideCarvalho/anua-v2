@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
 import { registerParticipantValidator } from '#validators/event'
@@ -29,9 +30,10 @@ export default class RegisterParticipantController {
     }
 
     // Check if user is already registered
+    // Validator provides participantId, model expects userId
     const existingParticipant = await EventParticipant.query()
       .where('eventId', eventId)
-      .where('participantId', data.participantId)
+      .where('userId', data.participantId)
       .first()
 
     if (existingParticipant) {
@@ -41,12 +43,12 @@ export default class RegisterParticipantController {
     const participant = await EventParticipant.create({
       id: randomUUID(),
       eventId,
-      participantId: data.participantId,
+      userId: data.participantId, // Map participantId to userId
       status: 'CONFIRMED',
-      parentalConsent: data.parentalConsent ?? false,
+      registrationDate: DateTime.now(),
     })
 
-    await participant.load('participant')
+    await participant.load('user')
     await participant.load('event')
 
     return response.created(participant)

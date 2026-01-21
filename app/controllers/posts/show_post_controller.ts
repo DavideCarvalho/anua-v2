@@ -7,15 +7,11 @@ export default class ShowPostController {
 
     const post = await Post.query()
       .where('id', id)
-      .preload('author')
+      .preload('user')
       .preload('school')
       .preload('comments', (query) => {
         query
-          .preload('author')
-          .whereNull('parentCommentId')
-          .preload('replies', (repliesQuery) => {
-            repliesQuery.preload('author')
-          })
+          .preload('user')
           .withCount('likes')
           .orderBy('createdAt', 'asc')
       })

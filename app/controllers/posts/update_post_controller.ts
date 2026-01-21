@@ -13,15 +13,16 @@ export default class UpdatePostController {
       return response.notFound({ message: 'Post not found' })
     }
 
-    // Only author can update their post
-    if (post.authorId !== auth.user!.id) {
+    // Only author can update their post - model uses userId not authorId
+    if (post.userId !== auth.user!.id) {
       return response.forbidden({ message: 'You can only edit your own posts' })
     }
 
     post.merge(data)
     await post.save()
 
-    await post.load('author')
+    // Model uses user relationship, not author
+    await post.load('user')
     await post.load('school')
 
     return response.ok(post)

@@ -28,12 +28,14 @@ export default class UnlockAchievementController {
       return response.notFound({ message: 'Perfil de gamificacao do aluno nao encontrado' })
     }
 
-    // Check if achievement was already unlocked (if not repeatable)
-    if (!achievement.isRepeatable) {
+    // Check if achievement was already unlocked (based on recurrence period)
+    const isOneTime = achievement.recurrencePeriod === 'ONCE'
+    if (isOneTime) {
       const existingUnlock = await GamificationEvent.query()
         .where('studentId', studentId)
-        .where('achievementId', achievementId)
-        .where('eventType', 'ACHIEVEMENT_UNLOCKED')
+        .where('entityType', 'ACHIEVEMENT')
+        .where('entityId', achievementId)
+        .where('type', 'ACHIEVEMENT_UNLOCKED')
         .first()
 
       if (existingUnlock) {
@@ -44,26 +46,27 @@ export default class UnlockAchievementController {
     // Create gamification event for unlocking the achievement
     const gamificationEvent = await GamificationEvent.create({
       studentId,
-      eventType: 'ACHIEVEMENT_UNLOCKED',
-      pointsChange: achievement.pointsReward,
-      achievementId: achievement.id,
-      description: `Conquista desbloqueada: ${achievement.name}`,
+      type: 'ACHIEVEMENT_UNLOCKED',
+      entityType: 'ACHIEVEMENT',
+      entityId: achievement.id,
       metadata: {
         achievementName: achievement.name,
-        achievementType: achievement.type,
+        achievementCategory: achievement.category,
+        pointsAwarded: achievement.points,
       },
+      processed: false,
     })
 
     // Update student points
-    studentGamification.points += achievement.pointsReward
+    studentGamification.totalPoints += achievement.points
     await studentGamification.save()
 
-    await gamificationEvent.load('achievement')
+    await gamificationEvent.load('student')
 
     return response.created({
       message: 'Conquista desbloqueada com sucesso',
       event: gamificationEvent,
-      pointsAwarded: achievement.pointsReward,
+      pointsAwarded: achievement.points,
     })
   }
 }

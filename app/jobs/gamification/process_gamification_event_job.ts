@@ -41,14 +41,10 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
       }
 
       // Check if already processed
-      if (event.status === 'PROCESSED') {
+      if (event.processed) {
         console.log(`[WORKER] Event ${eventId} already processed, skipping`)
         return
       }
-
-      // Update status to PROCESSING
-      event.status = 'PROCESSING'
-      await event.save()
 
       // 2. Get or create StudentGamification
       let studentGamification = await StudentGamification.query()
@@ -58,23 +54,17 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
       if (!studentGamification) {
         studentGamification = await StudentGamification.create({
           studentId: event.studentId,
-          points: 0,
-          level: 1,
-          experience: 0,
-          streakDays: 0,
-          totalAssignmentsCompleted: 0,
-          totalExamsTaken: 0,
-          averageGrade: 0,
-          attendancePercentage: 0,
+          totalPoints: 0,
+          currentLevel: 1,
         })
       }
 
       // 3. Get student's school ID
       const studentWithClass = await db
-        .from('students')
-        .join('users', 'students.user_id', 'users.id')
-        .where('students.id', event.studentId)
-        .select('users.school_id as schoolId')
+        .from('"Student"')
+        .join('"User"', '"Student".id', '"User".id')
+        .where('"Student".id', event.studentId)
+        .select('"User"."schoolId" as schoolId')
         .first()
 
       const schoolId = studentWithClass?.schoolId
@@ -107,16 +97,16 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
           const criteria = achievement.criteria as { eventType?: string; conditions?: Record<string, unknown> }
 
           // Check if event type matches
-          if (criteria.eventType !== event.eventType) {
+          if (criteria.eventType !== event.type) {
             continue
           }
 
-          // Check if already unlocked (for non-repeatable)
-          if (!achievement.isRepeatable) {
+          // Check if already unlocked (for ONCE recurrence period)
+          if (achievement.recurrencePeriod === 'ONCE') {
             const alreadyUnlocked = await db
-              .from('student_achievements')
-              .where('student_gamification_id', studentGamification.id)
-              .where('achievement_id', achievement.id)
+              .from('"StudentAchievement"')
+              .where('studentGamificationId', studentGamification.id)
+              .where('achievementId', achievement.id)
               .first()
 
             if (alreadyUnlocked) {
@@ -125,13 +115,13 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
           }
 
           // 6. Unlock achievement
-          await db.table('student_achievements').insert({
+          await db.table('"StudentAchievement"').insert({
             id: crypto.randomUUID(),
-            student_gamification_id: studentGamification.id,
-            achievement_id: achievement.id,
-            unlocked_at: DateTime.now().toSQL(),
-            created_at: DateTime.now().toSQL(),
-            updated_at: DateTime.now().toSQL(),
+            studentGamificationId: studentGamification.id,
+            achievementId: achievement.id,
+            unlockedAt: DateTime.now().toSQL(),
+            createdAt: DateTime.now().toSQL(),
+            updatedAt: DateTime.now().toSQL(),
           })
 
           achievementsUnlocked++
@@ -140,41 +130,20 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
             eventId,
             achievementId: achievement.id,
             achievementName: achievement.name,
-            points: achievement.pointsReward,
+            points: achievement.points,
           })
 
           // 7. Award points
-          if (achievement.pointsReward > 0) {
-            const newTotalPoints = studentGamification.points + achievement.pointsReward
-            const { level: newLevel, progress: newProgress } = this.calculateLevel(newTotalPoints)
-
-            // Update streak
-            const today = DateTime.now().startOf('day')
-            const lastActivity = studentGamification.lastActivityDate
-            let newStreakDays = studentGamification.streakDays
-
-            if (lastActivity) {
-              const lastActivityDay = lastActivity.startOf('day')
-              const daysDiff = today.diff(lastActivityDay, 'days').days
-
-              if (daysDiff === 1) {
-                newStreakDays++
-              } else if (daysDiff > 1) {
-                newStreakDays = 1
-              }
-            } else {
-              newStreakDays = 1
-            }
+          if (achievement.points > 0) {
+            const newTotalPoints = studentGamification.totalPoints + achievement.points
+            const { level: newLevel } = this.calculateLevel(newTotalPoints)
 
             // Update StudentGamification
-            studentGamification.points = newTotalPoints
-            studentGamification.level = newLevel
-            studentGamification.experience = newProgress
-            studentGamification.streakDays = newStreakDays
-            studentGamification.lastActivityDate = today
+            studentGamification.totalPoints = newTotalPoints
+            studentGamification.currentLevel = newLevel
             await studentGamification.save()
 
-            pointsAwarded += achievement.pointsReward
+            pointsAwarded += achievement.points
           }
         } catch (error) {
           console.error(`[WORKER] Error processing achievement ${achievement.id}:`, error)
@@ -182,7 +151,7 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
       }
 
       // 8. Mark event as processed
-      event.status = 'PROCESSED'
+      event.processed = true
       event.processedAt = DateTime.now()
       await event.save()
 
@@ -204,9 +173,8 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
       await GamificationEvent.query()
         .where('id', eventId)
         .update({
-          status: 'FAILED',
-          errorMessage: error instanceof Error ? error.message : String(error),
-          retryCount: db.raw('retry_count + 1'),
+          processed: false,
+          error: error instanceof Error ? error.message : String(error),
         })
 
       throw error

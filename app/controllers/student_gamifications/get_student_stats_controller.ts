@@ -11,38 +11,25 @@ export default class GetStudentStatsController {
       .preload('student', (studentQuery) => {
         studentQuery.preload('user')
       })
-      .preload('events', (eventsQuery) => {
-        eventsQuery.preload('achievement')
-      })
       .first()
 
     if (!gamification) {
       return response.notFound({ message: 'Student gamification profile not found' })
     }
 
-    // Get all point transactions for this student
-    const transactions = await GamificationEvent.query()
+    // Get all events for this student
+    const events = await GamificationEvent.query()
       .where('studentId', studentId)
       .orderBy('createdAt', 'desc')
       .limit(50)
 
     // Get achievements unlocked
-    const achievements = await GamificationEvent.query()
+    const achievementEvents = await GamificationEvent.query()
       .where('studentId', studentId)
-      .where('eventType', 'ACHIEVEMENT_UNLOCKED')
-      .preload('achievement')
-
-    // Calculate stats
-    const totalPointsEarned = transactions
-      .filter((t) => t.pointsChange > 0)
-      .reduce((sum, t) => sum + t.pointsChange, 0)
-
-    const totalPointsSpent = transactions
-      .filter((t) => t.pointsChange < 0)
-      .reduce((sum, t) => sum + Math.abs(t.pointsChange), 0)
+      .where('type', 'ACHIEVEMENT_UNLOCKED')
 
     // Count level ups by checking metadata for leveledUp flag
-    const levelUps = transactions.filter((t) => {
+    const levelUps = events.filter((t) => {
       const metadata = t.metadata as Record<string, unknown> | null
       return metadata?.previousLevel !== undefined && metadata?.newLevel !== undefined &&
              Number(metadata.newLevel) > Number(metadata.previousLevel)
@@ -52,34 +39,26 @@ export default class GetStudentStatsController {
       gamification: {
         id: gamification.id,
         studentId: gamification.studentId,
-        points: gamification.points,
-        level: gamification.level,
-        experience: gamification.experience,
-        streakDays: gamification.streakDays,
-        lastActivityDate: gamification.lastActivityDate,
-        totalAssignmentsCompleted: gamification.totalAssignmentsCompleted,
-        totalExamsTaken: gamification.totalExamsTaken,
-        averageGrade: gamification.averageGrade,
-        attendancePercentage: gamification.attendancePercentage,
+        totalPoints: gamification.totalPoints,
+        currentLevel: gamification.currentLevel,
       },
       student: gamification.student,
       stats: {
-        totalPointsEarned,
-        totalPointsSpent,
-        netPoints: totalPointsEarned - totalPointsSpent,
+        totalPoints: gamification.totalPoints,
         levelUps,
-        achievementsUnlocked: achievements.length,
+        achievementsUnlocked: achievementEvents.length,
       },
-      achievements: achievements.map((a) => ({
+      achievements: achievementEvents.map((a) => ({
         id: a.id,
-        achievement: a.achievement,
+        entityType: a.entityType,
+        entityId: a.entityId,
         unlockedAt: a.createdAt,
       })),
-      recentTransactions: transactions.slice(0, 20).map((t) => ({
+      recentEvents: events.slice(0, 20).map((t) => ({
         id: t.id,
-        eventType: t.eventType,
-        pointsChange: t.pointsChange,
-        description: t.description,
+        type: t.type,
+        entityType: t.entityType,
+        entityId: t.entityId,
         metadata: t.metadata,
         createdAt: t.createdAt,
       })),

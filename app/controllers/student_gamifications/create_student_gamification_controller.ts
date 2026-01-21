@@ -21,15 +21,8 @@ export default class CreateStudentGamificationController {
 
     const gamification = await StudentGamification.create({
       studentId: payload.studentId,
-      points: 0,
-      level: 1,
-      experience: 0,
-      streakDays: 0,
-      lastActivityDate: null,
-      totalAssignmentsCompleted: 0,
-      totalExamsTaken: 0,
-      averageGrade: 0,
-      attendancePercentage: 0,
+      totalPoints: 0,
+      currentLevel: 1,
     })
 
     await gamification.load('student', (studentQuery) => {

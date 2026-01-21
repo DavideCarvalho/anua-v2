@@ -8,13 +8,13 @@ export default class CreatePostController {
     const data = await request.validateUsing(createPostValidator)
 
     const post = await Post.create({
-      id: randomUUID(),
-      ...data,
-      authorId: auth.user!.id,
-      visibility: data.visibility ?? 'SCHOOL_ONLY',
+      uuid: randomUUID(),
+      content: data.content,
+      userId: auth.user!.id,
+      schoolId: data.schoolId,
     })
 
-    await post.load('author')
+    await post.load('user')
     await post.load('school')
 
     return response.created(post)

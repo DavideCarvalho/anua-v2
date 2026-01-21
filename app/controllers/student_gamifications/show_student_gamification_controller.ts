@@ -10,9 +10,6 @@ export default class ShowStudentGamificationController {
       .preload('student', (studentQuery) => {
         studentQuery.preload('user')
       })
-      .preload('events', (eventsQuery) => {
-        eventsQuery.preload('achievement')
-      })
       .first()
 
     if (!gamification) {

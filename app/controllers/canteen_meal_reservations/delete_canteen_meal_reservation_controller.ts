@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
 
 export default class DeleteCanteenMealReservationController {
@@ -6,15 +7,15 @@ export default class DeleteCanteenMealReservationController {
     const reservation = await CanteenMealReservation.find(params.id)
 
     if (!reservation) {
-      return response.notFound({ message: 'Reserva não encontrada' })
+      return response.notFound({ message: 'Reserva nao encontrada' })
     }
 
     reservation.status = 'CANCELLED'
-    reservation.consumedAt = null
+    reservation.cancelledAt = DateTime.now()
     await reservation.save()
 
     await reservation.load('meal')
-    await reservation.load('user')
+    await reservation.load('student')
 
     return response.ok(reservation)
   }

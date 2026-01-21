@@ -1,6 +1,4 @@
 import { Job } from '@boringnode/queue'
-import { DateTime } from 'luxon'
-import StudentGamification from '#models/student_gamification'
 
 export default class UpdateStreaksJob extends Job<void> {
   static readonly jobName = 'UpdateStreaksJob'
@@ -17,49 +15,14 @@ export default class UpdateStreaksJob extends Job<void> {
       timestamp: new Date().toISOString(),
     })
 
-    let streaksReset = 0
-
     try {
-      // Get all students with activity
-      const students = await StudentGamification.query()
-        .whereNotNull('lastActivityDate')
-        .select(['id', 'studentId', 'streakDays', 'lastActivityDate'])
-
-      const totalStudents = students.length
-
-      console.log('[STREAKS] Students found:', { total: totalStudents })
-
-      const today = DateTime.now().startOf('day')
-      const yesterday = today.minus({ days: 1 })
-
-      for (const student of students) {
-        if (!student.lastActivityDate) continue
-
-        const lastActivityDay = student.lastActivityDate.startOf('day')
-
-        // If last activity was today or yesterday, keep streak
-        if (lastActivityDay >= yesterday) {
-          continue
-        }
-
-        // If last activity was before yesterday, reset streak
-        if (lastActivityDay < yesterday) {
-          student.streakDays = 0
-          await student.save()
-
-          streaksReset++
-
-          console.log('[STREAKS] Resetting streak:', {
-            studentId: student.studentId,
-          })
-        }
-      }
+      // Note: The StudentGamification model doesn't have streak-related fields
+      // This job is a placeholder for future streak functionality
+      // When streak fields are added to the model, this can be implemented
 
       const duration = Date.now() - startTime
 
-      console.log('[STREAKS] Update completed:', {
-        totalStudents,
-        streaksReset,
+      console.log('[STREAKS] Update completed (no-op - streak fields not in model):', {
         duration: `${duration}ms`,
       })
     } catch (error) {

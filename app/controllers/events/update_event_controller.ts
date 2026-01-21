@@ -25,14 +25,13 @@ export default class UpdateEventController {
     if (data.location !== undefined) event.location = data.location
     if (data.type !== undefined) event.type = data.type
     if (data.maxParticipants !== undefined) event.maxParticipants = data.maxParticipants
-    if (data.additionalCostAmount !== undefined) event.additionalCostAmount = data.additionalCostAmount
-    if (data.additionalCostDescription !== undefined) event.additionalCostDescription = data.additionalCostDescription
     if (data.visibility !== undefined) event.visibility = data.visibility
     if (data.requiresParentalConsent !== undefined) event.requiresParentalConsent = data.requiresParentalConsent
-    if (data.hasAdditionalCosts !== undefined) event.hasAdditionalCosts = data.hasAdditionalCosts
-    if (data.startsAt !== undefined) event.startsAt = DateTime.fromJSDate(data.startsAt)
+    // Validator provides startsAt, model expects startDate
+    if (data.startsAt !== undefined) event.startDate = DateTime.fromJSDate(data.startsAt)
+    // Validator provides endsAt, model expects endDate
     if (data.endsAt !== undefined) {
-      event.endsAt = data.endsAt ? DateTime.fromJSDate(data.endsAt) : null
+      event.endDate = data.endsAt ? DateTime.fromJSDate(data.endsAt) : null
     }
 
     await event.save()

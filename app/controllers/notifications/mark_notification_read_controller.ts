@@ -8,16 +8,16 @@ export default class MarkNotificationReadController {
 
     const notification = await Notification.query()
       .where('id', id)
-      .where('recipientId', auth.user!.id)
+      .where('userId', auth.user!.id)
       .first()
 
     if (!notification) {
       return response.notFound({ message: 'Notification not found' })
     }
 
-    if (!notification.readAt) {
+    if (!notification.isRead) {
       notification.readAt = DateTime.now()
-      notification.status = 'READ'
+      notification.isRead = true
       await notification.save()
     }
 

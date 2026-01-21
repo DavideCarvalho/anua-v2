@@ -94,7 +94,7 @@ export default class GetSchoolEnrollmentInfoController {
         ? {
             id: contract.id,
             enrollmentValue: contract.enrollmentValue,
-            amount: contract.amount,
+            amount: contract.ammount,
             paymentType: contract.paymentType,
             enrollmentValueInstallments: contract.enrollmentValueInstallments,
             installments: contract.installments,

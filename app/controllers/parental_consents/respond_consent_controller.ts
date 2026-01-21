@@ -15,26 +15,26 @@ export default class RespondConsentController {
       .first()
 
     if (!consent) {
-      return response.notFound({ message: 'Autorização não encontrada' })
+      return response.notFound({ message: 'Autorizacao nao encontrada' })
     }
 
     if (consent.status !== 'PENDING') {
-      return response.badRequest({ message: 'Esta autorização já foi respondida' })
+      return response.badRequest({ message: 'Esta autorizacao ja foi respondida' })
     }
 
     if (consent.expiresAt && consent.expiresAt < DateTime.now()) {
       consent.status = 'EXPIRED'
       await consent.save()
-      return response.badRequest({ message: 'Esta autorização expirou' })
+      return response.badRequest({ message: 'Esta autorizacao expirou' })
     }
 
     consent.status = approved ? 'APPROVED' : 'DENIED'
-    consent.notes = notes || null
+    consent.respondedAt = DateTime.now()
 
     if (approved) {
-      consent.approvedAt = DateTime.now()
+      consent.approvalNotes = notes || null
     } else {
-      consent.deniedAt = DateTime.now()
+      consent.denialReason = notes || null
     }
 
     await consent.save()
@@ -42,9 +42,9 @@ export default class RespondConsentController {
     return response.ok({
       id: consent.id,
       status: consent.status,
-      notes: consent.notes,
-      approvedAt: consent.approvedAt?.toISO(),
-      deniedAt: consent.deniedAt?.toISO(),
+      approvalNotes: consent.approvalNotes,
+      denialReason: consent.denialReason,
+      respondedAt: consent.respondedAt?.toISO(),
     })
   }
 }
