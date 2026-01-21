@@ -6,7 +6,9 @@ import { hydrateRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
 import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { TuyauProvider } from '@tuyau/inertia/react'
 import { Toaster } from 'sonner'
+import { tuyau } from '../lib/api'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
@@ -31,10 +33,12 @@ createInertiaApp({
   setup({ el, App, props }) {
     hydrateRoot(
       el,
-      <QueryClientProvider client={queryClient}>
-        <App {...props} />
-        <Toaster richColors />
-      </QueryClientProvider>
+      <TuyauProvider client={tuyau}>
+        <QueryClientProvider client={queryClient}>
+          <App {...props} />
+          <Toaster richColors />
+        </QueryClientProvider>
+      </TuyauProvider>
     )
   },
 })

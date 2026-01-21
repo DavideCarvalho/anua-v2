@@ -10,6 +10,8 @@ export type CanteenPaymentMethod = 'BALANCE' | 'CASH' | 'CARD' | 'PIX'
 export type CanteenPurchaseStatus = 'PENDING' | 'PAID' | 'CANCELLED'
 
 export default class CanteenPurchase extends BaseModel {
+  static table = 'CanteenPurchase'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -44,12 +46,12 @@ export default class CanteenPurchase extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => Canteen)
+  @belongsTo(() => Canteen, { foreignKey: 'canteenId' })
   declare canteen: BelongsTo<typeof Canteen>
 
-  @hasMany(() => CanteenItemPurchased)
+  @hasMany(() => CanteenItemPurchased, { foreignKey: 'itemsPurchasedId' })
   declare itemsPurchased: HasMany<typeof CanteenItemPurchased>
 }

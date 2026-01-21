@@ -1,10 +1,11 @@
 import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useUsersQueryOptions } from '../hooks/queries/use-users'
+import { useSchoolEmployeesQueryOptions } from '../hooks/queries/use-school-employees'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import { formatRoleName } from '../lib/formatters'
 import {
   AlertCircle,
   Search,
@@ -75,7 +76,7 @@ function EmployeesListContent({
   onPageChange: (page: number) => void
 }) {
   const { data } = useSuspenseQuery(
-    useUsersQueryOptions({ page, limit: 20, search: search || undefined })
+    useSchoolEmployeesQueryOptions({ page, limit: 20, search: search || undefined })
   )
 
   const users = Array.isArray(data) ? data : data?.data || []
@@ -120,7 +121,7 @@ function EmployeesListContent({
                   </div>
                 </td>
                 <td className="p-4 text-muted-foreground">{user.email || '-'}</td>
-                <td className="p-4">{user.role?.name || '-'}</td>
+                <td className="p-4">{formatRoleName(user.role?.name)}</td>
                 <td className="p-4">
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${

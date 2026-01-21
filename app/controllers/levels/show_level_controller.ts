@@ -5,7 +5,7 @@ export default class ShowLevelController {
   async handle({ params, response }: HttpContext) {
     const level = await Level.query()
       .where('id', params.id)
-      .preload('course')
+      .preload('school')
       .preload('classes')
       .first()
 

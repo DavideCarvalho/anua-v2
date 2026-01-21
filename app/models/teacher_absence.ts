@@ -6,6 +6,8 @@ import CalendarSlot from './calendar_slot.js'
 import Teacher from './teacher.js'
 
 export default class TeacherAbsence extends BaseModel {
+  static table = 'TeacherAbsence'
+
   @beforeCreate()
   static assignId(model: TeacherAbsence) {
     if (!model.id) {
@@ -25,10 +27,10 @@ export default class TeacherAbsence extends BaseModel {
   @column()
   declare teacherIdTookPlace: string | null
 
-  @belongsTo(() => Absence)
+  @belongsTo(() => Absence, { foreignKey: 'absenceId' })
   declare absence: BelongsTo<typeof Absence>
 
-  @belongsTo(() => CalendarSlot)
+  @belongsTo(() => CalendarSlot, { foreignKey: 'calendarSlotId' })
   declare calendarSlot: BelongsTo<typeof CalendarSlot>
 
   @belongsTo(() => Teacher, { foreignKey: 'teacherIdTookPlace' })

@@ -10,25 +10,26 @@ export default class ListLevelsController {
     const schoolId = request.input('schoolId')
     const academicPeriodId = request.input('academicPeriodId')
 
-    const query = Level.query().preload('course').preload('classes').orderBy('order', 'asc')
+    const query = Level.query().preload('school').preload('classes').orderBy('order', 'asc')
 
     if (search) {
       query.whereILike('name', `%${search}%`)
     }
 
-    if (courseId) {
-      query.where('courseId', courseId)
-    }
-
     if (schoolId) {
-      query.whereHas('course', (builder) => {
-        builder.where('school_id', schoolId)
-      })
+      query.where('schoolId', schoolId)
     }
 
-    if (academicPeriodId) {
-      query.whereHas('academicPeriods', (builder) => {
-        builder.where('academic_periods.id', academicPeriodId)
+    if (courseId || academicPeriodId) {
+      query.whereHas('levelAssignments', (builder) => {
+        builder.whereHas('courseHasAcademicPeriod', (courseHasAcademicPeriodBuilder) => {
+          if (courseId) {
+            courseHasAcademicPeriodBuilder.where('courseId', courseId)
+          }
+          if (academicPeriodId) {
+            courseHasAcademicPeriodBuilder.where('academicPeriodId', academicPeriodId)
+          }
+        })
       })
     }
 

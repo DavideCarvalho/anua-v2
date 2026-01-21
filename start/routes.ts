@@ -25,10 +25,13 @@ const DestroySchoolController = () => import('#controllers/schools/destroy')
 // Auth
 const LoginController = () => import('#controllers/auth/login')
 const LogoutController = () => import('#controllers/auth/logout')
+const SendCodeController = () => import('#controllers/auth/send_code')
+const VerifyCodeController = () => import('#controllers/auth/verify_code')
 const MeController = () => import('#controllers/auth/me')
 
 // Users
 const IndexUsersController = () => import('#controllers/users/index')
+const SchoolEmployeesController = () => import('#controllers/users/school_employees')
 const ShowUserController = () => import('#controllers/users/show')
 const StoreUserController = () => import('#controllers/users/store')
 const UpdateUserController = () => import('#controllers/users/update')
@@ -92,6 +95,14 @@ const CreateLevelController = () => import('#controllers/levels/create_level_con
 const UpdateLevelController = () => import('#controllers/levels/update_level_controller')
 const DeleteLevelController = () => import('#controllers/levels/delete_level_controller')
 
+// Course Has Academic Periods
+const CreateCourseHasAcademicPeriodController = () =>
+  import('#controllers/course_has_academic_periods/create_course_has_academic_period_controller')
+
+// Level Assignments
+const CreateLevelAssignmentController = () =>
+  import('#controllers/level_assignments/create_level_assignment_controller')
+
 // Classes
 const ListClassesController = () => import('#controllers/classes/list_classes_controller')
 const ShowClassController = () => import('#controllers/classes/show_class_controller')
@@ -114,6 +125,12 @@ const UpdateSubjectController = () => import('#controllers/subjects/update_subje
 const DeleteSubjectController = () => import('#controllers/subjects/delete_subject_controller')
 const ListSubjectsForClassController = () =>
   import('#controllers/subjects/list_subjects_for_class_controller')
+
+// Schedules
+const GetClassScheduleController = () =>
+  import('#controllers/schedules/get_class_schedule_controller')
+const SaveClassScheduleController = () =>
+  import('#controllers/schedules/save_class_schedule_controller')
 
 // Teachers
 const ListTeachersController = () => import('#controllers/teachers/list_teachers_controller')
@@ -139,6 +156,131 @@ const DeleteExamController = () => import('#controllers/exams/delete_exam_contro
 const ListExamGradesController = () => import('#controllers/exams/list_exam_grades_controller')
 const SaveExamGradeController = () => import('#controllers/exams/save_exam_grade_controller')
 const UpdateExamGradeController = () => import('#controllers/exams/update_exam_grade_controller')
+
+// Grades Analytics
+const GetAcademicOverviewController = () =>
+  import('#controllers/grades/get_academic_overview_controller')
+const GetStudentsGradesController = () =>
+  import('#controllers/grades/get_students_grades_controller')
+const GetGradeDistributionController = () =>
+  import('#controllers/grades/get_grade_distribution_controller')
+const GetAtRiskStudentsController = () =>
+  import('#controllers/grades/get_at_risk_students_controller')
+
+// Analytics
+const GetAttendanceOverviewController = () =>
+  import('#controllers/analytics/get_attendance_overview_controller')
+const GetAttendanceTrendsController = () =>
+  import('#controllers/analytics/get_attendance_trends_controller')
+const GetChronicAbsenteeismController = () =>
+  import('#controllers/analytics/get_chronic_absenteeism_controller')
+const GetCanteenOverviewController = () =>
+  import('#controllers/analytics/get_canteen_overview_controller')
+const GetCanteenTrendsController = () =>
+  import('#controllers/analytics/get_canteen_trends_controller')
+const GetCanteenTopItemsController = () =>
+  import('#controllers/analytics/get_canteen_top_items_controller')
+const GetPaymentsOverviewController = () =>
+  import('#controllers/analytics/get_payments_overview_controller')
+const GetEnrollmentsOverviewController = () =>
+  import('#controllers/analytics/get_enrollments_overview_controller')
+const GetEnrollmentFunnelStatsController = () =>
+  import('#controllers/analytics/get_enrollment_funnel_stats_controller')
+const GetEnrollmentTrendsController = () =>
+  import('#controllers/analytics/get_enrollment_trends_controller')
+const GetEnrollmentByLevelController = () =>
+  import('#controllers/analytics/get_enrollment_by_level_controller')
+const GetIncidentsOverviewController = () =>
+  import('#controllers/analytics/get_incidents_overview_controller')
+const GetGamificationOverviewController = () =>
+  import('#controllers/analytics/get_gamification_overview_controller')
+const GetHrOverviewController = () =>
+  import('#controllers/analytics/get_hr_overview_controller')
+
+// Events
+const ListEventsController = () => import('#controllers/events/list_events_controller')
+const ShowEventController = () => import('#controllers/events/show_event_controller')
+const CreateEventController = () => import('#controllers/events/create_event_controller')
+const UpdateEventController = () => import('#controllers/events/update_event_controller')
+const DeleteEventController = () => import('#controllers/events/delete_event_controller')
+const PublishEventController = () => import('#controllers/events/publish_event_controller')
+const CancelEventController = () => import('#controllers/events/cancel_event_controller')
+const CompleteEventController = () => import('#controllers/events/complete_event_controller')
+
+// Event Participants
+const ListEventParticipantsController = () =>
+  import('#controllers/event_participants/list_event_participants_controller')
+const RegisterParticipantController = () =>
+  import('#controllers/event_participants/register_participant_controller')
+const UpdateParticipantStatusController = () =>
+  import('#controllers/event_participants/update_participant_status_controller')
+const CancelRegistrationController = () =>
+  import('#controllers/event_participants/cancel_registration_controller')
+const ConfirmAttendanceController = () =>
+  import('#controllers/event_participants/confirm_attendance_controller')
+
+// Parental Consents
+const ListPendingConsentsController = () =>
+  import('#controllers/parental_consents/list_pending_consents_controller')
+const RespondConsentController = () =>
+  import('#controllers/parental_consents/respond_consent_controller')
+const ListConsentHistoryController = () =>
+  import('#controllers/parental_consents/list_consent_history_controller')
+const ListEventConsentsController = () =>
+  import('#controllers/parental_consents/list_event_consents_controller')
+const RequestConsentController = () =>
+  import('#controllers/parental_consents/request_consent_controller')
+
+// Online Enrollment
+const GetSchoolEnrollmentInfoController = () =>
+  import('#controllers/online-enrollment/get_school_enrollment_info_controller')
+
+// Enrollment Management
+const ListEnrollmentsController = () =>
+  import('#controllers/enrollments/list_enrollments_controller')
+const UpdateDocumentStatusController = () =>
+  import('#controllers/enrollments/update_document_status_controller')
+const CheckExistingStudentController = () =>
+  import('#controllers/online-enrollment/check_existing_student_controller')
+const FindScholarshipByCodeController = () =>
+  import('#controllers/online-enrollment/find_scholarship_by_code_controller')
+const FinishEnrollmentController = () =>
+  import('#controllers/online-enrollment/finish_enrollment_controller')
+
+// Notifications
+const ListNotificationsController = () =>
+  import('#controllers/notifications/list_notifications_controller')
+const ShowNotificationController = () =>
+  import('#controllers/notifications/show_notification_controller')
+const MarkNotificationReadController = () =>
+  import('#controllers/notifications/mark_notification_read_controller')
+const MarkAllReadController = () =>
+  import('#controllers/notifications/mark_all_read_controller')
+const DeleteNotificationController = () =>
+  import('#controllers/notifications/delete_notification_controller')
+
+// Notification Preferences
+const ShowNotificationPreferencesController = () =>
+  import('#controllers/notification_preferences/show_notification_preferences_controller')
+const UpdateNotificationPreferencesController = () =>
+  import('#controllers/notification_preferences/update_notification_preferences_controller')
+
+// Posts
+const ListPostsController = () => import('#controllers/posts/list_posts_controller')
+const ShowPostController = () => import('#controllers/posts/show_post_controller')
+const CreatePostController = () => import('#controllers/posts/create_post_controller')
+const UpdatePostController = () => import('#controllers/posts/update_post_controller')
+const DeletePostController = () => import('#controllers/posts/delete_post_controller')
+const LikePostController = () => import('#controllers/posts/like_post_controller')
+const UnlikePostController = () => import('#controllers/posts/unlike_post_controller')
+
+// Comments
+const ListPostCommentsController = () =>
+  import('#controllers/comments/list_post_comments_controller')
+const CreateCommentController = () => import('#controllers/comments/create_comment_controller')
+const UpdateCommentController = () => import('#controllers/comments/update_comment_controller')
+const DeleteCommentController = () => import('#controllers/comments/delete_comment_controller')
+const LikeCommentController = () => import('#controllers/comments/like_comment_controller')
 
 // Attendance
 const ListAttendanceController = () => import('#controllers/attendance/list_attendance_controller')
@@ -439,6 +581,74 @@ const MarkInvoicePaidController = () =>
 const GetSchoolUsageMetricsController = () =>
   import('#controllers/school_usage_metrics/get_school_usage_metrics_controller')
 
+// Purchase Requests
+const ListPurchaseRequestsController = () =>
+  import('#controllers/purchase_requests/list_purchase_requests_controller')
+const ShowPurchaseRequestController = () =>
+  import('#controllers/purchase_requests/show_purchase_request_controller')
+const CreatePurchaseRequestController = () =>
+  import('#controllers/purchase_requests/create_purchase_request_controller')
+const UpdatePurchaseRequestController = () =>
+  import('#controllers/purchase_requests/update_purchase_request_controller')
+const DeletePurchaseRequestController = () =>
+  import('#controllers/purchase_requests/delete_purchase_request_controller')
+const ApprovePurchaseRequestController = () =>
+  import('#controllers/purchase_requests/approve_purchase_request_controller')
+const RejectPurchaseRequestController = () =>
+  import('#controllers/purchase_requests/reject_purchase_request_controller')
+const MarkAsBoughtController = () =>
+  import('#controllers/purchase_requests/mark_as_bought_controller')
+const MarkAsArrivedController = () =>
+  import('#controllers/purchase_requests/mark_as_arrived_controller')
+
+// Insurance
+const GetInsuranceConfigController = () =>
+  import('#controllers/insurance/get_insurance_config_controller')
+const UpdateSchoolInsuranceController = () =>
+  import('#controllers/insurance/update_school_insurance_controller')
+const UpdateSchoolChainInsuranceController = () =>
+  import('#controllers/insurance/update_school_chain_insurance_controller')
+const ResetSchoolInsuranceController = () =>
+  import('#controllers/insurance/reset_school_insurance_controller')
+const ListInsuranceClaimsController = () =>
+  import('#controllers/insurance/list_insurance_claims_controller')
+const ApproveInsuranceClaimController = () =>
+  import('#controllers/insurance/approve_insurance_claim_controller')
+const RejectInsuranceClaimController = () =>
+  import('#controllers/insurance/reject_insurance_claim_controller')
+const MarkClaimPaidController = () =>
+  import('#controllers/insurance/mark_claim_paid_controller')
+const ListInsuranceBillingsController = () =>
+  import('#controllers/insurance/list_insurance_billings_controller')
+const GetBillingDetailsController = () =>
+  import('#controllers/insurance/get_billing_details_controller')
+const GetInsuranceStatsController = () =>
+  import('#controllers/insurance/get_insurance_stats_controller')
+const GetDefaultRateBySchoolController = () =>
+  import('#controllers/insurance/get_default_rate_by_school_controller')
+const GetSchoolsWithoutInsuranceController = () =>
+  import('#controllers/insurance/get_schools_without_insurance_controller')
+const GetSchoolInsuranceStatsController = () =>
+  import('#controllers/insurance/get_school_insurance_stats_controller')
+const GetSchoolInsuranceBillingsController = () =>
+  import('#controllers/insurance/get_school_insurance_billings_controller')
+const GetSchoolInsuranceClaimsController = () =>
+  import('#controllers/insurance/get_school_insurance_claims_controller')
+
+// Impersonation
+const SetImpersonationController = () =>
+  import('#controllers/admin/set_impersonation_controller')
+const ClearImpersonationController = () =>
+  import('#controllers/admin/clear_impersonation_controller')
+const GetImpersonationStatusController = () =>
+  import('#controllers/admin/get_impersonation_status_controller')
+
+// Admin - Onboarding
+const CreateSchoolOnboardingController = () =>
+  import('#controllers/admin/create_school_onboarding_controller')
+const GetImpersonationConfigController = () =>
+  import('#controllers/admin/get_impersonation_config_controller')
+
 // =============================================================================
 // API ROUTE FUNCTIONS
 // =============================================================================
@@ -448,6 +658,8 @@ function registerAuthApiRoutes() {
   router
     .group(() => {
       router.post('/login', [LoginController, 'handle']).as('auth.login')
+      router.post('/send-code', [SendCodeController, 'handle']).as('auth.sendCode')
+      router.post('/verify-code', [VerifyCodeController, 'handle']).as('auth.verifyCode')
     })
     .prefix('/auth')
 
@@ -478,6 +690,9 @@ function registerUserApiRoutes() {
   router
     .group(() => {
       router.get('/', [IndexUsersController, 'handle']).as('users.index')
+      router
+        .get('/school-employees', [SchoolEmployeesController, 'handle'])
+        .as('users.schoolEmployees')
       router.post('/', [StoreUserController, 'handle']).as('users.store')
       router.get('/:id', [ShowUserController, 'handle']).as('users.show')
       router.put('/:id', [UpdateUserController, 'handle']).as('users.update')
@@ -699,6 +914,28 @@ function registerLevelApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerCourseHasAcademicPeriodApiRoutes() {
+  router
+    .group(() => {
+      router
+        .post('/', [CreateCourseHasAcademicPeriodController, 'handle'])
+        .as('courseHasAcademicPeriods.store')
+    })
+    .prefix('/course-has-academic-periods')
+    .use(middleware.auth())
+}
+
+function registerLevelAssignmentApiRoutes() {
+  router
+    .group(() => {
+      router
+        .post('/', [CreateLevelAssignmentController, 'handle'])
+        .as('levelAssignments.store')
+    })
+    .prefix('/level-assignments')
+    .use(middleware.auth())
+}
+
 function registerClassApiRoutes() {
   router
     .group(() => {
@@ -734,21 +971,27 @@ function registerSubjectApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerScheduleApiRoutes() {
+  router
+    .group(() => {
+      router
+        .get('/class/:classId', [GetClassScheduleController, 'handle'])
+        .as('schedules.getClassSchedule')
+      router
+        .post('/class/:classId', [SaveClassScheduleController, 'handle'])
+        .as('schedules.saveClassSchedule')
+    })
+    .prefix('/schedules')
+    .use(middleware.auth())
+}
+
 function registerTeacherApiRoutes() {
   router
     .group(() => {
       router.get('/', [ListTeachersController, 'handle']).as('teachers.listTeachers')
       router.post('/', [CreateTeacherController, 'handle']).as('teachers.createTeacher')
-      router.get('/:id', [ShowTeacherController, 'handle']).as('teachers.showTeacher')
-      router.put('/:id', [UpdateTeacherController, 'handle']).as('teachers.updateTeacher')
-      router.delete('/:id', [DeleteTeacherController, 'handle']).as('teachers.deleteTeacher')
-      router
-        .get('/:id/classes', [ListTeacherClassesController, 'handle'])
-        .as('teachers.listTeacherClasses')
-      router
-        .get('/:id/subjects', [ListTeacherSubjectsController, 'handle'])
-        .as('teachers.listTeacherSubjects')
 
+      // Rotas específicas ANTES das rotas com parâmetros /:id
       router
         .get('/timesheet', [
           () => import('#controllers/teachers/get_teachers_timesheet_controller'),
@@ -773,6 +1016,17 @@ function registerTeacherApiRoutes() {
           'handle',
         ])
         .as('teachers.rejectAbsence')
+
+      // Rotas com parâmetros /:id
+      router.get('/:id', [ShowTeacherController, 'handle']).as('teachers.showTeacher')
+      router.put('/:id', [UpdateTeacherController, 'handle']).as('teachers.updateTeacher')
+      router.delete('/:id', [DeleteTeacherController, 'handle']).as('teachers.deleteTeacher')
+      router
+        .get('/:id/classes', [ListTeacherClassesController, 'handle'])
+        .as('teachers.listTeacherClasses')
+      router
+        .get('/:id/subjects', [ListTeacherSubjectsController, 'handle'])
+        .as('teachers.listTeacherSubjects')
       router
         .post('/:id/classes', [AssignTeacherToClassController, 'handle'])
         .as('teachers.assignClass')
@@ -802,6 +1056,180 @@ function registerExamApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerGradesApiRoutes() {
+  router
+    .group(() => {
+      router
+        .get('/academic-overview', [GetAcademicOverviewController, 'handle'])
+        .as('grades.academicOverview')
+      router
+        .get('/students', [GetStudentsGradesController, 'handle'])
+        .as('grades.students')
+      router
+        .get('/distribution', [GetGradeDistributionController, 'handle'])
+        .as('grades.distribution')
+      router
+        .get('/at-risk', [GetAtRiskStudentsController, 'handle'])
+        .as('grades.atRisk')
+    })
+    .prefix('/grades')
+    .use(middleware.auth())
+}
+
+function registerAnalyticsApiRoutes() {
+  router
+    .group(() => {
+      // Attendance Analytics
+      router
+        .get('/attendance/overview', [GetAttendanceOverviewController, 'handle'])
+        .as('analytics.attendance.overview')
+      router
+        .get('/attendance/trends', [GetAttendanceTrendsController, 'handle'])
+        .as('analytics.attendance.trends')
+      router
+        .get('/attendance/chronic', [GetChronicAbsenteeismController, 'handle'])
+        .as('analytics.attendance.chronic')
+
+      // Canteen Analytics
+      router
+        .get('/canteen/overview', [GetCanteenOverviewController, 'handle'])
+        .as('analytics.canteen.overview')
+      router
+        .get('/canteen/trends', [GetCanteenTrendsController, 'handle'])
+        .as('analytics.canteen.trends')
+      router
+        .get('/canteen/top-items', [GetCanteenTopItemsController, 'handle'])
+        .as('analytics.canteen.topItems')
+
+      // Payments Analytics
+      router
+        .get('/payments/overview', [GetPaymentsOverviewController, 'handle'])
+        .as('analytics.payments.overview')
+
+      // Enrollments Analytics
+      router
+        .get('/enrollments/overview', [GetEnrollmentsOverviewController, 'handle'])
+        .as('analytics.enrollments.overview')
+      router
+        .get('/enrollments/funnel', [GetEnrollmentFunnelStatsController, 'handle'])
+        .as('analytics.enrollments.funnel')
+      router
+        .get('/enrollments/trends', [GetEnrollmentTrendsController, 'handle'])
+        .as('analytics.enrollments.trends')
+      router
+        .get('/enrollments/by-level', [GetEnrollmentByLevelController, 'handle'])
+        .as('analytics.enrollments.byLevel')
+
+      // Incidents Analytics
+      router
+        .get('/incidents/overview', [GetIncidentsOverviewController, 'handle'])
+        .as('analytics.incidents.overview')
+
+      // Gamification Analytics
+      router
+        .get('/gamification/overview', [GetGamificationOverviewController, 'handle'])
+        .as('analytics.gamification.overview')
+
+      // HR Analytics
+      router
+        .get('/hr/overview', [GetHrOverviewController, 'handle'])
+        .as('analytics.hr.overview')
+    })
+    .prefix('/analytics')
+    .use(middleware.auth())
+}
+
+function registerEventApiRoutes() {
+  router
+    .group(() => {
+      // CRUD
+      router.get('/', [ListEventsController, 'handle']).as('events.index')
+      router.post('/', [CreateEventController, 'handle']).as('events.store')
+      router.get('/:id', [ShowEventController, 'handle']).as('events.show')
+      router.put('/:id', [UpdateEventController, 'handle']).as('events.update')
+      router.delete('/:id', [DeleteEventController, 'handle']).as('events.destroy')
+
+      // Status actions
+      router.post('/:id/publish', [PublishEventController, 'handle']).as('events.publish')
+      router.post('/:id/cancel', [CancelEventController, 'handle']).as('events.cancel')
+      router.post('/:id/complete', [CompleteEventController, 'handle']).as('events.complete')
+
+      // Participants
+      router
+        .get('/:eventId/participants', [ListEventParticipantsController, 'handle'])
+        .as('events.participants.index')
+      router
+        .post('/:eventId/participants', [RegisterParticipantController, 'handle'])
+        .as('events.participants.register')
+      router
+        .put('/:eventId/participants/:participantId', [UpdateParticipantStatusController, 'handle'])
+        .as('events.participants.updateStatus')
+      router
+        .delete('/:eventId/participants/:participantId', [CancelRegistrationController, 'handle'])
+        .as('events.participants.cancel')
+      router
+        .post('/:eventId/participants/:participantId/confirm', [ConfirmAttendanceController, 'handle'])
+        .as('events.participants.confirmAttendance')
+
+      // Parental Consents (event-side)
+      router
+        .get('/:eventId/consents', [ListEventConsentsController, 'handle'])
+        .as('events.consents.index')
+      router
+        .post('/:eventId/consents', [RequestConsentController, 'handle'])
+        .as('events.consents.request')
+    })
+    .prefix('/events')
+    .use(middleware.auth())
+}
+
+function registerParentalConsentApiRoutes() {
+  router
+    .group(() => {
+      // Responsável endpoints
+      router.get('/pending', [ListPendingConsentsController, 'handle']).as('consents.pending')
+      router.get('/history', [ListConsentHistoryController, 'handle']).as('consents.history')
+      router.post('/:id/respond', [RespondConsentController, 'handle']).as('consents.respond')
+    })
+    .prefix('/parental-consents')
+    .use(middleware.auth())
+}
+
+function registerOnlineEnrollmentApiRoutes() {
+  router
+    .group(() => {
+      // Public routes - no auth required
+      router
+        .get('/:schoolSlug/:academicPeriodSlug/:courseSlug/info', [
+          GetSchoolEnrollmentInfoController,
+          'handle',
+        ])
+        .as('enrollment.info')
+      router
+        .post('/check-existing', [CheckExistingStudentController, 'handle'])
+        .as('enrollment.checkExisting')
+      router
+        .post('/find-scholarship', [FindScholarshipByCodeController, 'handle'])
+        .as('enrollment.findScholarship')
+      router
+        .post('/finish', [FinishEnrollmentController, 'handle'])
+        .as('enrollment.finish')
+    })
+    .prefix('/online-enrollment')
+}
+
+function registerEnrollmentManagementApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListEnrollmentsController, 'handle']).as('enrollments.index')
+      router
+        .put('/documents/:id/status', [UpdateDocumentStatusController, 'handle'])
+        .as('enrollments.documents.updateStatus')
+    })
+    .prefix('/enrollments')
+    .use(middleware.auth())
+}
+
 function registerAttendanceApiRoutes() {
   router
     .group(() => {
@@ -812,6 +1240,74 @@ function registerAttendanceApiRoutes() {
       router.put('/:id', [UpdateAttendanceController, 'handle']).as('attendance.update')
     })
     .prefix('/attendance')
+    .use(middleware.auth())
+}
+
+function registerNotificationApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListNotificationsController, 'handle']).as('notifications.index')
+      router.get('/:id', [ShowNotificationController, 'handle']).as('notifications.show')
+      router
+        .post('/:id/read', [MarkNotificationReadController, 'handle'])
+        .as('notifications.markRead')
+      router.post('/read-all', [MarkAllReadController, 'handle']).as('notifications.markAllRead')
+      router
+        .delete('/:id', [DeleteNotificationController, 'handle'])
+        .as('notifications.destroy')
+    })
+    .prefix('/notifications')
+    .use(middleware.auth())
+}
+
+function registerNotificationPreferenceApiRoutes() {
+  router
+    .group(() => {
+      router
+        .get('/', [ShowNotificationPreferencesController, 'handle'])
+        .as('notificationPreferences.show')
+      router
+        .put('/', [UpdateNotificationPreferencesController, 'handle'])
+        .as('notificationPreferences.update')
+    })
+    .prefix('/notification-preferences')
+    .use(middleware.auth())
+}
+
+function registerPostApiRoutes() {
+  router
+    .group(() => {
+      // CRUD
+      router.get('/', [ListPostsController, 'handle']).as('posts.index')
+      router.post('/', [CreatePostController, 'handle']).as('posts.store')
+      router.get('/:id', [ShowPostController, 'handle']).as('posts.show')
+      router.put('/:id', [UpdatePostController, 'handle']).as('posts.update')
+      router.delete('/:id', [DeletePostController, 'handle']).as('posts.destroy')
+
+      // Likes
+      router.post('/:id/like', [LikePostController, 'handle']).as('posts.like')
+      router.delete('/:id/like', [UnlikePostController, 'handle']).as('posts.unlike')
+
+      // Comments (nested under posts)
+      router
+        .get('/:postId/comments', [ListPostCommentsController, 'handle'])
+        .as('posts.comments.index')
+      router
+        .post('/:postId/comments', [CreateCommentController, 'handle'])
+        .as('posts.comments.store')
+    })
+    .prefix('/posts')
+    .use(middleware.auth())
+}
+
+function registerCommentApiRoutes() {
+  router
+    .group(() => {
+      router.put('/:id', [UpdateCommentController, 'handle']).as('comments.update')
+      router.delete('/:id', [DeleteCommentController, 'handle']).as('comments.destroy')
+      router.post('/:id/like', [LikeCommentController, 'handle']).as('comments.like')
+    })
+    .prefix('/comments')
     .use(middleware.auth())
 }
 
@@ -1238,6 +1734,8 @@ function registerAcademicPeriodApiRoutes() {
     import('#controllers/academic_periods/show_academic_period_controller')
   const UpdateAcademicPeriodController = () =>
     import('#controllers/academic_periods/update_academic_period_controller')
+  const DeleteAcademicPeriodController = () =>
+    import('#controllers/academic_periods/delete_academic_period_controller')
 
   router
     .group(() => {
@@ -1256,6 +1754,9 @@ function registerAcademicPeriodApiRoutes() {
       router
         .put('/:id', [UpdateAcademicPeriodController, 'handle'])
         .as('academicPeriods.updateAcademicPeriod')
+      router
+        .delete('/:id', [DeleteAcademicPeriodController, 'handle'])
+        .as('academicPeriods.deleteAcademicPeriod')
     })
     .prefix('/academic-periods')
     .use(middleware.auth())
@@ -1401,6 +1902,133 @@ function registerSchoolUsageMetricsApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerPurchaseRequestApiRoutes() {
+  router
+    .group(() => {
+      // CRUD
+      router.get('/', [ListPurchaseRequestsController, 'handle']).as('purchaseRequests.index')
+      router.post('/', [CreatePurchaseRequestController, 'handle']).as('purchaseRequests.store')
+      router.get('/:id', [ShowPurchaseRequestController, 'handle']).as('purchaseRequests.show')
+      router.put('/:id', [UpdatePurchaseRequestController, 'handle']).as('purchaseRequests.update')
+      router
+        .delete('/:id', [DeletePurchaseRequestController, 'handle'])
+        .as('purchaseRequests.destroy')
+
+      // Status actions
+      router
+        .post('/:id/approve', [ApprovePurchaseRequestController, 'handle'])
+        .as('purchaseRequests.approve')
+      router
+        .post('/:id/reject', [RejectPurchaseRequestController, 'handle'])
+        .as('purchaseRequests.reject')
+      router
+        .post('/:id/mark-bought', [MarkAsBoughtController, 'handle'])
+        .as('purchaseRequests.markBought')
+      router
+        .post('/:id/mark-arrived', [MarkAsArrivedController, 'handle'])
+        .as('purchaseRequests.markArrived')
+    })
+    .prefix('/purchase-requests')
+    .use(middleware.auth())
+}
+
+function registerInsuranceApiRoutes() {
+  router
+    .group(() => {
+      // Configuration
+      router.get('/config', [GetInsuranceConfigController, 'handle']).as('insurance.config')
+      router
+        .put('/school/:schoolId', [UpdateSchoolInsuranceController, 'handle'])
+        .as('insurance.updateSchool')
+      router
+        .put('/chain/:chainId', [UpdateSchoolChainInsuranceController, 'handle'])
+        .as('insurance.updateChain')
+      router
+        .post('/school/:schoolId/reset', [ResetSchoolInsuranceController, 'handle'])
+        .as('insurance.resetSchool')
+
+      // Claims
+      router.get('/claims', [ListInsuranceClaimsController, 'handle']).as('insurance.claims.index')
+      router
+        .post('/claims/:claimId/approve', [ApproveInsuranceClaimController, 'handle'])
+        .as('insurance.claims.approve')
+      router
+        .post('/claims/:claimId/reject', [RejectInsuranceClaimController, 'handle'])
+        .as('insurance.claims.reject')
+      router
+        .post('/claims/:claimId/mark-paid', [MarkClaimPaidController, 'handle'])
+        .as('insurance.claims.markPaid')
+
+      // Billings
+      router
+        .get('/billings', [ListInsuranceBillingsController, 'handle'])
+        .as('insurance.billings.index')
+      router
+        .get('/billings/:billingId', [GetBillingDetailsController, 'handle'])
+        .as('insurance.billings.show')
+
+      // Analytics
+      router.get('/stats', [GetInsuranceStatsController, 'handle']).as('insurance.stats')
+      router
+        .get('/analytics/default-rate', [GetDefaultRateBySchoolController, 'handle'])
+        .as('insurance.analytics.defaultRate')
+      router
+        .get('/analytics/schools-without', [GetSchoolsWithoutInsuranceController, 'handle'])
+        .as('insurance.analytics.schoolsWithout')
+
+      // School-specific
+      router
+        .get('/school/:schoolId/stats', [GetSchoolInsuranceStatsController, 'handle'])
+        .as('insurance.school.stats')
+      router
+        .get('/school/:schoolId/billings', [GetSchoolInsuranceBillingsController, 'handle'])
+        .as('insurance.school.billings')
+      router
+        .get('/school/:schoolId/claims', [GetSchoolInsuranceClaimsController, 'handle'])
+        .as('insurance.school.claims')
+    })
+    .prefix('/insurance')
+    .use(middleware.auth())
+}
+
+function registerImpersonationApiRoutes() {
+  router
+    .group(() => {
+      // Ativar impersonation
+      router
+        .post('/', [SetImpersonationController, 'handle'])
+        .as('impersonation.set')
+
+      // Desativar impersonation
+      router
+        .delete('/', [ClearImpersonationController, 'handle'])
+        .as('impersonation.clear')
+
+      // Status de impersonation
+      router
+        .get('/status', [GetImpersonationStatusController, 'handle'])
+        .as('impersonation.status')
+
+      // Lista de usuários para impersonation
+      router
+        .get('/config', [GetImpersonationConfigController, 'handle'])
+        .as('impersonation.config')
+    })
+    .prefix('/admin/impersonation')
+    .use(middleware.auth())
+}
+
+function registerAdminOnboardingApiRoutes() {
+  router
+    .group(() => {
+      router
+        .post('/onboarding', [CreateSchoolOnboardingController, 'handle'])
+        .as('admin.schools.onboarding')
+    })
+    .prefix('/admin/schools')
+    .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
+}
+
 // =============================================================================
 // DASHBOARD API CONTROLLERS
 // =============================================================================
@@ -1410,9 +2038,73 @@ const GetResponsavelStatsController = () =>
   import('#controllers/dashboard/get_responsavel_stats_controller')
 const GetAdminStatsController = () => import('#controllers/dashboard/get_admin_stats_controller')
 
+// Responsavel API Controllers
+const GetResponsavelStudentGradesController = () =>
+  import('#controllers/responsavel/get_student_grades_controller')
+const GetResponsavelStudentAttendanceController = () =>
+  import('#controllers/responsavel/get_student_attendance_controller')
+const GetResponsavelStudentPaymentsController = () =>
+  import('#controllers/responsavel/get_student_payments_controller')
+const GetResponsavelStudentBalanceController = () =>
+  import('#controllers/responsavel/get_student_balance_controller')
+const GetResponsavelStudentAssignmentsController = () =>
+  import('#controllers/responsavel/get_student_assignments_controller')
+const GetResponsavelStudentScheduleController = () =>
+  import('#controllers/responsavel/get_student_schedule_controller')
+const GetResponsavelStudentDocumentsController = () =>
+  import('#controllers/responsavel/get_student_documents_controller')
+const GetResponsavelStudentOccurrencesController = () =>
+  import('#controllers/responsavel/get_student_occurrences_controller')
+const AcknowledgeOccurrenceController = () =>
+  import('#controllers/responsavel/acknowledge_occurrence_controller')
+
 function registerDashboardApiRoutes() {
-  router.get('/escola/stats', [GetEscolaStatsController]).as('dashboard.escolaStats')
-  router.get('/responsavel/stats', [GetResponsavelStatsController]).as('dashboard.responsavelStats')
+  router
+    .get('/escola/stats', [GetEscolaStatsController])
+    .use([middleware.auth(), middleware.impersonation()])
+    .as('dashboard.escolaStats')
+  router
+    .get('/responsavel/stats', [GetResponsavelStatsController])
+    .use([middleware.auth(), middleware.impersonation()])
+    .as('dashboard.responsavelStats')
+
+  // Responsavel student-specific routes
+  router
+    .group(() => {
+      router
+        .get('/students/:studentId/grades', [GetResponsavelStudentGradesController])
+        .as('studentGrades')
+      router
+        .get('/students/:studentId/attendance', [GetResponsavelStudentAttendanceController])
+        .as('studentAttendance')
+      router
+        .get('/students/:studentId/payments', [GetResponsavelStudentPaymentsController])
+        .as('studentPayments')
+      router
+        .get('/students/:studentId/balance', [GetResponsavelStudentBalanceController])
+        .as('studentBalance')
+      router
+        .get('/students/:studentId/assignments', [GetResponsavelStudentAssignmentsController])
+        .as('studentAssignments')
+      router
+        .get('/students/:studentId/schedule', [GetResponsavelStudentScheduleController])
+        .as('studentSchedule')
+      router
+        .get('/students/:studentId/documents', [GetResponsavelStudentDocumentsController])
+        .as('studentDocuments')
+      router
+        .get('/students/:studentId/occurrences', [GetResponsavelStudentOccurrencesController])
+        .as('studentOccurrences')
+      router
+        .post('/students/:studentId/occurrences/:occurrenceId/acknowledge', [
+          AcknowledgeOccurrenceController,
+        ])
+        .as('acknowledgeOccurrence')
+    })
+    .prefix('/responsavel')
+    .use([middleware.auth(), middleware.impersonation()])
+    .as('responsavel.api')
+
   router
     .get('/admin/stats', [GetAdminStatsController])
     .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
@@ -1427,6 +2119,10 @@ function registerDashboardApiRoutes() {
 const ShowSignInPageController = () =>
   import('#controllers/pages/auth/show_sign_in_page_controller')
 
+// Public Pages
+const ShowMatriculaOnlinePageController = () =>
+  import('#controllers/pages/show_matricula_online_page_controller')
+
 // Dashboard Pages
 const ShowDashboardPageController = () =>
   import('#controllers/pages/show_dashboard_page_controller')
@@ -1440,6 +2136,8 @@ const ShowProfessoresPageController = () =>
   import('#controllers/pages/escola/show_professores_page_controller')
 const ShowTurmasPageController = () =>
   import('#controllers/pages/escola/show_turmas_page_controller')
+const ShowCursosNiveisPageController = () =>
+  import('#controllers/pages/escola/show_cursos_niveis_page_controller')
 const ShowCantinaItensPageController = () =>
   import('#controllers/pages/escola/show_cantina_itens_page_controller')
 const ShowCantinaPedidosPageController = () =>
@@ -1456,8 +2154,12 @@ const ShowContratoAssinaturasPageController = () =>
   import('#controllers/pages/escola/show_contrato_assinaturas_page_controller')
 const ShowContratoDocusealPageController = () =>
   import('#controllers/pages/escola/show_contrato_docuseal_page_controller')
+const ShowContratoFinanceiroPageController = () =>
+  import('#controllers/pages/escola/show_contrato_financeiro_page_controller')
 const ShowBolsasPageController = () =>
   import('#controllers/pages/escola/show_bolsas_page_controller')
+const ShowSegurosPageController = () =>
+  import('#controllers/pages/escola/show_seguros_page_controller')
 const ShowParceirosPageController = () =>
   import('#controllers/pages/escola/show_parceiros_page_controller')
 const ShowMateriasPageController = () =>
@@ -1466,6 +2168,20 @@ const ShowFolhaDePontoPageController = () =>
   import('#controllers/pages/escola/show_folha_de_ponto_page_controller')
 const ShowImpressaoPageController = () =>
   import('#controllers/pages/escola/show_impressao_page_controller')
+const ShowSolicitacoesDeCompraPageController = () =>
+  import('#controllers/pages/escola/show_solicitacoes_de_compra_page_controller')
+const ShowNotificacoesPageController = () =>
+  import('#controllers/pages/escola/show_notificacoes_page_controller')
+const ShowNotificacoesPreferenciasPageController = () =>
+  import('#controllers/pages/escola/show_notificacoes_preferencias_page_controller')
+const ShowEventosPageController = () =>
+  import('#controllers/pages/escola/show_eventos_page_controller')
+const ShowEventoAutorizacoesPageController = () =>
+  import('#controllers/pages/escola/show_evento_autorizacoes_page_controller')
+const ShowMuralPageController = () =>
+  import('#controllers/pages/escola/show_mural_page_controller')
+const ShowDesempenhoPageController = () =>
+  import('#controllers/pages/escola/show_desempenho_page_controller')
 const ShowPeriodosLetivosPageController = () =>
   import('#controllers/pages/escola/show_periodos_letivos_page_controller')
 const ShowPeriodosLetivosAdminPageController = () =>
@@ -1473,14 +2189,28 @@ const ShowPeriodosLetivosAdminPageController = () =>
 const ShowNovoPeriodoLetivoPageController = () =>
   import('#controllers/pages/escola/show_novo_periodo_letivo_page_controller')
 const ShowGradePageController = () => import('#controllers/pages/escola/show_grade_page_controller')
+const ShowHorariosPageController = () =>
+  import('#controllers/pages/escola/show_horarios_page_controller')
+const ShowQuadroPageController = () =>
+  import('#controllers/pages/escola/show_quadro_page_controller')
 const ShowOcorrenciasPageController = () =>
   import('#controllers/pages/escola/show_ocorrencias_page_controller')
+const ShowAtividadesPageController = () =>
+  import('#controllers/pages/escola/show_atividades_page_controller')
+const ShowProvasPageController = () =>
+  import('#controllers/pages/escola/show_provas_page_controller')
+const ShowPresencaPageController = () =>
+  import('#controllers/pages/escola/show_presenca_page_controller')
 const ShowCantinaCardapioPageController = () =>
   import('#controllers/pages/escola/show_cantina_cardapio_page_controller')
 const ShowCantinaPdvPageController = () =>
   import('#controllers/pages/escola/show_cantina_pdv_page_controller')
 const ShowCantinaVendasPageController = () =>
   import('#controllers/pages/escola/show_cantina_vendas_page_controller')
+const ShowCantinaReservasPageController = () =>
+  import('#controllers/pages/escola/show_cantina_reservas_page_controller')
+const ShowCantinaTransferenciasPageController = () =>
+  import('#controllers/pages/escola/show_cantina_transferencias_page_controller')
 const ShowInadimplenciaPageController = () =>
   import('#controllers/pages/escola/show_inadimplencia_page_controller')
 const ShowGamificacaoPageController = () =>
@@ -1497,10 +2227,50 @@ const ShowConfiguracoesPageController = () =>
 // Responsavel Pages
 const ShowResponsavelDashboardPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_dashboard_page_controller')
+const ShowResponsavelNotasPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_notas_page_controller')
+const ShowResponsavelFrequenciaPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_frequencia_page_controller')
+const ShowResponsavelMensalidadesPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_mensalidades_page_controller')
+const ShowResponsavelCantinaPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_cantina_page_controller')
+const ShowResponsavelGamificacaoPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_gamificacao_page_controller')
+const ShowResponsavelComunicadosPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_comunicados_page_controller')
+const ShowResponsavelPerfilPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_perfil_page_controller')
+const ShowResponsavelAutorizacoesPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_autorizacoes_page_controller')
+const ShowResponsavelAtividadesPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_atividades_page_controller')
+const ShowResponsavelHorarioPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_horario_page_controller')
+const ShowResponsavelDocumentosPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_documentos_page_controller')
+const ShowResponsavelOcorrenciasPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller')
 
 // Admin Pages
 const ShowAdminDashboardPageController = () =>
   import('#controllers/pages/admin/show_admin_dashboard_page_controller')
+const ShowAdminEscolasPageController = () =>
+  import('#controllers/pages/admin/show_admin_escolas_page_controller')
+const ShowAdminBillingDashboardPageController = () =>
+  import('#controllers/pages/admin/show_admin_billing_dashboard_page_controller')
+const ShowAdminSubscriptionsPageController = () =>
+  import('#controllers/pages/admin/show_admin_subscriptions_page_controller')
+const ShowAdminRedesPageController = () =>
+  import('#controllers/pages/admin/show_admin_redes_page_controller')
+const ShowAdminAnalyticsPageController = () =>
+  import('#controllers/pages/admin/show_admin_analytics_page_controller')
+const ShowAdminSegurosPageController = () =>
+  import('#controllers/pages/admin/show_admin_seguros_page_controller')
+const ShowAdminConfiguracoesPageController = () =>
+  import('#controllers/pages/admin/show_admin_configuracoes_page_controller')
+const ShowSchoolOnboardingPageController = () =>
+  import('#controllers/pages/admin/show_school_onboarding_page_controller')
 
 // =============================================================================
 // PAGE ROUTE FUNCTIONS (Inertia)
@@ -1511,6 +2281,13 @@ function registerPageRoutes() {
     .group(() => {
       // Public home
       router.on('/').renderInertia('home').as('home')
+
+      // Public enrollment page
+      router
+        .get('/:schoolSlug/matricula-online/:academicPeriodSlug/:courseSlug', [
+          ShowMatriculaOnlinePageController,
+        ])
+        .as('matriculaOnline')
 
       // Auth pages
       router.get('/sign-in', [ShowSignInPageController]).as('auth.signIn')
@@ -1558,6 +2335,11 @@ function registerPageRoutes() {
             .get('/administrativo/contratos/:id/docuseal', [ShowContratoDocusealPageController])
             .as('administrativo.contratos.docuseal')
           router
+            .get('/administrativo/contratos/:contractId/financeiro', [
+              ShowContratoFinanceiroPageController,
+            ])
+            .as('administrativo.contratos.financeiro')
+          router
             .get('/administrativo/bolsas', [ShowBolsasPageController])
             .as('administrativo.bolsas')
           router
@@ -1572,13 +2354,49 @@ function registerPageRoutes() {
           router
             .get('/administrativo/impressao', [ShowImpressaoPageController])
             .as('administrativo.impressao')
+          router
+            .get('/administrativo/solicitacoes-de-compra', [ShowSolicitacoesDeCompraPageController])
+            .as('administrativo.solicitacoesDeCompra')
+
+          // Notificações
+          router.get('/notificacoes', [ShowNotificacoesPageController]).as('notificacoes')
+          router
+            .get('/notificacoes/preferencias', [ShowNotificacoesPreferenciasPageController])
+            .as('notificacoes.preferencias')
+
+          // Eventos
+          router.get('/eventos', [ShowEventosPageController]).as('eventos')
+          router
+            .get('/eventos/:eventId/autorizacoes', [ShowEventoAutorizacoesPageController])
+            .as('eventos.autorizacoes')
+
+          // Mural
+          router.get('/mural', [ShowMuralPageController]).as('mural')
+
+          // Desempenho Academico
+          router.get('/desempenho', [ShowDesempenhoPageController]).as('desempenho')
+
+          // Matrículas
+          router.get('/matriculas', [ShowMatriculasPageController]).as('matriculas')
 
           // Pedagógico
           router.get('/pedagogico/turmas', [ShowTurmasPageController]).as('pedagogico.turmas')
           router.get('/pedagogico/grade', [ShowGradePageController]).as('pedagogico.grade')
           router
+            .get('/pedagogico/horarios', [ShowHorariosPageController])
+            .as('pedagogico.horarios')
+          router.get('/pedagogico/quadro', [ShowQuadroPageController]).as('pedagogico.quadro')
+          router
             .get('/pedagogico/ocorrencias', [ShowOcorrenciasPageController])
             .as('pedagogico.ocorrencias')
+          router
+            .get('/pedagogico/atividades', [ShowAtividadesPageController])
+            .as('pedagogico.atividades')
+          router.get('/pedagogico/provas', [ShowProvasPageController]).as('pedagogico.provas')
+          router.get('/pedagogico/presenca', [ShowPresencaPageController]).as('pedagogico.presenca')
+          router
+            .get('/pedagogico/cursos-niveis', [ShowCursosNiveisPageController])
+            .as('pedagogico.cursosNiveis')
 
           // Cantina
           router.get('/cantina/itens', [ShowCantinaItensPageController]).as('cantina.itens')
@@ -1588,6 +2406,12 @@ function registerPageRoutes() {
           router.get('/cantina/pdv', [ShowCantinaPdvPageController]).as('cantina.pdv')
           router.get('/cantina/pedidos', [ShowCantinaPedidosPageController]).as('cantina.pedidos')
           router.get('/cantina/vendas', [ShowCantinaVendasPageController]).as('cantina.vendas')
+          router
+            .get('/cantina/reservas', [ShowCantinaReservasPageController])
+            .as('cantina.reservas')
+          router
+            .get('/cantina/transferencias', [ShowCantinaTransferenciasPageController])
+            .as('cantina.transferencias')
 
           // Financeiro
           router
@@ -1596,6 +2420,9 @@ function registerPageRoutes() {
           router
             .get('/financeiro/inadimplencia', [ShowInadimplenciaPageController])
             .as('financeiro.inadimplencia')
+          router
+            .get('/financeiro/seguros', [ShowSegurosPageController])
+            .as('financeiro.seguros')
 
           // Gamificação
           router.get('/gamificacao', [ShowGamificacaoPageController]).as('gamificacao.index')
@@ -1613,27 +2440,91 @@ function registerPageRoutes() {
           router.get('/configuracoes', [ShowConfiguracoesPageController]).as('configuracoes')
         })
         .prefix('/escola')
-        .use([middleware.auth(), middleware.requireSchool()])
+        .use([middleware.auth(), middleware.impersonation(), middleware.requireSchool()])
         .as('escola')
 
       // Responsavel pages (parents/guardians)
       router
         .group(() => {
           router.get('/', [ShowResponsavelDashboardPageController]).as('dashboard')
-          // More responsavel pages will be added here
+          router.get('/notas', [ShowResponsavelNotasPageController]).as('notas')
+          router.get('/frequencia', [ShowResponsavelFrequenciaPageController]).as('frequencia')
+          router.get('/mensalidades', [ShowResponsavelMensalidadesPageController]).as('mensalidades')
+          router.get('/cantina', [ShowResponsavelCantinaPageController]).as('cantina')
+          router.get('/gamificacao', [ShowResponsavelGamificacaoPageController]).as('gamificacao')
+          router.get('/comunicados', [ShowResponsavelComunicadosPageController]).as('comunicados')
+          router.get('/autorizacoes', [ShowResponsavelAutorizacoesPageController]).as('autorizacoes')
+          router.get('/atividades', [ShowResponsavelAtividadesPageController]).as('atividades')
+          router.get('/horario', [ShowResponsavelHorarioPageController]).as('horario')
+          router.get('/documentos', [ShowResponsavelDocumentosPageController]).as('documentos')
+          router.get('/ocorrencias', [ShowResponsavelOcorrenciasPageController]).as('ocorrencias')
+          router.get('/perfil', [ShowResponsavelPerfilPageController]).as('perfil')
         })
         .prefix('/responsavel')
-        .use(middleware.auth())
+        .use([middleware.auth(), middleware.impersonation()])
         .as('responsavel')
 
       // Admin pages (platform admins)
       router
         .group(() => {
           router.get('/', [ShowAdminDashboardPageController]).as('dashboard')
-          // More admin pages will be added here
+          router.get('/escolas', [ShowAdminEscolasPageController]).as('escolas')
+          router.get('/onboarding', [ShowSchoolOnboardingPageController]).as('onboarding')
+          router
+            .get('/billing/dashboard', [ShowAdminBillingDashboardPageController])
+            .as('billing.dashboard')
+          router
+            .get('/billing/subscriptions', [ShowAdminSubscriptionsPageController])
+            .as('billing.subscriptions')
+          router.get('/redes', [ShowAdminRedesPageController]).as('redes')
+          router.get('/configuracoes', [ShowAdminConfiguracoesPageController]).as('configuracoes')
+
+          // Seguros pages
+          router.get('/seguros', [ShowAdminSegurosPageController, 'handle']).as('seguros.index')
+          router
+            .get('/seguros/sinistros', [ShowAdminSegurosPageController, 'sinistros'])
+            .as('seguros.sinistros')
+          router
+            .get('/seguros/faturamento', [ShowAdminSegurosPageController, 'faturamento'])
+            .as('seguros.faturamento')
+          router
+            .get('/seguros/analytics', [ShowAdminSegurosPageController, 'analytics'])
+            .as('seguros.analytics')
+          router
+            .get('/seguros/configuracao', [ShowAdminSegurosPageController, 'configuracao'])
+            .as('seguros.configuracao')
+
+          // Analytics pages
+          router
+            .get('/analytics', [ShowAdminAnalyticsPageController, 'index'])
+            .as('analytics.index')
+          router
+            .get('/analytics/academico', [ShowAdminAnalyticsPageController, 'academico'])
+            .as('analytics.academico')
+          router
+            .get('/analytics/presenca', [ShowAdminAnalyticsPageController, 'presenca'])
+            .as('analytics.presenca')
+          router
+            .get('/analytics/cantina', [ShowAdminAnalyticsPageController, 'cantina'])
+            .as('analytics.cantina')
+          router
+            .get('/analytics/pagamentos', [ShowAdminAnalyticsPageController, 'pagamentos'])
+            .as('analytics.pagamentos')
+          router
+            .get('/analytics/matriculas', [ShowAdminAnalyticsPageController, 'matriculas'])
+            .as('analytics.matriculas')
+          router
+            .get('/analytics/ocorrencias', [ShowAdminAnalyticsPageController, 'ocorrencias'])
+            .as('analytics.ocorrencias')
+          router
+            .get('/analytics/gamificacao', [ShowAdminAnalyticsPageController, 'gamificacao'])
+            .as('analytics.gamificacao')
+          router
+            .get('/analytics/rh', [ShowAdminAnalyticsPageController, 'rh'])
+            .as('analytics.rh')
         })
         .prefix('/admin')
-        .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
+        .use([middleware.auth(), middleware.impersonation(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
         .as('admin')
     })
     .as('web')
@@ -1663,10 +2554,23 @@ router
     registerContractDocumentApiRoutes()
     registerCourseApiRoutes()
     registerLevelApiRoutes()
+    registerCourseHasAcademicPeriodApiRoutes()
+    registerLevelAssignmentApiRoutes()
     registerClassApiRoutes()
     registerSubjectApiRoutes()
+    registerScheduleApiRoutes()
     registerTeacherApiRoutes()
     registerExamApiRoutes()
+    registerGradesApiRoutes()
+    registerAnalyticsApiRoutes()
+    registerEventApiRoutes()
+    registerParentalConsentApiRoutes()
+    registerOnlineEnrollmentApiRoutes()
+    registerEnrollmentManagementApiRoutes()
+    registerNotificationApiRoutes()
+    registerNotificationPreferenceApiRoutes()
+    registerPostApiRoutes()
+    registerCommentApiRoutes()
     registerAttendanceApiRoutes()
     registerAssignmentApiRoutes()
     registerStudentPaymentApiRoutes()
@@ -1695,6 +2599,10 @@ router
     registerSubscriptionApiRoutes()
     registerSubscriptionInvoiceApiRoutes()
     registerSchoolUsageMetricsApiRoutes()
+    registerPurchaseRequestApiRoutes()
+    registerInsuranceApiRoutes()
+    registerImpersonationApiRoutes()
+    registerAdminOnboardingApiRoutes()
   })
   .prefix('/api/v1')
   .as('api.v1')

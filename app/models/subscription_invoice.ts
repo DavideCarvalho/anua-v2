@@ -7,6 +7,8 @@ import SubscriptionEmailNotification from './subscription_email_notification.js'
 export type SubscriptionInvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELED' | 'REFUNDED'
 
 export default class SubscriptionInvoice extends BaseModel {
+  static table = 'SubscriptionInvoice'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -65,7 +67,7 @@ export default class SubscriptionInvoice extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Subscription)
+  @belongsTo(() => Subscription, { foreignKey: 'subscriptionId' })
   declare subscription: BelongsTo<typeof Subscription>
 
   @hasMany(() => SubscriptionEmailNotification, { foreignKey: 'subscriptionInvoiceId' })

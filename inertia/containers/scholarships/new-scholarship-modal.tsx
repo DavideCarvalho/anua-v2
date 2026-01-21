@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import type { SchoolPartnersForSelectResponse } from '../../hooks/queries/use-school-partners-for-select'
 import { toast } from 'sonner'
 
@@ -52,7 +52,7 @@ export function NewScholarshipModal({
   onSubmit: () => void
 }) {
   const createScholarship = useCreateScholarshipMutation()
-  const { data: partnersData } = useSuspenseQuery<SchoolPartnersForSelectResponse>(
+  const { data: partnersData } = useQuery<SchoolPartnersForSelectResponse>(
     useSchoolPartnersForSelectQueryOptions() as any
   )
 

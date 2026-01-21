@@ -5,7 +5,6 @@ export default class ShowCourseController {
   async handle({ params, response }: HttpContext) {
     const course = await Course.query()
       .where('id', params.id)
-      .preload('levels')
       .preload('academicPeriods')
       .first()
 

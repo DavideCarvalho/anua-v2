@@ -1,60 +1,47 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import Class_ from './class.js'
-import Subject from './subject.js'
-import Teacher from './teacher.js'
-import AssignmentSubmission from './assignment_submission.js'
-
-export type AssignmentStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+import TeacherHasClass from './teacher_has_class.js'
+import AcademicPeriod from './academic_period.js'
+import StudentHasAssignment from './student_has_assignment.js'
 
 export default class Assignment extends BaseModel {
+  static table = 'Assignment'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare title: string
+  declare name: string
 
   @column()
   declare description: string | null
-
-  @column()
-  declare instructions: string | null
-
-  @column()
-  declare maxScore: number
-
-  @column()
-  declare status: AssignmentStatus
 
   @column.dateTime()
   declare dueDate: DateTime
 
   @column()
-  declare classId: string
+  declare grade: number
 
   @column()
-  declare subjectId: string
+  declare teacherHasClassId: string
 
   @column()
-  declare teacherId: string
+  declare academicPeriodId: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Class_)
-  declare class: BelongsTo<typeof Class_>
+  @belongsTo(() => TeacherHasClass, { foreignKey: 'teacherHasClassId' })
+  declare teacherHasClass: BelongsTo<typeof TeacherHasClass>
 
-  @belongsTo(() => Subject)
-  declare subject: BelongsTo<typeof Subject>
+  @belongsTo(() => AcademicPeriod, { foreignKey: 'academicPeriodId' })
+  declare academicPeriod: BelongsTo<typeof AcademicPeriod>
 
-  @belongsTo(() => Teacher)
-  declare teacher: BelongsTo<typeof Teacher>
-
-  @hasMany(() => AssignmentSubmission)
-  declare submissions: HasMany<typeof AssignmentSubmission>
+  @hasMany(() => StudentHasAssignment, { foreignKey: 'assignmentId' })
+  declare submissions: HasMany<typeof StudentHasAssignment>
 }

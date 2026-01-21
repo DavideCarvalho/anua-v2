@@ -20,7 +20,7 @@ export default class StudentHasLevel extends BaseModel {
     }
   }
 
-  static table = 'student_has_levels'
+  static table = 'StudentHasLevel'
 
   @column({ isPrimary: true })
   declare id: string
@@ -82,7 +82,7 @@ export default class StudentHasLevel extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Student)
+  @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>
 
   @belongsTo(() => LevelAssignedToCourseHasAcademicPeriod, {
@@ -92,18 +92,18 @@ export default class StudentHasLevel extends BaseModel {
     typeof LevelAssignedToCourseHasAcademicPeriod
   >
 
-  @belongsTo(() => Level)
+  @belongsTo(() => Level, { foreignKey: 'levelId' })
   declare level: BelongsTo<typeof Level>
 
-  @belongsTo(() => AcademicPeriod)
+  @belongsTo(() => AcademicPeriod, { foreignKey: 'academicPeriodId' })
   declare academicPeriod: BelongsTo<typeof AcademicPeriod>
 
-  @belongsTo(() => Contract)
+  @belongsTo(() => Contract, { foreignKey: 'contractId' })
   declare contract: BelongsTo<typeof Contract>
 
-  @belongsTo(() => Scholarship)
+  @belongsTo(() => Scholarship, { foreignKey: 'scholarshipId' })
   declare scholarship: BelongsTo<typeof Scholarship>
 
-  @belongsTo(() => Class_)
+  @belongsTo(() => Class_, { foreignKey: 'classId' })
   declare class: BelongsTo<typeof Class_>
 }

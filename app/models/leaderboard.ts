@@ -6,15 +6,32 @@ import Class from './class.js'
 import Subject from './subject.js'
 import LeaderboardEntry from './leaderboard_entry.js'
 
-export type LeaderboardMetricType = 'POINTS' | 'AVERAGE_GRADE' | 'ATTENDANCE_PERCENTAGE' | 'ASSIGNMENTS_COMPLETED' | 'EXAMS_AVERAGE' | 'STREAK_DAYS' | 'BEHAVIOR_SCORE'
-export type LeaderboardPeriodType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ACADEMIC_PERIOD' | 'ALL_TIME'
+export type LeaderboardType = 'POINTS' | 'AVERAGE_GRADE' | 'ATTENDANCE_PERCENTAGE' | 'ASSIGNMENTS_COMPLETED' | 'EXAMS_AVERAGE' | 'STREAK_DAYS' | 'BEHAVIOR_SCORE'
+export type LeaderboardPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ACADEMIC_PERIOD' | 'ALL_TIME'
 
 export default class Leaderboard extends BaseModel {
+  static table = 'Leaderboard'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare schoolId: string
+  declare name: string
+
+  @column()
+  declare type: LeaderboardType
+
+  @column()
+  declare period: LeaderboardPeriod
+
+  @column.date()
+  declare startDate: DateTime
+
+  @column.date()
+  declare endDate: DateTime
+
+  @column()
+  declare schoolId: string | null
 
   @column()
   declare classId: string | null
@@ -23,41 +40,20 @@ export default class Leaderboard extends BaseModel {
   declare subjectId: string | null
 
   @column()
-  declare name: string
-
-  @column()
-  declare description: string | null
-
-  @column()
-  declare metricType: LeaderboardMetricType
-
-  @column()
-  declare periodType: LeaderboardPeriodType
-
-  @column.date()
-  declare startDate: DateTime | null
-
-  @column.date()
-  declare endDate: DateTime | null
-
-  @column()
   declare isActive: boolean
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
-
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => Class)
+  @belongsTo(() => Class, { foreignKey: 'classId' })
   declare class: BelongsTo<typeof Class>
 
-  @belongsTo(() => Subject)
+  @belongsTo(() => Subject, { foreignKey: 'subjectId' })
   declare subject: BelongsTo<typeof Subject>
 
-  @hasMany(() => LeaderboardEntry)
+  @hasMany(() => LeaderboardEntry, { foreignKey: 'leaderboardId' })
   declare entries: HasMany<typeof LeaderboardEntry>
 }

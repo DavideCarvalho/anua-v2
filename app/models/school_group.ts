@@ -8,7 +8,7 @@ import UserHasSchoolGroup from './user_has_school_group.js'
 export type SchoolGroupType = 'CITY' | 'STATE' | 'CUSTOM'
 
 export default class SchoolGroup extends BaseModel {
-  static table = 'school_groups'
+  static table = 'SchoolGroup'
 
   @column({ isPrimary: true })
   declare id: string
@@ -46,11 +46,11 @@ export default class SchoolGroup extends BaseModel {
   declare updatedAt: DateTime | null
 
   // Relationships
-  @belongsTo(() => SchoolChain)
+  @belongsTo(() => SchoolChain, { foreignKey: 'schoolChainId' })
   declare schoolChain: BelongsTo<typeof SchoolChain>
 
   @manyToMany(() => School, {
-    pivotTable: 'school_has_groups',
+    pivotTable: 'SchoolHasGroup',
     localKey: 'id',
     pivotForeignKey: 'school_group_id',
     relatedKey: 'id',
@@ -58,6 +58,6 @@ export default class SchoolGroup extends BaseModel {
   })
   declare schools: ManyToMany<typeof School>
 
-  @hasMany(() => UserHasSchoolGroup)
+  @hasMany(() => UserHasSchoolGroup, { foreignKey: 'schoolGroupId' })
   declare userHasSchoolGroups: HasMany<typeof UserHasSchoolGroup>
 }

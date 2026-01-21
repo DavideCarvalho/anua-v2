@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use-teacher-absences'
 import { useApproveAbsenceMutation } from '../../hooks/mutations/use-approve-absence'
@@ -46,9 +47,10 @@ export function ViewAbsencesModal({
   const approve = useApproveAbsenceMutation()
   const reject = useRejectAbsenceMutation()
 
-  const { data } = useSuspenseQuery(
-    useTeacherAbsencesQueryOptions({ teacherId: teacherId ?? '', month, year } as any)
-  )
+  const { data, isLoading } = useQuery({
+    ...useTeacherAbsencesQueryOptions({ teacherId: teacherId ?? '', month, year } as any),
+    enabled: !!teacherId && open,
+  })
 
   const absences = useMemo(() => {
     if (Array.isArray(data)) return data
@@ -72,7 +74,13 @@ export function ViewAbsencesModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {absences.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
+            </div>
+          ) : absences.length === 0 ? (
             <p className="text-muted-foreground text-center text-sm">
               Nenhuma falta registrada para este período
             </p>

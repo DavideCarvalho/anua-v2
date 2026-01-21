@@ -39,5 +39,6 @@ export const updateSchoolValidator = vine.compile(
     minimumGrade: vine.number().min(0).max(10).optional(),
     calculationAlgorithm: vine.enum(['AVERAGE', 'SUM']).optional(),
     minimumAttendancePercentage: vine.number().min(0).max(100).optional(),
+    active: vine.boolean().optional(),
   })
 )

@@ -2,15 +2,13 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Level from './level.js'
+import School from './school.js'
 import Student from './student.js'
 import Teacher from './teacher.js'
-import Assignment from './assignment.js'
 import Exam from './exam.js'
 
-export type ClassStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'
-
 export default class Class_ extends BaseModel {
-  static table = 'classes'
+  static table = 'Class'
 
   @column({ isPrimary: true })
   declare id: string
@@ -19,44 +17,43 @@ export default class Class_ extends BaseModel {
   declare name: string
 
   @column()
-  declare description: string | null
+  declare slug: string
 
   @column()
-  declare maxStudents: number | null
+  declare schoolId: string
 
   @column()
-  declare status: ClassStatus
+  declare levelId: string | null
 
   @column()
-  declare levelId: string
+  declare isArchived: boolean
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Level)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
+  declare school: BelongsTo<typeof School>
+
+  @belongsTo(() => Level, { foreignKey: 'levelId' })
   declare level: BelongsTo<typeof Level>
 
-  // Students are related through Student model's classId
   @hasMany(() => Student, { foreignKey: 'classId' })
   declare students: HasMany<typeof Student>
 
-  @hasMany(() => Assignment)
-  declare assignments: HasMany<typeof Assignment>
-
-  @hasMany(() => Exam)
+  @hasMany(() => Exam, { foreignKey: 'classId' })
   declare exams: HasMany<typeof Exam>
 
-  // Many-to-many with Teachers through teacher_has_classes
+  // Many-to-many with Teachers through TeacherHasClass
   @manyToMany(() => Teacher, {
-    pivotTable: 'teacher_has_classes',
+    pivotTable: 'TeacherHasClass',
     localKey: 'id',
-    pivotForeignKey: 'class_id',
+    pivotForeignKey: 'classId',
     relatedKey: 'id',
-    pivotRelatedForeignKey: 'teacher_id',
+    pivotRelatedForeignKey: 'teacherId',
   })
   declare teachers: ManyToMany<typeof Teacher>
 }

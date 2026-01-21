@@ -1,8 +1,9 @@
-import { Head } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import { EscolaLayout } from '../../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
-import { Button } from '../../../components/ui/button'
+import { buttonVariants } from '../../../components/ui/button'
 import { Calendar, Clock, BookOpen } from 'lucide-react'
+import { cn } from '../../../lib/utils'
 
 export default function GradePage() {
   return (
@@ -18,7 +19,7 @@ export default function GradePage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <Calendar className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Horários</CardTitle>
@@ -27,11 +28,16 @@ export default function GradePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">Gerenciar Horários</Button>
+              <Link
+                href="/escola/pedagogico/horarios"
+                className={cn(buttonVariants(), 'w-full')}
+              >
+                Gerenciar Horários
+              </Link>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <BookOpen className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Disciplinas</CardTitle>
@@ -40,11 +46,16 @@ export default function GradePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Ver Disciplinas</Button>
+              <Link
+                href="/escola/administrativo/materias"
+                className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}
+              >
+                Ver Disciplinas
+              </Link>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <Clock className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Quadro Geral</CardTitle>
@@ -53,7 +64,12 @@ export default function GradePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Ver Quadro</Button>
+              <Link
+                href="/escola/pedagogico/quadro"
+                className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}
+              >
+                Ver Quadro
+              </Link>
             </CardContent>
           </Card>
         </div>

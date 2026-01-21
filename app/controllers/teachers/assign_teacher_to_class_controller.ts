@@ -16,7 +16,9 @@ export default class AssignTeacherToClassController {
     const teacherHasClass = await TeacherHasClass.create({
       teacherId: params.id,
       classId: data.classId,
-      isMainTeacher: data.isMainTeacher ?? false,
+      subjectId: data.subjectId,
+      subjectQuantity: data.subjectQuantity ?? 1,
+      isActive: true,
     })
 
     await teacherHasClass.load('class')

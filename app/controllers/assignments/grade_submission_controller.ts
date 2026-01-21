@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
-import AssignmentSubmission from '#models/assignment_submission'
+import StudentHasAssignment from '#models/student_has_assignment'
 import { gradeSubmissionValidator } from '#validators/assignment'
 
 export default class GradeSubmissionController {
@@ -15,7 +14,7 @@ export default class GradeSubmissionController {
       return response.notFound({ message: 'Assignment not found' })
     }
 
-    const submission = await AssignmentSubmission.query()
+    const submission = await StudentHasAssignment.query()
       .where('id', submissionId)
       .where('assignmentId', id)
       .first()
@@ -24,12 +23,7 @@ export default class GradeSubmissionController {
       return response.notFound({ message: 'Submission not found' })
     }
 
-    submission.merge({
-      score: payload.score,
-      feedback: payload.feedback,
-      status: 'GRADED',
-      gradedAt: DateTime.now(),
-    })
+    submission.grade = payload.grade
     await submission.save()
 
     await submission.load('student')

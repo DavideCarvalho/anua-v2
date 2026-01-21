@@ -5,8 +5,9 @@ import StudentPayment from '#models/student_payment'
 import { DateTime } from 'luxon'
 
 export default class GetEscolaStatsController {
-  async handle({ auth, response }: HttpContext) {
-    const user = auth.user
+  async handle({ auth, response, effectiveUser }: HttpContext) {
+    // Usar effectiveUser se disponível (para impersonation)
+    const user = effectiveUser ?? auth.user
     if (!user) {
       return response.unauthorized({ message: 'Não autenticado' })
     }
@@ -35,8 +36,9 @@ export default class GetEscolaStatsController {
       .first()
 
     const totalTeachers = await Teacher.query()
-      .where('schoolId', schoolId)
-      .whereNull('deletedAt')
+      .whereHas('user', (userQuery) => {
+        userQuery.where('schoolId', schoolId).whereNull('deletedAt')
+      })
       .count('* as total')
       .first()
 
@@ -49,7 +51,7 @@ export default class GetEscolaStatsController {
       .where('status', 'PAID')
       .where('paidAt', '>=', startOfMonth.toISO()!)
       .where('paidAt', '<=', endOfMonth.toISO()!)
-      .sum('amountPaid as total')
+      .sum('amount as total')
       .first()
 
     const pendingPayments = await StudentPayment.query()

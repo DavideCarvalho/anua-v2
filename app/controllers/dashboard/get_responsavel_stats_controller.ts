@@ -21,17 +21,15 @@ export default class GetResponsavelStatsController {
         const student = relation.student
 
         let className = '-'
-        let courseName = '-'
+        let levelName = '-'
         if (student.classId) {
           const classInfo = await Class.query()
             .where('id', student.classId)
-            .preload('level', (levelQ) => {
-              levelQ.preload('course')
-            })
+            .preload('level')
             .first()
           if (classInfo) {
             className = classInfo.name
-            courseName = classInfo.level?.course?.name || '-'
+            levelName = classInfo.level?.name || '-'
           }
         }
 
@@ -43,7 +41,7 @@ export default class GetResponsavelStatsController {
           id: student.id,
           name: student.user?.name || 'Aluno',
           className,
-          courseName,
+          levelName,
           averageGrade: null,
           attendanceRate: null,
           pendingPayments: 0,

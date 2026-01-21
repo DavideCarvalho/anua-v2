@@ -4,6 +4,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 
 export default class Subject extends BaseModel {
+  static table = 'Subject'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -26,7 +28,7 @@ export default class Subject extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
   // Note: Other relationships will be added when their models are created:

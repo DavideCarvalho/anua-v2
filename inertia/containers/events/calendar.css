@@ -1,0 +1,140 @@
+/* Customização do React Big Calendar para tema escuro/claro */
+
+.rbc-calendar {
+  font-family: inherit;
+}
+
+/* Header do mês */
+.rbc-header {
+  padding: 10px 3px;
+  font-weight: 600;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Dias da semana */
+.rbc-day-bg {
+  border-left: 1px solid hsl(var(--border));
+}
+
+.rbc-day-bg:first-child {
+  border-left: none;
+}
+
+/* Hoje */
+.rbc-today {
+  background-color: hsl(var(--accent) / 0.1);
+}
+
+/* Eventos */
+.rbc-event {
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.rbc-event:hover {
+  opacity: 0.8;
+}
+
+.rbc-event-label {
+  font-size: 0.75rem;
+}
+
+/* Toolbar */
+.rbc-toolbar {
+  padding: 10px 0;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rbc-toolbar button {
+  padding: 6px 12px;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.rbc-toolbar button:hover {
+  background-color: hsl(var(--accent));
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Agenda view */
+.rbc-agenda-view {
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+}
+
+.rbc-agenda-table {
+  border-spacing: 0;
+}
+
+.rbc-agenda-table tbody > tr > td {
+  padding: 8px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.rbc-agenda-date-cell {
+  font-weight: 600;
+}
+
+/* Off-range (dias de outros meses) */
+.rbc-off-range {
+  color: hsl(var(--muted-foreground));
+}
+
+.rbc-off-range-bg {
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+/* Time slots */
+.rbc-time-slot {
+  border-top: 1px solid hsl(var(--border));
+}
+
+.rbc-current-time-indicator {
+  background-color: hsl(var(--destructive));
+}
+
+/* Month view */
+.rbc-month-view {
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.rbc-month-row {
+  border-top: 1px solid hsl(var(--border));
+}
+
+.rbc-date-cell {
+  padding: 4px;
+}
+
+.rbc-date-cell > a {
+  color: hsl(var(--foreground));
+  text-decoration: none;
+}
+
+/* Show more link */
+.rbc-show-more {
+  background-color: transparent;
+  color: hsl(var(--primary));
+  cursor: pointer;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.rbc-show-more:hover {
+  text-decoration: underline;
+}

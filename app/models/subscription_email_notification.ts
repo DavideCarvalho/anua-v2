@@ -4,6 +4,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import SubscriptionInvoice from './subscription_invoice.js'
 
 export default class SubscriptionEmailNotification extends BaseModel {
+  static table = 'SubscriptionEmailNotification'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -26,6 +28,6 @@ export default class SubscriptionEmailNotification extends BaseModel {
   declare metadata: Record<string, unknown> | null
 
   // Relationships
-  @belongsTo(() => SubscriptionInvoice)
+  @belongsTo(() => SubscriptionInvoice, { foreignKey: 'subscriptionInvoiceId' })
   declare subscriptionInvoice: BelongsTo<typeof SubscriptionInvoice>
 }

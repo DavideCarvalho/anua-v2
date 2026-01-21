@@ -5,6 +5,8 @@ import User from './user.js'
 import Post from './post.js'
 
 export default class UserLikedPost extends BaseModel {
+  static table = 'UserLikedPost'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -12,18 +14,18 @@ export default class UserLikedPost extends BaseModel {
   declare userId: string
 
   @column()
-  declare postId: string
+  declare postId: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => Post)
+  @belongsTo(() => Post, { foreignKey: 'postId' })
   declare post: BelongsTo<typeof Post>
 }

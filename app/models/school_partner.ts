@@ -6,6 +6,8 @@ import School from './school.js'
 import Scholarship from './scholarship.js'
 
 export default class SchoolPartner extends BaseModel {
+  static table = 'SchoolPartner'
+
   @beforeCreate()
   static assignId(partner: SchoolPartner) {
     if (!partner.id) {
@@ -52,9 +54,9 @@ export default class SchoolPartner extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @hasMany(() => Scholarship)
+  @hasMany(() => Scholarship, { foreignKey: 'schoolPartnerId' })
   declare scholarships: HasMany<typeof Scholarship>
 }

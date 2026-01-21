@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import {
   Select,
@@ -10,6 +10,7 @@ import {
 } from '../../components/ui/select'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
+import { Skeleton } from '../../components/ui/skeleton'
 
 import { useTeachersTimesheetQueryOptions } from '../../hooks/queries/use-teachers-timesheet'
 import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use-academic-periods'
@@ -24,7 +25,7 @@ export function TeacherTimesheetTable({
 
   const [selectedAcademicPeriodIds, setSelectedAcademicPeriodIds] = useState<string[]>([])
 
-  const { data: activeAcademicPeriods } = useSuspenseQuery(
+  const { data: activeAcademicPeriods, isLoading: isLoadingPeriods } = useQuery(
     useAcademicPeriodsQueryOptions({ page: 1, limit: 50 })
   )
 
@@ -33,7 +34,7 @@ export function TeacherTimesheetTable({
     return activeAcademicPeriods?.data ?? []
   }, [activeAcademicPeriods])
 
-  const { data: timesheet } = useSuspenseQuery(
+  const { data: timesheet, isLoading: isLoadingTimesheet } = useQuery(
     useTeachersTimesheetQueryOptions({
       month: selectedMonth,
       year: selectedYear,
@@ -44,6 +45,29 @@ export function TeacherTimesheetTable({
   )
 
   const rows = Array.isArray(timesheet) ? timesheet : (timesheet ?? [])
+
+  const isLoading = isLoadingPeriods || isLoadingTimesheet
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-[260px]" />
+          <Skeleton className="h-10 w-[120px]" />
+          <Skeleton className="h-10 w-[120px]" />
+        </div>
+        <Card>
+          <CardContent className="py-4">
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">

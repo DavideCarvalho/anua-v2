@@ -3,6 +3,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
 export default class Teacher extends BaseModel {
+  static table = 'Teacher'
+
   // Same ID as User (1:1 relationship)
   @column({ isPrimary: true })
   declare id: string

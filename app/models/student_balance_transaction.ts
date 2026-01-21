@@ -5,6 +5,8 @@ import Student from './student.js'
 import User from './user.js'
 
 export default class StudentBalanceTransaction extends BaseModel {
+  static table = 'StudentBalanceTransaction'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -51,7 +53,7 @@ export default class StudentBalanceTransaction extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Student)
+  @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>
 
   @belongsTo(() => User, { foreignKey: 'responsibleId' })

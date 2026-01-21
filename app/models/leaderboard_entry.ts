@@ -5,6 +5,8 @@ import Leaderboard from './leaderboard.js'
 import Student from './student.js'
 
 export default class LeaderboardEntry extends BaseModel {
+  static table = 'LeaderboardEntry'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -20,21 +22,15 @@ export default class LeaderboardEntry extends BaseModel {
   @column()
   declare rank: number
 
-  @column()
-  declare previousRank: number | null
-
-  @column.date()
-  declare calculationDate: DateTime
-
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Leaderboard)
+  @belongsTo(() => Leaderboard, { foreignKey: 'leaderboardId' })
   declare leaderboard: BelongsTo<typeof Leaderboard>
 
-  @belongsTo(() => Student)
+  @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>
 }

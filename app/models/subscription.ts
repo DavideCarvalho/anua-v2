@@ -11,6 +11,8 @@ export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'PAST_DUE' | 'BLOCKED' | '
 export type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'SEMI_ANNUAL' | 'ANNUAL'
 
 export default class Subscription extends BaseModel {
+  static table = 'Subscription'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -87,15 +89,15 @@ export default class Subscription extends BaseModel {
   @belongsTo(() => SubscriptionPlan, { foreignKey: 'planId' })
   declare plan: BelongsTo<typeof SubscriptionPlan>
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => SchoolChain)
+  @belongsTo(() => SchoolChain, { foreignKey: 'schoolChainId' })
   declare schoolChain: BelongsTo<typeof SchoolChain>
 
-  @hasMany(() => SubscriptionInvoice)
+  @hasMany(() => SubscriptionInvoice, { foreignKey: 'subscriptionId' })
   declare invoices: HasMany<typeof SubscriptionInvoice>
 
-  @hasMany(() => SubscriptionStatusHistory)
+  @hasMany(() => SubscriptionStatusHistory, { foreignKey: 'statusHistoryId' })
   declare statusHistory: HasMany<typeof SubscriptionStatusHistory>
 }

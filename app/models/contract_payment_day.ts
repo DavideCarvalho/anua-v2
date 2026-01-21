@@ -4,6 +4,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Contract from './contract.js'
 
 export default class ContractPaymentDay extends BaseModel {
+  static table = 'ContractPaymentDay'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -20,6 +22,6 @@ export default class ContractPaymentDay extends BaseModel {
   declare updatedAt: DateTime
 
   // Relacionamento
-  @belongsTo(() => Contract)
+  @belongsTo(() => Contract, { foreignKey: 'contractId' })
   declare contract: BelongsTo<typeof Contract>
 }

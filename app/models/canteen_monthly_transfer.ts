@@ -7,6 +7,8 @@ import CanteenPurchase from './canteen_purchase.js'
 export type CanteenMonthlyTransferStatus = 'PENDING' | 'TRANSFERRED' | 'CANCELLED'
 
 export default class CanteenMonthlyTransfer extends BaseModel {
+  static table = 'CanteenMonthlyTransfer'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -34,7 +36,7 @@ export default class CanteenMonthlyTransfer extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => Canteen)
+  @belongsTo(() => Canteen, { foreignKey: 'canteenId' })
   declare canteen: BelongsTo<typeof Canteen>
 
   @hasMany(() => CanteenPurchase, { foreignKey: 'monthlyTransferId' })

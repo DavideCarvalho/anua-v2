@@ -5,6 +5,8 @@ import User from './user.js'
 import School from './school.js'
 
 export default class UserHasSchool extends BaseModel {
+  static table = 'UserHasSchool'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -23,9 +25,9 @@ export default class UserHasSchool extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 }

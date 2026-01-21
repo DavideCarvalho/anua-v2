@@ -17,9 +17,10 @@ import {
   School,
 } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '../ui/button'
+import { Button, buttonVariants } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
+import { ImpersonationBanner } from '../admin/impersonation-banner'
 
 interface NavItem {
   title: string
@@ -174,6 +175,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="min-h-screen bg-background">
+      <ImpersonationBanner />
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -239,11 +241,14 @@ export function EscolaLayout({ children }: PropsWithChildren) {
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
-            <Link href="/api/v1/auth/logout" method="post" as="button" className="w-full mt-3">
-              <Button variant="outline" size="sm" className="w-full">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </Button>
+            <Link
+              href="/api/v1/auth/logout"
+              method="post"
+              as="button"
+              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair
             </Link>
           </div>
         </div>

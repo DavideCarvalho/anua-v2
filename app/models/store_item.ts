@@ -29,6 +29,8 @@ export type StoreItemPaymentMode = 'POINTS_ONLY' | 'MONEY_ONLY' | 'HYBRID'
 export type StoreItemPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'SEMESTER' | 'ANNUAL'
 
 export default class StoreItem extends BaseModel {
+  static table = 'StoreItem'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -104,12 +106,12 @@ export default class StoreItem extends BaseModel {
   @column.dateTime()
   declare deletedAt: DateTime | null
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => CanteenItem)
+  @belongsTo(() => CanteenItem, { foreignKey: 'canteenItemId' })
   declare canteenItem: BelongsTo<typeof CanteenItem>
 
-  @hasMany(() => StoreOrder)
+  @hasMany(() => StoreOrder, { foreignKey: 'storeItemId' })
   declare orders: HasMany<typeof StoreOrder>
 }

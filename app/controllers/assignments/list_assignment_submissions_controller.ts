@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
-import AssignmentSubmission from '#models/assignment_submission'
+import StudentHasAssignment from '#models/student_has_assignment'
 
 export default class ListAssignmentSubmissionsController {
   async handle({ params, request, response }: HttpContext) {
@@ -14,7 +14,7 @@ export default class ListAssignmentSubmissionsController {
       return response.notFound({ message: 'Assignment not found' })
     }
 
-    const submissions = await AssignmentSubmission.query()
+    const submissions = await StudentHasAssignment.query()
       .where('assignmentId', id)
       .preload('student')
       .orderBy('submittedAt', 'desc')

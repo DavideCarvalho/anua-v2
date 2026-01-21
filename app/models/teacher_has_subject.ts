@@ -5,6 +5,8 @@ import Teacher from './teacher.js'
 import Subject from './subject.js'
 
 export default class TeacherHasSubject extends BaseModel {
+  static table = 'TeacherHasSubject'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -21,9 +23,9 @@ export default class TeacherHasSubject extends BaseModel {
   declare updatedAt: DateTime | null
 
   // Relationships
-  @belongsTo(() => Teacher)
+  @belongsTo(() => Teacher, { foreignKey: 'teacherId' })
   declare teacher: BelongsTo<typeof Teacher>
 
-  @belongsTo(() => Subject)
+  @belongsTo(() => Subject, { foreignKey: 'subjectId' })
   declare subject: BelongsTo<typeof Subject>
 }

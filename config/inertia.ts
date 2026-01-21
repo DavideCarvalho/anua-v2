@@ -15,10 +15,12 @@ const inertiaConfig = defineConfig({
     user: (ctx) =>
       ctx.inertia.always(async () => {
         await ctx.auth.check()
-        const user = ctx.auth.user
+        // Usar effectiveUser se disponível (set pelo impersonation middleware)
+        const user = ctx.effectiveUser ?? ctx.auth.user
         if (!user) return null
-        await user.load('role')
-        await user.load('school')
+        // Carregar relacionamentos se ainda não carregados
+        if (!user.$preloaded.role) await user.load('role')
+        if (!user.$preloaded.school) await user.load('school')
         return new UserDto(user)
       }),
   },

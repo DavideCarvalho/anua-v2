@@ -6,50 +6,40 @@ import School from './school.js'
 import Comment from './comment.js'
 import UserLikedPost from './user_liked_post.js'
 
-export type PostType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'ANNOUNCEMENT'
-export type PostVisibility = 'PUBLIC' | 'SCHOOL_ONLY' | 'CLASS_ONLY' | 'PRIVATE'
-
 export default class Post extends BaseModel {
+  static table = 'Post'
+
   @column({ isPrimary: true })
-  declare id: string
+  declare id: number
+
+  @column()
+  declare uuid: string
 
   @column()
   declare content: string
 
   @column()
-  declare type: PostType
+  declare userId: string
 
   @column()
-  declare visibility: PostVisibility
-
-  @column()
-  declare attachmentUrl: string | null
-
-  @column()
-  declare authorId: string
-
-  @column()
-  declare schoolId: string
-
-  @column()
-  declare classId: string | null
+  declare schoolId: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => User, { foreignKey: 'authorId' })
-  declare author: BelongsTo<typeof User>
+  @belongsTo(() => User, { foreignKey: 'userId' })
+  declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @hasMany(() => Comment)
+  @hasMany(() => Comment, { foreignKey: 'postId' })
   declare comments: HasMany<typeof Comment>
 
-  @hasMany(() => UserLikedPost)
+  @hasMany(() => UserLikedPost, { foreignKey: 'postId' })
   declare likes: HasMany<typeof UserLikedPost>
 }

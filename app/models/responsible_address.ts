@@ -4,6 +4,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
 export default class ResponsibleAddress extends BaseModel {
+  static table = 'ResponsibleAddress'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -36,6 +38,11 @@ export default class ResponsibleAddress extends BaseModel {
 
   @column()
   declare longitude: number | null
+
+  // PostGIS geometry point - stored as USER-DEFINED type in DB
+  // Use raw queries for spatial operations
+  @column()
+  declare location: unknown | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

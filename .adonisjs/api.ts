@@ -7,6 +7,10 @@
 import type { MakeTuyauRequest, MakeNonSerializedTuyauResponse } from '@tuyau/utils/types'
 import type { InferInput } from '@vinejs/vine/types'
 
+type IdMatriculaonlineIdIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/show_matricula_online_page_controller.ts').default['handle'], false>
+}
 type SignInGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/auth/show_sign_in_page_controller.ts').default['handle'], false>
@@ -63,6 +67,10 @@ type EscolaAdministrativoContratosIdDocusealGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_contrato_docuseal_page_controller.ts').default['handle'], false>
 }
+type EscolaAdministrativoContratosIdFinanceiroGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_contrato_financeiro_page_controller.ts').default['handle'], false>
+}
 type EscolaAdministrativoBolsasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_bolsas_page_controller.ts').default['handle'], false>
@@ -83,6 +91,38 @@ type EscolaAdministrativoImpressaoGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_impressao_page_controller.ts').default['handle'], false>
 }
+type EscolaAdministrativoSolicitacoesdecompraGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_solicitacoes_de_compra_page_controller.ts').default['handle'], false>
+}
+type EscolaNotificacoesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_notificacoes_page_controller.ts').default['handle'], false>
+}
+type EscolaNotificacoesPreferenciasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_notificacoes_preferencias_page_controller.ts').default['handle'], false>
+}
+type EscolaEventosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_eventos_page_controller.ts').default['handle'], false>
+}
+type EscolaEventosIdAutorizacoesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_evento_autorizacoes_page_controller.ts').default['handle'], false>
+}
+type EscolaMuralGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_mural_page_controller.ts').default['handle'], false>
+}
+type EscolaDesempenhoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_desempenho_page_controller.ts').default['handle'], false>
+}
+type EscolaMatriculasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_matriculas_page_controller.ts').default['handle'], false>
+}
 type EscolaPedagogicoTurmasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_turmas_page_controller.ts').default['handle'], false>
@@ -94,6 +134,22 @@ type EscolaPedagogicoGradeGetHead = {
 type EscolaPedagogicoOcorrenciasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_ocorrencias_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoAtividadesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_atividades_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoProvasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_provas_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoPresencaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_presenca_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoCursosniveisGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_cursos_niveis_page_controller.ts').default['handle'], false>
 }
 type EscolaCantinaItensGetHead = {
   request: unknown
@@ -115,6 +171,14 @@ type EscolaCantinaVendasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_cantina_vendas_page_controller.ts').default['handle'], false>
 }
+type EscolaCantinaReservasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_cantina_reservas_page_controller.ts').default['handle'], false>
+}
+type EscolaCantinaTransferenciasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_cantina_transferencias_page_controller.ts').default['handle'], false>
+}
 type EscolaFinanceiroMensalidadesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_mensalidades_page_controller.ts').default['handle'], false>
@@ -122,6 +186,10 @@ type EscolaFinanceiroMensalidadesGetHead = {
 type EscolaFinanceiroInadimplenciaGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_inadimplencia_page_controller.ts').default['handle'], false>
+}
+type EscolaFinanceiroSegurosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_seguros_page_controller.ts').default['handle'], false>
 }
 type EscolaGamificacaoGetHead = {
   request: unknown
@@ -147,13 +215,149 @@ type ResponsavelGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_dashboard_page_controller.ts').default['handle'], false>
 }
+type ResponsavelNotasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_notas_page_controller.ts').default['handle'], false>
+}
+type ResponsavelFrequenciaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_frequencia_page_controller.ts').default['handle'], false>
+}
+type ResponsavelMensalidadesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_mensalidades_page_controller.ts').default['handle'], false>
+}
+type ResponsavelCantinaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_cantina_page_controller.ts').default['handle'], false>
+}
+type ResponsavelGamificacaoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_gamificacao_page_controller.ts').default['handle'], false>
+}
+type ResponsavelComunicadosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_comunicados_page_controller.ts').default['handle'], false>
+}
+type ResponsavelAutorizacoesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_autorizacoes_page_controller.ts').default['handle'], false>
+}
+type ResponsavelAtividadesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_atividades_page_controller.ts').default['handle'], false>
+}
+type ResponsavelHorarioGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_horario_page_controller.ts').default['handle'], false>
+}
+type ResponsavelDocumentosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_documentos_page_controller.ts').default['handle'], false>
+}
+type ResponsavelOcorrenciasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller.ts').default['handle'], false>
+}
+type ResponsavelPerfilGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_perfil_page_controller.ts').default['handle'], false>
+}
 type AdminGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_dashboard_page_controller.ts').default['handle'], false>
 }
+type AdminEscolasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_escolas_page_controller.ts').default['handle'], false>
+}
+type AdminOnboardingGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_school_onboarding_page_controller.ts').default['handle'], false>
+}
+type AdminBillingDashboardGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_billing_dashboard_page_controller.ts').default['handle'], false>
+}
+type AdminBillingSubscriptionsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_subscriptions_page_controller.ts').default['handle'], false>
+}
+type AdminRedesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_redes_page_controller.ts').default['handle'], false>
+}
+type AdminConfiguracoesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_configuracoes_page_controller.ts').default['handle'], false>
+}
+type AdminSegurosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_seguros_page_controller.ts').default['handle'], false>
+}
+type AdminSegurosSinistrosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_seguros_page_controller.ts').default['sinistros'], false>
+}
+type AdminSegurosFaturamentoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_seguros_page_controller.ts').default['faturamento'], false>
+}
+type AdminSegurosAnalyticsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_seguros_page_controller.ts').default['analytics'], false>
+}
+type AdminSegurosConfiguracaoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_seguros_page_controller.ts').default['configuracao'], false>
+}
+type AdminAnalyticsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['index'], false>
+}
+type AdminAnalyticsAcademicoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['academico'], false>
+}
+type AdminAnalyticsPresencaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['presenca'], false>
+}
+type AdminAnalyticsCantinaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['cantina'], false>
+}
+type AdminAnalyticsPagamentosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['pagamentos'], false>
+}
+type AdminAnalyticsMatriculasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['matriculas'], false>
+}
+type AdminAnalyticsOcorrenciasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['ocorrencias'], false>
+}
+type AdminAnalyticsGamificacaoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['gamificacao'], false>
+}
+type AdminAnalyticsRhGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['rh'], false>
+}
 type ApiV1AuthLoginPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/auth.ts')['loginValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/auth/login.ts').default['handle'], true>
+}
+type ApiV1AuthSendcodePost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/auth.ts')['sendCodeValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/auth/send_code.ts').default['handle'], true>
+}
+type ApiV1AuthVerifycodePost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/auth.ts')['verifyCodeValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/auth/verify_code.ts').default['handle'], true>
 }
 type ApiV1AuthLogoutPost = {
   request: unknown
@@ -170,6 +374,42 @@ type ApiV1EscolaStatsGetHead = {
 type ApiV1ResponsavelStatsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_responsavel_stats_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdGradesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_grades_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdAttendanceGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_attendance_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdPaymentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_payments_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdBalanceGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_balance_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdAssignmentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_assignments_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdScheduleGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_schedule_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdDocumentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_documents_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdOccurrencesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_occurrences_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdOccurrencesIdAcknowledgePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/acknowledge_occurrence_controller.ts').default['handle'], false>
 }
 type ApiV1AdminStatsGetHead = {
   request: unknown
@@ -206,6 +446,10 @@ type ApiV1SchoolsIdDelete = {
 type ApiV1UsersGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/users/index.ts').default['handle'], false>
+}
+type ApiV1UsersSchoolemployeesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/users/school_employees.ts').default['handle'], false>
 }
 type ApiV1UsersPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/user.ts')['createUserValidator']>>
@@ -579,6 +823,250 @@ type ApiV1ExamsIdGradesIdPut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/exam.ts')['saveExamGradeValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/exams/update_exam_grade_controller.ts').default['handle'], true>
 }
+type ApiV1GradesAcademicoverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/grades.ts')['getAcademicOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_academic_overview_controller.ts').default['handle'], true>
+}
+type ApiV1GradesStudentsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/grades.ts')['getStudentsGradesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_students_grades_controller.ts').default['handle'], true>
+}
+type ApiV1GradesDistributionGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/grades.ts')['getGradeDistributionValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_grade_distribution_controller.ts').default['handle'], true>
+}
+type ApiV1GradesAtriskGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/grades.ts')['getAtRiskStudentsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_at_risk_students_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsAttendanceOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getAttendanceOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_attendance_overview_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsAttendanceTrendsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getAttendanceTrendsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_attendance_trends_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsAttendanceChronicGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getChronicAbsenteeismValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_chronic_absenteeism_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsCanteenOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getCanteenOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_canteen_overview_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsCanteenTrendsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getCanteenTrendsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_canteen_trends_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsCanteenTopitemsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getCanteenTopItemsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_canteen_top_items_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsPaymentsOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getPaymentsOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_payments_overview_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsEnrollmentsOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getEnrollmentsOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_enrollments_overview_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsEnrollmentsFunnelGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getFunnelStatsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_enrollment_funnel_stats_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsEnrollmentsTrendsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getTrendsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_enrollment_trends_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsEnrollmentsBylevelGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getByLevelValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_enrollment_by_level_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsIncidentsOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getIncidentsOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_incidents_overview_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsGamificationOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getGamificationOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_gamification_overview_controller.ts').default['handle'], true>
+}
+type ApiV1AnalyticsHrOverviewGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getHrOverviewValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/analytics/get_hr_overview_controller.ts').default['handle'], true>
+}
+type ApiV1EventsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['listEventsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/list_events_controller.ts').default['handle'], true>
+}
+type ApiV1EventsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['createEventValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/create_event_controller.ts').default['handle'], true>
+}
+type ApiV1EventsIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/show_event_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['updateEventValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/update_event_controller.ts').default['handle'], true>
+}
+type ApiV1EventsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/delete_event_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdPublishPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/publish_event_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdCancelPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/cancel_event_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdCompletePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/events/complete_event_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdParticipantsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['listParticipantsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/list_event_participants_controller.ts').default['handle'], true>
+}
+type ApiV1EventsIdParticipantsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['registerParticipantValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/register_participant_controller.ts').default['handle'], true>
+}
+type ApiV1EventsIdParticipantsIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['updateParticipantStatusValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/update_participant_status_controller.ts').default['handle'], true>
+}
+type ApiV1EventsIdParticipantsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/cancel_registration_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdParticipantsIdConfirmPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/confirm_attendance_controller.ts').default['handle'], false>
+}
+type ApiV1EventsIdConsentsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['listEventConsentsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_event_consents_controller.ts').default['handle'], true>
+}
+type ApiV1EventsIdConsentsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['requestConsentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/request_consent_controller.ts').default['handle'], true>
+}
+type ApiV1ParentalconsentsPendingGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_pending_consents_controller.ts').default['handle'], false>
+}
+type ApiV1ParentalconsentsHistoryGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['listConsentHistoryValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_consent_history_controller.ts').default['handle'], true>
+}
+type ApiV1ParentalconsentsIdRespondPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['respondConsentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/respond_consent_controller.ts').default['handle'], true>
+}
+type ApiV1OnlineenrollmentIdIdIdInfoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/online-enrollment/get_school_enrollment_info_controller.ts').default['handle'], false>
+}
+type ApiV1OnlineenrollmentCheckexistingPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/online_enrollment.ts')['checkExistingValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/online-enrollment/check_existing_student_controller.ts').default['handle'], true>
+}
+type ApiV1OnlineenrollmentFindscholarshipPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/online_enrollment.ts')['findScholarshipValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/online-enrollment/find_scholarship_by_code_controller.ts').default['handle'], true>
+}
+type ApiV1OnlineenrollmentFinishPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/enrollment.ts')['finishEnrollmentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/online-enrollment/finish_enrollment_controller.ts').default['handle'], true>
+}
+type ApiV1EnrollmentsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/enrollment.ts')['listEnrollmentsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/enrollments/list_enrollments_controller.ts').default['handle'], true>
+}
+type ApiV1EnrollmentsDocumentsIdStatusPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/enrollment.ts')['updateDocumentStatusValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/enrollments/update_document_status_controller.ts').default['handle'], true>
+}
+type ApiV1NotificationsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/notification.ts')['listNotificationsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notifications/list_notifications_controller.ts').default['handle'], true>
+}
+type ApiV1NotificationsIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notifications/show_notification_controller.ts').default['handle'], false>
+}
+type ApiV1NotificationsIdReadPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notifications/mark_notification_read_controller.ts').default['handle'], false>
+}
+type ApiV1NotificationsReadallPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notifications/mark_all_read_controller.ts').default['handle'], false>
+}
+type ApiV1NotificationsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notifications/delete_notification_controller.ts').default['handle'], false>
+}
+type ApiV1NotificationpreferencesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notification_preferences/show_notification_preferences_controller.ts').default['handle'], false>
+}
+type ApiV1NotificationpreferencesPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/notification.ts')['updateNotificationPreferencesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/notification_preferences/update_notification_preferences_controller.ts').default['handle'], true>
+}
+type ApiV1PostsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/post.ts')['listPostsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/list_posts_controller.ts').default['handle'], true>
+}
+type ApiV1PostsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/post.ts')['createPostValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/create_post_controller.ts').default['handle'], true>
+}
+type ApiV1PostsIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/show_post_controller.ts').default['handle'], false>
+}
+type ApiV1PostsIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/post.ts')['updatePostValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/update_post_controller.ts').default['handle'], true>
+}
+type ApiV1PostsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/delete_post_controller.ts').default['handle'], false>
+}
+type ApiV1PostsIdLikePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/like_post_controller.ts').default['handle'], false>
+}
+type ApiV1PostsIdLikeDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/unlike_post_controller.ts').default['handle'], false>
+}
+type ApiV1PostsIdCommentsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/post.ts')['listCommentsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/comments/list_post_comments_controller.ts').default['handle'], true>
+}
+type ApiV1PostsIdCommentsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/post.ts')['createCommentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/comments/create_comment_controller.ts').default['handle'], true>
+}
+type ApiV1CommentsIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/post.ts')['updateCommentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/comments/update_comment_controller.ts').default['handle'], true>
+}
+type ApiV1CommentsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/comments/delete_comment_controller.ts').default['handle'], false>
+}
+type ApiV1CommentsIdLikePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/comments/like_comment_controller.ts').default['handle'], false>
+}
 type ApiV1AttendanceGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/list_attendance_controller.ts').default['handle'], false>
@@ -706,6 +1194,22 @@ type ApiV1CanteensIdItemsGetHead = {
 type ApiV1CanteenreportsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['getCanteenReportValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_reports/get_canteen_report_controller.ts').default['handle'], true>
+}
+type ApiV1CanteenmonthlytransfersGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['listCanteenMonthlyTransfersValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_monthly_transfers/list_canteen_monthly_transfers_controller.ts').default['handle'], true>
+}
+type ApiV1CanteenmonthlytransfersPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['createCanteenMonthlyTransferValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_monthly_transfers/create_canteen_monthly_transfer_controller.ts').default['handle'], true>
+}
+type ApiV1CanteenmonthlytransfersIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_monthly_transfers/show_canteen_monthly_transfer_controller.ts').default['handle'], false>
+}
+type ApiV1CanteenmonthlytransfersIdStatusPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['updateCanteenMonthlyTransferStatusValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_monthly_transfers/update_canteen_monthly_transfer_status_controller.ts').default['handle'], true>
 }
 type ApiV1CanteenitemsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['listCanteenItemsValidator']>>
@@ -1147,7 +1651,139 @@ type ApiV1SchoolusagemetricsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/subscription.ts')['getSchoolUsageMetricsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/school_usage_metrics/get_school_usage_metrics_controller.ts').default['handle'], true>
 }
+type ApiV1PurchaserequestsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/list_purchase_requests_controller.ts').default['handle'], false>
+}
+type ApiV1PurchaserequestsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/purchase_request.ts')['createPurchaseRequestValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/create_purchase_request_controller.ts').default['handle'], true>
+}
+type ApiV1PurchaserequestsIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/show_purchase_request_controller.ts').default['handle'], false>
+}
+type ApiV1PurchaserequestsIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/purchase_request.ts')['updatePurchaseRequestValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/update_purchase_request_controller.ts').default['handle'], true>
+}
+type ApiV1PurchaserequestsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/delete_purchase_request_controller.ts').default['handle'], false>
+}
+type ApiV1PurchaserequestsIdApprovePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/approve_purchase_request_controller.ts').default['handle'], false>
+}
+type ApiV1PurchaserequestsIdRejectPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/purchase_request.ts')['rejectPurchaseRequestValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/reject_purchase_request_controller.ts').default['handle'], true>
+}
+type ApiV1PurchaserequestsIdMarkboughtPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/purchase_request.ts')['markAsBoughtValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/mark_as_bought_controller.ts').default['handle'], true>
+}
+type ApiV1PurchaserequestsIdMarkarrivedPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/purchase_request.ts')['markAsArrivedValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/purchase_requests/mark_as_arrived_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceConfigGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getInsuranceConfigValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_insurance_config_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceSchoolIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['updateSchoolInsuranceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/update_school_insurance_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceChainIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['updateSchoolChainInsuranceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/update_school_chain_insurance_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceSchoolIdResetPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['resetSchoolInsuranceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/reset_school_insurance_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceClaimsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['listInsuranceClaimsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/list_insurance_claims_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceClaimsIdApprovePost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['approveInsuranceClaimValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/approve_insurance_claim_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceClaimsIdRejectPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['rejectInsuranceClaimValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/reject_insurance_claim_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceClaimsIdMarkpaidPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['markClaimPaidValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/mark_claim_paid_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceBillingsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['listInsuranceBillingsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/list_insurance_billings_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceBillingsIdGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getBillingDetailsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_billing_details_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceStatsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_insurance_stats_controller.ts').default['handle'], false>
+}
+type ApiV1InsuranceAnalyticsDefaultrateGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getDefaultRateBySchoolValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_default_rate_by_school_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceAnalyticsSchoolswithoutGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getSchoolsWithoutInsuranceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_schools_without_insurance_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceSchoolIdStatsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getSchoolInsuranceStatsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_school_insurance_stats_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceSchoolIdBillingsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getSchoolInsuranceBillingsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_school_insurance_billings_controller.ts').default['handle'], true>
+}
+type ApiV1InsuranceSchoolIdClaimsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/insurance.ts')['getSchoolInsuranceClaimsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/insurance/get_school_insurance_claims_controller.ts').default['handle'], true>
+}
+type ApiV1AdminImpersonationPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/set_impersonation_controller.ts').default['handle'], false>
+}
+type ApiV1AdminImpersonationDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/clear_impersonation_controller.ts').default['handle'], false>
+}
+type ApiV1AdminImpersonationStatusGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/get_impersonation_status_controller.ts').default['handle'], false>
+}
+type ApiV1AdminImpersonationConfigGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/get_impersonation_config_controller.ts').default['handle'], false>
+}
+type ApiV1AdminSchoolsOnboardingPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/onboarding.ts')['createSchoolOnboardingValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/create_school_onboarding_controller.ts').default['handle'], true>
+}
 export interface ApiDefinition {
+  ':schoolSlug': {
+    'matricula-online': {
+      ':academicPeriodSlug': {
+        ':courseSlug': {
+          '$url': {
+          };
+          '$get': IdMatriculaonlineIdIdGetHead;
+          '$head': IdMatriculaonlineIdIdGetHead;
+        };
+      };
+    };
+  };
   'sign-in': {
     '$url': {
     };
@@ -1233,6 +1869,14 @@ export interface ApiDefinition {
             '$head': EscolaAdministrativoContratosIdDocusealGetHead;
           };
         };
+        ':contractId': {
+          'financeiro': {
+            '$url': {
+            };
+            '$get': EscolaAdministrativoContratosIdFinanceiroGetHead;
+            '$head': EscolaAdministrativoContratosIdFinanceiroGetHead;
+          };
+        };
       };
       'bolsas': {
         '$url': {
@@ -1264,6 +1908,56 @@ export interface ApiDefinition {
         '$get': EscolaAdministrativoImpressaoGetHead;
         '$head': EscolaAdministrativoImpressaoGetHead;
       };
+      'solicitacoes-de-compra': {
+        '$url': {
+        };
+        '$get': EscolaAdministrativoSolicitacoesdecompraGetHead;
+        '$head': EscolaAdministrativoSolicitacoesdecompraGetHead;
+      };
+    };
+    'notificacoes': {
+      '$url': {
+      };
+      '$get': EscolaNotificacoesGetHead;
+      '$head': EscolaNotificacoesGetHead;
+      'preferencias': {
+        '$url': {
+        };
+        '$get': EscolaNotificacoesPreferenciasGetHead;
+        '$head': EscolaNotificacoesPreferenciasGetHead;
+      };
+    };
+    'eventos': {
+      '$url': {
+      };
+      '$get': EscolaEventosGetHead;
+      '$head': EscolaEventosGetHead;
+      ':eventId': {
+        'autorizacoes': {
+          '$url': {
+          };
+          '$get': EscolaEventosIdAutorizacoesGetHead;
+          '$head': EscolaEventosIdAutorizacoesGetHead;
+        };
+      };
+    };
+    'mural': {
+      '$url': {
+      };
+      '$get': EscolaMuralGetHead;
+      '$head': EscolaMuralGetHead;
+    };
+    'desempenho': {
+      '$url': {
+      };
+      '$get': EscolaDesempenhoGetHead;
+      '$head': EscolaDesempenhoGetHead;
+    };
+    'matriculas': {
+      '$url': {
+      };
+      '$get': EscolaMatriculasGetHead;
+      '$head': EscolaMatriculasGetHead;
     };
     'pedagogico': {
       'turmas': {
@@ -1283,6 +1977,30 @@ export interface ApiDefinition {
         };
         '$get': EscolaPedagogicoOcorrenciasGetHead;
         '$head': EscolaPedagogicoOcorrenciasGetHead;
+      };
+      'atividades': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoAtividadesGetHead;
+        '$head': EscolaPedagogicoAtividadesGetHead;
+      };
+      'provas': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoProvasGetHead;
+        '$head': EscolaPedagogicoProvasGetHead;
+      };
+      'presenca': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoPresencaGetHead;
+        '$head': EscolaPedagogicoPresencaGetHead;
+      };
+      'cursos-niveis': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoCursosniveisGetHead;
+        '$head': EscolaPedagogicoCursosniveisGetHead;
       };
     };
     'cantina': {
@@ -1316,6 +2034,18 @@ export interface ApiDefinition {
         '$get': EscolaCantinaVendasGetHead;
         '$head': EscolaCantinaVendasGetHead;
       };
+      'reservas': {
+        '$url': {
+        };
+        '$get': EscolaCantinaReservasGetHead;
+        '$head': EscolaCantinaReservasGetHead;
+      };
+      'transferencias': {
+        '$url': {
+        };
+        '$get': EscolaCantinaTransferenciasGetHead;
+        '$head': EscolaCantinaTransferenciasGetHead;
+      };
     };
     'financeiro': {
       'mensalidades': {
@@ -1329,6 +2059,12 @@ export interface ApiDefinition {
         };
         '$get': EscolaFinanceiroInadimplenciaGetHead;
         '$head': EscolaFinanceiroInadimplenciaGetHead;
+      };
+      'seguros': {
+        '$url': {
+        };
+        '$get': EscolaFinanceiroSegurosGetHead;
+        '$head': EscolaFinanceiroSegurosGetHead;
       };
     };
     'gamificacao': {
@@ -1367,12 +2103,206 @@ export interface ApiDefinition {
     };
     '$get': ResponsavelGetHead;
     '$head': ResponsavelGetHead;
+    'notas': {
+      '$url': {
+      };
+      '$get': ResponsavelNotasGetHead;
+      '$head': ResponsavelNotasGetHead;
+    };
+    'frequencia': {
+      '$url': {
+      };
+      '$get': ResponsavelFrequenciaGetHead;
+      '$head': ResponsavelFrequenciaGetHead;
+    };
+    'mensalidades': {
+      '$url': {
+      };
+      '$get': ResponsavelMensalidadesGetHead;
+      '$head': ResponsavelMensalidadesGetHead;
+    };
+    'cantina': {
+      '$url': {
+      };
+      '$get': ResponsavelCantinaGetHead;
+      '$head': ResponsavelCantinaGetHead;
+    };
+    'gamificacao': {
+      '$url': {
+      };
+      '$get': ResponsavelGamificacaoGetHead;
+      '$head': ResponsavelGamificacaoGetHead;
+    };
+    'comunicados': {
+      '$url': {
+      };
+      '$get': ResponsavelComunicadosGetHead;
+      '$head': ResponsavelComunicadosGetHead;
+    };
+    'autorizacoes': {
+      '$url': {
+      };
+      '$get': ResponsavelAutorizacoesGetHead;
+      '$head': ResponsavelAutorizacoesGetHead;
+    };
+    'atividades': {
+      '$url': {
+      };
+      '$get': ResponsavelAtividadesGetHead;
+      '$head': ResponsavelAtividadesGetHead;
+    };
+    'horario': {
+      '$url': {
+      };
+      '$get': ResponsavelHorarioGetHead;
+      '$head': ResponsavelHorarioGetHead;
+    };
+    'documentos': {
+      '$url': {
+      };
+      '$get': ResponsavelDocumentosGetHead;
+      '$head': ResponsavelDocumentosGetHead;
+    };
+    'ocorrencias': {
+      '$url': {
+      };
+      '$get': ResponsavelOcorrenciasGetHead;
+      '$head': ResponsavelOcorrenciasGetHead;
+    };
+    'perfil': {
+      '$url': {
+      };
+      '$get': ResponsavelPerfilGetHead;
+      '$head': ResponsavelPerfilGetHead;
+    };
   };
   'admin': {
     '$url': {
     };
     '$get': AdminGetHead;
     '$head': AdminGetHead;
+    'escolas': {
+      '$url': {
+      };
+      '$get': AdminEscolasGetHead;
+      '$head': AdminEscolasGetHead;
+    };
+    'onboarding': {
+      '$url': {
+      };
+      '$get': AdminOnboardingGetHead;
+      '$head': AdminOnboardingGetHead;
+    };
+    'billing': {
+      'dashboard': {
+        '$url': {
+        };
+        '$get': AdminBillingDashboardGetHead;
+        '$head': AdminBillingDashboardGetHead;
+      };
+      'subscriptions': {
+        '$url': {
+        };
+        '$get': AdminBillingSubscriptionsGetHead;
+        '$head': AdminBillingSubscriptionsGetHead;
+      };
+    };
+    'redes': {
+      '$url': {
+      };
+      '$get': AdminRedesGetHead;
+      '$head': AdminRedesGetHead;
+    };
+    'configuracoes': {
+      '$url': {
+      };
+      '$get': AdminConfiguracoesGetHead;
+      '$head': AdminConfiguracoesGetHead;
+    };
+    'seguros': {
+      '$url': {
+      };
+      '$get': AdminSegurosGetHead;
+      '$head': AdminSegurosGetHead;
+      'sinistros': {
+        '$url': {
+        };
+        '$get': AdminSegurosSinistrosGetHead;
+        '$head': AdminSegurosSinistrosGetHead;
+      };
+      'faturamento': {
+        '$url': {
+        };
+        '$get': AdminSegurosFaturamentoGetHead;
+        '$head': AdminSegurosFaturamentoGetHead;
+      };
+      'analytics': {
+        '$url': {
+        };
+        '$get': AdminSegurosAnalyticsGetHead;
+        '$head': AdminSegurosAnalyticsGetHead;
+      };
+      'configuracao': {
+        '$url': {
+        };
+        '$get': AdminSegurosConfiguracaoGetHead;
+        '$head': AdminSegurosConfiguracaoGetHead;
+      };
+    };
+    'analytics': {
+      '$url': {
+      };
+      '$get': AdminAnalyticsGetHead;
+      '$head': AdminAnalyticsGetHead;
+      'academico': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsAcademicoGetHead;
+        '$head': AdminAnalyticsAcademicoGetHead;
+      };
+      'presenca': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsPresencaGetHead;
+        '$head': AdminAnalyticsPresencaGetHead;
+      };
+      'cantina': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsCantinaGetHead;
+        '$head': AdminAnalyticsCantinaGetHead;
+      };
+      'pagamentos': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsPagamentosGetHead;
+        '$head': AdminAnalyticsPagamentosGetHead;
+      };
+      'matriculas': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsMatriculasGetHead;
+        '$head': AdminAnalyticsMatriculasGetHead;
+      };
+      'ocorrencias': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsOcorrenciasGetHead;
+        '$head': AdminAnalyticsOcorrenciasGetHead;
+      };
+      'gamificacao': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsGamificacaoGetHead;
+        '$head': AdminAnalyticsGamificacaoGetHead;
+      };
+      'rh': {
+        '$url': {
+        };
+        '$get': AdminAnalyticsRhGetHead;
+        '$head': AdminAnalyticsRhGetHead;
+      };
+    };
   };
   'api': {
     'v1': {
@@ -1381,6 +2311,16 @@ export interface ApiDefinition {
           '$url': {
           };
           '$post': ApiV1AuthLoginPost;
+        };
+        'send-code': {
+          '$url': {
+          };
+          '$post': ApiV1AuthSendcodePost;
+        };
+        'verify-code': {
+          '$url': {
+          };
+          '$post': ApiV1AuthVerifycodePost;
         };
         'logout': {
           '$url': {
@@ -1409,6 +2349,65 @@ export interface ApiDefinition {
           '$get': ApiV1ResponsavelStatsGetHead;
           '$head': ApiV1ResponsavelStatsGetHead;
         };
+        'students': {
+          ':studentId': {
+            'grades': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdGradesGetHead;
+              '$head': ApiV1ResponsavelStudentsIdGradesGetHead;
+            };
+            'attendance': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdAttendanceGetHead;
+              '$head': ApiV1ResponsavelStudentsIdAttendanceGetHead;
+            };
+            'payments': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdPaymentsGetHead;
+              '$head': ApiV1ResponsavelStudentsIdPaymentsGetHead;
+            };
+            'balance': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdBalanceGetHead;
+              '$head': ApiV1ResponsavelStudentsIdBalanceGetHead;
+            };
+            'assignments': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdAssignmentsGetHead;
+              '$head': ApiV1ResponsavelStudentsIdAssignmentsGetHead;
+            };
+            'schedule': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdScheduleGetHead;
+              '$head': ApiV1ResponsavelStudentsIdScheduleGetHead;
+            };
+            'documents': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdDocumentsGetHead;
+              '$head': ApiV1ResponsavelStudentsIdDocumentsGetHead;
+            };
+            'occurrences': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdOccurrencesGetHead;
+              '$head': ApiV1ResponsavelStudentsIdOccurrencesGetHead;
+              ':occurrenceId': {
+                'acknowledge': {
+                  '$url': {
+                  };
+                  '$post': ApiV1ResponsavelStudentsIdOccurrencesIdAcknowledgePost;
+                };
+              };
+            };
+          };
+        };
       };
       'admin': {
         'stats': {
@@ -1416,6 +2415,31 @@ export interface ApiDefinition {
           };
           '$get': ApiV1AdminStatsGetHead;
           '$head': ApiV1AdminStatsGetHead;
+        };
+        'impersonation': {
+          '$url': {
+          };
+          '$post': ApiV1AdminImpersonationPost;
+          '$delete': ApiV1AdminImpersonationDelete;
+          'status': {
+            '$url': {
+            };
+            '$get': ApiV1AdminImpersonationStatusGetHead;
+            '$head': ApiV1AdminImpersonationStatusGetHead;
+          };
+          'config': {
+            '$url': {
+            };
+            '$get': ApiV1AdminImpersonationConfigGetHead;
+            '$head': ApiV1AdminImpersonationConfigGetHead;
+          };
+        };
+        'schools': {
+          'onboarding': {
+            '$url': {
+            };
+            '$post': ApiV1AdminSchoolsOnboardingPost;
+          };
         };
       };
       'asaas': {
@@ -1461,6 +2485,12 @@ export interface ApiDefinition {
         };
         '$get': ApiV1UsersGetHead;
         '$head': ApiV1UsersGetHead;
+        'school-employees': {
+          '$url': {
+          };
+          '$get': ApiV1UsersSchoolemployeesGetHead;
+          '$head': ApiV1UsersSchoolemployeesGetHead;
+        };
         '$post': ApiV1UsersPost;
         ':id': {
           '$url': {
@@ -1829,6 +2859,327 @@ export interface ApiDefinition {
           };
         };
       };
+      'grades': {
+        'academic-overview': {
+          '$url': {
+          };
+          '$get': ApiV1GradesAcademicoverviewGetHead;
+          '$head': ApiV1GradesAcademicoverviewGetHead;
+        };
+        'students': {
+          '$url': {
+          };
+          '$get': ApiV1GradesStudentsGetHead;
+          '$head': ApiV1GradesStudentsGetHead;
+        };
+        'distribution': {
+          '$url': {
+          };
+          '$get': ApiV1GradesDistributionGetHead;
+          '$head': ApiV1GradesDistributionGetHead;
+        };
+        'at-risk': {
+          '$url': {
+          };
+          '$get': ApiV1GradesAtriskGetHead;
+          '$head': ApiV1GradesAtriskGetHead;
+        };
+      };
+      'analytics': {
+        'attendance': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsAttendanceOverviewGetHead;
+            '$head': ApiV1AnalyticsAttendanceOverviewGetHead;
+          };
+          'trends': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsAttendanceTrendsGetHead;
+            '$head': ApiV1AnalyticsAttendanceTrendsGetHead;
+          };
+          'chronic': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsAttendanceChronicGetHead;
+            '$head': ApiV1AnalyticsAttendanceChronicGetHead;
+          };
+        };
+        'canteen': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsCanteenOverviewGetHead;
+            '$head': ApiV1AnalyticsCanteenOverviewGetHead;
+          };
+          'trends': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsCanteenTrendsGetHead;
+            '$head': ApiV1AnalyticsCanteenTrendsGetHead;
+          };
+          'top-items': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsCanteenTopitemsGetHead;
+            '$head': ApiV1AnalyticsCanteenTopitemsGetHead;
+          };
+        };
+        'payments': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsPaymentsOverviewGetHead;
+            '$head': ApiV1AnalyticsPaymentsOverviewGetHead;
+          };
+        };
+        'enrollments': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsEnrollmentsOverviewGetHead;
+            '$head': ApiV1AnalyticsEnrollmentsOverviewGetHead;
+          };
+          'funnel': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsEnrollmentsFunnelGetHead;
+            '$head': ApiV1AnalyticsEnrollmentsFunnelGetHead;
+          };
+          'trends': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsEnrollmentsTrendsGetHead;
+            '$head': ApiV1AnalyticsEnrollmentsTrendsGetHead;
+          };
+          'by-level': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsEnrollmentsBylevelGetHead;
+            '$head': ApiV1AnalyticsEnrollmentsBylevelGetHead;
+          };
+        };
+        'incidents': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsIncidentsOverviewGetHead;
+            '$head': ApiV1AnalyticsIncidentsOverviewGetHead;
+          };
+        };
+        'gamification': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsGamificationOverviewGetHead;
+            '$head': ApiV1AnalyticsGamificationOverviewGetHead;
+          };
+        };
+        'hr': {
+          'overview': {
+            '$url': {
+            };
+            '$get': ApiV1AnalyticsHrOverviewGetHead;
+            '$head': ApiV1AnalyticsHrOverviewGetHead;
+          };
+        };
+      };
+      'events': {
+        '$url': {
+        };
+        '$get': ApiV1EventsGetHead;
+        '$head': ApiV1EventsGetHead;
+        '$post': ApiV1EventsPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1EventsIdGetHead;
+          '$head': ApiV1EventsIdGetHead;
+          '$put': ApiV1EventsIdPut;
+          '$delete': ApiV1EventsIdDelete;
+          'publish': {
+            '$url': {
+            };
+            '$post': ApiV1EventsIdPublishPost;
+          };
+          'cancel': {
+            '$url': {
+            };
+            '$post': ApiV1EventsIdCancelPost;
+          };
+          'complete': {
+            '$url': {
+            };
+            '$post': ApiV1EventsIdCompletePost;
+          };
+        };
+        ':eventId': {
+          'participants': {
+            '$url': {
+            };
+            '$get': ApiV1EventsIdParticipantsGetHead;
+            '$head': ApiV1EventsIdParticipantsGetHead;
+            '$post': ApiV1EventsIdParticipantsPost;
+            ':participantId': {
+              '$url': {
+              };
+              '$put': ApiV1EventsIdParticipantsIdPut;
+              '$delete': ApiV1EventsIdParticipantsIdDelete;
+              'confirm': {
+                '$url': {
+                };
+                '$post': ApiV1EventsIdParticipantsIdConfirmPost;
+              };
+            };
+          };
+          'consents': {
+            '$url': {
+            };
+            '$get': ApiV1EventsIdConsentsGetHead;
+            '$head': ApiV1EventsIdConsentsGetHead;
+            '$post': ApiV1EventsIdConsentsPost;
+          };
+        };
+      };
+      'parental-consents': {
+        'pending': {
+          '$url': {
+          };
+          '$get': ApiV1ParentalconsentsPendingGetHead;
+          '$head': ApiV1ParentalconsentsPendingGetHead;
+        };
+        'history': {
+          '$url': {
+          };
+          '$get': ApiV1ParentalconsentsHistoryGetHead;
+          '$head': ApiV1ParentalconsentsHistoryGetHead;
+        };
+        ':id': {
+          'respond': {
+            '$url': {
+            };
+            '$post': ApiV1ParentalconsentsIdRespondPost;
+          };
+        };
+      };
+      'online-enrollment': {
+        ':schoolSlug': {
+          ':academicPeriodSlug': {
+            ':courseSlug': {
+              'info': {
+                '$url': {
+                };
+                '$get': ApiV1OnlineenrollmentIdIdIdInfoGetHead;
+                '$head': ApiV1OnlineenrollmentIdIdIdInfoGetHead;
+              };
+            };
+          };
+        };
+        'check-existing': {
+          '$url': {
+          };
+          '$post': ApiV1OnlineenrollmentCheckexistingPost;
+        };
+        'find-scholarship': {
+          '$url': {
+          };
+          '$post': ApiV1OnlineenrollmentFindscholarshipPost;
+        };
+        'finish': {
+          '$url': {
+          };
+          '$post': ApiV1OnlineenrollmentFinishPost;
+        };
+      };
+      'enrollments': {
+        '$url': {
+        };
+        '$get': ApiV1EnrollmentsGetHead;
+        '$head': ApiV1EnrollmentsGetHead;
+        'documents': {
+          ':id': {
+            'status': {
+              '$url': {
+              };
+              '$put': ApiV1EnrollmentsDocumentsIdStatusPut;
+            };
+          };
+        };
+      };
+      'notifications': {
+        '$url': {
+        };
+        '$get': ApiV1NotificationsGetHead;
+        '$head': ApiV1NotificationsGetHead;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1NotificationsIdGetHead;
+          '$head': ApiV1NotificationsIdGetHead;
+          'read': {
+            '$url': {
+            };
+            '$post': ApiV1NotificationsIdReadPost;
+          };
+          '$delete': ApiV1NotificationsIdDelete;
+        };
+        'read-all': {
+          '$url': {
+          };
+          '$post': ApiV1NotificationsReadallPost;
+        };
+      };
+      'notification-preferences': {
+        '$url': {
+        };
+        '$get': ApiV1NotificationpreferencesGetHead;
+        '$head': ApiV1NotificationpreferencesGetHead;
+        '$put': ApiV1NotificationpreferencesPut;
+      };
+      'posts': {
+        '$url': {
+        };
+        '$get': ApiV1PostsGetHead;
+        '$head': ApiV1PostsGetHead;
+        '$post': ApiV1PostsPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1PostsIdGetHead;
+          '$head': ApiV1PostsIdGetHead;
+          '$put': ApiV1PostsIdPut;
+          '$delete': ApiV1PostsIdDelete;
+          'like': {
+            '$url': {
+            };
+            '$post': ApiV1PostsIdLikePost;
+            '$delete': ApiV1PostsIdLikeDelete;
+          };
+        };
+        ':postId': {
+          'comments': {
+            '$url': {
+            };
+            '$get': ApiV1PostsIdCommentsGetHead;
+            '$head': ApiV1PostsIdCommentsGetHead;
+            '$post': ApiV1PostsIdCommentsPost;
+          };
+        };
+      };
+      'comments': {
+        ':id': {
+          '$url': {
+          };
+          '$put': ApiV1CommentsIdPut;
+          '$delete': ApiV1CommentsIdDelete;
+          'like': {
+            '$url': {
+            };
+            '$post': ApiV1CommentsIdLikePost;
+          };
+        };
+      };
       'attendance': {
         '$url': {
         };
@@ -1956,6 +3307,24 @@ export interface ApiDefinition {
         };
         '$get': ApiV1CanteenreportsGetHead;
         '$head': ApiV1CanteenreportsGetHead;
+      };
+      'canteen-monthly-transfers': {
+        '$url': {
+        };
+        '$get': ApiV1CanteenmonthlytransfersGetHead;
+        '$head': ApiV1CanteenmonthlytransfersGetHead;
+        '$post': ApiV1CanteenmonthlytransfersPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1CanteenmonthlytransfersIdGetHead;
+          '$head': ApiV1CanteenmonthlytransfersIdGetHead;
+          'status': {
+            '$url': {
+            };
+            '$put': ApiV1CanteenmonthlytransfersIdStatusPut;
+          };
+        };
       };
       'canteen-items': {
         '$url': {
@@ -2376,6 +3745,141 @@ export interface ApiDefinition {
         '$get': ApiV1SchoolusagemetricsGetHead;
         '$head': ApiV1SchoolusagemetricsGetHead;
       };
+      'purchase-requests': {
+        '$url': {
+        };
+        '$get': ApiV1PurchaserequestsGetHead;
+        '$head': ApiV1PurchaserequestsGetHead;
+        '$post': ApiV1PurchaserequestsPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1PurchaserequestsIdGetHead;
+          '$head': ApiV1PurchaserequestsIdGetHead;
+          '$put': ApiV1PurchaserequestsIdPut;
+          '$delete': ApiV1PurchaserequestsIdDelete;
+          'approve': {
+            '$url': {
+            };
+            '$post': ApiV1PurchaserequestsIdApprovePost;
+          };
+          'reject': {
+            '$url': {
+            };
+            '$post': ApiV1PurchaserequestsIdRejectPost;
+          };
+          'mark-bought': {
+            '$url': {
+            };
+            '$post': ApiV1PurchaserequestsIdMarkboughtPost;
+          };
+          'mark-arrived': {
+            '$url': {
+            };
+            '$post': ApiV1PurchaserequestsIdMarkarrivedPost;
+          };
+        };
+      };
+      'insurance': {
+        'config': {
+          '$url': {
+          };
+          '$get': ApiV1InsuranceConfigGetHead;
+          '$head': ApiV1InsuranceConfigGetHead;
+        };
+        'school': {
+          ':schoolId': {
+            '$url': {
+            };
+            '$put': ApiV1InsuranceSchoolIdPut;
+            'reset': {
+              '$url': {
+              };
+              '$post': ApiV1InsuranceSchoolIdResetPost;
+            };
+            'stats': {
+              '$url': {
+              };
+              '$get': ApiV1InsuranceSchoolIdStatsGetHead;
+              '$head': ApiV1InsuranceSchoolIdStatsGetHead;
+            };
+            'billings': {
+              '$url': {
+              };
+              '$get': ApiV1InsuranceSchoolIdBillingsGetHead;
+              '$head': ApiV1InsuranceSchoolIdBillingsGetHead;
+            };
+            'claims': {
+              '$url': {
+              };
+              '$get': ApiV1InsuranceSchoolIdClaimsGetHead;
+              '$head': ApiV1InsuranceSchoolIdClaimsGetHead;
+            };
+          };
+        };
+        'chain': {
+          ':chainId': {
+            '$url': {
+            };
+            '$put': ApiV1InsuranceChainIdPut;
+          };
+        };
+        'claims': {
+          '$url': {
+          };
+          '$get': ApiV1InsuranceClaimsGetHead;
+          '$head': ApiV1InsuranceClaimsGetHead;
+          ':claimId': {
+            'approve': {
+              '$url': {
+              };
+              '$post': ApiV1InsuranceClaimsIdApprovePost;
+            };
+            'reject': {
+              '$url': {
+              };
+              '$post': ApiV1InsuranceClaimsIdRejectPost;
+            };
+            'mark-paid': {
+              '$url': {
+              };
+              '$post': ApiV1InsuranceClaimsIdMarkpaidPost;
+            };
+          };
+        };
+        'billings': {
+          '$url': {
+          };
+          '$get': ApiV1InsuranceBillingsGetHead;
+          '$head': ApiV1InsuranceBillingsGetHead;
+          ':billingId': {
+            '$url': {
+            };
+            '$get': ApiV1InsuranceBillingsIdGetHead;
+            '$head': ApiV1InsuranceBillingsIdGetHead;
+          };
+        };
+        'stats': {
+          '$url': {
+          };
+          '$get': ApiV1InsuranceStatsGetHead;
+          '$head': ApiV1InsuranceStatsGetHead;
+        };
+        'analytics': {
+          'default-rate': {
+            '$url': {
+            };
+            '$get': ApiV1InsuranceAnalyticsDefaultrateGetHead;
+            '$head': ApiV1InsuranceAnalyticsDefaultrateGetHead;
+          };
+          'schools-without': {
+            '$url': {
+            };
+            '$get': ApiV1InsuranceAnalyticsSchoolswithoutGetHead;
+            '$head': ApiV1InsuranceAnalyticsSchoolswithoutGetHead;
+          };
+        };
+      };
     };
   };
 }
@@ -2386,6 +3890,13 @@ const routes = [
     path: '/',
     method: ["GET","HEAD"],
     types: {} as unknown,
+  },
+  {
+    params: ["schoolSlug","academicPeriodSlug","courseSlug"],
+    name: 'web.matriculaOnline',
+    path: '/:schoolSlug/matricula-online/:academicPeriodSlug/:courseSlug',
+    method: ["GET","HEAD"],
+    types: {} as IdMatriculaonlineIdIdGetHead,
   },
   {
     params: [],
@@ -2486,6 +3997,13 @@ const routes = [
     types: {} as EscolaAdministrativoContratosIdDocusealGetHead,
   },
   {
+    params: ["contractId"],
+    name: 'web.escola.administrativo.contratos.financeiro',
+    path: '/escola/administrativo/contratos/:contractId/financeiro',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoContratosIdFinanceiroGetHead,
+  },
+  {
     params: [],
     name: 'web.escola.administrativo.bolsas',
     path: '/escola/administrativo/bolsas',
@@ -2522,6 +4040,62 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.escola.administrativo.solicitacoesDeCompra',
+    path: '/escola/administrativo/solicitacoes-de-compra',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoSolicitacoesdecompraGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.notificacoes',
+    path: '/escola/notificacoes',
+    method: ["GET","HEAD"],
+    types: {} as EscolaNotificacoesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.notificacoes.preferencias',
+    path: '/escola/notificacoes/preferencias',
+    method: ["GET","HEAD"],
+    types: {} as EscolaNotificacoesPreferenciasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.eventos',
+    path: '/escola/eventos',
+    method: ["GET","HEAD"],
+    types: {} as EscolaEventosGetHead,
+  },
+  {
+    params: ["eventId"],
+    name: 'web.escola.eventos.autorizacoes',
+    path: '/escola/eventos/:eventId/autorizacoes',
+    method: ["GET","HEAD"],
+    types: {} as EscolaEventosIdAutorizacoesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.mural',
+    path: '/escola/mural',
+    method: ["GET","HEAD"],
+    types: {} as EscolaMuralGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.desempenho',
+    path: '/escola/desempenho',
+    method: ["GET","HEAD"],
+    types: {} as EscolaDesempenhoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.matriculas',
+    path: '/escola/matriculas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaMatriculasGetHead,
+  },
+  {
+    params: [],
     name: 'web.escola.pedagogico.turmas',
     path: '/escola/pedagogico/turmas',
     method: ["GET","HEAD"],
@@ -2540,6 +4114,34 @@ const routes = [
     path: '/escola/pedagogico/ocorrencias',
     method: ["GET","HEAD"],
     types: {} as EscolaPedagogicoOcorrenciasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.pedagogico.atividades',
+    path: '/escola/pedagogico/atividades',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoAtividadesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.pedagogico.provas',
+    path: '/escola/pedagogico/provas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoProvasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.pedagogico.presenca',
+    path: '/escola/pedagogico/presenca',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoPresencaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.pedagogico.cursosNiveis',
+    path: '/escola/pedagogico/cursos-niveis',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoCursosniveisGetHead,
   },
   {
     params: [],
@@ -2578,6 +4180,20 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.escola.cantina.reservas',
+    path: '/escola/cantina/reservas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaCantinaReservasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.cantina.transferencias',
+    path: '/escola/cantina/transferencias',
+    method: ["GET","HEAD"],
+    types: {} as EscolaCantinaTransferenciasGetHead,
+  },
+  {
+    params: [],
     name: 'web.escola.financeiro.mensalidades',
     path: '/escola/financeiro/mensalidades',
     method: ["GET","HEAD"],
@@ -2589,6 +4205,13 @@ const routes = [
     path: '/escola/financeiro/inadimplencia',
     method: ["GET","HEAD"],
     types: {} as EscolaFinanceiroInadimplenciaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.financeiro.seguros',
+    path: '/escola/financeiro/seguros',
+    method: ["GET","HEAD"],
+    types: {} as EscolaFinanceiroSegurosGetHead,
   },
   {
     params: [],
@@ -2634,6 +4257,90 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.responsavel.notas',
+    path: '/responsavel/notas',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelNotasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.frequencia',
+    path: '/responsavel/frequencia',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelFrequenciaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.mensalidades',
+    path: '/responsavel/mensalidades',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelMensalidadesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.cantina',
+    path: '/responsavel/cantina',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelCantinaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.gamificacao',
+    path: '/responsavel/gamificacao',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelGamificacaoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.comunicados',
+    path: '/responsavel/comunicados',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelComunicadosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.autorizacoes',
+    path: '/responsavel/autorizacoes',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelAutorizacoesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.atividades',
+    path: '/responsavel/atividades',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelAtividadesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.horario',
+    path: '/responsavel/horario',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelHorarioGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.documentos',
+    path: '/responsavel/documentos',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelDocumentosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.ocorrencias',
+    path: '/responsavel/ocorrencias',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelOcorrenciasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.perfil',
+    path: '/responsavel/perfil',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelPerfilGetHead,
+  },
+  {
+    params: [],
     name: 'web.admin.dashboard',
     path: '/admin',
     method: ["GET","HEAD"],
@@ -2641,10 +4348,164 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.admin.escolas',
+    path: '/admin/escolas',
+    method: ["GET","HEAD"],
+    types: {} as AdminEscolasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.onboarding',
+    path: '/admin/onboarding',
+    method: ["GET","HEAD"],
+    types: {} as AdminOnboardingGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.billing.dashboard',
+    path: '/admin/billing/dashboard',
+    method: ["GET","HEAD"],
+    types: {} as AdminBillingDashboardGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.billing.subscriptions',
+    path: '/admin/billing/subscriptions',
+    method: ["GET","HEAD"],
+    types: {} as AdminBillingSubscriptionsGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.redes',
+    path: '/admin/redes',
+    method: ["GET","HEAD"],
+    types: {} as AdminRedesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.configuracoes',
+    path: '/admin/configuracoes',
+    method: ["GET","HEAD"],
+    types: {} as AdminConfiguracoesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.seguros.index',
+    path: '/admin/seguros',
+    method: ["GET","HEAD"],
+    types: {} as AdminSegurosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.seguros.sinistros',
+    path: '/admin/seguros/sinistros',
+    method: ["GET","HEAD"],
+    types: {} as AdminSegurosSinistrosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.seguros.faturamento',
+    path: '/admin/seguros/faturamento',
+    method: ["GET","HEAD"],
+    types: {} as AdminSegurosFaturamentoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.seguros.analytics',
+    path: '/admin/seguros/analytics',
+    method: ["GET","HEAD"],
+    types: {} as AdminSegurosAnalyticsGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.seguros.configuracao',
+    path: '/admin/seguros/configuracao',
+    method: ["GET","HEAD"],
+    types: {} as AdminSegurosConfiguracaoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.index',
+    path: '/admin/analytics',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.academico',
+    path: '/admin/analytics/academico',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsAcademicoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.presenca',
+    path: '/admin/analytics/presenca',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsPresencaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.cantina',
+    path: '/admin/analytics/cantina',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsCantinaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.pagamentos',
+    path: '/admin/analytics/pagamentos',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsPagamentosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.matriculas',
+    path: '/admin/analytics/matriculas',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsMatriculasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.ocorrencias',
+    path: '/admin/analytics/ocorrencias',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsOcorrenciasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.gamificacao',
+    path: '/admin/analytics/gamificacao',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsGamificacaoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.analytics.rh',
+    path: '/admin/analytics/rh',
+    method: ["GET","HEAD"],
+    types: {} as AdminAnalyticsRhGetHead,
+  },
+  {
+    params: [],
     name: 'api.v1.auth.login',
     path: '/api/v1/auth/login',
     method: ["POST"],
     types: {} as ApiV1AuthLoginPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.auth.sendCode',
+    path: '/api/v1/auth/send-code',
+    method: ["POST"],
+    types: {} as ApiV1AuthSendcodePost,
+  },
+  {
+    params: [],
+    name: 'api.v1.auth.verifyCode',
+    path: '/api/v1/auth/verify-code',
+    method: ["POST"],
+    types: {} as ApiV1AuthVerifycodePost,
   },
   {
     params: [],
@@ -2673,6 +4534,69 @@ const routes = [
     path: '/api/v1/responsavel/stats',
     method: ["GET","HEAD"],
     types: {} as ApiV1ResponsavelStatsGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentGrades',
+    path: '/api/v1/responsavel/students/:studentId/grades',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdGradesGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentAttendance',
+    path: '/api/v1/responsavel/students/:studentId/attendance',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdAttendanceGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentPayments',
+    path: '/api/v1/responsavel/students/:studentId/payments',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdPaymentsGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentBalance',
+    path: '/api/v1/responsavel/students/:studentId/balance',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdBalanceGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentAssignments',
+    path: '/api/v1/responsavel/students/:studentId/assignments',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdAssignmentsGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentSchedule',
+    path: '/api/v1/responsavel/students/:studentId/schedule',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdScheduleGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentDocuments',
+    path: '/api/v1/responsavel/students/:studentId/documents',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdDocumentsGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentOccurrences',
+    path: '/api/v1/responsavel/students/:studentId/occurrences',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdOccurrencesGetHead,
+  },
+  {
+    params: ["studentId","occurrenceId"],
+    name: 'api.v1.responsavel.api.acknowledgeOccurrence',
+    path: '/api/v1/responsavel/students/:studentId/occurrences/:occurrenceId/acknowledge',
+    method: ["POST"],
+    types: {} as ApiV1ResponsavelStudentsIdOccurrencesIdAcknowledgePost,
   },
   {
     params: [],
@@ -2736,6 +4660,13 @@ const routes = [
     path: '/api/v1/users',
     method: ["GET","HEAD"],
     types: {} as ApiV1UsersGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.users.schoolEmployees',
+    path: '/api/v1/users/school-employees',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1UsersSchoolemployeesGetHead,
   },
   {
     params: [],
@@ -3390,6 +5321,433 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.grades.academicOverview',
+    path: '/api/v1/grades/academic-overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1GradesAcademicoverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.grades.students',
+    path: '/api/v1/grades/students',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1GradesStudentsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.grades.distribution',
+    path: '/api/v1/grades/distribution',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1GradesDistributionGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.grades.atRisk',
+    path: '/api/v1/grades/at-risk',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1GradesAtriskGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.attendance.overview',
+    path: '/api/v1/analytics/attendance/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsAttendanceOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.attendance.trends',
+    path: '/api/v1/analytics/attendance/trends',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsAttendanceTrendsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.attendance.chronic',
+    path: '/api/v1/analytics/attendance/chronic',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsAttendanceChronicGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.canteen.overview',
+    path: '/api/v1/analytics/canteen/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsCanteenOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.canteen.trends',
+    path: '/api/v1/analytics/canteen/trends',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsCanteenTrendsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.canteen.topItems',
+    path: '/api/v1/analytics/canteen/top-items',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsCanteenTopitemsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.payments.overview',
+    path: '/api/v1/analytics/payments/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsPaymentsOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.enrollments.overview',
+    path: '/api/v1/analytics/enrollments/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsEnrollmentsOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.enrollments.funnel',
+    path: '/api/v1/analytics/enrollments/funnel',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsEnrollmentsFunnelGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.enrollments.trends',
+    path: '/api/v1/analytics/enrollments/trends',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsEnrollmentsTrendsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.enrollments.byLevel',
+    path: '/api/v1/analytics/enrollments/by-level',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsEnrollmentsBylevelGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.incidents.overview',
+    path: '/api/v1/analytics/incidents/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsIncidentsOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.gamification.overview',
+    path: '/api/v1/analytics/gamification/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsGamificationOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.analytics.hr.overview',
+    path: '/api/v1/analytics/hr/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AnalyticsHrOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.events.index',
+    path: '/api/v1/events',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1EventsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.events.store',
+    path: '/api/v1/events',
+    method: ["POST"],
+    types: {} as ApiV1EventsPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.events.show',
+    path: '/api/v1/events/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1EventsIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.events.update',
+    path: '/api/v1/events/:id',
+    method: ["PUT"],
+    types: {} as ApiV1EventsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.events.destroy',
+    path: '/api/v1/events/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1EventsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.events.publish',
+    path: '/api/v1/events/:id/publish',
+    method: ["POST"],
+    types: {} as ApiV1EventsIdPublishPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.events.cancel',
+    path: '/api/v1/events/:id/cancel',
+    method: ["POST"],
+    types: {} as ApiV1EventsIdCancelPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.events.complete',
+    path: '/api/v1/events/:id/complete',
+    method: ["POST"],
+    types: {} as ApiV1EventsIdCompletePost,
+  },
+  {
+    params: ["eventId"],
+    name: 'api.v1.events.participants.index',
+    path: '/api/v1/events/:eventId/participants',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1EventsIdParticipantsGetHead,
+  },
+  {
+    params: ["eventId"],
+    name: 'api.v1.events.participants.register',
+    path: '/api/v1/events/:eventId/participants',
+    method: ["POST"],
+    types: {} as ApiV1EventsIdParticipantsPost,
+  },
+  {
+    params: ["eventId","participantId"],
+    name: 'api.v1.events.participants.updateStatus',
+    path: '/api/v1/events/:eventId/participants/:participantId',
+    method: ["PUT"],
+    types: {} as ApiV1EventsIdParticipantsIdPut,
+  },
+  {
+    params: ["eventId","participantId"],
+    name: 'api.v1.events.participants.cancel',
+    path: '/api/v1/events/:eventId/participants/:participantId',
+    method: ["DELETE"],
+    types: {} as ApiV1EventsIdParticipantsIdDelete,
+  },
+  {
+    params: ["eventId","participantId"],
+    name: 'api.v1.events.participants.confirmAttendance',
+    path: '/api/v1/events/:eventId/participants/:participantId/confirm',
+    method: ["POST"],
+    types: {} as ApiV1EventsIdParticipantsIdConfirmPost,
+  },
+  {
+    params: ["eventId"],
+    name: 'api.v1.events.consents.index',
+    path: '/api/v1/events/:eventId/consents',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1EventsIdConsentsGetHead,
+  },
+  {
+    params: ["eventId"],
+    name: 'api.v1.events.consents.request',
+    path: '/api/v1/events/:eventId/consents',
+    method: ["POST"],
+    types: {} as ApiV1EventsIdConsentsPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.consents.pending',
+    path: '/api/v1/parental-consents/pending',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ParentalconsentsPendingGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.consents.history',
+    path: '/api/v1/parental-consents/history',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ParentalconsentsHistoryGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.consents.respond',
+    path: '/api/v1/parental-consents/:id/respond',
+    method: ["POST"],
+    types: {} as ApiV1ParentalconsentsIdRespondPost,
+  },
+  {
+    params: ["schoolSlug","academicPeriodSlug","courseSlug"],
+    name: 'api.v1.enrollment.info',
+    path: '/api/v1/online-enrollment/:schoolSlug/:academicPeriodSlug/:courseSlug/info',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1OnlineenrollmentIdIdIdInfoGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.enrollment.checkExisting',
+    path: '/api/v1/online-enrollment/check-existing',
+    method: ["POST"],
+    types: {} as ApiV1OnlineenrollmentCheckexistingPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.enrollment.findScholarship',
+    path: '/api/v1/online-enrollment/find-scholarship',
+    method: ["POST"],
+    types: {} as ApiV1OnlineenrollmentFindscholarshipPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.enrollment.finish',
+    path: '/api/v1/online-enrollment/finish',
+    method: ["POST"],
+    types: {} as ApiV1OnlineenrollmentFinishPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.enrollments.index',
+    path: '/api/v1/enrollments',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1EnrollmentsGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.enrollments.documents.updateStatus',
+    path: '/api/v1/enrollments/documents/:id/status',
+    method: ["PUT"],
+    types: {} as ApiV1EnrollmentsDocumentsIdStatusPut,
+  },
+  {
+    params: [],
+    name: 'api.v1.notifications.index',
+    path: '/api/v1/notifications',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1NotificationsGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.notifications.show',
+    path: '/api/v1/notifications/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1NotificationsIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.notifications.markRead',
+    path: '/api/v1/notifications/:id/read',
+    method: ["POST"],
+    types: {} as ApiV1NotificationsIdReadPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.notifications.markAllRead',
+    path: '/api/v1/notifications/read-all',
+    method: ["POST"],
+    types: {} as ApiV1NotificationsReadallPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.notifications.destroy',
+    path: '/api/v1/notifications/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1NotificationsIdDelete,
+  },
+  {
+    params: [],
+    name: 'api.v1.notificationPreferences.show',
+    path: '/api/v1/notification-preferences',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1NotificationpreferencesGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.notificationPreferences.update',
+    path: '/api/v1/notification-preferences',
+    method: ["PUT"],
+    types: {} as ApiV1NotificationpreferencesPut,
+  },
+  {
+    params: [],
+    name: 'api.v1.posts.index',
+    path: '/api/v1/posts',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1PostsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.posts.store',
+    path: '/api/v1/posts',
+    method: ["POST"],
+    types: {} as ApiV1PostsPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.posts.show',
+    path: '/api/v1/posts/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1PostsIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.posts.update',
+    path: '/api/v1/posts/:id',
+    method: ["PUT"],
+    types: {} as ApiV1PostsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.posts.destroy',
+    path: '/api/v1/posts/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1PostsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.posts.like',
+    path: '/api/v1/posts/:id/like',
+    method: ["POST"],
+    types: {} as ApiV1PostsIdLikePost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.posts.unlike',
+    path: '/api/v1/posts/:id/like',
+    method: ["DELETE"],
+    types: {} as ApiV1PostsIdLikeDelete,
+  },
+  {
+    params: ["postId"],
+    name: 'api.v1.posts.comments.index',
+    path: '/api/v1/posts/:postId/comments',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1PostsIdCommentsGetHead,
+  },
+  {
+    params: ["postId"],
+    name: 'api.v1.posts.comments.store',
+    path: '/api/v1/posts/:postId/comments',
+    method: ["POST"],
+    types: {} as ApiV1PostsIdCommentsPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.comments.update',
+    path: '/api/v1/comments/:id',
+    method: ["PUT"],
+    types: {} as ApiV1CommentsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.comments.destroy',
+    path: '/api/v1/comments/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1CommentsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.comments.like',
+    path: '/api/v1/comments/:id/like',
+    method: ["POST"],
+    types: {} as ApiV1CommentsIdLikePost,
+  },
+  {
+    params: [],
     name: 'api.v1.attendance.index',
     path: '/api/v1/attendance',
     method: ["GET","HEAD"],
@@ -3611,6 +5969,34 @@ const routes = [
     path: '/api/v1/canteen-reports',
     method: ["GET","HEAD"],
     types: {} as ApiV1CanteenreportsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.canteenMonthlyTransfers.index',
+    path: '/api/v1/canteen-monthly-transfers',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1CanteenmonthlytransfersGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.canteenMonthlyTransfers.store',
+    path: '/api/v1/canteen-monthly-transfers',
+    method: ["POST"],
+    types: {} as ApiV1CanteenmonthlytransfersPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.canteenMonthlyTransfers.show',
+    path: '/api/v1/canteen-monthly-transfers/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1CanteenmonthlytransfersIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.canteenMonthlyTransfers.updateStatus',
+    path: '/api/v1/canteen-monthly-transfers/:id/status',
+    method: ["PUT"],
+    types: {} as ApiV1CanteenmonthlytransfersIdStatusPut,
   },
   {
     params: [],
@@ -4381,6 +6767,216 @@ const routes = [
     path: '/api/v1/school-usage-metrics',
     method: ["GET","HEAD"],
     types: {} as ApiV1SchoolusagemetricsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.purchaseRequests.index',
+    path: '/api/v1/purchase-requests',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1PurchaserequestsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.purchaseRequests.store',
+    path: '/api/v1/purchase-requests',
+    method: ["POST"],
+    types: {} as ApiV1PurchaserequestsPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.show',
+    path: '/api/v1/purchase-requests/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1PurchaserequestsIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.update',
+    path: '/api/v1/purchase-requests/:id',
+    method: ["PUT"],
+    types: {} as ApiV1PurchaserequestsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.destroy',
+    path: '/api/v1/purchase-requests/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1PurchaserequestsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.approve',
+    path: '/api/v1/purchase-requests/:id/approve',
+    method: ["POST"],
+    types: {} as ApiV1PurchaserequestsIdApprovePost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.reject',
+    path: '/api/v1/purchase-requests/:id/reject',
+    method: ["POST"],
+    types: {} as ApiV1PurchaserequestsIdRejectPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.markBought',
+    path: '/api/v1/purchase-requests/:id/mark-bought',
+    method: ["POST"],
+    types: {} as ApiV1PurchaserequestsIdMarkboughtPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.purchaseRequests.markArrived',
+    path: '/api/v1/purchase-requests/:id/mark-arrived',
+    method: ["POST"],
+    types: {} as ApiV1PurchaserequestsIdMarkarrivedPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.insurance.config',
+    path: '/api/v1/insurance/config',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceConfigGetHead,
+  },
+  {
+    params: ["schoolId"],
+    name: 'api.v1.insurance.updateSchool',
+    path: '/api/v1/insurance/school/:schoolId',
+    method: ["PUT"],
+    types: {} as ApiV1InsuranceSchoolIdPut,
+  },
+  {
+    params: ["chainId"],
+    name: 'api.v1.insurance.updateChain',
+    path: '/api/v1/insurance/chain/:chainId',
+    method: ["PUT"],
+    types: {} as ApiV1InsuranceChainIdPut,
+  },
+  {
+    params: ["schoolId"],
+    name: 'api.v1.insurance.resetSchool',
+    path: '/api/v1/insurance/school/:schoolId/reset',
+    method: ["POST"],
+    types: {} as ApiV1InsuranceSchoolIdResetPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.insurance.claims.index',
+    path: '/api/v1/insurance/claims',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceClaimsGetHead,
+  },
+  {
+    params: ["claimId"],
+    name: 'api.v1.insurance.claims.approve',
+    path: '/api/v1/insurance/claims/:claimId/approve',
+    method: ["POST"],
+    types: {} as ApiV1InsuranceClaimsIdApprovePost,
+  },
+  {
+    params: ["claimId"],
+    name: 'api.v1.insurance.claims.reject',
+    path: '/api/v1/insurance/claims/:claimId/reject',
+    method: ["POST"],
+    types: {} as ApiV1InsuranceClaimsIdRejectPost,
+  },
+  {
+    params: ["claimId"],
+    name: 'api.v1.insurance.claims.markPaid',
+    path: '/api/v1/insurance/claims/:claimId/mark-paid',
+    method: ["POST"],
+    types: {} as ApiV1InsuranceClaimsIdMarkpaidPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.insurance.billings.index',
+    path: '/api/v1/insurance/billings',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceBillingsGetHead,
+  },
+  {
+    params: ["billingId"],
+    name: 'api.v1.insurance.billings.show',
+    path: '/api/v1/insurance/billings/:billingId',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceBillingsIdGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.insurance.stats',
+    path: '/api/v1/insurance/stats',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceStatsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.insurance.analytics.defaultRate',
+    path: '/api/v1/insurance/analytics/default-rate',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceAnalyticsDefaultrateGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.insurance.analytics.schoolsWithout',
+    path: '/api/v1/insurance/analytics/schools-without',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceAnalyticsSchoolswithoutGetHead,
+  },
+  {
+    params: ["schoolId"],
+    name: 'api.v1.insurance.school.stats',
+    path: '/api/v1/insurance/school/:schoolId/stats',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceSchoolIdStatsGetHead,
+  },
+  {
+    params: ["schoolId"],
+    name: 'api.v1.insurance.school.billings',
+    path: '/api/v1/insurance/school/:schoolId/billings',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceSchoolIdBillingsGetHead,
+  },
+  {
+    params: ["schoolId"],
+    name: 'api.v1.insurance.school.claims',
+    path: '/api/v1/insurance/school/:schoolId/claims',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InsuranceSchoolIdClaimsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.impersonation.set',
+    path: '/api/v1/admin/impersonation',
+    method: ["POST"],
+    types: {} as ApiV1AdminImpersonationPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.impersonation.clear',
+    path: '/api/v1/admin/impersonation',
+    method: ["DELETE"],
+    types: {} as ApiV1AdminImpersonationDelete,
+  },
+  {
+    params: [],
+    name: 'api.v1.impersonation.status',
+    path: '/api/v1/admin/impersonation/status',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AdminImpersonationStatusGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.impersonation.config',
+    path: '/api/v1/admin/impersonation/config',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AdminImpersonationConfigGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.admin.schools.onboarding',
+    path: '/api/v1/admin/schools/onboarding',
+    method: ["POST"],
+    types: {} as ApiV1AdminSchoolsOnboardingPost,
   },
 ] as const;
 export const api = {

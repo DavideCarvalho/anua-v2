@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { slugify } from '@adonisjs/lucid-slugify'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import CourseHasAcademicPeriod from './course_has_academic_period.js'
@@ -13,6 +15,15 @@ export type AcademicPeriodSegment =
   | 'OTHER'
 
 export default class AcademicPeriod extends BaseModel {
+  static table = 'AcademicPeriod'
+
+  @beforeCreate()
+  static assignId(academicPeriod: AcademicPeriod) {
+    if (!academicPeriod.id) {
+      academicPeriod.id = uuidv7()
+    }
+  }
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -20,6 +31,10 @@ export default class AcademicPeriod extends BaseModel {
   declare name: string
 
   @column()
+  @slugify({
+    strategy: 'dbIncrement',
+    fields: ['name'],
+  })
   declare slug: string
 
   @column.date()
@@ -62,7 +77,7 @@ export default class AcademicPeriod extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
   @belongsTo(() => AcademicPeriod, { foreignKey: 'previousAcademicPeriodId' })
@@ -71,7 +86,7 @@ export default class AcademicPeriod extends BaseModel {
   @hasMany(() => AcademicPeriod, { foreignKey: 'previousAcademicPeriodId' })
   declare nextAcademicPeriods: HasMany<typeof AcademicPeriod>
 
-  @hasMany(() => CourseHasAcademicPeriod)
+  @hasMany(() => CourseHasAcademicPeriod, { foreignKey: 'academicPeriodId' })
   declare courseAcademicPeriods: HasMany<typeof CourseHasAcademicPeriod>
 
   // Note: Other relationships will be added when their models are created:

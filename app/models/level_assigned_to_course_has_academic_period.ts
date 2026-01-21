@@ -13,7 +13,7 @@ export default class LevelAssignedToCourseHasAcademicPeriod extends BaseModel {
     }
   }
 
-  static table = 'level_assigned_to_course_has_academic_periods'
+  static table = 'LevelAssignedToCourseHasAcademicPeriod'
 
   @column({ isPrimary: true })
   declare id: string
@@ -27,12 +27,12 @@ export default class LevelAssignedToCourseHasAcademicPeriod extends BaseModel {
   @column()
   declare isActive: boolean
 
-  @belongsTo(() => Level)
+  @belongsTo(() => Level, { foreignKey: 'levelId' })
   declare level: BelongsTo<typeof Level>
 
-  @belongsTo(() => CourseHasAcademicPeriod)
+  @belongsTo(() => CourseHasAcademicPeriod, { foreignKey: 'courseHasAcademicPeriodId' })
   declare courseHasAcademicPeriod: BelongsTo<typeof CourseHasAcademicPeriod>
 
-  @hasMany(() => StudentHasLevel)
+  @hasMany(() => StudentHasLevel, { foreignKey: 'levelAssignedToCourseHasAcademicPeriodId' })
   declare studentLevels: HasMany<typeof StudentHasLevel>
 }

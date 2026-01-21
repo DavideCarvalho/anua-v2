@@ -16,7 +16,7 @@ export const updateTeacherValidator = vine.compile(
 export const assignTeacherToClassValidator = vine.compile(
   vine.object({
     classId: vine.string().trim(),
-    subjectId: vine.string().trim().optional(),
-    isMainTeacher: vine.boolean().optional(),
+    subjectId: vine.string().trim(),
+    subjectQuantity: vine.number().min(1).optional(),
   })
 )

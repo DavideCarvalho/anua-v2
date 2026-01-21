@@ -6,40 +6,36 @@ import Post from './post.js'
 import CommentLike from './comment_like.js'
 
 export default class Comment extends BaseModel {
+  static table = 'Comment'
+
   @column({ isPrimary: true })
-  declare id: string
+  declare id: number
 
   @column()
-  declare content: string
+  declare uuid: string
 
   @column()
-  declare authorId: string
+  declare postId: number
 
   @column()
-  declare postId: string
+  declare comment: string
 
   @column()
-  declare parentCommentId: string | null
+  declare userId: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => User, { foreignKey: 'authorId' })
-  declare author: BelongsTo<typeof User>
+  @belongsTo(() => User, { foreignKey: 'userId' })
+  declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => Post)
+  @belongsTo(() => Post, { foreignKey: 'postId' })
   declare post: BelongsTo<typeof Post>
 
-  @belongsTo(() => Comment, { foreignKey: 'parentCommentId' })
-  declare parentComment: BelongsTo<typeof Comment>
-
-  @hasMany(() => Comment, { foreignKey: 'parentCommentId' })
-  declare replies: HasMany<typeof Comment>
-
-  @hasMany(() => CommentLike)
+  @hasMany(() => CommentLike, { foreignKey: 'commentId' })
   declare likes: HasMany<typeof CommentLike>
 }

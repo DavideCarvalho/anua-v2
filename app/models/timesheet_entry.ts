@@ -6,6 +6,8 @@ import EmployeeTimesheet from './employee_timesheet.js'
 import Absence from './absence.js'
 
 export default class TimesheetEntry extends BaseModel {
+  static table = 'TimesheetEntry'
+
   @beforeCreate()
   static assignId(entry: TimesheetEntry) {
     if (!entry.id) {
@@ -40,9 +42,9 @@ export default class TimesheetEntry extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => EmployeeTimesheet)
+  @belongsTo(() => EmployeeTimesheet, { foreignKey: 'employeeTimesheetId' })
   declare employeeTimesheet: BelongsTo<typeof EmployeeTimesheet>
 
-  @hasOne(() => Absence)
+  @hasOne(() => Absence, { foreignKey: 'absenceId' })
   declare absence: HasOne<typeof Absence>
 }

@@ -14,10 +14,8 @@ import SchoolChain from './school_chain.js'
 import Student from './student.js'
 import StudentHasResponsible from './student_has_responsible.js'
 import ResponsibleAddress from './responsible_address.js'
-import ResponsibleDocument from './responsible_document.js'
 import UserHasSchool from './user_has_school.js'
 import UserHasSchoolGroup from './user_has_school_group.js'
-import CanteenMealReservation from './canteen_meal_reservation.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -25,6 +23,8 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 })
 
 export default class User extends compose(BaseModel, AuthFinder) {
+  static table = 'User'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -90,13 +90,13 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare updatedAt: DateTime | null
 
   // Relationships
-  @belongsTo(() => Role)
+  @belongsTo(() => Role, { foreignKey: 'roleId', localKey: 'id' })
   declare role: BelongsTo<typeof Role>
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId', localKey: 'id' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => SchoolChain)
+  @belongsTo(() => SchoolChain, { foreignKey: 'schoolChainId', localKey: 'id' })
   declare schoolChain: BelongsTo<typeof SchoolChain>
 
   @belongsTo(() => User, { foreignKey: 'deletedBy' })
@@ -112,24 +112,22 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @hasOne(() => ResponsibleAddress, { foreignKey: 'responsibleId' })
   declare responsibleAddress: HasOne<typeof ResponsibleAddress>
 
-  @hasMany(() => ResponsibleDocument, { foreignKey: 'responsibleId' })
-  declare responsibleDocuments: HasMany<typeof ResponsibleDocument>
+  // TODO: ResponsibleDocument table doesn't exist in DB - relationship removed
+  // @hasMany(() => ResponsibleDocument, { foreignKey: 'responsibleId' })
+  // declare responsibleDocuments: HasMany<typeof ResponsibleDocument>
 
-  @hasMany(() => UserHasSchool)
+  @hasMany(() => UserHasSchool, { foreignKey: 'userId' })
   declare userHasSchools: HasMany<typeof UserHasSchool>
 
-  @hasMany(() => UserHasSchoolGroup)
+  @hasMany(() => UserHasSchoolGroup, { foreignKey: 'userId' })
   declare userHasSchoolGroups: HasMany<typeof UserHasSchoolGroup>
-
-  @hasMany(() => CanteenMealReservation)
-  declare mealReservations: HasMany<typeof CanteenMealReservation>
 
   // Relacionamento com Teacher (1:1 quando é professor)
   // @hasOne(() => Teacher, { foreignKey: 'id', localKey: 'id' })
   // declare teacher: HasOne<typeof Teacher>
 
   // Relacionamentos de auditoria
-  // @hasMany(() => AuditLog)
+  // @hasMany(() => AuditLog, { foreignKey: 'userId' })
   // declare auditLogs: HasMany<typeof AuditLog>
 
   // Relacionamentos de usuários deletados por este usuário

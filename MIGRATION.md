@@ -237,20 +237,31 @@ DB_DATABASE=anua_v2
 
 ## Status Geral
 
-| Fase | Descrição        | Status    |
-| ---- | ---------------- | --------- |
-| 0    | Setup Inicial    | Concluído |
-| 1    | Módulo Escolas   | Concluído |
-| 2    | Auth/Usuários    | Concluído |
-| 3    | Alunos           | Concluído |
-| 4    | Responsáveis     | Concluído |
-| 5    | Matrícula Online | Concluído |
-| 6    | Pedagógico       | Concluído |
-| 7    | Financeiro       | Concluído |
-| 8    | Cantina          | Parcial   |
-| 9    | Gamificação      | Concluído |
-| 10   | Admin/Platform   | Concluído |
-| 11   | Frontend Pages   | Parcial   |
+| Fase | Descrição                | Status         |
+| ---- | ------------------------ | -------------- |
+| 0    | Setup Inicial            | Concluído      |
+| 1    | Módulo Escolas           | Concluído      |
+| 2    | Auth/Usuários            | Concluído      |
+| 3    | Alunos                   | Concluído      |
+| 4    | Responsáveis             | Concluído      |
+| 5    | Matrícula Online         | Concluído      |
+| 6    | Pedagógico               | Concluído      |
+| 7    | Financeiro               | Concluído      |
+| 8    | Cantina                  | Parcial        |
+| 9    | Gamificação              | Concluído      |
+| 10   | Admin/Platform           | Concluído      |
+| 11   | Frontend Pages           | Parcial        |
+| 12   | Backend Incompleto       | **Em Análise** |
+
+### Detalhamento Fase 12 (Módulos com Backend Incompleto)
+
+| Módulo             | Models | Migrations | Controllers | Rotas | Status     |
+| ------------------ | ------ | ---------- | ----------- | ----- | ---------- |
+| Events             | OK     | OK         | OK          | OK    | Concluído  |
+| Notifications      | OK     | OK         | OK          | OK    | Concluído  |
+| Posts/Feed         | OK     | OK         | OK          | OK    | Concluído  |
+| Grades (Analytics) | OK     | OK         | OK          | OK    | Concluído  |
+| Purchase Requests  | OK     | OK         | OK          | OK    | Concluído  |
 
 ---
 
@@ -2083,7 +2094,394 @@ npm run dev
 
 ---
 
-## Tarefas Pendentes (Refatoração)
+## Fase 12: Módulos com Backend Incompleto
+
+Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Controllers** e **Rotas**.
+
+### Sistema de Eventos (Events)
+
+**Status:** Concluído
+
+**Models existentes:**
+- [x] `Event` - Eventos escolares (reuniões, festas, passeios)
+- [x] `EventParticipant` - Participantes do evento
+
+**Migrations existentes:**
+- [x] `create_events_table`
+- [x] `create_event_participants_table`
+- [x] `create_event_comments_table`
+- [x] `create_event_parental_consents_table`
+
+**Validators criados:**
+- [x] `app/validators/event.ts` - createEventValidator, updateEventValidator, listEventsValidator, registerParticipantValidator, etc.
+
+**Controllers criados:**
+- [x] `events/list_events_controller.ts`
+- [x] `events/show_event_controller.ts`
+- [x] `events/create_event_controller.ts`
+- [x] `events/update_event_controller.ts`
+- [x] `events/delete_event_controller.ts`
+- [x] `events/publish_event_controller.ts`
+- [x] `events/cancel_event_controller.ts`
+- [x] `events/complete_event_controller.ts`
+- [x] `event_participants/list_event_participants_controller.ts`
+- [x] `event_participants/register_participant_controller.ts`
+- [x] `event_participants/update_participant_status_controller.ts`
+- [x] `event_participants/cancel_registration_controller.ts`
+- [x] `event_participants/confirm_attendance_controller.ts`
+
+**Endpoints implementados:**
+| Método | Rota | Controller | Status |
+| ------ | ---- | ---------- | ------ |
+| GET | `/api/v1/events` | list_events_controller | Concluído |
+| POST | `/api/v1/events` | create_event_controller | Concluído |
+| GET | `/api/v1/events/:id` | show_event_controller | Concluído |
+| PUT | `/api/v1/events/:id` | update_event_controller | Concluído |
+| DELETE | `/api/v1/events/:id` | delete_event_controller | Concluído |
+| POST | `/api/v1/events/:id/publish` | publish_event_controller | Concluído |
+| POST | `/api/v1/events/:id/cancel` | cancel_event_controller | Concluído |
+| POST | `/api/v1/events/:id/complete` | complete_event_controller | Concluído |
+| GET | `/api/v1/events/:eventId/participants` | list_event_participants_controller | Concluído |
+| POST | `/api/v1/events/:eventId/participants` | register_participant_controller | Concluído |
+| PUT | `/api/v1/events/:eventId/participants/:participantId` | update_participant_status_controller | Concluído |
+| DELETE | `/api/v1/events/:eventId/participants/:participantId` | cancel_registration_controller | Concluído |
+| POST | `/api/v1/events/:eventId/participants/:participantId/confirm` | confirm_attendance_controller | Concluído |
+
+---
+
+### Sistema de Notificações (Notifications)
+
+**Status:** Concluído
+
+**Models existentes:**
+- [x] `Notification` - Notificações do sistema
+- [x] `NotificationPreference` - Preferências de notificação por usuário
+
+**Migrations existentes:**
+- [x] `create_notifications_table`
+- [x] `create_notification_preferences_table`
+
+**Validators criados:**
+- [x] `app/validators/notification.ts` - listNotificationsValidator, createNotificationValidator, updateNotificationPreferencesValidator
+
+**Controllers criados:**
+- [x] `notifications/list_notifications_controller.ts`
+- [x] `notifications/show_notification_controller.ts`
+- [x] `notifications/mark_notification_read_controller.ts`
+- [x] `notifications/mark_all_read_controller.ts`
+- [x] `notifications/delete_notification_controller.ts`
+- [x] `notification_preferences/show_notification_preferences_controller.ts`
+- [x] `notification_preferences/update_notification_preferences_controller.ts`
+
+**Endpoints implementados:**
+| Método | Rota | Controller | Status |
+| ------ | ---- | ---------- | ------ |
+| GET | `/api/v1/notifications` | list_notifications_controller | Concluído |
+| GET | `/api/v1/notifications/:id` | show_notification_controller | Concluído |
+| POST | `/api/v1/notifications/:id/read` | mark_notification_read_controller | Concluído |
+| POST | `/api/v1/notifications/read-all` | mark_all_read_controller | Concluído |
+| DELETE | `/api/v1/notifications/:id` | delete_notification_controller | Concluído |
+| GET | `/api/v1/notification-preferences` | show_notification_preferences_controller | Concluído |
+| PUT | `/api/v1/notification-preferences` | update_notification_preferences_controller | Concluído |
+
+---
+
+### Sistema de Posts/Feed
+
+**Status:** Concluído
+
+**Models existentes:**
+- [x] `Post` - Posts do feed/mural
+- [x] `Comment` - Comentários em posts
+- [x] `CommentLike` - Likes em comentários
+- [x] `UserLikedPost` - Likes em posts
+
+**Migrations existentes:**
+- [x] `create_posts_table`
+- [x] `create_user_liked_posts_table`
+
+**Controllers criados:**
+- [x] `posts/list_posts_controller.ts`
+- [x] `posts/show_post_controller.ts`
+- [x] `posts/create_post_controller.ts`
+- [x] `posts/update_post_controller.ts`
+- [x] `posts/delete_post_controller.ts`
+- [x] `posts/like_post_controller.ts`
+- [x] `posts/unlike_post_controller.ts`
+- [x] `comments/list_post_comments_controller.ts`
+- [x] `comments/create_comment_controller.ts`
+- [x] `comments/update_comment_controller.ts`
+- [x] `comments/delete_comment_controller.ts`
+- [x] `comments/like_comment_controller.ts`
+
+**Validators criados:**
+- [x] `validators/post.ts` - createPostValidator, updatePostValidator, createCommentValidator, updateCommentValidator
+
+**Endpoints implementados:**
+| Método | Rota | Controller | Status |
+| ------ | ---- | ---------- | ------ |
+| GET | `/api/v1/posts` | list_posts_controller | Concluído |
+| POST | `/api/v1/posts` | create_post_controller | Concluído |
+| GET | `/api/v1/posts/:id` | show_post_controller | Concluído |
+| PUT | `/api/v1/posts/:id` | update_post_controller | Concluído |
+| DELETE | `/api/v1/posts/:id` | delete_post_controller | Concluído |
+| POST | `/api/v1/posts/:id/like` | like_post_controller | Concluído |
+| DELETE | `/api/v1/posts/:id/like` | unlike_post_controller | Concluído |
+| GET | `/api/v1/posts/:postId/comments` | list_post_comments_controller | Concluído |
+| POST | `/api/v1/posts/:postId/comments` | create_comment_controller | Concluído |
+| PUT | `/api/v1/comments/:id` | update_comment_controller | Concluído |
+| DELETE | `/api/v1/comments/:id` | delete_comment_controller | Concluído |
+| POST | `/api/v1/comments/:id/like` | like_comment_controller | Concluído |
+
+---
+
+### Sistema de Solicitações de Compra (Purchase Requests)
+
+**Status:** Concluído
+
+**Model criado:**
+- [x] `purchase_request.ts` - Solicitações de compra de materiais
+
+**Migration criada:**
+- [x] `1769100000000_create_purchase_requests_table.ts`
+
+**Validators criados:**
+- [x] `validators/purchase_request.ts` - createPurchaseRequestValidator, updatePurchaseRequestValidator, rejectPurchaseRequestValidator, markAsBoughtValidator, markAsArrivedValidator
+
+**Controllers criados:**
+- [x] `purchase_requests/list_purchase_requests_controller.ts`
+- [x] `purchase_requests/show_purchase_request_controller.ts`
+- [x] `purchase_requests/create_purchase_request_controller.ts`
+- [x] `purchase_requests/update_purchase_request_controller.ts`
+- [x] `purchase_requests/delete_purchase_request_controller.ts`
+- [x] `purchase_requests/approve_purchase_request_controller.ts`
+- [x] `purchase_requests/reject_purchase_request_controller.ts`
+- [x] `purchase_requests/mark_as_bought_controller.ts`
+- [x] `purchase_requests/mark_as_arrived_controller.ts`
+
+**Endpoints implementados:**
+| Método | Rota | Controller | Status |
+| ------ | ---- | ---------- | ------ |
+| GET | `/api/v1/purchase-requests` | list_purchase_requests_controller | Concluído |
+| POST | `/api/v1/purchase-requests` | create_purchase_request_controller | Concluído |
+| GET | `/api/v1/purchase-requests/:id` | show_purchase_request_controller | Concluído |
+| PUT | `/api/v1/purchase-requests/:id` | update_purchase_request_controller | Concluído |
+| DELETE | `/api/v1/purchase-requests/:id` | delete_purchase_request_controller | Concluído |
+| POST | `/api/v1/purchase-requests/:id/approve` | approve_purchase_request_controller | Concluído |
+| POST | `/api/v1/purchase-requests/:id/reject` | reject_purchase_request_controller | Concluído |
+| POST | `/api/v1/purchase-requests/:id/mark-bought` | mark_as_bought_controller | Concluído |
+| POST | `/api/v1/purchase-requests/:id/mark-arrived` | mark_as_arrived_controller | Concluído |
+
+**Fluxo de status:**
+```
+REQUESTED → APPROVED → BOUGHT → ARRIVED
+         ↘ REJECTED
+```
+
+**Frontend implementado:**
+- [x] Página: `inertia/pages/escola/administrativo/solicitacoes-de-compra.tsx`
+- [x] Rota: `/escola/:schoolSlug/administrativo/solicitacoes-de-compra`
+
+**Componentes UI criados:**
+- [x] `inertia/components/ui/popover.tsx`
+- [x] `inertia/components/ui/hover-card.tsx`
+- [x] `inertia/components/ui/date-picker.tsx`
+
+**Hooks criados:**
+- [x] `hooks/queries/use-purchase-requests.ts`
+- [x] `hooks/queries/use-purchase-request.ts`
+- [x] `hooks/mutations/use-create-purchase-request.ts`
+- [x] `hooks/mutations/use-update-purchase-request.ts`
+- [x] `hooks/mutations/use-delete-purchase-request.ts`
+- [x] `hooks/mutations/use-approve-purchase-request.ts`
+- [x] `hooks/mutations/use-reject-purchase-request.ts`
+- [x] `hooks/mutations/use-mark-bought-purchase-request.ts`
+- [x] `hooks/mutations/use-mark-arrived-purchase-request.ts`
+
+**Containers criados:**
+- [x] `containers/purchase-requests/purchase-requests-table.tsx`
+- [x] `containers/purchase-requests/new-purchase-request-modal.tsx`
+- [x] `containers/purchase-requests/approve-purchase-request-modal.tsx`
+- [x] `containers/purchase-requests/reject-purchase-request-modal.tsx`
+- [x] `containers/purchase-requests/bought-purchase-request-modal.tsx`
+- [x] `containers/purchase-requests/arrived-purchase-request-modal.tsx`
+
+**Dependências adicionadas:**
+- `react-day-picker` - DatePicker
+- `@radix-ui/react-popover` - Popover para DatePicker
+- `@radix-ui/react-hover-card` - HoverCard para detalhes na tabela
+
+---
+
+### Frontend - Notificações
+
+**Status:** Concluído
+
+**Páginas criadas:**
+- [x] `inertia/pages/escola/notificacoes.tsx`
+- [x] `inertia/pages/escola/notificacoes/preferencias.tsx`
+
+**Rotas:**
+- [x] `/escola/:schoolSlug/notificacoes`
+- [x] `/escola/:schoolSlug/notificacoes/preferencias`
+
+**Componentes UI criados:**
+- [x] `inertia/components/ui/separator.tsx`
+
+**Hooks criados:**
+- [x] `hooks/queries/use-notifications.ts`
+- [x] `hooks/queries/use-notification-preferences.ts`
+- [x] `hooks/mutations/use-mark-notification-read.ts`
+- [x] `hooks/mutations/use-mark-all-notifications-read.ts`
+- [x] `hooks/mutations/use-delete-notification.ts`
+- [x] `hooks/mutations/use-update-notification-preferences.ts`
+
+**Containers criados:**
+- [x] `containers/notifications/notifications-list.tsx`
+- [x] `containers/notifications/notification-preferences.tsx`
+
+**Controllers de página criados:**
+- [x] `controllers/pages/escola/show_notificacoes_page_controller.ts`
+- [x] `controllers/pages/escola/show_notificacoes_preferencias_page_controller.ts`
+
+**Dependências adicionadas:**
+- `@radix-ui/react-separator` - Separator para divisão de seções
+
+---
+
+### Frontend - Eventos
+
+**Status:** Concluído
+
+**Página criada:**
+- [x] `inertia/pages/escola/eventos.tsx`
+
+**Rota:**
+- [x] `/escola/:schoolSlug/eventos`
+
+**Hooks criados:**
+- [x] `hooks/queries/use-events.ts`
+- [x] `hooks/queries/use-event.ts`
+- [x] `hooks/mutations/use-create-event.ts`
+- [x] `hooks/mutations/use-update-event.ts`
+- [x] `hooks/mutations/use-delete-event.ts`
+- [x] `hooks/mutations/use-publish-event.ts`
+- [x] `hooks/mutations/use-cancel-event.ts`
+- [x] `hooks/mutations/use-complete-event.ts`
+
+**Containers criados:**
+- [x] `containers/events/events-calendar.tsx`
+- [x] `containers/events/new-event-modal.tsx`
+- [x] `containers/events/edit-event-modal.tsx`
+- [x] `containers/events/calendar.css`
+
+**Controller de página criado:**
+- [x] `controllers/pages/escola/show_eventos_page_controller.ts`
+
+**Dependências adicionadas:**
+- `react-big-calendar` - Calendário de eventos
+- `@types/react-big-calendar` - Tipos do calendário
+
+---
+
+### Frontend - Mural (Posts/Feed)
+
+**Status:** Concluído
+
+**Página criada:**
+- [x] `inertia/pages/escola/mural.tsx`
+
+**Rota:**
+- [x] `/escola/:schoolSlug/mural`
+
+**Componentes UI criados:**
+- [x] `inertia/components/ui/avatar.tsx`
+- [x] `inertia/components/ui/dropdown-menu.tsx`
+
+**Hooks criados:**
+- [x] `hooks/queries/use-posts.ts`
+- [x] `hooks/queries/use-post.ts`
+- [x] `hooks/queries/use-post-comments.ts`
+- [x] `hooks/mutations/use-create-post.ts`
+- [x] `hooks/mutations/use-update-post.ts`
+- [x] `hooks/mutations/use-delete-post.ts`
+- [x] `hooks/mutations/use-like-post.ts`
+- [x] `hooks/mutations/use-unlike-post.ts`
+- [x] `hooks/mutations/use-create-comment.ts`
+
+**Containers criados:**
+- [x] `containers/posts/posts-feed.tsx`
+- [x] `containers/posts/post-card.tsx`
+- [x] `containers/posts/new-post-modal.tsx`
+
+**Controller de página criado:**
+- [x] `controllers/pages/escola/show_mural_page_controller.ts`
+
+**Dependências adicionadas:**
+- `@radix-ui/react-avatar` - Avatar component
+- `@radix-ui/react-dropdown-menu` - DropdownMenu component
+- `@radix-ui/react-icons` - Radix icons
+
+---
+
+### Sistema de Notas (Grades)
+
+**Status:** Concluído (Analytics Principais)
+
+**Já implementado:**
+- [x] CRUD de Exams (provas)
+- [x] CRUD de ExamGrades (notas de provas)
+- [x] CRUD de Assignments (atividades)
+- [x] Assignment Submissions (entregas)
+- [x] Grade Submission (dar nota em atividade)
+- [x] `grades/get_academic_overview_controller.ts`
+- [x] `grades/get_students_grades_controller.ts`
+- [x] `grades/get_grade_distribution_controller.ts`
+- [x] `grades/get_at_risk_students_controller.ts`
+
+**Controllers opcionais (baixa prioridade):**
+- [ ] `grades/get_subject_difficulty_controller.ts`
+- [ ] `grades/get_assignment_completion_rates_controller.ts`
+
+**Endpoints implementados:**
+| Método | Rota | Controller | Status |
+| ------ | ---- | ---------- | ------ |
+| GET | `/api/v1/grades/academic-overview` | get_academic_overview_controller | Concluído |
+| GET | `/api/v1/grades/students` | get_students_grades_controller | Concluído |
+| GET | `/api/v1/grades/distribution` | get_grade_distribution_controller | Concluído |
+| GET | `/api/v1/grades/at-risk` | get_at_risk_students_controller | Concluído |
+| GET | `/api/v1/grades/subject-difficulty` | get_subject_difficulty_controller | Pendente (opcional) |
+| GET | `/api/v1/grades/assignment-completion` | get_assignment_completion_rates_controller | Pendente (opcional) |
+
+---
+
+### Frontend - Grades Analytics (Desempenho Academico)
+
+**Status:** Concluido
+
+**Pagina criada:**
+- [x] `inertia/pages/escola/desempenho.tsx`
+
+**Rota:**
+- [x] `/escola/:schoolSlug/desempenho`
+
+**Hooks criados:**
+- [x] `hooks/queries/use-academic-overview.ts`
+- [x] `hooks/queries/use-students-grades.ts`
+- [x] `hooks/queries/use-grade-distribution.ts`
+- [x] `hooks/queries/use-at-risk-students.ts`
+
+**Containers criados:**
+- [x] `containers/grades/academic-overview-cards.tsx` - 6 cards com visao geral
+- [x] `containers/grades/grade-distribution-chart.tsx` - Grafico de distribuicao de notas
+- [x] `containers/grades/at-risk-students-table.tsx` - Tabela de alunos em risco
+
+**Controller de pagina criado:**
+- [x] `controllers/pages/escola/show_desempenho_page_controller.ts`
+
+---
+
+## Tarefas Pendentes (Refatoracao)
 
 ### Renomear Controllers para Convenção Descritiva
 

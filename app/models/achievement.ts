@@ -4,17 +4,26 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import SchoolChain from './school_chain.js'
 
-export type AchievementType = 'ACADEMIC_PERFORMANCE' | 'ATTENDANCE' | 'BEHAVIOR' | 'PARTICIPATION' | 'STREAK' | 'SOCIAL' | 'SPECIAL'
+export type AchievementCategory =
+  | 'ACADEMIC_PERFORMANCE'
+  | 'ATTENDANCE'
+  | 'BEHAVIOR'
+  | 'PARTICIPATION'
+  | 'STREAK'
+  | 'SOCIAL'
+  | 'SPECIAL'
+
+export type AchievementRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'
+export type RecurrencePeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'ONCE'
 
 export default class Achievement extends BaseModel {
+  static table = 'Achievement'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare schoolId: string | null
-
-  @column()
-  declare schoolChainId: string | null
+  declare slug: string
 
   @column()
   declare name: string
@@ -23,25 +32,40 @@ export default class Achievement extends BaseModel {
   declare description: string
 
   @column()
-  declare iconUrl: string | null
+  declare icon: string | null
 
   @column()
-  declare badgeColor: string | null
+  declare points: number
 
   @column()
-  declare type: AchievementType
+  declare category: AchievementCategory
 
   @column()
   declare criteria: Record<string, unknown>
 
   @column()
-  declare pointsReward: number
+  declare isSecret: boolean
+
+  @column()
+  declare rarity: AchievementRarity
+
+  @column()
+  declare maxUnlocks: number | null
+
+  @column()
+  declare recurrencePeriod: RecurrencePeriod | null
+
+  @column()
+  declare schoolId: string | null
+
+  @column()
+  declare schoolChainId: string | null
 
   @column()
   declare isActive: boolean
 
-  @column()
-  declare isRepeatable: boolean
+  @column.dateTime()
+  declare deletedAt: DateTime | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -49,9 +73,9 @@ export default class Achievement extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => SchoolChain)
+  @belongsTo(() => SchoolChain, { foreignKey: 'schoolChainId' })
   declare schoolChain: BelongsTo<typeof SchoolChain>
 }

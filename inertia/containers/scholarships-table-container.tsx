@@ -3,10 +3,25 @@ import { useSearchParams } from '../hooks/use-search-params'
 import { Badge } from '../components/ui/badge'
 import { Switch } from '../components/ui/switch'
 import { useToggleScholarshipActiveMutation } from '../hooks/mutations/use-toggle-scholarship-active'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useScholarshipsQueryOptions } from '../hooks/queries/use-scholarships'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
+import { Skeleton } from '../components/ui/skeleton'
+
+function ScholarshipsTableSkeleton() {
+  return (
+    <Card>
+      <CardContent className="py-4">
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export function ScholarshipsTableContainer({ onEdit }: { onEdit: (id: string) => void }) {
   const { params, setParam } = useSearchParams()
@@ -19,8 +34,12 @@ export function ScholarshipsTableContainer({ onEdit }: { onEdit: (id: string) =>
     if (!params.limit) setParam('limit', '10')
   }, [params.page, params.limit, setParam])
 
-  const { data } = useSuspenseQuery(useScholarshipsQueryOptions({ page, limit }))
+  const { data, isLoading } = useQuery(useScholarshipsQueryOptions({ page, limit }))
   const toggleActive = useToggleScholarshipActiveMutation()
+
+  if (isLoading) {
+    return <ScholarshipsTableSkeleton />
+  }
 
   const rows = Array.isArray(data) ? data : data?.data || []
   const meta = !Array.isArray(data) && data?.meta ? data.meta : null

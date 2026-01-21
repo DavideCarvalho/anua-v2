@@ -5,6 +5,8 @@ import School from './school.js'
 import SchoolChain from './school_chain.js'
 
 export default class PaymentSettings extends BaseModel {
+  static table = 'PaymentSettings'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -36,9 +38,9 @@ export default class PaymentSettings extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => SchoolChain)
+  @belongsTo(() => SchoolChain, { foreignKey: 'schoolChainId' })
   declare schoolChain: BelongsTo<typeof SchoolChain>
 }

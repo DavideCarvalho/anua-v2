@@ -27,50 +27,64 @@ export type NotificationType =
   | 'SCHEDULE_CHANGED'
   | 'GENERAL_ANNOUNCEMENT'
 
-export type NotificationChannel = 'IN_APP' | 'EMAIL' | 'PUSH' | 'SMS' | 'WHATSAPP'
-export type NotificationStatus = 'PENDING' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED'
-
 export default class Notification extends BaseModel {
+  static table = 'Notification'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare title: string
-
-  @column()
-  declare content: string
+  declare userId: string
 
   @column()
   declare type: NotificationType
 
   @column()
-  declare channel: NotificationChannel
+  declare title: string
 
   @column()
-  declare status: NotificationStatus
+  declare message: string
 
   @column()
-  declare metadata: Record<string, any> | null
+  declare data: Record<string, unknown> | null
 
-  @column.dateTime()
-  declare scheduledAt: DateTime | null
-
-  @column.dateTime()
-  declare sentAt: DateTime | null
+  @column()
+  declare isRead: boolean
 
   @column.dateTime()
   declare readAt: DateTime | null
 
   @column()
-  declare recipientId: string
+  declare sentViaInApp: boolean
+
+  @column()
+  declare sentViaEmail: boolean
+
+  @column()
+  declare sentViaPush: boolean
+
+  @column()
+  declare sentViaSms: boolean
+
+  @column()
+  declare sentViaWhatsApp: boolean
+
+  @column.dateTime()
+  declare emailSentAt: DateTime | null
+
+  @column()
+  declare emailError: string | null
+
+  @column()
+  declare actionUrl: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => User, { foreignKey: 'recipientId' })
-  declare recipient: BelongsTo<typeof User>
+  @belongsTo(() => User, { foreignKey: 'userId' })
+  declare user: BelongsTo<typeof User>
 }

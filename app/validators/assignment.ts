@@ -28,14 +28,11 @@ export const updateAssignmentValidator = vine.compile(
 export const submitAssignmentValidator = vine.compile(
   vine.object({
     studentId: vine.string().trim(),
-    content: vine.string().trim().maxLength(5000).optional(),
-    attachmentUrl: vine.string().trim().url().optional(),
   })
 )
 
 export const gradeSubmissionValidator = vine.compile(
   vine.object({
-    score: vine.number().min(0),
-    feedback: vine.string().trim().maxLength(1000).optional(),
+    grade: vine.number().min(0),
   })
 )

@@ -5,6 +5,8 @@ import User from './user.js'
 import Student from './student.js'
 
 export default class StudentHasResponsible extends BaseModel {
+  static table = 'StudentHasResponsible'
+
   @column({ isPrimary: true })
   declare id: string
 

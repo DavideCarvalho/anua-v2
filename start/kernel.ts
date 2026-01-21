@@ -39,6 +39,7 @@ router.use([
   () => import('@adonisjs/session/session_middleware'),
   () => import('@adonisjs/shield/shield_middleware'),
   () => import('@adonisjs/auth/initialize_auth_middleware'),
+  () => import('@tuyau/superjson/superjson_middleware')
 ])
 
 /**
@@ -50,4 +51,5 @@ export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
   requireSchool: () => import('#middleware/require_school_middleware'),
   requireRole: () => import('#middleware/require_role_middleware'),
+  impersonation: () => import('#middleware/impersonation_middleware'),
 })

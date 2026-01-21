@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { Button } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
+import { ImpersonationBanner } from '../admin/impersonation-banner'
 
 interface NavItem {
   title: string
@@ -47,6 +48,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
 
   return (
     <div className="min-h-screen bg-background">
+      <ImpersonationBanner />
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}

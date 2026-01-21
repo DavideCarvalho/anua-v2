@@ -1,346 +1,782 @@
 import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
+import { useState } from 'react'
+import {
+  AlertCircle,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Brain,
+  Building2,
+  Calendar,
+  ChartBar,
+  Check,
+  ClipboardList,
+  CreditCard,
+  DollarSign,
+  FileText,
+  GraduationCap,
+  Settings,
+  ShoppingCart,
+  Sparkles,
+  TrendingUp,
+  Trophy,
+  Users,
+  Wallet,
+} from 'lucide-react'
+
+import { Button } from '~/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card'
+import { Input } from '~/components/ui/input'
+import { Textarea } from '~/components/ui/textarea'
+import { Label } from '~/components/ui/label'
+
+const insights: InsightCardProps[] = [
+  {
+    title: 'Alunos em Risco',
+    value: '23',
+    description: 'Detectados pela IA',
+    icon: AlertCircle,
+  },
+  {
+    title: 'Mensalidades',
+    value: '15',
+    description: 'Alerta automático de atrasos',
+    icon: CreditCard,
+  },
+  {
+    title: 'Matrículas',
+    value: '156',
+    description: 'Aumento de 12% este mês',
+    icon: Users,
+    trend: 'up',
+  },
+  {
+    title: 'Insights Gerados',
+    value: '47',
+    description: 'Hoje pela IA',
+    icon: Brain,
+  },
+]
 
 export default function Home() {
+  const [expanded, setExpanded] = useState(false)
+
   return (
     <>
-      <Head title="Homepage" />
+      <Head title="Anuá - O Super App da sua escola">
+        <meta name="description" content="Gerenciar sua escola nunca foi tão fácil!" />
+      </Head>
 
-      <div className="fixed xl:absolute left-8 right-8 top-0 bottom-0 xl:inset-0 max-w-screen-xl mx-auto before:content-[''] before:[background:repeating-linear-gradient(0deg,var(--sand-5)_0_4px,transparent_0_8px)] before:absolute before:top-0 before:left-0 before:h-full before:w-px after:content-[''] after:[background:repeating-linear-gradient(0deg,var(--sand-5)_0_4px,transparent_0_8px)] after:absolute after:top-0 after:right-0 after:h-full after:w-px"></div>
-
-      <div className="pt-4 h-full flex flex-col">
-        {/* Header */}
-        <div className="grow pb-4 bg-gradient-to-b from-sand-1 to-sand-2 flex justify-center items-center">
-          <a href="https://adonisjs.com" target="_blank" className="isolate">
-            <svg className="w-16 h-16 fill-primary" viewBox="0 0 33 33">
-              <path
-                fillRule="evenodd"
-                d="M0 16.333c0 13.173 3.16 16.333 16.333 16.333 13.173 0 16.333-3.16 16.333-16.333C32.666 3.16 29.506 0 16.333 0 3.16 0 0 3.16 0 16.333Zm6.586 3.393L11.71 8.083c.865-1.962 2.528-3.027 4.624-3.027 2.096 0 3.759 1.065 4.624 3.027l5.123 11.643c.233.566.432 1.297.432 1.93 0 2.893-2.029 4.923-4.923 4.923-.986 0-1.769-.252-2.561-.506-.812-.261-1.634-.526-2.695-.526-1.048 0-1.89.267-2.718.529-.801.253-1.59.503-2.538.503-2.894 0-4.923-2.03-4.923-4.924 0-.632.2-1.363.432-1.929Zm9.747-9.613-5.056 11.443c1.497-.699 3.227-1.032 5.056-1.032 1.763 0 3.56.333 4.99 1.032l-4.99-11.444Z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </a>
-        </div>
-
-        {/* Bento with documentation, Adocasts, packages and Discord */}
-        <div className="isolate mt-10 max-w-screen-xl mx-auto px-16 xl:px-8 grid grid-cols-1 xl:grid-cols-2 xl:grid-rows-3 gap-8">
-          <article className="row-span-3 relative p-6 shadow-sm hover:shadow border border-sand-7 hover:border-sand-8 rounded-2xl transition ease-in-out duration-700 group flex flex-col gap-8">
-            <div className="relative opacity-80">
-              <svg fill="none" viewBox="0 0 240 105">
-                <path fill="#F9F9F8" d="M0 4a4 4 0 0 1 4-4h232a4 4 0 0 1 4 4v101H0V4Z" />
-                <g fill="#000" fillRule="evenodd" clipPath="url(#a)" clipRule="evenodd">
-                  <path d="M24 11.444c0 4.391 1.053 5.445 5.444 5.445s5.445-1.054 5.445-5.445c0-4.39-1.054-5.444-5.445-5.444C25.054 6 24 7.053 24 11.444Zm2.195 1.131 1.708-3.88c.288-.655.843-1.01 1.541-1.01.699 0 1.253.355 1.542 1.01l1.707 3.88c.078.189.144.433.144.644 0 .964-.676 1.64-1.64 1.64-.33 0-.59-.083-.854-.168-.271-.087-.545-.175-.899-.175-.35 0-.63.089-.906.176-.267.085-.53.168-.846.168-.964 0-1.64-.677-1.64-1.641 0-.211.066-.455.143-.644Zm3.25-3.204-1.686 3.814c.499-.233 1.075-.344 1.685-.344.588 0 1.187.111 1.664.344l-1.664-3.814Zm26.473-.678c-.378 0-.65.268-.65.64 0 .374.272.641.65.641s.651-.267.651-.64-.273-.64-.65-.64Zm-11.907 5.502c-1.009 0-1.738-.745-1.738-1.91 0-1.187.73-1.933 1.737-1.933.468 0 .814.158 1.019.468V8.86h1.05v5.25h-1.05v-.372c-.2.304-.546.456-1.019.456Zm-.667-1.91c0-.652.352-1.077.887-1.077.54 0 .887.42.887 1.071 0 .64-.346 1.056-.887 1.056-.535 0-.887-.415-.887-1.05Zm4.384-.011c0-.646.351-1.06.877-1.06.53 0 .882.414.882 1.06 0 .646-.352 1.06-.883 1.06-.525 0-.876-.414-.876-1.06Zm11.571.835c0 .194-.147.31-.52.31-.42 0-.682-.221-.682-.489h-1.05c.026.725.714 1.265 1.711 1.265.946 0 1.55-.42 1.55-1.165 0-.557-.358-.945-1.066-1.087l-.762-.152c-.23-.047-.367-.163-.367-.315 0-.226.23-.347.525-.347.42 0 .583.195.583.426h.997c-.026-.683-.562-1.203-1.56-1.203-.929 0-1.559.468-1.559 1.176 0 .64.415.93 1.035 1.06l.756.164c.247.052.41.157.41.357Zm-2.85 1.002h-1.05v-3.675h1.05v3.675Zm-4.264-3.675v.384c.268-.31.625-.468 1.066-.468.824 0 1.36.536 1.36 1.365v2.394h-1.05v-2.173c0-.446-.252-.714-.688-.714-.436 0-.688.268-.688.714v2.173h-1.05v-3.675h1.05Zm-3.58-.084c-1.119 0-1.948.809-1.948 1.922s.83 1.921 1.948 1.921c1.123 0 1.953-.808 1.953-1.921s-.83-1.922-1.953-1.922Zm-8.758.856c-.535 0-.887.425-.887 1.076 0 .636.352 1.05.887 1.05.54 0 .887-.414.887-1.055 0-.65-.346-1.07-.887-1.07Zm-1.958 1.076c0 1.166.73 1.911 1.732 1.911.478 0 .82-.152 1.024-.456v.372h1.05v-3.675h-1.05v.384c-.21-.31-.556-.468-1.024-.468-1.003 0-1.732.746-1.732 1.932Z" />
-                </g>
-                <rect width="8" height="3" x="162" y="9.944" fill="#DAD9D6" rx="1" />
-                <rect width="14" height="3" x="174" y="9.944" fill="#DAD9D6" rx="1" />
-                <rect width="10" height="3" x="192" y="9.944" fill="#DAD9D6" rx="1" />
-                <rect width="10" height="3" x="206" y="9.944" fill="#DAD9D6" rx="1" />
-                <rect width="81" height="6" x="24" y="32" fill="#DAD9D6" rx="2" />
-                <rect width="95" height="6" x="24" y="44" fill="#DAD9D6" rx="2" />
-                <rect width="16" height="5" x="24" y="60" fill="#21201C" rx="1" />
-                <path fill="#DAD9D6" d="M24 85a4 4 0 0 1 4-4h184a4 4 0 0 1 4 4v20H24V85Z" />
-                <path
-                  fill="url(#b)"
-                  fillOpacity=".2"
-                  d="M24 85a4 4 0 0 1 4-4h184a4 4 0 0 1 4 4v20H24V85Z"
-                />
-                <defs>
-                  <linearGradient
-                    id="b"
-                    x1="120"
-                    x2="120"
-                    y1="81"
-                    y2="105"
-                    gradientUnits="userSpaceOnUse"
-                  >
-                    <stop stopOpacity="0" />
-                    <stop offset="1" stopColor="#82827C" />
-                  </linearGradient>
-                  <clipPath id="a">
-                    <path fill="#fff" d="M24 6h36.307v10.889H24z" />
-                  </clipPath>
-                </defs>
-              </svg>
-
-              <div className="absolute left-0 right-0 bottom-0 h-16 bg-gradient-to-b from-white/0 to-white"></div>
-            </div>
-
-            <div className="flex flex-row gap-4">
-              <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-md flex justify-center items-center">
-                <svg className="h-6 w-6 fill-primary" viewBox="0 0 256 256">
-                  <path
-                    fill="currentColor"
-                    d="M208 24H72a32 32 0 0 0-32 32v168a8 8 0 0 0 8 8h144a8 8 0 0 0 0-16H56a16 16 0 0 1 16-16h136a8 8 0 0 0 8-8V32a8 8 0 0 0-8-8m-88 16h48v72l-19.21-14.4a8 8 0 0 0-9.6 0L120 112Zm80 144H72a31.8 31.8 0 0 0-16 4.29V56a16 16 0 0 1 16-16h32v88a8 8 0 0 0 12.8 6.4L144 114l27.21 20.4A8 8 0 0 0 176 136a8 8 0 0 0 8-8V40h16Z"
-                  />
-                </svg>
+      <div>
+        <header className="bg-white py-4 sm:py-5">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <div className="shrink-0">
+                <Link route="home">
+                  <span className="text-3xl font-bold text-purple-600">Anuá</span>
+                </Link>
               </div>
 
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">
-                  <a href="https://docs.adonisjs.com" target="_blank">
-                    <span>Documentation</span>
-                    <span className="absolute inset-0"></span>
-                  </a>
-                </h2>
-
-                <p className="text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-700">
-                  Dive into the official documentation to learn AdonisJS. Read carefully to discover
-                  an unmatched set of features, best practices and developer experience. Through
-                  examples, guides and API references, you'll find everything you need to build your
-                  next project. From installation to deployment, we've got you covered.
-                </p>
-              </div>
-            </div>
-          </article>
-
-          <article className="relative p-6 shadow-sm hover:shadow border border-sand-7 hover:border-sand-8 rounded-2xl transition ease-in-out duration-700 group flex flex-row gap-4">
-            <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-md flex justify-center items-center">
-              <svg className="h-6 w-6 fill-primary" viewBox="0 0 256 256">
-                <path
-                  fill="currentColor"
-                  d="m164.44 105.34-48-32A8 8 0 0 0 104 80v64a8 8 0 0 0 12.44 6.66l48-32a8 8 0 0 0 0-13.32M120 129.05V95l25.58 17ZM216 40H40a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16m0 128H40V56h176zm16 40a8 8 0 0 1-8 8H32a8 8 0 0 1 0-16h192a8 8 0 0 1 8 8"
-                />
-              </svg>
-            </div>
-
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold">
-                <a href="https://adocasts.com" target="_blank">
-                  <span>Adocasts</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-700">
-                Level up your development and Adonis skills with hours of video content, from
-                beginner to advanced, through databases, testing, and more.
-              </p>
-            </div>
-          </article>
-
-          <article className="relative p-6 shadow-sm hover:shadow border border-sand-7 hover:border-sand-8 rounded-2xl transition ease-in-out duration-700 group flex flex-row gap-4">
-            <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-md flex justify-center items-center">
-              <svg className="h-6 w-6 fill-primary" viewBox="0 0 256 256">
-                <path
-                  fill="currentColor"
-                  d="M208 96a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16h-32a16 16 0 0 0-16 16v8H96v-8a16 16 0 0 0-16-16H48a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h8v64h-8a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h32a16 16 0 0 0 16-16v-8h64v8a16 16 0 0 0 16 16h32a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16h-8V96Zm-32-48h32v32h-32ZM48 48h32v15.9a.5.5 0 0 0 0 .2V80H48Zm32 160H48v-32h32v15.9a.5.5 0 0 0 0 .2zm128 0h-32v-32h32Zm-24-48h-8a16 16 0 0 0-16 16v8H96v-8a16 16 0 0 0-16-16h-8V96h8a16 16 0 0 0 16-16v-8h64v8a16 16 0 0 0 16 16h8Z"
-                />
-              </svg>
-            </div>
-
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold">
-                <a href="https://packages.adonisjs.com" target="_blank">
-                  <span>Packages</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-700">
-                Supercharge your AdonisJS application with packages built and maintained by both the
-                core team and the community.
-              </p>
-            </div>
-          </article>
-
-          <article className="relative p-6 shadow-sm hover:shadow border border-sand-7 hover:border-sand-8 rounded-2xl transition ease-in-out duration-700 group flex flex-row gap-4">
-            <div className="shrink-0 w-10 h-10 bg-primary/20 rounded-md flex justify-center items-center">
-              <svg className="h-6 w-6 fill-primary" viewBox="0 0 256 256">
-                <path
-                  fill="currentColor"
-                  d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88m44.42-143.16-64 32a8.05 8.05 0 0 0-3.58 3.58l-32 64A8 8 0 0 0 80 184a8.1 8.1 0 0 0 3.58-.84l64-32a8.05 8.05 0 0 0 3.58-3.58l32-64a8 8 0 0 0-10.74-10.74M138 138l-40.11 20.11L118 118l40.15-20.07Z"
-                />
-              </svg>
-            </div>
-
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold">
-                <a href="https://discord.gg/vDcEjq6" target="_blank">
-                  <span>Discord</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-700">
-                Never get lost again, ask questions, and share your knowledge or projects with a
-                growing and supportive community. Join us.
-              </p>
-            </div>
-          </article>
-        </div>
-
-        {/* Features */}
-        <div className="grow mt-10 mb-8 px-16 xl:px-8 max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <article className="relative py-4 px-5 bg-white border border-transparent rounded-lg hover:border-sand-8 hover:shadow-sm transition duration-100 ease-in-out group">
-              <h2 className="font-semibold text-sand-12">
+              <div className="hidden lg:ml-12 lg:flex lg:items-center lg:space-x-8">
                 <a
-                  href="https://lucid.adonisjs.com"
-                  target="_blank"
-                  className="flex flex-row gap-2"
+                  href="#funcionalidades"
+                  className="text-lg font-medium text-gray-700 transition-colors hover:text-purple-600"
                 >
-                  <span className="bg-[#D5EAE7] h-6 w-6 flex justify-center items-center rounded">
-                    <svg className="h-4 w-4 fill-[#0E766E]" viewBox="0 0 24 24">
-                      <g
-                        fill="none"
-                        stroke="currentColor"
+                  Funcionalidades
+                </a>
+                <a
+                  href="#preco"
+                  className="text-lg font-medium text-gray-700 transition-colors hover:text-purple-600"
+                >
+                  Preço
+                </a>
+                <a
+                  href="#fale-conosco"
+                  className="text-lg font-medium text-gray-700 transition-colors hover:text-purple-600"
+                >
+                  Fale conosco
+                </a>
+              </div>
+
+              <div className="hidden sm:flex sm:items-center sm:space-x-4">
+                <Link
+                  route="auth.signIn"
+                  className="rounded-full bg-purple-600 px-8 py-3 text-base font-medium text-white transition-all hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+                >
+                  Entrar
+                </Link>
+              </div>
+
+              <div className="flex lg:hidden">
+                <button
+                  type="button"
+                  className="inline-flex items-center rounded-full border border-purple-600 p-2.5 text-purple-600"
+                  onClick={() => setExpanded(!expanded)}
+                >
+                  {!expanded ? (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="2"
-                      >
-                        <path d="M4 6a8 3 0 1 0 16 0A8 3 0 1 0 4 6" />
-                        <path d="M4 6v6a8 3 0 0 0 16 0V6" />
-                        <path d="M4 12v6a8 3 0 0 0 16 0v-6" />
-                      </g>
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
                     </svg>
-                  </span>
-                  <span>Lucid</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="mt-4 text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-100">
-                A SQL ORM with a powerful query builder, active record, migrations, and model
-                factories. Everything you need to work with databases.
-              </p>
-
-              <svg
-                className="absolute top-4 right-5 opacity-0 group-hover:opacity-100 text-sand-9 w-4 h-4 transition ease-in-out duration-100"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1 9-9m-5 0h5v5"
-                />
-              </svg>
-            </article>
-
-            <article className="relative py-4 px-5 bg-white border border-transparent rounded-lg hover:border-sand-8 hover:shadow-sm transition duration-100 ease-in-out group">
-              <h2 className="font-semibold text-sand-12">
-                <a href="https://vinejs.dev/" target="_blank" className="flex flex-row gap-2">
-                  <span className="bg-[#F3DBFC] h-6 w-6 flex justify-center items-center rounded">
-                    <svg className="h-4 w-4 fill-[#CA5AF2]" viewBox="0 0 24 24">
+                  ) : (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
-                        fill="none"
-                        stroke="currentColor"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 3a12 12 0 0 0 8.5 3A12 12 0 0 1 12 21 12 12 0 0 1 3.5 6 12 12 0 0 0 12 3"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
-                  </span>
-                  <span>Vine</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="mt-4 text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-100">
-                A yet simple but feature rich and type-safe form data validation. It comes with 50+
-                built-in rules and an expressive API to define custom rules.
-              </p>
-
-              <svg
-                className="absolute top-4 right-5 opacity-0 group-hover:opacity-100 text-sand-9 w-4 h-4 transition ease-in-out duration-100"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1 9-9m-5 0h5v5"
-                />
-              </svg>
-            </article>
-
-            <article className="relative py-4 px-5 bg-white border border-transparent rounded-lg hover:border-sand-8 hover:shadow-sm transition duration-100 ease-in-out group">
-              <h2 className="font-semibold text-sand-12">
-                <a href="https://inertiajs.com/" target="_blank" className="flex flex-row gap-2">
-                  <span className="bg-[#B8EAE0] h-6 w-6 flex justify-center items-center rounded">
-                    <svg className="h-4 w-4 fill-[#4BBBA5]" viewBox="0 0 24 24">
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m12.5 8l4 4l-4 4H17l4-4l-4-4zm-9 0l4 4l-4 4H8l4-4l-4-4z"
-                      />
-                    </svg>
-                  </span>
-                  <span>InertiaJS</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="mt-4 text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-100">
-                The modern monolithic application architecture. It allows you to build single-page
-                applications without building an API.
-              </p>
-
-              <svg
-                className="absolute top-4 right-5 opacity-0 group-hover:opacity-100 text-sand-9 w-4 h-4 transition ease-in-out duration-100"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1 9-9m-5 0h5v5"
-                />
-              </svg>
-            </article>
-
-            <article className="relative py-4 px-5 bg-white border border-transparent rounded-lg hover:border-sand-8 hover:shadow-sm transition duration-100 ease-in-out group">
-              <h2 className="font-semibold text-sand-12">
-                <a href="https://japa.dev" target="_blank" className="flex flex-row gap-2">
-                  <span className="bg-[#FACDDC] h-6 w-6 flex justify-center items-center rounded">
-                    <svg className="h-4 w-4 fill-[#DD3074]" viewBox="0 0 256 256">
-                      <path
-                        fill="currentColor"
-                        d="m240.49 83.51-60-60a12 12 0 0 0-17 0L34.28 152.75a48.77 48.77 0 0 0 69 69l111.2-111.26 21.31-7.11a12 12 0 0 0 4.7-19.87M86.28 204.75a24.77 24.77 0 0 1-35-35l28.13-28.13c7.73-2.41 19.58-3 35.06 5a84 84 0 0 0 21.95 8ZM204.2 88.62a12.15 12.15 0 0 0-4.69 2.89l-38.89 38.9c-7.73 2.41-19.58 3-35.06-5a84 84 0 0 0-21.94-8L172 49l37.79 37.79Z"
-                      />
-                    </svg>
-                  </span>
-                  <span>Japa</span>
-                  <span className="absolute inset-0"></span>
-                </a>
-              </h2>
-
-              <p className="mt-4 text-sm text-sand-11 group-hover:text-sand-12 transition ease-in-out duration-100">
-                From JSON API tests using Open API schema to browser tests with Playwrighht, it
-                comes with everything you need to test your application.
-              </p>
-
-              <svg
-                className="absolute top-4 right-5 opacity-0 group-hover:opacity-100 text-sand-9 w-4 h-4 transition ease-in-out duration-100"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6m-7 1 9-9m-5 0h5v5"
-                />
-              </svg>
-            </article>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="text-sm text-center [&>code]:font-medium [&>code]:text-[#a599ff] bg-sand-12 text-sand-1 fixed bottom-0 left-0 right-0 py-2">
-          Route for this page is registered in <code>start/routes.ts</code> file, rendering{' '}
-          <code>inertia/pages/home.tsx</code> template
-        </div>
+        <section className="bg-gradient-to-b from-purple-50 to-white py-12 sm:py-16 lg:py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-2 lg:gap-x-16">
+              <div className="flex flex-col justify-center">
+                <div className="mb-4 inline-flex items-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700">
+                  <Brain className="mr-2 h-4 w-4" />O verdadeiro Super App da sua escola
+                </div>
+                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                  O ecossistema completo para escola <br />
+                  <span className="text-purple-600">potencializado por IA</span>
+                </h1>
+                <p className="mt-6 text-lg text-gray-600 lg:text-xl">
+                  Do administrativo ao pedagógico, do financeiro à gamificação. Anuá usa{' '}
+                  <span className="font-semibold text-purple-600">Inteligência Artificial</span>{' '}
+                  para integrar TODAS as áreas da sua escola em uma plataforma inteligente. Não é só
+                  agenda - é gestão completa com insights automáticos.
+                </p>
+                <div className="mt-8 flex flex-col sm:flex-row sm:space-x-4">
+                  <form className="flex-1">
+                    <div className="flex space-x-2">
+                      <input
+                        type="email"
+                        placeholder="Seu melhor email"
+                        className="w-full rounded-full border border-gray-300 px-6 py-3 text-gray-900 placeholder-gray-500 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-full bg-purple-600 px-8 py-3 font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+                      >
+                        Começar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm text-gray-600">Gestão de Matrículas</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm text-gray-600">Pedagógico Completo</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CreditCard className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm text-gray-600">Financeiro Integrado</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm text-gray-600">Gamificação</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <ChartBar className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm text-gray-600">Analytics Avançado</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Brain className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm text-gray-600">IA Integrada</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative lg:mt-0">
+                <div className="grid grid-cols-2 gap-4">
+                  {insights.map((insight) => (
+                    <InsightCard key={insight.title} {...insight} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção de IA */}
+        <section className="bg-gradient-to-b from-white to-gray-50 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+              <div className="flex flex-col justify-center">
+                <div className="mb-4 inline-flex w-fit items-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700">
+                  <Brain className="mr-2 h-4 w-4" />
+                  Powered by AI
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+                  Inteligência Artificial que realmente entende sua escola
+                </h2>
+                <p className="mt-6 text-lg text-gray-600">
+                  Nossa IA analisa continuamente todos os dados da sua escola - acadêmicos,
+                  financeiros e comportamentais - para gerar insights valiosos e alertas automáticos
+                  que você não encontraria sozinho.
+                </p>
+
+                <div className="mt-8 space-y-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                      <AlertCircle className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">
+                        Identificação de Alunos em Risco
+                      </h4>
+                      <p className="mt-1 text-sm text-gray-600">
+                        IA detecta automaticamente alunos com risco de evasão por baixo desempenho,
+                        faltas excessivas ou inadimplência
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                      <ChartBar className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Analytics Preditivo</h4>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Previsões de receita, tendências de matrícula e padrões de comportamento que
+                        ajudam na tomada de decisão estratégica
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                      <Brain className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Recomendações Inteligentes</h4>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Sistema sugere ações específicas baseadas nos padrões identificados, como
+                        contato com responsáveis ou ajustes na grade
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Grade Horária Inteligente</h4>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Algoritmos avançados geram automaticamente a grade ideal considerando
+                        disponibilidade dos professores e necessidades das turmas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="grid grid-cols-1 gap-6">
+                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-lg">
+                        <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
+                        Alertas Automáticos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <p className="text-sm font-medium text-gray-900">
+                            23 alunos em risco de reprovação por faltas
+                          </p>
+                          <p className="text-xs text-gray-500">Detectado há 2 horas</p>
+                        </div>
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <p className="text-sm font-medium text-gray-900">
+                            15 mensalidades com atraso superior a 30 dias
+                          </p>
+                          <p className="text-xs text-gray-500">Detectado hoje às 08:00</p>
+                        </div>
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <p className="text-sm font-medium text-gray-900">
+                            Tendência de queda no desempenho da Turma 8A
+                          </p>
+                          <p className="text-xs text-gray-500">Detectado há 1 dia</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-lg">
+                        <TrendingUp className="mr-2 h-5 w-5 text-green-500" />
+                        Insights em Tempo Real
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Taxa de presença</span>
+                            <span className="text-lg font-bold text-green-600">94%</span>
+                          </div>
+                          <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                            <div className="h-2 w-[94%] rounded-full bg-green-500" />
+                          </div>
+                        </div>
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Adimplência</span>
+                            <span className="text-lg font-bold text-green-600">87%</span>
+                          </div>
+                          <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                            <div className="h-2 w-[87%] rounded-full bg-green-500" />
+                          </div>
+                        </div>
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Média geral</span>
+                            <span className="text-lg font-bold text-blue-600">8.3</span>
+                          </div>
+                          <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                            <div className="h-2 w-[83%] rounded-full bg-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-16" id="funcionalidades">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+                Um ecossistema completo para sua escola
+              </h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Tudo que você precisa em uma única plataforma integrada. Do administrativo ao
+                pedagógico, do financeiro à experiência do aluno.
+              </p>
+            </div>
+
+            {/* Módulos Principais */}
+            <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Administrativo */}
+              <div className="rounded-xl bg-purple-50 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
+                  <Building2 className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gestão Administrativa</h3>
+                <p className="mt-4 text-gray-600">
+                  Matrículas online, gestão de alunos, professores e funcionários, folha de ponto,
+                  controle de documentos e muito mais.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Matrículas online com assinatura digital
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Gestão completa de colaboradores
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Sistema de folha de ponto
+                  </li>
+                </ul>
+              </div>
+
+              {/* Pedagógico */}
+              <div className="rounded-xl bg-purple-50 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
+                  <GraduationCap className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gestão Pedagógica</h3>
+                <p className="mt-4 text-gray-600">
+                  Turmas, grade horária, atividades, notas, frequência e ocorrências. Tudo integrado
+                  e fácil de usar.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Grade horária inteligente
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Gestão de notas e atividades
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Controle de frequência
+                  </li>
+                </ul>
+              </div>
+
+              {/* Financeiro */}
+              <div className="rounded-xl bg-purple-50 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gestão Financeira</h3>
+                <p className="mt-4 text-gray-600">
+                  Mensalidades, contratos, cobranças automáticas, bolsas e parcerias. Gateway de
+                  pagamento integrado.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Gateway de pagamento integrado
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Gestão de bolsas e parcerias
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Contratos com assinatura digital
+                  </li>
+                </ul>
+              </div>
+
+              {/* Gamificação */}
+              <div className="rounded-xl bg-purple-50 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gamificação</h3>
+                <p className="mt-4 text-gray-600">
+                  Sistema completo de pontos, conquistas, desafios, rankings e loja virtual para
+                  engajar seus alunos.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Sistema de pontos e recompensas
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Conquistas e desafios
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Loja virtual integrada
+                  </li>
+                </ul>
+              </div>
+
+              {/* Analytics */}
+              <div className="rounded-xl bg-purple-50 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900">
+                  Inteligência e Analytics
+                </h3>
+                <p className="mt-4 text-gray-600">
+                  Dashboards, relatórios e insights automáticos para tomada de decisão baseada em
+                  dados.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Alunos em risco de evasão
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Métricas financeiras e acadêmicas
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Relatórios personalizáveis
+                  </li>
+                </ul>
+              </div>
+
+              {/* Comunicação */}
+              <div className="rounded-xl bg-purple-50 p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
+                  <Bell className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-gray-900">Comunicação Integrada</h3>
+                <p className="mt-4 text-gray-600">
+                  Notificações por email, SMS, WhatsApp e push. Sistema de preferências para cada
+                  tipo de notificação.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Multi-canal (Email, SMS, WhatsApp, Push)
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Feed social interno
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-purple-600" />
+                    Gestão de preferências
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Seção de Diferenciais */}
+            <div className="mt-20">
+              <div className="rounded-2xl bg-gradient-to-br from-purple-600 to-purple-700 p-12 text-white">
+                <div className="text-center">
+                  <Sparkles className="mx-auto h-12 w-12" />
+                  <h3 className="mt-6 text-2xl font-bold sm:text-3xl">E muito mais...</h3>
+                  <p className="mx-auto mt-4 max-w-2xl text-lg opacity-90">
+                    Cantina, solicitações de compra e impressão, gestão de períodos acadêmicos,
+                    bolsas e parcerias, controle de coordenadores, gestão de redes com múltiplas
+                    escolas e integrações com os melhores serviços do mercado.
+                  </p>
+                </div>
+
+                <div className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+                  <div className="text-center">
+                    <ShoppingCart className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Cantina Digital</p>
+                  </div>
+                  <div className="text-center">
+                    <FileText className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Assinatura Digital</p>
+                  </div>
+                  <div className="text-center">
+                    <ClipboardList className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Solicitações</p>
+                  </div>
+                  <div className="text-center">
+                    <BookOpen className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Biblioteca</p>
+                  </div>
+                  <div className="text-center">
+                    <Settings className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Redes de Ensino</p>
+                  </div>
+                  <div className="text-center">
+                    <Brain className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">IA Integrada</p>
+                  </div>
+                  <div className="text-center">
+                    <Users className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Portal do Aluno</p>
+                  </div>
+                  <div className="text-center">
+                    <Wallet className="mx-auto h-8 w-8" />
+                    <p className="mt-2 text-sm font-medium">Gateway Pagamento</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <Pricing />
+        <Contact />
+        <Footer />
       </div>
     </>
+  )
+}
+
+const features = [
+  'Sistema completo de matrículas online',
+  'Gestão pedagógica (notas, frequência, atividades)',
+  'Financeiro com gateway de pagamento integrado',
+  'Gamificação com loja virtual e pontos',
+  'Analytics e IA para insights automáticos',
+  'Comunicação multi-canal (Email, SMS, WhatsApp, Push)',
+  'Cantina digital integrada',
+  'Contratos com assinatura digital',
+  'Gestão centralizada de redes de ensino',
+  'Portal do aluno e responsável',
+  'Sistema de solicitações (compras e impressões)',
+  'Suporte especializado',
+]
+
+function Pricing() {
+  return (
+    <section className="bg-white py-16" id="preco">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            Investimento simples, retorno garantido
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Um preço único por aluno. Todo o ecossistema incluído.
+          </p>
+        </div>
+
+        <div className="mt-16 flex justify-center">
+          <Card className="w-full max-w-md border-2 border-purple-200 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gray-900">
+                Ecossistema Completo
+              </CardTitle>
+              <CardDescription className="mt-4 text-gray-600">
+                Tudo que sua escola precisa. Sem cobranças adicionais por módulo.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mt-6 flex items-baseline">
+                <span className="text-5xl font-bold text-purple-600">R$ 18,90</span>
+                <span className="ml-2 text-gray-600">/aluno/mês</span>
+              </div>
+
+              <ul className="mt-8 space-y-4">
+                {features.map((feature) => (
+                  <li key={feature} className="flex items-center">
+                    <Check className="h-5 w-5 text-purple-600" />
+                    <span className="ml-3 text-gray-600">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button asChild className="w-full rounded-full" size="lg">
+                <a href="#fale-conosco">Começar a usar</a>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Contact() {
+  return (
+    <section className="bg-purple-50 py-16" id="fale-conosco">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            Transforme sua escola hoje
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Nossa equipe está pronta para mostrar como a IA pode revolucionar sua gestão escolar
+          </p>
+        </div>
+
+        <div className="mt-12 rounded-xl bg-white p-8 shadow-lg">
+          <form className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome</Label>
+              <Input id="name" placeholder="Digite seu nome" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="Digite seu email" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="schoolName">Nome da Escola</Label>
+              <Input id="schoolName" placeholder="Digite o nome da escola" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input id="phone" type="tel" placeholder="Digite seu telefone" />
+            </div>
+
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="message">Mensagem</Label>
+              <Textarea id="message" placeholder="Digite sua mensagem" className="min-h-[120px]" />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Button type="submit" className="w-full" size="lg">
+                Falar com especialista
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Footer() {
+  return (
+    <footer className="bg-white py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between space-y-6 sm:flex-row sm:space-y-0">
+          <div className="flex space-x-6">
+            <a href="#funcionalidades" className="text-gray-600 hover:text-purple-600">
+              Funcionalidades
+            </a>
+            <a href="#preco" className="text-gray-600 hover:text-purple-600">
+              Preço
+            </a>
+            <a href="#fale-conosco" className="text-gray-600 hover:text-purple-600">
+              Fale Conosco
+            </a>
+          </div>
+          <div className="text-center text-gray-600">
+            <p>© 2024 Anuá. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+interface InsightCardProps {
+  title: string
+  value: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+  trend?: 'up' | 'down'
+}
+
+function InsightCard({ title, value, description, icon: Icon, trend }: InsightCardProps) {
+  const trendColor = trend === 'up' ? 'text-green-500' : 'text-red-500'
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+          <Icon className="h-6 w-6 text-purple-600" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
+        {trend && (
+          <div className={`flex items-center ${trendColor} mt-2`}>
+            <TrendingUp className="mr-1 h-4 w-4" />
+            <span className="text-sm">12%</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

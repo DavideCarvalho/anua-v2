@@ -9,7 +9,7 @@ export default class ListCoursesController {
     const schoolId = request.input('schoolId')
     const academicPeriodId = request.input('academicPeriodId')
 
-    const query = Course.query().preload('levels').orderBy('name', 'asc')
+    const query = Course.query().orderBy('name', 'asc')
 
     if (search) {
       query.whereILike('name', `%${search}%`)

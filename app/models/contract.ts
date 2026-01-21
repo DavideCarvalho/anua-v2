@@ -11,6 +11,8 @@ import StudentHasLevel from './student_has_level.js'
 export type ContractPaymentType = 'MONTHLY' | 'UPFRONT'
 
 export default class Contract extends BaseModel {
+  static table = 'Contract'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -30,10 +32,10 @@ export default class Contract extends BaseModel {
   declare endDate: DateTime | null
 
   @column()
-  declare enrollmentValue: number | null // Valor da matrícula em centavos
+  declare enrollmentValue: number | null
 
   @column()
-  declare amount: number // Valor do curso em centavos
+  declare ammount: number // Note: typo in DB schema
 
   @column()
   declare docusealTemplateId: string | null
@@ -65,22 +67,22 @@ export default class Contract extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  // Relacionamentos
-  @belongsTo(() => School)
+  // Relationships
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @hasMany(() => ContractDocument)
+  @hasMany(() => ContractDocument, { foreignKey: 'contractId' })
   declare contractDocuments: HasMany<typeof ContractDocument>
 
-  @hasMany(() => ContractPaymentDay)
+  @hasMany(() => ContractPaymentDay, { foreignKey: 'contractId' })
   declare paymentDays: HasMany<typeof ContractPaymentDay>
 
-  @hasOne(() => ContractInterestConfig)
+  @hasOne(() => ContractInterestConfig, { foreignKey: 'contractId' })
   declare interestConfig: HasOne<typeof ContractInterestConfig>
 
-  @hasMany(() => ContractEarlyDiscount)
+  @hasMany(() => ContractEarlyDiscount, { foreignKey: 'contractId' })
   declare earlyDiscounts: HasMany<typeof ContractEarlyDiscount>
 
-  @hasMany(() => StudentHasLevel)
+  @hasMany(() => StudentHasLevel, { foreignKey: 'contractId' })
   declare studentHasLevels: HasMany<typeof StudentHasLevel>
 }

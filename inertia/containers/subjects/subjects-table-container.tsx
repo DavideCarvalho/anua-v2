@@ -1,9 +1,24 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
+import { Skeleton } from '../../components/ui/skeleton'
 import { useSubjectsQueryOptions } from '../../hooks/queries/use-subjects'
+
+function SubjectsTableSkeleton() {
+  return (
+    <Card>
+      <CardContent className="py-4">
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export function SubjectsTableContainer({
   schoolId,
@@ -14,7 +29,11 @@ export function SubjectsTableContainer({
 }) {
   const [page, setPage] = useState(1)
 
-  const { data } = useSuspenseQuery(useSubjectsQueryOptions({ page, limit: 10, schoolId }))
+  const { data, isLoading } = useQuery(useSubjectsQueryOptions({ page, limit: 10, schoolId }))
+
+  if (isLoading) {
+    return <SubjectsTableSkeleton />
+  }
 
   const rows = Array.isArray(data) ? data : data?.data || []
   const meta = !Array.isArray(data) && data?.meta ? data.meta : null
@@ -27,7 +46,7 @@ export function SubjectsTableContainer({
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left p-3 font-medium">Nome</th>
-                <th className="text-left p-3 font-medium">Slug</th>
+                <th className="text-left p-3 font-medium">Código</th>
                 <th className="text-right p-3 font-medium">Ações</th>
               </tr>
             </thead>
@@ -57,9 +76,7 @@ export function SubjectsTableContainer({
                 variant="outline"
                 size="sm"
                 disabled={meta.currentPage <= 1}
-                onClick={() => {
-                  setPage(meta.currentPage - 1)
-                }}
+                onClick={() => setPage(meta.currentPage - 1)}
               >
                 Anterior
               </Button>
@@ -67,9 +84,7 @@ export function SubjectsTableContainer({
                 variant="outline"
                 size="sm"
                 disabled={meta.currentPage >= meta.lastPage}
-                onClick={() => {
-                  setPage(meta.currentPage + 1)
-                }}
+                onClick={() => setPage(meta.currentPage + 1)}
               >
                 Próxima
               </Button>

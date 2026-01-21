@@ -6,6 +6,8 @@ import Contract from './contract.js'
 import StudentDocument from './student_document.js'
 
 export default class ContractDocument extends BaseModel {
+  static table = 'ContractDocument'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -31,12 +33,12 @@ export default class ContractDocument extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => Contract)
+  @belongsTo(() => Contract, { foreignKey: 'contractId' })
   declare contract: BelongsTo<typeof Contract>
 
-  @hasMany(() => StudentDocument)
+  @hasMany(() => StudentDocument, { foreignKey: 'contractDocumentId' })
   declare studentDocuments: HasMany<typeof StudentDocument>
 }

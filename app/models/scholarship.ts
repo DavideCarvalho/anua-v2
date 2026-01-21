@@ -8,6 +8,8 @@ import SchoolPartner from './school_partner.js'
 export type ScholarshipType = 'PHILANTHROPIC' | 'DISCOUNT' | 'COMPANY_PARTNERSHIP' | 'FREE'
 
 export default class Scholarship extends BaseModel {
+  static table = 'Scholarship'
+
   @beforeCreate()
   static assignId(scholarship: Scholarship) {
     if (!scholarship.id) {
@@ -51,9 +53,9 @@ export default class Scholarship extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @belongsTo(() => SchoolPartner)
+  @belongsTo(() => SchoolPartner, { foreignKey: 'schoolPartnerId' })
   declare schoolPartner: BelongsTo<typeof SchoolPartner>
 }

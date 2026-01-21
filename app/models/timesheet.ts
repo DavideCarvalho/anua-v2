@@ -8,6 +8,8 @@ import EmployeeTimesheet from './employee_timesheet.js'
 export type TimesheetStatus = 'OPEN' | 'CLOSED'
 
 export default class Timesheet extends BaseModel {
+  static table = 'Timesheet'
+
   @beforeCreate()
   static assignId(timesheet: Timesheet) {
     if (!timesheet.id) {
@@ -42,9 +44,9 @@ export default class Timesheet extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @hasMany(() => EmployeeTimesheet)
+  @hasMany(() => EmployeeTimesheet, { foreignKey: 'timesheetId' })
   declare employeeTimesheets: HasMany<typeof EmployeeTimesheet>
 }

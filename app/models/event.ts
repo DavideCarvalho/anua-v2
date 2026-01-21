@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import School from './school.js'
 import EventParticipant from './event_participant.js'
+import EventParentalConsent from './event_parental_consent.js'
 
 export type EventType =
   | 'ACADEMIC'
@@ -15,8 +16,11 @@ export type EventType =
   | 'GRADUATION'
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED'
 export type EventVisibility = 'PUBLIC' | 'SCHOOL_ONLY' | 'CLASS_ONLY' | 'INVITE_ONLY'
+export type EventPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
 
 export default class Event extends BaseModel {
+  static table = 'Event'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -27,7 +31,7 @@ export default class Event extends BaseModel {
   declare description: string | null
 
   @column()
-  declare location: string | null
+  declare shortDescription: string | null
 
   @column()
   declare type: EventType
@@ -39,45 +43,105 @@ export default class Event extends BaseModel {
   declare visibility: EventVisibility
 
   @column()
+  declare priority: EventPriority
+
+  @column.dateTime()
+  declare startDate: DateTime
+
+  @column.dateTime()
+  declare endDate: DateTime | null
+
+  @column()
+  declare startTime: string | null
+
+  @column()
+  declare endTime: string | null
+
+  @column()
+  declare isAllDay: boolean
+
+  @column()
+  declare location: string | null
+
+  @column()
+  declare locationDetails: string | null
+
+  @column()
+  declare isOnline: boolean
+
+  @column()
+  declare onlineUrl: string | null
+
+  @column()
+  declare isExternal: boolean
+
+  @column()
+  declare organizerId: string | null
+
+  @column()
   declare maxParticipants: number | null
+
+  @column()
+  declare currentParticipants: number
+
+  @column()
+  declare requiresRegistration: boolean
+
+  @column.dateTime()
+  declare registrationDeadline: DateTime | null
 
   @column()
   declare requiresParentalConsent: boolean
 
   @column()
-  declare hasAdditionalCosts: boolean
+  declare allowComments: boolean
 
   @column()
-  declare additionalCostAmount: number | null
+  declare sendNotifications: boolean
 
   @column()
-  declare additionalCostDescription: string | null
-
-  @column.dateTime()
-  declare startsAt: DateTime
-
-  @column.dateTime()
-  declare endsAt: DateTime | null
+  declare isRecurring: boolean
 
   @column()
-  declare organizerId: string
+  declare recurringPattern: Record<string, unknown> | null
+
+  @column()
+  declare bannerUrl: string | null
+
+  @column()
+  declare attachments: Record<string, unknown>[] | null
+
+  @column()
+  declare tags: string[] | null
+
+  @column()
+  declare metadata: Record<string, unknown> | null
 
   @column()
   declare schoolId: string
+
+  @column()
+  declare createdBy: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
   @belongsTo(() => User, { foreignKey: 'organizerId' })
   declare organizer: BelongsTo<typeof User>
 
-  @belongsTo(() => School)
+  @belongsTo(() => User, { foreignKey: 'createdBy' })
+  declare creator: BelongsTo<typeof User>
+
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
-  @hasMany(() => EventParticipant)
+  @hasMany(() => EventParticipant, { foreignKey: 'eventId' })
   declare participants: HasMany<typeof EventParticipant>
+
+  @hasMany(() => EventParentalConsent, { foreignKey: 'eventId' })
+  declare parentalConsents: HasMany<typeof EventParentalConsent>
 }

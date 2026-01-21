@@ -14,3 +14,16 @@ export const registerValidator = vine.compile(
     password: vine.string().minLength(6).confirmed(),
   })
 )
+
+export const sendCodeValidator = vine.compile(
+  vine.object({
+    email: vine.string().email(),
+  })
+)
+
+export const verifyCodeValidator = vine.compile(
+  vine.object({
+    email: vine.string().email(),
+    code: vine.string().fixedLength(6),
+  })
+)

@@ -4,9 +4,17 @@ import { createCourseValidator } from '#validators/course'
 
 export default class CreateCourseController {
   async handle({ request, response }: HttpContext) {
-    const data = await request.validateUsing(createCourseValidator)
+    let data
+    try {
+      data = await request.validateUsing(createCourseValidator)
+    } catch (error) {
+      return response.badRequest({ message: 'Erro de validação', errors: error.messages })
+    }
 
-    const course = await Course.create(data)
+    const course = await Course.create({
+      ...data,
+      version: 1,
+    })
 
     return response.created(course)
   }

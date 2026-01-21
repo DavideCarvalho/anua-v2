@@ -5,6 +5,7 @@ import SchoolChain from './school_chain.js'
 import User from './user.js'
 import SchoolGroup from './school_group.js'
 import UserHasSchool from './user_has_school.js'
+import InsuranceBilling from './insurance_billing.js'
 
 export type PaymentConfigStatus =
   | 'NOT_CONFIGURED'
@@ -18,6 +19,8 @@ export type PaymentConfigStatus =
 export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'
 
 export default class School extends BaseModel {
+  static table = 'School'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -54,6 +57,11 @@ export default class School extends BaseModel {
 
   @column()
   declare longitude: number | null
+
+  // PostGIS geometry point - stored as USER-DEFINED type in DB
+  // Use raw queries for spatial operations
+  @column()
+  declare location: unknown | null
 
   // Logo
   @column()
@@ -134,21 +142,34 @@ export default class School extends BaseModel {
   declare updatedAt: DateTime | null
 
   // Relationships
-  @belongsTo(() => SchoolChain)
+  @belongsTo(() => SchoolChain, {
+    foreignKey: 'schoolChainId',
+  })
   declare schoolChain: BelongsTo<typeof SchoolChain>
 
-  @hasMany(() => User)
-  declare users: HasMany<typeof User>
-
-  @hasMany(() => UserHasSchool)
+  @hasMany(() => UserHasSchool, {
+    foreignKey: 'schoolId',
+  })
   declare userHasSchools: HasMany<typeof UserHasSchool>
 
+  @manyToMany(() => User, {
+    pivotTable: 'UserHasSchool',
+    localKey: 'id',
+    pivotForeignKey: 'schoolId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'userId',
+  })
+  declare users: ManyToMany<typeof User>
+
   @manyToMany(() => SchoolGroup, {
-    pivotTable: 'school_has_groups',
+    pivotTable: 'SchoolHasGroup',
     localKey: 'id',
     pivotForeignKey: 'school_id',
     relatedKey: 'id',
     pivotRelatedForeignKey: 'school_group_id',
   })
   declare schoolGroups: ManyToMany<typeof SchoolGroup>
+
+  @hasMany(() => InsuranceBilling, { foreignKey: 'schoolId' })
+  declare insuranceBillings: HasMany<typeof InsuranceBilling>
 }

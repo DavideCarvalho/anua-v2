@@ -18,6 +18,8 @@ export type AbsenceReason =
 export type AbsenceStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 export default class Absence extends BaseModel {
+  static table = 'Absence'
+
   @beforeCreate()
   static assignId(absence: Absence) {
     if (!absence.id) {
@@ -58,12 +60,12 @@ export default class Absence extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 
-  @belongsTo(() => TimesheetEntry)
+  @belongsTo(() => TimesheetEntry, { foreignKey: 'timesheetEntryId' })
   declare timesheetEntry: BelongsTo<typeof TimesheetEntry>
 
-  @hasOne(() => TeacherAbsence)
+  @hasOne(() => TeacherAbsence, { foreignKey: 'teacherAbsenceId' })
   declare teacherAbsence: HasOne<typeof TeacherAbsence>
 }

@@ -5,6 +5,8 @@ import Canteen from './canteen.js'
 import CanteenItemPurchased from './canteen_item_purchased.js'
 
 export default class CanteenItem extends BaseModel {
+  static table = 'CanteenItem'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -18,19 +20,13 @@ export default class CanteenItem extends BaseModel {
   declare description: string | null
 
   @column()
-  declare price: number // Em centavos
+  declare price: number
 
   @column()
   declare category: string | null
 
   @column()
   declare isActive: boolean
-
-  @column()
-  declare imageUrl: string | null
-
-  @column()
-  declare stockQuantity: number | null // null = ilimitado
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -39,9 +35,9 @@ export default class CanteenItem extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Canteen)
+  @belongsTo(() => Canteen, { foreignKey: 'canteenId' })
   declare canteen: BelongsTo<typeof Canteen>
 
-  @hasMany(() => CanteenItemPurchased)
+  @hasMany(() => CanteenItemPurchased, { foreignKey: 'canteenItemId' })
   declare purchasedItems: HasMany<typeof CanteenItemPurchased>
 }

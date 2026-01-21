@@ -8,7 +8,7 @@ import User from './user.js'
 export type SubscriptionLevel = 'NETWORK' | 'INDIVIDUAL'
 
 export default class SchoolChain extends BaseModel {
-  static table = 'school_chains'
+  static table = 'SchoolChain'
 
   @column({ isPrimary: true })
   declare id: string
@@ -68,12 +68,14 @@ export default class SchoolChain extends BaseModel {
   declare updatedAt: DateTime | null
 
   // Relationships
-  @hasMany(() => School)
+  @hasMany(() => School, {
+    foreignKey: 'schoolChainId',
+  })
   declare schools: HasMany<typeof School>
 
-  @hasMany(() => SchoolGroup)
+  @hasMany(() => SchoolGroup, { foreignKey: 'schoolChainId' })
   declare schoolGroups: HasMany<typeof SchoolGroup>
 
-  @hasMany(() => User)
+  @hasMany(() => User, { foreignKey: 'schoolChainId' })
   declare users: HasMany<typeof User>
 }

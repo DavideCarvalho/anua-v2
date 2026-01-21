@@ -5,7 +5,7 @@ import CanteenPurchase from './canteen_purchase.js'
 import CanteenItem from './canteen_item.js'
 
 export default class CanteenItemPurchased extends BaseModel {
-  static table = 'canteen_item_purchased'
+  static table = 'CanteenItemPurchased'
 
   @column({ isPrimary: true })
   declare id: string
@@ -32,9 +32,9 @@ export default class CanteenItemPurchased extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => CanteenPurchase)
+  @belongsTo(() => CanteenPurchase, { foreignKey: 'canteenPurchaseId' })
   declare purchase: BelongsTo<typeof CanteenPurchase>
 
-  @belongsTo(() => CanteenItem)
+  @belongsTo(() => CanteenItem, { foreignKey: 'canteenItemId' })
   declare item: BelongsTo<typeof CanteenItem>
 }

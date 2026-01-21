@@ -6,6 +6,8 @@ import Subscription from './subscription.js'
 export type SubscriptionTier = 'FREE' | 'BASIC' | 'PROFESSIONAL' | 'ENTERPRISE' | 'CUSTOM'
 
 export default class SubscriptionPlan extends BaseModel {
+  static table = 'SubscriptionPlan'
+
   @column({ isPrimary: true })
   declare id: string
 

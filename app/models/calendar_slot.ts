@@ -1,54 +1,46 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Calendar from './calendar.js'
-import ClassSchedule from './class_schedule.js'
-
-export type SlotType = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT' | 'CUSTOM'
-export type DayOfWeek =
-  | 'MONDAY'
-  | 'TUESDAY'
-  | 'WEDNESDAY'
-  | 'THURSDAY'
-  | 'FRIDAY'
-  | 'SATURDAY'
-  | 'SUNDAY'
+import TeacherHasClass from './teacher_has_class.js'
 
 export default class CalendarSlot extends BaseModel {
+  static table = 'CalendarSlot'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare name: string
+  declare teacherHasClassId: string | null
 
   @column()
-  declare dayOfWeek: DayOfWeek
+  declare classWeekDay: number // 0 = Sunday, 1 = Monday, etc.
 
   @column()
-  declare type: SlotType
+  declare startTime: string // time format from DB
 
   @column()
-  declare startTime: string // HH:MM format
+  declare endTime: string // time format from DB
 
   @column()
-  declare endTime: string // HH:MM format
-
-  @column()
-  declare order: number
+  declare minutes: number
 
   @column()
   declare calendarId: string
+
+  @column()
+  declare isBreak: boolean
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Calendar)
+  @belongsTo(() => Calendar, { foreignKey: 'calendarId' })
   declare calendar: BelongsTo<typeof Calendar>
 
-  @hasMany(() => ClassSchedule)
-  declare classSchedules: HasMany<typeof ClassSchedule>
+  @belongsTo(() => TeacherHasClass, { foreignKey: 'teacherHasClassId' })
+  declare teacherHasClass: BelongsTo<typeof TeacherHasClass>
 }

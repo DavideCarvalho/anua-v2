@@ -9,6 +9,8 @@ import CanteenMeal from './canteen_meal.js'
 import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
 
 export default class Canteen extends BaseModel {
+  static table = 'Canteen'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -25,21 +27,21 @@ export default class Canteen extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => School)
+  @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 
   @belongsTo(() => User, { foreignKey: 'responsibleUserId' })
   declare responsibleUser: BelongsTo<typeof User>
 
-  @hasMany(() => CanteenItem)
+  @hasMany(() => CanteenItem, { foreignKey: 'canteenId' })
   declare items: HasMany<typeof CanteenItem>
 
-  @hasMany(() => CanteenPurchase)
+  @hasMany(() => CanteenPurchase, { foreignKey: 'canteenId' })
   declare purchases: HasMany<typeof CanteenPurchase>
 
-  @hasMany(() => CanteenMeal)
+  @hasMany(() => CanteenMeal, { foreignKey: 'canteenId' })
   declare meals: HasMany<typeof CanteenMeal>
 
-  @hasMany(() => CanteenMonthlyTransfer)
+  @hasMany(() => CanteenMonthlyTransfer, { foreignKey: 'canteenId' })
   declare monthlyTransfers: HasMany<typeof CanteenMonthlyTransfer>
 }

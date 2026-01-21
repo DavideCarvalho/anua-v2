@@ -1,9 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo, hasOne } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
+import InsuranceBilling from './insurance_billing.js'
+import InsuranceClaim from './insurance_claim.js'
 
 export default class StudentPayment extends BaseModel {
+  static table = 'StudentPayment'
+
   @column({ isPrimary: true })
   declare id: string
 
@@ -80,6 +84,12 @@ export default class StudentPayment extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Student)
+  @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>
+
+  @belongsTo(() => InsuranceBilling, { foreignKey: 'insuranceBillingId' })
+  declare insuranceBilling: BelongsTo<typeof InsuranceBilling>
+
+  @hasOne(() => InsuranceClaim, { foreignKey: 'insuranceClaimId' })
+  declare insuranceClaim: HasOne<typeof InsuranceClaim>
 }

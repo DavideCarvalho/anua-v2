@@ -1,37 +1,30 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
-import Student from './student.js'
-import ClassSchedule from './class_schedule.js'
-
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
+import CalendarSlot from './calendar_slot.js'
 
 export default class Attendance extends BaseModel {
+  static table = 'Attendance'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare status: AttendanceStatus
+  declare note: string | null
+
+  @column.dateTime()
+  declare date: DateTime
 
   @column()
-  declare justification: string | null
-
-  @column()
-  declare studentId: string
-
-  @column()
-  declare classScheduleId: string
+  declare calendarSlotId: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => Student)
-  declare student: BelongsTo<typeof Student>
-
-  @belongsTo(() => ClassSchedule)
-  declare classSchedule: BelongsTo<typeof ClassSchedule>
+  @belongsTo(() => CalendarSlot, { foreignKey: 'calendarSlotId' })
+  declare calendarSlot: BelongsTo<typeof CalendarSlot>
 }

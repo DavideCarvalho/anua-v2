@@ -19,13 +19,11 @@ export default class GetAdminStatsController {
     }
 
     const totalSchools = await School.query()
-      .whereNull('deletedAt')
       .count('* as total')
       .first()
 
+    // School table doesn't have 'active' column, count all schools
     const activeSchools = await School.query()
-      .whereNull('deletedAt')
-      .where('active', true)
       .count('* as total')
       .first()
 
@@ -42,13 +40,12 @@ export default class GetAdminStatsController {
     const totalStudents = await Student.query().count('* as total').first()
 
     const totalTeachers = await Teacher.query()
-      .whereNull('deletedAt')
       .count('* as total')
       .first()
 
     const activeSubscriptions = await Subscription.query()
       .where('status', 'ACTIVE')
-      .sum('currentPrice as total')
+      .sum('monthlyAmount as total')
       .first()
 
     const pendingInvoices = await SubscriptionInvoice.query()

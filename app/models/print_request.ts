@@ -7,6 +7,8 @@ import User from './user.js'
 export type PrintRequestStatus = 'REQUESTED' | 'APPROVED' | 'REJECTED' | 'PRINTED' | 'REVIEW'
 
 export default class PrintRequest extends BaseModel {
+  static table = 'PrintRequest'
+
   @beforeCreate()
   static assignId(model: PrintRequest) {
     if (!model.id) {
@@ -47,6 +49,6 @@ export default class PrintRequest extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 }

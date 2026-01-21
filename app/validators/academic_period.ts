@@ -19,12 +19,13 @@ export const listAcademicPeriodsValidator = vine.compile(
 
 export const createAcademicPeriodValidator = vine.compile(
   vine.object({
+    schoolId: vine.string().trim().optional(),
     name: vine.string().trim(),
     slug: vine.string().trim().optional(),
-    startDate: vine.date(),
-    endDate: vine.date(),
-    enrollmentStartDate: vine.date().optional(),
-    enrollmentEndDate: vine.date().optional(),
+    startDate: vine.date({ formats: ['iso8601'] }),
+    endDate: vine.date({ formats: ['iso8601'] }),
+    enrollmentStartDate: vine.date({ formats: ['iso8601'] }).optional(),
+    enrollmentEndDate: vine.date({ formats: ['iso8601'] }).optional(),
     segment: segmentEnum,
     previousAcademicPeriodId: vine.string().trim().optional(),
     minimumGradeOverride: vine.number().optional(),
@@ -36,10 +37,10 @@ export const updateAcademicPeriodValidator = vine.compile(
   vine.object({
     name: vine.string().trim().optional(),
     slug: vine.string().trim().optional(),
-    startDate: vine.date().optional(),
-    endDate: vine.date().optional(),
-    enrollmentStartDate: vine.date().optional(),
-    enrollmentEndDate: vine.date().optional(),
+    startDate: vine.date({ formats: ['iso8601'] }).optional(),
+    endDate: vine.date({ formats: ['iso8601'] }).optional(),
+    enrollmentStartDate: vine.date({ formats: ['iso8601'] }).optional(),
+    enrollmentEndDate: vine.date({ formats: ['iso8601'] }).optional(),
     segment: segmentEnum.optional(),
     previousAcademicPeriodId: vine.string().trim().optional(),
     minimumGradeOverride: vine.number().optional(),

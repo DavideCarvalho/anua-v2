@@ -2,31 +2,42 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
-import type { NotificationType, NotificationChannel } from './notification.js'
+import type { NotificationType } from './notification.js'
 
 export default class NotificationPreference extends BaseModel {
+  static table = 'NotificationPreference'
+
   @column({ isPrimary: true })
   declare id: string
 
   @column()
-  declare type: NotificationType
-
-  @column()
-  declare channel: NotificationChannel
-
-  @column()
-  declare enabled: boolean
-
-  @column()
   declare userId: string
+
+  @column()
+  declare notificationType: NotificationType
+
+  @column()
+  declare enableInApp: boolean
+
+  @column()
+  declare enableEmail: boolean
+
+  @column()
+  declare enablePush: boolean
+
+  @column()
+  declare enableSms: boolean
+
+  @column()
+  declare enableWhatsApp: boolean
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => User)
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare user: BelongsTo<typeof User>
 }

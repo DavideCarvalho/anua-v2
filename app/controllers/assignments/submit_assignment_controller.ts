@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
-import AssignmentSubmission from '#models/assignment_submission'
+import StudentHasAssignment from '#models/student_has_assignment'
 import { submitAssignmentValidator } from '#validators/assignment'
 
 export default class SubmitAssignmentController {
@@ -15,16 +15,20 @@ export default class SubmitAssignmentController {
       return response.notFound({ message: 'Assignment not found' })
     }
 
-    const now = DateTime.now()
-    const isLate = now > assignment.dueDate
+    // Check if student already submitted
+    const existingSubmission = await StudentHasAssignment.query()
+      .where('assignmentId', id)
+      .where('studentId', payload.studentId)
+      .first()
 
-    const submission = await AssignmentSubmission.create({
+    if (existingSubmission) {
+      return response.conflict({ message: 'Student already submitted this assignment' })
+    }
+
+    const submission = await StudentHasAssignment.create({
       assignmentId: id,
       studentId: payload.studentId,
-      content: payload.content,
-      attachmentUrl: payload.attachmentUrl,
-      status: isLate ? 'LATE' : 'SUBMITTED',
-      submittedAt: now,
+      submittedAt: DateTime.now(),
     })
 
     await submission.load('student')

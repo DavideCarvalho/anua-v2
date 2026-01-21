@@ -14,7 +14,7 @@ export default class CourseHasAcademicPeriod extends BaseModel {
     }
   }
 
-  static table = 'course_has_academic_periods'
+  static table = 'CourseHasAcademicPeriod'
 
   @column({ isPrimary: true })
   declare id: string
@@ -31,12 +31,12 @@ export default class CourseHasAcademicPeriod extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 
-  @belongsTo(() => Course)
+  @belongsTo(() => Course, { foreignKey: 'courseId' })
   declare course: BelongsTo<typeof Course>
 
-  @belongsTo(() => AcademicPeriod)
+  @belongsTo(() => AcademicPeriod, { foreignKey: 'academicPeriodId' })
   declare academicPeriod: BelongsTo<typeof AcademicPeriod>
 
-  @hasMany(() => LevelAssignedToCourseHasAcademicPeriod)
+  @hasMany(() => LevelAssignedToCourseHasAcademicPeriod, { foreignKey: 'courseHasAcademicPeriodId' })
   declare levelAssignments: HasMany<typeof LevelAssignedToCourseHasAcademicPeriod>
 }

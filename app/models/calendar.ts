@@ -1,43 +1,50 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
-import School from './school.js'
+import Class_ from './class.js'
+import AcademicPeriod from './academic_period.js'
 import CalendarSlot from './calendar_slot.js'
 
-export type CalendarStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT'
-
 export default class Calendar extends BaseModel {
+  static table = 'Calendar'
+
   @column({ isPrimary: true })
   declare id: string
+
+  @column()
+  declare classId: string
 
   @column()
   declare name: string
 
   @column()
-  declare description: string | null
+  declare academicPeriodId: string
 
   @column()
-  declare status: CalendarStatus
-
-  @column.date()
-  declare startDate: DateTime
-
-  @column.date()
-  declare endDate: DateTime
+  declare isActive: boolean
 
   @column()
-  declare schoolId: string
+  declare isCanceled: boolean
+
+  @column()
+  declare isApproved: boolean
+
+  @column()
+  declare canceledForNextCalendarId: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
+  declare updatedAt: DateTime
 
   // Relationships
-  @belongsTo(() => School)
-  declare school: BelongsTo<typeof School>
+  @belongsTo(() => Class_, { foreignKey: 'classId' })
+  declare class: BelongsTo<typeof Class_>
 
-  @hasMany(() => CalendarSlot)
+  @belongsTo(() => AcademicPeriod, { foreignKey: 'academicPeriodId' })
+  declare academicPeriod: BelongsTo<typeof AcademicPeriod>
+
+  @hasMany(() => CalendarSlot, { foreignKey: 'calendarId' })
   declare slots: HasMany<typeof CalendarSlot>
 }
