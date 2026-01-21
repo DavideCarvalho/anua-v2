@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+
+# Build output
+build
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Test files
+tests
+*.test.ts
+*.spec.ts
+
+# Documentation
+*.md
+!README.md
+
+# Terraform
+infra
+
+# Misc
+.DS_Store
+Thumbs.db
+tmp

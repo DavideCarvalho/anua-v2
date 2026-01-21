@@ -80,7 +80,7 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
               <div className="shrink-0">
-                <Link route="home">
+                <Link route="web.home">
                   <span className="text-3xl font-bold text-purple-600">Anuá</span>
                 </Link>
               </div>
@@ -108,7 +108,7 @@ export default function Home() {
 
               <div className="hidden sm:flex sm:items-center sm:space-x-4">
                 <Link
-                  route="auth.signIn"
+                  route="web.auth.signIn"
                   className="rounded-full bg-purple-600 px-8 py-3 text-base font-medium text-white transition-all hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
                 >
                   Entrar
