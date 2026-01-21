@@ -38,3 +38,17 @@ variable "github_repository_owner" {
   type        = string
   default     = "DavideCarvalho"
 }
+
+# Database
+variable "db_password" {
+  description = "Database password"
+  type        = string
+  sensitive   = true
+}
+
+# SMTP
+variable "smtp_password" {
+  description = "SMTP password (Resend API key)"
+  type        = string
+  sensitive   = true
+}

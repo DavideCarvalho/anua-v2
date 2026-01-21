@@ -138,6 +138,78 @@ module "database" {
 }
 
 # ==============================================================================
+# SECRET MANAGER
+# ==============================================================================
+
+resource "google_secret_manager_secret" "app_key" {
+  secret_id = "${var.environment}-${var.project_name}-app-key"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.required_apis]
+}
+
+resource "google_secret_manager_secret_version" "app_key" {
+  secret      = google_secret_manager_secret.app_key.id
+  secret_data = var.app_key
+}
+
+resource "google_secret_manager_secret" "db_password" {
+  secret_id = "${var.environment}-${var.project_name}-db-password"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.required_apis]
+}
+
+resource "google_secret_manager_secret_version" "db_password" {
+  secret      = google_secret_manager_secret.db_password.id
+  secret_data = var.db_password
+}
+
+resource "google_secret_manager_secret" "smtp_password" {
+  secret_id = "${var.environment}-${var.project_name}-smtp-password"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.required_apis]
+}
+
+resource "google_secret_manager_secret_version" "smtp_password" {
+  secret      = google_secret_manager_secret.smtp_password.id
+  secret_data = var.smtp_password
+}
+
+# Grant Cloud Run access to secrets
+resource "google_secret_manager_secret_iam_member" "app_key_access" {
+  secret_id = google_secret_manager_secret.app_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "db_password_access" {
+  secret_id = google_secret_manager_secret.db_password.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "smtp_password_access" {
+  secret_id = google_secret_manager_secret.smtp_password.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
+# ==============================================================================
 # CLOUD RUN - API
 # ==============================================================================
 
@@ -152,20 +224,48 @@ module "api" {
   image         = var.api_image
   vpc_connector = google_vpc_access_connector.connector.id
 
-  container_port = 3000
+  container_port = 3333
 
   env_vars = {
-    DATABASE_URL = module.database.connection_string_vpc
-    NODE_ENV     = var.environment
-    HOST         = "0.0.0.0"
-    PORT         = "3000"
-    APP_KEY      = var.app_key
+    NODE_ENV       = var.environment
+    HOST           = "0.0.0.0"
+    PORT           = "3333"
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
     SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+    # SMTP
+    SMTP_HOST       = "smtp.resend.com"
+    SMTP_PORT       = "465"
+    SMTP_USER       = "resend"
+    SMTP_FROM_EMAIL = "Anuá <dont-reply@transactional.anuaapp.com.br>"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = google_secret_manager_secret.app_key.secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = google_secret_manager_secret.db_password.secret_id
+      version   = "latest"
+    }
+    SMTP_PASSWORD = {
+      secret_id = google_secret_manager_secret.smtp_password.secret_id
+      version   = "latest"
+    }
   }
 
   depends_on = [
     google_project_service.required_apis,
-    module.database
+    module.database,
+    google_secret_manager_secret_version.app_key,
+    google_secret_manager_secret_version.db_password,
+    google_secret_manager_secret_version.smtp_password,
   ]
 }
 
@@ -186,12 +286,19 @@ module "migrate" {
   args    = ["ace", "migration:run", "--force"]
 
   env_vars = {
-    DATABASE_URL   = module.database.connection_string_vpc
     NODE_ENV       = var.environment
     HOST           = "0.0.0.0"
-    PORT           = "3000"
-    APP_KEY        = var.app_key
+    PORT           = "3333"
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
     SESSION_DRIVER = "cookie"
+    APP_KEY        = var.app_key
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_PASSWORD = var.db_password
+    DB_DATABASE = "school_super_app"
   }
 
   timeout      = "600s"
