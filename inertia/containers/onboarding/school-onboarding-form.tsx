@@ -2,12 +2,13 @@ import { Suspense, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { Plus, Building2, AlertCircle } from 'lucide-react'
+import { Plus, Building2, AlertCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ErrorBoundary } from 'react-error-boundary'
 import { router } from '@inertiajs/react'
 
 import { Button } from '../../components/ui/button'
+import { MaskedInput } from '../../components/ui/masked-input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Checkbox } from '../../components/ui/checkbox'
 import {
@@ -193,10 +194,6 @@ function OnboardingFormContent() {
         if (data.location?.coordinates?.longitude) {
           form.setValue('longitude', data.location.coordinates.longitude)
         }
-
-        toast.success('CEP encontrado!', {
-          description: 'Endereço preenchido automaticamente',
-        })
       } catch {
         toast.error('Erro ao buscar CEP', {
           description: 'Por favor, tente novamente',
@@ -312,17 +309,22 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>CEP</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="00000000"
-                            maxLength={8}
-                            {...field}
-                            onChange={(e) => handleZipCodeChange(e.target.value)}
-                            disabled={isLoadingCep}
-                          />
+                          <div className="relative">
+                            <MaskedInput
+                              mask="99999-999"
+                              maskChar={null}
+                              placeholder="00000-000"
+                              value={field.value}
+                              onChange={(value) => handleZipCodeChange(value)}
+                              disabled={isLoadingCep}
+                            />
+                            {isLoadingCep && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
-                        <FormDescription>
-                          {isLoadingCep ? 'Buscando CEP...' : 'Digite apenas números'}
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -337,7 +339,7 @@ function OnboardingFormContent() {
                       <FormItem className="md:col-span-2">
                         <FormLabel>Rua</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Rua das Flores" {...field} />
+                          <Input placeholder="Ex: Rua das Flores" {...field} disabled={isLoadingCep} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -351,7 +353,7 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>Número</FormLabel>
                         <FormControl>
-                          <Input placeholder="123" {...field} />
+                          <Input placeholder="123" {...field} disabled={isLoadingCep} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -367,7 +369,7 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>Complemento (Opcional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Sala 101" {...field} />
+                          <Input placeholder="Ex: Sala 101" {...field} disabled={isLoadingCep} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -381,7 +383,7 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>Bairro</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Centro" {...field} />
+                          <Input placeholder="Ex: Centro" {...field} disabled={isLoadingCep} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -397,7 +399,7 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>Cidade</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: São Paulo" {...field} />
+                          <Input placeholder="Ex: São Paulo" {...field} disabled={isLoadingCep} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -411,7 +413,7 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: SP" {...field} maxLength={2} />
+                          <Input placeholder="Ex: SP" {...field} maxLength={2} disabled={isLoadingCep} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -191,6 +191,9 @@ importers:
       react-hot-toast:
         specifier: ^2.6.0
         version: 2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react-input-mask:
+        specifier: ^2.0.4
+        version: 2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -258,6 +261,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.8)
+      '@types/react-input-mask':
+        specifier: ^3.0.6
+        version: 3.0.6
       '@vitejs/plugin-react':
         specifier: ^5.1.2
         version: 5.1.2(vite@6.4.1(@types/node@22.19.6)(jiti@2.6.1)(lightningcss@1.30.2))
@@ -2513,6 +2519,9 @@ packages:
     peerDependencies:
       '@types/react': ^19.2.0
 
+  '@types/react-input-mask@3.0.6':
+    resolution: {integrity: sha512-+5I18WKyG3eWIj7TVPWfK1VitI9mPpS9y6jE/BfmTCe+iL27NfBw/yzKRvCFp1DRBvlvvcsiZf05bub0YC1k8A==}
+
   '@types/react@19.2.8':
     resolution: {integrity: sha512-3MbSL37jEchWZz2p2mjntRZtPt837ij10ApxKfgmXCTuHWagYg7iA5bqPw6C8BMPfwidlvfPI/fxOc42HLhcyg==}
 
@@ -4315,6 +4324,12 @@ packages:
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
+
+  react-input-mask@2.0.4:
+    resolution: {integrity: sha512-1hwzMr/aO9tXfiroiVCx5EtKohKwLk/NT8QlJXHQ4N+yJJFyUuMT+zfTpLBwX/lK3PkuMlievIffncpMZ3HGRQ==}
+    peerDependencies:
+      react: '>=0.14.0'
+      react-dom: '>=0.14.0'
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -7549,6 +7564,10 @@ snapshots:
     dependencies:
       '@types/react': 19.2.8
 
+  '@types/react-input-mask@3.0.6':
+    dependencies:
+      '@types/react': 19.2.8
+
   '@types/react@19.2.8':
     dependencies:
       csstype: 3.2.3
@@ -9226,6 +9245,13 @@ snapshots:
       goober: 2.1.18(csstype@3.2.3)
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
+
+  react-input-mask@2.0.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      invariant: 2.2.4
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      warning: 4.0.3
 
   react-is@16.13.1: {}
 

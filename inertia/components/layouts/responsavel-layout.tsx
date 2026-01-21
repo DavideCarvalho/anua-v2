@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { Button } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
+import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 
 interface NavItem {
@@ -101,7 +102,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{formatRoleName(user?.role?.name)}</p>
               </div>
             </div>
             <Link href="/api/v1/auth/logout" method="post" as="button" className="w-full mt-3">

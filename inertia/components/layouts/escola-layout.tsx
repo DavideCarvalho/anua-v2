@@ -20,6 +20,7 @@ import { useState } from 'react'
 import { Button, buttonVariants } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
+import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 
 interface NavItem {
@@ -207,7 +208,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
           {user?.school && (
             <div className="border-b px-4 py-3">
               <p className="text-sm font-medium truncate">{user.school.name}</p>
-              <p className="text-xs text-muted-foreground">{user.role?.name}</p>
+              <p className="text-xs text-muted-foreground">{formatRoleName(user.role?.name)}</p>
             </div>
           )}
 
@@ -238,7 +239,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{formatRoleName(user?.role?.name)}</p>
               </div>
             </div>
             <Link

@@ -15,6 +15,7 @@ import {
 import { Button } from '../ui/button'
 import { ThemeToggle } from '../theme-toggle'
 import type { SharedProps } from '../../lib/types'
+import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBadge } from '../admin/impersonation-badge'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import {
@@ -184,7 +185,7 @@ function AppSidebar() {
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium truncate">{user?.name}</span>
-                <span className="text-xs text-muted-foreground truncate">{user?.role?.name}</span>
+                <span className="text-xs text-muted-foreground truncate">{formatRoleName(user?.role?.name)}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
