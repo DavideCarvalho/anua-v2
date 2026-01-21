@@ -768,8 +768,8 @@ function InsightCard({ title, value, description, icon: Icon, trend }: InsightCa
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
+        <p className="text-xs text-gray-600 dark:text-gray-400">{description}</p>
         {trend && (
           <div className={`flex items-center ${trendColor} mt-2`}>
             <TrendingUp className="mr-1 h-4 w-4" />

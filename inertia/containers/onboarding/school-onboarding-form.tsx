@@ -170,23 +170,33 @@ function OnboardingFormContent() {
     if (cleanZipCode.length === 8) {
       setIsLoadingCep(true)
       try {
-        const response = await fetch(`https://viacep.com.br/ws/${cleanZipCode}/json/`)
-        const data = await response.json()
+        const response = await fetch(`https://brasilapi.com.br/api/cep/v2/${cleanZipCode}`)
 
-        if (!data.erro) {
-          form.setValue('street', data.logradouro || '')
-          form.setValue('neighborhood', data.bairro || '')
-          form.setValue('city', data.localidade || '')
-          form.setValue('state', data.uf || '')
-
-          toast.success('CEP encontrado!', {
-            description: 'Endereço preenchido automaticamente',
-          })
-        } else {
+        if (!response.ok) {
           toast.error('CEP não encontrado', {
             description: 'Por favor, verifique o CEP informado',
           })
+          return
         }
+
+        const data = await response.json()
+
+        form.setValue('street', data.street || '')
+        form.setValue('neighborhood', data.neighborhood || '')
+        form.setValue('city', data.city || '')
+        form.setValue('state', data.state || '')
+
+        // BrasilAPI retorna coordenadas quando disponível
+        if (data.location?.coordinates?.latitude) {
+          form.setValue('latitude', data.location.coordinates.latitude)
+        }
+        if (data.location?.coordinates?.longitude) {
+          form.setValue('longitude', data.location.coordinates.longitude)
+        }
+
+        toast.success('CEP encontrado!', {
+          description: 'Endereço preenchido automaticamente',
+        })
       } catch {
         toast.error('Erro ao buscar CEP', {
           description: 'Por favor, tente novamente',
@@ -210,7 +220,7 @@ function OnboardingFormContent() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Dados da Escola</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dados da Escola</h3>
 
                 <FormField
                   control={form.control}
@@ -292,7 +302,7 @@ function OnboardingFormContent() {
 
               {/* Address Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Endereço da Escola</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Endereço da Escola</h3>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <FormField
@@ -412,7 +422,7 @@ function OnboardingFormContent() {
 
               {!hasNetworkSubscription && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Configuração de Assinatura</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Configuração de Assinatura</h3>
 
                   <FormField
                     control={form.control}
@@ -509,7 +519,7 @@ function OnboardingFormContent() {
               )}
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Dados do Diretor</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dados do Diretor</h3>
 
                 <FormField
                   control={form.control}
@@ -557,7 +567,7 @@ function OnboardingFormContent() {
 
               {/* Insurance Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Seguro de Inadimplência</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguro de Inadimplência</h3>
                 <p className="text-sm text-muted-foreground">
                   Configure o seguro contra inadimplência para proteger a escola de inadimplentes.
                 </p>
