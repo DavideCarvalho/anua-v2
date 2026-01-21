@@ -23,11 +23,6 @@ provider "google" {
 resource "google_project_service" "required_apis" {
   for_each = toset([
     "run.googleapis.com",
-    "sqladmin.googleapis.com",
-    "vpcaccess.googleapis.com",
-    "compute.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "servicenetworking.googleapis.com",
     "artifactregistry.googleapis.com",
     "secretmanager.googleapis.com",
     "iamcredentials.googleapis.com",
@@ -35,54 +30,6 @@ resource "google_project_service" "required_apis" {
 
   service            = each.key
   disable_on_destroy = false
-}
-
-# VPC Network
-resource "google_compute_network" "vpc" {
-  name                    = "${var.project_name}-vpc"
-  auto_create_subnetworks = false
-
-  depends_on = [google_project_service.required_apis]
-}
-
-# Subnet
-resource "google_compute_subnetwork" "subnet" {
-  name          = "${var.project_name}-subnet"
-  ip_cidr_range = "10.0.0.0/24"
-  region        = var.region
-  network       = google_compute_network.vpc.id
-
-  private_ip_google_access = true
-}
-
-# Reserve IP range for private service access (Cloud SQL)
-resource "google_compute_global_address" "private_ip_range" {
-  name          = "private-ip-range"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = google_compute_network.vpc.id
-
-  depends_on = [google_project_service.required_apis]
-}
-
-# Create private service connection
-resource "google_service_networking_connection" "private_vpc_connection" {
-  network                 = google_compute_network.vpc.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_range.name]
-
-  depends_on = [google_project_service.required_apis]
-}
-
-# VPC Connector for Cloud Run
-resource "google_vpc_access_connector" "connector" {
-  name          = "vpc-connector"
-  region        = var.region
-  network       = google_compute_network.vpc.name
-  ip_cidr_range = "10.8.0.0/28"
-
-  depends_on = [google_project_service.required_apis]
 }
 
 # ==============================================================================
@@ -113,28 +60,6 @@ resource "google_artifact_registry_repository" "docker_repo" {
   }
 
   depends_on = [google_project_service.required_apis]
-}
-
-# ==============================================================================
-# DATABASE
-# ==============================================================================
-
-module "database" {
-  source = "./modules/database"
-
-  project_id   = var.project_id
-  project_name = var.project_name
-  environment  = var.environment
-  region       = var.region
-  network_id   = google_compute_network.vpc.id
-
-  database_name = "anua_v2"
-  database_user = "app_user"
-
-  depends_on = [
-    google_project_service.required_apis,
-    google_service_networking_connection.private_vpc_connection
-  ]
 }
 
 # ==============================================================================
@@ -222,18 +147,16 @@ module "api" {
   region        = var.region
   service_name  = "api"
   image         = var.api_image
-  vpc_connector = google_vpc_access_connector.connector.id
 
   container_port = 3333
 
   env_vars = {
     NODE_ENV       = var.environment
     HOST           = "0.0.0.0"
-    PORT           = "3333"
     TZ             = "UTC"
     LOG_LEVEL      = "info"
     SESSION_DRIVER = "cookie"
-    # Database
+    # Database (existing from school-super-app)
     DB_HOST     = "34.39.158.54"
     DB_PORT     = "5432"
     DB_USER     = "app_user"
@@ -262,7 +185,6 @@ module "api" {
 
   depends_on = [
     google_project_service.required_apis,
-    module.database,
     google_secret_manager_secret_version.app_key,
     google_secret_manager_secret_version.db_password,
     google_secret_manager_secret_version.smtp_password,
@@ -276,24 +198,21 @@ module "api" {
 module "migrate" {
   source = "./modules/cloud-run-job"
 
-  project_id    = var.project_id
-  region        = var.region
-  job_name      = "${var.environment}-${var.project_name}-migrate"
-  image         = var.api_image
-  vpc_connector = google_vpc_access_connector.connector.id
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-migrate"
+  image      = var.api_image
 
   command = ["node"]
   args    = ["ace", "migration:run", "--force"]
 
   env_vars = {
     NODE_ENV       = var.environment
-    HOST           = "0.0.0.0"
-    PORT           = "3333"
     TZ             = "UTC"
     LOG_LEVEL      = "info"
     SESSION_DRIVER = "cookie"
     APP_KEY        = var.app_key
-    # Database
+    # Database (existing from school-super-app)
     DB_HOST     = "34.39.158.54"
     DB_PORT     = "5432"
     DB_USER     = "app_user"
@@ -308,7 +227,6 @@ module "migrate" {
 
   depends_on = [
     google_project_service.required_apis,
-    module.database
   ]
 }
 
