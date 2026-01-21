@@ -7,7 +7,7 @@ import type { Config } from 'tailwindcss'
 import scrollbar from 'tailwind-scrollbar'
 
 export default {
-  darkMode: 'media',
+  darkMode: 'class',
   content: ['./inertia/**/*.{ts,tsx}', './resources/views/**/*.edge'],
   theme: {
     container: {

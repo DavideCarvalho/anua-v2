@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 import { Button } from '../ui/button'
+import { ThemeToggle } from '../theme-toggle'
 import type { SharedProps } from '../../lib/types'
 import { ImpersonationBadge } from '../admin/impersonation-badge'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
@@ -214,6 +215,7 @@ export function AdminLayout({ children }: PropsWithChildren) {
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <div className="flex-1" />
+          <ThemeToggle />
         </header>
 
         <main className="flex-1 p-4 lg:p-6">{children}</main>

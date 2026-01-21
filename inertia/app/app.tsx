@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TuyauProvider } from '@tuyau/inertia/react'
 import { Toaster } from 'sonner'
 import { tuyau } from '../lib/api'
+import { ThemeProvider } from '../components/theme-provider'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
@@ -33,12 +34,14 @@ createInertiaApp({
   setup({ el, App, props }) {
     hydrateRoot(
       el,
-      <TuyauProvider client={tuyau}>
-        <QueryClientProvider client={queryClient}>
-          <App {...props} />
-          <Toaster richColors />
-        </QueryClientProvider>
-      </TuyauProvider>
+      <ThemeProvider defaultTheme="system" storageKey="anua-theme">
+        <TuyauProvider client={tuyau}>
+          <QueryClientProvider client={queryClient}>
+            <App {...props} />
+            <Toaster richColors />
+          </QueryClientProvider>
+        </TuyauProvider>
+      </ThemeProvider>
     )
   },
 })
