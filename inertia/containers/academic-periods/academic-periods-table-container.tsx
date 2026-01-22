@@ -223,8 +223,7 @@ export function AcademicPeriodsTableContainer({ schoolId }: { schoolId: string }
 
                           <DropdownMenuItem asChild>
                             <Link
-                              route="web.escola.administrativo.periodosLetivos.editar"
-                              params={{ id: row.id }}
+                              href={`/escola/administrativo/periodos-letivos/${row.id}/editar`}
                               className="flex items-center gap-2"
                             >
                               <Edit className="h-4 w-4" />
@@ -234,8 +233,7 @@ export function AcademicPeriodsTableContainer({ schoolId }: { schoolId: string }
 
                           <DropdownMenuItem asChild>
                             <Link
-                              route="web.escola.periodosLetivos.show"
-                              params={{ slug: row.slug }}
+                              href={`/escola/periodos-letivos/${row.slug}`}
                               className="flex items-center gap-2"
                             >
                               <Eye className="h-4 w-4" />
