@@ -205,8 +205,7 @@ const GetAtRiskStudentsController = () =>
   import('#controllers/grades/get_at_risk_students_controller')
 const GetClassGradesBySubjectController = () =>
   import('#controllers/grades/get_class_grades_by_subject_controller')
-const BatchSaveGradesController = () =>
-  import('#controllers/grades/batch_save_grades_controller')
+const BatchSaveGradesController = () => import('#controllers/grades/batch_save_grades_controller')
 
 // Analytics
 const GetAttendanceOverviewController = () =>
@@ -696,17 +695,17 @@ function registerAuthApiRoutes() {
   // Public
   router
     .group(() => {
-      router.post('/login', [LoginController, 'handle']).as('auth.login')
-      router.post('/send-code', [SendCodeController, 'handle']).as('auth.sendCode')
-      router.post('/verify-code', [VerifyCodeController, 'handle']).as('auth.verifyCode')
+      router.post('/login', [LoginController]).as('auth.login')
+      router.post('/send-code', [SendCodeController]).as('auth.sendCode')
+      router.post('/verify-code', [VerifyCodeController]).as('auth.verifyCode')
     })
     .prefix('/auth')
 
   // Protected
   router
     .group(() => {
-      router.post('/logout', [LogoutController, 'handle']).as('auth.logout')
-      router.get('/me', [MeController, 'handle']).as('auth.me')
+      router.post('/logout', [LogoutController]).as('auth.logout')
+      router.get('/me', [MeController]).as('auth.me')
     })
     .prefix('/auth')
     .use(middleware.auth())
@@ -715,17 +714,15 @@ function registerAuthApiRoutes() {
 function registerSchoolApiRoutes() {
   router
     .group(() => {
-      router.get('/', [IndexSchoolsController, 'handle']).as('schools.index')
-      router.post('/', [StoreSchoolController, 'handle']).as('schools.store')
-      router.get('/slug/:slug', [ShowSchoolBySlugController, 'handle']).as('schools.showBySlug')
-      router.get('/:id', [ShowSchoolController, 'handle']).as('schools.show')
-      router.put('/:id', [UpdateSchoolController, 'handle']).as('schools.update')
-      router.delete('/:id', [DestroySchoolController, 'handle']).as('schools.destroy')
-      router.post('/:id/logo', [UploadSchoolLogoController, 'handle']).as('schools.uploadLogo')
-      router.get('/:id/users', [ListSchoolUsersController, 'handle']).as('schools.users')
-      router
-        .put('/:id/director', [UpdateSchoolDirectorController, 'handle'])
-        .as('schools.updateDirector')
+      router.get('/', [IndexSchoolsController]).as('schools.index')
+      router.post('/', [StoreSchoolController]).as('schools.store')
+      router.get('/slug/:slug', [ShowSchoolBySlugController]).as('schools.showBySlug')
+      router.get('/:id', [ShowSchoolController]).as('schools.show')
+      router.put('/:id', [UpdateSchoolController]).as('schools.update')
+      router.delete('/:id', [DestroySchoolController]).as('schools.destroy')
+      router.post('/:id/logo', [UploadSchoolLogoController]).as('schools.uploadLogo')
+      router.get('/:id/users', [ListSchoolUsersController]).as('schools.users')
+      router.put('/:id/director', [UpdateSchoolDirectorController]).as('schools.updateDirector')
     })
     .prefix('/schools')
 }
@@ -733,18 +730,16 @@ function registerSchoolApiRoutes() {
 function registerUserApiRoutes() {
   router
     .group(() => {
-      router.get('/', [IndexUsersController, 'handle']).as('users.index')
-      router
-        .get('/school-employees', [SchoolEmployeesController, 'handle'])
-        .as('users.schoolEmployees')
-      router.post('/', [StoreUserController, 'handle']).as('users.store')
-      router.get('/:id', [ShowUserController, 'handle']).as('users.show')
-      router.put('/:id', [UpdateUserController, 'handle']).as('users.update')
-      router.delete('/:id', [DestroyUserController, 'handle']).as('users.destroy')
+      router.get('/', [IndexUsersController]).as('users.index')
+      router.get('/school-employees', [SchoolEmployeesController]).as('users.schoolEmployees')
+      router.post('/', [StoreUserController]).as('users.store')
+      router.get('/:id', [ShowUserController]).as('users.show')
+      router.put('/:id', [UpdateUserController]).as('users.update')
+      router.delete('/:id', [DestroyUserController]).as('users.destroy')
 
       // User Canteen Purchases
       router
-        .get('/:userId/canteen-purchases', [ListPurchasesByUserController, 'handle'])
+        .get('/:userId/canteen-purchases', [ListPurchasesByUserController])
         .as('users.canteenPurchases')
     })
     .prefix('/users')
@@ -763,12 +758,10 @@ function registerUserSchoolApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListUserSchoolsController, 'handle']).as('userSchools.listUserSchools')
-      router.post('/', [CreateUserSchoolController, 'handle']).as('userSchools.createUserSchool')
-      router.put('/:id', [UpdateUserSchoolController, 'handle']).as('userSchools.updateUserSchool')
-      router
-        .delete('/:id', [DeleteUserSchoolController, 'handle'])
-        .as('userSchools.deleteUserSchool')
+      router.get('/', [ListUserSchoolsController]).as('userSchools.listUserSchools')
+      router.post('/', [CreateUserSchoolController]).as('userSchools.createUserSchool')
+      router.put('/:id', [UpdateUserSchoolController]).as('userSchools.updateUserSchool')
+      router.delete('/:id', [DeleteUserSchoolController]).as('userSchools.deleteUserSchool')
     })
     .prefix('/user-schools')
     .use(middleware.auth())
@@ -784,14 +777,12 @@ function registerUserSchoolGroupApiRoutes() {
 
   router
     .group(() => {
+      router.get('/', [ListUserSchoolGroupsController]).as('userSchoolGroups.listUserSchoolGroups')
       router
-        .get('/', [ListUserSchoolGroupsController, 'handle'])
-        .as('userSchoolGroups.listUserSchoolGroups')
-      router
-        .post('/', [CreateUserSchoolGroupController, 'handle'])
+        .post('/', [CreateUserSchoolGroupController])
         .as('userSchoolGroups.createUserSchoolGroup')
       router
-        .delete('/:id', [DeleteUserSchoolGroupController, 'handle'])
+        .delete('/:id', [DeleteUserSchoolGroupController])
         .as('userSchoolGroups.deleteUserSchoolGroup')
     })
     .prefix('/user-school-groups')
@@ -801,12 +792,12 @@ function registerUserSchoolGroupApiRoutes() {
 function registerSchoolSwitcherApiRoutes() {
   router
     .group(() => {
-      router.get('/', [GetSchoolSwitcherDataController, 'handle']).as('schoolSwitcher.getData')
+      router.get('/', [GetSchoolSwitcherDataController]).as('schoolSwitcher.getData')
       router
-        .post('/toggle-school', [ToggleSchoolSelectionController, 'handle'])
+        .post('/toggle-school', [ToggleSchoolSelectionController])
         .as('schoolSwitcher.toggleSchool')
       router
-        .post('/toggle-group', [ToggleSchoolGroupSelectionController, 'handle'])
+        .post('/toggle-group', [ToggleSchoolGroupSelectionController])
         .as('schoolSwitcher.toggleGroup')
     })
     .prefix('/school-switcher')
@@ -816,28 +807,26 @@ function registerSchoolSwitcherApiRoutes() {
 function registerStudentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [IndexStudentsController, 'handle']).as('students.index')
-      router.post('/', [StoreStudentController, 'handle']).as('students.store')
-      router.post('/enroll', [EnrollStudentController, 'handle']).as('students.enroll')
-      router.get('/:id', [ShowStudentController, 'handle']).as('students.show')
-      router.put('/:id', [UpdateStudentController, 'handle']).as('students.update')
-      router.put('/:id/full', [FullUpdateStudentController, 'handle']).as('students.fullUpdate')
-      router.delete('/:id', [DestroyStudentController, 'handle']).as('students.destroy')
+      router.get('/', [IndexStudentsController]).as('students.index')
+      router.post('/', [StoreStudentController]).as('students.store')
+      router.post('/enroll', [EnrollStudentController]).as('students.enroll')
+      router.get('/:id', [ShowStudentController]).as('students.show')
+      router.put('/:id', [UpdateStudentController]).as('students.update')
+      router.put('/:id/full', [FullUpdateStudentController]).as('students.fullUpdate')
+      router.delete('/:id', [DestroyStudentController]).as('students.destroy')
       router
-        .get('/:studentId/attendance', [GetStudentAttendanceController, 'handle'])
+        .get('/:studentId/attendance', [GetStudentAttendanceController])
         .as('students.attendance')
 
       // Student Payments
       router
-        .get('/:studentId/payments', [ListStudentPaymentsByStudentController, 'handle'])
+        .get('/:studentId/payments', [ListStudentPaymentsByStudentController])
         .as('students.payments')
 
       // Student Balance
+      router.get('/:studentId/balance', [GetStudentBalanceController]).as('students.balance')
       router
-        .get('/:studentId/balance', [GetStudentBalanceController, 'handle'])
-        .as('students.balance')
-      router
-        .get('/:studentId/balance-transactions', [ListStudentBalanceByStudentController, 'handle'])
+        .get('/:studentId/balance-transactions', [ListStudentBalanceByStudentController])
         .as('students.balanceTransactions')
     })
     .prefix('/students')
@@ -848,17 +837,13 @@ function registerResponsibleApiRoutes() {
   router
     .group(() => {
       router
-        .get('/students/:studentId/responsibles', [ListStudentResponsiblesController, 'handle'])
+        .get('/students/:studentId/responsibles', [ListStudentResponsiblesController])
         .as('responsibles.listByStudent')
+      router.post('/responsibles', [AssignResponsibleController]).as('responsibles.assign')
       router
-        .post('/responsibles', [AssignResponsibleController, 'handle'])
-        .as('responsibles.assign')
-      router
-        .put('/responsibles/:id', [UpdateResponsibleAssignmentController, 'handle'])
+        .put('/responsibles/:id', [UpdateResponsibleAssignmentController])
         .as('responsibles.updateAssignment')
-      router
-        .delete('/responsibles/:id', [RemoveResponsibleController, 'handle'])
-        .as('responsibles.remove')
+      router.delete('/responsibles/:id', [RemoveResponsibleController]).as('responsibles.remove')
     })
     .use(middleware.auth())
 }
@@ -867,10 +852,10 @@ function registerResponsibleAddressApiRoutes() {
   router
     .group(() => {
       router
-        .get('/responsible-addresses/:responsibleId', [ShowResponsibleAddressController, 'handle'])
+        .get('/responsible-addresses/:responsibleId', [ShowResponsibleAddressController])
         .as('responsibleAddresses.show')
       router
-        .post('/responsible-addresses', [CreateResponsibleAddressController, 'handle'])
+        .post('/responsible-addresses', [CreateResponsibleAddressController])
         .as('responsibleAddresses.create')
     })
     .use(middleware.auth())
@@ -879,54 +864,54 @@ function registerResponsibleAddressApiRoutes() {
 function registerContractApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListContractsController, 'handle']).as('contracts.index')
-      router.post('/', [CreateContractController, 'handle']).as('contracts.store')
-      router.get('/:id', [ShowContractController, 'handle']).as('contracts.show')
-      router.put('/:id', [UpdateContractController, 'handle']).as('contracts.update')
-      router.delete('/:id', [DeleteContractController, 'handle']).as('contracts.destroy')
+      router.get('/', [ListContractsController]).as('contracts.index')
+      router.post('/', [CreateContractController]).as('contracts.store')
+      router.get('/:id', [ShowContractController]).as('contracts.show')
+      router.put('/:id', [UpdateContractController]).as('contracts.update')
+      router.delete('/:id', [DeleteContractController]).as('contracts.destroy')
 
       router
-        .get('/:contractId/signature-stats', [GetSignatureStatsController, 'handle'])
+        .get('/:contractId/signature-stats', [GetSignatureStatsController])
         .as('contracts.getSignatureStats')
 
       router
-        .get('/:contractId/docuseal-template', [GetDocusealTemplateController, 'handle'])
+        .get('/:contractId/docuseal-template', [GetDocusealTemplateController])
         .as('contracts.getDocusealTemplate')
       router
-        .post('/:contractId/docuseal-template', [UploadDocusealTemplateController, 'handle'])
+        .post('/:contractId/docuseal-template', [UploadDocusealTemplateController])
         .as('contracts.uploadDocusealTemplate')
       router
-        .delete('/:contractId/docuseal-template', [DeleteDocusealTemplateController, 'handle'])
+        .delete('/:contractId/docuseal-template', [DeleteDocusealTemplateController])
         .as('contracts.deleteDocusealTemplate')
 
       // Payment Days (nested)
       router
-        .get('/:contractId/payment-days', [ListContractPaymentDaysController, 'handle'])
+        .get('/:contractId/payment-days', [ListContractPaymentDaysController])
         .as('contracts.paymentDays.index')
       router
-        .post('/:contractId/payment-days', [AddContractPaymentDayController, 'handle'])
+        .post('/:contractId/payment-days', [AddContractPaymentDayController])
         .as('contracts.paymentDays.store')
       router
-        .delete('/:contractId/payment-days/:id', [RemoveContractPaymentDayController, 'handle'])
+        .delete('/:contractId/payment-days/:id', [RemoveContractPaymentDayController])
         .as('contracts.paymentDays.destroy')
 
       // Interest Config (nested)
       router
-        .get('/:contractId/interest-config', [ShowContractInterestConfigController, 'handle'])
+        .get('/:contractId/interest-config', [ShowContractInterestConfigController])
         .as('contracts.interestConfig.show')
       router
-        .put('/:contractId/interest-config', [UpdateContractInterestConfigController, 'handle'])
+        .put('/:contractId/interest-config', [UpdateContractInterestConfigController])
         .as('contracts.interestConfig.update')
 
       // Early Discounts (nested)
       router
-        .get('/:contractId/early-discounts', [ListContractEarlyDiscountsController, 'handle'])
+        .get('/:contractId/early-discounts', [ListContractEarlyDiscountsController])
         .as('contracts.earlyDiscounts.index')
       router
-        .post('/:contractId/early-discounts', [AddContractEarlyDiscountController, 'handle'])
+        .post('/:contractId/early-discounts', [AddContractEarlyDiscountController])
         .as('contracts.earlyDiscounts.store')
       router
-        .put('/:contractId/early-discounts/:id', [UpdateContractEarlyDiscountController, 'handle'])
+        .put('/:contractId/early-discounts/:id', [UpdateContractEarlyDiscountController])
         .as('contracts.earlyDiscounts.update')
       router
         .delete('/:contractId/early-discounts/:id', [
@@ -942,8 +927,8 @@ function registerContractApiRoutes() {
 function registerContractDocumentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListContractDocumentsController, 'handle']).as('contractDocuments.index')
-      router.post('/', [CreateContractDocumentController, 'handle']).as('contractDocuments.store')
+      router.get('/', [ListContractDocumentsController]).as('contractDocuments.index')
+      router.post('/', [CreateContractDocumentController]).as('contractDocuments.store')
     })
     .prefix('/contract-documents')
     .use(middleware.auth())
@@ -952,11 +937,11 @@ function registerContractDocumentApiRoutes() {
 function registerCourseApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCoursesController, 'handle']).as('courses.index')
-      router.post('/', [CreateCourseController, 'handle']).as('courses.store')
-      router.get('/:id', [ShowCourseController, 'handle']).as('courses.show')
-      router.put('/:id', [UpdateCourseController, 'handle']).as('courses.update')
-      router.delete('/:id', [DeleteCourseController, 'handle']).as('courses.destroy')
+      router.get('/', [ListCoursesController]).as('courses.index')
+      router.post('/', [CreateCourseController]).as('courses.store')
+      router.get('/:id', [ShowCourseController]).as('courses.show')
+      router.put('/:id', [UpdateCourseController]).as('courses.update')
+      router.delete('/:id', [DeleteCourseController]).as('courses.destroy')
 
       // Dashboard endpoints for course overview
       router
@@ -991,11 +976,11 @@ function registerCourseApiRoutes() {
 function registerLevelApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListLevelsController, 'handle']).as('levels.index')
-      router.post('/', [CreateLevelController, 'handle']).as('levels.store')
-      router.get('/:id', [ShowLevelController, 'handle']).as('levels.show')
-      router.put('/:id', [UpdateLevelController, 'handle']).as('levels.update')
-      router.delete('/:id', [DeleteLevelController, 'handle']).as('levels.destroy')
+      router.get('/', [ListLevelsController]).as('levels.index')
+      router.post('/', [CreateLevelController]).as('levels.store')
+      router.get('/:id', [ShowLevelController]).as('levels.show')
+      router.put('/:id', [UpdateLevelController]).as('levels.update')
+      router.delete('/:id', [DeleteLevelController]).as('levels.destroy')
     })
     .prefix('/levels')
     .use(middleware.auth())
@@ -1005,7 +990,7 @@ function registerCourseHasAcademicPeriodApiRoutes() {
   router
     .group(() => {
       router
-        .post('/', [CreateCourseHasAcademicPeriodController, 'handle'])
+        .post('/', [CreateCourseHasAcademicPeriodController])
         .as('courseHasAcademicPeriods.store')
     })
     .prefix('/course-has-academic-periods')
@@ -1015,7 +1000,7 @@ function registerCourseHasAcademicPeriodApiRoutes() {
 function registerLevelAssignmentApiRoutes() {
   router
     .group(() => {
-      router.post('/', [CreateLevelAssignmentController, 'handle']).as('levelAssignments.store')
+      router.post('/', [CreateLevelAssignmentController]).as('levelAssignments.store')
     })
     .prefix('/level-assignments')
     .use(middleware.auth())
@@ -1025,31 +1010,25 @@ function registerClassApiRoutes() {
   router
     .group(() => {
       router
-        .get('/sidebar', [GetClassesForSidebarController, 'handle'])
+        .get('/sidebar', [GetClassesForSidebarController])
         .as('classes.sidebar')
         .use(middleware.impersonation())
-      router.get('/', [ListClassesController, 'handle']).as('classes.index')
-      router.post('/', [CreateClassController, 'handle']).as('classes.store')
+      router.get('/', [ListClassesController]).as('classes.index')
+      router.post('/', [CreateClassController]).as('classes.store')
       router
-        .post('/with-teachers', [CreateClassWithTeachersController, 'handle'])
+        .post('/with-teachers', [CreateClassWithTeachersController])
         .as('classes.storeWithTeachers')
-      router.get('/slug/:slug', [ShowClassBySlugController, 'handle']).as('classes.showBySlug')
-      router.get('/:id', [ShowClassController, 'handle']).as('classes.show')
-      router.put('/:id', [UpdateClassController, 'handle']).as('classes.update')
+      router.get('/slug/:slug', [ShowClassBySlugController]).as('classes.showBySlug')
+      router.get('/:id', [ShowClassController]).as('classes.show')
+      router.put('/:id', [UpdateClassController]).as('classes.update')
       router
-        .put('/:id/teachers', [UpdateClassWithTeachersController, 'handle'])
+        .put('/:id/teachers', [UpdateClassWithTeachersController])
         .as('classes.updateWithTeachers')
-      router.delete('/:id', [DeleteClassController, 'handle']).as('classes.destroy')
-      router.get('/:id/students', [ListClassStudentsController, 'handle']).as('classes.students')
-      router
-        .get('/:id/students/count', [CountClassStudentsController, 'handle'])
-        .as('classes.studentsCount')
-      router
-        .get('/:classId/subjects', [ListSubjectsForClassController, 'handle'])
-        .as('classes.subjects')
-      router
-        .get('/:id/student-status', [GetStudentStatusController, 'handle'])
-        .as('classes.studentStatus')
+      router.delete('/:id', [DeleteClassController]).as('classes.destroy')
+      router.get('/:id/students', [ListClassStudentsController]).as('classes.students')
+      router.get('/:id/students/count', [CountClassStudentsController]).as('classes.studentsCount')
+      router.get('/:classId/subjects', [ListSubjectsForClassController]).as('classes.subjects')
+      router.get('/:id/student-status', [GetStudentStatusController]).as('classes.studentStatus')
     })
     .prefix('/classes')
     .use(middleware.auth())
@@ -1058,12 +1037,12 @@ function registerClassApiRoutes() {
 function registerSubjectApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubjectsController, 'handle']).as('subjects.index')
-      router.post('/', [CreateSubjectController, 'handle']).as('subjects.store')
-      router.get('/slug/:slug', [ShowSubjectBySlugController, 'handle']).as('subjects.showBySlug')
-      router.get('/:id', [ShowSubjectController, 'handle']).as('subjects.show')
-      router.put('/:id', [UpdateSubjectController, 'handle']).as('subjects.update')
-      router.delete('/:id', [DeleteSubjectController, 'handle']).as('subjects.destroy')
+      router.get('/', [ListSubjectsController]).as('subjects.index')
+      router.post('/', [CreateSubjectController]).as('subjects.store')
+      router.get('/slug/:slug', [ShowSubjectBySlugController]).as('subjects.showBySlug')
+      router.get('/:id', [ShowSubjectController]).as('subjects.show')
+      router.put('/:id', [UpdateSubjectController]).as('subjects.update')
+      router.delete('/:id', [DeleteSubjectController]).as('subjects.destroy')
     })
     .prefix('/subjects')
     .use(middleware.auth())
@@ -1072,14 +1051,12 @@ function registerSubjectApiRoutes() {
 function registerScheduleApiRoutes() {
   router
     .group(() => {
+      router.get('/class/:classId', [GetClassScheduleController]).as('schedules.getClassSchedule')
       router
-        .get('/class/:classId', [GetClassScheduleController, 'handle'])
-        .as('schedules.getClassSchedule')
-      router
-        .post('/class/:classId', [SaveClassScheduleController, 'handle'])
+        .post('/class/:classId', [SaveClassScheduleController])
         .as('schedules.saveClassSchedule')
       router
-        .post('/class/:classId/generate', [GenerateClassScheduleController, 'handle'])
+        .post('/class/:classId/generate', [GenerateClassScheduleController])
         .as('schedules.generateClassSchedule')
     })
     .prefix('/schedules')
@@ -1089,8 +1066,8 @@ function registerScheduleApiRoutes() {
 function registerTeacherApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListTeachersController, 'handle']).as('teachers.listTeachers')
-      router.post('/', [CreateTeacherController, 'handle']).as('teachers.createTeacher')
+      router.get('/', [ListTeachersController]).as('teachers.listTeachers')
+      router.post('/', [CreateTeacherController]).as('teachers.createTeacher')
 
       // Rotas específicas ANTES das rotas com parâmetros /:id
       router
@@ -1119,23 +1096,19 @@ function registerTeacherApiRoutes() {
         .as('teachers.rejectAbsence')
 
       // Rotas com parâmetros /:id
-      router.get('/:id', [ShowTeacherController, 'handle']).as('teachers.showTeacher')
-      router.put('/:id', [UpdateTeacherController, 'handle']).as('teachers.updateTeacher')
-      router.delete('/:id', [DeleteTeacherController, 'handle']).as('teachers.deleteTeacher')
+      router.get('/:id', [ShowTeacherController]).as('teachers.showTeacher')
+      router.put('/:id', [UpdateTeacherController]).as('teachers.updateTeacher')
+      router.delete('/:id', [DeleteTeacherController]).as('teachers.deleteTeacher')
+      router.get('/:id/classes', [ListTeacherClassesController]).as('teachers.listTeacherClasses')
       router
-        .get('/:id/classes', [ListTeacherClassesController, 'handle'])
-        .as('teachers.listTeacherClasses')
-      router
-        .get('/:id/subjects', [ListTeacherSubjectsController, 'handle'])
+        .get('/:id/subjects', [ListTeacherSubjectsController])
         .as('teachers.listTeacherSubjects')
       router
-        .put('/:id/subjects', [UpdateTeacherSubjectsController, 'handle'])
+        .put('/:id/subjects', [UpdateTeacherSubjectsController])
         .as('teachers.updateTeacherSubjects')
+      router.post('/:id/classes', [AssignTeacherToClassController]).as('teachers.assignClass')
       router
-        .post('/:id/classes', [AssignTeacherToClassController, 'handle'])
-        .as('teachers.assignClass')
-      router
-        .delete('/:id/classes/:classId', [RemoveTeacherFromClassController, 'handle'])
+        .delete('/:id/classes/:classId', [RemoveTeacherFromClassController])
         .as('teachers.removeClass')
     })
     .prefix('/teachers')
@@ -1145,17 +1118,15 @@ function registerTeacherApiRoutes() {
 function registerExamApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListExamsController, 'handle']).as('exams.index')
-      router.post('/', [CreateExamController, 'handle']).as('exams.store')
-      router.get('/:id', [ShowExamController, 'handle']).as('exams.show')
-      router.put('/:id', [UpdateExamController, 'handle']).as('exams.update')
-      router.delete('/:id', [DeleteExamController, 'handle']).as('exams.destroy')
-      router.get('/:id/grades', [ListExamGradesController, 'handle']).as('exams.grades')
-      router.post('/:id/grades/batch', [BatchSaveExamGradesController, 'handle']).as('exams.batchSaveGrades')
-      router.post('/:id/grades', [SaveExamGradeController, 'handle']).as('exams.saveGrade')
-      router
-        .put('/:id/grades/:gradeId', [UpdateExamGradeController, 'handle'])
-        .as('exams.updateGrade')
+      router.get('/', [ListExamsController]).as('exams.index')
+      router.post('/', [CreateExamController]).as('exams.store')
+      router.get('/:id', [ShowExamController]).as('exams.show')
+      router.put('/:id', [UpdateExamController]).as('exams.update')
+      router.delete('/:id', [DeleteExamController]).as('exams.destroy')
+      router.post('/:id/grades/batch', [BatchSaveExamGradesController]).as('exams.batchSaveGrades')
+      router.get('/:id/grades', [ListExamGradesController]).as('exams.grades')
+      router.post('/:id/grades', [SaveExamGradeController]).as('exams.saveGrade')
+      router.put('/:id/grades/:gradeId', [UpdateExamGradeController]).as('exams.updateGrade')
     })
     .prefix('/exams')
     .use(middleware.auth())
@@ -1165,17 +1136,15 @@ function registerGradesApiRoutes() {
   router
     .group(() => {
       router
-        .get('/academic-overview', [GetAcademicOverviewController, 'handle'])
+        .get('/academic-overview', [GetAcademicOverviewController])
         .as('grades.academicOverview')
-      router.get('/students', [GetStudentsGradesController, 'handle']).as('grades.students')
+      router.get('/students', [GetStudentsGradesController]).as('grades.students')
+      router.get('/distribution', [GetGradeDistributionController]).as('grades.distribution')
+      router.get('/at-risk', [GetAtRiskStudentsController]).as('grades.atRisk')
       router
-        .get('/distribution', [GetGradeDistributionController, 'handle'])
-        .as('grades.distribution')
-      router.get('/at-risk', [GetAtRiskStudentsController, 'handle']).as('grades.atRisk')
-      router
-        .get('/class/:classId/subject/:subjectId', [GetClassGradesBySubjectController, 'handle'])
+        .get('/class/:classId/subject/:subjectId', [GetClassGradesBySubjectController])
         .as('grades.classSubject')
-      router.post('/batch', [BatchSaveGradesController, 'handle']).as('grades.batchSave')
+      router.post('/batch', [BatchSaveGradesController]).as('grades.batchSave')
     })
     .prefix('/grades')
     .use(middleware.auth())
@@ -1186,57 +1155,55 @@ function registerAnalyticsApiRoutes() {
     .group(() => {
       // Attendance Analytics
       router
-        .get('/attendance/overview', [GetAttendanceOverviewController, 'handle'])
+        .get('/attendance/overview', [GetAttendanceOverviewController])
         .as('analytics.attendance.overview')
       router
-        .get('/attendance/trends', [GetAttendanceTrendsController, 'handle'])
+        .get('/attendance/trends', [GetAttendanceTrendsController])
         .as('analytics.attendance.trends')
       router
-        .get('/attendance/chronic', [GetChronicAbsenteeismController, 'handle'])
+        .get('/attendance/chronic', [GetChronicAbsenteeismController])
         .as('analytics.attendance.chronic')
 
       // Canteen Analytics
       router
-        .get('/canteen/overview', [GetCanteenOverviewController, 'handle'])
+        .get('/canteen/overview', [GetCanteenOverviewController])
         .as('analytics.canteen.overview')
+      router.get('/canteen/trends', [GetCanteenTrendsController]).as('analytics.canteen.trends')
       router
-        .get('/canteen/trends', [GetCanteenTrendsController, 'handle'])
-        .as('analytics.canteen.trends')
-      router
-        .get('/canteen/top-items', [GetCanteenTopItemsController, 'handle'])
+        .get('/canteen/top-items', [GetCanteenTopItemsController])
         .as('analytics.canteen.topItems')
 
       // Payments Analytics
       router
-        .get('/payments/overview', [GetPaymentsOverviewController, 'handle'])
+        .get('/payments/overview', [GetPaymentsOverviewController])
         .as('analytics.payments.overview')
 
       // Enrollments Analytics
       router
-        .get('/enrollments/overview', [GetEnrollmentsOverviewController, 'handle'])
+        .get('/enrollments/overview', [GetEnrollmentsOverviewController])
         .as('analytics.enrollments.overview')
       router
-        .get('/enrollments/funnel', [GetEnrollmentFunnelStatsController, 'handle'])
+        .get('/enrollments/funnel', [GetEnrollmentFunnelStatsController])
         .as('analytics.enrollments.funnel')
       router
-        .get('/enrollments/trends', [GetEnrollmentTrendsController, 'handle'])
+        .get('/enrollments/trends', [GetEnrollmentTrendsController])
         .as('analytics.enrollments.trends')
       router
-        .get('/enrollments/by-level', [GetEnrollmentByLevelController, 'handle'])
+        .get('/enrollments/by-level', [GetEnrollmentByLevelController])
         .as('analytics.enrollments.byLevel')
 
       // Incidents Analytics
       router
-        .get('/incidents/overview', [GetIncidentsOverviewController, 'handle'])
+        .get('/incidents/overview', [GetIncidentsOverviewController])
         .as('analytics.incidents.overview')
 
       // Gamification Analytics
       router
-        .get('/gamification/overview', [GetGamificationOverviewController, 'handle'])
+        .get('/gamification/overview', [GetGamificationOverviewController])
         .as('analytics.gamification.overview')
 
       // HR Analytics
-      router.get('/hr/overview', [GetHrOverviewController, 'handle']).as('analytics.hr.overview')
+      router.get('/hr/overview', [GetHrOverviewController]).as('analytics.hr.overview')
     })
     .prefix('/analytics')
     .use(middleware.auth())
@@ -1246,29 +1213,29 @@ function registerEventApiRoutes() {
   router
     .group(() => {
       // CRUD
-      router.get('/', [ListEventsController, 'handle']).as('events.index')
-      router.post('/', [CreateEventController, 'handle']).as('events.store')
-      router.get('/:id', [ShowEventController, 'handle']).as('events.show')
-      router.put('/:id', [UpdateEventController, 'handle']).as('events.update')
-      router.delete('/:id', [DeleteEventController, 'handle']).as('events.destroy')
+      router.get('/', [ListEventsController]).as('events.index')
+      router.post('/', [CreateEventController]).as('events.store')
+      router.get('/:id', [ShowEventController]).as('events.show')
+      router.put('/:id', [UpdateEventController]).as('events.update')
+      router.delete('/:id', [DeleteEventController]).as('events.destroy')
 
       // Status actions
-      router.post('/:id/publish', [PublishEventController, 'handle']).as('events.publish')
-      router.post('/:id/cancel', [CancelEventController, 'handle']).as('events.cancel')
-      router.post('/:id/complete', [CompleteEventController, 'handle']).as('events.complete')
+      router.post('/:id/publish', [PublishEventController]).as('events.publish')
+      router.post('/:id/cancel', [CancelEventController]).as('events.cancel')
+      router.post('/:id/complete', [CompleteEventController]).as('events.complete')
 
       // Participants
       router
-        .get('/:eventId/participants', [ListEventParticipantsController, 'handle'])
+        .get('/:eventId/participants', [ListEventParticipantsController])
         .as('events.participants.index')
       router
-        .post('/:eventId/participants', [RegisterParticipantController, 'handle'])
+        .post('/:eventId/participants', [RegisterParticipantController])
         .as('events.participants.register')
       router
-        .put('/:eventId/participants/:participantId', [UpdateParticipantStatusController, 'handle'])
+        .put('/:eventId/participants/:participantId', [UpdateParticipantStatusController])
         .as('events.participants.updateStatus')
       router
-        .delete('/:eventId/participants/:participantId', [CancelRegistrationController, 'handle'])
+        .delete('/:eventId/participants/:participantId', [CancelRegistrationController])
         .as('events.participants.cancel')
       router
         .post('/:eventId/participants/:participantId/confirm', [
@@ -1278,12 +1245,8 @@ function registerEventApiRoutes() {
         .as('events.participants.confirmAttendance')
 
       // Parental Consents (event-side)
-      router
-        .get('/:eventId/consents', [ListEventConsentsController, 'handle'])
-        .as('events.consents.index')
-      router
-        .post('/:eventId/consents', [RequestConsentController, 'handle'])
-        .as('events.consents.request')
+      router.get('/:eventId/consents', [ListEventConsentsController]).as('events.consents.index')
+      router.post('/:eventId/consents', [RequestConsentController]).as('events.consents.request')
     })
     .prefix('/events')
     .use(middleware.auth())
@@ -1293,9 +1256,9 @@ function registerParentalConsentApiRoutes() {
   router
     .group(() => {
       // Responsável endpoints
-      router.get('/pending', [ListPendingConsentsController, 'handle']).as('consents.pending')
-      router.get('/history', [ListConsentHistoryController, 'handle']).as('consents.history')
-      router.post('/:id/respond', [RespondConsentController, 'handle']).as('consents.respond')
+      router.get('/pending', [ListPendingConsentsController]).as('consents.pending')
+      router.get('/history', [ListConsentHistoryController]).as('consents.history')
+      router.post('/:id/respond', [RespondConsentController]).as('consents.respond')
     })
     .prefix('/parental-consents')
     .use(middleware.auth())
@@ -1312,12 +1275,12 @@ function registerOnlineEnrollmentApiRoutes() {
         ])
         .as('enrollment.info')
       router
-        .post('/check-existing', [CheckExistingStudentController, 'handle'])
+        .post('/check-existing', [CheckExistingStudentController])
         .as('enrollment.checkExisting')
       router
-        .post('/find-scholarship', [FindScholarshipByCodeController, 'handle'])
+        .post('/find-scholarship', [FindScholarshipByCodeController])
         .as('enrollment.findScholarship')
-      router.post('/finish', [FinishEnrollmentController, 'handle']).as('enrollment.finish')
+      router.post('/finish', [FinishEnrollmentController]).as('enrollment.finish')
     })
     .prefix('/online-enrollment')
 }
@@ -1325,9 +1288,9 @@ function registerOnlineEnrollmentApiRoutes() {
 function registerEnrollmentManagementApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListEnrollmentsController, 'handle']).as('enrollments.index')
+      router.get('/', [ListEnrollmentsController]).as('enrollments.index')
       router
-        .put('/documents/:id/status', [UpdateDocumentStatusController, 'handle'])
+        .put('/documents/:id/status', [UpdateDocumentStatusController])
         .as('enrollments.documents.updateStatus')
     })
     .prefix('/enrollments')
@@ -1337,14 +1300,14 @@ function registerEnrollmentManagementApiRoutes() {
 function registerAttendanceApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListAttendanceController, 'handle']).as('attendance.index')
-      router.post('/', [CreateAttendanceController, 'handle']).as('attendance.store')
-      router.post('/batch', [BatchCreateAttendanceController, 'handle']).as('attendance.batch')
+      router.get('/', [ListAttendanceController]).as('attendance.index')
+      router.post('/', [CreateAttendanceController]).as('attendance.store')
+      router.post('/batch', [BatchCreateAttendanceController]).as('attendance.batch')
       router
-        .get('/class/:classId/students', [GetClassStudentsAttendanceController, 'handle'])
+        .get('/class/:classId/students', [GetClassStudentsAttendanceController])
         .as('attendance.classStudents')
-      router.get('/:id', [ShowAttendanceController, 'handle']).as('attendance.show')
-      router.put('/:id', [UpdateAttendanceController, 'handle']).as('attendance.update')
+      router.get('/:id', [ShowAttendanceController]).as('attendance.show')
+      router.put('/:id', [UpdateAttendanceController]).as('attendance.update')
     })
     .prefix('/attendance')
     .use(middleware.auth())
@@ -1353,13 +1316,11 @@ function registerAttendanceApiRoutes() {
 function registerNotificationApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListNotificationsController, 'handle']).as('notifications.index')
-      router.get('/:id', [ShowNotificationController, 'handle']).as('notifications.show')
-      router
-        .post('/:id/read', [MarkNotificationReadController, 'handle'])
-        .as('notifications.markRead')
-      router.post('/read-all', [MarkAllReadController, 'handle']).as('notifications.markAllRead')
-      router.delete('/:id', [DeleteNotificationController, 'handle']).as('notifications.destroy')
+      router.get('/', [ListNotificationsController]).as('notifications.index')
+      router.get('/:id', [ShowNotificationController]).as('notifications.show')
+      router.post('/:id/read', [MarkNotificationReadController]).as('notifications.markRead')
+      router.post('/read-all', [MarkAllReadController]).as('notifications.markAllRead')
+      router.delete('/:id', [DeleteNotificationController]).as('notifications.destroy')
     })
     .prefix('/notifications')
     .use(middleware.auth())
@@ -1368,11 +1329,9 @@ function registerNotificationApiRoutes() {
 function registerNotificationPreferenceApiRoutes() {
   router
     .group(() => {
+      router.get('/', [ShowNotificationPreferencesController]).as('notificationPreferences.show')
       router
-        .get('/', [ShowNotificationPreferencesController, 'handle'])
-        .as('notificationPreferences.show')
-      router
-        .put('/', [UpdateNotificationPreferencesController, 'handle'])
+        .put('/', [UpdateNotificationPreferencesController])
         .as('notificationPreferences.update')
     })
     .prefix('/notification-preferences')
@@ -1383,23 +1342,19 @@ function registerPostApiRoutes() {
   router
     .group(() => {
       // CRUD
-      router.get('/', [ListPostsController, 'handle']).as('posts.index')
-      router.post('/', [CreatePostController, 'handle']).as('posts.store')
-      router.get('/:id', [ShowPostController, 'handle']).as('posts.show')
-      router.put('/:id', [UpdatePostController, 'handle']).as('posts.update')
-      router.delete('/:id', [DeletePostController, 'handle']).as('posts.destroy')
+      router.get('/', [ListPostsController]).as('posts.index')
+      router.post('/', [CreatePostController]).as('posts.store')
+      router.get('/:id', [ShowPostController]).as('posts.show')
+      router.put('/:id', [UpdatePostController]).as('posts.update')
+      router.delete('/:id', [DeletePostController]).as('posts.destroy')
 
       // Likes
-      router.post('/:id/like', [LikePostController, 'handle']).as('posts.like')
-      router.delete('/:id/like', [UnlikePostController, 'handle']).as('posts.unlike')
+      router.post('/:id/like', [LikePostController]).as('posts.like')
+      router.delete('/:id/like', [UnlikePostController]).as('posts.unlike')
 
       // Comments (nested under posts)
-      router
-        .get('/:postId/comments', [ListPostCommentsController, 'handle'])
-        .as('posts.comments.index')
-      router
-        .post('/:postId/comments', [CreateCommentController, 'handle'])
-        .as('posts.comments.store')
+      router.get('/:postId/comments', [ListPostCommentsController]).as('posts.comments.index')
+      router.post('/:postId/comments', [CreateCommentController]).as('posts.comments.store')
     })
     .prefix('/posts')
     .use(middleware.auth())
@@ -1408,9 +1363,9 @@ function registerPostApiRoutes() {
 function registerCommentApiRoutes() {
   router
     .group(() => {
-      router.put('/:id', [UpdateCommentController, 'handle']).as('comments.update')
-      router.delete('/:id', [DeleteCommentController, 'handle']).as('comments.destroy')
-      router.post('/:id/like', [LikeCommentController, 'handle']).as('comments.like')
+      router.put('/:id', [UpdateCommentController]).as('comments.update')
+      router.delete('/:id', [DeleteCommentController]).as('comments.destroy')
+      router.post('/:id/like', [LikeCommentController]).as('comments.like')
     })
     .prefix('/comments')
     .use(middleware.auth())
@@ -1419,19 +1374,17 @@ function registerCommentApiRoutes() {
 function registerAssignmentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListAssignmentsController, 'handle']).as('assignments.index')
-      router.post('/', [CreateAssignmentController, 'handle']).as('assignments.store')
-      router.get('/:id', [ShowAssignmentController, 'handle']).as('assignments.show')
-      router.put('/:id', [UpdateAssignmentController, 'handle']).as('assignments.update')
-      router.delete('/:id', [DeleteAssignmentController, 'handle']).as('assignments.destroy')
+      router.get('/', [ListAssignmentsController]).as('assignments.index')
+      router.post('/', [CreateAssignmentController]).as('assignments.store')
+      router.get('/:id', [ShowAssignmentController]).as('assignments.show')
+      router.put('/:id', [UpdateAssignmentController]).as('assignments.update')
+      router.delete('/:id', [DeleteAssignmentController]).as('assignments.destroy')
       router
-        .get('/:id/submissions', [ListAssignmentSubmissionsController, 'handle'])
+        .get('/:id/submissions', [ListAssignmentSubmissionsController])
         .as('assignments.submissions')
+      router.post('/:id/submissions', [SubmitAssignmentController]).as('assignments.submit')
       router
-        .post('/:id/submissions', [SubmitAssignmentController, 'handle'])
-        .as('assignments.submit')
-      router
-        .put('/:id/submissions/:submissionId', [GradeSubmissionController, 'handle'])
+        .put('/:id/submissions/:submissionId', [GradeSubmissionController])
         .as('assignments.grade')
     })
     .prefix('/assignments')
@@ -1441,25 +1394,19 @@ function registerAssignmentApiRoutes() {
 function registerStudentPaymentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStudentPaymentsController, 'handle']).as('studentPayments.index')
-      router.post('/', [CreateStudentPaymentController, 'handle']).as('studentPayments.store')
-      router.get('/:id', [ShowStudentPaymentController, 'handle']).as('studentPayments.show')
-      router.put('/:id', [UpdateStudentPaymentController, 'handle']).as('studentPayments.update')
+      router.get('/', [ListStudentPaymentsController]).as('studentPayments.index')
+      router.post('/', [CreateStudentPaymentController]).as('studentPayments.store')
+      router.get('/:id', [ShowStudentPaymentController]).as('studentPayments.show')
+      router.put('/:id', [UpdateStudentPaymentController]).as('studentPayments.update')
+      router.post('/:id/cancel', [CancelStudentPaymentController]).as('studentPayments.cancel')
+      router.post('/:id/mark-paid', [MarkPaymentAsPaidController]).as('studentPayments.markPaid')
       router
-        .post('/:id/cancel', [CancelStudentPaymentController, 'handle'])
-        .as('studentPayments.cancel')
-      router
-        .post('/:id/mark-paid', [MarkPaymentAsPaidController, 'handle'])
-        .as('studentPayments.markPaid')
-      router
-        .post('/:id/asaas-charge', [CreateStudentPaymentAsaasChargeController, 'handle'])
+        .post('/:id/asaas-charge', [CreateStudentPaymentAsaasChargeController])
         .as('studentPayments.asaasCharge')
       router
-        .post('/:id/send-boleto', [SendStudentPaymentBoletoEmailController, 'handle'])
+        .post('/:id/send-boleto', [SendStudentPaymentBoletoEmailController])
         .as('studentPayments.sendBoleto')
-      router
-        .get('/:id/boleto', [GetStudentPaymentBoletoController, 'handle'])
-        .as('studentPayments.getBoleto')
+      router.get('/:id/boleto', [GetStudentPaymentBoletoController]).as('studentPayments.getBoleto')
     })
     .prefix('/student-payments')
     .use(middleware.auth())
@@ -1469,13 +1416,13 @@ function registerStudentBalanceTransactionApiRoutes() {
   router
     .group(() => {
       router
-        .get('/', [ListStudentBalanceTransactionsController, 'handle'])
+        .get('/', [ListStudentBalanceTransactionsController])
         .as('studentBalanceTransactions.index')
       router
-        .post('/', [CreateStudentBalanceTransactionController, 'handle'])
+        .post('/', [CreateStudentBalanceTransactionController])
         .as('studentBalanceTransactions.store')
       router
-        .get('/:id', [ShowStudentBalanceTransactionController, 'handle'])
+        .get('/:id', [ShowStudentBalanceTransactionController])
         .as('studentBalanceTransactions.show')
     })
     .prefix('/student-balance-transactions')
@@ -1485,7 +1432,7 @@ function registerStudentBalanceTransactionApiRoutes() {
 function registerAsaasWebhookApiRoutes() {
   router
     .group(() => {
-      router.post('/webhook', [AsaasWebhookController, 'handle']).as('asaas.webhook')
+      router.post('/webhook', [AsaasWebhookController]).as('asaas.webhook')
     })
     .prefix('/asaas')
 }
@@ -1493,12 +1440,12 @@ function registerAsaasWebhookApiRoutes() {
 function registerCanteenApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteensController, 'handle']).as('canteens.index')
-      router.post('/', [CreateCanteenController, 'handle']).as('canteens.store')
-      router.get('/:id', [ShowCanteenController, 'handle']).as('canteens.show')
-      router.put('/:id', [UpdateCanteenController, 'handle']).as('canteens.update')
-      router.delete('/:id', [DeleteCanteenController, 'handle']).as('canteens.destroy')
-      router.get('/:canteenId/items', [ListItemsByCanteenController, 'handle']).as('canteens.items')
+      router.get('/', [ListCanteensController]).as('canteens.index')
+      router.post('/', [CreateCanteenController]).as('canteens.store')
+      router.get('/:id', [ShowCanteenController]).as('canteens.show')
+      router.put('/:id', [UpdateCanteenController]).as('canteens.update')
+      router.delete('/:id', [DeleteCanteenController]).as('canteens.destroy')
+      router.get('/:canteenId/items', [ListItemsByCanteenController]).as('canteens.items')
     })
     .prefix('/canteens')
     .use(middleware.auth())
@@ -1507,7 +1454,7 @@ function registerCanteenApiRoutes() {
 function registerCanteenReportApiRoutes() {
   router
     .group(() => {
-      router.get('/', [GetCanteenReportController, 'handle']).as('canteenReports.summary')
+      router.get('/', [GetCanteenReportController]).as('canteenReports.summary')
     })
     .prefix('/canteen-reports')
     .use(middleware.auth())
@@ -1516,17 +1463,11 @@ function registerCanteenReportApiRoutes() {
 function registerCanteenMonthlyTransferApiRoutes() {
   router
     .group(() => {
+      router.get('/', [ListCanteenMonthlyTransfersController]).as('canteenMonthlyTransfers.index')
+      router.post('/', [CreateCanteenMonthlyTransferController]).as('canteenMonthlyTransfers.store')
+      router.get('/:id', [ShowCanteenMonthlyTransferController]).as('canteenMonthlyTransfers.show')
       router
-        .get('/', [ListCanteenMonthlyTransfersController, 'handle'])
-        .as('canteenMonthlyTransfers.index')
-      router
-        .post('/', [CreateCanteenMonthlyTransferController, 'handle'])
-        .as('canteenMonthlyTransfers.store')
-      router
-        .get('/:id', [ShowCanteenMonthlyTransferController, 'handle'])
-        .as('canteenMonthlyTransfers.show')
-      router
-        .put('/:id/status', [UpdateCanteenMonthlyTransferStatusController, 'handle'])
+        .put('/:id/status', [UpdateCanteenMonthlyTransferStatusController])
         .as('canteenMonthlyTransfers.updateStatus')
     })
     .prefix('/canteen-monthly-transfers')
@@ -1536,13 +1477,13 @@ function registerCanteenMonthlyTransferApiRoutes() {
 function registerCanteenItemApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenItemsController, 'handle']).as('canteenItems.index')
-      router.post('/', [CreateCanteenItemController, 'handle']).as('canteenItems.store')
-      router.get('/:id', [ShowCanteenItemController, 'handle']).as('canteenItems.show')
-      router.put('/:id', [UpdateCanteenItemController, 'handle']).as('canteenItems.update')
-      router.delete('/:id', [DeleteCanteenItemController, 'handle']).as('canteenItems.destroy')
+      router.get('/', [ListCanteenItemsController]).as('canteenItems.index')
+      router.post('/', [CreateCanteenItemController]).as('canteenItems.store')
+      router.get('/:id', [ShowCanteenItemController]).as('canteenItems.show')
+      router.put('/:id', [UpdateCanteenItemController]).as('canteenItems.update')
+      router.delete('/:id', [DeleteCanteenItemController]).as('canteenItems.destroy')
       router
-        .get('/:id/toggle-active', [ToggleCanteenItemActiveController, 'handle'])
+        .get('/:id/toggle-active', [ToggleCanteenItemActiveController])
         .as('canteenItems.toggleActive')
     })
     .prefix('/canteen-items')
@@ -1552,11 +1493,11 @@ function registerCanteenItemApiRoutes() {
 function registerCanteenMealApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenMealsController, 'handle']).as('canteenMeals.index')
-      router.post('/', [CreateCanteenMealController, 'handle']).as('canteenMeals.store')
-      router.get('/:id', [ShowCanteenMealController, 'handle']).as('canteenMeals.show')
-      router.put('/:id', [UpdateCanteenMealController, 'handle']).as('canteenMeals.update')
-      router.delete('/:id', [DeleteCanteenMealController, 'handle']).as('canteenMeals.destroy')
+      router.get('/', [ListCanteenMealsController]).as('canteenMeals.index')
+      router.post('/', [CreateCanteenMealController]).as('canteenMeals.store')
+      router.get('/:id', [ShowCanteenMealController]).as('canteenMeals.show')
+      router.put('/:id', [UpdateCanteenMealController]).as('canteenMeals.update')
+      router.delete('/:id', [DeleteCanteenMealController]).as('canteenMeals.destroy')
     })
     .prefix('/canteen-meals')
     .use(middleware.auth())
@@ -1565,20 +1506,14 @@ function registerCanteenMealApiRoutes() {
 function registerCanteenMealReservationApiRoutes() {
   router
     .group(() => {
+      router.get('/', [ListCanteenMealReservationsController]).as('canteenMealReservations.index')
+      router.post('/', [CreateCanteenMealReservationController]).as('canteenMealReservations.store')
+      router.get('/:id', [ShowCanteenMealReservationController]).as('canteenMealReservations.show')
       router
-        .get('/', [ListCanteenMealReservationsController, 'handle'])
-        .as('canteenMealReservations.index')
-      router
-        .post('/', [CreateCanteenMealReservationController, 'handle'])
-        .as('canteenMealReservations.store')
-      router
-        .get('/:id', [ShowCanteenMealReservationController, 'handle'])
-        .as('canteenMealReservations.show')
-      router
-        .put('/:id/status', [UpdateCanteenMealReservationStatusController, 'handle'])
+        .put('/:id/status', [UpdateCanteenMealReservationStatusController])
         .as('canteenMealReservations.updateStatus')
       router
-        .delete('/:id', [DeleteCanteenMealReservationController, 'handle'])
+        .delete('/:id', [DeleteCanteenMealReservationController])
         .as('canteenMealReservations.cancel')
     })
     .prefix('/canteen-meal-reservations')
@@ -1588,15 +1523,13 @@ function registerCanteenMealReservationApiRoutes() {
 function registerCanteenPurchaseApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenPurchasesController, 'handle']).as('canteenPurchases.index')
-      router.post('/', [CreateCanteenPurchaseController, 'handle']).as('canteenPurchases.store')
-      router.get('/:id', [ShowCanteenPurchaseController, 'handle']).as('canteenPurchases.show')
+      router.get('/', [ListCanteenPurchasesController]).as('canteenPurchases.index')
+      router.post('/', [CreateCanteenPurchaseController]).as('canteenPurchases.store')
+      router.get('/:id', [ShowCanteenPurchaseController]).as('canteenPurchases.show')
       router
-        .put('/:id/status', [UpdateCanteenPurchaseStatusController, 'handle'])
+        .put('/:id/status', [UpdateCanteenPurchaseStatusController])
         .as('canteenPurchases.updateStatus')
-      router
-        .post('/:id/cancel', [CancelCanteenPurchaseController, 'handle'])
-        .as('canteenPurchases.cancel')
+      router.post('/:id/cancel', [CancelCanteenPurchaseController]).as('canteenPurchases.cancel')
     })
     .prefix('/canteen-purchases')
     .use(middleware.auth())
@@ -1605,12 +1538,12 @@ function registerCanteenPurchaseApiRoutes() {
 function registerAchievementApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListAchievementsController, 'handle']).as('achievements.index')
-      router.post('/', [CreateAchievementController, 'handle']).as('achievements.store')
-      router.get('/:id', [ShowAchievementController, 'handle']).as('achievements.show')
-      router.put('/:id', [UpdateAchievementController, 'handle']).as('achievements.update')
-      router.delete('/:id', [DeleteAchievementController, 'handle']).as('achievements.destroy')
-      router.post('/:id/unlock', [UnlockAchievementController, 'handle']).as('achievements.unlock')
+      router.get('/', [ListAchievementsController]).as('achievements.index')
+      router.post('/', [CreateAchievementController]).as('achievements.store')
+      router.get('/:id', [ShowAchievementController]).as('achievements.show')
+      router.put('/:id', [UpdateAchievementController]).as('achievements.update')
+      router.delete('/:id', [DeleteAchievementController]).as('achievements.destroy')
+      router.post('/:id/unlock', [UnlockAchievementController]).as('achievements.unlock')
     })
     .prefix('/achievements')
     .use(middleware.auth())
@@ -1619,13 +1552,13 @@ function registerAchievementApiRoutes() {
 function registerStoreItemApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStoreItemsController, 'handle']).as('storeItems.index')
-      router.post('/', [CreateStoreItemController, 'handle']).as('storeItems.store')
-      router.get('/:id', [ShowStoreItemController, 'handle']).as('storeItems.show')
-      router.put('/:id', [UpdateStoreItemController, 'handle']).as('storeItems.update')
-      router.delete('/:id', [DeleteStoreItemController, 'handle']).as('storeItems.destroy')
+      router.get('/', [ListStoreItemsController]).as('storeItems.index')
+      router.post('/', [CreateStoreItemController]).as('storeItems.store')
+      router.get('/:id', [ShowStoreItemController]).as('storeItems.show')
+      router.put('/:id', [UpdateStoreItemController]).as('storeItems.update')
+      router.delete('/:id', [DeleteStoreItemController]).as('storeItems.destroy')
       router
-        .patch('/:id/toggle-active', [ToggleStoreItemActiveController, 'handle'])
+        .patch('/:id/toggle-active', [ToggleStoreItemActiveController])
         .as('storeItems.toggleActive')
     })
     .prefix('/store-items')
@@ -1635,13 +1568,13 @@ function registerStoreItemApiRoutes() {
 function registerStoreOrderApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStoreOrdersController, 'handle']).as('storeOrders.index')
-      router.post('/', [CreateStoreOrderController, 'handle']).as('storeOrders.store')
-      router.get('/:id', [ShowStoreOrderController, 'handle']).as('storeOrders.show')
-      router.post('/:id/approve', [ApproveStoreOrderController, 'handle']).as('storeOrders.approve')
-      router.post('/:id/reject', [RejectStoreOrderController, 'handle']).as('storeOrders.reject')
-      router.post('/:id/deliver', [DeliverStoreOrderController, 'handle']).as('storeOrders.deliver')
-      router.post('/:id/cancel', [CancelStoreOrderController, 'handle']).as('storeOrders.cancel')
+      router.get('/', [ListStoreOrdersController]).as('storeOrders.index')
+      router.post('/', [CreateStoreOrderController]).as('storeOrders.store')
+      router.get('/:id', [ShowStoreOrderController]).as('storeOrders.show')
+      router.post('/:id/approve', [ApproveStoreOrderController]).as('storeOrders.approve')
+      router.post('/:id/reject', [RejectStoreOrderController]).as('storeOrders.reject')
+      router.post('/:id/deliver', [DeliverStoreOrderController]).as('storeOrders.deliver')
+      router.post('/:id/cancel', [CancelStoreOrderController]).as('storeOrders.cancel')
     })
     .prefix('/store-orders')
     .use(middleware.auth())
@@ -1650,21 +1583,11 @@ function registerStoreOrderApiRoutes() {
 function registerStudentGamificationApiRoutes() {
   router
     .group(() => {
-      router
-        .get('/', [ListStudentGamificationsController, 'handle'])
-        .as('studentGamifications.index')
-      router
-        .post('/', [CreateStudentGamificationController, 'handle'])
-        .as('studentGamifications.store')
-      router
-        .get('/:id', [ShowStudentGamificationController, 'handle'])
-        .as('studentGamifications.show')
-      router
-        .post('/add-points', [AddPointsController, 'handle'])
-        .as('studentGamifications.addPoints')
-      router
-        .get('/ranking', [GetPointsRankingController, 'handle'])
-        .as('studentGamifications.ranking')
+      router.get('/', [ListStudentGamificationsController]).as('studentGamifications.index')
+      router.post('/', [CreateStudentGamificationController]).as('studentGamifications.store')
+      router.get('/:id', [ShowStudentGamificationController]).as('studentGamifications.show')
+      router.post('/add-points', [AddPointsController]).as('studentGamifications.addPoints')
+      router.get('/ranking', [GetPointsRankingController]).as('studentGamifications.ranking')
     })
     .prefix('/student-gamifications')
     .use(middleware.auth())
@@ -1673,7 +1596,7 @@ function registerStudentGamificationApiRoutes() {
   router
     .group(() => {
       router
-        .get('/:studentId/gamification/stats', [GetStudentStatsController, 'handle'])
+        .get('/:studentId/gamification/stats', [GetStudentStatsController])
         .as('students.gamificationStats')
     })
     .prefix('/students')
@@ -1683,14 +1606,12 @@ function registerStudentGamificationApiRoutes() {
 function registerLeaderboardApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListLeaderboardsController, 'handle']).as('leaderboards.index')
-      router.post('/', [CreateLeaderboardController, 'handle']).as('leaderboards.store')
-      router.get('/:id', [ShowLeaderboardController, 'handle']).as('leaderboards.show')
-      router.put('/:id', [UpdateLeaderboardController, 'handle']).as('leaderboards.update')
-      router.delete('/:id', [DeleteLeaderboardController, 'handle']).as('leaderboards.destroy')
-      router
-        .get('/:id/entries', [ListLeaderboardEntriesController, 'handle'])
-        .as('leaderboards.entries')
+      router.get('/', [ListLeaderboardsController]).as('leaderboards.index')
+      router.post('/', [CreateLeaderboardController]).as('leaderboards.store')
+      router.get('/:id', [ShowLeaderboardController]).as('leaderboards.show')
+      router.put('/:id', [UpdateLeaderboardController]).as('leaderboards.update')
+      router.delete('/:id', [DeleteLeaderboardController]).as('leaderboards.destroy')
+      router.get('/:id/entries', [ListLeaderboardEntriesController]).as('leaderboards.entries')
     })
     .prefix('/leaderboards')
     .use(middleware.auth())
@@ -1699,12 +1620,10 @@ function registerLeaderboardApiRoutes() {
 function registerGamificationEventApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListGamificationEventsController, 'handle']).as('gamificationEvents.index')
-      router.post('/', [CreateGamificationEventController, 'handle']).as('gamificationEvents.store')
-      router.get('/:id', [ShowGamificationEventController, 'handle']).as('gamificationEvents.show')
-      router
-        .post('/:id/retry', [RetryGamificationEventController, 'handle'])
-        .as('gamificationEvents.retry')
+      router.get('/', [ListGamificationEventsController]).as('gamificationEvents.index')
+      router.post('/', [CreateGamificationEventController]).as('gamificationEvents.store')
+      router.get('/:id', [ShowGamificationEventController]).as('gamificationEvents.show')
+      router.post('/:id/retry', [RetryGamificationEventController]).as('gamificationEvents.retry')
     })
     .prefix('/gamification-events')
     .use(middleware.auth())
@@ -1724,14 +1643,12 @@ function registerScholarshipApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListScholarshipsController, 'handle']).as('scholarships.listScholarships')
-      router.post('/', [CreateScholarshipController, 'handle']).as('scholarships.createScholarship')
-      router.get('/:id', [ShowScholarshipController, 'handle']).as('scholarships.showScholarship')
+      router.get('/', [ListScholarshipsController]).as('scholarships.listScholarships')
+      router.post('/', [CreateScholarshipController]).as('scholarships.createScholarship')
+      router.get('/:id', [ShowScholarshipController]).as('scholarships.showScholarship')
+      router.put('/:id', [UpdateScholarshipController]).as('scholarships.updateScholarship')
       router
-        .put('/:id', [UpdateScholarshipController, 'handle'])
-        .as('scholarships.updateScholarship')
-      router
-        .patch('/:id/toggle-active', [ToggleScholarshipActiveController, 'handle'])
+        .patch('/:id/toggle-active', [ToggleScholarshipActiveController])
         .as('scholarships.toggleScholarshipActive')
     })
     .prefix('/scholarships')
@@ -1752,20 +1669,12 @@ function registerSchoolPartnerApiRoutes() {
 
   router
     .group(() => {
+      router.get('/', [ListSchoolPartnersController]).as('schoolPartners.listSchoolPartners')
+      router.post('/', [CreateSchoolPartnerController]).as('schoolPartners.createSchoolPartner')
+      router.get('/:id', [ShowSchoolPartnerController]).as('schoolPartners.showSchoolPartner')
+      router.put('/:id', [UpdateSchoolPartnerController]).as('schoolPartners.updateSchoolPartner')
       router
-        .get('/', [ListSchoolPartnersController, 'handle'])
-        .as('schoolPartners.listSchoolPartners')
-      router
-        .post('/', [CreateSchoolPartnerController, 'handle'])
-        .as('schoolPartners.createSchoolPartner')
-      router
-        .get('/:id', [ShowSchoolPartnerController, 'handle'])
-        .as('schoolPartners.showSchoolPartner')
-      router
-        .put('/:id', [UpdateSchoolPartnerController, 'handle'])
-        .as('schoolPartners.updateSchoolPartner')
-      router
-        .patch('/:id/toggle-active', [ToggleSchoolPartnerActiveController, 'handle'])
+        .patch('/:id/toggle-active', [ToggleSchoolPartnerActiveController])
         .as('schoolPartners.toggleSchoolPartnerActive')
     })
     .prefix('/school-partners')
@@ -1786,15 +1695,11 @@ function registerSchoolChainApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListSchoolChainsController, 'handle']).as('schoolChains.listSchoolChains')
-      router.post('/', [CreateSchoolChainController, 'handle']).as('schoolChains.createSchoolChain')
-      router.get('/:id', [ShowSchoolChainController, 'handle']).as('schoolChains.showSchoolChain')
-      router
-        .put('/:id', [UpdateSchoolChainController, 'handle'])
-        .as('schoolChains.updateSchoolChain')
-      router
-        .delete('/:id', [DeleteSchoolChainController, 'handle'])
-        .as('schoolChains.deleteSchoolChain')
+      router.get('/', [ListSchoolChainsController]).as('schoolChains.listSchoolChains')
+      router.post('/', [CreateSchoolChainController]).as('schoolChains.createSchoolChain')
+      router.get('/:id', [ShowSchoolChainController]).as('schoolChains.showSchoolChain')
+      router.put('/:id', [UpdateSchoolChainController]).as('schoolChains.updateSchoolChain')
+      router.delete('/:id', [DeleteSchoolChainController]).as('schoolChains.deleteSchoolChain')
     })
     .prefix('/school-chains')
     .use(middleware.auth())
@@ -1814,15 +1719,11 @@ function registerSchoolGroupApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListSchoolGroupsController, 'handle']).as('schoolGroups.listSchoolGroups')
-      router.post('/', [CreateSchoolGroupController, 'handle']).as('schoolGroups.createSchoolGroup')
-      router.get('/:id', [ShowSchoolGroupController, 'handle']).as('schoolGroups.showSchoolGroup')
-      router
-        .put('/:id', [UpdateSchoolGroupController, 'handle'])
-        .as('schoolGroups.updateSchoolGroup')
-      router
-        .delete('/:id', [DeleteSchoolGroupController, 'handle'])
-        .as('schoolGroups.deleteSchoolGroup')
+      router.get('/', [ListSchoolGroupsController]).as('schoolGroups.listSchoolGroups')
+      router.post('/', [CreateSchoolGroupController]).as('schoolGroups.createSchoolGroup')
+      router.get('/:id', [ShowSchoolGroupController]).as('schoolGroups.showSchoolGroup')
+      router.put('/:id', [UpdateSchoolGroupController]).as('schoolGroups.updateSchoolGroup')
+      router.delete('/:id', [DeleteSchoolGroupController]).as('schoolGroups.deleteSchoolGroup')
     })
     .prefix('/school-groups')
     .use(middleware.auth())
@@ -1850,32 +1751,26 @@ function registerAcademicPeriodApiRoutes() {
 
   router
     .group(() => {
+      router.get('/', [ListAcademicPeriodsController]).as('academicPeriods.listAcademicPeriods')
       router
-        .get('/', [ListAcademicPeriodsController, 'handle'])
-        .as('academicPeriods.listAcademicPeriods')
-      router
-        .get('/current-active', [GetCurrentActiveAcademicPeriodsController, 'handle'])
+        .get('/current-active', [GetCurrentActiveAcademicPeriodsController])
         .as('academicPeriods.getCurrentActiveAcademicPeriods')
       router
-        .get('/by-slug/:slug', [ShowAcademicPeriodBySlugController, 'handle'])
+        .get('/by-slug/:slug', [ShowAcademicPeriodBySlugController])
         .as('academicPeriods.showBySlug')
+      router.post('/', [CreateAcademicPeriodController]).as('academicPeriods.createAcademicPeriod')
+      router.get('/:id', [ShowAcademicPeriodController]).as('academicPeriods.showAcademicPeriod')
       router
-        .post('/', [CreateAcademicPeriodController, 'handle'])
-        .as('academicPeriods.createAcademicPeriod')
-      router
-        .get('/:id', [ShowAcademicPeriodController, 'handle'])
-        .as('academicPeriods.showAcademicPeriod')
-      router
-        .put('/:id', [UpdateAcademicPeriodController, 'handle'])
+        .put('/:id', [UpdateAcademicPeriodController])
         .as('academicPeriods.updateAcademicPeriod')
       router
-        .delete('/:id', [DeleteAcademicPeriodController, 'handle'])
+        .delete('/:id', [DeleteAcademicPeriodController])
         .as('academicPeriods.deleteAcademicPeriod')
       router
-        .get('/:id/courses', [ListAcademicPeriodCoursesController, 'handle'])
+        .get('/:id/courses', [ListAcademicPeriodCoursesController])
         .as('academicPeriods.listCourses')
       router
-        .put('/:id/courses', [UpdateAcademicPeriodCoursesController, 'handle'])
+        .put('/:id/courses', [UpdateAcademicPeriodCoursesController])
         .as('academicPeriods.updateCourses')
     })
     .prefix('/academic-periods')
@@ -1900,24 +1795,20 @@ function registerPrintRequestApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListPrintRequestsController, 'handle']).as('printRequests.listPrintRequests')
+      router.get('/', [ListPrintRequestsController]).as('printRequests.listPrintRequests')
+      router.post('/', [CreatePrintRequestController]).as('printRequests.createPrintRequest')
+      router.get('/:id', [ShowPrintRequestController]).as('printRequests.showPrintRequest')
       router
-        .post('/', [CreatePrintRequestController, 'handle'])
-        .as('printRequests.createPrintRequest')
-      router
-        .get('/:id', [ShowPrintRequestController, 'handle'])
-        .as('printRequests.showPrintRequest')
-      router
-        .patch('/:id/approve', [ApprovePrintRequestController, 'handle'])
+        .patch('/:id/approve', [ApprovePrintRequestController])
         .as('printRequests.approvePrintRequest')
       router
-        .patch('/:id/reject', [RejectPrintRequestController, 'handle'])
+        .patch('/:id/reject', [RejectPrintRequestController])
         .as('printRequests.rejectPrintRequest')
       router
-        .patch('/:id/review', [ReviewPrintRequestController, 'handle'])
+        .patch('/:id/review', [ReviewPrintRequestController])
         .as('printRequests.reviewPrintRequest')
       router
-        .patch('/:id/printed', [MarkPrintRequestPrintedController, 'handle'])
+        .patch('/:id/printed', [MarkPrintRequestPrintedController])
         .as('printRequests.markPrintRequestPrinted')
     })
     .prefix('/print-requests')
@@ -1927,8 +1818,8 @@ function registerPrintRequestApiRoutes() {
 function registerPlatformSettingsApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ShowPlatformSettingsController, 'handle']).as('platformSettings.show')
-      router.put('/', [UpdatePlatformSettingsController, 'handle']).as('platformSettings.update')
+      router.get('/', [ShowPlatformSettingsController]).as('platformSettings.show')
+      router.put('/', [UpdatePlatformSettingsController]).as('platformSettings.update')
     })
     .prefix('/platform-settings')
     .use(middleware.auth())
@@ -1937,15 +1828,11 @@ function registerPlatformSettingsApiRoutes() {
 function registerSubscriptionPlanApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionPlansController, 'handle']).as('subscriptionPlans.index')
-      router.post('/', [CreateSubscriptionPlanController, 'handle']).as('subscriptionPlans.store')
-      router.get('/:id', [ShowSubscriptionPlanController, 'handle']).as('subscriptionPlans.show')
-      router
-        .put('/:id', [UpdateSubscriptionPlanController, 'handle'])
-        .as('subscriptionPlans.update')
-      router
-        .delete('/:id', [DeleteSubscriptionPlanController, 'handle'])
-        .as('subscriptionPlans.destroy')
+      router.get('/', [ListSubscriptionPlansController]).as('subscriptionPlans.index')
+      router.post('/', [CreateSubscriptionPlanController]).as('subscriptionPlans.store')
+      router.get('/:id', [ShowSubscriptionPlanController]).as('subscriptionPlans.show')
+      router.put('/:id', [UpdateSubscriptionPlanController]).as('subscriptionPlans.update')
+      router.delete('/:id', [DeleteSubscriptionPlanController]).as('subscriptionPlans.destroy')
     })
     .prefix('/subscription-plans')
     .use(middleware.auth())
@@ -1954,16 +1841,14 @@ function registerSubscriptionPlanApiRoutes() {
 function registerSubscriptionApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionsController, 'handle']).as('subscriptions.index')
-      router.post('/', [CreateSubscriptionController, 'handle']).as('subscriptions.store')
-      router.get('/:id', [ShowSubscriptionController, 'handle']).as('subscriptions.show')
-      router.put('/:id', [UpdateSubscriptionController, 'handle']).as('subscriptions.update')
+      router.get('/', [ListSubscriptionsController]).as('subscriptions.index')
+      router.post('/', [CreateSubscriptionController]).as('subscriptions.store')
+      router.get('/:id', [ShowSubscriptionController]).as('subscriptions.show')
+      router.put('/:id', [UpdateSubscriptionController]).as('subscriptions.update')
+      router.post('/:id/cancel', [CancelSubscriptionController]).as('subscriptions.cancel')
+      router.post('/:id/pause', [PauseSubscriptionController]).as('subscriptions.pause')
       router
-        .post('/:id/cancel', [CancelSubscriptionController, 'handle'])
-        .as('subscriptions.cancel')
-      router.post('/:id/pause', [PauseSubscriptionController, 'handle']).as('subscriptions.pause')
-      router
-        .post('/:id/reactivate', [ReactivateSubscriptionController, 'handle'])
+        .post('/:id/reactivate', [ReactivateSubscriptionController])
         .as('subscriptions.reactivate')
     })
     .prefix('/subscriptions')
@@ -1973,7 +1858,7 @@ function registerSubscriptionApiRoutes() {
   router
     .group(() => {
       router
-        .get('/:schoolId/subscription', [GetSchoolSubscriptionController, 'handle'])
+        .get('/:schoolId/subscription', [GetSchoolSubscriptionController])
         .as('schools.subscription')
     })
     .prefix('/schools')
@@ -1983,7 +1868,7 @@ function registerSubscriptionApiRoutes() {
   router
     .group(() => {
       router
-        .get('/:schoolChainId/subscription', [GetChainSubscriptionController, 'handle'])
+        .get('/:schoolChainId/subscription', [GetChainSubscriptionController])
         .as('schoolChains.subscription')
     })
     .prefix('/school-chains')
@@ -1993,21 +1878,11 @@ function registerSubscriptionApiRoutes() {
 function registerSubscriptionInvoiceApiRoutes() {
   router
     .group(() => {
-      router
-        .get('/', [ListSubscriptionInvoicesController, 'handle'])
-        .as('subscriptionInvoices.index')
-      router
-        .post('/', [CreateSubscriptionInvoiceController, 'handle'])
-        .as('subscriptionInvoices.store')
-      router
-        .get('/:id', [ShowSubscriptionInvoiceController, 'handle'])
-        .as('subscriptionInvoices.show')
-      router
-        .put('/:id', [UpdateSubscriptionInvoiceController, 'handle'])
-        .as('subscriptionInvoices.update')
-      router
-        .post('/:id/mark-paid', [MarkInvoicePaidController, 'handle'])
-        .as('subscriptionInvoices.markPaid')
+      router.get('/', [ListSubscriptionInvoicesController]).as('subscriptionInvoices.index')
+      router.post('/', [CreateSubscriptionInvoiceController]).as('subscriptionInvoices.store')
+      router.get('/:id', [ShowSubscriptionInvoiceController]).as('subscriptionInvoices.show')
+      router.put('/:id', [UpdateSubscriptionInvoiceController]).as('subscriptionInvoices.update')
+      router.post('/:id/mark-paid', [MarkInvoicePaidController]).as('subscriptionInvoices.markPaid')
     })
     .prefix('/subscription-invoices')
     .use(middleware.auth())
@@ -2016,7 +1891,7 @@ function registerSubscriptionInvoiceApiRoutes() {
 function registerSchoolUsageMetricsApiRoutes() {
   router
     .group(() => {
-      router.get('/', [GetSchoolUsageMetricsController, 'handle']).as('schoolUsageMetrics.show')
+      router.get('/', [GetSchoolUsageMetricsController]).as('schoolUsageMetrics.show')
     })
     .prefix('/school-usage-metrics')
     .use(middleware.auth())
@@ -2026,27 +1901,17 @@ function registerPurchaseRequestApiRoutes() {
   router
     .group(() => {
       // CRUD
-      router.get('/', [ListPurchaseRequestsController, 'handle']).as('purchaseRequests.index')
-      router.post('/', [CreatePurchaseRequestController, 'handle']).as('purchaseRequests.store')
-      router.get('/:id', [ShowPurchaseRequestController, 'handle']).as('purchaseRequests.show')
-      router.put('/:id', [UpdatePurchaseRequestController, 'handle']).as('purchaseRequests.update')
-      router
-        .delete('/:id', [DeletePurchaseRequestController, 'handle'])
-        .as('purchaseRequests.destroy')
+      router.get('/', [ListPurchaseRequestsController]).as('purchaseRequests.index')
+      router.post('/', [CreatePurchaseRequestController]).as('purchaseRequests.store')
+      router.get('/:id', [ShowPurchaseRequestController]).as('purchaseRequests.show')
+      router.put('/:id', [UpdatePurchaseRequestController]).as('purchaseRequests.update')
+      router.delete('/:id', [DeletePurchaseRequestController]).as('purchaseRequests.destroy')
 
       // Status actions
-      router
-        .post('/:id/approve', [ApprovePurchaseRequestController, 'handle'])
-        .as('purchaseRequests.approve')
-      router
-        .post('/:id/reject', [RejectPurchaseRequestController, 'handle'])
-        .as('purchaseRequests.reject')
-      router
-        .post('/:id/mark-bought', [MarkAsBoughtController, 'handle'])
-        .as('purchaseRequests.markBought')
-      router
-        .post('/:id/mark-arrived', [MarkAsArrivedController, 'handle'])
-        .as('purchaseRequests.markArrived')
+      router.post('/:id/approve', [ApprovePurchaseRequestController]).as('purchaseRequests.approve')
+      router.post('/:id/reject', [RejectPurchaseRequestController]).as('purchaseRequests.reject')
+      router.post('/:id/mark-bought', [MarkAsBoughtController]).as('purchaseRequests.markBought')
+      router.post('/:id/mark-arrived', [MarkAsArrivedController]).as('purchaseRequests.markArrived')
     })
     .prefix('/purchase-requests')
     .use(middleware.auth())
@@ -2056,55 +1921,53 @@ function registerInsuranceApiRoutes() {
   router
     .group(() => {
       // Configuration
-      router.get('/config', [GetInsuranceConfigController, 'handle']).as('insurance.config')
+      router.get('/config', [GetInsuranceConfigController]).as('insurance.config')
       router
-        .put('/school/:schoolId', [UpdateSchoolInsuranceController, 'handle'])
+        .put('/school/:schoolId', [UpdateSchoolInsuranceController])
         .as('insurance.updateSchool')
       router
-        .put('/chain/:chainId', [UpdateSchoolChainInsuranceController, 'handle'])
+        .put('/chain/:chainId', [UpdateSchoolChainInsuranceController])
         .as('insurance.updateChain')
       router
-        .post('/school/:schoolId/reset', [ResetSchoolInsuranceController, 'handle'])
+        .post('/school/:schoolId/reset', [ResetSchoolInsuranceController])
         .as('insurance.resetSchool')
 
       // Claims
-      router.get('/claims', [ListInsuranceClaimsController, 'handle']).as('insurance.claims.index')
+      router.get('/claims', [ListInsuranceClaimsController]).as('insurance.claims.index')
       router
-        .post('/claims/:claimId/approve', [ApproveInsuranceClaimController, 'handle'])
+        .post('/claims/:claimId/approve', [ApproveInsuranceClaimController])
         .as('insurance.claims.approve')
       router
-        .post('/claims/:claimId/reject', [RejectInsuranceClaimController, 'handle'])
+        .post('/claims/:claimId/reject', [RejectInsuranceClaimController])
         .as('insurance.claims.reject')
       router
-        .post('/claims/:claimId/mark-paid', [MarkClaimPaidController, 'handle'])
+        .post('/claims/:claimId/mark-paid', [MarkClaimPaidController])
         .as('insurance.claims.markPaid')
 
       // Billings
+      router.get('/billings', [ListInsuranceBillingsController]).as('insurance.billings.index')
       router
-        .get('/billings', [ListInsuranceBillingsController, 'handle'])
-        .as('insurance.billings.index')
-      router
-        .get('/billings/:billingId', [GetBillingDetailsController, 'handle'])
+        .get('/billings/:billingId', [GetBillingDetailsController])
         .as('insurance.billings.show')
 
       // Analytics
-      router.get('/stats', [GetInsuranceStatsController, 'handle']).as('insurance.stats')
+      router.get('/stats', [GetInsuranceStatsController]).as('insurance.stats')
       router
-        .get('/analytics/default-rate', [GetDefaultRateBySchoolController, 'handle'])
+        .get('/analytics/default-rate', [GetDefaultRateBySchoolController])
         .as('insurance.analytics.defaultRate')
       router
-        .get('/analytics/schools-without', [GetSchoolsWithoutInsuranceController, 'handle'])
+        .get('/analytics/schools-without', [GetSchoolsWithoutInsuranceController])
         .as('insurance.analytics.schoolsWithout')
 
       // School-specific
       router
-        .get('/school/:schoolId/stats', [GetSchoolInsuranceStatsController, 'handle'])
+        .get('/school/:schoolId/stats', [GetSchoolInsuranceStatsController])
         .as('insurance.school.stats')
       router
-        .get('/school/:schoolId/billings', [GetSchoolInsuranceBillingsController, 'handle'])
+        .get('/school/:schoolId/billings', [GetSchoolInsuranceBillingsController])
         .as('insurance.school.billings')
       router
-        .get('/school/:schoolId/claims', [GetSchoolInsuranceClaimsController, 'handle'])
+        .get('/school/:schoolId/claims', [GetSchoolInsuranceClaimsController])
         .as('insurance.school.claims')
     })
     .prefix('/insurance')
@@ -2115,16 +1978,16 @@ function registerImpersonationApiRoutes() {
   router
     .group(() => {
       // Ativar impersonation
-      router.post('/', [SetImpersonationController, 'handle']).as('impersonation.set')
+      router.post('/', [SetImpersonationController]).as('impersonation.set')
 
       // Desativar impersonation
-      router.delete('/', [ClearImpersonationController, 'handle']).as('impersonation.clear')
+      router.delete('/', [ClearImpersonationController]).as('impersonation.clear')
 
       // Status de impersonation
-      router.get('/status', [GetImpersonationStatusController, 'handle']).as('impersonation.status')
+      router.get('/status', [GetImpersonationStatusController]).as('impersonation.status')
 
       // Lista de usuários para impersonation
-      router.get('/config', [GetImpersonationConfigController, 'handle']).as('impersonation.config')
+      router.get('/config', [GetImpersonationConfigController]).as('impersonation.config')
     })
     .prefix('/admin/impersonation')
     .use(middleware.auth())
@@ -2133,9 +1996,7 @@ function registerImpersonationApiRoutes() {
 function registerAdminOnboardingApiRoutes() {
   router
     .group(() => {
-      router
-        .post('/onboarding', [CreateSchoolOnboardingController, 'handle'])
-        .as('admin.schools.onboarding')
+      router.post('/onboarding', [CreateSchoolOnboardingController]).as('admin.schools.onboarding')
     })
     .prefix('/admin/schools')
     .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
@@ -2686,7 +2547,7 @@ function registerPageRoutes() {
           router.get('/configuracoes', [ShowAdminConfiguracoesPageController]).as('configuracoes')
 
           // Seguros pages
-          router.get('/seguros', [ShowAdminSegurosPageController, 'handle']).as('seguros.index')
+          router.get('/seguros', [ShowAdminSegurosPageController]).as('seguros.index')
           router
             .get('/seguros/sinistros', [ShowAdminSegurosPageController, 'sinistros'])
             .as('seguros.sinistros')

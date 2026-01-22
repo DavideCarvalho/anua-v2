@@ -125,7 +125,10 @@ async function fetchSubjectsForClass(classId: string): Promise<Subject[]> {
 }
 
 interface BatchAttendancePayload {
-  classScheduleId: string
+  classId: string
+  academicPeriodId: string
+  subjectId: string
+  date: string
   attendances: {
     studentId: string
     status: 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
@@ -139,8 +142,8 @@ async function createBatchAttendance(payload: BatchAttendancePayload): Promise<v
     body: JSON.stringify(payload),
   })
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to create attendance')
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data.message || 'Falha ao registrar presença')
   }
 }
 
@@ -306,10 +309,11 @@ function NewAttendanceModalContent({
   }
 
   function onSubmit(data: FormValues) {
-    // For now, we'll use the subjectId as the classScheduleId placeholder
-    // In a real implementation, you'd have a proper calendar slot ID
     createMutation.mutate({
-      classScheduleId: data.subjectId, // This should be the actual calendar slot ID
+      classId,
+      academicPeriodId,
+      subjectId: data.subjectId,
+      date: data.date.toISOString(),
       attendances: data.attendances.map((a) => ({
         studentId: a.student.id,
         status: a.status === 'EXCUSED' ? 'JUSTIFIED' : a.status,

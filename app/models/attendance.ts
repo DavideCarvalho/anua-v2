@@ -1,10 +1,18 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import CalendarSlot from './calendar_slot.js'
 
 export default class Attendance extends BaseModel {
   static table = 'Attendance'
+
+  @beforeCreate()
+  static assignId(model: Attendance) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

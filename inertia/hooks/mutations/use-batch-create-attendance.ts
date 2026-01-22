@@ -8,9 +8,11 @@ interface AttendanceRecord {
 }
 
 interface BatchCreateAttendanceData {
-  classScheduleId: string
+  classId: string
+  academicPeriodId: string
+  subjectId: string
   date: string
-  records: AttendanceRecord[]
+  attendances: AttendanceRecord[]
 }
 
 export function useBatchCreateAttendance() {
@@ -18,7 +20,7 @@ export function useBatchCreateAttendance() {
 
   return useMutation({
     mutationFn: (data: BatchCreateAttendanceData) => {
-      return tuyau.$route('api.v1.attendance.batch').$post({ ...data }).unwrap()
+      return tuyau.$route('api.v1.attendance.batch').$post(data).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['attendance'] })

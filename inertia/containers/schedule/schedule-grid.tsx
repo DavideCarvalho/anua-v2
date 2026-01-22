@@ -121,7 +121,9 @@ async function saveSchedule(
     body: JSON.stringify({ academicPeriodId, slots }),
   })
   if (!response.ok) {
-    throw new Error('Failed to save schedule')
+    const errorData = await response.json().catch(() => ({}))
+    const errorMessage = errorData.error || 'Erro ao salvar horários'
+    throw new Error(errorMessage)
   }
 }
 
@@ -158,8 +160,9 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       setIsDirty(false)
       queryClient.invalidateQueries({ queryKey: ['schedule', classId, academicPeriodId] })
     },
-    onError: () => {
-      toast.error('Erro ao salvar horários')
+    onError: (error: Error) => {
+      const errorMessage = error.message || 'Erro ao salvar horários'
+      toast.error(errorMessage)
     },
   })
 
@@ -195,6 +198,34 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       })
       .filter(Boolean) as Array<TeacherHasClass & { missing: number }>
   }, [scheduleData?.teacherClasses, localSlots])
+
+  const handleSave = useCallback(() => {
+    // Validar se há aulas pendentes
+    if (pendingClasses.length > 0) {
+      const totalMissing = pendingClasses.reduce((sum, pc) => sum + pc.missing, 0)
+      toast.warning(
+        `Existem ${totalMissing} aula(s) pendente(s) que ainda não foram atribuídas. Deseja continuar mesmo assim?`,
+        {
+          duration: 5000,
+        }
+      )
+    }
+
+    // Validar se há slots vazios (opcional - apenas aviso)
+    const emptySlots = localSlots.filter(
+      (s) => !s.isBreak && !s.teacherHasClassId
+    ).length
+    if (emptySlots > 0) {
+      toast.info(
+        `Existem ${emptySlots} horário(s) vazio(s) na grade. Você pode preenchê-los depois.`,
+        {
+          duration: 4000,
+        }
+      )
+    }
+
+    saveMutation.mutate()
+  }, [pendingClasses, localSlots, saveMutation])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
@@ -332,7 +363,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
           <RefreshCw className="mr-2 h-4 w-4" />
           Recarregar
         </Button>
-        <Button onClick={() => saveMutation.mutate()} disabled={!isDirty || saveMutation.isPending}>
+        <Button onClick={handleSave} disabled={saveMutation.isPending}>
           <Save className="mr-2 h-4 w-4" />
           {saveMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
         </Button>
