@@ -105,6 +105,32 @@ async function fetchSchedule(classId: string, academicPeriodId: string): Promise
   return response.json()
 }
 
+async function validateTeacherConflict(
+  teacherHasClassId: string,
+  classWeekDay: number,
+  startTime: string,
+  endTime: string,
+  academicPeriodId: string,
+  classId: string
+): Promise<{ hasConflict: boolean; reason?: string; teacherName?: string }> {
+  const response = await fetch('/api/v1/schedules/validate-conflict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      teacherHasClassId,
+      classWeekDay,
+      startTime,
+      endTime,
+      academicPeriodId,
+      classId,
+    }),
+  })
+  if (!response.ok) {
+    throw new Error('Erro ao validar conflito')
+  }
+  return response.json()
+}
+
 async function saveSchedule(
   classId: string,
   academicPeriodId: string,
@@ -189,8 +215,9 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     if (!scheduleData?.teacherClasses) return []
     return scheduleData.teacherClasses
       .map((tc) => {
+        // Contar apenas slots que não são intervalos e têm o teacherHasClassId correspondente
         const scheduledCount = localSlots.filter(
-          (s) => s.teacherHasClassId === tc.id
+          (s) => !s.isBreak && s.teacherHasClassId === tc.id
         ).length
         const missing = tc.subjectQuantity - scheduledCount
         if (missing <= 0) return null
@@ -233,7 +260,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
   )
 
   const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
+    async (event: DragEndEvent) => {
       const { active, over } = event
       if (!active || !over || active.id === over.id) return
 
@@ -260,9 +287,34 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
         if (slotIndex === -1) return
 
+        // Não permitir arrastar para slots de intervalo
+        if (localSlots[slotIndex].isBreak) {
+          toast.error('Não é possível adicionar aulas em horários de intervalo')
+          return
+        }
+
         // Check if slot is already occupied
         if (localSlots[slotIndex].teacherHasClassId) {
           toast.error('Este horário já está ocupado')
+          return
+        }
+
+        // Validar conflito de professor
+        try {
+          const validation = await validateTeacherConflict(
+            teacherHasClassId,
+            dayNumber,
+            startTime,
+            endTime,
+            academicPeriodId,
+            classId
+          )
+          if (validation.hasConflict) {
+            toast.error(validation.reason || 'Conflito de horário detectado')
+            return
+          }
+        } catch (error) {
+          toast.error('Erro ao validar disponibilidade do professor')
           return
         }
 
@@ -303,25 +355,84 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
       if (activeSlotIndex === -1 || overSlotIndex === -1) return
 
+      // Não permitir swap com slots de intervalo
+      if (localSlots[activeSlotIndex].isBreak || localSlots[overSlotIndex].isBreak) {
+        toast.error('Não é possível mover aulas para ou de um horário de intervalo')
+        return
+      }
+
+      const activeSlot = localSlots[activeSlotIndex]
+      const overSlot = localSlots[overSlotIndex]
+
+      // Validar conflitos antes de fazer o swap
+      // Validar se a aula do slot ativo pode ir para o slot de destino
+      if (overSlot.teacherHasClassId) {
+        try {
+          const validation = await validateTeacherConflict(
+            overSlot.teacherHasClassId,
+            activeDayNum,
+            activeStart,
+            activeEnd,
+            academicPeriodId,
+            classId
+          )
+          if (validation.hasConflict) {
+            toast.error(
+              `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`
+            )
+            return
+          }
+        } catch (error) {
+          toast.error('Erro ao validar disponibilidade do professor')
+          return
+        }
+      }
+
+      // Validar se a aula do slot de destino pode ir para o slot ativo
+      if (activeSlot.teacherHasClassId) {
+        try {
+          const validation = await validateTeacherConflict(
+            activeSlot.teacherHasClassId,
+            overDayNum,
+            overStart,
+            overEnd,
+            academicPeriodId,
+            classId
+          )
+          if (validation.hasConflict) {
+            toast.error(
+              `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`
+            )
+            return
+          }
+        } catch (error) {
+          toast.error('Erro ao validar disponibilidade do professor')
+          return
+        }
+      }
+
       const newSlots = [...localSlots]
+      // Salvar valores originais antes de fazer o swap
+      const activeTeacherHasClassId = newSlots[activeSlotIndex].teacherHasClassId
       const activeTeacherHasClass = newSlots[activeSlotIndex].teacherHasClass
+      const overTeacherHasClassId = newSlots[overSlotIndex].teacherHasClassId
       const overTeacherHasClass = newSlots[overSlotIndex].teacherHasClass
 
       newSlots[activeSlotIndex] = {
         ...newSlots[activeSlotIndex],
-        teacherHasClassId: newSlots[overSlotIndex].teacherHasClassId,
+        teacherHasClassId: overTeacherHasClassId,
         teacherHasClass: overTeacherHasClass,
       }
       newSlots[overSlotIndex] = {
         ...newSlots[overSlotIndex],
-        teacherHasClassId: newSlots[activeSlotIndex].teacherHasClassId,
+        teacherHasClassId: activeTeacherHasClassId,
         teacherHasClass: activeTeacherHasClass,
       }
 
       setLocalSlots(newSlots)
       setIsDirty(true)
     },
-    [localSlots, scheduleData?.teacherClasses]
+    [localSlots, scheduleData?.teacherClasses, academicPeriodId, classId]
   )
 
   if (isLoading) {

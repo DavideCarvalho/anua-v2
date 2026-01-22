@@ -164,6 +164,8 @@ const SaveClassScheduleController = () =>
   import('#controllers/schedules/save_class_schedule_controller')
 const GenerateClassScheduleController = () =>
   import('#controllers/schedules/generate_class_schedule_controller')
+const ValidateTeacherScheduleConflictController = () =>
+  import('#controllers/schedules/validate_teacher_schedule_conflict_controller')
 
 // Teachers
 const ListTeachersController = () => import('#controllers/teachers/list_teachers_controller')
@@ -1058,6 +1060,9 @@ function registerScheduleApiRoutes() {
       router
         .post('/class/:classId/generate', [GenerateClassScheduleController])
         .as('schedules.generateClassSchedule')
+      router
+        .post('/validate-conflict', [ValidateTeacherScheduleConflictController])
+        .as('schedules.validateConflict')
     })
     .prefix('/schedules')
     .use(middleware.auth())
