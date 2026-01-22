@@ -31,6 +31,10 @@ type EscolaPeriodosletivosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_periodos_letivos_page_controller.ts').default['handle'], false>
 }
+type EscolaPeriodosletivosIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_periodo_letivo_page_controller.ts').default['handle'], false>
+}
 type EscolaAdministrativoPeriodosletivosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_periodos_letivos_admin_page_controller.ts').default['handle'], false>
@@ -38,6 +42,10 @@ type EscolaAdministrativoPeriodosletivosGetHead = {
 type EscolaAdministrativoPeriodosletivosNovoperiodoletivoGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_novo_periodo_letivo_page_controller.ts').default['handle'], false>
+}
+type EscolaAdministrativoPeriodosletivosIdEditarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_editar_periodo_letivo_page_controller.ts').default['handle'], false>
 }
 type EscolaAdministrativoAlunosGetHead = {
   request: unknown
@@ -130,6 +138,14 @@ type EscolaPedagogicoTurmasGetHead = {
 type EscolaPedagogicoGradeGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_grade_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoHorariosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_horarios_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoQuadroGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_quadro_page_controller.ts').default['handle'], false>
 }
 type EscolaPedagogicoOcorrenciasGetHead = {
   request: unknown
@@ -271,6 +287,14 @@ type AdminEscolasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_escolas_page_controller.ts').default['handle'], false>
 }
+type AdminEscolasIdEditarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_edit_school_page_controller.ts').default['handle'], false>
+}
+type AdminEscolasIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_school_details_page_controller.ts').default['handle'], false>
+}
 type AdminOnboardingGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_school_onboarding_page_controller.ts').default['handle'], false>
@@ -278,6 +302,10 @@ type AdminOnboardingGetHead = {
 type AdminBillingDashboardGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_billing_dashboard_page_controller.ts').default['handle'], false>
+}
+type AdminBillingFaturasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_billing_faturas_page_controller.ts').default['handle'], false>
 }
 type AdminBillingSubscriptionsGetHead = {
   request: unknown
@@ -679,6 +707,14 @@ type ApiV1LevelsIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/levels/delete_level_controller.ts').default['handle'], false>
 }
+type ApiV1CoursehasacademicperiodsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/course_has_academic_period.ts')['createCourseHasAcademicPeriodValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/course_has_academic_periods/create_course_has_academic_period_controller.ts').default['handle'], true>
+}
+type ApiV1LevelassignmentsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/level_assignment.ts')['createLevelAssignmentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/level_assignments/create_level_assignment_controller.ts').default['handle'], true>
+}
 type ApiV1ClassesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/list_classes_controller.ts').default['handle'], false>
@@ -739,6 +775,14 @@ type ApiV1SubjectsIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/subjects/delete_subject_controller.ts').default['handle'], false>
 }
+type ApiV1SchedulesClassIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schedules/get_class_schedule_controller.ts').default['handle'], false>
+}
+type ApiV1SchedulesClassIdPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schedules/save_class_schedule_controller.ts').default['handle'], false>
+}
 type ApiV1TeachersGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/list_teachers_controller.ts').default['handle'], false>
@@ -746,6 +790,22 @@ type ApiV1TeachersGetHead = {
 type ApiV1TeachersPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher.ts')['createTeacherValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/create_teacher_controller.ts').default['handle'], true>
+}
+type ApiV1TeachersTimesheetGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['getTeachersTimesheetValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/get_teachers_timesheet_controller.ts').default['handle'], true>
+}
+type ApiV1TeachersAbsencesGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['getTeacherAbsencesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/get_teacher_absences_controller.ts').default['handle'], true>
+}
+type ApiV1TeachersAbsencesApprovePatch = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['approveAbsenceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/approve_absence_controller.ts').default['handle'], true>
+}
+type ApiV1TeachersAbsencesRejectPatch = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['rejectAbsenceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/reject_absence_controller.ts').default['handle'], true>
 }
 type ApiV1TeachersIdGetHead = {
   request: unknown
@@ -766,22 +826,6 @@ type ApiV1TeachersIdClassesGetHead = {
 type ApiV1TeachersIdSubjectsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/list_teacher_subjects_controller.ts').default['handle'], false>
-}
-type ApiV1TeachersTimesheetGetHead = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['getTeachersTimesheetValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/get_teachers_timesheet_controller.ts').default['handle'], true>
-}
-type ApiV1TeachersAbsencesGetHead = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['getTeacherAbsencesValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/get_teacher_absences_controller.ts').default['handle'], true>
-}
-type ApiV1TeachersAbsencesApprovePatch = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['approveAbsenceValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/approve_absence_controller.ts').default['handle'], true>
-}
-type ApiV1TeachersAbsencesRejectPatch = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher_timesheet.ts')['rejectAbsenceValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/reject_absence_controller.ts').default['handle'], true>
 }
 type ApiV1TeachersIdClassesPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher.ts')['assignTeacherToClassValidator']>>
@@ -1523,6 +1567,10 @@ type ApiV1AcademicperiodsCurrentactiveGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/get_current_active_academic_periods_controller.ts').default['handle'], false>
 }
+type ApiV1AcademicperiodsByslugIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/show_academic_period_by_slug_controller.ts').default['handle'], false>
+}
 type ApiV1AcademicperiodsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/academic_period.ts')['createAcademicPeriodValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/create_academic_period_controller.ts').default['handle'], true>
@@ -1534,6 +1582,18 @@ type ApiV1AcademicperiodsIdGetHead = {
 type ApiV1AcademicperiodsIdPut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/academic_period.ts')['updateAcademicPeriodValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/update_academic_period_controller.ts').default['handle'], true>
+}
+type ApiV1AcademicperiodsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/delete_academic_period_controller.ts').default['handle'], false>
+}
+type ApiV1AcademicperiodsIdCoursesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/list_academic_period_courses_controller.ts').default['handle'], false>
+}
+type ApiV1AcademicperiodsIdCoursesPut = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/update_academic_period_courses_controller.ts').default['handle'], false>
 }
 type ApiV1PrintrequestsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/print_request.ts')['listPrintRequestsValidator']>>
@@ -1812,6 +1872,12 @@ export interface ApiDefinition {
       };
       '$get': EscolaPeriodosletivosGetHead;
       '$head': EscolaPeriodosletivosGetHead;
+      ':slug': {
+        '$url': {
+        };
+        '$get': EscolaPeriodosletivosIdGetHead;
+        '$head': EscolaPeriodosletivosIdGetHead;
+      };
     };
     'administrativo': {
       'periodos-letivos': {
@@ -1824,6 +1890,14 @@ export interface ApiDefinition {
           };
           '$get': EscolaAdministrativoPeriodosletivosNovoperiodoletivoGetHead;
           '$head': EscolaAdministrativoPeriodosletivosNovoperiodoletivoGetHead;
+        };
+        ':id': {
+          'editar': {
+            '$url': {
+            };
+            '$get': EscolaAdministrativoPeriodosletivosIdEditarGetHead;
+            '$head': EscolaAdministrativoPeriodosletivosIdEditarGetHead;
+          };
         };
       };
       'alunos': {
@@ -1971,6 +2045,18 @@ export interface ApiDefinition {
         };
         '$get': EscolaPedagogicoGradeGetHead;
         '$head': EscolaPedagogicoGradeGetHead;
+      };
+      'horarios': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoHorariosGetHead;
+        '$head': EscolaPedagogicoHorariosGetHead;
+      };
+      'quadro': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoQuadroGetHead;
+        '$head': EscolaPedagogicoQuadroGetHead;
       };
       'ocorrencias': {
         '$url': {
@@ -2186,6 +2272,18 @@ export interface ApiDefinition {
       };
       '$get': AdminEscolasGetHead;
       '$head': AdminEscolasGetHead;
+      ':id': {
+        'editar': {
+          '$url': {
+          };
+          '$get': AdminEscolasIdEditarGetHead;
+          '$head': AdminEscolasIdEditarGetHead;
+        };
+        '$url': {
+        };
+        '$get': AdminEscolasIdGetHead;
+        '$head': AdminEscolasIdGetHead;
+      };
     };
     'onboarding': {
       '$url': {
@@ -2199,6 +2297,12 @@ export interface ApiDefinition {
         };
         '$get': AdminBillingDashboardGetHead;
         '$head': AdminBillingDashboardGetHead;
+      };
+      'faturas': {
+        '$url': {
+        };
+        '$get': AdminBillingFaturasGetHead;
+        '$head': AdminBillingFaturasGetHead;
       };
       'subscriptions': {
         '$url': {
@@ -2711,6 +2815,16 @@ export interface ApiDefinition {
           '$delete': ApiV1LevelsIdDelete;
         };
       };
+      'course-has-academic-periods': {
+        '$url': {
+        };
+        '$post': ApiV1CoursehasacademicperiodsPost;
+      };
+      'level-assignments': {
+        '$url': {
+        };
+        '$post': ApiV1LevelassignmentsPost;
+      };
       'classes': {
         '$url': {
         };
@@ -2777,12 +2891,45 @@ export interface ApiDefinition {
           '$delete': ApiV1SubjectsIdDelete;
         };
       };
+      'schedules': {
+        'class': {
+          ':classId': {
+            '$url': {
+            };
+            '$get': ApiV1SchedulesClassIdGetHead;
+            '$head': ApiV1SchedulesClassIdGetHead;
+            '$post': ApiV1SchedulesClassIdPost;
+          };
+        };
+      };
       'teachers': {
         '$url': {
         };
         '$get': ApiV1TeachersGetHead;
         '$head': ApiV1TeachersGetHead;
         '$post': ApiV1TeachersPost;
+        'timesheet': {
+          '$url': {
+          };
+          '$get': ApiV1TeachersTimesheetGetHead;
+          '$head': ApiV1TeachersTimesheetGetHead;
+        };
+        'absences': {
+          '$url': {
+          };
+          '$get': ApiV1TeachersAbsencesGetHead;
+          '$head': ApiV1TeachersAbsencesGetHead;
+          'approve': {
+            '$url': {
+            };
+            '$patch': ApiV1TeachersAbsencesApprovePatch;
+          };
+          'reject': {
+            '$url': {
+            };
+            '$patch': ApiV1TeachersAbsencesRejectPatch;
+          };
+        };
         ':id': {
           '$url': {
           };
@@ -2807,28 +2954,6 @@ export interface ApiDefinition {
             };
             '$get': ApiV1TeachersIdSubjectsGetHead;
             '$head': ApiV1TeachersIdSubjectsGetHead;
-          };
-        };
-        'timesheet': {
-          '$url': {
-          };
-          '$get': ApiV1TeachersTimesheetGetHead;
-          '$head': ApiV1TeachersTimesheetGetHead;
-        };
-        'absences': {
-          '$url': {
-          };
-          '$get': ApiV1TeachersAbsencesGetHead;
-          '$head': ApiV1TeachersAbsencesGetHead;
-          'approve': {
-            '$url': {
-            };
-            '$patch': ApiV1TeachersAbsencesApprovePatch;
-          };
-          'reject': {
-            '$url': {
-            };
-            '$patch': ApiV1TeachersAbsencesRejectPatch;
           };
         };
       };
@@ -3627,6 +3752,14 @@ export interface ApiDefinition {
           '$get': ApiV1AcademicperiodsCurrentactiveGetHead;
           '$head': ApiV1AcademicperiodsCurrentactiveGetHead;
         };
+        'by-slug': {
+          ':slug': {
+            '$url': {
+            };
+            '$get': ApiV1AcademicperiodsByslugIdGetHead;
+            '$head': ApiV1AcademicperiodsByslugIdGetHead;
+          };
+        };
         '$post': ApiV1AcademicperiodsPost;
         ':id': {
           '$url': {
@@ -3634,6 +3767,14 @@ export interface ApiDefinition {
           '$get': ApiV1AcademicperiodsIdGetHead;
           '$head': ApiV1AcademicperiodsIdGetHead;
           '$put': ApiV1AcademicperiodsIdPut;
+          '$delete': ApiV1AcademicperiodsIdDelete;
+          'courses': {
+            '$url': {
+            };
+            '$get': ApiV1AcademicperiodsIdCoursesGetHead;
+            '$head': ApiV1AcademicperiodsIdCoursesGetHead;
+            '$put': ApiV1AcademicperiodsIdCoursesPut;
+          };
         };
       };
       'print-requests': {
@@ -3934,6 +4075,13 @@ const routes = [
     types: {} as EscolaPeriodosletivosGetHead,
   },
   {
+    params: ["slug"],
+    name: 'web.escola.periodosLetivos.show',
+    path: '/escola/periodos-letivos/:slug',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdGetHead,
+  },
+  {
     params: [],
     name: 'web.escola.administrativo.periodosLetivos',
     path: '/escola/administrativo/periodos-letivos',
@@ -3946,6 +4094,13 @@ const routes = [
     path: '/escola/administrativo/periodos-letivos/novo-periodo-letivo',
     method: ["GET","HEAD"],
     types: {} as EscolaAdministrativoPeriodosletivosNovoperiodoletivoGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.escola.administrativo.periodosLetivos.editar',
+    path: '/escola/administrativo/periodos-letivos/:id/editar',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoPeriodosletivosIdEditarGetHead,
   },
   {
     params: [],
@@ -4107,6 +4262,20 @@ const routes = [
     path: '/escola/pedagogico/grade',
     method: ["GET","HEAD"],
     types: {} as EscolaPedagogicoGradeGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.pedagogico.horarios',
+    path: '/escola/pedagogico/horarios',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoHorariosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.pedagogico.quadro',
+    path: '/escola/pedagogico/quadro',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoQuadroGetHead,
   },
   {
     params: [],
@@ -4354,6 +4523,20 @@ const routes = [
     types: {} as AdminEscolasGetHead,
   },
   {
+    params: ["id"],
+    name: 'web.admin.escolas.edit',
+    path: '/admin/escolas/:id/editar',
+    method: ["GET","HEAD"],
+    types: {} as AdminEscolasIdEditarGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.admin.escolas.show',
+    path: '/admin/escolas/:id',
+    method: ["GET","HEAD"],
+    types: {} as AdminEscolasIdGetHead,
+  },
+  {
     params: [],
     name: 'web.admin.onboarding',
     path: '/admin/onboarding',
@@ -4366,6 +4549,13 @@ const routes = [
     path: '/admin/billing/dashboard',
     method: ["GET","HEAD"],
     types: {} as AdminBillingDashboardGetHead,
+  },
+  {
+    params: [],
+    name: 'web.admin.billing.faturas',
+    path: '/admin/billing/faturas',
+    method: ["GET","HEAD"],
+    types: {} as AdminBillingFaturasGetHead,
   },
   {
     params: [],
@@ -5069,6 +5259,20 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.courseHasAcademicPeriods.store',
+    path: '/api/v1/course-has-academic-periods',
+    method: ["POST"],
+    types: {} as ApiV1CoursehasacademicperiodsPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.levelAssignments.store',
+    path: '/api/v1/level-assignments',
+    method: ["POST"],
+    types: {} as ApiV1LevelassignmentsPost,
+  },
+  {
+    params: [],
     name: 'api.v1.classes.index',
     path: '/api/v1/classes',
     method: ["GET","HEAD"],
@@ -5173,6 +5377,20 @@ const routes = [
     types: {} as ApiV1SubjectsIdDelete,
   },
   {
+    params: ["classId"],
+    name: 'api.v1.schedules.getClassSchedule',
+    path: '/api/v1/schedules/class/:classId',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1SchedulesClassIdGetHead,
+  },
+  {
+    params: ["classId"],
+    name: 'api.v1.schedules.saveClassSchedule',
+    path: '/api/v1/schedules/class/:classId',
+    method: ["POST"],
+    types: {} as ApiV1SchedulesClassIdPost,
+  },
+  {
     params: [],
     name: 'api.v1.teachers.listTeachers',
     path: '/api/v1/teachers',
@@ -5185,6 +5403,34 @@ const routes = [
     path: '/api/v1/teachers',
     method: ["POST"],
     types: {} as ApiV1TeachersPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.teachers.getTeachersTimesheet',
+    path: '/api/v1/teachers/timesheet',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1TeachersTimesheetGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.teachers.getTeacherAbsences',
+    path: '/api/v1/teachers/absences',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1TeachersAbsencesGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.teachers.approveAbsence',
+    path: '/api/v1/teachers/absences/approve',
+    method: ["PATCH"],
+    types: {} as ApiV1TeachersAbsencesApprovePatch,
+  },
+  {
+    params: [],
+    name: 'api.v1.teachers.rejectAbsence',
+    path: '/api/v1/teachers/absences/reject',
+    method: ["PATCH"],
+    types: {} as ApiV1TeachersAbsencesRejectPatch,
   },
   {
     params: ["id"],
@@ -5220,34 +5466,6 @@ const routes = [
     path: '/api/v1/teachers/:id/subjects',
     method: ["GET","HEAD"],
     types: {} as ApiV1TeachersIdSubjectsGetHead,
-  },
-  {
-    params: [],
-    name: 'api.v1.teachers.getTeachersTimesheet',
-    path: '/api/v1/teachers/timesheet',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1TeachersTimesheetGetHead,
-  },
-  {
-    params: [],
-    name: 'api.v1.teachers.getTeacherAbsences',
-    path: '/api/v1/teachers/absences',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1TeachersAbsencesGetHead,
-  },
-  {
-    params: [],
-    name: 'api.v1.teachers.approveAbsence',
-    path: '/api/v1/teachers/absences/approve',
-    method: ["PATCH"],
-    types: {} as ApiV1TeachersAbsencesApprovePatch,
-  },
-  {
-    params: [],
-    name: 'api.v1.teachers.rejectAbsence',
-    path: '/api/v1/teachers/absences/reject',
-    method: ["PATCH"],
-    types: {} as ApiV1TeachersAbsencesRejectPatch,
   },
   {
     params: ["id"],
@@ -6545,6 +6763,13 @@ const routes = [
     types: {} as ApiV1AcademicperiodsCurrentactiveGetHead,
   },
   {
+    params: ["slug"],
+    name: 'api.v1.academicPeriods.showBySlug',
+    path: '/api/v1/academic-periods/by-slug/:slug',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AcademicperiodsByslugIdGetHead,
+  },
+  {
     params: [],
     name: 'api.v1.academicPeriods.createAcademicPeriod',
     path: '/api/v1/academic-periods',
@@ -6564,6 +6789,27 @@ const routes = [
     path: '/api/v1/academic-periods/:id',
     method: ["PUT"],
     types: {} as ApiV1AcademicperiodsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.academicPeriods.deleteAcademicPeriod',
+    path: '/api/v1/academic-periods/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1AcademicperiodsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.academicPeriods.listCourses',
+    path: '/api/v1/academic-periods/:id/courses',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AcademicperiodsIdCoursesGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.academicPeriods.updateCourses',
+    path: '/api/v1/academic-periods/:id/courses',
+    method: ["PUT"],
+    types: {} as ApiV1AcademicperiodsIdCoursesPut,
   },
   {
     params: [],

@@ -1732,10 +1732,16 @@ function registerAcademicPeriodApiRoutes() {
     import('#controllers/academic_periods/create_academic_period_controller')
   const ShowAcademicPeriodController = () =>
     import('#controllers/academic_periods/show_academic_period_controller')
+  const ShowAcademicPeriodBySlugController = () =>
+    import('#controllers/academic_periods/show_academic_period_by_slug_controller')
   const UpdateAcademicPeriodController = () =>
     import('#controllers/academic_periods/update_academic_period_controller')
   const DeleteAcademicPeriodController = () =>
     import('#controllers/academic_periods/delete_academic_period_controller')
+  const ListAcademicPeriodCoursesController = () =>
+    import('#controllers/academic_periods/list_academic_period_courses_controller')
+  const UpdateAcademicPeriodCoursesController = () =>
+    import('#controllers/academic_periods/update_academic_period_courses_controller')
 
   router
     .group(() => {
@@ -1745,6 +1751,9 @@ function registerAcademicPeriodApiRoutes() {
       router
         .get('/current-active', [GetCurrentActiveAcademicPeriodsController, 'handle'])
         .as('academicPeriods.getCurrentActiveAcademicPeriods')
+      router
+        .get('/by-slug/:slug', [ShowAcademicPeriodBySlugController, 'handle'])
+        .as('academicPeriods.showBySlug')
       router
         .post('/', [CreateAcademicPeriodController, 'handle'])
         .as('academicPeriods.createAcademicPeriod')
@@ -1757,6 +1766,12 @@ function registerAcademicPeriodApiRoutes() {
       router
         .delete('/:id', [DeleteAcademicPeriodController, 'handle'])
         .as('academicPeriods.deleteAcademicPeriod')
+      router
+        .get('/:id/courses', [ListAcademicPeriodCoursesController, 'handle'])
+        .as('academicPeriods.listCourses')
+      router
+        .put('/:id/courses', [UpdateAcademicPeriodCoursesController, 'handle'])
+        .as('academicPeriods.updateCourses')
     })
     .prefix('/academic-periods')
     .use(middleware.auth())
@@ -2188,6 +2203,10 @@ const ShowPeriodosLetivosAdminPageController = () =>
   import('#controllers/pages/escola/show_periodos_letivos_admin_page_controller')
 const ShowNovoPeriodoLetivoPageController = () =>
   import('#controllers/pages/escola/show_novo_periodo_letivo_page_controller')
+const ShowPeriodoLetivoPageController = () =>
+  import('#controllers/pages/escola/show_periodo_letivo_page_controller')
+const ShowEditarPeriodoLetivoPageController = () =>
+  import('#controllers/pages/escola/show_editar_periodo_letivo_page_controller')
 const ShowGradePageController = () => import('#controllers/pages/escola/show_grade_page_controller')
 const ShowHorariosPageController = () =>
   import('#controllers/pages/escola/show_horarios_page_controller')
@@ -2259,6 +2278,8 @@ const ShowAdminEscolasPageController = () =>
   import('#controllers/pages/admin/show_admin_escolas_page_controller')
 const ShowAdminBillingDashboardPageController = () =>
   import('#controllers/pages/admin/show_admin_billing_dashboard_page_controller')
+const ShowAdminBillingFaturasPageController = () =>
+  import('#controllers/pages/admin/show_admin_billing_faturas_page_controller')
 const ShowAdminSubscriptionsPageController = () =>
   import('#controllers/pages/admin/show_admin_subscriptions_page_controller')
 const ShowAdminRedesPageController = () =>
@@ -2271,6 +2292,10 @@ const ShowAdminConfiguracoesPageController = () =>
   import('#controllers/pages/admin/show_admin_configuracoes_page_controller')
 const ShowSchoolOnboardingPageController = () =>
   import('#controllers/pages/admin/show_school_onboarding_page_controller')
+const ShowSchoolDetailsPageController = () =>
+  import('#controllers/pages/admin/show_school_details_page_controller')
+const ShowEditSchoolPageController = () =>
+  import('#controllers/pages/admin/show_edit_school_page_controller')
 
 // =============================================================================
 // PAGE ROUTE FUNCTIONS (Inertia)
@@ -2302,6 +2327,9 @@ function registerPageRoutes() {
           router.get('/', [ShowEscolaDashboardPageController]).as('dashboard')
           router.get('/periodos-letivos', [ShowPeriodosLetivosPageController]).as('periodosLetivos')
           router
+            .get('/periodos-letivos/:slug', [ShowPeriodoLetivoPageController])
+            .as('periodosLetivos.show')
+          router
             .get('/administrativo/periodos-letivos', [ShowPeriodosLetivosAdminPageController])
             .as('administrativo.periodosLetivos')
           router
@@ -2309,6 +2337,11 @@ function registerPageRoutes() {
               ShowNovoPeriodoLetivoPageController,
             ])
             .as('administrativo.novoPeriodoLetivo')
+          router
+            .get('/administrativo/periodos-letivos/:id/editar', [
+              ShowEditarPeriodoLetivoPageController,
+            ])
+            .as('administrativo.periodosLetivos.editar')
 
           // Administrativo
           router
@@ -2469,10 +2502,15 @@ function registerPageRoutes() {
         .group(() => {
           router.get('/', [ShowAdminDashboardPageController]).as('dashboard')
           router.get('/escolas', [ShowAdminEscolasPageController]).as('escolas')
+          router.get('/escolas/:id/editar', [ShowEditSchoolPageController]).as('escolas.edit')
+          router.get('/escolas/:id', [ShowSchoolDetailsPageController]).as('escolas.show')
           router.get('/onboarding', [ShowSchoolOnboardingPageController]).as('onboarding')
           router
             .get('/billing/dashboard', [ShowAdminBillingDashboardPageController])
             .as('billing.dashboard')
+          router
+            .get('/billing/faturas', [ShowAdminBillingFaturasPageController])
+            .as('billing.faturas')
           router
             .get('/billing/subscriptions', [ShowAdminSubscriptionsPageController])
             .as('billing.subscriptions')
