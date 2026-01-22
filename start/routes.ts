@@ -190,6 +190,8 @@ const UpdateExamController = () => import('#controllers/exams/update_exam_contro
 const DeleteExamController = () => import('#controllers/exams/delete_exam_controller')
 const ListExamGradesController = () => import('#controllers/exams/list_exam_grades_controller')
 const SaveExamGradeController = () => import('#controllers/exams/save_exam_grade_controller')
+const BatchSaveExamGradesController = () =>
+  import('#controllers/exams/batch_save_exam_grades_controller')
 const UpdateExamGradeController = () => import('#controllers/exams/update_exam_grade_controller')
 
 // Grades Analytics
@@ -1149,6 +1151,7 @@ function registerExamApiRoutes() {
       router.put('/:id', [UpdateExamController, 'handle']).as('exams.update')
       router.delete('/:id', [DeleteExamController, 'handle']).as('exams.destroy')
       router.get('/:id/grades', [ListExamGradesController, 'handle']).as('exams.grades')
+      router.post('/:id/grades/batch', [BatchSaveExamGradesController, 'handle']).as('exams.batchSaveGrades')
       router.post('/:id/grades', [SaveExamGradeController, 'handle']).as('exams.saveGrade')
       router
         .put('/:id/grades/:gradeId', [UpdateExamGradeController, 'handle'])

@@ -38,3 +38,16 @@ export const saveExamGradeValidator = vine.compile(
     absent: vine.boolean().optional(),
   })
 )
+
+export const batchSaveExamGradesValidator = vine.compile(
+  vine.object({
+    grades: vine.array(
+      vine.object({
+        studentId: vine.string().trim(),
+        score: vine.number().min(0),
+        feedback: vine.string().trim().maxLength(1000).optional(),
+        absent: vine.boolean().optional(),
+      })
+    ),
+  })
+)

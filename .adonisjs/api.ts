@@ -975,6 +975,10 @@ type ApiV1ExamsIdGradesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/exams/list_exam_grades_controller.ts').default['handle'], false>
 }
+type ApiV1ExamsIdGradesBatchPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/exam.ts')['batchSaveExamGradesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/exams/batch_save_exam_grades_controller.ts').default['handle'], true>
+}
 type ApiV1ExamsIdGradesPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/exam.ts')['saveExamGradeValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/exams/save_exam_grade_controller.ts').default['handle'], true>
@@ -3277,6 +3281,11 @@ export interface ApiDefinition {
             };
             '$get': ApiV1ExamsIdGradesGetHead;
             '$head': ApiV1ExamsIdGradesGetHead;
+            'batch': {
+              '$url': {
+              };
+              '$post': ApiV1ExamsIdGradesBatchPost;
+            };
             '$post': ApiV1ExamsIdGradesPost;
             ':gradeId': {
               '$url': {
@@ -6061,6 +6070,13 @@ const routes = [
     path: '/api/v1/exams/:id/grades',
     method: ["GET","HEAD"],
     types: {} as ApiV1ExamsIdGradesGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.exams.batchSaveGrades',
+    path: '/api/v1/exams/:id/grades/batch',
+    method: ["POST"],
+    types: {} as ApiV1ExamsIdGradesBatchPost,
   },
   {
     params: ["id"],

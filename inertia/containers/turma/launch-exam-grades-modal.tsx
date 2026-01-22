@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, Save, Users } from 'lucide-react'
+import { tuyau } from '~/lib/api'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -91,20 +92,21 @@ interface SaveGradePayload {
   absent: boolean
 }
 
-async function saveExamGrade(payload: SaveGradePayload): Promise<void> {
-  const response = await fetch(`/api/v1/exams/${payload.examId}/grades`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      studentId: payload.studentId,
-      score: payload.score,
-      absent: payload.absent,
-    }),
-  })
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to save grade')
-  }
+async function batchSaveExamGrades(
+  examId: string,
+  grades: SaveGradePayload[]
+): Promise<void> {
+  await tuyau
+    .$route('api.v1.exams.batchSaveGrades')
+    .$post({
+      params: { id: examId },
+      grades: grades.map((g) => ({
+        studentId: g.studentId,
+        score: g.score,
+        absent: g.absent,
+      })),
+    })
+    .unwrap()
 }
 
 function LaunchExamGradesModalSkeleton() {
@@ -174,8 +176,8 @@ function LaunchExamGradesModalContent({
 
   const saveMutation = useMutation({
     mutationFn: async (grades: SaveGradePayload[]) => {
-      // Save all grades in parallel
-      await Promise.all(grades.map(saveExamGrade))
+      // Save all grades in a single batch request
+      await batchSaveExamGrades(examId, grades)
     },
     onSuccess: () => {
       toast.success('Notas salvas com sucesso!')
