@@ -21,6 +21,8 @@ const ShowSchoolBySlugController = () => import('#controllers/schools/show_by_sl
 const StoreSchoolController = () => import('#controllers/schools/store')
 const UpdateSchoolController = () => import('#controllers/schools/update')
 const DestroySchoolController = () => import('#controllers/schools/destroy')
+const UploadSchoolLogoController = () =>
+  import('#controllers/schools/upload_school_logo_controller')
 
 // Auth
 const LoginController = () => import('#controllers/auth/login')
@@ -110,10 +112,14 @@ const ShowClassBySlugController = () => import('#controllers/classes/show_class_
 const CreateClassController = () => import('#controllers/classes/create_class_controller')
 const UpdateClassController = () => import('#controllers/classes/update_class_controller')
 const DeleteClassController = () => import('#controllers/classes/delete_class_controller')
+const UpdateClassWithTeachersController = () =>
+  import('#controllers/classes/update_class_with_teachers_controller')
 const ListClassStudentsController = () =>
   import('#controllers/classes/list_class_students_controller')
 const CountClassStudentsController = () =>
   import('#controllers/classes/count_class_students_controller')
+const GetClassesForSidebarController = () =>
+  import('#controllers/classes/get_classes_for_sidebar_controller')
 
 // Subjects
 const ListSubjectsController = () => import('#controllers/subjects/list_subjects_controller')
@@ -142,6 +148,8 @@ const ListTeacherClassesController = () =>
   import('#controllers/teachers/list_teacher_classes_controller')
 const ListTeacherSubjectsController = () =>
   import('#controllers/teachers/list_teacher_subjects_controller')
+const UpdateTeacherSubjectsController = () =>
+  import('#controllers/teachers/update_teacher_subjects_controller')
 const AssignTeacherToClassController = () =>
   import('#controllers/teachers/assign_teacher_to_class_controller')
 const RemoveTeacherFromClassController = () =>
@@ -682,6 +690,7 @@ function registerSchoolApiRoutes() {
       router.get('/:id', [ShowSchoolController, 'handle']).as('schools.show')
       router.put('/:id', [UpdateSchoolController, 'handle']).as('schools.update')
       router.delete('/:id', [DestroySchoolController, 'handle']).as('schools.destroy')
+      router.post('/:id/logo', [UploadSchoolLogoController, 'handle']).as('schools.uploadLogo')
     })
     .prefix('/schools')
 }
@@ -704,7 +713,7 @@ function registerUserApiRoutes() {
         .as('users.canteenPurchases')
     })
     .prefix('/users')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerUserSchoolApiRoutes() {
@@ -939,11 +948,18 @@ function registerLevelAssignmentApiRoutes() {
 function registerClassApiRoutes() {
   router
     .group(() => {
+      router
+        .get('/sidebar', [GetClassesForSidebarController, 'handle'])
+        .as('classes.sidebar')
+        .use(middleware.impersonation())
       router.get('/', [ListClassesController, 'handle']).as('classes.index')
       router.post('/', [CreateClassController, 'handle']).as('classes.store')
       router.get('/slug/:slug', [ShowClassBySlugController, 'handle']).as('classes.showBySlug')
       router.get('/:id', [ShowClassController, 'handle']).as('classes.show')
       router.put('/:id', [UpdateClassController, 'handle']).as('classes.update')
+      router
+        .put('/:id/teachers', [UpdateClassWithTeachersController, 'handle'])
+        .as('classes.updateWithTeachers')
       router.delete('/:id', [DeleteClassController, 'handle']).as('classes.destroy')
       router.get('/:id/students', [ListClassStudentsController, 'handle']).as('classes.students')
       router
@@ -1028,6 +1044,9 @@ function registerTeacherApiRoutes() {
         .get('/:id/subjects', [ListTeacherSubjectsController, 'handle'])
         .as('teachers.listTeacherSubjects')
       router
+        .put('/:id/subjects', [UpdateTeacherSubjectsController, 'handle'])
+        .as('teachers.updateTeacherSubjects')
+      router
         .post('/:id/classes', [AssignTeacherToClassController, 'handle'])
         .as('teachers.assignClass')
       router
@@ -1035,7 +1054,7 @@ function registerTeacherApiRoutes() {
         .as('teachers.removeClass')
     })
     .prefix('/teachers')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerExamApiRoutes() {
@@ -2207,6 +2226,20 @@ const ShowPeriodoLetivoPageController = () =>
   import('#controllers/pages/escola/show_periodo_letivo_page_controller')
 const ShowEditarPeriodoLetivoPageController = () =>
   import('#controllers/pages/escola/show_editar_periodo_letivo_page_controller')
+const ShowCursoVisaoGeralPageController = () =>
+  import('#controllers/pages/escola/show_curso_visao_geral_page_controller')
+const ShowCursoTurmasPageController = () =>
+  import('#controllers/pages/escola/show_curso_turmas_page_controller')
+const ShowTurmaAtividadesPageController = () =>
+  import('#controllers/pages/escola/show_turma_atividades_page_controller')
+const ShowTurmaProvasPageController = () =>
+  import('#controllers/pages/escola/show_turma_provas_page_controller')
+const ShowTurmaPresencasPageController = () =>
+  import('#controllers/pages/escola/show_turma_presencas_page_controller')
+const ShowTurmaNotasPageController = () =>
+  import('#controllers/pages/escola/show_turma_notas_page_controller')
+const ShowTurmaSituacaoPageController = () =>
+  import('#controllers/pages/escola/show_turma_situacao_page_controller')
 const ShowGradePageController = () => import('#controllers/pages/escola/show_grade_page_controller')
 const ShowHorariosPageController = () =>
   import('#controllers/pages/escola/show_horarios_page_controller')
@@ -2342,6 +2375,43 @@ function registerPageRoutes() {
               ShowEditarPeriodoLetivoPageController,
             ])
             .as('administrativo.periodosLetivos.editar')
+
+          // Curso pages (within periodo letivo)
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/visao-geral', [
+              ShowCursoVisaoGeralPageController,
+            ])
+            .as('periodosLetivos.cursos.visaoGeral')
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas', [ShowCursoTurmasPageController])
+            .as('periodosLetivos.cursos.turmas')
+
+          // Turma pages (within curso)
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/atividades', [
+              ShowTurmaAtividadesPageController,
+            ])
+            .as('periodosLetivos.cursos.turmas.atividades')
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/provas', [
+              ShowTurmaProvasPageController,
+            ])
+            .as('periodosLetivos.cursos.turmas.provas')
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/presencas', [
+              ShowTurmaPresencasPageController,
+            ])
+            .as('periodosLetivos.cursos.turmas.presencas')
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/notas', [
+              ShowTurmaNotasPageController,
+            ])
+            .as('periodosLetivos.cursos.turmas.notas')
+          router
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/situacao', [
+              ShowTurmaSituacaoPageController,
+            ])
+            .as('periodosLetivos.cursos.turmas.situacao')
 
           // Administrativo
           router

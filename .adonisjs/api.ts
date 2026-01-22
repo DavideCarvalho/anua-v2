@@ -471,6 +471,10 @@ type ApiV1SchoolsIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/schools/destroy.ts').default['handle'], false>
 }
+type ApiV1SchoolsIdLogoPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schools/upload_school_logo_controller.ts').default['handle'], false>
+}
 type ApiV1UsersGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/users/index.ts').default['handle'], false>
@@ -715,6 +719,10 @@ type ApiV1LevelassignmentsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/level_assignment.ts')['createLevelAssignmentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/level_assignments/create_level_assignment_controller.ts').default['handle'], true>
 }
+type ApiV1ClassesSidebarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/get_classes_for_sidebar_controller.ts').default['handle'], false>
+}
 type ApiV1ClassesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/list_classes_controller.ts').default['handle'], false>
@@ -734,6 +742,10 @@ type ApiV1ClassesIdGetHead = {
 type ApiV1ClassesIdPut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['updateClassValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_controller.ts').default['handle'], true>
+}
+type ApiV1ClassesIdTeachersPut = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_with_teachers_controller.ts').default['handle'], false>
 }
 type ApiV1ClassesIdDelete = {
   request: unknown
@@ -826,6 +838,10 @@ type ApiV1TeachersIdClassesGetHead = {
 type ApiV1TeachersIdSubjectsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/list_teacher_subjects_controller.ts').default['handle'], false>
+}
+type ApiV1TeachersIdSubjectsPut = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/update_teacher_subjects_controller.ts').default['handle'], false>
 }
 type ApiV1TeachersIdClassesPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher.ts')['assignTeacherToClassValidator']>>
@@ -2574,6 +2590,11 @@ export interface ApiDefinition {
           '$head': ApiV1SchoolsIdGetHead;
           '$put': ApiV1SchoolsIdPut;
           '$delete': ApiV1SchoolsIdDelete;
+          'logo': {
+            '$url': {
+            };
+            '$post': ApiV1SchoolsIdLogoPost;
+          };
         };
         ':schoolId': {
           'subscription': {
@@ -2826,6 +2847,12 @@ export interface ApiDefinition {
         '$post': ApiV1LevelassignmentsPost;
       };
       'classes': {
+        'sidebar': {
+          '$url': {
+          };
+          '$get': ApiV1ClassesSidebarGetHead;
+          '$head': ApiV1ClassesSidebarGetHead;
+        };
         '$url': {
         };
         '$get': ApiV1ClassesGetHead;
@@ -2845,6 +2872,11 @@ export interface ApiDefinition {
           '$get': ApiV1ClassesIdGetHead;
           '$head': ApiV1ClassesIdGetHead;
           '$put': ApiV1ClassesIdPut;
+          'teachers': {
+            '$url': {
+            };
+            '$put': ApiV1ClassesIdTeachersPut;
+          };
           '$delete': ApiV1ClassesIdDelete;
           'students': {
             '$url': {
@@ -2954,6 +2986,7 @@ export interface ApiDefinition {
             };
             '$get': ApiV1TeachersIdSubjectsGetHead;
             '$head': ApiV1TeachersIdSubjectsGetHead;
+            '$put': ApiV1TeachersIdSubjectsPut;
           };
         };
       };
@@ -4026,6 +4059,13 @@ export interface ApiDefinition {
 }
 const routes = [
   {
+    params: ["*"],
+    name: 'drive.fs.serve',
+    path: '/uploads/*',
+    method: ["GET","HEAD"],
+    types: {} as unknown,
+  },
+  {
     params: [],
     name: 'web.home',
     path: '/',
@@ -4845,6 +4885,13 @@ const routes = [
     types: {} as ApiV1SchoolsIdDelete,
   },
   {
+    params: ["id"],
+    name: 'api.v1.schools.uploadLogo',
+    path: '/api/v1/schools/:id/logo',
+    method: ["POST"],
+    types: {} as ApiV1SchoolsIdLogoPost,
+  },
+  {
     params: [],
     name: 'api.v1.users.index',
     path: '/api/v1/users',
@@ -5273,6 +5320,13 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.classes.sidebar',
+    path: '/api/v1/classes/sidebar',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ClassesSidebarGetHead,
+  },
+  {
+    params: [],
     name: 'api.v1.classes.index',
     path: '/api/v1/classes',
     method: ["GET","HEAD"],
@@ -5305,6 +5359,13 @@ const routes = [
     path: '/api/v1/classes/:id',
     method: ["PUT"],
     types: {} as ApiV1ClassesIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.classes.updateWithTeachers',
+    path: '/api/v1/classes/:id/teachers',
+    method: ["PUT"],
+    types: {} as ApiV1ClassesIdTeachersPut,
   },
   {
     params: ["id"],
@@ -5466,6 +5527,13 @@ const routes = [
     path: '/api/v1/teachers/:id/subjects',
     method: ["GET","HEAD"],
     types: {} as ApiV1TeachersIdSubjectsGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.teachers.updateTeacherSubjects',
+    path: '/api/v1/teachers/:id/subjects',
+    method: ["PUT"],
+    types: {} as ApiV1TeachersIdSubjectsPut,
   },
   {
     params: ["id"],
