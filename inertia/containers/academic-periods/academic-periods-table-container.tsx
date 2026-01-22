@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { format, differenceInDays, isBefore } from 'date-fns'
 import {
   AlertCircle,
@@ -223,7 +223,8 @@ export function AcademicPeriodsTableContainer({ schoolId }: { schoolId: string }
 
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/escola/administrativo/periodos-letivos/${row.id}/editar`}
+                              route="web.escola.administrativo.periodosLetivos.editar"
+                              params={{ id: row.id }}
                               className="flex items-center gap-2"
                             >
                               <Edit className="h-4 w-4" />
@@ -233,7 +234,8 @@ export function AcademicPeriodsTableContainer({ schoolId }: { schoolId: string }
 
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/escola/periodos-letivos/${row.slug}`}
+                              route="web.escola.periodosLetivos.show"
+                              params={{ slug: row.slug }}
                               className="flex items-center gap-2"
                             >
                               <Eye className="h-4 w-4" />
