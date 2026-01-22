@@ -164,9 +164,9 @@ export default class School extends BaseModel {
   @manyToMany(() => SchoolGroup, {
     pivotTable: 'SchoolHasGroup',
     localKey: 'id',
-    pivotForeignKey: 'school_id',
+    pivotForeignKey: 'schoolId',
     relatedKey: 'id',
-    pivotRelatedForeignKey: 'school_group_id',
+    pivotRelatedForeignKey: 'schoolGroupId',
   })
   declare schoolGroups: ManyToMany<typeof SchoolGroup>
 

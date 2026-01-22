@@ -6,7 +6,7 @@ import School from '#models/school'
 /**
  * Controller para retornar usuários disponíveis para personificação
  * Filtra por role e escola, permite busca
- * Igual ao school-super-app: retorna também listas de roles e escolas para filtros
+ * Usa UserHasSchool para relacionamento usuário-escola
  */
 export default class GetImpersonationConfigController {
   async handle({ auth, request, response }: HttpContext) {
@@ -33,7 +33,9 @@ export default class GetImpersonationConfigController {
         roleQuery.whereNotIn('name', ['ADMIN', 'SUPER_ADMIN'])
       })
       .preload('role')
-      .preload('school')
+      .preload('userHasSchools', (uhsQuery) => {
+        uhsQuery.preload('school')
+      })
 
     // Filtro por busca
     if (search) {
@@ -42,14 +44,16 @@ export default class GetImpersonationConfigController {
       })
     }
 
-    // Filtro por role (por ID agora, igual school-super-app)
+    // Filtro por role (por ID)
     if (roleFilter && roleFilter !== 'all') {
       query.where('roleId', roleFilter)
     }
 
-    // Filtro por escola
+    // Filtro por escola (via UserHasSchool)
     if (schoolFilter && schoolFilter !== 'all') {
-      query.where('schoolId', schoolFilter)
+      query.whereHas('userHasSchools', (uhsQuery) => {
+        uhsQuery.where('schoolId', schoolFilter)
+      })
     }
 
     // Buscar em paralelo: usuários, roles e escolas
@@ -65,13 +69,17 @@ export default class GetImpersonationConfigController {
     )
 
     return {
-      users: users.all().map((u) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role?.name,
-        school: u.school?.name ?? null,
-      })),
+      users: users.all().map((u) => {
+        // Pegar a primeira escola do usuário via UserHasSchool
+        const firstSchool = u.userHasSchools?.[0]?.school
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role?.name,
+          school: firstSchool?.name ?? null,
+        }
+      }),
       meta: {
         total: users.total,
         perPage: users.perPage,

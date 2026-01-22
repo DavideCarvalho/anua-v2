@@ -56,6 +56,8 @@ export default defineConfig({
     () => import('@tuyau/core/tuyau_provider'),
     () => import('@adonisjs/mail/mail_provider'),
     () => import('@adonisjs/cache/cache_provider'),
+    () => import('@adonisjs/drive/drive_provider'),
+    () => import('@jrmc/adonis-attachment/attachment_provider'),
   ],
 
   /*

@@ -14,7 +14,7 @@ export default class IndexStudentsController {
       .preload('user', (userQuery) => {
         userQuery.whereNull('deletedAt')
       })
-      .orderBy('createdAt', 'desc')
+      .orderBy('id', 'desc')
 
     if (search) {
       query.whereHas('user', (userQuery) => {

@@ -49,3 +49,21 @@ export const updateAcademicPeriodValidator = vine.compile(
     isClosed: vine.boolean().optional(),
   })
 )
+
+export const updateCoursesValidator = vine.compile(
+  vine.object({
+    courses: vine.array(
+      vine.object({
+        id: vine.string().optional(),
+        courseId: vine.string(),
+        levels: vine.array(
+          vine.object({
+            id: vine.string().optional(),
+            levelId: vine.string(),
+            isActive: vine.boolean().optional(),
+          })
+        ),
+      })
+    ),
+  })
+)

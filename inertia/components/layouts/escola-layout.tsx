@@ -24,6 +24,7 @@ import { cn } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
+import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
 
 interface NavItem {
   title: string
@@ -216,13 +217,8 @@ export function EscolaLayout({ children }: PropsWithChildren) {
             </button>
           </div>
 
-          {/* School info */}
-          {user?.school && (
-            <div className="border-b px-4 py-3">
-              <p className="text-sm font-medium truncate">{user.school.name}</p>
-              <p className="text-xs text-muted-foreground">{formatRoleName(user.role?.name)}</p>
-            </div>
-          )}
+          {/* School switcher */}
+          <SchoolGroupSwitcher />
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-3 py-4">

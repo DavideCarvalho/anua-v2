@@ -14,8 +14,9 @@ export default class ListAssignmentsController {
       .preload('teacherHasClass', (query) => {
         query.preload('class')
         query.preload('subject')
-        query.preload('teacher')
+        query.preload('teacher', (tq) => tq.preload('user'))
       })
+      .withCount('submissions', (q) => q.as('submissionsCount'))
       .orderBy('dueDate', 'desc')
 
     if (classId) {

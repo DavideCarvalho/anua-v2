@@ -2,19 +2,38 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.assignments.show')
+type SerializedResponse<T> = T extends { serialize: () => infer U }
+  ? U
+  : T extends { toJSON: () => infer U }
+    ? U
+    : T
 
-export type AssignmentResponse = InferResponseType<typeof $route.$get>
+type AssignmentParams = Parameters<typeof tuyau.api.v1.assignments>[0]
 
-export function useAssignmentQueryOptions(id: string) {
+const $route = tuyau.api.v1.assignments({ id: '' }).$get
+
+export type AssignmentResponse = InferResponseType<typeof $route>
+export type AssignmentData = SerializedResponse<AssignmentResponse>
+
+export function useAssignmentQueryOptions(params: AssignmentParams) {
   return {
-    queryKey: ['assignment', id],
+    queryKey: ['assignment', params],
     queryFn: () => {
-      return tuyau
-        .$route('api.v1.assignments.show')
-        .$get({ params: { id } })
+      return tuyau.api.v1
+        .assignments(params)
+        .$get()
         .unwrap()
+        .then((response) => {
+          if (response && typeof response === 'object') {
+            if ('serialize' in response && typeof response.serialize === 'function') {
+              return response.serialize()
+            }
+            if ('toJSON' in response && typeof response.toJSON === 'function') {
+              return response.toJSON()
+            }
+          }
+          return response as AssignmentData
+        })
     },
-    enabled: !!id,
-  } satisfies QueryOptions<AssignmentResponse>
+  } satisfies QueryOptions<AssignmentData>
 }

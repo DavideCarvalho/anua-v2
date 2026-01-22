@@ -53,9 +53,12 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 
-import { useEnrollmentsQueryOptions } from '../../hooks/queries/use-enrollments'
+import { useEnrollmentsQueryOptions, type EnrollmentsResponse } from '../../hooks/queries/use-enrollments'
 import { useUpdateDocumentStatusMutation } from '../../hooks/mutations/use-update-document-status'
 import { brazilianDateFormatter } from '../../lib/formatters'
+
+type Enrollment = EnrollmentsResponse['data'][number]
+type StudentDocument = NonNullable<Enrollment['student']>['documents'][number]
 
 const STATUS_OPTIONS = [
   { label: 'Pendente de Revisão', value: 'PENDING_DOCUMENT_REVIEW' },
@@ -175,15 +178,15 @@ export function EnrollmentsTable({
     setRejectionReason('')
   }
 
-  const getPendingDocsCount = (documents: any[]) => {
+  const getPendingDocsCount = (documents: StudentDocument[]) => {
     return documents.filter((d) => d.status === 'PENDING').length
   }
 
-  const getApprovedDocsCount = (documents: any[]) => {
+  const getApprovedDocsCount = (documents: StudentDocument[]) => {
     return documents.filter((d) => d.status === 'APPROVED').length
   }
 
-  const getRejectedDocsCount = (documents: any[]) => {
+  const getRejectedDocsCount = (documents: StudentDocument[]) => {
     return documents.filter((d) => d.status === 'REJECTED').length
   }
 
@@ -231,10 +234,9 @@ export function EnrollmentsTable({
                   <TableHead>Data</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {rows.map((enrollment: any) => (
-                  <Collapsible key={enrollment.id} asChild>
-                    <>
+              {rows.map((enrollment: Enrollment) => (
+                <Collapsible key={enrollment.id} asChild>
+                  <TableBody>
                       <TableRow className="cursor-pointer hover:bg-muted/50">
                         <TableCell>
                           <CollapsibleTrigger asChild>
@@ -347,7 +349,7 @@ export function EnrollmentsTable({
                               </h4>
                               {enrollment.student?.documents?.length > 0 ? (
                                 <div className="space-y-2">
-                                  {enrollment.student.documents.map((doc: any) => (
+                                  {enrollment.student.documents.map((doc: StudentDocument) => (
                                     <div
                                       key={doc.id}
                                       className="flex items-center justify-between rounded-lg border bg-background p-3"
@@ -451,10 +453,9 @@ export function EnrollmentsTable({
                           </TableCell>
                         </TableRow>
                       </CollapsibleContent>
-                    </>
+                    </TableBody>
                   </Collapsible>
                 ))}
-              </TableBody>
             </Table>
           )}
 

@@ -1,4 +1,5 @@
-import { Link, usePage } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
 import {
   LayoutDashboard,
@@ -46,42 +47,44 @@ import {
 
 interface NavItem {
   title: string
+  route: string
   href: string
   icon: React.ElementType
-  children?: { title: string; href: string }[]
+  children?: { title: string; route: string; href: string }[]
 }
 
 const navigation: NavItem[] = [
-  { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { title: 'Escolas', href: '/admin/escolas', icon: Building2 },
-  { title: 'Redes', href: '/admin/redes', icon: Network },
+  { title: 'Dashboard', route: 'web.admin.dashboard', href: '/admin', icon: LayoutDashboard },
+  { title: 'Escolas', route: 'web.admin.escolas', href: '/admin/escolas', icon: Building2 },
+  { title: 'Redes', route: 'web.admin.redes', href: '/admin/redes', icon: Network },
   {
     title: 'Analytics',
+    route: 'web.admin.analytics.index',
     href: '/admin/analytics',
     icon: BarChart3,
     children: [
-      { title: 'Acadêmico', href: '/admin/analytics/academico' },
-      { title: 'Presença', href: '/admin/analytics/presenca' },
-      { title: 'Cantina', href: '/admin/analytics/cantina' },
-      { title: 'Pagamentos', href: '/admin/analytics/pagamentos' },
-      { title: 'Matrículas', href: '/admin/analytics/matriculas' },
-      { title: 'Ocorrências', href: '/admin/analytics/ocorrencias' },
-      { title: 'Gamificação', href: '/admin/analytics/gamificacao' },
-      { title: 'RH', href: '/admin/analytics/rh' },
+      { title: 'Acadêmico', route: 'web.admin.analytics.academico', href: '/admin/analytics/academico' },
+      { title: 'Presença', route: 'web.admin.analytics.presenca', href: '/admin/analytics/presenca' },
+      { title: 'Cantina', route: 'web.admin.analytics.cantina', href: '/admin/analytics/cantina' },
+      { title: 'Pagamentos', route: 'web.admin.analytics.pagamentos', href: '/admin/analytics/pagamentos' },
+      { title: 'Matrículas', route: 'web.admin.analytics.matriculas', href: '/admin/analytics/matriculas' },
+      { title: 'Ocorrências', route: 'web.admin.analytics.ocorrencias', href: '/admin/analytics/ocorrencias' },
+      { title: 'Gamificação', route: 'web.admin.analytics.gamificacao', href: '/admin/analytics/gamificacao' },
+      { title: 'RH', route: 'web.admin.analytics.rh', href: '/admin/analytics/rh' },
     ],
   },
   {
     title: 'Billing',
+    route: 'web.admin.billing.dashboard',
     href: '/admin/billing',
     icon: CreditCard,
     children: [
-      { title: 'Dashboard', href: '/admin/billing/dashboard' },
-      { title: 'Faturas', href: '/admin/billing/invoices' },
-      { title: 'Assinaturas', href: '/admin/billing/subscriptions' },
+      { title: 'Dashboard', route: 'web.admin.billing.dashboard', href: '/admin/billing/dashboard' },
+      { title: 'Assinaturas', route: 'web.admin.billing.subscriptions', href: '/admin/billing/subscriptions' },
     ],
   },
-  { title: 'Seguros', href: '/admin/seguros', icon: Shield },
-  { title: 'Configurações', href: '/admin/configuracoes', icon: Settings },
+  { title: 'Seguros', route: 'web.admin.seguros.index', href: '/admin/seguros', icon: Shield },
+  { title: 'Configurações', route: 'web.admin.configuracoes', href: '/admin/configuracoes', icon: Settings },
 ]
 
 function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: string }) {
@@ -102,9 +105,9 @@ function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: stri
         <CollapsibleContent>
           <SidebarMenuSub>
             {item.children?.map((child) => (
-              <SidebarMenuSubItem key={child.href}>
+              <SidebarMenuSubItem key={child.route}>
                 <SidebarMenuSubButton asChild isActive={pathname === child.href}>
-                  <Link href={child.href}>{child.title}</Link>
+                  <Link route={child.route}>{child.title}</Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
@@ -121,7 +124,7 @@ function NavItemSimple({ item, pathname }: { item: NavItem; pathname: string }) 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-        <Link href={item.href}>
+        <Link route={item.route}>
           <item.icon className="h-4 w-4" />
           <span>{item.title}</span>
         </Link>
@@ -141,7 +144,7 @@ function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/admin">
+              <Link route="web.admin.dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   A
                 </div>
@@ -192,11 +195,14 @@ function AppSidebar() {
         </SidebarMenu>
 
         {/* Logout */}
-        <Link href="/api/v1/auth/logout" method="post" as="button" className="w-full">
-          <Button variant="outline" size="sm" className="w-full justify-start">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Sair</span>
-          </Button>
+        <Link
+          route="api.v1.auth.logout"
+          method="post"
+          as="button"
+          className="inline-flex w-full items-center justify-start gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Sair</span>
         </Link>
       </SidebarFooter>
 

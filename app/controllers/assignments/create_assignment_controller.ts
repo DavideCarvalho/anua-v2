@@ -8,7 +8,16 @@ import { createAssignmentValidator } from '#validators/assignment'
 
 export default class CreateAssignmentController {
   async handle({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(createAssignmentValidator)
+    let payload
+    try {
+      payload = await request.validateUsing(createAssignmentValidator)
+    } catch (error) {
+      console.error('Validation error:', error)
+      return response.badRequest({
+        message: 'Validation failed',
+        errors: error.messages || error.message,
+      })
+    }
 
     // Find the TeacherHasClass record that links teacher, class, and subject
     const teacherHasClass = await TeacherHasClass.query()
@@ -23,20 +32,27 @@ export default class CreateAssignmentController {
       })
     }
 
-    // Get the school from the class to find the active academic period
-    const classRecord = await Class_.find(payload.classId)
-    if (!classRecord) {
-      return response.notFound({ message: 'Class not found' })
-    }
+    // Use provided academicPeriodId or fall back to active period
+    let academicPeriodId = payload.academicPeriodId
 
-    // Find active academic period for this school
-    const academicPeriod = await AcademicPeriod.query()
-      .where('schoolId', classRecord.schoolId)
-      .where('isActive', true)
-      .first()
+    if (!academicPeriodId) {
+      // Get the school from the class to find the active academic period
+      const classRecord = await Class_.find(payload.classId)
+      if (!classRecord) {
+        return response.notFound({ message: 'Class not found' })
+      }
 
-    if (!academicPeriod) {
-      return response.notFound({ message: 'No active academic period found' })
+      // Find active academic period for this school
+      const academicPeriod = await AcademicPeriod.query()
+        .where('schoolId', classRecord.schoolId)
+        .where('isActive', true)
+        .first()
+
+      if (!academicPeriod) {
+        return response.notFound({ message: 'No active academic period found' })
+      }
+
+      academicPeriodId = academicPeriod.id
     }
 
     const assignment = await Assignment.create({
@@ -45,7 +61,7 @@ export default class CreateAssignmentController {
       grade: payload.maxScore ?? 100,
       dueDate: DateTime.fromJSDate(payload.dueDate),
       teacherHasClassId: teacherHasClass.id,
-      academicPeriodId: academicPeriod.id,
+      academicPeriodId,
     })
 
     await assignment.load('teacherHasClass', (query) => {

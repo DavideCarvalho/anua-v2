@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
 import {
@@ -12,6 +13,7 @@ import { Button } from '~/components/ui/button'
 import { Calendar, Plus, Settings, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { formatSegmentName } from '~/lib/formatters'
 
 interface AcademicPeriod {
   id: string
@@ -64,7 +66,7 @@ export default function PeriodosLetivosPage() {
             <h1 className="text-2xl font-bold tracking-tight">Períodos Letivos</h1>
             <p className="text-muted-foreground">Gerencie os anos e semestres letivos</p>
           </div>
-          <Link href="/escola/administrativo/periodos-letivos/novo-periodo-letivo">
+          <Link route="web.escola.administrativo.novoPeriodoLetivo">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Novo Período
@@ -94,7 +96,7 @@ export default function PeriodosLetivosPage() {
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Nenhum período letivo cadastrado.</p>
-                <Link href="/escola/administrativo/periodos-letivos/novo-periodo-letivo">
+                <Link route="web.escola.administrativo.novoPeriodoLetivo">
                   <Button className="mt-4">
                     <Plus className="h-4 w-4 mr-2" />
                     Criar Primeiro Período
@@ -130,7 +132,7 @@ export default function PeriodosLetivosPage() {
                   <CardTitle className={!period.isActive ? 'text-muted-foreground' : ''}>
                     {period.name}
                   </CardTitle>
-                  <CardDescription>{period.segment}</CardDescription>
+                  <CardDescription>{formatSegmentName(period.segment)}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 text-sm">
@@ -152,7 +154,7 @@ export default function PeriodosLetivosPage() {
                       </div>
                     )}
                   </div>
-                  <Link href={`/escola/administrativo/periodos-letivos/${period.id}`}>
+                  <Link route="web.escola.periodosLetivos.show" params={{ slug: period.slug }}>
                     <Button
                       variant={period.isActive ? 'outline' : 'ghost'}
                       className="w-full mt-4"

@@ -136,7 +136,7 @@ export default function BillingDashboardPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <a
-                href="/admin/billing/invoices"
+                href="/admin/billing/faturas"
                 className="flex items-center gap-2 rounded-lg border p-3 hover:bg-muted transition-colors"
               >
                 <DollarSign className="h-5 w-5 text-primary" />

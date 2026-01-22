@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { Suspense } from 'react'
 import { ArrowLeft, Settings } from 'lucide-react'
 
@@ -30,7 +31,7 @@ export default function NotificacoesPreferenciasPage() {
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/escola/notificacoes">
+          <Link route="web.escola.notificacoes">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

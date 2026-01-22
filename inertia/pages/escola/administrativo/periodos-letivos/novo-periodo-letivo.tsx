@@ -1,4 +1,5 @@
-import { Head, Link, usePage } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { ArrowLeft } from 'lucide-react'
 
 import type { SharedProps } from '~/lib/types'
@@ -16,7 +17,7 @@ export default function NovoPeriodoLetivoPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/escola/administrativo/periodos-letivos">
+          <Link route="web.escola.administrativo.periodosLetivos">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

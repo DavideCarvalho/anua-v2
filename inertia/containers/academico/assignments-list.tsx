@@ -1,7 +1,7 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { FileText, Calendar, Users, CheckCircle, Clock, Edit, Trash2, Eye } from 'lucide-react'
+import { FileText, Calendar, Edit, Trash2, Eye } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
+import type { AssignmentsData } from '../../hooks/queries/use-assignments'
 import { useAssignmentsQueryOptions } from '../../hooks/queries/use-assignments'
 
 interface AssignmentsListProps {
@@ -33,16 +34,32 @@ export function AssignmentsList({
   onEdit,
   onDelete,
 }: AssignmentsListProps) {
-  const { data } = useSuspenseQuery(useAssignmentsQueryOptions({ classId, subjectId }))
+  const { data, isLoading } = useQuery(useAssignmentsQueryOptions({ classId, subjectId }))
+
+  if (isLoading) {
+    return <AssignmentsListSkeleton />
+  }
+
+  type AssignmentRow = AssignmentsData extends { data: (infer T)[] } ? T : never
+
+  const rows: AssignmentRow[] = data?.data ?? []
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PUBLISHED':
         return <Badge variant="default">Publicada</Badge>
       case 'DRAFT':
-        return <Badge variant="secondary">Rascunho</Badge>
+        return (
+          <Badge variant="outline" className="bg-muted/60 text-muted-foreground">
+            Rascunho
+          </Badge>
+        )
       case 'ARCHIVED':
-        return <Badge variant="outline">Arquivada</Badge>
+        return (
+          <Badge variant="outline" className="bg-muted/60 text-muted-foreground">
+            Arquivada
+          </Badge>
+        )
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -50,7 +67,7 @@ export function AssignmentsList({
 
   const isOverdue = (dueDate: string) => new Date(dueDate) < new Date()
 
-  if (!data.data || data.data.length === 0) {
+  if (rows.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -87,7 +104,7 @@ export function AssignmentsList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.data.map((assignment: any) => (
+            {rows.map((assignment: AssignmentRow) => (
               <TableRow key={assignment.id}>
                 <TableCell className="font-medium">{assignment.title}</TableCell>
                 <TableCell>{assignment.class?.name || '-'}</TableCell>
@@ -103,7 +120,7 @@ export function AssignmentsList({
                           : ''
                       )}
                     >
-                      {format(new Date(assignment.dueDate), "dd/MM/yyyy", { locale: ptBR })}
+                      {format(new Date(assignment.dueDate), 'dd/MM/yyyy', { locale: ptBR })}
                     </span>
                   </div>
                 </TableCell>

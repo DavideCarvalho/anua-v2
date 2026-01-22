@@ -1,13 +1,56 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Shield, AlertCircle, CheckCircle2, DollarSign, Users, FileWarning } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
+import { Button } from '../../components/ui/button'
 import { useInsuranceStatsQueryOptions } from '../../hooks/queries/use-insurance-stats'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
+export function InsuranceStatsCardsSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: 7 }).map((_, i) => (
+        <Card key={i}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-16 mb-1" />
+            <Skeleton className="h-3 w-20" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
 export function InsuranceStatsCards() {
-  const { data } = useSuspenseQuery(useInsuranceStatsQueryOptions())
+  const { data, isLoading, isError, error, refetch } = useQuery(useInsuranceStatsQueryOptions())
+
+  if (isLoading) {
+    return <InsuranceStatsCardsSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="flex items-center gap-4 py-6">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-destructive">Erro ao carregar estatísticas de seguro</h3>
+            <p className="text-sm text-muted-foreground">
+              {error?.message || 'Ocorreu um erro inesperado'}
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => refetch()}>
+            Tentar novamente
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (!data) return null
 
@@ -95,25 +138,6 @@ export function InsuranceStatsCards() {
           <p className="text-xs text-muted-foreground">pagamentos em atraso</p>
         </CardContent>
       </Card>
-    </div>
-  )
-}
-
-export function InsuranceStatsCardsSkeleton() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: 7 }).map((_, i) => (
-        <Card key={i}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-8 w-16 mb-1" />
-            <Skeleton className="h-3 w-20" />
-          </CardContent>
-        </Card>
-      ))}
     </div>
   )
 }

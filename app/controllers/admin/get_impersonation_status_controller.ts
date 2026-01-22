@@ -37,7 +37,12 @@ export default class GetImpersonationStatusController {
     }
 
     await impersonatingUser.load('role')
-    await impersonatingUser.load('school')
+    await impersonatingUser.load('userHasSchools', (query) => {
+      query.preload('school')
+    })
+
+    // Pegar a primeira escola do usuário via UserHasSchool
+    const firstSchool = impersonatingUser.userHasSchools?.[0]?.school
 
     return {
       isImpersonating: true,
@@ -46,10 +51,10 @@ export default class GetImpersonationStatusController {
         name: impersonatingUser.name,
         email: impersonatingUser.email,
         role: impersonatingUser.role?.name,
-        school: impersonatingUser.school
+        school: firstSchool
           ? {
-              id: impersonatingUser.school.id,
-              name: impersonatingUser.school.name,
+              id: firstSchool.id,
+              name: firstSchool.name,
             }
           : null,
       },

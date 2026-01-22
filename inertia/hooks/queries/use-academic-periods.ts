@@ -17,8 +17,6 @@ export function useAcademicPeriodsQueryOptions(query: AcademicPeriodsQuery = {})
 
   return {
     queryKey: ['academic-periods', mergedQuery],
-    queryFn: () => {
-      return $route({ query: mergedQuery }).unwrap()
-    },
-  } satisfies QueryOptions<AcademicPeriodsResponse>
+    queryFn: () => $route({ query: mergedQuery }).unwrap(),
+  } satisfies QueryOptions
 }

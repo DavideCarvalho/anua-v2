@@ -18,19 +18,16 @@ export function useClassesQueryOptions(params: UseClassesParams = {}) {
 
   return {
     queryKey: ['classes', { page, limit, levelId, academicPeriodId }],
-    queryFn: async () => {
-      const response = await tuyau.api.v1.classes.$get({
-        query: {
-          page,
-          limit,
-          levelId,
-          academicPeriodId,
-        },
-      })
-      if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar turmas')
-      }
-      return response.data
-    },
+    queryFn: () =>
+      tuyau.api.v1.classes
+        .$get({
+          query: {
+            page,
+            limit,
+            levelId,
+            academicPeriodId,
+          },
+        })
+        .unwrap(),
   } satisfies QueryOptions
 }

@@ -15,14 +15,21 @@ export default class CreateExamController {
       return response.notFound({ message: 'Class not found' })
     }
 
-    // Find active academic period for this school
-    const academicPeriod = await AcademicPeriod.query()
-      .where('schoolId', classRecord.schoolId)
-      .where('isActive', true)
-      .first()
+    // Use provided academicPeriodId or fall back to active period
+    let academicPeriodId = payload.academicPeriodId
 
-    if (!academicPeriod) {
-      return response.notFound({ message: 'No active academic period found' })
+    if (!academicPeriodId) {
+      // Find active academic period for this school
+      const academicPeriod = await AcademicPeriod.query()
+        .where('schoolId', classRecord.schoolId)
+        .where('isActive', true)
+        .first()
+
+      if (!academicPeriod) {
+        return response.notFound({ message: 'No active academic period found' })
+      }
+
+      academicPeriodId = academicPeriod.id
     }
 
     const exam = await Exam.create({
@@ -39,7 +46,7 @@ export default class CreateExamController {
       teacherId: payload.teacherId,
       // Use derived values for fields not in validator
       schoolId: classRecord.schoolId,
-      academicPeriodId: academicPeriod.id,
+      academicPeriodId,
       weight: 1,
     })
 

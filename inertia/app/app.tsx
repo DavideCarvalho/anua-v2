@@ -10,6 +10,7 @@ import { TuyauProvider } from '@tuyau/inertia/react'
 import { Toaster } from 'sonner'
 import { tuyau } from '../lib/api'
 import { ThemeProvider } from '../components/theme-provider'
+import { NuqsAdapter } from '../lib/nuqs-inertia-adapter'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
@@ -37,8 +38,10 @@ createInertiaApp({
       <ThemeProvider defaultTheme="system" storageKey="anua-theme">
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
-            <App {...props} />
-            <Toaster richColors />
+            <NuqsAdapter>
+              <App {...props} />
+              <Toaster richColors />
+            </NuqsAdapter>
           </QueryClientProvider>
         </TuyauProvider>
       </ThemeProvider>

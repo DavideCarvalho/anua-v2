@@ -1,4 +1,5 @@
-import { Head, usePage, Link } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { Suspense } from 'react'
 import { ArrowLeft, Shield } from 'lucide-react'
 
@@ -24,7 +25,7 @@ export default function EventoAutorizacoesPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/escola/eventos">
+          <Link route="web.escola.eventos">
             <Button variant="outline" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useClassesQueryOptions } from '../hooks/queries/use-classes'
 import { Card, CardContent } from '../components/ui/card'
@@ -13,7 +13,40 @@ import {
   Users,
   MoreHorizontal,
   Plus,
+  Edit,
+  Trash2,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+import { EditClassModal } from './classes/edit-class-modal'
+import { CreateClassModal } from './classes/create-class-modal'
+import { tuyau } from '../lib/api'
+
+interface ClassItem {
+  id: string
+  name: string
+  slug: string
+  level?: {
+    name: string
+    course?: {
+      name: string
+    }
+  }
+  studentsCount?: number
+  active?: boolean
+  teacherClasses?: Array<{
+    id: string
+    teacherId: string
+    subjectId: string
+    subjectQuantity: number
+    teacher?: { id: string; user?: { name: string } }
+    subject?: { id: string; name: string }
+  }>
+}
 
 // Loading Skeleton
 function ClassesListSkeleton() {
@@ -65,10 +98,18 @@ function ClassesListError({
 }
 
 // Content Component
-function ClassesListContent({ page, onPageChange }: { page: number; onPageChange: (page: number) => void }) {
+function ClassesListContent({
+  page,
+  onPageChange,
+  onEditClass,
+}: {
+  page: number
+  onPageChange: (page: number) => void
+  onEditClass: (classItem: ClassItem) => void
+}) {
   const { data } = useSuspenseQuery(useClassesQueryOptions({ page, limit: 20 }))
 
-  const classes = Array.isArray(data) ? data : data?.data || []
+  const classes: ClassItem[] = Array.isArray(data) ? data : data?.data || []
   const meta = !Array.isArray(data) && data?.meta ? data.meta : null
 
   if (classes.length === 0) {
@@ -86,8 +127,12 @@ function ClassesListContent({ page, onPageChange }: { page: number; onPageChange
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {classes.map((classItem: any) => (
-          <Card key={classItem.id} className="hover:shadow-md transition-shadow cursor-pointer">
+        {classes.map((classItem) => (
+          <Card
+            key={classItem.id}
+            className="hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => onEditClass(classItem)}
+          >
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
@@ -96,9 +141,28 @@ function ClassesListContent({ page, onPageChange }: { page: number; onPageChange
                     {classItem.level?.name || 'Sem série'} - {classItem.level?.course?.name || ''}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onEditClass(classItem)
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar turma
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Excluir turma
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <div className="mt-4 flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-1">
@@ -107,10 +171,12 @@ function ClassesListContent({ page, onPageChange }: { page: number; onPageChange
                 </div>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    classItem.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                    classItem.active !== false
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-700'
                   }`}
                 >
-                  {classItem.active ? 'Ativa' : 'Inativa'}
+                  {classItem.active !== false ? 'Ativa' : 'Inativa'}
                 </span>
               </div>
             </CardContent>
@@ -153,6 +219,31 @@ function ClassesListContent({ page, onPageChange }: { page: number; onPageChange
 // Container Export
 export function ClassesListContainer() {
   const [page, setPage] = useState(1)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null)
+  const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(false)
+
+  const handleEditClass = async (classItem: ClassItem) => {
+    setIsLoadingClassDetails(true)
+    try {
+      // Fetch full class details with teacher assignments (teacherClasses is preloaded)
+      const classData = await tuyau.api.v1.classes({ id: classItem.id }).$get().unwrap()
+
+      setSelectedClass({
+        ...classItem,
+        ...classData,
+      })
+      setEditModalOpen(true)
+    } catch (error) {
+      console.error('Error fetching class details:', error)
+      // Open modal with basic data anyway
+      setSelectedClass(classItem)
+      setEditModalOpen(true)
+    } finally {
+      setIsLoadingClassDetails(false)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -161,7 +252,7 @@ export function ClassesListContainer() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar turmas..." className="pl-9" />
         </div>
-        <Button className="ml-auto">
+        <Button className="ml-auto" onClick={() => setCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nova Turma
         </Button>
@@ -176,11 +267,26 @@ export function ClassesListContainer() {
             )}
           >
             <Suspense fallback={<ClassesListSkeleton />}>
-              <ClassesListContent page={page} onPageChange={setPage} />
+              <ClassesListContent
+                page={page}
+                onPageChange={setPage}
+                onEditClass={handleEditClass}
+              />
             </Suspense>
           </ErrorBoundary>
         )}
       </QueryErrorResetBoundary>
+
+      <EditClassModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        classData={selectedClass}
+      />
+
+      <CreateClassModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+      />
     </div>
   )
 }

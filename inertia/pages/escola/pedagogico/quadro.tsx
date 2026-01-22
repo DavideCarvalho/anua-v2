@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { useState } from 'react'
 import { EscolaLayout } from '~/components/layouts'
 import {
@@ -130,7 +131,7 @@ export default function QuadroPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/escola/pedagogico/grade">
+          <Link route="web.escola.pedagogico.grade">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

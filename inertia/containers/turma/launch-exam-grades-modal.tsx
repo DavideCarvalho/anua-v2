@@ -1,0 +1,330 @@
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Loader2, Save, Users } from 'lucide-react'
+
+import { Button } from '~/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
+import { Input } from '~/components/ui/input'
+import { ScrollArea } from '~/components/ui/scroll-area'
+import { Checkbox } from '~/components/ui/checkbox'
+import { ErrorBoundary } from '~/components/error-boundary'
+
+interface LaunchExamGradesModalProps {
+  examId: string
+  examTitle: string
+  maxScore: number
+  classId: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+interface Student {
+  id: string
+  user?: {
+    name: string
+  }
+}
+
+interface StudentGrade {
+  studentId: string
+  name: string
+  score: number | null
+  absent: boolean
+}
+
+const schema = z.object({
+  grades: z.array(
+    z.object({
+      studentId: z.string(),
+      name: z.string(),
+      score: z.number().min(0).nullable(),
+      absent: z.boolean(),
+    })
+  ),
+})
+
+type FormValues = z.infer<typeof schema>
+
+async function fetchStudentsForClass(classId: string): Promise<Student[]> {
+  const response = await fetch(`/api/v1/classes/${classId}/students?limit=1000`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch students')
+  }
+  const data = await response.json()
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data.data)) return data.data
+  return []
+}
+
+async function fetchExistingGrades(
+  examId: string
+): Promise<{ studentId: string; score: number; attended: boolean }[]> {
+  const response = await fetch(`/api/v1/exams/${examId}/grades`)
+  if (!response.ok) {
+    if (response.status === 404) return []
+    throw new Error('Failed to fetch grades')
+  }
+  const data = await response.json()
+  const grades = Array.isArray(data) ? data : data.data || []
+  return grades.map((g: any) => ({
+    studentId: g.studentId,
+    score: g.score,
+    attended: g.attended,
+  }))
+}
+
+interface SaveGradePayload {
+  examId: string
+  studentId: string
+  score: number
+  absent: boolean
+}
+
+async function saveExamGrade(payload: SaveGradePayload): Promise<void> {
+  const response = await fetch(`/api/v1/exams/${payload.examId}/grades`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      studentId: payload.studentId,
+      score: payload.score,
+      absent: payload.absent,
+    }),
+  })
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || 'Failed to save grade')
+  }
+}
+
+function LaunchExamGradesModalSkeleton() {
+  return (
+    <div className="py-12 text-center">
+      <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+      <p className="mt-2 text-sm text-muted-foreground">Carregando alunos...</p>
+    </div>
+  )
+}
+
+function LaunchExamGradesModalEmpty() {
+  return (
+    <div className="py-12 text-center">
+      <Users className="mx-auto h-8 w-8 text-muted-foreground" />
+      <p className="mt-2 text-sm text-muted-foreground">Nenhum aluno encontrado</p>
+    </div>
+  )
+}
+
+function LaunchExamGradesModalContent({
+  examId,
+  examTitle,
+  maxScore,
+  classId,
+  onOpenChange,
+}: Omit<LaunchExamGradesModalProps, 'open'>) {
+  const queryClient = useQueryClient()
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      grades: [],
+    },
+  })
+
+  const { data: students, isLoading: isLoadingStudents } = useQuery({
+    queryKey: ['class-students-for-grades', classId],
+    queryFn: () => fetchStudentsForClass(classId),
+  })
+
+  const { data: existingGrades, isLoading: isLoadingGrades } = useQuery({
+    queryKey: ['exam-grades', examId],
+    queryFn: () => fetchExistingGrades(examId),
+  })
+
+  // Initialize form when data is loaded
+  useEffect(() => {
+    if (!students || !Array.isArray(students)) return
+
+    const gradesMap = new Map(
+      (existingGrades || []).map((g) => [g.studentId, g])
+    )
+
+    const formGrades: StudentGrade[] = students.map((student) => {
+      const existing = gradesMap.get(student.id)
+      return {
+        studentId: student.id,
+        name: student.user?.name || 'Nome nao disponivel',
+        score: existing?.score ?? null,
+        absent: existing ? !existing.attended : false,
+      }
+    })
+
+    form.setValue('grades', formGrades)
+  }, [students, existingGrades, form])
+
+  const saveMutation = useMutation({
+    mutationFn: async (grades: SaveGradePayload[]) => {
+      // Save all grades in parallel
+      await Promise.all(grades.map(saveExamGrade))
+    },
+    onSuccess: () => {
+      toast.success('Notas salvas com sucesso!')
+      queryClient.invalidateQueries({ queryKey: ['exams'] })
+      queryClient.invalidateQueries({ queryKey: ['exam-grades', examId] })
+      onOpenChange(false)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao salvar notas')
+    },
+  })
+
+  const grades = form.watch('grades')
+  const isLoading = isLoadingStudents || isLoadingGrades
+
+  if (isLoading) {
+    return <LaunchExamGradesModalSkeleton />
+  }
+
+  if (!grades || grades.length === 0) {
+    return <LaunchExamGradesModalEmpty />
+  }
+
+  function onSubmit(data: FormValues) {
+    const gradesToSave = data.grades
+      .filter((g) => g.score !== null || g.absent)
+      .map((g) => ({
+        examId,
+        studentId: g.studentId,
+        score: g.absent ? 0 : (g.score ?? 0),
+        absent: g.absent,
+      }))
+
+    if (gradesToSave.length === 0) {
+      toast.error('Adicione pelo menos uma nota antes de salvar')
+      return
+    }
+
+    saveMutation.mutate(gradesToSave)
+  }
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="rounded-md bg-muted/50 p-3">
+        <p className="text-sm text-muted-foreground">
+          Preencha as notas dos alunos. Marque "Faltou" para alunos ausentes.
+        </p>
+      </div>
+
+      <ScrollArea className="h-[400px] pr-4">
+        <div className="space-y-2">
+          {grades.map((student, index) => (
+            <div
+              key={student.studentId}
+              className="flex items-center justify-between gap-4 rounded-md border p-3"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{student.name}</p>
+              </div>
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={`absent-${student.studentId}`}
+                    checked={student.absent}
+                    onCheckedChange={(checked) => {
+                      form.setValue(`grades.${index}.absent`, !!checked)
+                      if (checked) {
+                        form.setValue(`grades.${index}.score`, 0)
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={`absent-${student.studentId}`}
+                    className="text-sm text-muted-foreground"
+                  >
+                    Faltou
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={maxScore}
+                    step="0.1"
+                    inputMode="decimal"
+                    placeholder="0"
+                    className="w-20 text-center"
+                    disabled={student.absent}
+                    value={student.score ?? ''}
+                    onChange={(e) => {
+                      const score = e.target.valueAsNumber
+                      if (Number.isNaN(score)) {
+                        form.setValue(`grades.${index}.score`, null)
+                        return
+                      }
+                      form.setValue(`grades.${index}.score`, score)
+                    }}
+                  />
+                  <span className="text-sm text-muted-foreground">/ {maxScore}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={saveMutation.isPending} className="gap-2">
+          {saveMutation.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          Salvar Notas
+        </Button>
+      </DialogFooter>
+    </form>
+  )
+}
+
+export function LaunchExamGradesModal({
+  open,
+  onOpenChange,
+  examTitle,
+  maxScore,
+  ...props
+}: LaunchExamGradesModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{examTitle}</DialogTitle>
+          <DialogDescription>
+            Lancar notas para esta prova. Nota maxima: {maxScore}
+          </DialogDescription>
+        </DialogHeader>
+
+        <ErrorBoundary>
+          <LaunchExamGradesModalContent
+            examTitle={examTitle}
+            maxScore={maxScore}
+            onOpenChange={onOpenChange}
+            {...props}
+          />
+        </ErrorBoundary>
+      </DialogContent>
+    </Dialog>
+  )
+}

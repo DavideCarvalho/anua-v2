@@ -114,14 +114,14 @@ export function PurchaseRequestsTable({
         <div className="space-y-1">
           <div className="text-sm font-medium">Status</div>
           <Select
-            value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value || undefined)}
+            value={statusFilter || 'all'}
+            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {STATUS_OPTIONS.map((status) => (
                 <SelectItem key={status.value} value={status.value}>
                   {status.label}

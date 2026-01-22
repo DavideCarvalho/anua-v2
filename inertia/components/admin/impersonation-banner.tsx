@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, X, AlertTriangle, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -7,13 +7,13 @@ import { Button } from '../ui/button'
 import { useClearImpersonation } from '../../hooks/mutations/use-impersonation-mutations'
 import { useImpersonationStatusQueryOptions } from '../../hooks/queries/use-impersonation-status'
 
-function getRedirectPathForRole(role: string): string {
+function getRouteForRole(role: string): 'web.responsavel.dashboard' | 'web.escola.dashboard' {
   // Responsáveis vão para /responsavel
   if (role === 'RESPONSIBLE' || role === 'STUDENT_RESPONSIBLE') {
-    return '/responsavel'
+    return 'web.responsavel.dashboard'
   }
   // Todos os outros vão para /escola
-  return '/escola'
+  return 'web.escola.dashboard'
 }
 
 // Traduções dos cargos
@@ -87,7 +87,7 @@ export function ImpersonationBanner() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Link href={getRedirectPathForRole(impersonatingUser.role || '')}>
+        <Link route={getRouteForRole(impersonatingUser.role || '')}>
           <Button
             variant="secondary"
             size="sm"

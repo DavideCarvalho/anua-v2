@@ -2,29 +2,42 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.assignments.index')
+type SerializedResponse<T> = T extends { serialize: () => infer U }
+  ? U
+  : T extends { toJSON: () => infer U }
+    ? U
+    : T
 
-export type AssignmentsResponse = InferResponseType<typeof $route.$get>
+const $route = tuyau.api.v1.assignments.$get
 
-interface UseAssignmentsOptions {
-  classId?: string
-  subjectId?: string
-  teacherId?: string
-  status?: string
-  page?: number
-  limit?: number
-}
+export type AssignmentsResponse = InferResponseType<typeof $route>
+export type AssignmentsData = SerializedResponse<AssignmentsResponse>
 
-export function useAssignmentsQueryOptions(options: UseAssignmentsOptions = {}) {
-  const { page = 1, limit = 20, ...filters } = options
+type AssignmentsQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+
+export function useAssignmentsQueryOptions(query: AssignmentsQuery = {}) {
+  const mergedQuery: AssignmentsQuery = {
+    page: 1,
+    limit: 20,
+    ...query,
+  }
 
   return {
-    queryKey: ['assignments', { page, limit, ...filters }],
+    queryKey: ['assignments', mergedQuery],
     queryFn: () => {
-      return tuyau
-        .$route('api.v1.assignments.index')
-        .$get({ query: { page, limit, ...filters } })
+      return $route({ query: mergedQuery })
         .unwrap()
+        .then((response) => {
+          if (response && typeof response === 'object') {
+            if ('serialize' in response && typeof response.serialize === 'function') {
+              return response.serialize()
+            }
+            if ('toJSON' in response && typeof response.toJSON === 'function') {
+              return response.toJSON()
+            }
+          }
+          return response as unknown as AssignmentsData
+        })
     },
-  } satisfies QueryOptions<AssignmentsResponse>
+  } satisfies QueryOptions<AssignmentsData>
 }

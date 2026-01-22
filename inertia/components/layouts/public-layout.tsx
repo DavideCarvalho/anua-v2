@@ -1,4 +1,5 @@
-import { Link, usePage } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { Button } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
@@ -13,18 +14,18 @@ export function PublicLayout({ children }: PropsWithChildren) {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
           <div className="mr-4 flex">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
+            <Link route="web.home" className="mr-6 flex items-center space-x-2">
               <span className="font-bold text-xl">Anua</span>
             </Link>
           </div>
 
           <div className="flex flex-1 items-center justify-end space-x-2">
             {user ? (
-              <Link href="/dashboard">
+              <Link route="web.dashboard">
                 <Button>Meu Painel</Button>
               </Link>
             ) : (
-              <Link href="/sign-in">
+              <Link route="web.auth.signIn">
                 <Button>Entrar</Button>
               </Link>
             )}

@@ -135,18 +135,60 @@ data "google_project" "project" {
 }
 
 # ==============================================================================
+# CLOUD STORAGE - UPLOADS
+# ==============================================================================
+
+resource "google_storage_bucket" "uploads" {
+  name          = "${var.project_id}-uploads"
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+
+  cors {
+    origin          = ["*"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+
+  lifecycle_rule {
+    condition {
+      age = 365
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}
+
+# Make bucket publicly readable
+resource "google_storage_bucket_iam_member" "uploads_public_read" {
+  bucket = google_storage_bucket.uploads.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
+# Grant Cloud Run service account write access
+resource "google_storage_bucket_iam_member" "uploads_cloud_run_write" {
+  bucket = google_storage_bucket.uploads.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+# ==============================================================================
 # CLOUD RUN - API
 # ==============================================================================
 
 module "api" {
   source = "./modules/cloud-run"
 
-  project_id    = var.project_id
-  project_name  = var.project_name
-  environment   = var.environment
-  region        = var.region
-  service_name  = "api"
-  image         = var.api_image
+  project_id   = var.project_id
+  project_name = var.project_name
+  environment  = var.environment
+  region       = var.region
+  service_name = "api"
+  image        = var.api_image
 
   container_port = 3333
 
@@ -166,6 +208,9 @@ module "api" {
     SMTP_PORT       = "465"
     SMTP_USER       = "resend"
     SMTP_FROM_EMAIL = "Anuá <dont-reply@transactional.anuaapp.com.br>"
+    # Storage
+    DRIVE_DISK = "gcs"
+    GCS_BUCKET = google_storage_bucket.uploads.name
   }
 
   secrets = {
@@ -188,6 +233,7 @@ module "api" {
     google_secret_manager_secret_version.app_key,
     google_secret_manager_secret_version.db_password,
     google_secret_manager_secret_version.smtp_password,
+    google_storage_bucket.uploads,
   ]
 }
 

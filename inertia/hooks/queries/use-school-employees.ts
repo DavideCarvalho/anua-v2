@@ -11,13 +11,14 @@ interface UseSchoolEmployeesParams {
   limit?: number
   search?: string
   roles?: string[]
+  status?: string
 }
 
 export function useSchoolEmployeesQueryOptions(params: UseSchoolEmployeesParams = {}) {
-  const { page = 1, limit = 20, search, roles } = params
+  const { page = 1, limit = 20, search, roles, status } = params
 
   return {
-    queryKey: ['school-employees', { page, limit, search, roles }],
+    queryKey: ['school-employees', { page, limit, search, roles, status }],
     queryFn: async () => {
       const response = await tuyau.api.v1.users['school-employees'].$get({
         query: {
@@ -25,6 +26,7 @@ export function useSchoolEmployeesQueryOptions(params: UseSchoolEmployeesParams 
           limit,
           search,
           roles,
+          status,
         },
       })
       if (response.error) {

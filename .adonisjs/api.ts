@@ -47,6 +47,34 @@ type EscolaAdministrativoPeriodosletivosIdEditarGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_editar_periodo_letivo_page_controller.ts').default['handle'], false>
 }
+type EscolaPeriodosletivosIdCursosIdVisaogeralGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_curso_visao_geral_page_controller.ts').default['handle'], false>
+}
+type EscolaPeriodosletivosIdCursosIdTurmasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_curso_turmas_page_controller.ts').default['handle'], false>
+}
+type EscolaPeriodosletivosIdCursosIdTurmasIdAtividadesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_turma_atividades_page_controller.ts').default['handle'], false>
+}
+type EscolaPeriodosletivosIdCursosIdTurmasIdProvasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_turma_provas_page_controller.ts').default['handle'], false>
+}
+type EscolaPeriodosletivosIdCursosIdTurmasIdPresencasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_turma_presencas_page_controller.ts').default['handle'], false>
+}
+type EscolaPeriodosletivosIdCursosIdTurmasIdNotasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_turma_notas_page_controller.ts').default['handle'], false>
+}
+type EscolaPeriodosletivosIdCursosIdTurmasIdSituacaoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_turma_situacao_page_controller.ts').default['handle'], false>
+}
 type EscolaAdministrativoAlunosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_alunos_page_controller.ts').default['handle'], false>
@@ -155,9 +183,25 @@ type EscolaPedagogicoAtividadesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_atividades_page_controller.ts').default['handle'], false>
 }
+type EscolaPedagogicoAtividadesIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_atividade_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoAtividadesIdEditarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_edit_atividade_page_controller.ts').default['handle'], false>
+}
 type EscolaPedagogicoProvasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_provas_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoProvasIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_prova_page_controller.ts').default['handle'], false>
+}
+type EscolaPedagogicoProvasIdEditarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_edit_prova_page_controller.ts').default['handle'], false>
 }
 type EscolaPedagogicoPresencaGetHead = {
   request: unknown
@@ -475,6 +519,14 @@ type ApiV1SchoolsIdLogoPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/schools/upload_school_logo_controller.ts').default['handle'], false>
 }
+type ApiV1SchoolsIdUsersGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schools/list_school_users_controller.ts').default['handle'], false>
+}
+type ApiV1SchoolsIdDirectorPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/school.ts')['updateDirectorValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schools/update_school_director_controller.ts').default['handle'], true>
+}
 type ApiV1UsersGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/users/index.ts').default['handle'], false>
@@ -531,6 +583,18 @@ type ApiV1UserschoolgroupsIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/user_school_groups/delete_user_school_group_controller.ts').default['handle'], false>
 }
+type ApiV1SchoolswitcherGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/school_switcher/get_school_switcher_data_controller.ts').default['handle'], false>
+}
+type ApiV1SchoolswitcherToggleschoolPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/school_switcher.ts')['toggleSchoolSelectionValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/school_switcher/toggle_school_selection_controller.ts').default['handle'], true>
+}
+type ApiV1SchoolswitcherTogglegroupPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/school_switcher.ts')['toggleSchoolGroupSelectionValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/school_switcher/toggle_school_group_selection_controller.ts').default['handle'], true>
+}
 type ApiV1StudentsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/index.ts').default['handle'], false>
@@ -539,6 +603,10 @@ type ApiV1StudentsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student.ts')['createStudentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/store.ts').default['handle'], true>
 }
+type ApiV1StudentsEnrollPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student.ts')['enrollStudentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/enroll_student_controller.ts').default['handle'], true>
+}
 type ApiV1StudentsIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/show.ts').default['handle'], false>
@@ -546,6 +614,10 @@ type ApiV1StudentsIdGetHead = {
 type ApiV1StudentsIdPut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student.ts')['updateStudentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/update.ts').default['handle'], true>
+}
+type ApiV1StudentsIdFullPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student.ts')['fullUpdateStudentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/full_update_student_controller.ts').default['handle'], true>
 }
 type ApiV1StudentsIdDelete = {
   request: unknown
@@ -691,6 +763,22 @@ type ApiV1CoursesIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/courses/delete_course_controller.ts').default['handle'], false>
 }
+type ApiV1CoursesIdAcademicperiodsIdDashboardMetricsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/courses/get_course_dashboard_metrics_controller.ts').default['handle'], false>
+}
+type ApiV1CoursesIdAcademicperiodsIdDashboardAlertsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/courses/get_course_alerts_controller.ts').default['handle'], false>
+}
+type ApiV1CoursesIdAcademicperiodsIdDashboardActivityfeedGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/courses/get_course_activity_feed_controller.ts').default['handle'], false>
+}
+type ApiV1CoursesIdAcademicperiodsIdClassesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/courses/get_course_classes_controller.ts').default['handle'], false>
+}
 type ApiV1LevelsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/levels/list_levels_controller.ts').default['handle'], false>
@@ -731,6 +819,10 @@ type ApiV1ClassesPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['createClassValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/create_class_controller.ts').default['handle'], true>
 }
+type ApiV1ClassesWithteachersPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['createClassWithTeachersValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/create_class_with_teachers_controller.ts').default['handle'], true>
+}
 type ApiV1ClassesSlugIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/show_class_by_slug_controller.ts').default['handle'], false>
@@ -744,8 +836,8 @@ type ApiV1ClassesIdPut = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_controller.ts').default['handle'], true>
 }
 type ApiV1ClassesIdTeachersPut = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_with_teachers_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['updateClassWithTeachersValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_with_teachers_controller.ts').default['handle'], true>
 }
 type ApiV1ClassesIdDelete = {
   request: unknown
@@ -762,6 +854,10 @@ type ApiV1ClassesIdStudentsCountGetHead = {
 type ApiV1ClassesIdSubjectsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/subjects/list_subjects_for_class_controller.ts').default['handle'], false>
+}
+type ApiV1ClassesIdStudentstatusGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/get_student_status_controller.ts').default['handle'], false>
 }
 type ApiV1SubjectsGetHead = {
   request: unknown
@@ -794,6 +890,10 @@ type ApiV1SchedulesClassIdGetHead = {
 type ApiV1SchedulesClassIdPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/schedules/save_class_schedule_controller.ts').default['handle'], false>
+}
+type ApiV1SchedulesClassIdGeneratePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schedules/generate_class_schedule_controller.ts').default['handle'], false>
 }
 type ApiV1TeachersGetHead = {
   request: unknown
@@ -840,8 +940,8 @@ type ApiV1TeachersIdSubjectsGetHead = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/list_teacher_subjects_controller.ts').default['handle'], false>
 }
 type ApiV1TeachersIdSubjectsPut = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/update_teacher_subjects_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher.ts')['updateTeacherSubjectsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/update_teacher_subjects_controller.ts').default['handle'], true>
 }
 type ApiV1TeachersIdClassesPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/teacher.ts')['assignTeacherToClassValidator']>>
@@ -898,6 +998,14 @@ type ApiV1GradesDistributionGetHead = {
 type ApiV1GradesAtriskGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/grades.ts')['getAtRiskStudentsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_at_risk_students_controller.ts').default['handle'], true>
+}
+type ApiV1GradesClassIdSubjectIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_class_grades_by_subject_controller.ts').default['handle'], false>
+}
+type ApiV1GradesBatchPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/batch_save_grades_controller.ts').default['handle'], false>
 }
 type ApiV1AnalyticsAttendanceOverviewGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getAttendanceOverviewValidator']>>
@@ -1138,6 +1246,10 @@ type ApiV1AttendancePost = {
 type ApiV1AttendanceBatchPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/attendance.ts')['batchCreateAttendanceValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/batch_create_attendance_controller.ts').default['handle'], true>
+}
+type ApiV1AttendanceClassIdStudentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_class_students_attendance_controller.ts').default['handle'], false>
 }
 type ApiV1AttendanceIdGetHead = {
   request: unknown
@@ -1608,8 +1720,8 @@ type ApiV1AcademicperiodsIdCoursesGetHead = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/list_academic_period_courses_controller.ts').default['handle'], false>
 }
 type ApiV1AcademicperiodsIdCoursesPut = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/update_academic_period_courses_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/academic_period.ts')['updateCoursesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/academic_periods/update_academic_period_courses_controller.ts').default['handle'], true>
 }
 type ApiV1PrintrequestsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/print_request.ts')['listPrintRequestsValidator']>>
@@ -1893,6 +2005,54 @@ export interface ApiDefinition {
         };
         '$get': EscolaPeriodosletivosIdGetHead;
         '$head': EscolaPeriodosletivosIdGetHead;
+        'cursos': {
+          ':cursoSlug': {
+            'visao-geral': {
+              '$url': {
+              };
+              '$get': EscolaPeriodosletivosIdCursosIdVisaogeralGetHead;
+              '$head': EscolaPeriodosletivosIdCursosIdVisaogeralGetHead;
+            };
+            'turmas': {
+              '$url': {
+              };
+              '$get': EscolaPeriodosletivosIdCursosIdTurmasGetHead;
+              '$head': EscolaPeriodosletivosIdCursosIdTurmasGetHead;
+              ':turmaSlug': {
+                'atividades': {
+                  '$url': {
+                  };
+                  '$get': EscolaPeriodosletivosIdCursosIdTurmasIdAtividadesGetHead;
+                  '$head': EscolaPeriodosletivosIdCursosIdTurmasIdAtividadesGetHead;
+                };
+                'provas': {
+                  '$url': {
+                  };
+                  '$get': EscolaPeriodosletivosIdCursosIdTurmasIdProvasGetHead;
+                  '$head': EscolaPeriodosletivosIdCursosIdTurmasIdProvasGetHead;
+                };
+                'presencas': {
+                  '$url': {
+                  };
+                  '$get': EscolaPeriodosletivosIdCursosIdTurmasIdPresencasGetHead;
+                  '$head': EscolaPeriodosletivosIdCursosIdTurmasIdPresencasGetHead;
+                };
+                'notas': {
+                  '$url': {
+                  };
+                  '$get': EscolaPeriodosletivosIdCursosIdTurmasIdNotasGetHead;
+                  '$head': EscolaPeriodosletivosIdCursosIdTurmasIdNotasGetHead;
+                };
+                'situacao': {
+                  '$url': {
+                  };
+                  '$get': EscolaPeriodosletivosIdCursosIdTurmasIdSituacaoGetHead;
+                  '$head': EscolaPeriodosletivosIdCursosIdTurmasIdSituacaoGetHead;
+                };
+              };
+            };
+          };
+        };
       };
     };
     'administrativo': {
@@ -2085,12 +2245,36 @@ export interface ApiDefinition {
         };
         '$get': EscolaPedagogicoAtividadesGetHead;
         '$head': EscolaPedagogicoAtividadesGetHead;
+        ':id': {
+          '$url': {
+          };
+          '$get': EscolaPedagogicoAtividadesIdGetHead;
+          '$head': EscolaPedagogicoAtividadesIdGetHead;
+          'editar': {
+            '$url': {
+            };
+            '$get': EscolaPedagogicoAtividadesIdEditarGetHead;
+            '$head': EscolaPedagogicoAtividadesIdEditarGetHead;
+          };
+        };
       };
       'provas': {
         '$url': {
         };
         '$get': EscolaPedagogicoProvasGetHead;
         '$head': EscolaPedagogicoProvasGetHead;
+        ':id': {
+          '$url': {
+          };
+          '$get': EscolaPedagogicoProvasIdGetHead;
+          '$head': EscolaPedagogicoProvasIdGetHead;
+          'editar': {
+            '$url': {
+            };
+            '$get': EscolaPedagogicoProvasIdEditarGetHead;
+            '$head': EscolaPedagogicoProvasIdEditarGetHead;
+          };
+        };
       };
       'presenca': {
         '$url': {
@@ -2595,6 +2779,17 @@ export interface ApiDefinition {
             };
             '$post': ApiV1SchoolsIdLogoPost;
           };
+          'users': {
+            '$url': {
+            };
+            '$get': ApiV1SchoolsIdUsersGetHead;
+            '$head': ApiV1SchoolsIdUsersGetHead;
+          };
+          'director': {
+            '$url': {
+            };
+            '$put': ApiV1SchoolsIdDirectorPut;
+          };
         };
         ':schoolId': {
           'subscription': {
@@ -2659,18 +2854,44 @@ export interface ApiDefinition {
           '$delete': ApiV1UserschoolgroupsIdDelete;
         };
       };
+      'school-switcher': {
+        '$url': {
+        };
+        '$get': ApiV1SchoolswitcherGetHead;
+        '$head': ApiV1SchoolswitcherGetHead;
+        'toggle-school': {
+          '$url': {
+          };
+          '$post': ApiV1SchoolswitcherToggleschoolPost;
+        };
+        'toggle-group': {
+          '$url': {
+          };
+          '$post': ApiV1SchoolswitcherTogglegroupPost;
+        };
+      };
       'students': {
         '$url': {
         };
         '$get': ApiV1StudentsGetHead;
         '$head': ApiV1StudentsGetHead;
         '$post': ApiV1StudentsPost;
+        'enroll': {
+          '$url': {
+          };
+          '$post': ApiV1StudentsEnrollPost;
+        };
         ':id': {
           '$url': {
           };
           '$get': ApiV1StudentsIdGetHead;
           '$head': ApiV1StudentsIdGetHead;
           '$put': ApiV1StudentsIdPut;
+          'full': {
+            '$url': {
+            };
+            '$put': ApiV1StudentsIdFullPut;
+          };
           '$delete': ApiV1StudentsIdDelete;
         };
         ':studentId': {
@@ -2820,6 +3041,38 @@ export interface ApiDefinition {
           '$put': ApiV1CoursesIdPut;
           '$delete': ApiV1CoursesIdDelete;
         };
+        ':courseId': {
+          'academic-periods': {
+            ':academicPeriodId': {
+              'dashboard': {
+                'metrics': {
+                  '$url': {
+                  };
+                  '$get': ApiV1CoursesIdAcademicperiodsIdDashboardMetricsGetHead;
+                  '$head': ApiV1CoursesIdAcademicperiodsIdDashboardMetricsGetHead;
+                };
+                'alerts': {
+                  '$url': {
+                  };
+                  '$get': ApiV1CoursesIdAcademicperiodsIdDashboardAlertsGetHead;
+                  '$head': ApiV1CoursesIdAcademicperiodsIdDashboardAlertsGetHead;
+                };
+                'activity-feed': {
+                  '$url': {
+                  };
+                  '$get': ApiV1CoursesIdAcademicperiodsIdDashboardActivityfeedGetHead;
+                  '$head': ApiV1CoursesIdAcademicperiodsIdDashboardActivityfeedGetHead;
+                };
+              };
+              'classes': {
+                '$url': {
+                };
+                '$get': ApiV1CoursesIdAcademicperiodsIdClassesGetHead;
+                '$head': ApiV1CoursesIdAcademicperiodsIdClassesGetHead;
+              };
+            };
+          };
+        };
       };
       'levels': {
         '$url': {
@@ -2858,6 +3111,11 @@ export interface ApiDefinition {
         '$get': ApiV1ClassesGetHead;
         '$head': ApiV1ClassesGetHead;
         '$post': ApiV1ClassesPost;
+        'with-teachers': {
+          '$url': {
+          };
+          '$post': ApiV1ClassesWithteachersPost;
+        };
         'slug': {
           ':slug': {
             '$url': {
@@ -2889,6 +3147,12 @@ export interface ApiDefinition {
               '$get': ApiV1ClassesIdStudentsCountGetHead;
               '$head': ApiV1ClassesIdStudentsCountGetHead;
             };
+          };
+          'student-status': {
+            '$url': {
+            };
+            '$get': ApiV1ClassesIdStudentstatusGetHead;
+            '$head': ApiV1ClassesIdStudentstatusGetHead;
           };
         };
         ':classId': {
@@ -2931,6 +3195,11 @@ export interface ApiDefinition {
             '$get': ApiV1SchedulesClassIdGetHead;
             '$head': ApiV1SchedulesClassIdGetHead;
             '$post': ApiV1SchedulesClassIdPost;
+            'generate': {
+              '$url': {
+              };
+              '$post': ApiV1SchedulesClassIdGeneratePost;
+            };
           };
         };
       };
@@ -3041,6 +3310,23 @@ export interface ApiDefinition {
           };
           '$get': ApiV1GradesAtriskGetHead;
           '$head': ApiV1GradesAtriskGetHead;
+        };
+        'class': {
+          ':classId': {
+            'subject': {
+              ':subjectId': {
+                '$url': {
+                };
+                '$get': ApiV1GradesClassIdSubjectIdGetHead;
+                '$head': ApiV1GradesClassIdSubjectIdGetHead;
+              };
+            };
+          };
+        };
+        'batch': {
+          '$url': {
+          };
+          '$post': ApiV1GradesBatchPost;
         };
       };
       'analytics': {
@@ -3348,6 +3634,16 @@ export interface ApiDefinition {
           '$url': {
           };
           '$post': ApiV1AttendanceBatchPost;
+        };
+        'class': {
+          ':classId': {
+            'students': {
+              '$url': {
+              };
+              '$get': ApiV1AttendanceClassIdStudentsGetHead;
+              '$head': ApiV1AttendanceClassIdStudentsGetHead;
+            };
+          };
         };
         ':id': {
           '$url': {
@@ -4143,6 +4439,55 @@ const routes = [
     types: {} as EscolaAdministrativoPeriodosletivosIdEditarGetHead,
   },
   {
+    params: ["slug","cursoSlug"],
+    name: 'web.escola.periodosLetivos.cursos.visaoGeral',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/visao-geral',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdVisaogeralGetHead,
+  },
+  {
+    params: ["slug","cursoSlug"],
+    name: 'web.escola.periodosLetivos.cursos.turmas',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdTurmasGetHead,
+  },
+  {
+    params: ["slug","cursoSlug","turmaSlug"],
+    name: 'web.escola.periodosLetivos.cursos.turmas.atividades',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/atividades',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdTurmasIdAtividadesGetHead,
+  },
+  {
+    params: ["slug","cursoSlug","turmaSlug"],
+    name: 'web.escola.periodosLetivos.cursos.turmas.provas',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/provas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdTurmasIdProvasGetHead,
+  },
+  {
+    params: ["slug","cursoSlug","turmaSlug"],
+    name: 'web.escola.periodosLetivos.cursos.turmas.presencas',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/presencas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdTurmasIdPresencasGetHead,
+  },
+  {
+    params: ["slug","cursoSlug","turmaSlug"],
+    name: 'web.escola.periodosLetivos.cursos.turmas.notas',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/notas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdTurmasIdNotasGetHead,
+  },
+  {
+    params: ["slug","cursoSlug","turmaSlug"],
+    name: 'web.escola.periodosLetivos.cursos.turmas.situacao',
+    path: '/escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/situacao',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPeriodosletivosIdCursosIdTurmasIdSituacaoGetHead,
+  },
+  {
     params: [],
     name: 'web.escola.administrativo.alunos',
     path: '/escola/administrativo/alunos',
@@ -4332,11 +4677,39 @@ const routes = [
     types: {} as EscolaPedagogicoAtividadesGetHead,
   },
   {
+    params: ["id"],
+    name: 'web.escola.pedagogico.atividades.show',
+    path: '/escola/pedagogico/atividades/:id',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoAtividadesIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.escola.pedagogico.atividades.edit',
+    path: '/escola/pedagogico/atividades/:id/editar',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoAtividadesIdEditarGetHead,
+  },
+  {
     params: [],
     name: 'web.escola.pedagogico.provas',
     path: '/escola/pedagogico/provas',
     method: ["GET","HEAD"],
     types: {} as EscolaPedagogicoProvasGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.escola.pedagogico.provas.show',
+    path: '/escola/pedagogico/provas/:id',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoProvasIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.escola.pedagogico.provas.edit',
+    path: '/escola/pedagogico/provas/:id/editar',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoProvasIdEditarGetHead,
   },
   {
     params: [],
@@ -4892,6 +5265,20 @@ const routes = [
     types: {} as ApiV1SchoolsIdLogoPost,
   },
   {
+    params: ["id"],
+    name: 'api.v1.schools.users',
+    path: '/api/v1/schools/:id/users',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1SchoolsIdUsersGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.schools.updateDirector',
+    path: '/api/v1/schools/:id/director',
+    method: ["PUT"],
+    types: {} as ApiV1SchoolsIdDirectorPut,
+  },
+  {
     params: [],
     name: 'api.v1.users.index',
     path: '/api/v1/users',
@@ -4991,6 +5378,27 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.schoolSwitcher.getData',
+    path: '/api/v1/school-switcher',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1SchoolswitcherGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.schoolSwitcher.toggleSchool',
+    path: '/api/v1/school-switcher/toggle-school',
+    method: ["POST"],
+    types: {} as ApiV1SchoolswitcherToggleschoolPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.schoolSwitcher.toggleGroup',
+    path: '/api/v1/school-switcher/toggle-group',
+    method: ["POST"],
+    types: {} as ApiV1SchoolswitcherTogglegroupPost,
+  },
+  {
+    params: [],
     name: 'api.v1.students.index',
     path: '/api/v1/students',
     method: ["GET","HEAD"],
@@ -5002,6 +5410,13 @@ const routes = [
     path: '/api/v1/students',
     method: ["POST"],
     types: {} as ApiV1StudentsPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.students.enroll',
+    path: '/api/v1/students/enroll',
+    method: ["POST"],
+    types: {} as ApiV1StudentsEnrollPost,
   },
   {
     params: ["id"],
@@ -5016,6 +5431,13 @@ const routes = [
     path: '/api/v1/students/:id',
     method: ["PUT"],
     types: {} as ApiV1StudentsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.students.fullUpdate',
+    path: '/api/v1/students/:id/full',
+    method: ["PUT"],
+    types: {} as ApiV1StudentsIdFullPut,
   },
   {
     params: ["id"],
@@ -5270,6 +5692,34 @@ const routes = [
     types: {} as ApiV1CoursesIdDelete,
   },
   {
+    params: ["courseId","academicPeriodId"],
+    name: 'api.v1.courses.dashboard.metrics',
+    path: '/api/v1/courses/:courseId/academic-periods/:academicPeriodId/dashboard/metrics',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1CoursesIdAcademicperiodsIdDashboardMetricsGetHead,
+  },
+  {
+    params: ["courseId","academicPeriodId"],
+    name: 'api.v1.courses.dashboard.alerts',
+    path: '/api/v1/courses/:courseId/academic-periods/:academicPeriodId/dashboard/alerts',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1CoursesIdAcademicperiodsIdDashboardAlertsGetHead,
+  },
+  {
+    params: ["courseId","academicPeriodId"],
+    name: 'api.v1.courses.dashboard.activityFeed',
+    path: '/api/v1/courses/:courseId/academic-periods/:academicPeriodId/dashboard/activity-feed',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1CoursesIdAcademicperiodsIdDashboardActivityfeedGetHead,
+  },
+  {
+    params: ["courseId","academicPeriodId"],
+    name: 'api.v1.courses.classes',
+    path: '/api/v1/courses/:courseId/academic-periods/:academicPeriodId/classes',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1CoursesIdAcademicperiodsIdClassesGetHead,
+  },
+  {
     params: [],
     name: 'api.v1.levels.index',
     path: '/api/v1/levels',
@@ -5340,6 +5790,13 @@ const routes = [
     types: {} as ApiV1ClassesPost,
   },
   {
+    params: [],
+    name: 'api.v1.classes.storeWithTeachers',
+    path: '/api/v1/classes/with-teachers',
+    method: ["POST"],
+    types: {} as ApiV1ClassesWithteachersPost,
+  },
+  {
     params: ["slug"],
     name: 'api.v1.classes.showBySlug',
     path: '/api/v1/classes/slug/:slug',
@@ -5396,6 +5853,13 @@ const routes = [
     types: {} as ApiV1ClassesIdSubjectsGetHead,
   },
   {
+    params: ["id"],
+    name: 'api.v1.classes.studentStatus',
+    path: '/api/v1/classes/:id/student-status',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ClassesIdStudentstatusGetHead,
+  },
+  {
     params: [],
     name: 'api.v1.subjects.index',
     path: '/api/v1/subjects',
@@ -5450,6 +5914,13 @@ const routes = [
     path: '/api/v1/schedules/class/:classId',
     method: ["POST"],
     types: {} as ApiV1SchedulesClassIdPost,
+  },
+  {
+    params: ["classId"],
+    name: 'api.v1.schedules.generateClassSchedule',
+    path: '/api/v1/schedules/class/:classId/generate',
+    method: ["POST"],
+    types: {} as ApiV1SchedulesClassIdGeneratePost,
   },
   {
     params: [],
@@ -5632,6 +6103,20 @@ const routes = [
     path: '/api/v1/grades/at-risk',
     method: ["GET","HEAD"],
     types: {} as ApiV1GradesAtriskGetHead,
+  },
+  {
+    params: ["classId","subjectId"],
+    name: 'api.v1.grades.classSubject',
+    path: '/api/v1/grades/class/:classId/subject/:subjectId',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1GradesClassIdSubjectIdGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.grades.batchSave',
+    path: '/api/v1/grades/batch',
+    method: ["POST"],
+    types: {} as ApiV1GradesBatchPost,
   },
   {
     params: [],
@@ -6052,6 +6537,13 @@ const routes = [
     path: '/api/v1/attendance/batch',
     method: ["POST"],
     types: {} as ApiV1AttendanceBatchPost,
+  },
+  {
+    params: ["classId"],
+    name: 'api.v1.attendance.classStudents',
+    path: '/api/v1/attendance/class/:classId/students',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AttendanceClassIdStudentsGetHead,
   },
   {
     params: ["id"],

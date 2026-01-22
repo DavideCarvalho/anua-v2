@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
 import {
   Card,
@@ -18,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { ArrowLeft, Calendar, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { ScheduleGrid } from '~/containers/schedule/schedule-grid'
+import { ScheduleConfigForm } from '~/containers/schedule/schedule-config-form'
 
 interface ClassOption {
   id: string
@@ -30,6 +32,17 @@ interface ClassOption {
 interface AcademicPeriodOption {
   id: string
   name: string
+}
+
+interface ScheduleData {
+  calendar: { id: string; name: string; isActive: boolean } | null
+  slots: Array<{
+    id: string
+    classWeekDay: number
+    startTime: string
+    endTime: string
+    isBreak: boolean
+  }>
 }
 
 async function fetchClasses(): Promise<{ data: ClassOption[] }> {
@@ -44,9 +57,19 @@ async function fetchAcademicPeriods(): Promise<{ data: AcademicPeriodOption[] }>
   return response.json()
 }
 
+async function fetchSchedule(classId: string, academicPeriodId: string): Promise<ScheduleData> {
+  const response = await fetch(
+    `/api/v1/schedules/class/${classId}?academicPeriodId=${academicPeriodId}`
+  )
+  if (!response.ok) throw new Error('Failed to fetch schedule')
+  return response.json()
+}
+
 export default function HorariosPage() {
+  const queryClient = useQueryClient()
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
+  const [showConfigForm, setShowConfigForm] = useState(false)
 
   const { data: classesData, isLoading: loadingClasses } = useQuery({
     queryKey: ['classes'],
@@ -58,9 +81,24 @@ export default function HorariosPage() {
     queryFn: fetchAcademicPeriods,
   })
 
+  const { data: scheduleData, isLoading: loadingSchedule } = useQuery({
+    queryKey: ['schedule', selectedClassId, selectedAcademicPeriodId],
+    queryFn: () => fetchSchedule(selectedClassId, selectedAcademicPeriodId),
+    enabled: !!selectedClassId && !!selectedAcademicPeriodId,
+  })
+
   const classes = classesData?.data ?? []
   const academicPeriods = periodsData?.data ?? []
   const selectedClass = classes.find((c) => c.id === selectedClassId)
+
+  const hasSchedule = scheduleData?.slots && scheduleData.slots.length > 0
+  const shouldShowConfigForm = !loadingSchedule && (!hasSchedule || showConfigForm)
+
+  const handleGenerate = () => {
+    // Invalidate the schedule query to refetch with new data
+    queryClient.invalidateQueries({ queryKey: ['schedule', selectedClassId, selectedAcademicPeriodId] })
+    setShowConfigForm(false)
+  }
 
   return (
     <EscolaLayout>
@@ -68,7 +106,7 @@ export default function HorariosPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/escola/pedagogico/grade">
+          <Link route="web.escola.pedagogico.grade">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -86,7 +124,7 @@ export default function HorariosPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Configuração
+              Seleção
             </CardTitle>
             <CardDescription>
               Selecione a turma e o período letivo para configurar os horários
@@ -98,7 +136,10 @@ export default function HorariosPage() {
                 <Label>Turma</Label>
                 <Select
                   value={selectedClassId}
-                  onValueChange={setSelectedClassId}
+                  onValueChange={(value) => {
+                    setSelectedClassId(value)
+                    setShowConfigForm(false)
+                  }}
                   disabled={loadingClasses}
                 >
                   <SelectTrigger>
@@ -122,7 +163,10 @@ export default function HorariosPage() {
                 <Label>Período Letivo</Label>
                 <Select
                   value={selectedAcademicPeriodId}
-                  onValueChange={setSelectedAcademicPeriodId}
+                  onValueChange={(value) => {
+                    setSelectedAcademicPeriodId(value)
+                    setShowConfigForm(false)
+                  }}
                   disabled={loadingPeriods}
                 >
                   <SelectTrigger>
@@ -145,22 +189,46 @@ export default function HorariosPage() {
 
         {/* Aviso se não selecionou */}
         {(!selectedClassId || !selectedAcademicPeriodId) && (
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950">
             <CardContent className="pt-6">
-              <p className="text-sm text-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 Selecione uma turma e um período letivo para visualizar e editar os horários.
               </p>
             </CardContent>
           </Card>
         )}
 
-        {/* Grade de horários */}
+        {/* Conteúdo principal */}
         {selectedClassId && selectedAcademicPeriodId && (
-          <ScheduleGrid
-            classId={selectedClassId}
-            academicPeriodId={selectedAcademicPeriodId}
-            className={selectedClass?.name}
-          />
+          <>
+            {/* Botão para reconfigurar se já tem schedule */}
+            {hasSchedule && !showConfigForm && (
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowConfigForm(true)}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Reconfigurar Grade
+                </Button>
+              </div>
+            )}
+
+            {/* Config Form */}
+            {shouldShowConfigForm && (
+              <ScheduleConfigForm
+                classId={selectedClassId}
+                academicPeriodId={selectedAcademicPeriodId}
+                onGenerate={handleGenerate}
+              />
+            )}
+
+            {/* Grade de horários */}
+            {hasSchedule && !showConfigForm && (
+              <ScheduleGrid
+                classId={selectedClassId}
+                academicPeriodId={selectedAcademicPeriodId}
+                className={selectedClass?.name}
+              />
+            )}
+          </>
         )}
       </div>
     </EscolaLayout>

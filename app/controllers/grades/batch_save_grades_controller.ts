@@ -1,0 +1,66 @@
+import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
+import Assignment from '#models/assignment'
+import StudentHasAssignment from '#models/student_has_assignment'
+import vine from '@vinejs/vine'
+
+const batchSaveGradesValidator = vine.compile(
+  vine.object({
+    assignmentId: vine.string().trim(),
+    grades: vine.array(
+      vine.object({
+        studentId: vine.string().trim(),
+        grade: vine.number().min(0).nullable(),
+        submittedAt: vine.string().trim().nullable().optional(),
+      })
+    ),
+  })
+)
+
+export default class BatchSaveGradesController {
+  async handle({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(batchSaveGradesValidator)
+
+    const assignment = await Assignment.find(payload.assignmentId)
+    if (!assignment) {
+      return response.notFound({ message: 'Atividade não encontrada' })
+    }
+
+    const results = []
+
+    for (const gradeData of payload.grades) {
+      // Skip if grade is null (student didn't submit)
+      if (gradeData.grade === null) continue
+
+      // Find or create the student submission
+      let submission = await StudentHasAssignment.query()
+        .where('studentId', gradeData.studentId)
+        .where('assignmentId', payload.assignmentId)
+        .first()
+
+      if (submission) {
+        // Update existing submission
+        submission.grade = gradeData.grade
+        if (gradeData.submittedAt) {
+          submission.submittedAt = DateTime.fromISO(gradeData.submittedAt)
+        }
+        await submission.save()
+      } else {
+        // Create new submission
+        submission = await StudentHasAssignment.create({
+          studentId: gradeData.studentId,
+          assignmentId: payload.assignmentId,
+          grade: gradeData.grade,
+          submittedAt: gradeData.submittedAt ? DateTime.fromISO(gradeData.submittedAt) : DateTime.now(),
+        })
+      }
+
+      results.push(submission)
+    }
+
+    return response.ok({
+      message: 'Notas salvas com sucesso',
+      count: results.length,
+    })
+  }
+}

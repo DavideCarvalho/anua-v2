@@ -3,7 +3,12 @@ import vine from '@vinejs/vine'
 export const createSchoolValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(255),
-    slug: vine.string().trim().minLength(2).maxLength(100).regex(/^[a-z0-9-]+$/),
+    slug: vine
+      .string()
+      .trim()
+      .minLength(2)
+      .maxLength(100)
+      .regex(/^[a-z0-9-]+$/),
     street: vine.string().trim().maxLength(255).optional(),
     number: vine.string().trim().maxLength(20).optional(),
     complement: vine.string().trim().maxLength(100).optional(),
@@ -24,7 +29,13 @@ export const createSchoolValidator = vine.compile(
 export const updateSchoolValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(255).optional(),
-    slug: vine.string().trim().minLength(2).maxLength(100).regex(/^[a-z0-9-]+$/).optional(),
+    slug: vine
+      .string()
+      .trim()
+      .minLength(2)
+      .maxLength(100)
+      .regex(/^[a-z0-9-]+$/)
+      .optional(),
     street: vine.string().trim().maxLength(255).optional().nullable(),
     number: vine.string().trim().maxLength(20).optional().nullable(),
     complement: vine.string().trim().maxLength(100).optional().nullable(),
@@ -40,5 +51,23 @@ export const updateSchoolValidator = vine.compile(
     calculationAlgorithm: vine.enum(['AVERAGE', 'SUM']).optional(),
     minimumAttendancePercentage: vine.number().min(0).max(100).optional(),
     active: vine.boolean().optional(),
+    // Insurance fields
+    hasInsurance: vine.boolean().optional().nullable(),
+    insurancePercentage: vine.number().min(3).max(100).optional().nullable(),
+    insuranceCoveragePercentage: vine.number().min(0).max(100).optional().nullable(),
+    insuranceClaimWaitingDays: vine.number().min(1).optional().nullable(),
+  })
+)
+
+export const updateDirectorValidator = vine.compile(
+  vine.object({
+    existingUserId: vine.string().optional(),
+    newDirector: vine
+      .object({
+        name: vine.string().minLength(2),
+        email: vine.string().email(),
+        phone: vine.string().optional(),
+      })
+      .optional(),
   })
 )

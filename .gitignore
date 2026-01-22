@@ -24,6 +24,10 @@ yarn-error.log
 # Platform specific
 .DS_Store
 
+# Storage uploads
+storage/*
+!storage/.gitkeep
+
 # Terraform
 infra/terraform/.terraform/
 infra/terraform/*.tfstate

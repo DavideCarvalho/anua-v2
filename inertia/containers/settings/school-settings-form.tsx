@@ -13,8 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
+import { ImageUpload } from '../../components/ui/image-upload'
 import { useSchool } from '../../hooks/queries/use-school'
 import { useUpdateSchool } from '../../hooks/mutations/use-school-mutations'
+import { useUploadSchoolLogo } from '../../hooks/mutations/use-upload-school-logo'
 import type { SharedProps } from '../../lib/types'
 
 export function SchoolSettingsForm() {
@@ -37,6 +39,7 @@ export function SchoolSettingsForm() {
 function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
   const { data: school } = useSchool(schoolId)
   const updateSchool = useUpdateSchool()
+  const uploadLogo = useUploadSchoolLogo(schoolId)
 
   const [formData, setFormData] = useState({
     name: school?.name || '',
@@ -106,13 +109,15 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
             />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="logoUrl">URL do Logo</Label>
-            <Input
-              id="logoUrl"
-              type="url"
+            <Label>Logo da Escola</Label>
+            <ImageUpload
               value={formData.logoUrl}
-              onChange={(e) => handleChange('logoUrl', e.target.value)}
-              placeholder="https://exemplo.com/logo.png"
+              onChange={(url) => handleChange('logoUrl', url || '')}
+              onUpload={async (file) => {
+                const url = await uploadLogo.mutateAsync(file)
+                return url
+              }}
+              disabled={uploadLogo.isPending}
             />
           </div>
         </CardContent>

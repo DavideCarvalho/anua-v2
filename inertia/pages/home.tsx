@@ -75,8 +75,8 @@ export default function Home() {
         <meta name="description" content="Gerenciar sua escola nunca foi tão fácil!" />
       </Head>
 
-      <div>
-        <header className="bg-white py-4 sm:py-5">
+      <div className="min-h-screen bg-background overflow-x-hidden">
+        <header className="bg-background py-4 sm:py-5">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
               <div className="shrink-0">
@@ -88,19 +88,19 @@ export default function Home() {
               <div className="hidden lg:ml-12 lg:flex lg:items-center lg:space-x-8">
                 <a
                   href="#funcionalidades"
-                  className="text-lg font-medium text-gray-700 transition-colors hover:text-purple-600"
+                  className="text-lg font-medium text-muted-foreground transition-colors hover:text-purple-600"
                 >
                   Funcionalidades
                 </a>
                 <a
                   href="#preco"
-                  className="text-lg font-medium text-gray-700 transition-colors hover:text-purple-600"
+                  className="text-lg font-medium text-muted-foreground transition-colors hover:text-purple-600"
                 >
                   Preço
                 </a>
                 <a
                   href="#fale-conosco"
-                  className="text-lg font-medium text-gray-700 transition-colors hover:text-purple-600"
+                  className="text-lg font-medium text-muted-foreground transition-colors hover:text-purple-600"
                 >
                   Fale conosco
                 </a>
@@ -146,18 +146,18 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="bg-gradient-to-b from-purple-50 to-white py-12 sm:py-16 lg:py-20">
+        <section className="bg-gradient-to-b from-purple-50 to-background dark:from-purple-950/20 py-12 sm:py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-2 lg:gap-x-16">
               <div className="flex flex-col justify-center">
-                <div className="mb-4 inline-flex items-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700">
+                <div className="mb-4 inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-300">
                   <Brain className="mr-2 h-4 w-4" />O verdadeiro Super App da sua escola
                 </div>
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                   O ecossistema completo para escola <br />
                   <span className="text-purple-600">potencializado por IA</span>
                 </h1>
-                <p className="mt-6 text-lg text-gray-600 lg:text-xl">
+                <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
                   Do administrativo ao pedagógico, do financeiro à gamificação. Anuá usa{' '}
                   <span className="font-semibold text-purple-600">Inteligência Artificial</span>{' '}
                   para integrar TODAS as áreas da sua escola em uma plataforma inteligente. Não é só
@@ -169,7 +169,7 @@ export default function Home() {
                       <input
                         type="email"
                         placeholder="Seu melhor email"
-                        className="w-full rounded-full border border-gray-300 px-6 py-3 text-gray-900 placeholder-gray-500 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                        className="w-full rounded-full border border-input bg-background px-6 py-3 text-foreground placeholder-muted-foreground focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600"
                       />
                       <button
                         type="submit"
@@ -184,27 +184,27 @@ export default function Home() {
                 <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <div className="flex items-center space-x-2">
                     <Users className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-600">Gestão de Matrículas</span>
+                    <span className="text-sm text-muted-foreground">Gestão de Matrículas</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-600">Pedagógico Completo</span>
+                    <span className="text-sm text-muted-foreground">Pedagógico Completo</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <CreditCard className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-600">Financeiro Integrado</span>
+                    <span className="text-sm text-muted-foreground">Financeiro Integrado</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <TrendingUp className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-600">Gamificação</span>
+                    <span className="text-sm text-muted-foreground">Gamificação</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <ChartBar className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-600">Analytics Avançado</span>
+                    <span className="text-sm text-muted-foreground">Analytics Avançado</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Brain className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm text-gray-600">IA Integrada</span>
+                    <span className="text-sm text-muted-foreground">IA Integrada</span>
                   </div>
                 </div>
               </div>
@@ -221,18 +221,18 @@ export default function Home() {
         </section>
 
         {/* Seção de IA */}
-        <section className="bg-gradient-to-b from-white to-gray-50 py-16">
+        <section className="bg-gradient-to-b from-background to-muted/50 py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
               <div className="flex flex-col justify-center">
-                <div className="mb-4 inline-flex w-fit items-center rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700">
+                <div className="mb-4 inline-flex w-fit items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-300">
                   <Brain className="mr-2 h-4 w-4" />
                   Powered by AI
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+                <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
                   Inteligência Artificial que realmente entende sua escola
                 </h2>
-                <p className="mt-6 text-lg text-gray-600">
+                <p className="mt-6 text-lg text-muted-foreground">
                   Nossa IA analisa continuamente todos os dados da sua escola - acadêmicos,
                   financeiros e comportamentais - para gerar insights valiosos e alertas automáticos
                   que você não encontraria sozinho.
@@ -240,14 +240,14 @@ export default function Home() {
 
                 <div className="mt-8 space-y-4">
                   <div className="flex items-start space-x-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
                       <AlertCircle className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">
+                      <h4 className="font-semibold text-foreground">
                         Identificação de Alunos em Risco
                       </h4>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         IA detecta automaticamente alunos com risco de evasão por baixo desempenho,
                         faltas excessivas ou inadimplência
                       </p>
@@ -255,12 +255,12 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
                       <ChartBar className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Analytics Preditivo</h4>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <h4 className="font-semibold text-foreground">Analytics Preditivo</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
                         Previsões de receita, tendências de matrícula e padrões de comportamento que
                         ajudam na tomada de decisão estratégica
                       </p>
@@ -268,12 +268,12 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
                       <Brain className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Recomendações Inteligentes</h4>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <h4 className="font-semibold text-foreground">Recomendações Inteligentes</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
                         Sistema sugere ações específicas baseadas nos padrões identificados, como
                         contato com responsáveis ou ajustes na grade
                       </p>
@@ -281,12 +281,12 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
                       <TrendingUp className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Grade Horária Inteligente</h4>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <h4 className="font-semibold text-foreground">Grade Horária Inteligente</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
                         Algoritmos avançados geram automaticamente a grade ideal considerando
                         disponibilidade dos professores e necessidades das turmas
                       </p>
@@ -297,7 +297,7 @@ export default function Home() {
 
               <div className="relative">
                 <div className="grid grid-cols-1 gap-6">
-                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+                  <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-background dark:from-purple-950/30">
                     <CardHeader>
                       <CardTitle className="flex items-center text-lg">
                         <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
@@ -306,29 +306,29 @@ export default function Home() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="rounded-lg bg-background p-3 shadow-sm">
+                          <p className="text-sm font-medium text-foreground">
                             23 alunos em risco de reprovação por faltas
                           </p>
-                          <p className="text-xs text-gray-500">Detectado há 2 horas</p>
+                          <p className="text-xs text-muted-foreground">Detectado há 2 horas</p>
                         </div>
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="rounded-lg bg-background p-3 shadow-sm">
+                          <p className="text-sm font-medium text-foreground">
                             15 mensalidades com atraso superior a 30 dias
                           </p>
-                          <p className="text-xs text-gray-500">Detectado hoje às 08:00</p>
+                          <p className="text-xs text-muted-foreground">Detectado hoje às 08:00</p>
                         </div>
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="rounded-lg bg-background p-3 shadow-sm">
+                          <p className="text-sm font-medium text-foreground">
                             Tendência de queda no desempenho da Turma 8A
                           </p>
-                          <p className="text-xs text-gray-500">Detectado há 1 dia</p>
+                          <p className="text-xs text-muted-foreground">Detectado há 1 dia</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+                  <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-background dark:from-purple-950/30">
                     <CardHeader>
                       <CardTitle className="flex items-center text-lg">
                         <TrendingUp className="mr-2 h-5 w-5 text-green-500" />
@@ -337,30 +337,30 @@ export default function Home() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                        <div className="rounded-lg bg-background p-3 shadow-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Taxa de presença</span>
+                            <span className="text-sm text-muted-foreground">Taxa de presença</span>
                             <span className="text-lg font-bold text-green-600">94%</span>
                           </div>
-                          <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                          <div className="mt-2 h-2 w-full rounded-full bg-muted">
                             <div className="h-2 w-[94%] rounded-full bg-green-500" />
                           </div>
                         </div>
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                        <div className="rounded-lg bg-background p-3 shadow-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Adimplência</span>
+                            <span className="text-sm text-muted-foreground">Adimplência</span>
                             <span className="text-lg font-bold text-green-600">87%</span>
                           </div>
-                          <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                          <div className="mt-2 h-2 w-full rounded-full bg-muted">
                             <div className="h-2 w-[87%] rounded-full bg-green-500" />
                           </div>
                         </div>
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                        <div className="rounded-lg bg-background p-3 shadow-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Média geral</span>
+                            <span className="text-sm text-muted-foreground">Média geral</span>
                             <span className="text-lg font-bold text-blue-600">8.3</span>
                           </div>
-                          <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                          <div className="mt-2 h-2 w-full rounded-full bg-muted">
                             <div className="h-2 w-[83%] rounded-full bg-blue-500" />
                           </div>
                         </div>
@@ -373,13 +373,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-white py-16" id="funcionalidades">
+        <section className="bg-background py-16" id="funcionalidades">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
                 Um ecossistema completo para sua escola
               </h2>
-              <p className="mt-4 text-lg text-gray-600">
+              <p className="mt-4 text-lg text-muted-foreground">
                 Tudo que você precisa em uma única plataforma integrada. Do administrativo ao
                 pedagógico, do financeiro à experiência do aluno.
               </p>
@@ -388,16 +388,16 @@ export default function Home() {
             {/* Módulos Principais */}
             <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {/* Administrativo */}
-              <div className="rounded-xl bg-purple-50 p-8">
+              <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gestão Administrativa</h3>
-                <p className="mt-4 text-gray-600">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">Gestão Administrativa</h3>
+                <p className="mt-4 text-muted-foreground">
                   Matrículas online, gestão de alunos, professores e funcionários, folha de ponto,
                   controle de documentos e muito mais.
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center">
                     <Check className="mr-2 h-4 w-4 text-purple-600" />
                     Matrículas online com assinatura digital
@@ -414,16 +414,16 @@ export default function Home() {
               </div>
 
               {/* Pedagógico */}
-              <div className="rounded-xl bg-purple-50 p-8">
+              <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <GraduationCap className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gestão Pedagógica</h3>
-                <p className="mt-4 text-gray-600">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">Gestão Pedagógica</h3>
+                <p className="mt-4 text-muted-foreground">
                   Turmas, grade horária, atividades, notas, frequência e ocorrências. Tudo integrado
                   e fácil de usar.
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center">
                     <Check className="mr-2 h-4 w-4 text-purple-600" />
                     Grade horária inteligente
@@ -440,16 +440,16 @@ export default function Home() {
               </div>
 
               {/* Financeiro */}
-              <div className="rounded-xl bg-purple-50 p-8">
+              <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <DollarSign className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gestão Financeira</h3>
-                <p className="mt-4 text-gray-600">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">Gestão Financeira</h3>
+                <p className="mt-4 text-muted-foreground">
                   Mensalidades, contratos, cobranças automáticas, bolsas e parcerias. Gateway de
                   pagamento integrado.
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center">
                     <Check className="mr-2 h-4 w-4 text-purple-600" />
                     Gateway de pagamento integrado
@@ -466,16 +466,16 @@ export default function Home() {
               </div>
 
               {/* Gamificação */}
-              <div className="rounded-xl bg-purple-50 p-8">
+              <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <Trophy className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">Gamificação</h3>
-                <p className="mt-4 text-gray-600">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">Gamificação</h3>
+                <p className="mt-4 text-muted-foreground">
                   Sistema completo de pontos, conquistas, desafios, rankings e loja virtual para
                   engajar seus alunos.
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center">
                     <Check className="mr-2 h-4 w-4 text-purple-600" />
                     Sistema de pontos e recompensas
@@ -492,18 +492,18 @@ export default function Home() {
               </div>
 
               {/* Analytics */}
-              <div className="rounded-xl bg-purple-50 p-8">
+              <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <BarChart3 className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">
                   Inteligência e Analytics
                 </h3>
-                <p className="mt-4 text-gray-600">
+                <p className="mt-4 text-muted-foreground">
                   Dashboards, relatórios e insights automáticos para tomada de decisão baseada em
                   dados.
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center">
                     <Check className="mr-2 h-4 w-4 text-purple-600" />
                     Alunos em risco de evasão
@@ -520,16 +520,16 @@ export default function Home() {
               </div>
 
               {/* Comunicação */}
-              <div className="rounded-xl bg-purple-50 p-8">
+              <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <Bell className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-gray-900">Comunicação Integrada</h3>
-                <p className="mt-4 text-gray-600">
+                <h3 className="mt-6 text-xl font-semibold text-foreground">Comunicação Integrada</h3>
+                <p className="mt-4 text-muted-foreground">
                   Notificações por email, SMS, WhatsApp e push. Sistema de preferências para cada
                   tipo de notificação.
                 </p>
-                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center">
                     <Check className="mr-2 h-4 w-4 text-purple-600" />
                     Multi-canal (Email, SMS, WhatsApp, Push)
@@ -623,38 +623,38 @@ const features = [
 
 function Pricing() {
   return (
-    <section className="bg-white py-16" id="preco">
+    <section className="bg-background py-16" id="preco">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
             Investimento simples, retorno garantido
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="mt-4 text-lg text-muted-foreground">
             Um preço único por aluno. Todo o ecossistema incluído.
           </p>
         </div>
 
         <div className="mt-16 flex justify-center">
-          <Card className="w-full max-w-md border-2 border-purple-200 shadow-lg">
+          <Card className="w-full max-w-md border-2 border-purple-200 dark:border-purple-800 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Ecossistema Completo
               </CardTitle>
-              <CardDescription className="mt-4 text-gray-600">
+              <CardDescription className="mt-4">
                 Tudo que sua escola precisa. Sem cobranças adicionais por módulo.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="mt-6 flex items-baseline">
                 <span className="text-5xl font-bold text-purple-600">R$ 18,90</span>
-                <span className="ml-2 text-gray-600">/aluno/mês</span>
+                <span className="ml-2 text-muted-foreground">/aluno/mês</span>
               </div>
 
               <ul className="mt-8 space-y-4">
                 {features.map((feature) => (
                   <li key={feature} className="flex items-center">
                     <Check className="h-5 w-5 text-purple-600" />
-                    <span className="ml-3 text-gray-600">{feature}</span>
+                    <span className="ml-3 text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -673,18 +673,18 @@ function Pricing() {
 
 function Contact() {
   return (
-    <section className="bg-purple-50 py-16" id="fale-conosco">
+    <section className="bg-purple-50 dark:bg-purple-950/20 py-16" id="fale-conosco">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
             Transforme sua escola hoje
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="mt-4 text-lg text-muted-foreground">
             Nossa equipe está pronta para mostrar como a IA pode revolucionar sua gestão escolar
           </p>
         </div>
 
-        <div className="mt-12 rounded-xl bg-white p-8 shadow-lg">
+        <div className="mt-12 rounded-xl bg-card p-8 shadow-lg">
           <form className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Nome</Label>
@@ -725,21 +725,21 @@ function Contact() {
 
 function Footer() {
   return (
-    <footer className="bg-white py-12">
+    <footer className="bg-background py-12 border-t">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between space-y-6 sm:flex-row sm:space-y-0">
           <div className="flex space-x-6">
-            <a href="#funcionalidades" className="text-gray-600 hover:text-purple-600">
+            <a href="#funcionalidades" className="text-muted-foreground hover:text-purple-600">
               Funcionalidades
             </a>
-            <a href="#preco" className="text-gray-600 hover:text-purple-600">
+            <a href="#preco" className="text-muted-foreground hover:text-purple-600">
               Preço
             </a>
-            <a href="#fale-conosco" className="text-gray-600 hover:text-purple-600">
+            <a href="#fale-conosco" className="text-muted-foreground hover:text-purple-600">
               Fale Conosco
             </a>
           </div>
-          <div className="text-center text-gray-600">
+          <div className="text-center text-muted-foreground">
             <p>© 2024 Anuá. Todos os direitos reservados.</p>
           </div>
         </div>
@@ -762,14 +762,14 @@ function InsightCard({ title, value, description, icon: Icon, trend }: InsightCa
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
           <Icon className="h-6 w-6 text-purple-600" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
-        <p className="text-xs text-gray-600 dark:text-gray-400">{description}</p>
+        <div className="text-2xl font-bold text-foreground">{value}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
         {trend && (
           <div className={`flex items-center ${trendColor} mt-2`}>
             <TrendingUp className="mr-1 h-4 w-4" />

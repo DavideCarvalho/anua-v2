@@ -46,15 +46,13 @@ export function SubjectsTableContainer({
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left p-3 font-medium">Nome</th>
-                <th className="text-left p-3 font-medium">Código</th>
                 <th className="text-right p-3 font-medium">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row: any) => (
+              {rows.map((row) => (
                 <tr key={row.id} className="border-t">
                   <td className="p-3 font-medium">{row.name}</td>
-                  <td className="p-3 text-muted-foreground">{row.slug}</td>
                   <td className="p-3 text-right">
                     <Button variant="ghost" onClick={() => onEdit(row.id)}>
                       Editar

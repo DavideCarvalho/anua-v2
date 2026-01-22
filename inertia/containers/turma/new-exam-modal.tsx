@@ -1,0 +1,354 @@
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '~/components/ui/dialog'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { Textarea } from '~/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
+import { DatePicker } from '~/components/ui/date-picker'
+import type { UserDto } from '~/lib/types'
+
+const examTypes = [
+  { value: 'WRITTEN', label: 'Escrita' },
+  { value: 'ORAL', label: 'Oral' },
+  { value: 'PRACTICAL', label: 'Pratica' },
+  { value: 'PROJECT', label: 'Projeto' },
+  { value: 'QUIZ', label: 'Quiz' },
+] as const
+
+const schema = z.object({
+  title: z.string().min(1, 'Qual o nome da prova?'),
+  scheduledDate: z.date({ message: 'Quando e a data da prova?' }),
+  maxScore: z.number({ message: 'Qual a pontuacao maxima?' }).min(0),
+  type: z.enum(['WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT', 'QUIZ'], {
+    message: 'Qual o tipo da prova?',
+  }),
+  subjectId: z.string().min(1, 'Qual materia?'),
+  description: z.string().optional(),
+})
+
+type FormValues = z.infer<typeof schema>
+
+interface NewExamModalProps {
+  classId: string
+  academicPeriodId: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  user: UserDto | null
+}
+
+interface Subject {
+  id: string
+  name: string
+  teacherId: string
+}
+
+interface TeacherClass {
+  teacherId: string
+  subject: { id: string; name: string } | null
+  teacher: { user: { id: string } } | null
+}
+
+const DIRECTOR_ROLES = ['SCHOOL_DIRECTOR', 'SCHOOL_COORDINATOR', 'ADMIN', 'SUPER_ADMIN']
+
+async function fetchSubjectsForClass(
+  classId: string,
+  user: UserDto | null
+): Promise<Subject[]> {
+  const response = await fetch(`/api/v1/classes/${classId}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch class data')
+  }
+  const data = await response.json()
+
+  const isDirectorOrAdmin = user?.role?.name && DIRECTOR_ROLES.includes(user.role.name)
+
+  // Extract subjects from teacherClasses
+  const subjects: Subject[] = []
+  const seen = new Set<string>()
+
+  for (const tc of (data.teacherClasses || []) as TeacherClass[]) {
+    if (!tc.subject || seen.has(tc.subject.id)) continue
+
+    // Directors/coordinators can see all subjects
+    // Teachers only see subjects they teach
+    const canSeeSubject = isDirectorOrAdmin || tc.teacher?.user?.id === user?.id
+
+    if (canSeeSubject) {
+      seen.add(tc.subject.id)
+      subjects.push({
+        id: tc.subject.id,
+        name: tc.subject.name,
+        teacherId: tc.teacherId,
+      })
+    }
+  }
+
+  return subjects
+}
+
+interface CreateExamPayload {
+  title: string
+  description?: string
+  maxScore: number
+  type: string
+  scheduledDate: Date
+  classId: string
+  subjectId: string
+  teacherId: string
+  academicPeriodId: string
+}
+
+async function createExam(payload: CreateExamPayload): Promise<void> {
+  const response = await fetch('/api/v1/exams', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || 'Failed to create exam')
+  }
+}
+
+export function NewExamModal({
+  classId,
+  academicPeriodId,
+  open,
+  onOpenChange,
+  user,
+}: NewExamModalProps) {
+  const queryClient = useQueryClient()
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: '',
+      scheduledDate: new Date(),
+      maxScore: 10,
+      type: 'WRITTEN',
+      description: '',
+      subjectId: '',
+    },
+  })
+
+  const { data: subjects, isLoading: isLoadingSubjects } = useQuery({
+    queryKey: ['class-subjects', classId, user?.id],
+    queryFn: () => fetchSubjectsForClass(classId, user),
+    enabled: open,
+  })
+
+  // Auto-select first subject if only one
+  useEffect(() => {
+    if (subjects && subjects.length === 1 && subjects[0]) {
+      form.setValue('subjectId', subjects[0].id)
+    }
+  }, [subjects, form])
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        title: '',
+        scheduledDate: new Date(),
+        maxScore: 10,
+        type: 'WRITTEN',
+        description: '',
+        subjectId: subjects?.length === 1 ? subjects[0]?.id : '',
+      })
+    }
+  }, [open, form, subjects])
+
+  const createMutation = useMutation({
+    mutationFn: createExam,
+    onSuccess: () => {
+      toast.success('Prova criada com sucesso!')
+      queryClient.invalidateQueries({ queryKey: ['exams'] })
+      onOpenChange(false)
+      form.reset()
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao criar prova')
+    },
+  })
+
+  const onSubmit = form.handleSubmit((data) => {
+    const selectedSubject = subjects?.find((s) => s.id === data.subjectId)
+    if (!selectedSubject) {
+      toast.error('Selecione uma materia')
+      return
+    }
+
+    createMutation.mutate({
+      title: data.title,
+      description: data.description,
+      maxScore: data.maxScore,
+      type: data.type,
+      scheduledDate: data.scheduledDate,
+      classId,
+      subjectId: data.subjectId,
+      teacherId: selectedSubject.teacherId,
+      academicPeriodId,
+    })
+  })
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]">
+        <form onSubmit={onSubmit}>
+          <DialogHeader>
+            <DialogTitle>Criar nova prova</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Nome da prova *</Label>
+              <Input
+                id="title"
+                {...form.register('title')}
+                placeholder="Ex: Prova de Matematica"
+              />
+              {form.formState.errors.title && (
+                <p className="text-sm text-destructive">{form.formState.errors.title.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Pra qual materia? *</Label>
+              {isLoadingSubjects ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Carregando materias...
+                </div>
+              ) : (
+                <Select
+                  value={form.watch('subjectId')}
+                  onValueChange={(value) => form.setValue('subjectId', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a materia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects?.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {form.formState.errors.subjectId && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.subjectId.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Tipo de prova *</Label>
+                <Select
+                  value={form.watch('type')}
+                  onValueChange={(value) =>
+                    form.setValue('type', value as FormValues['type'])
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {examTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.type && (
+                  <p className="text-sm text-destructive">{form.formState.errors.type.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maxScore">Pontuacao maxima *</Label>
+                <Input
+                  id="maxScore"
+                  type="number"
+                  min={0}
+                  step={0.1}
+                  {...form.register('maxScore', { valueAsNumber: true })}
+                />
+                {form.formState.errors.maxScore && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.maxScore.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Quando e a prova? *</Label>
+              <DatePicker
+                date={form.watch('scheduledDate')}
+                onChange={(date) => {
+                  if (date) form.setValue('scheduledDate', date)
+                }}
+                fromDate={new Date()}
+              />
+              {form.formState.errors.scheduledDate && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.scheduledDate.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Descricao (opcional)</Label>
+              <Textarea
+                id="description"
+                rows={3}
+                placeholder="Conteudo da prova, instrucoes, etc."
+                {...form.register('description')}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                'Salvar'
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}

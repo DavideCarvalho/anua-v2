@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { Suspense } from 'react'
 import { Shield, AlertCircle, FileText, BarChart3, Settings } from 'lucide-react'
 
@@ -33,7 +34,7 @@ export default function AdminSegurosPage() {
 
         {/* Quick Navigation */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Link href="/admin/seguros/sinistros">
+          <Link route="web.admin.seguros.sinistros">
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
               <CardHeader className="pb-2">
                 <AlertCircle className="h-5 w-5 text-yellow-600" />
@@ -47,7 +48,7 @@ export default function AdminSegurosPage() {
             </Card>
           </Link>
 
-          <Link href="/admin/seguros/faturamento">
+          <Link route="web.admin.seguros.faturamento">
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
               <CardHeader className="pb-2">
                 <FileText className="h-5 w-5 text-blue-600" />
@@ -61,7 +62,7 @@ export default function AdminSegurosPage() {
             </Card>
           </Link>
 
-          <Link href="/admin/seguros/analytics">
+          <Link route="web.admin.seguros.analytics">
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
               <CardHeader className="pb-2">
                 <BarChart3 className="h-5 w-5 text-purple-600" />
@@ -75,7 +76,7 @@ export default function AdminSegurosPage() {
             </Card>
           </Link>
 
-          <Link href="/admin/seguros/configuracao">
+          <Link route="web.admin.seguros.configuracao">
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
               <CardHeader className="pb-2">
                 <Settings className="h-5 w-5 text-gray-600" />

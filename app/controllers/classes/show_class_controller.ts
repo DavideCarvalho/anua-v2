@@ -8,6 +8,13 @@ export default class ShowClassController {
       .preload('level')
       .preload('students')
       .preload('teachers')
+      .preload('teacherClasses', (query) => {
+        query.where('isActive', true)
+        query.preload('teacher', (teacherQuery) => {
+          teacherQuery.preload('user')
+        })
+        query.preload('subject')
+      })
       .first()
 
     if (!class_) {

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import InputMask from 'react-input-mask'
 import { cn } from '~/lib/utils'
 
 export interface MaskedInputProps extends Omit<React.ComponentProps<'input'>, 'onChange'> {
@@ -8,26 +7,46 @@ export interface MaskedInputProps extends Omit<React.ComponentProps<'input'>, 'o
   onChange?: (value: string) => void
 }
 
+function applyMask(value: string, mask: string): string {
+  const cleanValue = value.replace(/\D/g, '')
+  let result = ''
+  let valueIndex = 0
+
+  for (let i = 0; i < mask.length && valueIndex < cleanValue.length; i++) {
+    if (mask[i] === '9') {
+      result += cleanValue[valueIndex]
+      valueIndex++
+    } else {
+      result += mask[i]
+      if (cleanValue[valueIndex] === mask[i]) {
+        valueIndex++
+      }
+    }
+  }
+
+  return result
+}
+
 const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
-  ({ className, mask, maskChar = '_', onChange, ...props }, ref) => {
+  ({ className, mask, onChange, value, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const maskedValue = applyMask(e.target.value, mask)
+      onChange?.(maskedValue)
+    }
+
+    const displayValue = value ? applyMask(String(value), mask) : ''
+
     return (
-      <InputMask
-        mask={mask}
-        maskChar={maskChar}
-        onChange={(e) => onChange?.(e.target.value)}
-        {...props}
-      >
-        {(inputProps: React.InputHTMLAttributes<HTMLInputElement>) => (
-          <input
-            {...inputProps}
-            ref={ref}
-            className={cn(
-              'flex h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1 text-base text-gray-900 dark:text-white shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-gray-900 dark:file:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-              className
-            )}
-          />
+      <input
+        ref={ref}
+        value={displayValue}
+        onChange={handleChange}
+        className={cn(
+          'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+          className
         )}
-      </InputMask>
+        {...props}
+      />
     )
   }
 )

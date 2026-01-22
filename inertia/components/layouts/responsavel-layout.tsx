@@ -1,4 +1,5 @@
-import { Link, usePage } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
 import {
   LayoutDashboard,
@@ -24,21 +25,22 @@ import { ImpersonationBanner } from '../admin/impersonation-banner'
 
 interface NavItem {
   title: string
+  route: string
   href: string
   icon: React.ElementType
 }
 
 const navigation: NavItem[] = [
-  { title: 'Início', href: '/responsavel', icon: LayoutDashboard },
-  { title: 'Notas', href: '/responsavel/notas', icon: BookOpen },
-  { title: 'Frequência', href: '/responsavel/frequencia', icon: Calendar },
-  { title: 'Mensalidades', href: '/responsavel/mensalidades', icon: DollarSign },
-  { title: 'Cantina', href: '/responsavel/cantina', icon: UtensilsCrossed },
-  { title: 'Autorizações', href: '/responsavel/autorizacoes', icon: ClipboardCheck },
-  { title: 'Documentos', href: '/responsavel/documentos', icon: FileText },
-  { title: 'Gamificação', href: '/responsavel/gamificacao', icon: Trophy },
-  { title: 'Comunicados', href: '/responsavel/comunicados', icon: Bell },
-  { title: 'Perfil', href: '/responsavel/perfil', icon: User },
+  { title: 'Início', route: 'web.responsavel.dashboard', href: '/responsavel', icon: LayoutDashboard },
+  { title: 'Notas', route: 'web.responsavel.notas', href: '/responsavel/notas', icon: BookOpen },
+  { title: 'Frequência', route: 'web.responsavel.frequencia', href: '/responsavel/frequencia', icon: Calendar },
+  { title: 'Mensalidades', route: 'web.responsavel.mensalidades', href: '/responsavel/mensalidades', icon: DollarSign },
+  { title: 'Cantina', route: 'web.responsavel.cantina', href: '/responsavel/cantina', icon: UtensilsCrossed },
+  { title: 'Autorizações', route: 'web.responsavel.autorizacoes', href: '/responsavel/autorizacoes', icon: ClipboardCheck },
+  { title: 'Documentos', route: 'web.responsavel.documentos', href: '/responsavel/documentos', icon: FileText },
+  { title: 'Gamificação', route: 'web.responsavel.gamificacao', href: '/responsavel/gamificacao', icon: Trophy },
+  { title: 'Comunicados', route: 'web.responsavel.comunicados', href: '/responsavel/comunicados', icon: Bell },
+  { title: 'Perfil', route: 'web.responsavel.perfil', href: '/responsavel/perfil', icon: User },
 ]
 
 export function ResponsavelLayout({ children }: PropsWithChildren) {
@@ -62,7 +64,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
       >
         <div className="flex h-full flex-col">
           <div className="flex h-14 items-center border-b px-4">
-            <Link href="/responsavel" className="flex items-center gap-2">
+            <Link route="web.responsavel.dashboard" className="flex items-center gap-2">
               <span className="font-bold text-lg text-primary">Anua</span>
               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Responsável</span>
             </Link>
@@ -78,8 +80,8 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
                 const isActive = pathname === item.href
                 return (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    key={item.route}
+                    route={item.route}
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       isActive
@@ -105,11 +107,14 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
                 <p className="text-xs text-muted-foreground truncate">{formatRoleName(user?.role?.name)}</p>
               </div>
             </div>
-            <Link href="/api/v1/auth/logout" method="post" as="button" className="w-full mt-3">
-              <Button variant="outline" size="sm" className="w-full">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </Button>
+            <Link
+              route="api.v1.auth.logout"
+              method="post"
+              as="button"
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
             </Link>
           </div>
         </div>

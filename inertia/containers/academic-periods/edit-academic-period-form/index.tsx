@@ -78,30 +78,29 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
   const updatePeriodMutation = useMutation({
     mutationFn: async (data: EditAcademicPeriodFormValues) => {
       // Update basic period info
-      await tuyau.api.v1['academic-periods'][':id'].$put({
-        id: academicPeriod.id,
-      }, {
-        name: data.calendar.name,
-        segment: data.calendar.segment,
-        startDate: data.calendar.startDate.toISOString(),
-        endDate: data.calendar.endDate.toISOString(),
-        enrollmentStartDate: data.calendar.enrollmentStartDate?.toISOString(),
-        enrollmentEndDate: data.calendar.enrollmentEndDate?.toISOString(),
-      }).unwrap()
+      await tuyau.api.v1['academic-periods']({ id: academicPeriod.id })
+        .$put({
+          name: data.calendar.name,
+          segment: data.calendar.segment,
+          startDate: data.calendar.startDate.toISOString(),
+          endDate: data.calendar.endDate.toISOString(),
+          enrollmentStartDate: data.calendar.enrollmentStartDate?.toISOString(),
+          enrollmentEndDate: data.calendar.enrollmentEndDate?.toISOString(),
+        })
+        .unwrap()
 
       // Update courses
-      await tuyau.api.v1['academic-periods'][':id'].courses.$put({
-        id: academicPeriod.id,
-      }, {
-        courses: data.courses.map((course) => ({
-          id: course.id,
-          courseId: course.courseId,
-          levels: course.levels.map((level) => ({
-            id: level.id,
-            levelId: level.levelId,
-            isActive: level.isActive,
+      await tuyau.api.v1['academic-periods']({ id: academicPeriod.id }).courses
+        .$put({
+          courses: data.courses.map((course) => ({
+            id: course.id,
+            courseId: course.courseId,
+            levels: course.levels.map((level) => ({
+              id: level.id,
+              levelId: level.levelId,
+              isActive: level.isActive,
+            })),
           })),
-        })),
       }).unwrap()
     },
     onSuccess: () => {

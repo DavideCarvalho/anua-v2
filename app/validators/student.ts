@@ -47,3 +47,136 @@ export const updateStudentValidator = vine.compile(
     enrollmentStatus: vine.enum(['PENDING_DOCUMENT_REVIEW', 'REGISTERED']).optional(),
   })
 )
+
+// Validator for full student update (similar to enroll but for updates)
+export const fullUpdateStudentValidator = vine.compile(
+  vine.object({
+    basicInfo: vine.object({
+      name: vine.string().trim().minLength(2).maxLength(255),
+      email: vine.string().email().trim().optional(),
+      phone: vine.string().trim(),
+      birthDate: vine.date(),
+      documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
+      documentNumber: vine.string().trim(),
+      isSelfResponsible: vine.boolean(),
+      whatsappContact: vine.boolean(),
+    }),
+    responsibles: vine.array(
+      vine.object({
+        id: vine.string().uuid().optional(),
+        name: vine.string().trim().minLength(2),
+        email: vine.string().email().trim(),
+        phone: vine.string().trim(),
+        documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
+        documentNumber: vine.string().trim(),
+        birthDate: vine.date(),
+        isPedagogical: vine.boolean(),
+        isFinancial: vine.boolean(),
+      })
+    ),
+    address: vine.object({
+      zipCode: vine.string().trim(),
+      street: vine.string().trim(),
+      number: vine.string().trim(),
+      complement: vine.string().trim().optional(),
+      neighborhood: vine.string().trim(),
+      city: vine.string().trim(),
+      state: vine.string().trim(),
+    }),
+    medicalInfo: vine.object({
+      conditions: vine.string().trim().optional(),
+      medications: vine
+        .array(
+          vine.object({
+            id: vine.string().uuid().optional(),
+            name: vine.string().trim(),
+            dosage: vine.string().trim(),
+            frequency: vine.string().trim(),
+            instructions: vine.string().trim().optional(),
+          })
+        )
+        .optional(),
+      emergencyContacts: vine.array(
+        vine.object({
+          id: vine.string().uuid().optional(),
+          name: vine.string().trim(),
+          phone: vine.string().trim(),
+          relationship: vine.string().trim(),
+          order: vine.number(),
+        })
+      ),
+    }),
+  })
+)
+
+// Validator for full enrollment flow
+export const enrollStudentValidator = vine.compile(
+  vine.object({
+    basicInfo: vine.object({
+      name: vine.string().trim().minLength(2).maxLength(255),
+      email: vine.string().email().trim().optional(),
+      phone: vine.string().trim(),
+      birthDate: vine.date(),
+      documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
+      documentNumber: vine.string().trim(),
+      isSelfResponsible: vine.boolean(),
+      whatsappContact: vine.boolean(),
+    }),
+    responsibles: vine.array(
+      vine.object({
+        id: vine.string().uuid().optional(),
+        name: vine.string().trim().minLength(2),
+        email: vine.string().email().trim(),
+        phone: vine.string().trim(),
+        documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
+        documentNumber: vine.string().trim(),
+        birthDate: vine.date(),
+        isPedagogical: vine.boolean(),
+        isFinancial: vine.boolean(),
+      })
+    ),
+    address: vine.object({
+      zipCode: vine.string().trim(),
+      street: vine.string().trim(),
+      number: vine.string().trim(),
+      complement: vine.string().trim().optional(),
+      neighborhood: vine.string().trim(),
+      city: vine.string().trim(),
+      state: vine.string().trim(),
+    }),
+    medicalInfo: vine.object({
+      conditions: vine.string().trim().optional(),
+      medications: vine
+        .array(
+          vine.object({
+            name: vine.string().trim(),
+            dosage: vine.string().trim(),
+            frequency: vine.string().trim(),
+            instructions: vine.string().trim().optional(),
+          })
+        )
+        .optional(),
+      emergencyContacts: vine.array(
+        vine.object({
+          name: vine.string().trim(),
+          phone: vine.string().trim(),
+          relationship: vine.string().trim(),
+          order: vine.number(),
+        })
+      ),
+    }),
+    billing: vine.object({
+      academicPeriodId: vine.string().uuid(),
+      courseId: vine.string().uuid(),
+      levelId: vine.string().uuid(),
+      classId: vine.string().uuid().optional(),
+      contractId: vine.string().uuid().optional(),
+      monthlyFee: vine.number().min(0),
+      discount: vine.number().min(0).max(100),
+      paymentDate: vine.number().min(1).max(31),
+      paymentMethod: vine.enum(['BOLETO', 'CREDIT_CARD', 'PIX']),
+      installments: vine.number().min(1).max(12),
+      scholarshipId: vine.string().uuid().optional().nullable(),
+    }),
+  })
+)

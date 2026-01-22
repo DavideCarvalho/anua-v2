@@ -22,3 +22,13 @@ output "workload_identity_provider" {
   description = "Workload Identity Provider for GitHub Actions"
   value       = google_iam_workload_identity_pool_provider.github_provider.name
 }
+
+output "uploads_bucket_name" {
+  description = "Name of the GCS bucket for uploads"
+  value       = google_storage_bucket.uploads.name
+}
+
+output "uploads_bucket_url" {
+  description = "URL of the GCS bucket for uploads"
+  value       = google_storage_bucket.uploads.url
+}

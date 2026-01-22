@@ -1,6 +1,7 @@
 import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
+import { usePage } from '@inertiajs/react'
 import { useTeachersQueryOptions } from '../hooks/queries/use-teachers'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -13,7 +14,24 @@ import {
   GraduationCap,
   MoreHorizontal,
   Plus,
+  Edit,
+  DollarSign,
+  BookOpen,
+  UserX,
+  UserCheck,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+import { NewTeacherModal } from './teachers/new-teacher-modal'
+import { EditTeacherDataModal } from './teachers/edit-teacher-data-modal'
+import { EditTeacherRateModal } from './teachers/edit-teacher-rate-modal'
+import { EditTeacherSubjectsModal } from './teachers/edit-teacher-subjects-modal'
+import type { SharedProps } from '../lib/types'
 
 // Loading Skeleton
 function TeachersListSkeleton() {
@@ -64,15 +82,35 @@ function TeachersListError({
   )
 }
 
+interface TeacherItem {
+  id: string
+  hourlyRate?: number
+  user?: {
+    id: string
+    name: string
+    email: string
+    active: boolean
+  }
+  subjects?: Array<{ id: string; name: string }>
+}
+
 // Content Component
 function TeachersListContent({
   search,
   page,
   onPageChange,
+  onEditData,
+  onEditRate,
+  onEditSubjects,
+  onToggleActive,
 }: {
   search: string
   page: number
   onPageChange: (page: number) => void
+  onEditData: (teacher: TeacherItem) => void
+  onEditRate: (teacher: TeacherItem) => void
+  onEditSubjects: (teacher: TeacherItem) => void
+  onToggleActive: (teacher: TeacherItem) => void
 }) {
   const { data } = useSuspenseQuery(
     useTeachersQueryOptions({ page, limit: 20, search: search || undefined })
@@ -137,9 +175,41 @@ function TeachersListContent({
                   </span>
                 </td>
                 <td className="p-4 text-right">
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEditData(teacher)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar dados
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEditRate(teacher)}>
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Editar valor hora/aula
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEditSubjects(teacher)}>
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Editar disciplinas
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => onToggleActive(teacher)}>
+                        {teacher.user?.active ? (
+                          <>
+                            <UserX className="h-4 w-4 mr-2" />
+                            Desativar professor
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Ativar professor
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             ))}
@@ -181,13 +251,42 @@ function TeachersListContent({
 
 // Container Export
 export function TeachersListContainer() {
+  const { props } = usePage<SharedProps>()
+  const schoolId = props.user?.schoolId
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [page, setPage] = useState(1)
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false)
+
+  // Edit modals state
+  const [selectedTeacher, setSelectedTeacher] = useState<TeacherItem | null>(null)
+  const [isEditDataModalOpen, setIsEditDataModalOpen] = useState(false)
+  const [isEditRateModalOpen, setIsEditRateModalOpen] = useState(false)
+  const [isEditSubjectsModalOpen, setIsEditSubjectsModalOpen] = useState(false)
 
   const handleSearch = () => {
     setSearch(searchInput)
     setPage(1)
+  }
+
+  const handleEditData = (teacher: TeacherItem) => {
+    setSelectedTeacher(teacher)
+    setIsEditDataModalOpen(true)
+  }
+
+  const handleEditRate = (teacher: TeacherItem) => {
+    setSelectedTeacher(teacher)
+    setIsEditRateModalOpen(true)
+  }
+
+  const handleEditSubjects = (teacher: TeacherItem) => {
+    setSelectedTeacher(teacher)
+    setIsEditSubjectsModalOpen(true)
+  }
+
+  const handleToggleActive = async (teacher: TeacherItem) => {
+    // TODO: Implement toggle active mutation
+    console.log('Toggle active for teacher:', teacher.id)
   }
 
   return (
@@ -206,11 +305,19 @@ export function TeachersListContainer() {
         <Button onClick={handleSearch} variant="secondary">
           Buscar
         </Button>
-        <Button className="ml-auto">
+        <Button className="ml-auto" onClick={() => setIsNewModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Professor
         </Button>
       </div>
+
+      {schoolId && (
+        <NewTeacherModal
+          schoolId={schoolId}
+          open={isNewModalOpen}
+          onOpenChange={setIsNewModalOpen}
+        />
+      )}
 
       <QueryErrorResetBoundary>
         {({ reset }) => (
@@ -221,11 +328,40 @@ export function TeachersListContainer() {
             )}
           >
             <Suspense fallback={<TeachersListSkeleton />}>
-              <TeachersListContent search={search} page={page} onPageChange={setPage} />
+              <TeachersListContent
+                search={search}
+                page={page}
+                onPageChange={setPage}
+                onEditData={handleEditData}
+                onEditRate={handleEditRate}
+                onEditSubjects={handleEditSubjects}
+                onToggleActive={handleToggleActive}
+              />
             </Suspense>
           </ErrorBoundary>
         )}
       </QueryErrorResetBoundary>
+
+      <EditTeacherDataModal
+        open={isEditDataModalOpen}
+        onOpenChange={setIsEditDataModalOpen}
+        teacher={selectedTeacher}
+      />
+
+      <EditTeacherRateModal
+        open={isEditRateModalOpen}
+        onOpenChange={setIsEditRateModalOpen}
+        teacher={selectedTeacher}
+      />
+
+      {schoolId && (
+        <EditTeacherSubjectsModal
+          open={isEditSubjectsModalOpen}
+          onOpenChange={setIsEditSubjectsModalOpen}
+          teacher={selectedTeacher}
+          schoolId={schoolId}
+        />
+      )}
     </div>
   )
 }

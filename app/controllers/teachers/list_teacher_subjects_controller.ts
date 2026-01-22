@@ -13,7 +13,6 @@ export default class ListTeacherSubjectsController {
     const teacherSubjects = await TeacherHasSubject.query()
       .where('teacherId', params.id)
       .preload('subject')
-      .orderBy('createdAt', 'desc')
 
     return response.ok(teacherSubjects)
   }

@@ -21,10 +21,10 @@ export default class GetInsuranceStatsController {
 
     // Count insured students (students in contracts with insurance)
     const insuredStudents = await db
-      .from('student_has_levels')
-      .join('contracts', 'student_has_levels.contract_id', 'contracts.id')
-      .where('contracts.has_insurance', true)
-      .countDistinct('student_has_levels.student_id as count')
+      .from('StudentHasLevel')
+      .join('Contract', 'StudentHasLevel.contractId', 'Contract.id')
+      .where('Contract.hasInsurance', true)
+      .countDistinct('StudentHasLevel.studentId as count')
 
     const totalInsuredStudents = Number(insuredStudents[0]?.count || 0)
 
@@ -45,7 +45,7 @@ export default class GetInsuranceStatsController {
     const paidClaimsAmountThisMonth = await InsuranceClaim.query()
       .where('status', 'PAID')
       .whereBetween('paidAt', [startOfMonth.toSQL()!, endOfMonth.toSQL()!])
-      .sum('covered_amount as total')
+      .sum('coveredAmount as total')
 
     const totalPaidAmountThisMonth = Number(paidClaimsAmountThisMonth[0].$extras.total || 0)
 
@@ -59,7 +59,7 @@ export default class GetInsuranceStatsController {
     const monthlyRevenue = await InsuranceBilling.query()
       .where('status', 'PAID')
       .whereBetween('paidAt', [startOfMonth.toSQL()!, endOfMonth.toSQL()!])
-      .sum('total_amount as total')
+      .sum('totalAmount as total')
 
     const totalMonthlyRevenue = Number(monthlyRevenue[0].$extras.total || 0)
 

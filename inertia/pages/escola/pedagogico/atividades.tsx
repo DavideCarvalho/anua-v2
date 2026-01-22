@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { Plus, FileText, Filter } from 'lucide-react'
+import { useRouter } from '@tuyau/inertia/react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Button } from '../../../components/ui/button'
@@ -13,20 +14,20 @@ import {
   SelectValue,
 } from '../../../components/ui/select'
 
-import { AssignmentsList, AssignmentsListSkeleton } from '../../../containers/academico/assignments-list'
+import { AssignmentsList } from '../../../containers/academico/assignments-list'
 
 interface PageProps {
   schoolId: string
   classes?: Array<{ id: string; name: string }>
   subjects?: Array<{ id: string; name: string }>
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export default function AtividadesPage() {
-  const { schoolId, classes = [], subjects = [] } = usePage<PageProps>().props
+  const { classes = [], subjects = [] } = usePage<PageProps>().props
   const [selectedClass, setSelectedClass] = useState<string>('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
-
+  const router = useRouter()
   return (
     <EscolaLayout>
       <Head title="Atividades" />
@@ -51,12 +52,15 @@ export default function AtividadesPage() {
           <CardContent className="py-4">
             <div className="flex items-center gap-4">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <Select
+                value={selectedClass || 'all'}
+                onValueChange={(v) => setSelectedClass(v === 'all' ? '' : v)}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Todas as turmas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as turmas</SelectItem>
+                  <SelectItem value="all">Todas as turmas</SelectItem>
                   {classes.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -64,12 +68,15 @@ export default function AtividadesPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+              <Select
+                value={selectedSubject || 'all'}
+                onValueChange={(v) => setSelectedSubject(v === 'all' ? '' : v)}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Todas as materias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as materias</SelectItem>
+                  <SelectItem value="all">Todas as materias</SelectItem>
                   {subjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
@@ -82,18 +89,16 @@ export default function AtividadesPage() {
         </Card>
 
         {/* Assignments List */}
-        <Suspense fallback={<AssignmentsListSkeleton />}>
-          <AssignmentsList
-            classId={selectedClass || undefined}
-            subjectId={selectedSubject || undefined}
-            onView={(id) => {
-              window.location.href = `/escola/${schoolId}/pedagogico/atividades/${id}`
-            }}
-            onEdit={(id) => {
-              window.location.href = `/escola/${schoolId}/pedagogico/atividades/${id}/editar`
-            }}
-          />
-        </Suspense>
+        <AssignmentsList
+          classId={selectedClass || undefined}
+          subjectId={selectedSubject || undefined}
+          onView={(id) => {
+            router.visit({ route: 'web.escola.pedagogico.atividades.show', params: { id } })
+          }}
+          onEdit={(id) => {
+            router.visit({ route: 'web.escola.pedagogico.atividades.edit', params: { id } })
+          }}
+        />
       </div>
     </EscolaLayout>
   )

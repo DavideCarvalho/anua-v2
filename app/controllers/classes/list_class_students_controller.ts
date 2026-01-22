@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import Student from '#models/student'
+import StudentDto from '#models/dto/student.dto'
 
 export default class ListClassStudentsController {
   async handle({ params, request, response }: HttpContext) {
@@ -15,9 +16,12 @@ export default class ListClassStudentsController {
 
     const students = await Student.query()
       .where('classId', params.id)
-      .orderBy('createdAt', 'desc')
+      .preload('user')
       .paginate(page, limit)
 
-    return response.ok(students)
+    return response.ok({
+      data: StudentDto.fromArray(students.all()),
+      meta: students.getMeta(),
+    })
   }
 }

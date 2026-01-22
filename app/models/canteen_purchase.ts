@@ -52,6 +52,6 @@ export default class CanteenPurchase extends BaseModel {
   @belongsTo(() => Canteen, { foreignKey: 'canteenId' })
   declare canteen: BelongsTo<typeof Canteen>
 
-  @hasMany(() => CanteenItemPurchased, { foreignKey: 'itemsPurchasedId' })
+  @hasMany(() => CanteenItemPurchased, { foreignKey: 'canteenPurchaseId' })
   declare itemsPurchased: HasMany<typeof CanteenItemPurchased>
 }

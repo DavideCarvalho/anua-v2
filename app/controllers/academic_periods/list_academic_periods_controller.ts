@@ -3,13 +3,15 @@ import AcademicPeriod from '#models/academic_period'
 import { listAcademicPeriodsValidator } from '#validators/academic_period'
 
 export default class ListAcademicPeriodsController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { request, response, auth } = ctx
     const payload = await request.validateUsing(listAcademicPeriodsValidator)
 
     const page = payload.page ?? 1
     const limit = payload.limit ?? 10
 
-    const schoolId = payload.schoolId ?? auth.user?.schoolId
+    const effectiveUser = ctx.effectiveUser || auth.user
+    const schoolId = payload.schoolId ?? effectiveUser?.schoolId
 
     const query = AcademicPeriod.query().orderBy('startDate', 'desc')
 

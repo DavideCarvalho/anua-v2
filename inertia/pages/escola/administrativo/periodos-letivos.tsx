@@ -1,4 +1,5 @@
-import { Head, Link, usePage } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 
 import type { SharedProps } from '../../../lib/types'
 import { EscolaLayout } from '../../../components/layouts'
@@ -17,7 +18,7 @@ export default function PeriodosLetivosAdminPage() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Períodos letivos</h2>
           <Button asChild>
-            <Link href="/escola/administrativo/periodos-letivos/novo-periodo-letivo">
+            <Link route="web.escola.administrativo.novoPeriodoLetivo">
               Criar período letivo
             </Link>
           </Button>

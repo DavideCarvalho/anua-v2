@@ -23,6 +23,17 @@ const UpdateSchoolController = () => import('#controllers/schools/update')
 const DestroySchoolController = () => import('#controllers/schools/destroy')
 const UploadSchoolLogoController = () =>
   import('#controllers/schools/upload_school_logo_controller')
+const UpdateSchoolDirectorController = () =>
+  import('#controllers/schools/update_school_director_controller')
+const ListSchoolUsersController = () => import('#controllers/schools/list_school_users_controller')
+
+// School Switcher
+const GetSchoolSwitcherDataController = () =>
+  import('#controllers/school_switcher/get_school_switcher_data_controller')
+const ToggleSchoolSelectionController = () =>
+  import('#controllers/school_switcher/toggle_school_selection_controller')
+const ToggleSchoolGroupSelectionController = () =>
+  import('#controllers/school_switcher/toggle_school_group_selection_controller')
 
 // Auth
 const LoginController = () => import('#controllers/auth/login')
@@ -45,6 +56,9 @@ const ShowStudentController = () => import('#controllers/students/show')
 const StoreStudentController = () => import('#controllers/students/store')
 const UpdateStudentController = () => import('#controllers/students/update')
 const DestroyStudentController = () => import('#controllers/students/destroy')
+const EnrollStudentController = () => import('#controllers/students/enroll_student_controller')
+const FullUpdateStudentController = () =>
+  import('#controllers/students/full_update_student_controller')
 
 // Responsibles
 const ListStudentResponsiblesController = () =>
@@ -89,6 +103,13 @@ const ShowCourseController = () => import('#controllers/courses/show_course_cont
 const CreateCourseController = () => import('#controllers/courses/create_course_controller')
 const UpdateCourseController = () => import('#controllers/courses/update_course_controller')
 const DeleteCourseController = () => import('#controllers/courses/delete_course_controller')
+const GetCourseDashboardMetricsController = () =>
+  import('#controllers/courses/get_course_dashboard_metrics_controller')
+const GetCourseAlertsController = () => import('#controllers/courses/get_course_alerts_controller')
+const GetCourseActivityFeedController = () =>
+  import('#controllers/courses/get_course_activity_feed_controller')
+const GetCourseClassesController = () =>
+  import('#controllers/courses/get_course_classes_controller')
 
 // Levels
 const ListLevelsController = () => import('#controllers/levels/list_levels_controller')
@@ -114,12 +135,16 @@ const UpdateClassController = () => import('#controllers/classes/update_class_co
 const DeleteClassController = () => import('#controllers/classes/delete_class_controller')
 const UpdateClassWithTeachersController = () =>
   import('#controllers/classes/update_class_with_teachers_controller')
+const CreateClassWithTeachersController = () =>
+  import('#controllers/classes/create_class_with_teachers_controller')
 const ListClassStudentsController = () =>
   import('#controllers/classes/list_class_students_controller')
 const CountClassStudentsController = () =>
   import('#controllers/classes/count_class_students_controller')
 const GetClassesForSidebarController = () =>
   import('#controllers/classes/get_classes_for_sidebar_controller')
+const GetStudentStatusController = () =>
+  import('#controllers/students/get_student_status_controller')
 
 // Subjects
 const ListSubjectsController = () => import('#controllers/subjects/list_subjects_controller')
@@ -137,6 +162,8 @@ const GetClassScheduleController = () =>
   import('#controllers/schedules/get_class_schedule_controller')
 const SaveClassScheduleController = () =>
   import('#controllers/schedules/save_class_schedule_controller')
+const GenerateClassScheduleController = () =>
+  import('#controllers/schedules/generate_class_schedule_controller')
 
 // Teachers
 const ListTeachersController = () => import('#controllers/teachers/list_teachers_controller')
@@ -174,6 +201,10 @@ const GetGradeDistributionController = () =>
   import('#controllers/grades/get_grade_distribution_controller')
 const GetAtRiskStudentsController = () =>
   import('#controllers/grades/get_at_risk_students_controller')
+const GetClassGradesBySubjectController = () =>
+  import('#controllers/grades/get_class_grades_by_subject_controller')
+const BatchSaveGradesController = () =>
+  import('#controllers/grades/batch_save_grades_controller')
 
 // Analytics
 const GetAttendanceOverviewController = () =>
@@ -202,8 +233,7 @@ const GetIncidentsOverviewController = () =>
   import('#controllers/analytics/get_incidents_overview_controller')
 const GetGamificationOverviewController = () =>
   import('#controllers/analytics/get_gamification_overview_controller')
-const GetHrOverviewController = () =>
-  import('#controllers/analytics/get_hr_overview_controller')
+const GetHrOverviewController = () => import('#controllers/analytics/get_hr_overview_controller')
 
 // Events
 const ListEventsController = () => import('#controllers/events/list_events_controller')
@@ -262,8 +292,7 @@ const ShowNotificationController = () =>
   import('#controllers/notifications/show_notification_controller')
 const MarkNotificationReadController = () =>
   import('#controllers/notifications/mark_notification_read_controller')
-const MarkAllReadController = () =>
-  import('#controllers/notifications/mark_all_read_controller')
+const MarkAllReadController = () => import('#controllers/notifications/mark_all_read_controller')
 const DeleteNotificationController = () =>
   import('#controllers/notifications/delete_notification_controller')
 
@@ -301,6 +330,8 @@ const UpdateAttendanceController = () =>
   import('#controllers/attendance/update_attendance_controller')
 const GetStudentAttendanceController = () =>
   import('#controllers/attendance/get_student_attendance_controller')
+const GetClassStudentsAttendanceController = () =>
+  import('#controllers/attendance/get_class_students_attendance_controller')
 
 // Assignments
 const ListAssignmentsController = () =>
@@ -624,8 +655,7 @@ const ApproveInsuranceClaimController = () =>
   import('#controllers/insurance/approve_insurance_claim_controller')
 const RejectInsuranceClaimController = () =>
   import('#controllers/insurance/reject_insurance_claim_controller')
-const MarkClaimPaidController = () =>
-  import('#controllers/insurance/mark_claim_paid_controller')
+const MarkClaimPaidController = () => import('#controllers/insurance/mark_claim_paid_controller')
 const ListInsuranceBillingsController = () =>
   import('#controllers/insurance/list_insurance_billings_controller')
 const GetBillingDetailsController = () =>
@@ -644,8 +674,7 @@ const GetSchoolInsuranceClaimsController = () =>
   import('#controllers/insurance/get_school_insurance_claims_controller')
 
 // Impersonation
-const SetImpersonationController = () =>
-  import('#controllers/admin/set_impersonation_controller')
+const SetImpersonationController = () => import('#controllers/admin/set_impersonation_controller')
 const ClearImpersonationController = () =>
   import('#controllers/admin/clear_impersonation_controller')
 const GetImpersonationStatusController = () =>
@@ -691,6 +720,10 @@ function registerSchoolApiRoutes() {
       router.put('/:id', [UpdateSchoolController, 'handle']).as('schools.update')
       router.delete('/:id', [DestroySchoolController, 'handle']).as('schools.destroy')
       router.post('/:id/logo', [UploadSchoolLogoController, 'handle']).as('schools.uploadLogo')
+      router.get('/:id/users', [ListSchoolUsersController, 'handle']).as('schools.users')
+      router
+        .put('/:id/director', [UpdateSchoolDirectorController, 'handle'])
+        .as('schools.updateDirector')
     })
     .prefix('/schools')
 }
@@ -763,13 +796,30 @@ function registerUserSchoolGroupApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerSchoolSwitcherApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [GetSchoolSwitcherDataController, 'handle']).as('schoolSwitcher.getData')
+      router
+        .post('/toggle-school', [ToggleSchoolSelectionController, 'handle'])
+        .as('schoolSwitcher.toggleSchool')
+      router
+        .post('/toggle-group', [ToggleSchoolGroupSelectionController, 'handle'])
+        .as('schoolSwitcher.toggleGroup')
+    })
+    .prefix('/school-switcher')
+    .use([middleware.auth(), middleware.impersonation()])
+}
+
 function registerStudentApiRoutes() {
   router
     .group(() => {
       router.get('/', [IndexStudentsController, 'handle']).as('students.index')
       router.post('/', [StoreStudentController, 'handle']).as('students.store')
+      router.post('/enroll', [EnrollStudentController, 'handle']).as('students.enroll')
       router.get('/:id', [ShowStudentController, 'handle']).as('students.show')
       router.put('/:id', [UpdateStudentController, 'handle']).as('students.update')
+      router.put('/:id/full', [FullUpdateStudentController, 'handle']).as('students.fullUpdate')
       router.delete('/:id', [DestroyStudentController, 'handle']).as('students.destroy')
       router
         .get('/:studentId/attendance', [GetStudentAttendanceController, 'handle'])
@@ -789,7 +839,7 @@ function registerStudentApiRoutes() {
         .as('students.balanceTransactions')
     })
     .prefix('/students')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerResponsibleApiRoutes() {
@@ -905,6 +955,32 @@ function registerCourseApiRoutes() {
       router.get('/:id', [ShowCourseController, 'handle']).as('courses.show')
       router.put('/:id', [UpdateCourseController, 'handle']).as('courses.update')
       router.delete('/:id', [DeleteCourseController, 'handle']).as('courses.destroy')
+
+      // Dashboard endpoints for course overview
+      router
+        .get('/:courseId/academic-periods/:academicPeriodId/dashboard/metrics', [
+          GetCourseDashboardMetricsController,
+          'handle',
+        ])
+        .as('courses.dashboard.metrics')
+      router
+        .get('/:courseId/academic-periods/:academicPeriodId/dashboard/alerts', [
+          GetCourseAlertsController,
+          'handle',
+        ])
+        .as('courses.dashboard.alerts')
+      router
+        .get('/:courseId/academic-periods/:academicPeriodId/dashboard/activity-feed', [
+          GetCourseActivityFeedController,
+          'handle',
+        ])
+        .as('courses.dashboard.activityFeed')
+      router
+        .get('/:courseId/academic-periods/:academicPeriodId/classes', [
+          GetCourseClassesController,
+          'handle',
+        ])
+        .as('courses.classes')
     })
     .prefix('/courses')
     .use(middleware.auth())
@@ -937,9 +1013,7 @@ function registerCourseHasAcademicPeriodApiRoutes() {
 function registerLevelAssignmentApiRoutes() {
   router
     .group(() => {
-      router
-        .post('/', [CreateLevelAssignmentController, 'handle'])
-        .as('levelAssignments.store')
+      router.post('/', [CreateLevelAssignmentController, 'handle']).as('levelAssignments.store')
     })
     .prefix('/level-assignments')
     .use(middleware.auth())
@@ -954,6 +1028,9 @@ function registerClassApiRoutes() {
         .use(middleware.impersonation())
       router.get('/', [ListClassesController, 'handle']).as('classes.index')
       router.post('/', [CreateClassController, 'handle']).as('classes.store')
+      router
+        .post('/with-teachers', [CreateClassWithTeachersController, 'handle'])
+        .as('classes.storeWithTeachers')
       router.get('/slug/:slug', [ShowClassBySlugController, 'handle']).as('classes.showBySlug')
       router.get('/:id', [ShowClassController, 'handle']).as('classes.show')
       router.put('/:id', [UpdateClassController, 'handle']).as('classes.update')
@@ -968,6 +1045,9 @@ function registerClassApiRoutes() {
       router
         .get('/:classId/subjects', [ListSubjectsForClassController, 'handle'])
         .as('classes.subjects')
+      router
+        .get('/:id/student-status', [GetStudentStatusController, 'handle'])
+        .as('classes.studentStatus')
     })
     .prefix('/classes')
     .use(middleware.auth())
@@ -996,6 +1076,9 @@ function registerScheduleApiRoutes() {
       router
         .post('/class/:classId', [SaveClassScheduleController, 'handle'])
         .as('schedules.saveClassSchedule')
+      router
+        .post('/class/:classId/generate', [GenerateClassScheduleController, 'handle'])
+        .as('schedules.generateClassSchedule')
     })
     .prefix('/schedules')
     .use(middleware.auth())
@@ -1081,15 +1164,15 @@ function registerGradesApiRoutes() {
       router
         .get('/academic-overview', [GetAcademicOverviewController, 'handle'])
         .as('grades.academicOverview')
-      router
-        .get('/students', [GetStudentsGradesController, 'handle'])
-        .as('grades.students')
+      router.get('/students', [GetStudentsGradesController, 'handle']).as('grades.students')
       router
         .get('/distribution', [GetGradeDistributionController, 'handle'])
         .as('grades.distribution')
+      router.get('/at-risk', [GetAtRiskStudentsController, 'handle']).as('grades.atRisk')
       router
-        .get('/at-risk', [GetAtRiskStudentsController, 'handle'])
-        .as('grades.atRisk')
+        .get('/class/:classId/subject/:subjectId', [GetClassGradesBySubjectController, 'handle'])
+        .as('grades.classSubject')
+      router.post('/batch', [BatchSaveGradesController, 'handle']).as('grades.batchSave')
     })
     .prefix('/grades')
     .use(middleware.auth())
@@ -1150,9 +1233,7 @@ function registerAnalyticsApiRoutes() {
         .as('analytics.gamification.overview')
 
       // HR Analytics
-      router
-        .get('/hr/overview', [GetHrOverviewController, 'handle'])
-        .as('analytics.hr.overview')
+      router.get('/hr/overview', [GetHrOverviewController, 'handle']).as('analytics.hr.overview')
     })
     .prefix('/analytics')
     .use(middleware.auth())
@@ -1187,7 +1268,10 @@ function registerEventApiRoutes() {
         .delete('/:eventId/participants/:participantId', [CancelRegistrationController, 'handle'])
         .as('events.participants.cancel')
       router
-        .post('/:eventId/participants/:participantId/confirm', [ConfirmAttendanceController, 'handle'])
+        .post('/:eventId/participants/:participantId/confirm', [
+          ConfirmAttendanceController,
+          'handle',
+        ])
         .as('events.participants.confirmAttendance')
 
       // Parental Consents (event-side)
@@ -1230,9 +1314,7 @@ function registerOnlineEnrollmentApiRoutes() {
       router
         .post('/find-scholarship', [FindScholarshipByCodeController, 'handle'])
         .as('enrollment.findScholarship')
-      router
-        .post('/finish', [FinishEnrollmentController, 'handle'])
-        .as('enrollment.finish')
+      router.post('/finish', [FinishEnrollmentController, 'handle']).as('enrollment.finish')
     })
     .prefix('/online-enrollment')
 }
@@ -1255,6 +1337,9 @@ function registerAttendanceApiRoutes() {
       router.get('/', [ListAttendanceController, 'handle']).as('attendance.index')
       router.post('/', [CreateAttendanceController, 'handle']).as('attendance.store')
       router.post('/batch', [BatchCreateAttendanceController, 'handle']).as('attendance.batch')
+      router
+        .get('/class/:classId/students', [GetClassStudentsAttendanceController, 'handle'])
+        .as('attendance.classStudents')
       router.get('/:id', [ShowAttendanceController, 'handle']).as('attendance.show')
       router.put('/:id', [UpdateAttendanceController, 'handle']).as('attendance.update')
     })
@@ -1271,9 +1356,7 @@ function registerNotificationApiRoutes() {
         .post('/:id/read', [MarkNotificationReadController, 'handle'])
         .as('notifications.markRead')
       router.post('/read-all', [MarkAllReadController, 'handle']).as('notifications.markAllRead')
-      router
-        .delete('/:id', [DeleteNotificationController, 'handle'])
-        .as('notifications.destroy')
+      router.delete('/:id', [DeleteNotificationController, 'handle']).as('notifications.destroy')
     })
     .prefix('/notifications')
     .use(middleware.auth())
@@ -1793,7 +1876,7 @@ function registerAcademicPeriodApiRoutes() {
         .as('academicPeriods.updateCourses')
     })
     .prefix('/academic-periods')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerPrintRequestApiRoutes() {
@@ -2029,24 +2112,16 @@ function registerImpersonationApiRoutes() {
   router
     .group(() => {
       // Ativar impersonation
-      router
-        .post('/', [SetImpersonationController, 'handle'])
-        .as('impersonation.set')
+      router.post('/', [SetImpersonationController, 'handle']).as('impersonation.set')
 
       // Desativar impersonation
-      router
-        .delete('/', [ClearImpersonationController, 'handle'])
-        .as('impersonation.clear')
+      router.delete('/', [ClearImpersonationController, 'handle']).as('impersonation.clear')
 
       // Status de impersonation
-      router
-        .get('/status', [GetImpersonationStatusController, 'handle'])
-        .as('impersonation.status')
+      router.get('/status', [GetImpersonationStatusController, 'handle']).as('impersonation.status')
 
       // Lista de usuários para impersonation
-      router
-        .get('/config', [GetImpersonationConfigController, 'handle'])
-        .as('impersonation.config')
+      router.get('/config', [GetImpersonationConfigController, 'handle']).as('impersonation.config')
     })
     .prefix('/admin/impersonation')
     .use(middleware.auth())
@@ -2212,8 +2287,7 @@ const ShowEventosPageController = () =>
   import('#controllers/pages/escola/show_eventos_page_controller')
 const ShowEventoAutorizacoesPageController = () =>
   import('#controllers/pages/escola/show_evento_autorizacoes_page_controller')
-const ShowMuralPageController = () =>
-  import('#controllers/pages/escola/show_mural_page_controller')
+const ShowMuralPageController = () => import('#controllers/pages/escola/show_mural_page_controller')
 const ShowDesempenhoPageController = () =>
   import('#controllers/pages/escola/show_desempenho_page_controller')
 const ShowPeriodosLetivosPageController = () =>
@@ -2249,8 +2323,15 @@ const ShowOcorrenciasPageController = () =>
   import('#controllers/pages/escola/show_ocorrencias_page_controller')
 const ShowAtividadesPageController = () =>
   import('#controllers/pages/escola/show_atividades_page_controller')
+const ShowAtividadePageController = () =>
+  import('#controllers/pages/escola/show_atividade_page_controller')
+const ShowEditAtividadePageController = () =>
+  import('#controllers/pages/escola/show_edit_atividade_page_controller')
 const ShowProvasPageController = () =>
   import('#controllers/pages/escola/show_provas_page_controller')
+const ShowProvaPageController = () => import('#controllers/pages/escola/show_prova_page_controller')
+const ShowEditProvaPageController = () =>
+  import('#controllers/pages/escola/show_edit_prova_page_controller')
 const ShowPresencaPageController = () =>
   import('#controllers/pages/escola/show_presenca_page_controller')
 const ShowCantinaCardapioPageController = () =>
@@ -2383,7 +2464,9 @@ function registerPageRoutes() {
             ])
             .as('periodosLetivos.cursos.visaoGeral')
           router
-            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas', [ShowCursoTurmasPageController])
+            .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas', [
+              ShowCursoTurmasPageController,
+            ])
             .as('periodosLetivos.cursos.turmas')
 
           // Turma pages (within curso)
@@ -2485,9 +2568,7 @@ function registerPageRoutes() {
           // Pedagógico
           router.get('/pedagogico/turmas', [ShowTurmasPageController]).as('pedagogico.turmas')
           router.get('/pedagogico/grade', [ShowGradePageController]).as('pedagogico.grade')
-          router
-            .get('/pedagogico/horarios', [ShowHorariosPageController])
-            .as('pedagogico.horarios')
+          router.get('/pedagogico/horarios', [ShowHorariosPageController]).as('pedagogico.horarios')
           router.get('/pedagogico/quadro', [ShowQuadroPageController]).as('pedagogico.quadro')
           router
             .get('/pedagogico/ocorrencias', [ShowOcorrenciasPageController])
@@ -2495,7 +2576,19 @@ function registerPageRoutes() {
           router
             .get('/pedagogico/atividades', [ShowAtividadesPageController])
             .as('pedagogico.atividades')
+          router
+            .get('/pedagogico/atividades/:id', [ShowAtividadePageController])
+            .as('pedagogico.atividades.show')
+          router
+            .get('/pedagogico/atividades/:id/editar', [ShowEditAtividadePageController])
+            .as('pedagogico.atividades.edit')
           router.get('/pedagogico/provas', [ShowProvasPageController]).as('pedagogico.provas')
+          router
+            .get('/pedagogico/provas/:id', [ShowProvaPageController])
+            .as('pedagogico.provas.show')
+          router
+            .get('/pedagogico/provas/:id/editar', [ShowEditProvaPageController])
+            .as('pedagogico.provas.edit')
           router.get('/pedagogico/presenca', [ShowPresencaPageController]).as('pedagogico.presenca')
           router
             .get('/pedagogico/cursos-niveis', [ShowCursosNiveisPageController])
@@ -2523,9 +2616,7 @@ function registerPageRoutes() {
           router
             .get('/financeiro/inadimplencia', [ShowInadimplenciaPageController])
             .as('financeiro.inadimplencia')
-          router
-            .get('/financeiro/seguros', [ShowSegurosPageController])
-            .as('financeiro.seguros')
+          router.get('/financeiro/seguros', [ShowSegurosPageController]).as('financeiro.seguros')
 
           // Gamificação
           router.get('/gamificacao', [ShowGamificacaoPageController]).as('gamificacao.index')
@@ -2552,11 +2643,15 @@ function registerPageRoutes() {
           router.get('/', [ShowResponsavelDashboardPageController]).as('dashboard')
           router.get('/notas', [ShowResponsavelNotasPageController]).as('notas')
           router.get('/frequencia', [ShowResponsavelFrequenciaPageController]).as('frequencia')
-          router.get('/mensalidades', [ShowResponsavelMensalidadesPageController]).as('mensalidades')
+          router
+            .get('/mensalidades', [ShowResponsavelMensalidadesPageController])
+            .as('mensalidades')
           router.get('/cantina', [ShowResponsavelCantinaPageController]).as('cantina')
           router.get('/gamificacao', [ShowResponsavelGamificacaoPageController]).as('gamificacao')
           router.get('/comunicados', [ShowResponsavelComunicadosPageController]).as('comunicados')
-          router.get('/autorizacoes', [ShowResponsavelAutorizacoesPageController]).as('autorizacoes')
+          router
+            .get('/autorizacoes', [ShowResponsavelAutorizacoesPageController])
+            .as('autorizacoes')
           router.get('/atividades', [ShowResponsavelAtividadesPageController]).as('atividades')
           router.get('/horario', [ShowResponsavelHorarioPageController]).as('horario')
           router.get('/documentos', [ShowResponsavelDocumentosPageController]).as('documentos')
@@ -2627,12 +2722,14 @@ function registerPageRoutes() {
           router
             .get('/analytics/gamificacao', [ShowAdminAnalyticsPageController, 'gamificacao'])
             .as('analytics.gamificacao')
-          router
-            .get('/analytics/rh', [ShowAdminAnalyticsPageController, 'rh'])
-            .as('analytics.rh')
+          router.get('/analytics/rh', [ShowAdminAnalyticsPageController, 'rh']).as('analytics.rh')
         })
         .prefix('/admin')
-        .use([middleware.auth(), middleware.impersonation(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
+        .use([
+          middleware.auth(),
+          middleware.impersonation(),
+          middleware.requireRole(['SUPER_ADMIN', 'ADMIN']),
+        ])
         .as('admin')
     })
     .as('web')
@@ -2655,6 +2752,7 @@ router
     registerUserApiRoutes()
     registerUserSchoolApiRoutes()
     registerUserSchoolGroupApiRoutes()
+    registerSchoolSwitcherApiRoutes()
     registerStudentApiRoutes()
     registerResponsibleApiRoutes()
     registerResponsibleAddressApiRoutes()

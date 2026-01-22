@@ -1,6 +1,7 @@
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
+import Subject from './subject.js'
 
 export default class Teacher extends BaseModel {
   static table = 'Teacher'
@@ -16,9 +17,12 @@ export default class Teacher extends BaseModel {
   @belongsTo(() => User, { foreignKey: 'id' })
   declare user: BelongsTo<typeof User>
 
-  // Note: Other relationships will be added when their models are created:
-  // - TeacherHasClass
-  // - TeacherAvailability
-  // - TeacherHasSubject
-  // - TeacherAbsence
+  @manyToMany(() => Subject, {
+    pivotTable: 'TeacherHasSubject',
+    localKey: 'id',
+    pivotForeignKey: 'teacherId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'subjectId',
+  })
+  declare subjects: ManyToMany<typeof Subject>
 }

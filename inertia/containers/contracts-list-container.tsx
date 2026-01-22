@@ -1,6 +1,7 @@
 import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
+import { usePage } from '@inertiajs/react'
 import { useContractsQueryOptions } from '../hooks/queries/use-contracts'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -17,6 +18,8 @@ import {
   Clock,
   XCircle,
 } from 'lucide-react'
+import { NewContractModal } from './contracts/new-contract-modal'
+import type { SharedProps } from '../lib/types'
 
 // Loading Skeleton
 function ContractsListSkeleton() {
@@ -197,7 +200,10 @@ function ContractsListContent({
 
 // Container Export
 export function ContractsListContainer() {
+  const { props } = usePage<SharedProps>()
+  const schoolId = props.user?.schoolId
   const [page, setPage] = useState(1)
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false)
 
   return (
     <div className="space-y-4">
@@ -206,11 +212,19 @@ export function ContractsListContainer() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar contratos..." className="pl-9" />
         </div>
-        <Button className="ml-auto">
+        <Button className="ml-auto" onClick={() => setIsNewModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Contrato
         </Button>
       </div>
+
+      {schoolId && (
+        <NewContractModal
+          schoolId={schoolId}
+          open={isNewModalOpen}
+          onOpenChange={setIsNewModalOpen}
+        />
+      )}
 
       <QueryErrorResetBoundary>
         {({ reset }) => (

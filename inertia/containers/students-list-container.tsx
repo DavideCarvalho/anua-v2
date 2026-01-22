@@ -6,6 +6,12 @@ import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+import {
   AlertCircle,
   Search,
   ChevronLeft,
@@ -13,7 +19,19 @@ import {
   User,
   MoreHorizontal,
   Plus,
+  Pencil,
+  RefreshCw,
+  Trash2,
 } from 'lucide-react'
+import { NewStudentModal } from './students/new-student-modal'
+import { DeleteStudentModal } from './students/delete-student-modal'
+import { EditStudentModal } from './students/edit-student-modal'
+import { ChangeStudentCourseModal } from './students/change-course-modal'
+
+interface StudentAction {
+  id: string
+  name: string
+}
 
 // Loading Skeleton
 function StudentsListSkeleton() {
@@ -76,10 +94,16 @@ function StudentsListContent({
   search,
   page,
   onPageChange,
+  onEditStudent,
+  onChangeCourse,
+  onDeleteStudent,
 }: {
   search: string
   page: number
   onPageChange: (page: number) => void
+  onEditStudent: (student: StudentAction) => void
+  onChangeCourse: (student: StudentAction) => void
+  onDeleteStudent: (student: StudentAction) => void
 }) {
   const { data } = useSuspenseQuery(
     useStudentsQueryOptions({ page, limit: 20, search: search || undefined })
@@ -142,9 +166,49 @@ function StudentsListContent({
                   </span>
                 </td>
                 <td className="p-4 text-right">
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onEditStudent({
+                            id: student.id,
+                            name: student.user?.name || student.name,
+                          })
+                        }
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Editar aluno
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onChangeCourse({
+                            id: student.id,
+                            name: student.user?.name || student.name,
+                          })
+                        }
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Mudar curso
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onDeleteStudent({
+                            id: student.id,
+                            name: student.user?.name || student.name,
+                          })
+                        }
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir aluno
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             ))}
@@ -190,6 +254,10 @@ export function StudentsListContainer() {
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [page, setPage] = useState(1)
+  const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false)
+  const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
+  const [editStudent, setEditStudent] = useState<StudentAction | null>(null)
+  const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
 
   const handleSearch = () => {
     setSearch(searchInput)
@@ -213,11 +281,51 @@ export function StudentsListContainer() {
         <Button onClick={handleSearch} variant="secondary">
           Buscar
         </Button>
-        <Button className="ml-auto">
+        <Button className="ml-auto" onClick={() => setIsNewStudentModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Aluno
         </Button>
       </div>
+
+      <NewStudentModal
+        open={isNewStudentModalOpen}
+        onOpenChange={setIsNewStudentModalOpen}
+      />
+
+      {deleteStudent && (
+        <DeleteStudentModal
+          studentId={deleteStudent.id}
+          studentName={deleteStudent.name}
+          open={!!deleteStudent}
+          onOpenChange={(open) => {
+            if (!open) setDeleteStudent(null)
+          }}
+          onSuccess={() => setDeleteStudent(null)}
+        />
+      )}
+
+      {editStudent && (
+        <EditStudentModal
+          studentId={editStudent.id}
+          open={!!editStudent}
+          onOpenChange={(open) => {
+            if (!open) setEditStudent(null)
+          }}
+          onSuccess={() => setEditStudent(null)}
+        />
+      )}
+
+      {changeCourseStudent && (
+        <ChangeStudentCourseModal
+          studentId={changeCourseStudent.id}
+          studentName={changeCourseStudent.name}
+          open={!!changeCourseStudent}
+          onOpenChange={(open) => {
+            if (!open) setChangeCourseStudent(null)
+          }}
+          onSuccess={() => setChangeCourseStudent(null)}
+        />
+      )}
 
       {/* List */}
       <QueryErrorResetBoundary>
@@ -229,7 +337,14 @@ export function StudentsListContainer() {
             )}
           >
             <Suspense fallback={<StudentsListSkeleton />}>
-              <StudentsListContent search={search} page={page} onPageChange={setPage} />
+              <StudentsListContent
+                search={search}
+                page={page}
+                onPageChange={setPage}
+                onEditStudent={setEditStudent}
+                onChangeCourse={setChangeCourseStudent}
+                onDeleteStudent={setDeleteStudent}
+              />
             </Suspense>
           </ErrorBoundary>
         )}

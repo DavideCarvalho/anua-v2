@@ -18,14 +18,10 @@ export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
     queryKey: ['academic-period', academicPeriodId, 'with-courses'],
     queryFn: async () => {
       // Fetch period data
-      const period = await tuyau.api.v1['academic-periods'][':id'].$get({
-        id: academicPeriodId,
-      }).unwrap()
+      const period = await tuyau.api.v1['academic-periods']({ id: academicPeriodId }).$get().unwrap()
 
       // Fetch courses
-      const courses = await tuyau.api.v1['academic-periods'][':id'].courses.$get({
-        id: academicPeriodId,
-      }).unwrap()
+      const courses = await tuyau.api.v1['academic-periods']({ id: academicPeriodId }).courses.$get().unwrap()
 
       return {
         ...period,

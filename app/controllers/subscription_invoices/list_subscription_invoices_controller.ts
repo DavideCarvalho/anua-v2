@@ -9,7 +9,9 @@ export default class ListSubscriptionInvoicesController {
     const { subscriptionId, status, month, year, page = 1, limit = 20 } = payload
 
     const query = SubscriptionInvoice.query()
-      .preload('subscription')
+      .preload('subscription', (subscriptionQuery) => {
+        subscriptionQuery.preload('school')
+      })
       .orderBy('createdAt', 'desc')
 
     if (subscriptionId) {

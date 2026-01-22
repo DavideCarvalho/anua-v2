@@ -1,27 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import vine from '@vinejs/vine'
 import AcademicPeriod from '#models/academic_period'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import db from '@adonisjs/lucid/services/db'
-
-const updateCoursesValidator = vine.compile(
-  vine.object({
-    courses: vine.array(
-      vine.object({
-        id: vine.string().optional(),
-        courseId: vine.string(),
-        levels: vine.array(
-          vine.object({
-            id: vine.string().optional(),
-            levelId: vine.string(),
-            isActive: vine.boolean().optional(),
-          })
-        ),
-      })
-    ),
-  })
-)
+import { updateCoursesValidator } from '#validators/academic_period'
 
 export default class UpdateAcademicPeriodCoursesController {
   async handle({ params, request, response }: HttpContext) {
@@ -31,7 +13,17 @@ export default class UpdateAcademicPeriodCoursesController {
       return response.notFound({ message: 'Período letivo não encontrado' })
     }
 
-    const payload = await request.validateUsing(updateCoursesValidator)
+    const payload: {
+      courses: Array<{
+        id?: string
+        courseId: string
+        levels: Array<{
+          id?: string
+          levelId: string
+          isActive?: boolean
+        }>
+      }>
+    } = await request.validateUsing(updateCoursesValidator)
 
     await db.transaction(async (trx) => {
       // Get existing course-academic period relationships
@@ -40,9 +32,7 @@ export default class UpdateAcademicPeriodCoursesController {
         .useTransaction(trx)
 
       const existingCapIds = existingCaps.map((cap) => cap.id)
-      const incomingCapIds = payload.courses
-        .filter((c) => c.id)
-        .map((c) => c.id as string)
+      const incomingCapIds = payload.courses.filter((c) => c.id).map((c) => c.id as string)
 
       // Delete removed course-academic period relationships
       const capsToDelete = existingCapIds.filter((id) => !incomingCapIds.includes(id))
@@ -91,9 +81,7 @@ export default class UpdateAcademicPeriodCoursesController {
           .useTransaction(trx)
 
         const existingLaIds = existingLas.map((la) => la.id)
-        const incomingLaIds = courseData.levels
-          .filter((l) => l.id)
-          .map((l) => l.id as string)
+        const incomingLaIds = courseData.levels.filter((l) => l.id).map((l) => l.id as string)
 
         // Delete removed level assignments
         const lasToDelete = existingLaIds.filter((id) => !incomingLaIds.includes(id))

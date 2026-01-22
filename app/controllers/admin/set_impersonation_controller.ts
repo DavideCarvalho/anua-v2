@@ -42,7 +42,12 @@ export default class SetImpersonationController {
     session.put('originalUserId', user.id)
 
     await targetUser.load('role')
-    await targetUser.load('school')
+    await targetUser.load('userHasSchools', (query) => {
+      query.preload('school')
+    })
+
+    // Pegar a primeira escola do usuário via UserHasSchool
+    const firstSchool = targetUser.userHasSchools?.[0]?.school
 
     console.log(`[IMPERSONATION] Admin ${user.id} (${user.name}) now impersonating ${targetUser.id} (${targetUser.name})`)
 
@@ -54,7 +59,7 @@ export default class SetImpersonationController {
         name: targetUser.name,
         email: targetUser.email,
         role: targetUser.role?.name,
-        school: targetUser.school ? { id: targetUser.school.id, name: targetUser.school.name } : null,
+        school: firstSchool ? { id: firstSchool.id, name: firstSchool.name } : null,
       },
     }
   }

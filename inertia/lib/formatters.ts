@@ -63,8 +63,26 @@ export type AcademicPeriodSegment =
   | 'HIGHSCHOOL'
   | 'TECHNICAL'
   | 'UNIVERSITY'
+  | 'OTHER'
 
 export type EducationType = 'formal' | 'technical'
+
+const segmentTranslations: Record<string, string> = {
+  KINDERGARTEN: 'Educação Infantil',
+  ELEMENTARY: 'Ensino Fundamental',
+  HIGHSCHOOL: 'Ensino Médio',
+  TECHNICAL: 'Ensino Técnico',
+  UNIVERSITY: 'Ensino Superior',
+  OTHER: 'Outro',
+}
+
+/**
+ * Traduz o nome do segmento para português
+ */
+export function formatSegmentName(segment: string | null | undefined): string {
+  if (!segment) return '-'
+  return segmentTranslations[segment] || segment
+}
 
 /**
  * Determina o tipo de ensino baseado no segment do período acadêmico

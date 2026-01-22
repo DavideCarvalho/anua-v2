@@ -6,6 +6,7 @@ import School from './school.js'
 import Student from './student.js'
 import Teacher from './teacher.js'
 import Exam from './exam.js'
+import TeacherHasClass from './teacher_has_class.js'
 
 export default class Class_ extends BaseModel {
   static table = 'Class'
@@ -46,6 +47,9 @@ export default class Class_ extends BaseModel {
 
   @hasMany(() => Exam, { foreignKey: 'classId' })
   declare exams: HasMany<typeof Exam>
+
+  @hasMany(() => TeacherHasClass, { foreignKey: 'classId' })
+  declare teacherClasses: HasMany<typeof TeacherHasClass>
 
   // Many-to-many with Teachers through TeacherHasClass
   @manyToMany(() => Teacher, {

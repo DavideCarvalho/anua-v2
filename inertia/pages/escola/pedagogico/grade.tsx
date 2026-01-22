@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { EscolaLayout } from '../../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
 import { buttonVariants } from '../../../components/ui/button'
@@ -29,7 +30,7 @@ export default function GradePage() {
             </CardHeader>
             <CardContent>
               <Link
-                href="/escola/pedagogico/horarios"
+                route="web.escola.pedagogico.horarios"
                 className={cn(buttonVariants(), 'w-full')}
               >
                 Gerenciar Horários
@@ -47,7 +48,7 @@ export default function GradePage() {
             </CardHeader>
             <CardContent>
               <Link
-                href="/escola/administrativo/materias"
+                route="web.escola.administrativo.materias"
                 className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}
               >
                 Ver Disciplinas
@@ -65,7 +66,7 @@ export default function GradePage() {
             </CardHeader>
             <CardContent>
               <Link
-                href="/escola/pedagogico/quadro"
+                route="web.escola.pedagogico.quadro"
                 className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}
               >
                 Ver Quadro

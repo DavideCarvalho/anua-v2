@@ -27,10 +27,10 @@
   @stack('dumper')
   @viteReactRefresh()
   @inertiaHead()
-  @vite(['inertia/app/app.tsx', `inertia/pages/${page.component}.tsx`])
+  @vite(['inertia/css/app.css', 'inertia/app/app.tsx', `inertia/pages/${page.component}.tsx`])
 </head>
 
-<body class="min-h-screen w-screen font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
+<body class="min-h-screen font-sans overflow-x-hidden">
   @inertia()
 </body>
 

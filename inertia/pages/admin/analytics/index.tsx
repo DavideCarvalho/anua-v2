@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
+import { Link } from '@tuyau/inertia/react'
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
 import {
@@ -16,7 +17,7 @@ const analyticsPages = [
   {
     title: 'Acadêmico',
     description: 'Notas, atividades e desempenho dos alunos',
-    href: '/admin/analytics/academico',
+    route: 'web.admin.analytics.academico' as const,
     icon: GraduationCap,
     color: 'text-blue-600',
     bgColor: 'bg-blue-100',
@@ -24,7 +25,7 @@ const analyticsPages = [
   {
     title: 'Presença',
     description: 'Frequência, atrasos e absenteísmo',
-    href: '/admin/analytics/presenca',
+    route: 'web.admin.analytics.presenca' as const,
     icon: Users,
     color: 'text-green-600',
     bgColor: 'bg-green-100',
@@ -32,7 +33,7 @@ const analyticsPages = [
   {
     title: 'Cantina',
     description: 'Vendas, receita e itens populares',
-    href: '/admin/analytics/cantina',
+    route: 'web.admin.analytics.cantina' as const,
     icon: UtensilsCrossed,
     color: 'text-orange-600',
     bgColor: 'bg-orange-100',
@@ -40,7 +41,7 @@ const analyticsPages = [
   {
     title: 'Pagamentos',
     description: 'Mensalidades e inadimplência',
-    href: '/admin/analytics/pagamentos',
+    route: 'web.admin.analytics.pagamentos' as const,
     icon: DollarSign,
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-100',
@@ -48,7 +49,7 @@ const analyticsPages = [
   {
     title: 'Matrículas',
     description: 'Alunos por período e curso',
-    href: '/admin/analytics/matriculas',
+    route: 'web.admin.analytics.matriculas' as const,
     icon: UserPlus,
     color: 'text-purple-600',
     bgColor: 'bg-purple-100',
@@ -56,7 +57,7 @@ const analyticsPages = [
   {
     title: 'Ocorrências',
     description: 'Incidentes e registros disciplinares',
-    href: '/admin/analytics/ocorrencias',
+    route: 'web.admin.analytics.ocorrencias' as const,
     icon: AlertTriangle,
     color: 'text-amber-600',
     bgColor: 'bg-amber-100',
@@ -64,7 +65,7 @@ const analyticsPages = [
   {
     title: 'Gamificação',
     description: 'Pontos, conquistas e rankings',
-    href: '/admin/analytics/gamificacao',
+    route: 'web.admin.analytics.gamificacao' as const,
     icon: Trophy,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-100',
@@ -72,7 +73,7 @@ const analyticsPages = [
   {
     title: 'RH',
     description: 'Funcionários, professores e ponto',
-    href: '/admin/analytics/rh',
+    route: 'web.admin.analytics.rh' as const,
     icon: Briefcase,
     color: 'text-slate-600',
     bgColor: 'bg-slate-100',
@@ -96,7 +97,7 @@ export default function AdminAnalyticsIndex() {
           {analyticsPages.map((page) => {
             const Icon = page.icon
             return (
-              <Link key={page.href} href={page.href}>
+              <Link key={page.route} route={page.route}>
                 <Card className="h-full transition-colors hover:bg-muted/50">
                   <CardHeader className="flex flex-row items-center gap-4">
                     <div className={`rounded-lg p-2 ${page.bgColor}`}>

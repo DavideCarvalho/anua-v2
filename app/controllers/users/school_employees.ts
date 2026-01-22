@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
+import { EmployeeListDto } from '#dtos/employee_dto'
 
 interface UserSchoolRow {
   schoolId: string
@@ -20,33 +21,30 @@ interface EmployeeRow {
 }
 
 export default class SchoolEmployeesController {
-  async handle({ request, response, auth }: HttpContext) {
-    const user = auth.user!
+  async handle(ctx: HttpContext) {
+    const { request, auth } = ctx
+    const user = ctx.effectiveUser ?? auth.user!
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
     const roles = request.input('roles', [])
+    const status = request.input('status', '') // 'active', 'inactive', or '' for all
 
     // Get schools the user has access to
     const userSchoolsResult = await db.rawQuery<{ rows: UserSchoolRow[] }>(
-      `
-      SELECT "schoolId" FROM "UserHasSchool" WHERE "userId" = :userId
-      `,
+      `SELECT "schoolId" FROM "UserHasSchool" WHERE "userId" = :userId`,
       { userId: user.id }
     )
 
     const schoolIds = userSchoolsResult.rows.map((row) => row.schoolId).filter(Boolean)
 
     if (schoolIds.length === 0) {
-      return response.ok({
-        data: [],
-        meta: {
-          total: 0,
-          perPage: limit,
-          currentPage: page,
-          lastPage: 1,
-          firstPage: 1,
-        },
+      return new EmployeeListDto([], {
+        total: 0,
+        perPage: limit,
+        currentPage: page,
+        lastPage: 1,
+        firstPage: 1,
       })
     }
 
@@ -54,7 +52,7 @@ export default class SchoolEmployeesController {
     const excludedRoles = ['STUDENT', 'STUDENT_RESPONSIBLE', 'ADMIN', 'SUPER_ADMIN']
 
     let roleFilter = ''
-    const params: Record<string, string | string[] | number> = {
+    const params: Record<string, string | string[] | number | boolean> = {
       schoolIds,
       excludedRoles,
       limit,
@@ -72,28 +70,28 @@ export default class SchoolEmployeesController {
       params.search = `%${search}%`
     }
 
-    // Count total
-    const countResult = await db.rawQuery<{ rows: CountRow[] }>(
-      `
+    let statusFilter = ''
+    if (status === 'active') {
+      statusFilter = 'AND u.active = true'
+    } else if (status === 'inactive') {
+      statusFilter = 'AND u.active = false'
+    }
+
+    // Simple query using only UserHasSchool
+    const countQuery = `
       SELECT COUNT(DISTINCT u.id) as total
       FROM "User" u
       JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
       JOIN "Role" r ON u."roleId" = r.id
       WHERE uhs."schoolId" = ANY(:schoolIds)
-      AND u.active = true
       AND u."deletedAt" IS NULL
       AND r.name != ALL(:excludedRoles)
+      ${statusFilter}
       ${roleFilter}
       ${searchFilter}
-      `,
-      params
-    )
+    `
 
-    const total = Number(countResult.rows[0]?.total || 0)
-
-    // Get employees
-    const employeesResult = await db.rawQuery<{ rows: EmployeeRow[] }>(
-      `
+    const baseQuery = `
       SELECT DISTINCT
         u.id,
         u.name,
@@ -106,17 +104,22 @@ export default class SchoolEmployeesController {
       JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
       JOIN "Role" r ON u."roleId" = r.id
       WHERE uhs."schoolId" = ANY(:schoolIds)
-      AND u.active = true
       AND u."deletedAt" IS NULL
       AND r.name != ALL(:excludedRoles)
+      ${statusFilter}
       ${roleFilter}
       ${searchFilter}
       ORDER BY u.name ASC
       LIMIT :limit
       OFFSET :offset
-      `,
-      params
-    )
+    `
+
+    // Count total
+    const countResult = await db.rawQuery<{ rows: CountRow[] }>(countQuery, params)
+    const total = Number(countResult.rows[0]?.total || 0)
+
+    // Get employees
+    const employeesResult = await db.rawQuery<{ rows: EmployeeRow[] }>(baseQuery, params)
 
     const employees = employeesResult.rows.map((row) => ({
       id: row.id,
@@ -130,15 +133,12 @@ export default class SchoolEmployeesController {
       },
     }))
 
-    return response.ok({
-      data: employees,
-      meta: {
-        total,
-        perPage: limit,
-        currentPage: page,
-        lastPage: Math.ceil(total / limit) || 1,
-        firstPage: 1,
-      },
+    return new EmployeeListDto(employees, {
+      total,
+      perPage: limit,
+      currentPage: page,
+      lastPage: Math.ceil(total / limit) || 1,
+      firstPage: 1,
     })
   }
 }
