@@ -207,7 +207,7 @@ function NewAttendanceModalContent({
     ...useClassStudentsQueryOptions({ classId, courseId, academicPeriodId, limit: 1000 }),
     enabled: open,
   })
-  const students = studentsResponse?.data ?? []
+  const students = useMemo(() => studentsResponse?.data ?? [], [studentsResponse?.data])
 
   const { data: subjects, isLoading: isLoadingSubjects } = useQuery({
     queryKey: ['class-subjects', classId],
@@ -239,9 +239,20 @@ function NewAttendanceModalContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId])
 
-  // Initialize attendances when students are loaded
+  // Track if we've initialized for current modal open
+  const [hasInitialized, setHasInitialized] = useState(false)
+
+  // Reset initialization flag when modal closes
   useEffect(() => {
-    if (!students || !Array.isArray(students)) return
+    if (!open) {
+      setHasInitialized(false)
+    }
+  }, [open])
+
+  // Initialize attendances when modal opens and students are loaded
+  useEffect(() => {
+    if (!open || hasInitialized || students.length === 0) return
+
     const attendances = students.map((student) => ({
       student: {
         id: student.id,
@@ -250,25 +261,11 @@ function NewAttendanceModalContent({
       status: 'PRESENT' as const,
     }))
     form.setValue('attendances', attendances)
+    form.setValue('dates', [])
+    setSearchQuery('')
+    setHasInitialized(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [students])
-
-  // Reset form when modal opens
-  useEffect(() => {
-    if (open && students && Array.isArray(students) && students.length > 0) {
-      const attendances = students.map((student) => ({
-        student: {
-          id: student.id,
-          name: student.user?.name || 'Nome não disponível',
-        },
-        status: 'PRESENT' as const,
-      }))
-      form.setValue('attendances', attendances)
-      form.setValue('dates', [])
-      setSearchQuery('')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, students])
+  }, [open, students, hasInitialized])
 
   const createMutation = useMutation({
     mutationFn: createBatchAttendance,

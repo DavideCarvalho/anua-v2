@@ -90,9 +90,8 @@ async function batchSaveExamGrades(
   grades: SaveGradePayload[]
 ): Promise<void> {
   await tuyau
-    .$route('api.v1.exams.batchSaveGrades')
+    .$route('api.v1.exams.batchSaveGrades', { id: examId })
     .$post({
-      params: { id: examId },
       grades: grades.map((g) => ({
         studentId: g.studentId,
         score: g.score,

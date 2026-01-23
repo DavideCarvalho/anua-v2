@@ -7,6 +7,8 @@ export default class IndexStudentsController {
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
     const classId = request.input('classId')
+    const academicPeriodId = request.input('academicPeriodId')
+    const courseId = request.input('courseId')
     const enrollmentStatus = request.input('enrollmentStatus')
 
     const user = effectiveUser ?? auth.user
@@ -51,6 +53,22 @@ export default class IndexStudentsController {
 
     if (classId) {
       query.where('classId', classId)
+    }
+
+    // Filtrar por período letivo e/ou curso via StudentHasLevel
+    if (academicPeriodId || courseId) {
+      query.whereHas('levels', (slQuery) => {
+        slQuery.whereHas('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
+          lacapQuery.whereHas('courseHasAcademicPeriod', (chapQuery) => {
+            if (academicPeriodId) {
+              chapQuery.where('academicPeriodId', academicPeriodId)
+            }
+            if (courseId) {
+              chapQuery.where('courseId', courseId)
+            }
+          })
+        })
+      })
     }
 
     if (enrollmentStatus) {

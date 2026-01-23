@@ -1,7 +1,6 @@
 import { Head, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { Plus, ClipboardList, Filter } from 'lucide-react'
-import { useRouter } from '@tuyau/inertia/react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Button } from '../../../components/ui/button'
@@ -89,16 +88,7 @@ export default function ProvasPage() {
         </Card>
 
         {/* Exams List */}
-        <ExamsList
-          classId={selectedClass || undefined}
-          subjectId={selectedSubject || undefined}
-          onView={(id) => {
-            router.visit({ route: 'web.escola.pedagogico.provas.show', params: { id } })
-          }}
-          onEdit={(id) => {
-            router.visit({ route: 'web.escola.pedagogico.provas.edit', params: { id } })
-          }}
-        />
+        <ExamsList classId={selectedClass || undefined} subjectId={selectedSubject || undefined} />
       </div>
     </EscolaLayout>
   )

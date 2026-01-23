@@ -43,15 +43,16 @@ interface Exam {
   type: string
   status: string
   classId: string
+  academicPeriodId: string
+  courseId: string | null
   class: { id: string; name: string } | null
   subject: { id: string; name: string } | null
   gradesCount: number
 }
 
 interface ExamsListProps {
-  classId: string
-  courseId: string
-  academicPeriodId: string
+  classId?: string
+  subjectId?: string
 }
 
 async function deleteExam(examId: string): Promise<void> {
@@ -84,12 +85,12 @@ function ExamsListEmpty() {
   )
 }
 
-export function ExamsList({ classId, courseId, academicPeriodId }: ExamsListProps) {
+export function ExamsList({ classId, subjectId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
   const queryClient = useQueryClient()
 
-  const { data, isLoading, isError } = useQuery(useExamsQueryOptions({ classId }))
+  const { data, isLoading, isError } = useQuery(useExamsQueryOptions({ classId, subjectId }))
 
   const deleteMutation = useMutation({
     mutationFn: deleteExam,
@@ -203,7 +204,13 @@ export function ExamsList({ classId, courseId, academicPeriodId }: ExamsListProp
                       variant="outline"
                       size="sm"
                       className="flex items-center gap-2"
-                      onClick={() => setSelectedExam(exam)}
+                      onClick={() => {
+                        if (!exam.courseId) {
+                          toast.error('Não foi possível identificar o curso da turma. Verifique se a turma está vinculada a um curso.')
+                          return
+                        }
+                        setSelectedExam(exam)
+                      }}
                     >
                       <ClipboardList className="h-4 w-4" />
                       <span>Lancar Notas</span>
@@ -239,14 +246,14 @@ export function ExamsList({ classId, courseId, academicPeriodId }: ExamsListProp
         </TableBody>
       </Table>
 
-      {selectedExam && (
+      {selectedExam && selectedExam.courseId && (
         <LaunchExamGradesModal
           examId={selectedExam.id}
           examTitle={selectedExam.title}
           maxScore={selectedExam.maxScore}
-          classId={classId}
-          courseId={courseId}
-          academicPeriodId={academicPeriodId}
+          classId={selectedExam.classId}
+          courseId={selectedExam.courseId}
+          academicPeriodId={selectedExam.academicPeriodId}
           open={!!selectedExam}
           onOpenChange={(open) => {
             if (!open) setSelectedExam(null)

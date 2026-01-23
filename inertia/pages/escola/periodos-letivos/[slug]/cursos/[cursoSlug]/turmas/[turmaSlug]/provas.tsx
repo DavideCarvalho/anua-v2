@@ -58,7 +58,7 @@ export default function TurmaProvasPage({
             </div>
           </CardHeader>
           <CardContent>
-            <ExamsList classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
+            <ExamsList classId={classId} />
           </CardContent>
         </Card>
 

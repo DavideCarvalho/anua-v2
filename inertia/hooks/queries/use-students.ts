@@ -11,14 +11,16 @@ interface UseStudentsParams {
   limit?: number
   search?: string
   classId?: string
+  academicPeriodId?: string
+  courseId?: string
   active?: boolean
 }
 
 export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
-  const { page = 1, limit = 20, search, classId, active } = params
+  const { page = 1, limit = 20, search, classId, academicPeriodId, courseId, active } = params
 
   return {
-    queryKey: ['students', { page, limit, search, classId, active }],
+    queryKey: ['students', { page, limit, search, classId, academicPeriodId, courseId, active }],
     queryFn: async () => {
       const response = await tuyau.api.v1.students.$get({
         query: {
@@ -26,6 +28,8 @@ export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
           limit,
           search,
           classId,
+          academicPeriodId,
+          courseId,
           active,
         },
       })

@@ -23,6 +23,7 @@ export default class ExamDto extends BaseModelDto {
   declare subject: { id: string; name: string } | null
   declare teacher: { id: string } | null
   declare gradesCount: number
+  declare courseId: string | null
 
   constructor(exam?: Exam) {
     super()
@@ -49,5 +50,6 @@ export default class ExamDto extends BaseModelDto {
     this.subject = exam.subject ? { id: exam.subject.id, name: exam.subject.name } : null
     this.teacher = exam.teacher ? { id: exam.teacher.id } : null
     this.gradesCount = Number(exam.$extras?.gradesCount ?? 0)
+    this.courseId = exam.$extras?.courseId ?? null
   }
 }
