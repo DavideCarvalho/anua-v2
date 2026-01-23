@@ -29,9 +29,10 @@ storage/*
 !storage/.gitkeep
 
 # Terraform
-infra/terraform/.terraform/
-infra/terraform/*.tfstate
-infra/terraform/*.tfstate.*
-infra/terraform/.terraform.lock.hcl
-infra/terraform/terraform.tfvars
-infra/terraform/*.auto.tfvars
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.*
+infra/terraform/**/.terraform.lock.hcl
+infra/terraform/**/terraform.tfvars
+infra/terraform/**/*.auto.tfvars
+infra/terraform/**/*.tfplan
