@@ -5,6 +5,9 @@ import School from '#models/school'
 import AcademicPeriod from '#models/academic_period'
 import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
+import Exam from '#models/exam'
+import ExamGrade from '#models/exam_grade'
+import { getStudents } from '#services/class_students_service'
 
 type StudentStatus = 'APPROVED' | 'AT_RISK_GRADE' | 'AT_RISK_ATTENDANCE' | 'FAILED' | 'IN_PROGRESS'
 
@@ -24,9 +27,15 @@ export default class GetStudentStatusController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.id
     const subjectId = request.input('subjectId')
+    const courseId = request.input('courseId')
+    const academicPeriodId = request.input('academicPeriodId')
 
     if (!subjectId) {
       return response.badRequest({ message: 'subjectId é obrigatório' })
+    }
+
+    if (!courseId || !academicPeriodId) {
+      return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
     }
 
     // Find the class
@@ -39,15 +48,11 @@ export default class GetStudentStatusController {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
-    // Get current or last active academic period for the school
-    const academicPeriod = await AcademicPeriod.query()
-      .where('schoolId', classEntity.schoolId)
-      .where('isActive', true)
-      .orderBy('startDate', 'desc')
-      .first()
+    // Get the academic period from the parameter
+    const academicPeriod = await AcademicPeriod.find(academicPeriodId)
 
     if (!academicPeriod) {
-      return response.ok([])
+      return response.notFound({ message: 'Período letivo não encontrado' })
     }
 
     // Get school configuration
@@ -61,17 +66,18 @@ export default class GetStudentStatusController {
       academicPeriod.minimumAttendanceOverride ?? school.minimumAttendancePercentage ?? 75
     const calculationAlgorithm = school.calculationAlgorithm ?? 'AVERAGE'
 
-    // Get students in the class
-    const students = await db
-      .from('Student')
-      .join('User', 'Student.id', 'User.id')
-      .where('Student.classId', classId)
-      .whereNull('User.deletedAt')
-      .select('Student.id', 'User.name')
+    // Get students in the class using StudentHasLevel with course+period context
+    const studentsInClass = await getStudents({ classId, courseId, academicPeriodId })
 
-    if (students.length === 0) {
+    if (studentsInClass.length === 0) {
       return response.ok([])
     }
+
+    // Map to simpler format for rest of the function
+    const students = studentsInClass.map((s) => ({
+      id: s.studentId,
+      name: s.student.user?.name ?? 'Nome não disponível',
+    }))
 
     // Get TeacherHasClass for this class and subject
     const teacherHasClass = await db
@@ -85,10 +91,11 @@ export default class GetStudentStatusController {
       return response.ok([])
     }
 
-    // Get all assignments for this subject/class/academic period
+    // Get all assignments for this subject/class
     const assignments = await Assignment.query()
-      .where('teacherHasClassId', teacherHasClass.id)
-      .where('academicPeriodId', academicPeriod.id)
+      .whereHas('teacherHasClass', (q) => {
+        q.where('classId', classId).where('subjectId', subjectId)
+      })
       .orderBy('dueDate', 'asc')
 
     // Get student assignments
@@ -99,6 +106,19 @@ export default class GetStudentStatusController {
         assignments.map((a) => a.id)
       )
       .select('studentId', 'assignmentId', 'grade')
+
+    // Get all exams for this subject/class
+    const exams = await Exam.query()
+      .where('classId', classId)
+      .where('subjectId', subjectId)
+      .orderBy('examDate', 'asc')
+
+    // Get student exam grades
+    const studentExamGrades = exams.length > 0
+      ? await ExamGrade.query()
+          .whereIn('examId', exams.map((e) => e.id))
+          .select('studentId', 'examId', 'score', 'attended')
+      : []
 
     // Get attendance records for this class/subject/academic period
     const attendanceRecords = await Attendance.query()
@@ -122,12 +142,16 @@ export default class GetStudentStatusController {
 
     const totalClasses = attendanceRecords.length
 
-    // Calculate max possible grade based on algorithm
+    // Calculate max possible grade based on algorithm (assignments + exams)
+    const totalAssignmentPoints = assignments.reduce((sum, a) => sum + a.grade, 0)
+    const totalExamPoints = exams.reduce((sum, e) => sum + e.maxScore, 0)
+    const totalItems = assignments.length + exams.length
+
     const maxPossibleGrade =
       calculationAlgorithm === 'SUM'
-        ? assignments.reduce((sum, a) => sum + a.grade, 0)
-        : assignments.length > 0
-          ? assignments.reduce((sum, a) => sum + a.grade, 0) / assignments.length
+        ? totalAssignmentPoints + totalExamPoints
+        : totalItems > 0
+          ? (totalAssignmentPoints + totalExamPoints) / totalItems
           : 0
 
     // Build result for each student
@@ -138,24 +162,54 @@ export default class GetStudentStatusController {
       )
       const gradedAssignments = studentAssignmentList.filter((sa) => sa.grade !== null)
 
-      // Calculate final grade
+      // Get student's exam grades
+      const studentExamList = studentExamGrades.filter(
+        (eg) => eg.studentId === student.id
+      )
+      const gradedExams = studentExamList.filter((eg) => eg.score !== null && eg.attended)
+
+      // Calculate final grade (assignments + exams)
       let finalGrade = 0
-      if (gradedAssignments.length > 0) {
+      const totalGradedItems = gradedAssignments.length + gradedExams.length
+
+      if (totalGradedItems > 0) {
+        const assignmentSum = gradedAssignments.reduce((sum, sa) => sum + (sa.grade ?? 0), 0)
+        const examSum = gradedExams.reduce((sum, eg) => sum + (eg.score ?? 0), 0)
+
         if (calculationAlgorithm === 'SUM') {
-          finalGrade = gradedAssignments.reduce((sum, sa) => sum + (sa.grade ?? 0), 0)
+          finalGrade = assignmentSum + examSum
         } else {
-          const sum = gradedAssignments.reduce((sum, sa) => sum + (sa.grade ?? 0), 0)
-          finalGrade = sum / gradedAssignments.length
+          finalGrade = (assignmentSum + examSum) / totalGradedItems
         }
       }
 
       // Find missed assignments (not submitted or no grade)
-      const missedAssignments = assignments.filter((assignment) => {
+      const missedAssignmentsList = assignments.filter((assignment) => {
         const studentAssignment = studentAssignmentList.find(
           (sa) => sa.assignmentId === assignment.id
         )
         return !studentAssignment || studentAssignment.grade === null
       })
+
+      // Find missed exams (not attended or no score)
+      const missedExamsList = exams.filter((exam) => {
+        const studentExam = studentExamList.find((eg) => eg.examId === exam.id)
+        return !studentExam || !studentExam.attended || studentExam.score === null
+      })
+
+      // Combine missed items
+      const missedItems = [
+        ...missedAssignmentsList.map((a) => ({
+          id: a.id,
+          name: a.name,
+          dueDate: a.dueDate.toISO() ?? '',
+        })),
+        ...missedExamsList.map((e) => ({
+          id: e.id,
+          name: e.title,
+          dueDate: e.examDate.toISO() ?? '',
+        })),
+      ]
 
       // Calculate attendance
       const studentAttendanceList = studentAttendance.filter(
@@ -183,8 +237,8 @@ export default class GetStudentStatusController {
       // Determine status
       let status: StudentStatus
 
-      // If no assignments AND no classes, we can't evaluate yet
-      const hasNoData = assignments.length === 0 && totalClasses === 0
+      // If no assignments, no exams AND no classes, we can't evaluate yet
+      const hasNoData = totalItems === 0 && totalClasses === 0
 
       // Check if close to attendance fail (5 or fewer classes margin)
       const isCloseToAttendanceFail =
@@ -193,7 +247,7 @@ export default class GetStudentStatusController {
       if (hasNoData) {
         status = 'IN_PROGRESS'
       } else {
-        const hasPassingGrade = assignments.length === 0 || finalGrade >= minimumGrade
+        const hasPassingGrade = totalItems === 0 || finalGrade >= minimumGrade
         const hasPassingAttendance =
           totalClasses === 0 || attendancePercentage >= minimumAttendancePercentage
 
@@ -217,11 +271,7 @@ export default class GetStudentStatusController {
         attendancePercentage: Number.parseFloat(attendancePercentage.toFixed(1)),
         pointsUntilPass: pointsUntilPass > 0 ? Number.parseFloat(pointsUntilPass.toFixed(1)) : null,
         classesUntilFail: isCloseToAttendanceFail ? classesUntilFail : null,
-        missedAssignments: missedAssignments.map((a) => ({
-          id: a.id,
-          name: a.name,
-          dueDate: a.dueDate.toISO() ?? '',
-        })),
+        missedAssignments: missedItems,
       }
     })
 

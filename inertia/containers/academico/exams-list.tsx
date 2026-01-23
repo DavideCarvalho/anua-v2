@@ -50,6 +50,8 @@ interface Exam {
 
 interface ExamsListProps {
   classId: string
+  courseId: string
+  academicPeriodId: string
 }
 
 async function deleteExam(examId: string): Promise<void> {
@@ -82,7 +84,7 @@ function ExamsListEmpty() {
   )
 }
 
-export function ExamsList({ classId }: ExamsListProps) {
+export function ExamsList({ classId, courseId, academicPeriodId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
   const queryClient = useQueryClient()
@@ -243,6 +245,8 @@ export function ExamsList({ classId }: ExamsListProps) {
           examTitle={selectedExam.title}
           maxScore={selectedExam.maxScore}
           classId={classId}
+          courseId={courseId}
+          academicPeriodId={academicPeriodId}
           open={!!selectedExam}
           onOpenChange={(open) => {
             if (!open) setSelectedExam(null)

@@ -12,6 +12,8 @@ import { SubjectGradesTable } from './subject-grades-table'
 
 interface GradesAccordionProps {
   classId: string
+  courseId: string
+  academicPeriodId: string
 }
 
 interface Subject {
@@ -62,7 +64,7 @@ function GradesAccordionEmpty() {
   )
 }
 
-function GradesAccordionContent({ classId }: GradesAccordionProps) {
+function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesAccordionProps) {
   const { data: subjects, isLoading, isError } = useQuery({
     queryKey: ['class-subjects-for-grades', classId],
     queryFn: () => fetchSubjectsForClass(classId),
@@ -95,7 +97,7 @@ function GradesAccordionContent({ classId }: GradesAccordionProps) {
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <SubjectGradesTable classId={classId} subjectId={subject.id} />
+            <SubjectGradesTable classId={classId} subjectId={subject.id} courseId={courseId} academicPeriodId={academicPeriodId} />
           </AccordionContent>
         </AccordionItem>
       ))}

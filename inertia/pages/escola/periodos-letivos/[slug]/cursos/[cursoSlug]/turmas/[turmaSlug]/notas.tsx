@@ -20,6 +20,8 @@ export default function TurmaNotasPage({
   courseSlug,
   classSlug,
   classId,
+  academicPeriodId,
+  courseId,
   className,
   courseName,
 }: Props) {
@@ -40,7 +42,7 @@ export default function TurmaNotasPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <GradesAccordion classId={classId} />
+            <GradesAccordion classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
           </CardContent>
         </Card>
       </TurmaLayout>

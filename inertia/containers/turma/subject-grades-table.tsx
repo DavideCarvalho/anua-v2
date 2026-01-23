@@ -18,6 +18,8 @@ import { LaunchGradesModal } from './launch-grades-modal'
 interface SubjectGradesTableProps {
   classId: string
   subjectId: string
+  courseId: string
+  academicPeriodId: string
 }
 
 interface StudentGrade {
@@ -43,9 +45,11 @@ interface GradesResponse {
 
 async function fetchSubjectGrades(
   classId: string,
-  subjectId: string
+  subjectId: string,
+  courseId: string,
+  academicPeriodId: string
 ): Promise<GradesResponse> {
-  const response = await fetch(`/api/v1/grades/class/${classId}/subject/${subjectId}`)
+  const response = await fetch(`/api/v1/grades/class/${classId}/subject/${subjectId}?courseId=${courseId}&academicPeriodId=${academicPeriodId}`)
   if (!response.ok) {
     throw new Error('Failed to fetch grades')
   }
@@ -85,13 +89,13 @@ interface SelectedAssignment {
   maxGrade: number
 }
 
-function SubjectGradesTableContent({ classId, subjectId }: SubjectGradesTableProps) {
+function SubjectGradesTableContent({ classId, subjectId, courseId, academicPeriodId }: SubjectGradesTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedAssignment, setSelectedAssignment] = useState<SelectedAssignment | null>(null)
 
   const { data: response, isLoading, isError } = useQuery({
-    queryKey: ['subject-grades', classId, subjectId],
-    queryFn: () => fetchSubjectGrades(classId, subjectId),
+    queryKey: ['subject-grades', classId, subjectId, courseId, academicPeriodId],
+    queryFn: () => fetchSubjectGrades(classId, subjectId, courseId, academicPeriodId),
   })
 
   const toggleRow = (studentId: string) => {
@@ -249,6 +253,8 @@ function SubjectGradesTableContent({ classId, subjectId }: SubjectGradesTablePro
           assignmentName={selectedAssignment.name}
           maxGrade={selectedAssignment.maxGrade}
           classId={classId}
+          courseId={courseId}
+          academicPeriodId={academicPeriodId}
           open={!!selectedAssignment}
           onOpenChange={(open) => {
             if (!open) setSelectedAssignment(null)

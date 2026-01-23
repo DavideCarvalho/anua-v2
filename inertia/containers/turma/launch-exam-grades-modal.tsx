@@ -20,12 +20,15 @@ import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { Checkbox } from '~/components/ui/checkbox'
 import { ErrorBoundary } from '~/components/error-boundary'
+import { useClassStudentsQueryOptions } from '~/hooks/queries/use-class-students'
 
 interface LaunchExamGradesModalProps {
   examId: string
   examTitle: string
   maxScore: number
   classId: string
+  courseId: string
+  academicPeriodId: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -57,16 +60,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-async function fetchStudentsForClass(classId: string): Promise<Student[]> {
-  const response = await fetch(`/api/v1/classes/${classId}/students?limit=1000`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch students')
-  }
-  const data = await response.json()
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.data)) return data.data
-  return []
-}
 
 async function fetchExistingGrades(
   examId: string
@@ -132,6 +125,8 @@ function LaunchExamGradesModalContent({
   examTitle,
   maxScore,
   classId,
+  courseId,
+  academicPeriodId,
   onOpenChange,
 }: Omit<LaunchExamGradesModalProps, 'open'>) {
   const queryClient = useQueryClient()
@@ -143,10 +138,15 @@ function LaunchExamGradesModalContent({
     },
   })
 
-  const { data: students, isLoading: isLoadingStudents } = useQuery({
-    queryKey: ['class-students-for-grades', classId],
-    queryFn: () => fetchStudentsForClass(classId),
+  const studentsQueryOptions = useClassStudentsQueryOptions({
+    classId,
+    courseId,
+    academicPeriodId,
+    limit: 1000,
   })
+
+  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(studentsQueryOptions)
+  const students = studentsResponse?.data || []
 
   const { data: existingGrades, isLoading: isLoadingGrades } = useQuery({
     queryKey: ['exam-grades', examId],
@@ -155,13 +155,13 @@ function LaunchExamGradesModalContent({
 
   // Initialize form when data is loaded
   useEffect(() => {
-    if (!students || !Array.isArray(students)) return
+    if (!students || students.length === 0) return
 
     const gradesMap = new Map(
       (existingGrades || []).map((g) => [g.studentId, g])
     )
 
-    const formGrades: StudentGrade[] = students.map((student) => {
+    const formGrades: StudentGrade[] = students.map((student: Student) => {
       const existing = gradesMap.get(student.id)
       return {
         studentId: student.id,
@@ -306,7 +306,10 @@ export function LaunchExamGradesModal({
   onOpenChange,
   examTitle,
   maxScore,
-  ...props
+  examId,
+  classId,
+  courseId,
+  academicPeriodId,
 }: LaunchExamGradesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -320,10 +323,13 @@ export function LaunchExamGradesModal({
 
         <ErrorBoundary>
           <LaunchExamGradesModalContent
+            examId={examId}
             examTitle={examTitle}
             maxScore={maxScore}
+            classId={classId}
+            courseId={courseId}
+            academicPeriodId={academicPeriodId}
             onOpenChange={onOpenChange}
-            {...props}
           />
         </ErrorBoundary>
       </DialogContent>

@@ -27,6 +27,7 @@ export default function TurmaAtividadesPage({
   classSlug,
   classId,
   academicPeriodId,
+  courseId,
   className,
   courseName,
 }: Props) {
@@ -57,7 +58,7 @@ export default function TurmaAtividadesPage({
             </div>
           </CardHeader>
           <CardContent>
-            <AssignmentsTable classId={classId} academicPeriodId={academicPeriodId} />
+            <AssignmentsTable classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
           </CardContent>
         </Card>
 

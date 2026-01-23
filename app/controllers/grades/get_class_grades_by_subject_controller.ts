@@ -1,8 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Student from '#models/student'
 import Assignment from '#models/assignment'
 import TeacherHasClass from '#models/teacher_has_class'
 import StudentHasAssignment from '#models/student_has_assignment'
+import { getStudents } from '#services/class_students_service'
 
 interface StudentGradeData {
   id: string
@@ -22,9 +22,15 @@ interface StudentGradeData {
 }
 
 export default class GetClassGradesBySubjectController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, request, response }: HttpContext) {
     const classId = params.classId
     const subjectId = params.subjectId
+    const courseId = request.input('courseId')
+    const academicPeriodId = request.input('academicPeriodId')
+
+    if (!courseId || !academicPeriodId) {
+      return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
+    }
 
     // Get the school's calculation algorithm
     const teacherHasClass = await TeacherHasClass.query()
@@ -47,10 +53,12 @@ export default class GetClassGradesBySubjectController {
       })
       .orderBy('createdAt', 'asc')
 
-    // Get students in this class
-    const students = await Student.query()
-      .where('classId', classId)
-      .preload('user')
+    // Get students in this class using StudentHasLevel with course+period context
+    const studentsInClass = await getStudents({ classId, courseId, academicPeriodId })
+    const students = studentsInClass.map((s) => ({
+      id: s.studentId,
+      user: s.student.user,
+    }))
 
     // Get all student submissions for these assignments
     const assignmentIds = assignments.map((a) => a.id)

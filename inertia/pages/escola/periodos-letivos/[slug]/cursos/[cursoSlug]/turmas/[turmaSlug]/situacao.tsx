@@ -41,6 +41,8 @@ export default function TurmaSituacaoPage({
   courseSlug,
   classSlug,
   classId,
+  academicPeriodId,
+  courseId,
   className,
   courseName,
   subjects,
@@ -102,7 +104,7 @@ export default function TurmaSituacaoPage({
             </div>
           </CardHeader>
           <CardContent>
-            <StudentStatusTable classId={classId} subjectId={selectedSubjectId} />
+            <StudentStatusTable classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} subjectId={selectedSubjectId} />
           </CardContent>
         </Card>
       </TurmaLayout>

@@ -5,7 +5,7 @@ import Exam from './exam.js'
 import Student from './student.js'
 
 export default class ExamGrade extends BaseModel {
-  static table = 'ExamGrade'
+  static table = 'exam_grades'
 
   @column({ isPrimary: true, columnName: 'id' })
   declare id: string

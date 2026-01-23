@@ -18,6 +18,8 @@ import { useStudentStatus, type StudentStatusData, type StudentStatus } from '~/
 
 interface StudentStatusTableProps {
   classId: string
+  courseId: string
+  academicPeriodId: string
   subjectId: string | null
 }
 
@@ -190,12 +192,14 @@ function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
   )
 }
 
-export function StudentStatusTable({ classId, subjectId }: StudentStatusTableProps) {
+export function StudentStatusTable({ classId, courseId, academicPeriodId, subjectId }: StudentStatusTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [showOnlyAtRisk, setShowOnlyAtRisk] = useState(false)
 
   const { data: students, isLoading, isError } = useStudentStatus({
     classId,
+    courseId,
+    academicPeriodId,
     subjectId,
     enabled: !!subjectId,
   })

@@ -21,16 +21,20 @@ export interface StudentStatusData {
 
 interface UseStudentStatusOptions {
   classId: string
+  courseId: string
+  academicPeriodId: string
   subjectId: string | null
   enabled?: boolean
 }
 
 async function fetchStudentStatus(
   classId: string,
+  courseId: string,
+  academicPeriodId: string,
   subjectId: string
 ): Promise<StudentStatusData[]> {
   const response = await fetch(
-    `/api/v1/classes/${classId}/student-status?subjectId=${subjectId}`
+    `/api/v1/classes/${classId}/student-status?subjectId=${subjectId}&courseId=${courseId}&academicPeriodId=${academicPeriodId}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch student status')
@@ -38,10 +42,10 @@ async function fetchStudentStatus(
   return response.json()
 }
 
-export function useStudentStatus({ classId, subjectId, enabled = true }: UseStudentStatusOptions) {
+export function useStudentStatus({ classId, courseId, academicPeriodId, subjectId, enabled = true }: UseStudentStatusOptions) {
   return useQuery({
-    queryKey: ['student-status', classId, subjectId],
-    queryFn: () => fetchStudentStatus(classId, subjectId!),
-    enabled: enabled && !!classId && !!subjectId,
+    queryKey: ['student-status', classId, courseId, academicPeriodId, subjectId],
+    queryFn: () => fetchStudentStatus(classId, courseId, academicPeriodId, subjectId!),
+    enabled: enabled && !!classId && !!courseId && !!academicPeriodId && !!subjectId,
   })
 }

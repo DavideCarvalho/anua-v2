@@ -25,6 +25,7 @@ import { LaunchGradesModal } from './launch-grades-modal'
 
 interface AssignmentsTableProps {
   classId: string
+  courseId: string
   academicPeriodId: string
 }
 
@@ -103,7 +104,7 @@ function AssignmentsTableEmpty() {
   )
 }
 
-export function AssignmentsTable({ classId, academicPeriodId }: AssignmentsTableProps) {
+export function AssignmentsTable({ classId, courseId, academicPeriodId }: AssignmentsTableProps) {
   const [page, setPage] = useState(1)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const queryClient = useQueryClient()
@@ -268,6 +269,8 @@ export function AssignmentsTable({ classId, academicPeriodId }: AssignmentsTable
           assignmentName={selectedAssignment.name}
           maxGrade={selectedAssignment.grade}
           classId={classId}
+          courseId={courseId}
+          academicPeriodId={academicPeriodId}
           open={!!selectedAssignment}
           onOpenChange={(open) => {
             if (!open) setSelectedAssignment(null)

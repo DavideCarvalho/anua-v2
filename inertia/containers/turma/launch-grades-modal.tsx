@@ -18,12 +18,15 @@ import {
 import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { ErrorBoundary } from '~/components/error-boundary'
+import { useClassStudentsQueryOptions } from '~/hooks/queries/use-class-students'
 
 interface LaunchGradesModalProps {
   assignmentId: string
   assignmentName: string
   maxGrade: number
   classId: string
+  courseId: string
+  academicPeriodId: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -55,16 +58,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-async function fetchStudentsForClass(classId: string): Promise<Student[]> {
-  const response = await fetch(`/api/v1/classes/${classId}/students?limit=1000`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch students')
-  }
-  const data = await response.json()
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.data)) return data.data
-  return []
-}
 
 async function fetchExistingGrades(
   assignmentId: string
@@ -128,6 +121,8 @@ function LaunchGradesModalContent({
   assignmentName,
   maxGrade,
   classId,
+  courseId,
+  academicPeriodId,
   onOpenChange,
 }: Omit<LaunchGradesModalProps, 'open'>) {
   const queryClient = useQueryClient()
@@ -140,10 +135,15 @@ function LaunchGradesModalContent({
     },
   })
 
-  const { data: students, isLoading: isLoadingStudents } = useQuery({
-    queryKey: ['class-students-for-grades', classId],
-    queryFn: () => fetchStudentsForClass(classId),
+  const studentsQueryOptions = useClassStudentsQueryOptions({
+    classId,
+    courseId,
+    academicPeriodId,
+    limit: 1000,
   })
+
+  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(studentsQueryOptions)
+  const students = studentsResponse?.data || []
 
   const { data: existingGrades, isLoading: isLoadingGrades } = useQuery({
     queryKey: ['assignment-grades', assignmentId],
@@ -152,13 +152,13 @@ function LaunchGradesModalContent({
 
   // Initialize form when data is loaded
   useEffect(() => {
-    if (!students || !Array.isArray(students)) return
+    if (!students || students.length === 0) return
 
     const gradesMap = new Map(
       (existingGrades || []).map((g) => [g.studentId, g])
     )
 
-    const formGrades: StudentGrade[] = students.map((student) => {
+    const formGrades: StudentGrade[] = students.map((student: Student) => {
       const existing = gradesMap.get(student.id)
       return {
         studentId: student.id,
@@ -296,7 +296,10 @@ export function LaunchGradesModal({
   onOpenChange,
   assignmentName,
   maxGrade,
-  ...props
+  classId,
+  courseId,
+  academicPeriodId,
+  assignmentId,
 }: LaunchGradesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -310,10 +313,13 @@ export function LaunchGradesModal({
 
         <ErrorBoundary>
           <LaunchGradesModalContent
+            assignmentId={assignmentId}
             assignmentName={assignmentName}
             maxGrade={maxGrade}
+            classId={classId}
+            courseId={courseId}
+            academicPeriodId={academicPeriodId}
             onOpenChange={onOpenChange}
-            {...props}
           />
         </ErrorBoundary>
       </DialogContent>

@@ -15,6 +15,7 @@ interface Props {
   courseSlug: string
   classSlug: string
   classId: string
+  courseId: string
   className: string
   courseName: string
   academicPeriodId: string
@@ -25,6 +26,7 @@ export default function TurmaProvasPage({
   courseSlug,
   classSlug,
   classId,
+  courseId,
   className,
   courseName,
   academicPeriodId,
@@ -56,7 +58,7 @@ export default function TurmaProvasPage({
             </div>
           </CardHeader>
           <CardContent>
-            <ExamsList classId={classId} />
+            <ExamsList classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
           </CardContent>
         </Card>
 

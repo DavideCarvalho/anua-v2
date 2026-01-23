@@ -14,7 +14,7 @@ export type ExamType = 'WRITTEN' | 'ORAL' | 'PRACTICAL' | 'PROJECT' | 'QUIZ'
 export type ExamLocation = 'CLASSROOM' | 'AUDITORIUM' | 'LABORATORY' | 'ONLINE' | 'OTHER'
 
 export default class Exam extends BaseModel {
-  static table = 'Exam'
+  static table = 'exams'
 
   @beforeCreate()
   static assignId(model: Exam) {
