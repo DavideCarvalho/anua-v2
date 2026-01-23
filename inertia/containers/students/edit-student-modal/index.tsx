@@ -346,15 +346,14 @@ export function EditStudentModal({
                 <Button type="button" variant="outline" onClick={handleClose}>
                   Cancelar
                 </Button>
-                {isLastStep ? (
-                  <Button type="submit" disabled={fullUpdateStudent.isPending}>
-                    {fullUpdateStudent.isPending ? 'Salvando...' : 'Salvar Alterações'}
-                  </Button>
-                ) : (
-                  <Button type="button" onClick={handleNext}>
+                {!isLastStep && (
+                  <Button type="button" variant="outline" onClick={handleNext}>
                     Próximo
                   </Button>
                 )}
+                <Button type="submit" disabled={fullUpdateStudent.isPending}>
+                  {fullUpdateStudent.isPending ? 'Salvando...' : 'Salvar Alterações'}
+                </Button>
               </div>
             </div>
           </form>
