@@ -12,6 +12,7 @@ export default class GetCurrentActiveAcademicPeriodsController {
     const periods = await AcademicPeriod.query()
       .where('schoolId', schoolId)
       .where('isActive', true)
+      .whereNull('deletedAt')
       .orderBy('startDate', 'desc')
 
     return response.ok(periods)

@@ -15,16 +15,16 @@ export default class LevelAssignedToCourseHasAcademicPeriod extends BaseModel {
 
   static table = 'LevelAssignedToCourseHasAcademicPeriod'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'levelId' })
   declare levelId: string
 
-  @column()
+  @column({ columnName: 'courseHasAcademicPeriodId' })
   declare courseHasAcademicPeriodId: string
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
   @belongsTo(() => Level, { foreignKey: 'levelId' })

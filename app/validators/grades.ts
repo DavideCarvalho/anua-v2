@@ -34,3 +34,16 @@ export const getAtRiskStudentsValidator = vine.compile(
     limit: vine.number().optional(),
   })
 )
+
+export const batchSaveGradesValidator = vine.compile(
+  vine.object({
+    assignmentId: vine.string().trim(),
+    grades: vine.array(
+      vine.object({
+        studentId: vine.string().trim(),
+        grade: vine.number().min(0).nullable(),
+        submittedAt: vine.string().trim().nullable().optional(),
+      })
+    ),
+  })
+)

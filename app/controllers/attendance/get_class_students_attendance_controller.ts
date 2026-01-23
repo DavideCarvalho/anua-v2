@@ -32,13 +32,17 @@ export default class GetClassStudentsAttendanceController {
     const students = await Student.query()
       .where('classId', classId)
       .preload('user')
-      .join('User', 'Student.id', 'User.id')
-      .orderBy('User.name', 'asc')
-      .select('Student.*')
       .paginate(page, limit)
 
+    // Sort by user name after loading
+    const sortedStudents = students.all().sort((a, b) => {
+      const nameA = a.user?.name || ''
+      const nameB = b.user?.name || ''
+      return nameA.localeCompare(nameB)
+    })
+
     // Get attendance counts for each student
-    const studentIds = students.map((s) => s.id)
+    const studentIds = sortedStudents.map((s) => s.id)
 
     // Get attendance summary per student
     const attendanceSummary = await db
@@ -59,7 +63,7 @@ export default class GetClassStudentsAttendanceController {
     }
 
     // Build response data
-    const data: StudentAttendanceData[] = students.map((student) => {
+    const data: StudentAttendanceData[] = sortedStudents.map((student) => {
       const summary = summaryMap.get(student.id)
       const totalClasses = summary ? Number(summary.total_classes) : 0
       const presentCount = summary ? Number(summary.present_count) : 0

@@ -24,57 +24,60 @@ export default class AcademicPeriod extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'slug' })
   @slugify({
     strategy: 'dbIncrement',
     fields: ['name'],
   })
   declare slug: string
 
-  @column.date()
+  @column.date({ columnName: 'startDate' })
   declare startDate: DateTime
 
-  @column.date()
+  @column.date({ columnName: 'endDate' })
   declare endDate: DateTime
 
-  @column.date()
+  @column.date({ columnName: 'enrollmentStartDate' })
   declare enrollmentStartDate: DateTime | null
 
-  @column.date()
+  @column.date({ columnName: 'enrollmentEndDate' })
   declare enrollmentEndDate: DateTime | null
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column()
+  @column({ columnName: 'segment' })
   declare segment: AcademicPeriodSegment
 
-  @column()
+  @column({ columnName: 'isClosed' })
   declare isClosed: boolean
 
-  @column()
+  @column({ columnName: 'minimumGradeOverride' })
   declare minimumGradeOverride: number | null
 
-  @column()
+  @column({ columnName: 'minimumAttendanceOverride' })
   declare minimumAttendanceOverride: number | null
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'previousAcademicPeriodId' })
   declare previousAcademicPeriodId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
+
+  @column.dateTime({ columnName: 'deletedAt' })
+  declare deletedAt: DateTime | null
 
   // Relationships
   @belongsTo(() => School, { foreignKey: 'schoolId' })

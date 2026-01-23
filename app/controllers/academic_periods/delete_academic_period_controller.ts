@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import AcademicPeriod from '#models/academic_period'
 
 export default class DeleteAcademicPeriodController {
@@ -9,22 +10,19 @@ export default class DeleteAcademicPeriodController {
       return response.notFound({ message: 'Período letivo não encontrado' })
     }
 
+    // Check if already deleted
+    if (academicPeriod.deletedAt) {
+      return response.badRequest({ message: 'Período letivo já foi excluído' })
+    }
+
     // Check if user has access to this school
     const schoolId = auth.user?.schoolId
     if (schoolId && academicPeriod.schoolId !== schoolId) {
       return response.forbidden({ message: 'Sem permissão para excluir este período letivo' })
     }
 
-    // Check if period has already started
-    const now = new Date()
-    const startDate = new Date(academicPeriod.startDate.toJSDate())
-    if (now >= startDate) {
-      return response.badRequest({
-        message: 'Não é possível excluir um período letivo que já iniciou',
-      })
-    }
-
-    await academicPeriod.delete()
+    academicPeriod.deletedAt = DateTime.now()
+    await academicPeriod.save()
 
     return response.ok({ message: 'Período letivo excluído com sucesso' })
   }

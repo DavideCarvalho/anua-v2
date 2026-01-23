@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon'
-import hash from '@adonisjs/core/services/hash'
-import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, belongsTo, hasOne, hasMany } from '@adonisjs/lucid/orm'
-import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, column, belongsTo, hasOne, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne, HasMany } from '@adonisjs/lucid/types/relations'
 
 // Core models
@@ -17,76 +15,75 @@ import ResponsibleAddress from './responsible_address.js'
 import UserHasSchool from './user_has_school.js'
 import UserHasSchoolGroup from './user_has_school_group.js'
 
-const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
-  passwordColumnName: 'password',
-})
-
-export default class User extends compose(BaseModel, AuthFinder) {
+export default class User extends BaseModel {
   static table = 'User'
 
-  @column({ isPrimary: true })
+  @beforeCreate()
+  static assignId(user: User) {
+    if (!user.id) {
+      user.id = uuidv7()
+    }
+  }
+
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'slug' })
   declare slug: string
 
-  @column()
+  @column({ columnName: 'email' })
   declare email: string | null
 
-  @column({ serializeAs: null })
-  declare password: string | null
-
-  @column()
+  @column({ columnName: 'phone' })
   declare phone: string | null
 
-  @column()
+  @column({ columnName: 'whatsappContact' })
   declare whatsappContact: boolean
 
-  @column.date()
+  @column.date({ columnName: 'birthDate' })
   declare birthDate: DateTime | null
 
-  @column()
+  @column({ columnName: 'documentType' })
   declare documentType: string | null
 
-  @column()
+  @column({ columnName: 'documentNumber' })
   declare documentNumber: string | null
 
-  @column()
+  @column({ columnName: 'asaasCustomerId' })
   declare asaasCustomerId: string | null
 
-  @column()
+  @column({ columnName: 'imageUrl' })
   declare imageUrl: string | null
 
-  @column()
+  @column({ columnName: 'active' })
   declare active: boolean
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'deletedAt' })
   declare deletedAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'deletedBy' })
   declare deletedBy: string | null
 
-  @column()
+  @column({ columnName: 'grossSalary' })
   declare grossSalary: number
 
   // Foreign keys
-  @column()
+  @column({ columnName: 'roleId' })
   declare roleId: string | null
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string | null
 
-  @column()
+  @column({ columnName: 'schoolChainId' })
   declare schoolChainId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime | null
 
   // Relationships

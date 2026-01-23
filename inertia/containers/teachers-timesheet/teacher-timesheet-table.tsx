@@ -11,11 +11,12 @@ import {
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
+import { ErrorBoundary } from '../../components/error-boundary'
 
 import { useTeachersTimesheetQueryOptions } from '../../hooks/queries/use-teachers-timesheet'
 import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use-academic-periods'
 
-export function TeacherTimesheetTable({
+function TeacherTimesheetTableContent({
   onViewAbsences,
 }: {
   onViewAbsences: (teacherId: string, month: number, year: number) => void
@@ -30,7 +31,6 @@ export function TeacherTimesheetTable({
   )
 
   const periods = useMemo(() => {
-    if (Array.isArray(activeAcademicPeriods)) return activeAcademicPeriods
     return activeAcademicPeriods?.data ?? []
   }, [activeAcademicPeriods])
 
@@ -44,7 +44,13 @@ export function TeacherTimesheetTable({
     } as any)
   )
 
-  const rows = Array.isArray(timesheet) ? timesheet : (timesheet ?? [])
+  const rows = useMemo(() => {
+    if (Array.isArray(timesheet)) return timesheet
+    if (timesheet && typeof timesheet === 'object' && 'data' in timesheet && Array.isArray((timesheet as any).data)) {
+      return (timesheet as any).data
+    }
+    return []
+  }, [timesheet])
 
   const isLoading = isLoadingPeriods || isLoadingTimesheet
 
@@ -159,5 +165,15 @@ export function TeacherTimesheetTable({
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export function TeacherTimesheetTable(props: {
+  onViewAbsences: (teacherId: string, month: number, year: number) => void
+}) {
+  return (
+    <ErrorBoundary>
+      <TeacherTimesheetTableContent {...props} />
+    </ErrorBoundary>
   )
 }

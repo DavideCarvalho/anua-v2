@@ -18,35 +18,35 @@ export default class Level extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'slug' })
   @slugify({
     strategy: 'dbIncrement',
     fields: ['name'],
   })
   declare slug: string
 
-  @column()
+  @column({ columnName: 'order' })
   declare order: number
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'contractId' })
   declare contractId: string | null
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime | null
 
   // Relationships

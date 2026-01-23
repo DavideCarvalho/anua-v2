@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Calendar from './calendar.js'
 import TeacherHasClass from './teacher_has_class.js'
@@ -7,34 +8,41 @@ import TeacherHasClass from './teacher_has_class.js'
 export default class CalendarSlot extends BaseModel {
   static table = 'CalendarSlot'
 
-  @column({ isPrimary: true })
+  @beforeCreate()
+  static assignId(calendarSlot: CalendarSlot) {
+    if (!calendarSlot.id) {
+      calendarSlot.id = uuidv7()
+    }
+  }
+
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'teacherHasClassId' })
   declare teacherHasClassId: string | null
 
-  @column()
+  @column({ columnName: 'classWeekDay' })
   declare classWeekDay: number // 0 = Sunday, 1 = Monday, etc.
 
-  @column()
+  @column({ columnName: 'startTime' })
   declare startTime: string // time format from DB
 
-  @column()
+  @column({ columnName: 'endTime' })
   declare endTime: string // time format from DB
 
-  @column()
+  @column({ columnName: 'minutes' })
   declare minutes: number
 
-  @column()
+  @column({ columnName: 'calendarId' })
   declare calendarId: string
 
-  @column()
+  @column({ columnName: 'isBreak' })
   declare isBreak: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

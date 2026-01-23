@@ -56,7 +56,7 @@ export default function PeriodosLetivosPage() {
     }
   }
 
-  const periods = Array.isArray(data) ? data : data?.data ?? []
+  const periods = data?.data ?? []
 
   return (
     <EscolaLayout>

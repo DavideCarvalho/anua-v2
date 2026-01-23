@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Class_ from './class.js'
 import AcademicPeriod from './academic_period.js'
@@ -8,34 +9,41 @@ import CalendarSlot from './calendar_slot.js'
 export default class Calendar extends BaseModel {
   static table = 'Calendar'
 
-  @column({ isPrimary: true })
+  @beforeCreate()
+  static assignId(calendar: Calendar) {
+    if (!calendar.id) {
+      calendar.id = uuidv7()
+    }
+  }
+
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'classId' })
   declare classId: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column()
+  @column({ columnName: 'isCanceled' })
   declare isCanceled: boolean
 
-  @column()
+  @column({ columnName: 'isApproved' })
   declare isApproved: boolean
 
-  @column()
+  @column({ columnName: 'canceledForNextCalendarId' })
   declare canceledForNextCalendarId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

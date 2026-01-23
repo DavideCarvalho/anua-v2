@@ -1,5 +1,4 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import string from '@adonisjs/core/helpers/string'
 import { DateTime } from 'luxon'
 import AcademicPeriod from '#models/academic_period'
 import { updateAcademicPeriodValidator } from '#validators/academic_period'
@@ -13,25 +12,8 @@ export default class UpdateAcademicPeriodController {
       return response.notFound({ message: 'Período letivo não encontrado' })
     }
 
-    const slug = payload.slug ?? (payload.name ? string.slug(payload.name) : undefined)
-
-    if (slug) {
-      const existing = await AcademicPeriod.query()
-        .where('schoolId', academicPeriod.schoolId)
-        .where('slug', slug)
-        .whereNot('id', academicPeriod.id)
-        .first()
-
-      if (existing) {
-        return response.conflict({
-          message: 'Já existe um período letivo com este slug nesta escola',
-        })
-      }
-    }
-
     academicPeriod.merge({
       name: payload.name ?? academicPeriod.name,
-      slug: slug ?? academicPeriod.slug,
       startDate: payload.startDate
         ? DateTime.fromJSDate(payload.startDate)
         : academicPeriod.startDate,

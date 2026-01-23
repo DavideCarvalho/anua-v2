@@ -61,7 +61,7 @@ export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props)
               segment={data.segment}
             />
 
-            <CursosDoPeríodoList courses={data.courses ?? []} />
+            <CursosDoPeríodoList courses={data.courses ?? []} segment={data.segment} />
           </>
         )}
       </div>

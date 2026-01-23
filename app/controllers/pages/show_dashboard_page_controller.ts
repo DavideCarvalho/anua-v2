@@ -1,13 +1,18 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ShowDashboardPageController {
-  async handle({ inertia, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle(ctx: HttpContext) {
+    const { inertia, auth, response, effectiveUser } = ctx
+
+    if (!auth.user) {
       return response.redirect('/sign-in')
     }
 
-    await user.load('role')
+    // Use effectiveUser if impersonating, otherwise use auth.user
+    const user = effectiveUser || auth.user
+    if (user.roleId) {
+      await user.load('role')
+    }
 
     const roleName = user.role?.name
 

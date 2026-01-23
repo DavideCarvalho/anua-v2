@@ -7,10 +7,10 @@ export default class Teacher extends BaseModel {
   static table = 'Teacher'
 
   // Same ID as User (1:1 relationship)
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'hourlyRate' })
   declare hourlyRate: number
 
   // Relationships

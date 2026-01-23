@@ -54,7 +54,6 @@ export default class ValidateTeacherScheduleConflictController {
     // Check if teacher is occupied in another class at this time
     const isOccupied = await this.isTeacherOccupiedInOtherClass(
       teacherId,
-      dayName,
       startTime,
       endTime,
       academicPeriodId,
@@ -92,7 +91,6 @@ export default class ValidateTeacherScheduleConflictController {
 
   private async isTeacherOccupiedInOtherClass(
     teacherId: string,
-    day: string,
     startTime: string,
     endTime: string,
     academicPeriodId: string,

@@ -9,25 +9,25 @@ export default class StudentMedication extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'medicalInfoId' })
   declare medicalInfoId: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'dosage' })
   declare dosage: string
 
-  @column()
+  @column({ columnName: 'frequency' })
   declare frequency: string
 
-  @column()
+  @column({ columnName: 'instructions' })
   declare instructions: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => StudentMedicalInfo, { foreignKey: 'medicalInfoId' })

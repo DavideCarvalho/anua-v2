@@ -161,11 +161,11 @@ export function ChangeStudentCourseModal({
     enabled: !!levelId && !!academicPeriodId,
   })
 
-  const academicPeriods = academicPeriodsData ?? []
+  const academicPeriods = academicPeriodsData?.data ?? []
   const courses = coursesData ?? []
   const selectedCourse = courses.find((c) => c.courseId === courseId)
   const levels = selectedCourse?.levels ?? []
-  const classes = classesData ?? []
+  const classes = classesData?.data ?? []
 
   // Get segment from selected academic period for dynamic labels
   const selectedPeriod = academicPeriods.find((p) => p.id === academicPeriodId)

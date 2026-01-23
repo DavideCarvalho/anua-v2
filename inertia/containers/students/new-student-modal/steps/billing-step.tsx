@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -19,6 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use-academic-periods'
 import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use-academic-period-courses'
 import { useClassesQueryOptions } from '~/hooks/queries/use-classes'
+import { getCourseLabel, getLevelLabel } from '~/lib/formatters'
+import type { AcademicPeriodSegment } from '~/lib/formatters'
 import type { NewStudentFormData, PaymentMethod } from '../schema'
 
 const PaymentMethodLabels: Record<PaymentMethod, string> = {
@@ -48,11 +51,24 @@ export function BillingStep() {
     enabled: !!levelId && !!academicPeriodId,
   })
 
-  const academicPeriods = academicPeriodsData ?? []
+  const academicPeriods = academicPeriodsData?.data ?? []
   const courses = coursesData ?? []
+  const selectedPeriod = academicPeriods.find((p) => p.id === academicPeriodId)
+  const segment = (selectedPeriod?.segment ?? 'ELEMENTARY') as AcademicPeriodSegment
   const selectedCourse = courses.find((c) => c.courseId === courseId)
   const levels = selectedCourse?.levels ?? []
-  const classes = classesData ?? []
+  const classes = classesData?.data ?? []
+
+  const courseLabel = getCourseLabel(segment)
+  const levelLabel = getLevelLabel(segment)
+
+  // Auto-select course if there's only one
+  const hasOnlyOneCourse = courses.length === 1
+  useEffect(() => {
+    if (hasOnlyOneCourse && !courseId) {
+      form.setValue('billing.courseId', courses[0].courseId)
+    }
+  }, [hasOnlyOneCourse, courseId, courses, form])
 
   return (
     <div className="space-y-6 py-4">
@@ -97,20 +113,63 @@ export function BillingStep() {
             )}
           />
 
+          {/* Only show course selector if there's more than one course */}
+          {!hasOnlyOneCourse && (
+            <FormField
+              control={form.control}
+              name="billing.courseId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{courseLabel}*</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      form.setValue('billing.levelId', '')
+                      form.setValue('billing.classId', '')
+                    }}
+                    value={field.value}
+                    disabled={!academicPeriodId || isLoadingCourses}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            !academicPeriodId
+                              ? 'Selecione o período letivo primeiro'
+                              : isLoadingCourses
+                                ? 'Carregando...'
+                                : `Selecione o ${courseLabel.toLowerCase()}`
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {courses.map((course) => (
+                        <SelectItem key={course.courseId} value={course.courseId}>
+                          {course.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
           <FormField
             control={form.control}
-            name="billing.courseId"
+            name="billing.levelId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Curso*</FormLabel>
+                <FormLabel>{levelLabel}*</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value)
-                    form.setValue('billing.levelId', '')
                     form.setValue('billing.classId', '')
                   }}
                   value={field.value}
-                  disabled={!academicPeriodId || isLoadingCourses}
+                  disabled={!courseId || isLoadingCourses}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -120,43 +179,7 @@ export function BillingStep() {
                             ? 'Selecione o período letivo primeiro'
                             : isLoadingCourses
                               ? 'Carregando...'
-                              : 'Selecione o curso'
-                        }
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {courses.map((course) => (
-                      <SelectItem key={course.courseId} value={course.courseId}>
-                        {course.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="billing.levelId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nível/Série*</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value)
-                    form.setValue('billing.classId', '')
-                  }}
-                  value={field.value}
-                  disabled={!courseId}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          !courseId ? 'Selecione o curso primeiro' : 'Selecione o nível/série'
+                              : `Selecione o ${levelLabel.toLowerCase()}`
                         }
                       />
                     </SelectTrigger>
@@ -190,7 +213,7 @@ export function BillingStep() {
                       <SelectValue
                         placeholder={
                           !levelId
-                            ? 'Selecione o nível primeiro'
+                            ? `Selecione o ${levelLabel.toLowerCase()} primeiro`
                             : isLoadingClasses
                               ? 'Carregando...'
                               : 'Selecione a turma (opcional)'
@@ -199,7 +222,6 @@ export function BillingStep() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Sem turma definida</SelectItem>
                     {classes.map((cls) => (
                       <SelectItem key={cls.id} value={cls.id}>
                         {cls.name}

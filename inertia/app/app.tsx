@@ -14,14 +14,7 @@ import { NuqsAdapter } from '../lib/nuqs-inertia-adapter'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-    },
-  },
-})
+const queryClient = new QueryClient();
 
 createInertiaApp({
   progress: { color: '#5468FF' },

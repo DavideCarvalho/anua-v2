@@ -1,6 +1,7 @@
 import { Suspense, useState } from 'react'
-import { useSuspenseQuery, useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useSuspenseQuery, useQueryClient, useMutation, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
+import { toast } from 'sonner'
 import { useClassesQueryOptions } from '../hooks/queries/use-classes'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -22,6 +23,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog'
 import { EditClassModal } from './classes/edit-class-modal'
 import { CreateClassModal } from './classes/create-class-modal'
 import { tuyau } from '../lib/api'
@@ -102,15 +113,17 @@ function ClassesListContent({
   page,
   onPageChange,
   onEditClass,
+  onDeleteClass,
 }: {
   page: number
   onPageChange: (page: number) => void
   onEditClass: (classItem: ClassItem) => void
+  onDeleteClass: (classItem: ClassItem) => void
 }) {
   const { data } = useSuspenseQuery(useClassesQueryOptions({ page, limit: 20 }))
 
-  const classes: ClassItem[] = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const classes: ClassItem[] = data?.data || []
+  const meta = data?.meta ?? null
 
   if (classes.length === 0) {
     return (
@@ -130,8 +143,7 @@ function ClassesListContent({
         {classes.map((classItem) => (
           <Card
             key={classItem.id}
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onEditClass(classItem)}
+            className="hover:shadow-md transition-shadow"
           >
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -142,22 +154,20 @@ function ClassesListContent({
                   </p>
                 </div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onEditClass(classItem)
-                      }}
-                    >
+                    <DropdownMenuItem onClick={() => onEditClass(classItem)}>
                       <Edit className="h-4 w-4 mr-2" />
                       Editar turma
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => onDeleteClass(classItem)}
+                    >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Excluir turma
                     </DropdownMenuItem>
@@ -218,11 +228,24 @@ function ClassesListContent({
 
 // Container Export
 export function ClassesListContainer() {
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null)
+  const [classToDelete, setClassToDelete] = useState<ClassItem | null>(null)
   const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(false)
+
+  const { mutateAsync: deleteClass, isPending: isDeleting } = useMutation({
+    mutationFn: async (classId: string) => {
+      const response = await tuyau.api.v1.classes({ id: classId }).$delete()
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao excluir turma')
+      }
+      return response
+    },
+  })
 
   const handleEditClass = async (classItem: ClassItem) => {
     setIsLoadingClassDetails(true)
@@ -242,6 +265,24 @@ export function ClassesListContainer() {
       setEditModalOpen(true)
     } finally {
       setIsLoadingClassDetails(false)
+    }
+  }
+
+  const handleDeleteClass = (classItem: ClassItem) => {
+    setClassToDelete(classItem)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!classToDelete) return
+    try {
+      await deleteClass(classToDelete.id)
+      toast.success('Turma excluída com sucesso')
+      queryClient.invalidateQueries({ queryKey: ['classes'] })
+      setDeleteDialogOpen(false)
+      setClassToDelete(null)
+    } catch (error) {
+      toast.error('Erro ao excluir turma')
     }
   }
 
@@ -271,6 +312,7 @@ export function ClassesListContainer() {
                 page={page}
                 onPageChange={setPage}
                 onEditClass={handleEditClass}
+                onDeleteClass={handleDeleteClass}
               />
             </Suspense>
           </ErrorBoundary>
@@ -287,6 +329,28 @@ export function ClassesListContainer() {
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir turma</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a turma "{classToDelete?.name}"? Esta ação não pode ser
+              desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

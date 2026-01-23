@@ -1,16 +1,21 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { v7 as uuidv7 } from 'uuid'
 import AcademicPeriod from '#models/academic_period'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
+import Class_ from '#models/class'
+import ClassHasAcademicPeriod from '#models/class_has_academic_period'
+import TeacherHasClass from '#models/teacher_has_class'
 import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
+import string from '@adonisjs/core/helpers/string'
 
 export default class UpdateAcademicPeriodCoursesController {
   async handle({ params, request, response }: HttpContext) {
     const academicPeriod = await AcademicPeriod.find(params.id)
 
     if (!academicPeriod) {
-      return response.notFound({ message: 'Período letivo não encontrado' })
+      return response.notFound({ message: 'Periodo letivo nao encontrado' })
     }
 
     const payload: {
@@ -21,6 +26,16 @@ export default class UpdateAcademicPeriodCoursesController {
           id?: string
           levelId: string
           isActive?: boolean
+          classes?: Array<{
+            id?: string
+            name: string
+            teachers?: Array<{
+              id?: string
+              teacherId: string
+              subjectId: string
+              subjectQuantity: number
+            }>
+          }>
         }>
       }>
     } = await request.validateUsing(updateCoursesValidator)
@@ -111,6 +126,121 @@ export default class UpdateAcademicPeriodCoursesController {
             la.isActive = levelData.isActive ?? true
             await la.save()
           }
+
+          // Handle classes for this level
+          if (levelData.classes) {
+            // Get existing classes for this level in this academic period
+            const existingClassesInPeriod = await ClassHasAcademicPeriod.query()
+              .where('academicPeriodId', academicPeriod.id)
+              .preload('class', (q) => q.where('levelId', levelData.levelId))
+              .useTransaction(trx)
+
+            const existingClassIds = existingClassesInPeriod
+              .filter((cap) => cap.class?.levelId === levelData.levelId)
+              .map((cap) => cap.classId)
+
+            const incomingClassIds = levelData.classes.filter((c) => c.id).map((c) => c.id as string)
+
+            // Delete removed classes from this academic period
+            const classesToRemove = existingClassIds.filter((id) => !incomingClassIds.includes(id))
+            if (classesToRemove.length > 0) {
+              await ClassHasAcademicPeriod.query()
+                .where('academicPeriodId', academicPeriod.id)
+                .whereIn('classId', classesToRemove)
+                .useTransaction(trx)
+                .delete()
+            }
+
+            // Create or update classes
+            for (const classData of levelData.classes) {
+              let classEntity: Class_
+
+              if (classData.id) {
+                // Update existing class
+                const existingClass = await Class_.query()
+                  .where('id', classData.id)
+                  .useTransaction(trx)
+                  .first()
+
+                if (!existingClass) {
+                  continue
+                }
+
+                existingClass.name = classData.name
+                existingClass.slug = string.slug(classData.name, { lower: true })
+                await existingClass.save()
+                classEntity = existingClass
+              } else {
+                // Create new class
+                classEntity = new Class_()
+                classEntity.useTransaction(trx)
+                classEntity.id = uuidv7()
+                classEntity.name = classData.name
+                classEntity.slug = string.slug(classData.name, { lower: true })
+                classEntity.levelId = levelData.levelId
+                classEntity.schoolId = academicPeriod.schoolId
+                classEntity.isArchived = false
+                await classEntity.save()
+
+                // Link class to academic period
+                const classHasAcademicPeriod = new ClassHasAcademicPeriod()
+                classHasAcademicPeriod.useTransaction(trx)
+                classHasAcademicPeriod.classId = classEntity.id
+                classHasAcademicPeriod.academicPeriodId = academicPeriod.id
+                await classHasAcademicPeriod.save()
+              }
+
+              // Handle teachers for this class
+              if (classData.teachers) {
+                // Get existing teachers for this class
+                const existingTeachers = await TeacherHasClass.query()
+                  .where('classId', classEntity.id)
+                  .useTransaction(trx)
+
+                const existingTeacherIds = existingTeachers.map((t) => t.id)
+                const incomingTeacherIds = classData.teachers
+                  .filter((t) => t.id)
+                  .map((t) => t.id as string)
+
+                // Delete removed teachers
+                const teachersToRemove = existingTeacherIds.filter(
+                  (id) => !incomingTeacherIds.includes(id)
+                )
+                if (teachersToRemove.length > 0) {
+                  await TeacherHasClass.query()
+                    .whereIn('id', teachersToRemove)
+                    .useTransaction(trx)
+                    .delete()
+                }
+
+                // Create or update teachers
+                for (const teacherData of classData.teachers) {
+                  if (teacherData.id) {
+                    // Update existing
+                    await TeacherHasClass.query()
+                      .where('id', teacherData.id)
+                      .useTransaction(trx)
+                      .update({
+                        teacherId: teacherData.teacherId,
+                        subjectId: teacherData.subjectId,
+                        subjectQuantity: teacherData.subjectQuantity,
+                      })
+                  } else {
+                    // Create new
+                    const teacherHasClass = new TeacherHasClass()
+                    teacherHasClass.useTransaction(trx)
+                    teacherHasClass.id = uuidv7()
+                    teacherHasClass.teacherId = teacherData.teacherId
+                    teacherHasClass.classId = classEntity.id
+                    teacherHasClass.subjectId = teacherData.subjectId
+                    teacherHasClass.subjectQuantity = teacherData.subjectQuantity
+                    teacherHasClass.isActive = true
+                    await teacherHasClass.save()
+                  }
+                }
+              }
+            }
+          }
         }
       }
     })
@@ -126,19 +256,58 @@ export default class UpdateAcademicPeriodCoursesController {
       })
       .firstOrFail()
 
+    // Get all classes for this academic period
+    const classesInPeriod = await ClassHasAcademicPeriod.query()
+      .where('academicPeriodId', academicPeriod.id)
+      .preload('class', (classQuery) => {
+        classQuery.preload('teacherClasses', (teacherClassQuery) => {
+          teacherClassQuery.preload('teacher', (teacherQuery) => {
+            teacherQuery.preload('user')
+          })
+          teacherClassQuery.preload('subject')
+        })
+      })
+
+    // Create a map of levelId -> classes
+    const classesMap = new Map<string, typeof classesInPeriod>()
+    for (const chap of classesInPeriod) {
+      const levelId = chap.class.levelId
+      if (levelId) {
+        if (!classesMap.has(levelId)) {
+          classesMap.set(levelId, [])
+        }
+        classesMap.get(levelId)!.push(chap)
+      }
+    }
+
     const courses = updatedPeriod.courseAcademicPeriods.map((cap) => ({
       id: cap.id,
       courseId: cap.courseId,
       name: cap.course.name,
       levels: cap.levelAssignments
-        .map((la) => ({
-          id: la.id,
-          levelId: la.levelId,
-          name: la.level.name,
-          order: la.level.order,
-          contractId: la.level.contractId,
-          isActive: la.isActive,
-        }))
+        .map((la) => {
+          const levelClasses = classesMap.get(la.levelId) || []
+          return {
+            id: la.id,
+            levelId: la.levelId,
+            name: la.level.name,
+            order: la.level.order,
+            contractId: la.level.contractId,
+            isActive: la.isActive,
+            classes: levelClasses.map((chap) => ({
+              id: chap.class.id,
+              name: chap.class.name,
+              teachers: chap.class.teacherClasses.map((tc) => ({
+                id: tc.id,
+                teacherId: tc.teacherId,
+                teacherName: tc.teacher?.user?.name || '',
+                subjectId: tc.subjectId,
+                subjectName: tc.subject?.name || '',
+                subjectQuantity: tc.subjectQuantity,
+              })),
+            })),
+          }
+        })
         .sort((a, b) => a.order - b.order),
     }))
 

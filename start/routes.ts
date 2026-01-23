@@ -329,6 +329,8 @@ const CreateAttendanceController = () =>
   import('#controllers/attendance/create_attendance_controller')
 const BatchCreateAttendanceController = () =>
   import('#controllers/attendance/batch_create_attendance_controller')
+const GetAttendanceAvailableDatesController = () =>
+  import('#controllers/attendance/get_attendance_available_dates_controller')
 const UpdateAttendanceController = () =>
   import('#controllers/attendance/update_attendance_controller')
 const GetStudentAttendanceController = () =>
@@ -923,7 +925,7 @@ function registerContractApiRoutes() {
         .as('contracts.earlyDiscounts.destroy')
     })
     .prefix('/contracts')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerContractDocumentApiRoutes() {
@@ -972,7 +974,7 @@ function registerCourseApiRoutes() {
         .as('courses.classes')
     })
     .prefix('/courses')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerLevelApiRoutes() {
@@ -985,7 +987,7 @@ function registerLevelApiRoutes() {
       router.delete('/:id', [DeleteLevelController]).as('levels.destroy')
     })
     .prefix('/levels')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerCourseHasAcademicPeriodApiRoutes() {
@@ -1033,7 +1035,7 @@ function registerClassApiRoutes() {
       router.get('/:id/student-status', [GetStudentStatusController]).as('classes.studentStatus')
     })
     .prefix('/classes')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerSubjectApiRoutes() {
@@ -1047,7 +1049,7 @@ function registerSubjectApiRoutes() {
       router.delete('/:id', [DeleteSubjectController]).as('subjects.destroy')
     })
     .prefix('/subjects')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerScheduleApiRoutes() {
@@ -1254,7 +1256,7 @@ function registerEventApiRoutes() {
       router.post('/:eventId/consents', [RequestConsentController]).as('events.consents.request')
     })
     .prefix('/events')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerParentalConsentApiRoutes() {
@@ -1311,6 +1313,9 @@ function registerAttendanceApiRoutes() {
       router
         .get('/class/:classId/students', [GetClassStudentsAttendanceController])
         .as('attendance.classStudents')
+      router
+        .get('/available-dates', [GetAttendanceAvailableDatesController])
+        .as('attendance.availableDates')
       router.get('/:id', [ShowAttendanceController]).as('attendance.show')
       router.put('/:id', [UpdateAttendanceController]).as('attendance.update')
     })
@@ -2161,8 +2166,6 @@ const ShowDesempenhoPageController = () =>
   import('#controllers/pages/escola/show_desempenho_page_controller')
 const ShowPeriodosLetivosPageController = () =>
   import('#controllers/pages/escola/show_periodos_letivos_page_controller')
-const ShowPeriodosLetivosAdminPageController = () =>
-  import('#controllers/pages/escola/show_periodos_letivos_admin_page_controller')
 const ShowNovoPeriodoLetivoPageController = () =>
   import('#controllers/pages/escola/show_novo_periodo_letivo_page_controller')
 const ShowPeriodoLetivoPageController = () =>
@@ -2302,7 +2305,7 @@ function registerPageRoutes() {
       router.get('/login', [ShowSignInPageController]).as('auth.login') // Alias
 
       // Dashboard router (redirects based on role)
-      router.get('/dashboard', [ShowDashboardPageController]).use(middleware.auth()).as('dashboard')
+      router.get('/dashboard', [ShowDashboardPageController]).use([middleware.auth(), middleware.impersonation()]).as('dashboard')
 
       // Escola pages (school staff)
       router
@@ -2312,9 +2315,6 @@ function registerPageRoutes() {
           router
             .get('/periodos-letivos/:slug', [ShowPeriodoLetivoPageController])
             .as('periodosLetivos.show')
-          router
-            .get('/administrativo/periodos-letivos', [ShowPeriodosLetivosAdminPageController])
-            .as('administrativo.periodosLetivos')
           router
             .get('/administrativo/periodos-letivos/novo-periodo-letivo', [
               ShowNovoPeriodoLetivoPageController,

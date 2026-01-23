@@ -4,7 +4,9 @@ import Teacher from '#models/teacher'
 import User from '#models/user'
 import Role from '#models/role'
 import TeacherHasSubject from '#models/teacher_has_subject'
+import UserHasSchool from '#models/user_has_school'
 import { createTeacherValidator } from '#validators/teacher'
+import TeacherDto from '#models/dto/teacher.dto'
 
 class ConflictError extends Error {
   status = 409
@@ -33,24 +35,28 @@ export default class CreateTeacherController {
     }
 
     // Get teacher role
-    const teacherRole = await Role.findBy('name', 'TEACHER')
+    const teacherRole = await Role.findBy('name', 'SCHOOL_TEACHER')
     if (!teacherRole) {
       throw new InternalError('Role de professor não encontrada')
     }
 
-    // Generate random password
-    const randomPassword = string.random(12)
     const slug = string.slug(data.name, { lower: true })
 
-    // Create user
+    // Create user (auth is done via email code, no password needed)
     const user = await User.create({
       name: data.name,
       email: data.email,
-      password: randomPassword,
       schoolId: data.schoolId,
       roleId: teacherRole.id,
       slug,
       active: true,
+    })
+
+    // Link user to school (required for list queries)
+    await UserHasSchool.create({
+      userId: user.id,
+      schoolId: data.schoolId,
+      isDefault: true,
     })
 
     // Create teacher
@@ -72,9 +78,6 @@ export default class CreateTeacherController {
     await teacher.load('user')
     await teacher.load('subjects')
 
-    return {
-      ...teacher.toJSON(),
-      generatedPassword: randomPassword,
-    }
+    return new TeacherDto(teacher)
   }
 }

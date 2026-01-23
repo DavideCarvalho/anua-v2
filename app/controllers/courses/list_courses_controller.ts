@@ -2,12 +2,16 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Course from '#models/course'
 
 export default class ListCoursesController {
-  async handle({ request, response }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { request, response, selectedSchoolIds } = ctx
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
     const schoolId = request.input('schoolId')
     const academicPeriodId = request.input('academicPeriodId')
+
+    // Use schoolId from request (for admins) or selectedSchoolIds from middleware
+    const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
 
     const query = Course.query().orderBy('name', 'asc')
 
@@ -15,8 +19,8 @@ export default class ListCoursesController {
       query.whereILike('name', `%${search}%`)
     }
 
-    if (schoolId) {
-      query.where('schoolId', schoolId)
+    if (schoolIds && schoolIds.length > 0) {
+      query.whereIn('schoolId', schoolIds)
     }
 
     if (academicPeriodId) {

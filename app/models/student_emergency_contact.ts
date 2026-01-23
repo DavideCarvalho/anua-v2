@@ -23,28 +23,28 @@ export default class StudentEmergencyContact extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'userId' })
   declare userId: string | null
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'phone' })
   declare phone: string
 
-  @column()
+  @column({ columnName: 'relationship' })
   declare relationship: EmergencyContactRelationship
 
-  @column()
+  @column({ columnName: 'order' })
   declare order: number
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

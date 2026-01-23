@@ -2,20 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
-import vine from '@vinejs/vine'
-
-const batchSaveGradesValidator = vine.compile(
-  vine.object({
-    assignmentId: vine.string().trim(),
-    grades: vine.array(
-      vine.object({
-        studentId: vine.string().trim(),
-        grade: vine.number().min(0).nullable(),
-        submittedAt: vine.string().trim().nullable().optional(),
-      })
-    ),
-  })
-)
+import { batchSaveGradesValidator } from '#validators/grades'
 
 export default class BatchSaveGradesController {
   async handle({ request, response }: HttpContext) {

@@ -17,10 +17,16 @@ import {
   type Segment,
 } from '../schemas/edit-academic-period.schema'
 
-const STEPS = [
-  { title: 'Calendário', description: 'Datas e informações' },
-  { title: 'Cursos', description: 'Níveis e séries' },
-]
+function getSteps(segment: string) {
+  const isCourseBased = segment === 'TECHNICAL' || segment === 'UNIVERSITY'
+  return [
+    { title: 'Calendário', description: 'Datas e informações' },
+    {
+      title: isCourseBased ? 'Cursos' : 'Séries',
+      description: isCourseBased ? 'Cursos e semestres' : 'Séries e turmas',
+    },
+  ]
+}
 
 interface AcademicPeriodData {
   id: string
@@ -44,6 +50,18 @@ interface AcademicPeriodData {
       order: number
       contractId: string | null
       isActive: boolean
+      classes?: Array<{
+        id: string
+        name: string
+        teachers?: Array<{
+          id: string
+          teacherId: string
+          teacherName: string
+          subjectId: string
+          subjectName: string
+          subjectQuantity: number
+        }>
+      }>
     }>
   }>
 }
@@ -55,6 +73,7 @@ interface EditAcademicPeriodFormProps {
 export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFormProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const queryClient = useQueryClient()
+  const steps = getSteps(academicPeriod.segment)
 
   const form = useForm<EditAcademicPeriodFormValues>({
     resolver: zodResolver(editAcademicPeriodSchema),
@@ -99,6 +118,16 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
               id: level.id,
               levelId: level.levelId,
               isActive: level.isActive,
+              classes: level.classes?.map((cls) => ({
+                id: cls.id,
+                name: cls.name,
+                teachers: cls.teachers?.map((t) => ({
+                  id: t.id,
+                  teacherId: t.teacherId,
+                  subjectId: t.subjectId,
+                  subjectQuantity: t.subjectQuantity,
+                })),
+              })),
             })),
           })),
       }).unwrap()
@@ -113,15 +142,19 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     },
   })
 
-  const handleNext = async () => {
+  const handleNext = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (currentStep === 0) {
       const valid = await form.trigger('calendar')
       if (!valid) return
     }
-    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1))
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
   }
 
-  const handlePrevious = () => {
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setCurrentStep((prev) => Math.max(prev - 1, 0))
   }
 
@@ -132,7 +165,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit} className="space-y-8">
-        <Stepper steps={STEPS} currentStep={currentStep} />
+        <Stepper steps={steps} currentStep={currentStep} />
 
         <div className="min-h-[400px]">
           {currentStep === 0 && <CalendarForm />}
@@ -151,12 +184,13 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
           </Button>
 
           <div className="flex gap-2">
-            {currentStep < STEPS.length - 1 ? (
+            {currentStep < steps.length - 1 && (
               <Button type="button" onClick={handleNext}>
                 Próximo
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-            ) : (
+            )}
+            {currentStep === steps.length - 1 && (
               <Button type="submit" disabled={updatePeriodMutation.isPending}>
                 {updatePeriodMutation.isPending ? (
                   <>

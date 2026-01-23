@@ -30,6 +30,38 @@ export const createAcademicPeriodValidator = vine.compile(
     previousAcademicPeriodId: vine.string().trim().optional(),
     minimumGradeOverride: vine.number().optional(),
     minimumAttendanceOverride: vine.number().optional(),
+    courses: vine
+      .array(
+        vine.object({
+          courseId: vine.string().optional(),
+          name: vine.string().trim(),
+          levels: vine.array(
+            vine.object({
+              levelId: vine.string().optional(),
+              name: vine.string().trim(),
+              order: vine.number(),
+              contractId: vine.string().optional(),
+              classes: vine
+                .array(
+                  vine.object({
+                    name: vine.string().trim(),
+                    teachers: vine
+                      .array(
+                        vine.object({
+                          teacherId: vine.string(),
+                          subjectId: vine.string(),
+                          subjectQuantity: vine.number(),
+                        })
+                      )
+                      .optional(),
+                  })
+                )
+                .optional(),
+            })
+          ),
+        })
+      )
+      .optional(),
   })
 )
 
@@ -61,6 +93,24 @@ export const updateCoursesValidator = vine.compile(
             id: vine.string().optional(),
             levelId: vine.string(),
             isActive: vine.boolean().optional(),
+            classes: vine
+              .array(
+                vine.object({
+                  id: vine.string().optional(),
+                  name: vine.string(),
+                  teachers: vine
+                    .array(
+                      vine.object({
+                        id: vine.string().optional(),
+                        teacherId: vine.string(),
+                        subjectId: vine.string(),
+                        subjectQuantity: vine.number(),
+                      })
+                    )
+                    .optional(),
+                })
+              )
+              .optional(),
           })
         ),
       })

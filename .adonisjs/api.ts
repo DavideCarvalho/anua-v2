@@ -35,10 +35,6 @@ type EscolaPeriodosletivosIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_periodo_letivo_page_controller.ts').default['handle'], false>
 }
-type EscolaAdministrativoPeriodosletivosGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_periodos_letivos_admin_page_controller.ts').default['handle'], false>
-}
 type EscolaAdministrativoPeriodosletivosNovoperiodoletivoGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_novo_periodo_letivo_page_controller.ts').default['handle'], false>
@@ -895,6 +891,10 @@ type ApiV1SchedulesClassIdGeneratePost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/schedules/generate_class_schedule_controller.ts').default['handle'], false>
 }
+type ApiV1SchedulesValidateconflictPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/schedules/validate_teacher_schedule_conflict_controller.ts').default['handle'], false>
+}
 type ApiV1TeachersGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/teachers/list_teachers_controller.ts').default['handle'], false>
@@ -1008,8 +1008,8 @@ type ApiV1GradesClassIdSubjectIdGetHead = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/get_class_grades_by_subject_controller.ts').default['handle'], false>
 }
 type ApiV1GradesBatchPost = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/batch_save_grades_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/grades.ts')['batchSaveGradesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/grades/batch_save_grades_controller.ts').default['handle'], true>
 }
 type ApiV1AnalyticsAttendanceOverviewGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/analytics.ts')['getAttendanceOverviewValidator']>>
@@ -1254,6 +1254,10 @@ type ApiV1AttendanceBatchPost = {
 type ApiV1AttendanceClassIdStudentsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_class_students_attendance_controller.ts').default['handle'], false>
+}
+type ApiV1AttendanceAvailabledatesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_attendance_available_dates_controller.ts').default['handle'], false>
 }
 type ApiV1AttendanceIdGetHead = {
   request: unknown
@@ -2061,10 +2065,6 @@ export interface ApiDefinition {
     };
     'administrativo': {
       'periodos-letivos': {
-        '$url': {
-        };
-        '$get': EscolaAdministrativoPeriodosletivosGetHead;
-        '$head': EscolaAdministrativoPeriodosletivosGetHead;
         'novo-periodo-letivo': {
           '$url': {
           };
@@ -3206,6 +3206,11 @@ export interface ApiDefinition {
             };
           };
         };
+        'validate-conflict': {
+          '$url': {
+          };
+          '$post': ApiV1SchedulesValidateconflictPost;
+        };
       };
       'teachers': {
         '$url': {
@@ -3653,6 +3658,12 @@ export interface ApiDefinition {
               '$head': ApiV1AttendanceClassIdStudentsGetHead;
             };
           };
+        };
+        'available-dates': {
+          '$url': {
+          };
+          '$get': ApiV1AttendanceAvailabledatesGetHead;
+          '$head': ApiV1AttendanceAvailabledatesGetHead;
         };
         ':id': {
           '$url': {
@@ -4425,13 +4436,6 @@ const routes = [
     path: '/escola/periodos-letivos/:slug',
     method: ["GET","HEAD"],
     types: {} as EscolaPeriodosletivosIdGetHead,
-  },
-  {
-    params: [],
-    name: 'web.escola.administrativo.periodosLetivos',
-    path: '/escola/administrativo/periodos-letivos',
-    method: ["GET","HEAD"],
-    types: {} as EscolaAdministrativoPeriodosletivosGetHead,
   },
   {
     params: [],
@@ -5933,6 +5937,13 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.schedules.validateConflict',
+    path: '/api/v1/schedules/validate-conflict',
+    method: ["POST"],
+    types: {} as ApiV1SchedulesValidateconflictPost,
+  },
+  {
+    params: [],
     name: 'api.v1.teachers.listTeachers',
     path: '/api/v1/teachers',
     method: ["GET","HEAD"],
@@ -6560,6 +6571,13 @@ const routes = [
     path: '/api/v1/attendance/class/:classId/students',
     method: ["GET","HEAD"],
     types: {} as ApiV1AttendanceClassIdStudentsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.attendance.availableDates',
+    path: '/api/v1/attendance/available-dates',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AttendanceAvailabledatesGetHead,
   },
   {
     params: ["id"],

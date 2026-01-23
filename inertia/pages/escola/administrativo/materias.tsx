@@ -11,7 +11,7 @@ import { EditSubjectModal } from '../../../containers/subjects/edit-subject-moda
 
 export default function MateriasPage() {
   const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const schoolId = props.selectedSchoolIds?.[0]
 
   const [isNewModalOpen, setIsNewModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)

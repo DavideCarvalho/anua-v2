@@ -263,7 +263,11 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-[700px] max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Nova Matrícula</DialogTitle>
         </DialogHeader>

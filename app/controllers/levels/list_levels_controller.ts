@@ -2,7 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
 
 export default class ListLevelsController {
-  async handle({ request, response }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { request, response, selectedSchoolIds } = ctx
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
@@ -10,14 +11,17 @@ export default class ListLevelsController {
     const schoolId = request.input('schoolId')
     const academicPeriodId = request.input('academicPeriodId')
 
+    // Use schoolId from request (for admins) or selectedSchoolIds from middleware
+    const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
+
     const query = Level.query().preload('school').preload('classes').orderBy('order', 'asc')
 
     if (search) {
       query.whereILike('name', `%${search}%`)
     }
 
-    if (schoolId) {
-      query.where('schoolId', schoolId)
+    if (schoolIds && schoolIds.length > 0) {
+      query.whereIn('schoolId', schoolIds)
     }
 
     if (courseId || academicPeriodId) {

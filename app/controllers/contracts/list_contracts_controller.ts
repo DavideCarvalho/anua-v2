@@ -3,8 +3,27 @@ import Contract from '#models/contract'
 import { listContractsValidator } from '#validators/contract'
 
 export default class ListContractsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
     const payload = await request.validateUsing(listContractsValidator)
+
+    const user = effectiveUser ?? auth.user
+    if (!user) {
+      return response.unauthorized({ message: 'Não autenticado' })
+    }
+
+    await user.load('role')
+    const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role?.name || '')
+
+    // Admins podem passar schoolId param, outros usam selectedSchoolIds do middleware
+    const schoolIds = isAdmin
+      ? payload.schoolId
+        ? [payload.schoolId]
+        : selectedSchoolIds
+      : selectedSchoolIds
+
+    if ((!schoolIds || schoolIds.length === 0) && !isAdmin) {
+      return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
+    }
 
     const page = payload.page || 1
     const limit = payload.limit || 20
@@ -16,8 +35,9 @@ export default class ListContractsController {
       .preload('earlyDiscounts')
       .orderBy('createdAt', 'desc')
 
-    if (payload.schoolId) {
-      query.where('schoolId', payload.schoolId)
+    // Filtrar por escolas selecionadas
+    if (schoolIds && schoolIds.length > 0) {
+      query.whereIn('schoolId', schoolIds)
     }
 
     if (payload.academicPeriodId) {

@@ -11,40 +11,40 @@ export default class StudentDocument extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'fileName' })
   declare fileName: string
 
-  @column()
+  @column({ columnName: 'fileUrl' })
   declare fileUrl: string
 
-  @column()
+  @column({ columnName: 'mimeType' })
   declare mimeType: string
 
-  @column()
+  @column({ columnName: 'size' })
   declare size: number
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: 'PENDING' | 'APPROVED' | 'REJECTED'
 
-  @column()
+  @column({ columnName: 'reviewedBy' })
   declare reviewedBy: string | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'reviewedAt' })
   declare reviewedAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'rejectionReason' })
   declare rejectionReason: string | null
 
-  @column()
+  @column({ columnName: 'contractDocumentId' })
   declare contractDocumentId: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

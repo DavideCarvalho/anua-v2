@@ -1,0 +1,31 @@
+import { BaseModelDto } from '@adocasts.com/dto/base'
+import type EventRecurrence from '#models/event_recurrence'
+import type { DateTime } from 'luxon'
+
+export default class EventRecurrenceDto extends BaseModelDto {
+  declare id: string
+  declare eventId: string
+  declare pattern: string
+  declare interval: number
+  declare daysOfWeek: number[] | null
+  declare dayOfMonth: number | null
+  declare endDate: DateTime | null
+  declare occurrences: number | null
+  declare createdAt: DateTime
+
+  constructor(eventRecurrence?: EventRecurrence) {
+    super()
+
+    if (!eventRecurrence) return
+
+    this.id = eventRecurrence.id
+    this.eventId = eventRecurrence.eventId
+    this.pattern = eventRecurrence.pattern
+    this.interval = eventRecurrence.interval
+    this.daysOfWeek = eventRecurrence.daysOfWeek
+    this.dayOfMonth = eventRecurrence.dayOfMonth
+    this.endDate = eventRecurrence.endDate
+    this.occurrences = eventRecurrence.occurrences
+    this.createdAt = eventRecurrence.createdAt
+  }
+}

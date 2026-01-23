@@ -13,58 +13,58 @@ export type ContractPaymentType = 'MONTHLY' | 'UPFRONT'
 export default class Contract extends BaseModel {
   static table = 'Contract'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string | null
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'description' })
   declare description: string | null
 
-  @column.date()
+  @column.date({ columnName: 'endDate' })
   declare endDate: DateTime | null
 
-  @column()
+  @column({ columnName: 'enrollmentValue' })
   declare enrollmentValue: number | null
 
-  @column()
+  @column({ columnName: 'ammount' })
   declare ammount: number // Note: typo in DB schema
 
-  @column()
+  @column({ columnName: 'docusealTemplateId' })
   declare docusealTemplateId: string | null
 
-  @column()
+  @column({ columnName: 'paymentType' })
   declare paymentType: ContractPaymentType
 
-  @column()
+  @column({ columnName: 'enrollmentValueInstallments' })
   declare enrollmentValueInstallments: number
 
-  @column()
+  @column({ columnName: 'enrollmentPaymentUntilDays' })
   declare enrollmentPaymentUntilDays: number | null
 
-  @column()
+  @column({ columnName: 'installments' })
   declare installments: number
 
-  @column()
+  @column({ columnName: 'flexibleInstallments' })
   declare flexibleInstallments: boolean
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column()
+  @column({ columnName: 'hasInsurance' })
   declare hasInsurance: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

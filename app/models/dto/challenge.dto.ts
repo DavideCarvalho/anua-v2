@@ -1,0 +1,44 @@
+import { BaseModelDto } from '@adocasts.com/dto/base'
+import type Challenge from '#models/challenge'
+import type { ChallengeCategory, RecurrencePeriod } from '#models/challenge'
+import type { DateTime } from 'luxon'
+
+export default class ChallengeDto extends BaseModelDto {
+  declare id: string
+  declare name: string
+  declare description: string
+  declare icon: string | null
+  declare points: number
+  declare category: ChallengeCategory
+  declare criteria: Record<string, unknown>
+  declare isRecurring: boolean
+  declare recurrencePeriod: RecurrencePeriod | null
+  declare startDate: DateTime | null
+  declare endDate: DateTime | null
+  declare schoolId: string | null
+  declare isActive: boolean
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
+
+  constructor(challenge?: Challenge) {
+    super()
+
+    if (!challenge) return
+
+    this.id = challenge.id
+    this.name = challenge.name
+    this.description = challenge.description
+    this.icon = challenge.icon
+    this.points = challenge.points
+    this.category = challenge.category
+    this.criteria = challenge.criteria
+    this.isRecurring = challenge.isRecurring
+    this.recurrencePeriod = challenge.recurrencePeriod
+    this.startDate = challenge.startDate
+    this.endDate = challenge.endDate
+    this.schoolId = challenge.schoolId
+    this.isActive = challenge.isActive
+    this.createdAt = challenge.createdAt
+    this.updatedAt = challenge.updatedAt
+  }
+}

@@ -1,9 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
+import ClassDto from '#models/dto/class.dto'
 import db from '@adonisjs/lucid/services/db'
 
 export default class ListClassesController {
-  async handle({ request, response }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { request, selectedSchoolIds } = ctx
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
@@ -11,6 +13,9 @@ export default class ListClassesController {
     const schoolId = request.input('schoolId')
     const status = request.input('status')
     const academicPeriodId = request.input('academicPeriodId')
+
+    // Use schoolId from request (for admins) or selectedSchoolIds from middleware
+    const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
 
     const query = Class_.query().preload('level').orderBy('name', 'asc')
 
@@ -22,8 +27,8 @@ export default class ListClassesController {
       query.where('levelId', levelId)
     }
 
-    if (schoolId) {
-      query.where('schoolId', schoolId)
+    if (schoolIds && schoolIds.length > 0) {
+      query.whereIn('schoolId', schoolIds)
     }
 
     if (status) {
@@ -44,6 +49,6 @@ export default class ListClassesController {
 
     const classes = await query.paginate(page, limit)
 
-    return response.ok(classes)
+    return ClassDto.fromPaginator(classes)
   }
 }

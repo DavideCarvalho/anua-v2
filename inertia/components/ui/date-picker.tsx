@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 
 import { cn } from '~/lib/utils'
@@ -31,6 +31,7 @@ export function DatePicker({
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           disabled={disabled}
           className={cn(
@@ -54,14 +55,24 @@ export function DatePicker({
               ? { before: fromDate, after: toDate }
               : undefined
           }
+          components={{
+            PreviousMonthButton: (props) => (
+              <button type="button" {...props} className={cn(props.className, 'absolute left-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input')}>
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            ),
+            NextMonthButton: (props) => (
+              <button type="button" {...props} className={cn(props.className, 'absolute right-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input')}>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            ),
+          }}
           classNames={{
             months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
             month: 'space-y-4',
             month_caption: 'flex justify-center pt-1 relative items-center',
             caption_label: 'text-sm font-medium',
             nav: 'space-x-1 flex items-center',
-            button_previous: 'absolute left-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input',
-            button_next: 'absolute right-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input',
             month_grid: 'w-full border-collapse space-y-1',
             weekdays: 'flex',
             weekday: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]',

@@ -30,7 +30,6 @@ import { useSubjectsQueryOptions } from '../../hooks/queries/use-subjects'
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  hourlyRate: z.string().optional(),
   subjectIds: z.array(z.string()).default([]),
 })
 
@@ -58,7 +57,6 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
     defaultValues: {
       name: '',
       email: '',
-      hourlyRate: '',
       subjectIds: [],
     },
   })
@@ -69,7 +67,6 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
         name: values.name,
         email: values.email,
         schoolId,
-        hourlyRate: values.hourlyRate ? Number(values.hourlyRate) : undefined,
         subjectIds: values.subjectIds.length > 0 ? values.subjectIds : undefined,
       })
       if (response.error) {
@@ -181,20 +178,6 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="email@exemplo.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="hourlyRate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valor hora/aula (opcional)</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="0.01" min="0" placeholder="0,00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

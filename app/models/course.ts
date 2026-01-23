@@ -18,41 +18,41 @@ export default class Course extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'slug' })
   @slugify({
     strategy: 'dbIncrement',
     fields: ['name'],
   })
   declare slug: string
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'version' })
   declare version: number
 
-  @column()
+  @column({ columnName: 'coordinatorId' })
   declare coordinatorId: string | null
 
-  @column()
+  @column({ columnName: 'enrollmentMinimumAge' })
   declare enrollmentMinimumAge: number | null
 
-  @column()
+  @column({ columnName: 'enrollmentMaximumAge' })
   declare enrollmentMaximumAge: number | null
 
-  @column()
+  @column({ columnName: 'maxStudentsPerClass' })
   declare maxStudentsPerClass: number | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime | null
 
   // Relationships
@@ -69,9 +69,9 @@ export default class Course extends BaseModel {
   @manyToMany(() => AcademicPeriod, {
     pivotTable: 'CourseHasAcademicPeriod',
     localKey: 'id',
-    pivotForeignKey: 'course_id',
+    pivotForeignKey: 'courseId',
     relatedKey: 'id',
-    pivotRelatedForeignKey: 'academic_period_id',
+    pivotRelatedForeignKey: 'academicPeriodId',
   })
   declare academicPeriods: ManyToMany<typeof AcademicPeriod>
 }

@@ -10,22 +10,23 @@ export default class StudentMedicalInfo extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'conditions' })
   declare conditions: string | null
 
   @column({
+    columnName: 'documents',
     prepare: (value) => JSON.stringify(value),
     consume: (value) => (typeof value === 'string' ? JSON.parse(value) : value),
   })
   declare documents: Array<{ name: string; url: string }> | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

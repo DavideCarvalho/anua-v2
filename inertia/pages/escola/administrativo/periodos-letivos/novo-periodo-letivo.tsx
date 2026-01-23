@@ -17,7 +17,7 @@ export default function NovoPeriodoLetivoPage() {
 
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link route="web.escola.administrativo.periodosLetivos">
+          <Link route="web.escola.periodosLetivos">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>

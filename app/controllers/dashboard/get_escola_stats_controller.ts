@@ -5,17 +5,13 @@ import StudentPayment from '#models/student_payment'
 import { DateTime } from 'luxon'
 
 export default class GetEscolaStatsController {
-  async handle({ auth, response, effectiveUser }: HttpContext) {
-    // Usar effectiveUser se disponível (para impersonation)
-    const user = effectiveUser ?? auth.user
-    if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
-    }
-
-    const schoolId = user.schoolId
-    if (!schoolId) {
+  async handle({ response, selectedSchoolIds }: HttpContext) {
+    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
       return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
     }
+
+    // Para stats, usar a primeira escola selecionada (ou agregar todas)
+    const schoolId = selectedSchoolIds[0]
 
     const now = DateTime.now()
     const startOfMonth = now.startOf('month')

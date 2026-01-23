@@ -19,34 +19,34 @@ export default class Student extends BaseModel {
   static table = 'Student'
 
   // Same ID as User (1:1 relationship)
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'descountPercentage' })
   declare descountPercentage: number // Note: typo in DB schema
 
-  @column()
+  @column({ columnName: 'monthlyPaymentAmount' })
   declare monthlyPaymentAmount: number
 
-  @column()
+  @column({ columnName: 'isSelfResponsible' })
   declare isSelfResponsible: boolean
 
-  @column()
+  @column({ columnName: 'paymentDate' })
   declare paymentDate: number | null
 
-  @column()
+  @column({ columnName: 'classId' })
   declare classId: string | null
 
-  @column()
+  @column({ columnName: 'contractId' })
   declare contractId: string | null
 
-  @column()
+  @column({ columnName: 'canteenLimit' })
   declare canteenLimit: number | null
 
-  @column()
+  @column({ columnName: 'balance' })
   declare balance: number
 
-  @column()
+  @column({ columnName: 'enrollmentStatus' })
   declare enrollmentStatus: EnrollmentStatus
 
   // Relationships

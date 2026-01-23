@@ -116,7 +116,7 @@ export const enrollStudentValidator = vine.compile(
       name: vine.string().trim().minLength(2).maxLength(255),
       email: vine.string().email().trim().optional(),
       phone: vine.string().trim(),
-      birthDate: vine.date(),
+      birthDate: vine.string(), // ISO string from frontend
       documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
       documentNumber: vine.string().trim(),
       isSelfResponsible: vine.boolean(),
@@ -130,7 +130,7 @@ export const enrollStudentValidator = vine.compile(
         phone: vine.string().trim(),
         documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
         documentNumber: vine.string().trim(),
-        birthDate: vine.date(),
+        birthDate: vine.string(), // ISO string from frontend
         isPedagogical: vine.boolean(),
         isFinancial: vine.boolean(),
       })
@@ -167,15 +167,15 @@ export const enrollStudentValidator = vine.compile(
     }),
     billing: vine.object({
       academicPeriodId: vine.string().uuid(),
-      courseId: vine.string().uuid(),
-      levelId: vine.string().uuid(),
+      courseId: vine.string().uuid().optional(),
+      levelId: vine.string().uuid().optional(),
       classId: vine.string().uuid().optional(),
       contractId: vine.string().uuid().optional(),
-      monthlyFee: vine.number().min(0),
-      discount: vine.number().min(0).max(100),
-      paymentDate: vine.number().min(1).max(31),
-      paymentMethod: vine.enum(['BOLETO', 'CREDIT_CARD', 'PIX']),
-      installments: vine.number().min(1).max(12),
+      monthlyFee: vine.number().min(0).optional(),
+      discount: vine.number().min(0).max(100).optional(),
+      paymentDate: vine.number().min(1).max(31).optional(),
+      paymentMethod: vine.enum(['BOLETO', 'CREDIT_CARD', 'PIX']).optional(),
+      installments: vine.number().min(1).max(12).optional(),
       scholarshipId: vine.string().uuid().optional().nullable(),
     }),
   })

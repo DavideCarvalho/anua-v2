@@ -18,13 +18,13 @@ export default class StudentHasAcademicPeriod extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string
 
-  @column()
+  @column({ columnName: 'classId' })
   declare classId: string | null
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

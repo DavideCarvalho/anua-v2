@@ -21,124 +21,124 @@ export type PixKeyType = 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'
 export default class School extends BaseModel {
   static table = 'School'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'slug' })
   declare slug: string
 
   // Address
-  @column()
+  @column({ columnName: 'street' })
   declare street: string | null
 
-  @column()
+  @column({ columnName: 'number' })
   declare number: string | null
 
-  @column()
+  @column({ columnName: 'complement' })
   declare complement: string | null
 
-  @column()
+  @column({ columnName: 'neighborhood' })
   declare neighborhood: string | null
 
-  @column()
+  @column({ columnName: 'city' })
   declare city: string | null
 
-  @column()
+  @column({ columnName: 'state' })
   declare state: string | null
 
-  @column()
+  @column({ columnName: 'zipCode' })
   declare zipCode: string | null
 
-  @column()
+  @column({ columnName: 'latitude' })
   declare latitude: number | null
 
-  @column()
-  declare longitude: number | null
+  @column({ columnName: 'longitude' })
+  declare longitude: string | null
 
   // PostGIS geometry point - stored as USER-DEFINED type in DB
   // Use raw queries for spatial operations
-  @column()
+  @column({ columnName: 'location' })
   declare location: unknown | null
 
   // Logo
-  @column()
+  @column({ columnName: 'logoUrl' })
   declare logoUrl: string | null
 
   // Asaas integration
-  @column()
+  @column({ columnName: 'asaasAccountId' })
   declare asaasAccountId: string | null
 
-  @column()
+  @column({ columnName: 'asaasWebhookToken' })
   declare asaasWebhookToken: string | null
 
-  @column()
+  @column({ columnName: 'asaasWalletId' })
   declare asaasWalletId: string | null
 
-  @column({ serializeAs: null })
+  @column({ serializeAs: null, columnName: 'asaasApiKey' })
   declare asaasApiKey: string | null
 
-  @column()
+  @column({ columnName: 'asaasDocumentUrl' })
   declare asaasDocumentUrl: string | null
 
-  @column()
+  @column({ columnName: 'asaasCommercialInfoIsExpired' })
   declare asaasCommercialInfoIsExpired: boolean | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'asaasCommercialInfoScheduledDate' })
   declare asaasCommercialInfoScheduledDate: DateTime | null
 
   // Payment config
-  @column()
+  @column({ columnName: 'paymentConfigStatus' })
   declare paymentConfigStatus: PaymentConfigStatus
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'paymentConfigStatusUpdatedAt' })
   declare paymentConfigStatusUpdatedAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'pixKey' })
   declare pixKey: string | null
 
-  @column()
+  @column({ columnName: 'pixKeyType' })
   declare pixKeyType: PixKeyType | null
 
-  @column()
+  @column({ columnName: 'usePlatformManagedPayments' })
   declare usePlatformManagedPayments: boolean
 
-  @column()
+  @column({ columnName: 'enablePaymentNotifications' })
   declare enablePaymentNotifications: boolean
 
   // Academic settings
-  @column()
+  @column({ columnName: 'minimumGrade' })
   declare minimumGrade: number
 
-  @column()
+  @column({ columnName: 'calculationAlgorithm' })
   declare calculationAlgorithm: string
 
-  @column()
+  @column({ columnName: 'minimumAttendancePercentage' })
   declare minimumAttendancePercentage: number
 
   // Insurance config
-  @column()
+  @column({ columnName: 'hasInsurance' })
   declare hasInsurance: boolean | null
 
-  @column()
+  @column({ columnName: 'insurancePercentage' })
   declare insurancePercentage: number | null
 
-  @column()
+  @column({ columnName: 'insuranceCoveragePercentage' })
   declare insuranceCoveragePercentage: number | null
 
-  @column()
+  @column({ columnName: 'insuranceClaimWaitingDays' })
   declare insuranceClaimWaitingDays: number | null
 
   // Foreign keys
-  @column()
+  @column({ columnName: 'schoolChainId' })
   declare schoolChainId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime | null
 
   // Relationships

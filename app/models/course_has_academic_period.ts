@@ -16,19 +16,19 @@ export default class CourseHasAcademicPeriod extends BaseModel {
 
   static table = 'CourseHasAcademicPeriod'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'courseId' })
   declare courseId: string
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime | null
 
   @belongsTo(() => Course, { foreignKey: 'courseId' })

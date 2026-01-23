@@ -12,21 +12,33 @@ import StudentMedication from '#models/student_medication'
 import StudentEmergencyContact from '#models/student_emergency_contact'
 import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasAcademicPeriod from '#models/student_has_academic_period'
+import StudentHasLevel from '#models/student_has_level'
+import AcademicPeriod from '#models/academic_period'
+import Class_ from '#models/class'
+import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { enrollStudentValidator } from '#validators/student'
 
 export default class EnrollStudentController {
   async handle(ctx: HttpContext) {
     const { request, response } = ctx
-    const effectiveUser = ctx.effectiveUser || ctx.auth.user!
 
-    const data = await request.validateUsing(enrollStudentValidator)
-
-    // Get school from effective user
-    await effectiveUser.load('school')
-    const schoolId = effectiveUser.school?.id || effectiveUser.schoolId
-    if (!schoolId) {
-      return response.badRequest({ message: 'Usuário não está vinculado a uma escola' })
+    let data
+    try {
+      data = await request.validateUsing(enrollStudentValidator)
+    } catch (error: any) {
+      console.error('Validation error:', error.messages || error)
+      return response.unprocessableEntity({
+        message: 'Erro de validação',
+        errors: error.messages || error,
+      })
     }
+
+    // Get school from the academic period
+    const academicPeriod = await AcademicPeriod.find(data.billing.academicPeriodId)
+    if (!academicPeriod) {
+      return response.badRequest({ message: 'Período letivo não encontrado' })
+    }
+    const schoolId = academicPeriod.schoolId
 
     // Check if student already exists by document
     const existingUser = await User.query()
@@ -53,8 +65,11 @@ export default class EnrollStudentController {
       return response.internalServerError({ message: 'Role STUDENT não encontrada' })
     }
 
-    // Get RESPONSIBLE role for creating responsibles
-    const responsibleRole = await Role.findBy('name', 'RESPONSIBLE')
+    // Get STUDENT_RESPONSIBLE role for creating responsibles
+    const responsibleRole = await Role.findBy('name', 'STUDENT_RESPONSIBLE')
+    if (!responsibleRole && !data.basicInfo.isSelfResponsible && data.responsibles.length > 0) {
+      return response.internalServerError({ message: 'Role STUDENT_RESPONSIBLE não encontrada' })
+    }
 
     const trx = await db.transaction()
 
@@ -70,7 +85,7 @@ export default class EnrollStudentController {
           slug: userSlug,
           email: data.basicInfo.email || null,
           phone: data.basicInfo.phone,
-          birthDate: DateTime.fromJSDate(data.basicInfo.birthDate),
+          birthDate: DateTime.fromISO(data.basicInfo.birthDate),
           documentType: data.basicInfo.documentType,
           documentNumber: data.basicInfo.documentNumber,
           whatsappContact: data.basicInfo.whatsappContact,
@@ -85,10 +100,10 @@ export default class EnrollStudentController {
       const student = await Student.create(
         {
           id: user.id,
-          descountPercentage: data.billing.discount,
-          monthlyPaymentAmount: data.billing.monthlyFee,
+          descountPercentage: data.billing.discount ?? 0,
+          monthlyPaymentAmount: data.billing.monthlyFee ?? 0,
           isSelfResponsible: data.basicInfo.isSelfResponsible,
-          paymentDate: data.billing.paymentDate,
+          paymentDate: data.billing.paymentDate ?? 5,
           classId: data.billing.classId || null,
           contractId: data.billing.contractId || null,
           balance: 0,
@@ -122,11 +137,11 @@ export default class EnrollStudentController {
                 slug: respSlug,
                 email: respData.email,
                 phone: respData.phone,
-                birthDate: DateTime.fromJSDate(respData.birthDate),
+                birthDate: DateTime.fromISO(respData.birthDate),
                 documentType: respData.documentType,
                 documentNumber: respData.documentNumber,
                 schoolId: schoolId,
-                roleId: responsibleRole?.id || null,
+                roleId: responsibleRole!.id,
                 active: true,
               },
               { client: trx }
@@ -214,6 +229,37 @@ export default class EnrollStudentController {
         },
         { client: trx }
       )
+
+      // 9. Create StudentHasLevel (for proper enrollment tracking)
+      if (data.billing.classId) {
+        // Get the class to find its levelId
+        const classRecord = await Class_.find(data.billing.classId)
+        if (classRecord?.levelId) {
+          // Find the LevelAssignedToCourseHasAcademicPeriod for this level and academic period
+          const levelAssignment = await LevelAssignedToCourseHasAcademicPeriod.query({ client: trx })
+            .where('levelId', classRecord.levelId)
+            .whereHas('courseHasAcademicPeriod', (query) => {
+              query.where('academicPeriodId', data.billing.academicPeriodId)
+            })
+            .first()
+
+          if (levelAssignment) {
+            await StudentHasLevel.create(
+              {
+                studentId: student.id,
+                levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+                academicPeriodId: data.billing.academicPeriodId,
+                levelId: classRecord.levelId,
+                classId: data.billing.classId,
+                paymentMethod: data.billing.paymentMethod || null,
+                installments: data.billing.installments || null,
+                paymentDay: data.billing.paymentDate || null,
+              },
+              { client: trx }
+            )
+          }
+        }
+      }
 
       await trx.commit()
 

@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { v7 as uuidv7 } from 'uuid'
+import db from '@adonisjs/lucid/services/db'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import TeacherHasClass from '#models/teacher_has_class'
 import TeacherAvailability from '#models/teacher_availability'
-import db from '@adonisjs/lucid/services/db'
 
 interface ScheduleConfig {
   startTime: string // "07:30"
@@ -349,8 +349,12 @@ export default class GenerateClassScheduleController {
       }
     }
 
-    // Query occupied slots
-    const result = await db.rawQuery<{
+    if (teacherIds.length === 0) {
+      return occupied
+    }
+
+    // Query occupied slots using raw query for proper table name casing
+    const slotsResult = await db.rawQuery<{
       rows: Array<{
         teacherId: string
         classWeekDay: number
@@ -359,28 +363,35 @@ export default class GenerateClassScheduleController {
       }>
     }>(
       `
-      SELECT thc."teacherId", cs."classWeekDay", cs."startTime", cs."endTime"
+      SELECT
+        thc."teacherId",
+        cs."classWeekDay",
+        cs."startTime",
+        cs."endTime"
       FROM "CalendarSlot" cs
-      JOIN "Calendar" c ON cs."calendarId" = c.id
-      JOIN "TeacherHasClass" thc ON cs."teacherHasClassId" = thc.id
+      INNER JOIN "Calendar" c ON cs."calendarId" = c."id"
+      INNER JOIN "TeacherHasClass" thc ON cs."teacherHasClassId" = thc."id"
       WHERE c."academicPeriodId" = :academicPeriodId
         AND c."isActive" = true
         AND c."isCanceled" = false
         AND c."classId" != :excludeClassId
         AND thc."teacherId" = ANY(:teacherIds)
         AND cs."isBreak" = false
-    `,
+      `,
       { academicPeriodId, excludeClassId, teacherIds }
     )
 
+    const slots = slotsResult.rows
+
     const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
-    for (const row of result.rows) {
-      const dayName = dayNames[row.classWeekDay]
-      if (dayName && occupied[row.teacherId]?.[dayName]) {
-        occupied[row.teacherId][dayName].push({
-          startTime: row.startTime,
-          endTime: row.endTime,
+    for (const slot of slots) {
+      const teacherId = slot.teacherId
+      const dayName = dayNames[slot.classWeekDay]
+      if (dayName && occupied[teacherId]?.[dayName]) {
+        occupied[teacherId][dayName].push({
+          startTime: slot.startTime,
+          endTime: slot.endTime,
         })
       }
     }

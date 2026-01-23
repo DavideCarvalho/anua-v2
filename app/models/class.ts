@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Level from './level.js'
 import School from './school.js'
@@ -12,28 +13,35 @@ import AcademicPeriod from './academic_period.js'
 export default class Class_ extends BaseModel {
   static table = 'Class'
 
-  @column({ isPrimary: true })
+  @beforeCreate()
+  static assignId(classEntity: Class_) {
+    if (!classEntity.id) {
+      classEntity.id = uuidv7()
+    }
+  }
+
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'slug' })
   declare slug: string
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'levelId' })
   declare levelId: string | null
 
-  @column()
+  @column({ columnName: 'isArchived' })
   declare isArchived: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

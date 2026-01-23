@@ -1,0 +1,23 @@
+import { BaseModelDto } from '@adocasts.com/dto/base'
+import type CalendarConfig from '#models/calendar_config'
+import type { DateTime } from 'luxon'
+
+export default class CalendarConfigDto extends BaseModelDto {
+  declare id: string
+  declare classesConfig: Record<string, unknown> | null
+  declare classesClashConfig: Record<string, unknown> | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
+
+  constructor(calendarConfig?: CalendarConfig) {
+    super()
+
+    if (!calendarConfig) return
+
+    this.id = calendarConfig.id
+    this.classesConfig = calendarConfig.classesConfig
+    this.classesClashConfig = calendarConfig.classesClashConfig
+    this.createdAt = calendarConfig.createdAt
+    this.updatedAt = calendarConfig.updatedAt
+  }
+}

@@ -6,7 +6,9 @@ export default class ShowAcademicPeriodBySlugController {
     const include = request.qs().include?.split(',') ?? []
     const includeCourses = include.includes('courses')
 
-    const query = AcademicPeriod.query().where('slug', params.slug)
+    const query = AcademicPeriod.query()
+      .where('slug', params.slug)
+      .whereNull('deletedAt')
 
     if (includeCourses) {
       query.preload('courseAcademicPeriods', (courseQuery) => {

@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { createSchoolOnboardingValidator } from '#validators/onboarding'
-import { randomUUID } from 'node:crypto'
+import { v7 as uuidv7 } from 'uuid'
 
 interface SchoolRow {
   id: string
@@ -84,7 +84,7 @@ export default class CreateSchoolOnboardingController {
     const finalPlatformFeePercentage = data.platformFeePercentage ?? 5.0
 
     // Gerar IDs
-    const schoolId = randomUUID()
+    const schoolId = uuidv7()
     const slug = generateSlug(data.name)
 
     // Verificar se slug já existe e adicionar sufixo se necessário
@@ -153,7 +153,7 @@ export default class CreateSchoolOnboardingController {
       directorName = existingUser.name
       directorEmail = existingUser.email
     } else {
-      directorId = randomUUID()
+      directorId = uuidv7()
       directorName = data.directorName
       directorEmail = data.directorEmail
 
@@ -189,18 +189,19 @@ export default class CreateSchoolOnboardingController {
     // Associar diretor à escola
     await db.rawQuery(
       `
-      INSERT INTO "UserHasSchool" ("userId", "schoolId", "isDefault")
-      VALUES (:userId, :schoolId, true)
+      INSERT INTO "UserHasSchool" (id, "userId", "schoolId", "isDefault", "createdAt", "updatedAt")
+      VALUES (:id, :userId, :schoolId, true, NOW(), NOW())
       ON CONFLICT ("userId", "schoolId") DO NOTHING
       `,
       {
+        id: uuidv7(),
         userId: directorId,
         schoolId: schoolId,
       }
     )
 
     // Criar PaymentSettings
-    const paymentSettingsId = randomUUID()
+    const paymentSettingsId = uuidv7()
     await db.rawQuery(
       `
       INSERT INTO "PaymentSettings" (
@@ -219,7 +220,7 @@ export default class CreateSchoolOnboardingController {
     )
 
     // Criar Subscription
-    const subscriptionId = randomUUID()
+    const subscriptionId = uuidv7()
     const now = new Date()
     const trialEndsAt = new Date(now)
     trialEndsAt.setDate(now.getDate() + finalTrialDays)
@@ -254,7 +255,7 @@ export default class CreateSchoolOnboardingController {
       )
       `,
       {
-        id: randomUUID(),
+        id: uuidv7(),
         subscriptionId: subscriptionId,
         reason: `Assinatura criada durante onboarding - Trial de ${finalTrialDays} dias`,
       }

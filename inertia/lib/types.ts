@@ -42,9 +42,20 @@ export interface UserDto {
   school?: SchoolDto
 }
 
+export interface UserSchool {
+  id: string
+  name: string
+  slug: string
+  isDefault: boolean
+}
+
 export interface SharedProps {
   [key: string]: unknown
   user: UserDto | null
+  /** Escolas que o usuário tem acesso */
+  userSchools: UserSchool[]
+  /** IDs das escolas atualmente selecionadas */
+  selectedSchoolIds: string[]
 }
 
 // Role names from the system

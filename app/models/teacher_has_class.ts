@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Teacher from './teacher.js'
 import Class_ from './class.js'
@@ -9,40 +10,47 @@ import CalendarSlot from './calendar_slot.js'
 export default class TeacherHasClass extends BaseModel {
   static table = 'TeacherHasClass'
 
-  @column({ isPrimary: true })
+  @beforeCreate()
+  static assignId(teacherHasClass: TeacherHasClass) {
+    if (!teacherHasClass.id) {
+      teacherHasClass.id = uuidv7()
+    }
+  }
+
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'teacherId' })
   declare teacherId: string
 
-  @column()
+  @column({ columnName: 'classId' })
   declare classId: string
 
-  @column()
+  @column({ columnName: 'subjectId' })
   declare subjectId: string
 
-  @column()
+  @column({ columnName: 'subjectQuantity' })
   declare subjectQuantity: number
 
-  @column()
+  @column({ columnName: 'classWeekDay' })
   declare classWeekDay: string | null
 
-  @column()
+  @column({ columnName: 'startTime' })
   declare startTime: string | null
 
-  @column()
+  @column({ columnName: 'endTime' })
   declare endTime: string | null
 
-  @column()
+  @column({ columnName: 'teacherAvailabilityId' })
   declare teacherAvailabilityId: string | null
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

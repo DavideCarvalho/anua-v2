@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
@@ -9,46 +8,40 @@ export default class StudentAddress extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'street' })
   declare street: string
 
-  @column()
+  @column({ columnName: 'number' })
   declare number: string
 
-  @column()
+  @column({ columnName: 'complement' })
   declare complement: string | null
 
-  @column()
+  @column({ columnName: 'neighborhood' })
   declare neighborhood: string
 
-  @column()
+  @column({ columnName: 'city' })
   declare city: string
 
-  @column()
+  @column({ columnName: 'state' })
   declare state: string
 
-  @column()
+  @column({ columnName: 'zipCode' })
   declare zipCode: string
 
-  @column()
+  @column({ columnName: 'latitude' })
   declare latitude: number | null
 
-  @column()
+  @column({ columnName: 'longitude' })
   declare longitude: number | null
 
   // PostGIS geometry point - stored as USER-DEFINED type in DB
   // Use raw queries for spatial operations
-  @column()
+  @column({ columnName: 'location' })
   declare location: unknown | null
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>

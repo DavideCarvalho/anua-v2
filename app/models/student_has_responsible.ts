@@ -10,22 +10,22 @@ export default class StudentHasResponsible extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'responsibleId' })
   declare responsibleId: string
 
-  @column()
+  @column({ columnName: 'isPedagogical' })
   declare isPedagogical: boolean
 
-  @column()
+  @column({ columnName: 'isFinancial' })
   declare isFinancial: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relacionamentos

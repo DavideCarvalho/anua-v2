@@ -5,7 +5,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { router } from '@inertiajs/react'
+import { useRouter } from '@tuyau/inertia/react'
 
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
@@ -88,6 +88,7 @@ interface NewAcademicPeriodFormProps {
 }
 
 export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriodFormProps) {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -128,7 +129,6 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
   const handleSubmit = async (values: AcademicPeriodFormValues) => {
     setIsSubmitting(true)
     try {
-      // 1. Create AcademicPeriod
       const response = await fetch('/api/v1/academic-periods', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,6 +140,20 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
           segment: values.calendar.segment,
           enrollmentStartDate: values.calendar.enrollmentStartDate?.toISOString(),
           enrollmentEndDate: values.calendar.enrollmentEndDate?.toISOString(),
+          courses: values.courses.map((course) => ({
+            courseId: course.id,
+            name: course.name,
+            levels: course.levels.map((level) => ({
+              levelId: level.id,
+              name: level.name,
+              order: level.order,
+              contractId: level.contractId,
+              classes: level.classes.map((cls) => ({
+                name: cls.name,
+                teachers: cls.teachers,
+              })),
+            })),
+          })),
         }),
       })
 
@@ -148,83 +162,9 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
         throw new Error(errorData.message || 'Erro ao criar período letivo')
       }
 
-      const academicPeriod = await response.json()
-
-      // 2. Create courses and levels if any
-      if (values.courses.length > 0) {
-        for (const course of values.courses) {
-          // 2a. Create Course
-          const courseResponse = await fetch('/api/v1/courses', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: course.name,
-              order: course.order,
-              schoolId: values.schoolId,
-            }),
-          })
-
-          if (!courseResponse.ok) {
-            console.error('Error creating course:', course.name)
-            continue
-          }
-
-          const createdCourse = await courseResponse.json()
-
-          // 2b. Create CourseHasAcademicPeriod (link course to academic period)
-          const courseHasAcademicPeriodResponse = await fetch('/api/v1/course-has-academic-periods', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              courseId: createdCourse.id,
-              academicPeriodId: academicPeriod.id,
-            }),
-          })
-
-          if (!courseHasAcademicPeriodResponse.ok) {
-            console.error('Error linking course to academic period:', course.name)
-            continue
-          }
-
-          const courseHasAcademicPeriod = await courseHasAcademicPeriodResponse.json()
-
-          // 2c. Create levels for this course
-          for (const level of course.levels) {
-            // Create Level (with schoolId)
-            const levelResponse = await fetch('/api/v1/levels', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                name: level.name,
-                order: level.order,
-                schoolId: values.schoolId,
-              }),
-            })
-
-            if (!levelResponse.ok) {
-              console.error('Error creating level:', level.name)
-              continue
-            }
-
-            const createdLevel = await levelResponse.json()
-
-            // Create LevelAssignedToCourseHasAcademicPeriod (link level to courseHasAcademicPeriod)
-            await fetch('/api/v1/level-assignments', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                levelId: createdLevel.id,
-                courseHasAcademicPeriodId: courseHasAcademicPeriod.id,
-                isActive: true,
-              }),
-            })
-          }
-        }
-      }
-
       toast.success('Período letivo criado com sucesso!')
       onSuccess?.()
-      router.visit('/escola/administrativo/periodos-letivos')
+      router.visit({ route: 'web.escola.periodosLetivos' })
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao criar período letivo')
       console.error(error)

@@ -3,7 +3,8 @@ import Event from '#models/event'
 import { listEventsValidator } from '#validators/event'
 
 export default class ListEventsController {
-  async handle({ request, response }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { request, response, selectedSchoolIds } = ctx
     const {
       schoolId,
       type,
@@ -15,13 +16,16 @@ export default class ListEventsController {
       limit = 20,
     } = await request.validateUsing(listEventsValidator)
 
+    // Use schoolId from request (for admins) or selectedSchoolIds from middleware
+    const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
+
     const query = Event.query()
       .preload('organizer')
       .preload('school')
       .withCount('participants')
 
-    if (schoolId) {
-      query.where('schoolId', schoolId)
+    if (schoolIds && schoolIds.length > 0) {
+      query.whereIn('schoolId', schoolIds)
     }
 
     if (type) {

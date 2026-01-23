@@ -22,64 +22,64 @@ export default class StudentHasLevel extends BaseModel {
 
   static table = 'StudentHasLevel'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'levelAssignedToCourseAcademicPeriodId' })
   declare levelAssignedToCourseAcademicPeriodId: string
 
-  @column()
+  @column({ columnName: 'scholarshipId' })
   declare scholarshipId: string | null
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string | null
 
-  @column()
+  @column({ columnName: 'levelId' })
   declare levelId: string | null
 
-  @column()
+  @column({ columnName: 'classId' })
   declare classId: string | null
 
-  @column()
+  @column({ columnName: 'contractId' })
   declare contractId: string | null
 
-  @column()
+  @column({ columnName: 'contractUrl' })
   declare contractUrl: string | null
 
-  @column()
+  @column({ columnName: 'paymentMethod' })
   declare paymentMethod: 'BOLETO' | 'CREDIT_CARD' | 'PIX' | null
 
-  @column()
+  @column({ columnName: 'enrollmentInstallments' })
   declare enrollmentInstallments: number | null
 
-  @column()
+  @column({ columnName: 'installments' })
   declare installments: number | null
 
-  @column()
+  @column({ columnName: 'paymentDay' })
   declare paymentDay: number | null
 
-  @column()
+  @column({ columnName: 'docusealSubmissionId' })
   declare docusealSubmissionId: string | null
 
-  @column()
+  @column({ columnName: 'docusealSignatureStatus' })
   declare docusealSignatureStatus: DocusealSignatureStatus | null
 
-  @column.date()
+  @column.date({ columnName: 'documentSignedAt' })
   declare documentSignedAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'enrollmentPaymentId' })
   declare enrollmentPaymentId: string | null
 
-  @column()
+  @column({ columnName: 'signedContractFilePath' })
   declare signedContractFilePath: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

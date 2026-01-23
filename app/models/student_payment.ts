@@ -8,79 +8,79 @@ import InsuranceClaim from './insurance_claim.js'
 export default class StudentPayment extends BaseModel {
   static table = 'StudentPayment'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'amount' })
   declare amount: number
 
-  @column()
+  @column({ columnName: 'month' })
   declare month: number
 
-  @column()
+  @column({ columnName: 'year' })
   declare year: number
 
-  @column()
+  @column({ columnName: 'type' })
   declare type: 'ENROLLMENT' | 'TUITION' | 'CANTEEN' | 'COURSE' | 'AGREEMENT' | 'STUDENT_LOAN' | 'OTHER'
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED'
 
-  @column()
+  @column({ columnName: 'totalAmount' })
   declare totalAmount: number
 
-  @column.date()
+  @column.date({ columnName: 'dueDate' })
   declare dueDate: DateTime
 
-  @column()
+  @column({ columnName: 'installments' })
   declare installments: number
 
-  @column()
+  @column({ columnName: 'installmentNumber' })
   declare installmentNumber: number
 
-  @column()
+  @column({ columnName: 'discountPercentage' })
   declare discountPercentage: number
 
-  @column.date()
+  @column.date({ columnName: 'paidAt' })
   declare paidAt: DateTime | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'emailSentAt' })
   declare emailSentAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'contractId' })
   declare contractId: string
 
-  @column()
+  @column({ columnName: 'classHasAcademicPeriodId' })
   declare classHasAcademicPeriodId: string | null
 
-  @column()
+  @column({ columnName: 'studentHasLevelId' })
   declare studentHasLevelId: string | null
 
-  @column()
+  @column({ columnName: 'invoiceUrl' })
   declare invoiceUrl: string | null
 
-  @column()
+  @column({ columnName: 'paymentGatewayId' })
   declare paymentGatewayId: string | null
 
-  @column()
+  @column({ columnName: 'paymentGateway' })
   declare paymentGateway: 'ASAAS' | 'CUSTOM' | null
 
-  @column()
+  @column({ columnName: 'metadata' })
   declare metadata: Record<string, unknown> | null
 
-  @column()
+  @column({ columnName: 'agreementId' })
   declare agreementId: string | null
 
-  @column()
+  @column({ columnName: 'insuranceBillingId' })
   declare insuranceBillingId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships
