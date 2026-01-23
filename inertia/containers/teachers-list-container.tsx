@@ -30,7 +30,16 @@ import {
   BookOpen,
   UserX,
   UserCheck,
+  Filter,
+  X,
 } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,6 +118,7 @@ interface TeacherItem {
 function TeachersListContent({
   search,
   page,
+  active,
   onPageChange,
   onEditData,
   onEditRate,
@@ -117,6 +127,7 @@ function TeachersListContent({
 }: {
   search: string
   page: number
+  active?: boolean
   onPageChange: (page: number) => void
   onEditData: (teacher: TeacherItem) => void
   onEditRate: (teacher: TeacherItem) => void
@@ -124,7 +135,7 @@ function TeachersListContent({
   onToggleActive: (teacher: TeacherItem) => void
 }) {
   const { data } = useSuspenseQuery(
-    useTeachersQueryOptions({ page, limit: 20, search: search || undefined })
+    useTeachersQueryOptions({ page, limit: 20, search: search || undefined, active })
   )
 
   const teachers = Array.isArray(data) ? data : data?.data || []
@@ -271,6 +282,7 @@ export function TeachersListContainer() {
   const [searchInput, setSearchInput] = useState('')
   const [page, setPage] = useState(1)
   const [isNewModalOpen, setIsNewModalOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<string>('active') // 'all', 'active', 'inactive'
 
   // Edit modals state
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherItem | null>(null)
@@ -284,6 +296,21 @@ export function TeachersListContainer() {
     setSearch(searchInput)
     setPage(1)
   }
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value)
+    setPage(1)
+  }
+
+  const clearFilters = () => {
+    setStatusFilter('active')
+    setPage(1)
+  }
+
+  const hasActiveFilters = statusFilter !== 'active'
+
+  // Convert status filter to active boolean
+  const activeFilter = statusFilter === 'all' ? undefined : statusFilter === 'active'
 
   const handleEditData = (teacher: TeacherItem) => {
     setSelectedTeacher(teacher)
@@ -346,6 +373,34 @@ export function TeachersListContainer() {
         </Button>
       </div>
 
+      {/* Filters */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Ativos</SelectItem>
+                <SelectItem value="inactive">Inativos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-1" />
+                Limpar filtros
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {schoolId && (
         <NewTeacherModal
           schoolId={schoolId}
@@ -366,6 +421,7 @@ export function TeachersListContainer() {
               <TeachersListContent
                 search={search}
                 page={page}
+                active={activeFilter}
                 onPageChange={setPage}
                 onEditData={handleEditData}
                 onEditRate={handleEditRate}

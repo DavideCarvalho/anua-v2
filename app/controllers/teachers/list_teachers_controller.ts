@@ -32,6 +32,7 @@ export default class ListTeachersController {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
+    const active = request.input('active')
 
     // Get schools the user has access to
     const userSchoolsResult = await db.rawQuery<{ rows: UserSchoolRow[] }>(
@@ -51,7 +52,7 @@ export default class ListTeachersController {
       })
     }
 
-    const params: Record<string, string | string[] | number> = {
+    const params: Record<string, string | string[] | number | boolean> = {
       schoolIds,
       limit,
       offset: (page - 1) * limit,
@@ -63,6 +64,12 @@ export default class ListTeachersController {
       params.search = `%${search}%`
     }
 
+    let activeFilter = ''
+    if (active !== undefined && active !== null && active !== '') {
+      activeFilter = 'AND u.active = :active'
+      params.active = active === 'true' || active === true
+    }
+
     // Count total
     const countQuery = `
       SELECT COUNT(DISTINCT t.id) as total
@@ -72,6 +79,7 @@ export default class ListTeachersController {
       WHERE uhs."schoolId" = ANY(:schoolIds)
       AND u."deletedAt" IS NULL
       ${searchFilter}
+      ${activeFilter}
     `
 
     const countResult = await db.rawQuery<{ rows: CountRow[] }>(countQuery, params)
@@ -92,6 +100,7 @@ export default class ListTeachersController {
       WHERE uhs."schoolId" = ANY(:schoolIds)
       AND u."deletedAt" IS NULL
       ${searchFilter}
+      ${activeFilter}
       ORDER BY u.name ASC
       LIMIT :limit
       OFFSET :offset
