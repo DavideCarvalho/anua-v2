@@ -2,6 +2,7 @@ import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { usePage } from '@inertiajs/react'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useTeachersQueryOptions } from '../hooks/queries/use-teachers'
 import { useUpdateTeacherMutationOptions } from '../hooks/mutations/use-teacher-mutations'
 import { Card, CardContent } from '../components/ui/card'
@@ -30,7 +31,6 @@ import {
   BookOpen,
   UserX,
   UserCheck,
-  Filter,
   X,
 } from 'lucide-react'
 import {
@@ -117,25 +117,30 @@ interface TeacherItem {
 // Content Component
 function TeachersListContent({
   search,
+  status,
   page,
-  active,
+  limit,
   onPageChange,
   onEditData,
   onEditRate,
   onEditSubjects,
   onToggleActive,
 }: {
-  search: string
+  search: string | null
+  status: string | null
   page: number
-  active?: boolean
+  limit: number
   onPageChange: (page: number) => void
   onEditData: (teacher: TeacherItem) => void
   onEditRate: (teacher: TeacherItem) => void
   onEditSubjects: (teacher: TeacherItem) => void
   onToggleActive: (teacher: TeacherItem) => void
 }) {
+  // Convert status to active boolean
+  const active = status === 'all' ? undefined : status === 'inactive' ? false : true
+
   const { data } = useSuspenseQuery(
-    useTeachersQueryOptions({ page, limit: 20, search: search || undefined, active })
+    useTeachersQueryOptions({ page, limit, search: search || undefined, active })
   )
 
   const teachers = Array.isArray(data) ? data : data?.data || []
@@ -278,11 +283,17 @@ function TeachersListContent({
 export function TeachersListContainer() {
   const { props } = usePage<SharedProps>()
   const schoolId = props.user?.schoolId
-  const [search, setSearch] = useState('')
-  const [searchInput, setSearchInput] = useState('')
-  const [page, setPage] = useState(1)
+
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    search: parseAsString,
+    status: parseAsString.withDefault('active'),
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(20),
+  })
+
+  const { search, status, page, limit } = filters
   const [isNewModalOpen, setIsNewModalOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<string>('active') // 'all', 'active', 'inactive'
 
   // Edit modals state
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherItem | null>(null)
@@ -292,25 +303,11 @@ export function TeachersListContainer() {
   const [isToggleActiveModalOpen, setIsToggleActiveModalOpen] = useState(false)
   const [teacherToToggle, setTeacherToToggle] = useState<TeacherItem | null>(null)
 
-  const handleSearch = () => {
-    setSearch(searchInput)
-    setPage(1)
-  }
-
-  const handleStatusChange = (value: string) => {
-    setStatusFilter(value)
-    setPage(1)
-  }
+  const hasActiveFilters = search || status !== 'active'
 
   const clearFilters = () => {
-    setStatusFilter('active')
-    setPage(1)
+    setFilters({ search: null, status: 'active', page: 1 })
   }
-
-  const hasActiveFilters = statusFilter !== 'active'
-
-  // Convert status filter to active boolean
-  const activeFilter = statusFilter === 'all' ? undefined : statusFilter === 'active'
 
   const handleEditData = (teacher: TeacherItem) => {
     setSelectedTeacher(teacher)
@@ -353,53 +350,43 @@ export function TeachersListContainer() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar professores..."
             className="pl-9"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            value={search || ''}
+            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
-        <Button onClick={handleSearch} variant="secondary">
-          Buscar
-        </Button>
+
+        <Select
+          value={status}
+          onValueChange={(value) => setFilters({ status: value, page: 1 })}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">Ativos</SelectItem>
+            <SelectItem value="inactive">Inativos</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {hasActiveFilters && (
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
+            <X className="h-4 w-4 mr-1" />
+            Limpar filtros
+          </Button>
+        )}
+
         <Button className="ml-auto" onClick={() => setIsNewModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Professor
         </Button>
       </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Ativos</SelectItem>
-                <SelectItem value="inactive">Inativos</SelectItem>
-                <SelectItem value="all">Todos</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <X className="h-4 w-4 mr-1" />
-                Limpar filtros
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {schoolId && (
         <NewTeacherModal
@@ -420,9 +407,10 @@ export function TeachersListContainer() {
             <Suspense fallback={<TeachersListSkeleton />}>
               <TeachersListContent
                 search={search}
+                status={status}
                 page={page}
-                active={activeFilter}
-                onPageChange={setPage}
+                limit={limit}
+                onPageChange={(p) => setFilters({ page: p })}
                 onEditData={handleEditData}
                 onEditRate={handleEditRate}
                 onEditSubjects={handleEditSubjects}

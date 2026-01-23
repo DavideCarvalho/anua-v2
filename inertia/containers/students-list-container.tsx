@@ -1,10 +1,20 @@
-import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { Suspense, useMemo, useState } from 'react'
+import { useSuspenseQuery, useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useStudentsQueryOptions } from '../hooks/queries/use-students'
+import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use-academic-periods'
+import { tuyau } from '../lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +32,8 @@ import {
   Pencil,
   RefreshCw,
   Trash2,
+  Filter,
+  X,
 } from 'lucide-react'
 import { NewStudentModal } from './students/new-student-modal'
 import { DeleteStudentModal } from './students/delete-student-modal'
@@ -93,20 +105,35 @@ function StudentsListError({
 function StudentsListContent({
   search,
   page,
+  limit,
+  academicPeriodId,
+  courseId,
+  classId,
   onPageChange,
   onEditStudent,
   onChangeCourse,
   onDeleteStudent,
 }: {
-  search: string
+  search: string | null
   page: number
+  limit: number
+  academicPeriodId: string | null
+  courseId: string | null
+  classId: string | null
   onPageChange: (page: number) => void
   onEditStudent: (student: StudentAction) => void
   onChangeCourse: (student: StudentAction) => void
   onDeleteStudent: (student: StudentAction) => void
 }) {
   const { data } = useSuspenseQuery(
-    useStudentsQueryOptions({ page, limit: 20, search: search || undefined })
+    useStudentsQueryOptions({
+      page,
+      limit,
+      search: search || undefined,
+      academicPeriodId: academicPeriodId || undefined,
+      courseId: courseId || undefined,
+      classId: classId || undefined,
+    })
   )
 
   const students = Array.isArray(data) ? data : data?.data || []
@@ -249,19 +276,76 @@ function StudentsListContent({
   )
 }
 
+// Types for cascading filter data
+interface CourseLevel {
+  id: string
+  levelId: string
+  name: string
+  classes: { id: string; name: string }[]
+}
+
+interface AcademicPeriodCourse {
+  id: string
+  courseId: string
+  name: string
+  levels: CourseLevel[]
+}
+
 // Container Export
 export function StudentsListContainer() {
-  const [search, setSearch] = useState('')
-  const [searchInput, setSearchInput] = useState('')
-  const [page, setPage] = useState(1)
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    search: parseAsString,
+    academicPeriodId: parseAsString,
+    courseId: parseAsString,
+    classId: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(20),
+  })
+
+  const { search, academicPeriodId, courseId, classId, page, limit } = filters
+
   const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false)
   const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
   const [editStudent, setEditStudent] = useState<StudentAction | null>(null)
   const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
 
-  const handleSearch = () => {
-    setSearch(searchInput)
-    setPage(1)
+  // Fetch academic periods
+  const { data: academicPeriodsData } = useQuery({
+    ...useAcademicPeriodsQueryOptions({ limit: 100 }),
+  })
+  const academicPeriods = academicPeriodsData?.data ?? []
+
+  // Fetch courses for selected academic period
+  const { data: coursesData } = useQuery({
+    queryKey: ['academic-period-courses', academicPeriodId],
+    queryFn: async () => {
+      const response = await tuyau.api.v1['academic-periods']({ id: academicPeriodId! }).courses.$get()
+      if (response.error) throw new Error('Erro ao carregar cursos')
+      return response.data as AcademicPeriodCourse[]
+    },
+    enabled: !!academicPeriodId,
+  })
+  const courses = coursesData ?? []
+
+  // Get classes for selected course (from courses data)
+  const classes = useMemo(() => {
+    if (!courseId || !courses.length) return []
+    const selectedCourse = courses.find((c) => c.courseId === courseId)
+    if (!selectedCourse) return []
+    // Flatten classes from all levels
+    return selectedCourse.levels.flatMap((level) =>
+      level.classes.map((cls) => ({
+        ...cls,
+        levelName: level.name,
+      }))
+    )
+  }, [courseId, courses])
+
+  const hasActiveFilters = search || academicPeriodId || courseId || classId
+
+  const clearFilters = () => {
+    setFilters({ search: null, academicPeriodId: null, courseId: null, classId: null, page: 1 })
   }
 
   return (
@@ -273,19 +357,102 @@ export function StudentsListContainer() {
           <Input
             placeholder="Buscar alunos..."
             className="pl-9"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            value={search || ''}
+            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
-        <Button onClick={handleSearch} variant="secondary">
-          Buscar
-        </Button>
         <Button className="ml-auto" onClick={() => setIsNewStudentModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Aluno
         </Button>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+
+            {/* Academic Period Filter */}
+            <Select
+              value={academicPeriodId || 'all'}
+              onValueChange={(value) =>
+                setFilters({
+                  academicPeriodId: value === 'all' ? null : value,
+                  courseId: null,
+                  classId: null,
+                  page: 1,
+                })
+              }
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Período Letivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os períodos</SelectItem>
+                {academicPeriods.map((period: any) => (
+                  <SelectItem key={period.id} value={period.id}>
+                    {period.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Course Filter */}
+            <Select
+              value={courseId || 'all'}
+              onValueChange={(value) =>
+                setFilters({
+                  courseId: value === 'all' ? null : value,
+                  classId: null,
+                  page: 1,
+                })
+              }
+              disabled={!academicPeriodId}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Curso" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os cursos</SelectItem>
+                {courses.map((course) => (
+                  <SelectItem key={course.courseId} value={course.courseId}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Class Filter */}
+            <Select
+              value={classId || 'all'}
+              onValueChange={(value) =>
+                setFilters({ classId: value === 'all' ? null : value, page: 1 })
+              }
+              disabled={!courseId}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Turma" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as turmas</SelectItem>
+                {classes.map((cls) => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.name} ({cls.levelName})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-1" />
+                Limpar filtros
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <NewStudentModal
         open={isNewStudentModalOpen}
@@ -340,7 +507,11 @@ export function StudentsListContainer() {
               <StudentsListContent
                 search={search}
                 page={page}
-                onPageChange={setPage}
+                limit={limit}
+                academicPeriodId={academicPeriodId}
+                courseId={courseId}
+                classId={classId}
+                onPageChange={(p) => setFilters({ page: p })}
                 onEditStudent={setEditStudent}
                 onChangeCourse={setChangeCourseStudent}
                 onDeleteStudent={setDeleteStudent}
