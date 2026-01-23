@@ -5,33 +5,33 @@ import Exam from './exam.js'
 import Student from './student.js'
 
 export default class ExamGrade extends BaseModel {
-  static table = 'exam_grades'
+  static table = 'ExamGrade'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'examId' })
   declare examId: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'score' })
   declare score: number | null
 
-  @column()
+  @column({ columnName: 'attended' })
   declare attended: boolean
 
-  @column()
+  @column({ columnName: 'feedback' })
   declare feedback: string | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'gradedAt' })
   declare gradedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

@@ -14,7 +14,7 @@ export type ExamType = 'WRITTEN' | 'ORAL' | 'PRACTICAL' | 'PROJECT' | 'QUIZ'
 export type ExamLocation = 'CLASSROOM' | 'AUDITORIUM' | 'LABORATORY' | 'ONLINE' | 'OTHER'
 
 export default class Exam extends BaseModel {
-  static table = 'exams'
+  static table = 'Exam'
 
   @beforeCreate()
   static assignId(model: Exam) {
@@ -23,61 +23,61 @@ export default class Exam extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'title' })
   declare title: string
 
-  @column()
+  @column({ columnName: 'description' })
   declare description: string | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'examDate' })
   declare examDate: DateTime
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'startTime' })
   declare startTime: DateTime | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'endTime' })
   declare endTime: DateTime | null
 
-  @column()
+  @column({ columnName: 'location' })
   declare location: ExamLocation | null
 
-  @column()
+  @column({ columnName: 'maxScore' })
   declare maxScore: number
 
-  @column()
+  @column({ columnName: 'weight' })
   declare weight: number
 
-  @column()
+  @column({ columnName: 'type' })
   declare type: ExamType
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: ExamStatus
 
-  @column()
+  @column({ columnName: 'instructions' })
   declare instructions: string | null
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'classId' })
   declare classId: string
 
-  @column()
+  @column({ columnName: 'subjectId' })
   declare subjectId: string | null
 
-  @column()
+  @column({ columnName: 'teacherId' })
   declare teacherId: string
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships
