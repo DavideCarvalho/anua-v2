@@ -56,7 +56,7 @@ export default class School extends BaseModel {
   declare latitude: number | null
 
   @column({ columnName: 'longitude' })
-  declare longitude: string | null
+  declare longitude: number | null
 
   // PostGIS geometry point - stored as USER-DEFINED type in DB
   // Use raw queries for spatial operations

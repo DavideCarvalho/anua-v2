@@ -1,27 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { loginValidator } from '#validators/auth'
+import UserDto from '#models/dto/user.dto'
 
 export default class LoginController {
-  async handle({ request, response, auth }: HttpContext) {
-    const { email, password } = await request.validateUsing(loginValidator)
+  async handle({ request, response }: HttpContext) {
+    const { email } = await request.validateUsing(loginValidator)
 
-    const user = await User.verifyCredentials(email, password)
+    const user = await User.findByOrFail('email', email)
 
-    if (!user.active) {
-      return response.forbidden({ message: 'Usuário inativo' })
-    }
+    // await auth.use('web').login(user)
 
-    await auth.use('web').login(user)
-
-    return response.ok({
-      message: 'Login realizado com sucesso',
-      user: await User.query()
-        .where('id', user.id)
-        .preload('role')
-        .preload('school')
-        .preload('schoolChain')
-        .firstOrFail(),
-    })
+    return response.ok(new UserDto(user))
   }
 }

@@ -12,7 +12,6 @@ import db from '@adonisjs/lucid/services/db'
 import { finishEnrollmentValidator } from '#validators/enrollment'
 import { v7 as uuidv7 } from 'uuid'
 import { DateTime } from 'luxon'
-import hash from '@adonisjs/core/services/hash'
 
 export default class FinishEnrollmentController {
   async handle({ request, response }: HttpContext) {
@@ -38,7 +37,6 @@ export default class FinishEnrollmentController {
             documentNumber: data.student.document,
             documentType: data.student.documentType,
             birthDate: data.student.birthDate ? DateTime.fromISO(data.student.birthDate) : null,
-            password: await hash.make(uuidv7()), // Random password, will need to reset
             active: true,
             whatsappContact: false,
             grossSalary: 0,
@@ -194,10 +192,7 @@ export default class FinishEnrollmentController {
               phone: responsible.phone,
               documentNumber: responsible.document,
               documentType: responsible.documentType,
-              birthDate: responsible.birthDate
-                ? DateTime.fromISO(responsible.birthDate)
-                : null,
-              password: await hash.make(uuidv7()),
+              birthDate: responsible.birthDate ? DateTime.fromISO(responsible.birthDate) : null,
               active: true,
               whatsappContact: false,
               grossSalary: 0,

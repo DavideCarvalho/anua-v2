@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentAddress from '#models/student_address'
-import type { DateTime } from 'luxon'
 
 export default class StudentAddressDto extends BaseModelDto {
   declare id: string
@@ -15,8 +14,6 @@ export default class StudentAddressDto extends BaseModelDto {
   declare latitude: number | null
   declare longitude: number | null
   declare location: unknown | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
 
   constructor(model?: StudentAddress) {
     super()
@@ -35,7 +32,5 @@ export default class StudentAddressDto extends BaseModelDto {
     this.latitude = model.latitude
     this.longitude = model.longitude
     this.location = model.location
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
   }
 }
