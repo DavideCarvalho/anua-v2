@@ -1,8 +1,9 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Class_ from '#models/class'
 import type { DateTime } from 'luxon'
+import LevelDto from '#models/dto/level.dto'
 
-export default class ClassDto extends BaseModelDto {
+export default class ClassListItemDto extends BaseModelDto {
   declare id: string
   declare name: string
   declare slug: string
@@ -11,6 +12,8 @@ export default class ClassDto extends BaseModelDto {
   declare isArchived: boolean
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare level: LevelDto | null
+  declare studentsCount: number
 
   constructor(model?: Class_) {
     super()
@@ -25,5 +28,7 @@ export default class ClassDto extends BaseModelDto {
     this.isArchived = model.isArchived
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.level = model.level ? new LevelDto(model.level) : null
+    this.studentsCount = (model.$extras?.students_count as number) ?? 0
   }
 }
