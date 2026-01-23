@@ -1,10 +1,13 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Calendar, Check, X, Clock, User } from 'lucide-react'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { Calendar, Check, X, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use-teacher-absences'
-import { useApproveTeacherAbsence, useRejectTeacherAbsence } from '../../hooks/mutations/use-teacher-mutations'
+import {
+  useApproveTeacherAbsenceMutationOptions,
+  useRejectTeacherAbsenceMutationOptions,
+} from '../../hooks/mutations/use-teacher-mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -32,11 +35,30 @@ const statusConfig: Record<
 }
 
 export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
+  const queryClient = useQueryClient()
   const { data } = useSuspenseQuery(useTeacherAbsencesQueryOptions({ status }))
-  const approveMutation = useApproveTeacherAbsence()
-  const rejectMutation = useRejectTeacherAbsence()
+  const approveMutation = useMutation(useApproveTeacherAbsenceMutationOptions())
+  const rejectMutation = useMutation(useRejectTeacherAbsenceMutationOptions())
 
   const absences = Array.isArray(data) ? data : data?.data || []
+
+  const handleApprove = async (absenceId: string) => {
+    try {
+      await approveMutation.mutateAsync(absenceId)
+      queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
+    } catch (error) {
+      console.error('Error approving absence:', error)
+    }
+  }
+
+  const handleReject = async (absenceId: string) => {
+    try {
+      await rejectMutation.mutateAsync({ absenceId })
+      queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
+    } catch (error) {
+      console.error('Error rejecting absence:', error)
+    }
+  }
 
   if (absences.length === 0) {
     return (
@@ -100,7 +122,7 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => approveMutation.mutate(absence.id)}
+                          onClick={() => handleApprove(absence.id)}
                           disabled={approveMutation.isPending}
                           title="Aprovar"
                         >
@@ -109,7 +131,7 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => rejectMutation.mutate({ absenceId: absence.id })}
+                          onClick={() => handleReject(absence.id)}
                           disabled={rejectMutation.isPending}
                           title="Rejeitar"
                         >

@@ -1,10 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
-export function useUpdateTeacher() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useUpdateTeacherMutationOptions() {
+  return {
     mutationFn: ({
       id,
       ...data
@@ -17,74 +14,49 @@ export function useUpdateTeacher() {
     }) => {
       return tuyau.$route('api.v1.teachers.update', { id }).$put(data).unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teachers'] })
-    },
-  })
+  }
 }
 
-export function useAssignTeacherToClass() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useAssignTeacherToClassMutationOptions() {
+  return {
     mutationFn: ({ teacherId, classId }: { teacherId: string; classId: string }) => {
       return tuyau
         .$route('api.v1.teachers.assignClass', { id: teacherId })
         .$post({ classId })
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-classes', variables.teacherId] })
-      queryClient.invalidateQueries({ queryKey: ['teachers'] })
-    },
-  })
+  }
 }
 
-export function useRemoveTeacherFromClass() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useRemoveTeacherFromClassMutationOptions() {
+  return {
     mutationFn: ({ teacherId, classId }: { teacherId: string; classId: string }) => {
       return tuyau
         .$route('api.v1.teachers.removeClass', { id: teacherId, classId })
         .$delete({})
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-classes', variables.teacherId] })
-      queryClient.invalidateQueries({ queryKey: ['teachers'] })
-    },
-  })
+  }
 }
 
-export function useApproveTeacherAbsence() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useApproveTeacherAbsenceMutationOptions() {
+  return {
     mutationFn: (absenceId: string) => {
       return tuyau
         .$route('api.v1.teachers.approveAbsence')
         .$patch({ absenceId })
         .unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
-    },
-  })
+  }
 }
 
-export function useRejectTeacherAbsence() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useRejectTeacherAbsenceMutationOptions() {
+  return {
     mutationFn: ({ absenceId, reason }: { absenceId: string; reason?: string }) => {
       return tuyau
         .$route('api.v1.teachers.rejectAbsence')
         .$patch({ absenceId, reason })
         .unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
-    },
-  })
+  }
 }
