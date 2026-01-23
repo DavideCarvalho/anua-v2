@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     adonisjs({
-      entrypoints: ['inertia/app/app.tsx'],
+      entrypoints: ['inertia/app/app.tsx', 'inertia/css/app.css'],
       reload: ['resources/views/**/*.edge'],
     }),
   ],
