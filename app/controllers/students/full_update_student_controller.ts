@@ -52,7 +52,7 @@ export default class FullUpdateStudentController {
         name: data.basicInfo.name,
         email: data.basicInfo.email || null,
         phone: data.basicInfo.phone,
-        birthDate: DateTime.fromJSDate(data.basicInfo.birthDate),
+        birthDate: DateTime.fromISO(data.basicInfo.birthDate),
         documentType: data.basicInfo.documentType,
         documentNumber: data.basicInfo.documentNumber,
         whatsappContact: data.basicInfo.whatsappContact,
@@ -86,7 +86,7 @@ export default class FullUpdateStudentController {
               name: respData.name,
               email: respData.email,
               phone: respData.phone,
-              birthDate: DateTime.fromJSDate(respData.birthDate),
+              birthDate: DateTime.fromISO(respData.birthDate),
               documentType: respData.documentType,
             })
             await responsibleUser.useTransaction(trx).save()
@@ -102,7 +102,7 @@ export default class FullUpdateStudentController {
                 slug: respSlug,
                 email: respData.email,
                 phone: respData.phone,
-                birthDate: DateTime.fromJSDate(respData.birthDate),
+                birthDate: DateTime.fromISO(respData.birthDate),
                 documentType: respData.documentType,
                 documentNumber: respData.documentNumber,
                 schoolId: student.user.schoolId,

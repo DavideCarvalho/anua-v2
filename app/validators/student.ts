@@ -60,7 +60,7 @@ export const fullUpdateStudentValidator = vine.compile(
       name: vine.string().trim().minLength(2).maxLength(255),
       email: vine.string().email().trim().optional(),
       phone: vine.string().trim(),
-      birthDate: vine.date(),
+      birthDate: vine.string(), // ISO string from frontend
       documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
       documentNumber: vine.string().trim(),
       isSelfResponsible: vine.boolean(),
@@ -74,7 +74,7 @@ export const fullUpdateStudentValidator = vine.compile(
         phone: vine.string().trim(),
         documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
         documentNumber: vine.string().trim(),
-        birthDate: vine.date(),
+        birthDate: vine.string(), // ISO string from frontend
         isPedagogical: vine.boolean(),
         isFinancial: vine.boolean(),
       })
