@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
-import Student from '#models/student'
+import StudentHasLevel from '#models/student_has_level'
 import db from '@adonisjs/lucid/services/db'
 
 interface StudentAttendanceData {
@@ -28,21 +28,23 @@ export default class GetClassStudentsAttendanceController {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
 
-    // Get students in this class with their user info, ordered by name
-    const students = await Student.query()
+    // Get students in this class via StudentHasLevel (supports multiple classes per student for DP cases)
+    const studentLevels = await StudentHasLevel.query()
       .where('classId', classId)
-      .preload('user')
+      .preload('student', (query) => {
+        query.preload('user')
+      })
       .paginate(page, limit)
 
     // Sort by user name after loading
-    const sortedStudents = students.all().sort((a, b) => {
-      const nameA = a.user?.name || ''
-      const nameB = b.user?.name || ''
+    const sortedStudentLevels = studentLevels.all().sort((a, b) => {
+      const nameA = a.student?.user?.name || ''
+      const nameB = b.student?.user?.name || ''
       return nameA.localeCompare(nameB)
     })
 
     // Get attendance counts for each student
-    const studentIds = sortedStudents.map((s) => s.id)
+    const studentIds = sortedStudentLevels.map((sl) => sl.studentId)
 
     // Get attendance summary per student
     const attendanceSummary = await db
@@ -63,8 +65,8 @@ export default class GetClassStudentsAttendanceController {
     }
 
     // Build response data
-    const data: StudentAttendanceData[] = sortedStudents.map((student) => {
-      const summary = summaryMap.get(student.id)
+    const data: StudentAttendanceData[] = sortedStudentLevels.map((studentLevel) => {
+      const summary = summaryMap.get(studentLevel.studentId)
       const totalClasses = summary ? Number(summary.total_classes) : 0
       const presentCount = summary ? Number(summary.present_count) : 0
       const absentCount = summary ? Number(summary.absent_count) : 0
@@ -79,8 +81,8 @@ export default class GetClassStudentsAttendanceController {
 
       return {
         student: {
-          id: student.id,
-          name: student.user?.name || 'Nome não disponível',
+          id: studentLevel.studentId,
+          name: studentLevel.student?.user?.name || 'Nome não disponível',
         },
         totalClasses,
         presentCount,
@@ -94,10 +96,10 @@ export default class GetClassStudentsAttendanceController {
     return response.ok({
       data,
       meta: {
-        total: students.total,
-        perPage: students.perPage,
-        currentPage: students.currentPage,
-        lastPage: students.lastPage,
+        total: studentLevels.total,
+        perPage: studentLevels.perPage,
+        currentPage: studentLevels.currentPage,
+        lastPage: studentLevels.lastPage,
       },
     })
   }

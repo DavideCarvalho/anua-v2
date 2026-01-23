@@ -19,7 +19,7 @@ export default class ListClassesController {
 
     const query = Class_.query()
       .preload('level')
-      .withCount('students')
+      .withCount('studentLevels')
       .orderBy('name', 'asc')
 
     if (search) {

@@ -5,6 +5,7 @@ import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relat
 import Level from './level.js'
 import School from './school.js'
 import Student from './student.js'
+import StudentHasLevel from './student_has_level.js'
 import Teacher from './teacher.js'
 import Exam from './exam.js'
 import TeacherHasClass from './teacher_has_class.js'
@@ -53,6 +54,9 @@ export default class Class_ extends BaseModel {
 
   @hasMany(() => Student, { foreignKey: 'classId' })
   declare students: HasMany<typeof Student>
+
+  @hasMany(() => StudentHasLevel, { foreignKey: 'classId' })
+  declare studentLevels: HasMany<typeof StudentHasLevel>
 
   @hasMany(() => Exam, { foreignKey: 'classId' })
   declare exams: HasMany<typeof Exam>

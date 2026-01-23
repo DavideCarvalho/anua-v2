@@ -29,6 +29,6 @@ export default class ListClassesResponseDto extends BaseModelDto {
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
     this.level = model.level ? new LevelDto(model.level) : null
-    this.studentsCount = (model.$extras?.students_count as number) ?? 0
+    this.studentsCount = (model.$extras?.studentLevels_count as number) ?? 0
   }
 }
