@@ -1,25 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import {
+  Calendar,
   CheckCircle,
+  Loader2,
   Search,
   Users,
   X,
   XCircle,
-  Loader2,
 } from 'lucide-react'
 
-import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
-import { Checkbox } from '~/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -30,7 +27,6 @@ import {
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Progress } from '~/components/ui/progress'
-import { ScrollArea } from '~/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -38,12 +34,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { DatePicker } from '~/components/ui/date-picker'
 import { cn } from '~/lib/utils'
 import { ErrorBoundary } from '~/components/error-boundary'
 
 const schema = z.object({
-  date: z.date(),
+  dates: z.array(z.string()).min(1, 'Selecione pelo menos uma data'),
   subjectId: z.string().min(1, 'Selecione a matéria'),
   attendances: z.array(
     z.object({
@@ -124,11 +119,36 @@ async function fetchSubjectsForClass(classId: string): Promise<Subject[]> {
   return subjects
 }
 
+interface AvailableDate {
+  date: string
+  label: string
+}
+
+async function fetchAvailableDates(
+  classId: string,
+  academicPeriodId: string,
+  subjectId: string
+): Promise<AvailableDate[]> {
+  const params = new URLSearchParams({
+    classId,
+    academicPeriodId,
+    subjectId,
+  })
+  const response = await fetch(
+    `/api/v1/attendance/available-dates?${params.toString()}`
+  )
+  if (!response.ok) {
+    throw new Error('Falha ao carregar dias de aula')
+  }
+  const data = (await response.json()) as { dates: AvailableDate[] }
+  return data.dates ?? []
+}
+
 interface BatchAttendancePayload {
   classId: string
   academicPeriodId: string
   subjectId: string
-  date: string
+  dates: string[]
   attendances: {
     studentId: string
     status: 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
@@ -192,7 +212,7 @@ function NewAttendanceModalContent({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      date: new Date(),
+      dates: [],
       subjectId: '',
       attendances: [],
     },
@@ -210,12 +230,29 @@ function NewAttendanceModalContent({
     enabled: open,
   })
 
+  const subjectId = form.watch('subjectId')
+  const { data: availableDates = [], isLoading: isLoadingDates } = useQuery({
+    queryKey: ['attendance-available-dates', classId, academicPeriodId, subjectId],
+    queryFn: () =>
+      fetchAvailableDates(classId, academicPeriodId, subjectId),
+    enabled: open && !!subjectId,
+  })
+
   // Auto-select first subject if only one
   useEffect(() => {
     if (subjects && subjects.length === 1 && subjects[0]) {
       form.setValue('subjectId', subjects[0].id)
     }
-  }, [subjects, form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjects])
+
+  // When subject changes, clear date selection
+  useEffect(() => {
+    if (subjectId) {
+      form.setValue('dates', [])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjectId])
 
   // Initialize attendances when students are loaded
   useEffect(() => {
@@ -228,7 +265,8 @@ function NewAttendanceModalContent({
       status: 'PRESENT' as const,
     }))
     form.setValue('attendances', attendances)
-  }, [students, form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [students])
 
   // Reset form when modal opens
   useEffect(() => {
@@ -241,16 +279,20 @@ function NewAttendanceModalContent({
         status: 'PRESENT' as const,
       }))
       form.setValue('attendances', attendances)
-      form.setValue('date', new Date())
+      form.setValue('dates', [])
       setSearchQuery('')
     }
-  }, [open, students, form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, students])
 
   const createMutation = useMutation({
     mutationFn: createBatchAttendance,
     onSuccess: () => {
       toast.success('Presença registrada com sucesso!')
       queryClient.invalidateQueries({ queryKey: ['class-students-attendance', classId] })
+      queryClient.invalidateQueries({
+        queryKey: ['attendance-available-dates', classId, academicPeriodId, subjectId],
+      })
       onOpenChange(false)
       form.reset()
     },
@@ -285,6 +327,28 @@ function NewAttendanceModalContent({
     )
   }, [studentsAttendances, searchQuery])
 
+  // Watch the dates value
+  const selectedDates = form.watch('dates')
+
+  // Toggle date selection
+  function toggleDate(date: string) {
+    const current = form.getValues('dates')
+    if (current.includes(date)) {
+      form.setValue('dates', current.filter((d) => d !== date))
+    } else {
+      form.setValue('dates', [...current, date])
+    }
+  }
+
+  // Select/deselect all dates
+  function selectAllDates() {
+    form.setValue('dates', availableDates.map((d) => d.date))
+  }
+
+  function deselectAllDates() {
+    form.setValue('dates', [])
+  }
+
   // Quick action functions
   function markAllPresent() {
     const updated = studentsAttendances.map((a) => ({
@@ -308,16 +372,19 @@ function NewAttendanceModalContent({
     form.setValue(`attendances.${index}.status`, newStatus)
   }
 
-  function onSubmit(data: FormValues) {
-    createMutation.mutate({
+  async function onSubmit(data: FormValues) {
+    const attendances = data.attendances.map((a) => ({
+      studentId: a.student.id,
+      status: (a.status === 'EXCUSED' ? 'JUSTIFIED' : a.status) as 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED',
+    }))
+
+    // Send single request with all dates
+    await createMutation.mutateAsync({
       classId,
       academicPeriodId,
       subjectId: data.subjectId,
-      date: data.date.toISOString(),
-      attendances: data.attendances.map((a) => ({
-        studentId: a.student.id,
-        status: a.status === 'EXCUSED' ? 'JUSTIFIED' : a.status,
-      })),
+      dates: data.dates,
+      attendances,
     })
   }
 
@@ -346,25 +413,14 @@ function NewAttendanceModalContent({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-full p-0 sm:max-w-[700px] sm:p-6">
-        <div className="sticky top-0 z-10 space-y-4 bg-background p-4 sm:relative sm:p-0">
-          <DialogHeader>
-            <DialogTitle>Registrar Presença</DialogTitle>
-          </DialogHeader>
+      <DialogContent className="flex max-h-[90vh] max-w-full flex-col p-0 sm:max-w-[700px]">
+        <DialogHeader className="shrink-0 border-b px-4 py-4 sm:px-6">
+          <DialogTitle>Registrar Presença</DialogTitle>
+        </DialogHeader>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Date Picker */}
-            <div className="space-y-2">
-              <Label>Data da Aula</Label>
-              <DatePicker
-                date={form.watch('date')}
-                onChange={(date) => {
-                  if (date) form.setValue('date', date)
-                }}
-              />
-            </div>
-
-            {/* Subject Select */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            {/* Subject Select — first, like school-super-app */}
             <div className="space-y-2">
               <Label>Matéria *</Label>
               {isLoadingSubjects ? (
@@ -392,6 +448,78 @@ function NewAttendanceModalContent({
               {form.formState.errors.subjectId && (
                 <p className="text-sm text-destructive">
                   {form.formState.errors.subjectId.message}
+                </p>
+              )}
+            </div>
+
+            {/* Date Selection — multiple dates allowed */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Datas das Aulas
+                {selectedDates.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {selectedDates.length} selecionada{selectedDates.length > 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </Label>
+              {!subjectId ? (
+                <p className="text-sm text-muted-foreground">
+                  Selecione a matéria para ver os dias de aula.
+                </p>
+              ) : isLoadingDates ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Carregando dias de aula...
+                </div>
+              ) : availableDates.length === 0 ? (
+                <p className="text-sm text-destructive">
+                  Nenhum dia de aula para esta matéria. Verifique o quadro de horários
+                  e o período letivo.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={selectAllDates}
+                    >
+                      Selecionar Todas
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={deselectAllDates}
+                    >
+                      Limpar
+                    </Button>
+                  </div>
+                  <div className="h-[120px] overflow-y-auto rounded-md border p-2">
+                    <div className="space-y-2">
+                      {availableDates.map((d) => (
+                        <label
+                          key={d.date}
+                          className="flex cursor-pointer items-center gap-2 rounded p-1 hover:bg-muted"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedDates.includes(d.date)}
+                            onChange={() => toggleDate(d.date)}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm">{d.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {form.formState.errors.dates && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.dates.message}
                 </p>
               )}
             </div>
@@ -455,68 +583,64 @@ function NewAttendanceModalContent({
                 )}
               </div>
             )}
-          </form>
-        </div>
 
-        {/* Student List */}
-        <div className="overflow-y-auto px-4 sm:px-0">
-          {isLoadingStudents ? (
-            <AttendanceSkeleton />
-          ) : studentsAttendances.length === 0 ? (
-            <NoStudentsEmpty />
-          ) : (
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-2">
-                {filteredStudents.map((attendance) => {
-                  // Find the original index for form control
-                  const originalIndex = studentsAttendances.findIndex(
-                    (a) => a.student.id === attendance.student.id
-                  )
-                  const isPresent = form.watch(`attendances.${originalIndex}.status`) === 'PRESENT'
+            {/* Student List */}
+            <div className="space-y-2">
+              <Label>Alunos</Label>
+              {isLoadingStudents ? (
+                <AttendanceSkeleton />
+              ) : studentsAttendances.length === 0 ? (
+                <NoStudentsEmpty />
+              ) : (
+                <div className="space-y-2">
+                  {filteredStudents.map((attendance) => {
+                    const originalIndex = studentsAttendances.findIndex(
+                      (a) => a.student.id === attendance.student.id
+                    )
+                    const isPresent = attendance.status === 'PRESENT'
 
-                  return (
-                    <Card
-                      key={attendance.student.id}
-                      className={cn(
-                        'cursor-pointer border-l-4 transition-all hover:shadow-md',
-                        isPresent
-                          ? 'border-l-green-500 bg-green-50/50 dark:bg-green-950/20'
-                          : 'border-l-red-500 bg-red-50/50 dark:bg-red-950/20'
-                      )}
-                      onClick={() => toggleAttendance(originalIndex)}
-                    >
-                      <CardContent className="flex items-center justify-between p-4">
+                    return (
+                      <div
+                        key={attendance.student.id}
+                        className={cn(
+                          'flex cursor-pointer items-center justify-between rounded-lg border-l-4 p-3 transition-all hover:bg-muted/50',
+                          isPresent
+                            ? 'border-l-green-500 bg-green-50/50 dark:bg-green-950/20'
+                            : 'border-l-red-500 bg-red-50/50 dark:bg-red-950/20'
+                        )}
+                        onClick={() => toggleAttendance(originalIndex)}
+                      >
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback>
-                              {getInitials(attendance.student.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{attendance.student.name}</span>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                            {getInitials(attendance.student.name)}
+                          </div>
+                          <span className="text-sm font-medium">{attendance.student.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           {isPresent ? (
-                            <Badge className="bg-green-500">Presente</Badge>
+                            <Badge className="bg-green-500 text-xs">Presente</Badge>
                           ) : (
-                            <Badge variant="destructive">Ausente</Badge>
+                            <Badge variant="destructive" className="text-xs">Ausente</Badge>
                           )}
-                          <Checkbox
+                          <input
+                            type="checkbox"
                             checked={isPresent}
-                            onCheckedChange={() => toggleAttendance(originalIndex)}
+                            onChange={() => toggleAttendance(originalIndex)}
                             onClick={(e) => e.stopPropagation()}
+                            className="h-4 w-4 rounded border-gray-300"
                           />
                         </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            </ScrollArea>
-          )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </form>
         </div>
 
         {/* Footer */}
-        <DialogFooter className="sticky bottom-0 border-t bg-background p-4 sm:relative sm:border-0 sm:p-0">
+        <DialogFooter className="shrink-0 border-t px-4 py-4 sm:px-6">
           <div className="flex w-full gap-2 sm:w-auto">
             <Button
               type="button"
@@ -529,7 +653,11 @@ function NewAttendanceModalContent({
             <Button
               type="submit"
               onClick={form.handleSubmit(onSubmit)}
-              disabled={createMutation.isPending || !form.watch('subjectId')}
+              disabled={
+                createMutation.isPending ||
+                !subjectId ||
+                selectedDates.length === 0
+              }
               className="flex-1 sm:flex-none"
             >
               {createMutation.isPending ? (

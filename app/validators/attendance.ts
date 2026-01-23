@@ -21,7 +21,7 @@ export const batchCreateAttendanceValidator = vine.compile(
     classId: vine.string().trim(),
     academicPeriodId: vine.string().trim(),
     subjectId: vine.string().trim(),
-    date: vine.date({ formats: ['iso8601'] }),
+    dates: vine.array(vine.date({ formats: ['iso8601'] })).minLength(1),
     attendances: vine.array(
       vine.object({
         studentId: vine.string().trim(),

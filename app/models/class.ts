@@ -7,6 +7,7 @@ import Student from './student.js'
 import Teacher from './teacher.js'
 import Exam from './exam.js'
 import TeacherHasClass from './teacher_has_class.js'
+import AcademicPeriod from './academic_period.js'
 
 export default class Class_ extends BaseModel {
   static table = 'Class'
@@ -60,4 +61,14 @@ export default class Class_ extends BaseModel {
     pivotRelatedForeignKey: 'teacherId',
   })
   declare teachers: ManyToMany<typeof Teacher>
+
+  // Many-to-many with AcademicPeriods through ClassHasAcademicPeriod
+  @manyToMany(() => AcademicPeriod, {
+    pivotTable: 'ClassHasAcademicPeriod',
+    localKey: 'id',
+    pivotForeignKey: 'classId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'academicPeriodId',
+  })
+  declare academicPeriods: ManyToMany<typeof AcademicPeriod>
 }

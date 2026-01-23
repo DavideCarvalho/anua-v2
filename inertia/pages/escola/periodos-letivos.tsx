@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { EscolaLayout } from '~/components/layouts'
 import {
   Card,
@@ -10,51 +11,52 @@ import {
   CardTitle,
 } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
-import { Calendar, Plus, Settings, Loader2 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
+import { Calendar, Plus, Settings, Loader2, MoreVertical, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatSegmentName } from '~/lib/formatters'
-
-interface AcademicPeriod {
-  id: string
-  name: string
-  slug: string
-  startDate: string
-  endDate: string
-  enrollmentStartDate: string | null
-  enrollmentEndDate: string | null
-  isActive: boolean
-  segment: string
-  isClosed: boolean
-}
-
-interface AcademicPeriodsResponse {
-  data: AcademicPeriod[]
-  meta: {
-    total: number
-    perPage: number
-    currentPage: number
-    lastPage: number
-  }
-}
-
-async function fetchAcademicPeriods(): Promise<AcademicPeriodsResponse> {
-  const response = await fetch('/api/v1/academic-periods?limit=50')
-  if (!response.ok) throw new Error('Falha ao carregar períodos letivos')
-  return response.json()
-}
+import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use-academic-periods'
+import { useDeleteAcademicPeriodMutationOptions } from '~/hooks/mutations/use-academic-period-mutations'
 
 function formatDate(dateString: string): string {
   return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR })
 }
 
 export default function PeriodosLetivosPage() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['academicPeriods'],
-    queryFn: fetchAcademicPeriods,
-  })
+  const queryClient = useQueryClient()
 
-  const periods = data?.data ?? []
+  const { data, isLoading, error } = useQuery(useAcademicPeriodsQueryOptions({ limit: 50 }))
+
+  const deleteMutation = useMutation(useDeleteAcademicPeriodMutationOptions())
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteMutation.mutateAsync(id)
+      toast.success('Período letivo excluído com sucesso')
+      queryClient.invalidateQueries({ queryKey: ['academic-periods'] })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao excluir período letivo')
+    }
+  }
+
+  const periods = Array.isArray(data) ? data : data?.data ?? []
 
   return (
     <EscolaLayout>
@@ -116,7 +118,7 @@ export default function PeriodosLetivosPage() {
                     <Calendar
                       className={`h-6 w-6 ${period.isActive ? 'text-primary' : 'text-muted-foreground'}`}
                     />
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       {period.isActive && (
                         <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
                           Atual
@@ -127,6 +129,43 @@ export default function PeriodosLetivosPage() {
                           Encerrado
                         </span>
                       )}
+                      <AlertDialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir período letivo</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir "{period.name}"? O período será desativado e não aparecerá mais na listagem.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(period.id)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                   <CardTitle className={!period.isActive ? 'text-muted-foreground' : ''}>

@@ -45,8 +45,8 @@ interface ScheduleData {
   }>
 }
 
-async function fetchClasses(): Promise<{ data: ClassOption[] }> {
-  const response = await fetch('/api/v1/classes?limit=100')
+async function fetchClasses(academicPeriodId: string): Promise<{ data: ClassOption[] }> {
+  const response = await fetch(`/api/v1/classes?limit=100&academicPeriodId=${academicPeriodId}`)
   if (!response.ok) throw new Error('Failed to fetch classes')
   return response.json()
 }
@@ -71,14 +71,15 @@ export default function HorariosPage() {
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
 
-  const { data: classesData, isLoading: loadingClasses } = useQuery({
-    queryKey: ['classes'],
-    queryFn: fetchClasses,
-  })
-
   const { data: periodsData, isLoading: loadingPeriods } = useQuery({
     queryKey: ['academicPeriods'],
     queryFn: fetchAcademicPeriods,
+  })
+
+  const { data: classesData, isLoading: loadingClasses } = useQuery({
+    queryKey: ['classes', selectedAcademicPeriodId],
+    queryFn: () => fetchClasses(selectedAcademicPeriodId),
+    enabled: !!selectedAcademicPeriodId,
   })
 
   const { data: scheduleData, isLoading: loadingSchedule } = useQuery({
@@ -133,38 +134,12 @@ export default function HorariosPage() {
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Turma</Label>
-                <Select
-                  value={selectedClassId}
-                  onValueChange={(value) => {
-                    setSelectedClassId(value)
-                    setShowConfigForm(false)
-                  }}
-                  disabled={loadingClasses}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={loadingClasses ? 'Carregando...' : 'Selecione uma turma'}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {classes.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                        {c.level?.name && ` - ${c.level.name}`}
-                        {c.level?.course?.name && ` (${c.level.course.name})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label>Período Letivo</Label>
                 <Select
                   value={selectedAcademicPeriodId}
                   onValueChange={(value) => {
                     setSelectedAcademicPeriodId(value)
+                    setSelectedClassId('')
                     setShowConfigForm(false)
                   }}
                   disabled={loadingPeriods}
@@ -178,6 +153,39 @@ export default function HorariosPage() {
                     {academicPeriods.map((ap) => (
                       <SelectItem key={ap.id} value={ap.id}>
                         {ap.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Turma</Label>
+                <Select
+                  value={selectedClassId}
+                  onValueChange={(value) => {
+                    setSelectedClassId(value)
+                    setShowConfigForm(false)
+                  }}
+                  disabled={!selectedAcademicPeriodId || loadingClasses}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !selectedAcademicPeriodId
+                          ? 'Selecione um período primeiro'
+                          : loadingClasses
+                            ? 'Carregando...'
+                            : 'Selecione uma turma'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                        {c.level?.name && ` - ${c.level.name}`}
+                        {c.level?.course?.name && ` (${c.level.course.name})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
