@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
-import ClassListItemDto from './dtos/class_list_item.dto.js'
+import ListClassesResponseDto from './dtos/list_classes_response.dto.js'
 import db from '@adonisjs/lucid/services/db'
 
 export default class ListClassesController {
@@ -52,6 +52,6 @@ export default class ListClassesController {
 
     const classes = await query.paginate(page, limit)
 
-    return ClassListItemDto.fromPaginator(classes)
+    return ListClassesResponseDto.fromPaginator(classes)
   }
 }

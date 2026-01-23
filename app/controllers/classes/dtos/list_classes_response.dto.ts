@@ -3,7 +3,7 @@ import type Class_ from '#models/class'
 import type { DateTime } from 'luxon'
 import LevelDto from '#models/dto/level.dto'
 
-export default class ClassListItemDto extends BaseModelDto {
+export default class ListClassesResponseDto extends BaseModelDto {
   declare id: string
   declare name: string
   declare slug: string
