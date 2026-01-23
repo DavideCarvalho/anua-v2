@@ -25,6 +25,7 @@ export default function TurmaPresencasPage({
   classSlug,
   classId,
   academicPeriodId,
+  courseId,
   className,
   courseName,
 }: Props) {
@@ -53,13 +54,14 @@ export default function TurmaPresencasPage({
             </div>
           </CardHeader>
           <CardContent>
-            <AttendancesTable classId={classId} academicPeriodId={academicPeriodId} />
+            <AttendancesTable classId={classId} academicPeriodId={academicPeriodId} courseId={courseId} />
           </CardContent>
         </Card>
 
         <NewAttendanceModal
           classId={classId}
           academicPeriodId={academicPeriodId}
+          courseId={courseId}
           open={modalOpen}
           onOpenChange={setModalOpen}
         />

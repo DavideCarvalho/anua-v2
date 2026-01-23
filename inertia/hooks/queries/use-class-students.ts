@@ -9,22 +9,24 @@ export type ClassStudentsResponse = InferResponseType<typeof $route.$get>
 
 interface UseClassStudentsOptions {
   classId: string
+  courseId: string
+  academicPeriodId: string
   page?: number
   limit?: number
 }
 
 export function useClassStudentsQueryOptions(options: UseClassStudentsOptions) {
-  const { classId, page = 1, limit = 50 } = options
+  const { classId, courseId, academicPeriodId, page = 1, limit = 50 } = options
 
   return {
-    queryKey: ['class-students', { classId, page, limit }],
+    queryKey: ['class-students', { classId, courseId, academicPeriodId, page, limit }],
     queryFn: () => {
       return tuyau
         .$route('api.v1.classes.students', { id: classId })
-        .$get({ query: { page, limit } })
+        .$get({ query: { page, limit, courseId, academicPeriodId } })
         .unwrap()
     },
-    enabled: !!classId,
+    enabled: !!classId && !!courseId && !!academicPeriodId,
   } satisfies QueryOptions<ClassStudentsResponse>
 }
 

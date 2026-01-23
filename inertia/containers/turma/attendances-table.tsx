@@ -18,6 +18,7 @@ import { ErrorBoundary } from '~/components/error-boundary'
 interface AttendancesTableProps {
   classId: string
   academicPeriodId: string
+  courseId: string
 }
 
 interface StudentAttendance {
@@ -45,11 +46,17 @@ interface PaginatedResponse {
 
 async function fetchClassStudentsAttendance(
   classId: string,
+  courseId: string,
+  academicPeriodId: string,
   page: number
 ): Promise<PaginatedResponse> {
-  const response = await fetch(
-    `/api/v1/attendance/class/${classId}/students?page=${page}&limit=20`
-  )
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: '20',
+    courseId,
+    academicPeriodId,
+  })
+  const response = await fetch(`/api/v1/attendance/class/${classId}/students?${params}`)
   if (!response.ok) {
     throw new Error('Failed to fetch attendance data')
   }
@@ -82,7 +89,7 @@ function getAttendanceBadgeVariant(percentage: number) {
   return 'destructive'
 }
 
-function AttendancesTableContent({ classId, academicPeriodId }: AttendancesTableProps) {
+function AttendancesTableContent({ classId, academicPeriodId, courseId }: AttendancesTableProps) {
   const [page, setPage] = useState(1)
 
   const {
@@ -90,8 +97,8 @@ function AttendancesTableContent({ classId, academicPeriodId }: AttendancesTable
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['class-students-attendance', classId, page],
-    queryFn: () => fetchClassStudentsAttendance(classId, page),
+    queryKey: ['class-students-attendance', classId, courseId, academicPeriodId, page],
+    queryFn: () => fetchClassStudentsAttendance(classId, courseId, academicPeriodId, page),
   })
 
   if (isLoading) {

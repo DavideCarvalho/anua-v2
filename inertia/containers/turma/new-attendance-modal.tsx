@@ -56,16 +56,12 @@ type FormValues = z.infer<typeof schema>
 interface NewAttendanceModalProps {
   classId: string
   academicPeriodId: string
+  courseId: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-interface Student {
-  id: string
-  user: {
-    name: string
-  }
-}
+import { useClassStudentsQueryOptions } from '../../hooks/queries/use-class-students'
 
 interface Subject {
   id: string
@@ -81,18 +77,6 @@ function getInitials(name: string): string {
     .join('')
     .slice(0, 2)
     .toUpperCase()
-}
-
-async function fetchStudentsForClass(classId: string): Promise<Student[]> {
-  const response = await fetch(`/api/v1/classes/${classId}/students?limit=1000`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch students')
-  }
-  const data = await response.json()
-  // Handle both array and paginated response formats
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data.data)) return data.data
-  return []
 }
 
 async function fetchSubjectsForClass(classId: string): Promise<Subject[]> {
@@ -203,6 +187,7 @@ function NoStudentsEmpty() {
 function NewAttendanceModalContent({
   classId,
   academicPeriodId,
+  courseId,
   open,
   onOpenChange,
 }: NewAttendanceModalProps) {
@@ -218,11 +203,11 @@ function NewAttendanceModalContent({
     },
   })
 
-  const { data: students, isLoading: isLoadingStudents } = useQuery({
-    queryKey: ['class-students', classId],
-    queryFn: () => fetchStudentsForClass(classId),
+  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery({
+    ...useClassStudentsQueryOptions({ classId, courseId, academicPeriodId, limit: 1000 }),
     enabled: open,
   })
+  const students = studentsResponse?.data ?? []
 
   const { data: subjects, isLoading: isLoadingSubjects } = useQuery({
     queryKey: ['class-subjects', classId],
