@@ -12,6 +12,8 @@ export const createTeacherValidator = vine.compile(
 
 export const updateTeacherValidator = vine.compile(
   vine.object({
+    name: vine.string().trim().minLength(2).optional(),
+    email: vine.string().email().trim().optional(),
     hourlyRate: vine.number().min(0).optional(),
   })
 )

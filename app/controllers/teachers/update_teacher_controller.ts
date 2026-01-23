@@ -4,7 +4,10 @@ import { updateTeacherValidator } from '#validators/teacher'
 
 export default class UpdateTeacherController {
   async handle({ params, request, response }: HttpContext) {
-    const teacher = await Teacher.find(params.id)
+    const teacher = await Teacher.query()
+      .where('id', params.id)
+      .preload('user')
+      .first()
 
     if (!teacher) {
       return response.notFound({ message: 'Professor não encontrado' })
@@ -12,8 +15,20 @@ export default class UpdateTeacherController {
 
     const data = await request.validateUsing(updateTeacherValidator)
 
-    teacher.merge(data)
-    await teacher.save()
+    // Update User fields (name, email)
+    if (data.name || data.email) {
+      teacher.user.merge({
+        ...(data.name && { name: data.name }),
+        ...(data.email && { email: data.email }),
+      })
+      await teacher.user.save()
+    }
+
+    // Update Teacher fields (hourlyRate)
+    if (data.hourlyRate !== undefined) {
+      teacher.merge({ hourlyRate: data.hourlyRate })
+      await teacher.save()
+    }
 
     await teacher.load('user')
 
