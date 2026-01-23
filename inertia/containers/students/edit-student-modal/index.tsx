@@ -322,7 +322,13 @@ export function EditStudentModal({
         </DialogHeader>
 
         <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              form.handleSubmit(handleSubmit)(e)
+            }}
+            className="space-y-6"
+          >
             <Stepper currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
 
             {renderStep()}
