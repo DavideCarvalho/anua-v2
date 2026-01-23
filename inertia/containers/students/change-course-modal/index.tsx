@@ -65,6 +65,7 @@ interface StudentLevel {
   classId: string
   academicPeriodId?: string | null
   levelId?: string | null
+  class?: StudentClass
   levelAssignedToCourseAcademicPeriod?: LevelAssignedToCourseAcademicPeriod
 }
 
@@ -333,7 +334,9 @@ export function ChangeStudentCourseModal({
   }
 
   const studentData = student as StudentData | undefined
-  const currentClass = studentData?.class
+  // Get class from the most recent StudentHasLevel that has a class
+  const currentStudentLevel = studentData?.levels?.find((l) => l.classId && l.class)
+  const currentClass = currentStudentLevel?.class ?? studentData?.class
 
   if (isLoadingStudent) {
     return (
