@@ -30,7 +30,16 @@ export default class FullUpdateStudentController {
       return response.notFound({ message: 'Aluno não encontrado' })
     }
 
-    const data = await request.validateUsing(fullUpdateStudentValidator)
+    let data
+    try {
+      data = await request.validateUsing(fullUpdateStudentValidator)
+    } catch (error: any) {
+      console.error('Validation error:', error.messages || error)
+      return response.unprocessableEntity({
+        message: 'Erro de validação',
+        errors: error.messages || error,
+      })
+    }
 
     // Get RESPONSIBLE role for creating responsibles
     const responsibleRole = await Role.findBy('name', 'RESPONSIBLE')
