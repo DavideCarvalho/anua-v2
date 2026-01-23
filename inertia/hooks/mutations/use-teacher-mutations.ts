@@ -12,7 +12,7 @@ export function useUpdateTeacherMutationOptions() {
       hourlyRate?: number
       active?: boolean
     }) => {
-      return tuyau.$route('api.v1.teachers.update', { id }).$put(data).unwrap()
+      return tuyau.$route('api.v1.teachers.updateTeacher', { id }).$put(data).unwrap()
     },
   }
 }

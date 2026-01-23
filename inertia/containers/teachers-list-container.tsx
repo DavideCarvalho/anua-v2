@@ -1,13 +1,22 @@
 import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useSuspenseQuery, QueryErrorResetBoundary, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { usePage } from '@inertiajs/react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTeachersQueryOptions } from '../hooks/queries/use-teachers'
 import { useUpdateTeacherMutationOptions } from '../hooks/mutations/use-teacher-mutations'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog'
 import {
   AlertCircle,
   Search,
@@ -197,7 +206,10 @@ function TeachersListContent({
                         Editar disciplinas
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => onToggleActive(teacher)}>
+                      <DropdownMenuItem
+                        onClick={() => onToggleActive(teacher)}
+                        className={teacher.user?.active ? 'text-destructive focus:text-destructive' : ''}
+                      >
                         {teacher.user?.active ? (
                           <>
                             <UserX className="h-4 w-4 mr-2" />
@@ -265,6 +277,8 @@ export function TeachersListContainer() {
   const [isEditDataModalOpen, setIsEditDataModalOpen] = useState(false)
   const [isEditRateModalOpen, setIsEditRateModalOpen] = useState(false)
   const [isEditSubjectsModalOpen, setIsEditSubjectsModalOpen] = useState(false)
+  const [isToggleActiveModalOpen, setIsToggleActiveModalOpen] = useState(false)
+  const [teacherToToggle, setTeacherToToggle] = useState<TeacherItem | null>(null)
 
   const handleSearch = () => {
     setSearch(searchInput)
@@ -289,15 +303,24 @@ export function TeachersListContainer() {
   const queryClient = useQueryClient()
   const updateTeacher = useMutation(useUpdateTeacherMutationOptions())
 
-  const handleToggleActive = async (teacher: TeacherItem) => {
+  const handleToggleActive = (teacher: TeacherItem) => {
+    setTeacherToToggle(teacher)
+    setIsToggleActiveModalOpen(true)
+  }
+
+  const confirmToggleActive = async () => {
+    if (!teacherToToggle) return
     try {
       await updateTeacher.mutateAsync({
-        id: teacher.id,
-        active: !teacher.user?.active,
+        id: teacherToToggle.id,
+        active: !teacherToToggle.user?.active,
       })
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
     } catch (error) {
       console.error('Error toggling teacher active status:', error)
+    } finally {
+      setIsToggleActiveModalOpen(false)
+      setTeacherToToggle(null)
     }
   }
 
@@ -374,6 +397,34 @@ export function TeachersListContainer() {
           schoolId={schoolId}
         />
       )}
+
+      <AlertDialog open={isToggleActiveModalOpen} onOpenChange={setIsToggleActiveModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {teacherToToggle?.user?.active ? 'Desativar professor' : 'Ativar professor'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {teacherToToggle?.user?.active
+                ? `Tem certeza que deseja desativar o professor "${teacherToToggle?.user?.name}"? Ele não poderá mais acessar o sistema.`
+                : `Tem certeza que deseja ativar o professor "${teacherToToggle?.user?.name}"? Ele poderá acessar o sistema novamente.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmToggleActive}
+              className={teacherToToggle?.user?.active ? 'bg-destructive hover:bg-destructive/90' : ''}
+            >
+              {updateTeacher.isPending
+                ? 'Processando...'
+                : teacherToToggle?.user?.active
+                  ? 'Desativar'
+                  : 'Ativar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
