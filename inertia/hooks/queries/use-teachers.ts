@@ -16,6 +16,9 @@ interface UseTeachersParams {
 export function useTeachersQueryOptions(params: UseTeachersParams = {}) {
   const { page = 1, limit = 20, search, active } = params
 
+  // Convert boolean to string to ensure proper serialization in query params
+  const activeParam = active === undefined ? undefined : active ? 'true' : 'false'
+
   return {
     queryKey: ['teachers', { page, limit, search, active }],
     queryFn: async () => {
@@ -24,7 +27,7 @@ export function useTeachersQueryOptions(params: UseTeachersParams = {}) {
           page,
           limit,
           search,
-          active,
+          active: activeParam,
         },
       })
       if (response.error) {
