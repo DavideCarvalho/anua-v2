@@ -3,6 +3,7 @@ import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query
 import { ErrorBoundary } from 'react-error-boundary'
 import { usePage } from '@inertiajs/react'
 import { useTeachersQueryOptions } from '../hooks/queries/use-teachers'
+import { useUpdateTeacher } from '../hooks/mutations/use-teacher-mutations'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -284,9 +285,17 @@ export function TeachersListContainer() {
     setIsEditSubjectsModalOpen(true)
   }
 
+  const updateTeacher = useUpdateTeacher()
+
   const handleToggleActive = async (teacher: TeacherItem) => {
-    // TODO: Implement toggle active mutation
-    console.log('Toggle active for teacher:', teacher.id)
+    try {
+      await updateTeacher.mutateAsync({
+        id: teacher.id,
+        active: !teacher.user?.active,
+      })
+    } catch (error) {
+      console.error('Error toggling teacher active status:', error)
+    }
   }
 
   return (

@@ -15,6 +15,7 @@ export const updateTeacherValidator = vine.compile(
     name: vine.string().trim().minLength(2).optional(),
     email: vine.string().email().trim().optional(),
     hourlyRate: vine.number().min(0).optional(),
+    active: vine.boolean().optional(),
   })
 )
 

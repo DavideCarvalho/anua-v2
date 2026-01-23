@@ -15,11 +15,12 @@ export default class UpdateTeacherController {
 
     const data = await request.validateUsing(updateTeacherValidator)
 
-    // Update User fields (name, email)
-    if (data.name || data.email) {
+    // Update User fields (name, email, active)
+    if (data.name || data.email || data.active !== undefined) {
       teacher.user.merge({
         ...(data.name && { name: data.name }),
         ...(data.email && { email: data.email }),
+        ...(data.active !== undefined && { active: data.active }),
       })
       await teacher.user.save()
     }

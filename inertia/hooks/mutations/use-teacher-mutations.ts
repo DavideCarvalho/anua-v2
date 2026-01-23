@@ -1,6 +1,28 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
+export function useUpdateTeacher() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      ...data
+    }: {
+      id: string
+      name?: string
+      email?: string
+      hourlyRate?: number
+      active?: boolean
+    }) => {
+      return tuyau.$route('api.v1.teachers.update', { id }).$put(data).unwrap()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teachers'] })
+    },
+  })
+}
+
 export function useAssignTeacherToClass() {
   const queryClient = useQueryClient()
 
