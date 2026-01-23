@@ -11,6 +11,8 @@ export default class ClassDto extends BaseModelDto {
   declare isArchived: boolean
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare level: { id: string; name: string } | null
+  declare studentsCount: number
 
   constructor(model?: Class_) {
     super()
@@ -25,5 +27,7 @@ export default class ClassDto extends BaseModelDto {
     this.isArchived = model.isArchived
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.level = model.level ? { id: model.level.id, name: model.level.name } : null
+    this.studentsCount = (model.$extras?.students_count as number) ?? 0
   }
 }
