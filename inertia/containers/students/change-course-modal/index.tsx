@@ -305,6 +305,9 @@ export function ChangeStudentCourseModal({
       await updateStudent.mutateAsync({
         id: studentId,
         classId: data.classId,
+        academicPeriodId: data.academicPeriodId,
+        courseId: data.courseId,
+        levelId: data.levelId,
       })
 
       toast.success('Turma alterada com sucesso!')

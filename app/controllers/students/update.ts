@@ -2,6 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Student from '#models/student'
+import StudentHasLevel from '#models/student_has_level'
+import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { updateStudentValidator } from '#validators/student'
 
 export default class UpdateStudentController {
@@ -66,6 +68,51 @@ export default class UpdateStudentController {
       if (Object.keys(studentUpdates).length > 0) {
         student.merge(studentUpdates)
         await student.useTransaction(trx).save()
+      }
+
+      // Handle class change with StudentHasLevel
+      if (data.classId && data.academicPeriodId && data.levelId) {
+        // Find the LevelAssignedToCourseHasAcademicPeriod
+        const levelAssignmentQuery = LevelAssignedToCourseHasAcademicPeriod.query({ client: trx })
+          .where('levelId', data.levelId)
+          .whereHas('courseHasAcademicPeriod', (query) => {
+            query.where('academicPeriodId', data.academicPeriodId!)
+            if (data.courseId) {
+              query.where('courseId', data.courseId)
+            }
+          })
+
+        const levelAssignment = await levelAssignmentQuery.first()
+
+        if (levelAssignment) {
+          // Check if student already has a StudentHasLevel for this academic period
+          const existingStudentLevel = await StudentHasLevel.query({ client: trx })
+            .where('studentId', student.id)
+            .where('academicPeriodId', data.academicPeriodId)
+            .first()
+
+          if (existingStudentLevel) {
+            // Update existing record
+            existingStudentLevel.merge({
+              levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+              levelId: data.levelId,
+              classId: data.classId,
+            })
+            await existingStudentLevel.useTransaction(trx).save()
+          } else {
+            // Create new StudentHasLevel
+            await StudentHasLevel.create(
+              {
+                studentId: student.id,
+                levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+                academicPeriodId: data.academicPeriodId,
+                levelId: data.levelId,
+                classId: data.classId,
+              },
+              { client: trx }
+            )
+          }
+        }
       }
 
       await trx.commit()

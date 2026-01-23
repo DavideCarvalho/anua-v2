@@ -45,6 +45,11 @@ export const updateStudentValidator = vine.compile(
     canteenLimit: vine.number().min(0).optional(),
     balance: vine.number().optional(),
     enrollmentStatus: vine.enum(['PENDING_DOCUMENT_REVIEW', 'REGISTERED']).optional(),
+
+    // Class change fields (for StudentHasLevel)
+    academicPeriodId: vine.string().uuid().optional(),
+    courseId: vine.string().uuid().optional(),
+    levelId: vine.string().uuid().optional(),
   })
 )
 
