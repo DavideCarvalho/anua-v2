@@ -8,7 +8,6 @@ import { CalendarDays } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
 import { Calendar } from '~/components/ui/calendar'
-import { DateRangePicker } from '~/components/ui/date-range-picker'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
@@ -32,8 +31,6 @@ import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 export function CalendarForm() {
   const form = useFormContext<AcademicPeriodFormValues>()
 
-  const fromDate = form.watch('calendar.startDate')
-  const toDate = form.watch('calendar.endDate')
   const holidays = form.watch('calendar.holidays') || []
   const weekendDaysWithClasses = form.watch('calendar.weekendDaysWithClasses') || []
 
@@ -84,15 +81,81 @@ export function CalendarForm() {
         <p className="text-sm text-muted-foreground">
           Selecione a data de início e término do período letivo
         </p>
-        <DateRangePicker
-          from={fromDate}
-          to={toDate}
-          onSelectDate={(from, to) => {
-            if (from) form.setValue('calendar.startDate', from)
-            if (to) form.setValue('calendar.endDate', to)
-          }}
-          className="w-full"
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="calendar.startDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Início do Período</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Selecione uma data</span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ?? undefined}
+                      onSelect={field.onChange}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="calendar.endDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Término do Período</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+                        ) : (
+                          <span>Selecione uma data</span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ?? undefined}
+                      onSelect={field.onChange}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
       <div className="space-y-4">

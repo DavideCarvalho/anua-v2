@@ -84,13 +84,19 @@ function SubjectTeacherRow({
   })
 
   const teacherSubjects = useMemo(() => {
-    const subjects = Array.isArray(teacherSubjectsData)
-      ? teacherSubjectsData
-      : teacherSubjectsData?.data || []
+    if (!teacherSubjectsData) return []
+
+    // Extract subjects from the TeacherHasSubject array
+    const subjects = teacherSubjectsData
+      .filter((item) => item.subject)
+      .map((item) => ({
+        id: item.subject!.id,
+        name: item.subject!.name,
+      }))
 
     // If we have an initial subject that's not in the list, add it
     if (initialSubject && selectedSubjectId === initialSubject.id) {
-      const hasInitialSubject = subjects.some((s: { id: string }) => s.id === initialSubject.id)
+      const hasInitialSubject = subjects.some((s) => s.id === initialSubject.id)
       if (!hasInitialSubject) {
         return [...subjects, initialSubject]
       }
@@ -140,7 +146,7 @@ function SubjectTeacherRow({
                 <SelectValue placeholder={hasNoSubjects ? 'Sem disciplinas' : 'Selecione...'} />
               </SelectTrigger>
               <SelectContent>
-                {teacherSubjects.map((subject: { id: string; name: string }) => (
+                {teacherSubjects.map((subject) => (
                   <SelectItem key={subject.id} value={subject.id}>
                     {subject.name}
                   </SelectItem>
