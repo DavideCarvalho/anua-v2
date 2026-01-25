@@ -1,42 +1,26 @@
 import { Head, usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
-import { ArrowLeft } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 
 import { EscolaLayout } from '../../../../components/layouts'
 import { Button } from '../../../../components/ui/button'
 import { ContractForm } from '../../../../containers/contracts/contract-form'
+import { useContractQueryOptions } from '../../../../hooks/queries/use_contract'
 import type { SharedProps } from '../../../../lib/types'
 
-interface Contract {
-  id: string
-  name: string
-  description?: string | null
-  academicPeriodId?: string | null
-  endDate?: string | null
-  hasInsurance: boolean
-  isActive: boolean
-  enrollmentValue?: number | null
-  enrollmentValueInstallments: number
-  ammount: number
-  paymentType: 'MONTHLY' | 'UPFRONT'
-  installments: number
-  flexibleInstallments: boolean
-  paymentDays?: { day: number }[]
-  interestConfig?: {
-    delayInterestPercentage?: number | null
-    delayInterestPerDayDelayed?: number | null
-  } | null
-  earlyDiscounts?: { daysBeforeDeadline: number; percentage: number }[]
-}
-
 interface PageProps extends SharedProps {
-  contract: Contract
+  id: string
 }
 
 export default function EditarContratoPage() {
   const { props } = usePage<PageProps>()
   const schoolId = props.user?.schoolId
-  const contract = props.contract
+  const contractId = props.id
+
+  const { data: contract, isLoading, error } = useQuery(
+    useContractQueryOptions({ id: contractId })
+  )
 
   return (
     <EscolaLayout>
@@ -51,11 +35,19 @@ export default function EditarContratoPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Editar Contrato</h1>
-            <p className="text-muted-foreground">{contract?.name}</p>
+            <p className="text-muted-foreground">{contract?.name || 'Carregando...'}</p>
           </div>
         </div>
 
-        {schoolId && contract ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : error ? (
+          <div className="text-sm text-destructive">
+            Erro ao carregar contrato: {error.message}
+          </div>
+        ) : schoolId && contract ? (
           <ContractForm schoolId={schoolId} initialData={contract} />
         ) : (
           <div className="text-sm text-muted-foreground">
