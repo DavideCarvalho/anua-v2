@@ -330,6 +330,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   />
 
                   <div className="flex flex-col gap-4">
+                    {/* TODO: Habilitar quando seguro de inadimplência estiver pronto
                     <FormField
                       control={form.control}
                       name="hasInsurance"
@@ -352,6 +353,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                         </FormItem>
                       )}
                     />
+                    */}
 
                     <FormField
                       control={form.control}
