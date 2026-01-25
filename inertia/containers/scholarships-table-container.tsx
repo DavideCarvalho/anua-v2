@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import { useSearchParams } from '../hooks/use-search-params'
+import { useSearchParams } from '../hooks/use_search_params'
 import { Badge } from '../components/ui/badge'
 import { Switch } from '../components/ui/switch'
-import { useToggleScholarshipActiveMutation } from '../hooks/mutations/use-toggle-scholarship-active'
+import { useToggleScholarshipActiveMutation } from '../hooks/mutations/use_toggle_scholarship_active'
 import { useQuery } from '@tanstack/react-query'
-import { useScholarshipsQueryOptions } from '../hooks/queries/use-scholarships'
+import { useScholarshipsQueryOptions } from '../hooks/queries/use_scholarships'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Skeleton } from '../components/ui/skeleton'
@@ -60,7 +60,9 @@ export function ScholarshipsTableContainer({ onEdit }: { onEdit: (id: string) =>
               <tr>
                 <th className="text-left p-3 font-medium">Nome</th>
                 <th className="text-left p-3 font-medium">Tipo</th>
-                <th className="text-left p-3 font-medium">Desconto</th>
+                <th className="text-left p-3 font-medium">Desc. Mensalidade</th>
+                <th className="text-left p-3 font-medium">Desc. Matrícula</th>
+                <th className="text-left p-3 font-medium">Código</th>
                 <th className="text-left p-3 font-medium">Parceiro</th>
                 <th className="text-left p-3 font-medium">Status</th>
                 <th className="text-right p-3 font-medium">Ações</th>
@@ -74,6 +76,8 @@ export function ScholarshipsTableContainer({ onEdit }: { onEdit: (id: string) =>
                     <Badge variant="outline">{typeMap[row.type] || row.type}</Badge>
                   </td>
                   <td className="p-3 text-muted-foreground">{row.discountPercentage}%</td>
+                  <td className="p-3 text-muted-foreground">{row.enrollmentDiscountPercentage ?? 0}%</td>
+                  <td className="p-3 text-muted-foreground font-mono text-sm">{row.code || '-'}</td>
                   <td className="p-3 text-muted-foreground">{row.schoolPartner?.name || '-'}</td>
                   <td className="p-3">
                     <Switch

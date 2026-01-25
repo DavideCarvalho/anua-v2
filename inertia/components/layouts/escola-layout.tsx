@@ -52,7 +52,7 @@ const navigation: NavItem[] = [
       { title: 'Professores', route: 'web.escola.administrativo.professores', href: '/escola/administrativo/professores' },
       // { title: 'Matrículas', route: 'web.escola.administrativo.matriculas', href: '/escola/administrativo/matriculas' },
       { title: 'Contratos', route: 'web.escola.administrativo.contratos', href: '/escola/administrativo/contratos' },
-      // { title: 'Bolsas', route: 'web.escola.administrativo.bolsas', href: '/escola/administrativo/bolsas' },
+      { title: 'Bolsas', route: 'web.escola.administrativo.bolsas', href: '/escola/administrativo/bolsas' },
       // { title: 'Parceiros', route: 'web.escola.administrativo.parceiros', href: '/escola/administrativo/parceiros' },
       { title: 'Matérias', route: 'web.escola.administrativo.materias', href: '/escola/administrativo/materias' },
       // { title: 'Folha de Ponto', route: 'web.escola.administrativo.folhaDePonto', href: '/escola/administrativo/folha-de-ponto' },

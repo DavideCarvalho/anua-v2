@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import type { SchoolPartnersForSelectResponse } from '../../hooks/queries/use-school-partners-for-select'
+import type { SchoolPartnersForSelectResponse } from '../../hooks/queries/use_school_partners_for_select'
 import { toast } from 'sonner'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
@@ -26,8 +26,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreateScholarshipMutation } from '../../hooks/mutations/use-create-scholarship'
-import { useSchoolPartnersForSelectQueryOptions } from '../../hooks/queries/use-school-partners-for-select'
+import { useCreateScholarshipMutation } from '../../hooks/mutations/use_create_scholarship'
+import { useSchoolPartnersForSelectQueryOptions } from '../../hooks/queries/use_school_partners_for_select'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -38,6 +38,7 @@ const schema = z.object({
   type: z.enum(['PHILANTHROPIC', 'DISCOUNT', 'COMPANY_PARTNERSHIP', 'FREE']),
   description: z.string().optional(),
   schoolPartnerId: z.string().optional(),
+  code: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -67,6 +68,7 @@ export function NewScholarshipModal({
       discountPercentage: 0,
       enrollmentDiscountPercentage: 0,
       type: 'PHILANTHROPIC',
+      code: '',
     },
   })
 
@@ -79,6 +81,7 @@ export function NewScholarshipModal({
         type: values.type,
         description: values.description,
         schoolPartnerId: values.schoolPartnerId,
+        code: values.code || undefined,
       })
       .then(() => {
         form.reset()
@@ -198,6 +201,23 @@ export function NewScholarshipModal({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Código (opcional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Ex: XPTO20" />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Usado na matrícula online para aplicar a bolsa
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
