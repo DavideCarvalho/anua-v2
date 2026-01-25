@@ -31,7 +31,6 @@ interface Contract {
 
 interface PageProps extends SharedProps {
   contract: Contract
-  academicPeriods: { id: string; name: string }[]
 }
 
 export default function EditarContratoPage() {
@@ -57,11 +56,7 @@ export default function EditarContratoPage() {
         </div>
 
         {schoolId && contract ? (
-          <ContractForm
-            schoolId={schoolId}
-            academicPeriods={props.academicPeriods || []}
-            initialData={contract}
-          />
+          <ContractForm schoolId={schoolId} initialData={contract} />
         ) : (
           <div className="text-sm text-muted-foreground">
             Contrato não encontrado.

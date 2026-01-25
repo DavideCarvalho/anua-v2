@@ -7,12 +7,8 @@ import { Button } from '../../../../components/ui/button'
 import { ContractForm } from '../../../../containers/contracts/contract-form'
 import type { SharedProps } from '../../../../lib/types'
 
-interface PageProps extends SharedProps {
-  academicPeriods: { id: string; name: string }[]
-}
-
 export default function NovoContratoPage() {
-  const { props } = usePage<PageProps>()
+  const { props } = usePage<SharedProps>()
   const schoolId = props.user?.schoolId
 
   return (
@@ -35,10 +31,7 @@ export default function NovoContratoPage() {
         </div>
 
         {schoolId ? (
-          <ContractForm
-            schoolId={schoolId}
-            academicPeriods={props.academicPeriods || []}
-          />
+          <ContractForm schoolId={schoolId} />
         ) : (
           <div className="text-sm text-muted-foreground">
             Escola não encontrada no contexto.
