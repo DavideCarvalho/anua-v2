@@ -20,6 +20,23 @@ export const createContractValidator = vine.compile(
     installments: vine.number().min(1).optional(),
     flexibleInstallments: vine.boolean().optional(),
     hasInsurance: vine.boolean().optional(),
+    isActive: vine.boolean().optional(),
+    // Nested data
+    paymentDays: vine.array(vine.number().min(1).max(31)).optional(),
+    interestConfig: vine
+      .object({
+        delayInterestPercentage: vine.number().min(0).optional(),
+        delayInterestPerDayDelayed: vine.number().min(0).optional(),
+      })
+      .optional(),
+    earlyDiscounts: vine
+      .array(
+        vine.object({
+          percentage: vine.number().min(0).max(100),
+          daysBeforeDeadline: vine.number().min(1),
+        })
+      )
+      .optional(),
   })
 )
 

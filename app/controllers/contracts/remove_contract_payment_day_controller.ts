@@ -15,7 +15,5 @@ export default class RemoveContractPaymentDayController {
     }
 
     await paymentDay.delete()
-
-    return response.noContent()
   }
 }

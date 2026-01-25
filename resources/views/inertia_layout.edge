@@ -1,21 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <title inertia>AdonisJS x Inertia x React</title>
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="msapplication-TileColor" content="#9333ea">
+  <meta name="theme-color" content="#9333ea">
 
+  <!-- Preconnect to external domains -->
   <link rel="preconnect" href="https://fonts.bunny.net">
+  <link rel="dns-prefetch" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=instrument-sans:400,400i,500,500i,600,600i,700,700i" rel="stylesheet" />
 
+  <!-- Default SEO (overridden by page-specific) -->
+  <title inertia>Anuá - Sistema de Gestão Escolar com IA</title>
+  <meta name="description" content="Sistema de gestão escolar completo com inteligência artificial. Matrículas, pedagógico, financeiro, gamificação e muito mais em uma única plataforma.">
+  <meta name="keywords" content="gestão escolar, sistema escolar, software escola, matrícula online, controle de notas, frequência escolar, gestão pedagógica, sistema educacional, ERP escolar, IA educação">
+  <meta name="author" content="Anuá">
+  <meta name="robots" content="index, follow">
+
+  <!-- Geo Tags -->
+  <meta name="geo.region" content="BR">
+  <meta name="geo.placename" content="Brasil">
+  <meta name="language" content="Portuguese">
+
+  <!-- Theme Script (prevents flash) -->
   <script>
-    // Prevent flash of unstyled content by setting theme before page renders
     (function() {
       const theme = localStorage.getItem('anua-theme') || 'system';
       const root = document.documentElement;
-
       if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         root.classList.add('dark');
       } else {

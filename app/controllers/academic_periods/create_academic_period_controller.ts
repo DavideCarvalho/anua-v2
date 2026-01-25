@@ -11,6 +11,7 @@ import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_co
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import { createAcademicPeriodValidator } from '#validators/academic_period'
+import AcademicPeriodDto from '#models/dto/academic_period.dto'
 
 export default class CreateAcademicPeriodController {
   async handle({ request, response, auth }: HttpContext) {
@@ -175,7 +176,7 @@ export default class CreateAcademicPeriodController {
         }
       }
 
-      return academicPeriod
+      return new AcademicPeriodDto(academicPeriod)
     })
 
     return response.created(result)

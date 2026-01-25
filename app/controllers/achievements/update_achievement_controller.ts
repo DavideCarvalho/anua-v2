@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
 import type { AchievementCategory } from '#models/achievement'
 import { updateAchievementValidator } from '#validators/gamification'
+import AchievementDto from '#models/dto/achievement.dto'
 
 // Map validator category to model category
 const categoryMap: Record<string, AchievementCategory> = {
@@ -47,6 +48,6 @@ export default class UpdateAchievementController {
 
     await achievement.save()
 
-    return response.ok(achievement)
+    return new AchievementDto(achievement)
   }
 }

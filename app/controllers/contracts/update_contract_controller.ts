@@ -14,9 +14,10 @@ export default class UpdateContractController {
       return response.notFound({ message: 'Contract not found' })
     }
 
-    const { endDate, ...rest } = payload
+    const { endDate, amount, ...rest } = payload
     contract.merge({
       ...rest,
+      ...(amount !== undefined && { ammount: amount }), // typo no banco: ammount ao invés de amount
       ...(endDate !== undefined && { endDate: endDate ? DateTime.fromJSDate(endDate) : null }),
     })
     await contract.save()

@@ -1,0 +1,21 @@
+{
+  "name": "Anuá - Sistema de Gestão Escolar",
+  "short_name": "Anuá",
+  "description": "Sistema de gestão escolar completo com inteligência artificial",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9333ea",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://anuaapp.com.br/sitemap.xml
+
+# Disallow admin and authenticated areas
+Disallow: /escola/
+Disallow: /admin/
+Disallow: /responsavel/
+Disallow: /api/
+Disallow: /auth/
+
+# Allow landing pages
+Allow: /
+Allow: /sign-in
+Allow: /matricula-online

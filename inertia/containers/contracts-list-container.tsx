@@ -1,13 +1,30 @@
 import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { usePage } from '@inertiajs/react'
+import { router } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { useContractsQueryOptions } from '../hooks/queries/use_contracts'
+import { useDeleteContractMutation } from '../hooks/mutations/use_contract_mutations'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
-import { Switch } from '../components/ui/switch'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
 import {
   AlertCircle,
   Search,
@@ -15,9 +32,21 @@ import {
   ChevronRight,
   FileText,
   Plus,
-  Pencil,
+  MoreHorizontal,
+  Edit,
+  Trash2,
 } from 'lucide-react'
-import type { SharedProps } from '../lib/types'
+
+interface ContractItem {
+  id: string
+  name: string
+  description?: string
+  enrollmentValue?: number
+  ammount?: number
+  installments?: number
+  flexibleInstallments?: boolean
+  isActive?: boolean
+}
 
 // Loading Skeleton
 function ContractsListSkeleton() {
@@ -80,9 +109,13 @@ function formatCurrency(valueInCents: number | null | undefined): string {
 function ContractsListContent({
   page,
   onPageChange,
+  onEdit,
+  onDelete,
 }: {
   page: number
   onPageChange: (page: number) => void
+  onEdit: (contract: ContractItem) => void
+  onDelete: (contract: ContractItem) => void
 }) {
   const { data } = useSuspenseQuery(useContractsQueryOptions({ page, limit: 20 }))
 
@@ -111,7 +144,6 @@ function ContractsListContent({
               <th className="text-left p-4 font-medium">Matrícula</th>
               <th className="text-left p-4 font-medium">Mensalidade</th>
               <th className="text-left p-4 font-medium">Parcelas</th>
-              <th className="text-left p-4 font-medium">Ativo</th>
               <th className="text-right p-4 font-medium">Ações</th>
             </tr>
           </thead>
@@ -143,19 +175,28 @@ function ContractsListContent({
                     `${contract.installments}x`
                   )}
                 </td>
-                <td className="p-4">
-                  <Switch checked={contract.isActive} disabled />
-                </td>
                 <td className="p-4 text-right">
-                  <Link
-                    route="web.escola.administrativo.contratos.editar"
-                    params={{ id: contract.id }}
-                  >
-                    <Button variant="ghost" size="sm">
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Editar
-                    </Button>
-                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(contract)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onDelete(contract)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             ))}
@@ -198,6 +239,31 @@ function ContractsListContent({
 // Container Export
 export function ContractsListContainer() {
   const [page, setPage] = useState(1)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [contractToDelete, setContractToDelete] = useState<ContractItem | null>(null)
+
+  const deleteContract = useDeleteContractMutation()
+
+  const handleEdit = (contract: ContractItem) => {
+    router.visit(`/escola/administrativo/contratos/${contract.id}/editar`)
+  }
+
+  const handleDelete = (contract: ContractItem) => {
+    setContractToDelete(contract)
+    setIsDeleteModalOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!contractToDelete) return
+    try {
+      await deleteContract.mutateAsync(contractToDelete.id)
+    } catch (error) {
+      console.error('Error deleting contract:', error)
+    } finally {
+      setIsDeleteModalOpen(false)
+      setContractToDelete(null)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -223,11 +289,37 @@ export function ContractsListContainer() {
             )}
           >
             <Suspense fallback={<ContractsListSkeleton />}>
-              <ContractsListContent page={page} onPageChange={setPage} />
+              <ContractsListContent
+                page={page}
+                onPageChange={setPage}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             </Suspense>
           </ErrorBoundary>
         )}
       </QueryErrorResetBoundary>
+
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o contrato "{contractToDelete?.name}"? Esta ação não
+              pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleteContract.isPending ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

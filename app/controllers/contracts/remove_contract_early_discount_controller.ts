@@ -15,7 +15,5 @@ export default class RemoveContractEarlyDiscountController {
     }
 
     await earlyDiscount.delete()
-
-    return response.noContent()
   }
 }

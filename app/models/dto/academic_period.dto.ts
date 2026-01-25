@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type AcademicPeriod from '#models/academic_period'
 import type { AcademicPeriodSegment } from '#models/academic_period'
 import type { DateTime } from 'luxon'
+import CourseHasAcademicPeriodDto from './course_has_academic_period.dto.js'
 
 export default class AcademicPeriodDto extends BaseModelDto {
   declare id: string
@@ -20,6 +21,7 @@ export default class AcademicPeriodDto extends BaseModelDto {
   declare previousAcademicPeriodId: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare courseAcademicPeriods?: CourseHasAcademicPeriodDto[]
 
   constructor(academicPeriod?: AcademicPeriod) {
     super()
@@ -42,5 +44,8 @@ export default class AcademicPeriodDto extends BaseModelDto {
     this.previousAcademicPeriodId = academicPeriod.previousAcademicPeriodId
     this.createdAt = academicPeriod.createdAt
     this.updatedAt = academicPeriod.updatedAt
+    this.courseAcademicPeriods = academicPeriod.courseAcademicPeriods
+      ? CourseHasAcademicPeriodDto.fromArray(academicPeriod.courseAcademicPeriods)
+      : undefined
   }
 }

@@ -8,6 +8,17 @@ import Contract from './contract.js'
 import Class_ from './class.js'
 import LevelAssignedToCourseHasAcademicPeriod from './level_assigned_to_course_has_academic_period.js'
 
+// Level serve para agrupar salas
+// No ensino fundamental e médio, as salas são tipo 6° Ano A, 6° Ano B, 7° Ano A, 7° Ano B
+// Então o Level vai ser 6° Ano, 7° Ano
+// Em cursos técnicos e faculdade, os levels são os semestres
+// Exemplo: Informática 1° Semestre, Informática 2° Semestre
+// Usamos courseSlug para identificar o level na matrícula digital
+// O course slug para ensino médio e fundamental vai ser igual em todos os Level: "ensino-medio" e "ensino-fundamental" respectivamente
+// Enquanto que para cada curso técnico teremos um slug diferente, como "informatica" ou "matematica"
+// Isso vai ser definido na hora de criar o level
+// Se a gente quiser fazer algo de tipo, a pessoa acabou o último level do sei lá, educação infantil,
+// já que a ordem é educação infantil -> ensino fundamental -> ensino médio, a gente faz essa lógica na mão
 export default class Level extends BaseModel {
   static table = 'Level'
 

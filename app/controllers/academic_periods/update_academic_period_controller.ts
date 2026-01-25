@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import AcademicPeriod from '#models/academic_period'
 import { updateAcademicPeriodValidator } from '#validators/academic_period'
+import AcademicPeriodDto from '#models/dto/academic_period.dto'
 
 export default class UpdateAcademicPeriodController {
   async handle({ request, params, response }: HttpContext) {
@@ -49,6 +50,6 @@ export default class UpdateAcademicPeriodController {
 
     await academicPeriod.save()
 
-    return response.ok(academicPeriod)
+    return new AcademicPeriodDto(academicPeriod)
   }
 }

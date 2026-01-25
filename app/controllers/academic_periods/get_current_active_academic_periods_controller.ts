@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
+import AcademicPeriodDto from '#models/dto/academic_period.dto'
 
 export default class GetCurrentActiveAcademicPeriodsController {
   async handle({ auth, response }: HttpContext) {
@@ -15,6 +16,6 @@ export default class GetCurrentActiveAcademicPeriodsController {
       .whereNull('deletedAt')
       .orderBy('startDate', 'desc')
 
-    return response.ok(periods)
+    return AcademicPeriodDto.fromArray(periods)
   }
 }

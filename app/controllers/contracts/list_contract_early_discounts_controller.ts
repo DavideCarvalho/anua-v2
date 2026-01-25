@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractEarlyDiscount from '#models/contract_early_discount'
+import { ContractEarlyDiscountDto } from '#models/dto/contract_early_discount.dto'
 
 export default class ListContractEarlyDiscountsController {
   async handle({ params }: HttpContext) {
@@ -9,6 +10,6 @@ export default class ListContractEarlyDiscountsController {
       .where('contractId', contractId)
       .orderBy('daysBeforeDeadline', 'desc')
 
-    return earlyDiscounts
+    return ContractEarlyDiscountDto.fromArray(earlyDiscounts)
   }
 }

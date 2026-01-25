@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#faf5ff"/>
+      <stop offset="50%" style="stop-color:#f3e8ff"/>
+      <stop offset="100%" style="stop-color:#ede9fe"/>
+    </linearGradient>
+    <linearGradient id="purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9333ea"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="200" fill="#9333ea" opacity="0.05"/>
+  <circle cx="1100" cy="530" r="250" fill="#9333ea" opacity="0.05"/>
+  <circle cx="900" cy="100" r="150" fill="#7c3aed" opacity="0.03"/>
+
+  <!-- Logo Icon -->
+  <g transform="translate(510, 80)">
+    <circle cx="90" cy="90" r="80" fill="url(#purple-gradient)"/>
+    <path d="M90 25 L135 145 L120 145 L110 120 L70 120 L60 145 L45 145 Z" fill="white" opacity="0.95"/>
+    <path d="M90 55 L105 100 L75 100 Z" fill="url(#purple-gradient)"/>
+    <circle cx="50" cy="65" r="7" fill="white" opacity="0.6"/>
+    <circle cx="130" cy="65" r="7" fill="white" opacity="0.6"/>
+    <circle cx="90" cy="155" r="7" fill="white" opacity="0.6"/>
+    <line x1="50" y1="65" x2="90" y2="40" stroke="white" stroke-width="2" opacity="0.3"/>
+    <line x1="130" y1="65" x2="90" y2="40" stroke="white" stroke-width="2" opacity="0.3"/>
+  </g>
+
+  <!-- Brand name -->
+  <text x="600" y="310" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="72" font-weight="800" fill="#1f2937" text-anchor="middle">Anuá</text>
+
+  <!-- Main tagline -->
+  <text x="600" y="380" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="36" font-weight="600" fill="#4b5563" text-anchor="middle">Sistema de Gestão Escolar</text>
+
+  <!-- AI highlight -->
+  <rect x="420" y="410" width="360" height="50" rx="25" fill="url(#purple-gradient)"/>
+  <text x="600" y="445" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="600" fill="white" text-anchor="middle">Potencializado por IA</text>
+
+  <!-- Features row -->
+  <text x="600" y="530" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" fill="#6b7280" text-anchor="middle">Matrículas  •  Pedagógico  •  Financeiro  •  Gamificação  •  Analytics</text>
+
+  <!-- URL -->
+  <text x="600" y="590" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="600" fill="#9333ea" text-anchor="middle">anuaapp.com.br</text>
+</svg>

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
+import { ContractDto } from '#models/dto/contract.dto'
 
 export default class ShowContractController {
   async handle({ params, response }: HttpContext) {
@@ -17,6 +18,6 @@ export default class ShowContractController {
     await contract.load('earlyDiscounts')
     await contract.load('contractDocuments')
 
-    return contract
+    return new ContractDto(contract)
   }
 }

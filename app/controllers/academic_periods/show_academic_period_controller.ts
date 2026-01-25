@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
+import AcademicPeriodDto from '#models/dto/academic_period.dto'
 
 export default class ShowAcademicPeriodController {
   async handle({ params, response }: HttpContext) {
@@ -12,6 +13,6 @@ export default class ShowAcademicPeriodController {
       return response.notFound({ message: 'Período letivo não encontrado' })
     }
 
-    return response.ok(academicPeriod)
+    return new AcademicPeriodDto(academicPeriod)
   }
 }

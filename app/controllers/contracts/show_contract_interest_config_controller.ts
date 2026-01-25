@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractInterestConfig from '#models/contract_interest_config'
+import { ContractInterestConfigDto } from '#models/dto/contract_interest_config.dto'
 
 export default class ShowContractInterestConfigController {
   async handle({ params, response }: HttpContext) {
@@ -13,6 +14,6 @@ export default class ShowContractInterestConfigController {
       return response.notFound({ message: 'Interest config not found' })
     }
 
-    return interestConfig
+    return new ContractInterestConfigDto(interestConfig)
   }
 }

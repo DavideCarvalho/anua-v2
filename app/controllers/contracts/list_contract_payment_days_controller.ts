@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractPaymentDay from '#models/contract_payment_day'
+import { ContractPaymentDayDto } from '#models/dto/contract_payment_day.dto'
 
 export default class ListContractPaymentDaysController {
   async handle({ params }: HttpContext) {
@@ -9,6 +10,6 @@ export default class ListContractPaymentDaysController {
       .where('contractId', contractId)
       .orderBy('day', 'asc')
 
-    return paymentDays
+    return ContractPaymentDayDto.fromArray(paymentDays)
   }
 }

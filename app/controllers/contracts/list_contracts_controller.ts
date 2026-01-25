@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
 import { listContractsValidator } from '#validators/contract'
+import { ContractDto } from '#models/dto/contract.dto'
 
 export default class ListContractsController {
   async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
@@ -50,6 +51,6 @@ export default class ListContractsController {
 
     const contracts = await query.paginate(page, limit)
 
-    return contracts
+    return ContractDto.fromPaginator(contracts)
   }
 }

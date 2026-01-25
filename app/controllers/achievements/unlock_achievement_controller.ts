@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
 import GamificationEvent from '#models/gamification_event'
 import StudentGamification from '#models/student_gamification'
+import GamificationEventDto from '#models/dto/gamification_event.dto'
 
 export default class UnlockAchievementController {
   async handle({ request, response }: HttpContext) {
@@ -63,10 +64,6 @@ export default class UnlockAchievementController {
 
     await gamificationEvent.load('student')
 
-    return response.created({
-      message: 'Conquista desbloqueada com sucesso',
-      event: gamificationEvent,
-      pointsAwarded: achievement.points,
-    })
+    return new GamificationEventDto(gamificationEvent)
   }
 }

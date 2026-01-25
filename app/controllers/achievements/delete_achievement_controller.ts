@@ -14,7 +14,5 @@ export default class DeleteAchievementController {
     // so we deactivate it instead
     achievement.isActive = false
     await achievement.save()
-
-    return response.noContent()
   }
 }

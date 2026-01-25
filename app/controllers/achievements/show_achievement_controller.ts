@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
+import AchievementDto from '#models/dto/achievement.dto'
 
 export default class ShowAchievementController {
   async handle({ params, response }: HttpContext) {
@@ -9,6 +10,6 @@ export default class ShowAchievementController {
       return response.notFound({ message: 'Conquista nao encontrada' })
     }
 
-    return response.ok(achievement)
+    return new AchievementDto(achievement)
   }
 }

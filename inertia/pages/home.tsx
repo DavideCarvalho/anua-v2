@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { useState } from 'react'
 import {
@@ -37,6 +36,12 @@ import {
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Label } from '~/components/ui/label'
+import {
+  SeoHead,
+  getOrganizationSchema,
+  getSoftwareApplicationSchema,
+  getFAQSchema,
+} from '~/components/seo/seo-head'
 
 const insights: InsightCardProps[] = [
   {
@@ -66,14 +71,41 @@ const insights: InsightCardProps[] = [
   },
 ]
 
+const faqs = [
+  {
+    question: 'O que é o Anuá?',
+    answer: 'Anuá é um sistema de gestão escolar completo que integra todas as áreas da sua escola em uma única plataforma, potencializado por inteligência artificial.',
+  },
+  {
+    question: 'Quanto custa o Anuá?',
+    answer: 'O Anuá custa R$ 18,90 por aluno por mês, com acesso a todas as funcionalidades incluídas.',
+  },
+  {
+    question: 'O Anuá tem inteligência artificial?',
+    answer: 'Sim! Nossa IA analisa dados acadêmicos, financeiros e comportamentais para gerar insights automáticos, identificar alunos em risco e otimizar a gestão.',
+  },
+  {
+    question: 'Posso fazer matrículas online?',
+    answer: 'Sim, o Anuá oferece sistema completo de matrículas online com assinatura digital de contratos.',
+  },
+]
+
 export default function Home() {
   const [expanded, setExpanded] = useState(false)
 
   return (
     <>
-      <Head title="Anuá - O Super App da sua escola">
-        <meta name="description" content="Gerenciar sua escola nunca foi tão fácil!" />
-      </Head>
+      <SeoHead
+        title="Sistema de Gestão Escolar com IA"
+        description="Anuá é o sistema de gestão escolar completo com inteligência artificial. Matrículas online, gestão pedagógica, financeiro integrado, gamificação e muito mais. Experimente grátis!"
+        keywords="sistema de gestão escolar, software para escola, gestão escolar com IA, matrícula online, controle de notas, frequência escolar, gestão pedagógica, ERP escolar, sistema educacional, cantina escolar, gamificação escolar"
+        url="/"
+        structuredData={[
+          getOrganizationSchema(),
+          getSoftwareApplicationSchema(),
+          getFAQSchema(faqs),
+        ]}
+      />
 
       <div className="min-h-screen bg-background overflow-x-hidden">
         <header className="bg-background py-4 sm:py-5">
@@ -146,22 +178,24 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="bg-gradient-to-b from-purple-50 to-background dark:from-purple-950/20 py-12 sm:py-16 lg:py-20">
+        <section className="bg-gradient-to-b from-purple-50 to-background dark:from-purple-950/20 py-12 sm:py-16 lg:py-20" aria-labelledby="hero-heading">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-2 lg:gap-x-16">
               <div className="flex flex-col justify-center">
                 <div className="mb-4 inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-300">
-                  <Brain className="mr-2 h-4 w-4" />O verdadeiro Super App da sua escola
+                  <Brain className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <span>Sistema de Gestão Escolar com Inteligência Artificial</span>
                 </div>
-                <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                  O ecossistema completo para escola <br />
-                  <span className="text-purple-600">potencializado por IA</span>
+                <h1 id="hero-heading" className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                  Software de Gestão Escolar Completo{' '}
+                  <span className="text-purple-600">Potencializado por IA</span>
                 </h1>
                 <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
-                  Do administrativo ao pedagógico, do financeiro à gamificação. Anuá usa{' '}
-                  <span className="font-semibold text-purple-600">Inteligência Artificial</span>{' '}
-                  para integrar TODAS as áreas da sua escola em uma plataforma inteligente. Não é só
-                  agenda - é gestão completa com insights automáticos.
+                  O Anuá é o <strong>sistema de gestão escolar</strong> que integra todas as áreas da sua instituição:
+                  do administrativo ao pedagógico, do financeiro à gamificação. Nossa{' '}
+                  <strong className="text-purple-600">Inteligência Artificial</strong>{' '}
+                  gera insights automáticos, identifica alunos em risco e otimiza processos.
+                  Muito mais que uma agenda escolar - é <strong>gestão completa com IA</strong>.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row sm:space-x-4">
                   <form className="flex-1">
@@ -373,17 +407,17 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-background py-16" id="funcionalidades">
+        <section className="bg-background py-16" id="funcionalidades" aria-labelledby="features-heading">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-                Um ecossistema completo para sua escola
+            <header className="text-center">
+              <h2 id="features-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
+                Funcionalidades do Sistema de Gestão Escolar Anuá
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Tudo que você precisa em uma única plataforma integrada. Do administrativo ao
-                pedagógico, do financeiro à experiência do aluno.
+                Todas as ferramentas que sua escola precisa em uma única plataforma integrada.
+                Gestão administrativa, pedagógica, financeira e experiência completa para alunos e responsáveis.
               </p>
-            </div>
+            </header>
 
             {/* Módulos Principais */}
             <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -623,16 +657,16 @@ const features = [
 
 function Pricing() {
   return (
-    <section className="bg-background py-16" id="preco">
+    <section className="bg-background py-16" id="preco" aria-labelledby="pricing-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-            Investimento simples, retorno garantido
+        <header className="text-center">
+          <h2 id="pricing-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
+            Preço do Sistema de Gestão Escolar Anuá
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Um preço único por aluno. Todo o ecossistema incluído.
+            Investimento acessível por aluno. Todas as funcionalidades incluídas, sem custos extras por módulo.
           </p>
-        </div>
+        </header>
 
         <div className="mt-16 flex justify-center">
           <Card className="w-full max-w-md border-2 border-purple-200 dark:border-purple-800 shadow-lg">
@@ -673,16 +707,16 @@ function Pricing() {
 
 function Contact() {
   return (
-    <section className="bg-purple-50 dark:bg-purple-950/20 py-16" id="fale-conosco">
+    <section className="bg-purple-50 dark:bg-purple-950/20 py-16" id="fale-conosco" aria-labelledby="contact-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-            Transforme sua escola hoje
+        <header className="text-center">
+          <h2 id="contact-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
+            Solicite uma Demonstração do Anuá
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Nossa equipe está pronta para mostrar como a IA pode revolucionar sua gestão escolar
+            Nossa equipe especializada está pronta para mostrar como o sistema de gestão escolar com IA pode transformar sua instituição
           </p>
-        </div>
+        </header>
 
         <div className="mt-12 rounded-xl bg-card p-8 shadow-lg">
           <form className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -725,22 +759,22 @@ function Contact() {
 
 function Footer() {
   return (
-    <footer className="bg-background py-12 border-t">
+    <footer className="bg-background py-12 border-t" role="contentinfo">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between space-y-6 sm:flex-row sm:space-y-0">
-          <div className="flex space-x-6">
-            <a href="#funcionalidades" className="text-muted-foreground hover:text-purple-600">
+          <nav aria-label="Links do rodapé" className="flex space-x-6">
+            <a href="#funcionalidades" className="text-muted-foreground hover:text-purple-600 transition-colors">
               Funcionalidades
             </a>
-            <a href="#preco" className="text-muted-foreground hover:text-purple-600">
+            <a href="#preco" className="text-muted-foreground hover:text-purple-600 transition-colors">
               Preço
             </a>
-            <a href="#fale-conosco" className="text-muted-foreground hover:text-purple-600">
+            <a href="#fale-conosco" className="text-muted-foreground hover:text-purple-600 transition-colors">
               Fale Conosco
             </a>
-          </div>
+          </nav>
           <div className="text-center text-muted-foreground">
-            <p>© 2024 Anuá. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} Anuá - Sistema de Gestão Escolar. Todos os direitos reservados.</p>
           </div>
         </div>
       </div>

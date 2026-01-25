@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
 import { listAchievementsValidator } from '#validators/gamification'
+import AchievementDto from '#models/dto/achievement.dto'
 
 // Map validator category to model type
 const categoryToTypeMap: Record<string, string> = {
@@ -12,7 +13,7 @@ const categoryToTypeMap: Record<string, string> = {
 }
 
 export default class ListAchievementsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(listAchievementsValidator)
 
     const page = payload.page || 1
@@ -35,6 +36,6 @@ export default class ListAchievementsController {
 
     const achievements = await query.paginate(page, limit)
 
-    return response.ok(achievements)
+    return AchievementDto.fromPaginator(achievements)
   }
 }

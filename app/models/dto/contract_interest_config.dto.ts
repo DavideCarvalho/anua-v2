@@ -6,8 +6,6 @@ export class ContractInterestConfigDto extends BaseModelDto {
   declare contractId: string
   declare delayInterestPercentage: number
   declare delayInterestPerDayDelayed: number
-  declare createdAt: string
-  declare updatedAt: string
 
   constructor(instance?: ContractInterestConfig) {
     super()
@@ -18,8 +16,6 @@ export class ContractInterestConfigDto extends BaseModelDto {
     this.contractId = instance.contractId
     this.delayInterestPercentage = instance.delayInterestPercentage
     this.delayInterestPerDayDelayed = instance.delayInterestPerDayDelayed
-    this.createdAt = instance.createdAt.toISO()!
-    this.updatedAt = instance.updatedAt.toISO()!
   }
 }
 

@@ -91,6 +91,14 @@ type EscolaAdministrativoContratosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_contratos_page_controller.ts').default['handle'], false>
 }
+type EscolaAdministrativoContratosNovoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_novo_contrato_page_controller.ts').default['handle'], false>
+}
+type EscolaAdministrativoContratosIdEditarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_editar_contrato_page_controller.ts').default['handle'], false>
+}
 type EscolaAdministrativoContratosIdAssinaturasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_contrato_assinaturas_page_controller.ts').default['handle'], false>
@@ -2109,7 +2117,19 @@ export interface ApiDefinition {
         };
         '$get': EscolaAdministrativoContratosGetHead;
         '$head': EscolaAdministrativoContratosGetHead;
+        'novo': {
+          '$url': {
+          };
+          '$get': EscolaAdministrativoContratosNovoGetHead;
+          '$head': EscolaAdministrativoContratosNovoGetHead;
+        };
         ':id': {
+          'editar': {
+            '$url': {
+            };
+            '$get': EscolaAdministrativoContratosIdEditarGetHead;
+            '$head': EscolaAdministrativoContratosIdEditarGetHead;
+          };
           'assinaturas': {
             '$url': {
             };
@@ -4534,6 +4554,20 @@ const routes = [
     path: '/escola/administrativo/contratos',
     method: ["GET","HEAD"],
     types: {} as EscolaAdministrativoContratosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.administrativo.contratos.novo',
+    path: '/escola/administrativo/contratos/novo',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoContratosNovoGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.escola.administrativo.contratos.editar',
+    path: '/escola/administrativo/contratos/:id/editar',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoContratosIdEditarGetHead,
   },
   {
     params: ["id"],

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9333ea"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon -->
+  <circle cx="40" cy="40" r="35" fill="url(#logoGradient)"/>
+
+  <!-- Stylized "A" -->
+  <path d="M40 12 L62 62 L54 62 L50 52 L30 52 L26 62 L18 62 Z" fill="white" opacity="0.95"/>
+  <path d="M40 24 L47 45 L33 45 Z" fill="url(#logoGradient)"/>
+
+  <!-- Neural dots -->
+  <circle cx="22" cy="28" r="3" fill="white" opacity="0.6"/>
+  <circle cx="58" cy="28" r="3" fill="white" opacity="0.6"/>
+  <circle cx="40" cy="68" r="3" fill="white" opacity="0.6"/>
+
+  <!-- Connecting lines -->
+  <line x1="22" y1="28" x2="40" y2="18" stroke="white" stroke-width="1" opacity="0.3"/>
+  <line x1="58" y1="28" x2="40" y2="18" stroke="white" stroke-width="1" opacity="0.3"/>
+
+  <!-- Text "Anuá" -->
+  <text x="90" y="52" font-family="system-ui, -apple-system, sans-serif" font-size="42" font-weight="700" fill="#9333ea">Anuá</text>
+</svg>

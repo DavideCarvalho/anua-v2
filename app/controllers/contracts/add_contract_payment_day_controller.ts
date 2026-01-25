@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractPaymentDay from '#models/contract_payment_day'
 import { createContractPaymentDayValidator } from '#validators/contract'
+import { ContractPaymentDayDto } from '#models/dto/contract_payment_day.dto'
 
 export default class AddContractPaymentDayController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const { contractId } = params
     const payload = await request.validateUsing(createContractPaymentDayValidator)
 
@@ -12,6 +13,6 @@ export default class AddContractPaymentDayController {
       day: payload.day,
     })
 
-    return response.created(paymentDay)
+    return new ContractPaymentDayDto(paymentDay)
   }
 }

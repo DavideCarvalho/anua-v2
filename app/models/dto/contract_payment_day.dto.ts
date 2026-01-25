@@ -5,8 +5,6 @@ export class ContractPaymentDayDto extends BaseModelDto {
   declare id: string
   declare contractId: string
   declare day: number
-  declare createdAt: string
-  declare updatedAt: string
 
   constructor(instance?: ContractPaymentDay) {
     super()
@@ -16,8 +14,6 @@ export class ContractPaymentDayDto extends BaseModelDto {
     this.id = instance.id
     this.contractId = instance.contractId
     this.day = instance.day
-    this.createdAt = instance.createdAt.toISO()!
-    this.updatedAt = instance.updatedAt.toISO()!
   }
 }
 

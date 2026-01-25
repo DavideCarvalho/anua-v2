@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react'
 import { useEffect, useRef, useState } from 'react'
 import { router } from '@inertiajs/react'
 import confetti from 'canvas-confetti'
@@ -29,6 +28,7 @@ import { FloatingOrbs } from './sign-in/components/decorative/floating-orbs'
 import { GridPattern } from './sign-in/components/decorative/grid-pattern'
 import { HeroIllustration } from './sign-in/components/illustrations/hero-illustration'
 import { SuccessIllustration } from './sign-in/components/illustrations/success-illustration'
+import { SeoHead } from '~/components/seo/seo-head'
 
 enum FormStep {
   EMAIL = 'email',
@@ -202,7 +202,12 @@ export default function SignIn() {
 
   return (
     <>
-      <Head title="Entrar - Anuá" />
+      <SeoHead
+        title="Entrar"
+        description="Acesse o Anuá, o sistema de gestão escolar com inteligência artificial. Faça login para gerenciar sua escola de forma completa e integrada."
+        url="/sign-in"
+        noIndex={true}
+      />
       <Toaster position="top-center" />
 
       <div className="bg-linear-to-br relative h-screen w-full overflow-hidden from-indigo-50 via-purple-50 to-blue-50 dark:from-gray-950 dark:via-indigo-950 dark:to-purple-950">

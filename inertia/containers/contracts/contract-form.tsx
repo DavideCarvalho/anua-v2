@@ -4,12 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useRouter } from '@tuyau/inertia/react'
-import { useQuery } from '@tanstack/react-query'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
+import { CurrencyInput } from '../../components/ui/currency-input'
 import { Textarea } from '../../components/ui/textarea'
 import { Checkbox } from '../../components/ui/checkbox'
 import { Stepper } from '../../components/ui/stepper'
@@ -30,16 +30,11 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { tuyau } from '../../lib/api'
-import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use_academic_periods'
 
 const formSchema = z.object({
-  // Basic info
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   description: z.string().optional(),
-  academicPeriodId: z.string().optional(),
-  endDate: z.string().optional(),
   hasInsurance: z.boolean().default(false),
-  isActive: z.boolean().default(true),
 
   // Payment
   enrollmentValue: z.string().optional(),
@@ -65,30 +60,61 @@ type FormValues = z.infer<typeof formSchema>
 
 interface ContractFormProps {
   schoolId: string
-  initialData?: {
-    id: string
-    name: string
-    description?: string | null
-    academicPeriodId?: string | null
-    endDate?: string | null
-    hasInsurance: boolean
-    isActive: boolean
-    enrollmentValue?: number | null
-    enrollmentValueInstallments: number
-    ammount: number
-    paymentType: 'MONTHLY' | 'UPFRONT'
-    installments: number
-    flexibleInstallments: boolean
-    paymentDays?: { day: number }[]
-    interestConfig?: {
-      delayInterestPercentage?: number | null
-      delayInterestPerDayDelayed?: number | null
-    } | null
-    earlyDiscounts?: { daysBeforeDeadline: number; percentage: number }[]
-  }
 }
 
 const AVAILABLE_DAYS = [5, 10, 15, 20, 25]
+
+function SimulatorBox({ amount }: { amount: number }) {
+  const [periodMonths, setPeriodMonths] = useState(12)
+  const [elapsedMonths, setElapsedMonths] = useState(0)
+
+  const remainingMonths = Math.max(1, periodMonths - elapsedMonths)
+  const installmentValue = amount / remainingMonths
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+
+  return (
+    <div className="bg-background rounded p-3 space-y-3">
+      <p className="text-xs text-muted-foreground font-medium">Simulador de Parcelas</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Duração do período (meses)</label>
+          <Input
+            type="number"
+            min="1"
+            max="24"
+            value={periodMonths}
+            onChange={(e) => setPeriodMonths(Math.max(1, Number(e.target.value)))}
+            className="h-8 text-sm"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Meses decorridos</label>
+          <Input
+            type="number"
+            min="0"
+            max={periodMonths - 1}
+            value={elapsedMonths}
+            onChange={(e) => setElapsedMonths(Math.min(periodMonths - 1, Math.max(0, Number(e.target.value))))}
+            className="h-8 text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="border-t pt-3 flex justify-between items-center">
+        <span className="text-sm text-muted-foreground">Resultado:</span>
+        <span className="text-sm font-medium">
+          {remainingMonths}x de {formatCurrency(installmentValue)}
+        </span>
+      </div>
+    </div>
+  )
+}
 
 const steps = [
   { title: 'Informações Básicas', description: 'Nome e configurações gerais' },
@@ -102,26 +128,15 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEditing = !!initialData
 
-  // Fetch academic periods via API
-  const { data: academicPeriodsData } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 100 })
-  )
-  const academicPeriods = Array.isArray(academicPeriodsData)
-    ? academicPeriodsData
-    : academicPeriodsData?.data || []
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
-      academicPeriodId: initialData?.academicPeriodId || undefined,
-      endDate: initialData?.endDate ? initialData.endDate.split('T')[0] : '',
       hasInsurance: initialData?.hasInsurance || false,
-      isActive: initialData?.isActive ?? true,
       enrollmentValue: initialData?.enrollmentValue
         ? String(initialData.enrollmentValue / 100)
-        : '',
+        : '0',
       enrollmentValueInstallments: initialData?.enrollmentValueInstallments || 1,
       amount: initialData?.ammount ? String(initialData.ammount / 100) : '',
       paymentType: initialData?.paymentType || 'MONTHLY',
@@ -135,6 +150,19 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   })
 
   const earlyDiscounts = form.watch('earlyDiscounts')
+  const paymentType = form.watch('paymentType')
+  const flexibleInstallments = form.watch('flexibleInstallments')
+  const amount = form.watch('amount')
+  const installments = form.watch('installments')
+  const enrollmentValue = form.watch('enrollmentValue')
+  const enrollmentValueInstallments = form.watch('enrollmentValueInstallments')
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+  }
 
   const handleNext = async () => {
     let fieldsToValidate: (keyof FormValues)[] = []
@@ -143,6 +171,9 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       fieldsToValidate = ['name']
     } else if (currentStep === 1) {
       fieldsToValidate = ['amount', 'paymentType', 'paymentDays']
+      if (form.getValues('paymentType') === 'UPFRONT' && !form.getValues('flexibleInstallments')) {
+        fieldsToValidate.push('installments')
+      }
     }
 
     const isValid = await form.trigger(fieldsToValidate)
@@ -161,14 +192,11 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true)
     try {
-      const payload = {
+      const basePayload = {
         schoolId,
         name: values.name,
         description: values.description || undefined,
-        academicPeriodId: values.academicPeriodId || undefined,
-        endDate: values.endDate || undefined,
         hasInsurance: values.hasInsurance,
-        isActive: values.isActive,
         enrollmentValue: values.enrollmentValue
           ? Math.round(Number(values.enrollmentValue) * 100)
           : undefined,
@@ -180,17 +208,17 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       }
 
       if (isEditing) {
-        const response = await tuyau.api.v1.contracts({ id: initialData.id }).$put(payload)
+        const response = await tuyau.api.v1.contracts({ id: initialData.id }).$put(basePayload)
         if (response.error) throw new Error(response.error.message)
 
         // Update payment days
         for (const day of values.paymentDays) {
-          await tuyau.api.v1.contracts({ id: initialData.id })['payment-days'].$post({ day })
+          await tuyau.api.v1.contracts({ contractId: initialData.id })['payment-days'].$post({ day })
         }
 
         // Update interest config if provided
         if (values.interestPercentage || values.interestPerDay) {
-          await tuyau.api.v1.contracts({ id: initialData.id })['interest-config'].$put({
+          await tuyau.api.v1.contracts({ contractId: initialData.id })['interest-config'].$put({
             delayInterestPercentage: values.interestPercentage || 0,
             delayInterestPerDayDelayed: values.interestPerDay || 0,
           })
@@ -198,32 +226,22 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
 
         toast.success('Contrato atualizado com sucesso!')
       } else {
+        // Create with all nested data in one request
+        const payload = {
+          ...basePayload,
+          paymentDays: values.paymentDays,
+          interestConfig:
+            values.interestPercentage || values.interestPerDay
+              ? {
+                  delayInterestPercentage: values.interestPercentage || 0,
+                  delayInterestPerDayDelayed: values.interestPerDay || 0,
+                }
+              : undefined,
+          earlyDiscounts: values.earlyDiscounts.length > 0 ? values.earlyDiscounts : undefined,
+        }
+
         const response = await tuyau.api.v1.contracts.$post(payload)
         if (response.error) throw new Error(response.error.message)
-
-        const contractId = response.data?.id
-        if (contractId) {
-          // Add payment days
-          for (const day of values.paymentDays) {
-            await tuyau.api.v1.contracts({ id: contractId })['payment-days'].$post({ day })
-          }
-
-          // Add interest config if provided
-          if (values.interestPercentage || values.interestPerDay) {
-            await tuyau.api.v1.contracts({ id: contractId })['interest-config'].$put({
-              delayInterestPercentage: values.interestPercentage || 0,
-              delayInterestPerDayDelayed: values.interestPerDay || 0,
-            })
-          }
-
-          // Add early discounts
-          for (const discount of values.earlyDiscounts) {
-            await tuyau.api.v1.contracts({ id: contractId })['early-discounts'].$post({
-              daysBeforeDeadline: discount.daysBeforeDeadline,
-              percentage: discount.percentage,
-            })
-          }
-        }
 
         toast.success('Contrato criado com sucesso!')
       }
@@ -278,31 +296,6 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
 
                   <FormField
                     control={form.control}
-                    name="academicPeriodId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Período Letivo</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um período" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {academicPeriods.map((period: any) => (
-                              <SelectItem key={period.id} value={period.id}>
-                                {period.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
@@ -315,191 +308,149 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                     )}
                   />
 
+                  {/* TODO: Habilitar quando seguro de inadimplência estiver pronto
                   <FormField
                     control={form.control}
-                    name="endDate"
+                    name="hasInsurance"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Término</FormLabel>
+                      <FormItem className="flex flex-row items-center gap-3 space-y-0">
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
-                        <FormMessage />
+                        <div>
+                          <FormLabel className="font-normal">
+                            Seguro de Inadimplência
+                          </FormLabel>
+                          <FormDescription>
+                            Habilita cobertura de inadimplência para este contrato
+                          </FormDescription>
+                        </div>
                       </FormItem>
                     )}
                   />
-
-                  <div className="flex flex-col gap-4">
-                    {/* TODO: Habilitar quando seguro de inadimplência estiver pronto
-                    <FormField
-                      control={form.control}
-                      name="hasInsurance"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center gap-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div>
-                            <FormLabel className="font-normal">
-                              Seguro de Inadimplência
-                            </FormLabel>
-                            <FormDescription>
-                              Habilita cobertura de inadimplência para este contrato
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                    */}
-
-                    <FormField
-                      control={form.control}
-                      name="isActive"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center gap-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div>
-                            <FormLabel className="font-normal">Contrato Ativo</FormLabel>
-                            <FormDescription>
-                              Contratos inativos não aparecem nas opções de matrícula
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  */}
                 </div>
               )}
 
               {/* Step 1: Pagamento */}
               {currentStep === 1 && (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="enrollmentValue"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Valor da Matrícula (R$)</FormLabel>
+                  {/* Tipo de Pagamento */}
+                  <FormField
+                    control={form.control}
+                    name="paymentType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Pagamento *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="500,00"
-                              {...field}
-                            />
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          <SelectContent>
+                            <SelectItem value="MONTHLY">Mensal</SelectItem>
+                            <SelectItem value="UPFRONT">À Vista (parcelado)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="enrollmentValueInstallments"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Parcelas da Matrícula</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="1" max="12" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Valor - label dinâmico baseado no tipo */}
+                  {paymentType === 'MONTHLY' ? (
                     <FormField
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor do Curso (R$) *</FormLabel>
+                          <FormLabel>Valor da Mensalidade *</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="1200,00"
-                              {...field}
+                            <CurrencyInput
+                              placeholder="1.200,00"
+                              value={field.value}
+                              onChange={field.onChange}
                             />
                           </FormControl>
-                          <FormDescription>Valor total ou mensal dependendo do tipo</FormDescription>
+                          <FormDescription>
+                            As mensalidades serão geradas automaticamente até o final do período letivo
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="paymentType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Pagamento *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                  ) : (
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor Total *</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
+                              <CurrencyInput
+                                placeholder="12.000,00"
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="MONTHLY">Mensal</SelectItem>
-                              <SelectItem value="UPFRONT">À Vista (parcelado)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="installments"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Parcelas do Curso</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="1" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="flexibleInstallments"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-end gap-3 space-y-0 pb-2">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div>
-                            <FormLabel className="font-normal">Parcelas Flexíveis</FormLabel>
                             <FormDescription>
-                              Aluno escolhe quantidade de parcelas
+                              Valor total a ser dividido em parcelas
                             </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="installments"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Parcelas Máximas {!flexibleInstallments && '*'}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  disabled={flexibleInstallments}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="flexibleInstallments"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-end gap-3 space-y-0 pb-2">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div>
+                                <FormLabel className="font-normal">Calcular parcelas automaticamente</FormLabel>
+                                <FormDescription>
+                                  O número de parcelas será calculado com base no tempo restante até o fim do período letivo
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dias de Vencimento */}
                   <FormField
                     control={form.control}
                     name="paymentDays"
@@ -532,6 +483,97 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                       </FormItem>
                     )}
                   />
+
+                  {/* Taxa de Matrícula */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-sm font-medium mb-4">Taxa de Matrícula</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="enrollmentValue"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor</FormLabel>
+                            <FormControl>
+                              <CurrencyInput
+                                placeholder="500,00"
+                                value={field.value || '0'}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="enrollmentValueInstallments"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Parcelas</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="1" max="12" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Resumo do Cálculo */}
+                  {amount && Number(amount) > 0 && (
+                    <div className="border-t pt-6">
+                      <h3 className="text-sm font-medium mb-4">Resumo</h3>
+                      <div className="bg-muted rounded-lg p-4 space-y-3">
+                        {paymentType === 'MONTHLY' ? (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Mensalidade</span>
+                            <span className="font-medium">{formatCurrency(Number(amount))}</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Valor Total</span>
+                              <span className="font-medium">{formatCurrency(Number(amount))}</span>
+                            </div>
+                            {!flexibleInstallments && installments > 0 && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Parcelas</span>
+                                <span className="font-medium">
+                                  {installments}x de {formatCurrency(Number(amount) / installments)}
+                                </span>
+                              </div>
+                            )}
+                            {flexibleInstallments && (
+                              <div className="space-y-3">
+                                <div className="flex justify-between">
+                                  <span className="text-muted-foreground">Parcelas</span>
+                                  <span className="font-medium text-muted-foreground">
+                                    Calculado automaticamente
+                                  </span>
+                                </div>
+                                <SimulatorBox amount={Number(amount)} />
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {enrollmentValue && Number(enrollmentValue) > 0 && (
+                          <>
+                            <div className="border-t pt-3 flex justify-between">
+                              <span className="text-muted-foreground">Taxa de Matrícula</span>
+                              <span className="font-medium">
+                                {enrollmentValueInstallments > 1
+                                  ? `${enrollmentValueInstallments}x de ${formatCurrency(Number(enrollmentValue) / enrollmentValueInstallments)}`
+                                  : formatCurrency(Number(enrollmentValue))}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -669,11 +711,17 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   >
                     Cancelar
                   </Button>
-                  {currentStep < steps.length - 1 ? (
+                  {currentStep === 0 && (
                     <Button type="button" onClick={handleNext}>
                       Próximo
                     </Button>
-                  ) : (
+                  )}
+                  {currentStep === 1 && (
+                    <Button type="button" onClick={handleNext}>
+                      Próximo
+                    </Button>
+                  )}
+                  {currentStep === 2 && (
                     <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? (
                         <>
