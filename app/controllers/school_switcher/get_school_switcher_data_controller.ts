@@ -11,9 +11,7 @@ export default class GetSchoolSwitcherDataController {
     const user = ctx.effectiveUser || auth.user!
 
     // Get all schools the user has access to via UserHasSchool
-    const userSchools = await UserHasSchool.query()
-      .where('userId', user.id)
-      .preload('school')
+    const userSchools = await UserHasSchool.query().where('userId', user.id).preload('school')
 
     const schools = userSchools.map((uhs) => ({
       id: uhs.school.id,

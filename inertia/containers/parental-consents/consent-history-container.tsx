@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 
-import { useConsentHistoryQueryOptions } from '../../hooks/queries/use-consent-history'
+import { useConsentHistoryQueryOptions } from '../../hooks/queries/use_consent_history'
 
 type ConsentHistoryItem = {
   id: string

@@ -25,8 +25,8 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use-purchase-request'
-import { useMarkBoughtPurchaseRequestMutation } from '../../hooks/mutations/use-mark-bought-purchase-request'
+import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use_purchase_request'
+import { useMarkBoughtPurchaseRequestMutation } from '../../hooks/mutations/use_mark_bought_purchase_request'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const schema = z.object({

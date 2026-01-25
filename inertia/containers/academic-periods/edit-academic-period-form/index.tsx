@@ -15,7 +15,7 @@ import {
   editAcademicPeriodSchema,
   type EditAcademicPeriodFormValues,
   type Segment,
-} from '../schemas/edit-academic-period.schema'
+} from '../schemas/edit_academic_period.schema'
 
 function getSteps(segment: string) {
   const isCourseBased = segment === 'TECHNICAL' || segment === 'UNIVERSITY'

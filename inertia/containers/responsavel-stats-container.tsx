@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useResponsavelStatsQueryOptions } from '../hooks/queries/use-responsavel-stats'
+import { useResponsavelStatsQueryOptions } from '../hooks/queries/use_responsavel_stats'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { BookOpen, Calendar, DollarSign, Trophy, AlertCircle, Bell } from 'lucide-react'

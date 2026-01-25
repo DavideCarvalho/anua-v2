@@ -14,9 +14,11 @@ interface ChronicStudentRow {
 
 export default class GetChronicAbsenteeismController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, schoolChainId, threshold = 20 } = await request.validateUsing(
-      getChronicAbsenteeismValidator
-    )
+    const {
+      schoolId,
+      schoolChainId,
+      threshold = 20,
+    } = await request.validateUsing(getChronicAbsenteeismValidator)
 
     let schoolFilter = ''
     const params: Record<string, string | number> = { threshold }

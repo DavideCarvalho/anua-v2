@@ -10,7 +10,7 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useAcademicOverviewQueryOptions } from '../../hooks/queries/use-academic-overview'
+import { useAcademicOverviewQueryOptions } from '../../hooks/queries/use_academic_overview'
 
 interface AcademicOverviewCardsProps {
   schoolId?: string

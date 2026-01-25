@@ -5,10 +5,7 @@ import { updateStoreItemValidator } from '#validators/gamification'
 
 export default class UpdateStoreItemController {
   async handle({ params, request, response }: HttpContext) {
-    const storeItem = await StoreItem.query()
-      .where('id', params.id)
-      .whereNull('deletedAt')
-      .first()
+    const storeItem = await StoreItem.query().where('id', params.id).whereNull('deletedAt').first()
 
     if (!storeItem) {
       return response.notFound({ message: 'Item da loja não encontrado' })

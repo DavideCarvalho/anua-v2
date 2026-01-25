@@ -33,6 +33,10 @@ export default class CoordinatorHasLevel extends BaseModel {
   @belongsTo(() => User, { foreignKey: 'coordinatorId' })
   declare coordinator: BelongsTo<typeof User>
 
-  @belongsTo(() => LevelAssignedToCourseHasAcademicPeriod, { foreignKey: 'levelAssignedToCourseHasAcademicPeriodId' })
-  declare levelAssignedToCourseHasAcademicPeriod: BelongsTo<typeof LevelAssignedToCourseHasAcademicPeriod>
+  @belongsTo(() => LevelAssignedToCourseHasAcademicPeriod, {
+    foreignKey: 'levelAssignedToCourseHasAcademicPeriodId',
+  })
+  declare levelAssignedToCourseHasAcademicPeriod: BelongsTo<
+    typeof LevelAssignedToCourseHasAcademicPeriod
+  >
 }

@@ -14,7 +14,7 @@ import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
 import { tuyau } from '~/lib/api'
-import { useSubjectsQueryOptions } from '~/hooks/queries/use-subjects'
+import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
 
 interface TeacherData {
   id: string

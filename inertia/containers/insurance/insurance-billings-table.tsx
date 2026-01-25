@@ -28,7 +28,7 @@ import {
 } from '../../components/ui/tooltip'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useInsuranceBillingsQueryOptions } from '../../hooks/queries/use-insurance-billings'
+import { useInsuranceBillingsQueryOptions } from '../../hooks/queries/use_insurance_billings'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_OPTIONS = [

@@ -10,9 +10,11 @@ interface TrendRow {
 
 export default class GetCanteenTrendsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, schoolChainId, period = 'month' } = await request.validateUsing(
-      getCanteenTrendsValidator
-    )
+    const {
+      schoolId,
+      schoolChainId,
+      period = 'month',
+    } = await request.validateUsing(getCanteenTrendsValidator)
 
     let schoolFilter = ''
     const params: Record<string, string> = {}

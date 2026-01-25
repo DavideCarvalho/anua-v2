@@ -23,8 +23,8 @@ import {
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use-purchase-request'
-import { useMarkArrivedPurchaseRequestMutation } from '../../hooks/mutations/use-mark-arrived-purchase-request'
+import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use_purchase_request'
+import { useMarkArrivedPurchaseRequestMutation } from '../../hooks/mutations/use_mark_arrived_purchase_request'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const schema = z.object({

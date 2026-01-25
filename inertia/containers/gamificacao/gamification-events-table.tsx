@@ -33,8 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { useGamificationEvents } from '../../hooks/queries/use-gamification-events'
-import { useRetryGamificationEvent } from '../../hooks/mutations/use-gamification-event-mutations'
+import { useGamificationEvents } from '../../hooks/queries/use_gamification_events'
+import { useRetryGamificationEvent } from '../../hooks/mutations/use_gamification_event_mutations'
 import type { SharedProps } from '../../lib/types'
 
 const EVENT_TYPES = [

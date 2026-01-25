@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useStudentBalanceQueryOptions } from '../../hooks/queries/use-student-balance'
+import { useStudentBalanceQueryOptions } from '../../hooks/queries/use_student_balance'
 
 interface StudentBalanceContainerProps {
   studentId: string

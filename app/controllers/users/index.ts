@@ -20,9 +20,7 @@ export default class IndexUsersController {
 
     if (search) {
       query.where((builder) => {
-        builder
-          .whereILike('name', `%${search}%`)
-          .orWhereILike('email', `%${search}%`)
+        builder.whereILike('name', `%${search}%`).orWhereILike('email', `%${search}%`)
       })
     }
 

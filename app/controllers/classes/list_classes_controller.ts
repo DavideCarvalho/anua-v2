@@ -17,10 +17,7 @@ export default class ListClassesController {
     // Use schoolId from request (for admins) or selectedSchoolIds from middleware
     const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
 
-    const query = Class_.query()
-      .preload('level')
-      .withCount('studentLevels')
-      .orderBy('name', 'asc')
+    const query = Class_.query().preload('level').withCount('studentLevels').orderBy('name', 'asc')
 
     if (search) {
       query.whereILike('name', `%${search}%`)

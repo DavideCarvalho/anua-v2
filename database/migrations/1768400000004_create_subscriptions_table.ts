@@ -42,14 +42,8 @@ export default class extends BaseSchema {
         .onDelete('CASCADE')
 
       // Status and billing
-      table
-        .specificType('status', 'subscription_status')
-        .notNullable()
-        .defaultTo('TRIAL')
-      table
-        .specificType('billing_cycle', 'billing_cycle')
-        .notNullable()
-        .defaultTo('MONTHLY')
+      table.specificType('status', 'subscription_status').notNullable().defaultTo('TRIAL')
+      table.specificType('billing_cycle', 'billing_cycle').notNullable().defaultTo('MONTHLY')
 
       // Period dates
       table.date('current_period_start').notNullable()

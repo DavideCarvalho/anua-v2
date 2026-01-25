@@ -70,8 +70,7 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
       const schoolId = studentWithClass?.schoolId
 
       // 4. Find active achievements
-      const achievementsQuery = Achievement.query()
-        .where('isActive', true)
+      const achievementsQuery = Achievement.query().where('isActive', true)
 
       if (schoolId) {
         achievementsQuery.where((builder) => {
@@ -94,7 +93,10 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
       // 5. Evaluate each achievement
       for (const achievement of achievements) {
         try {
-          const criteria = achievement.criteria as { eventType?: string; conditions?: Record<string, unknown> }
+          const criteria = achievement.criteria as {
+            eventType?: string
+            conditions?: Record<string, unknown>
+          }
 
           // Check if event type matches
           if (criteria.eventType !== event.type) {

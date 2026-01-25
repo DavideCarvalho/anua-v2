@@ -29,8 +29,8 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { tuyau } from '../../lib/api'
-import { useSchoolChainsQueryOptions } from '../../hooks/queries/use-school-chains'
-import { usePlatformSettingsQueryOptions } from '../../hooks/queries/use-platform-settings'
+import { useSchoolChainsQueryOptions } from '../../hooks/queries/use_school_chains'
+import { usePlatformSettingsQueryOptions } from '../../hooks/queries/use_platform_settings'
 import { CreateSchoolChainDialog } from './create-school-chain-dialog'
 import { type SchoolOnboardingFormData, schoolOnboardingSchema } from './schema'
 

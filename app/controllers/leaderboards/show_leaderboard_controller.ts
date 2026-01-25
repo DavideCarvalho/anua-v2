@@ -7,11 +7,9 @@ export default class ShowLeaderboardController {
       .where('id', params.id)
       .preload('school')
       .preload('entries', (entriesQuery) => {
-        entriesQuery
-          .orderBy('rank', 'asc')
-          .preload('student', (studentQuery) => {
-            studentQuery.preload('user')
-          })
+        entriesQuery.orderBy('rank', 'asc').preload('student', (studentQuery) => {
+          studentQuery.preload('user')
+        })
       })
       .first()
 

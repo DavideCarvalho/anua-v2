@@ -2133,6 +2133,10 @@ const ShowMatriculasPageController = () =>
   import('#controllers/pages/escola/show_matriculas_page_controller')
 const ShowContratosPageController = () =>
   import('#controllers/pages/escola/show_contratos_page_controller')
+const ShowNovoContratoPageController = () =>
+  import('#controllers/pages/escola/show_novo_contrato_page_controller')
+const ShowEditarContratoPageController = () =>
+  import('#controllers/pages/escola/show_editar_contrato_page_controller')
 const ShowContratoAssinaturasPageController = () =>
   import('#controllers/pages/escola/show_contrato_assinaturas_page_controller')
 const ShowContratoDocusealPageController = () =>
@@ -2305,7 +2309,10 @@ function registerPageRoutes() {
       router.get('/login', [ShowSignInPageController]).as('auth.login') // Alias
 
       // Dashboard router (redirects based on role)
-      router.get('/dashboard', [ShowDashboardPageController]).use([middleware.auth(), middleware.impersonation()]).as('dashboard')
+      router
+        .get('/dashboard', [ShowDashboardPageController])
+        .use([middleware.auth(), middleware.impersonation()])
+        .as('dashboard')
 
       // Escola pages (school staff)
       router
@@ -2381,6 +2388,12 @@ function registerPageRoutes() {
           router
             .get('/administrativo/contratos', [ShowContratosPageController])
             .as('administrativo.contratos')
+          router
+            .get('/administrativo/contratos/novo', [ShowNovoContratoPageController])
+            .as('administrativo.contratos.novo')
+          router
+            .get('/administrativo/contratos/:id/editar', [ShowEditarContratoPageController])
+            .as('administrativo.contratos.editar')
           router
             .get('/administrativo/contratos/:id/assinaturas', [
               ShowContratoAssinaturasPageController,

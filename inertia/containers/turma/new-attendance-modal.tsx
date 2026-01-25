@@ -61,7 +61,7 @@ interface NewAttendanceModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-import { useClassStudentsQueryOptions } from '../../hooks/queries/use-class-students'
+import { useClassStudentsQueryOptions } from '../../hooks/queries/use_class_students'
 
 interface Subject {
   id: string

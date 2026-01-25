@@ -20,7 +20,7 @@ import {
 } from '../../components/ui/select'
 import { Badge } from '../../components/ui/badge'
 
-import { usePrintRequestsQueryOptions } from '../../hooks/queries/use-print-requests'
+import { usePrintRequestsQueryOptions } from '../../hooks/queries/use_print_requests'
 
 const STATUS_OPTIONS = [
   { label: 'Pedido', value: 'REQUESTED' },

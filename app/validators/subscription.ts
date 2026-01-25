@@ -4,7 +4,14 @@ import vine from '@vinejs/vine'
 // Enums
 // ==========================================
 const subscriptionTiers = ['FREE', 'BASIC', 'PROFESSIONAL', 'ENTERPRISE', 'CUSTOM'] as const
-const subscriptionStatuses = ['TRIAL', 'ACTIVE', 'PAST_DUE', 'BLOCKED', 'CANCELED', 'PAUSED'] as const
+const subscriptionStatuses = [
+  'TRIAL',
+  'ACTIVE',
+  'PAST_DUE',
+  'BLOCKED',
+  'CANCELED',
+  'PAUSED',
+] as const
 const billingCycles = ['MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL'] as const
 const invoiceStatuses = ['PENDING', 'PAID', 'OVERDUE', 'CANCELED', 'REFUNDED'] as const
 const paymentMethods = ['BOLETO', 'CREDIT_CARD', 'PIX'] as const

@@ -21,7 +21,9 @@ export default class GetSchoolUsageMetricsController {
       .first()
 
     if (!metrics) {
-      return response.notFound({ message: 'School usage metrics not found for the specified period' })
+      return response.notFound({
+        message: 'School usage metrics not found for the specified period',
+      })
     }
 
     return metrics

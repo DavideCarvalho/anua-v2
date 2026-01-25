@@ -31,8 +31,11 @@ export default class GetStudentStatsController {
     // Count level ups by checking metadata for leveledUp flag
     const levelUps = events.filter((t) => {
       const metadata = t.metadata as Record<string, unknown> | null
-      return metadata?.previousLevel !== undefined && metadata?.newLevel !== undefined &&
-             Number(metadata.newLevel) > Number(metadata.previousLevel)
+      return (
+        metadata?.previousLevel !== undefined &&
+        metadata?.newLevel !== undefined &&
+        Number(metadata.newLevel) > Number(metadata.previousLevel)
+      )
     }).length
 
     return response.ok({

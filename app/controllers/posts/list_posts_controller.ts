@@ -31,9 +31,7 @@ export default class ListPostsController {
       query.where('visibility', data.visibility)
     }
 
-    const posts = await query
-      .orderBy('createdAt', 'desc')
-      .paginate(page, limit)
+    const posts = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
     return response.ok(posts)
   }

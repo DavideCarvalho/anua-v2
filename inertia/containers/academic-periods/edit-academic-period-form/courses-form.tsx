@@ -5,7 +5,7 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 
 import { CourseLevels } from './course-levels'
-import type { EditAcademicPeriodFormValues } from '../schemas/edit-academic-period.schema'
+import type { EditAcademicPeriodFormValues } from '../schemas/edit_academic_period.schema'
 
 export function CoursesForm() {
   const form = useFormContext<EditAcademicPeriodFormValues>()

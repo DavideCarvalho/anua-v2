@@ -1,7 +1,7 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
-import { useSchoolEmployeesQueryOptions } from '../hooks/queries/use-school-employees'
+import { useSchoolEmployeesQueryOptions } from '../hooks/queries/use_school_employees'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'

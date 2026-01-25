@@ -20,7 +20,7 @@ export default class RequireRoleMiddleware {
 
     if (impersonation?.isImpersonating && impersonation.originalUser) {
       // Para rotas admin, usar a role do usuário original
-      const isAdminRoute = roles.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r))
+      const isAdminRoute = roles.some((r) => ['SUPER_ADMIN', 'ADMIN'].includes(r))
       if (isAdminRoute) {
         roleName = impersonation.originalUser.role ?? undefined
       }

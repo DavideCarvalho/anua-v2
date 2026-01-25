@@ -46,11 +46,9 @@ export async function getStudents(params: ClassContextParams): Promise<StudentIn
   const studentLevels = await StudentHasLevel.query()
     .where('classId', classId)
     .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
-      laQuery
-        .where('isActive', true)
-        .whereHas('courseHasAcademicPeriod', (caQuery) => {
-          caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
-        })
+      laQuery.where('isActive', true).whereHas('courseHasAcademicPeriod', (caQuery) => {
+        caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
+      })
     })
     .preload('student', (sq) => sq.preload('user'))
     .orderBy('createdAt', 'asc')
@@ -75,11 +73,9 @@ export async function getStudentsPaginated(
   const studentLevels = await StudentHasLevel.query()
     .where('classId', classId)
     .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
-      laQuery
-        .where('isActive', true)
-        .whereHas('courseHasAcademicPeriod', (caQuery) => {
-          caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
-        })
+      laQuery.where('isActive', true).whereHas('courseHasAcademicPeriod', (caQuery) => {
+        caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
+      })
     })
     .preload('student', (sq) => sq.preload('user'))
     .orderBy('createdAt', 'asc')
@@ -111,11 +107,9 @@ export async function getStudentIds(params: ClassContextParams): Promise<string[
   const studentLevels = await StudentHasLevel.query()
     .where('classId', classId)
     .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
-      laQuery
-        .where('isActive', true)
-        .whereHas('courseHasAcademicPeriod', (caQuery) => {
-          caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
-        })
+      laQuery.where('isActive', true).whereHas('courseHasAcademicPeriod', (caQuery) => {
+        caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
+      })
     })
     .select('studentId')
 

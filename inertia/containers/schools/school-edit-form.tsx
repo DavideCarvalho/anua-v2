@@ -38,8 +38,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Label } from '../../components/ui/label'
 import { tuyau } from '../../lib/api'
-import { useSchoolQueryOptions } from '../../hooks/queries/use-schools'
-import { schoolEditSchema, type SchoolEditFormData } from './school-edit-schema'
+import { useSchoolQueryOptions } from '../../hooks/queries/use_schools'
+import { schoolEditSchema, type SchoolEditFormData } from './school_edit_schema'
 
 const newDirectorSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),

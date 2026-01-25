@@ -10,10 +10,7 @@ export default class RegisterParticipantController {
     const { eventId } = params
     const data = await request.validateUsing(registerParticipantValidator)
 
-    const event = await Event.query()
-      .where('id', eventId)
-      .withCount('participants')
-      .first()
+    const event = await Event.query().where('id', eventId).withCount('participants').first()
 
     if (!event) {
       return response.notFound({ message: 'Event not found' })

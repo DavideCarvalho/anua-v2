@@ -15,7 +15,7 @@ import {
   ConsentHistoryContainer,
   ConsentHistorySkeleton,
 } from '../../containers/parental-consents/consent-history-container'
-import { usePendingConsentsQueryOptions } from '../../hooks/queries/use-pending-consents'
+import { usePendingConsentsQueryOptions } from '../../hooks/queries/use_pending_consents'
 
 function PendingCountBadge() {
   const { data } = useSuspenseQuery(usePendingConsentsQueryOptions())

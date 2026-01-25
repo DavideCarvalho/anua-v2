@@ -64,9 +64,7 @@ export default class GetImpersonationConfigController {
     ])
 
     // Filtrar ADMIN e SUPER_ADMIN dos roles disponíveis para filtro
-    const availableRoles = allRoles.filter(
-      (role) => !['ADMIN', 'SUPER_ADMIN'].includes(role.name)
-    )
+    const availableRoles = allRoles.filter((role) => !['ADMIN', 'SUPER_ADMIN'].includes(role.name))
 
     return {
       users: users.all().map((u) => {

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useAtRiskStudentsQueryOptions } from '../../../hooks/queries/use-at-risk-students'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useAtRiskStudentsQueryOptions } from '../../../hooks/queries/use_at_risk_students'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,

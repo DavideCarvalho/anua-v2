@@ -13,8 +13,7 @@ export default class ListNotificationsController {
       limit = 20,
     } = await request.validateUsing(listNotificationsValidator)
 
-    const query = Notification.query()
-      .where('recipientId', auth.user!.id)
+    const query = Notification.query().where('recipientId', auth.user!.id)
 
     if (type) {
       query.where('type', type)
@@ -32,9 +31,7 @@ export default class ListNotificationsController {
       query.whereNull('readAt')
     }
 
-    const notifications = await query
-      .orderBy('createdAt', 'desc')
-      .paginate(page, limit)
+    const notifications = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
     // Get unread count
     const unreadCount = await Notification.query()

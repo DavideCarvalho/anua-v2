@@ -6,7 +6,14 @@ import Class from './class.js'
 import Subject from './subject.js'
 import LeaderboardEntry from './leaderboard_entry.js'
 
-export type LeaderboardType = 'POINTS' | 'AVERAGE_GRADE' | 'ATTENDANCE_PERCENTAGE' | 'ASSIGNMENTS_COMPLETED' | 'EXAMS_AVERAGE' | 'STREAK_DAYS' | 'BEHAVIOR_SCORE'
+export type LeaderboardType =
+  | 'POINTS'
+  | 'AVERAGE_GRADE'
+  | 'ATTENDANCE_PERCENTAGE'
+  | 'ASSIGNMENTS_COMPLETED'
+  | 'EXAMS_AVERAGE'
+  | 'STREAK_DAYS'
+  | 'BEHAVIOR_SCORE'
 export type LeaderboardPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ACADEMIC_PERIOD' | 'ALL_TIME'
 
 export default class Leaderboard extends BaseModel {

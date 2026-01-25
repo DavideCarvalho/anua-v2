@@ -18,8 +18,8 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 
-import { usePendingConsentsQueryOptions } from '../../hooks/queries/use-pending-consents'
-import { useRespondConsentMutation } from '../../hooks/mutations/use-respond-consent'
+import { usePendingConsentsQueryOptions } from '../../hooks/queries/use_pending_consents'
+import { useRespondConsentMutation } from '../../hooks/mutations/use_respond_consent'
 
 type PendingConsent = {
   id: string

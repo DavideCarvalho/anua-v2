@@ -3,12 +3,12 @@ import { ShoppingCart, Check, X, Truck, Clock, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useStoreOrdersQueryOptions } from '../../hooks/queries/use-store-orders'
+import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_store_orders'
 import {
   useApproveStoreOrder,
   useRejectStoreOrder,
   useDeliverStoreOrder,
-} from '../../hooks/mutations/use-store-order-actions'
+} from '../../hooks/mutations/use_store_order_actions'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

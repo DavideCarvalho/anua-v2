@@ -13,8 +13,8 @@ import { StepAddress } from './step-address'
 import { StepMedicalInfo } from './step-medical-info'
 import { StepBilling } from './step-billing'
 
-import { useSchoolEnrollmentInfoQueryOptions } from '../../hooks/queries/use-school-enrollment-info'
-import { useFinishEnrollmentMutation } from '../../hooks/mutations/use-finish-enrollment'
+import { useSchoolEnrollmentInfoQueryOptions } from '../../hooks/queries/use_school_enrollment_info'
+import { useFinishEnrollmentMutation } from '../../hooks/mutations/use_finish_enrollment'
 
 export interface EnrollmentFormData {
   student: {

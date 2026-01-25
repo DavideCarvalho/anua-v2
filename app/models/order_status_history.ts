@@ -5,7 +5,13 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import StoreOrder from './store_order.js'
 import User from './user.js'
 
-export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED'
+export type OrderStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PREPARING'
+  | 'READY'
+  | 'DELIVERED'
+  | 'CANCELLED'
 
 export default class OrderStatusHistory extends BaseModel {
   static table = 'OrderStatusHistory'

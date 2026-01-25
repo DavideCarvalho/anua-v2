@@ -14,9 +14,11 @@ interface TopItemRow {
 
 export default class GetCanteenTopItemsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, schoolChainId, limit = 10 } = await request.validateUsing(
-      getCanteenTopItemsValidator
-    )
+    const {
+      schoolId,
+      schoolChainId,
+      limit = 10,
+    } = await request.validateUsing(getCanteenTopItemsValidator)
 
     let schoolFilter = ''
     const params: Record<string, string | number> = { limit }

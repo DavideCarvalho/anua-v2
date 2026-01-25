@@ -23,9 +23,9 @@ import { ScrollArea } from '../ui/scroll-area'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '../ui/sidebar'
 import { cn } from '../../lib/utils'
 
-import { useImpersonationStatusQueryOptions } from '../../hooks/queries/use-impersonation-status'
-import { useImpersonationConfigQueryOptions } from '../../hooks/queries/use-impersonation-config'
-import { useSetImpersonation, useClearImpersonation } from '../../hooks/mutations/use-impersonation-mutations'
+import { useImpersonationStatusQueryOptions } from '../../hooks/queries/use_impersonation_status'
+import { useImpersonationConfigQueryOptions } from '../../hooks/queries/use_impersonation_config'
+import { useSetImpersonation, useClearImpersonation } from '../../hooks/mutations/use_impersonation_mutations'
 
 interface ImpersonationBadgeProps {
   roleName: string

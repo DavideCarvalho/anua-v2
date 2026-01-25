@@ -30,7 +30,7 @@ import {
 } from '../../../components/ui/select'
 import { Button } from '../../../components/ui/button'
 import { Skeleton } from '../../../components/ui/skeleton'
-import { useSubscriptionInvoicesQueryOptions } from '../../../hooks/queries/use-subscription-invoices'
+import { useSubscriptionInvoicesQueryOptions } from '../../../hooks/queries/use_subscription_invoices'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../../lib/formatters'
 
 const STATUS_OPTIONS = [

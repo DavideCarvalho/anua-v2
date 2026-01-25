@@ -24,7 +24,14 @@ export default class StudentPayment extends BaseModel {
   declare year: number
 
   @column({ columnName: 'type' })
-  declare type: 'ENROLLMENT' | 'TUITION' | 'CANTEEN' | 'COURSE' | 'AGREEMENT' | 'STUDENT_LOAN' | 'OTHER'
+  declare type:
+    | 'ENROLLMENT'
+    | 'TUITION'
+    | 'CANTEEN'
+    | 'COURSE'
+    | 'AGREEMENT'
+    | 'STUDENT_LOAN'
+    | 'OTHER'
 
   @column({ columnName: 'status' })
   declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED'

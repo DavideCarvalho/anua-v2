@@ -135,7 +135,9 @@ export default class UpdateSchoolDirectorController {
         )
 
         // Criar registro Teacher para o diretor
-        await db.rawQuery(`INSERT INTO "Teacher" (id, "hourlyRate") VALUES (:id, 0)`, { id: userId })
+        await db.rawQuery(`INSERT INTO "Teacher" (id, "hourlyRate") VALUES (:id, 0)`, {
+          id: userId,
+        })
 
         // Vincular à escola
         await UserHasSchool.create({

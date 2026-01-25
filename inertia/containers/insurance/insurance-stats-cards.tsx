@@ -4,7 +4,7 @@ import { Shield, AlertCircle, CheckCircle2, DollarSign, Users, FileWarning } fro
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Button } from '../../components/ui/button'
-import { useInsuranceStatsQueryOptions } from '../../hooks/queries/use-insurance-stats'
+import { useInsuranceStatsQueryOptions } from '../../hooks/queries/use_insurance_stats'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 export function InsuranceStatsCardsSkeleton() {

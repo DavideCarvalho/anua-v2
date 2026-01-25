@@ -4,7 +4,7 @@ import { BarChart3 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useGradeDistributionQueryOptions } from '../../hooks/queries/use-grade-distribution'
+import { useGradeDistributionQueryOptions } from '../../hooks/queries/use_grade_distribution'
 
 interface GradeDistributionChartProps {
   schoolId?: string

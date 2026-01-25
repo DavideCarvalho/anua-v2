@@ -30,7 +30,9 @@ export default class GetSchoolEnrollmentInfoController {
     // Check if enrollment is open
     const now = new Date()
     if (academicPeriod.enrollmentStartDate && academicPeriod.enrollmentStartDate.toJSDate() > now) {
-      return response.badRequest({ message: 'Matrículas ainda não foram abertas para este período' })
+      return response.badRequest({
+        message: 'Matrículas ainda não foram abertas para este período',
+      })
     }
     if (academicPeriod.enrollmentEndDate && academicPeriod.enrollmentEndDate.toJSDate() < now) {
       return response.badRequest({ message: 'Matrículas encerradas para este período' })
@@ -47,9 +49,7 @@ export default class GetSchoolEnrollmentInfoController {
     }
 
     // Get initial level for this course in this academic period
-    const levels = await Level.query()
-      .where('courseId', course.id)
-      .orderBy('order', 'asc')
+    const levels = await Level.query().where('courseId', course.id).orderBy('order', 'asc')
 
     if (levels.length === 0) {
       return response.badRequest({ message: 'Nenhum nível disponível para este curso' })

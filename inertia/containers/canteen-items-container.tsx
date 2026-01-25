@@ -1,7 +1,7 @@
 import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useCanteenItemsQueryOptions } from '../hooks/queries/use-canteen-items'
+import { useCanteenItemsQueryOptions } from '../hooks/queries/use_canteen_items'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'

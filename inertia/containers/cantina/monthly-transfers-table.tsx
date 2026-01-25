@@ -3,8 +3,8 @@ import { Wallet, Check, Clock, AlertTriangle, Building } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useCanteenMonthlyTransfersQueryOptions } from '../../hooks/queries/use-canteen-monthly-transfers'
-import { useUpdateCanteenMonthlyTransferStatus } from '../../hooks/mutations/use-canteen-reservation-mutations'
+import { useCanteenMonthlyTransfersQueryOptions } from '../../hooks/queries/use_canteen_monthly_transfers'
+import { useUpdateCanteenMonthlyTransferStatus } from '../../hooks/mutations/use_canteen_reservation_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

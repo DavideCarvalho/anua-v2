@@ -66,25 +66,27 @@ export default class GetSchoolInsuranceStatsController {
 
     const totalPayments = Number(paymentStats?.$extras.total || 0)
     const overduePayments = Number(paymentStats?.$extras.overdue || 0)
-    const defaultRate = totalPayments > 0
-      ? Math.round((overduePayments / totalPayments) * 10000) / 100
-      : 0
+    const defaultRate =
+      totalPayments > 0 ? Math.round((overduePayments / totalPayments) * 10000) / 100 : 0
 
     return response.ok({
       insuredStudents: totalInsuredStudents,
       totalStudents: totalSchoolStudents,
-      insuredPercentage: totalSchoolStudents > 0
-        ? Math.round((totalInsuredStudents / totalSchoolStudents) * 100)
-        : 0,
+      insuredPercentage:
+        totalSchoolStudents > 0
+          ? Math.round((totalInsuredStudents / totalSchoolStudents) * 100)
+          : 0,
       activeClaims: totalActiveClaims,
       defaultRate,
-      latestBilling: latestBilling ? {
-        id: latestBilling.id,
-        period: latestBilling.period.toISODate(),
-        totalAmount: latestBilling.totalAmount,
-        status: latestBilling.status,
-        dueDate: latestBilling.dueDate.toISODate(),
-      } : null,
+      latestBilling: latestBilling
+        ? {
+            id: latestBilling.id,
+            period: latestBilling.period.toISODate(),
+            totalAmount: latestBilling.totalAmount,
+            status: latestBilling.status,
+            dueDate: latestBilling.dueDate.toISODate(),
+          }
+        : null,
     })
   }
 }

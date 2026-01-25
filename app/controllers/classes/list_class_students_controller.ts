@@ -13,8 +13,8 @@ export default class ListClassStudentsController {
       return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
     }
 
-    const class_ = await Class_.find(classId)
-    if (!class_) {
+    const classEntity = await Class_.find(classId)
+    if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
@@ -25,11 +25,9 @@ export default class ListClassStudentsController {
     const studentLevels = await StudentHasLevel.query()
       .where('classId', classId)
       .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
-        laQuery
-          .where('isActive', true)
-          .whereHas('courseHasAcademicPeriod', (caQuery) => {
-            caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
-          })
+        laQuery.where('isActive', true).whereHas('courseHasAcademicPeriod', (caQuery) => {
+          caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
+        })
       })
       .preload('student', (sq) => sq.preload('user'))
       .orderBy('createdAt', 'asc')

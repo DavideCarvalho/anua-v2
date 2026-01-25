@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import { ChevronDown, GraduationCap, Eye, Users } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { useSidebarClasses } from '../../hooks/queries/use-sidebar-classes'
+import { useSidebarClasses } from '../../hooks/queries/use_sidebar_classes'
 import type { SharedProps } from '../../lib/types'
 
 interface SidebarCourseProps {

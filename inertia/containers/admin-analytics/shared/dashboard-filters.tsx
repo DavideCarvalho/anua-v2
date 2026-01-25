@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../components/ui/select'
-import { useSchoolsQueryOptions } from '../../../hooks/queries/use-schools'
-import { useSchoolChainsQueryOptions } from '../../../hooks/queries/use-school-chains'
-import { useSearchParams } from '../../../hooks/use-search-params'
+import { useSchoolsQueryOptions } from '../../../hooks/queries/use_schools'
+import { useSchoolChainsQueryOptions } from '../../../hooks/queries/use_school_chains'
+import { useSearchParams } from '../../../hooks/use_search_params'
 
 interface DashboardFiltersProps {
   showSchoolFilter?: boolean

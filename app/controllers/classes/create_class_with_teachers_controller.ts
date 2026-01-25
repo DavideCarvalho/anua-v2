@@ -24,7 +24,7 @@ export default class CreateClassWithTeachersController {
     const classId = uuidv7()
     const slug = slugify(payload.name)
 
-    const class_ = await Class_.create({
+    const classEntity = await Class_.create({
       id: classId,
       name: payload.name,
       slug,
@@ -36,7 +36,7 @@ export default class CreateClassWithTeachersController {
     for (const item of payload.subjectsWithTeachers) {
       await TeacherHasClass.create({
         id: uuidv7(),
-        classId: class_.id,
+        classId: classEntity.id,
         teacherId: item.teacherId,
         subjectId: item.subjectId,
         subjectQuantity: item.quantity,
@@ -46,7 +46,7 @@ export default class CreateClassWithTeachersController {
 
     // Return the created class with teachers
     const createdClass = await Class_.query()
-      .where('id', class_.id)
+      .where('id', classEntity.id)
       .preload('teacherClasses', (query) => {
         query.where('isActive', true)
         query.preload('teacher', (tq) => tq.preload('user'))

@@ -1,8 +1,8 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Building, Plus, MoreHorizontal, School, Users } from 'lucide-react'
 
-import { useSchoolChainsQueryOptions } from '../../hooks/queries/use-school-chains'
-import { useDeleteSchoolChain } from '../../hooks/mutations/use-school-chain-mutations'
+import { useSchoolChainsQueryOptions } from '../../hooks/queries/use_school_chains'
+import { useDeleteSchoolChain } from '../../hooks/mutations/use_school_chain_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

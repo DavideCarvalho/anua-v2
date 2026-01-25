@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useRejectPrintRequestMutation } from '../../hooks/mutations/use-reject-print-request'
+import { useRejectPrintRequestMutation } from '../../hooks/mutations/use_reject_print_request'
 
 const schema = z.object({
   reason: z.string().min(1, 'Motivo é obrigatório'),

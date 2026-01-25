@@ -11,7 +11,7 @@ export default function ContratosPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contratos</h1>
           <p className="text-muted-foreground">
-            Gerencie os contratos de matrícula dos alunos
+            Gerencie os modelos de contrato da escola
           </p>
         </div>
 

@@ -38,8 +38,8 @@ import {
 } from '../../components/ui/tooltip'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../components/ui/hover-card'
 
-import { usePurchaseRequestsQueryOptions } from '../../hooks/queries/use-purchase-requests'
-import { useDeletePurchaseRequestMutation } from '../../hooks/mutations/use-delete-purchase-request'
+import { usePurchaseRequestsQueryOptions } from '../../hooks/queries/use_purchase_requests'
+import { useDeletePurchaseRequestMutation } from '../../hooks/mutations/use_delete_purchase_request'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_OPTIONS = [

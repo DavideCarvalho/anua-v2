@@ -8,9 +8,9 @@ import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use-teacher-absences'
-import { useApproveAbsenceMutation } from '../../hooks/mutations/use-approve-absence'
-import { useRejectAbsenceMutation } from '../../hooks/mutations/use-reject-absence'
+import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use_teacher_absences'
+import { useApproveAbsenceMutation } from '../../hooks/mutations/use_approve_absence'
+import { useRejectAbsenceMutation } from '../../hooks/mutations/use_reject_absence'
 
 const ABSENCE_REASON_LABELS: Record<string, string> = {
   SICKNESS: 'Doença',

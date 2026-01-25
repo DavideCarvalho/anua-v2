@@ -16,8 +16,8 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import type { AssignmentsData } from '../../hooks/queries/use-assignments'
-import { useAssignmentsQueryOptions } from '../../hooks/queries/use-assignments'
+import type { AssignmentsData } from '../../hooks/queries/use_assignments'
+import { useAssignmentsQueryOptions } from '../../hooks/queries/use_assignments'
 
 interface AssignmentsListProps {
   classId?: string

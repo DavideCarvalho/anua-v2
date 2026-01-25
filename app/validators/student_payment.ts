@@ -6,7 +6,15 @@ export const createStudentPaymentValidator = vine.compile(
     amount: vine.number().positive(),
     month: vine.number().min(1).max(12),
     year: vine.number().min(2020).max(2100),
-    type: vine.enum(['ENROLLMENT', 'TUITION', 'CANTEEN', 'COURSE', 'AGREEMENT', 'STUDENT_LOAN', 'OTHER']),
+    type: vine.enum([
+      'ENROLLMENT',
+      'TUITION',
+      'CANTEEN',
+      'COURSE',
+      'AGREEMENT',
+      'STUDENT_LOAN',
+      'OTHER',
+    ]),
     totalAmount: vine.number().positive(),
     dueDate: vine.date(),
     installments: vine.number().min(1).optional(),
@@ -32,7 +40,9 @@ export const listStudentPaymentsValidator = vine.compile(
     studentId: vine.string().trim().optional(),
     contractId: vine.string().trim().optional(),
     status: vine.enum(['NOT_PAID', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'FAILED']).optional(),
-    type: vine.enum(['ENROLLMENT', 'TUITION', 'CANTEEN', 'COURSE', 'AGREEMENT', 'STUDENT_LOAN', 'OTHER']).optional(),
+    type: vine
+      .enum(['ENROLLMENT', 'TUITION', 'CANTEEN', 'COURSE', 'AGREEMENT', 'STUDENT_LOAN', 'OTHER'])
+      .optional(),
     month: vine.number().min(1).max(12).optional(),
     year: vine.number().min(2020).max(2100).optional(),
     page: vine.number().min(1).optional(),

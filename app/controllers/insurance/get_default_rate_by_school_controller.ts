@@ -7,7 +7,8 @@ export default class GetDefaultRateBySchoolController {
     const { limit = 10 } = await request.validateUsing(getDefaultRateBySchoolValidator)
 
     // Calculate default rate by school
-    const schoolStats = await db.rawQuery(`
+    const schoolStats = await db.rawQuery(
+      `
       SELECT
         s.id,
         s.name,
@@ -28,7 +29,9 @@ export default class GetDefaultRateBySchoolController {
       HAVING COUNT(sp.id) > 0
       ORDER BY "defaultRate" DESC
       LIMIT ?
-    `, [limit])
+    `,
+      [limit]
+    )
 
     const schools = schoolStats.rows.map((row: any) => ({
       id: row.id,
@@ -50,9 +53,8 @@ export default class GetDefaultRateBySchoolController {
 
     const totalPayments = Number(platformStats.rows[0]?.totalPayments || 0)
     const overduePayments = Number(platformStats.rows[0]?.overduePayments || 0)
-    const platformDefaultRate = totalPayments > 0
-      ? Math.round((overduePayments / totalPayments) * 10000) / 100
-      : 0
+    const platformDefaultRate =
+      totalPayments > 0 ? Math.round((overduePayments / totalPayments) * 10000) / 100 : 0
 
     return response.ok({
       platformDefaultRate,

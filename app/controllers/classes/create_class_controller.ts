@@ -6,8 +6,8 @@ export default class CreateClassController {
   async handle({ request, response }: HttpContext) {
     const data = await request.validateUsing(createClassValidator)
 
-    const class_ = await Class_.create(data)
+    const classEntity = await Class_.create(data)
 
-    return response.created(class_)
+    return response.created(classEntity)
   }
 }

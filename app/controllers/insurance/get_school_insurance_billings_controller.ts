@@ -4,7 +4,9 @@ import { getSchoolInsuranceBillingsValidator } from '#validators/insurance'
 
 export default class GetSchoolInsuranceBillingsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, limit = 10 } = await request.validateUsing(getSchoolInsuranceBillingsValidator)
+    const { schoolId, limit = 10 } = await request.validateUsing(
+      getSchoolInsuranceBillingsValidator
+    )
 
     const billings = await InsuranceBilling.query()
       .where('schoolId', schoolId)

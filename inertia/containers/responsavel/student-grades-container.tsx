@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useStudentGradesQueryOptions } from '../../hooks/queries/use-student-grades'
+import { useStudentGradesQueryOptions } from '../../hooks/queries/use_student_grades'
 
 interface StudentGradesContainerProps {
   studentId: string

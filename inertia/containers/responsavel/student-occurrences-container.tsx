@@ -33,8 +33,8 @@ import {
   AccordionTrigger,
 } from '../../components/ui/accordion'
 
-import { useStudentOccurrencesQueryOptions } from '../../hooks/queries/use-student-occurrences'
-import { useAcknowledgeOccurrence } from '../../hooks/mutations/use-acknowledge-occurrence'
+import { useStudentOccurrencesQueryOptions } from '../../hooks/queries/use_student_occurrences'
+import { useAcknowledgeOccurrence } from '../../hooks/mutations/use_acknowledge_occurrence'
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 interface StudentOccurrencesContainerProps {

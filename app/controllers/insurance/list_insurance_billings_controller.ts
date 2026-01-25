@@ -4,12 +4,16 @@ import { listInsuranceBillingsValidator } from '#validators/insurance'
 
 export default class ListInsuranceBillingsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, status, startDate, endDate, page = 1, limit = 20 } =
-      await request.validateUsing(listInsuranceBillingsValidator)
+    const {
+      schoolId,
+      status,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 20,
+    } = await request.validateUsing(listInsuranceBillingsValidator)
 
-    const query = InsuranceBilling.query()
-      .preload('school')
-      .orderBy('period', 'desc')
+    const query = InsuranceBilling.query().preload('school').orderBy('period', 'desc')
 
     if (schoolId) {
       query.where('schoolId', schoolId)

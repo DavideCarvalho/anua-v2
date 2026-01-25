@@ -1,8 +1,8 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Trophy, Plus, MoreHorizontal, Users, Target, Calendar } from 'lucide-react'
 
-import { useLeaderboardsQueryOptions } from '../../hooks/queries/use-leaderboards'
-import { useDeleteLeaderboard } from '../../hooks/mutations/use-leaderboard-mutations'
+import { useLeaderboardsQueryOptions } from '../../hooks/queries/use_leaderboards'
+import { useDeleteLeaderboard } from '../../hooks/mutations/use_leaderboard_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

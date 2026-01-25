@@ -4,8 +4,8 @@ import { Eye, X, AlertTriangle, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 import { Button } from '../ui/button'
-import { useClearImpersonation } from '../../hooks/mutations/use-impersonation-mutations'
-import { useImpersonationStatusQueryOptions } from '../../hooks/queries/use-impersonation-status'
+import { useClearImpersonation } from '../../hooks/mutations/use_impersonation_mutations'
+import { useImpersonationStatusQueryOptions } from '../../hooks/queries/use_impersonation_status'
 
 function getRouteForRole(role: string): 'web.responsavel.dashboard' | 'web.escola.dashboard' {
   // Responsáveis vão para /responsavel

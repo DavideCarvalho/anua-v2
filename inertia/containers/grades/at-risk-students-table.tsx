@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useAtRiskStudentsQueryOptions } from '../../hooks/queries/use-at-risk-students'
+import { useAtRiskStudentsQueryOptions } from '../../hooks/queries/use_at_risk_students'
 
 interface AtRiskStudentsTableProps {
   schoolId?: string

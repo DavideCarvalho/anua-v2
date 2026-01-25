@@ -7,7 +7,12 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
-      table.uuid('student_id').notNullable().references('id').inTable('students').onDelete('CASCADE')
+      table
+        .uuid('student_id')
+        .notNullable()
+        .references('id')
+        .inTable('students')
+        .onDelete('CASCADE')
       table.string('file_name').notNullable()
       table.text('file_url').notNullable()
       table.string('mime_type').notNullable()
@@ -19,7 +24,12 @@ export default class extends BaseSchema {
       table.timestamp('reviewed_at', { useTz: true }).nullable()
       table.text('rejection_reason').nullable()
 
-      table.uuid('contract_document_id').notNullable().references('id').inTable('contract_documents').onDelete('CASCADE')
+      table
+        .uuid('contract_document_id')
+        .notNullable()
+        .references('id')
+        .inTable('contract_documents')
+        .onDelete('CASCADE')
 
       table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(this.now())
       table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(this.now())

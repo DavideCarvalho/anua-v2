@@ -30,11 +30,11 @@ import {
 } from '~/components/ui/select'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
-import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use-student'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use-academic-periods'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use-academic-period-courses'
-import { useClassesQueryOptions } from '~/hooks/queries/use-classes'
-import { useUpdateStudent } from '~/hooks/mutations/use-student-mutations'
+import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
+import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
+import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
+import { useUpdateStudent } from '~/hooks/mutations/use_student_mutations'
 import {
   getCourseLabels,
   getLevelLabels,

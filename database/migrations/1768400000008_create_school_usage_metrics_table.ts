@@ -8,12 +8,7 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
       // Foreign key
-      table
-        .uuid('school_id')
-        .notNullable()
-        .references('id')
-        .inTable('schools')
-        .onDelete('CASCADE')
+      table.uuid('school_id').notNullable().references('id').inTable('schools').onDelete('CASCADE')
 
       // Period
       table.integer('month').notNullable() // 1-12

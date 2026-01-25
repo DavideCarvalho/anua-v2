@@ -38,7 +38,9 @@ export default class BatchSaveGradesController {
           studentId: gradeData.studentId,
           assignmentId: payload.assignmentId,
           grade: gradeData.grade,
-          submittedAt: gradeData.submittedAt ? DateTime.fromISO(gradeData.submittedAt) : DateTime.now(),
+          submittedAt: gradeData.submittedAt
+            ? DateTime.fromISO(gradeData.submittedAt)
+            : DateTime.now(),
         })
       }
 

@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useResponsavelStudentPaymentsQueryOptions } from '../../hooks/queries/use-responsavel-student-payments'
+import { useResponsavelStudentPaymentsQueryOptions } from '../../hooks/queries/use_responsavel_student_payments'
 
 interface StudentPaymentsContainerProps {
   studentId: string

@@ -21,7 +21,7 @@ import {
 } from '../../components/ui/form'
 import { Textarea } from '../../components/ui/textarea'
 
-import { useRejectPurchaseRequestMutation } from '../../hooks/mutations/use-reject-purchase-request'
+import { useRejectPurchaseRequestMutation } from '../../hooks/mutations/use_reject_purchase_request'
 
 const schema = z.object({
   reason: z.string().min(1, 'Informe o motivo da rejeição'),

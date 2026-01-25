@@ -14,9 +14,9 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { ImageUpload } from '../../components/ui/image-upload'
-import { useSchool } from '../../hooks/queries/use-school'
-import { useUpdateSchool } from '../../hooks/mutations/use-school-mutations'
-import { useUploadSchoolLogo } from '../../hooks/mutations/use-upload-school-logo'
+import { useSchool } from '../../hooks/queries/use_school'
+import { useUpdateSchool } from '../../hooks/mutations/use_school_mutations'
+import { useUploadSchoolLogo } from '../../hooks/mutations/use_upload_school_logo'
 import type { SharedProps } from '../../lib/types'
 
 export function SchoolSettingsForm() {

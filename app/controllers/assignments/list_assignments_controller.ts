@@ -11,10 +11,10 @@ export default class ListAssignmentsController {
     const academicPeriodId = request.input('academicPeriodId')
 
     const query = Assignment.query()
-      .preload('teacherHasClass', (query) => {
-        query.preload('class')
-        query.preload('subject')
-        query.preload('teacher', (tq) => tq.preload('user'))
+      .preload('teacherHasClass', (thcQuery) => {
+        thcQuery.preload('class')
+        thcQuery.preload('subject')
+        thcQuery.preload('teacher', (tq) => tq.preload('user'))
       })
       .withCount('submissions', (q) => q.as('submissionsCount'))
       .orderBy('dueDate', 'desc')

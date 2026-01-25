@@ -25,7 +25,7 @@ import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { useCreatePurchaseRequestMutation } from '../../hooks/mutations/use-create-purchase-request'
+import { useCreatePurchaseRequestMutation } from '../../hooks/mutations/use_create_purchase_request'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const schema = z.object({

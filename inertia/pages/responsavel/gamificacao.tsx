@@ -7,7 +7,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use-responsavel-stats'
+import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 
 function GamificacaoContent() {
   const { data } = useSuspenseQuery(useResponsavelStatsQueryOptions())

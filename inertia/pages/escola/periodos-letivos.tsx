@@ -32,8 +32,8 @@ import { Calendar, Plus, Settings, Loader2, MoreVertical, Trash2 } from 'lucide-
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatSegmentName } from '~/lib/formatters'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use-academic-periods'
-import { useDeleteAcademicPeriodMutationOptions } from '~/hooks/mutations/use-academic-period-mutations'
+import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { useDeleteAcademicPeriodMutationOptions } from '~/hooks/mutations/use_academic_period_mutations'
 
 function formatDate(dateString: string): string {
   return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR })

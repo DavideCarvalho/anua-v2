@@ -3,7 +3,7 @@ import Class_ from '#models/class'
 
 export default class ShowClassController {
   async handle({ params, response }: HttpContext) {
-    const class_ = await Class_.query()
+    const classEntity = await Class_.query()
       .where('id', params.id)
       .preload('level')
       .preload('students')
@@ -17,10 +17,10 @@ export default class ShowClassController {
       })
       .first()
 
-    if (!class_) {
+    if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
-    return response.ok(class_)
+    return response.ok(classEntity)
   }
 }

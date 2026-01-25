@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreateSchoolPartnerMutation } from '../../hooks/mutations/use-create-school-partner'
+import { useCreateSchoolPartnerMutation } from '../../hooks/mutations/use_create_school_partner'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),

@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useEnrollmentTrendsQueryOptions } from '../../hooks/queries/use-enrollment-trends'
+import { useEnrollmentTrendsQueryOptions } from '../../hooks/queries/use_enrollment_trends'
 
 interface EnrollmentTrendsChartProps {
   schoolId?: string

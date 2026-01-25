@@ -10,10 +10,7 @@ export default class ShowPostController {
       .preload('user')
       .preload('school')
       .preload('comments', (query) => {
-        query
-          .preload('user')
-          .withCount('likes')
-          .orderBy('createdAt', 'asc')
+        query.preload('user').withCount('likes').orderBy('createdAt', 'asc')
       })
       .withCount('likes')
       .withCount('comments')

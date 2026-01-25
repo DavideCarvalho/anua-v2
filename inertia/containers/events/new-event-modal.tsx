@@ -33,7 +33,7 @@ import {
 import { Switch } from '../../components/ui/switch'
 import { Textarea } from '../../components/ui/textarea'
 
-import { useCreateEventMutation } from '../../hooks/mutations/use-create-event'
+import { useCreateEventMutation } from '../../hooks/mutations/use_create_event'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',

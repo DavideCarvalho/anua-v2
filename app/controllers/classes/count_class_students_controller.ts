@@ -4,9 +4,9 @@ import Student from '#models/student'
 
 export default class CountClassStudentsController {
   async handle({ params, response }: HttpContext) {
-    const class_ = await Class_.find(params.id)
+    const classEntity = await Class_.find(params.id)
 
-    if (!class_) {
+    if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 

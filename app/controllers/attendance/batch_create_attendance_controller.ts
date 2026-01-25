@@ -75,9 +75,7 @@ export default class BatchCreateAttendanceController {
       const timeStr = date.toFormat('HH:mm')
 
       // Find the exact slot matching weekday and time
-      let slot = allSlots.find(
-        (s) => s.classWeekDay === weekday && s.startTime === timeStr
-      )
+      let slot = allSlots.find((s) => s.classWeekDay === weekday && s.startTime === timeStr)
 
       // Fallback: first slot for that weekday
       if (!slot) {

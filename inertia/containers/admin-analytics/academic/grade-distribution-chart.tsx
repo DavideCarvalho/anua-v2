@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useGradeDistributionQueryOptions } from '../../../hooks/queries/use-grade-distribution'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useGradeDistributionQueryOptions } from '../../../hooks/queries/use_grade_distribution'
 import { ChartContainer } from '../shared/chart-container'
 
 export function GradeDistributionChart() {

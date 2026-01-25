@@ -22,8 +22,8 @@ import {
 } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
 
-import { usePlatformSettings } from '../../hooks/queries/use-platform-settings'
-import { useUpdatePlatformSettings } from '../../hooks/mutations/use-platform-settings-mutations'
+import { usePlatformSettings } from '../../hooks/queries/use_platform_settings'
+import { useUpdatePlatformSettings } from '../../hooks/mutations/use_platform_settings_mutations'
 
 const platformSettingsSchema = z.object({
   defaultTrialDays: z.number().int().min(0, 'Dias de trial devem ser positivos'),

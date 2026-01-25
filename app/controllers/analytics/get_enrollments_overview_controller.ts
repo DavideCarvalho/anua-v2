@@ -124,7 +124,8 @@ export default class GetEnrollmentsOverviewController {
       pendingStudents,
       cancelledStudents: 0, // Schema doesn't support cancelled status yet
       recentEnrollments,
-      activeRate: totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100 * 10) / 10 : 0,
+      activeRate:
+        totalStudents > 0 ? Math.round((activeStudents / totalStudents) * 100 * 10) / 10 : 0,
       byStatus,
       byLevel,
     })

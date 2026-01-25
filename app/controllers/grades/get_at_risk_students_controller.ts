@@ -119,9 +119,7 @@ export default class GetAtRiskStudentsController {
       totalAtRisk: atRiskStudents.length,
       totalStudents,
       atRiskPercentage:
-        totalStudents > 0
-          ? Math.round((atRiskStudents.length / totalStudents) * 100 * 10) / 10
-          : 0,
+        totalStudents > 0 ? Math.round((atRiskStudents.length / totalStudents) * 100 * 10) / 10 : 0,
       bySchool: Array.from(bySchool.values())
         .sort((a, b) => b.count - a.count)
         .map((item) => ({

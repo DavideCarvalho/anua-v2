@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 
 import { EscolaLayout } from '~/components/layouts'
 import { Card, CardContent } from '~/components/ui/card'
-import { useAcademicPeriodBySlugQueryOptions } from '~/hooks/queries/use-academic-period-by-slug'
+import { useAcademicPeriodBySlugQueryOptions } from '~/hooks/queries/use_academic_period_by_slug'
 import { PeriodoLetivoHeader } from '~/containers/academic-periods/periodo-letivo-header'
 import { PeriodoLetivoInfoCard } from '~/containers/academic-periods/periodo-letivo-info-card'
 import { CursosDoPeríodoList } from '~/containers/academic-periods/cursos-do-periodo-list'

@@ -1,8 +1,8 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Package, Plus, MoreHorizontal, Users, GraduationCap, Building2 } from 'lucide-react'
 
-import { useSubscriptionPlansQueryOptions } from '../../hooks/queries/use-subscription-plans'
-import { useDeleteSubscriptionPlan } from '../../hooks/mutations/use-subscription-mutations'
+import { useSubscriptionPlansQueryOptions } from '../../hooks/queries/use_subscription_plans'
+import { useDeleteSubscriptionPlan } from '../../hooks/mutations/use_subscription_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

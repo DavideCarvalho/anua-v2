@@ -3,7 +3,7 @@ import { Inbox } from 'lucide-react'
 
 import { Card, CardContent } from '../../components/ui/card'
 
-import { usePostsQueryOptions } from '../../hooks/queries/use-posts'
+import { usePostsQueryOptions } from '../../hooks/queries/use_posts'
 import { PostCard } from './post-card'
 
 interface PostsFeedProps {

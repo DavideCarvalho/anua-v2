@@ -33,12 +33,12 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Switch } from '../../components/ui/switch'
-import { useAchievements } from '../../hooks/queries/use-achievements'
+import { useAchievements } from '../../hooks/queries/use_achievements'
 import {
   useCreateAchievement,
   useUpdateAchievement,
   useDeleteAchievement,
-} from '../../hooks/mutations/use-achievement-mutations'
+} from '../../hooks/mutations/use_achievement_mutations'
 import type { SharedProps } from '../../lib/types'
 
 const ACHIEVEMENT_TYPES = [

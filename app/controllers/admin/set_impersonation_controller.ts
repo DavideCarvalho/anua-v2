@@ -49,7 +49,9 @@ export default class SetImpersonationController {
     // Pegar a primeira escola do usuário via UserHasSchool
     const firstSchool = targetUser.userHasSchools?.[0]?.school
 
-    console.log(`[IMPERSONATION] Admin ${user.id} (${user.name}) now impersonating ${targetUser.id} (${targetUser.name})`)
+    console.log(
+      `[IMPERSONATION] Admin ${user.id} (${user.name}) now impersonating ${targetUser.id} (${targetUser.name})`
+    )
 
     return {
       success: true,

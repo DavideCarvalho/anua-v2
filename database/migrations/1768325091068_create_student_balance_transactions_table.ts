@@ -7,23 +7,32 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
-      table.uuid('student_id').notNullable().references('id').inTable('students').onDelete('CASCADE')
+      table
+        .uuid('student_id')
+        .notNullable()
+        .references('id')
+        .inTable('students')
+        .onDelete('CASCADE')
       table.integer('amount').notNullable() // Value in cents (positive = credit, negative = debit)
 
-      table.enum('type', [
-        'TOP_UP',           // Credit recharge
-        'CANTEEN_PURCHASE', // Canteen purchase
-        'STORE_PURCHASE',   // Gamification store purchase
-        'REFUND',           // Refund
-        'ADJUSTMENT'        // Manual adjustment
-      ]).notNullable()
+      table
+        .enum('type', [
+          'TOP_UP', // Credit recharge
+          'CANTEEN_PURCHASE', // Canteen purchase
+          'STORE_PURCHASE', // Gamification store purchase
+          'REFUND', // Refund
+          'ADJUSTMENT', // Manual adjustment
+        ])
+        .notNullable()
 
-      table.enum('status', [
-        'PENDING',    // Awaiting payment (for recharges)
-        'COMPLETED',  // Completed
-        'FAILED',     // Failed
-        'CANCELLED'   // Cancelled
-      ]).defaultTo('COMPLETED')
+      table
+        .enum('status', [
+          'PENDING', // Awaiting payment (for recharges)
+          'COMPLETED', // Completed
+          'FAILED', // Failed
+          'CANCELLED', // Cancelled
+        ])
+        .defaultTo('COMPLETED')
 
       table.string('description').nullable()
       table.integer('previous_balance').notNullable()

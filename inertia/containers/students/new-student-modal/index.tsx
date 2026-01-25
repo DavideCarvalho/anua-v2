@@ -16,7 +16,7 @@ import { AddressStep } from './steps/address-step'
 import { MedicalInfoStep } from './steps/medical-info-step'
 import { BillingStep } from './steps/billing-step'
 import { newStudentSchema, type NewStudentFormData } from './schema'
-import { useEnrollStudent } from '~/hooks/mutations/use-student-mutations'
+import { useEnrollStudent } from '~/hooks/mutations/use_student_mutations'
 
 const STEPS_CONFIG = [
   { title: 'Aluno', description: 'Dados do aluno' },

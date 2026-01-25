@@ -18,14 +18,10 @@ export default class GetAdminStatsController {
       return response.forbidden({ message: 'Acesso negado' })
     }
 
-    const totalSchools = await School.query()
-      .count('* as total')
-      .first()
+    const totalSchools = await School.query().count('* as total').first()
 
     // School table doesn't have 'active' column, count all schools
-    const activeSchools = await School.query()
-      .count('* as total')
-      .first()
+    const activeSchools = await School.query().count('* as total').first()
 
     const trialSchools = await Subscription.query()
       .where('status', 'TRIAL')
@@ -39,9 +35,7 @@ export default class GetAdminStatsController {
 
     const totalStudents = await Student.query().count('* as total').first()
 
-    const totalTeachers = await Teacher.query()
-      .count('* as total')
-      .first()
+    const totalTeachers = await Teacher.query().count('* as total').first()
 
     const activeSubscriptions = await Subscription.query()
       .where('status', 'ACTIVE')

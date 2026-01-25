@@ -18,8 +18,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useSchoolPartnerQueryOptions } from '../../hooks/queries/use-school-partner'
-import { useUpdateSchoolPartnerMutation } from '../../hooks/mutations/use-update-school-partner'
+import { useSchoolPartnerQueryOptions } from '../../hooks/queries/use_school_partner'
+import { useUpdateSchoolPartnerMutation } from '../../hooks/mutations/use_update_school_partner'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),

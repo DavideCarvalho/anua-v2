@@ -1,6 +1,13 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
-import { BaseModel, column, hasMany, manyToMany, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
+import {
+  BaseModel,
+  column,
+  hasMany,
+  manyToMany,
+  belongsTo,
+  beforeCreate,
+} from '@adonisjs/lucid/orm'
 import { slugify } from '@adonisjs/lucid-slugify'
 import type { HasMany, ManyToMany, BelongsTo } from '@adonisjs/lucid/types/relations'
 import AcademicPeriod from './academic_period.js'

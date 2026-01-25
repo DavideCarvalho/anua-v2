@@ -7,9 +7,9 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 
-import { useNotificationsQueryOptions } from '../../hooks/queries/use-notifications'
-import { useMarkNotificationReadMutation } from '../../hooks/mutations/use-mark-notification-read'
-import { useMarkAllNotificationsReadMutation } from '../../hooks/mutations/use-mark-all-notifications-read'
+import { useNotificationsQueryOptions } from '../../hooks/queries/use_notifications'
+import { useMarkNotificationReadMutation } from '../../hooks/mutations/use_mark_notification_read'
+import { useMarkAllNotificationsReadMutation } from '../../hooks/mutations/use_mark_all_notifications_read'
 
 interface NotificationsListProps {
   onNotificationClick?: (notification: Notification) => void

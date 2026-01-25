@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { DollarSign, ShoppingCart, Package, TrendingUp, CreditCard, ArrowDownCircle } from 'lucide-react'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useCanteenOverviewQueryOptions } from '../../../hooks/queries/use-canteen-overview'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useCanteenOverviewQueryOptions } from '../../../hooks/queries/use_canteen_overview'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 

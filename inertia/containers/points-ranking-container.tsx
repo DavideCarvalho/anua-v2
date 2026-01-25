@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Trophy, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
-import { usePointsRankingQueryOptions } from '../hooks/queries/use-points-ranking'
+import { usePointsRankingQueryOptions } from '../hooks/queries/use_points_ranking'
 
 function PointsRankingSkeleton() {
   return (

@@ -7,8 +7,8 @@ import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { Separator } from '../../components/ui/separator'
 
-import { useNotificationPreferencesQueryOptions } from '../../hooks/queries/use-notification-preferences'
-import { useUpdateNotificationPreferencesMutation } from '../../hooks/mutations/use-update-notification-preferences'
+import { useNotificationPreferencesQueryOptions } from '../../hooks/queries/use_notification_preferences'
+import { useUpdateNotificationPreferencesMutation } from '../../hooks/mutations/use_update_notification_preferences'
 
 interface NotificationPreference {
   id: string

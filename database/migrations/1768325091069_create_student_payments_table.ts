@@ -7,29 +7,31 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
-      table.uuid('student_id').notNullable().references('id').inTable('students').onDelete('CASCADE')
+      table
+        .uuid('student_id')
+        .notNullable()
+        .references('id')
+        .inTable('students')
+        .onDelete('CASCADE')
       table.integer('amount').notNullable()
       table.integer('month').notNullable()
       table.integer('year').notNullable()
 
-      table.enum('type', [
-        'ENROLLMENT',
-        'TUITION',
-        'CANTEEN',
-        'COURSE',
-        'AGREEMENT',
-        'STUDENT_LOAN',
-        'OTHER'
-      ]).notNullable()
+      table
+        .enum('type', [
+          'ENROLLMENT',
+          'TUITION',
+          'CANTEEN',
+          'COURSE',
+          'AGREEMENT',
+          'STUDENT_LOAN',
+          'OTHER',
+        ])
+        .notNullable()
 
-      table.enum('status', [
-        'NOT_PAID',
-        'PENDING',
-        'PAID',
-        'OVERDUE',
-        'CANCELLED',
-        'FAILED'
-      ]).defaultTo('NOT_PAID')
+      table
+        .enum('status', ['NOT_PAID', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'FAILED'])
+        .defaultTo('NOT_PAID')
 
       table.integer('total_amount').defaultTo(0)
       table.date('due_date').notNullable()

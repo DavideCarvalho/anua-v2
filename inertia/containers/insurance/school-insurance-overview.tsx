@@ -13,9 +13,9 @@ import {
 } from '../../components/ui/table'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useSchoolInsuranceStatsQueryOptions } from '../../hooks/queries/use-school-insurance-stats'
-import { useSchoolInsuranceBillingsQueryOptions } from '../../hooks/queries/use-school-insurance-billings'
-import { useSchoolInsuranceClaimsQueryOptions } from '../../hooks/queries/use-school-insurance-claims'
+import { useSchoolInsuranceStatsQueryOptions } from '../../hooks/queries/use_school_insurance_stats'
+import { useSchoolInsuranceBillingsQueryOptions } from '../../hooks/queries/use_school_insurance_billings'
+import { useSchoolInsuranceClaimsQueryOptions } from '../../hooks/queries/use_school_insurance_claims'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_COLORS: Record<string, string> = {

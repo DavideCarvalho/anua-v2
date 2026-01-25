@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { GraduationCap, BookOpen, CheckCircle, AlertTriangle, Users, FileText } from 'lucide-react'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useAcademicOverviewQueryOptions } from '../../../hooks/queries/use-academic-overview'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useAcademicOverviewQueryOptions } from '../../../hooks/queries/use_academic_overview'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 

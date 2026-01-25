@@ -3,11 +3,11 @@ import { Calendar, Check, X, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use-teacher-absences'
+import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use_teacher_absences'
 import {
   useApproveTeacherAbsenceMutationOptions,
   useRejectTeacherAbsenceMutationOptions,
-} from '../../hooks/mutations/use-teacher-mutations'
+} from '../../hooks/mutations/use_teacher_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

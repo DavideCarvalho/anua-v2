@@ -17,7 +17,7 @@ import {
 import { Alert, AlertDescription } from '../../components/ui/alert'
 
 import type { EnrollmentFormData } from './enrollment-form'
-import { useFindScholarshipMutation } from '../../hooks/mutations/use-find-scholarship'
+import { useFindScholarshipMutation } from '../../hooks/mutations/use_find_scholarship'
 
 interface StepBillingProps {
   schoolId: string

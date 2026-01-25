@@ -7,10 +7,7 @@ export default class GetInsuranceConfigController {
   async handle({ request, response }: HttpContext) {
     const { schoolId } = await request.validateUsing(getInsuranceConfigValidator)
 
-    const school = await School.query()
-      .where('id', schoolId)
-      .preload('schoolChain')
-      .first()
+    const school = await School.query().where('id', schoolId).preload('schoolChain').first()
 
     if (!school) {
       return response.notFound({ message: 'Escola não encontrada' })
@@ -29,7 +26,11 @@ export default class GetInsuranceConfigController {
       source: {
         hasInsurance: school.hasInsurance !== null ? 'school' : chain ? 'chain' : 'default',
         insurancePercentage:
-          school.insurancePercentage !== null ? 'school' : chain?.insurancePercentage ? 'chain' : 'default',
+          school.insurancePercentage !== null
+            ? 'school'
+            : chain?.insurancePercentage
+              ? 'chain'
+              : 'default',
         insuranceCoveragePercentage:
           school.insuranceCoveragePercentage !== null
             ? 'school'
@@ -47,11 +48,9 @@ export default class GetInsuranceConfigController {
   }
 
   private resolveConfig(school: School, chain: SchoolChain | null) {
-    const hasInsurance =
-      school.hasInsurance ?? chain?.hasInsuranceByDefault ?? false
+    const hasInsurance = school.hasInsurance ?? chain?.hasInsuranceByDefault ?? false
 
-    const insurancePercentage =
-      school.insurancePercentage ?? chain?.insurancePercentage ?? 3
+    const insurancePercentage = school.insurancePercentage ?? chain?.insurancePercentage ?? 3
 
     const insuranceCoveragePercentage =
       school.insuranceCoveragePercentage ?? chain?.insuranceCoveragePercentage ?? 100

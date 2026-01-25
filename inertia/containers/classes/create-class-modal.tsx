@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import type { SharedProps } from '~/lib/types'
-import { useTeacherSubjectsQueryOptions } from '~/hooks/queries/use-teacher-subjects'
+import { useTeacherSubjectsQueryOptions } from '~/hooks/queries/use_teacher_subjects'
 
 const createClassSchema = z.object({
   name: z.string().min(1, 'Qual o nome da turma?'),

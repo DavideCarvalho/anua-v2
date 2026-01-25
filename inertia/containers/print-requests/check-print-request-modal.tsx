@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
-import { usePrintRequestQueryOptions } from '../../hooks/queries/use-print-request'
-import { useApprovePrintRequestMutation } from '../../hooks/mutations/use-approve-print-request'
+import { usePrintRequestQueryOptions } from '../../hooks/queries/use_print_request'
+import { useApprovePrintRequestMutation } from '../../hooks/mutations/use_approve_print_request'
 
 export function CheckPrintRequestModal({
   printRequestId,

@@ -29,7 +29,7 @@ import {
   AccordionTrigger,
 } from '../../components/ui/accordion'
 
-import { useStudentAssignmentsQueryOptions } from '../../hooks/queries/use-student-assignments'
+import { useStudentAssignmentsQueryOptions } from '../../hooks/queries/use_student_assignments'
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 interface StudentAssignmentsContainerProps {

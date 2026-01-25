@@ -1,15 +1,15 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Calendar, Percent, DollarSign, Plus, Trash2, AlertCircle } from 'lucide-react'
 
-import { useContractPaymentDaysQueryOptions } from '../../hooks/queries/use-contract-payment-days'
-import { useContractInterestConfigQueryOptions } from '../../hooks/queries/use-contract-interest-config'
-import { useContractEarlyDiscountsQueryOptions } from '../../hooks/queries/use-contract-early-discounts'
+import { useContractPaymentDaysQueryOptions } from '../../hooks/queries/use_contract_payment_days'
+import { useContractInterestConfigQueryOptions } from '../../hooks/queries/use_contract_interest_config'
+import { useContractEarlyDiscountsQueryOptions } from '../../hooks/queries/use_contract_early_discounts'
 import {
   useAddContractPaymentDay,
   useRemoveContractPaymentDay,
   useAddContractEarlyDiscount,
   useRemoveContractEarlyDiscount,
-} from '../../hooks/mutations/use-contract-financial-mutations'
+} from '../../hooks/mutations/use_contract_financial_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

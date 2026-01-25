@@ -24,8 +24,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { usePrintRequestQueryOptions } from '../../hooks/queries/use-print-request'
-import { useReviewPrintRequestMutation } from '../../hooks/mutations/use-review-print-request'
+import { usePrintRequestQueryOptions } from '../../hooks/queries/use_print_request'
+import { useReviewPrintRequestMutation } from '../../hooks/mutations/use_review_print_request'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),

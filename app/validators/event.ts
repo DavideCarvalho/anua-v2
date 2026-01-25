@@ -1,7 +1,15 @@
 import vine from '@vinejs/vine'
 
 // Event Types
-const eventTypes = ['ACADEMIC', 'SOCIAL', 'SPORTS', 'CULTURAL', 'FIELD_TRIP', 'MEETING', 'GRADUATION'] as const
+const eventTypes = [
+  'ACADEMIC',
+  'SOCIAL',
+  'SPORTS',
+  'CULTURAL',
+  'FIELD_TRIP',
+  'MEETING',
+  'GRADUATION',
+] as const
 const eventStatuses = ['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED'] as const
 const eventVisibilities = ['PUBLIC', 'SCHOOL_ONLY', 'CLASS_ONLY', 'INVITE_ONLY'] as const
 const participationStatuses = ['INVITED', 'CONFIRMED', 'DECLINED', 'ATTENDED', 'ABSENT'] as const

@@ -39,10 +39,10 @@ import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useInsuranceClaimsQueryOptions } from '../../hooks/queries/use-insurance-claims'
-import { useApproveInsuranceClaimMutation } from '../../hooks/mutations/use-approve-insurance-claim'
-import { useRejectInsuranceClaimMutation } from '../../hooks/mutations/use-reject-insurance-claim'
-import { useMarkClaimPaidMutation } from '../../hooks/mutations/use-mark-claim-paid'
+import { useInsuranceClaimsQueryOptions } from '../../hooks/queries/use_insurance_claims'
+import { useApproveInsuranceClaimMutation } from '../../hooks/mutations/use_approve_insurance_claim'
+import { useRejectInsuranceClaimMutation } from '../../hooks/mutations/use_reject_insurance_claim'
+import { useMarkClaimPaidMutation } from '../../hooks/mutations/use_mark_claim_paid'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_OPTIONS = [

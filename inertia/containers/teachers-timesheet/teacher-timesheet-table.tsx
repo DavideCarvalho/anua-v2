@@ -13,8 +13,8 @@ import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { ErrorBoundary } from '../../components/error-boundary'
 
-import { useTeachersTimesheetQueryOptions } from '../../hooks/queries/use-teachers-timesheet'
-import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use-academic-periods'
+import { useTeachersTimesheetQueryOptions } from '../../hooks/queries/use_teachers_timesheet'
+import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use_academic_periods'
 
 function TeacherTimesheetTableContent({
   onViewAbsences,

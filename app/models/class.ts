@@ -1,6 +1,13 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
-import { BaseModel, beforeCreate, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import {
+  BaseModel,
+  beforeCreate,
+  column,
+  belongsTo,
+  hasMany,
+  manyToMany,
+} from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Level from './level.js'
 import School from './school.js'
@@ -11,6 +18,7 @@ import Exam from './exam.js'
 import TeacherHasClass from './teacher_has_class.js'
 import AcademicPeriod from './academic_period.js'
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Using underscore suffix to avoid JS reserved keyword 'class'
 export default class Class_ extends BaseModel {
   static table = 'Class'
 

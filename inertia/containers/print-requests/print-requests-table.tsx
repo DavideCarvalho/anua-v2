@@ -12,13 +12,13 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { usePrintRequestsQueryOptions } from '../../hooks/queries/use-print-requests'
+import { usePrintRequestsQueryOptions } from '../../hooks/queries/use_print_requests'
 import {
   useApprovePrintRequest,
   useRejectPrintRequest,
   useMarkPrintRequestPrinted,
   useReviewPrintRequest,
-} from '../../hooks/mutations/use-print-request-actions'
+} from '../../hooks/mutations/use_print_request_actions'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

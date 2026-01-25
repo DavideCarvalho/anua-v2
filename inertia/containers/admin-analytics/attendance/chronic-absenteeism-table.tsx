@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useChronicAbsenteeismQueryOptions } from '../../../hooks/queries/use-chronic-absenteeism'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useChronicAbsenteeismQueryOptions } from '../../../hooks/queries/use_chronic_absenteeism'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,

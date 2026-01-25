@@ -22,7 +22,7 @@ import {
   SEGMENTS,
   SEGMENT_LABELS,
   type EditAcademicPeriodFormValues,
-} from '../schemas/edit-academic-period.schema'
+} from '../schemas/edit_academic_period.schema'
 
 export function CalendarForm() {
   const form = useFormContext<EditAcademicPeriodFormValues>()

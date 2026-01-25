@@ -31,8 +31,8 @@ import {
   TableRow,
 } from '../../components/ui/table'
 import { tuyau } from '../../lib/api'
-import { useSchoolQueryOptions } from '../../hooks/queries/use-schools'
-import { useSetImpersonation } from '../../hooks/mutations/use-impersonation-mutations'
+import { useSchoolQueryOptions } from '../../hooks/queries/use_schools'
+import { useSetImpersonation } from '../../hooks/mutations/use_impersonation_mutations'
 
 const ROLE_TRANSLATIONS: Record<string, string> = {
   SCHOOL_DIRECTOR: 'Diretor(a)',

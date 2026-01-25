@@ -26,7 +26,8 @@ export default class UpdateEventController {
     if (data.type !== undefined) event.type = data.type
     if (data.maxParticipants !== undefined) event.maxParticipants = data.maxParticipants
     if (data.visibility !== undefined) event.visibility = data.visibility
-    if (data.requiresParentalConsent !== undefined) event.requiresParentalConsent = data.requiresParentalConsent
+    if (data.requiresParentalConsent !== undefined)
+      event.requiresParentalConsent = data.requiresParentalConsent
     // Validator provides startsAt, model expects startDate
     if (data.startsAt !== undefined) event.startDate = DateTime.fromJSDate(data.startsAt)
     // Validator provides endsAt, model expects endDate

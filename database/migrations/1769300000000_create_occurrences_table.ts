@@ -7,13 +7,13 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
-      table.uuid('student_id').notNullable().references('id').inTable('students').onDelete('CASCADE')
       table
-        .uuid('reported_by')
+        .uuid('student_id')
         .notNullable()
         .references('id')
-        .inTable('users')
-        .onDelete('SET NULL')
+        .inTable('students')
+        .onDelete('CASCADE')
+      table.uuid('reported_by').notNullable().references('id').inTable('users').onDelete('SET NULL')
       table.uuid('resolved_by').nullable().references('id').inTable('users').onDelete('SET NULL')
 
       table

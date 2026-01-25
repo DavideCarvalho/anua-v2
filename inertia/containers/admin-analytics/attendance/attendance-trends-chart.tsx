@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useAttendanceTrendsQueryOptions } from '../../../hooks/queries/use-attendance-trends'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useAttendanceTrendsQueryOptions } from '../../../hooks/queries/use_attendance_trends'
 import { ChartContainer } from '../shared/chart-container'
 
 export function AttendanceTrendsChart() {

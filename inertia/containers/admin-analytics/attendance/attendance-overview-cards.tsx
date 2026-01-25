@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Users, CheckCircle, XCircle, Clock, FileCheck } from 'lucide-react'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useAttendanceOverviewQueryOptions } from '../../../hooks/queries/use-attendance-overview'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useAttendanceOverviewQueryOptions } from '../../../hooks/queries/use_attendance_overview'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 

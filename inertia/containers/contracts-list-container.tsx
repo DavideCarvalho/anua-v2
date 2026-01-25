@@ -2,23 +2,21 @@ import { Suspense, useState } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { usePage } from '@inertiajs/react'
-import { useContractsQueryOptions } from '../hooks/queries/use-contracts'
+import { Link } from '@tuyau/inertia/react'
+import { useContractsQueryOptions } from '../hooks/queries/use_contracts'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import { Switch } from '../components/ui/switch'
 import {
   AlertCircle,
   Search,
   ChevronLeft,
   ChevronRight,
   FileText,
-  MoreHorizontal,
   Plus,
-  CheckCircle,
-  Clock,
-  XCircle,
+  Pencil,
 } from 'lucide-react'
-import { NewContractModal } from './contracts/new-contract-modal'
 import type { SharedProps } from '../lib/types'
 
 // Loading Skeleton
@@ -32,8 +30,8 @@ function ContractsListSkeleton() {
       <div className="border rounded-lg">
         {Array.from({ length: 10 }).map((_, i) => (
           <div key={i} className="p-4 border-b last:border-0">
-            <div className="grid grid-cols-5 gap-4">
-              {Array.from({ length: 5 }).map((_, j) => (
+            <div className="grid grid-cols-6 gap-4">
+              {Array.from({ length: 6 }).map((_, j) => (
                 <div key={j} className="h-4 bg-muted animate-pulse rounded" />
               ))}
             </div>
@@ -70,17 +68,12 @@ function ContractsListError({
   )
 }
 
-const statusConfig: Record<string, { label: string; className: string; icon: any }> = {
-  active: { label: 'Ativo', className: 'bg-green-100 text-green-700', icon: CheckCircle },
-  pending: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-700', icon: Clock },
-  cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-700', icon: XCircle },
-  expired: { label: 'Expirado', className: 'bg-gray-100 text-gray-700', icon: XCircle },
-}
-
-function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return '-'
-  const d = new Date(date)
-  return d.toLocaleDateString('pt-BR')
+function formatCurrency(valueInCents: number | null | undefined): string {
+  if (valueInCents == null) return '-'
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(valueInCents / 100)
 }
 
 // Content Component
@@ -114,54 +107,58 @@ function ContractsListContent({
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left p-4 font-medium">Contrato</th>
-              <th className="text-left p-4 font-medium">Aluno</th>
-              <th className="text-left p-4 font-medium">Início</th>
-              <th className="text-left p-4 font-medium">Término</th>
-              <th className="text-left p-4 font-medium">Status</th>
+              <th className="text-left p-4 font-medium">Nome</th>
+              <th className="text-left p-4 font-medium">Matrícula</th>
+              <th className="text-left p-4 font-medium">Mensalidade</th>
+              <th className="text-left p-4 font-medium">Parcelas</th>
+              <th className="text-left p-4 font-medium">Ativo</th>
               <th className="text-right p-4 font-medium">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {contracts.map((contract: any) => {
-              const status = statusConfig[contract.status] || statusConfig.pending
-              const StatusIcon = status.icon
-
-              return (
-                <tr key={contract.id} className="border-t hover:bg-muted/30 transition-colors">
-                  <td className="p-4">
-                    <span className="font-mono text-sm">#{contract.id.slice(0, 8)}</span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                        {contract.student?.user?.name?.charAt(0) ||
-                          contract.student?.name?.charAt(0) ||
-                          'A'}
-                      </div>
-                      <span className="font-medium">
-                        {contract.student?.user?.name || contract.student?.name || '-'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-muted-foreground">{formatDate(contract.startDate)}</td>
-                  <td className="p-4 text-muted-foreground">{formatDate(contract.endDate)}</td>
-                  <td className="p-4">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.className}`}
-                    >
-                      <StatusIcon className="h-3 w-3" />
-                      {status.label}
+            {contracts.map((contract: any) => (
+              <tr key={contract.id} className="border-t hover:bg-muted/30 transition-colors">
+                <td className="p-4">
+                  <div>
+                    <span className="font-medium">{contract.name}</span>
+                    {contract.description && (
+                      <p className="text-sm text-muted-foreground truncate max-w-xs">
+                        {contract.description}
+                      </p>
+                    )}
+                  </div>
+                </td>
+                <td className="p-4 text-muted-foreground">
+                  {formatCurrency(contract.enrollmentValue)}
+                </td>
+                <td className="p-4 text-muted-foreground">
+                  {formatCurrency(contract.ammount)}
+                </td>
+                <td className="p-4 text-muted-foreground">
+                  {contract.flexibleInstallments ? (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                      Flexível
                     </span>
-                  </td>
-                  <td className="p-4 text-right">
+                  ) : (
+                    `${contract.installments}x`
+                  )}
+                </td>
+                <td className="p-4">
+                  <Switch checked={contract.isActive} disabled />
+                </td>
+                <td className="p-4 text-right">
+                  <Link
+                    route="web.escola.administrativo.contratos.editar"
+                    params={{ id: contract.id }}
+                  >
                     <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Editar
                     </Button>
-                  </td>
-                </tr>
-              )
-            })}
+                  </Link>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -200,10 +197,7 @@ function ContractsListContent({
 
 // Container Export
 export function ContractsListContainer() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
   const [page, setPage] = useState(1)
-  const [isNewModalOpen, setIsNewModalOpen] = useState(false)
 
   return (
     <div className="space-y-4">
@@ -212,19 +206,13 @@ export function ContractsListContainer() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar contratos..." className="pl-9" />
         </div>
-        <Button className="ml-auto" onClick={() => setIsNewModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Contrato
-        </Button>
+        <Link route="web.escola.administrativo.contratos.novo">
+          <Button className="ml-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Contrato
+          </Button>
+        </Link>
       </div>
-
-      {schoolId && (
-        <NewContractModal
-          schoolId={schoolId}
-          open={isNewModalOpen}
-          onOpenChange={setIsNewModalOpen}
-        />
-      )}
 
       <QueryErrorResetBoundary>
         {({ reset }) => (

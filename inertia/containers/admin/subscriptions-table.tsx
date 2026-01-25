@@ -13,12 +13,12 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useSubscriptionsQueryOptions } from '../../hooks/queries/use-subscriptions'
+import { useSubscriptionsQueryOptions } from '../../hooks/queries/use_subscriptions'
 import {
   useCancelSubscription,
   usePauseSubscription,
   useReactivateSubscription,
-} from '../../hooks/mutations/use-subscription-mutations'
+} from '../../hooks/mutations/use_subscription_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

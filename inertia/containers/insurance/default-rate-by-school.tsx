@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 import { Skeleton } from '../../components/ui/skeleton'
-import { useInsuranceDefaultRateQueryOptions } from '../../hooks/queries/use-insurance-default-rate'
+import { useInsuranceDefaultRateQueryOptions } from '../../hooks/queries/use_insurance_default_rate'
 
 export function DefaultRateBySchool() {
   const { data } = useSuspenseQuery(useInsuranceDefaultRateQueryOptions(10))

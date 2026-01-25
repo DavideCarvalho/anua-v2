@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 
-import { useEventConsentsQueryOptions } from '../../hooks/queries/use-event-consents'
+import { useEventConsentsQueryOptions } from '../../hooks/queries/use_event_consents'
 
 interface EventConsentsTrackingProps {
   eventId: string

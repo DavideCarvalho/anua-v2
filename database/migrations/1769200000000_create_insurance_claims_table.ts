@@ -6,7 +6,12 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
-      table.uuid('student_payment_id').notNullable().references('id').inTable('student_payments').onDelete('CASCADE')
+      table
+        .uuid('student_payment_id')
+        .notNullable()
+        .references('id')
+        .inTable('student_payments')
+        .onDelete('CASCADE')
       table.date('claim_date').notNullable()
       table.integer('overdue_amount').notNullable() // valor em centavos
       table.float('coverage_percentage').notNullable() // 50, 70 ou 100

@@ -8,7 +8,14 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare amount: number
   declare month: number
   declare year: number
-  declare type: 'ENROLLMENT' | 'TUITION' | 'CANTEEN' | 'COURSE' | 'AGREEMENT' | 'STUDENT_LOAN' | 'OTHER'
+  declare type:
+    | 'ENROLLMENT'
+    | 'TUITION'
+    | 'CANTEEN'
+    | 'COURSE'
+    | 'AGREEMENT'
+    | 'STUDENT_LOAN'
+    | 'OTHER'
   declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED'
   declare totalAmount: number
   declare dueDate: DateTime

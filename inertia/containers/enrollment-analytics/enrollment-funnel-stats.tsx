@@ -4,7 +4,7 @@ import { Users, FileCheck, Clock, FileSignature, CheckCircle, XCircle } from 'lu
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Progress } from '../../components/ui/progress'
 
-import { useEnrollmentFunnelStatsQueryOptions } from '../../hooks/queries/use-enrollment-funnel-stats'
+import { useEnrollmentFunnelStatsQueryOptions } from '../../hooks/queries/use_enrollment_funnel_stats'
 
 interface EnrollmentFunnelStatsProps {
   schoolId?: string

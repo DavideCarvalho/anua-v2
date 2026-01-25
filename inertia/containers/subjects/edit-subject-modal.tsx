@@ -23,8 +23,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useSubjectQueryOptions } from '../../hooks/queries/use-subject'
-import { useUpdateSubjectMutation } from '../../hooks/mutations/use-update-subject'
+import { useSubjectQueryOptions } from '../../hooks/queries/use_subject'
+import { useUpdateSubjectMutation } from '../../hooks/mutations/use_update_subject'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),

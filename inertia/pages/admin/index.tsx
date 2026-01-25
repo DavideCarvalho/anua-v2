@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
 import { AdminLayout } from '../../components/layouts'
 import { AdminStatsContainer } from '../../containers/admin-stats-container'
-import { useSchoolsQueryOptions } from '../../hooks/queries/use-schools'
+import { useSchoolsQueryOptions } from '../../hooks/queries/use_schools'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Building2, DollarSign, Loader2 } from 'lucide-react'
 

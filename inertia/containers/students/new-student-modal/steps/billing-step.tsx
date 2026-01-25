@@ -17,9 +17,9 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use-academic-periods'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use-academic-period-courses'
-import { useClassesQueryOptions } from '~/hooks/queries/use-classes'
+import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
+import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
 import { getCourseLabel, getLevelLabel } from '~/lib/formatters'
 import type { AcademicPeriodSegment } from '~/lib/formatters'
 import type { NewStudentFormData, PaymentMethod } from '../schema'

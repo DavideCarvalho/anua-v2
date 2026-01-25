@@ -19,10 +19,7 @@ export default class ListEventsController {
     // Use schoolId from request (for admins) or selectedSchoolIds from middleware
     const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
 
-    const query = Event.query()
-      .preload('organizer')
-      .preload('school')
-      .withCount('participants')
+    const query = Event.query().preload('organizer').preload('school').withCount('participants')
 
     if (schoolIds && schoolIds.length > 0) {
       query.whereIn('schoolId', schoolIds)
@@ -48,9 +45,7 @@ export default class ListEventsController {
       query.where('startsAt', '<=', endDate)
     }
 
-    const events = await query
-      .orderBy('startsAt', 'desc')
-      .paginate(page, limit)
+    const events = await query.orderBy('startsAt', 'desc').paginate(page, limit)
 
     return response.ok(events)
   }

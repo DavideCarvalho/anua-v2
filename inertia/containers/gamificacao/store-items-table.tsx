@@ -2,9 +2,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 
-import { useStoreItemsQueryOptions } from '../../hooks/queries/use-store-items'
-import { useToggleStoreItem } from '../../hooks/mutations/use-toggle-store-item'
-import { useDeleteStoreItem } from '../../hooks/mutations/use-delete-store-item'
+import { useStoreItemsQueryOptions } from '../../hooks/queries/use_store_items'
+import { useToggleStoreItem } from '../../hooks/mutations/use_toggle_store_item'
+import { useDeleteStoreItem } from '../../hooks/mutations/use_delete_store_item'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

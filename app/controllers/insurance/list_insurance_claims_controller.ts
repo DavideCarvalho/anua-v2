@@ -4,8 +4,14 @@ import { listInsuranceClaimsValidator } from '#validators/insurance'
 
 export default class ListInsuranceClaimsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, status, startDate, endDate, page = 1, limit = 20 } =
-      await request.validateUsing(listInsuranceClaimsValidator)
+    const {
+      schoolId,
+      status,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 20,
+    } = await request.validateUsing(listInsuranceClaimsValidator)
 
     const query = InsuranceClaim.query()
       .preload('studentPayment', (paymentQuery) => {

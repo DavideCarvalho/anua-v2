@@ -9,7 +9,7 @@ import { NewPrintRequestModal } from '../../../containers/print-requests/new-pri
 import { CheckPrintRequestModal } from '../../../containers/print-requests/check-print-request-modal'
 import { RejectPrintRequestModal } from '../../../containers/print-requests/reject-print-request-modal'
 import { ReviewPrintRequestModal } from '../../../containers/print-requests/review-print-request-modal'
-import { useMarkPrintRequestPrintedMutation } from '../../../hooks/mutations/use-mark-print-request-printed'
+import { useMarkPrintRequestPrintedMutation } from '../../../hooks/mutations/use_mark_print_request_printed'
 import { toast } from 'sonner'
 
 export default function ImpressaoPage() {

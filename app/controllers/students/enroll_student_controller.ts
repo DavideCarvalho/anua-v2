@@ -127,8 +127,7 @@ export default class EnrollStudentController {
           } else {
             // Create new responsible user
             const respId = uuidv7()
-            const respSlug =
-              string.slug(respData.name, { lower: true }) + '-' + respId.slice(0, 8)
+            const respSlug = string.slug(respData.name, { lower: true }) + '-' + respId.slice(0, 8)
 
             responsibleUser = await User.create(
               {
@@ -236,7 +235,9 @@ export default class EnrollStudentController {
         const classRecord = await Class_.find(data.billing.classId)
         if (classRecord?.levelId) {
           // Find the LevelAssignedToCourseHasAcademicPeriod for this level and academic period
-          const levelAssignment = await LevelAssignedToCourseHasAcademicPeriod.query({ client: trx })
+          const levelAssignment = await LevelAssignedToCourseHasAcademicPeriod.query({
+            client: trx,
+          })
             .where('levelId', classRecord.levelId)
             .whereHas('courseHasAcademicPeriod', (query) => {
               query.where('academicPeriodId', data.billing.academicPeriodId)

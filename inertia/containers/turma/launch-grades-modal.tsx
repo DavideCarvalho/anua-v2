@@ -18,7 +18,7 @@ import {
 import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { ErrorBoundary } from '~/components/error-boundary'
-import { useClassStudentsQueryOptions } from '~/hooks/queries/use-class-students'
+import { useClassStudentsQueryOptions } from '~/hooks/queries/use_class_students'
 
 interface LaunchGradesModalProps {
   assignmentId: string

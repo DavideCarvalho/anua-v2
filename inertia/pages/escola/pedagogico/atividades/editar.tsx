@@ -9,8 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../../components/ui/card'
-import type { AssignmentData } from '../../../../hooks/queries/use-assignment'
-import { useAssignmentQueryOptions } from '../../../../hooks/queries/use-assignment'
+import type { AssignmentData } from '../../../../hooks/queries/use_assignment'
+import { useAssignmentQueryOptions } from '../../../../hooks/queries/use_assignment'
 
 interface Props {
   assignmentId: string

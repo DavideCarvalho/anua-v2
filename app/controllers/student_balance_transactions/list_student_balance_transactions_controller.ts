@@ -9,9 +9,7 @@ export default class ListStudentBalanceTransactionsController {
     const page = payload.page || 1
     const limit = payload.limit || 10
 
-    const query = StudentBalanceTransaction.query()
-      .preload('student')
-      .orderBy('createdAt', 'desc')
+    const query = StudentBalanceTransaction.query().preload('student').orderBy('createdAt', 'desc')
 
     if (payload.studentId) {
       query.where('studentId', payload.studentId)

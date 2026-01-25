@@ -53,8 +53,8 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 
-import { useEnrollmentsQueryOptions, type EnrollmentsResponse } from '../../hooks/queries/use-enrollments'
-import { useUpdateDocumentStatusMutation } from '../../hooks/mutations/use-update-document-status'
+import { useEnrollmentsQueryOptions, type EnrollmentsResponse } from '../../hooks/queries/use_enrollments'
+import { useUpdateDocumentStatusMutation } from '../../hooks/mutations/use_update_document_status'
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 type Enrollment = EnrollmentsResponse['data'][number]

@@ -14,10 +14,7 @@ export default class UpdateExamGradeController {
       return response.notFound({ message: 'Exam not found' })
     }
 
-    const grade = await ExamGrade.query()
-      .where('id', gradeId)
-      .where('examId', id)
-      .first()
+    const grade = await ExamGrade.query().where('id', gradeId).where('examId', id).first()
 
     if (!grade) {
       return response.notFound({ message: 'Exam grade not found' })

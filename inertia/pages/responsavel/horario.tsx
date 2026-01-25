@@ -7,7 +7,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use-responsavel-stats'
+import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 import {
   StudentScheduleContainer,
   StudentScheduleContainerSkeleton,

@@ -11,8 +11,8 @@ import {
 } from '../../components/ui/dialog'
 import { Label } from '../../components/ui/label'
 
-import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use-purchase-request'
-import { useApprovePurchaseRequestMutation } from '../../hooks/mutations/use-approve-purchase-request'
+import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use_purchase_request'
+import { useApprovePurchaseRequestMutation } from '../../hooks/mutations/use_approve_purchase_request'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 interface ApprovePurchaseRequestModalProps {

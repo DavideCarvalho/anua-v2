@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
 
-import { useSchoolsQueryOptions } from '../../hooks/queries/use-schools'
+import { useSchoolsQueryOptions } from '../../hooks/queries/use_schools'
 
 interface School {
   id: string

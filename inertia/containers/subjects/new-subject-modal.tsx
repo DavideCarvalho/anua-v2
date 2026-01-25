@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreateSubjectMutation } from '../../hooks/mutations/use-create-subject'
+import { useCreateSubjectMutation } from '../../hooks/mutations/use_create_subject'
 
 const schema = z.object({
   name: z.string().min(1, 'Qual o nome da matéria?'),

@@ -17,15 +17,11 @@ export default class GetAttendanceOverviewController {
       params.schoolChainId = schoolChainId
     }
 
-    const [
-      totalStudentsResult,
-      attendanceStatsResult,
-      _lateArrivalsResult,
-      justifiedAbsencesResult,
-    ] = await Promise.all([
-      // Total de estudantes ativos
-      db.rawQuery(
-        `
+    const [totalStudentsResult, attendanceStatsResult, , justifiedAbsencesResult] =
+      await Promise.all([
+        // Total de estudantes ativos
+        db.rawQuery(
+          `
         SELECT COUNT(DISTINCT st.id) as count
         FROM "Student" st
         JOIN "User" u ON st.id = u.id
@@ -35,12 +31,12 @@ export default class GetAttendanceOverviewController {
         AND u."deletedAt" IS NULL
         ${schoolFilter}
         `,
-        params
-      ),
+          params
+        ),
 
-      // Stats de presenca
-      db.rawQuery(
-        `
+        // Stats de presenca
+        db.rawQuery(
+          `
         SELECT
           COUNT(*) as total_records,
           COUNT(CASE WHEN sha.status = 'PRESENT' THEN 1 END) as present_count,
@@ -54,12 +50,12 @@ export default class GetAttendanceOverviewController {
         JOIN "School" s ON uhs."schoolId" = s.id
         WHERE 1=1 ${schoolFilter}
         `,
-        params
-      ),
+          params
+        ),
 
-      // Atrasos
-      db.rawQuery(
-        `
+        // Atrasos
+        db.rawQuery(
+          `
         SELECT COUNT(*) as count
         FROM "StudentHasAttendance" sha
         JOIN "Attendance" a ON sha."attendanceId" = a.id
@@ -70,12 +66,12 @@ export default class GetAttendanceOverviewController {
         WHERE sha.status = 'LATE'
         ${schoolFilter}
         `,
-        params
-      ),
+          params
+        ),
 
-      // Faltas justificadas
-      db.rawQuery(
-        `
+        // Faltas justificadas
+        db.rawQuery(
+          `
         SELECT COUNT(*) as count
         FROM "StudentHasAttendance" sha
         JOIN "Attendance" a ON sha."attendanceId" = a.id
@@ -87,9 +83,9 @@ export default class GetAttendanceOverviewController {
         AND sha.justification IS NOT NULL
         ${schoolFilter}
         `,
-        params
-      ),
-    ])
+          params
+        ),
+      ])
 
     const totalStudents = Number(totalStudentsResult.rows[0]?.count || 0)
     const totalRecords = Number(attendanceStatsResult.rows[0]?.total_records || 0)

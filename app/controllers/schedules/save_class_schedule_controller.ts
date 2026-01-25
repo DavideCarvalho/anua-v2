@@ -53,9 +53,7 @@ export default class SaveClassScheduleController {
         }
 
         // Delete existing slots
-        await CalendarSlot.query({ client: trx })
-          .where('calendarId', calendar.id)
-          .delete()
+        await CalendarSlot.query({ client: trx }).where('calendarId', calendar.id).delete()
 
         // Create new slots
         for (const slot of slots) {
@@ -86,5 +84,5 @@ export default class SaveClassScheduleController {
 function calculateMinutes(startTime: string, endTime: string): number {
   const [startH, startM] = startTime.split(':').map(Number)
   const [endH, endM] = endTime.split(':').map(Number)
-  return (endH * 60 + endM) - (startH * 60 + startM)
+  return endH * 60 + endM - (startH * 60 + startM)
 }

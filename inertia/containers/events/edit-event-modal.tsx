@@ -34,8 +34,8 @@ import {
 import { Switch } from '../../components/ui/switch'
 import { Textarea } from '../../components/ui/textarea'
 
-import { useEventQueryOptions } from '../../hooks/queries/use-event'
-import { useUpdateEventMutation } from '../../hooks/mutations/use-update-event'
+import { useEventQueryOptions } from '../../hooks/queries/use_event'
+import { useUpdateEventMutation } from '../../hooks/mutations/use_update_event'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',

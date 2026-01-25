@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 import { Skeleton } from '../../components/ui/skeleton'
-import { useSchoolsWithoutInsuranceQueryOptions } from '../../hooks/queries/use-schools-without-insurance'
+import { useSchoolsWithoutInsuranceQueryOptions } from '../../hooks/queries/use_schools_without_insurance'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const RISK_COLORS: Record<string, string> = {

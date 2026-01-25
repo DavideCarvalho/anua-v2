@@ -7,7 +7,11 @@ export default class extends BaseSchema {
     this.schema.alterTable(this.tableName, (table) => {
       table.foreign('role_id').references('id').inTable('roles').onDelete('SET NULL')
       table.foreign('school_id').references('id').inTable('schools').onDelete('SET NULL')
-      table.foreign('school_chain_id').references('id').inTable('school_chains').onDelete('SET NULL')
+      table
+        .foreign('school_chain_id')
+        .references('id')
+        .inTable('school_chains')
+        .onDelete('SET NULL')
       table.foreign('deleted_by').references('id').inTable('users').onDelete('SET NULL')
     })
   }

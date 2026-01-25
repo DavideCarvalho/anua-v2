@@ -17,7 +17,9 @@ export default class extends BaseSchema {
       table.float('canteen_limit').nullable()
       table.integer('balance').defaultTo(0) // Balance in cents for canteen and store
 
-      table.enum('enrollment_status', ['PENDING_DOCUMENT_REVIEW', 'REGISTERED']).defaultTo('PENDING_DOCUMENT_REVIEW')
+      table
+        .enum('enrollment_status', ['PENDING_DOCUMENT_REVIEW', 'REGISTERED'])
+        .defaultTo('PENDING_DOCUMENT_REVIEW')
 
       table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(this.now())
       table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(this.now())

@@ -17,8 +17,8 @@ import { ResponsiblesStep } from '../new-student-modal/steps/responsibles-step'
 import { AddressStep } from '../new-student-modal/steps/address-step'
 import { MedicalInfoStep } from '../new-student-modal/steps/medical-info-step'
 import { editStudentSchema, type EditStudentFormData } from './schema'
-import { useStudentQueryOptions } from '~/hooks/queries/use-student'
-import { useFullUpdateStudent } from '~/hooks/mutations/use-student-mutations'
+import { useStudentQueryOptions } from '~/hooks/queries/use_student'
+import { useFullUpdateStudent } from '~/hooks/mutations/use_student_mutations'
 
 const STEPS_CONFIG = [
   { title: 'Aluno', description: 'Dados do aluno' },

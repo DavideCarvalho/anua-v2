@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useStudentScheduleQueryOptions } from '../../hooks/queries/use-student-schedule'
+import { useStudentScheduleQueryOptions } from '../../hooks/queries/use_student_schedule'
 
 interface StudentScheduleContainerProps {
   studentId: string

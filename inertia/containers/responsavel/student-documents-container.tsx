@@ -18,7 +18,7 @@ import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
 
-import { useStudentDocumentsQueryOptions } from '../../hooks/queries/use-student-documents'
+import { useStudentDocumentsQueryOptions } from '../../hooks/queries/use_student_documents'
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 interface StudentDocumentsContainerProps {

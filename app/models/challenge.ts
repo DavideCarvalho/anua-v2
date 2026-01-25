@@ -5,7 +5,12 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import StudentChallenge from './student_challenge.js'
 
-export type ChallengeCategory = 'ATTENDANCE' | 'ACADEMIC' | 'BEHAVIOR' | 'EXTRACURRICULAR' | 'SPECIAL'
+export type ChallengeCategory =
+  | 'ATTENDANCE'
+  | 'ACADEMIC'
+  | 'BEHAVIOR'
+  | 'EXTRACURRICULAR'
+  | 'SPECIAL'
 export type RecurrencePeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
 
 export default class Challenge extends BaseModel {

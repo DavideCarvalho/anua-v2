@@ -3,11 +3,11 @@ import { Calendar, User, Check, X, Clock, Utensils } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useCanteenMealReservationsQueryOptions } from '../../hooks/queries/use-canteen-meal-reservations'
+import { useCanteenMealReservationsQueryOptions } from '../../hooks/queries/use_canteen_meal_reservations'
 import {
   useUpdateCanteenMealReservationStatus,
   useCancelCanteenMealReservation,
-} from '../../hooks/mutations/use-canteen-reservation-mutations'
+} from '../../hooks/mutations/use_canteen_reservation_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'

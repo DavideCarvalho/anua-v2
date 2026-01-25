@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { DollarSign, CheckCircle, Clock, AlertTriangle, Users, Calendar } from 'lucide-react'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { usePaymentsOverviewQueryOptions } from '../../../hooks/queries/use-payments-overview'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { usePaymentsOverviewQueryOptions } from '../../../hooks/queries/use_payments_overview'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 

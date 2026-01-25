@@ -8,7 +8,12 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
 
       table.uuid('school_id').notNullable().references('id').inTable('schools').onDelete('CASCADE')
-      table.uuid('school_group_id').notNullable().references('id').inTable('school_groups').onDelete('CASCADE')
+      table
+        .uuid('school_group_id')
+        .notNullable()
+        .references('id')
+        .inTable('school_groups')
+        .onDelete('CASCADE')
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

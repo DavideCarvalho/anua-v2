@@ -145,7 +145,8 @@ export default class GenerateClassScheduleController {
       }
 
       return response.badRequest({
-        error: 'Nenhum professor/matéria atribuído a esta turma. Configure as atribuições primeiro.',
+        error:
+          'Nenhum professor/matéria atribuído a esta turma. Configure as atribuições primeiro.',
       })
     }
 
@@ -217,7 +218,12 @@ export default class GenerateClassScheduleController {
           // Check teacher availability
           const teacherAvailabilities = availabilitiesByTeacher[tracker.teacherId] || []
           if (
-            !isTeacherAvailableForSlot(teacherAvailabilities, day.name, slot.startTime, slot.endTime)
+            !isTeacherAvailableForSlot(
+              teacherAvailabilities,
+              day.name,
+              slot.startTime,
+              slot.endTime
+            )
           ) {
             continue
           }
@@ -335,8 +341,10 @@ export default class GenerateClassScheduleController {
     teacherIds: string[],
     excludeClassId: string
   ): Promise<Record<string, Record<string, Array<{ startTime: string; endTime: string }>>>> {
-    const occupied: Record<string, Record<string, Array<{ startTime: string; endTime: string }>>> =
-      {}
+    const occupied: Record<
+      string,
+      Record<string, Array<{ startTime: string; endTime: string }>>
+    > = {}
 
     // Initialize structure
     for (const teacherId of teacherIds) {

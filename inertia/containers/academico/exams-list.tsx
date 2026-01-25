@@ -31,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog'
-import { useExamsQueryOptions } from '../../hooks/queries/use-exams'
+import { useExamsQueryOptions } from '../../hooks/queries/use_exams'
 import { LaunchExamGradesModal } from '../turma/launch-exam-grades-modal'
 
 interface Exam {

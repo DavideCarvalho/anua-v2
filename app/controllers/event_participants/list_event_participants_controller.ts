@@ -14,17 +14,13 @@ export default class ListEventParticipantsController {
       return response.notFound({ message: 'Event not found' })
     }
 
-    const query = EventParticipant.query()
-      .where('eventId', eventId)
-      .preload('user')
+    const query = EventParticipant.query().where('eventId', eventId).preload('user')
 
     if (status) {
       query.where('status', status)
     }
 
-    const participants = await query
-      .orderBy('createdAt', 'desc')
-      .paginate(page, limit)
+    const participants = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
     return response.ok(participants)
   }

@@ -4,7 +4,11 @@ import { getSchoolInsuranceClaimsValidator } from '#validators/insurance'
 
 export default class GetSchoolInsuranceClaimsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, status, limit = 10 } = await request.validateUsing(getSchoolInsuranceClaimsValidator)
+    const {
+      schoolId,
+      status,
+      limit = 10,
+    } = await request.validateUsing(getSchoolInsuranceClaimsValidator)
 
     const query = InsuranceClaim.query()
       .preload('studentPayment', (paymentQuery) => {

@@ -10,7 +10,7 @@ import { TuyauProvider } from '@tuyau/inertia/react'
 import { Toaster } from 'sonner'
 import { tuyau } from '../lib/api'
 import { ThemeProvider } from '../components/theme-provider'
-import { NuqsAdapter } from '../lib/nuqs-inertia-adapter'
+import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 

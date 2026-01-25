@@ -15,9 +15,9 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
 
-import { useLikePostMutation } from '../../hooks/mutations/use-like-post'
-import { useUnlikePostMutation } from '../../hooks/mutations/use-unlike-post'
-import { useDeletePostMutation } from '../../hooks/mutations/use-delete-post'
+import { useLikePostMutation } from '../../hooks/mutations/use_like_post'
+import { useUnlikePostMutation } from '../../hooks/mutations/use_unlike_post'
+import { useDeletePostMutation } from '../../hooks/mutations/use_delete_post'
 
 interface Post {
   id: string

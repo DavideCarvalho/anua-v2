@@ -34,7 +34,7 @@ import type {
   EditAcademicPeriodFormValues,
   LevelFormValues,
   ClassFormValues,
-} from '../schemas/edit-academic-period.schema'
+} from '../schemas/edit_academic_period.schema'
 import { EditClassModal } from './edit-class-modal'
 
 interface CourseLevelsProps {

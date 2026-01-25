@@ -16,9 +16,9 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useContractDocusealTemplateQueryOptions } from '../../hooks/queries/use-contract-docuseal-template'
-import { useUploadContractDocusealTemplateMutation } from '../../hooks/mutations/use-upload-contract-docuseal-template'
-import { useDeleteContractDocusealTemplateMutation } from '../../hooks/mutations/use-delete-contract-docuseal-template'
+import { useContractDocusealTemplateQueryOptions } from '../../hooks/queries/use_contract_docuseal_template'
+import { useUploadContractDocusealTemplateMutation } from '../../hooks/mutations/use_upload_contract_docuseal_template'
+import { useDeleteContractDocusealTemplateMutation } from '../../hooks/mutations/use_delete_contract_docuseal_template'
 import { useQuery } from '@tanstack/react-query'
 
 const schema = z.object({

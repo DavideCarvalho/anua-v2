@@ -43,7 +43,9 @@ export default class RequestConsentController {
       .first()
 
     if (existingConsent) {
-      return response.badRequest({ message: 'Já existe uma solicitação de autorização para este aluno' })
+      return response.badRequest({
+        message: 'Já existe uma solicitação de autorização para este aluno',
+      })
     }
 
     const consent = await EventParentalConsent.create({

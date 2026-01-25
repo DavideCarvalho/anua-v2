@@ -9,7 +9,11 @@ interface EnrollmentTrendRow {
 
 export default class GetEnrollmentTrendsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, academicPeriodId, days = 30 } = await request.validateUsing(getTrendsValidator)
+    const {
+      schoolId,
+      academicPeriodId,
+      days = 30,
+    } = await request.validateUsing(getTrendsValidator)
 
     let schoolFilter = ''
     let periodFilter = ''

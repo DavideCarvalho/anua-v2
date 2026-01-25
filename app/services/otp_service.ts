@@ -73,9 +73,7 @@ export async function createVerificationCode(
     ttl: '60s',
   })
 
-  console.log(
-    `[OTP] Created code for ${normalizedEmail}, expires in ${expiresInMinutes} minutes`
-  )
+  console.log(`[OTP] Created code for ${normalizedEmail}, expires in ${expiresInMinutes} minutes`)
 
   return code
 }

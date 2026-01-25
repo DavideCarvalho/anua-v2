@@ -3,7 +3,7 @@ import { createInertiaApp } from '@inertiajs/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TuyauProvider } from '@tuyau/inertia/react'
 import { tuyau } from '../lib/api'
-import { NuqsAdapter } from '../lib/nuqs-inertia-adapter'
+import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
 
 export default function render(page: any) {
   return createInertiaApp({

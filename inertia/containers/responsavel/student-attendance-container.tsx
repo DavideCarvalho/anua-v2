@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useStudentAttendanceQueryOptions } from '../../hooks/queries/use-student-attendance'
+import { useStudentAttendanceQueryOptions } from '../../hooks/queries/use_student_attendance'
 
 interface StudentAttendanceContainerProps {
   studentId: string

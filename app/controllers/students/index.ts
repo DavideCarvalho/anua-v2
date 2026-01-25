@@ -21,7 +21,9 @@ export default class IndexStudentsController {
 
     // Admins podem passar schoolId param, outros usam selectedSchoolIds do middleware
     const schoolIds = isAdmin
-      ? (request.input('schoolId') ? [request.input('schoolId')] : selectedSchoolIds)
+      ? request.input('schoolId')
+        ? [request.input('schoolId')]
+        : selectedSchoolIds
       : selectedSchoolIds
 
     if ((!schoolIds || schoolIds.length === 0) && !isAdmin) {

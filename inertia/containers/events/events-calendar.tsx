@@ -14,7 +14,7 @@ import { ptBR } from 'date-fns/locale'
 import { Calendar, ShieldAlert } from 'lucide-react'
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'
 
-import { useEventsQueryOptions } from '../../hooks/queries/use-events'
+import { useEventsQueryOptions } from '../../hooks/queries/use_events'
 import { EditEventModal } from './edit-event-modal'
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'

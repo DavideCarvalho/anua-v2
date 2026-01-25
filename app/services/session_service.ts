@@ -163,9 +163,7 @@ export async function setImpersonation(
       ttl: `${remainingSeconds}s`,
     })
 
-    console.log(
-      `[SESSION] User ${sessionData.userId} is now impersonating ${impersonatingUserId}`
-    )
+    console.log(`[SESSION] User ${sessionData.userId} is now impersonating ${impersonatingUserId}`)
 
     return true
   }

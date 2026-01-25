@@ -4,16 +4,20 @@ import { listEnrollmentsValidator } from '#validators/enrollment'
 
 export default class ListEnrollmentsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, academicPeriodId, status, levelId, page = 1, limit = 20 } =
-      await request.validateUsing(listEnrollmentsValidator)
+    const {
+      schoolId,
+      academicPeriodId,
+      status,
+      levelId,
+      page = 1,
+      limit = 20,
+    } = await request.validateUsing(listEnrollmentsValidator)
 
     const query = StudentHasLevel.query()
       .preload('student', (studentQuery) => {
-        studentQuery
-          .preload('user')
-          .preload('documents', (docQuery) => {
-            docQuery.preload('contractDocument')
-          })
+        studentQuery.preload('user').preload('documents', (docQuery) => {
+          docQuery.preload('contractDocument')
+        })
       })
       .preload('level')
       .preload('academicPeriod')

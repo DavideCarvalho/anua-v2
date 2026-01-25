@@ -136,10 +136,12 @@ export default class UpdateAcademicPeriodCoursesController {
               .useTransaction(trx)
 
             const existingClassIds = existingClassesInPeriod
-              .filter((cap) => cap.class?.levelId === levelData.levelId)
-              .map((cap) => cap.classId)
+              .filter((chap) => chap.class?.levelId === levelData.levelId)
+              .map((chap) => chap.classId)
 
-            const incomingClassIds = levelData.classes.filter((c) => c.id).map((c) => c.id as string)
+            const incomingClassIds = levelData.classes
+              .filter((c) => c.id)
+              .map((c) => c.id as string)
 
             // Delete removed classes from this academic period
             const classesToRemove = existingClassIds.filter((id) => !incomingClassIds.includes(id))

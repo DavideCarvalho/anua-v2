@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog'
-import { useDeleteStudent } from '~/hooks/mutations/use-student-mutations'
+import { useDeleteStudent } from '~/hooks/mutations/use_student_mutations'
 
 interface DeleteStudentModalProps {
   studentId: string

@@ -7,7 +7,8 @@ export default class GetSchoolsWithoutInsuranceController {
     const { limit = 20 } = await request.validateUsing(getSchoolsWithoutInsuranceValidator)
 
     // Get schools without insurance with their default statistics
-    const schools = await db.rawQuery(`
+    const schools = await db.rawQuery(
+      `
       SELECT
         s.id,
         s.name,
@@ -28,7 +29,9 @@ export default class GetSchoolsWithoutInsuranceController {
       GROUP BY s.id, s.name
       ORDER BY "overdueAmount" DESC
       LIMIT ?
-    `, [limit])
+    `,
+      [limit]
+    )
 
     const formattedSchools = schools.rows.map((row: any) => {
       const defaultRate = Number(row.defaultRate)
@@ -37,12 +40,15 @@ export default class GetSchoolsWithoutInsuranceController {
 
       // Calculate risk score (0-100)
       // Based on: default rate (40%), overdue amount (30%), student count (20%), trend (10% - not calculated here)
-      const riskScore = Math.min(100, Math.round(
-        (defaultRate * 0.4) +
-        (Math.min(overdueAmount / 100000, 100) * 0.3) + // Normalize overdue amount
-        (Math.min(totalStudents / 100, 100) * 0.2) +
-        10 // Base risk
-      ))
+      const riskScore = Math.min(
+        100,
+        Math.round(
+          defaultRate * 0.4 +
+            Math.min(overdueAmount / 100000, 100) * 0.3 + // Normalize overdue amount
+            Math.min(totalStudents / 100, 100) * 0.2 +
+            10 // Base risk
+        )
+      )
 
       return {
         id: row.id,

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from '../../../hooks/use-search-params'
-import { useCanteenTopItemsQueryOptions } from '../../../hooks/queries/use-canteen-top-items'
+import { useSearchParams } from '../../../hooks/use_search_params'
+import { useCanteenTopItemsQueryOptions } from '../../../hooks/queries/use_canteen_top_items'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,

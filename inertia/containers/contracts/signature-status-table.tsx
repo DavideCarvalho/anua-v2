@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useContractSignatureStatsQueryOptions } from '../../hooks/queries/use-contract-signature-stats'
+import { useContractSignatureStatsQueryOptions } from '../../hooks/queries/use_contract_signature_stats'
 
 export function SignatureStatusTable({ contractId }: { contractId: string }) {
   const { data } = useSuspenseQuery(useContractSignatureStatsQueryOptions(contractId))

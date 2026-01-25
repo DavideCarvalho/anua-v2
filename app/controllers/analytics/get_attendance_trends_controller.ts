@@ -12,9 +12,11 @@ interface AttendanceTrendRow {
 
 export default class GetAttendanceTrendsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, schoolChainId, period = 'month' } = await request.validateUsing(
-      getAttendanceTrendsValidator
-    )
+    const {
+      schoolId,
+      schoolChainId,
+      period = 'month',
+    } = await request.validateUsing(getAttendanceTrendsValidator)
 
     let schoolFilter = ''
     const params: Record<string, string> = {}
@@ -33,15 +35,15 @@ export default class GetAttendanceTrendsController {
     switch (period) {
       case 'week':
         dateFormat = 'YYYY-MM-DD'
-        dateInterval = "7 days"
+        dateInterval = '7 days'
         break
       case 'year':
         dateFormat = 'YYYY-MM'
-        dateInterval = "12 months"
+        dateInterval = '12 months'
         break
       default:
         dateFormat = 'YYYY-MM-DD'
-        dateInterval = "30 days"
+        dateInterval = '30 days'
     }
 
     const trendsResult = await db.rawQuery(

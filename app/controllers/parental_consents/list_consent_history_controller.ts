@@ -5,9 +5,12 @@ import { listConsentHistoryValidator } from '#validators/consent'
 export default class ListConsentHistoryController {
   async handle({ auth, request, response }: HttpContext) {
     const user = auth.user!
-    const { page = 1, limit = 20, status, studentId } = await request.validateUsing(
-      listConsentHistoryValidator
-    )
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      studentId,
+    } = await request.validateUsing(listConsentHistoryValidator)
 
     const query = EventParentalConsent.query()
       .where('responsibleId', user.id)

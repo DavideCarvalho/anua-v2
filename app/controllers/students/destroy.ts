@@ -4,10 +4,7 @@ import Student from '#models/student'
 
 export default class DestroyStudentController {
   async handle({ params, response, auth }: HttpContext) {
-    const student = await Student.query()
-      .where('id', params.id)
-      .preload('user')
-      .first()
+    const student = await Student.query().where('id', params.id).preload('user').first()
 
     if (!student) {
       return response.notFound({ message: 'Aluno não encontrado' })

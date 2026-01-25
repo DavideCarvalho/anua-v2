@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../../components/ui/card'
-import type { ExamData } from '../../../../hooks/queries/use-exam'
-import { useExamQueryOptions } from '../../../../hooks/queries/use-exam'
+import type { ExamData } from '../../../../hooks/queries/use_exam'
+import { useExamQueryOptions } from '../../../../hooks/queries/use_exam'
 
 interface Props {
   examId: string

@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useEscolaStatsQueryOptions } from '../hooks/queries/use-escola-stats'
+import { useEscolaStatsQueryOptions } from '../hooks/queries/use_escola_stats'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Users, GraduationCap, DollarSign, TrendingUp, AlertCircle } from 'lucide-react'

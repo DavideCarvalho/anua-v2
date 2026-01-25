@@ -84,13 +84,11 @@ export default class GetGradeDistributionController {
     // Calculate statistics
     const average = total > 0 ? percentages.reduce((sum, p) => sum + p, 0) / total : 0
     const sortedPercentages = [...percentages].sort((a, b) => a - b)
-    const median = total > 0 ? sortedPercentages[Math.floor(total / 2)] ?? 0 : 0
+    const median = total > 0 ? (sortedPercentages[Math.floor(total / 2)] ?? 0) : 0
 
     // Calculate standard deviation
     const variance =
-      total > 0
-        ? percentages.reduce((sum, p) => sum + Math.pow(p - average, 2), 0) / total
-        : 0
+      total > 0 ? percentages.reduce((sum, p) => sum + Math.pow(p - average, 2), 0) / total : 0
     const standardDeviation = Math.sqrt(variance)
 
     return response.ok({

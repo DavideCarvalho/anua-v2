@@ -8,9 +8,7 @@ export default class ListStudentPaymentsController {
 
     const { studentId, contractId, status, type, month, year, page = 1, limit = 20 } = payload
 
-    const query = StudentPayment.query()
-      .preload('student')
-      .orderBy('dueDate', 'desc')
+    const query = StudentPayment.query().preload('student').orderBy('dueDate', 'desc')
 
     if (studentId) {
       query.where('studentId', studentId)

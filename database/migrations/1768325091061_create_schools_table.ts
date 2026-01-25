@@ -73,7 +73,12 @@ export default class extends BaseSchema {
       table.integer('insurance_claim_waiting_days').nullable()
 
       // Foreign keys
-      table.uuid('school_chain_id').nullable().references('id').inTable('school_chains').onDelete('SET NULL')
+      table
+        .uuid('school_chain_id')
+        .nullable()
+        .references('id')
+        .inTable('school_chains')
+        .onDelete('SET NULL')
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

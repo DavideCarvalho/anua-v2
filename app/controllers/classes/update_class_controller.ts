@@ -4,17 +4,17 @@ import { updateClassValidator } from '#validators/class'
 
 export default class UpdateClassController {
   async handle({ params, request, response }: HttpContext) {
-    const class_ = await Class_.find(params.id)
+    const classEntity = await Class_.find(params.id)
 
-    if (!class_) {
+    if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
     const data = await request.validateUsing(updateClassValidator)
 
-    class_.merge(data)
-    await class_.save()
+    classEntity.merge(data)
+    await classEntity.save()
 
-    return response.ok(class_)
+    return response.ok(classEntity)
   }
 }

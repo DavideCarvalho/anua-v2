@@ -13,7 +13,7 @@ import {
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 
-import { useEnrollmentByLevelQueryOptions } from '../../hooks/queries/use-enrollment-by-level'
+import { useEnrollmentByLevelQueryOptions } from '../../hooks/queries/use_enrollment_by_level'
 
 interface EnrollmentByLevelTableProps {
   schoolId?: string

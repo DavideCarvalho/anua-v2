@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreatePrintRequestMutation } from '../../hooks/mutations/use-create-print-request'
+import { useCreatePrintRequestMutation } from '../../hooks/mutations/use_create_print_request'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),

@@ -39,10 +39,7 @@ export default class GetStudentStatusController {
     }
 
     // Find the class
-    const classEntity = await Class_.query()
-      .where('id', classId)
-      .preload('school')
-      .first()
+    const classEntity = await Class_.query().where('id', classId).preload('school').first()
 
     if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
@@ -114,20 +111,22 @@ export default class GetStudentStatusController {
       .orderBy('examDate', 'asc')
 
     // Get student exam grades
-    const studentExamGrades = exams.length > 0
-      ? await ExamGrade.query()
-          .whereIn('examId', exams.map((e) => e.id))
-          .select('studentId', 'examId', 'score', 'attended')
-      : []
+    const studentExamGrades =
+      exams.length > 0
+        ? await ExamGrade.query()
+            .whereIn(
+              'examId',
+              exams.map((e) => e.id)
+            )
+            .select('studentId', 'examId', 'score', 'attended')
+        : []
 
     // Get attendance records for this class/subject/academic period
     const attendanceRecords = await Attendance.query()
       .whereHas('calendarSlot', (csQuery) => {
-        csQuery
-          .where('teacherHasClassId', teacherHasClass.id)
-          .whereHas('calendar', (calQuery) => {
-            calQuery.where('academicPeriodId', academicPeriod.id)
-          })
+        csQuery.where('teacherHasClassId', teacherHasClass.id).whereHas('calendar', (calQuery) => {
+          calQuery.where('academicPeriodId', academicPeriod.id)
+        })
       })
       .preload('calendarSlot')
 
@@ -157,15 +156,11 @@ export default class GetStudentStatusController {
     // Build result for each student
     const results: StudentStatusResult[] = students.map((student) => {
       // Get student's assignment grades
-      const studentAssignmentList = studentAssignments.filter(
-        (sa) => sa.studentId === student.id
-      )
+      const studentAssignmentList = studentAssignments.filter((sa) => sa.studentId === student.id)
       const gradedAssignments = studentAssignmentList.filter((sa) => sa.grade !== null)
 
       // Get student's exam grades
-      const studentExamList = studentExamGrades.filter(
-        (eg) => eg.studentId === student.id
-      )
+      const studentExamList = studentExamGrades.filter((eg) => eg.studentId === student.id)
       const gradedExams = studentExamList.filter((eg) => eg.score !== null && eg.attended)
 
       // Calculate final grade (assignments + exams)
@@ -212,15 +207,12 @@ export default class GetStudentStatusController {
       ]
 
       // Calculate attendance
-      const studentAttendanceList = studentAttendance.filter(
-        (sa) => sa.studentId === student.id
-      )
+      const studentAttendanceList = studentAttendance.filter((sa) => sa.studentId === student.id)
       const attendedClasses = studentAttendanceList.filter(
         (sa) => sa.status === 'PRESENT' || sa.status === 'LATE'
       ).length
 
-      const attendancePercentage =
-        totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 100
+      const attendancePercentage = totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 100
 
       // Calculate classes until fail (margin of 5 classes)
       const classesUntilFail =

@@ -12,9 +12,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.raw('gen_random_uuid()'))
       table.string('name').notNullable()
-      table
-        .specificType('tier', 'subscription_tier')
-        .notNullable()
+      table.specificType('tier', 'subscription_tier').notNullable()
       table.text('description').nullable()
       table.integer('monthly_price').notNullable() // in cents
       table.integer('annual_price').nullable() // discounted annual price in cents

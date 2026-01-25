@@ -64,11 +64,12 @@ export default class GetClassGradesBySubjectController {
     const assignmentIds = assignments.map((a) => a.id)
     const studentIds = students.map((s) => s.id)
 
-    const allSubmissions = assignmentIds.length > 0 && studentIds.length > 0
-      ? await StudentHasAssignment.query()
-          .whereIn('assignmentId', assignmentIds)
-          .whereIn('studentId', studentIds)
-      : []
+    const allSubmissions =
+      assignmentIds.length > 0 && studentIds.length > 0
+        ? await StudentHasAssignment.query()
+            .whereIn('assignmentId', assignmentIds)
+            .whereIn('studentId', studentIds)
+        : []
 
     // Calculate max possible grade based on algorithm
     const maxPossibleGrade =
@@ -104,7 +105,7 @@ export default class GetClassGradesBySubjectController {
         if (calculationAlgorithm === 'SUM') {
           finalGrade = gradedAssignments.reduce((sum, g) => sum + (g.grade ?? 0), 0)
         } else {
-          const sum = gradedAssignments.reduce((sum, g) => sum + (g.grade ?? 0), 0)
+          const sum = gradedAssignments.reduce((acc, g) => acc + (g.grade ?? 0), 0)
           finalGrade = sum / gradedAssignments.length
         }
       }
@@ -112,10 +113,10 @@ export default class GetClassGradesBySubjectController {
       return {
         id: student.id,
         name: student.user?.name ?? 'Nome não disponível',
-        finalGrade: parseFloat(finalGrade.toFixed(1)),
+        finalGrade: Number.parseFloat(finalGrade.toFixed(1)),
         gradedCount: gradedAssignments.length,
         totalCount: assignments.length,
-        maxPossibleGrade: parseFloat(maxPossibleGrade.toFixed(1)),
+        maxPossibleGrade: Number.parseFloat(maxPossibleGrade.toFixed(1)),
         grades: studentGrades,
       }
     })

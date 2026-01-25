@@ -35,10 +35,7 @@ export default class extends BaseSchema {
       table.integer('amount').notNullable() // in cents
 
       // Status
-      table
-        .specificType('status', 'subscription_invoice_status')
-        .notNullable()
-        .defaultTo('PENDING')
+      table.specificType('status', 'subscription_invoice_status').notNullable().defaultTo('PENDING')
 
       // Dates
       table.date('due_date').notNullable()

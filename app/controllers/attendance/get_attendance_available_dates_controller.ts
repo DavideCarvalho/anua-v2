@@ -85,7 +85,13 @@ export default class GetAttendanceAvailableDatesController {
 
     const holidayDates = new Set(
       holidays
-        .map((h) => (h.date instanceof DateTime ? h.date : DateTime.fromJSDate(h.date as unknown as Date)).toISODate() ?? '')
+        .map(
+          (h) =>
+            (h.date instanceof DateTime
+              ? h.date
+              : DateTime.fromJSDate(h.date as unknown as Date)
+            ).toISODate() ?? ''
+        )
         .filter(Boolean)
     )
 
@@ -141,7 +147,8 @@ export default class GetAttendanceAvailableDatesController {
 
           results.push({
             date: dt.toISO()!,
-            label: `${WEEKDAY_LABELS[weekday] ?? ''}, ${dt.toFormat('dd/MM/yyyy')} às ${dt.toFormat('HH:mm')}`.trim(),
+            label:
+              `${WEEKDAY_LABELS[weekday] ?? ''}, ${dt.toFormat('dd/MM/yyyy')} às ${dt.toFormat('HH:mm')}`.trim(),
             slotId: slot.id,
           })
         }

@@ -4,9 +4,12 @@ import { getStudentsGradesValidator } from '#validators/grades'
 
 export default class GetStudentsGradesController {
   async handle({ request, response }: HttpContext) {
-    const { classId, subjectId, page = 1, limit = 20 } = await request.validateUsing(
-      getStudentsGradesValidator
-    )
+    const {
+      classId,
+      subjectId,
+      page = 1,
+      limit = 20,
+    } = await request.validateUsing(getStudentsGradesValidator)
 
     const offset = (page - 1) * limit
 

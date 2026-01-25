@@ -25,7 +25,7 @@ import {
 import { Input } from '../../components/ui/input'
 import { Checkbox } from '../../components/ui/checkbox'
 import { tuyau } from '../../lib/api'
-import { useSubjectsQueryOptions } from '../../hooks/queries/use-subjects'
+import { useSubjectsQueryOptions } from '../../hooks/queries/use_subjects'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),

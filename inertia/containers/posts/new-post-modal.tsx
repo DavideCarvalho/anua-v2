@@ -29,7 +29,7 @@ import {
 } from '../../components/ui/select'
 import { Textarea } from '../../components/ui/textarea'
 
-import { useCreatePostMutation } from '../../hooks/mutations/use-create-post'
+import { useCreatePostMutation } from '../../hooks/mutations/use_create_post'
 
 const PostType = {
   TEXT: 'TEXT',

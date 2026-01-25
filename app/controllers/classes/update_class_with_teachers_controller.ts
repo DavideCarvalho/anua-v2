@@ -7,15 +7,15 @@ import { updateClassWithTeachersValidator } from '#validators/class'
 
 export default class UpdateClassWithTeachersController {
   async handle({ params, request, response }: HttpContext) {
-    const class_ = await Class_.find(params.id)
+    const classEntity = await Class_.find(params.id)
 
-    if (!class_) {
+    if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
     const payload = await request.validateUsing(updateClassWithTeachersValidator)
 
-    const existingAssignments = await TeacherHasClass.query().where('classId', class_.id)
+    const existingAssignments = await TeacherHasClass.query().where('classId', classEntity.id)
 
     // Create a map for quick lookup: "teacherId:subjectId" -> record
     const existingMap = new Map<string, TeacherHasClass>()
@@ -46,7 +46,7 @@ export default class UpdateClassWithTeachersController {
       } else {
         toCreate.push({
           id: uuidv7(),
-          classId: class_.id,
+          classId: classEntity.id,
           teacherId: item.teacherId,
           subjectId: item.subjectId,
           subjectQuantity: item.quantity,
@@ -61,8 +61,8 @@ export default class UpdateClassWithTeachersController {
       .map((a) => a.id)
 
     // Update class name
-    class_.name = payload.name
-    await class_.save()
+    classEntity.name = payload.name
+    await classEntity.save()
 
     // Deactivate removed assignments
     if (toDeactivateIds.length > 0) {
@@ -84,7 +84,7 @@ export default class UpdateClassWithTeachersController {
 
     // Return updated class with teachers
     const updatedClass = await Class_.query()
-      .where('id', class_.id)
+      .where('id', classEntity.id)
       .preload('teacherClasses', (query) => {
         query.where('isActive', true)
         query.preload('teacher', (tq) => tq.preload('user'))

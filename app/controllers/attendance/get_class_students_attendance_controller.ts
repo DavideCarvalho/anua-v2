@@ -14,8 +14,8 @@ export default class GetClassStudentsAttendanceController {
       return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
     }
 
-    const class_ = await Class_.find(classId)
-    if (!class_) {
+    const classEntity = await Class_.find(classId)
+    if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
@@ -26,11 +26,9 @@ export default class GetClassStudentsAttendanceController {
     const studentLevels = await StudentHasLevel.query()
       .where('classId', classId)
       .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
-        laQuery
-          .where('isActive', true)
-          .whereHas('courseHasAcademicPeriod', (caQuery) => {
-            caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
-          })
+        laQuery.where('isActive', true).whereHas('courseHasAcademicPeriod', (caQuery) => {
+          caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)
+        })
       })
       .preload('student', (sq) => sq.preload('user'))
       .orderBy('createdAt', 'asc')
@@ -45,10 +43,8 @@ export default class GetClassStudentsAttendanceController {
         ? await db
             .from('StudentHasAttendance')
             .select('studentId')
-            .select(db.raw("COUNT(*) as total_classes"))
-            .select(
-              db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count")
-            )
+            .select(db.raw('COUNT(*) as total_classes'))
+            .select(db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count"))
             .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
             .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
             .select(

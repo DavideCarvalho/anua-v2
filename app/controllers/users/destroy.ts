@@ -4,10 +4,7 @@ import User from '#models/user'
 
 export default class DestroyUserController {
   async handle({ params, response, auth }: HttpContext) {
-    const user = await User.query()
-      .where('id', params.id)
-      .whereNull('deletedAt')
-      .first()
+    const user = await User.query().where('id', params.id).whereNull('deletedAt').first()
 
     if (!user) {
       return response.notFound({ message: 'Usuário não encontrado' })
