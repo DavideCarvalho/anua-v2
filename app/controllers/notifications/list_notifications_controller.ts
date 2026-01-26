@@ -3,7 +3,7 @@ import Notification from '#models/notification'
 import { listNotificationsValidator } from '#validators/notification'
 
 export default class ListNotificationsController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser }: HttpContext) {
     const {
       type,
       channel,
@@ -13,30 +13,26 @@ export default class ListNotificationsController {
       limit = 20,
     } = await request.validateUsing(listNotificationsValidator)
 
-    const query = Notification.query().where('recipientId', auth.user!.id)
+    const user = effectiveUser ?? auth.user!
+    const query = Notification.query().where('userId', user.id)
 
     if (type) {
       query.where('type', type)
     }
 
-    if (channel) {
-      query.where('channel', channel)
-    }
-
-    if (status) {
-      query.where('status', status)
-    }
+    // Note: Notification model doesn't have 'channel' or 'status' fields
+    // Removing those filters for now
 
     if (unreadOnly) {
-      query.whereNull('readAt')
+      query.where('isRead', false)
     }
 
     const notifications = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
     // Get unread count
     const unreadCount = await Notification.query()
-      .where('recipientId', auth.user!.id)
-      .whereNull('readAt')
+      .where('userId', user.id)
+      .where('isRead', false)
       .count('* as total')
 
     return response.ok({

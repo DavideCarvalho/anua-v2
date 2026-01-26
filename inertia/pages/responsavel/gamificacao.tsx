@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
-import { Suspense } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Trophy, Star, Medal, Target } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { Trophy, Star, Medal, Target, XCircle } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -10,9 +10,29 @@ import { Badge } from '../../components/ui/badge'
 import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 
 function GamificacaoContent() {
-  const { data } = useSuspenseQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
 
-  if (data.students.length === 0) {
+  if (isLoading) {
+    return <GamificacaoSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar dados</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const students = data?.students ?? []
+
+  if (students.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -30,7 +50,7 @@ function GamificacaoContent() {
     <div className="space-y-6">
       {/* Students Points */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {data.students.map((student) => (
+        {students.map((student) => (
           <Card key={student.id}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -126,9 +146,21 @@ export default function GamificacaoPage() {
           </p>
         </div>
 
-        <Suspense fallback={<GamificacaoSkeleton />}>
+        <ErrorBoundary
+          fallback={
+            <Card>
+              <CardContent className="py-12 text-center">
+                <XCircle className="mx-auto h-12 w-12 text-destructive" />
+                <h3 className="mt-4 text-lg font-semibold">Erro ao carregar dados</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Ocorreu um erro ao renderizar o componente.
+                </p>
+              </CardContent>
+            </Card>
+          }
+        >
           <GamificacaoContent />
-        </Suspense>
+        </ErrorBoundary>
       </div>
     </ResponsavelLayout>
   )

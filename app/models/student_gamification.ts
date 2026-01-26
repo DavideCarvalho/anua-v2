@@ -7,34 +7,34 @@ import PointTransaction from './point_transaction.js'
 export default class StudentGamification extends BaseModel {
   static table = 'StudentGamification'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'totalPoints' })
   declare totalPoints: number
 
-  @column()
+  @column({ columnName: 'currentLevel' })
   declare currentLevel: number
 
-  @column()
+  @column({ columnName: 'levelProgress' })
   declare levelProgress: number
 
-  @column()
+  @column({ columnName: 'streak' })
   declare streak: number
 
-  @column()
+  @column({ columnName: 'longestStreak' })
   declare longestStreak: number
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'lastActivityAt' })
   declare lastActivityAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

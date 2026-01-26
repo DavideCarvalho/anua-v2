@@ -1,7 +1,8 @@
 import { Head } from '@inertiajs/react'
-import { Suspense, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Calendar, User } from 'lucide-react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { Calendar, User, XCircle } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
@@ -41,14 +42,33 @@ function StudentSelector({
 }
 
 function FrequenciaContent() {
-  const { data } = useSuspenseQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
+  const students = data?.students ?? []
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    data.students.length > 0 ? data.students[0].id : null
+    students.length > 0 ? students[0].id : null
   )
 
-  const selectedStudent = data.students.find((s) => s.id === selectedStudentId)
+  const selectedStudent = students.find((s) => s.id === selectedStudentId)
 
-  if (data.students.length === 0) {
+  if (isLoading) {
+    return <FrequenciaSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar dados</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (students.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -64,12 +84,12 @@ function FrequenciaContent() {
 
   return (
     <div className="space-y-6">
-      {data.students.length > 1 && (
+      {students.length > 1 && (
         <Card>
           <CardContent className="py-4">
             <p className="mb-3 text-sm font-medium">Selecione um aluno:</p>
             <StudentSelector
-              students={data.students}
+              students={students}
               selectedId={selectedStudentId}
               onSelect={setSelectedStudentId}
             />
@@ -78,12 +98,10 @@ function FrequenciaContent() {
       )}
 
       {selectedStudentId && selectedStudent && (
-        <Suspense fallback={<StudentAttendanceContainerSkeleton />}>
-          <StudentAttendanceContainer
-            studentId={selectedStudentId}
-            studentName={selectedStudent.name}
-          />
-        </Suspense>
+        <StudentAttendanceContainer
+          studentId={selectedStudentId}
+          studentName={selectedStudent.name}
+        />
       )}
     </div>
   )
@@ -123,9 +141,21 @@ export default function FrequenciaPage() {
           </p>
         </div>
 
-        <Suspense fallback={<FrequenciaSkeleton />}>
+        <ErrorBoundary
+          fallback={
+            <Card>
+              <CardContent className="py-12 text-center">
+                <XCircle className="mx-auto h-12 w-12 text-destructive" />
+                <h3 className="mt-4 text-lg font-semibold">Erro ao carregar dados</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Ocorreu um erro ao renderizar o componente.
+                </p>
+              </CardContent>
+            </Card>
+          }
+        >
           <FrequenciaContent />
-        </Suspense>
+        </ErrorBoundary>
       </div>
     </ResponsavelLayout>
   )

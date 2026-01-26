@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { Shield, Clock, History } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Badge } from '../../components/ui/badge'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import {
   PendingConsentsContainer,
@@ -18,8 +18,8 @@ import {
 import { usePendingConsentsQueryOptions } from '../../hooks/queries/use_pending_consents'
 
 function PendingCountBadge() {
-  const { data } = useSuspenseQuery(usePendingConsentsQueryOptions())
-  const count = data.data?.length || 0
+  const { data } = useQuery(usePendingConsentsQueryOptions())
+  const count = data?.length ?? 0
 
   if (count === 0) return null
 
@@ -53,9 +53,7 @@ export default function AutorizacoesPage() {
             <TabsTrigger value="pending" className="flex items-center">
               <Clock className="h-4 w-4 mr-2" />
               Pendentes
-              <Suspense fallback={null}>
-                <PendingCountBadge />
-              </Suspense>
+              <PendingCountBadge />
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center">
               <History className="h-4 w-4 mr-2" />
@@ -64,15 +62,11 @@ export default function AutorizacoesPage() {
           </TabsList>
 
           <TabsContent value="pending" className="mt-6">
-            <Suspense fallback={<PendingConsentsSkeleton />}>
-              <PendingConsentsContainer />
-            </Suspense>
+            <PendingConsentsContainer />
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
-            <Suspense fallback={<ConsentHistorySkeleton />}>
-              <ConsentHistoryContainer page={historyPage} onPageChange={setHistoryPage} />
-            </Suspense>
+            <ConsentHistoryContainer page={historyPage} onPageChange={setHistoryPage} />
           </TabsContent>
         </Tabs>
       </div>

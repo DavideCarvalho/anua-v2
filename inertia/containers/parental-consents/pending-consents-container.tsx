@@ -1,8 +1,9 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { CheckCircle2, XCircle, Calendar, Clock, MapPin, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
@@ -18,44 +19,38 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 
-import { usePendingConsentsQueryOptions } from '../../hooks/queries/use_pending_consents'
+import { usePendingConsentsQueryOptions, type PendingConsentsResponse } from '../../hooks/queries/use_pending_consents'
 import { useRespondConsentMutation } from '../../hooks/mutations/use_respond_consent'
 
-type PendingConsent = {
-  id: string
-  eventId: string
-  studentId: string
-  status: string
-  requestedAt: string
-  expiresAt: string | null
-  event: {
-    id: string
-    title: string
-    type: string
-    description?: string
-    location?: string
-    startsAt: string
-    endsAt?: string
-    school: {
-      id: string
-      name: string
-    }
-  }
-  student: {
-    id: string
-    name: string
-  }
-}
+type PendingConsent = PendingConsentsResponse[number]
 
-export function PendingConsentsContainer() {
-  const { data } = useSuspenseQuery(usePendingConsentsQueryOptions())
+function PendingConsentsContent() {
+  const { data, isLoading, isError, error } = useQuery(usePendingConsentsQueryOptions())
   const respondMutation = useRespondConsentMutation()
 
   const [selectedConsent, setSelectedConsent] = useState<PendingConsent | null>(null)
   const [respondType, setRespondType] = useState<'approve' | 'deny' | null>(null)
   const [notes, setNotes] = useState('')
 
-  const consents = data.data as PendingConsent[]
+  if (isLoading) {
+    return <PendingConsentsSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar autorizações</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const consents = data ?? []
 
   const handleRespond = async () => {
     if (!selectedConsent || !respondType) return
@@ -115,9 +110,11 @@ export function PendingConsentsContainer() {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    {format(new Date(consent.event.startsAt), "EEEE, dd 'de' MMMM 'de' yyyy", {
-                      locale: ptBR,
-                    })}
+                    {consent.event.startDate
+                      ? format(new Date(consent.event.startDate), "EEEE, dd 'de' MMMM 'de' yyyy", {
+                          locale: ptBR,
+                        })
+                      : 'Data não informada'}
                   </span>
                 </div>
                 {consent.event.location && (
@@ -230,6 +227,26 @@ export function PendingConsentsContainer() {
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+export function PendingConsentsContainer() {
+  return (
+    <ErrorBoundary
+      fallback={
+        <Card>
+          <CardContent className="py-12 text-center">
+            <XCircle className="mx-auto h-12 w-12 text-destructive" />
+            <h3 className="mt-4 text-lg font-semibold">Erro ao carregar autorizações</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Ocorreu um erro ao renderizar o componente.
+            </p>
+          </CardContent>
+        </Card>
+      }
+    >
+      <PendingConsentsContent />
+    </ErrorBoundary>
   )
 }
 

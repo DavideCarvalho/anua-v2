@@ -20,7 +20,6 @@ import {
   Clock,
 } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'

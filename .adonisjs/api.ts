@@ -327,6 +327,14 @@ type ResponsavelPerfilGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_perfil_page_controller.ts').default['handle'], false>
 }
+type ResponsavelNotificacoesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/show_responsavel_notificacoes_page_controller.ts').default['handle'], false>
+}
+type ResponsavelCreditoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/show_responsavel_credito_page_controller.ts').default['handle'], false>
+}
 type AdminGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_dashboard_page_controller.ts').default['handle'], false>
@@ -486,6 +494,14 @@ type ApiV1ResponsavelStudentsIdOccurrencesGetHead = {
 type ApiV1ResponsavelStudentsIdOccurrencesIdAcknowledgePost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/acknowledge_occurrence_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelStudentsIdOverviewGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_overview_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelNotificationsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_notifications_controller.ts').default['handle'], false>
 }
 type ApiV1AdminStatsGetHead = {
   request: unknown
@@ -2485,6 +2501,18 @@ export interface ApiDefinition {
       '$get': ResponsavelPerfilGetHead;
       '$head': ResponsavelPerfilGetHead;
     };
+    'notificacoes': {
+      '$url': {
+      };
+      '$get': ResponsavelNotificacoesGetHead;
+      '$head': ResponsavelNotificacoesGetHead;
+    };
+    'credito': {
+      '$url': {
+      };
+      '$get': ResponsavelCreditoGetHead;
+      '$head': ResponsavelCreditoGetHead;
+    };
   };
   'admin': {
     '$url': {
@@ -2734,7 +2762,19 @@ export interface ApiDefinition {
                 };
               };
             };
+            'overview': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdOverviewGetHead;
+              '$head': ApiV1ResponsavelStudentsIdOverviewGetHead;
+            };
           };
+        };
+        'notifications': {
+          '$url': {
+          };
+          '$get': ApiV1ResponsavelNotificationsGetHead;
+          '$head': ApiV1ResponsavelNotificationsGetHead;
         };
       };
       'admin': {
@@ -4970,6 +5010,20 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.responsavel.notificacoes',
+    path: '/responsavel/notificacoes',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelNotificacoesGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.credito',
+    path: '/responsavel/credito',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelCreditoGetHead,
+  },
+  {
+    params: [],
     name: 'web.admin.dashboard',
     path: '/admin',
     method: ["GET","HEAD"],
@@ -5247,6 +5301,20 @@ const routes = [
     path: '/api/v1/responsavel/students/:studentId/occurrences/:occurrenceId/acknowledge',
     method: ["POST"],
     types: {} as ApiV1ResponsavelStudentsIdOccurrencesIdAcknowledgePost,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentOverview',
+    path: '/api/v1/responsavel/students/:studentId/overview',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdOverviewGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.responsavel.api.notifications',
+    path: '/api/v1/responsavel/notifications',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelNotificationsGetHead,
   },
   {
     params: [],

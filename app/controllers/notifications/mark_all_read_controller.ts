@@ -3,15 +3,16 @@ import Notification from '#models/notification'
 import { DateTime } from 'luxon'
 
 export default class MarkAllReadController {
-  async handle({ response, auth }: HttpContext) {
+  async handle({ response, auth, effectiveUser }: HttpContext) {
     const now = DateTime.now()
 
+    const user = effectiveUser ?? auth.user!
     const result = await Notification.query()
-      .where('recipientId', auth.user!.id)
-      .whereNull('readAt')
+      .where('userId', user.id)
+      .where('isRead', false)
       .update({
+        isRead: true,
         readAt: now.toSQL(),
-        status: 'READ',
       })
 
     return response.ok({

@@ -3,12 +3,13 @@ import Notification from '#models/notification'
 import { DateTime } from 'luxon'
 
 export default class MarkNotificationReadController {
-  async handle({ params, response, auth }: HttpContext) {
+  async handle({ params, response, auth, effectiveUser }: HttpContext) {
     const { id } = params
 
+    const user = effectiveUser ?? auth.user!
     const notification = await Notification.query()
       .where('id', id)
-      .where('userId', auth.user!.id)
+      .where('userId', user.id)
       .first()
 
     if (!notification) {

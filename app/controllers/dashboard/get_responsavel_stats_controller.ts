@@ -2,10 +2,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasResponsible from '#models/student_has_responsible'
 import Class from '#models/class'
 import StudentGamification from '#models/student_gamification'
+import Notification from '#models/notification'
 
 export default class GetResponsavelStatsController {
-  async handle({ auth, response }: HttpContext) {
-    const user = auth.user
+  async handle({ auth, response, effectiveUser }: HttpContext) {
+    const user = effectiveUser ?? auth.user
     if (!user) {
       return response.unauthorized({ message: 'Não autenticado' })
     }
@@ -54,9 +55,20 @@ export default class GetResponsavelStatsController {
       })
     )
 
+    // Count unread notifications for all students this responsible has access to
+    const studentIds = studentRelations.map((r) => r.studentId)
+    let unreadCount = 0
+    if (studentIds.length > 0) {
+      const notificationsCount = await Notification.query()
+        .whereIn('userId', studentIds)
+        .where('isRead', false)
+        .count('* as total')
+      unreadCount = Number(notificationsCount[0]?.$extras.total || 0)
+    }
+
     return {
       students,
-      notifications: 0,
+      notifications: unreadCount,
     }
   }
 }

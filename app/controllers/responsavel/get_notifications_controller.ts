@@ -3,8 +3,8 @@ import Notification from '#models/notification'
 import StudentHasResponsible from '#models/student_has_responsible'
 
 export default class GetNotificationsController {
-  async handle({ auth, request, response }: HttpContext) {
-    const user = auth.user
+  async handle({ auth, request, response, effectiveUser }: HttpContext) {
+    const user = effectiveUser ?? auth.user
     if (!user) {
       return response.unauthorized({ message: 'Não autenticado' })
     }

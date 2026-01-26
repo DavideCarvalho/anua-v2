@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
-import { Suspense } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Bell, MessageSquare, Calendar, User } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { Bell, MessageSquare, Calendar, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -9,12 +9,32 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 
-import { useNotificationsQueryOptions } from '../../hooks/queries/use_notifications'
+import { useNotificationsQueryOptions, type NotificationsResponse } from '../../hooks/queries/use_notifications'
 
 function ComunicadosContent() {
-  const { data } = useSuspenseQuery(useNotificationsQueryOptions({ limit: 20 }))
+  const { data, isLoading, isError, error } = useQuery(useNotificationsQueryOptions({ limit: 20 }))
 
-  if (data.data.length === 0) {
+  if (isLoading) {
+    return <ComunicadosSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar comunicados</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const notifications = data?.data ?? []
+
+  if (notifications.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -30,7 +50,7 @@ function ComunicadosContent() {
 
   return (
     <div className="space-y-4">
-      {data.data.map((notification: any) => (
+      {notifications.map((notification) => (
         <Card
           key={notification.id}
           className={notification.readAt ? 'opacity-75' : 'border-primary/50'}
@@ -97,9 +117,21 @@ export default function ComunicadosPage() {
           </p>
         </div>
 
-        <Suspense fallback={<ComunicadosSkeleton />}>
+        <ErrorBoundary
+          fallback={
+            <Card>
+              <CardContent className="py-12 text-center">
+                <XCircle className="mx-auto h-12 w-12 text-destructive" />
+                <h3 className="mt-4 text-lg font-semibold">Erro ao carregar comunicados</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Ocorreu um erro ao renderizar o componente.
+                </p>
+              </CardContent>
+            </Card>
+          }
+        >
           <ComunicadosContent />
-        </Suspense>
+        </ErrorBoundary>
       </div>
     </ResponsavelLayout>
   )
