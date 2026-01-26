@@ -5,9 +5,7 @@ import { useContractPaymentDaysQueryOptions } from '../../hooks/queries/use_cont
 import { useContractInterestConfigQueryOptions } from '../../hooks/queries/use_contract_interest_config'
 import { useContractEarlyDiscountsQueryOptions } from '../../hooks/queries/use_contract_early_discounts'
 import {
-  useAddContractPaymentDay,
   useRemoveContractPaymentDay,
-  useAddContractEarlyDiscount,
   useRemoveContractEarlyDiscount,
 } from '../../hooks/mutations/use_contract_financial_mutations'
 
@@ -34,9 +32,9 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
   const removePaymentDay = useRemoveContractPaymentDay()
   const removeDiscount = useRemoveContractEarlyDiscount()
 
-  const paymentDays = Array.isArray(paymentDaysData) ? paymentDaysData : paymentDaysData?.data || []
+  const paymentDays = Array.isArray(paymentDaysData) ? paymentDaysData : []
   const interestConfig = interestData && typeof interestData === 'object' ? interestData : null
-  const discounts = Array.isArray(discountsData) ? discountsData : discountsData?.data || []
+  const discounts = Array.isArray(discountsData) ? discountsData : []
 
   return (
     <div className="space-y-6">

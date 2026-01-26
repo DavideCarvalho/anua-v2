@@ -23,7 +23,5 @@ export default class DeleteAcademicPeriodController {
 
     academicPeriod.deletedAt = DateTime.now()
     await academicPeriod.save()
-
-    return response.ok({ message: 'Período letivo excluído com sucesso' })
   }
 }

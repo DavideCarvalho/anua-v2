@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Check, X, DollarSign } from 'lucide-react'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
+import { Check, X, DollarSign, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '../../components/ui/button'
@@ -66,18 +68,67 @@ const STATUS_LABELS: Record<string, string> = {
   REJECTED: 'Rejeitado',
 }
 
+function InsuranceClaimsErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
+  return (
+    <Card className="border-destructive">
+      <CardContent className="flex items-center gap-4 py-6">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-destructive">Erro ao carregar sinistros</h3>
+          <p className="text-sm text-muted-foreground">
+            {error.message || 'Ocorreu um erro inesperado'}
+          </p>
+        </div>
+        <Button variant="outline" onClick={resetErrorBoundary}>
+          Tentar novamente
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function InsuranceClaimsTable() {
-  const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <InsuranceClaimsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <InsuranceClaimsTableContent />
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  )
+}
+
+function InsuranceClaimsTableContent() {
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    status: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  })
+
+  const { status: statusFilter, page, limit } = filters
+
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
-  const { data } = useSuspenseQuery(
+  const { data, isLoading, error, refetch } = useQuery(
     useInsuranceClaimsQueryOptions({
       status: statusFilter as any,
       page,
-      limit: 10,
+      limit,
     })
   )
 
@@ -137,7 +188,9 @@ export function InsuranceClaimsTable() {
           <div className="text-sm font-medium">Status</div>
           <Select
             value={statusFilter || 'all'}
-            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
+            onValueChange={(value) =>
+              setFilters({ status: value === 'all' ? null : value, page: 1 })
+            }
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Todos" />
@@ -276,7 +329,7 @@ export function InsuranceClaimsTable() {
                   variant="outline"
                   size="sm"
                   disabled={meta.page <= 1}
-                  onClick={() => setPage(meta.page - 1)}
+                  onClick={() => setFilters({ page: meta.page - 1 })}
                 >
                   Anterior
                 </Button>
@@ -284,7 +337,7 @@ export function InsuranceClaimsTable() {
                   variant="outline"
                   size="sm"
                   disabled={meta.page >= meta.lastPage}
-                  onClick={() => setPage(meta.page + 1)}
+                  onClick={() => setFilters({ page: meta.page + 1 })}
                 >
                   Próxima
                 </Button>

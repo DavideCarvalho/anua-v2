@@ -179,6 +179,6 @@ export default class CreateAcademicPeriodController {
       return new AcademicPeriodDto(academicPeriod)
     })
 
-    return response.created(result)
+    return result
   }
 }

@@ -29,37 +29,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { tuyau } from '../../lib/api'
+import {
+  useCreateContractMutation,
+  useUpdateContractMutation,
+} from '../../hooks/mutations/use_contract_mutations'
+import {
+  useAddContractPaymentDay,
+  useUpdateContractInterestConfig,
+} from '../../hooks/mutations/use_contract_financial_mutations'
+import type { ContractResponse } from '../../hooks/queries/use_contract'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   description: z.string().optional(),
-  hasInsurance: z.boolean().default(false),
+  hasInsurance: z.boolean(),
 
   // Payment
   enrollmentValue: z.string().optional(),
-  enrollmentValueInstallments: z.coerce.number().min(1).default(1),
+  enrollmentValueInstallments: z.number().min(1),
   amount: z.string().min(1, 'Valor do curso é obrigatório'),
   paymentType: z.enum(['MONTHLY', 'UPFRONT']),
-  installments: z.coerce.number().min(1).default(12),
-  flexibleInstallments: z.boolean().default(false),
+  installments: z.number().min(1),
+  flexibleInstallments: z.boolean(),
   paymentDays: z.array(z.number()).min(1, 'Selecione pelo menos um dia de vencimento'),
 
   // Interest and discounts
-  interestPercentage: z.coerce.number().min(0).max(100).optional(),
-  interestPerDay: z.coerce.number().min(0).max(100).optional(),
+  interestPercentage: z.number().min(0).max(100).optional(),
+  interestPerDay: z.number().min(0).max(100).optional(),
   earlyDiscounts: z.array(
     z.object({
-      daysBeforeDeadline: z.coerce.number().min(1),
-      percentage: z.coerce.number().min(0).max(100),
+      daysBeforeDeadline: z.number().min(1),
+      percentage: z.number().min(0).max(100),
     })
-  ).default([]),
+  ),
 })
 
 type FormValues = z.infer<typeof formSchema>
 
 interface ContractFormProps {
   schoolId: string
+  initialData?: ContractResponse
 }
 
 const AVAILABLE_DAYS = [5, 10, 15, 20, 25]
@@ -125,8 +134,18 @@ const steps = [
 export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const isEditing = !!initialData
+
+  const createContract = useCreateContractMutation()
+  const updateContract = useUpdateContractMutation()
+  const addPaymentDay = useAddContractPaymentDay()
+  const updateInterestConfig = useUpdateContractInterestConfig()
+
+  const isSubmitting =
+    createContract.isPending ||
+    updateContract.isPending ||
+    addPaymentDay.isPending ||
+    updateInterestConfig.isPending
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -138,11 +157,11 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
         ? String(initialData.enrollmentValue / 100)
         : '0',
       enrollmentValueInstallments: initialData?.enrollmentValueInstallments || 1,
-      amount: initialData?.ammount ? String(initialData.ammount / 100) : '',
+      amount: initialData?.amount ? String(initialData.amount / 100) : '',
       paymentType: initialData?.paymentType || 'MONTHLY',
       installments: initialData?.installments || 12,
       flexibleInstallments: initialData?.flexibleInstallments || false,
-      paymentDays: initialData?.paymentDays?.map((p) => p.day) || [10],
+      paymentDays: initialData?.paymentDays?.map((p: { day: number }) => p.day) || [10],
       interestPercentage: initialData?.interestConfig?.delayInterestPercentage || undefined,
       interestPerDay: initialData?.interestConfig?.delayInterestPerDayDelayed || undefined,
       earlyDiscounts: initialData?.earlyDiscounts || [],
@@ -190,7 +209,6 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   }
 
   async function onSubmit(values: FormValues) {
-    setIsSubmitting(true)
     try {
       const basePayload = {
         schoolId,
@@ -207,18 +225,21 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
         flexibleInstallments: values.flexibleInstallments,
       }
 
-      if (isEditing) {
-        const response = await tuyau.api.v1.contracts({ id: initialData.id }).$put(basePayload)
-        if (response.error) throw new Error(response.error.message)
+      if (isEditing && initialData) {
+        await updateContract.mutateAsync({
+          id: initialData.id,
+          ...basePayload,
+        })
 
         // Update payment days
         for (const day of values.paymentDays) {
-          await tuyau.api.v1.contracts({ contractId: initialData.id })['payment-days'].$post({ day })
+          await addPaymentDay.mutateAsync({ contractId: initialData.id, day })
         }
 
         // Update interest config if provided
         if (values.interestPercentage || values.interestPerDay) {
-          await tuyau.api.v1.contracts({ contractId: initialData.id })['interest-config'].$put({
+          await updateInterestConfig.mutateAsync({
+            contractId: initialData.id,
             delayInterestPercentage: values.interestPercentage || 0,
             delayInterestPerDayDelayed: values.interestPerDay || 0,
           })
@@ -240,9 +261,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
           earlyDiscounts: values.earlyDiscounts.length > 0 ? values.earlyDiscounts : undefined,
         }
 
-        const response = await tuyau.api.v1.contracts.$post(payload)
-        if (response.error) throw new Error(response.error.message)
-
+        await createContract.mutateAsync(payload)
         toast.success('Contrato criado com sucesso!')
       }
 
@@ -251,8 +270,6 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       toast.error(isEditing ? 'Erro ao atualizar contrato' : 'Erro ao criar contrato', {
         description: error instanceof Error ? error.message : 'Erro desconhecido',
       })
-    } finally {
-      setIsSubmitting(false)
     }
   }
 

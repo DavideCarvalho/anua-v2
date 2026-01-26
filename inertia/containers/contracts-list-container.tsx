@@ -1,8 +1,9 @@
-import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { router } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useContractsQueryOptions } from '../hooks/queries/use_contracts'
 import { useDeleteContractMutation } from '../hooks/mutations/use_contract_mutations'
 import { Card, CardContent } from '../components/ui/card'
@@ -71,8 +72,8 @@ function ContractsListSkeleton() {
   )
 }
 
-// Error Fallback
-function ContractsListError({
+// Error Fallback (for ErrorBoundary)
+function ContractsListErrorFallback({
   error,
   resetErrorBoundary,
 }: {
@@ -105,140 +106,38 @@ function formatCurrency(valueInCents: number | null | undefined): string {
   }).format(valueInCents / 100)
 }
 
-// Content Component
-function ContractsListContent({
-  page,
-  onPageChange,
-  onEdit,
-  onDelete,
-}: {
-  page: number
-  onPageChange: (page: number) => void
-  onEdit: (contract: ContractItem) => void
-  onDelete: (contract: ContractItem) => void
-}) {
-  const { data } = useSuspenseQuery(useContractsQueryOptions({ page, limit: 20 }))
-
-  const contracts = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
-
-  if (contracts.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold">Nenhum contrato encontrado</h3>
-          <p className="text-sm text-muted-foreground mt-1">Cadastre o primeiro contrato</p>
-        </CardContent>
-      </Card>
-    )
-  }
-
+// Container Export
+export function ContractsListContainer() {
   return (
-    <div className="space-y-4">
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left p-4 font-medium">Nome</th>
-              <th className="text-left p-4 font-medium">Matrícula</th>
-              <th className="text-left p-4 font-medium">Mensalidade</th>
-              <th className="text-left p-4 font-medium">Parcelas</th>
-              <th className="text-right p-4 font-medium">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contracts.map((contract: any) => (
-              <tr key={contract.id} className="border-t hover:bg-muted/30 transition-colors">
-                <td className="p-4">
-                  <div>
-                    <span className="font-medium">{contract.name}</span>
-                    {contract.description && (
-                      <p className="text-sm text-muted-foreground truncate max-w-xs">
-                        {contract.description}
-                      </p>
-                    )}
-                  </div>
-                </td>
-                <td className="p-4 text-muted-foreground">
-                  {formatCurrency(contract.enrollmentValue)}
-                </td>
-                <td className="p-4 text-muted-foreground">
-                  {formatCurrency(contract.ammount)}
-                </td>
-                <td className="p-4 text-muted-foreground">
-                  {contract.flexibleInstallments ? (
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                      Flexível
-                    </span>
-                  ) : (
-                    `${contract.installments}x`
-                  )}
-                </td>
-                <td className="p-4 text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(contract)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => onDelete(contract)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {meta && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {contracts.length} de {meta.total} contratos
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm">
-              Página {page} de {meta.lastPage}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= meta.lastPage}
-              onClick={() => onPageChange(page + 1)}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <ContractsListErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <ContractsListContent />
+        </ErrorBoundary>
       )}
-    </div>
+    </QueryErrorResetBoundary>
   )
 }
 
-// Container Export
-export function ContractsListContainer() {
-  const [page, setPage] = useState(1)
+function ContractsListContent() {
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    search: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(20),
+  })
+
+  const { search, page, limit } = filters
+
+  const { data, isLoading, error, refetch } = useQuery(
+    useContractsQueryOptions({ page, limit, search: search || undefined })
+  )
+
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [contractToDelete, setContractToDelete] = useState<ContractItem | null>(null)
 
@@ -265,12 +164,20 @@ export function ContractsListContainer() {
     }
   }
 
+  const contracts = Array.isArray(data) ? data : data?.data || []
+  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar contratos..." className="pl-9" />
+          <Input
+            placeholder="Buscar contratos..."
+            className="pl-9"
+            value={search || ''}
+            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
+          />
         </div>
         <Link route="web.escola.administrativo.contratos.novo">
           <Button className="ml-auto">
@@ -280,25 +187,122 @@ export function ContractsListContainer() {
         </Link>
       </div>
 
-      <QueryErrorResetBoundary>
-        {({ reset }) => (
-          <ErrorBoundary
-            onReset={reset}
-            fallbackRender={({ error, resetErrorBoundary }) => (
-              <ContractsListError error={error} resetErrorBoundary={resetErrorBoundary} />
-            )}
-          >
-            <Suspense fallback={<ContractsListSkeleton />}>
-              <ContractsListContent
-                page={page}
-                onPageChange={setPage}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            </Suspense>
-          </ErrorBoundary>
-        )}
-      </QueryErrorResetBoundary>
+      {isLoading && <ContractsListSkeleton />}
+
+      {error && (
+        <ContractsListErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+      )}
+
+      {!isLoading && !error && contracts.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold">Nenhum contrato encontrado</h3>
+            <p className="text-sm text-muted-foreground mt-1">Cadastre o primeiro contrato</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && !error && contracts.length > 0 && (
+        <div className="space-y-4">
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left p-4 font-medium">Nome</th>
+                  <th className="text-left p-4 font-medium">Matrícula</th>
+                  <th className="text-left p-4 font-medium">Mensalidade</th>
+                  <th className="text-left p-4 font-medium">Parcelas</th>
+                  <th className="text-right p-4 font-medium">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contracts.map((contract: any) => (
+                  <tr key={contract.id} className="border-t hover:bg-muted/30 transition-colors">
+                    <td className="p-4">
+                      <div>
+                        <span className="font-medium">{contract.name}</span>
+                        {contract.description && (
+                          <p className="text-sm text-muted-foreground truncate max-w-xs">
+                            {contract.description}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4 text-muted-foreground">
+                      {formatCurrency(contract.enrollmentValue)}
+                    </td>
+                    <td className="p-4 text-muted-foreground">
+                      {formatCurrency(contract.ammount)}
+                    </td>
+                    <td className="p-4 text-muted-foreground">
+                      {contract.flexibleInstallments ? (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                          Flexível
+                        </span>
+                      ) : (
+                        `${contract.installments}x`
+                      )}
+                    </td>
+                    <td className="p-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(contract)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(contract)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {meta && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Mostrando {contracts.length} de {meta.total} contratos
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setFilters({ page: page - 1 })}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm">
+                  Página {page} de {meta.lastPage}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= meta.lastPage}
+                  onClick={() => setFilters({ page: page + 1 })}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>

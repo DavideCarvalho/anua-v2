@@ -6,31 +6,19 @@ const $route = tuyau.api.v1.contracts.$get
 
 export type ContractsResponse = InferResponseType<typeof $route>
 
-interface UseContractsParams {
-  page?: number
-  limit?: number
-  schoolId?: string
-  status?: string
-}
+type ContractsQuery = NonNullable<Parameters<typeof $route>[0]>['query']
 
-export function useContractsQueryOptions(params: UseContractsParams = {}) {
-  const { page = 1, limit = 20, schoolId, status } = params
+export function useContractsQueryOptions(query: ContractsQuery = {}) {
+  const mergedQuery: ContractsQuery = {
+    page: 1,
+    limit: 20,
+    ...query,
+  }
 
   return {
-    queryKey: ['contracts', { page, limit, schoolId, status }],
-    queryFn: async () => {
-      const response = await tuyau.api.v1.contracts.$get({
-        query: {
-          page,
-          limit,
-          schoolId,
-          status,
-        },
-      })
-      if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar contratos')
-      }
-      return response.data
+    queryKey: ['contracts', mergedQuery],
+    queryFn: () => {
+      return $route({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions
+  } satisfies QueryOptions<ContractsResponse>
 }

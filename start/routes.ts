@@ -2040,6 +2040,10 @@ const GetResponsavelStudentOccurrencesController = () =>
   import('#controllers/responsavel/get_student_occurrences_controller')
 const AcknowledgeOccurrenceController = () =>
   import('#controllers/responsavel/acknowledge_occurrence_controller')
+const GetStudentOverviewController = () =>
+  import('#controllers/responsavel/get_student_overview_controller')
+const GetResponsavelNotificationsController = () =>
+  import('#controllers/responsavel/get_notifications_controller')
 
 function registerDashboardApiRoutes() {
   router
@@ -2083,6 +2087,12 @@ function registerDashboardApiRoutes() {
           AcknowledgeOccurrenceController,
         ])
         .as('acknowledgeOccurrence')
+      router
+        .get('/students/:studentId/overview', [GetStudentOverviewController])
+        .as('studentOverview')
+      router
+        .get('/notifications', [GetResponsavelNotificationsController])
+        .as('notifications')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])
@@ -2250,6 +2260,10 @@ const ShowResponsavelComunicadosPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_comunicados_page_controller')
 const ShowResponsavelPerfilPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_perfil_page_controller')
+const ShowResponsavelNotificacoesPageController = () =>
+  import('#controllers/pages/show_responsavel_notificacoes_page_controller')
+const ShowResponsavelCreditoPageController = () =>
+  import('#controllers/pages/show_responsavel_credito_page_controller')
 const ShowResponsavelAutorizacoesPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_autorizacoes_page_controller')
 const ShowResponsavelAtividadesPageController = () =>
@@ -2539,6 +2553,8 @@ function registerPageRoutes() {
           router.get('/documentos', [ShowResponsavelDocumentosPageController]).as('documentos')
           router.get('/ocorrencias', [ShowResponsavelOcorrenciasPageController]).as('ocorrencias')
           router.get('/perfil', [ShowResponsavelPerfilPageController]).as('perfil')
+          router.get('/notificacoes', [ShowResponsavelNotificacoesPageController]).as('notificacoes')
+          router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')
         })
         .prefix('/responsavel')
         .use([middleware.auth(), middleware.impersonation()])

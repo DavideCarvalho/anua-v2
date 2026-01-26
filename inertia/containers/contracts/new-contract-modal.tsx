@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -84,7 +83,8 @@ export function NewContractModal({ schoolId, open, onOpenChange }: NewContractMo
         installments: Number(values.installments),
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao criar contrato')
+        const errorValue = response.error.value as { message?: string; errors?: unknown[] }
+        throw new Error(errorValue?.message || 'Erro ao criar contrato')
       }
       return response.data
     },

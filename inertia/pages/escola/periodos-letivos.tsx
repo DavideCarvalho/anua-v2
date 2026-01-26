@@ -199,7 +199,7 @@ export default function PeriodosLetivosPage() {
                       className="w-full mt-4"
                     >
                       <Settings className="h-4 w-4 mr-2" />
-                      {period.isActive ? 'Configurar' : 'Ver Detalhes'}
+                      Ver Detalhes
                     </Button>
                   </Link>
                 </CardContent>

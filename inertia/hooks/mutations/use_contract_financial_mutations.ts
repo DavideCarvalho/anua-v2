@@ -1,19 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { InferRequestType } from '@tuyau/client'
 
 // Payment Days
-const $addPaymentDayRoute = tuyau.$route('api.v1.contracts.paymentDays.store')
-type AddPaymentDayPayload = InferRequestType<typeof $addPaymentDayRoute.$post> & {
+interface AddPaymentDayPayload {
   contractId: string
+  day: number
 }
 
 export function useAddContractPaymentDay() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ contractId, ...data }: AddPaymentDayPayload) => {
-      return tuyau.$route('api.v1.contracts.paymentDays.store', { contractId }).$post(data).unwrap()
+    mutationFn: ({ contractId, day }: AddPaymentDayPayload) => {
+      return tuyau
+        .$route('api.v1.contracts.paymentDays.store', { contractId })
+        .$post({ contractId, day })
+        .unwrap()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
@@ -42,9 +44,10 @@ export function useRemoveContractPaymentDay() {
 }
 
 // Interest Config
-const $updateInterestRoute = tuyau.$route('api.v1.contracts.interestConfig.update')
-type UpdateInterestPayload = InferRequestType<typeof $updateInterestRoute.$put> & {
+interface UpdateInterestPayload {
   contractId: string
+  delayInterestPercentage?: number
+  delayInterestPerDayDelayed?: number
 }
 
 export function useUpdateContractInterestConfig() {
@@ -66,19 +69,20 @@ export function useUpdateContractInterestConfig() {
 }
 
 // Early Discounts
-const $addDiscountRoute = tuyau.$route('api.v1.contracts.earlyDiscounts.store')
-type AddDiscountPayload = InferRequestType<typeof $addDiscountRoute.$post> & {
+interface AddDiscountPayload {
   contractId: string
+  percentage: number
+  daysBeforeDeadline: number
 }
 
 export function useAddContractEarlyDiscount() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ contractId, ...data }: AddDiscountPayload) => {
+    mutationFn: ({ contractId, percentage, daysBeforeDeadline }: AddDiscountPayload) => {
       return tuyau
         .$route('api.v1.contracts.earlyDiscounts.store', { contractId })
-        .$post(data)
+        .$post({ contractId, percentage, daysBeforeDeadline })
         .unwrap()
     },
     onSuccess: (_, variables) => {

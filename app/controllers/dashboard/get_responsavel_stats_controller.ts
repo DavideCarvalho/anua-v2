@@ -46,6 +46,10 @@ export default class GetResponsavelStatsController {
           attendanceRate: null,
           pendingPayments: 0,
           points: gamification?.totalPoints || 0,
+          permissions: {
+            pedagogical: relation.isPedagogical,
+            financial: relation.isFinancial,
+          },
         }
       })
     )

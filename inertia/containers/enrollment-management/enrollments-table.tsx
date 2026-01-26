@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import {
   CheckCircle2,
   Clock,
@@ -87,6 +89,31 @@ const DOC_STATUS_LABELS: Record<string, string> = {
   REJECTED: 'Rejeitado',
 }
 
+function EnrollmentsErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
+  return (
+    <Card className="border-destructive">
+      <CardContent className="flex items-center gap-4 py-6">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-destructive">Erro ao carregar matrículas</h3>
+          <p className="text-sm text-muted-foreground">
+            {error.message || 'Ocorreu um erro inesperado'}
+          </p>
+        </div>
+        <Button variant="outline" onClick={resetErrorBoundary}>
+          Tentar novamente
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 interface EnrollmentsTableProps {
   schoolId: string
   academicPeriodId?: string
@@ -98,8 +125,40 @@ export function EnrollmentsTable({
   academicPeriodId,
   levelId,
 }: EnrollmentsTableProps) {
-  const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <EnrollmentsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <EnrollmentsTableContent
+            schoolId={schoolId}
+            academicPeriodId={academicPeriodId}
+            levelId={levelId}
+          />
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  )
+}
+
+function EnrollmentsTableContent({
+  schoolId,
+  academicPeriodId,
+  levelId,
+}: EnrollmentsTableProps) {
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    status: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  })
+
+  const { status: statusFilter, page, limit } = filters
+
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -109,14 +168,14 @@ export function EnrollmentsTable({
   } | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
-  const { data } = useSuspenseQuery(
+  const { data, isLoading, error, refetch } = useQuery(
     useEnrollmentsQueryOptions({
       schoolId,
       academicPeriodId,
       levelId,
       status: statusFilter as any,
       page,
-      limit: 10,
+      limit,
     })
   )
 
@@ -197,7 +256,9 @@ export function EnrollmentsTable({
           <div className="text-sm font-medium">Status da Matrícula</div>
           <Select
             value={statusFilter || 'all'}
-            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
+            onValueChange={(value) =>
+              setFilters({ status: value === 'all' ? null : value, page: 1 })
+            }
           >
             <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Todos" />
@@ -469,7 +530,7 @@ export function EnrollmentsTable({
                   variant="outline"
                   size="sm"
                   disabled={meta.page <= 1}
-                  onClick={() => setPage(meta.page - 1)}
+                  onClick={() => setFilters({ page: meta.page - 1 })}
                 >
                   Anterior
                 </Button>
@@ -477,7 +538,7 @@ export function EnrollmentsTable({
                   variant="outline"
                   size="sm"
                   disabled={meta.page >= meta.lastPage}
-                  onClick={() => setPage(meta.page + 1)}
+                  onClick={() => setFilters({ page: meta.page + 1 })}
                 >
                   Próxima
                 </Button>

@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Eye, Download } from 'lucide-react'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
+import { Eye, Download, AlertCircle } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
@@ -52,19 +53,67 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: 'Cancelado',
 }
 
+function InsuranceBillingsErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
+  return (
+    <Card className="border-destructive">
+      <CardContent className="flex items-center gap-4 py-6">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-destructive">Erro ao carregar faturamentos</h3>
+          <p className="text-sm text-muted-foreground">
+            {error.message || 'Ocorreu um erro inesperado'}
+          </p>
+        </div>
+        <Button variant="outline" onClick={resetErrorBoundary}>
+          Tentar novamente
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 interface InsuranceBillingsTableProps {
   onViewDetails?: (billingId: string) => void
 }
 
 export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTableProps) {
-  const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <InsuranceBillingsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <InsuranceBillingsTableContent onViewDetails={onViewDetails} />
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  )
+}
 
-  const { data } = useSuspenseQuery(
+function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTableProps) {
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    status: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  })
+
+  const { status: statusFilter, page, limit } = filters
+
+  const { data, isLoading, error, refetch } = useQuery(
     useInsuranceBillingsQueryOptions({
       status: statusFilter as any,
       page,
-      limit: 10,
+      limit,
     })
   )
 
@@ -83,7 +132,9 @@ export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTable
           <div className="text-sm font-medium">Status</div>
           <Select
             value={statusFilter || 'all'}
-            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
+            onValueChange={(value) =>
+              setFilters({ status: value === 'all' ? null : value, page: 1 })
+            }
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Todos" />
@@ -196,7 +247,7 @@ export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTable
                   variant="outline"
                   size="sm"
                   disabled={meta.page <= 1}
-                  onClick={() => setPage(meta.page - 1)}
+                  onClick={() => setFilters({ page: meta.page - 1 })}
                 >
                   Anterior
                 </Button>
@@ -204,7 +255,7 @@ export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTable
                   variant="outline"
                   size="sm"
                   disabled={meta.page >= meta.lastPage}
-                  onClick={() => setPage(meta.page + 1)}
+                  onClick={() => setFilters({ page: meta.page + 1 })}
                 >
                   Próxima
                 </Button>

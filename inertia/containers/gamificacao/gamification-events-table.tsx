@@ -1,5 +1,7 @@
-import { useState } from 'react'
 import { usePage } from '@inertiajs/react'
+import { QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
@@ -13,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  AlertCircle,
 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -52,19 +55,67 @@ const STATUS_CONFIG = {
   FAILED: { label: 'Falhou', color: 'bg-red-100 text-red-700', icon: XCircle },
 }
 
+function GamificationEventsErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
+  return (
+    <Card className="border-destructive">
+      <CardContent className="flex items-center gap-4 py-6">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-destructive">Erro ao carregar eventos</h3>
+          <p className="text-sm text-muted-foreground">
+            {error.message || 'Ocorreu um erro inesperado'}
+          </p>
+        </div>
+        <Button variant="outline" onClick={resetErrorBoundary}>
+          Tentar novamente
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function GamificationEventsTable() {
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <GamificationEventsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <GamificationEventsTableContent />
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  )
+}
+
+function GamificationEventsTableContent() {
   const { props } = usePage<SharedProps>()
   const schoolId = props.user?.schoolId
 
-  const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    status: parseAsString.withDefault('all'),
+    type: parseAsString.withDefault('all'),
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(15),
+  })
+
+  const { status: statusFilter, type: typeFilter, page, limit } = filters
 
   const { data: events } = useGamificationEvents({
     status: statusFilter !== 'all' ? (statusFilter as 'PENDING' | 'PROCESSED' | 'FAILED') : undefined,
     type: typeFilter !== 'all' ? typeFilter : undefined,
     page,
-    limit: 15,
+    limit,
   })
 
   const retryEvent = useRetryGamificationEvent()
@@ -95,7 +146,10 @@ export function GamificationEventsTable() {
         {/* Filters */}
         <div className="flex items-center gap-4">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => setFilters({ status: value, page: 1 })}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -106,7 +160,10 @@ export function GamificationEventsTable() {
               <SelectItem value="FAILED">Falhou</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select
+            value={typeFilter}
+            onValueChange={(value) => setFilters({ type: value, page: 1 })}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
@@ -208,7 +265,7 @@ export function GamificationEventsTable() {
                     variant="outline"
                     size="sm"
                     disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
+                    onClick={() => setFilters({ page: page - 1 })}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -219,7 +276,7 @@ export function GamificationEventsTable() {
                     variant="outline"
                     size="sm"
                     disabled={page >= meta.lastPage}
-                    onClick={() => setPage(page + 1)}
+                    onClick={() => setFilters({ page: page + 1 })}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

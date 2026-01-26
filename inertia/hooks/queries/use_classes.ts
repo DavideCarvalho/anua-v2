@@ -6,28 +6,19 @@ const $route = tuyau.api.v1.classes.$get
 
 export type ClassesResponse = InferResponseType<typeof $route>
 
-interface UseClassesParams {
-  page?: number
-  limit?: number
-  levelId?: string
-  academicPeriodId?: string
-}
+type ClassesQuery = NonNullable<Parameters<typeof $route>[0]>['query']
 
-export function useClassesQueryOptions(params: UseClassesParams = {}) {
-  const { page = 1, limit = 20, levelId, academicPeriodId } = params
+export function useClassesQueryOptions(query: ClassesQuery = {}) {
+  const mergedQuery: ClassesQuery = {
+    page: 1,
+    limit: 20,
+    ...query,
+  }
 
   return {
-    queryKey: ['classes', { page, limit, levelId, academicPeriodId }],
-    queryFn: () =>
-      tuyau.api.v1.classes
-        .$get({
-          query: {
-            page,
-            limit,
-            levelId,
-            academicPeriodId,
-          },
-        })
-        .unwrap(),
-  } satisfies QueryOptions
+    queryKey: ['classes', mergedQuery],
+    queryFn: () => {
+      return $route({ query: mergedQuery }).unwrap()
+    },
+  } satisfies QueryOptions<ClassesResponse>
 }

@@ -12,6 +12,7 @@ export const listScholarshipsValidator = vine.compile(
     schoolId: vine.string().trim().optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
+    search: vine.string().trim().optional(),
   })
 )
 

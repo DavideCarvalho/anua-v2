@@ -17,6 +17,10 @@ export default class ListScholarshipsController {
       query.where('schoolId', schoolId)
     }
 
+    if (payload.search) {
+      query.where('name', 'ilike', `%${payload.search}%`)
+    }
+
     const scholarships = await query.paginate(page, limit)
 
     return response.ok(scholarships)

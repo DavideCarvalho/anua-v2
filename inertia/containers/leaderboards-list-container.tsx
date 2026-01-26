@@ -1,38 +1,35 @@
-import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger } from 'nuqs'
 import { useLeaderboardsQueryOptions } from '../hooks/queries/use_leaderboards'
-import type { LeaderboardsResponse } from '../hooks/queries/use_leaderboards'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { ChevronLeft, ChevronRight, AlertCircle, Trophy } from 'lucide-react'
 
 function LeaderboardsSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="border rounded-lg">
-        <div className="p-4 border-b">
+    <div className="border rounded-lg">
+      <div className="p-4 border-b">
+        <div className="grid grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-4 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
+      </div>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="p-4 border-b last:border-0">
           <div className="grid grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-4 bg-muted animate-pulse rounded" />
+            {Array.from({ length: 4 }).map((_, j) => (
+              <div key={j} className="h-4 bg-muted animate-pulse rounded" />
             ))}
           </div>
         </div>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="p-4 border-b last:border-0">
-            <div className="grid grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, j) => (
-                <div key={j} className="h-4 bg-muted animate-pulse rounded" />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      ))}
     </div>
   )
 }
 
-function LeaderboardsError({
+function LeaderboardsErrorFallback({
   error,
   resetErrorBoundary,
 }: {
@@ -55,19 +52,44 @@ function LeaderboardsError({
   )
 }
 
-type LeaderboardsData = Exclude<LeaderboardsResponse, undefined>
+export function LeaderboardsListContainer() {
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <LeaderboardsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <LeaderboardsListContent />
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  )
+}
 
-function LeaderboardsContent({
-  page,
-  onPageChange,
-}: {
-  page: number
-  onPageChange: (page: number) => void
-}) {
-  const { data } = useSuspenseQuery(useLeaderboardsQueryOptions({ page, limit: 20 }))
+function LeaderboardsListContent() {
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(20),
+  })
+
+  const { page, limit } = filters
+
+  const { data, isLoading, error, refetch } = useQuery(useLeaderboardsQueryOptions({ page, limit }))
 
   const leaderboards = Array.isArray(data) ? data : data?.data || []
   const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+
+  if (isLoading) {
+    return <LeaderboardsSkeleton />
+  }
+
+  if (error) {
+    return <LeaderboardsErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+  }
 
   if (leaderboards.length === 0) {
     return (
@@ -126,7 +148,7 @@ function LeaderboardsContent({
               variant="outline"
               size="sm"
               disabled={page <= 1}
-              onClick={() => onPageChange(page - 1)}
+              onClick={() => setFilters({ page: page - 1 })}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -137,7 +159,7 @@ function LeaderboardsContent({
               variant="outline"
               size="sm"
               disabled={page >= meta.lastPage}
-              onClick={() => onPageChange(page + 1)}
+              onClick={() => setFilters({ page: page + 1 })}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -145,26 +167,5 @@ function LeaderboardsContent({
         </div>
       )}
     </div>
-  )
-}
-
-export function LeaderboardsListContainer() {
-  const [page, setPage] = useState(1)
-
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <LeaderboardsError error={error} resetErrorBoundary={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<LeaderboardsSkeleton />}>
-            <LeaderboardsContent page={page} onPageChange={setPage} />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
   )
 }

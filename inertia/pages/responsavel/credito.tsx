@@ -1,20 +1,21 @@
 import { Head, usePage } from '@inertiajs/react'
+import { useQuery } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
+import { AlertCircle, Wallet } from 'lucide-react'
 import { ResponsavelLayout } from '../../components/layouts'
-import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
 import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
-import { AlertCircle } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { BalanceOverviewContainer } from '../../containers/responsavel/balance-overview-container'
+import { TransactionsHistoryContainer } from '../../containers/responsavel/transactions-history-container'
 import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 import type { SharedProps } from '../../lib/types'
 
-function ResponsavelContent() {
+function CreditoContent() {
   const { url } = usePage<SharedProps>()
   const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
 
   if (isLoading) {
-    return <ResponsavelSkeleton />
+    return <CreditoSkeleton />
   }
 
   if (isError) {
@@ -35,13 +36,10 @@ function ResponsavelContent() {
   // Early return se não tiver filhos
   if (data.students.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Você não está vinculado a nenhum aluno no momento.
-        </p>
-      </div>
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>Nenhum aluno vinculado</AlertDescription>
+      </Alert>
     )
   }
 
@@ -53,60 +51,90 @@ function ResponsavelContent() {
       : new URL(`http://localhost${url}`)
     alunoId = urlObj.searchParams.get('aluno')
   } catch {
+    // Fallback if URL parsing fails
     const match = url.match(/[?&]aluno=([^&]+)/)
     alunoId = match ? match[1] : null
   }
-  alunoId = alunoId || data.students[0]?.id
 
   // Buscar studentId
   const studentId = data.students.find((s) => s.id === alunoId)?.id || data.students[0]?.id
+  const selectedStudent = data.students.find((s) => s.id === studentId)
 
   // Se não tiver studentId válido, mostrar aviso
-  if (!studentId || !data.students.some((s) => s.id === studentId)) {
+  if (!studentId || !selectedStudent) {
     return (
-      <Alert>
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>Aluno não encontrado</AlertDescription>
+      </Alert>
+    )
+  }
+
+  // Verificar permissão financeira
+  if (!selectedStudent.permissions?.financial) {
+    return (
+      <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Aluno não encontrado. Por favor, selecione um aluno no menu acima.
+          Você não tem permissão financeira para gerenciar o saldo deste aluno. Entre em contato
+          com a secretaria da escola.
         </AlertDescription>
       </Alert>
     )
   }
 
-  return <DashboardOverviewContainer studentId={studentId} />
-}
-
-function ResponsavelSkeleton() {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="py-12 text-center">
-          <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-muted" />
-          <div className="mt-4 h-5 w-48 animate-pulse rounded bg-muted mx-auto" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      {/* Balance Overview */}
+      <BalanceOverviewContainer studentId={studentId} />
+
+      {/* Transactions History */}
+      <TransactionsHistoryContainer studentId={studentId} />
+    </div>
   )
 }
 
-export default function ResponsavelDashboard() {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+function CreditoSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <CardContent className="p-6">
+              <div className="h-20 animate-pulse rounded bg-muted" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 animate-pulse rounded bg-muted" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
+export default function CreditoPage() {
   return (
     <ResponsavelLayout>
-      <Head title="Início" />
+      <Head title="Crédito e Saldo" />
 
       <div className="space-y-6">
-        {/* Welcome section */}
+        {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Olá, {user?.name?.split(' ')[0]}!
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Wallet className="h-6 w-6" />
+            Crédito e Saldo
           </h1>
-          <p className="text-muted-foreground">Acompanhe o desempenho dos seus filhos</p>
+          <p className="text-muted-foreground">Gerencie o saldo do aluno</p>
         </div>
 
-        {/* Dashboard Overview */}
+        {/* Content */}
         <ErrorBoundary
           fallbackRender={({ error, resetErrorBoundary }) => (
             <Alert variant="destructive">
@@ -120,7 +148,7 @@ export default function ResponsavelDashboard() {
             </Alert>
           )}
         >
-          <ResponsavelContent />
+          <CreditoContent />
         </ErrorBoundary>
       </div>
     </ResponsavelLayout>

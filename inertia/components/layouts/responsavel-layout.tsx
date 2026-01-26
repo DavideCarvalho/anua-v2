@@ -15,6 +15,9 @@ import {
   Menu,
   X,
   ClipboardCheck,
+  Wallet,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '../ui/button'
@@ -22,26 +25,111 @@ import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
+import { StudentSelectorWithData } from '../responsavel/student-selector'
+import { useQuery } from '@tanstack/react-query'
+import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 
 interface NavItem {
   title: string
   route: string
   href: string
   icon: React.ElementType
+  requiresPedagogical?: boolean
+  requiresFinancial?: boolean
 }
 
-const navigation: NavItem[] = [
+// Navigation items organized by category
+const baseNavigation: NavItem[] = [
   { title: 'Início', route: 'web.responsavel.dashboard', href: '/responsavel', icon: LayoutDashboard },
-  { title: 'Notas', route: 'web.responsavel.notas', href: '/responsavel/notas', icon: BookOpen },
-  { title: 'Frequência', route: 'web.responsavel.frequencia', href: '/responsavel/frequencia', icon: Calendar },
-  { title: 'Mensalidades', route: 'web.responsavel.mensalidades', href: '/responsavel/mensalidades', icon: DollarSign },
-  { title: 'Cantina', route: 'web.responsavel.cantina', href: '/responsavel/cantina', icon: UtensilsCrossed },
-  { title: 'Autorizações', route: 'web.responsavel.autorizacoes', href: '/responsavel/autorizacoes', icon: ClipboardCheck },
-  { title: 'Documentos', route: 'web.responsavel.documentos', href: '/responsavel/documentos', icon: FileText },
-  { title: 'Gamificação', route: 'web.responsavel.gamificacao', href: '/responsavel/gamificacao', icon: Trophy },
   { title: 'Comunicados', route: 'web.responsavel.comunicados', href: '/responsavel/comunicados', icon: Bell },
+  { title: 'Autorizações', route: 'web.responsavel.autorizacoes', href: '/responsavel/autorizacoes', icon: ClipboardCheck },
+]
+
+const pedagogicalNavigation: NavItem[] = [
+  { title: 'Frequência', route: 'web.responsavel.frequencia', href: '/responsavel/frequencia', icon: Calendar, requiresPedagogical: true },
+  { title: 'Horário', route: 'web.responsavel.horario', href: '/responsavel/horario', icon: Clock, requiresPedagogical: true },
+  { title: 'Atividades', route: 'web.responsavel.atividades', href: '/responsavel/atividades', icon: FileText, requiresPedagogical: true },
+  { title: 'Notas', route: 'web.responsavel.notas', href: '/responsavel/notas', icon: BookOpen, requiresPedagogical: true },
+  { title: 'Ocorrências', route: 'web.responsavel.ocorrencias', href: '/responsavel/ocorrencias', icon: AlertTriangle, requiresPedagogical: true },
+  { title: 'Documentos', route: 'web.responsavel.documentos', href: '/responsavel/documentos', icon: FileText, requiresPedagogical: true },
+]
+
+const financialNavigation: NavItem[] = [
+  { title: 'Crédito', route: 'web.responsavel.credito', href: '/responsavel/credito', icon: Wallet, requiresFinancial: true },
+  { title: 'Mensalidades', route: 'web.responsavel.mensalidades', href: '/responsavel/mensalidades', icon: DollarSign, requiresFinancial: true },
+]
+
+const commonNavigation: NavItem[] = [
+  { title: 'Gamificação', route: 'web.responsavel.gamificacao', href: '/responsavel/gamificacao', icon: Trophy },
+  { title: 'Cantina', route: 'web.responsavel.cantina', href: '/responsavel/cantina', icon: UtensilsCrossed },
   { title: 'Perfil', route: 'web.responsavel.perfil', href: '/responsavel/perfil', icon: User },
 ]
+
+function NavigationContent() {
+  const { url } = usePage<SharedProps>()
+  const { data, isLoading } = useQuery(useResponsavelStatsQueryOptions())
+  const pathname = url.split('?')[0]
+  
+  if (isLoading || !data) {
+    return (
+      <div className="space-y-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-10 animate-pulse rounded bg-muted" />
+        ))}
+      </div>
+    )
+  }
+  
+  // Get selected student from URL or first student
+  let selectedStudentId: string | null = null
+  try {
+    const urlObj = typeof window !== 'undefined'
+      ? new URL(url, window.location.origin)
+      : new URL(`http://localhost${url}`)
+    selectedStudentId = urlObj.searchParams.get('aluno')
+  } catch {
+    const match = url.match(/[?&]aluno=([^&]+)/)
+    selectedStudentId = match ? match[1] : null
+  }
+  
+  const studentId = selectedStudentId || data.students[0]?.id
+  const selectedStudent = data.students.find((s) => s.id === studentId) || data.students[0]
+  
+  const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
+  const hasFinancial = selectedStudent?.permissions?.financial || false
+
+  // Build navigation based on permissions
+  const navigation = [
+    ...baseNavigation,
+    ...(hasPedagogical ? pedagogicalNavigation : []),
+    ...commonNavigation,
+    ...(hasFinancial ? financialNavigation : []),
+  ]
+
+  return (
+    <div className="space-y-1">
+      {navigation.map((item) => {
+        const Icon = item.icon
+        const isActive = pathname === item.href
+        return (
+          <Link
+            key={item.route}
+            route={item.route}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {item.title}
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
 
 export function ResponsavelLayout({ children }: PropsWithChildren) {
   const { props, url } = usePage<SharedProps>()
@@ -74,27 +162,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
           </div>
 
           <nav className="flex-1 overflow-y-auto px-3 py-4">
-            <div className="space-y-1">
-              {navigation.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.route}
-                    route={item.route}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.title}
-                  </Link>
-                )
-              })}
-            </div>
+            <NavigationContent />
           </nav>
 
           <div className="border-t p-4">
@@ -125,6 +193,9 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
           <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
           </button>
+          <div className="ml-auto">
+            <StudentSelectorWithData />
+          </div>
         </header>
         <main className="p-4 lg:p-6">{children}</main>
       </div>

@@ -1,10 +1,12 @@
-import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { ErrorBoundary } from 'react-error-boundary'
+import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useSchoolPartnersQueryOptions } from '../hooks/queries/use_school_partners'
-import { useSearchParams } from '../hooks/use_search_params'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Skeleton } from '../components/ui/skeleton'
+import { Input } from '../components/ui/input'
+import { Search, AlertCircle } from 'lucide-react'
 
 function SchoolPartnersTableSkeleton() {
   return (
@@ -20,18 +22,61 @@ function SchoolPartnersTableSkeleton() {
   )
 }
 
+function SchoolPartnersErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
+  return (
+    <Card className="border-destructive">
+      <CardContent className="flex items-center gap-4 py-6">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-destructive">Erro ao carregar parceiros</h3>
+          <p className="text-sm text-muted-foreground">
+            {error.message || 'Ocorreu um erro inesperado'}
+          </p>
+        </div>
+        <Button variant="outline" onClick={resetErrorBoundary}>
+          Tentar novamente
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function SchoolPartnersTableContainer({ onEdit }: { onEdit: (id: string) => void }) {
-  const { params, setParam } = useSearchParams()
+  return (
+    <QueryErrorResetBoundary>
+      {({ reset }) => (
+        <ErrorBoundary
+          onReset={reset}
+          fallbackRender={({ error, resetErrorBoundary }) => (
+            <SchoolPartnersErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+          )}
+        >
+          <SchoolPartnersTableContent onEdit={onEdit} />
+        </ErrorBoundary>
+      )}
+    </QueryErrorResetBoundary>
+  )
+}
 
-  const page = params.page ? Number(params.page) : 1
-  const limit = params.limit ? Number(params.limit) : 10
+function SchoolPartnersTableContent({ onEdit }: { onEdit: (id: string) => void }) {
+  // URL state with nuqs
+  const [filters, setFilters] = useQueryStates({
+    search: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  })
 
-  useEffect(() => {
-    if (!params.page) setParam('page', '1')
-    if (!params.limit) setParam('limit', '10')
-  }, [params.page, params.limit, setParam])
+  const { search, page, limit } = filters
 
-  const { data, isLoading } = useQuery(useSchoolPartnersQueryOptions({ page, limit }))
+  const { data, isLoading } = useQuery(
+    useSchoolPartnersQueryOptions({ page, limit, search: search || undefined })
+  )
 
   if (isLoading) {
     return <SchoolPartnersTableSkeleton />
@@ -43,6 +88,17 @@ export function SchoolPartnersTableContainer({ onEdit }: { onEdit: (id: string) 
   return (
     <Card>
       <CardContent className="py-4">
+        <div className="mb-4">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar parceiros..."
+              className="pl-9"
+              value={search || ''}
+              onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
+            />
+          </div>
+        </div>
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-muted/50">
@@ -95,7 +151,7 @@ export function SchoolPartnersTableContainer({ onEdit }: { onEdit: (id: string) 
                 variant="outline"
                 size="sm"
                 disabled={meta.currentPage <= 1}
-                onClick={() => setParam('page', String(meta.currentPage - 1))}
+                onClick={() => setFilters({ page: meta.currentPage - 1 })}
               >
                 Anterior
               </Button>
@@ -103,7 +159,7 @@ export function SchoolPartnersTableContainer({ onEdit }: { onEdit: (id: string) 
                 variant="outline"
                 size="sm"
                 disabled={meta.currentPage >= meta.lastPage}
-                onClick={() => setParam('page', String(meta.currentPage + 1))}
+                onClick={() => setFilters({ page: meta.currentPage + 1 })}
               >
                 Próxima
               </Button>

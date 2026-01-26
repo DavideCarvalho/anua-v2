@@ -6,31 +6,19 @@ const $route = tuyau.api.v1['canteen-items'].$get
 
 export type CanteenItemsResponse = InferResponseType<typeof $route>
 
-interface UseCanteenItemsParams {
-  page?: number
-  limit?: number
-  canteenId?: string
-  active?: boolean
-}
+type CanteenItemsQuery = NonNullable<Parameters<typeof $route>[0]>['query']
 
-export function useCanteenItemsQueryOptions(params: UseCanteenItemsParams = {}) {
-  const { page = 1, limit = 20, canteenId, active } = params
+export function useCanteenItemsQueryOptions(query: CanteenItemsQuery = {}) {
+  const mergedQuery: CanteenItemsQuery = {
+    page: 1,
+    limit: 20,
+    ...query,
+  }
 
   return {
-    queryKey: ['canteen-items', { page, limit, canteenId, active }],
-    queryFn: async () => {
-      const response = await tuyau.api.v1['canteen-items'].$get({
-        query: {
-          page,
-          limit,
-          canteenId,
-          active,
-        },
-      })
-      if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar itens da cantina')
-      }
-      return response.data
+    queryKey: ['canteen-items', mergedQuery],
+    queryFn: () => {
+      return $route({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions
+  } satisfies QueryOptions<CanteenItemsResponse>
 }

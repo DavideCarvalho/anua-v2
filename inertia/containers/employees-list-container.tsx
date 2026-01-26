@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
+import { usePage } from '@inertiajs/react'
 import { useSchoolEmployeesQueryOptions } from '../hooks/queries/use_school_employees'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import { NewEmployeeModal } from './employees/new-employee-modal'
+import type { SharedProps } from '../lib/types'
 import {
   Select,
   SelectContent,
@@ -212,6 +216,10 @@ function EmployeesListContent({
 
 // Container Export
 export function EmployeesListContainer() {
+  const { props } = usePage<SharedProps>()
+  const schoolId = props.user?.schoolId
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false)
+
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
     roles: parseAsArrayOf(parseAsString),
@@ -305,11 +313,19 @@ export function EmployeesListContainer() {
           </Button>
         )}
 
-        <Button className="ml-auto">
+        <Button className="ml-auto" onClick={() => setIsNewModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Funcionário
         </Button>
       </div>
+
+      {schoolId && (
+        <NewEmployeeModal
+          schoolId={schoolId}
+          open={isNewModalOpen}
+          onOpenChange={setIsNewModalOpen}
+        />
+      )}
 
       <QueryErrorResetBoundary>
         {({ reset }) => (
