@@ -77,10 +77,6 @@ const faqs = [
     answer: 'Anuá é um sistema de gestão escolar completo que integra todas as áreas da sua escola em uma única plataforma, potencializado por inteligência artificial.',
   },
   {
-    question: 'Quanto custa o Anuá?',
-    answer: 'O Anuá custa R$ 18,90 por aluno por mês, com acesso a todas as funcionalidades incluídas.',
-  },
-  {
     question: 'O Anuá tem inteligência artificial?',
     answer: 'Sim! Nossa IA analisa dados acadêmicos, financeiros e comportamentais para gerar insights automáticos, identificar alunos em risco e otimizar a gestão.',
   },
@@ -123,12 +119,6 @@ export default function Home() {
                   className="text-lg font-medium text-muted-foreground transition-colors hover:text-purple-600"
                 >
                   Funcionalidades
-                </a>
-                <a
-                  href="#preco"
-                  className="text-lg font-medium text-muted-foreground transition-colors hover:text-purple-600"
-                >
-                  Preço
                 </a>
                 <a
                   href="#fale-conosco"
@@ -632,76 +622,10 @@ export default function Home() {
           </div>
         </section>
 
-        <Pricing />
         <Contact />
         <Footer />
       </div>
     </>
-  )
-}
-
-const features = [
-  'Sistema completo de matrículas online',
-  'Gestão pedagógica (notas, frequência, atividades)',
-  'Financeiro com gateway de pagamento integrado',
-  'Gamificação com loja virtual e pontos',
-  'Analytics e IA para insights automáticos',
-  'Comunicação multi-canal (Email, SMS, WhatsApp, Push)',
-  'Cantina digital integrada',
-  'Contratos com assinatura digital',
-  'Gestão centralizada de redes de ensino',
-  'Portal do aluno e responsável',
-  'Sistema de solicitações (compras e impressões)',
-  'Suporte especializado',
-]
-
-function Pricing() {
-  return (
-    <section className="bg-background py-16" id="preco" aria-labelledby="pricing-heading">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <header className="text-center">
-          <h2 id="pricing-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
-            Preço do Sistema de Gestão Escolar Anuá
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Investimento acessível por aluno. Todas as funcionalidades incluídas, sem custos extras por módulo.
-          </p>
-        </header>
-
-        <div className="mt-16 flex justify-center">
-          <Card className="w-full max-w-md border-2 border-purple-200 dark:border-purple-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-foreground">
-                Ecossistema Completo
-              </CardTitle>
-              <CardDescription className="mt-4">
-                Tudo que sua escola precisa. Sem cobranças adicionais por módulo.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mt-6 flex items-baseline">
-                <span className="text-5xl font-bold text-purple-600">R$ 18,90</span>
-                <span className="ml-2 text-muted-foreground">/aluno/mês</span>
-              </div>
-
-              <ul className="mt-8 space-y-4">
-                {features.map((feature) => (
-                  <li key={feature} className="flex items-center">
-                    <Check className="h-5 w-5 text-purple-600" />
-                    <span className="ml-3 text-muted-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              <Button asChild className="w-full rounded-full" size="lg">
-                <a href="#fale-conosco">Começar a usar</a>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
-    </section>
   )
 }
 
@@ -711,7 +635,7 @@ function Contact() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="text-center">
           <h2 id="contact-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
-            Solicite uma Demonstração do Anuá
+            Entre em contato conosco
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Nossa equipe especializada está pronta para mostrar como o sistema de gestão escolar com IA pode transformar sua instituição
@@ -765,9 +689,6 @@ function Footer() {
           <nav aria-label="Links do rodapé" className="flex space-x-6">
             <a href="#funcionalidades" className="text-muted-foreground hover:text-purple-600 transition-colors">
               Funcionalidades
-            </a>
-            <a href="#preco" className="text-muted-foreground hover:text-purple-600 transition-colors">
-              Preço
             </a>
             <a href="#fale-conosco" className="text-muted-foreground hover:text-purple-600 transition-colors">
               Fale Conosco
