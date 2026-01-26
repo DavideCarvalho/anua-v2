@@ -96,19 +96,26 @@ export const newStudentSchema = z.object({
     courseId: z.string().min(1, 'O curso é obrigatório'),
     levelId: z.string().min(1, 'O nível é obrigatório'),
     classId: z.string().optional(),
-    contractId: z.string().optional(),
+    contractId: z.string().nullable().optional(),
+
+    // Contract values
     monthlyFee: z.number().min(0, 'O valor deve ser maior ou igual a 0'),
-    discount: z
-      .number()
-      .min(0, 'O desconto deve ser maior ou igual a 0')
-      .max(100, 'O desconto deve ser menor ou igual a 100'),
+    enrollmentFee: z.number().min(0).optional().default(0),
+    installments: z.number().min(1).max(12),
+    enrollmentInstallments: z.number().min(1).max(12).optional().default(1),
+    flexibleInstallments: z.boolean().optional().default(true),
+
+    // Payment
     paymentDate: z
       .number()
       .min(1, 'O dia deve ser maior que 0')
       .max(31, 'O dia deve ser menor ou igual a 31'),
     paymentMethod: z.enum(PaymentMethod),
-    installments: z.number().min(1).max(12),
+
+    // Scholarship
     scholarshipId: z.string().nullable().optional(),
+    discountPercentage: z.number().min(0).max(100).optional().default(0),
+    enrollmentDiscountPercentage: z.number().min(0).max(100).optional().default(0),
   }),
 })
 
