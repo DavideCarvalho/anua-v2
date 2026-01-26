@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -17,10 +17,19 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
 import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
 import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
+import { useContractQueryOptions } from '~/hooks/queries/use_contract'
+import { useScholarshipsQueryOptions } from '~/hooks/queries/use_scholarships'
 import { getCourseLabel, getLevelLabel } from '~/lib/formatters'
+import {
+  ContractDetailsCard,
+  ScholarshipSelector,
+  DiscountComparison,
+  RequiredDocumentsList,
+} from '~/components/enrollment'
 import type { AcademicPeriodSegment } from '~/lib/formatters'
 import type { NewStudentFormData, PaymentMethod } from '../schema'
 
@@ -62,6 +71,34 @@ export function BillingStep() {
   const courseLabel = getCourseLabel(segment)
   const levelLabel = getLevelLabel(segment)
 
+  // Get contractId from selected level
+  const selectedLevel = levels.find((l) => l.levelId === levelId)
+  const contractId = selectedLevel?.contractId
+
+  // Fetch contract details
+  const { data: contractData, isLoading: isLoadingContract } = useQuery({
+    ...useContractQueryOptions(contractId),
+    enabled: !!contractId,
+  })
+
+  // Fetch scholarships
+  const { data: scholarshipsData, isLoading: isLoadingScholarships } = useQuery({
+    ...useScholarshipsQueryOptions({ active: true, limit: 100 }),
+  })
+
+  const scholarships = scholarshipsData?.data ?? []
+
+  // Calculate months remaining until academic period ends
+  const maxInstallments = useMemo(() => {
+    if (!selectedPeriod?.endDate || !contractData) return 12
+    const endDate = new Date(selectedPeriod.endDate)
+    const now = new Date()
+    const monthsDiff =
+      (endDate.getFullYear() - now.getFullYear()) * 12 +
+      (endDate.getMonth() - now.getMonth())
+    return Math.min(Math.max(monthsDiff, 1), contractData.installments)
+  }, [selectedPeriod?.endDate, contractData])
+
   // Auto-select course if there's only one
   const hasOnlyOneCourse = courses.length === 1
   useEffect(() => {
@@ -69,6 +106,43 @@ export function BillingStep() {
       form.setValue('billing.courseId', courses[0].courseId)
     }
   }, [hasOnlyOneCourse, courseId, courses, form])
+
+  // Auto-fill form when contract is loaded
+  useEffect(() => {
+    if (contractData) {
+      form.setValue('billing.contractId', contractData.id)
+      form.setValue('billing.monthlyFee', contractData.amount)
+      form.setValue('billing.enrollmentFee', contractData.enrollmentValue ?? 0)
+      form.setValue(
+        'billing.installments',
+        contractData.flexibleInstallments ? maxInstallments : contractData.installments
+      )
+      form.setValue('billing.enrollmentInstallments', contractData.enrollmentValueInstallments)
+      form.setValue('billing.flexibleInstallments', contractData.flexibleInstallments)
+    } else if (levelId && !contractId) {
+      // Level selected but no contract - clear contract fields
+      form.setValue('billing.contractId', null)
+      form.setValue('billing.monthlyFee', 0)
+      form.setValue('billing.enrollmentFee', 0)
+    }
+  }, [contractData, contractId, levelId, maxInstallments, form])
+
+  // Handle scholarship selection
+  const handleScholarshipChange = (
+    scholarshipId: string | null,
+    scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
+  ) => {
+    form.setValue('billing.scholarshipId', scholarshipId)
+    form.setValue('billing.discountPercentage', scholarship?.discountPercentage ?? 0)
+    form.setValue(
+      'billing.enrollmentDiscountPercentage',
+      scholarship?.enrollmentDiscountPercentage ?? 0
+    )
+  }
+
+  const selectedScholarshipId = form.watch('billing.scholarshipId')
+  const discountPercentage = form.watch('billing.discountPercentage') ?? 0
+  const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
 
   return (
     <div className="space-y-6 py-4">
@@ -89,6 +163,8 @@ export function BillingStep() {
                     form.setValue('billing.courseId', '')
                     form.setValue('billing.levelId', '')
                     form.setValue('billing.classId', '')
+                    form.setValue('billing.contractId', null)
+                    form.setValue('billing.scholarshipId', null)
                   }}
                   value={field.value}
                   disabled={isLoadingPeriods}
@@ -126,6 +202,8 @@ export function BillingStep() {
                       field.onChange(value)
                       form.setValue('billing.levelId', '')
                       form.setValue('billing.classId', '')
+                      form.setValue('billing.contractId', null)
+                      form.setValue('billing.scholarshipId', null)
                     }}
                     value={field.value}
                     disabled={!academicPeriodId || isLoadingCourses}
@@ -167,6 +245,9 @@ export function BillingStep() {
                   onValueChange={(value) => {
                     field.onChange(value)
                     form.setValue('billing.classId', '')
+                    form.setValue('billing.scholarshipId', null)
+                    form.setValue('billing.discountPercentage', 0)
+                    form.setValue('billing.enrollmentDiscountPercentage', 0)
                   }}
                   value={field.value}
                   disabled={!courseId || isLoadingCourses}
@@ -236,121 +317,82 @@ export function BillingStep() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Informações de Pagamento</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <FormField
-            control={form.control}
-            name="billing.paymentMethod"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Forma de Pagamento*</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {(['BOLETO', 'CREDIT_CARD', 'PIX'] as const).map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {PaymentMethodLabels[method]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
+      {/* Contract Loading State */}
+      {levelId && isLoadingContract && (
+        <Card>
+          <CardHeader className="pb-3">
+            <Skeleton className="h-5 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Contract Details */}
+      {contractData && (
+        <ContractDetailsCard
+          name={contractData.name}
+          enrollmentValue={contractData.enrollmentValue}
+          monthlyFee={contractData.amount}
+          installments={contractData.installments}
+          enrollmentInstallments={contractData.enrollmentValueInstallments}
+          paymentType={contractData.paymentType}
+        />
+      )}
+
+      {/* Scholarship Selection */}
+      {contractData && (
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            <ScholarshipSelector
+              scholarships={scholarships}
+              value={selectedScholarshipId ?? null}
+              onChange={handleScholarshipChange}
+              isLoading={isLoadingScholarships}
+            />
+
+            {(discountPercentage > 0 || enrollmentDiscountPercentage > 0) && (
+              <DiscountComparison
+                originalEnrollmentFee={contractData.enrollmentValue ?? 0}
+                originalMonthlyFee={contractData.amount}
+                enrollmentDiscountPercentage={enrollmentDiscountPercentage}
+                monthlyDiscountPercentage={discountPercentage}
+                installments={form.watch('billing.installments')}
+              />
             )}
-          />
+          </CardContent>
+        </Card>
+      )}
 
-          <div className="grid grid-cols-2 gap-4">
+      {/* Payment Info - Only show if contract exists */}
+      {contractData && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Informações de Pagamento</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <FormField
               control={form.control}
-              name="billing.monthlyFee"
+              name="billing.paymentMethod"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mensalidade (R$)*</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      placeholder="0.00"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="billing.discount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Desconto (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={100}
-                      placeholder="0"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="billing.paymentDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dia de Vencimento*</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={31}
-                      placeholder="5"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="billing.installments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Parcelas*</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value?.toString()}
-                  >
+                  <FormLabel>Forma de Pagamento*</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}x
+                      {(['BOLETO', 'CREDIT_CARD', 'PIX'] as const).map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {PaymentMethodLabels[method]}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -359,9 +401,75 @@ export function BillingStep() {
                 </FormItem>
               )}
             />
-          </div>
-        </CardContent>
-      </Card>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="billing.paymentDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dia de Vencimento*</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={31}
+                        placeholder="5"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="billing.installments"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Parcelas Mensalidade*</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(Number(value))}
+                      value={field.value?.toString()}
+                      disabled={!contractData.flexibleInstallments}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.from(
+                          { length: contractData.flexibleInstallments ? maxInstallments : 1 },
+                          (_, i) =>
+                            contractData.flexibleInstallments ? i + 1 : contractData.installments
+                        ).map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num}x
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {!contractData.flexibleInstallments && (
+                      <p className="text-xs text-muted-foreground">
+                        Parcelas fixas definidas no contrato
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Required Documents */}
+      {contractData?.contractDocuments && contractData.contractDocuments.length > 0 && (
+        <RequiredDocumentsList documents={contractData.contractDocuments} />
+      )}
     </div>
   )
 }
