@@ -1,25 +1,18 @@
 import { tuyau } from '../../lib/api'
+import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.contracts.show')
+const $route = tuyau.api.v1.contracts({ id: '' }).$get
 
-export type ContractResponse = InferResponseType<typeof $route.$get>
+export type ContractResponse = InferResponseType<typeof $route>
 
-interface UseContractParams {
-  id: string
-}
-
-export function useContractQueryOptions({ id }: UseContractParams) {
+export function useContractQueryOptions(contractId: string | null | undefined) {
   return {
-    queryKey: ['contract', id],
-    queryFn: async () => {
-      const response = await tuyau.$route('api.v1.contracts.show', { id }).$get()
-      if (response.error) {
-        const errorValue = response.error.value as { message?: string } | undefined
-        throw new Error(errorValue?.message || 'Erro ao carregar contrato')
-      }
-      return response.data
+    queryKey: ['contract', contractId],
+    queryFn: () => {
+      if (!contractId) return null
+      return tuyau.api.v1.contracts({ id: contractId }).$get().unwrap()
     },
-    enabled: !!id,
-  }
+    enabled: !!contractId,
+  } satisfies QueryOptions<ContractResponse | null>
 }
