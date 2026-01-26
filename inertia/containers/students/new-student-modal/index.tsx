@@ -72,13 +72,17 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
         courseId: '',
         levelId: '',
         classId: '',
-        contractId: '',
+        contractId: null,
         monthlyFee: 0,
-        discount: 0,
+        enrollmentFee: 0,
         paymentDate: 5,
         paymentMethod: 'BOLETO',
         installments: 12,
+        enrollmentInstallments: 1,
+        flexibleInstallments: true,
         scholarshipId: null,
+        discountPercentage: 0,
+        enrollmentDiscountPercentage: 0,
       },
     },
   })
@@ -141,15 +145,24 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
         }
         break
       case 4:
-        isValid = await form.trigger([
-          'billing.academicPeriodId',
-          'billing.courseId',
-          'billing.levelId',
-          'billing.monthlyFee',
-          'billing.paymentDate',
-          'billing.paymentMethod',
-          'billing.installments',
-        ])
+        // Only validate payment fields if contract exists
+        const contractId = form.getValues('billing.contractId')
+        if (contractId) {
+          isValid = await form.trigger([
+            'billing.academicPeriodId',
+            'billing.courseId',
+            'billing.levelId',
+            'billing.paymentDate',
+            'billing.paymentMethod',
+            'billing.installments',
+          ])
+        } else {
+          isValid = await form.trigger([
+            'billing.academicPeriodId',
+            'billing.courseId',
+            'billing.levelId',
+          ])
+        }
         break
     }
 
@@ -222,8 +235,13 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
           classId: data.billing.classId || undefined,
           contractId: data.billing.contractId || undefined,
           monthlyFee: data.billing.monthlyFee,
-          discount: data.billing.discount,
+          enrollmentFee: data.billing.enrollmentFee,
+          discount: data.billing.discountPercentage,
+          enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
           paymentDate: data.billing.paymentDate,
+          installments: data.billing.installments,
+          enrollmentInstallments: data.billing.enrollmentInstallments,
+          scholarshipId: data.billing.scholarshipId || undefined,
         },
       })
 
