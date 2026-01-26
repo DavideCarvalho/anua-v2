@@ -15,11 +15,11 @@ const PaymentTypeLabels = {
   UPFRONT: 'À Vista',
 }
 
-function formatCurrency(value: number) {
+function formatCurrency(valueInCents: number) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(value)
+  }).format(valueInCents / 100)
 }
 
 export function ContractDetailsCard({
