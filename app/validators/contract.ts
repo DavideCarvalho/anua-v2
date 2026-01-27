@@ -59,6 +59,7 @@ export const updateContractValidator = vine.compile(
     flexibleInstallments: vine.boolean().optional(),
     isActive: vine.boolean().optional(),
     hasInsurance: vine.boolean().optional(),
+    paymentDays: vine.array(vine.number().min(1).max(31)).optional(),
   })
 )
 
@@ -86,6 +87,12 @@ export const createContractPaymentDayValidator = vine.compile(
   vine.object({
     contractId: vine.string().trim(),
     day: vine.number().min(1).max(31),
+  })
+)
+
+export const syncContractPaymentDaysValidator = vine.compile(
+  vine.object({
+    days: vine.array(vine.number().min(1).max(31)).minLength(1),
   })
 )
 

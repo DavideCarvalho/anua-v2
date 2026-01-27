@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Scholarship from '#models/scholarship'
 import type { ScholarshipType } from '#models/scholarship'
-import type { DateTime } from 'luxon'
 
 export default class ScholarshipDto extends BaseModelDto {
   declare id: string
@@ -14,8 +13,6 @@ export default class ScholarshipDto extends BaseModelDto {
   declare isActive: boolean
   declare description: string | null
   declare code: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
 
   constructor(model?: Scholarship) {
     super()
@@ -32,7 +29,5 @@ export default class ScholarshipDto extends BaseModelDto {
     this.isActive = model.isActive
     this.description = model.description
     this.code = model.code
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
   }
 }

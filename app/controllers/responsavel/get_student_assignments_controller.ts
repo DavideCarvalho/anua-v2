@@ -1,11 +1,46 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import {
+  StudentAssignmentsResponseDto,
+  AssignmentDto,
+  SubjectFilterDto,
+  TeacherDto,
+  SubmissionDto,
+  AssignmentsSummaryDto,
+} from '#models/dto/student_assignments_response.dto'
+
+interface AssignmentRow {
+  id: string
+  name: string
+  description: string | null
+  max_score: string | number
+  due_date: string
+  subject_id: string
+  subject_name: string
+  teacher_id: string
+  teacher_name: string
+  submission_id: string | null
+  score: string | number | null
+  submitted_at: string | null
+  computed_status: string
+}
+
+interface SubjectRow {
+  id: string
+  name: string
+}
+
+interface SummaryRow {
+  total: string | number
+  pending: string | number
+  completed: string | number
+  overdue: string | number
+}
 
 export default class GetStudentAssignmentsController {
-  async handle({ params, auth, response, request }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle({ params, response, request, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Nao autenticado' })
     }
 
@@ -14,7 +49,7 @@ export default class GetStudentAssignmentsController {
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .first()
 
@@ -26,14 +61,14 @@ export default class GetStudentAssignmentsController {
 
     // Build the base query
     let statusFilter = ''
-    const queryParams: Record<string, any> = { studentId }
+    const queryParams: Record<string, string> = { studentId }
 
     if (status === 'pending') {
-      statusFilter = `AND (sha.id IS NULL OR sha.status IN ('NOT_SUBMITTED', 'SUBMITTED'))`
+      statusFilter = `AND sha.id IS NULL`
     } else if (status === 'completed') {
-      statusFilter = `AND sha.status = 'GRADED'`
+      statusFilter = `AND sha.id IS NOT NULL AND sha.grade IS NOT NULL`
     } else if (status === 'late') {
-      statusFilter = `AND sha.status = 'LATE'`
+      statusFilter = `AND sha.id IS NULL AND a."dueDate" < NOW()`
     }
 
     let subjectFilter = ''
@@ -47,28 +82,22 @@ export default class GetStudentAssignmentsController {
       `
       SELECT
         a.id,
-        a.title,
+        a.name,
         a.description,
-        a.instructions,
         a.grade as max_score,
         a."dueDate" as due_date,
-        a.status as assignment_status,
         s.id as subject_id,
         s.name as subject_name,
         thc."teacherId" as teacher_id,
         u.name as teacher_name,
         sha.id as submission_id,
         sha.grade as score,
-        sha.feedback,
-        sha.status as submission_status,
         sha."submittedAt" as submitted_at,
-        sha."gradedAt" as graded_at,
         CASE
           WHEN sha.id IS NULL AND a."dueDate" < NOW() THEN 'overdue'
           WHEN sha.id IS NULL THEN 'not_submitted'
-          WHEN sha.status = 'GRADED' THEN 'graded'
-          WHEN sha.status = 'SUBMITTED' THEN 'submitted'
-          WHEN sha.status = 'LATE' THEN 'late'
+          WHEN sha.grade IS NOT NULL THEN 'graded'
+          WHEN sha."submittedAt" IS NOT NULL THEN 'submitted'
           ELSE 'not_submitted'
         END as computed_status
       FROM "Assignment" a
@@ -79,7 +108,6 @@ export default class GetStudentAssignmentsController {
       JOIN "Student" st ON st."classId" = c.id
       LEFT JOIN "StudentHasAssignment" sha ON sha."assignmentId" = a.id AND sha."studentId" = st.id
       WHERE st.id = :studentId
-        AND a.status = 'PUBLISHED'
         ${statusFilter}
         ${subjectFilter}
       ORDER BY a."dueDate" DESC
@@ -97,7 +125,6 @@ export default class GetStudentAssignmentsController {
       JOIN "Subject" s ON thc."subjectId" = s.id
       JOIN "Student" st ON st."classId" = c.id
       WHERE st.id = :studentId
-        AND a.status = 'PUBLISHED'
       ORDER BY s.name
       `,
       { studentId }
@@ -109,13 +136,13 @@ export default class GetStudentAssignmentsController {
       SELECT
         COUNT(DISTINCT a.id) as total,
         COUNT(DISTINCT CASE
-          WHEN sha.id IS NULL OR sha.status IN ('NOT_SUBMITTED', 'SUBMITTED') THEN a.id
+          WHEN sha.id IS NULL THEN a.id
         END) as pending,
         COUNT(DISTINCT CASE
-          WHEN sha.status = 'GRADED' THEN a.id
+          WHEN sha.id IS NOT NULL AND sha.grade IS NOT NULL THEN a.id
         END) as completed,
         COUNT(DISTINCT CASE
-          WHEN (sha.id IS NULL AND a."dueDate" < NOW()) OR sha.status = 'LATE' THEN a.id
+          WHEN sha.id IS NULL AND a."dueDate" < NOW() THEN a.id
         END) as overdue
       FROM "Assignment" a
       JOIN "TeacherHasClass" thc ON a."teacherHasClassId" = thc.id
@@ -123,49 +150,61 @@ export default class GetStudentAssignmentsController {
       JOIN "Student" st ON st."classId" = c.id
       LEFT JOIN "StudentHasAssignment" sha ON sha."assignmentId" = a.id AND sha."studentId" = st.id
       WHERE st.id = :studentId
-        AND a.status = 'PUBLISHED'
       `,
       { studentId }
     )
 
-    return response.ok({
-      assignments: assignments.rows.map((row: any) => ({
-        id: row.id,
-        title: row.title,
-        description: row.description,
-        instructions: row.instructions,
-        maxScore: Number(row.max_score),
-        dueDate: row.due_date,
-        subject: {
-          id: row.subject_id,
-          name: row.subject_name,
-        },
-        teacher: {
-          id: row.teacher_id,
-          name: row.teacher_name,
-        },
-        submission: row.submission_id
-          ? {
-              id: row.submission_id,
-              score: row.score ? Number(row.score) : null,
-              feedback: row.feedback,
-              status: row.submission_status,
-              submittedAt: row.submitted_at,
-              gradedAt: row.graded_at,
-            }
-          : null,
-        computedStatus: row.computed_status,
-      })),
-      subjects: subjects.rows.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-      })),
-      summary: {
-        total: Number(summary.rows[0]?.total || 0),
-        pending: Number(summary.rows[0]?.pending || 0),
-        completed: Number(summary.rows[0]?.completed || 0),
-        overdue: Number(summary.rows[0]?.overdue || 0),
-      },
+    const assignmentsList = (assignments.rows as AssignmentRow[]).map(
+      (row) =>
+        new AssignmentDto({
+          id: row.id,
+          title: row.name,
+          description: row.description,
+          instructions: null,
+          maxScore: Number(row.max_score),
+          dueDate: row.due_date,
+          subject: new SubjectFilterDto({
+            id: row.subject_id,
+            name: row.subject_name,
+          }),
+          teacher: new TeacherDto({
+            id: row.teacher_id,
+            name: row.teacher_name,
+          }),
+          submission: row.submission_id
+            ? new SubmissionDto({
+                id: row.submission_id,
+                score: row.score ? Number(row.score) : null,
+                feedback: null,
+                status: row.score ? 'GRADED' : 'SUBMITTED',
+                submittedAt: row.submitted_at,
+                gradedAt: row.score ? row.submitted_at : null,
+              })
+            : null,
+          computedStatus: row.computed_status,
+        })
+    )
+
+    const subjectsList = (subjects.rows as SubjectRow[]).map(
+      (row) =>
+        new SubjectFilterDto({
+          id: row.id,
+          name: row.name,
+        })
+    )
+
+    const summaryRow = summary.rows[0] as SummaryRow | undefined
+    const summaryData = new AssignmentsSummaryDto({
+      total: Number(summaryRow?.total || 0),
+      pending: Number(summaryRow?.pending || 0),
+      completed: Number(summaryRow?.completed || 0),
+      overdue: Number(summaryRow?.overdue || 0),
+    })
+
+    return new StudentAssignmentsResponseDto({
+      assignments: assignmentsList,
+      subjects: subjectsList,
+      summary: summaryData,
     })
   }
 }

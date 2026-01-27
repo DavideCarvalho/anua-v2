@@ -10,21 +10,20 @@ import type { QueryOptions } from '@tanstack/react-query'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
-const $route = tuyau.api.v1.responsavel.api.students[':studentId'].balance.$get
-
-type BalanceResponse = Awaited<ReturnType<typeof $route>>
-
 function useBalanceQueryOptions(studentId: string, page: number = 1) {
   return {
-    queryKey: ['responsavel', 'student', studentId, 'balance', page],
+    queryKey: ['responsavel', 'student', studentId, 'transactions', page],
     queryFn: async () => {
-      const response = await $route({ params: { studentId }, query: { page, limit: 20 } })
+      const response = await tuyau
+        .$route('api.v1.responsavel.api.studentBalance', { studentId })
+        .$get({ query: { page, limit: 20 } })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar transações')
+        throw new Error(response.error.message || 'Erro ao carregar transacoes')
       }
       return response.data
     },
-  } satisfies QueryOptions
+    enabled: !!studentId,
+  }
 }
 
 function TransactionsHistorySkeleton() {

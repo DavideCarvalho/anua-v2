@@ -86,7 +86,7 @@ export function BillingStep() {
     ...useScholarshipsQueryOptions({ active: true, limit: 100 }),
   })
 
-  const scholarships = scholarshipsData?.data ?? []
+  const scholarships = useMemo(() => scholarshipsData?.data ?? [], [scholarshipsData?.data])
 
   // Calculate months remaining until academic period ends
   const maxInstallments = useMemo(() => {
@@ -105,7 +105,8 @@ export function BillingStep() {
     if (hasOnlyOneCourse && !courseId) {
       form.setValue('billing.courseId', courses[0].courseId)
     }
-  }, [hasOnlyOneCourse, courseId, courses, form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasOnlyOneCourse, courseId, courses])
 
   // Auto-fill form when contract is loaded
   useEffect(() => {
@@ -125,7 +126,8 @@ export function BillingStep() {
       form.setValue('billing.monthlyFee', 0)
       form.setValue('billing.enrollmentFee', 0)
     }
-  }, [contractData, contractId, levelId, maxInstallments, form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractData?.id, contractId, levelId])
 
   // Handle scholarship selection
   const handleScholarshipChange = (
@@ -363,7 +365,7 @@ export function BillingStep() {
                 originalMonthlyFee={contractData.amount}
                 enrollmentDiscountPercentage={enrollmentDiscountPercentage}
                 monthlyDiscountPercentage={discountPercentage}
-                installments={form.watch('billing.installments')}
+                installments={contractData.paymentType === 'MONTHLY' ? 12 : form.watch('billing.installments')}
               />
             )}
           </CardContent>
@@ -402,38 +404,16 @@ export function BillingStep() {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className={contractData.paymentType === 'UPFRONT' ? 'grid grid-cols-2 gap-4' : ''}>
               <FormField
                 control={form.control}
                 name="billing.paymentDate"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Dia de Vencimento*</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={31}
-                        placeholder="5"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="billing.installments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Parcelas Mensalidade*</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
                       value={field.value?.toString()}
-                      disabled={!contractData.flexibleInstallments}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -441,26 +421,60 @@ export function BillingStep() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Array.from(
-                          { length: contractData.flexibleInstallments ? maxInstallments : 1 },
-                          (_, i) =>
-                            contractData.flexibleInstallments ? i + 1 : contractData.installments
-                        ).map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num}x
+                        {(contractData.paymentDays?.length
+                          ? contractData.paymentDays.map((pd) => pd.day).sort((a, b) => a - b)
+                          : [5, 10, 15, 20]
+                        ).map((day) => (
+                          <SelectItem key={day} value={day.toString()}>
+                            Dia {day}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {!contractData.flexibleInstallments && (
-                      <p className="text-xs text-muted-foreground">
-                        Parcelas fixas definidas no contrato
-                      </p>
-                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {contractData.paymentType === 'UPFRONT' && (
+                <FormField
+                  control={form.control}
+                  name="billing.installments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parcelas*</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value?.toString()}
+                        disabled={!contractData.flexibleInstallments}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Array.from(
+                            { length: contractData.flexibleInstallments ? maxInstallments : 1 },
+                            (_, i) =>
+                              contractData.flexibleInstallments ? i + 1 : contractData.installments
+                          ).map((num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num}x
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!contractData.flexibleInstallments && (
+                        <p className="text-xs text-muted-foreground">
+                          Parcelas fixas definidas no contrato
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
           </CardContent>
         </Card>

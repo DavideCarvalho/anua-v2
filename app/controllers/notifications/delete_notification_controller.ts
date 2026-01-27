@@ -6,17 +6,12 @@ export default class DeleteNotificationController {
     const { id } = params
 
     const user = effectiveUser ?? auth.user!
-    const notification = await Notification.query()
-      .where('id', id)
-      .where('userId', user.id)
-      .first()
+    const notification = await Notification.query().where('id', id).where('userId', user.id).first()
 
     if (!notification) {
       return response.notFound({ message: 'Notification not found' })
     }
 
     await notification.delete()
-
-    return response.ok({ message: 'Notification deleted successfully' })
   }
 }

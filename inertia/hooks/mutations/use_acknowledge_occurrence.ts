@@ -12,11 +12,9 @@ export function useAcknowledgeOccurrence() {
       studentId: string
       occurrenceId: string
     }) => {
-      const response = await tuyau.api.v1.responsavel.students[':studentId'].occurrences[
-        ':occurrenceId'
-      ].acknowledge.$post({
-        params: { studentId, occurrenceId },
-      })
+      const response = await tuyau
+        .$route('api.v1.responsavel.api.acknowledgeOccurrence', { studentId, occurrenceId })
+        .$post()
 
       if (response.error) {
         throw new Error(response.error.message || 'Erro ao reconhecer ocorrencia')

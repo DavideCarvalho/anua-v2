@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Clock, User, XCircle } from 'lucide-react'
@@ -44,9 +44,14 @@ function StudentSelector({
 function HorarioContent() {
   const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
   const students = data?.students ?? []
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    students.length > 0 ? students[0].id : null
-  )
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
+
+  // Sincroniza selectedStudentId quando students carrega
+  useEffect(() => {
+    if (students.length > 0 && !selectedStudentId) {
+      setSelectedStudentId(students[0].id)
+    }
+  }, [students, selectedStudentId])
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId)
 

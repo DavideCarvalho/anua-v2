@@ -131,10 +131,9 @@ function NavigationContent() {
 }
 
 export function ResponsavelLayout({ children }: PropsWithChildren) {
-  const { props, url } = usePage<SharedProps>()
+  const { props } = usePage<SharedProps>()
   const user = props.user
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const pathname = url.split('?')[0]
 
   return (
     <div className="min-h-screen bg-background">

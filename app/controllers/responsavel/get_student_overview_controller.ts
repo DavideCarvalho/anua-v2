@@ -6,9 +6,8 @@ import CanteenPurchase from '#models/canteen_purchase'
 import db from '@adonisjs/lucid/services/db'
 
 export default class GetStudentOverviewController {
-  async handle({ params, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle({ params, response, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Não autenticado' })
     }
 
@@ -16,7 +15,7 @@ export default class GetStudentOverviewController {
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .preload('student', (query) => {
         query.preload('user', (userQuery) => {

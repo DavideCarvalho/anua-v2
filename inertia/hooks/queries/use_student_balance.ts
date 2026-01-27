@@ -21,8 +21,8 @@ export function useStudentBalanceQueryOptions({
     queryKey: ['responsavel', 'student-balance', studentId, { page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.responsavel.api.studentBalance')
-        .$get({ params: { studentId }, query: { page, limit } })
+        .$route('api.v1.responsavel.api.studentBalance', { studentId })
+        .$get({ query: { page, limit } })
         .unwrap()
     },
     enabled: !!studentId,

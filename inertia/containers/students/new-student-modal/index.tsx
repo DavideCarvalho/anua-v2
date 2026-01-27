@@ -232,16 +232,17 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
         medicalInfo: data.medicalInfo,
         billing: {
           academicPeriodId: data.billing.academicPeriodId,
-          classId: data.billing.classId || undefined,
-          contractId: data.billing.contractId || undefined,
           monthlyFee: data.billing.monthlyFee,
           enrollmentFee: data.billing.enrollmentFee,
           discount: data.billing.discountPercentage,
           enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
           paymentDate: data.billing.paymentDate,
+          paymentMethod: data.billing.paymentMethod,
           installments: data.billing.installments,
           enrollmentInstallments: data.billing.enrollmentInstallments,
-          scholarshipId: data.billing.scholarshipId || undefined,
+          ...(data.billing.classId && { classId: data.billing.classId }),
+          ...(data.billing.contractId && { contractId: data.billing.contractId }),
+          ...(data.billing.scholarshipId && { scholarshipId: data.billing.scholarshipId }),
         },
       })
 
@@ -258,23 +259,6 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
     setCurrentStep(0)
     setStepsStatus(STEPS_CONFIG.map(() => 'pending'))
     onOpenChange(false)
-  }
-
-  function renderStep() {
-    switch (currentStep) {
-      case 0:
-        return <StudentInfoStep />
-      case 1:
-        return <ResponsiblesStep />
-      case 2:
-        return <AddressStep />
-      case 3:
-        return <MedicalInfoStep />
-      case 4:
-        return <BillingStep />
-      default:
-        return null
-    }
   }
 
   const isLastStep = currentStep === 4
@@ -298,7 +282,20 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
               onStepClick={handleStepClick}
             />
 
-            {renderStep()}
+            {/* Step 0: Dados do Aluno */}
+            {currentStep === 0 && <StudentInfoStep />}
+
+            {/* Step 1: Responsáveis */}
+            {currentStep === 1 && <ResponsiblesStep />}
+
+            {/* Step 2: Endereço */}
+            {currentStep === 2 && <AddressStep />}
+
+            {/* Step 3: Informações Médicas */}
+            {currentStep === 3 && <MedicalInfoStep />}
+
+            {/* Step 4: Cobrança */}
+            {currentStep === 4 && <BillingStep />}
 
             <div className="flex justify-between pt-4 border-t">
               <Button

@@ -19,7 +19,7 @@ export default function EditarContratoPage() {
   const contractId = props.id
 
   const { data: contract, isLoading, error } = useQuery(
-    useContractQueryOptions({ id: contractId })
+    useContractQueryOptions(contractId)
   )
 
   return (
@@ -48,7 +48,7 @@ export default function EditarContratoPage() {
             Erro ao carregar contrato: {error.message}
           </div>
         ) : schoolId && contract ? (
-          <ContractForm schoolId={schoolId} initialData={contract} />
+          <ContractForm key={contract.id} schoolId={schoolId} initialData={contract} />
         ) : (
           <div className="text-sm text-muted-foreground">
             Contrato não encontrado.

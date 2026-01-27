@@ -21,8 +21,8 @@ export function useResponsavelStudentPaymentsQueryOptions({
     queryKey: ['responsavel', 'student-payments', studentId, { page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.responsavel.api.studentPayments')
-        .$get({ params: { studentId }, query: { page, limit } })
+        .$route('api.v1.responsavel.api.studentPayments', { studentId })
+        .$get({ query: { page, limit } })
         .unwrap()
     },
     enabled: !!studentId,

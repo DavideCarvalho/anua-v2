@@ -3,9 +3,8 @@ import Occurrence from '#models/occurrence'
 import StudentHasResponsible from '#models/student_has_responsible'
 
 export default class AcknowledgeOccurrenceController {
-  async handle({ params, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle({ params, response, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Nao autenticado' })
     }
 
@@ -13,7 +12,7 @@ export default class AcknowledgeOccurrenceController {
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .first()
 

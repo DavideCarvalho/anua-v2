@@ -7,21 +7,20 @@ import type { QueryOptions } from '@tanstack/react-query'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
-const $route = tuyau.api.v1.responsavel.api.students[':studentId'].balance.$get
-
-type BalanceResponse = Awaited<ReturnType<typeof $route>>
-
 function useBalanceQueryOptions(studentId: string) {
   return {
     queryKey: ['responsavel', 'student', studentId, 'balance'],
     queryFn: async () => {
-      const response = await $route({ params: { studentId } })
+      const response = await tuyau
+        .$route('api.v1.responsavel.api.studentBalance', { studentId })
+        .$get()
       if (response.error) {
         throw new Error(response.error.message || 'Erro ao carregar saldo')
       }
       return response.data
     },
-  } satisfies QueryOptions
+    enabled: !!studentId,
+  }
 }
 
 function BalanceOverviewSkeleton() {

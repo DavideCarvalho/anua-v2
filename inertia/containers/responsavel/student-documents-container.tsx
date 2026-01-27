@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   FileText,
   CheckCircle2,
@@ -18,8 +18,14 @@ import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
 
-import { useStudentDocumentsQueryOptions } from '../../hooks/queries/use_student_documents'
+import {
+  useStudentDocumentsQueryOptions,
+  type StudentDocumentsResponse,
+} from '../../hooks/queries/use_student_documents'
 import { brazilianDateFormatter } from '../../lib/formatters'
+
+type MissingDocument = StudentDocumentsResponse['missingDocuments'][number]
+type StudentDocument = StudentDocumentsResponse['documents'][number]
 
 interface StudentDocumentsContainerProps {
   studentId: string
@@ -60,7 +66,29 @@ export function StudentDocumentsContainer({
   studentId,
   studentName,
 }: StudentDocumentsContainerProps) {
-  const { data } = useSuspenseQuery(useStudentDocumentsQueryOptions(studentId))
+  const { data, isLoading, isError, error } = useQuery(useStudentDocumentsQueryOptions(studentId))
+
+  if (isLoading) {
+    return <StudentDocumentsContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar documentos</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentDocumentsContainerSkeleton />
+  }
 
   const hasDocuments = data.documents.length > 0
   const hasMissingRequired = data.summary.requiredMissing > 0
@@ -152,7 +180,7 @@ export function StudentDocumentsContainer({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.missingDocuments.map((doc: any) => (
+              {data.missingDocuments.map((doc: MissingDocument) => (
                 <div
                   key={doc.id}
                   className={cn(
@@ -204,7 +232,7 @@ export function StudentDocumentsContainer({
             </div>
           ) : (
             <div className="space-y-4">
-              {data.documents.map((doc: any) => {
+              {data.documents.map((doc: StudentDocument) => {
                 const statusConfig = STATUS_CONFIG[doc.status as keyof typeof STATUS_CONFIG]
                 const StatusIcon = statusConfig?.icon || Clock
                 const FileIcon = getFileIcon(doc.mimeType)

@@ -33,10 +33,7 @@ import {
   useCreateContractMutation,
   useUpdateContractMutation,
 } from '../../hooks/mutations/use_contract_mutations'
-import {
-  useAddContractPaymentDay,
-  useUpdateContractInterestConfig,
-} from '../../hooks/mutations/use_contract_financial_mutations'
+import { useUpdateContractInterestConfig } from '../../hooks/mutations/use_contract_financial_mutations'
 import type { ContractResponse } from '../../hooks/queries/use_contract'
 
 const formSchema = z.object({
@@ -54,12 +51,28 @@ const formSchema = z.object({
   paymentDays: z.array(z.number()).min(1, 'Selecione pelo menos um dia de vencimento'),
 
   // Interest and discounts
-  interestPercentage: z.number().min(0).max(100).optional(),
-  interestPerDay: z.number().min(0).max(100).optional(),
+  interestPercentage: z.preprocess(
+    (v) => (v === '' || v === undefined ? undefined : Number(v)),
+    z.number().min(0).max(100).optional()
+  ),
+  interestPerDay: z.preprocess(
+    (v) => (v === '' || v === undefined ? undefined : Number(v)),
+    z.number().min(0).max(100).optional()
+  ),
   earlyDiscounts: z.array(
     z.object({
       daysBeforeDeadline: z.number().min(1),
       percentage: z.number().min(0).max(100),
+    })
+  ),
+
+  // Documents
+  contractDocuments: z.array(
+    z.object({
+      id: z.string().optional(),
+      name: z.string().min(1, 'Nome do documento é obrigatório'),
+      description: z.string().optional(),
+      required: z.boolean(),
     })
   ),
 })
@@ -129,6 +142,7 @@ const steps = [
   { title: 'Informações Básicas', description: 'Nome e configurações gerais' },
   { title: 'Pagamento', description: 'Valores e parcelas' },
   { title: 'Juros e Descontos', description: 'Multas e incentivos' },
+  { title: 'Documentos', description: 'Documentos exigidos' },
 ]
 
 export function ContractForm({ schoolId, initialData }: ContractFormProps) {
@@ -138,14 +152,10 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
 
   const createContract = useCreateContractMutation()
   const updateContract = useUpdateContractMutation()
-  const addPaymentDay = useAddContractPaymentDay()
   const updateInterestConfig = useUpdateContractInterestConfig()
 
   const isSubmitting =
-    createContract.isPending ||
-    updateContract.isPending ||
-    addPaymentDay.isPending ||
-    updateInterestConfig.isPending
+    createContract.isPending || updateContract.isPending || updateInterestConfig.isPending
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -165,10 +175,18 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       interestPercentage: initialData?.interestConfig?.delayInterestPercentage || undefined,
       interestPerDay: initialData?.interestConfig?.delayInterestPerDayDelayed || undefined,
       earlyDiscounts: initialData?.earlyDiscounts || [],
+      contractDocuments:
+        initialData?.contractDocuments?.map((doc) => ({
+          id: doc.id,
+          name: doc.name,
+          description: doc.description || '',
+          required: doc.required,
+        })) || [],
     },
   })
 
   const earlyDiscounts = form.watch('earlyDiscounts')
+  const contractDocuments = form.watch('contractDocuments')
   const paymentType = form.watch('paymentType')
   const flexibleInstallments = form.watch('flexibleInstallments')
   const amount = form.watch('amount')
@@ -229,12 +247,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
         await updateContract.mutateAsync({
           id: initialData.id,
           ...basePayload,
+          paymentDays: values.paymentDays,
         })
-
-        // Update payment days
-        for (const day of values.paymentDays) {
-          await addPaymentDay.mutateAsync({ contractId: initialData.id, day })
-        }
 
         // Update interest config if provided
         if (values.interestPercentage || values.interestPerDay) {
@@ -282,6 +296,19 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
     const current = form.getValues('earlyDiscounts')
     form.setValue(
       'earlyDiscounts',
+      current.filter((_, i) => i !== index)
+    )
+  }
+
+  function addDocument() {
+    const current = form.getValues('contractDocuments')
+    form.setValue('contractDocuments', [...current, { name: '', description: '', required: true }])
+  }
+
+  function removeDocument(index: number) {
+    const current = form.getValues('contractDocuments')
+    form.setValue(
+      'contractDocuments',
       current.filter((_, i) => i !== index)
     )
   }
@@ -713,6 +740,112 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                 </div>
               )}
 
+              {/* Step 3: Documentos */}
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium">Documentos Exigidos</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Defina os documentos que serão exigidos na matrícula
+                        </p>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" onClick={addDocument}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar
+                      </Button>
+                    </div>
+
+                    {contractDocuments.length === 0 ? (
+                      <div className="border rounded-lg p-8 text-center">
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Nenhum documento exigido configurado
+                        </p>
+                        <Button type="button" variant="outline" size="sm" onClick={addDocument}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Adicionar Documento
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {contractDocuments.map((_, index) => (
+                          <div key={index} className="border rounded-lg p-4 space-y-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 grid grid-cols-2 gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name={`contractDocuments.${index}.name`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Nome do Documento *</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Ex: RG do Aluno" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name={`contractDocuments.${index}.description`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Descrição</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          placeholder="Descrição opcional"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="mt-8"
+                                onClick={() => removeDocument(index)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+
+                            <FormField
+                              control={form.control}
+                              name={`contractDocuments.${index}.required`}
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-center gap-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                    />
+                                  </FormControl>
+                                  <div>
+                                    <FormLabel className="font-normal">
+                                      Documento obrigatório
+                                    </FormLabel>
+                                    <FormDescription>
+                                      Se marcado, a matrícula não poderá ser concluída sem este documento
+                                    </FormDescription>
+                                  </div>
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Navigation buttons */}
               <div className="mt-8 flex justify-between">
                 {currentStep > 0 && (
@@ -728,17 +861,12 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   >
                     Cancelar
                   </Button>
-                  {currentStep === 0 && (
+                  {currentStep < 3 && (
                     <Button type="button" onClick={handleNext}>
                       Próximo
                     </Button>
                   )}
-                  {currentStep === 1 && (
-                    <Button type="button" onClick={handleNext}>
-                      Próximo
-                    </Button>
-                  )}
-                  {currentStep === 2 && (
+                  {currentStep === 3 && (
                     <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? (
                         <>

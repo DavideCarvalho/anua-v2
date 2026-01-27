@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   BookOpen,
   Clock,
@@ -8,6 +8,7 @@ import {
   FileText,
   Calendar,
   Filter,
+  XCircle,
 } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
@@ -29,8 +30,14 @@ import {
   AccordionTrigger,
 } from '../../components/ui/accordion'
 
-import { useStudentAssignmentsQueryOptions } from '../../hooks/queries/use_student_assignments'
+import {
+  useStudentAssignmentsQueryOptions,
+  type StudentAssignmentsResponse,
+} from '../../hooks/queries/use_student_assignments'
 import { brazilianDateFormatter } from '../../lib/formatters'
+
+type Subject = StudentAssignmentsResponse['subjects'][number]
+type Assignment = StudentAssignmentsResponse['assignments'][number]
 
 interface StudentAssignmentsContainerProps {
   studentId: string
@@ -51,12 +58,34 @@ export function StudentAssignmentsContainer({
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
 
-  const { data } = useSuspenseQuery(
+  const { data, isLoading, isError, error } = useQuery(
     useStudentAssignmentsQueryOptions(studentId, {
       status: statusFilter === 'all' ? undefined : statusFilter,
       subjectId: subjectFilter === 'all' ? undefined : subjectFilter,
     })
   )
+
+  if (isLoading) {
+    return <StudentAssignmentsContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar atividades</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentAssignmentsContainerSkeleton />
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -205,7 +234,7 @@ export function StudentAssignmentsContainer({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as materias</SelectItem>
-                  {data.subjects.map((subject: any) => (
+                  {data.subjects.map((subject: Subject) => (
                     <SelectItem key={subject.id} value={subject.id}>
                       {subject.name}
                     </SelectItem>
@@ -242,7 +271,7 @@ export function StudentAssignmentsContainer({
             </div>
           ) : (
             <Accordion type="single" collapsible className="space-y-2">
-              {data.assignments.map((assignment: any) => {
+              {data.assignments.map((assignment: Assignment) => {
                 const dueInfo = formatDueDate(assignment.dueDate)
                 return (
                   <AccordionItem

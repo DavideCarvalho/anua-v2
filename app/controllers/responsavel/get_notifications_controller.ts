@@ -3,9 +3,8 @@ import Notification from '#models/notification'
 import StudentHasResponsible from '#models/student_has_responsible'
 
 export default class GetNotificationsController {
-  async handle({ auth, request, response, effectiveUser }: HttpContext) {
-    const user = effectiveUser ?? auth.user
-    if (!user) {
+  async handle({ request, response, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Não autenticado' })
     }
 
@@ -14,7 +13,7 @@ export default class GetNotificationsController {
 
     // Get all students that this responsible has access to
     const studentRelations = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .preload('student')
 
     const studentIds = studentRelations.map((r) => r.studentId)

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Calendar, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -15,7 +15,12 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useStudentAttendanceQueryOptions } from '../../hooks/queries/use_student_attendance'
+import {
+  useStudentAttendanceQueryOptions,
+  type StudentAttendanceResponse,
+} from '../../hooks/queries/use_student_attendance'
+
+type AttendanceRecord = StudentAttendanceResponse['data'][number]
 
 interface StudentAttendanceContainerProps {
   studentId: string
@@ -26,7 +31,29 @@ export function StudentAttendanceContainer({
   studentId,
   studentName,
 }: StudentAttendanceContainerProps) {
-  const { data } = useSuspenseQuery(useStudentAttendanceQueryOptions({ studentId }))
+  const { data, isLoading, error, isError } = useQuery(useStudentAttendanceQueryOptions({ studentId }))
+
+  if (isLoading) {
+    return <StudentAttendanceContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar frequência</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentAttendanceContainerSkeleton />
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -95,7 +122,7 @@ export function StudentAttendanceContainer({
               <p className="text-sm text-muted-foreground">Atrasos</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-3xl font-bold text-blue-600">{data.summary.justifiedCount}</p>
+              <p className="text-3xl font-bold text-blue-600">{data.summary.excusedCount}</p>
               <p className="text-sm text-muted-foreground">Justificadas</p>
             </div>
           </div>
@@ -124,7 +151,7 @@ export function StudentAttendanceContainer({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((attendance: any) => (
+                {data.data.map((attendance: AttendanceRecord) => (
                   <TableRow key={attendance.id}>
                     <TableCell>
                       {format(new Date(attendance.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}

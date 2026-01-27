@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
   AlertCircle,
@@ -33,9 +33,14 @@ import {
   AccordionTrigger,
 } from '../../components/ui/accordion'
 
-import { useStudentOccurrencesQueryOptions } from '../../hooks/queries/use_student_occurrences'
+import {
+  useStudentOccurrencesQueryOptions,
+  type StudentOccurrencesResponse,
+} from '../../hooks/queries/use_student_occurrences'
 import { useAcknowledgeOccurrence } from '../../hooks/mutations/use_acknowledge_occurrence'
 import { brazilianDateFormatter } from '../../lib/formatters'
+
+type Occurrence = StudentOccurrencesResponse['occurrences'][number]
 
 interface StudentOccurrencesContainerProps {
   studentId: string
@@ -72,7 +77,7 @@ export function StudentOccurrencesContainer({
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [severityFilter, setSeverityFilter] = useState<string>('all')
 
-  const { data } = useSuspenseQuery(
+  const { data, isLoading, isError, error } = useQuery(
     useStudentOccurrencesQueryOptions(studentId, {
       type: typeFilter === 'all' ? undefined : typeFilter,
       status: statusFilter === 'all' ? undefined : statusFilter,
@@ -81,6 +86,28 @@ export function StudentOccurrencesContainer({
   )
 
   const acknowledgeMutation = useAcknowledgeOccurrence()
+
+  if (isLoading) {
+    return <StudentOccurrencesContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar ocorrencias</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentOccurrencesContainerSkeleton />
+  }
 
   const hasUnacknowledged = data.summary.unacknowledged > 0
   const hasOccurrences = data.occurrences.length > 0
@@ -255,7 +282,7 @@ export function StudentOccurrencesContainer({
             </div>
           ) : (
             <Accordion type="single" collapsible className="space-y-2">
-              {data.occurrences.map((occurrence: any) => {
+              {data.occurrences.map((occurrence: Occurrence) => {
                 const typeConfig = TYPE_CONFIG[occurrence.type as keyof typeof TYPE_CONFIG]
                 const severityConfig =
                   SEVERITY_CONFIG[occurrence.severity as keyof typeof SEVERITY_CONFIG]

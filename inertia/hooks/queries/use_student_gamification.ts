@@ -98,3 +98,54 @@ export function useStudentGamificationStatsQueryOptions(studentId: string) {
 export function useStudentGamificationStats(studentId: string) {
   return useSuspenseQuery(useStudentGamificationStatsQueryOptions(studentId))
 }
+
+// Responsavel: Get student gamification details
+export type ResponsavelStudentGamificationResponse = {
+  student: {
+    id: string
+    name: string
+  }
+  gamification: {
+    totalPoints: number
+    currentLevel: number
+    levelProgress: number
+    streak: number
+    longestStreak: number
+    lastActivityAt: string | null
+  }
+  achievements: Array<{
+    id: string
+    name: string
+    description: string
+    icon: string | null
+    points: number
+    category: string
+    rarity: string
+    unlockedAt: string
+    progress: number
+  }>
+  recentTransactions: Array<{
+    id: string
+    points: number
+    balanceAfter: number
+    type: string
+    reason: string | null
+    createdAt: string
+  }>
+}
+
+export function useResponsavelStudentGamificationQueryOptions(studentId: string) {
+  return {
+    queryKey: ['responsavel', 'students', studentId, 'gamification'],
+    queryFn: async () => {
+      const response = await tuyau
+        .$route('api.v1.responsavel.api.studentGamification', { studentId })
+        .$get()
+      if (response.error) {
+        throw new Error(response.error.message || 'Erro ao carregar gamificacao')
+      }
+      return response.data as ResponsavelStudentGamificationResponse
+    },
+    enabled: !!studentId,
+  } satisfies QueryOptions<ResponsavelStudentGamificationResponse>
+}

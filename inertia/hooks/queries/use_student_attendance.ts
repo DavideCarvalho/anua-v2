@@ -21,8 +21,8 @@ export function useStudentAttendanceQueryOptions({
     queryKey: ['responsavel', 'student-attendance', studentId, { page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.responsavel.api.studentAttendance')
-        .$get({ params: { studentId }, query: { page, limit } })
+        .$route('api.v1.responsavel.api.studentAttendance', { studentId })
+        .$get({ query: { page, limit } })
         .unwrap()
     },
     enabled: !!studentId,

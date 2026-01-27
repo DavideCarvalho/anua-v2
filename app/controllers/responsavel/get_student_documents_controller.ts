@@ -1,11 +1,48 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import {
+  StudentDocumentsResponseDto,
+  StudentDocumentDto,
+  DocumentTypeDto,
+  MissingDocumentDto,
+  DocumentsSummaryDto,
+} from '#models/dto/student_documents_response.dto'
+
+interface DocumentRow {
+  id: string
+  fileName: string
+  fileUrl: string
+  mimeType: string
+  size: string | number
+  status: string
+  rejectionReason: string | null
+  reviewedAt: string | null
+  createdAt: string
+  contractDocumentId: string
+  documentTypeName: string
+  documentTypeDescription: string | null
+  required: boolean
+  reviewerName: string | null
+}
+
+interface MissingDocumentRow {
+  id: string
+  name: string
+  description: string | null
+  required: boolean
+}
+
+interface SummaryRow {
+  total: string | number
+  pending: string | number
+  approved: string | number
+  rejected: string | number
+}
 
 export default class GetStudentDocumentsController {
-  async handle({ params, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle({ params, response, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Nao autenticado' })
     }
 
@@ -13,7 +50,7 @@ export default class GetStudentDocumentsController {
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .first()
 
@@ -28,24 +65,24 @@ export default class GetStudentDocumentsController {
       `
       SELECT
         sd.id,
-        sd.file_name,
-        sd.file_url,
-        sd.mime_type,
+        sd."fileName",
+        sd."fileUrl",
+        sd."mimeType",
         sd.size,
         sd.status,
-        sd.rejection_reason,
-        sd.reviewed_at,
-        sd.created_at,
-        cd.id as contract_document_id,
-        cd.name as document_type_name,
-        cd.description as document_type_description,
-        cd.is_required,
-        u.name as reviewer_name
-      FROM student_documents sd
-      JOIN contract_documents cd ON sd.contract_document_id = cd.id
-      LEFT JOIN users u ON sd.reviewed_by = u.id
-      WHERE sd.student_id = :studentId
-      ORDER BY sd.created_at DESC
+        sd."rejectionReason",
+        sd."reviewedAt",
+        sd."createdAt",
+        cd.id as "contractDocumentId",
+        cd.name as "documentTypeName",
+        cd.description as "documentTypeDescription",
+        cd.required,
+        u.name as "reviewerName"
+      FROM "StudentDocument" sd
+      JOIN "ContractDocument" cd ON sd."contractDocumentId" = cd.id
+      LEFT JOIN "User" u ON sd."reviewedBy" = u.id
+      WHERE sd."studentId" = :studentId
+      ORDER BY sd."createdAt" DESC
       `,
       { studentId }
     )
@@ -57,16 +94,16 @@ export default class GetStudentDocumentsController {
         cd.id,
         cd.name,
         cd.description,
-        cd.is_required
-      FROM contract_documents cd
-      JOIN students s ON s.contract_id = cd.contract_id
+        cd.required
+      FROM "ContractDocument" cd
+      JOIN "Student" s ON s."contractId" = cd."contractId"
       WHERE s.id = :studentId
         AND cd.id NOT IN (
-          SELECT contract_document_id
-          FROM student_documents
-          WHERE student_id = :studentId
+          SELECT "contractDocumentId"
+          FROM "StudentDocument"
+          WHERE "studentId" = :studentId
         )
-      ORDER BY cd.is_required DESC, cd.name
+      ORDER BY cd.required DESC, cd.name
       `,
       { studentId }
     )
@@ -79,47 +116,61 @@ export default class GetStudentDocumentsController {
         COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending,
         COUNT(CASE WHEN status = 'APPROVED' THEN 1 END) as approved,
         COUNT(CASE WHEN status = 'REJECTED' THEN 1 END) as rejected
-      FROM student_documents
-      WHERE student_id = :studentId
+      FROM "StudentDocument"
+      WHERE "studentId" = :studentId
       `,
       { studentId }
     )
 
     // Count required missing documents
-    const requiredMissing = missingDocuments.rows.filter((d: any) => d.is_required).length
+    const missingRows = missingDocuments.rows as MissingDocumentRow[]
+    const requiredMissing = missingRows.filter((d) => d.required).length
 
-    return response.ok({
-      documents: documents.rows.map((row: any) => ({
-        id: row.id,
-        fileName: row.file_name,
-        fileUrl: row.file_url,
-        mimeType: row.mime_type,
-        size: Number(row.size),
-        status: row.status,
-        rejectionReason: row.rejection_reason,
-        reviewedAt: row.reviewed_at,
-        createdAt: row.created_at,
-        documentType: {
-          id: row.contract_document_id,
-          name: row.document_type_name,
-          description: row.document_type_description,
-          isRequired: row.is_required,
-        },
-        reviewerName: row.reviewer_name,
-      })),
-      missingDocuments: missingDocuments.rows.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        isRequired: row.is_required,
-      })),
-      summary: {
-        total: Number(summary.rows[0]?.total || 0),
-        pending: Number(summary.rows[0]?.pending || 0),
-        approved: Number(summary.rows[0]?.approved || 0),
-        rejected: Number(summary.rows[0]?.rejected || 0),
-        requiredMissing,
-      },
+    const documentsList = (documents.rows as DocumentRow[]).map(
+      (row) =>
+        new StudentDocumentDto({
+          id: row.id,
+          fileName: row.fileName,
+          fileUrl: row.fileUrl,
+          mimeType: row.mimeType,
+          size: Number(row.size),
+          status: row.status,
+          rejectionReason: row.rejectionReason,
+          reviewedAt: row.reviewedAt,
+          createdAt: row.createdAt,
+          documentType: new DocumentTypeDto({
+            id: row.contractDocumentId,
+            name: row.documentTypeName,
+            description: row.documentTypeDescription,
+            isRequired: row.required,
+          }),
+          reviewerName: row.reviewerName,
+        })
+    )
+
+    const missingDocumentsList = missingRows.map(
+      (row) =>
+        new MissingDocumentDto({
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          isRequired: row.required,
+        })
+    )
+
+    const summaryRow = summary.rows[0] as SummaryRow | undefined
+    const summaryData = new DocumentsSummaryDto({
+      total: Number(summaryRow?.total || 0),
+      pending: Number(summaryRow?.pending || 0),
+      approved: Number(summaryRow?.approved || 0),
+      rejected: Number(summaryRow?.rejected || 0),
+      requiredMissing,
+    })
+
+    return new StudentDocumentsResponseDto({
+      documents: documentsList,
+      missingDocuments: missingDocumentsList,
+      summary: summaryData,
     })
   }
 }

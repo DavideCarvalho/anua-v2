@@ -1,11 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentPayment from '#models/student_payment'
 import StudentHasResponsible from '#models/student_has_responsible'
+import {
+  StudentPaymentsResponseDto,
+  StudentPaymentDto,
+  PaymentsSummaryDto,
+  PaginationMetaDto,
+} from '#models/dto/student_payments_response.dto'
 
 export default class GetStudentPaymentsController {
-  async handle({ params, request, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle({ params, request, response, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Nao autenticado' })
     }
 
@@ -15,7 +20,7 @@ export default class GetStudentPaymentsController {
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .first()
 
@@ -53,29 +58,45 @@ export default class GetStudentPaymentsController {
       }
     })
 
-    return response.ok({
-      data: payments.all().map((p) => ({
-        id: p.id,
-        type: p.type,
-        amount: Number(p.amount),
-        dueDate: p.dueDate,
-        paidAt: p.paidAt,
-        status: p.status,
-        paymentGateway: p.paymentGateway,
-        paymentGatewayId: p.paymentGatewayId,
-      })),
-      meta: payments.getMeta(),
-      summary: {
-        totalAmount,
-        paidAmount,
-        pendingAmount,
-        overdueAmount,
-        paidCount: allPayments.filter((p) => p.status === 'PAID').length,
-        pendingCount: allPayments.filter((p) => p.status === 'PENDING').length,
-        overdueCount: allPayments.filter(
-          (p) => p.status === 'PENDING' && new Date(p.dueDate.toString()) < today
-        ).length,
-      },
+    const paymentsList = payments.all().map(
+      (p) =>
+        new StudentPaymentDto({
+          id: p.id,
+          type: p.type,
+          amount: Number(p.amount),
+          dueDate: p.dueDate,
+          paidAt: p.paidAt,
+          status: p.status,
+          paymentGateway: p.paymentGateway,
+          paymentGatewayId: p.paymentGatewayId,
+        })
+    )
+
+    const paginationMeta = payments.getMeta()
+    const metaDto = new PaginationMetaDto({
+      total: paginationMeta.total,
+      perPage: paginationMeta.perPage,
+      currentPage: paginationMeta.currentPage,
+      lastPage: paginationMeta.lastPage,
+      firstPage: paginationMeta.firstPage,
+    })
+
+    const summaryDto = new PaymentsSummaryDto({
+      totalAmount,
+      paidAmount,
+      pendingAmount,
+      overdueAmount,
+      paidCount: allPayments.filter((p) => p.status === 'PAID').length,
+      pendingCount: allPayments.filter((p) => p.status === 'PENDING').length,
+      overdueCount: allPayments.filter(
+        (p) => p.status === 'PENDING' && new Date(p.dueDate.toString()) < today
+      ).length,
+    })
+
+    return new StudentPaymentsResponseDto({
+      data: paymentsList,
+      meta: metaDto,
+      summary: summaryDto,
     })
   }
 }

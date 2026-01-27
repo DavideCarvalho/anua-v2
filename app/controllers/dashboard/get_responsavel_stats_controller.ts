@@ -40,6 +40,7 @@ export default class GetResponsavelStatsController {
 
         return {
           id: student.id,
+          slug: student.user?.slug || student.id,
           name: student.user?.name || 'Aluno',
           className,
           levelName,

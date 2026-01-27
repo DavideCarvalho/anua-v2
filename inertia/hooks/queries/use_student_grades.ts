@@ -10,11 +10,7 @@ export function useStudentGradesQueryOptions(studentId: string) {
   return {
     queryKey: ['responsavel', 'student-grades', studentId],
     queryFn: () => {
-      return tuyau
-        .$route('api.v1.responsavel.api.studentGrades')
-        .$get({ params: { studentId } })
-        .unwrap()
+      return tuyau.$route('api.v1.responsavel.api.studentGrades', { studentId }).$get().unwrap()
     },
-    enabled: !!studentId,
   } satisfies QueryOptions<StudentGradesResponse>
 }

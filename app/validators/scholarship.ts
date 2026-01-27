@@ -13,6 +13,7 @@ export const listScholarshipsValidator = vine.compile(
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
     search: vine.string().trim().optional(),
+    active: vine.boolean().optional(),
   })
 )
 

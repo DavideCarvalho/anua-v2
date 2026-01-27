@@ -1,5 +1,4 @@
-import { Head, usePage } from '@inertiajs/react'
-import { useQuery } from '@tanstack/react-query'
+import { Head } from '@inertiajs/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { AlertCircle, Wallet } from 'lucide-react'
 import { ResponsavelLayout } from '../../components/layouts'
@@ -7,89 +6,57 @@ import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { BalanceOverviewContainer } from '../../containers/responsavel/balance-overview-container'
 import { TransactionsHistoryContainer } from '../../containers/responsavel/transactions-history-container'
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
-import type { SharedProps } from '../../lib/types'
+import { useSelectedStudent } from '../../hooks/use_selected_student'
+
+function NoStudentCard() {
+  return (
+    <Card>
+      <CardContent className="py-12 text-center">
+        <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+        <h3 className="mt-4 text-lg font-semibold">Nenhum aluno selecionado</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Selecione um aluno no menu acima para ver o saldo
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function NoFinancialPermissionCard() {
+  return (
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>
+        Voce nao tem permissao financeira para gerenciar o saldo deste aluno. Entre em contato
+        com a secretaria da escola.
+      </AlertDescription>
+    </Alert>
+  )
+}
 
 function CreditoContent() {
-  const { url } = usePage<SharedProps>()
-  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
+  const { student, isLoaded } = useSelectedStudent()
 
-  if (isLoading) {
+  if (!isLoaded) {
     return <CreditoSkeleton />
   }
 
-  if (isError) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Erro ao carregar dados: {error instanceof Error ? error.message : 'Erro desconhecido'}
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
-  if (!data) {
-    return null
-  }
-
-  // Early return se não tiver filhos
-  if (data.students.length === 0) {
-    return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Nenhum aluno vinculado</AlertDescription>
-      </Alert>
-    )
-  }
-
-  // Pegar studentId dos query params ou usar primeiro filho
-  let alunoId: string | null = null
-  try {
-    const urlObj = typeof window !== 'undefined'
-      ? new URL(url, window.location.origin)
-      : new URL(`http://localhost${url}`)
-    alunoId = urlObj.searchParams.get('aluno')
-  } catch {
-    // Fallback if URL parsing fails
-    const match = url.match(/[?&]aluno=([^&]+)/)
-    alunoId = match ? match[1] : null
-  }
-
-  // Buscar studentId
-  const studentId = data.students.find((s) => s.id === alunoId)?.id || data.students[0]?.id
-  const selectedStudent = data.students.find((s) => s.id === studentId)
-
-  // Se não tiver studentId válido, mostrar aviso
-  if (!studentId || !selectedStudent) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Aluno não encontrado</AlertDescription>
-      </Alert>
-    )
+  if (!student) {
+    return <NoStudentCard />
   }
 
   // Verificar permissão financeira
-  if (!selectedStudent.permissions?.financial) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Você não tem permissão financeira para gerenciar o saldo deste aluno. Entre em contato
-          com a secretaria da escola.
-        </AlertDescription>
-      </Alert>
-    )
+  if (!student.permissions?.financial) {
+    return <NoFinancialPermissionCard />
   }
 
   return (
     <div className="space-y-6">
       {/* Balance Overview */}
-      <BalanceOverviewContainer studentId={studentId} />
+      <BalanceOverviewContainer studentId={student.id} />
 
       {/* Transactions History */}
-      <TransactionsHistoryContainer studentId={studentId} />
+      <TransactionsHistoryContainer studentId={student.id} />
     </div>
   )
 }

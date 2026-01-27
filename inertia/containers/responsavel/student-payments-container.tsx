@@ -1,11 +1,12 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { DollarSign, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { DollarSign, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -15,7 +16,12 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useResponsavelStudentPaymentsQueryOptions } from '../../hooks/queries/use_responsavel_student_payments'
+import {
+  useResponsavelStudentPaymentsQueryOptions,
+  type ResponsavelStudentPaymentsResponse,
+} from '../../hooks/queries/use_responsavel_student_payments'
+
+type Payment = ResponsavelStudentPaymentsResponse['data'][number]
 
 interface StudentPaymentsContainerProps {
   studentId: string
@@ -26,7 +32,31 @@ export function StudentPaymentsContainer({
   studentId,
   studentName,
 }: StudentPaymentsContainerProps) {
-  const { data } = useSuspenseQuery(useResponsavelStudentPaymentsQueryOptions({ studentId }))
+  const { data, isLoading, isError, error } = useQuery(
+    useResponsavelStudentPaymentsQueryOptions({ studentId })
+  )
+
+  if (isLoading) {
+    return <StudentPaymentsContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar pagamentos</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentPaymentsContainerSkeleton />
+  }
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -139,7 +169,7 @@ export function StudentPaymentsContainer({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((payment: any) => (
+                {data.data.map((payment: Payment) => (
                   <TableRow key={payment.id}>
                     <TableCell className="font-medium">{payment.description}</TableCell>
                     <TableCell>

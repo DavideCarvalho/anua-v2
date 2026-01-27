@@ -82,7 +82,7 @@ function EscolaStatsContent() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Receita Mensal</CardTitle>
+          <CardTitle className="text-sm font-medium">Previsão de Receita</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -93,7 +93,7 @@ function EscolaStatsContent() {
             }).format(stats.monthlyRevenue / 100)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {stats.pendingPayments} pagamentos pendentes
+            Baseado em {stats.activeStudents} alunos ativos
           </p>
         </CardContent>
       </Card>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from '../../components/ui/form'
+import { Checkbox } from '../../components/ui/checkbox'
 
 import { useScholarshipQueryOptions } from '../../hooks/queries/use_scholarship'
 import { useUpdateScholarshipMutation } from '../../hooks/mutations/use_update_scholarship'
@@ -42,6 +43,14 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
+function generateCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  const randomPart = Array.from({ length: 6 }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length))
+  ).join('')
+  return `BOLSA${randomPart}`
+}
+
 export function EditScholarshipModal({
   scholarshipId,
   open,
@@ -52,6 +61,7 @@ export function EditScholarshipModal({
   onCancel: () => void
 }) {
   const updateScholarship = useUpdateScholarshipMutation()
+  const [autoGenerateCode, setAutoGenerateCode] = useState(false)
 
   const { data: scholarship } = useQuery({
     ...useScholarshipQueryOptions({ id: scholarshipId }),
@@ -206,8 +216,30 @@ export function EditScholarshipModal({
                 <FormItem>
                   <FormLabel>Código (opcional)</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Ex: XPTO20" />
+                    <Input
+                      {...field}
+                      placeholder="Ex: XPTO20"
+                      disabled={autoGenerateCode}
+                    />
                   </FormControl>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Checkbox
+                      id="auto-generate-code"
+                      checked={autoGenerateCode}
+                      onCheckedChange={(checked) => {
+                        setAutoGenerateCode(!!checked)
+                        if (checked) {
+                          field.onChange(generateCode())
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="auto-generate-code"
+                      className="text-sm text-muted-foreground cursor-pointer"
+                    >
+                      Gerar código automaticamente
+                    </label>
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Usado na matrícula online para aplicar a bolsa
                   </p>

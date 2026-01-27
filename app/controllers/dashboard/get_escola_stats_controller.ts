@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Student from '#models/student'
 import Teacher from '#models/teacher'
 import StudentPayment from '#models/student_payment'
-import { DateTime } from 'luxon'
+import StudentHasLevel from '#models/student_has_level'
 
 export default class GetEscolaStatsController {
   async handle({ response, selectedSchoolIds }: HttpContext) {
@@ -12,10 +12,6 @@ export default class GetEscolaStatsController {
 
     // Para stats, usar a primeira escola selecionada (ou agregar todas)
     const schoolId = selectedSchoolIds[0]
-
-    const now = DateTime.now()
-    const startOfMonth = now.startOf('month')
-    const endOfMonth = now.endOf('month')
 
     const totalStudents = await Student.query()
       .whereHas('user', (q) => {
@@ -38,17 +34,28 @@ export default class GetEscolaStatsController {
       .count('* as total')
       .first()
 
-    const paidPayments = await StudentPayment.query()
+    // Previsão de receita mensal: soma dos contratos dos alunos ativos em períodos ativos
+    // aplicando o desconto da bolsa quando existir
+    const studentLevels = await StudentHasLevel.query()
       .whereHas('student', (studentQ) => {
         studentQ.whereHas('user', (userQ) => {
-          userQ.where('schoolId', schoolId)
+          userQ.where('schoolId', schoolId).where('active', true).whereNull('deletedAt')
         })
       })
-      .where('status', 'PAID')
-      .where('paidAt', '>=', startOfMonth.toISO()!)
-      .where('paidAt', '<=', endOfMonth.toISO()!)
-      .sum('amount as total')
-      .first()
+      .whereHas('academicPeriod', (periodQ) => {
+        periodQ.where('isActive', true).whereNull('deletedAt')
+      })
+      .whereNotNull('contractId')
+      .preload('contract')
+      .preload('scholarship')
+
+    let monthlyRevenue = 0
+    for (const studentLevel of studentLevels) {
+      const contractAmount = studentLevel.contract?.ammount || 0
+      const discountPercentage = studentLevel.scholarship?.discountPercentage || 0
+      const effectiveAmount = contractAmount * (1 - discountPercentage / 100)
+      monthlyRevenue += effectiveAmount
+    }
 
     const pendingPayments = await StudentPayment.query()
       .whereHas('student', (studentQ) => {
@@ -64,7 +71,7 @@ export default class GetEscolaStatsController {
       totalStudents: Number(totalStudents?.$extras.total) || 0,
       activeStudents: Number(activeStudents?.$extras.total) || 0,
       totalTeachers: Number(totalTeachers?.$extras.total) || 0,
-      monthlyRevenue: Number(paidPayments?.$extras.total) || 0,
+      monthlyRevenue: Math.round(monthlyRevenue),
       pendingPayments: Number(pendingPayments?.$extras.total) || 0,
       attendanceRate: 0,
     }

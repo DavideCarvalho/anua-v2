@@ -1,11 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance from '#models/student_has_attendance'
 import StudentHasResponsible from '#models/student_has_responsible'
+import {
+  StudentAttendanceResponseDto,
+  AttendanceRecordDto,
+  AttendanceSummaryDto,
+} from '#models/dto/student_attendance_response.dto'
 
 export default class GetStudentAttendanceController {
-  async handle({ params, request, auth, response }: HttpContext) {
-    const user = auth.user
-    if (!user) {
+  async handle({ params, request, response, effectiveUser }: HttpContext) {
+    if (!effectiveUser) {
       return response.unauthorized({ message: 'Nao autenticado' })
     }
 
@@ -15,7 +19,7 @@ export default class GetStudentAttendanceController {
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
-      .where('responsibleId', user.id)
+      .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .first()
 
@@ -56,22 +60,29 @@ export default class GetStudentAttendanceController {
     const presentCount = (statsMap['PRESENT'] || 0) + (statsMap['LATE'] || 0)
     const attendanceRate = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0
 
-    return response.ok({
-      data: attendances.all().map((a) => ({
-        id: a.id,
-        date: a.attendance?.date?.toISO() || a.createdAt.toISO(),
-        status: a.status,
-        justification: a.justification,
-      })),
+    const attendanceRecords = attendances.all().map(
+      (a) =>
+        new AttendanceRecordDto({
+          id: a.id,
+          date: a.attendance?.date?.toISO() || a.createdAt.toISO() || '',
+          status: a.status,
+          justification: a.justification,
+        })
+    )
+
+    const summary = new AttendanceSummaryDto({
+      totalClasses,
+      presentCount: statsMap['PRESENT'] || 0,
+      absentCount: statsMap['ABSENT'] || 0,
+      lateCount: statsMap['LATE'] || 0,
+      excusedCount: statsMap['EXCUSED'] || 0,
+      attendanceRate,
+    })
+
+    return new StudentAttendanceResponseDto({
+      data: attendanceRecords,
       meta: attendances.getMeta(),
-      summary: {
-        totalClasses,
-        presentCount: statsMap['PRESENT'] || 0,
-        absentCount: statsMap['ABSENT'] || 0,
-        lateCount: statsMap['LATE'] || 0,
-        excusedCount: statsMap['EXCUSED'] || 0,
-        attendanceRate,
-      },
+      summary,
     })
   }
 }

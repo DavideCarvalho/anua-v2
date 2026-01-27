@@ -1,15 +1,56 @@
-import { Head, usePage } from '@inertiajs/react'
-import { User, Mail, Phone, MapPin, Shield } from 'lucide-react'
+import { Head, usePage, router } from '@inertiajs/react'
+import { useState } from 'react'
+import { User, Mail, Phone, MapPin, Shield, Pencil } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/dialog'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
+import { useUpdateProfile } from '../../hooks/mutations/use_update_profile'
 import type { SharedProps } from '../../lib/types'
 
 export default function PerfilPage() {
   const { props } = usePage<SharedProps>()
   const user = props.user
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [name, setName] = useState(user?.name || '')
+  const [phone, setPhone] = useState(user?.phone || '')
+
+  const updateProfile = useUpdateProfile()
+
+  const handleEditProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!name.trim()) return
+
+    updateProfile.mutate(
+      { name: name.trim(), phone: phone.trim() || undefined },
+      {
+        onSuccess: () => {
+          setEditDialogOpen(false)
+          router.reload()
+        },
+      }
+    )
+  }
+
+  const handleOpenEditDialog = () => {
+    setName(user?.name || '')
+    setPhone(user?.phone || '')
+    setEditDialogOpen(true)
+  }
 
   return (
     <ResponsavelLayout>
@@ -86,9 +127,67 @@ export default function PerfilPage() {
                 </div>
                 <Badge variant="outline">Ativo</Badge>
               </div>
-              <Button variant="outline" className="w-full" disabled>
-                Editar Perfil (em breve)
-              </Button>
+
+              <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full gap-2" onClick={handleOpenEditDialog}>
+                    <Pencil className="h-4 w-4" />
+                    Editar Perfil
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <form onSubmit={handleEditProfile}>
+                    <DialogHeader>
+                      <DialogTitle>Editar Perfil</DialogTitle>
+                      <DialogDescription>
+                        Atualize suas informacoes pessoais
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">Nome</Label>
+                        <Input
+                          id="name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="Seu nome completo"
+                          required
+                          minLength={2}
+                          maxLength={255}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="phone">Telefone</Label>
+                        <Input
+                          id="phone"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          placeholder="(00) 00000-0000"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" value={user?.email || ''} disabled />
+                        <p className="text-xs text-muted-foreground">
+                          O email nao pode ser alterado
+                        </p>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setEditDialogOpen(false)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button type="submit" disabled={updateProfile.isPending}>
+                        {updateProfile.isPending ? 'Salvando...' : 'Salvar'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
@@ -100,19 +199,22 @@ export default function PerfilPage() {
               <Shield className="h-5 w-5" />
               Seguranca
             </CardTitle>
-            <CardDescription>Gerencie a seguranca da sua conta</CardDescription>
+            <CardDescription>Informacoes sobre a seguranca da sua conta</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
-                <p className="font-medium">Alterar Senha</p>
-                <p className="text-sm text-muted-foreground">
-                  Atualize sua senha periodicamente para maior seguranca
-                </p>
+                <p className="font-medium">Metodo de login</p>
+                <p className="text-sm text-muted-foreground">Codigo de verificacao por email</p>
               </div>
-              <Button variant="outline" disabled>
-                Alterar (em breve)
-              </Button>
+              <Badge variant="secondary">Ativo</Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <p className="font-medium">Email verificado</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              </div>
+              <Badge variant="secondary">Verificado</Badge>
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import { differenceInMonths } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -117,6 +118,26 @@ function EnrollmentTabContent({
 
   const scholarships = scholarshipsData?.data ?? []
 
+  // Get available payment days from contract
+  const availablePaymentDays = useMemo(() => {
+    if (!contractData?.paymentDays?.length) return [5, 10, 15, 20] // fallback
+    return contractData.paymentDays.map((pd) => pd.day).sort((a, b) => a - b)
+  }, [contractData?.paymentDays])
+
+  // Calculate max installments based on flexibleInstallments
+  const maxInstallments = useMemo(() => {
+    if (!contractData) return 12
+
+    if (contractData.flexibleInstallments && enrollment.academicPeriod?.endDate) {
+      const endDate = new Date(enrollment.academicPeriod.endDate)
+      const now = new Date()
+      const monthsDiff = differenceInMonths(endDate, now)
+      return Math.max(1, Math.min(monthsDiff, contractData.installments))
+    }
+
+    return contractData.installments
+  }, [contractData, enrollment.academicPeriod?.endDate])
+
   // Initialize scholarship percentages from enrollment on mount
   useEffect(() => {
     if (enrollment.scholarship) {
@@ -125,6 +146,14 @@ function EnrollmentTabContent({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enrollment.id])
+
+  // Set installments to 1 for MONTHLY payment type
+  useEffect(() => {
+    if (contractData?.paymentType === 'MONTHLY') {
+      form.setValue('installments', 1)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractData?.paymentType])
 
   const handleScholarshipChange = (
     newScholarshipId: string | null,
@@ -199,7 +228,7 @@ function EnrollmentTabContent({
                 originalMonthlyFee={contractData.amount}
                 enrollmentDiscountPercentage={enrollmentDiscountPercentage}
                 monthlyDiscountPercentage={discountPercentage}
-                installments={form.watch('installments')}
+                installments={contractData.paymentType === 'MONTHLY' ? 12 : form.watch('installments')}
               />
             )}
           </CardContent>
@@ -208,7 +237,7 @@ function EnrollmentTabContent({
         {/* Payment Info */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className={`grid gap-4 ${contractData?.paymentType === 'UPFRONT' ? 'grid-cols-3' : 'grid-cols-2'}`}>
               <FormField
                 control={form.control}
                 name="paymentMethod"
@@ -240,26 +269,6 @@ function EnrollmentTabContent({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Dia de Vencimento</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={31}
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="installments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Parcelas</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
                       value={field.value?.toString()}
@@ -270,9 +279,9 @@ function EnrollmentTabContent({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num}x
+                        {availablePaymentDays.map((day) => (
+                          <SelectItem key={day} value={day.toString()}>
+                            Dia {day}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -281,6 +290,36 @@ function EnrollmentTabContent({
                   </FormItem>
                 )}
               />
+
+              {contractData?.paymentType === 'UPFRONT' && (
+                <FormField
+                  control={form.control}
+                  name="installments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parcelas</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Array.from({ length: maxInstallments }, (_, i) => i + 1).map((num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                              {num}x
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
           </CardContent>
         </Card>

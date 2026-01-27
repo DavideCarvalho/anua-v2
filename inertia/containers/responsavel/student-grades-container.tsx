@@ -1,5 +1,5 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { BookOpen, TrendingUp, Clock, CheckCircle } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { BookOpen, TrendingUp, Clock, XCircle } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -13,7 +13,13 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useStudentGradesQueryOptions } from '../../hooks/queries/use_student_grades'
+import {
+  useStudentGradesQueryOptions,
+  type StudentGradesResponse,
+} from '../../hooks/queries/use_student_grades'
+
+type SubjectGrade = StudentGradesResponse['bySubject'][number]
+type RecentAssignment = StudentGradesResponse['recentAssignments'][number]
 
 interface StudentGradesContainerProps {
   studentId: string
@@ -21,7 +27,29 @@ interface StudentGradesContainerProps {
 }
 
 export function StudentGradesContainer({ studentId, studentName }: StudentGradesContainerProps) {
-  const { data } = useSuspenseQuery(useStudentGradesQueryOptions(studentId))
+  const { data, isLoading, isError, error } = useQuery(useStudentGradesQueryOptions(studentId))
+
+  if (isLoading) {
+    return <StudentGradesContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar notas</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentGradesContainerSkeleton />
+  }
 
   const getGradeColor = (average: number) => {
     if (average >= 7) return 'text-green-600'
@@ -88,7 +116,7 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
             </div>
           ) : (
             <div className="space-y-4">
-              {data.bySubject.map((subject: any) => (
+              {data.bySubject.map((subject: SubjectGrade) => (
                 <div
                   key={subject.subjectId}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -139,7 +167,7 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.recentAssignments.map((assignment: any) => (
+                {data.recentAssignments.map((assignment: RecentAssignment) => (
                   <TableRow key={assignment.assignmentId}>
                     <TableCell className="font-medium">{assignment.title}</TableCell>
                     <TableCell>{assignment.subjectName}</TableCell>

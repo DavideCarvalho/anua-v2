@@ -252,8 +252,11 @@ export default class EnrollStudentController {
                 academicPeriodId: data.billing.academicPeriodId,
                 levelId: classRecord.levelId,
                 classId: data.billing.classId,
+                contractId: data.billing.contractId || null,
+                scholarshipId: data.billing.scholarshipId || null,
                 paymentMethod: data.billing.paymentMethod || null,
                 installments: data.billing.installments || null,
+                enrollmentInstallments: data.billing.enrollmentInstallments || null,
                 paymentDay: data.billing.paymentDate || null,
               },
               { client: trx }

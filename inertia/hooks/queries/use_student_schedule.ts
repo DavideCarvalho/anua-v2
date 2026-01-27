@@ -2,21 +2,15 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.responsavel.students[':studentId'].schedule.$get
+const $route = tuyau.$route('api.v1.responsavel.api.studentSchedule')
 
-export type StudentScheduleResponse = InferResponseType<typeof $route>
+export type StudentScheduleResponse = InferResponseType<typeof $route.$get>
 
 export function useStudentScheduleQueryOptions(studentId: string) {
   return {
     queryKey: ['responsavel', 'students', studentId, 'schedule'],
-    queryFn: async () => {
-      const response = await $route({
-        params: { studentId },
-      })
-      if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar horario')
-      }
-      return response.data
+    queryFn: () => {
+      return tuyau.$route('api.v1.responsavel.api.studentSchedule', { studentId }).$get().unwrap()
     },
-  } satisfies QueryOptions
+  } satisfies QueryOptions<StudentScheduleResponse>
 }

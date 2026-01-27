@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Scholarship from '#models/scholarship'
+import ScholarshipDto from '#models/dto/scholarship.dto'
 import { listScholarshipsValidator } from '#validators/scholarship'
 
 export default class ListScholarshipsController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, auth }: HttpContext) {
     const payload = await request.validateUsing(listScholarshipsValidator)
 
     const page = payload.page ?? 1
@@ -27,6 +28,6 @@ export default class ListScholarshipsController {
 
     const scholarships = await query.paginate(page, limit)
 
-    return response.ok(scholarships)
+    return ScholarshipDto.fromPaginator(scholarships)
   }
 }

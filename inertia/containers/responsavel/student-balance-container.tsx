@@ -1,11 +1,12 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -15,7 +16,12 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useStudentBalanceQueryOptions } from '../../hooks/queries/use_student_balance'
+import {
+  useStudentBalanceQueryOptions,
+  type StudentBalanceResponse,
+} from '../../hooks/queries/use_student_balance'
+
+type BalanceTransaction = StudentBalanceResponse['data'][number]
 
 interface StudentBalanceContainerProps {
   studentId: string
@@ -26,7 +32,31 @@ export function StudentBalanceContainer({
   studentId,
   studentName,
 }: StudentBalanceContainerProps) {
-  const { data } = useSuspenseQuery(useStudentBalanceQueryOptions({ studentId }))
+  const { data, isLoading, isError, error } = useQuery(
+    useStudentBalanceQueryOptions({ studentId })
+  )
+
+  if (isLoading) {
+    return <StudentBalanceContainerSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-12 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-destructive" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar saldo</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return <StudentBalanceContainerSkeleton />
+  }
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -118,7 +148,7 @@ export function StudentBalanceContainer({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((transaction: any) => (
+                {data.data.map((transaction: BalanceTransaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>
                       {format(new Date(transaction.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}

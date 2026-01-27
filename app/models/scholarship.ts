@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, belongsTo, beforeCreate, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
@@ -20,38 +19,32 @@ export default class Scholarship extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'schoolPartnerId' })
   declare schoolPartnerId: string | null
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'enrollmentDiscountPercentage' })
   declare enrollmentDiscountPercentage: number
 
-  @column()
+  @column({ columnName: 'discountPercentage' })
   declare discountPercentage: number
 
-  @column()
+  @column({ columnName: 'type' })
   declare type: ScholarshipType
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column()
+  @column({ columnName: 'description' })
   declare description: string | null
 
-  @column()
+  @column({ columnName: 'code' })
   declare code: string | null
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
 
   @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>

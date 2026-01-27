@@ -10,7 +10,7 @@ export default class StudentBalanceTransaction extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
   @column()
@@ -25,31 +25,31 @@ export default class StudentBalanceTransaction extends BaseModel {
   @column()
   declare description: string | null
 
-  @column()
+  @column({ columnName: 'previousBalance' })
   declare previousBalance: number
 
-  @column()
+  @column({ columnName: 'newBalance' })
   declare newBalance: number
 
-  @column()
+  @column({ columnName: 'canteenPurchaseId' })
   declare canteenPurchaseId: string | null
 
-  @column()
+  @column({ columnName: 'storeOrderId' })
   declare storeOrderId: string | null
 
-  @column()
+  @column({ columnName: 'responsibleId' })
   declare responsibleId: string | null
 
-  @column()
+  @column({ columnName: 'paymentGatewayId' })
   declare paymentGatewayId: string | null
 
-  @column()
+  @column({ columnName: 'paymentMethod' })
   declare paymentMethod: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

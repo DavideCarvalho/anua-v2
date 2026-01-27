@@ -1,11 +1,19 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { Clock, BookOpen, User } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Clock, BookOpen, User, AlertCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
+import { Button } from '../../components/ui/button'
 
-import { useStudentScheduleQueryOptions } from '../../hooks/queries/use_student_schedule'
+import {
+  useStudentScheduleQueryOptions,
+  type StudentScheduleResponse,
+} from '../../hooks/queries/use_student_schedule'
+
+type ScheduleDay = NonNullable<StudentScheduleResponse['scheduleByDay']>[string]
+type ScheduleSlot = ScheduleDay['slots'][number]
+type Subject = StudentScheduleResponse['subjects'][number]
 
 interface StudentScheduleContainerProps {
   studentId: string
@@ -42,7 +50,34 @@ export function StudentScheduleContainer({
   studentId,
   studentName,
 }: StudentScheduleContainerProps) {
-  const { data } = useSuspenseQuery(useStudentScheduleQueryOptions(studentId))
+  const { data, isLoading, error, refetch } = useQuery(useStudentScheduleQueryOptions(studentId))
+
+  if (isLoading) {
+    return <StudentScheduleContainerSkeleton />
+  }
+
+  if (error) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="flex items-center gap-4 py-6">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-destructive">Erro ao carregar horário</h3>
+            <p className="text-sm text-muted-foreground">
+              {error.message || 'Ocorreu um erro inesperado'}
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => refetch()}>
+            Tentar novamente
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!data) {
+    return null
+  }
 
   const days = Object.entries(data.scheduleByDay || {})
   const hasSchedule = days.length > 0
@@ -76,7 +111,7 @@ export function StudentScheduleContainer({
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {data.subjects.map((subject: any) => (
+              {data.subjects.map((subject: Subject) => (
                 <div
                   key={subject.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
@@ -123,7 +158,7 @@ export function StudentScheduleContainer({
                       <th className="p-3 text-left text-sm font-medium text-muted-foreground border-b">
                         Horario
                       </th>
-                      {days.map(([day, dayData]: [string, any]) => (
+                      {days.map(([day, dayData]: [string, ScheduleDay]) => (
                         <th
                           key={day}
                           className="p-3 text-center text-sm font-medium border-b min-w-[120px]"
@@ -136,8 +171,8 @@ export function StudentScheduleContainer({
                   <tbody>
                     {/* Get unique time slots */}
                     {(() => {
-                      const allSlots = days.flatMap(([_, dayData]: [string, any]) =>
-                        dayData.slots.map((slot: any) => ({
+                      const allSlots = days.flatMap(([_, dayData]: [string, ScheduleDay]) =>
+                        dayData.slots.map((slot: ScheduleSlot) => ({
                           time: `${slot.startTime} - ${slot.endTime}`,
                           type: slot.type,
                         }))
@@ -157,9 +192,9 @@ export function StudentScheduleContainer({
                               {TYPE_LABELS[timeSlot.type] || timeSlot.type}
                             </Badge>
                           </td>
-                          {days.map(([day, dayData]: [string, any]) => {
+                          {days.map(([day, dayData]: [string, ScheduleDay]) => {
                             const slot = dayData.slots.find(
-                              (s: any) => `${s.startTime} - ${s.endTime}` === timeSlot.time
+                              (s: ScheduleSlot) => `${s.startTime} - ${s.endTime}` === timeSlot.time
                             )
                             return (
                               <td key={day} className="p-3 text-center">
@@ -187,14 +222,14 @@ export function StudentScheduleContainer({
 
               {/* Mobile view - Cards by day */}
               <div className="md:hidden space-y-4">
-                {days.map(([day, dayData]: [string, any]) => (
+                {days.map(([day, dayData]: [string, ScheduleDay]) => (
                   <Card key={day}>
                     <CardHeader className="py-3">
                       <CardTitle className="text-base">{dayData.label}</CardTitle>
                     </CardHeader>
                     <CardContent className="py-0 pb-4">
                       <div className="space-y-2">
-                        {dayData.slots.map((slot: any) => (
+                        {dayData.slots.map((slot: ScheduleSlot) => (
                           <div
                             key={slot.id}
                             className="flex items-center justify-between p-3 bg-muted rounded-lg"
