@@ -299,6 +299,10 @@ type ResponsavelGamificacaoGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_gamificacao_page_controller.ts').default['handle'], false>
 }
+type ResponsavelGamificacaoIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_gamificacao_details_page_controller.ts').default['handle'], false>
+}
 type ResponsavelComunicadosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_comunicados_page_controller.ts').default['handle'], false>
@@ -499,9 +503,17 @@ type ApiV1ResponsavelStudentsIdOverviewGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_overview_controller.ts').default['handle'], false>
 }
+type ApiV1ResponsavelStudentsIdGamificationGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_gamification_controller.ts').default['handle'], false>
+}
 type ApiV1ResponsavelNotificationsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_notifications_controller.ts').default['handle'], false>
+}
+type ApiV1ResponsavelProfilePut = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/update_profile_controller.ts').default['handle'], false>
 }
 type ApiV1AdminStatsGetHead = {
   request: unknown
@@ -642,6 +654,14 @@ type ApiV1StudentsIdFullPut = {
 type ApiV1StudentsIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/destroy.ts').default['handle'], false>
+}
+type ApiV1StudentsIdEnrollmentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/list_enrollments_controller.ts').default['handle'], false>
+}
+type ApiV1StudentsIdEnrollmentsIdPatch = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_enrollment.ts')['updateEnrollmentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/update_enrollment_controller.ts').default['handle'], true>
 }
 type ApiV1StudentsIdAttendanceGetHead = {
   request: unknown
@@ -2458,6 +2478,12 @@ export interface ApiDefinition {
       };
       '$get': ResponsavelGamificacaoGetHead;
       '$head': ResponsavelGamificacaoGetHead;
+      ':studentId': {
+        '$url': {
+        };
+        '$get': ResponsavelGamificacaoIdGetHead;
+        '$head': ResponsavelGamificacaoIdGetHead;
+      };
     };
     'comunicados': {
       '$url': {
@@ -2768,6 +2794,12 @@ export interface ApiDefinition {
               '$get': ApiV1ResponsavelStudentsIdOverviewGetHead;
               '$head': ApiV1ResponsavelStudentsIdOverviewGetHead;
             };
+            'gamification': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdGamificationGetHead;
+              '$head': ApiV1ResponsavelStudentsIdGamificationGetHead;
+            };
           };
         };
         'notifications': {
@@ -2775,6 +2807,11 @@ export interface ApiDefinition {
           };
           '$get': ApiV1ResponsavelNotificationsGetHead;
           '$head': ApiV1ResponsavelNotificationsGetHead;
+        };
+        'profile': {
+          '$url': {
+          };
+          '$put': ApiV1ResponsavelProfilePut;
         };
       };
       'admin': {
@@ -2957,6 +2994,17 @@ export interface ApiDefinition {
             '$put': ApiV1StudentsIdFullPut;
           };
           '$delete': ApiV1StudentsIdDelete;
+          'enrollments': {
+            '$url': {
+            };
+            '$get': ApiV1StudentsIdEnrollmentsGetHead;
+            '$head': ApiV1StudentsIdEnrollmentsGetHead;
+            ':enrollmentId': {
+              '$url': {
+              };
+              '$patch': ApiV1StudentsIdEnrollmentsIdPatch;
+            };
+          };
         };
         ':studentId': {
           'attendance': {
@@ -4960,6 +5008,13 @@ const routes = [
     types: {} as ResponsavelGamificacaoGetHead,
   },
   {
+    params: ["studentId"],
+    name: 'web.responsavel.gamificacao.details',
+    path: '/responsavel/gamificacao/:studentId',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelGamificacaoIdGetHead,
+  },
+  {
     params: [],
     name: 'web.responsavel.comunicados',
     path: '/responsavel/comunicados',
@@ -5310,11 +5365,25 @@ const routes = [
     types: {} as ApiV1ResponsavelStudentsIdOverviewGetHead,
   },
   {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentGamification',
+    path: '/api/v1/responsavel/students/:studentId/gamification',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdGamificationGetHead,
+  },
+  {
     params: [],
     name: 'api.v1.responsavel.api.notifications',
     path: '/api/v1/responsavel/notifications',
     method: ["GET","HEAD"],
     types: {} as ApiV1ResponsavelNotificationsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.responsavel.api.updateProfile',
+    path: '/api/v1/responsavel/profile',
+    method: ["PUT"],
+    types: {} as ApiV1ResponsavelProfilePut,
   },
   {
     params: [],
@@ -5560,6 +5629,20 @@ const routes = [
     path: '/api/v1/students/:id',
     method: ["DELETE"],
     types: {} as ApiV1StudentsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.students.enrollments.list',
+    path: '/api/v1/students/:id/enrollments',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StudentsIdEnrollmentsGetHead,
+  },
+  {
+    params: ["id","enrollmentId"],
+    name: 'api.v1.students.enrollments.update',
+    path: '/api/v1/students/:id/enrollments/:enrollmentId',
+    method: ["PATCH"],
+    types: {} as ApiV1StudentsIdEnrollmentsIdPatch,
   },
   {
     params: ["studentId"],
