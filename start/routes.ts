@@ -61,6 +61,8 @@ const FullUpdateStudentController = () =>
   import('#controllers/students/full_update_student_controller')
 const ListStudentEnrollmentsController = () =>
   import('#controllers/students/list_enrollments_controller')
+const UpdateEnrollmentController = () =>
+  import('#controllers/students/update_enrollment_controller')
 
 // Responsibles
 const ListStudentResponsiblesController = () =>
@@ -821,6 +823,9 @@ function registerStudentApiRoutes() {
       router.put('/:id/full', [FullUpdateStudentController]).as('students.fullUpdate')
       router.delete('/:id', [DestroyStudentController]).as('students.destroy')
       router.get('/:id/enrollments', [ListStudentEnrollmentsController]).as('students.enrollments.list')
+      router
+        .patch('/:id/enrollments/:enrollmentId', [UpdateEnrollmentController])
+        .as('students.enrollments.update')
       router
         .get('/:studentId/attendance', [GetStudentAttendanceController])
         .as('students.attendance')
