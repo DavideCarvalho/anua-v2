@@ -5,7 +5,6 @@ export default class ShowScholarshipController {
   async handle({ params, response }: HttpContext) {
     const scholarship = await Scholarship.query()
       .where('id', params.id)
-      .preload('schoolPartner')
       .first()
 
     if (!scholarship) {
