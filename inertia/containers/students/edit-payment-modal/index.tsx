@@ -83,10 +83,13 @@ function EnrollmentTabContent({
 }) {
   const updateEnrollment = useUpdateEnrollment()
 
+  // Use enrollment's contractId, or fallback to level's contractId
+  const initialContractId = enrollment.contractId ?? (enrollment.level as any)?.contractId ?? ''
+
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      contractId: enrollment.contractId ?? '',
+      contractId: initialContractId,
       scholarshipId: enrollment.scholarshipId ?? null,
       paymentMethod: enrollment.paymentMethod ?? 'BOLETO',
       paymentDay: enrollment.paymentDay ?? 5,
@@ -96,7 +99,7 @@ function EnrollmentTabContent({
     },
   })
 
-  const contractId = form.watch('contractId')
+  const contractId = form.watch('contractId') || initialContractId
   const scholarshipId = form.watch('scholarshipId')
   const discountPercentage = form.watch('discountPercentage') ?? 0
   const enrollmentDiscountPercentage = form.watch('enrollmentDiscountPercentage') ?? 0
