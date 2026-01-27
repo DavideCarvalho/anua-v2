@@ -1,9 +1,8 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import type { SchoolPartnersForSelectResponse } from '../../hooks/queries/use_school_partners_for_select'
 import { toast } from 'sonner'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
@@ -27,7 +26,6 @@ import {
 } from '../../components/ui/form'
 
 import { useScholarshipQueryOptions } from '../../hooks/queries/use_scholarship'
-import { useSchoolPartnersForSelectQueryOptions } from '../../hooks/queries/use_school_partners_for_select'
 import { useUpdateScholarshipMutation } from '../../hooks/mutations/use_update_scholarship'
 
 const schema = z.object({
@@ -54,14 +52,6 @@ export function EditScholarshipModal({
   onCancel: () => void
 }) {
   const updateScholarship = useUpdateScholarshipMutation()
-
-  const { data: partnersData } = useQuery<SchoolPartnersForSelectResponse>(
-    useSchoolPartnersForSelectQueryOptions() as any
-  )
-  const partners = useMemo(() => {
-    if (Array.isArray(partnersData)) return partnersData
-    return partnersData?.data ?? []
-  }, [partnersData])
 
   const { data: scholarship } = useQuery({
     ...useScholarshipQueryOptions({ id: scholarshipId }),
@@ -208,30 +198,6 @@ export function EditScholarshipModal({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="schoolPartnerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Parceiro</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o parceiro" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {partners.map((partner: any) => (
-                        <SelectItem key={partner.id} value={partner.id}>
-                          {partner.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
