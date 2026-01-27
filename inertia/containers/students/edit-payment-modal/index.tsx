@@ -114,27 +114,14 @@ function EnrollmentTabContent({
 
   const scholarships = scholarshipsData?.data ?? []
 
-  // Set discount percentages when scholarship changes
-  useEffect(() => {
-    if (scholarshipId) {
-      const scholarship = scholarships.find((s) => s.id === scholarshipId)
-      if (scholarship) {
-        form.setValue('discountPercentage', scholarship.discountPercentage)
-        form.setValue('enrollmentDiscountPercentage', scholarship.enrollmentDiscountPercentage)
-      }
-    } else {
-      form.setValue('discountPercentage', 0)
-      form.setValue('enrollmentDiscountPercentage', 0)
-    }
-  }, [scholarshipId, scholarships, form])
-
-  // Initialize scholarship percentages from enrollment
+  // Initialize scholarship percentages from enrollment on mount
   useEffect(() => {
     if (enrollment.scholarship) {
       form.setValue('discountPercentage', enrollment.scholarship.discountPercentage)
       form.setValue('enrollmentDiscountPercentage', enrollment.scholarship.enrollmentDiscountPercentage)
     }
-  }, [enrollment, form])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enrollment.id])
 
   const handleScholarshipChange = (
     newScholarshipId: string | null,
