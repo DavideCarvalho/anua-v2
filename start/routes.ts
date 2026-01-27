@@ -59,6 +59,8 @@ const DestroyStudentController = () => import('#controllers/students/destroy')
 const EnrollStudentController = () => import('#controllers/students/enroll_student_controller')
 const FullUpdateStudentController = () =>
   import('#controllers/students/full_update_student_controller')
+const ListStudentEnrollmentsController = () =>
+  import('#controllers/students/list_enrollments_controller')
 
 // Responsibles
 const ListStudentResponsiblesController = () =>
@@ -818,6 +820,7 @@ function registerStudentApiRoutes() {
       router.put('/:id', [UpdateStudentController]).as('students.update')
       router.put('/:id/full', [FullUpdateStudentController]).as('students.fullUpdate')
       router.delete('/:id', [DestroyStudentController]).as('students.destroy')
+      router.get('/:id/enrollments', [ListStudentEnrollmentsController]).as('students.enrollments.list')
       router
         .get('/:studentId/attendance', [GetStudentAttendanceController])
         .as('students.attendance')
@@ -2038,12 +2041,16 @@ const GetResponsavelStudentDocumentsController = () =>
   import('#controllers/responsavel/get_student_documents_controller')
 const GetResponsavelStudentOccurrencesController = () =>
   import('#controllers/responsavel/get_student_occurrences_controller')
+const GetResponsavelStudentGamificationController = () =>
+  import('#controllers/responsavel/get_student_gamification_controller')
 const AcknowledgeOccurrenceController = () =>
   import('#controllers/responsavel/acknowledge_occurrence_controller')
 const GetStudentOverviewController = () =>
   import('#controllers/responsavel/get_student_overview_controller')
 const GetResponsavelNotificationsController = () =>
   import('#controllers/responsavel/get_notifications_controller')
+const UpdateResponsavelProfileController = () =>
+  import('#controllers/responsavel/update_profile_controller')
 
 function registerDashboardApiRoutes() {
   router
@@ -2091,8 +2098,10 @@ function registerDashboardApiRoutes() {
         .get('/students/:studentId/overview', [GetStudentOverviewController])
         .as('studentOverview')
       router
-        .get('/notifications', [GetResponsavelNotificationsController])
-        .as('notifications')
+        .get('/students/:studentId/gamification', [GetResponsavelStudentGamificationController])
+        .as('studentGamification')
+      router.get('/notifications', [GetResponsavelNotificationsController]).as('notifications')
+      router.put('/profile', [UpdateResponsavelProfileController]).as('updateProfile')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])
@@ -2256,6 +2265,8 @@ const ShowResponsavelCantinaPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_cantina_page_controller')
 const ShowResponsavelGamificacaoPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_gamificacao_page_controller')
+const ShowResponsavelGamificacaoDetailsPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_gamificacao_details_page_controller')
 const ShowResponsavelComunicadosPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_comunicados_page_controller')
 const ShowResponsavelPerfilPageController = () =>
@@ -2544,6 +2555,9 @@ function registerPageRoutes() {
             .as('mensalidades')
           router.get('/cantina', [ShowResponsavelCantinaPageController]).as('cantina')
           router.get('/gamificacao', [ShowResponsavelGamificacaoPageController]).as('gamificacao')
+          router
+            .get('/gamificacao/:studentId', [ShowResponsavelGamificacaoDetailsPageController])
+            .as('gamificacao.details')
           router.get('/comunicados', [ShowResponsavelComunicadosPageController]).as('comunicados')
           router
             .get('/autorizacoes', [ShowResponsavelAutorizacoesPageController])
@@ -2553,7 +2567,9 @@ function registerPageRoutes() {
           router.get('/documentos', [ShowResponsavelDocumentosPageController]).as('documentos')
           router.get('/ocorrencias', [ShowResponsavelOcorrenciasPageController]).as('ocorrencias')
           router.get('/perfil', [ShowResponsavelPerfilPageController]).as('perfil')
-          router.get('/notificacoes', [ShowResponsavelNotificacoesPageController]).as('notificacoes')
+          router
+            .get('/notificacoes', [ShowResponsavelNotificacoesPageController])
+            .as('notificacoes')
           router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')
         })
         .prefix('/responsavel')
