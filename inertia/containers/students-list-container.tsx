@@ -39,6 +39,8 @@ import { NewStudentModal } from './students/new-student-modal'
 import { DeleteStudentModal } from './students/delete-student-modal'
 import { EditStudentModal } from './students/edit-student-modal'
 import { ChangeStudentCourseModal } from './students/change-course-modal'
+import { EditPaymentModal } from './students/edit-payment-modal'
+import { CreditCard } from 'lucide-react'
 
 interface StudentAction {
   id: string
@@ -112,6 +114,7 @@ function StudentsListContent({
   onPageChange,
   onEditStudent,
   onChangeCourse,
+  onEditPayment,
   onDeleteStudent,
 }: {
   search: string | null
@@ -123,6 +126,7 @@ function StudentsListContent({
   onPageChange: (page: number) => void
   onEditStudent: (student: StudentAction) => void
   onChangeCourse: (student: StudentAction) => void
+  onEditPayment: (student: StudentAction) => void
   onDeleteStudent: (student: StudentAction) => void
 }) {
   const { data } = useSuspenseQuery(
@@ -224,6 +228,17 @@ function StudentsListContent({
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
+                          onEditPayment({
+                            id: student.id,
+                            name: student.user?.name || student.name,
+                          })
+                        }
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Editar pagamento
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
                           onDeleteStudent({
                             id: student.id,
                             name: student.user?.name || student.name,
@@ -309,6 +324,7 @@ export function StudentsListContainer() {
   const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
   const [editStudent, setEditStudent] = useState<StudentAction | null>(null)
   const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
+  const [editPaymentStudent, setEditPaymentStudent] = useState<StudentAction | null>(null)
 
   // Fetch academic periods
   const { data: academicPeriodsData } = useQuery({
@@ -494,6 +510,18 @@ export function StudentsListContainer() {
         />
       )}
 
+      {editPaymentStudent && (
+        <EditPaymentModal
+          studentId={editPaymentStudent.id}
+          studentName={editPaymentStudent.name}
+          open={!!editPaymentStudent}
+          onOpenChange={(open) => {
+            if (!open) setEditPaymentStudent(null)
+          }}
+          onSuccess={() => setEditPaymentStudent(null)}
+        />
+      )}
+
       {/* List */}
       <QueryErrorResetBoundary>
         {({ reset }) => (
@@ -514,6 +542,7 @@ export function StudentsListContainer() {
                 onPageChange={(p) => setFilters({ page: p })}
                 onEditStudent={setEditStudent}
                 onChangeCourse={setChangeCourseStudent}
+                onEditPayment={setEditPaymentStudent}
                 onDeleteStudent={setDeleteStudent}
               />
             </Suspense>
