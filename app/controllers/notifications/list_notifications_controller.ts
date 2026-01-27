@@ -6,8 +6,6 @@ export default class ListNotificationsController {
   async handle({ request, response, auth, effectiveUser }: HttpContext) {
     const {
       type,
-      channel,
-      status,
       unreadOnly,
       page = 1,
       limit = 20,
