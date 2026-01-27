@@ -11,7 +11,7 @@ export default class ListScholarshipsController {
 
     const schoolId = payload.schoolId ?? auth.user?.schoolId
 
-    const query = Scholarship.query().preload('schoolPartner').orderBy('createdAt', 'desc')
+    const query = Scholarship.query().orderBy('name', 'asc')
 
     if (schoolId) {
       query.where('schoolId', schoolId)
@@ -19,6 +19,10 @@ export default class ListScholarshipsController {
 
     if (payload.search) {
       query.where('name', 'ilike', `%${payload.search}%`)
+    }
+
+    if (payload.active !== undefined) {
+      query.where('isActive', payload.active)
     }
 
     const scholarships = await query.paginate(page, limit)
