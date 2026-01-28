@@ -2,8 +2,9 @@
 # These services don't expose HTTP endpoints, so we don't use probes
 
 resource "google_cloud_run_v2_service" "worker" {
-  name     = "${var.environment}-${var.project_name}-${var.service_name}"
-  location = var.region
+  name                = "${var.environment}-${var.project_name}-${var.service_name}"
+  location            = var.region
+  deletion_protection = false
 
   labels = {
     environment = var.environment

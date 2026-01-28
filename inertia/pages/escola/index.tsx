@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaStatsContainer } from '../../containers/escola-stats-container'
+import { EscolaInsightsContainer } from '../../containers/escola-insights-container'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Users, DollarSign } from 'lucide-react'
 import type { SharedProps } from '../../lib/types'
@@ -62,17 +63,7 @@ export default function EscolaDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Avisos Recentes</CardTitle>
-              <CardDescription>Últimas atualizações do sistema</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground text-center py-8">
-                Nenhum aviso no momento
-              </div>
-            </CardContent>
-          </Card>
+          <EscolaInsightsContainer />
         </div>
       </div>
     </EscolaLayout>

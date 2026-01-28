@@ -2030,6 +2030,8 @@ function registerAdminOnboardingApiRoutes() {
 // =============================================================================
 
 const GetEscolaStatsController = () => import('#controllers/dashboard/get_escola_stats_controller')
+const GetEscolaInsightsController = () =>
+  import('#controllers/dashboard/get_escola_insights_controller')
 const GetResponsavelStatsController = () =>
   import('#controllers/dashboard/get_responsavel_stats_controller')
 const GetAdminStatsController = () => import('#controllers/dashboard/get_admin_stats_controller')
@@ -2067,6 +2069,10 @@ function registerDashboardApiRoutes() {
     .get('/escola/stats', [GetEscolaStatsController])
     .use([middleware.auth(), middleware.impersonation()])
     .as('dashboard.escolaStats')
+  router
+    .get('/escola/insights', [GetEscolaInsightsController])
+    .use([middleware.auth(), middleware.impersonation()])
+    .as('dashboard.escolaInsights')
   router
     .get('/responsavel/stats', [GetResponsavelStatsController])
     .use([middleware.auth(), middleware.impersonation()])
