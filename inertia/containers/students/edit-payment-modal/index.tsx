@@ -375,69 +375,78 @@ export function EditPaymentModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Editar Pagamento
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col p-0">
+        {/* Fixed Header */}
+        <div className="p-6 pb-4 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Editar Pagamento
+            </DialogTitle>
+          </DialogHeader>
 
-        {/* Student Info */}
-        <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback>
-              {studentName
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .slice(0, 2)
-                .toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="font-semibold">{studentName}</h3>
+          {/* Student Info */}
+          <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3 mt-4">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback>
+                {studentName
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold">{studentName}</h3>
+            </div>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : enrollmentsByPeriod.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            Este aluno nao possui matriculas ativas.
-          </div>
-        ) : (
-          <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="w-full justify-start">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : enrollmentsByPeriod.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              Este aluno nao possui matriculas ativas.
+            </div>
+          ) : (
+            <Tabs defaultValue={defaultTab} className="w-full">
+              <TabsList className="w-full justify-start">
+                {enrollmentsByPeriod.map((enrollment) => (
+                  <TabsTrigger
+                    key={enrollment.id}
+                    value={enrollment.academicPeriodId ?? ''}
+                  >
+                    {enrollment.academicPeriod?.name ?? 'Periodo'}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
               {enrollmentsByPeriod.map((enrollment) => (
-                <TabsTrigger
-                  key={enrollment.id}
-                  value={enrollment.academicPeriodId ?? ''}
-                >
-                  {enrollment.academicPeriod?.name ?? 'Periodo'}
-                </TabsTrigger>
+                <TabsContent key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
+                  <EnrollmentTabContent
+                    enrollment={enrollment}
+                    studentId={studentId}
+                    onSuccess={handleSuccess}
+                  />
+                </TabsContent>
               ))}
-            </TabsList>
+            </Tabs>
+          )}
+        </div>
 
-            {enrollmentsByPeriod.map((enrollment) => (
-              <TabsContent key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
-                <EnrollmentTabContent
-                  enrollment={enrollment}
-                  studentId={studentId}
-                  onSuccess={handleSuccess}
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            Fechar
-          </Button>
-        </DialogFooter>
+        {/* Fixed Footer */}
+        <div className="p-6 pt-4 border-t bg-background shrink-0">
+          <DialogFooter>
+            <Button variant="outline" onClick={handleClose}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

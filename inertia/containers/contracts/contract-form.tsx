@@ -143,6 +143,7 @@ const steps = [
   { title: 'Pagamento', description: 'Valores e parcelas' },
   { title: 'Juros e Descontos', description: 'Multas e incentivos' },
   { title: 'Documentos', description: 'Documentos exigidos' },
+  { title: 'Revisão', description: 'Confirme os dados' },
 ]
 
 export function ContractForm({ schoolId, initialData }: ContractFormProps) {
@@ -315,7 +316,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
 
   return (
     <div className="space-y-8">
-      <Stepper steps={steps} currentStep={currentStep} />
+      <Stepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
 
       <Card>
         <CardContent className="pt-6">
@@ -846,6 +847,174 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                 </div>
               )}
 
+              {/* Step 4: Revisão */}
+              {currentStep === 4 && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Revise as informações do contrato</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Confira se todos os dados estão corretos antes de {isEditing ? 'salvar' : 'criar'} o contrato.
+                    </p>
+                  </div>
+
+                  {/* Informações Básicas */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-muted-foreground">Informações Básicas</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentStep(0)}
+                      >
+                        Editar
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Nome</p>
+                        <p className="font-medium">{form.getValues('name') || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Descrição</p>
+                        <p className="font-medium">{form.getValues('description') || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pagamento */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-muted-foreground">Pagamento</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentStep(1)}
+                      >
+                        Editar
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Tipo de Pagamento</p>
+                        <p className="font-medium">
+                          {paymentType === 'MONTHLY' ? 'Mensal' : 'À Vista (parcelado)'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">
+                          {paymentType === 'MONTHLY' ? 'Mensalidade' : 'Valor Total'}
+                        </p>
+                        <p className="font-medium">{formatCurrency(Number(amount) || 0)}</p>
+                      </div>
+                      {paymentType === 'UPFRONT' && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Parcelas</p>
+                          <p className="font-medium">
+                            {flexibleInstallments
+                              ? 'Calculado automaticamente'
+                              : `${installments}x de ${formatCurrency((Number(amount) || 0) / installments)}`}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs text-muted-foreground">Dias de Vencimento</p>
+                        <p className="font-medium">
+                          {form.getValues('paymentDays').map((d) => `Dia ${d}`).join(', ') || '-'}
+                        </p>
+                      </div>
+                    </div>
+                    {enrollmentValue && Number(enrollmentValue) > 0 && (
+                      <div className="border-t pt-3 mt-3">
+                        <p className="text-xs text-muted-foreground mb-1">Taxa de Matrícula</p>
+                        <p className="font-medium">
+                          {enrollmentValueInstallments > 1
+                            ? `${enrollmentValueInstallments}x de ${formatCurrency(Number(enrollmentValue) / enrollmentValueInstallments)}`
+                            : formatCurrency(Number(enrollmentValue))}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Juros e Descontos */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-muted-foreground">Juros e Descontos</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentStep(2)}
+                      >
+                        Editar
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Multa por Atraso</p>
+                        <p className="font-medium">
+                          {form.getValues('interestPercentage')
+                            ? `${form.getValues('interestPercentage')}%`
+                            : 'Não configurado'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Juros ao Dia</p>
+                        <p className="font-medium">
+                          {form.getValues('interestPerDay')
+                            ? `${form.getValues('interestPerDay')}%`
+                            : 'Não configurado'}
+                        </p>
+                      </div>
+                    </div>
+                    {earlyDiscounts.length > 0 && (
+                      <div className="border-t pt-3 mt-3">
+                        <p className="text-xs text-muted-foreground mb-2">Descontos por Antecipação</p>
+                        <div className="space-y-1">
+                          {earlyDiscounts.map((discount, index) => (
+                            <p key={index} className="text-sm">
+                              {discount.percentage}% de desconto para pagamento {discount.daysBeforeDeadline} dias antes
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Documentos */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-muted-foreground">Documentos Exigidos</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentStep(3)}
+                      >
+                        Editar
+                      </Button>
+                    </div>
+                    {contractDocuments.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Nenhum documento configurado</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {contractDocuments.map((doc, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <span className="text-sm">{doc.name}</span>
+                            {doc.required && (
+                              <span className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded">
+                                Obrigatório
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Navigation buttons */}
               <div className="mt-8 flex justify-between">
                 {currentStep > 0 && (
@@ -861,12 +1030,12 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   >
                     Cancelar
                   </Button>
-                  {currentStep < 3 && (
+                  {currentStep < 4 && (
                     <Button type="button" onClick={handleNext}>
                       Próximo
                     </Button>
                   )}
-                  {currentStep === 3 && (
+                  {currentStep === 4 && (
                     <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? (
                         <>

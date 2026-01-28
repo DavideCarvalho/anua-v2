@@ -3,6 +3,7 @@ import Student from '#models/student'
 import Teacher from '#models/teacher'
 import StudentPayment from '#models/student_payment'
 import StudentHasLevel from '#models/student_has_level'
+import AcademicPeriod from '#models/academic_period'
 
 export default class GetEscolaStatsController {
   async handle({ response, selectedSchoolIds }: HttpContext) {
@@ -30,6 +31,14 @@ export default class GetEscolaStatsController {
           periodQ.where('isActive', true).whereNull('deletedAt')
         })
       })
+      .count('* as total')
+      .first()
+
+    // Períodos letivos ativos
+    const activeAcademicPeriods = await AcademicPeriod.query()
+      .where('schoolId', schoolId)
+      .where('isActive', true)
+      .whereNull('deletedAt')
       .count('* as total')
       .first()
 
@@ -77,6 +86,7 @@ export default class GetEscolaStatsController {
     return {
       totalStudents: Number(totalStudents?.$extras.total) || 0,
       activeStudents: Number(activeStudents?.$extras.total) || 0,
+      activeAcademicPeriods: Number(activeAcademicPeriods?.$extras.total) || 0,
       totalTeachers: Number(totalTeachers?.$extras.total) || 0,
       monthlyRevenue: Math.round(monthlyRevenue),
       pendingPayments: Number(pendingPayments?.$extras.total) || 0,

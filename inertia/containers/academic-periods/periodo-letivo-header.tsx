@@ -30,8 +30,8 @@ export function PeriodoLetivoHeader({
 
   const getStatus = () => {
     if (isClosed) return { label: 'Encerrado', variant: 'secondary' as const }
-    if (isBeforeStart) return { label: 'Não iniciado', variant: 'outline' as const }
     if (isActive) return { label: 'Em andamento', variant: 'default' as const }
+    if (isBeforeStart) return { label: 'Não iniciado', variant: 'outline' as const }
     return { label: 'Finalizado', variant: 'secondary' as const }
   }
 

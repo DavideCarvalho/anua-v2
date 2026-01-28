@@ -17,7 +17,14 @@ export default class ListClassesController {
     // Use schoolId from request (for admins) or selectedSchoolIds from middleware
     const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
 
-    const query = Class_.query().preload('level').withCount('studentLevels').orderBy('name', 'asc')
+    const query = Class_.query()
+      .preload('level')
+      .withCount('studentLevels', (q) => {
+        q.whereNull('deletedAt').whereHas('academicPeriod', (periodQ) => {
+          periodQ.where('isActive', true).whereNull('deletedAt')
+        })
+      })
+      .orderBy('name', 'asc')
 
     if (search) {
       query.whereILike('name', `%${search}%`)
