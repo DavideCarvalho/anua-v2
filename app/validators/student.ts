@@ -59,10 +59,10 @@ export const fullUpdateStudentValidator = vine.compile(
     basicInfo: vine.object({
       name: vine.string().trim().minLength(2).maxLength(255),
       email: vine.string().email().trim().optional(),
-      phone: vine.string().trim(),
+      phone: vine.string().trim().optional(), // Required for adults, validated in controller
       birthDate: vine.string(), // ISO string from frontend
       documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
-      documentNumber: vine.string().trim(),
+      documentNumber: vine.string().trim().optional(), // Required for adults, validated in controller
       isSelfResponsible: vine.boolean(),
       whatsappContact: vine.boolean(),
     }),
@@ -120,10 +120,10 @@ export const enrollStudentValidator = vine.compile(
     basicInfo: vine.object({
       name: vine.string().trim().minLength(2).maxLength(255),
       email: vine.string().email().trim().optional(),
-      phone: vine.string().trim(),
+      phone: vine.string().trim().optional(), // Required for adults, validated in controller
       birthDate: vine.string(), // ISO string from frontend
       documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
-      documentNumber: vine.string().trim(),
+      documentNumber: vine.string().trim().optional(), // Required for adults, validated in controller
       isSelfResponsible: vine.boolean(),
       whatsappContact: vine.boolean(),
     }),
@@ -135,7 +135,7 @@ export const enrollStudentValidator = vine.compile(
         phone: vine.string().trim(),
         documentType: vine.enum(['CPF', 'RG', 'PASSPORT']),
         documentNumber: vine.string().trim(),
-        birthDate: vine.string(), // ISO string from frontend
+        birthDate: vine.string(), // ISO string from frontend - must be adult, validated in controller
         isPedagogical: vine.boolean(),
         isFinancial: vine.boolean(),
       })

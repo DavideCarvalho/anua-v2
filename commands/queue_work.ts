@@ -29,13 +29,14 @@ export default class QueueWork extends BaseCommand {
       queueConfig.worker.concurrency = this.concurrency
     }
 
-    const queuesToProcess = this.queues?.length ? this.queues : ['default', 'gamification']
+    const queuesToProcess = this.queues?.length ? this.queues : ['default', 'gamification', 'payments']
 
     this.logger.info(`Processing queues: ${queuesToProcess.join(', ')}`)
     this.logger.info(`Concurrency: ${queueConfig.worker.concurrency}`)
 
     // Start a simple HTTP server for Cloud Run health checks
-    const healthPort = process.env.WORKER_PORT || 8081
+    // Cloud Run sets PORT=8080 by default
+    const healthPort = process.env.PORT || 8080
     const healthServer = createServer((req, res) => {
       if (req.url === '/' || req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'text/plain' })

@@ -8,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
-import { Input } from '~/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -46,7 +45,7 @@ export function BillingStep() {
   const courseId = form.watch('billing.courseId')
   const levelId = form.watch('billing.levelId')
 
-  const { data: academicPeriodsData, isLoading: isLoadingPeriods } = useQuery(
+  const { data: academicPeriodsData } = useQuery(
     useAcademicPeriodsQueryOptions({ limit: 50 })
   )
 
@@ -153,44 +152,6 @@ export function BillingStep() {
           <CardTitle className="text-base">Informações Acadêmicas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <FormField
-            control={form.control}
-            name="billing.academicPeriodId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Período Letivo*</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value)
-                    form.setValue('billing.courseId', '')
-                    form.setValue('billing.levelId', '')
-                    form.setValue('billing.classId', '')
-                    form.setValue('billing.contractId', null)
-                    form.setValue('billing.scholarshipId', null)
-                  }}
-                  value={field.value}
-                  disabled={isLoadingPeriods}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={isLoadingPeriods ? 'Carregando...' : 'Selecione o período letivo'}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {academicPeriods.map((period) => (
-                      <SelectItem key={period.id} value={period.id}>
-                        {period.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           {/* Only show course selector if there's more than one course */}
           {!hasOnlyOneCourse && (
             <FormField

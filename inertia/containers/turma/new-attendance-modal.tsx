@@ -37,6 +37,11 @@ import {
 import { cn } from '~/lib/utils'
 import { ErrorBoundary } from '~/components/error-boundary'
 
+import { useClassStudentsQueryOptions } from '../../hooks/queries/use_class_students'
+import { useClassQueryOptions } from '../../hooks/queries/use_class'
+import { useAttendanceAvailableDatesQueryOptions } from '../../hooks/queries/use_attendance_available_dates'
+import { useBatchCreateAttendanceMutationOptions } from '../../hooks/mutations/use_batch_create_attendance'
+
 const schema = z.object({
   dates: z.array(z.string()).min(1, 'Selecione pelo menos uma data'),
   subjectId: z.string().min(1, 'Selecione a matéria'),
@@ -61,8 +66,6 @@ interface NewAttendanceModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-import { useClassStudentsQueryOptions } from '../../hooks/queries/use_class_students'
-
 interface Subject {
   id: string
   name: string
@@ -77,78 +80,6 @@ function getInitials(name: string): string {
     .join('')
     .slice(0, 2)
     .toUpperCase()
-}
-
-async function fetchSubjectsForClass(classId: string): Promise<Subject[]> {
-  const response = await fetch(`/api/v1/classes/${classId}`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch class data')
-  }
-  const data = await response.json()
-
-  const subjects: Subject[] = []
-  const seen = new Set<string>()
-
-  for (const tc of data.teacherClasses || []) {
-    if (tc.subject && !seen.has(tc.subject.id)) {
-      seen.add(tc.subject.id)
-      subjects.push({
-        id: tc.subject.id,
-        name: tc.subject.name,
-        teacherId: tc.teacherId,
-      })
-    }
-  }
-
-  return subjects
-}
-
-interface AvailableDate {
-  date: string
-  label: string
-}
-
-async function fetchAvailableDates(
-  classId: string,
-  academicPeriodId: string,
-  subjectId: string
-): Promise<AvailableDate[]> {
-  const params = new URLSearchParams({
-    classId,
-    academicPeriodId,
-    subjectId,
-  })
-  const response = await fetch(
-    `/api/v1/attendance/available-dates?${params.toString()}`
-  )
-  if (!response.ok) {
-    throw new Error('Falha ao carregar dias de aula')
-  }
-  const data = (await response.json()) as { dates: AvailableDate[] }
-  return data.dates ?? []
-}
-
-interface BatchAttendancePayload {
-  classId: string
-  academicPeriodId: string
-  subjectId: string
-  dates: string[]
-  attendances: {
-    studentId: string
-    status: 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
-  }[]
-}
-
-async function createBatchAttendance(payload: BatchAttendancePayload): Promise<void> {
-  const response = await fetch('/api/v1/attendance/batch', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}))
-    throw new Error(data.message || 'Falha ao registrar presença')
-  }
 }
 
 // Loading skeleton component
@@ -209,19 +140,39 @@ function NewAttendanceModalContent({
   })
   const students = useMemo(() => studentsResponse?.data ?? [], [studentsResponse?.data])
 
-  const { data: subjects, isLoading: isLoadingSubjects } = useQuery({
-    queryKey: ['class-subjects', classId],
-    queryFn: () => fetchSubjectsForClass(classId),
+  const { data: classData, isLoading: isLoadingSubjects } = useQuery({
+    ...useClassQueryOptions(classId),
     enabled: open,
   })
 
+  const subjects = useMemo(() => {
+    const result: Subject[] = []
+    const seen = new Set<string>()
+
+    for (const tc of classData?.teacherClasses || []) {
+      if (tc.subject && !seen.has(tc.subject.id)) {
+        seen.add(tc.subject.id)
+        result.push({
+          id: tc.subject.id,
+          name: tc.subject.name,
+          teacherId: tc.teacherId,
+        })
+      }
+    }
+
+    return result
+  }, [classData])
+
   const subjectId = form.watch('subjectId')
-  const { data: availableDates = [], isLoading: isLoadingDates } = useQuery({
-    queryKey: ['attendance-available-dates', classId, academicPeriodId, subjectId],
-    queryFn: () =>
-      fetchAvailableDates(classId, academicPeriodId, subjectId),
+  const { data: availableDatesResponse, isLoading: isLoadingDates } = useQuery({
+    ...useAttendanceAvailableDatesQueryOptions({
+      classId,
+      academicPeriodId,
+      subjectId,
+    }),
     enabled: open && !!subjectId,
   })
+  const availableDates = availableDatesResponse?.dates ?? []
 
   // Auto-select first subject if only one
   useEffect(() => {
@@ -268,12 +219,12 @@ function NewAttendanceModalContent({
   }, [open, students, hasInitialized])
 
   const createMutation = useMutation({
-    mutationFn: createBatchAttendance,
+    ...useBatchCreateAttendanceMutationOptions(),
     onSuccess: () => {
       toast.success('Presença registrada com sucesso!')
       queryClient.invalidateQueries({ queryKey: ['class-students-attendance', classId] })
       queryClient.invalidateQueries({
-        queryKey: ['attendance-available-dates', classId, academicPeriodId, subjectId],
+        queryKey: ['attendance-available-dates'],
       })
       onOpenChange(false)
       form.reset()
@@ -360,12 +311,11 @@ function NewAttendanceModalContent({
       status: (a.status === 'EXCUSED' ? 'JUSTIFIED' : a.status) as 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED',
     }))
 
-    // Send single request with all dates
     await createMutation.mutateAsync({
       classId,
       academicPeriodId,
       subjectId: data.subjectId,
-      dates: data.dates,
+      dates: data.dates.map((d) => new Date(d)),
       attendances,
     })
   }

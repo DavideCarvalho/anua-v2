@@ -7,16 +7,61 @@ import {
 
 // Schema for edit is similar to new student but with optional fields and IDs
 export const editStudentSchema = z.object({
-  basicInfo: z.object({
-    name: z.string().min(1, 'O nome é obrigatório'),
-    email: z.string().email('Email inválido').optional().or(z.literal('')),
-    phone: z.string().min(1, 'O telefone é obrigatório'),
-    birthDate: z.date({ required_error: 'A data de nascimento é obrigatória' }),
-    documentType: z.enum(DocumentType),
-    documentNumber: z.string().min(1, 'O número do documento é obrigatório'),
-    isSelfResponsible: z.boolean(),
-    whatsappContact: z.boolean(),
-  }),
+  basicInfo: z
+    .object({
+      name: z.string().min(1, 'O nome é obrigatório'),
+      email: z.string().email('Email inválido').optional().or(z.literal('')),
+      phone: z.string().optional().or(z.literal('')),
+      birthDate: z.date({ required_error: 'A data de nascimento é obrigatória' }),
+      documentType: z.enum(DocumentType),
+      documentNumber: z.string().optional().or(z.literal('')),
+      isSelfResponsible: z.boolean(),
+      whatsappContact: z.boolean(),
+    })
+    .refine(
+      (data) => {
+        // Phone is required only for adults (18+)
+        const today = new Date()
+        const birthDate = data.birthDate
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        const isAdult =
+          monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
+            ? age - 1 >= 18
+            : age >= 18
+
+        if (isAdult && (!data.phone || data.phone.length === 0)) {
+          return false
+        }
+        return true
+      },
+      {
+        message: 'O telefone é obrigatório para maiores de 18 anos',
+        path: ['phone'],
+      }
+    )
+    .refine(
+      (data) => {
+        // Document is required only for adults (18+)
+        const today = new Date()
+        const birthDate = data.birthDate
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        const isAdult =
+          monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
+            ? age - 1 >= 18
+            : age >= 18
+
+        if (isAdult && (!data.documentNumber || data.documentNumber.length === 0)) {
+          return false
+        }
+        return true
+      },
+      {
+        message: 'O número do documento é obrigatório para maiores de 18 anos',
+        path: ['documentNumber'],
+      }
+    ),
   responsibles: z.array(
     z.object({
       id: z.string().optional(),

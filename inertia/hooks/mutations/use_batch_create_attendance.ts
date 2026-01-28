@@ -1,29 +1,16 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { MutationOptions } from '@tanstack/react-query'
+import type { InferResponseType } from '@tuyau/client'
 import { tuyau } from '../../lib/api'
 
-interface AttendanceRecord {
-  studentId: string
-  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
-  justification?: string
-}
+const $route = tuyau.$route('api.v1.attendance.batch')
 
-interface BatchCreateAttendanceData {
-  classId: string
-  academicPeriodId: string
-  subjectId: string
-  date: string
-  attendances: AttendanceRecord[]
-}
+export type BatchCreateAttendanceResponse = InferResponseType<typeof $route.$post>
+export type BatchCreateAttendanceData = NonNullable<Parameters<typeof $route.$post>[0]>
 
-export function useBatchCreateAttendance() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useBatchCreateAttendanceMutationOptions() {
+  return {
     mutationFn: (data: BatchCreateAttendanceData) => {
-      return tuyau.$route('api.v1.attendance.batch').$post(data).unwrap()
+      return $route.$post(data).unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
-    },
-  })
+  } satisfies MutationOptions<BatchCreateAttendanceResponse, Error, BatchCreateAttendanceData>
 }

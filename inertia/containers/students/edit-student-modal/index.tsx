@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -17,7 +17,7 @@ import { ResponsiblesStep } from '../new-student-modal/steps/responsibles-step'
 import { AddressStep } from '../new-student-modal/steps/address-step'
 import { MedicalInfoStep } from '../new-student-modal/steps/medical-info-step'
 import { editStudentSchema, type EditStudentFormData } from './schema'
-import { useStudentQueryOptions } from '~/hooks/queries/use_student'
+import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
 import { useFullUpdateStudent } from '~/hooks/mutations/use_student_mutations'
 
 const STEPS_CONFIG = [
@@ -29,6 +29,7 @@ const STEPS_CONFIG = [
 
 interface EditStudentModalProps {
   studentId: string
+  academicPeriodId?: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: () => void
@@ -36,6 +37,7 @@ interface EditStudentModalProps {
 
 export function EditStudentModal({
   studentId,
+  academicPeriodId,
   open,
   onOpenChange,
   onSuccess,
@@ -52,6 +54,16 @@ export function EditStudentModal({
   })
 
   const fullUpdateStudent = useFullUpdateStudent()
+
+  // Get academicPeriodId from student's levels if not passed as prop
+  const effectiveAcademicPeriodId = useMemo(() => {
+    if (academicPeriodId) return academicPeriodId
+    // StudentResponse includes levels with nested academicPeriod
+    const levels = (student as StudentResponse | undefined)?.levels
+    const firstLevel = levels?.[0]
+    const academicPeriod = firstLevel?.levelAssignedToCourseAcademicPeriod?.courseHasAcademicPeriod?.academicPeriod
+    return academicPeriod?.id || null
+  }, [academicPeriodId, student])
 
   const form = useForm<EditStudentFormData>({
     resolver: zodResolver(editStudentSchema),
@@ -287,9 +299,9 @@ export function EditStudentModal({
   function renderStep() {
     switch (currentStep) {
       case 0:
-        return <StudentInfoStep />
+        return <StudentInfoStep excludeUserId={studentId} academicPeriodId={effectiveAcademicPeriodId || undefined} />
       case 1:
-        return <ResponsiblesStep />
+        return <ResponsiblesStep academicPeriodId={effectiveAcademicPeriodId || undefined} />
       case 2:
         return <AddressStep />
       case 3:
@@ -316,10 +328,13 @@ export function EditStudentModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Editar Aluno</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-[700px] max-h-[90vh] flex flex-col p-0">
+        {/* Fixed Header */}
+        <div className="p-6 pb-4 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle>Editar Aluno</DialogTitle>
+          </DialogHeader>
+        </div>
 
         <FormProvider {...form}>
           <form
@@ -327,13 +342,17 @@ export function EditStudentModal({
               e.preventDefault()
               form.handleSubmit(handleSubmit)(e)
             }}
-            className="space-y-6"
+            className="flex flex-col flex-1 min-h-0"
           >
-            <Stepper currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <Stepper currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
 
-            {renderStep()}
+              {renderStep()}
+            </div>
 
-            <div className="flex justify-between pt-4 border-t">
+            {/* Fixed Footer */}
+            <div className="flex justify-between p-6 pt-4 border-t bg-background shrink-0">
               <Button
                 type="button"
                 variant="outline"

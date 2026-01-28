@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
-import { BaseModel, belongsTo, beforeCreate, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, hasMany, beforeCreate, column } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import LevelAssignedToCourseHasAcademicPeriod from './level_assigned_to_course_has_academic_period.js'
 import Level from './level.js'
@@ -9,6 +9,7 @@ import AcademicPeriod from './academic_period.js'
 import Contract from './contract.js'
 import Scholarship from './scholarship.js'
 import Class_ from './class.js'
+import StudentPayment from './student_payment.js'
 
 export type DocusealSignatureStatus = 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED'
 
@@ -76,6 +77,9 @@ export default class StudentHasLevel extends BaseModel {
   @column({ columnName: 'signedContractFilePath' })
   declare signedContractFilePath: string | null
 
+  @column.dateTime({ columnName: 'deletedAt' })
+  declare deletedAt: DateTime | null
+
   @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
@@ -106,4 +110,7 @@ export default class StudentHasLevel extends BaseModel {
 
   @belongsTo(() => Class_, { foreignKey: 'classId' })
   declare class: BelongsTo<typeof Class_>
+
+  @hasMany(() => StudentPayment, { foreignKey: 'studentHasLevelId' })
+  declare studentPayments: HasMany<typeof StudentPayment>
 }

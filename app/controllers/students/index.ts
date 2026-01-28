@@ -31,9 +31,10 @@ export default class IndexStudentsController {
     }
 
     const query = Student.query()
-      .preload('user', (userQuery) => {
-        userQuery.whereNull('deletedAt')
+      .whereHas('levels', (levelQuery) => {
+        levelQuery.whereNull('deletedAt')
       })
+      .preload('user')
       .preload('class')
       .orderBy('id', 'desc')
 
@@ -60,7 +61,7 @@ export default class IndexStudentsController {
     // Filtrar por período letivo e/ou curso via StudentHasLevel
     if (academicPeriodId || courseId) {
       query.whereHas('levels', (slQuery) => {
-        slQuery.whereHas('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
+        slQuery.whereNull('deletedAt').whereHas('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
           lacapQuery.whereHas('courseHasAcademicPeriod', (chapQuery) => {
             if (academicPeriodId) {
               chapQuery.where('academicPeriodId', academicPeriodId)

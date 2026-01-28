@@ -31,6 +31,7 @@ export default defineConfig({
     () => import('@tuyau/core/commands'),
     () => import('@adocasts.com/dto/commands'),
     () => import('@adonisjs/mail/commands'),
+    () => import('adonisjs-scheduler/commands'),
   ],
 
   /*
@@ -64,6 +65,10 @@ export default defineConfig({
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/drive/drive_provider'),
     () => import('@jrmc/adonis-attachment/attachment_provider'),
+    {
+      file: () => import('adonisjs-scheduler/scheduler_provider'),
+      environment: ['console'],
+    },
   ],
 
   /*
@@ -78,6 +83,10 @@ export default defineConfig({
     () => import('#start/routes'),
     () => import('#start/kernel'),
     () => import('#start/orm'),
+    {
+      file: () => import('#start/scheduler'),
+      environment: ['console'],
+    },
   ],
 
   /*

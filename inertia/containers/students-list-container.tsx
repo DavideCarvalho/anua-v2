@@ -57,16 +57,16 @@ function StudentsListSkeleton() {
       </div>
       <div className="border rounded-lg">
         <div className="p-4 border-b">
-          <div className="grid grid-cols-5 gap-4">
-            {Array.from({ length: 5 }).map((_, i) => (
+          <div className="grid grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-4 bg-muted animate-pulse rounded" />
             ))}
           </div>
         </div>
         {Array.from({ length: 10 }).map((_, i) => (
           <div key={i} className="p-4 border-b last:border-0">
-            <div className="grid grid-cols-5 gap-4">
-              {Array.from({ length: 5 }).map((_, j) => (
+            <div className="grid grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, j) => (
                 <div key={j} className="h-4 bg-muted animate-pulse rounded" />
               ))}
             </div>
@@ -166,7 +166,6 @@ function StudentsListContent({
               <th className="text-left p-4 font-medium">Nome</th>
               <th className="text-left p-4 font-medium">Email</th>
               <th className="text-left p-4 font-medium">Turma</th>
-              <th className="text-left p-4 font-medium">Status</th>
               <th className="text-right p-4 font-medium">Ações</th>
             </tr>
           </thead>
@@ -185,17 +184,6 @@ function StudentsListContent({
                   {student.user?.email || student.email || '-'}
                 </td>
                 <td className="p-4">{student.class?.name || '-'}</td>
-                <td className="p-4">
-                  <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      student.user?.active || student.active
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {student.user?.active || student.active ? 'Ativo' : 'Inativo'}
-                  </span>
-                </td>
                 <td className="p-4 text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -490,6 +478,7 @@ export function StudentsListContainer() {
       {editStudent && (
         <EditStudentModal
           studentId={editStudent.id}
+          academicPeriodId={academicPeriodId}
           open={!!editStudent}
           onOpenChange={(open) => {
             if (!open) setEditStudent(null)

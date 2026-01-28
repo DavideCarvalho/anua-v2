@@ -639,6 +639,10 @@ type ApiV1StudentsEnrollPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student.ts')['enrollStudentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/enroll_student_controller.ts').default['handle'], true>
 }
+type ApiV1StudentsCheckdocumentGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/check_document_controller.ts').default['handle'], false>
+}
 type ApiV1StudentsIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/show.ts').default['handle'], false>
@@ -2981,6 +2985,12 @@ export interface ApiDefinition {
           '$url': {
           };
           '$post': ApiV1StudentsEnrollPost;
+        };
+        'check-document': {
+          '$url': {
+          };
+          '$get': ApiV1StudentsCheckdocumentGetHead;
+          '$head': ApiV1StudentsCheckdocumentGetHead;
         };
         ':id': {
           '$url': {
@@ -5601,6 +5611,13 @@ const routes = [
     path: '/api/v1/students/enroll',
     method: ["POST"],
     types: {} as ApiV1StudentsEnrollPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.students.checkDocument',
+    path: '/api/v1/students/check-document',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StudentsCheckdocumentGetHead,
   },
   {
     params: ["id"],

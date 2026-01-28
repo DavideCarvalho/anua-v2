@@ -41,6 +41,61 @@ export default class FullUpdateStudentController {
       })
     }
 
+    // Helper function to check if a date represents an adult (18+)
+    const isAdult = (birthDateStr: string): boolean => {
+      const birthDate = DateTime.fromISO(birthDateStr)
+      if (!birthDate.isValid) return false
+      const today = DateTime.now()
+      const age = today.diff(birthDate, 'years').years
+      return age >= 18
+    }
+
+    // Check if student is adult
+    const studentIsAdult = isAdult(data.basicInfo.birthDate)
+
+    // If student is adult, document and phone are required
+    if (studentIsAdult) {
+      if (!data.basicInfo.documentNumber) {
+        return response.badRequest({ message: 'Documento é obrigatório para maiores de idade' })
+      }
+      if (!data.basicInfo.phone) {
+        return response.badRequest({ message: 'Telefone é obrigatório para maiores de idade' })
+      }
+    }
+
+    // Check if all responsibles are adults
+    for (const responsible of data.responsibles) {
+      if (!isAdult(responsible.birthDate)) {
+        return response.badRequest({
+          message: `Responsável "${responsible.name}" deve ser maior de idade`,
+        })
+      }
+    }
+
+    // Check for duplicate documents
+    const studentDoc = data.basicInfo.documentNumber?.replace(/\D/g, '') || ''
+    const responsibleDocs = data.responsibles.map((r) => r.documentNumber.replace(/\D/g, ''))
+
+    // Check if student document matches any responsible
+    if (studentDoc) {
+      const conflictWithResponsible = data.responsibles.find(
+        (r) => r.documentNumber.replace(/\D/g, '') === studentDoc
+      )
+      if (conflictWithResponsible) {
+        return response.badRequest({
+          message: `Documento do aluno não pode ser igual ao do responsável "${conflictWithResponsible.name}"`,
+        })
+      }
+    }
+
+    // Check if any responsible documents are duplicated
+    const uniqueDocs = new Set(responsibleDocs)
+    if (uniqueDocs.size !== responsibleDocs.length) {
+      return response.badRequest({
+        message: 'Cada responsável deve ter um documento único',
+      })
+    }
+
     // Get RESPONSIBLE role for creating responsibles
     const responsibleRole = await Role.findBy('name', 'RESPONSIBLE')
 
@@ -51,10 +106,10 @@ export default class FullUpdateStudentController {
       student.user.merge({
         name: data.basicInfo.name,
         email: data.basicInfo.email || null,
-        phone: data.basicInfo.phone,
+        phone: data.basicInfo.phone || null,
         birthDate: DateTime.fromISO(data.basicInfo.birthDate),
         documentType: data.basicInfo.documentType,
-        documentNumber: data.basicInfo.documentNumber,
+        documentNumber: data.basicInfo.documentNumber || null,
         whatsappContact: data.basicInfo.whatsappContact,
       })
       await student.user.useTransaction(trx).save()

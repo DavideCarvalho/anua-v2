@@ -1,5 +1,6 @@
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { Plus, Trash2 } from 'lucide-react'
+import { useCallback, useMemo } from 'react'
+import { Plus, Trash2, AlertCircle } from 'lucide-react'
 import {
   FormControl,
   FormField,
@@ -18,14 +19,79 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Alert, AlertDescription } from '~/components/ui/alert'
+import { DocumentInput } from '~/components/forms/document-input'
 import type { NewStudentFormData } from '../schema'
 
-export function ResponsiblesStep() {
+interface ResponsiblesStepProps {
+  academicPeriodId?: string
+}
+
+export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {}) {
   const form = useFormContext<NewStudentFormData>()
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'responsibles',
   })
+  // Use academicPeriodId from props or from form
+  const formAcademicPeriodId = form.watch('billing.academicPeriodId')
+  const effectiveAcademicPeriodId = academicPeriodId || formAcademicPeriodId
+
+  // Watch student document for conflict check
+  const studentDocumentNumber = form.watch('basicInfo.documentNumber')
+
+  // Watch all responsibles for document conflict check
+  const responsibles = form.watch('responsibles')
+
+  // Check if responsible is adult (18+)
+  const isAdult = useCallback((date: Date | undefined): boolean => {
+    if (!date) return false
+    const today = new Date()
+    const age = today.getFullYear() - date.getFullYear()
+    const monthDiff = today.getMonth() - date.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+      return age - 1 >= 18
+    }
+    return age >= 18
+  }, [])
+
+  // Check for document conflicts
+  const documentConflicts = useMemo(() => {
+    const conflicts: { type: 'student' | 'responsible'; index: number; otherIndex?: number }[] = []
+    const cleanStudentDoc = studentDocumentNumber?.replace(/\D/g, '') || ''
+
+    responsibles.forEach((resp, index) => {
+      const cleanRespDoc = resp.documentNumber?.replace(/\D/g, '') || ''
+      if (!cleanRespDoc) return
+
+      // Check if same as student
+      if (cleanStudentDoc && cleanRespDoc === cleanStudentDoc) {
+        conflicts.push({ type: 'student', index })
+      }
+
+      // Check if same as other responsibles
+      responsibles.forEach((otherResp, otherIndex) => {
+        if (otherIndex <= index) return
+        const cleanOtherDoc = otherResp.documentNumber?.replace(/\D/g, '') || ''
+        if (cleanOtherDoc && cleanRespDoc === cleanOtherDoc) {
+          conflicts.push({ type: 'responsible', index, otherIndex })
+        }
+      })
+    })
+
+    return conflicts
+  }, [studentDocumentNumber, responsibles])
+
+  const getDocumentConflictError = (index: number): string | null => {
+    const conflict = documentConflicts.find(
+      (c) => c.index === index || c.otherIndex === index
+    )
+    if (!conflict) return null
+    if (conflict.type === 'student') {
+      return 'Documento igual ao do aluno'
+    }
+    return 'Documento igual ao de outro responsável'
+  }
 
   const addResponsible = () => {
     append({
@@ -40,8 +106,27 @@ export function ResponsiblesStep() {
     })
   }
 
+  // Check for any underage responsibles
+  const hasUnderageResponsibles = responsibles.some((resp) => !isAdult(resp.birthDate))
+
   return (
     <div className="space-y-4 py-4">
+      {/* Show alerts for validation issues */}
+      {(documentConflicts.length > 0 || hasUnderageResponsibles) && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {documentConflicts.length > 0 && hasUnderageResponsibles ? (
+              'Existem documentos duplicados e responsáveis menores de idade. Corrija antes de continuar.'
+            ) : documentConflicts.length > 0 ? (
+              'Existem documentos duplicados. Cada pessoa deve ter um documento único.'
+            ) : (
+              'Todos os responsáveis devem ser maiores de idade.'
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {fields.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-4">
           Nenhum responsável adicionado. Clique no botão abaixo para adicionar.
@@ -119,22 +204,31 @@ export function ResponsiblesStep() {
             <FormField
               control={form.control}
               name={`responsibles.${index}.birthDate`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data de Nascimento*</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="date"
-                      value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                      onChange={(e) => {
-                        const date = e.target.value ? new Date(e.target.value) : undefined
-                        field.onChange(date)
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const birthDate = field.value
+                const isAdultResponsible = isAdult(birthDate)
+                const showAgeError = birthDate && !isAdultResponsible
+                return (
+                  <FormItem>
+                    <FormLabel>Data de Nascimento*</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        className={showAgeError ? 'border-destructive' : ''}
+                        value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                        onChange={(e) => {
+                          const date = e.target.value ? new Date(e.target.value) : undefined
+                          field.onChange(date)
+                        }}
+                      />
+                    </FormControl>
+                    {showAgeError && (
+                      <p className="text-sm text-destructive">Responsável deve ser maior de idade</p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )
+              }}
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -164,15 +258,30 @@ export function ResponsiblesStep() {
               <FormField
                 control={form.control}
                 name={`responsibles.${index}.documentNumber`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número do Documento*</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Número" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field: docField }) => {
+                  const docType = form.watch(`responsibles.${index}.documentType`)
+                  const responsibleId = form.getValues(`responsibles.${index}.id`)
+                  const conflictError = getDocumentConflictError(index)
+                  return (
+                    <FormItem>
+                      <FormLabel>Número do Documento*</FormLabel>
+                      <FormControl>
+                        <DocumentInput
+                          value={docField.value}
+                          onChange={docField.onChange}
+                          documentType={docType}
+                          excludeUserId={responsibleId}
+                          academicPeriodId={effectiveAcademicPeriodId}
+                          placeholder="Número"
+                        />
+                      </FormControl>
+                      {conflictError && (
+                        <p className="text-sm text-destructive">{conflictError}</p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
             </div>
 

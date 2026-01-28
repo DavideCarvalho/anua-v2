@@ -22,8 +22,10 @@ export default class ListClassStudentsController {
     const limit = request.input('limit', 20)
 
     // Get students via StudentHasLevel with course+period validation
+    // Only return active enrollments (not soft-deleted)
     const studentLevels = await StudentHasLevel.query()
       .where('classId', classId)
+      .whereNull('deletedAt')
       .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
         laQuery.where('isActive', true).whereHas('courseHasAcademicPeriod', (caQuery) => {
           caQuery.where('courseId', courseId).where('academicPeriodId', academicPeriodId)

@@ -1,5 +1,5 @@
 import { useFormContext } from 'react-hook-form'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import {
   FormControl,
   FormField,
@@ -16,12 +16,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { DocumentInput } from '~/components/forms/document-input'
 import type { NewStudentFormData } from '../schema'
 
-export function StudentInfoStep() {
+interface StudentInfoStepProps {
+  excludeUserId?: string
+  academicPeriodId?: string
+}
+
+export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfoStepProps = {}) {
   const form = useFormContext<NewStudentFormData>()
   const birthDate = form.watch('basicInfo.birthDate')
   const isSelfResponsible = form.watch('basicInfo.isSelfResponsible')
+  const documentType = form.watch('basicInfo.documentType')
+  const documentNumber = form.watch('basicInfo.documentNumber')
+  // Use academicPeriodId from props or from form (for new student modal)
+  const formAcademicPeriodId = form.watch('billing.academicPeriodId')
+  const effectiveAcademicPeriodId = academicPeriodId || formAcademicPeriodId
+
+  // Watch responsibles to check for document conflicts
+  const responsibles = form.watch('responsibles')
+
+  // Check if student document matches any responsible's document
+  const documentConflictWithResponsible = useMemo(() => {
+    const cleanStudentDoc = documentNumber?.replace(/\D/g, '') || ''
+    if (!cleanStudentDoc || !responsibles?.length) return null
+
+    const conflictIndex = responsibles.findIndex((resp) => {
+      const cleanRespDoc = resp.documentNumber?.replace(/\D/g, '') || ''
+      return cleanRespDoc && cleanRespDoc === cleanStudentDoc
+    })
+
+    if (conflictIndex >= 0) {
+      return responsibles[conflictIndex].name || `Responsável ${conflictIndex + 1}`
+    }
+    return null
+  }, [documentNumber, responsibles])
 
   const isAdult = useCallback((date: Date | undefined): boolean => {
     if (!date) return false
@@ -37,12 +67,20 @@ export function StudentInfoStep() {
   }, [])
 
   useEffect(() => {
-    if (!isAdult(birthDate) && form.getValues('basicInfo.isSelfResponsible')) {
-      form.setValue('basicInfo.isSelfResponsible', false)
+    if (!isAdult(birthDate)) {
+      if (form.getValues('basicInfo.isSelfResponsible')) {
+        form.setValue('basicInfo.isSelfResponsible', false)
+      }
+      if (form.getValues('basicInfo.whatsappContact')) {
+        form.setValue('basicInfo.whatsappContact', false)
+      }
     }
   }, [birthDate, form, isAdult])
 
-  const isEmailRequired = isAdult(birthDate) && isSelfResponsible
+  const isStudentAdult = isAdult(birthDate)
+  const isEmailRequired = isStudentAdult && isSelfResponsible
+  const isPhoneRequired = isStudentAdult
+  const isDocumentRequired = isStudentAdult
 
   return (
     <div className="grid gap-4 py-4">
@@ -125,10 +163,11 @@ export function StudentInfoStep() {
           name="basicInfo.phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Telefone*</FormLabel>
+              <FormLabel>Telefone{isPhoneRequired ? '*' : ' (opcional)'}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
+                  value={field.value || ''}
                   maxLength={11}
                   placeholder="11999999999"
                   onChange={(e) => {
@@ -148,7 +187,11 @@ export function StudentInfoStep() {
           render={({ field }) => (
             <FormItem className="flex flex-row items-end gap-2 pb-2">
               <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={!isStudentAdult}
+                />
               </FormControl>
               <FormLabel className="font-normal">WhatsApp</FormLabel>
             </FormItem>
@@ -185,10 +228,24 @@ export function StudentInfoStep() {
           name="basicInfo.documentNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Número do Documento*</FormLabel>
+              <FormLabel>
+                Número do Documento{isDocumentRequired ? '*' : ' (opcional)'}
+              </FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Número" />
+                <DocumentInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  documentType={documentType}
+                  excludeUserId={excludeUserId}
+                  academicPeriodId={effectiveAcademicPeriodId}
+                  placeholder="Número"
+                />
               </FormControl>
+              {documentConflictWithResponsible && (
+                <p className="text-sm text-destructive">
+                  Documento igual ao de {documentConflictWithResponsible}
+                </p>
+              )}
               <FormMessage />
             </FormItem>
           )}

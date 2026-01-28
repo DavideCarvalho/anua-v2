@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasLevel from '#models/student_has_level'
+import Level from '#models/level'
 import { updateEnrollmentValidator } from '#validators/student_enrollment'
 
 export default class UpdateEnrollmentController {
@@ -13,6 +14,15 @@ export default class UpdateEnrollmentController {
       .firstOrFail()
 
     enrollment.merge(payload)
+
+    // Se não tem contractId, pega do Level
+    if (!enrollment.contractId && enrollment.levelId) {
+      const level = await Level.find(enrollment.levelId)
+      if (level?.contractId) {
+        enrollment.contractId = level.contractId
+      }
+    }
+
     await enrollment.save()
 
     // Reload with relations

@@ -20,9 +20,15 @@ export default class GetEscolaStatsController {
       .count('* as total')
       .first()
 
+    // Alunos ativos = alunos com pelo menos uma matrícula ativa em período ativo
     const activeStudents = await Student.query()
       .whereHas('user', (q) => {
-        q.where('schoolId', schoolId).where('active', true).whereNull('deletedAt')
+        q.where('schoolId', schoolId).whereNull('deletedAt')
+      })
+      .whereHas('levels', (levelQ) => {
+        levelQ.whereNull('deletedAt').whereHas('academicPeriod', (periodQ) => {
+          periodQ.where('isActive', true).whereNull('deletedAt')
+        })
       })
       .count('* as total')
       .first()
@@ -34,18 +40,19 @@ export default class GetEscolaStatsController {
       .count('* as total')
       .first()
 
-    // Previsão de receita mensal: soma dos contratos dos alunos ativos em períodos ativos
+    // Previsão de receita mensal: soma dos contratos das matrículas ativas em períodos ativos
     // aplicando o desconto da bolsa quando existir
     const studentLevels = await StudentHasLevel.query()
+      .whereNull('deletedAt')
+      .whereNotNull('contractId')
       .whereHas('student', (studentQ) => {
         studentQ.whereHas('user', (userQ) => {
-          userQ.where('schoolId', schoolId).where('active', true).whereNull('deletedAt')
+          userQ.where('schoolId', schoolId).whereNull('deletedAt')
         })
       })
       .whereHas('academicPeriod', (periodQ) => {
         periodQ.where('isActive', true).whereNull('deletedAt')
       })
-      .whereNotNull('contractId')
       .preload('contract')
       .preload('scholarship')
 

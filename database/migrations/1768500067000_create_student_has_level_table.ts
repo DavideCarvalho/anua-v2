@@ -59,6 +59,7 @@ export default class extends BaseSchema {
       table.date('documentSignedAt').nullable()
       table.text('enrollmentPaymentId').nullable()
       table.text('signedContractFilePath').nullable()
+      table.timestamp('deletedAt').nullable()
       table.timestamp('createdAt').notNullable().defaultTo(this.now())
       table.timestamp('updatedAt').notNullable()
     })

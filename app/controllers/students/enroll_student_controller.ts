@@ -15,21 +15,70 @@ import StudentHasAcademicPeriod from '#models/student_has_academic_period'
 import StudentHasLevel from '#models/student_has_level'
 import AcademicPeriod from '#models/academic_period'
 import Class_ from '#models/class'
+import Level from '#models/level'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { enrollStudentValidator } from '#validators/student'
+import { getQueueManager } from '#services/queue_service'
+import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
 
 export default class EnrollStudentController {
   async handle(ctx: HttpContext) {
     const { request, response } = ctx
 
-    let data
-    try {
-      data = await request.validateUsing(enrollStudentValidator)
-    } catch (error: any) {
-      console.error('Validation error:', error.messages || error)
-      return response.unprocessableEntity({
-        message: 'Erro de validação',
-        errors: error.messages || error,
+    const data = await request.validateUsing(enrollStudentValidator)
+
+    // Helper function to check if a date represents an adult (18+)
+    const isAdult = (birthDateStr: string): boolean => {
+      const birthDate = DateTime.fromISO(birthDateStr)
+      if (!birthDate.isValid) return false
+      const today = DateTime.now()
+      const age = today.diff(birthDate, 'years').years
+      return age >= 18
+    }
+
+    // Check if student is adult
+    const studentIsAdult = isAdult(data.basicInfo.birthDate)
+
+    // If student is adult, document and phone are required
+    if (studentIsAdult) {
+      if (!data.basicInfo.documentNumber) {
+        return response.badRequest({ message: 'Documento é obrigatório para maiores de idade' })
+      }
+      if (!data.basicInfo.phone) {
+        return response.badRequest({ message: 'Telefone é obrigatório para maiores de idade' })
+      }
+    }
+
+    // Check if all responsibles are adults
+    for (const responsible of data.responsibles) {
+      if (!isAdult(responsible.birthDate)) {
+        return response.badRequest({
+          message: `Responsável "${responsible.name}" deve ser maior de idade`,
+        })
+      }
+    }
+
+    // Check for duplicate documents
+    const studentDoc = data.basicInfo.documentNumber?.replace(/\D/g, '') || ''
+    const responsibleDocs = data.responsibles.map((r) => r.documentNumber.replace(/\D/g, ''))
+
+    // Check if student document matches any responsible
+    if (studentDoc) {
+      const conflictWithResponsible = data.responsibles.find(
+        (r) => r.documentNumber.replace(/\D/g, '') === studentDoc
+      )
+      if (conflictWithResponsible) {
+        return response.badRequest({
+          message: `Documento do aluno não pode ser igual ao do responsável "${conflictWithResponsible.name}"`,
+        })
+      }
+    }
+
+    // Check if any responsible documents are duplicated
+    const uniqueDocs = new Set(responsibleDocs)
+    if (uniqueDocs.size !== responsibleDocs.length) {
+      return response.badRequest({
+        message: 'Cada responsável deve ter um documento único',
       })
     }
 
@@ -40,10 +89,10 @@ export default class EnrollStudentController {
     }
     const schoolId = academicPeriod.schoolId
 
-    // Check if student already exists by document
-    const existingUser = await User.query()
-      .where('documentNumber', data.basicInfo.documentNumber)
-      .first()
+    // Check if student already exists by document (only if document is provided)
+    const existingUser = studentDoc
+      ? await User.query().where('documentNumber', studentDoc).where('schoolId', schoolId).first()
+      : null
 
     if (existingUser) {
       // Check if already enrolled in this academic period
@@ -84,10 +133,10 @@ export default class EnrollStudentController {
           name: data.basicInfo.name,
           slug: userSlug,
           email: data.basicInfo.email || null,
-          phone: data.basicInfo.phone,
+          phone: data.basicInfo.phone || null,
           birthDate: DateTime.fromISO(data.basicInfo.birthDate),
           documentType: data.basicInfo.documentType,
-          documentNumber: data.basicInfo.documentNumber,
+          documentNumber: data.basicInfo.documentNumber || null,
           whatsappContact: data.basicInfo.whatsappContact,
           schoolId: schoolId,
           roleId: studentRole.id,
@@ -230,6 +279,8 @@ export default class EnrollStudentController {
       )
 
       // 9. Create StudentHasLevel (for proper enrollment tracking)
+      let createdStudentHasLevelId: string | null = null
+
       if (data.billing.classId) {
         // Get the class to find its levelId
         const classRecord = await Class_.find(data.billing.classId)
@@ -245,14 +296,18 @@ export default class EnrollStudentController {
             .first()
 
           if (levelAssignment) {
-            await StudentHasLevel.create(
+            // Get the Level's default contractId as fallback
+            const level = await Level.find(classRecord.levelId)
+            const contractId = data.billing.contractId || level?.contractId || null
+
+            const studentHasLevel = await StudentHasLevel.create(
               {
                 studentId: student.id,
                 levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
                 academicPeriodId: data.billing.academicPeriodId,
                 levelId: classRecord.levelId,
                 classId: data.billing.classId,
-                contractId: data.billing.contractId || null,
+                contractId,
                 scholarshipId: data.billing.scholarshipId || null,
                 paymentMethod: data.billing.paymentMethod || null,
                 installments: data.billing.installments || null,
@@ -261,11 +316,29 @@ export default class EnrollStudentController {
               },
               { client: trx }
             )
+            createdStudentHasLevelId = studentHasLevel.id
           }
         }
       }
 
       await trx.commit()
+
+      // Dispatch payment generation job after successful enrollment
+      // Job will check for contract (own or from level) and skip if none
+      if (createdStudentHasLevelId) {
+        try {
+          const queueManager = await getQueueManager()
+          await queueManager.dispatch(GenerateStudentPaymentsJob, {
+            studentHasLevelId: createdStudentHasLevelId,
+          })
+          console.log('[ENROLL] Dispatched payment generation job:', {
+            studentHasLevelId: createdStudentHasLevelId,
+          })
+        } catch (jobError) {
+          // Log error but don't fail enrollment
+          console.error('[ENROLL] Failed to dispatch payment job:', jobError)
+        }
+      }
 
       // Load student with relationships
       const enrolledStudent = await Student.query()

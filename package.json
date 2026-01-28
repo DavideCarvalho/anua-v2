@@ -112,6 +112,7 @@
     "@tuyau/inertia": "^0.0.15",
     "@tuyau/superjson": "^0.1.2",
     "@vinejs/vine": "^3.0.1",
+    "adonisjs-scheduler": "^2.6.4",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
