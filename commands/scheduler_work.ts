@@ -1,31 +1,19 @@
-import { BaseCommand, flags } from '@adonisjs/core/ace'
+import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 import { createServer } from 'node:http'
-// @ts-expect-error - Worker is not exported in types but exists
-import { Worker } from 'adonisjs-scheduler/build/src/worker.js'
+import { spawn } from 'node:child_process'
 
-export default class SchedulerWork extends BaseCommand {
+export default class SchedulerServe extends BaseCommand {
   static commandName = 'scheduler:serve'
   static description = 'Start the scheduler with health check server for Cloud Run'
 
   static options: CommandOptions = {
-    startApp: true,
+    startApp: false,
     staysAlive: true,
   }
 
-  @flags.string({ description: 'Tag for the scheduler', default: 'default' })
-  declare tag: string
-
-  private worker?: InstanceType<typeof Worker>
-
-  prepare() {
-    this.app.terminating(async () => {
-      if (this.worker) await this.worker.stop()
-    })
-  }
-
   async run() {
-    this.logger.info('Starting scheduler...')
+    this.logger.info('Starting scheduler with health check server...')
 
     // Start a simple HTTP server for Cloud Run health checks
     // Cloud Run sets PORT=8080 by default
@@ -44,19 +32,31 @@ export default class SchedulerWork extends BaseCommand {
       this.logger.info(`Health check server listening on port ${healthPort}`)
     })
 
-    // Handle graceful shutdown
-    this.app.terminating(async () => {
-      this.logger.info('Shutting down scheduler...')
-      healthServer.close()
+    // Spawn the actual scheduler:run command
+    const scheduler = spawn('node', ['ace', 'scheduler:run'], {
+      stdio: 'inherit',
+      cwd: process.cwd(),
     })
 
-    try {
-      this.worker = new Worker(this.app)
-      await this.worker.start(this.tag)
-      this.logger.info('Scheduler started successfully')
-    } catch (error) {
+    scheduler.on('error', (error) => {
       this.logger.error(`Failed to start scheduler: ${error}`)
       this.exitCode = 1
+    })
+
+    scheduler.on('exit', (code) => {
+      this.logger.info(`Scheduler exited with code ${code}`)
+      healthServer.close()
+      process.exit(code || 0)
+    })
+
+    // Handle graceful shutdown
+    const shutdown = () => {
+      this.logger.info('Shutting down...')
+      scheduler.kill('SIGTERM')
+      healthServer.close()
     }
+
+    process.on('SIGTERM', shutdown)
+    process.on('SIGINT', shutdown)
   }
 }
