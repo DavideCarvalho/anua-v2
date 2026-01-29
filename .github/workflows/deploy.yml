@@ -52,19 +52,37 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy to Cloud Run
+      - name: Deploy all services to Cloud Run (parallel)
         run: |
+          # Deploy API
           gcloud run services update ${{ env.SERVICE_NAME }} \
             --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --set-env-vars="NODE_ENV=production,HOST=0.0.0.0,TZ=UTC,LOG_LEVEL=info,SESSION_DRIVER=cookie,DB_HOST=34.39.158.54,DB_PORT=5432,DB_USER=app_user,DB_DATABASE=school_super_app,SMTP_HOST=smtp.resend.com,SMTP_PORT=465,SMTP_USER=resend,SMTP_FROM_EMAIL=Anuá <dont-reply@transactional.anuaapp.com.br>,DRIVE_DISK=gcs,GCS_BUCKET=${{ env.PROJECT_ID }}-uploads" \
             --set-secrets="APP_KEY=production-anua-v2-app-key:latest,DB_PASSWORD=production-anua-v2-db-password:latest,SMTP_PASSWORD=production-anua-v2-smtp-password:latest" \
-            --quiet
+            --quiet &
 
-      - name: Show service URL
-        run: |
-          echo "Deployed to:"
-          gcloud run services describe ${{ env.SERVICE_NAME }} \
+          # Deploy Queue Worker
+          gcloud run services update production-anua-v2-queue-worker \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --region=${{ env.REGION }} \
-            --format='value(status.url)'
+            --platform=managed \
+            --quiet &
+
+          # Deploy Scheduler
+          gcloud run services update production-anua-v2-scheduler \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --quiet &
+
+          # Wait for all deployments to complete
+          wait
+
+      - name: Show deployed services
+        run: |
+          echo "Deployed services:"
+          echo "API: $(gcloud run services describe ${{ env.SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')"
+          echo "Queue Worker: $(gcloud run services describe production-anua-v2-queue-worker --region=${{ env.REGION }} --format='value(status.url)')"
+          echo "Scheduler: $(gcloud run services describe production-anua-v2-scheduler --region=${{ env.REGION }} --format='value(status.url)')"
