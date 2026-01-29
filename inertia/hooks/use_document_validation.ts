@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { validateDocument } from '~/lib/document-validators'
+import { validateDocument } from '~/lib/document_validators'
 import { tuyau } from '~/lib/api'
 
 interface DocumentValidationResult {

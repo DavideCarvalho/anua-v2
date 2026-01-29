@@ -14,7 +14,6 @@ export default class GenerateMissingPayments {
     logger.info('[SCHEDULER] Starting missing payments generation')
 
     try {
-
       // Find all StudentHasLevel records in active academic periods
       // that have contracts but no payments (only active enrollments)
       const studentLevelsWithoutPayments = await StudentHasLevel.query()

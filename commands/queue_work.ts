@@ -29,7 +29,9 @@ export default class QueueWork extends BaseCommand {
       queueConfig.worker.concurrency = this.concurrency
     }
 
-    const queuesToProcess = this.queues?.length ? this.queues : ['default', 'gamification', 'payments']
+    const queuesToProcess = this.queues?.length
+      ? this.queues
+      : ['default', 'gamification', 'payments']
 
     this.logger.info(`Processing queues: ${queuesToProcess.join(', ')}`)
     this.logger.info(`Concurrency: ${queueConfig.worker.concurrency}`)

@@ -93,12 +93,7 @@ export class AssignmentsSummaryDto extends BaseModelDto {
   declare completed: number
   declare overdue: number
 
-  constructor(data: {
-    total: number
-    pending: number
-    completed: number
-    overdue: number
-  }) {
+  constructor(data: { total: number; pending: number; completed: number; overdue: number }) {
     super()
     this.total = data.total
     this.pending = data.pending

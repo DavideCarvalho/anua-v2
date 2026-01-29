@@ -14,9 +14,7 @@ export default class DestroyStudentController {
     }
 
     // Soft delete StudentHasLevel records
-    const query = StudentHasLevel.query()
-      .where('studentId', studentId)
-      .whereNull('deletedAt')
+    const query = StudentHasLevel.query().where('studentId', studentId).whereNull('deletedAt')
 
     // If academicPeriodId is provided, only delete for that period
     if (academicPeriodId) {

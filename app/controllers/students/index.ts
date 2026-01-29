@@ -61,16 +61,18 @@ export default class IndexStudentsController {
     // Filtrar por período letivo e/ou curso via StudentHasLevel
     if (academicPeriodId || courseId) {
       query.whereHas('levels', (slQuery) => {
-        slQuery.whereNull('deletedAt').whereHas('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
-          lacapQuery.whereHas('courseHasAcademicPeriod', (chapQuery) => {
-            if (academicPeriodId) {
-              chapQuery.where('academicPeriodId', academicPeriodId)
-            }
-            if (courseId) {
-              chapQuery.where('courseId', courseId)
-            }
+        slQuery
+          .whereNull('deletedAt')
+          .whereHas('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
+            lacapQuery.whereHas('courseHasAcademicPeriod', (chapQuery) => {
+              if (academicPeriodId) {
+                chapQuery.where('academicPeriodId', academicPeriodId)
+              }
+              if (courseId) {
+                chapQuery.where('courseId', courseId)
+              }
+            })
           })
-        })
       })
     }
 

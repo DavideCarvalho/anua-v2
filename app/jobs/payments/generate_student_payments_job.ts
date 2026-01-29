@@ -50,16 +50,12 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
       }
 
       if (studentHasLevel.deletedAt) {
-        console.warn(
-          `[WORKER] StudentHasLevel ${studentHasLevelId} was soft-deleted - skipping`
-        )
+        console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} was soft-deleted - skipping`)
         return
       }
 
       if (!studentHasLevel.contractId) {
-        console.warn(
-          `[WORKER] StudentHasLevel ${studentHasLevelId} has no contract - skipping`
-        )
+        console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} has no contract - skipping`)
         return
       }
 
@@ -213,7 +209,9 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
 
     for (let i = 0; i < monthsDiff; i++) {
       const paymentMonth = startDate.plus({ months: i })
-      const dueDate = paymentMonth.set({ day: Math.min(paymentDay, paymentMonth.daysInMonth ?? 28) })
+      const dueDate = paymentMonth.set({
+        day: Math.min(paymentDay, paymentMonth.daysInMonth ?? 28),
+      })
 
       // Check if payment already exists for this month
       const existingPayment = await StudentPayment.query()
@@ -250,7 +248,10 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
     })
   }
 
-  private async getPaymentDay(studentHasLevel: StudentHasLevel, contract: Contract): Promise<number> {
+  private async getPaymentDay(
+    studentHasLevel: StudentHasLevel,
+    contract: Contract
+  ): Promise<number> {
     // Priority: StudentHasLevel.paymentDay > Contract.paymentDays[0] > default 5
     if (studentHasLevel.paymentDay) {
       return studentHasLevel.paymentDay

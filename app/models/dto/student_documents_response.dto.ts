@@ -7,12 +7,7 @@ export class DocumentTypeDto extends BaseModelDto {
   declare description: string | null
   declare isRequired: boolean
 
-  constructor(data: {
-    id: string
-    name: string
-    description: string | null
-    isRequired: boolean
-  }) {
+  constructor(data: { id: string; name: string; description: string | null; isRequired: boolean }) {
     super()
     this.id = data.id
     this.name = data.name
@@ -68,12 +63,7 @@ export class MissingDocumentDto extends BaseModelDto {
   declare description: string | null
   declare isRequired: boolean
 
-  constructor(data: {
-    id: string
-    name: string
-    description: string | null
-    isRequired: boolean
-  }) {
+  constructor(data: { id: string; name: string; description: string | null; isRequired: boolean }) {
     super()
     this.id = data.id
     this.name = data.name

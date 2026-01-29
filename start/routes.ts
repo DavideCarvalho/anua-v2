@@ -63,8 +63,7 @@ const ListStudentEnrollmentsController = () =>
   import('#controllers/students/list_enrollments_controller')
 const UpdateEnrollmentController = () =>
   import('#controllers/students/update_enrollment_controller')
-const CheckDocumentController = () =>
-  import('#controllers/students/check_document_controller')
+const CheckDocumentController = () => import('#controllers/students/check_document_controller')
 
 // Responsibles
 const ListStudentResponsiblesController = () =>
