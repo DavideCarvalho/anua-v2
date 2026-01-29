@@ -1,10 +1,10 @@
 import scheduler from 'adonisjs-scheduler/services/main'
+import GenerateMissingPayments from '#start/jobs/generate_missing_payments'
 
 // Gerar pagamentos faltantes - Diariamente às 02:00
 scheduler
   .call(async () => {
-    const module = await import('#start/jobs/generate_missing_payments')
-    await module.default.handle()
+    await GenerateMissingPayments.handle()
   })
   .daily()
   .at('02:00')
