@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
-import { v7 as uuidv7 } from 'uuid'
 import Agreement from '#models/agreement'
 import AgreementEarlyDiscount from '#models/agreement_early_discount'
 import StudentPayment from '#models/student_payment'
@@ -80,7 +79,6 @@ export default class CreateAgreementController {
         const dueDate = startDate.plus({ months: i }).set({ day: payload.paymentDay })
         await StudentPayment.create(
           {
-            id: uuidv7(),
             studentId,
             amount: installmentAmount,
             totalAmount: installmentAmount,
