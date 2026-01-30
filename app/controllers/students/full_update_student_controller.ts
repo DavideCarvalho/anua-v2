@@ -292,8 +292,8 @@ export default class FullUpdateStudentController {
 
       for (const contact of data.medicalInfo.emergencyContacts) {
         const userId =
-          contact.responsibleIndex != null
-            ? responsibleUserIds[contact.responsibleIndex] ?? null
+          typeof contact.responsibleIndex === 'number'
+            ? (responsibleUserIds[contact.responsibleIndex] ?? null)
             : null
         await StudentEmergencyContact.create(
           {

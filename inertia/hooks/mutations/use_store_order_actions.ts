@@ -19,7 +19,10 @@ export function useRejectStoreOrder() {
 
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => {
-      return tuyau.$route('api.v1.storeOrders.reject', { id }).$post({ reason } as any).unwrap()
+      return tuyau
+        .$route('api.v1.storeOrders.reject', { id })
+        .$post({ reason } as any)
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['store-orders'] })

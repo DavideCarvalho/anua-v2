@@ -9,7 +9,10 @@ export function useInsuranceBillingDetailsQueryOptions(billingId: string) {
   return {
     queryKey: ['insurance', 'billings', billingId],
     queryFn: () => {
-      return tuyau.$route('api.v1.insurance.billings.show', { billingId }).$get({} as any).unwrap()
+      return tuyau
+        .$route('api.v1.insurance.billings.show', { billingId })
+        .$get({} as any)
+        .unwrap()
     },
     enabled: !!billingId,
   }

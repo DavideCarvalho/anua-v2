@@ -7,7 +7,10 @@ export function useMarkArrivedPurchaseRequestMutation() {
   return useMutation({
     mutationFn: (data: { id: string; arrivalDate: string }) => {
       const { id, ...body } = data
-      return tuyau.$route('api.v1.purchaseRequests.markArrived', { id }).$post(body as any).unwrap()
+      return tuyau
+        .$route('api.v1.purchaseRequests.markArrived', { id })
+        .$post(body as any)
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })

@@ -6,7 +6,10 @@ export function useMarkPrintRequestPrintedMutation() {
 
   return useMutation({
     mutationFn: (id: string) => {
-      return tuyau.$route('api.v1.printRequests.markPrintRequestPrinted', { id }).$patch({}).unwrap()
+      return tuyau
+        .$route('api.v1.printRequests.markPrintRequestPrinted', { id })
+        .$patch({})
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['print-requests'] })

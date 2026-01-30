@@ -7,7 +7,10 @@ export function useRequestConsentMutation() {
   return useMutation({
     mutationFn: (data: { eventId: string; studentId: string; responsibleId: string }) => {
       const { eventId, studentId, responsibleId } = data
-      return tuyau.$route('api.v1.events.consents.request', { eventId }).$post({ studentId, responsibleId } as any).unwrap()
+      return tuyau
+        .$route('api.v1.events.consents.request', { eventId })
+        .$post({ studentId, responsibleId } as any)
+        .unwrap()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['events', variables.eventId, 'consents'] })

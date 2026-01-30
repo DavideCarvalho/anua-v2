@@ -223,8 +223,8 @@ export default class FinishEnrollmentController {
       for (let i = 0; i < data.emergencyContacts.length; i++) {
         const contact = data.emergencyContacts[i]
         const userId =
-          contact.responsibleIndex != null
-            ? responsibleUserIds[contact.responsibleIndex] ?? null
+          typeof contact.responsibleIndex === 'number'
+            ? (responsibleUserIds[contact.responsibleIndex] ?? null)
             : null
         await StudentEmergencyContact.create(
           {

@@ -23,7 +23,10 @@ export function useUpdateCanteenPurchaseStatus() {
 
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => {
-      return tuyau.$route('api.v1.canteenPurchases.updateStatus', { id }).$put({ status } as any).unwrap()
+      return tuyau
+        .$route('api.v1.canteenPurchases.updateStatus', { id })
+        .$put({ status } as any)
+        .unwrap()
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['canteen-purchase', variables.id] })

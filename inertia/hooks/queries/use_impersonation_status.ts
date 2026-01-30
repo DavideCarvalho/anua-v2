@@ -11,7 +11,9 @@ export function useImpersonationStatusQueryOptions() {
     queryFn: async () => {
       const response = await $route()
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar status de personificação')
+        throw new Error(
+          (response.error as any).value?.message || 'Erro ao carregar status de personificação'
+        )
       }
       return response.data
     },

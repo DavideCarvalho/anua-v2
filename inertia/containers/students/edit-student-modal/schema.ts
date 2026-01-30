@@ -1,8 +1,5 @@
 import { z } from 'zod'
-import {
-  DocumentType,
-  EmergencyContactRelationship,
-} from '../new-student-modal/schema'
+import { DocumentType, EmergencyContactRelationship } from '../new-student-modal/schema'
 
 // Schema for edit is similar to new student but with optional fields and IDs
 export const editStudentSchema = z.object({

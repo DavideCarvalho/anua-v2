@@ -7,7 +7,10 @@ export function useRejectPrintRequestMutation() {
   return useMutation({
     mutationFn: (data: { id: string; reason: string }) => {
       const { id, ...body } = data
-      return tuyau.$route('api.v1.printRequests.rejectPrintRequest', { id }).$patch(body as any).unwrap()
+      return tuyau
+        .$route('api.v1.printRequests.rejectPrintRequest', { id })
+        .$patch(body as any)
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['print-requests'] })

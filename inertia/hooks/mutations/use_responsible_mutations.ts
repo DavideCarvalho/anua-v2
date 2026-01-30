@@ -57,10 +57,7 @@ export function useRemoveResponsible() {
 
   return useMutation({
     mutationFn: ({ responsibleId }: { studentId: string; responsibleId: string }) => {
-      return tuyau
-        .$route('api.v1.responsibles.remove', { id: responsibleId })
-        .$delete({})
-        .unwrap()
+      return tuyau.$route('api.v1.responsibles.remove', { id: responsibleId }).$delete({}).unwrap()
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['student-responsibles', variables.studentId] })

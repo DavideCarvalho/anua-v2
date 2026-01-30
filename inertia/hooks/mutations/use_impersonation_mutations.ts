@@ -28,7 +28,9 @@ export function useClearImpersonation() {
     mutationFn: async () => {
       const response = await tuyau.api.v1.admin.impersonation.$delete()
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao desativar personificação')
+        throw new Error(
+          (response.error as any).value?.message || 'Erro ao desativar personificação'
+        )
       }
       return response.data
     },

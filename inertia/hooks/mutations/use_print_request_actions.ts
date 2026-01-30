@@ -51,11 +51,20 @@ export function useReviewPrintRequest() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name: string; dueDate: string; fileUrl: string; quantity: number; frontAndBack?: boolean } }) => {
-      return tuyau
-        .$route('api.v1.printRequests.reviewPrintRequest', { id })
-        .$patch(data)
-        .unwrap()
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string
+      data: {
+        name: string
+        dueDate: string
+        fileUrl: string
+        quantity: number
+        frontAndBack?: boolean
+      }
+    }) => {
+      return tuyau.$route('api.v1.printRequests.reviewPrintRequest', { id }).$patch(data).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['print-requests'] })

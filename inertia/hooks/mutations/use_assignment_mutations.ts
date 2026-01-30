@@ -37,13 +37,7 @@ export function useSubmitAssignment() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      assignmentId,
-      studentId,
-    }: {
-      assignmentId: string
-      studentId: string
-    }) => {
+    mutationFn: ({ assignmentId, studentId }: { assignmentId: string; studentId: string }) => {
       return tuyau
         .$route('api.v1.assignments.submit', { id: assignmentId })
         .$post({ studentId })

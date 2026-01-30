@@ -290,15 +290,15 @@ export default class EnrollStudentController {
 
       // 7. Create Emergency Contacts
       for (const contact of data.medicalInfo.emergencyContacts) {
-        const userId =
-          contact.responsibleIndex != null
-            ? responsibleUserIds[contact.responsibleIndex] ?? null
+        const contactUserId =
+          typeof contact.responsibleIndex === 'number'
+            ? (responsibleUserIds[contact.responsibleIndex] ?? null)
             : null
         await StudentEmergencyContact.create(
           {
             id: uuidv7(),
             studentId: student.id,
-            userId,
+            userId: contactUserId,
             name: contact.name,
             phone: contact.phone,
             relationship: contact.relationship as any,

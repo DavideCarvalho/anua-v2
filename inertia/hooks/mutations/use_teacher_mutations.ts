@@ -49,8 +49,17 @@ export function useApproveTeacherAbsenceMutationOptions() {
 
 export function useRejectTeacherAbsenceMutationOptions() {
   return {
-    mutationFn: ({ absenceId, rejectionReason }: { absenceId: string; rejectionReason: string }) => {
-      return tuyau.$route('api.v1.teachers.rejectAbsence').$patch({ absenceId, rejectionReason }).unwrap()
+    mutationFn: ({
+      absenceId,
+      rejectionReason,
+    }: {
+      absenceId: string
+      rejectionReason: string
+    }) => {
+      return tuyau
+        .$route('api.v1.teachers.rejectAbsence')
+        .$patch({ absenceId, rejectionReason })
+        .unwrap()
     },
   }
 }

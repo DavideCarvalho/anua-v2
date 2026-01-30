@@ -5,7 +5,15 @@ export function useRegisterForEvent() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ eventId, participantId, parentalConsent }: { eventId: string; participantId: string; parentalConsent?: boolean }) => {
+    mutationFn: ({
+      eventId,
+      participantId,
+      parentalConsent,
+    }: {
+      eventId: string
+      participantId: string
+      parentalConsent?: boolean
+    }) => {
       return tuyau
         .$route('api.v1.events.participants.register', { eventId })
         .$post({ participantId, parentalConsent })

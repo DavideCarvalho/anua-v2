@@ -52,17 +52,8 @@ export function useMarkPaymentAsPaid() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({
-      id,
-      paidAt,
-    }: {
-      id: string
-      paidAt?: string
-    }) => {
-      return tuyau
-        .$route('api.v1.studentPayments.markPaid', { id })
-        .$post({ paidAt })
-        .unwrap()
+    mutationFn: ({ id, paidAt }: { id: string; paidAt?: string }) => {
+      return tuyau.$route('api.v1.studentPayments.markPaid', { id }).$post({ paidAt }).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['student-payments'] })

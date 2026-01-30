@@ -13,7 +13,10 @@ export function useUpdateDocumentStatusMutation() {
   return useMutation({
     mutationFn: (data: UpdateDocumentStatusData) => {
       const { id, status, rejectionReason } = data
-      return tuyau.$route('api.v1.enrollments.documents.updateStatus', { id }).$put({ status, rejectionReason } as any).unwrap()
+      return tuyau
+        .$route('api.v1.enrollments.documents.updateStatus', { id })
+        .$put({ status, rejectionReason } as any)
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] })

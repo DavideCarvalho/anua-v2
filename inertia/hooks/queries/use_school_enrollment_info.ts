@@ -13,7 +13,10 @@ export function useSchoolEnrollmentInfoQueryOptions(
   return {
     queryKey: ['enrollment', 'info', schoolSlug, academicPeriodSlug, courseSlug],
     queryFn: () => {
-      return tuyau.$route('api.v1.enrollment.info', { schoolSlug, academicPeriodSlug, courseSlug } as any).$get().unwrap()
+      return tuyau
+        .$route('api.v1.enrollment.info', { schoolSlug, academicPeriodSlug, courseSlug } as any)
+        .$get()
+        .unwrap()
     },
     enabled: !!schoolSlug && !!academicPeriodSlug && !!courseSlug,
   }
