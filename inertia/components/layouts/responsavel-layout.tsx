@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import type { RouteName } from '@tuyau/client'
 import type { PropsWithChildren } from 'react'
+import { PostHogProvider } from '../posthog-provider'
 import {
   LayoutDashboard,
   BookOpen,
@@ -139,6 +140,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
+    <PostHogProvider>
     <div className="min-h-screen bg-background">
       <ImpersonationBanner />
       {sidebarOpen && (
@@ -200,5 +202,6 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
         <main className="p-4 lg:p-6">{children}</main>
       </div>
     </div>
+    </PostHogProvider>
   )
 }

@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
+import { PostHogProvider } from '../posthog-provider'
 import {
   LayoutDashboard,
   Building2,
@@ -208,20 +209,22 @@ function AppSidebar() {
 
 export function AdminLayout({ children }: PropsWithChildren) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        {/* Banner de impersonation - z-index alto para ficar acima de tudo */}
-        <ImpersonationBanner />
+    <PostHogProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          {/* Banner de impersonation - z-index alto para ficar acima de tudo */}
+          <ImpersonationBanner />
 
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <div className="flex-1" />
-          <ThemeToggle />
-        </header>
+          <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <div className="flex-1" />
+            <ThemeToggle />
+          </header>
 
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+          <main className="flex-1 p-4 lg:p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </PostHogProvider>
   )
 }

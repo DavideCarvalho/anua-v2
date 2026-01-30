@@ -10,7 +10,6 @@ import { TuyauProvider } from '@tuyau/inertia/react'
 import { Toaster } from 'sonner'
 import { tuyau } from '../lib/api'
 import { ThemeProvider } from '../components/theme-provider'
-import { PostHogProvider } from '../components/posthog-provider'
 import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
@@ -33,10 +32,8 @@ createInertiaApp({
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-              <PostHogProvider>
-                <App {...props} />
-                <Toaster richColors />
-              </PostHogProvider>
+              <App {...props} />
+              <Toaster richColors />
             </NuqsAdapter>
           </QueryClientProvider>
         </TuyauProvider>

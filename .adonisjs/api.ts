@@ -1372,8 +1372,8 @@ type ApiV1StudentpaymentsIdPut = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_payments/update_student_payment_controller.ts').default['handle'], true>
 }
 type ApiV1StudentpaymentsIdCancelPost = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_payments/cancel_student_payment_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_payment.ts')['cancelStudentPaymentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_payments/cancel_student_payment_controller.ts').default['handle'], true>
 }
 type ApiV1StudentpaymentsIdMarkpaidPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_payment.ts')['markPaymentAsPaidValidator']>>
@@ -1390,6 +1390,10 @@ type ApiV1StudentpaymentsIdSendboletoPost = {
 type ApiV1StudentpaymentsIdBoletoGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_payments/get_student_payment_boleto_controller.ts').default['handle'], false>
+}
+type ApiV1AgreementsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/agreement.ts')['createAgreementValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/agreements/create_agreement_controller.ts').default['handle'], true>
 }
 type ApiV1StudentbalancetransactionsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_balance_transaction.ts')['listStudentBalanceTransactionsValidator']>>
@@ -3877,6 +3881,11 @@ export interface ApiDefinition {
             '$head': ApiV1StudentpaymentsIdBoletoGetHead;
           };
         };
+      };
+      'agreements': {
+        '$url': {
+        };
+        '$post': ApiV1AgreementsPost;
       };
       'student-balance-transactions': {
         '$url': {
@@ -6947,6 +6956,13 @@ const routes = [
     path: '/api/v1/student-payments/:id/boleto',
     method: ["GET","HEAD"],
     types: {} as ApiV1StudentpaymentsIdBoletoGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.agreements.store',
+    path: '/api/v1/agreements',
+    method: ["POST"],
+    types: {} as ApiV1AgreementsPost,
   },
   {
     params: [],

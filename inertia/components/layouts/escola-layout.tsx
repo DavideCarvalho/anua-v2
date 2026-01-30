@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
+import { PostHogProvider } from '../posthog-provider'
 import {
   LayoutDashboard,
   Users,
@@ -190,6 +191,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
   const pathname = url.split('?')[0]
 
   return (
+    <PostHogProvider>
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <ImpersonationBanner />
       <div className="flex flex-1 overflow-hidden">
@@ -283,5 +285,6 @@ export function EscolaLayout({ children }: PropsWithChildren) {
         </div>
       </div>
     </div>
+    </PostHogProvider>
   )
 }

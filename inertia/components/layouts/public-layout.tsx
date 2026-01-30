@@ -3,12 +3,14 @@ import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { Button } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
+import { PostHogProvider } from '../posthog-provider'
 
 export function PublicLayout({ children }: PropsWithChildren) {
   const { props } = usePage<SharedProps>()
   const user = props.user
 
   return (
+    <PostHogProvider>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,5 +47,6 @@ export function PublicLayout({ children }: PropsWithChildren) {
         </div>
       </footer>
     </div>
+    </PostHogProvider>
   )
 }

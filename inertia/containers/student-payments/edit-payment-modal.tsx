@@ -47,7 +47,7 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
   const updatePayment = useUpdateStudentPayment()
 
   const form = useForm<EditPaymentFormData>({
-    resolver: zodResolver(editPaymentSchema),
+    resolver: zodResolver(editPaymentSchema) as any,
     defaultValues: {
       amount: Number(payment.amount),
       dueDate: new Date(payment.dueDate).toISOString().split('T')[0],
@@ -64,7 +64,7 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
       await updatePayment.mutateAsync({
         id: payment.id,
         amount: data.amount,
-        dueDate: new Date(data.dueDate),
+        dueDate: data.dueDate,
         discountPercentage: data.discountPercentage,
       })
       toast.success('Mensalidade atualizada com sucesso')

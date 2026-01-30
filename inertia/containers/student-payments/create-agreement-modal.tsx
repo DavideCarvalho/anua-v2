@@ -95,7 +95,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   }, [paymentsData])
 
   const form = useForm<AgreementFormData>({
-    resolver: zodResolver(agreementSchema),
+    resolver: zodResolver(agreementSchema) as any,
     defaultValues: {
       selectedPaymentIds: [payment.id],
       installments: 3,
@@ -325,7 +325,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-3 mt-3">
-                  {earlyDiscounts.map((discount, index) => (
+                  {earlyDiscounts.map((_discount, index) => (
                     <div key={index} className="flex items-end gap-3">
                       <FormField
                         control={form.control}

@@ -34,7 +34,7 @@ import { useMarkPaymentAsPaid } from '~/hooks/mutations/use_student_payment_muta
 const markPaidSchema = z.object({
   paidAt: z.string().min(1, 'Data do pagamento é obrigatória'),
   paymentMethod: z.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER'], {
-    required_error: 'Selecione o método de pagamento',
+    message: 'Selecione o método de pagamento',
   }),
   amountPaid: z.coerce.number().positive('Valor deve ser maior que zero'),
   observation: z.string().optional(),
@@ -66,7 +66,7 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
   const markPaid = useMarkPaymentAsPaid()
 
   const form = useForm<MarkPaidFormData>({
-    resolver: zodResolver(markPaidSchema),
+    resolver: zodResolver(markPaidSchema) as any,
     defaultValues: {
       paidAt: new Date().toISOString().split('T')[0],
       paymentMethod: undefined,

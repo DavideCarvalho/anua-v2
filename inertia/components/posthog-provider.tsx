@@ -1,9 +1,10 @@
+import type { PropsWithChildren } from 'react'
 import { useEffect, useRef } from 'react'
 import { router, usePage } from '@inertiajs/react'
 import { posthog, initPostHog } from '~/lib/posthog'
 import type { SharedProps } from '~/lib/types'
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+export function PostHogProvider({ children }: PropsWithChildren) {
   const { props } = usePage<SharedProps>()
   const user = props.user
   const initialized = useRef(false)

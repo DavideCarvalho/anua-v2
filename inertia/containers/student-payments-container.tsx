@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
@@ -5,6 +6,12 @@ import { useStudentPaymentsQueryOptions } from '../hooks/queries/use_student_pay
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
 import {
   AlertCircle,
   Search,
@@ -16,7 +23,13 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Pencil,
+  Handshake,
 } from 'lucide-react'
+import { EditPaymentModal } from './student-payments/edit-payment-modal'
+import { MarkPaidModal } from './student-payments/mark-paid-modal'
+import { CancelPaymentDialog } from './student-payments/cancel-payment-dialog'
+import { CreateAgreementModal } from './student-payments/create-agreement-modal'
 
 // Loading Skeleton
 function StudentPaymentsSkeleton() {
@@ -113,6 +126,10 @@ export function StudentPaymentsContainer({
   )
 }
 
+type ModalType = 'edit' | 'mark-paid' | 'cancel' | 'agreement' | null
+
+const ACTIONABLE_STATUSES: PaymentStatus[] = ['NOT_PAID', 'PENDING', 'OVERDUE']
+
 function StudentPaymentsContent({
   status,
   showSearch = true,
@@ -120,6 +137,19 @@ function StudentPaymentsContent({
   status?: PaymentStatus
   showSearch?: boolean
 }) {
+  const [selectedPayment, setSelectedPayment] = useState<any>(null)
+  const [activeModal, setActiveModal] = useState<ModalType>(null)
+
+  function openModal(payment: any, modal: ModalType) {
+    setSelectedPayment(payment)
+    setActiveModal(modal)
+  }
+
+  function closeModal() {
+    setActiveModal(null)
+    setSelectedPayment(null)
+  }
+
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
@@ -218,9 +248,40 @@ function StudentPaymentsContent({
                         </span>
                       </td>
                       <td className="p-4 text-right">
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                        {ACTIONABLE_STATUSES.includes(payment.status as PaymentStatus) && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openModal(payment, 'edit')}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openModal(payment, 'mark-paid')}>
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Marcar como pago
+                              </DropdownMenuItem>
+                              {payment.type !== 'AGREEMENT' && (
+                                <>
+                                  <DropdownMenuItem onClick={() => openModal(payment, 'agreement')}>
+                                    <Handshake className="h-4 w-4 mr-2" />
+                                    Criar acordo
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => openModal(payment, 'cancel')}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Cancelar
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </td>
                     </tr>
                   )
@@ -258,6 +319,38 @@ function StudentPaymentsContent({
             </div>
           )}
         </div>
+      )}
+
+      {selectedPayment && activeModal === 'edit' && (
+        <EditPaymentModal
+          payment={selectedPayment}
+          open
+          onOpenChange={(open) => !open && closeModal()}
+        />
+      )}
+
+      {selectedPayment && activeModal === 'mark-paid' && (
+        <MarkPaidModal
+          payment={selectedPayment}
+          open
+          onOpenChange={(open) => !open && closeModal()}
+        />
+      )}
+
+      {selectedPayment && activeModal === 'cancel' && (
+        <CancelPaymentDialog
+          payment={selectedPayment}
+          open
+          onOpenChange={(open) => !open && closeModal()}
+        />
+      )}
+
+      {selectedPayment && activeModal === 'agreement' && (
+        <CreateAgreementModal
+          payment={selectedPayment}
+          open
+          onOpenChange={(open) => !open && closeModal()}
+        />
       )}
     </div>
   )

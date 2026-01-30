@@ -67,7 +67,12 @@ export function useMarkPaymentAsPaid() {
     }) => {
       return tuyau
         .$route('api.v1.studentPayments.markPaid', { id })
-        .$post({ paidAt, paymentMethod, amountPaid, observation })
+        .$post({
+          paidAt,
+          paymentMethod: paymentMethod as 'PIX' | 'BOLETO' | 'CREDIT_CARD' | 'CASH' | 'OTHER' | undefined,
+          amountPaid,
+          observation,
+        })
         .unwrap()
     },
     onSuccess: () => {
