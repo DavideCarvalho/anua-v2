@@ -58,7 +58,7 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
       setIsLiked(false)
       setLikeCount((c) => c - 1)
       try {
-        await unlikeMutation.mutateAsync({ id: post.id })
+        await unlikeMutation.mutateAsync(post.id)
       } catch {
         setIsLiked(true)
         setLikeCount((c) => c + 1)
@@ -68,7 +68,7 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
       setIsLiked(true)
       setLikeCount((c) => c + 1)
       try {
-        await likeMutation.mutateAsync({ id: post.id })
+        await likeMutation.mutateAsync(post.id)
       } catch {
         setIsLiked(false)
         setLikeCount((c) => c - 1)
@@ -78,7 +78,7 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
   }
 
   const handleDelete = () => {
-    toast.promise(deleteMutation.mutateAsync({ id: post.id }), {
+    toast.promise(deleteMutation.mutateAsync(post.id), {
       loading: 'Excluindo post...',
       success: 'Post excluido!',
       error: 'Erro ao excluir post',

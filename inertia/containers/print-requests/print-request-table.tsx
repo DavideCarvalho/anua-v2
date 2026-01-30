@@ -58,8 +58,9 @@ export function PrintRequestTable({
     } as any)
   )
 
-  const rows = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const result = data as any
+  const rows = Array.isArray(result) ? result : result?.data || []
+  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
 
   const statusBadge = useMemo(
     () => ({
@@ -116,8 +117,8 @@ export function PrintRequestTable({
                   <TableCell>{row.quantity}</TableCell>
                   <TableCell>{String(row.dueDate).slice(0, 10)}</TableCell>
                   <TableCell>
-                    <Badge variant={statusBadge[row.status] === 'default' ? 'default' : 'outline'}>
-                      {STATUS_LABELS[row.status] ?? row.status}
+                    <Badge variant={(statusBadge as Record<string, string>)[row.status] === 'default' ? 'default' : 'outline'}>
+                      {STATUS_LABELS[row.status as string] ?? row.status}
                     </Badge>
                   </TableCell>
                   <TableCell>{row.frontAndBack ? 'Frente e verso' : 'Apenas frente'}</TableCell>

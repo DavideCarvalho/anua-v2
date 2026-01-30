@@ -122,7 +122,7 @@ export function EscolaStatsContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <EscolaStatsError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <EscolaStatsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<EscolaStatsSkeleton />}>

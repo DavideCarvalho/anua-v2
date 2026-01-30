@@ -121,7 +121,6 @@ function LaunchExamGradesModalEmpty() {
 
 function LaunchExamGradesModalContent({
   examId,
-  examTitle,
   maxScore,
   classId,
   courseId,

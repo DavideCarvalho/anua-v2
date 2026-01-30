@@ -26,7 +26,7 @@ export default function TurmaProvasPage({
   courseSlug,
   classSlug,
   classId,
-  courseId,
+  courseId: _courseId,
   className,
   courseName,
   academicPeriodId,

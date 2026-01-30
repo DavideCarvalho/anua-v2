@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.insurance.school.billings')
@@ -10,8 +9,8 @@ export function useSchoolInsuranceBillingsQueryOptions(schoolId: string, limit?:
   return {
     queryKey: ['insurance', 'school', schoolId, 'billings', limit],
     queryFn: () => {
-      return $route.$get({ params: { schoolId }, query: { limit } }).unwrap()
+      return $route.$get({ params: { schoolId }, query: { limit } } as any).unwrap()
     },
     enabled: !!schoolId,
-  } satisfies QueryOptions<SchoolInsuranceBillingsResponse>
+  }
 }

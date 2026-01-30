@@ -90,7 +90,7 @@ export function BillingStep() {
   // Calculate months remaining until academic period ends
   const maxInstallments = useMemo(() => {
     if (!selectedPeriod?.endDate || !contractData) return 12
-    const endDate = new Date(selectedPeriod.endDate)
+    const endDate = new Date(String(selectedPeriod.endDate))
     const now = new Date()
     const monthsDiff =
       (endDate.getFullYear() - now.getFullYear()) * 12 +
@@ -383,9 +383,9 @@ export function BillingStep() {
                       </FormControl>
                       <SelectContent>
                         {(contractData.paymentDays?.length
-                          ? contractData.paymentDays.map((pd) => pd.day).sort((a, b) => a - b)
+                          ? contractData.paymentDays.map((pd: { day: number }) => pd.day).sort((a: number, b: number) => a - b)
                           : [5, 10, 15, 20]
-                        ).map((day) => (
+                        ).map((day: number) => (
                           <SelectItem key={day} value={day.toString()}>
                             Dia {day}
                           </SelectItem>

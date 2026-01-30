@@ -28,7 +28,7 @@ export function CheckPrintRequestModal({
   const { data } = useSuspenseQuery(usePrintRequestQueryOptions({ id: printRequestId }))
 
   async function handleApprove() {
-    const promise = approve.mutateAsync({ id: printRequestId } as any).then(() => {
+    const promise = approve.mutateAsync(printRequestId).then(() => {
       toast.success('Solicitação aprovada com sucesso!')
       onClose()
     })

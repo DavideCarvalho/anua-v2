@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { usePage } from '@inertiajs/react'
 import { format, subDays } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import {
   DollarSign,
   ShoppingCart,
@@ -18,7 +16,6 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Badge } from '../../components/ui/badge'
 import { useCanteenReport } from '../../hooks/queries/use_canteen_reports'
-import type { SharedProps } from '../../lib/types'
 
 const paymentMethodIcons: Record<string, typeof CreditCard> = {
   CREDIT_CARD: CreditCard,

@@ -38,7 +38,7 @@ export function useCancelSubscription() {
 
   return useMutation({
     mutationFn: (id: string) => {
-      return tuyau.$route('api.v1.subscriptions.cancel', { id }).$post({}).unwrap()
+      return tuyau.$route('api.v1.subscriptions.cancel', { id }).$post({} as any).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] })

@@ -36,11 +36,11 @@ const statusConfig: Record<
 
 export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
   const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(useTeacherAbsencesQueryOptions({ status }))
+  const { data } = useSuspenseQuery(useTeacherAbsencesQueryOptions({ status } as any))
   const approveMutation = useMutation(useApproveTeacherAbsenceMutationOptions())
   const rejectMutation = useMutation(useRejectTeacherAbsenceMutationOptions())
 
-  const absences = Array.isArray(data) ? data : data?.data || []
+  const absences = Array.isArray(data) ? data : (data as any)?.data || []
 
   const handleApprove = async (absenceId: string) => {
     try {
@@ -53,7 +53,7 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
 
   const handleReject = async (absenceId: string) => {
     try {
-      await rejectMutation.mutateAsync({ absenceId })
+      await rejectMutation.mutateAsync({ absenceId, rejectionReason: '' })
       queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
     } catch (error) {
       console.error('Error rejecting absence:', error)

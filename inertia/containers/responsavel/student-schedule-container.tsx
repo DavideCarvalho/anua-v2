@@ -158,7 +158,7 @@ export function StudentScheduleContainer({
                       <th className="p-3 text-left text-sm font-medium text-muted-foreground border-b">
                         Horario
                       </th>
-                      {days.map(([day, dayData]: [string, ScheduleDay]) => (
+                      {days.map(([day, _dayData]: [string, ScheduleDay]) => (
                         <th
                           key={day}
                           className="p-3 text-center text-sm font-medium border-b min-w-[120px]"
@@ -172,7 +172,7 @@ export function StudentScheduleContainer({
                     {/* Get unique time slots */}
                     {(() => {
                       const allSlots = days.flatMap(([_, dayData]: [string, ScheduleDay]) =>
-                        dayData.slots.map((slot: ScheduleSlot) => ({
+                        dayData.slots.map((slot: any) => ({
                           time: `${slot.startTime} - ${slot.endTime}`,
                           type: slot.type,
                         }))
@@ -229,7 +229,7 @@ export function StudentScheduleContainer({
                     </CardHeader>
                     <CardContent className="py-0 pb-4">
                       <div className="space-y-2">
-                        {dayData.slots.map((slot: ScheduleSlot) => (
+                        {dayData.slots.map((slot: any) => (
                           <div
                             key={slot.id}
                             className="flex items-center justify-between p-3 bg-muted rounded-lg"

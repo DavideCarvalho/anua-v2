@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.students.show')
@@ -13,5 +12,5 @@ export function useStudentQueryOptions(studentId: string) {
       return tuyau.$route('api.v1.students.show', { id: studentId }).$get().unwrap()
     },
     enabled: !!studentId,
-  } satisfies QueryOptions<StudentResponse>
+  }
 }

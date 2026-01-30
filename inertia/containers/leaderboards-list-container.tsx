@@ -59,7 +59,7 @@ export function LeaderboardsListContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <LeaderboardsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <LeaderboardsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <LeaderboardsListContent />
@@ -80,8 +80,9 @@ function LeaderboardsListContent() {
 
   const { data, isLoading, error, refetch } = useQuery(useLeaderboardsQueryOptions({ page, limit }))
 
-  const leaderboards = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const result = data as any
+  const leaderboards = Array.isArray(result) ? result : result?.data || []
+  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
 
   if (isLoading) {
     return <LeaderboardsSkeleton />

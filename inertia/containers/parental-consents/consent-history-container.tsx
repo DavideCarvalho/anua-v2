@@ -46,7 +46,7 @@ export function ConsentHistoryContainer({
 }: ConsentHistoryContainerProps) {
   const { data } = useSuspenseQuery(useConsentHistoryQueryOptions({ page, limit: 10 }))
 
-  const consents = data.data as ConsentHistoryItem[]
+  const consents = data.data as unknown as ConsentHistoryItem[]
   const meta = data.meta
 
   const getStatusBadge = (status: ConsentHistoryItem['status']) => {

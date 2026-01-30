@@ -22,7 +22,7 @@ export function GradeDistributionChart() {
       {data && data.distribution && data.distribution.length > 0 ? (
         <div className="space-y-3">
           {data.distribution.map((item: any) => {
-            const percentage = data.total > 0 ? (item.count / data.total) * 100 : 0
+            const percentage = data.totalGrades > 0 ? (item.count / data.totalGrades) * 100 : 0
             return (
               <div key={item.range} className="space-y-1">
                 <div className="flex justify-between text-sm">

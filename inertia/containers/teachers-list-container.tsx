@@ -401,7 +401,7 @@ export function TeachersListContainer() {
           <ErrorBoundary
             onReset={reset}
             fallbackRender={({ error, resetErrorBoundary }) => (
-              <TeachersListError error={error} resetErrorBoundary={resetErrorBoundary} />
+              <TeachersListError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
             )}
           >
             <Suspense fallback={<TeachersListSkeleton />}>

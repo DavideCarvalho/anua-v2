@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
+import type { RouteName } from '@tuyau/client'
 import type { PropsWithChildren } from 'react'
 import {
   LayoutDashboard,
@@ -27,10 +28,11 @@ import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { StudentSelectorWithData } from '../responsavel/student-selector'
 import { useQuery } from '@tanstack/react-query'
 import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { api } from '../../../.adonisjs/api'
 
 interface NavItem {
   title: string
-  route: string
+  route: RouteName<typeof api.routes>
   href: string
   icon: React.ElementType
   requiresPedagogical?: boolean
@@ -107,13 +109,14 @@ function NavigationContent() {
 
   return (
     <div className="space-y-1">
-      {navigation.map((item) => {
+      {navigation.map((item: NavItem) => {
         const Icon = item.icon
         const isActive = pathname === item.href
         return (
           <Link
             key={item.route}
             route={item.route}
+            params={undefined}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isActive
@@ -175,7 +178,6 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
             </div>
             <Link
               route="api.v1.auth.logout"
-              method="post"
               as="button"
               className="mt-3 inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
             >

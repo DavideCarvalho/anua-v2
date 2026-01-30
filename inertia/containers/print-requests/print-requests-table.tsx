@@ -54,13 +54,13 @@ const statusConfig: Record<
 }
 
 export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
-  const { data } = useSuspenseQuery(usePrintRequestsQueryOptions({ statuses }))
+  const { data } = useSuspenseQuery(usePrintRequestsQueryOptions({ statuses } as any))
   const approveMutation = useApprovePrintRequest()
   const rejectMutation = useRejectPrintRequest()
   const printedMutation = useMarkPrintRequestPrinted()
   const reviewMutation = useReviewPrintRequest()
 
-  const requests = Array.isArray(data) ? data : data?.data || []
+  const requests = Array.isArray(data) ? data : (data as any)?.data || []
 
   if (requests.length === 0) {
     return (
@@ -157,7 +157,7 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => reviewMutation.mutate({ id: request.id })}
+                            onClick={() => reviewMutation.mutate(request.id)}
                             disabled={reviewMutation.isPending}
                             title="Solicitar Revisão"
                           >

@@ -76,7 +76,7 @@ export function CanteenPurchasesContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <CanteenPurchasesErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <CanteenPurchasesErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <CanteenPurchasesContent />
@@ -100,8 +100,9 @@ function CanteenPurchasesContent() {
     useCanteenPurchasesQueryOptions({ page, limit, search: search || undefined })
   )
 
-  const purchases = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const result = data as any
+  const purchases = Array.isArray(result) ? result : result?.data || []
+  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
 
   return (
     <div className="space-y-4">

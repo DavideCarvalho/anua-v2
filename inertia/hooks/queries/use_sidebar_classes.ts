@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -13,7 +12,7 @@ export function useSidebarClassesQueryOptions() {
     queryKey: ['sidebar-classes'],
     queryFn: () => $route().unwrap(),
     staleTime: 1000 * 60 * 5, // 5 minutes
-  } satisfies QueryOptions<SidebarClassesResponse>
+  }
 }
 
 interface CourseInfo {

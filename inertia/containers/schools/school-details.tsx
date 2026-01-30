@@ -30,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
-import { tuyau } from '../../lib/api'
 import { useSchoolQueryOptions } from '../../hooks/queries/use_schools'
 import { useSetImpersonation } from '../../hooks/mutations/use_impersonation_mutations'
 
@@ -394,7 +393,7 @@ export function SchoolDetails({ schoolId }: { schoolId: string }) {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <DetailsError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <DetailsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<DetailsSkeleton />}>

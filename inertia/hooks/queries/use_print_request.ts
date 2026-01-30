@@ -6,9 +6,7 @@ const $route = tuyau.$route('api.v1.printRequests.showPrintRequest')
 
 export type PrintRequestResponse = InferResponseType<typeof $route.$get>
 
-type PrintRequestParams = NonNullable<Parameters<typeof $route.$get>[0]>['params']
-
-export function usePrintRequestQueryOptions(params: PrintRequestParams) {
+export function usePrintRequestQueryOptions(params: { id: string }) {
   return {
     queryKey: ['print-request', params],
     queryFn: () => {

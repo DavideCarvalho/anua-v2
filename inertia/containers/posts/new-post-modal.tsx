@@ -77,7 +77,7 @@ export function NewPostModal({ open, onOpenChange, schoolId, classId }: NewPostM
   const createPostMutation = useCreatePostMutation()
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       content: '',
       type: PostType.TEXT,

@@ -1,12 +1,11 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { CheckCircle2, XCircle, Clock, AlertCircle, Send, Users } from 'lucide-react'
+import { CheckCircle2, XCircle, Clock, AlertCircle, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
-import { Button } from '../../components/ui/button'
 import {
   Table,
   TableBody,
@@ -69,7 +68,7 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
 
   const event = data.event
   const stats = data.stats as Stats
-  const consents = data.consents as Consent[]
+  const consents = data.consents as unknown as Consent[]
 
   const getStatusBadge = (status: ConsentStatus) => {
     switch (status) {
@@ -111,7 +110,7 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
         <CardHeader>
           <CardTitle>{event.title}</CardTitle>
           <CardDescription>
-            {format(new Date(event.startsAt), "EEEE, dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
+            {format(new Date(String(event.startDate)), "EEEE, dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
               locale: ptBR,
             })}
           </CardDescription>

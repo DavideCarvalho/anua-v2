@@ -1,10 +1,6 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const $route = tuyau.$route('api.v1.enrollments.documents.updateStatus')
-
-type UpdateDocumentStatusParams = NonNullable<Parameters<typeof $route.$put>[0]>['params']
-
 type UpdateDocumentStatusData = {
   id: string
   status: 'APPROVED' | 'REJECTED'
@@ -17,7 +13,7 @@ export function useUpdateDocumentStatusMutation() {
   return useMutation({
     mutationFn: (data: UpdateDocumentStatusData) => {
       const { id, status, rejectionReason } = data
-      return $route.$put({ params: { id }, status, rejectionReason } as any).unwrap()
+      return tuyau.$route('api.v1.enrollments.documents.updateStatus', { id }).$put({ status, rejectionReason } as any).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enrollments'] })

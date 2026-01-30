@@ -89,7 +89,7 @@ export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTable
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <InsuranceBillingsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <InsuranceBillingsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <InsuranceBillingsTableContent onViewDetails={onViewDetails} />
@@ -109,7 +109,7 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
 
   const { status: statusFilter, page, limit } = filters
 
-  const { data, isLoading, error, refetch } = useQuery(
+  const { data } = useQuery(
     useInsuranceBillingsQueryOptions({
       status: statusFilter as any,
       page,

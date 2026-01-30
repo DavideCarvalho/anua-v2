@@ -23,7 +23,7 @@ export function useStoreItemsQueryOptions(options: UseStoreItemsOptions = {}) {
     queryFn: () => {
       return tuyau
         .$route('api.v1.storeItems.index')
-        .$get({ query: { schoolId, category, paymentMode, isActive, page, limit } })
+        .$get({ query: { schoolId, category, paymentMode, isActive, page, limit } as any })
         .unwrap()
     },
   } satisfies QueryOptions<StoreItemsResponse>

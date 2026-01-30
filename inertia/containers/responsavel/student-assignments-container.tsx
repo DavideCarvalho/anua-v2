@@ -272,7 +272,7 @@ export function StudentAssignmentsContainer({
           ) : (
             <Accordion type="single" collapsible className="space-y-2">
               {data.assignments.map((assignment: Assignment) => {
-                const dueInfo = formatDueDate(assignment.dueDate)
+                const dueInfo = formatDueDate(String(assignment.dueDate))
                 return (
                   <AccordionItem
                     key={assignment.id}
@@ -349,7 +349,7 @@ export function StudentAssignmentsContainer({
                               Data de Entrega
                             </h4>
                             <p className="mt-1 text-sm">
-                              {brazilianDateFormatter(assignment.dueDate)}
+                              {brazilianDateFormatter(String(assignment.dueDate))}
                             </p>
                           </div>
                         </div>

@@ -123,8 +123,8 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
 
   useEffect(() => {
     if (event) {
-      const startsAt = new Date(event.startsAt)
-      const endsAt = event.endsAt ? new Date(event.endsAt) : null
+      const startsAt = new Date(String(event.startDate))
+      const endsAt = (event as any).endsAt ? new Date((event as any).endsAt) : null
 
       form.reset({
         title: event.title,

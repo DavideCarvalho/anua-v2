@@ -1,5 +1,5 @@
 import { Head, usePage } from '@inertiajs/react'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { UserCheck, Filter, Calendar, Save, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -35,7 +35,7 @@ interface PageProps {
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
 
 export default function PresencaPage() {
-  const { schoolId, classes = [], students = [] } = usePage<PageProps>().props
+  const { classes = [], students = [] } = usePage<PageProps>().props
   const [selectedClass, setSelectedClass] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
   const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({})
@@ -58,7 +58,7 @@ export default function PresencaPage() {
     }, 1000)
   }
 
-  const getStatusButton = (studentId: string, status: AttendanceStatus, icon: React.ReactNode, label: string, color: string) => {
+  const getStatusButton = (studentId: string, status: AttendanceStatus, icon: React.ReactNode, _label: string, color: string) => {
     const isSelected = attendance[studentId] === status
     return (
       <Button

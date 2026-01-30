@@ -23,7 +23,7 @@ export function useStoreOrdersQueryOptions(options: UseStoreOrdersOptions = {}) 
     queryFn: () => {
       return tuyau
         .$route('api.v1.storeOrders.index')
-        .$get({ query: { schoolId, studentId, status, search, page, limit } })
+        .$get({ query: { schoolId, studentId, status, search, page, limit } as any })
         .unwrap()
     },
   } satisfies QueryOptions<StoreOrdersResponse>

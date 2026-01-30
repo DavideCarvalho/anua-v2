@@ -91,7 +91,7 @@ export function PointsRankingContainer({ schoolId }: { schoolId: string }) {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <PointsRankingError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <PointsRankingError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<PointsRankingSkeleton />}>

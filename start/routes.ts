@@ -64,6 +64,7 @@ const ListStudentEnrollmentsController = () =>
 const UpdateEnrollmentController = () =>
   import('#controllers/students/update_enrollment_controller')
 const CheckDocumentController = () => import('#controllers/students/check_document_controller')
+const CheckEmailController = () => import('#controllers/students/check_email_controller')
 
 // Responsibles
 const ListStudentResponsiblesController = () =>
@@ -820,6 +821,7 @@ function registerStudentApiRoutes() {
       router.post('/', [StoreStudentController]).as('students.store')
       router.post('/enroll', [EnrollStudentController]).as('students.enroll')
       router.get('/check-document', [CheckDocumentController]).as('students.checkDocument')
+      router.get('/check-email', [CheckEmailController]).as('students.checkEmail')
       router.get('/:id', [ShowStudentController]).as('students.show')
       router.put('/:id', [UpdateStudentController]).as('students.update')
       router.put('/:id/full', [FullUpdateStudentController]).as('students.fullUpdate')

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Users, GraduationCap, UserCheck, BarChart3, Loader2 } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, BarChart3 } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 

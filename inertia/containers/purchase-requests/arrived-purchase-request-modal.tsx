@@ -104,7 +104,7 @@ export function ArrivedPurchaseRequestModal({
               {purchaseRequest?.estimatedArrivalDate && (
                 <div className="space-y-1">
                   <Label>Previsão de chegada</Label>
-                  <p>{brazilianDateFormatter(purchaseRequest.estimatedArrivalDate)}</p>
+                  <p>{brazilianDateFormatter(String(purchaseRequest.estimatedArrivalDate))}</p>
                 </div>
               )}
 

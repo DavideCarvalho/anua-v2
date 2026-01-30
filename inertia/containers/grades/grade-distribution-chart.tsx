@@ -86,18 +86,18 @@ export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps
           ))}
         </div>
 
-        {data.summary && (
+        {data && (
           <div className="mt-6 grid grid-cols-3 gap-4 border-t pt-4">
             <div className="text-center">
-              <p className="text-2xl font-bold">{data.summary.average?.toFixed(1) || '-'}</p>
+              <p className="text-2xl font-bold">{data.average?.toFixed(1) || '-'}</p>
               <p className="text-xs text-muted-foreground">Media Geral</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold">{data.summary.median?.toFixed(1) || '-'}</p>
+              <p className="text-2xl font-bold">{data.median?.toFixed(1) || '-'}</p>
               <p className="text-xs text-muted-foreground">Mediana</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold">{data.summary.passRate?.toFixed(1) || '-'}%</p>
+              <p className="text-2xl font-bold">{(data as any).passRate?.toFixed(1) || '-'}%</p>
               <p className="text-xs text-muted-foreground">Taxa de Aprovacao</p>
             </div>
           </div>

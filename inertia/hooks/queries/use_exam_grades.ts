@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.exams.grades')
@@ -25,7 +24,7 @@ export function useExamGradesQueryOptions(options: UseExamGradesOptions) {
         .unwrap()
     },
     enabled: !!examId,
-  } satisfies QueryOptions<ExamGradesResponse>
+  }
 }
 
 export function useExamGrades(options: UseExamGradesOptions) {

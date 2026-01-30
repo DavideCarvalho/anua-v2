@@ -76,7 +76,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
   const steps = getSteps(academicPeriod.segment)
 
   const form = useForm<EditAcademicPeriodFormValues>({
-    resolver: zodResolver(editAcademicPeriodSchema),
+    resolver: zodResolver(editAcademicPeriodSchema) as any,
     defaultValues: {
       calendar: {
         name: academicPeriod.name,

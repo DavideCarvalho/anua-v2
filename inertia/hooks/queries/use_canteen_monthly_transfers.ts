@@ -25,7 +25,7 @@ export function useCanteenMonthlyTransfersQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.canteenMonthlyTransfers.index')
-        .$get({ query: { canteenId, month, year, status, page, limit } })
+        .$get({ query: { canteenId, month, year, status, page, limit } as any })
         .unwrap()
     },
   } satisfies QueryOptions<CanteenMonthlyTransfersResponse>

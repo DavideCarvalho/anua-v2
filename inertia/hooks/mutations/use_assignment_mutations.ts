@@ -39,16 +39,14 @@ export function useSubmitAssignment() {
   return useMutation({
     mutationFn: ({
       assignmentId,
-      content,
-      attachments,
+      studentId,
     }: {
       assignmentId: string
-      content?: string
-      attachments?: string[]
+      studentId: string
     }) => {
       return tuyau
         .$route('api.v1.assignments.submit', { id: assignmentId })
-        .$post({ content, attachments })
+        .$post({ studentId })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

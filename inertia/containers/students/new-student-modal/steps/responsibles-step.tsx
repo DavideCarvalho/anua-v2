@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { DocumentInput } from '~/components/forms/document-input'
+import { EmailInput } from '~/components/forms/email-input'
 import type { NewStudentFormData } from '../schema'
 
 interface ResponsiblesStepProps {
@@ -37,10 +38,11 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
   const formAcademicPeriodId = form.watch('billing.academicPeriodId')
   const effectiveAcademicPeriodId = academicPeriodId || formAcademicPeriodId
 
-  // Watch student document for conflict check
+  // Watch student document and email for conflict checks
   const studentDocumentNumber = form.watch('basicInfo.documentNumber')
+  const studentEmail = form.watch('basicInfo.email')
 
-  // Watch all responsibles for document conflict check
+  // Watch all responsibles for conflict checks
   const responsibles = form.watch('responsibles')
 
   // Check if responsible is adult (18+)
@@ -82,6 +84,34 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
     return conflicts
   }, [studentDocumentNumber, responsibles])
 
+  // Check for email conflicts
+  const responsibleEmailsKey = responsibles.map((r) => r.email || '').join('\0')
+  const emailConflicts = useMemo(() => {
+    const conflicts: { type: 'student' | 'responsible'; index: number; otherIndex?: number }[] = []
+    const cleanStudentEmail = studentEmail?.toLowerCase().trim() || ''
+
+    responsibles.forEach((resp, index) => {
+      const cleanRespEmail = resp.email?.toLowerCase().trim() || ''
+      if (!cleanRespEmail) return
+
+      // Check if same as student
+      if (cleanStudentEmail && cleanRespEmail === cleanStudentEmail) {
+        conflicts.push({ type: 'student', index })
+      }
+
+      // Check if same as other responsibles
+      responsibles.forEach((otherResp, otherIndex) => {
+        if (otherIndex <= index) return
+        const cleanOtherEmail = otherResp.email?.toLowerCase().trim() || ''
+        if (cleanOtherEmail && cleanRespEmail === cleanOtherEmail) {
+          conflicts.push({ type: 'responsible', index, otherIndex })
+        }
+      })
+    })
+
+    return conflicts
+  }, [studentEmail, responsibleEmailsKey])
+
   const getDocumentConflictError = (index: number): string | null => {
     const conflict = documentConflicts.find(
       (c) => c.index === index || c.otherIndex === index
@@ -91,6 +121,17 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
       return 'Documento igual ao do aluno'
     }
     return 'Documento igual ao de outro responsável'
+  }
+
+  const getEmailConflictError = (index: number): string | null => {
+    const conflict = emailConflicts.find(
+      (c) => c.index === index || c.otherIndex === index
+    )
+    if (!conflict) return null
+    if (conflict.type === 'student') {
+      return 'Email igual ao do aluno'
+    }
+    return 'Email igual ao de outro responsável'
   }
 
   const addResponsible = () => {
@@ -112,17 +153,23 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
   return (
     <div className="space-y-4 py-4">
       {/* Show alerts for validation issues */}
-      {(documentConflicts.length > 0 || hasUnderageResponsibles) && (
+      {(documentConflicts.length > 0 || emailConflicts.length > 0 || hasUnderageResponsibles) && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {documentConflicts.length > 0 && hasUnderageResponsibles ? (
-              'Existem documentos duplicados e responsáveis menores de idade. Corrija antes de continuar.'
-            ) : documentConflicts.length > 0 ? (
-              'Existem documentos duplicados. Cada pessoa deve ter um documento único.'
-            ) : (
-              'Todos os responsáveis devem ser maiores de idade.'
-            )}
+            {(() => {
+              const issues: string[] = []
+              if (documentConflicts.length > 0) issues.push('documentos duplicados')
+              if (emailConflicts.length > 0) issues.push('emails duplicados')
+              if (hasUnderageResponsibles) issues.push('responsáveis menores de idade')
+
+              if (issues.length === 1) {
+                if (documentConflicts.length > 0) return 'Existem documentos duplicados. Cada pessoa deve ter um documento único.'
+                if (emailConflicts.length > 0) return 'Existem emails duplicados. Cada pessoa deve ter um email único.'
+                return 'Todos os responsáveis devem ser maiores de idade.'
+              }
+              return `Existem ${issues.join(' e ')}. Corrija antes de continuar.`
+            })()}
           </AlertDescription>
         </Alert>
       )}
@@ -167,15 +214,26 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
               <FormField
                 control={form.control}
                 name={`responsibles.${index}.email`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email*</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" placeholder="email@exemplo.com" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const responsibleId = form.getValues(`responsibles.${index}.id`)
+                  const emailError = getEmailConflictError(index)
+                  return (
+                    <FormItem>
+                      <FormLabel>Email*</FormLabel>
+                      <FormControl>
+                        <EmailInput
+                          value={field.value}
+                          onChange={field.onChange}
+                          excludeUserId={responsibleId}
+                          academicPeriodId={effectiveAcademicPeriodId}
+                        />
+                      </FormControl>
+                      {emailError && (
+                        <p className="text-sm text-destructive">{emailError}</p>
+                      )}
+                    </FormItem>
+                  )
+                }}
               />
 
               <FormField

@@ -36,7 +36,7 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
   const { data } = useSuspenseQuery(useCanteenMonthlyTransfersQueryOptions({ canteenId }))
   const updateStatusMutation = useUpdateCanteenMonthlyTransferStatus()
 
-  const transfers = Array.isArray(data) ? data : data?.data || []
+  const transfers = Array.isArray(data) ? data : (data as any)?.data || []
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

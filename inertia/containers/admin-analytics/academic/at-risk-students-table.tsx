@@ -29,7 +29,7 @@ export function AtRiskStudentsTable() {
       isLoading={isLoading}
       error={error}
     >
-      {data && data.students && data.students.length > 0 ? (
+      {data && (data as any).students && (data as any).students.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -40,7 +40,7 @@ export function AtRiskStudentsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.students.slice(0, 10).map((student: any) => (
+            {(data as any).students.slice(0, 10).map((student: any) => (
               <TableRow key={student.id}>
                 <TableCell className="font-medium">{student.name}</TableCell>
                 <TableCell>{student.schoolName}</TableCell>

@@ -108,6 +108,7 @@ export const fullUpdateStudentValidator = vine.compile(
           phone: vine.string().trim(),
           relationship: vine.string().trim(),
           order: vine.number(),
+          responsibleIndex: vine.number().optional(),
         })
       ),
     }),
@@ -167,6 +168,7 @@ export const enrollStudentValidator = vine.compile(
           phone: vine.string().trim(),
           relationship: vine.string().trim(),
           order: vine.number(),
+          responsibleIndex: vine.number().optional(),
         })
       ),
     }),

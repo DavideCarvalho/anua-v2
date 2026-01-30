@@ -47,21 +47,21 @@ export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props)
             <PeriodoLetivoHeader
               id={data.id}
               name={data.name}
-              startDate={data.startDate}
-              endDate={data.endDate}
+              startDate={String(data.startDate)}
+              endDate={String(data.endDate)}
               isActive={data.isActive}
               isClosed={data.isClosed}
             />
 
             <PeriodoLetivoInfoCard
-              startDate={data.startDate}
-              endDate={data.endDate}
-              enrollmentStartDate={data.enrollmentStartDate}
-              enrollmentEndDate={data.enrollmentEndDate}
+              startDate={String(data.startDate)}
+              endDate={String(data.endDate)}
+              enrollmentStartDate={data.enrollmentStartDate ? String(data.enrollmentStartDate) : null}
+              enrollmentEndDate={data.enrollmentEndDate ? String(data.enrollmentEndDate) : null}
               segment={data.segment}
             />
 
-            <CursosDoPeríodoList courses={data.courses ?? []} segment={data.segment} />
+            <CursosDoPeríodoList courses={(data as any).courses ?? []} segment={data.segment} />
           </>
         )}
       </div>

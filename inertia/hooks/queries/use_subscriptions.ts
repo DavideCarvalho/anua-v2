@@ -22,7 +22,7 @@ export function useSubscriptionsQueryOptions(options: UseSubscriptionsOptions = 
     queryFn: () => {
       return tuyau
         .$route('api.v1.subscriptions.index')
-        .$get({ query: { status, schoolId, schoolChainId, page, limit } })
+        .$get({ query: { status, schoolId, schoolChainId, page, limit } as any })
         .unwrap()
     },
   } satisfies QueryOptions<SubscriptionsResponse>

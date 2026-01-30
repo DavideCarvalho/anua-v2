@@ -140,7 +140,7 @@ function SubjectTeacherRow({
               onValueChange={(value) => {
                 form.setValue(`subjectsWithTeachers.${index}.subjectId`, value)
               }}
-              disabled={!selectedTeacherId || hasNoSubjects}
+              disabled={!selectedTeacherId || !!hasNoSubjects}
             >
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder={hasNoSubjects ? 'Sem disciplinas' : 'Selecione...'} />
@@ -210,7 +210,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
   }, [classData])
 
   const form = useForm<EditClassFormValues>({
-    resolver: zodResolver(editClassSchema),
+    resolver: zodResolver(editClassSchema) as any,
     defaultValues: initialValues,
   })
 
@@ -278,11 +278,11 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
     mutationFn: (data: EditClassFormValues) => {
       if (!classData) throw new Error('Turma não encontrada')
 
-      return tuyau.api.v1.classes({ id: classData.id }).teachers
+      return tuyau.$route('api.v1.classes.update', { id: classData.id } as any)
         .$put({
           name: data.name,
           subjectsWithTeachers: data.subjectsWithTeachers,
-        })
+        } as any)
         .unwrap()
     },
     onSuccess: () => {

@@ -132,7 +132,7 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
     })
   )
 
-  const events = (data?.data ?? []) as APIEvent[]
+  const events = ((data as any)?.data ?? []) as APIEvent[]
 
   // Converter eventos da API para formato do calendário
   const calendarEvents: CalendarEvent[] = useMemo(() => {

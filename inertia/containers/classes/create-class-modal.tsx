@@ -82,7 +82,7 @@ function SubjectTeacherRow({
   const teacherSubjects = useMemo(() => {
     const rawData = Array.isArray(teacherSubjectsData)
       ? teacherSubjectsData
-      : teacherSubjectsData?.data || []
+      : (teacherSubjectsData as any)?.data || []
     // API returns TeacherHasSubject with nested subject, extract the subject info
     return rawData.map((item: { subject?: { id: string; name: string }; id: string; name?: string }) => {
       if (item.subject) {
@@ -137,7 +137,7 @@ function SubjectTeacherRow({
           onValueChange={(value) => {
             form.setValue(`subjectsWithTeachers.${index}.subjectId`, value)
           }}
-          disabled={!selectedTeacherId || hasNoSubjects}
+          disabled={!selectedTeacherId || !!hasNoSubjects}
         >
           <SelectTrigger className="mt-1">
             <SelectValue placeholder={hasNoSubjects ? 'Sem disciplinas' : ''} />
@@ -189,7 +189,7 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
   const schoolId = props.user?.schoolId
 
   const form = useForm<CreateClassFormValues>({
-    resolver: zodResolver(createClassSchema),
+    resolver: zodResolver(createClassSchema) as any,
     defaultValues: {
       name: '',
       subjectsWithTeachers: [{ teacherId: '', subjectId: '', quantity: 1 }],

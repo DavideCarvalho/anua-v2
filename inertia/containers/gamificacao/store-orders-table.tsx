@@ -44,7 +44,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const rejectMutation = useRejectStoreOrder()
   const deliverMutation = useDeliverStoreOrder()
 
-  const orders = Array.isArray(data) ? data : data?.data || []
+  const orders = Array.isArray(data) ? data : (data as any)?.data || []
 
   if (orders.length === 0) {
     return (

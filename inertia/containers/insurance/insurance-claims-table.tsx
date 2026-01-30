@@ -100,7 +100,7 @@ export function InsuranceClaimsTable() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <InsuranceClaimsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <InsuranceClaimsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <InsuranceClaimsTableContent />
@@ -124,7 +124,7 @@ function InsuranceClaimsTableContent() {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
-  const { data, isLoading, error, refetch } = useQuery(
+  const { data } = useQuery(
     useInsuranceClaimsQueryOptions({
       status: statusFilter as any,
       page,

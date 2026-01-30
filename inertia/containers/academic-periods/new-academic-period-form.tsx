@@ -28,8 +28,8 @@ const schema = z.object({
   previousPeriodId: z.string().nullable().optional(),
   calendar: z.object({
     name: z.string().min(1, 'Nome é obrigatório'),
-    startDate: z.date({ required_error: 'Data de início é obrigatória' }),
-    endDate: z.date({ required_error: 'Data de término é obrigatória' }),
+    startDate: z.date({ error: 'Data de início é obrigatória' }),
+    endDate: z.date({ error: 'Data de término é obrigatória' }),
     segment: segmentEnum,
     holidays: z.array(z.date()).optional().default([]),
     weekendDaysWithClasses: z.array(z.date()).optional().default([]),
@@ -93,7 +93,7 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<AcademicPeriodFormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       schoolId,
       previousPeriodId: null,

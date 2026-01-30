@@ -50,10 +50,10 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
     useSubjectsQueryOptions({ page: 1, limit: 100, schoolId })
   )
 
-  const subjects = Array.isArray(subjectsData) ? subjectsData : subjectsData?.data || []
+  const subjects = Array.isArray(subjectsData) ? subjectsData : (subjectsData as any)?.data || []
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: '',
       email: '',
@@ -70,7 +70,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
         subjectIds: values.subjectIds.length > 0 ? values.subjectIds : undefined,
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao criar professor')
+        throw new Error((response.error as any).value?.message || 'Erro ao criar professor')
       }
       return response.data
     },
@@ -82,8 +82,8 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
   async function onSubmit(values: FormValues) {
     try {
       const result = await createTeacher(values)
-      if (result?.generatedPassword) {
-        setGeneratedPassword(result.generatedPassword)
+      if ((result as any)?.generatedPassword) {
+        setGeneratedPassword((result as any).generatedPassword)
       } else {
         toast.success('Professor criado com sucesso!')
         handleClose()
@@ -192,7 +192,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
                   <FormItem>
                     <FormLabel>Disciplinas</FormLabel>
                     <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3">
-                      {subjects.map((subject) => (
+                      {subjects.map((subject: { id: string; name: string }) => (
                         <FormField
                           key={subject.id}
                           control={form.control}

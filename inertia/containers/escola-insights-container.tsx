@@ -295,7 +295,7 @@ export function EscolaInsightsContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <InsightsError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <InsightsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<InsightsSkeleton />}>

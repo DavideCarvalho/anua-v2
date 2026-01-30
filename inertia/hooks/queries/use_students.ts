@@ -34,7 +34,7 @@ export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
         },
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar alunos')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar alunos')
       }
       return response.data
     },

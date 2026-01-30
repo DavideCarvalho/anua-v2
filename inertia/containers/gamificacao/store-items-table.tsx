@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles } from 'lucide-react'
-import { useState } from 'react'
 
 import { useStoreItemsQueryOptions } from '../../hooks/queries/use_store_items'
 import { useToggleStoreItem } from '../../hooks/mutations/use_toggle_store_item'
@@ -62,7 +61,7 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
   const toggleMutation = useToggleStoreItem()
   const deleteMutation = useDeleteStoreItem()
 
-  const items = Array.isArray(data) ? data : data?.data || []
+  const items = Array.isArray(data) ? data : (data as any)?.data || []
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

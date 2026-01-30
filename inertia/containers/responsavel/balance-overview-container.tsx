@@ -3,7 +3,6 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
@@ -15,7 +14,7 @@ function useBalanceQueryOptions(studentId: string) {
         .$route('api.v1.responsavel.api.studentBalance', { studentId })
         .$get()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar saldo')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar saldo')
       }
       return response.data
     },
@@ -37,15 +36,6 @@ function BalanceOverviewSkeleton() {
         </Card>
       ))}
     </div>
-  )
-}
-
-function BalanceOverviewError() {
-  return (
-    <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
-      <AlertDescription>Erro ao carregar informações de saldo</AlertDescription>
-    </Alert>
   )
 }
 
@@ -135,7 +125,7 @@ export function BalanceOverviewContainer({ studentId }: { studentId: string }) {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Erro ao carregar saldo: {error.message}
+                Erro ao carregar saldo: {(error as Error).message}
                 <button onClick={resetErrorBoundary} className="ml-2 underline">
                   Tentar novamente
                 </button>

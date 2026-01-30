@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
@@ -18,7 +17,7 @@ function useBalanceQueryOptions(studentId: string, page: number = 1) {
         .$route('api.v1.responsavel.api.studentBalance', { studentId })
         .$get({ query: { page, limit: 20 } })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar transacoes')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar transacoes')
       }
       return response.data
     },
@@ -40,15 +39,6 @@ function TransactionsHistorySkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-function TransactionsHistoryError() {
-  return (
-    <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
-      <AlertDescription>Erro ao carregar histórico de transações</AlertDescription>
-    </Alert>
   )
 }
 
@@ -128,7 +118,7 @@ function TransactionsHistoryContent({ studentId }: { studentId: string }) {
                   <div>
                     <p className="font-medium">{transaction.description}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDate(transaction.createdAt)}
+                      {formatDate(String(transaction.createdAt))}
                     </p>
                   </div>
                 </div>
@@ -199,7 +189,7 @@ export function TransactionsHistoryContainer({ studentId }: { studentId: string 
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Erro ao carregar transações: {error.message}
+                Erro ao carregar transações: {(error as Error).message}
                 <button onClick={resetErrorBoundary} className="ml-2 underline">
                   Tentar novamente
                 </button>

@@ -29,7 +29,7 @@ export function useCanteenMealReservationsQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.canteenMealReservations.index')
-        .$get({ query: { canteenId, mealId, studentId, status, date, page, limit } })
+        .$get({ query: { canteenId, mealId, studentId, status, date, page, limit } as any })
         .unwrap()
     },
   } satisfies QueryOptions<CanteenMealReservationsResponse>

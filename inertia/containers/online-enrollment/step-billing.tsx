@@ -32,8 +32,6 @@ interface StepBillingProps {
 
 export function StepBilling({ schoolId, contract }: StepBillingProps) {
   const {
-    register,
-    formState: { errors },
     setValue,
     watch,
   } = useFormContext<EnrollmentFormData>()

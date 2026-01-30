@@ -20,7 +20,7 @@ export default function SolicitacoesDeCompraPage() {
   const { schoolId } = usePage<PageProps>().props
 
   const [newModalOpen, setNewModalOpen] = useState(false)
-  const [editModalId, setEditModalId] = useState<string | null>(null)
+  const [_editModalId, setEditModalId] = useState<string | null>(null)
   const [approveModalId, setApproveModalId] = useState<string | null>(null)
   const [rejectModalId, setRejectModalId] = useState<string | null>(null)
   const [boughtModalId, setBoughtModalId] = useState<string | null>(null)

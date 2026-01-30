@@ -34,7 +34,6 @@ export function StepMedicalInfo() {
   const {
     register,
     control,
-    formState: { errors },
     setValue,
     watch,
   } = useFormContext<EnrollmentFormData>()

@@ -15,7 +15,7 @@ interface PostsFeedProps {
 export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) {
   const { data } = useSuspenseQuery(usePostsQueryOptions({ schoolId, classId }))
 
-  const posts = data?.data ?? []
+  const posts = (data as any)?.data ?? []
 
   if (posts.length === 0) {
     return (

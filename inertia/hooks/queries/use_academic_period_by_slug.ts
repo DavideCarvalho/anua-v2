@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 
 interface UseAcademicPeriodBySlugOptions {
   slug: string
@@ -19,5 +18,5 @@ export function useAcademicPeriodBySlugQueryOptions({
         .unwrap()
     },
     enabled: !!slug,
-  } satisfies QueryOptions
+  }
 }

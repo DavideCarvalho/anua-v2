@@ -97,7 +97,7 @@ function ResponsavelStatsContent() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {data.students.map((student) => (
+            {data.students.map((student: any) => (
               <Card key={student.id}>
                 <CardHeader>
                   <CardTitle className="text-lg">{student.name}</CardTitle>
@@ -167,7 +167,7 @@ export function ResponsavelStatsContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ResponsavelStatsError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <ResponsavelStatsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<ResponsavelStatsSkeleton />}>

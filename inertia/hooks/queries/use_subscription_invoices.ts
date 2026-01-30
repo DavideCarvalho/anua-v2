@@ -21,7 +21,7 @@ export function useSubscriptionInvoicesQueryOptions(options: UseSubscriptionInvo
     queryFn: () => {
       return tuyau
         .$route('api.v1.subscriptionInvoices.index')
-        .$get({ query: { subscriptionId, status, page, limit } })
+        .$get({ query: { subscriptionId, status, page, limit } as any })
         .unwrap()
     },
   } satisfies QueryOptions<SubscriptionInvoicesResponse>

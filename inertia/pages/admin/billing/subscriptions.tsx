@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react'
 import { Suspense, useState } from 'react'
-import { CreditCard, Package, FileText } from 'lucide-react'
+import { CreditCard, Package } from 'lucide-react'
 
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'

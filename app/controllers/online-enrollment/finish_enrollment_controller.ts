@@ -158,23 +158,8 @@ export default class FinishEnrollmentController {
         }
       }
 
-      // 8. Create emergency contacts
-      for (let i = 0; i < data.emergencyContacts.length; i++) {
-        const contact = data.emergencyContacts[i]
-        await StudentEmergencyContact.create(
-          {
-            id: uuidv7(),
-            studentId: student.id,
-            name: contact.name,
-            phone: contact.phone,
-            relationship: contact.relationship,
-            order: i,
-          },
-          { client: trx }
-        )
-      }
-
-      // 9. Create/link responsibles (guardians)
+      // 8. Create/link responsibles (guardians)
+      const responsibleUserIds: string[] = []
       for (const responsible of data.responsibles) {
         // Find or create responsible user
         let responsibleUser = await User.query({ client: trx })
@@ -219,6 +204,8 @@ export default class FinishEnrollmentController {
           }
         }
 
+        responsibleUserIds.push(responsibleUser.id)
+
         // Link responsible to student
         await StudentHasResponsible.create(
           {
@@ -227,6 +214,27 @@ export default class FinishEnrollmentController {
             responsibleId: responsibleUser.id,
             isPedagogical: responsible.isPedagogical,
             isFinancial: responsible.isFinancial,
+          },
+          { client: trx }
+        )
+      }
+
+      // 9. Create emergency contacts
+      for (let i = 0; i < data.emergencyContacts.length; i++) {
+        const contact = data.emergencyContacts[i]
+        const userId =
+          contact.responsibleIndex != null
+            ? responsibleUserIds[contact.responsibleIndex] ?? null
+            : null
+        await StudentEmergencyContact.create(
+          {
+            id: uuidv7(),
+            studentId: student.id,
+            userId,
+            name: contact.name,
+            phone: contact.phone,
+            relationship: contact.relationship,
+            order: i,
           },
           { client: trx }
         )

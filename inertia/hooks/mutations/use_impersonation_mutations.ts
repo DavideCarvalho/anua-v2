@@ -10,7 +10,7 @@ export function useSetImpersonation() {
         userId,
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao ativar personificação')
+        throw new Error((response.error as any).value?.message || 'Erro ao ativar personificação')
       }
       return response.data
     },
@@ -28,7 +28,7 @@ export function useClearImpersonation() {
     mutationFn: async () => {
       const response = await tuyau.api.v1.admin.impersonation.$delete()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao desativar personificação')
+        throw new Error((response.error as any).value?.message || 'Erro ao desativar personificação')
       }
       return response.data
     },

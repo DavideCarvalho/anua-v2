@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { DocumentInput } from '~/components/forms/document-input'
+import { EmailInput } from '~/components/forms/email-input'
 import type { NewStudentFormData } from '../schema'
 
 interface StudentInfoStepProps {
@@ -37,6 +38,9 @@ export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfo
   // Watch responsibles to check for document conflicts
   const responsibles = form.watch('responsibles')
 
+  // Watch student email for conflict check
+  const studentEmail = form.watch('basicInfo.email')
+
   // Check if student document matches any responsible's document
   const documentConflictWithResponsible = useMemo(() => {
     const cleanStudentDoc = documentNumber?.replace(/\D/g, '') || ''
@@ -52,6 +56,22 @@ export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfo
     }
     return null
   }, [documentNumber, responsibles])
+
+  // Check if student email matches any responsible's email
+  const emailConflictWithResponsible = useMemo(() => {
+    const cleanStudentEmail = studentEmail?.toLowerCase().trim() || ''
+    if (!cleanStudentEmail || !responsibles?.length) return null
+
+    const conflictIndex = responsibles.findIndex((resp) => {
+      const cleanRespEmail = resp.email?.toLowerCase().trim() || ''
+      return cleanRespEmail && cleanRespEmail === cleanStudentEmail
+    })
+
+    if (conflictIndex >= 0) {
+      return responsibles[conflictIndex].name || `Responsável ${conflictIndex + 1}`
+    }
+    return null
+  }, [studentEmail, responsibles])
 
   const isAdult = useCallback((date: Date | undefined): boolean => {
     if (!date) return false
@@ -145,13 +165,18 @@ export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfo
           <FormItem>
             <FormLabel>Email{isEmailRequired ? '*' : ' (opcional)'}</FormLabel>
             <FormControl>
-              <Input
-                {...field}
-                type="email"
+              <EmailInput
                 value={field.value || ''}
-                placeholder="email@exemplo.com"
+                onChange={field.onChange}
+                excludeUserId={excludeUserId}
+                academicPeriodId={effectiveAcademicPeriodId}
               />
             </FormControl>
+            {emailConflictWithResponsible && (
+              <p className="text-sm text-destructive">
+                Email igual ao de {emailConflictWithResponsible}
+              </p>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -233,7 +258,7 @@ export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfo
               </FormLabel>
               <FormControl>
                 <DocumentInput
-                  value={field.value}
+                  value={field.value ?? ''}
                   onChange={field.onChange}
                   documentType={documentType}
                   excludeUserId={excludeUserId}

@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.studentBalanceTransactions.index')
@@ -24,10 +23,10 @@ export function useStudentBalanceTransactionsQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.studentBalanceTransactions.index')
-        .$get({ query: { studentId, type, page, limit } })
+        .$get({ query: { studentId, type, page, limit } as any })
         .unwrap()
     },
-  } satisfies QueryOptions<StudentBalanceTransactionsResponse>
+  }
 }
 
 export function useStudentBalanceTransactions(options: UseStudentBalanceTransactionsOptions = {}) {
@@ -46,7 +45,7 @@ export function useStudentBalanceTransactionQueryOptions(id: string) {
       return tuyau.$route('api.v1.studentBalanceTransactions.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  } satisfies QueryOptions<StudentBalanceTransactionResponse>
+  }
 }
 
 export function useStudentBalanceTransaction(id: string) {

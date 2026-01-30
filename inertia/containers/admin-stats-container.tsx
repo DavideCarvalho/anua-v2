@@ -146,7 +146,7 @@ export function AdminStatsContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <AdminStatsError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <AdminStatsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<AdminStatsSkeleton />}>

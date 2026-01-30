@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.canteenMeals.index')
@@ -26,7 +25,7 @@ export function useCanteenMealsQueryOptions(options: UseCanteenMealsOptions = {}
         .$get({ query: { canteenId, startDate, endDate, page, limit } })
         .unwrap()
     },
-  } satisfies QueryOptions<CanteenMealsResponse>
+  }
 }
 
 export function useCanteenMeals(options: UseCanteenMealsOptions = {}) {
@@ -45,7 +44,7 @@ export function useCanteenMealQueryOptions(id: string) {
       return tuyau.$route('api.v1.canteenMeals.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  } satisfies QueryOptions<CanteenMealResponse>
+  }
 }
 
 export function useCanteenMeal(id: string) {

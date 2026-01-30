@@ -315,7 +315,7 @@ function NewAttendanceModalContent({
       classId,
       academicPeriodId,
       subjectId: data.subjectId,
-      dates: data.dates.map((d) => new Date(d)),
+      dates: data.dates.map((d) => new Date(d).toISOString()),
       attendances,
     })
   }

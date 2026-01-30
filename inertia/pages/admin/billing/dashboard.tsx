@@ -2,7 +2,6 @@ import { Head } from '@inertiajs/react'
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   CreditCard,
   AlertTriangle,
   CheckCircle,

@@ -1,6 +1,5 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.classes.show')
@@ -14,7 +13,7 @@ export function useClassQueryOptions(classId: string) {
       return tuyau.$route('api.v1.classes.show', { id: classId }).$get().unwrap()
     },
     enabled: !!classId,
-  } satisfies QueryOptions<ClassResponse>
+  }
 }
 
 export function useClass(classId: string) {

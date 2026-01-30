@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.responsibles.listByStudent')
@@ -14,7 +13,7 @@ export function useStudentResponsiblesQueryOptions(studentId: string) {
       return tuyau.$route('api.v1.responsibles.listByStudent', { studentId }).$get().unwrap()
     },
     enabled: !!studentId,
-  } satisfies QueryOptions<StudentResponsiblesResponse>
+  }
 }
 
 export function useStudentResponsibles(studentId: string) {

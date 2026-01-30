@@ -55,15 +55,13 @@ export function useMarkPaymentAsPaid() {
     mutationFn: ({
       id,
       paidAt,
-      paidAmount,
     }: {
       id: string
       paidAt?: string
-      paidAmount?: number
     }) => {
       return tuyau
         .$route('api.v1.studentPayments.markPaid', { id })
-        .$post({ paidAt, paidAmount })
+        .$post({ paidAt })
         .unwrap()
     },
     onSuccess: () => {

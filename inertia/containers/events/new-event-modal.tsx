@@ -113,7 +113,7 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
   const createEventMutation = useCreateEventMutation()
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       title: '',
       description: '',
@@ -146,11 +146,15 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
   const onSubmit = async (values: FormValues) => {
     toast.promise(
       createEventMutation.mutateAsync({
-        ...values,
+        title: values.title,
+        description: values.description,
+        type: values.type as any,
+        visibility: values.visibility as any,
+        location: values.location,
+        requiresParentalConsent: values.requiresParentalConsent,
         schoolId,
         startsAt: new Date(values.startsAt).toISOString(),
         endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
-        onlineUrl: values.onlineUrl || undefined,
       }),
       {
         loading: 'Criando evento...',

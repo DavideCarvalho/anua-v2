@@ -26,7 +26,6 @@ export default function ProvasPage() {
   const { classes = [], subjects = [] } = usePage<PageProps>().props
   const [selectedClass, setSelectedClass] = useState<string>('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
-  const router = useRouter()
   return (
     <EscolaLayout>
       <Head title="Provas" />

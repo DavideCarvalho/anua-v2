@@ -74,11 +74,12 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
       const response = await tuyau.api.v1.users.$post({
         name: values.name,
         email: values.email,
+        password: Math.random().toString(36).slice(-8) + 'A1!',
         schoolId,
-        role: values.role,
+        roleId: values.role,
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao criar funcionário')
+        throw new Error((response.error as any).value?.message || 'Erro ao criar funcionário')
       }
       return response.data
     },
@@ -90,8 +91,8 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
   async function onSubmit(values: FormValues) {
     try {
       const result = await createEmployee(values)
-      if (result?.generatedPassword) {
-        setGeneratedPassword(result.generatedPassword)
+      if ((result as any)?.generatedPassword) {
+        setGeneratedPassword((result as any).generatedPassword)
       } else {
         toast.success('Funcionário criado com sucesso!')
         handleClose()

@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import {
   DocumentType,
-  PaymentMethod,
   EmergencyContactRelationship,
 } from '../new-student-modal/schema'
 
@@ -12,7 +11,7 @@ export const editStudentSchema = z.object({
       name: z.string().min(1, 'O nome é obrigatório'),
       email: z.string().email('Email inválido').optional().or(z.literal('')),
       phone: z.string().optional().or(z.literal('')),
-      birthDate: z.date({ required_error: 'A data de nascimento é obrigatória' }),
+      birthDate: z.date({ error: 'A data de nascimento é obrigatória' }),
       documentType: z.enum(DocumentType),
       documentNumber: z.string().optional().or(z.literal('')),
       isSelfResponsible: z.boolean(),
@@ -70,7 +69,7 @@ export const editStudentSchema = z.object({
       phone: z.string().min(1, 'O telefone é obrigatório'),
       documentType: z.enum(DocumentType),
       documentNumber: z.string().min(1, 'O número do documento é obrigatório'),
-      birthDate: z.date({ required_error: 'A data de nascimento é obrigatória' }),
+      birthDate: z.date({ error: 'A data de nascimento é obrigatória' }),
       isPedagogical: z.boolean(),
       isFinancial: z.boolean(),
     })
@@ -103,9 +102,10 @@ export const editStudentSchema = z.object({
         name: z.string().min(1, 'O nome é obrigatório'),
         phone: z.string().min(1, 'O telefone é obrigatório'),
         relationship: z.enum(EmergencyContactRelationship, {
-          required_error: 'O parentesco é obrigatório',
+          error: 'O parentesco é obrigatório',
         }),
         order: z.number(),
+        responsibleIndex: z.number().optional(),
       })
     ),
   }),

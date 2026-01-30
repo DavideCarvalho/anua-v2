@@ -131,7 +131,7 @@ export function EnrollmentsTable({
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <EnrollmentsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <EnrollmentsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <EnrollmentsTableContent
@@ -168,7 +168,7 @@ function EnrollmentsTableContent({
   } | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
-  const { data, isLoading, error, refetch } = useQuery(
+  const { data } = useQuery(
     useEnrollmentsQueryOptions({
       schoolId,
       academicPeriodId,
@@ -397,7 +397,7 @@ function EnrollmentsTableContent({
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {brazilianDateFormatter(enrollment.createdAt)}
+                          {enrollment.createdAt ? brazilianDateFormatter(String(enrollment.createdAt)) : '-'}
                         </TableCell>
                       </TableRow>
 

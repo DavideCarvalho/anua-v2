@@ -47,7 +47,7 @@ export function LeaderboardsManagement({
   const { data } = useSuspenseQuery(useLeaderboardsQueryOptions({ schoolId }))
   const deleteMutation = useDeleteLeaderboard()
 
-  const leaderboards = Array.isArray(data) ? data : data?.data || []
+  const leaderboards = Array.isArray(data) ? data : (data as any)?.data || []
 
   if (leaderboards.length === 0) {
     return (

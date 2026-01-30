@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const { data: schoolsData, isLoading: isLoadingSchools } = useQuery(
     useSchoolsQueryOptions({ page: 1, limit: 5 })
   )
-  const recentSchools = schoolsData?.data ?? []
+  const recentSchools = (schoolsData as any)?.data ?? []
 
   return (
     <AdminLayout>

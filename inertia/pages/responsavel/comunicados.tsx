@@ -9,7 +9,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 
-import { useNotificationsQueryOptions, type NotificationsResponse } from '../../hooks/queries/use_notifications'
+import { useNotificationsQueryOptions } from '../../hooks/queries/use_notifications'
 
 function ComunicadosContent() {
   const { data, isLoading, isError, error } = useQuery(useNotificationsQueryOptions({ limit: 20 }))

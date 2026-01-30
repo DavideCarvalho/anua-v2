@@ -1,20 +1,16 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const $route = tuyau.$route('api.v1.events.complete')
-
-type CompleteEventParams = NonNullable<Parameters<typeof $route.$post>[0]>['params']
-
 export function useCompleteEventMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (params: CompleteEventParams) => {
-      return $route.$post({ params }).unwrap()
+    mutationFn: (id: string) => {
+      return tuyau.$route('api.v1.events.complete', { id }).$post({}).unwrap()
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
-      queryClient.invalidateQueries({ queryKey: ['events', variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['events', id] })
     },
   })
 }

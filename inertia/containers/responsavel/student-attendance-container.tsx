@@ -5,7 +5,6 @@ import { ptBR } from 'date-fns/locale'
 
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
 import {
   Table,
   TableBody,
@@ -17,10 +16,7 @@ import {
 
 import {
   useStudentAttendanceQueryOptions,
-  type StudentAttendanceResponse,
 } from '../../hooks/queries/use_student_attendance'
-
-type AttendanceRecord = StudentAttendanceResponse['data'][number]
 
 interface StudentAttendanceContainerProps {
   studentId: string
@@ -151,7 +147,7 @@ export function StudentAttendanceContainer({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((attendance: AttendanceRecord) => (
+                {data.data.map((attendance: any) => (
                   <TableRow key={attendance.id}>
                     <TableCell>
                       {format(new Date(attendance.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}

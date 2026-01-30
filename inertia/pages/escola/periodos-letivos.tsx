@@ -177,18 +177,18 @@ export default function PeriodosLetivosPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Início</span>
-                      <span>{formatDate(period.startDate)}</span>
+                      <span>{formatDate(String(period.startDate))}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Término</span>
-                      <span>{formatDate(period.endDate)}</span>
+                      <span>{formatDate(String(period.endDate))}</span>
                     </div>
                     {period.enrollmentStartDate && period.enrollmentEndDate && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Matrículas</span>
                         <span>
-                          {formatDate(period.enrollmentStartDate)} -{' '}
-                          {formatDate(period.enrollmentEndDate)}
+                          {formatDate(String(period.enrollmentStartDate))} -{' '}
+                          {formatDate(String(period.enrollmentEndDate))}
                         </span>
                       </div>
                     )}

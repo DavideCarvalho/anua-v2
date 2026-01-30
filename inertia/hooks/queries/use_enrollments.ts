@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.enrollments.index')
@@ -21,5 +20,5 @@ export function useEnrollmentsQueryOptions(query: EnrollmentsQuery) {
       return $route.$get({ query: mergedQuery }).unwrap()
     },
     enabled: !!query.schoolId,
-  } satisfies QueryOptions<EnrollmentsResponse>
+  }
 }

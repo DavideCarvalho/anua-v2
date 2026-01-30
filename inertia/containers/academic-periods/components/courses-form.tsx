@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -17,13 +17,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Card, CardContent, CardHeader } from '~/components/ui/card'
 import {
   FormControl,
   FormField,
@@ -197,15 +197,6 @@ export function CoursesForm() {
     ])
   }
 
-  const removeLevel = (courseIndex: number, levelIndex: number) => {
-    const levels = form.getValues(`courses.${courseIndex}.levels`) || []
-    const newLevels = levels.filter((_, i) => i !== levelIndex)
-    newLevels.forEach((level, idx) => {
-      level.order = idx
-    })
-    form.setValue(`courses.${courseIndex}.levels`, newLevels)
-  }
-
   const handleCreateContract = () => {
     toast.info('Funcionalidade de criar contrato ainda não implementada')
   }
@@ -309,7 +300,7 @@ export function CoursesForm() {
                         strategy={verticalListSortingStrategy}
                       >
                         <div className="space-y-3">
-                          {levels.map((level, levelIndex) => (
+                          {levels.map((_level, levelIndex) => (
                             <SortableLevel
                               key={`level-${levelIndex}`}
                               id={`level-${levelIndex}`}

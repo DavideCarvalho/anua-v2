@@ -3,7 +3,6 @@ import { router } from '@inertiajs/react'
 import confetti from 'canvas-confetti'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  AlertCircle,
   ArrowLeft,
   CheckCircle2,
   Loader2,
@@ -97,7 +96,7 @@ export default function SignIn() {
       })
 
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao enviar código')
+        throw new Error((response.error as any).value?.message || 'Erro ao enviar código')
       }
 
       setFlowState('idle')
@@ -154,7 +153,7 @@ export default function SignIn() {
       })
 
       if (response.error) {
-        throw new Error(response.error.message || 'Código inválido')
+        throw new Error((response.error as any).value?.message || 'Código inválido')
       }
 
       // Sucesso!

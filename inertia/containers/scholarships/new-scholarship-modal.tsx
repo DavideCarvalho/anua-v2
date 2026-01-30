@@ -59,7 +59,7 @@ export function NewScholarshipModal({
 
   const partners = useMemo(() => {
     if (Array.isArray(partnersData)) return partnersData
-    return partnersData?.data ?? []
+    return (partnersData as any)?.data ?? []
   }, [partnersData])
 
   const form = useForm<FormValues>({

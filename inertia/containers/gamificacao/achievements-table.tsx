@@ -102,16 +102,20 @@ export function AchievementsTable() {
 
   const handleCreate = async () => {
     await createAchievement.mutateAsync({
-      ...formData,
+      name: formData.name,
+      description: formData.description,
+      category: formData.type as any,
+      points: formData.pointsReward,
       schoolId: schoolId || undefined,
-      iconUrl: formData.iconUrl || null,
+      icon: formData.iconUrl || undefined,
+      isActive: formData.isActive,
       criteria: {},
     })
     setIsCreateOpen(false)
     setFormData(defaultFormData)
   }
 
-  const handleEdit = (achievement: AchievementsResponse['data'][0]) => {
+  const handleEdit = (achievement: any) => {
     setEditingId(achievement.id)
     setFormData({
       name: achievement.name,
@@ -129,8 +133,12 @@ export function AchievementsTable() {
     if (!editingId) return
     await updateAchievement.mutateAsync({
       id: editingId,
-      ...formData,
-      iconUrl: formData.iconUrl || null,
+      name: formData.name,
+      description: formData.description,
+      category: formData.type as any,
+      points: formData.pointsReward,
+      icon: formData.iconUrl || undefined,
+      isActive: formData.isActive,
     })
     setEditingId(null)
     setFormData(defaultFormData)
@@ -140,8 +148,6 @@ export function AchievementsTable() {
     if (!confirm('Tem certeza que deseja excluir esta conquista?')) return
     await deleteAchievement.mutateAsync(id)
   }
-
-  type AchievementsResponse = typeof achievements
 
   const achievementsList = achievements?.data || []
 
@@ -199,7 +205,7 @@ export function AchievementsTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {achievementsList.map((achievement) => (
+              {achievementsList.map((achievement: any) => (
                 <TableRow key={achievement.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">

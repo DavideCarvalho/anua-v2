@@ -12,7 +12,7 @@ export function useEscolaStatsQueryOptions() {
     queryFn: async () => {
       const response = await $route()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar estatísticas')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar estatísticas')
       }
       return response.data
     },

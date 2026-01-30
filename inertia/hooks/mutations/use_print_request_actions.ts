@@ -38,7 +38,7 @@ export function useRejectPrintRequest() {
     mutationFn: ({ id, feedback }: { id: string; feedback?: string }) => {
       return tuyau
         .$route('api.v1.printRequests.rejectPrintRequest', { id })
-        .$patch({ rejectedFeedback: feedback })
+        .$patch({ reason: feedback ?? '' })
         .unwrap()
     },
     onSuccess: () => {
@@ -51,10 +51,10 @@ export function useReviewPrintRequest() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, feedback }: { id: string; feedback?: string }) => {
+    mutationFn: ({ id, data }: { id: string; data: { name: string; dueDate: string; fileUrl: string; quantity: number; frontAndBack?: boolean } }) => {
       return tuyau
         .$route('api.v1.printRequests.reviewPrintRequest', { id })
-        .$patch({ rejectedFeedback: feedback })
+        .$patch(data)
         .unwrap()
     },
     onSuccess: () => {

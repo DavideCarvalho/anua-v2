@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.leaderboards.entries')
@@ -24,5 +23,5 @@ export function useLeaderboardEntriesQueryOptions(options: UseLeaderboardEntries
         .unwrap()
     },
     enabled: !!leaderboardId,
-  } satisfies QueryOptions<LeaderboardEntriesResponse>
+  }
 }

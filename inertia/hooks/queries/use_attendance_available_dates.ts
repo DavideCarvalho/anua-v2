@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.attendance.availableDates')
@@ -15,7 +14,7 @@ export function useAttendanceAvailableDatesQueryOptions(query: AttendanceAvailab
       return $route.$get({ query }).unwrap()
     },
     enabled: !!query?.classId && !!query?.academicPeriodId && !!query?.subjectId,
-  } satisfies QueryOptions<AttendanceAvailableDatesResponse>
+  }
 }
 
 export function useAttendanceAvailableDates(query: AttendanceAvailableDatesQuery) {

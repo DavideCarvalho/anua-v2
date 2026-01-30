@@ -459,6 +459,10 @@ type ApiV1EscolaStatsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_escola_stats_controller.ts').default['handle'], false>
 }
+type ApiV1EscolaInsightsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_escola_insights_controller.ts').default['handle'], false>
+}
 type ApiV1ResponsavelStatsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_responsavel_stats_controller.ts').default['handle'], false>
@@ -642,6 +646,10 @@ type ApiV1StudentsEnrollPost = {
 type ApiV1StudentsCheckdocumentGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/check_document_controller.ts').default['handle'], false>
+}
+type ApiV1StudentsCheckemailGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/check_email_controller.ts').default['handle'], false>
 }
 type ApiV1StudentsIdGetHead = {
   request: unknown
@@ -2727,6 +2735,12 @@ export interface ApiDefinition {
           '$get': ApiV1EscolaStatsGetHead;
           '$head': ApiV1EscolaStatsGetHead;
         };
+        'insights': {
+          '$url': {
+          };
+          '$get': ApiV1EscolaInsightsGetHead;
+          '$head': ApiV1EscolaInsightsGetHead;
+        };
       };
       'responsavel': {
         'stats': {
@@ -2991,6 +3005,12 @@ export interface ApiDefinition {
           };
           '$get': ApiV1StudentsCheckdocumentGetHead;
           '$head': ApiV1StudentsCheckdocumentGetHead;
+        };
+        'check-email': {
+          '$url': {
+          };
+          '$get': ApiV1StudentsCheckemailGetHead;
+          '$head': ApiV1StudentsCheckemailGetHead;
         };
         ':id': {
           '$url': {
@@ -5299,6 +5319,13 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.dashboard.escolaInsights',
+    path: '/api/v1/escola/insights',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1EscolaInsightsGetHead,
+  },
+  {
+    params: [],
     name: 'api.v1.dashboard.responsavelStats',
     path: '/api/v1/responsavel/stats',
     method: ["GET","HEAD"],
@@ -5618,6 +5645,13 @@ const routes = [
     path: '/api/v1/students/check-document',
     method: ["GET","HEAD"],
     types: {} as ApiV1StudentsCheckdocumentGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.students.checkEmail',
+    path: '/api/v1/students/check-email',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StudentsCheckemailGetHead,
   },
   {
     params: ["id"],

@@ -62,7 +62,7 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
   const academicPeriods = academicPeriodsData?.data ?? []
 
   const form = useForm<NewStudentFormData>({
-    resolver: zodResolver(newStudentSchema),
+    resolver: zodResolver(newStudentSchema) as any,
     defaultValues: {
       basicInfo: {
         name: '',
@@ -325,6 +325,7 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
             phone: r.phone,
             relationship: 'GUARDIAN' as const,
             order: index,
+            responsibleIndex: index,
           }))
         )
       }

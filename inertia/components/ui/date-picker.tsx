@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -52,7 +51,7 @@ export function DatePicker({
           locale={ptBR}
           disabled={
             fromDate || toDate
-              ? { before: fromDate, after: toDate }
+              ? { before: fromDate, after: toDate } as any
               : undefined
           }
           components={{

@@ -38,7 +38,7 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
 
   const handleNotificationClick = async (notification: Notification) => {
     if (!notification.readAt) {
-      toast.promise(markReadMutation.mutateAsync({ id: notification.id }), {
+      toast.promise(markReadMutation.mutateAsync(notification.id), {
         loading: 'Marcando como lida...',
         success: 'Notificação marcada como lida',
         error: 'Erro ao marcar como lida',

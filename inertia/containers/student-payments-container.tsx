@@ -103,7 +103,7 @@ export function StudentPaymentsContainer({
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <StudentPaymentsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <StudentPaymentsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <StudentPaymentsContent status={status} showSearch={showSearch} />
@@ -133,8 +133,9 @@ function StudentPaymentsContent({
     useStudentPaymentsQueryOptions({ page, limit, status, search: search || undefined })
   )
 
-  const payments = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const result = data as any
+  const payments = Array.isArray(result) ? result : result?.data || []
+  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
 
   return (
     <div className="space-y-4">

@@ -14,15 +14,9 @@ export function useSaveExamGrade() {
 
   return useMutation({
     mutationFn: ({ examId, studentId, score, feedback, absent }: SaveExamGradeData) => {
-      return tuyau
-        .$route('api.v1.exams.grades.store')
-        .$post({
-          params: { id: examId },
-          studentId,
-          score,
-          feedback,
-          absent,
-        })
+      return (tuyau as any)
+        .$route('api.v1.exams.grades.store', { id: examId })
+        .$post({ studentId, score, feedback, absent })
         .unwrap()
     },
     onSuccess: (_, variables) => {

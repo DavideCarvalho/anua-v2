@@ -55,7 +55,7 @@ export function NewPurchaseRequestModal({
   const createMutation = useCreatePurchaseRequestMutation()
 
   const form = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       productName: '',
       quantity: 1,

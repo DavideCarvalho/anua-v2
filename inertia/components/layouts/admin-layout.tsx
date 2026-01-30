@@ -13,7 +13,6 @@ import {
   ChevronDown,
 } from 'lucide-react'
 
-import { Button } from '../ui/button'
 import { ThemeToggle } from '../theme-toggle'
 import type { SharedProps } from '../../lib/types'
 import { formatRoleName } from '../../lib/formatters'
@@ -37,20 +36,21 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
-  useSidebar,
 } from '../ui/sidebar'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../ui/collapsible'
+import { api } from '../../../.adonisjs/api'
+import type { RouteName } from '@tuyau/client'
 
 interface NavItem {
   title: string
-  route: string
+  route: RouteName<typeof api.routes>
   href: string
   icon: React.ElementType
-  children?: { title: string; route: string; href: string }[]
+  children?: { title: string; route: RouteName<typeof api.routes>; href: string }[]
 }
 
 const navigation: NavItem[] = [
@@ -89,9 +89,6 @@ const navigation: NavItem[] = [
 
 function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: string }) {
   const isActive = item.children?.some((c) => pathname === c.href)
-  const { state } = useSidebar()
-  const isCollapsed = state === 'collapsed'
-
   return (
     <Collapsible defaultOpen={isActive} className="group/collapsible">
       <SidebarMenuItem>
@@ -107,7 +104,7 @@ function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: stri
             {item.children?.map((child) => (
               <SidebarMenuSubItem key={child.route}>
                 <SidebarMenuSubButton asChild isActive={pathname === child.href}>
-                  <Link route={child.route}>{child.title}</Link>
+                  <Link route={child.route as any} params={undefined as any}>{child.title}</Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
@@ -124,7 +121,7 @@ function NavItemSimple({ item, pathname }: { item: NavItem; pathname: string }) 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-        <Link route={item.route}>
+        <Link route={item.route as any} params={undefined as any}>
           <item.icon className="h-4 w-4" />
           <span>{item.title}</span>
         </Link>
@@ -197,8 +194,6 @@ function AppSidebar() {
         {/* Logout */}
         <Link
           route="api.v1.auth.logout"
-          method="post"
-          as="button"
           className="inline-flex w-full items-center justify-start gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <LogOut className="h-4 w-4" />

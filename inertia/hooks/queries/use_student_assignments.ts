@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.responsavel.api.studentAssignments')
@@ -22,10 +21,10 @@ export function useStudentAssignmentsQueryOptions(
           },
         })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar atividades')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar atividades')
       }
       return response.data
     },
     enabled: !!studentId,
-  } satisfies QueryOptions
+  }
 }

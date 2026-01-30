@@ -332,7 +332,7 @@ export function EmployeesListContainer() {
           <ErrorBoundary
             onReset={reset}
             fallbackRender={({ error, resetErrorBoundary }) => (
-              <EmployeesListError error={error} resetErrorBoundary={resetErrorBoundary} />
+              <EmployeesListError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
             )}
           >
             <EmployeesListContent

@@ -121,6 +121,7 @@ export default class FullUpdateStudentController {
       await student.useTransaction(trx).save()
 
       // 3. Update/Create Responsibles
+      const responsibleUserIds: string[] = []
       if (!data.basicInfo.isSelfResponsible) {
         // Get existing responsible IDs
         const existingResponsibleIds = student.responsibles.map((r) => r.responsibleId)
@@ -167,6 +168,8 @@ export default class FullUpdateStudentController {
               { client: trx }
             )
           }
+
+          responsibleUserIds.push(responsibleUser.id)
 
           // Check if link exists
           const existingLink = await StudentHasResponsible.query({ client: trx })
@@ -288,10 +291,15 @@ export default class FullUpdateStudentController {
       await StudentEmergencyContact.query({ client: trx }).where('studentId', student.id).delete()
 
       for (const contact of data.medicalInfo.emergencyContacts) {
+        const userId =
+          contact.responsibleIndex != null
+            ? responsibleUserIds[contact.responsibleIndex] ?? null
+            : null
         await StudentEmergencyContact.create(
           {
             id: uuidv7(),
             studentId: student.id,
+            userId,
             name: contact.name,
             phone: contact.phone,
             relationship: contact.relationship as any,

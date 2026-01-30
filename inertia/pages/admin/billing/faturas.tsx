@@ -80,8 +80,8 @@ export default function BillingFaturasPage() {
     })
   )
 
-  const invoices = data?.data || []
-  const meta = data?.meta
+  const invoices = (data as any)?.data || []
+  const meta = (data as any)?.meta
 
   const filteredInvoices = search
     ? invoices.filter((invoice: any) =>

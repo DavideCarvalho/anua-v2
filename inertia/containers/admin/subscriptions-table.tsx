@@ -68,7 +68,7 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
   const pauseMutation = usePauseSubscription()
   const reactivateMutation = useReactivateSubscription()
 
-  const subscriptions = Array.isArray(data) ? data : data?.data || []
+  const subscriptions = Array.isArray(data) ? data : (data as any)?.data || []
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

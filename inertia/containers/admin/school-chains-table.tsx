@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Building, Plus, MoreHorizontal, School, Users } from 'lucide-react'
+import { Building, Plus, MoreHorizontal, School } from 'lucide-react'
 
 import { useSchoolChainsQueryOptions } from '../../hooks/queries/use_school_chains'
 import { useDeleteSchoolChain } from '../../hooks/mutations/use_school_chain_mutations'
@@ -31,7 +31,7 @@ export function SchoolChainsTable({ onCreateChain, onViewSchools }: SchoolChains
   const { data } = useSuspenseQuery(useSchoolChainsQueryOptions({}))
   const deleteMutation = useDeleteSchoolChain()
 
-  const chains = Array.isArray(data) ? data : data?.data || []
+  const chains = Array.isArray(data) ? data : (data as any)?.data || []
 
   if (chains.length === 0) {
     return (

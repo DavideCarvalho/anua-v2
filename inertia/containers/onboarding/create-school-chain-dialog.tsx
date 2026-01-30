@@ -56,14 +56,14 @@ export function CreateSchoolChainDialog({
 
   const { mutateAsync: createSchoolChain, isPending } = useMutation({
     mutationFn: async (data: CreateSchoolChainFormData) => {
+      const slug = data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       const response = await tuyau.api.v1['school-chains'].$post({
         name: data.name,
+        slug,
         subscriptionLevel: data.subscriptionLevel,
-        trialDays: data.trialDays,
-        pricePerStudent: data.pricePerStudent,
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao criar rede')
+        throw new Error((response.error as any).value?.message || 'Erro ao criar rede')
       }
       return response.data
     },

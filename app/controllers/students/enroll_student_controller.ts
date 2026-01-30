@@ -89,6 +89,38 @@ export default class EnrollStudentController {
     }
     const schoolId = academicPeriod.schoolId
 
+    // Check if email is already in use (if provided)
+    const studentEmail = data.basicInfo.email?.trim().toLowerCase()
+    if (studentEmail) {
+      const existingEmailUser = await User.query()
+        .where('email', studentEmail)
+        .where('schoolId', schoolId)
+        .first()
+
+      if (existingEmailUser) {
+        return response.conflict({
+          message: `Email "${studentEmail}" já está cadastrado para ${existingEmailUser.name}`,
+        })
+      }
+    }
+
+    // Check if responsible emails are already in use
+    for (const responsible of data.responsibles) {
+      const respEmail = responsible.email?.trim().toLowerCase()
+      if (respEmail) {
+        const existingRespEmail = await User.query()
+          .where('email', respEmail)
+          .where('schoolId', schoolId)
+          .first()
+
+        if (existingRespEmail) {
+          return response.conflict({
+            message: `Email "${respEmail}" já está cadastrado para ${existingRespEmail.name}`,
+          })
+        }
+      }
+    }
+
     // Check if student already exists by document (only if document is provided)
     const existingUser = studentDoc
       ? await User.query().where('documentNumber', studentDoc).where('schoolId', schoolId).first()
@@ -162,6 +194,7 @@ export default class EnrollStudentController {
       )
 
       // 3. Create/Link Responsibles
+      const responsibleUserIds: string[] = []
       if (!data.basicInfo.isSelfResponsible && data.responsibles.length > 0) {
         for (const respData of data.responsibles) {
           let responsibleUser: User
@@ -195,6 +228,8 @@ export default class EnrollStudentController {
               { client: trx }
             )
           }
+
+          responsibleUserIds.push(responsibleUser.id)
 
           // Link responsible to student
           await StudentHasResponsible.create(
@@ -255,10 +290,15 @@ export default class EnrollStudentController {
 
       // 7. Create Emergency Contacts
       for (const contact of data.medicalInfo.emergencyContacts) {
+        const userId =
+          contact.responsibleIndex != null
+            ? responsibleUserIds[contact.responsibleIndex] ?? null
+            : null
         await StudentEmergencyContact.create(
           {
             id: uuidv7(),
             studentId: student.id,
+            userId,
             name: contact.name,
             phone: contact.phone,
             relationship: contact.relationship as any,

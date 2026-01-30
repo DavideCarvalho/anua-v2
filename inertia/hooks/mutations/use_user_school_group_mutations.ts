@@ -22,9 +22,9 @@ export function useDeleteUserSchoolGroup() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ userId, schoolGroupId }: { userId: string; schoolGroupId: string }) => {
+    mutationFn: ({ id }: { id: string }) => {
       return tuyau
-        .$route('api.v1.userSchoolGroups.deleteUserSchoolGroup', { userId, schoolGroupId })
+        .$route('api.v1.userSchoolGroups.deleteUserSchoolGroup', { id })
         .$delete({})
         .unwrap()
     },

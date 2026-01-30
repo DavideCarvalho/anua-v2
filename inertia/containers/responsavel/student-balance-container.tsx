@@ -6,7 +6,6 @@ import { ptBR } from 'date-fns/locale'
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
-import { Skeleton } from '../../components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -151,7 +150,7 @@ export function StudentBalanceContainer({
                 {data.data.map((transaction: BalanceTransaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>
-                      {format(new Date(transaction.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      {format(new Date(String(transaction.createdAt)), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                     </TableCell>
                     <TableCell className="font-medium">
                       {transaction.description || '-'}

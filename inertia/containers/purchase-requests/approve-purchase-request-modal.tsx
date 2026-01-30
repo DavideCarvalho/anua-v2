@@ -33,7 +33,7 @@ export function ApprovePurchaseRequestModal({
   const approveMutation = useApprovePurchaseRequestMutation()
 
   async function handleApprove() {
-    toast.promise(approveMutation.mutateAsync({ id: purchaseRequestId }), {
+    toast.promise(approveMutation.mutateAsync(purchaseRequestId), {
       loading: 'Aprovando solicitação...',
       success: () => {
         onClose()
@@ -73,7 +73,7 @@ export function ApprovePurchaseRequestModal({
 
           <div className="space-y-1">
             <Label>Para quando?</Label>
-            <p>{purchaseRequest?.dueDate ? brazilianDateFormatter(purchaseRequest.dueDate) : '-'}</p>
+            <p>{purchaseRequest?.dueDate ? brazilianDateFormatter(String(purchaseRequest.dueDate)) : '-'}</p>
           </div>
 
           {purchaseRequest?.productUrl && (

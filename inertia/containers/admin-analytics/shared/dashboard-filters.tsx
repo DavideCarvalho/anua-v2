@@ -24,8 +24,9 @@ export function DashboardFilters({
   const schoolId = params.schoolId ?? ''
   const schoolChainId = params.schoolChainId ?? ''
 
-  const { data: schools } = useQuery(useSchoolsQueryOptions())
+  const { data: schoolsRaw } = useQuery(useSchoolsQueryOptions())
   const { data: chains } = useQuery(useSchoolChainsQueryOptions())
+  const schools = Array.isArray(schoolsRaw) ? schoolsRaw : (schoolsRaw as any)?.data || []
 
   function handleSchoolChange(value: string) {
     if (value && value !== 'all') {
@@ -75,7 +76,7 @@ export function DashboardFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as escolas</SelectItem>
-              {schools.map((school) => (
+              {schools.map((school: { id: string; name: string }) => (
                 <SelectItem key={school.id} value={school.id}>
                   {school.name}
                 </SelectItem>

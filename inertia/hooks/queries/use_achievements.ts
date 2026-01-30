@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.achievements.index')
@@ -26,7 +25,7 @@ export function useAchievementsQueryOptions(options: UseAchievementsOptions = {}
         .$get({ query: { schoolId, category, isActive, page, limit } })
         .unwrap()
     },
-  } satisfies QueryOptions<AchievementsResponse>
+  }
 }
 
 export function useAchievements(options: UseAchievementsOptions = {}) {
@@ -45,7 +44,7 @@ export function useAchievementQueryOptions(id: string) {
       return tuyau.$route('api.v1.achievements.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  } satisfies QueryOptions<AchievementResponse>
+  }
 }
 
 export function useAchievement(id: string) {

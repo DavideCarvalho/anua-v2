@@ -80,7 +80,7 @@ function OnboardingFormContent() {
   const { data: platformSettings } = useSuspenseQuery(usePlatformSettingsQueryOptions())
 
   const form = useForm<SchoolOnboardingFormData>({
-    resolver: zodResolver(schoolOnboardingSchema),
+    resolver: zodResolver(schoolOnboardingSchema) as any,
     defaultValues: {
       schoolName: '',
       isNetwork: false,
@@ -107,8 +107,8 @@ function OnboardingFormContent() {
   })
 
   const schoolChainId = form.watch('schoolChainId')
-  const chainsList = Array.isArray(schoolChains) ? schoolChains : schoolChains?.data ?? []
-  const selectedChain = chainsList.find((chain) => chain.id === schoolChainId)
+  const chainsList = Array.isArray(schoolChains) ? schoolChains : (schoolChains as any)?.data ?? []
+  const selectedChain = chainsList.find((chain: { id: string; subscriptionLevel?: string }) => chain.id === schoolChainId)
   const hasNetworkSubscription = selectedChain?.subscriptionLevel === 'NETWORK'
 
   const { mutateAsync: createSchool, isPending } = useMutation({
@@ -138,7 +138,7 @@ function OnboardingFormContent() {
         insuranceClaimWaitingDays: data.insuranceClaimWaitingDays,
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao criar escola')
+        throw new Error((response.error as any).value?.message || 'Erro ao criar escola')
       }
       return response.data
     },
@@ -267,7 +267,7 @@ function OnboardingFormContent() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {chainsList.map((chain) => (
+                                {chainsList.map((chain: { id: string; name: string }) => (
                                   <SelectItem key={chain.id} value={chain.id}>
                                     {chain.name}
                                   </SelectItem>
@@ -715,7 +715,7 @@ export function SchoolOnboardingForm() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <OnboardingFormError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <OnboardingFormError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<OnboardingFormSkeleton />}>

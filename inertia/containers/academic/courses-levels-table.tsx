@@ -52,8 +52,8 @@ export function CoursesLevelsTable({
 
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set())
 
-  const courses = Array.isArray(coursesData) ? coursesData : coursesData?.data || []
-  const levels = Array.isArray(levelsData) ? levelsData : levelsData?.data || []
+  const courses = Array.isArray(coursesData) ? coursesData : (coursesData as any)?.data || []
+  const levels = Array.isArray(levelsData) ? levelsData : (levelsData as any)?.data || []
 
   const toggleCourse = (courseId: string) => {
     setExpandedCourses((prev) => {

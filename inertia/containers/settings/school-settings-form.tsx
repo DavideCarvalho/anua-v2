@@ -37,7 +37,8 @@ export function SchoolSettingsForm() {
 }
 
 function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
-  const { data: school } = useSchool(schoolId)
+  const { data: schoolData } = useSchool(schoolId)
+  const school = schoolData as any
   const updateSchool = useUpdateSchool()
   const uploadLogo = useUploadSchoolLogo(schoolId)
 

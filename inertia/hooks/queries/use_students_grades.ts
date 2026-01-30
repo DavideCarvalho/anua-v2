@@ -8,7 +8,7 @@ export type StudentsGradesResponse = InferResponseType<typeof $route.$get>
 
 type StudentsGradesQuery = NonNullable<Parameters<typeof $route.$get>[0]>['query']
 
-export function useStudentsGradesQueryOptions(query: StudentsGradesQuery = {}) {
+export function useStudentsGradesQueryOptions(query: StudentsGradesQuery = {} as any) {
   return {
     queryKey: ['grades', 'students', query],
     queryFn: () => {

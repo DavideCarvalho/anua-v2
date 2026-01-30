@@ -367,7 +367,7 @@ export function StudentOccurrencesContainer({
                             {occurrence.resolverName && (
                               <p className="mt-2 text-xs text-green-600">
                                 Resolvido por {occurrence.resolverName} em{' '}
-                                {brazilianDateFormatter(occurrence.resolvedAt)}
+                                {brazilianDateFormatter(String(occurrence.resolvedAt))}
                               </p>
                             )}
                           </div>
@@ -390,7 +390,7 @@ export function StudentOccurrencesContainer({
                         {occurrence.responsibleAcknowledged && (
                           <p className="text-xs text-muted-foreground text-right">
                             Reconhecido em{' '}
-                            {brazilianDateFormatter(occurrence.responsibleAcknowledgedAt)}
+                            {brazilianDateFormatter(String(occurrence.responsibleAcknowledgedAt))}
                           </p>
                         )}
                       </div>

@@ -32,7 +32,7 @@ export function useUsersQueryOptions(params: UseUsersParams = {}) {
         },
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar usuários')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar usuários')
       }
       return response.data
     },

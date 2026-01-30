@@ -9,11 +9,9 @@ import { useQuery } from '@tanstack/react-query'
 
 import {
   PendingConsentsContainer,
-  PendingConsentsSkeleton,
 } from '../../containers/parental-consents/pending-consents-container'
 import {
   ConsentHistoryContainer,
-  ConsentHistorySkeleton,
 } from '../../containers/parental-consents/consent-history-container'
 import { usePendingConsentsQueryOptions } from '../../hooks/queries/use_pending_consents'
 

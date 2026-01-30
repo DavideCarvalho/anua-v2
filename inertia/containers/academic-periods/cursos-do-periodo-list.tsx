@@ -1,4 +1,4 @@
-import { BookOpen, Layers, GraduationCap } from 'lucide-react'
+import { Layers, GraduationCap } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'

@@ -21,13 +21,13 @@ export function NotificationPreferences() {
   const { data } = useSuspenseQuery(useNotificationPreferencesQueryOptions())
   const updateMutation = useUpdateNotificationPreferencesMutation()
 
-  const preferences = (data?.preferences ?? []) as NotificationPreference[]
+  const preferences = (data?.preferences ?? []) as unknown as NotificationPreference[]
   const grouped = data?.grouped as Record<string, Record<string, boolean>> ?? {}
 
   const handleToggle = (type: string, channel: string, currentValue: boolean) => {
     toast.promise(
       updateMutation.mutateAsync({
-        preferences: [{ type, channel, enabled: !currentValue }],
+        preferences: [{ type, channel, enabled: !currentValue }] as any,
       }),
       {
         loading: 'Atualizando preferência...',

@@ -13,8 +13,8 @@ export function useCreateResponsibleAddress() {
   return useMutation({
     mutationFn: ({ responsibleId, ...data }: CreateResponsibleAddressPayload) => {
       return tuyau
-        .$route('api.v1.responsibleAddresses.create', { responsibleId })
-        .$post(data)
+        .$route('api.v1.responsibleAddresses.create', { responsibleId } as any)
+        .$post(data as any)
         .unwrap()
     },
     onSuccess: (_data, variables) => {

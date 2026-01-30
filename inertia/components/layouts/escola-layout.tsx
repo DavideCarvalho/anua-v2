@@ -4,7 +4,6 @@ import type { PropsWithChildren } from 'react'
 import {
   LayoutDashboard,
   Users,
-  GraduationCap,
   BookOpen,
   Calendar,
   UtensilsCrossed,
@@ -18,20 +17,22 @@ import {
   School,
 } from 'lucide-react'
 import { useState } from 'react'
-import { Button, buttonVariants } from '../ui/button'
+import { buttonVariants } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
 import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
+import { api } from '../../../.adonisjs/api'
+import type { RouteName } from '@tuyau/client'
 
 interface NavItem {
   title: string
-  route: string
+  route: RouteName<typeof api.routes>
   href: string
   icon: React.ElementType
-  children?: { title: string; route: string; href: string }[]
+  children?: { title: string; route: RouteName<typeof api.routes>; href: string }[]
 }
 
 const navigation: NavItem[] = [
@@ -147,7 +148,8 @@ function NavItemComponent({
             {item.children!.map((child) => (
               <Link
                 key={child.route}
-                route={child.route}
+                route={child.route as any}
+                params={undefined as any}
                 className={cn(
                   'block rounded-lg px-3 py-2 text-sm transition-colors',
                   pathname === child.href
@@ -166,7 +168,8 @@ function NavItemComponent({
 
   return (
     <Link
-      route={item.route}
+      route={item.route as any}
+      params={undefined as any}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         pathname === item.href
@@ -257,8 +260,6 @@ export function EscolaLayout({ children }: PropsWithChildren) {
             </div>
             <Link
               route="api.v1.auth.logout"
-              method="post"
-              as="button"
               className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
             >
               <LogOut className="mr-2 h-4 w-4" />

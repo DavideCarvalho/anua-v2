@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.gamificationEvents.index')
@@ -23,10 +22,10 @@ export function useGamificationEventsQueryOptions(options: UseGamificationEvents
     queryFn: () => {
       return tuyau
         .$route('api.v1.gamificationEvents.index')
-        .$get({ query: { studentId, type, status, page, limit } })
+        .$get({ query: { studentId, type, status, page, limit } as any })
         .unwrap()
     },
-  } satisfies QueryOptions<GamificationEventsResponse>
+  }
 }
 
 export function useGamificationEvents(options: UseGamificationEventsOptions = {}) {
@@ -45,7 +44,7 @@ export function useGamificationEventQueryOptions(id: string) {
       return tuyau.$route('api.v1.gamificationEvents.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  } satisfies QueryOptions<GamificationEventResponse>
+  }
 }
 
 export function useGamificationEvent(id: string) {

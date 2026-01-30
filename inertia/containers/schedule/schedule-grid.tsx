@@ -10,7 +10,6 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -19,8 +18,6 @@ import {
   rectSwappingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -156,7 +153,7 @@ async function saveSchedule(
 export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleGridProps) {
   const queryClient = useQueryClient()
   const [localSlots, setLocalSlots] = useState<CalendarSlot[]>([])
-  const [isDirty, setIsDirty] = useState(false)
+  const [_isDirty, setIsDirty] = useState(false)
 
   const {
     data: scheduleData,
@@ -493,7 +490,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {pendingClasses.map((pc, index) =>
+                  {pendingClasses.map((pc) =>
                     Array.from({ length: pc.missing }, (_, i) => (
                       <DraggablePendingClass
                         key={`pending_${pc.id}_${i}`}

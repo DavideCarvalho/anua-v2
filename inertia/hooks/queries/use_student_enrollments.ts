@@ -1,20 +1,18 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.students({ id: '' }).enrollments.$get
+const $route = tuyau.$route('api.v1.students.enrollments.list')
 
-export type StudentEnrollmentsResponse = InferResponseType<typeof $route>
-export type StudentEnrollment = StudentEnrollmentsResponse[number]
+export type StudentEnrollmentsResponse = InferResponseType<typeof $route.$get>
+export type StudentEnrollment = StudentEnrollmentsResponse extends Array<infer T> ? T : never
 
 export function useStudentEnrollmentsQueryOptions(studentId: string | null | undefined) {
   return {
     queryKey: ['student-enrollments', studentId],
     queryFn: async () => {
       if (!studentId) return []
-      const response = await tuyau.api.v1.students({ id: studentId }).enrollments.$get()
-      return response.data ?? []
+      return tuyau.$route('api.v1.students.enrollments.list', { id: studentId }).$get().unwrap()
     },
     enabled: !!studentId,
-  } satisfies QueryOptions<StudentEnrollmentsResponse>
+  }
 }

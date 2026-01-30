@@ -1,4 +1,3 @@
-import { usePage } from '@inertiajs/react'
 import { QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
@@ -38,7 +37,6 @@ import {
 } from '../../components/ui/select'
 import { useGamificationEvents } from '../../hooks/queries/use_gamification_events'
 import { useRetryGamificationEvent } from '../../hooks/mutations/use_gamification_event_mutations'
-import type { SharedProps } from '../../lib/types'
 
 const EVENT_TYPES = [
   { value: 'ATTENDANCE', label: 'Presenca' },
@@ -87,7 +85,7 @@ export function GamificationEventsTable() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <GamificationEventsErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <GamificationEventsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <GamificationEventsTableContent />
@@ -98,9 +96,6 @@ export function GamificationEventsTable() {
 }
 
 function GamificationEventsTableContent() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
-
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     status: parseAsString.withDefault('all'),
@@ -120,8 +115,8 @@ function GamificationEventsTableContent() {
 
   const retryEvent = useRetryGamificationEvent()
 
-  const eventsList = events?.data || []
-  const meta = events?.meta
+  const eventsList = (events as any)?.data || []
+  const meta = (events as any)?.meta
 
   const handleRetry = async (id: string) => {
     await retryEvent.mutateAsync(id)

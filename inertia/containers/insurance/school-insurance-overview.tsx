@@ -16,7 +16,7 @@ import { Skeleton } from '../../components/ui/skeleton'
 import { useSchoolInsuranceStatsQueryOptions } from '../../hooks/queries/use_school_insurance_stats'
 import { useSchoolInsuranceBillingsQueryOptions } from '../../hooks/queries/use_school_insurance_billings'
 import { useSchoolInsuranceClaimsQueryOptions } from '../../hooks/queries/use_school_insurance_claims'
-import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
+import { brazilianRealFormatter } from '../../lib/formatters'
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: 'border-yellow-200 bg-yellow-50 text-yellow-700',
@@ -232,7 +232,7 @@ export function SchoolInsuranceOverview({ schoolId }: SchoolInsuranceOverviewPro
                 O seguro educacional protege sua escola contra inadimplência. Quando um aluno
                 atinge o período de carência com pagamento em atraso, um sinistro é aberto
                 automaticamente e você pode receber até{' '}
-                <strong>{stats?.latestBilling?.insurancePercentage || 100}%</strong> do valor
+                <strong>{(stats?.latestBilling as any)?.insurancePercentage || 100}%</strong> do valor
                 em atraso após aprovação.
               </p>
             </div>

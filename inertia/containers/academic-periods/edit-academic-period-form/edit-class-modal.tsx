@@ -84,7 +84,7 @@ export function EditClassModal({
   initialData,
 }: EditClassModalProps) {
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       name: '',
       teachers: [],
@@ -92,7 +92,7 @@ export function EditClassModal({
   })
 
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control: form.control as any,
     name: 'teachers',
   })
 

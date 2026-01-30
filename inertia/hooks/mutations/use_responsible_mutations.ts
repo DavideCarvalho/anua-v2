@@ -8,15 +8,17 @@ export function useAssignResponsible() {
     mutationFn: ({
       studentId,
       responsibleId,
-      relationship,
+      isPedagogical,
+      isFinancial,
     }: {
       studentId: string
       responsibleId: string
-      relationship?: string
+      isPedagogical?: boolean
+      isFinancial?: boolean
     }) => {
       return tuyau
-        .$route('api.v1.responsibles.assign', { studentId })
-        .$post({ responsibleId, relationship })
+        .$route('api.v1.responsibles.assign', { studentId } as any)
+        .$post({ responsibleId, isPedagogical, isFinancial } as any)
         .unwrap()
     },
     onSuccess: (_data, variables) => {
@@ -30,19 +32,18 @@ export function useUpdateResponsibleAssignment() {
 
   return useMutation({
     mutationFn: ({
-      studentId,
       responsibleId,
-      relationship,
-      isFinancialResponsible,
+      isPedagogical,
+      isFinancial,
     }: {
       studentId: string
       responsibleId: string
-      relationship?: string
-      isFinancialResponsible?: boolean
+      isPedagogical?: boolean
+      isFinancial?: boolean
     }) => {
       return tuyau
-        .$route('api.v1.responsibles.updateAssignment', { studentId, responsibleId })
-        .$put({ relationship, isFinancialResponsible })
+        .$route('api.v1.responsibles.updateAssignment', { id: responsibleId })
+        .$put({ isPedagogical, isFinancial })
         .unwrap()
     },
     onSuccess: (_data, variables) => {
@@ -55,9 +56,9 @@ export function useRemoveResponsible() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ studentId, responsibleId }: { studentId: string; responsibleId: string }) => {
+    mutationFn: ({ responsibleId }: { studentId: string; responsibleId: string }) => {
       return tuyau
-        .$route('api.v1.responsibles.remove', { studentId, responsibleId })
+        .$route('api.v1.responsibles.remove', { id: responsibleId })
         .$delete({})
         .unwrap()
     },

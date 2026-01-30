@@ -75,11 +75,9 @@ interface StudentClass {
   levelId?: string | null
 }
 
-interface StudentData extends StudentResponse {
-  classId?: string | null
+type StudentData = StudentResponse & {
   class?: StudentClass
   levels?: StudentLevel[]
-  enrollmentStatus?: string
 }
 
 interface ChangeStudentCourseModalProps {

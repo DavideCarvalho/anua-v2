@@ -13,13 +13,9 @@ export function useGradeSubmission() {
 
   return useMutation({
     mutationFn: ({ assignmentId, submissionId, score, feedback }: GradeSubmissionData) => {
-      return tuyau
-        .$route('api.v1.assignments.submissions.grade')
-        .$post({
-          params: { id: assignmentId, submissionId },
-          score,
-          feedback,
-        })
+      return (tuyau as any)
+        .$route('api.v1.assignments.submissions.grade', { id: assignmentId, submissionId })
+        .$post({ score, feedback })
         .unwrap()
     },
     onSuccess: (_, variables) => {

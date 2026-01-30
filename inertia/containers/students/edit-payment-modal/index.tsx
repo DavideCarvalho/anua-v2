@@ -29,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { Input } from '~/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Card, CardContent } from '~/components/ui/card'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
@@ -121,7 +120,7 @@ function EnrollmentTabContent({
   // Get available payment days from contract
   const availablePaymentDays = useMemo(() => {
     if (!contractData?.paymentDays?.length) return [5, 10, 15, 20] // fallback
-    return contractData.paymentDays.map((pd) => pd.day).sort((a, b) => a - b)
+    return contractData.paymentDays.map((pd: { day: number }) => pd.day).sort((a: number, b: number) => a - b)
   }, [contractData?.paymentDays])
 
   // Calculate max installments based on flexibleInstallments
@@ -129,7 +128,7 @@ function EnrollmentTabContent({
     if (!contractData) return 12
 
     if (contractData.flexibleInstallments && enrollment.academicPeriod?.endDate) {
-      const endDate = new Date(enrollment.academicPeriod.endDate)
+      const endDate = new Date(String(enrollment.academicPeriod.endDate))
       const now = new Date()
       const monthsDiff = differenceInMonths(endDate, now)
       return Math.max(1, Math.min(monthsDiff, contractData.installments))
@@ -279,7 +278,7 @@ function EnrollmentTabContent({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {availablePaymentDays.map((day) => (
+                        {availablePaymentDays.map((day: number) => (
                           <SelectItem key={day} value={day.toString()}>
                             Dia {day}
                           </SelectItem>
@@ -356,9 +355,9 @@ export function EditPaymentModal({
   // Group enrollments by academic period
   const enrollmentsByPeriod = useMemo(() => {
     if (!enrollments) return []
-    return enrollments.filter((e) => e.academicPeriod).sort((a, b) => {
-      const dateA = new Date(a.academicPeriod?.startDate ?? 0)
-      const dateB = new Date(b.academicPeriod?.startDate ?? 0)
+    return enrollments.filter((e: StudentEnrollment) => e.academicPeriod).sort((a: StudentEnrollment, b: StudentEnrollment) => {
+      const dateA = new Date(String(a.academicPeriod?.startDate ?? 0))
+      const dateB = new Date(String(b.academicPeriod?.startDate ?? 0))
       return dateB.getTime() - dateA.getTime()
     })
   }, [enrollments])
@@ -416,7 +415,7 @@ export function EditPaymentModal({
           ) : (
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="w-full justify-start">
-                {enrollmentsByPeriod.map((enrollment) => (
+                {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
                   <TabsTrigger
                     key={enrollment.id}
                     value={enrollment.academicPeriodId ?? ''}
@@ -426,7 +425,7 @@ export function EditPaymentModal({
                 ))}
               </TabsList>
 
-              {enrollmentsByPeriod.map((enrollment) => (
+              {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
                 <TabsContent key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
                   <EnrollmentTabContent
                     enrollment={enrollment}

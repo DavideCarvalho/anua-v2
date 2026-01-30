@@ -44,7 +44,7 @@ export function EditTeacherSubjectsModal({
     useSubjectsQueryOptions({ page: 1, limit: 100, schoolId })
   )
 
-  const subjects = Array.isArray(subjectsData) ? subjectsData : subjectsData?.data || []
+  const subjects = Array.isArray(subjectsData) ? subjectsData : (subjectsData as any)?.data || []
 
   // Initialize selected subjects when teacher changes
   useEffect(() => {
@@ -102,7 +102,7 @@ export function EditTeacherSubjectsModal({
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto border rounded-lg p-3">
-              {subjects.map((subject) => (
+              {subjects.map((subject: { id: string; name: string }) => (
                 <div key={subject.id} className="flex items-center gap-2">
                   <Checkbox
                     id={`subject-${subject.id}`}

@@ -75,6 +75,7 @@ export const finishEnrollmentValidator = vine.compile(
           'GUARDIAN',
           'OTHER',
         ]),
+        responsibleIndex: vine.number().optional(),
       })
     ),
 

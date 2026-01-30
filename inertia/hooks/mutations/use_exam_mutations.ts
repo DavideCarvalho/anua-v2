@@ -50,7 +50,7 @@ export function useUpdateExamGrade() {
     }) => {
       return tuyau
         .$route('api.v1.exams.updateGrade', { id: examId, gradeId })
-        .$put({ score, feedback })
+        .$put({ score, feedback } as any)
         .unwrap()
     },
     onSuccess: (_data, variables) => {

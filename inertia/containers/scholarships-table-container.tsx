@@ -25,19 +25,6 @@ import {
   Edit,
 } from 'lucide-react'
 
-interface ScholarshipItem {
-  id: string
-  name: string
-  type: string
-  discountPercentage: number
-  enrollmentDiscountPercentage?: number
-  code?: string
-  isActive: boolean
-  schoolPartner?: {
-    name: string
-  }
-}
-
 // Loading Skeleton
 function ScholarshipsListSkeleton() {
   return (
@@ -104,7 +91,7 @@ export function ScholarshipsTableContainer({
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ScholarshipsListErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <ScholarshipsListErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <ScholarshipsTableContent onEdit={onEdit} onNew={onNew} />
@@ -190,7 +177,7 @@ function ScholarshipsTableContent({
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row: ScholarshipItem) => (
+                {rows.map((row: any) => (
                   <tr key={row.id} className="border-t hover:bg-muted/30 transition-colors">
                     <td className="p-4 font-medium">{row.name}</td>
                     <td className="p-4">

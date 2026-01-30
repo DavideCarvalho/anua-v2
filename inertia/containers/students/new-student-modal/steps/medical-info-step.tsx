@@ -1,5 +1,6 @@
 import { useFieldArray, useFormContext } from 'react-hook-form'
-import { Plus, Trash2, GripVertical } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
+import { Plus, Trash2, GripVertical, UserCheck } from 'lucide-react'
 import {
   FormControl,
   FormField,
@@ -43,6 +44,70 @@ export function MedicalInfoStep() {
     control: form.control,
     name: 'medicalInfo.emergencyContacts',
   })
+
+  const responsibles = form.watch('responsibles')
+  const watchedEmergencyContacts = form.watch('medicalInfo.emergencyContacts')
+
+  // Track which responsibleIndexes are already used
+  const usedResponsibleIndexes = useMemo(() => {
+    const indexes = new Set<number>()
+    watchedEmergencyContacts?.forEach((contact) => {
+      if (contact.responsibleIndex != null) {
+        indexes.add(contact.responsibleIndex)
+      }
+    })
+    return indexes
+  }, [watchedEmergencyContacts])
+
+  // If a responsible is removed, clear emergency contacts linked to it
+  useEffect(() => {
+    watchedEmergencyContacts?.forEach((contact, contactIndex) => {
+      if (
+        contact.responsibleIndex != null &&
+        contact.responsibleIndex >= responsibles.length
+      ) {
+        form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.responsibleIndex`, undefined)
+        form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.name`, '')
+        form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.phone`, '')
+        form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.relationship`, 'OTHER')
+      }
+    })
+  }, [responsibles.length])
+
+  const handleSelectResponsible = (contactIndex: number, value: string) => {
+    if (value === 'manual') {
+      form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.responsibleIndex`, undefined)
+      form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.name`, '')
+      form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.phone`, '')
+      form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.relationship`, 'OTHER')
+      return
+    }
+
+    const respIndex = parseInt(value, 10)
+    const resp = responsibles[respIndex]
+    if (!resp) return
+
+    form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.responsibleIndex`, respIndex)
+    form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.name`, resp.name)
+    form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.phone`, resp.phone)
+  }
+
+  // Sync responsible data changes to linked emergency contacts
+  const responsibleDataKey = responsibles
+    .map((r) => `${r.name}|${r.phone}`)
+    .join('\0')
+
+  useEffect(() => {
+    watchedEmergencyContacts?.forEach((contact, contactIndex) => {
+      if (contact.responsibleIndex != null) {
+        const resp = responsibles[contact.responsibleIndex]
+        if (resp) {
+          form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.name`, resp.name)
+          form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.phone`, resp.phone)
+        }
+      }
+    })
+  }, [responsibleDataKey])
 
   return (
     <div className="space-y-6 py-4">
@@ -203,91 +268,141 @@ export function MedicalInfoStep() {
               Pelo menos um contato de emergência é obrigatório
             </p>
           )}
-          {emergencyContacts.map((field, index) => (
-            <Card key={field.id}>
-              <CardContent className="pt-4 space-y-4">
-                <div className="flex items-start gap-2">
-                  <div className="flex items-center justify-center w-6 h-10 text-muted-foreground">
-                    <GripVertical className="h-4 w-4" />
+          {emergencyContacts.map((field, index) => {
+            const isLinked = watchedEmergencyContacts?.[index]?.responsibleIndex != null
+            const currentResponsibleIndex = watchedEmergencyContacts?.[index]?.responsibleIndex
+
+            return (
+              <Card key={field.id}>
+                <CardContent className="pt-4 space-y-4">
+                  <div className="flex items-start gap-2">
+                    <div className="flex items-center justify-center w-6 h-10 text-muted-foreground">
+                      <GripVertical className="h-4 w-4" />
+                    </div>
+                    <Label className="flex items-center h-10 text-sm font-medium">
+                      Prioridade {index + 1}
+                    </Label>
                   </div>
-                  <Label className="flex items-center h-10 text-sm font-medium">
-                    Prioridade {index + 1}
-                  </Label>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`medicalInfo.emergencyContacts.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome*</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Nome do contato" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`medicalInfo.emergencyContacts.${index}.phone`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone*</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            maxLength={11}
-                            placeholder="11999999999"
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/\D/g, '')
-                              field.onChange(value)
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex items-end gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`medicalInfo.emergencyContacts.${index}.relationship`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Parentesco*</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {EmergencyContactRelationship.map((rel) => (
-                              <SelectItem key={rel} value={rel}>
-                                {EmergencyContactRelationshipLabels[rel]}
+
+                  {responsibles.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="h-4 w-4 text-muted-foreground" />
+                      <Select
+                        value={
+                          currentResponsibleIndex != null
+                            ? String(currentResponsibleIndex)
+                            : 'manual'
+                        }
+                        onValueChange={(value) => handleSelectResponsible(index, value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Selecionar responsável" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="manual">Outro contato</SelectItem>
+                          {responsibles.map((resp, respIndex) => {
+                            const isUsedByOther =
+                              usedResponsibleIndexes.has(respIndex) &&
+                              currentResponsibleIndex !== respIndex
+                            return (
+                              <SelectItem
+                                key={respIndex}
+                                value={String(respIndex)}
+                                disabled={isUsedByOther}
+                              >
+                                {resp.name || `Responsável ${respIndex + 1}`}
                               </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeEmergencyContact(index)}
-                    className="mb-2"
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`medicalInfo.emergencyContacts.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome*</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Nome do contato"
+                              disabled={isLinked}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`medicalInfo.emergencyContacts.${index}.phone`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Telefone*</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              maxLength={11}
+                              placeholder="11999999999"
+                              disabled={isLinked}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '')
+                                field.onChange(value)
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="flex items-end gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`medicalInfo.emergencyContacts.${index}.relationship`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Parentesco*</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isLinked}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {EmergencyContactRelationship.map((rel) => (
+                                <SelectItem key={rel} value={rel}>
+                                  {EmergencyContactRelationshipLabels[rel]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeEmergencyContact(index)}
+                      className="mb-2"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </CardContent>
       </Card>
     </div>

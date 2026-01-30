@@ -199,7 +199,7 @@ function SubjectGradesTableContent({ classId, subjectId, courseId, academicPerio
                         <div className="space-y-2">
                           <h4 className="text-sm font-semibold">Notas Individuais</h4>
                           <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                            {student.grades.map((gradeItem) => (
+                            {student.grades.map((gradeItem: StudentGrade['grades'][number]) => (
                               <div
                                 key={gradeItem.assignment.id}
                                 className="flex items-center justify-between rounded-md border bg-background p-2"

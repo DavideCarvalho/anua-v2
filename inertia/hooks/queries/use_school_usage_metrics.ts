@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.schoolUsageMetrics.show')
@@ -25,7 +24,7 @@ export function useSchoolUsageMetricsQueryOptions(options: UseSchoolUsageMetrics
         .unwrap()
     },
     enabled: !!schoolId,
-  } satisfies QueryOptions<SchoolUsageMetricsResponse>
+  }
 }
 
 export function useSchoolUsageMetrics(options: UseSchoolUsageMetricsOptions) {

@@ -22,7 +22,7 @@ export function useAssignTeacherToClassMutationOptions() {
     mutationFn: ({ teacherId, classId }: { teacherId: string; classId: string }) => {
       return tuyau
         .$route('api.v1.teachers.assignClass', { id: teacherId })
-        .$post({ classId })
+        .$post({ classId } as any)
         .unwrap()
     },
   }
@@ -49,8 +49,8 @@ export function useApproveTeacherAbsenceMutationOptions() {
 
 export function useRejectTeacherAbsenceMutationOptions() {
   return {
-    mutationFn: ({ absenceId, reason }: { absenceId: string; reason?: string }) => {
-      return tuyau.$route('api.v1.teachers.rejectAbsence').$patch({ absenceId, reason }).unwrap()
+    mutationFn: ({ absenceId, rejectionReason }: { absenceId: string; rejectionReason: string }) => {
+      return tuyau.$route('api.v1.teachers.rejectAbsence').$patch({ absenceId, rejectionReason }).unwrap()
     },
   }
 }

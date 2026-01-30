@@ -30,7 +30,7 @@ export function useImpersonationConfigQueryOptions(params: ImpersonationConfigPa
         },
       })
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar configuração de personificação')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar configuração de personificação')
       }
       return response.data
     },

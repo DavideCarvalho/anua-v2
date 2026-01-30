@@ -1,21 +1,21 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { InferRequestType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.posts.update')
 
-type UpdatePostParams = NonNullable<Parameters<typeof $route.$put>[0]>['params']
-type UpdatePostBody = NonNullable<Parameters<typeof $route.$put>[0]>
+type UpdatePostBody = InferRequestType<typeof $route.$put>
 
 export function useUpdatePostMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ params, ...body }: UpdatePostBody & { params: UpdatePostParams }) => {
-      return $route.$put({ params, ...body }).unwrap()
+    mutationFn: ({ id, ...body }: UpdatePostBody & { id: string }) => {
+      return tuyau.$route('api.v1.posts.update', { id }).$put(body).unwrap()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })
-      queryClient.invalidateQueries({ queryKey: ['posts', variables.params.id] })
+      queryClient.invalidateQueries({ queryKey: ['posts', variables.id] })
     },
   })
 }

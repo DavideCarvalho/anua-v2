@@ -5,7 +5,6 @@ import { Trophy, Star, Medal, Target, XCircle } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
 
 import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 
@@ -50,7 +49,7 @@ function GamificacaoContent() {
     <div className="space-y-6">
       {/* Students Points */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {students.map((student) => (
+        {students.map((student: any) => (
           <Card key={student.id}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

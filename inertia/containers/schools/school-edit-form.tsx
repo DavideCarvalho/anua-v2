@@ -105,12 +105,12 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
   // Buscar usuários da escola para o select
   const { data: schoolUsers, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['school-users', schoolId],
-    queryFn: () => tuyau.api.v1.schools({ id: schoolId }).users.$get().unwrap(),
+    queryFn: () => (tuyau.api.v1.schools as any)({ id: schoolId }).users.$get().unwrap(),
     enabled: directorMode === 'select',
   })
 
   const form = useForm<SchoolEditFormData>({
-    resolver: zodResolver(schoolEditSchema),
+    resolver: zodResolver(schoolEditSchema) as any,
     defaultValues: {
       name: school?.name || '',
       logoUrl: school?.logoUrl || null,
@@ -135,9 +135,9 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
 
   const { mutateAsync: updateSchool, isPending } = useMutation({
     mutationFn: async (data: SchoolEditFormData) => {
-      const response = await tuyau.api.v1.schools({ id: schoolId }).$put(data)
+      const response = await (tuyau.api.v1.schools as any)({ id: schoolId }).$put(data)
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao atualizar escola')
+        throw new Error((response.error as any).value?.message || 'Erro ao atualizar escola')
       }
       return response.data
     },
@@ -149,7 +149,7 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
 
   const { mutateAsync: updateDirector, isPending: isUpdatingDirector } = useMutation({
     mutationFn: async (data: { existingUserId?: string; newDirector?: { name: string; email: string; phone?: string } }) => {
-      return tuyau.api.v1.schools({ id: schoolId }).director.$put(data).unwrap()
+      return (tuyau.api.v1.schools as any)({ id: schoolId }).director.$put(data).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school', schoolId] })
@@ -170,7 +170,7 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
     } else if (directorMode === 'create') {
       const validation = newDirectorSchema.safeParse(newDirectorData)
       if (!validation.success) {
-        toast.error('Dados inválidos', { description: validation.error.errors[0]?.message })
+        toast.error('Dados inválidos', { description: validation.error.issues[0]?.message })
         return
       }
       await updateDirector({ newDirector: newDirectorData })
@@ -783,7 +783,7 @@ export function SchoolEditForm({ schoolId }: { schoolId: string }) {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <EditFormError error={error} resetErrorBoundary={resetErrorBoundary} />
+            <EditFormError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <Suspense fallback={<EditFormSkeleton />}>

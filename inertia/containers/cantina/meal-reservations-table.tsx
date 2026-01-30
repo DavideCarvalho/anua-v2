@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Calendar, User, Check, X, Clock, Utensils } from 'lucide-react'
+import { Calendar, User, Check, X, Utensils } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -44,7 +44,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
   const updateStatusMutation = useUpdateCanteenMealReservationStatus()
   const cancelMutation = useCancelCanteenMealReservation()
 
-  const reservations = Array.isArray(data) ? data : data?.data || []
+  const reservations = Array.isArray(data) ? data : (data as any)?.data || []
 
   if (reservations.length === 0) {
     return (

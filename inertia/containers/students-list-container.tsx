@@ -140,8 +140,9 @@ function StudentsListContent({
     })
   )
 
-  const students = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const result = data as any
+  const students = Array.isArray(result) ? result : result?.data || []
+  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
 
   if (students.length === 0) {
     return (
@@ -517,7 +518,7 @@ export function StudentsListContainer() {
           <ErrorBoundary
             onReset={reset}
             fallbackRender={({ error, resetErrorBoundary }) => (
-              <StudentsListError error={error} resetErrorBoundary={resetErrorBoundary} />
+              <StudentsListError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
             )}
           >
             <Suspense fallback={<StudentsListSkeleton />}>

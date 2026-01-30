@@ -5,10 +5,10 @@ export function useRegisterForEvent() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ eventId, userId }: { eventId: string; userId?: string }) => {
+    mutationFn: ({ eventId, participantId, parentalConsent }: { eventId: string; participantId: string; parentalConsent?: boolean }) => {
       return tuyau
-        .$route('api.v1.events.participants.register', { id: eventId })
-        .$post({ userId })
+        .$route('api.v1.events.participants.register', { eventId })
+        .$post({ participantId, parentalConsent })
         .unwrap()
     },
     onSuccess: (_data, variables) => {
@@ -34,8 +34,8 @@ export function useUpdateParticipantStatus() {
       status: 'REGISTERED' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
     }) => {
       return tuyau
-        .$route('api.v1.events.participants.updateStatus', { id: eventId, participantId })
-        .$put({ status })
+        .$route('api.v1.events.participants.updateStatus', { eventId, participantId })
+        .$put({ status } as any)
         .unwrap()
     },
     onSuccess: (_data, variables) => {
@@ -52,7 +52,7 @@ export function useCancelEventRegistration() {
   return useMutation({
     mutationFn: ({ eventId, participantId }: { eventId: string; participantId: string }) => {
       return tuyau
-        .$route('api.v1.events.participants.cancel', { id: eventId, participantId })
+        .$route('api.v1.events.participants.cancel', { eventId, participantId })
         .$delete({})
         .unwrap()
     },
@@ -71,7 +71,7 @@ export function useConfirmEventAttendance() {
   return useMutation({
     mutationFn: ({ eventId, participantId }: { eventId: string; participantId: string }) => {
       return tuyau
-        .$route('api.v1.events.participants.confirmAttendance', { id: eventId, participantId })
+        .$route('api.v1.events.participants.confirmAttendance', { eventId, participantId })
         .$post({})
         .unwrap()
     },

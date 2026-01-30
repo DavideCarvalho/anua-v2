@@ -17,6 +17,7 @@ import { ResponsiblesStep } from '../new-student-modal/steps/responsibles-step'
 import { AddressStep } from '../new-student-modal/steps/address-step'
 import { MedicalInfoStep } from '../new-student-modal/steps/medical-info-step'
 import { editStudentSchema, type EditStudentFormData } from './schema'
+import { EmergencyContactRelationship } from '../new-student-modal/schema'
 import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
 import { useFullUpdateStudent } from '~/hooks/mutations/use_student_mutations'
 
@@ -99,7 +100,22 @@ export function EditStudentModal({
   // Populate form with student data when loaded
   useEffect(() => {
     if (student && open && !isInitialized) {
-      const studentData = student as any
+      const studentData = student as StudentResponse
+
+      const mappedResponsibles =
+        studentData.responsibles?.map((r) => ({
+          id: r.responsibleId,
+          name: r.responsible?.name || '',
+          email: r.responsible?.email || '',
+          phone: r.responsible?.phone || '',
+          documentType: (r.responsible?.documentType as 'CPF' | 'RG' | 'PASSPORT') || 'CPF',
+          documentNumber: r.responsible?.documentNumber || '',
+          birthDate: r.responsible?.birthDate
+            ? new Date(String(r.responsible.birthDate))
+            : new Date(),
+          isPedagogical: r.isPedagogical || false,
+          isFinancial: r.isFinancial || false,
+        })) || []
 
       form.reset({
         basicInfo: {
@@ -107,27 +123,14 @@ export function EditStudentModal({
           email: studentData.user?.email || '',
           phone: studentData.user?.phone || '',
           birthDate: studentData.user?.birthDate
-            ? new Date(studentData.user.birthDate)
+            ? new Date(String(studentData.user.birthDate))
             : new Date(),
-          documentType: studentData.user?.documentType || 'CPF',
+          documentType: (studentData.user?.documentType as 'CPF' | 'RG' | 'PASSPORT') || 'CPF',
           documentNumber: studentData.user?.documentNumber || '',
           isSelfResponsible: studentData.isSelfResponsible || false,
           whatsappContact: studentData.user?.whatsappContact || false,
         },
-        responsibles:
-          studentData.responsibles?.map((r: any) => ({
-            id: r.responsibleId,
-            name: r.responsible?.name || '',
-            email: r.responsible?.email || '',
-            phone: r.responsible?.phone || '',
-            documentType: r.responsible?.documentType || 'CPF',
-            documentNumber: r.responsible?.documentNumber || '',
-            birthDate: r.responsible?.birthDate
-              ? new Date(r.responsible.birthDate)
-              : new Date(),
-            isPedagogical: r.isPedagogical || false,
-            isFinancial: r.isFinancial || false,
-          })) || [],
+        responsibles: mappedResponsibles,
         address: {
           zipCode: studentData.address?.zipCode || '',
           street: studentData.address?.street || '',
@@ -140,7 +143,7 @@ export function EditStudentModal({
         medicalInfo: {
           conditions: studentData.medicalInfo?.conditions || '',
           medications:
-            studentData.medicalInfo?.medications?.map((m: any) => ({
+            studentData.medicalInfo?.medications?.map((m) => ({
               id: m.id,
               name: m.name || '',
               dosage: m.dosage || '',
@@ -148,16 +151,32 @@ export function EditStudentModal({
               instructions: m.instructions || '',
             })) || [],
           emergencyContacts:
-            studentData.emergencyContacts?.map((c: any, index: number) => ({
-              id: c.id,
-              name: c.name || '',
-              phone: c.phone || '',
-              relationship: c.relationship || 'OTHER',
-              order: c.order ?? index,
-            })) || [],
+            studentData.emergencyContacts?.map((c, index) => {
+              // Match by userId first, then fallback to name+phone for legacy data
+              let respIndex = -1
+              if (c.userId) {
+                respIndex = studentData.responsibles?.findIndex(
+                  (r) => r.responsibleId === c.userId
+                ) ?? -1
+              }
+              if (respIndex < 0) {
+                respIndex = mappedResponsibles.findIndex(
+                  (r) => r.name === c.name && r.phone === c.phone
+                )
+              }
+              return {
+                id: c.id,
+                name: c.name || '',
+                phone: c.phone || '',
+                relationship: (c.relationship as typeof EmergencyContactRelationship[number]) || 'OTHER',
+                order: c.order ?? index,
+                responsibleIndex: respIndex >= 0 ? respIndex : undefined,
+              }
+            }) || [],
         },
       })
 
+      setStepsStatus(STEPS_CONFIG.map(() => 'success'))
       setIsInitialized(true)
     }
   }, [student, open, isInitialized, form])

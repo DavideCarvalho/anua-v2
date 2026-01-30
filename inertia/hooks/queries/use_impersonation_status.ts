@@ -1,5 +1,4 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.api.v1.admin.impersonation.status.$get
@@ -12,10 +11,10 @@ export function useImpersonationStatusQueryOptions() {
     queryFn: async () => {
       const response = await $route()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar status de personificação')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar status de personificação')
       }
       return response.data
     },
     staleTime: 0, // Sempre buscar status atualizado
-  } satisfies QueryOptions
+  }
 }

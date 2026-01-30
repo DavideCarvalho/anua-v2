@@ -55,7 +55,7 @@ export function BoughtPurchaseRequestModal({
   const markBoughtMutation = useMarkBoughtPurchaseRequestMutation()
 
   const form = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       finalQuantity: purchaseRequest?.quantity ?? 1,
       finalUnitValue: purchaseRequest?.unitValue ?? 0,

@@ -258,7 +258,7 @@ export function StudentDocumentsContainer({
                           {doc.fileName} - {formatFileSize(doc.size)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Enviado em {brazilianDateFormatter(doc.createdAt)}
+                          Enviado em {brazilianDateFormatter(String(doc.createdAt))}
                         </p>
                         {doc.status === 'REJECTED' && doc.rejectionReason && (
                           <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
@@ -267,7 +267,7 @@ export function StudentDocumentsContainer({
                         )}
                         {doc.reviewedAt && doc.reviewerName && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            Revisado por {doc.reviewerName} em {brazilianDateFormatter(doc.reviewedAt)}
+                            Revisado por {doc.reviewerName} em {brazilianDateFormatter(String(doc.reviewedAt))}
                           </p>
                         )}
                       </div>

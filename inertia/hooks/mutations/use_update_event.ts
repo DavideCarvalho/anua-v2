@@ -1,21 +1,21 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { InferRequestType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.events.update')
 
-type UpdateEventParams = NonNullable<Parameters<typeof $route.$put>[0]>['params']
-type UpdateEventBody = NonNullable<Parameters<typeof $route.$put>[0]>
+type UpdateEventBody = InferRequestType<typeof $route.$put>
 
 export function useUpdateEventMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ params, ...body }: UpdateEventBody & { params: UpdateEventParams }) => {
-      return $route.$put({ params, ...body }).unwrap()
+    mutationFn: ({ id, ...body }: UpdateEventBody & { id: string }) => {
+      return tuyau.$route('api.v1.events.update', { id }).$put(body).unwrap()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
-      queryClient.invalidateQueries({ queryKey: ['events', variables.params.id] })
+      queryClient.invalidateQueries({ queryKey: ['events', variables.id] })
     },
   })
 }

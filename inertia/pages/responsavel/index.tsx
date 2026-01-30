@@ -112,7 +112,7 @@ export default function ResponsavelDashboard() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Erro inesperado: {error.message}
+                Erro inesperado: {(error as Error).message}
                 <button onClick={resetErrorBoundary} className="ml-2 underline">
                   Tentar novamente
                 </button>

@@ -119,7 +119,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
     )
   }
 
-  const exams: Exam[] = data?.data ?? []
+  const exams: Exam[] = (data?.data ?? []) as any
 
   if (exams.length === 0) {
     return <ExamsListEmpty />

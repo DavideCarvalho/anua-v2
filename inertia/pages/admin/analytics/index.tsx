@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { AdminLayout } from '../../../components/layouts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
 import {
   GraduationCap,
   Users,

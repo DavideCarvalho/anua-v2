@@ -7,7 +7,6 @@ import {
   ShoppingCart,
   CheckCircle,
   Clock,
-  BookOpen,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -30,21 +29,6 @@ function DashboardOverviewSkeleton() {
         ))}
       </div>
     </div>
-  )
-}
-
-function DashboardOverviewError() {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="py-12 text-center">
-          <User className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold text-destructive">
-            Erro ao carregar dados
-          </h3>
-        </div>
-      </CardContent>
-    </Card>
   )
 }
 
@@ -222,7 +206,7 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
               <CardContent>
                 {overview.pedagogical.recentGrades.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.pedagogical.recentGrades.map((grade, index) => (
+                    {overview.pedagogical.recentGrades.map((grade: { subject: string; assignmentTitle: string; grade: number; maxGrade: number }, index: number) => (
                       <div
                         key={index}
                         className="flex items-center justify-between rounded-lg border p-3"
@@ -267,7 +251,7 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
               <CardContent>
                 {overview.pedagogical.upcomingAssignments.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.pedagogical.upcomingAssignments.map((assignment) => (
+                    {overview.pedagogical.upcomingAssignments.map((assignment: { id: string; title: string; subject: string; dueDate: string }) => (
                       <div
                         key={assignment.id}
                         className="flex items-center gap-3 rounded-lg border p-3"
@@ -329,7 +313,7 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
                           <div className="flex-1">
                             <p className="font-medium">{payment.description}</p>
                             <p className="text-xs text-muted-foreground">
-                              Vencimento: {formatDate(payment.dueDate)}
+                              Vencimento: {formatDate(String(payment.dueDate))}
                             </p>
                           </div>
                           <div className="text-right">
@@ -366,7 +350,7 @@ export function DashboardOverviewContainer({ studentId }: { studentId: string })
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Erro ao carregar dados: {error.message}
+                Erro ao carregar dados: {(error as Error).message}
                 <button onClick={resetErrorBoundary} className="ml-2 underline">
                   Tentar novamente
                 </button>

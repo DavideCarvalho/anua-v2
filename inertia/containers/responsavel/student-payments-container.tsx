@@ -3,10 +3,8 @@ import { DollarSign, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-r
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
-import { Skeleton } from '../../components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -18,10 +16,7 @@ import {
 
 import {
   useResponsavelStudentPaymentsQueryOptions,
-  type ResponsavelStudentPaymentsResponse,
 } from '../../hooks/queries/use_responsavel_student_payments'
-
-type Payment = ResponsavelStudentPaymentsResponse['data'][number]
 
 interface StudentPaymentsContainerProps {
   studentId: string
@@ -169,7 +164,7 @@ export function StudentPaymentsContainer({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((payment: Payment) => (
+                {data.data.map((payment: any) => (
                   <TableRow key={payment.id}>
                     <TableCell className="font-medium">{payment.description}</TableCell>
                     <TableCell>
@@ -179,7 +174,7 @@ export function StudentPaymentsContainer({
                       {formatCurrency(payment.amount)}
                     </TableCell>
                     <TableCell className="text-center">
-                      {getStatusBadge(payment.status, payment.dueDate)}
+                      {getStatusBadge(payment.status, String(payment.dueDate))}
                     </TableCell>
                   </TableRow>
                 ))}

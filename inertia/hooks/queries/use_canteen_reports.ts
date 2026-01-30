@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const $route = tuyau.$route('api.v1.canteenReports.summary')
@@ -26,7 +25,7 @@ export function useCanteenReportQueryOptions(options: UseCanteenReportOptions) {
         .unwrap()
     },
     enabled: !!canteenId,
-  } satisfies QueryOptions<CanteenReportResponse>
+  }
 }
 
 export function useCanteenReport(options: UseCanteenReportOptions) {

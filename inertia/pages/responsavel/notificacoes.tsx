@@ -7,11 +7,8 @@ import { Card, CardContent } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 
 const $route = tuyau.api.v1.responsavel.notifications.$get
-
-type NotificationsResponse = Awaited<ReturnType<typeof $route>>
 
 function useNotificationsQueryOptions() {
   return {
@@ -19,11 +16,11 @@ function useNotificationsQueryOptions() {
     queryFn: async () => {
       const response = await $route()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar notificações')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar notificações')
       }
       return response.data
     },
-  } satisfies QueryOptions
+  }
 }
 
 const TYPE_ICONS: Record<string, typeof Bell> = {
@@ -41,7 +38,8 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
 }
 
 function NotificacoesContent() {
-  const { data: notificationsData, isLoading, isError, error } = useQuery(useNotificationsQueryOptions())
+  const { data: rawNotificationsData, isLoading, isError, error } = useQuery(useNotificationsQueryOptions())
+  const notificationsData = rawNotificationsData as any
 
   if (isLoading) {
     return <NotificacoesSkeleton />
@@ -97,7 +95,7 @@ function NotificacoesContent() {
       {/* Lista de Notificações */}
       {notificationsData.data.length > 0 ? (
         <div className="space-y-2">
-          {notificationsData.data.map((notification) => {
+          {notificationsData.data.map((notification: any) => {
             const Icon = TYPE_ICONS[notification.type as keyof typeof TYPE_ICONS] || Bell
 
             return (
@@ -194,7 +192,7 @@ export default function NotificacoesPage() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Erro inesperado: {error.message}
+              Erro inesperado: {(error as Error).message}
               <button onClick={resetErrorBoundary} className="ml-2 underline">
                 Tentar novamente
               </button>

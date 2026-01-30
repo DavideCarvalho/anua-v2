@@ -53,7 +53,7 @@ export function useToggleCanteenItemActive() {
 
   return useMutation({
     mutationFn: (id: string) => {
-      return tuyau.$route('api.v1.canteenItems.toggleActive', { id }).$post({}).unwrap()
+      return tuyau.$route('api.v1.canteenItems.toggleActive', { id }).$get().unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['canteen-items'] })

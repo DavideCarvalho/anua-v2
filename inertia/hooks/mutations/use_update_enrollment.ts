@@ -18,16 +18,10 @@ export function useUpdateEnrollment() {
 
   return useMutation({
     mutationFn: async ({ studentId, enrollmentId, data }: UpdateEnrollmentParams) => {
-      const response = await tuyau.api.v1
-        .students({ id: studentId })
-        .enrollments({ enrollmentId })
-        .$patch(data)
-
-      if (response.error) {
-        throw new Error('Erro ao atualizar informações de pagamento')
-      }
-
-      return response.data
+      return tuyau
+        .$route('api.v1.students.enrollments.update', { id: studentId, enrollmentId } as any)
+        .$patch(data as any)
+        .unwrap()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['student-enrollments', variables.studentId] })

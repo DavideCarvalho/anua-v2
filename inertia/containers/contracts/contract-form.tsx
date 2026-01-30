@@ -159,7 +159,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
     createContract.isPending || updateContract.isPending || updateInterestConfig.isPending
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
@@ -177,7 +177,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       interestPerDay: initialData?.interestConfig?.delayInterestPerDayDelayed || undefined,
       earlyDiscounts: initialData?.earlyDiscounts || [],
       contractDocuments:
-        initialData?.contractDocuments?.map((doc) => ({
+        initialData?.contractDocuments?.map((doc: { id: string; name: string; description?: string; required: boolean }) => ({
           id: doc.id,
           name: doc.name,
           description: doc.description || '',

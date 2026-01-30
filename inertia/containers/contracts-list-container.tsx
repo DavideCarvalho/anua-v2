@@ -114,7 +114,7 @@ export function ContractsListContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ContractsListErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <ContractsListErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <ContractsListContent />

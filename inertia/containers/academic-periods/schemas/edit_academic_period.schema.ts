@@ -22,9 +22,9 @@ export const SEGMENT_LABELS: Record<Segment, string> = {
 
 export const calendarFormSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  segment: z.enum(SEGMENTS, { required_error: 'Segmento é obrigatório' }),
-  startDate: z.date({ required_error: 'Data de início é obrigatória' }),
-  endDate: z.date({ required_error: 'Data de término é obrigatória' }),
+  segment: z.enum(SEGMENTS, { error: 'Segmento é obrigatório' }),
+  startDate: z.date({ error: 'Data de início é obrigatória' }),
+  endDate: z.date({ error: 'Data de término é obrigatória' }),
   enrollmentStartDate: z.date().nullable().optional(),
   enrollmentEndDate: z.date().nullable().optional(),
 })

@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // List student gamifications
@@ -25,7 +24,7 @@ export function useStudentGamificationsQueryOptions(options: UseStudentGamificat
         .$get({ query: { schoolId, page, limit } })
         .unwrap()
     },
-  } satisfies QueryOptions<StudentGamificationsResponse>
+  }
 }
 
 export function useStudentGamifications(options: UseStudentGamificationsOptions = {}) {
@@ -44,7 +43,7 @@ export function useStudentGamificationQueryOptions(id: string) {
       return tuyau.$route('api.v1.studentGamifications.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  } satisfies QueryOptions<StudentGamificationResponse>
+  }
 }
 
 export function useStudentGamification(id: string) {
@@ -70,10 +69,10 @@ export function useGamificationRankingQueryOptions(options: UseGamificationRanki
     queryFn: () => {
       return tuyau
         .$route('api.v1.studentGamifications.ranking')
-        .$get({ query: { schoolId, period, limit } })
+        .$get({ query: { schoolId, period, limit } as any })
         .unwrap()
     },
-  } satisfies QueryOptions<GamificationRankingResponse>
+  }
 }
 
 export function useGamificationRanking(options: UseGamificationRankingOptions = {}) {
@@ -89,10 +88,10 @@ export function useStudentGamificationStatsQueryOptions(studentId: string) {
   return {
     queryKey: ['student-gamification-stats', studentId],
     queryFn: () => {
-      return tuyau.$route('api.v1.students.gamificationStats', { id: studentId }).$get().unwrap()
+      return tuyau.$route('api.v1.students.gamificationStats', { studentId }).$get().unwrap()
     },
     enabled: !!studentId,
-  } satisfies QueryOptions<StudentGamificationStatsResponse>
+  }
 }
 
 export function useStudentGamificationStats(studentId: string) {
@@ -142,10 +141,10 @@ export function useResponsavelStudentGamificationQueryOptions(studentId: string)
         .$route('api.v1.responsavel.api.studentGamification', { studentId })
         .$get()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao carregar gamificacao')
+        throw new Error((response.error as any).value?.message || 'Erro ao carregar gamificacao')
       }
       return response.data as ResponsavelStudentGamificationResponse
     },
     enabled: !!studentId,
-  } satisfies QueryOptions<ResponsavelStudentGamificationResponse>
+  }
 }

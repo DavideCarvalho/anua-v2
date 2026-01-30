@@ -111,7 +111,7 @@ export function ClassesListContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ClassesListErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
+            <ClassesListErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
           <ClassesListContent />
@@ -142,13 +142,13 @@ function ClassesListContent() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null)
   const [classToDelete, setClassToDelete] = useState<ClassItem | null>(null)
-  const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(false)
+  const [_isLoadingClassDetails, setIsLoadingClassDetails] = useState(false)
 
   const { mutateAsync: deleteClass, isPending: isDeleting } = useMutation({
     mutationFn: async (classId: string) => {
-      const response = await tuyau.api.v1.classes({ id: classId }).$delete()
+      const response = await (tuyau.api.v1.classes as any)({ id: classId }).$delete()
       if (response.error) {
-        throw new Error(response.error.message || 'Erro ao excluir turma')
+        throw new Error((response.error as any).value?.message || 'Erro ao excluir turma')
       }
       return response
     },
@@ -157,7 +157,7 @@ function ClassesListContent() {
   const handleEditClass = async (classItem: ClassItem) => {
     setIsLoadingClassDetails(true)
     try {
-      const classData = await tuyau.api.v1.classes({ id: classItem.id }).$get().unwrap()
+      const classData = await (tuyau.api.v1.classes as any)({ id: classItem.id }).$get().unwrap()
       setSelectedClass({
         ...classItem,
         ...classData,
@@ -190,7 +190,7 @@ function ClassesListContent() {
     }
   }
 
-  const classes: ClassItem[] = data?.data || []
+  const classes: ClassItem[] = (data?.data || []) as any
   const meta = data?.meta ?? null
 
   return (
