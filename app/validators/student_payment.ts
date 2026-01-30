@@ -55,5 +55,14 @@ export const markPaymentAsPaidValidator = vine.compile(
     paidAt: vine.date().optional(),
     paymentGatewayId: vine.string().trim().optional(),
     paymentGateway: vine.enum(['ASAAS', 'CUSTOM']).optional(),
+    paymentMethod: vine.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER']).optional(),
+    amountPaid: vine.number().positive().optional(),
+    observation: vine.string().trim().maxLength(500).optional(),
+  })
+)
+
+export const cancelStudentPaymentValidator = vine.compile(
+  vine.object({
+    reason: vine.string().trim().minLength(10).maxLength(500),
   })
 )

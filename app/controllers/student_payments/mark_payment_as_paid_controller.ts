@@ -25,6 +25,12 @@ export default class MarkPaymentAsPaidController {
       payment.paymentGateway = payload.paymentGateway
     }
 
+    const metadata: Record<string, unknown> = { ...(payment.metadata || {}) }
+    if (payload.paymentMethod) metadata.paymentMethod = payload.paymentMethod
+    if (payload.amountPaid) metadata.amountPaid = payload.amountPaid
+    if (payload.observation) metadata.observation = payload.observation
+    payment.metadata = metadata
+
     await payment.save()
 
     await payment.load('student')
