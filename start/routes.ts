@@ -383,6 +383,10 @@ const GetStudentPaymentBoletoController = () =>
 const ListStudentPaymentsByStudentController = () =>
   import('#controllers/student_payments/list_student_payments_by_student_controller')
 
+// Agreements
+const CreateAgreementController = () =>
+  import('#controllers/agreements/create_agreement_controller')
+
 // Asaas
 const AsaasWebhookController = () => import('#controllers/asaas/asaas_webhook_controller')
 
@@ -1433,6 +1437,15 @@ function registerStudentPaymentApiRoutes() {
       router.get('/:id/boleto', [GetStudentPaymentBoletoController]).as('studentPayments.getBoleto')
     })
     .prefix('/student-payments')
+    .use(middleware.auth())
+}
+
+function registerAgreementApiRoutes() {
+  router
+    .group(() => {
+      router.post('/', [CreateAgreementController]).as('agreements.store')
+    })
+    .prefix('/agreements')
     .use(middleware.auth())
 }
 
@@ -2711,6 +2724,7 @@ router
     registerAttendanceApiRoutes()
     registerAssignmentApiRoutes()
     registerStudentPaymentApiRoutes()
+    registerAgreementApiRoutes()
     registerStudentBalanceTransactionApiRoutes()
     registerCanteenApiRoutes()
     registerCanteenReportApiRoutes()
