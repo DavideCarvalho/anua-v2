@@ -39,8 +39,8 @@ export function useCancelStudentPayment() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => {
-      return tuyau.$route('api.v1.studentPayments.cancel', { id }).$post({}).unwrap()
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => {
+      return tuyau.$route('api.v1.studentPayments.cancel', { id }).$post({ reason }).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['student-payments'] })
