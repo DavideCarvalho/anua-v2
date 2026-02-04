@@ -35,9 +35,8 @@ import {
   Filter,
   X,
 } from 'lucide-react'
-import { NewStudentModal } from './students/new-student-modal'
+import { Link, router } from '@inertiajs/react'
 import { DeleteStudentModal } from './students/delete-student-modal'
-import { EditStudentModal } from './students/edit-student-modal'
 import { ChangeStudentCourseModal } from './students/change-course-modal'
 import { EditPaymentModal } from './students/edit-payment-modal'
 import { CreditCard } from 'lucide-react'
@@ -309,9 +308,7 @@ export function StudentsListContainer() {
 
   const { search, academicPeriodId, courseId, classId, page, limit } = filters
 
-  const [isNewStudentModalOpen, setIsNewStudentModalOpen] = useState(false)
   const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
-  const [editStudent, setEditStudent] = useState<StudentAction | null>(null)
   const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
   const [editPaymentStudent, setEditPaymentStudent] = useState<StudentAction | null>(null)
 
@@ -366,9 +363,11 @@ export function StudentsListContainer() {
             onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
-        <Button className="ml-auto" onClick={() => setIsNewStudentModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Aluno
+        <Button className="ml-auto" asChild>
+          <Link href="/escola/administrativo/matriculas/nova">
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Aluno
+          </Link>
         </Button>
       </div>
 
@@ -459,11 +458,6 @@ export function StudentsListContainer() {
         </CardContent>
       </Card>
 
-      <NewStudentModal
-        open={isNewStudentModalOpen}
-        onOpenChange={setIsNewStudentModalOpen}
-      />
-
       {deleteStudent && (
         <DeleteStudentModal
           studentId={deleteStudent.id}
@@ -473,18 +467,6 @@ export function StudentsListContainer() {
             if (!open) setDeleteStudent(null)
           }}
           onSuccess={() => setDeleteStudent(null)}
-        />
-      )}
-
-      {editStudent && (
-        <EditStudentModal
-          studentId={editStudent.id}
-          academicPeriodId={academicPeriodId}
-          open={!!editStudent}
-          onOpenChange={(open) => {
-            if (!open) setEditStudent(null)
-          }}
-          onSuccess={() => setEditStudent(null)}
         />
       )}
 
@@ -530,7 +512,9 @@ export function StudentsListContainer() {
                 courseId={courseId}
                 classId={classId}
                 onPageChange={(p) => setFilters({ page: p })}
-                onEditStudent={setEditStudent}
+                onEditStudent={(student) =>
+                  router.visit(`/escola/administrativo/alunos/${student.id}/editar`)
+                }
                 onChangeCourse={setChangeCourseStudent}
                 onEditPayment={setEditPaymentStudent}
                 onDeleteStudent={setDeleteStudent}

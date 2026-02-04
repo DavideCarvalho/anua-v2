@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import User from '#models/user'
 import { verifyCode } from '#services/otp_service'
 import { verifyCodeValidator } from '#validators/auth'
@@ -27,6 +28,12 @@ export default class VerifyCodeController {
       }
 
       await auth.use('web').login(user)
+
+      // Set emailVerifiedAt on first OTP verification (proves email ownership)
+      if (!user.emailVerifiedAt) {
+        user.emailVerifiedAt = DateTime.now()
+        await user.save()
+      }
 
       return response.ok({
         message: 'Login realizado com sucesso!',

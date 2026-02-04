@@ -96,8 +96,11 @@ export default class FullUpdateStudentController {
       })
     }
 
-    // Get RESPONSIBLE role for creating responsibles
-    const responsibleRole = await Role.findBy('name', 'RESPONSIBLE')
+    // Get STUDENT_RESPONSIBLE role for creating responsibles
+    const responsibleRole = await Role.findBy('name', 'STUDENT_RESPONSIBLE')
+    if (!responsibleRole && !data.basicInfo.isSelfResponsible && data.responsibles.length > 0) {
+      return response.internalServerError({ message: 'Role STUDENT_RESPONSIBLE não encontrada' })
+    }
 
     const trx = await db.transaction()
 
@@ -137,10 +140,12 @@ export default class FullUpdateStudentController {
 
           if (existingResponsible) {
             responsibleUser = existingResponsible
-            // Update existing responsible data
+            // Update existing responsible data (skip email if already verified)
             responsibleUser.merge({
               name: respData.name,
-              email: respData.email,
+              ...(!existingResponsible.emailVerifiedAt && respData.email
+                ? { email: respData.email }
+                : {}),
               phone: respData.phone,
               birthDate: DateTime.fromISO(respData.birthDate),
               documentType: respData.documentType,
@@ -162,7 +167,7 @@ export default class FullUpdateStudentController {
                 documentType: respData.documentType,
                 documentNumber: respData.documentNumber,
                 schoolId: student.user.schoolId,
-                roleId: responsibleRole?.id || null,
+                roleId: responsibleRole!.id,
                 active: true,
               },
               { client: trx }

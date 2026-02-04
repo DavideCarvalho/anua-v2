@@ -1,8 +1,47 @@
 import { z } from 'zod'
-import { DocumentType, EmergencyContactRelationship } from '../new-student-modal/schema'
 
-// Schema for edit is similar to new student but with optional fields and IDs
-export const editStudentSchema = z.object({
+export const PaymentMethod = ['BOLETO', 'CREDIT_CARD', 'PIX'] as const
+export type PaymentMethod = (typeof PaymentMethod)[number]
+
+export const DocumentType = ['CPF', 'RG', 'PASSPORT'] as const
+export type DocumentType = (typeof DocumentType)[number]
+
+export const DocumentTypeLabels: Record<DocumentType, string> = {
+  CPF: 'CPF',
+  RG: 'RG',
+  PASSPORT: 'Passaporte',
+}
+
+export const EmergencyContactRelationship = [
+  'MOTHER',
+  'FATHER',
+  'GRANDMOTHER',
+  'GRANDFATHER',
+  'AUNT',
+  'UNCLE',
+  'COUSIN',
+  'NEPHEW',
+  'NIECE',
+  'GUARDIAN',
+  'OTHER',
+] as const
+export type EmergencyContactRelationship = (typeof EmergencyContactRelationship)[number]
+
+export const EmergencyContactRelationshipLabels: Record<EmergencyContactRelationship, string> = {
+  MOTHER: 'Mãe',
+  FATHER: 'Pai',
+  GRANDMOTHER: 'Avó',
+  GRANDFATHER: 'Avô',
+  AUNT: 'Tia',
+  UNCLE: 'Tio',
+  COUSIN: 'Primo(a)',
+  NEPHEW: 'Sobrinho',
+  NIECE: 'Sobrinha',
+  GUARDIAN: 'Responsável Legal',
+  OTHER: 'Outro',
+}
+
+export const enrollmentSchema = z.object({
   basicInfo: z
     .object({
       name: z.string().min(1, 'O nome é obrigatório'),
@@ -87,7 +126,6 @@ export const editStudentSchema = z.object({
     medications: z
       .array(
         z.object({
-          id: z.string().optional(),
           name: z.string().min(1, 'O nome do medicamento é obrigatório'),
           dosage: z.string().min(1, 'A dosagem é obrigatória'),
           frequency: z.string().min(1, 'A frequência é obrigatória'),
@@ -97,7 +135,6 @@ export const editStudentSchema = z.object({
       .optional(),
     emergencyContacts: z.array(
       z.object({
-        id: z.string().optional(),
         name: z.string().min(1, 'O nome é obrigatório'),
         phone: z.string().min(1, 'O telefone é obrigatório'),
         relationship: z.enum(EmergencyContactRelationship, {
@@ -108,6 +145,32 @@ export const editStudentSchema = z.object({
       })
     ),
   }),
+  billing: z.object({
+    academicPeriodId: z.string().min(1, 'O período letivo é obrigatório'),
+    courseId: z.string().min(1, 'O curso é obrigatório'),
+    levelId: z.string().min(1, 'O nível é obrigatório'),
+    classId: z.string().optional(),
+    contractId: z.string().nullable().optional(),
+
+    // Contract values
+    monthlyFee: z.number().min(0, 'O valor deve ser maior ou igual a 0'),
+    enrollmentFee: z.number().min(0).optional().default(0),
+    installments: z.number().min(1).max(12),
+    enrollmentInstallments: z.number().min(1).max(12).optional().default(1),
+    flexibleInstallments: z.boolean().optional().default(true),
+
+    // Payment
+    paymentDate: z
+      .number()
+      .min(1, 'O dia deve ser maior que 0')
+      .max(31, 'O dia deve ser menor ou igual a 31'),
+    paymentMethod: z.enum(PaymentMethod),
+
+    // Scholarship
+    scholarshipId: z.string().nullable().optional(),
+    discountPercentage: z.number().min(0).max(100).optional().default(0),
+    enrollmentDiscountPercentage: z.number().min(0).max(100).optional().default(0),
+  }),
 })
 
-export type EditStudentFormData = z.infer<typeof editStudentSchema>
+export type EnrollmentFormData = z.infer<typeof enrollmentSchema>

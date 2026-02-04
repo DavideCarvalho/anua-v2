@@ -104,18 +104,33 @@ export default class EnrollStudentController {
       }
     }
 
-    // Check if responsible emails are already in use
+    // Check for duplicate emails between responsibles in the form
+    const responsibleEmails = data.responsibles
+      .map((r) => r.email?.trim().toLowerCase())
+      .filter(Boolean) as string[]
+    const uniqueEmails = new Set(responsibleEmails)
+    if (uniqueEmails.size !== responsibleEmails.length) {
+      return response.badRequest({
+        message: 'Cada responsável deve ter um email único',
+      })
+    }
+
+    // Check if responsible emails conflict with existing users (different document = conflict)
     for (const responsible of data.responsibles) {
       const respEmail = responsible.email?.trim().toLowerCase()
-      if (respEmail) {
-        const existingRespEmail = await User.query()
-          .where('email', respEmail)
-          .where('schoolId', schoolId)
-          .first()
+      if (!respEmail) continue
 
-        if (existingRespEmail) {
+      const existingUser = await User.query()
+        .where('email', respEmail)
+        .where('schoolId', schoolId)
+        .first()
+
+      if (existingUser) {
+        const respDoc = responsible.documentNumber?.replace(/\D/g, '') || ''
+        const existingDoc = existingUser.documentNumber?.replace(/\D/g, '') || ''
+        if (!respDoc || !existingDoc || respDoc !== existingDoc) {
           return response.conflict({
-            message: `Email "${respEmail}" já está cadastrado para ${existingRespEmail.name}`,
+            message: `Email "${respEmail}" já está cadastrado para ${existingUser.name}`,
           })
         }
       }
@@ -206,6 +221,11 @@ export default class EnrollStudentController {
 
           if (existingResponsible) {
             responsibleUser = existingResponsible
+            // Update email only if user hasn't verified theirs yet
+            if (!existingResponsible.emailVerifiedAt && respData.email) {
+              existingResponsible.email = respData.email
+              await existingResponsible.useTransaction(trx).save()
+            }
           } else {
             // Create new responsible user
             const respId = uuidv7()
@@ -367,8 +387,8 @@ export default class EnrollStudentController {
       // Job will check for contract (own or from level) and skip if none
       if (createdStudentHasLevelId) {
         try {
-          const queueManager = await getQueueManager()
-          await queueManager.dispatch(GenerateStudentPaymentsJob, {
+          await getQueueManager()
+          await GenerateStudentPaymentsJob.dispatch({
             studentHasLevelId: createdStudentHasLevelId,
           })
           console.log('[ENROLL] Dispatched payment generation job:', {

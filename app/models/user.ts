@@ -80,6 +80,12 @@ export default class User extends BaseModel {
   @column({ columnName: 'schoolChainId' })
   declare schoolChainId: string | null
 
+  @column.dateTime({ columnName: 'emailVerifiedAt' })
+  declare emailVerifiedAt: DateTime | null
+
+  @column.dateTime({ columnName: 'lastLoggedInAt' })
+  declare lastLoggedInAt: DateTime | null
+
   @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 

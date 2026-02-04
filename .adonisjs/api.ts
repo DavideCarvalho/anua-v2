@@ -75,6 +75,10 @@ type EscolaAdministrativoAlunosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_alunos_page_controller.ts').default['handle'], false>
 }
+type EscolaAdministrativoAlunosIdEditarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_editar_aluno_page_controller.ts').default['handle'], false>
+}
 type EscolaAdministrativoFuncionariosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_funcionarios_page_controller.ts').default['handle'], false>
@@ -86,6 +90,10 @@ type EscolaAdministrativoProfessoresGetHead = {
 type EscolaAdministrativoMatriculasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_matriculas_page_controller.ts').default['handle'], false>
+}
+type EscolaAdministrativoMatriculasNovaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_nova_matricula_page_controller.ts').default['handle'], false>
 }
 type EscolaAdministrativoContratosGetHead = {
   request: unknown
@@ -243,10 +251,6 @@ type EscolaCantinaTransferenciasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_cantina_transferencias_page_controller.ts').default['handle'], false>
 }
-type EscolaFinanceiroMensalidadesGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_mensalidades_page_controller.ts').default['handle'], false>
-}
 type EscolaFinanceiroInadimplenciaGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_inadimplencia_page_controller.ts').default['handle'], false>
@@ -254,6 +258,18 @@ type EscolaFinanceiroInadimplenciaGetHead = {
 type EscolaFinanceiroSegurosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_seguros_page_controller.ts').default['handle'], false>
+}
+type EscolaFinanceiroFaturasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_faturas_page_controller.ts').default['handle'], false>
+}
+type EscolaLojasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_lojas_page_controller.ts').default['handle'], false>
+}
+type EscolaLojasIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_loja_detail_page_controller.ts').default['handle'], false>
 }
 type EscolaGamificacaoGetHead = {
   request: unknown
@@ -338,6 +354,10 @@ type ResponsavelNotificacoesGetHead = {
 type ResponsavelCreditoGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/show_responsavel_credito_page_controller.ts').default['handle'], false>
+}
+type ResponsavelLojaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_loja_page_controller.ts').default['handle'], false>
 }
 type AdminGetHead = {
   request: unknown
@@ -435,6 +455,38 @@ type AdminAnalyticsRhGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/admin/show_admin_analytics_page_controller.ts').default['rh'], false>
 }
+type LojaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/loja/show_loja_dashboard_page_controller.ts').default['handle'], false>
+}
+type LojaProdutosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/loja/show_loja_produtos_page_controller.ts').default['handle'], false>
+}
+type LojaPedidosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/loja/show_loja_pedidos_page_controller.ts').default['handle'], false>
+}
+type LojaFinanceiroGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/loja/show_loja_financeiro_page_controller.ts').default['handle'], false>
+}
+type AlunoLojaGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/aluno/show_aluno_loja_page_controller.ts').default['handle'], false>
+}
+type AlunoLojaCarrinhoGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/aluno/show_aluno_carrinho_page_controller.ts').default['handle'], false>
+}
+type AlunoLojaPedidosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/aluno/show_aluno_pedidos_page_controller.ts').default['handle'], false>
+}
+type AlunoLojaIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/aluno/show_aluno_loja_store_page_controller.ts').default['handle'], false>
+}
 type ApiV1AuthLoginPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/auth.ts')['loginValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/auth/login.ts').default['handle'], true>
@@ -516,8 +568,20 @@ type ApiV1ResponsavelNotificationsGetHead = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_notifications_controller.ts').default['handle'], false>
 }
 type ApiV1ResponsavelProfilePut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/responsavel.ts')['updateProfileValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/update_profile_controller.ts').default['handle'], true>
+}
+type ApiV1ResponsavelStudentsIdWallettopupsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/wallet_top_up.ts')['createWalletTopUpValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/wallet_top_ups/create_wallet_top_up_controller.ts').default['handle'], true>
+}
+type ApiV1ResponsavelStudentsIdWallettopupsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/wallet_top_up.ts')['listWalletTopUpsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/wallet_top_ups/list_wallet_top_ups_controller.ts').default['handle'], true>
+}
+type ApiV1ResponsavelWallettopupsIdGetHead = {
   request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/update_profile_controller.ts').default['handle'], false>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/wallet_top_ups/show_wallet_top_up_controller.ts').default['handle'], false>
 }
 type ApiV1AdminStatsGetHead = {
   request: unknown
@@ -650,6 +714,10 @@ type ApiV1StudentsCheckdocumentGetHead = {
 type ApiV1StudentsCheckemailGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/check_email_controller.ts').default['handle'], false>
+}
+type ApiV1StudentsLookupresponsibleGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/lookup_responsible_controller.ts').default['handle'], false>
 }
 type ApiV1StudentsIdGetHead = {
   request: unknown
@@ -1395,6 +1463,14 @@ type ApiV1AgreementsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/agreement.ts')['createAgreementValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/agreements/create_agreement_controller.ts').default['handle'], true>
 }
+type ApiV1InvoicesGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/invoice.ts')['listInvoicesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/invoices/list_invoices_controller.ts').default['handle'], true>
+}
+type ApiV1InvoicesIdMarkpaidPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/invoice.ts')['markInvoicePaidValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/invoices/mark_invoice_paid_controller.ts').default['handle'], true>
+}
 type ApiV1StudentbalancetransactionsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_balance_transaction.ts')['listStudentBalanceTransactionsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_balance_transactions/list_student_balance_transactions_controller.ts').default['handle'], true>
@@ -1559,6 +1635,50 @@ type ApiV1AchievementsIdUnlockPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/achievements/unlock_achievement_controller.ts').default['handle'], false>
 }
+type ApiV1StoresGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['listStoresValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/stores/list_stores_controller.ts').default['handle'], true>
+}
+type ApiV1StoresPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['createStoreValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/stores/create_store_controller.ts').default['handle'], true>
+}
+type ApiV1StoresIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/stores/show_store_controller.ts').default['handle'], false>
+}
+type ApiV1StoresIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['updateStoreValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/stores/update_store_controller.ts').default['handle'], true>
+}
+type ApiV1StoresIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/stores/delete_store_controller.ts').default['handle'], false>
+}
+type ApiV1StoresIdFinancialsettingsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_financial_settings/show_store_financial_settings_controller.ts').default['handle'], false>
+}
+type ApiV1StoresIdFinancialsettingsPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['upsertStoreFinancialSettingsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_financial_settings/upsert_store_financial_settings_controller.ts').default['handle'], true>
+}
+type ApiV1StoresettlementsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['listStoreSettlementsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_settlements/list_store_settlements_controller.ts').default['handle'], true>
+}
+type ApiV1StoresettlementsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['createStoreSettlementValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_settlements/create_store_settlement_controller.ts').default['handle'], true>
+}
+type ApiV1StoresettlementsIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_settlements/show_store_settlement_controller.ts').default['handle'], false>
+}
+type ApiV1StoresettlementsIdStatusPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['updateStoreSettlementStatusValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_settlements/update_store_settlement_status_controller.ts').default['handle'], true>
+}
 type ApiV1StoreitemsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['listStoreItemsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_items/list_store_items_controller.ts').default['handle'], true>
@@ -1610,6 +1730,110 @@ type ApiV1StoreordersIdDeliverPost = {
 type ApiV1StoreordersIdCancelPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/cancel_store_order_controller.ts').default['handle'], false>
+}
+type ApiV1StoreinstallmentrulesGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['listStoreInstallmentRulesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_installment_rules/list_store_installment_rules_controller.ts').default['handle'], true>
+}
+type ApiV1StoreinstallmentrulesPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['createStoreInstallmentRuleValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_installment_rules/create_store_installment_rule_controller.ts').default['handle'], true>
+}
+type ApiV1StoreinstallmentrulesIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['updateStoreInstallmentRuleValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_installment_rules/update_store_installment_rule_controller.ts').default['handle'], true>
+}
+type ApiV1StoreinstallmentrulesIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_installment_rules/delete_store_installment_rule_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerStoreGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/show_own_store_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerProductsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['listStoreItemsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/list_own_products_controller.ts').default['handle'], true>
+}
+type ApiV1StoreownerProductsPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['createStoreItemValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/create_product_controller.ts').default['handle'], true>
+}
+type ApiV1StoreownerProductsIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['updateStoreItemValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/update_product_controller.ts').default['handle'], true>
+}
+type ApiV1StoreownerProductsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/delete_product_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerProductsIdToggleactivePatch = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/toggle_product_active_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerOrdersGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['listStoreOrdersValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/list_own_orders_controller.ts').default['handle'], true>
+}
+type ApiV1StoreownerOrdersIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/show_order_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerOrdersIdApprovePost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/approve_order_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerOrdersIdRejectPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/reject_order_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerOrdersIdPreparingPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/mark_preparing_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerOrdersIdReadyPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/mark_ready_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerOrdersIdDeliverPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/deliver_order_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerFinancialsettingsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/show_financial_settings_controller.ts').default['handle'], false>
+}
+type ApiV1StoreownerFinancialsettingsPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['updateOwnFinancialSettingsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/update_financial_settings_controller.ts').default['handle'], true>
+}
+type ApiV1StoreownerSettlementsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/list_settlements_controller.ts').default['handle'], false>
+}
+type ApiV1MarketplaceStoresGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/marketplace/list_marketplace_stores_controller.ts').default['handle'], false>
+}
+type ApiV1MarketplaceStoresIdItemsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/marketplace/list_store_items_controller.ts').default['handle'], false>
+}
+type ApiV1MarketplaceInstallmentoptionsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/marketplace/get_installment_options_controller.ts').default['handle'], false>
+}
+type ApiV1MarketplaceCheckoutPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/marketplace.ts')['marketplaceCheckoutValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/marketplace/marketplace_checkout_controller.ts').default['handle'], true>
+}
+type ApiV1MarketplaceOrdersGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/marketplace/list_my_orders_controller.ts').default['handle'], false>
+}
+type ApiV1MarketplaceOrdersIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/marketplace/show_my_order_controller.ts').default['handle'], false>
 }
 type ApiV1StudentgamificationsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['listStudentGamificationsValidator']>>
@@ -2027,6 +2251,10 @@ type ApiV1AdminSchoolsOnboardingPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/onboarding.ts')['createSchoolOnboardingValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/create_school_onboarding_controller.ts').default['handle'], true>
 }
+type ApiV1AdminJobsGeneratemissingpaymentsPost = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/trigger_missing_payments_controller.ts').default['handle'], false>
+}
 export interface ApiDefinition {
   ':schoolSlug': {
     'matricula-online': {
@@ -2145,6 +2373,14 @@ export interface ApiDefinition {
         };
         '$get': EscolaAdministrativoAlunosGetHead;
         '$head': EscolaAdministrativoAlunosGetHead;
+        ':id': {
+          'editar': {
+            '$url': {
+            };
+            '$get': EscolaAdministrativoAlunosIdEditarGetHead;
+            '$head': EscolaAdministrativoAlunosIdEditarGetHead;
+          };
+        };
       };
       'funcionarios': {
         '$url': {
@@ -2163,6 +2399,12 @@ export interface ApiDefinition {
         };
         '$get': EscolaAdministrativoMatriculasGetHead;
         '$head': EscolaAdministrativoMatriculasGetHead;
+        'nova': {
+          '$url': {
+          };
+          '$get': EscolaAdministrativoMatriculasNovaGetHead;
+          '$head': EscolaAdministrativoMatriculasNovaGetHead;
+        };
       };
       'contratos': {
         '$url': {
@@ -2410,12 +2652,6 @@ export interface ApiDefinition {
       };
     };
     'financeiro': {
-      'mensalidades': {
-        '$url': {
-        };
-        '$get': EscolaFinanceiroMensalidadesGetHead;
-        '$head': EscolaFinanceiroMensalidadesGetHead;
-      };
       'inadimplencia': {
         '$url': {
         };
@@ -2427,6 +2663,24 @@ export interface ApiDefinition {
         };
         '$get': EscolaFinanceiroSegurosGetHead;
         '$head': EscolaFinanceiroSegurosGetHead;
+      };
+      'faturas': {
+        '$url': {
+        };
+        '$get': EscolaFinanceiroFaturasGetHead;
+        '$head': EscolaFinanceiroFaturasGetHead;
+      };
+    };
+    'lojas': {
+      '$url': {
+      };
+      '$get': EscolaLojasGetHead;
+      '$head': EscolaLojasGetHead;
+      ':id': {
+        '$url': {
+        };
+        '$get': EscolaLojasIdGetHead;
+        '$head': EscolaLojasIdGetHead;
       };
     };
     'gamificacao': {
@@ -2554,6 +2808,12 @@ export interface ApiDefinition {
       };
       '$get': ResponsavelCreditoGetHead;
       '$head': ResponsavelCreditoGetHead;
+    };
+    'loja': {
+      '$url': {
+      };
+      '$get': ResponsavelLojaGetHead;
+      '$head': ResponsavelLojaGetHead;
     };
   };
   'admin': {
@@ -2702,6 +2962,56 @@ export interface ApiDefinition {
       };
     };
   };
+  'loja': {
+    '$url': {
+    };
+    '$get': LojaGetHead;
+    '$head': LojaGetHead;
+    'produtos': {
+      '$url': {
+      };
+      '$get': LojaProdutosGetHead;
+      '$head': LojaProdutosGetHead;
+    };
+    'pedidos': {
+      '$url': {
+      };
+      '$get': LojaPedidosGetHead;
+      '$head': LojaPedidosGetHead;
+    };
+    'financeiro': {
+      '$url': {
+      };
+      '$get': LojaFinanceiroGetHead;
+      '$head': LojaFinanceiroGetHead;
+    };
+  };
+  'aluno': {
+    'loja': {
+      '$url': {
+      };
+      '$get': AlunoLojaGetHead;
+      '$head': AlunoLojaGetHead;
+      'carrinho': {
+        '$url': {
+        };
+        '$get': AlunoLojaCarrinhoGetHead;
+        '$head': AlunoLojaCarrinhoGetHead;
+      };
+      'pedidos': {
+        '$url': {
+        };
+        '$get': AlunoLojaPedidosGetHead;
+        '$head': AlunoLojaPedidosGetHead;
+      };
+      ':id': {
+        '$url': {
+        };
+        '$get': AlunoLojaIdGetHead;
+        '$head': AlunoLojaIdGetHead;
+      };
+    };
+  };
   'api': {
     'v1': {
       'auth': {
@@ -2822,6 +3132,13 @@ export interface ApiDefinition {
               '$get': ApiV1ResponsavelStudentsIdGamificationGetHead;
               '$head': ApiV1ResponsavelStudentsIdGamificationGetHead;
             };
+            'wallet-top-ups': {
+              '$url': {
+              };
+              '$post': ApiV1ResponsavelStudentsIdWallettopupsPost;
+              '$get': ApiV1ResponsavelStudentsIdWallettopupsGetHead;
+              '$head': ApiV1ResponsavelStudentsIdWallettopupsGetHead;
+            };
           };
         };
         'notifications': {
@@ -2834,6 +3151,14 @@ export interface ApiDefinition {
           '$url': {
           };
           '$put': ApiV1ResponsavelProfilePut;
+        };
+        'wallet-top-ups': {
+          ':id': {
+            '$url': {
+            };
+            '$get': ApiV1ResponsavelWallettopupsIdGetHead;
+            '$head': ApiV1ResponsavelWallettopupsIdGetHead;
+          };
         };
       };
       'admin': {
@@ -2866,6 +3191,13 @@ export interface ApiDefinition {
             '$url': {
             };
             '$post': ApiV1AdminSchoolsOnboardingPost;
+          };
+        };
+        'jobs': {
+          'generate-missing-payments': {
+            '$url': {
+            };
+            '$post': ApiV1AdminJobsGeneratemissingpaymentsPost;
           };
         };
       };
@@ -3015,6 +3347,12 @@ export interface ApiDefinition {
           };
           '$get': ApiV1StudentsCheckemailGetHead;
           '$head': ApiV1StudentsCheckemailGetHead;
+        };
+        'lookup-responsible': {
+          '$url': {
+          };
+          '$get': ApiV1StudentsLookupresponsibleGetHead;
+          '$head': ApiV1StudentsLookupresponsibleGetHead;
         };
         ':id': {
           '$url': {
@@ -3887,6 +4225,19 @@ export interface ApiDefinition {
         };
         '$post': ApiV1AgreementsPost;
       };
+      'invoices': {
+        '$url': {
+        };
+        '$get': ApiV1InvoicesGetHead;
+        '$head': ApiV1InvoicesGetHead;
+        ':id': {
+          'mark-paid': {
+            '$url': {
+            };
+            '$post': ApiV1InvoicesIdMarkpaidPost;
+          };
+        };
+      };
       'student-balance-transactions': {
         '$url': {
         };
@@ -4045,6 +4396,48 @@ export interface ApiDefinition {
           };
         };
       };
+      'stores': {
+        '$url': {
+        };
+        '$get': ApiV1StoresGetHead;
+        '$head': ApiV1StoresGetHead;
+        '$post': ApiV1StoresPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1StoresIdGetHead;
+          '$head': ApiV1StoresIdGetHead;
+          '$put': ApiV1StoresIdPut;
+          '$delete': ApiV1StoresIdDelete;
+        };
+        ':storeId': {
+          'financial-settings': {
+            '$url': {
+            };
+            '$get': ApiV1StoresIdFinancialsettingsGetHead;
+            '$head': ApiV1StoresIdFinancialsettingsGetHead;
+            '$put': ApiV1StoresIdFinancialsettingsPut;
+          };
+        };
+      };
+      'store-settlements': {
+        '$url': {
+        };
+        '$get': ApiV1StoresettlementsGetHead;
+        '$head': ApiV1StoresettlementsGetHead;
+        '$post': ApiV1StoresettlementsPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1StoresettlementsIdGetHead;
+          '$head': ApiV1StoresettlementsIdGetHead;
+          'status': {
+            '$url': {
+            };
+            '$put': ApiV1StoresettlementsIdStatusPut;
+          };
+        };
+      };
       'store-items': {
         '$url': {
         };
@@ -4095,6 +4488,134 @@ export interface ApiDefinition {
             '$url': {
             };
             '$post': ApiV1StoreordersIdCancelPost;
+          };
+        };
+      };
+      'store-installment-rules': {
+        '$url': {
+        };
+        '$get': ApiV1StoreinstallmentrulesGetHead;
+        '$head': ApiV1StoreinstallmentrulesGetHead;
+        '$post': ApiV1StoreinstallmentrulesPost;
+        ':id': {
+          '$url': {
+          };
+          '$put': ApiV1StoreinstallmentrulesIdPut;
+          '$delete': ApiV1StoreinstallmentrulesIdDelete;
+        };
+      };
+      'store-owner': {
+        'store': {
+          '$url': {
+          };
+          '$get': ApiV1StoreownerStoreGetHead;
+          '$head': ApiV1StoreownerStoreGetHead;
+        };
+        'products': {
+          '$url': {
+          };
+          '$get': ApiV1StoreownerProductsGetHead;
+          '$head': ApiV1StoreownerProductsGetHead;
+          '$post': ApiV1StoreownerProductsPost;
+          ':id': {
+            '$url': {
+            };
+            '$put': ApiV1StoreownerProductsIdPut;
+            '$delete': ApiV1StoreownerProductsIdDelete;
+            'toggle-active': {
+              '$url': {
+              };
+              '$patch': ApiV1StoreownerProductsIdToggleactivePatch;
+            };
+          };
+        };
+        'orders': {
+          '$url': {
+          };
+          '$get': ApiV1StoreownerOrdersGetHead;
+          '$head': ApiV1StoreownerOrdersGetHead;
+          ':id': {
+            '$url': {
+            };
+            '$get': ApiV1StoreownerOrdersIdGetHead;
+            '$head': ApiV1StoreownerOrdersIdGetHead;
+            'approve': {
+              '$url': {
+              };
+              '$post': ApiV1StoreownerOrdersIdApprovePost;
+            };
+            'reject': {
+              '$url': {
+              };
+              '$post': ApiV1StoreownerOrdersIdRejectPost;
+            };
+            'preparing': {
+              '$url': {
+              };
+              '$post': ApiV1StoreownerOrdersIdPreparingPost;
+            };
+            'ready': {
+              '$url': {
+              };
+              '$post': ApiV1StoreownerOrdersIdReadyPost;
+            };
+            'deliver': {
+              '$url': {
+              };
+              '$post': ApiV1StoreownerOrdersIdDeliverPost;
+            };
+          };
+        };
+        'financial-settings': {
+          '$url': {
+          };
+          '$get': ApiV1StoreownerFinancialsettingsGetHead;
+          '$head': ApiV1StoreownerFinancialsettingsGetHead;
+          '$put': ApiV1StoreownerFinancialsettingsPut;
+        };
+        'settlements': {
+          '$url': {
+          };
+          '$get': ApiV1StoreownerSettlementsGetHead;
+          '$head': ApiV1StoreownerSettlementsGetHead;
+        };
+      };
+      'marketplace': {
+        'stores': {
+          '$url': {
+          };
+          '$get': ApiV1MarketplaceStoresGetHead;
+          '$head': ApiV1MarketplaceStoresGetHead;
+          ':storeId': {
+            'items': {
+              '$url': {
+              };
+              '$get': ApiV1MarketplaceStoresIdItemsGetHead;
+              '$head': ApiV1MarketplaceStoresIdItemsGetHead;
+            };
+          };
+        };
+        'installment-options': {
+          '$url': {
+          };
+          '$get': ApiV1MarketplaceInstallmentoptionsGetHead;
+          '$head': ApiV1MarketplaceInstallmentoptionsGetHead;
+        };
+        'checkout': {
+          '$url': {
+          };
+          '$post': ApiV1MarketplaceCheckoutPost;
+        };
+        'orders': {
+          '$url': {
+          };
+          '$get': ApiV1MarketplaceOrdersGetHead;
+          '$head': ApiV1MarketplaceOrdersGetHead;
+          ':id': {
+            '$url': {
+            };
+            '$get': ApiV1MarketplaceOrdersIdGetHead;
+            '$head': ApiV1MarketplaceOrdersIdGetHead;
           };
         };
       };
@@ -4655,6 +5176,13 @@ const routes = [
     types: {} as EscolaAdministrativoAlunosGetHead,
   },
   {
+    params: ["id"],
+    name: 'web.escola.administrativo.alunos.editar',
+    path: '/escola/administrativo/alunos/:id/editar',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoAlunosIdEditarGetHead,
+  },
+  {
     params: [],
     name: 'web.escola.administrativo.funcionarios',
     path: '/escola/administrativo/funcionarios',
@@ -4674,6 +5202,13 @@ const routes = [
     path: '/escola/administrativo/matriculas',
     method: ["GET","HEAD"],
     types: {} as EscolaAdministrativoMatriculasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.administrativo.matriculas.nova',
+    path: '/escola/administrativo/matriculas/nova',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoMatriculasNovaGetHead,
   },
   {
     params: [],
@@ -4950,13 +5485,6 @@ const routes = [
   },
   {
     params: [],
-    name: 'web.escola.financeiro.mensalidades',
-    path: '/escola/financeiro/mensalidades',
-    method: ["GET","HEAD"],
-    types: {} as EscolaFinanceiroMensalidadesGetHead,
-  },
-  {
-    params: [],
     name: 'web.escola.financeiro.inadimplencia',
     path: '/escola/financeiro/inadimplencia',
     method: ["GET","HEAD"],
@@ -4968,6 +5496,27 @@ const routes = [
     path: '/escola/financeiro/seguros',
     method: ["GET","HEAD"],
     types: {} as EscolaFinanceiroSegurosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.financeiro.faturas',
+    path: '/escola/financeiro/faturas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaFinanceiroFaturasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.lojas.index',
+    path: '/escola/lojas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaLojasGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.escola.lojas.show',
+    path: '/escola/lojas/:id',
+    method: ["GET","HEAD"],
+    types: {} as EscolaLojasIdGetHead,
   },
   {
     params: [],
@@ -5115,6 +5664,13 @@ const routes = [
     path: '/responsavel/credito',
     method: ["GET","HEAD"],
     types: {} as ResponsavelCreditoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.responsavel.loja',
+    path: '/responsavel/loja',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelLojaGetHead,
   },
   {
     params: [],
@@ -5286,6 +5842,62 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.loja.dashboard',
+    path: '/loja',
+    method: ["GET","HEAD"],
+    types: {} as LojaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.loja.produtos',
+    path: '/loja/produtos',
+    method: ["GET","HEAD"],
+    types: {} as LojaProdutosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.loja.pedidos',
+    path: '/loja/pedidos',
+    method: ["GET","HEAD"],
+    types: {} as LojaPedidosGetHead,
+  },
+  {
+    params: [],
+    name: 'web.loja.financeiro',
+    path: '/loja/financeiro',
+    method: ["GET","HEAD"],
+    types: {} as LojaFinanceiroGetHead,
+  },
+  {
+    params: [],
+    name: 'web.aluno.loja.index',
+    path: '/aluno/loja',
+    method: ["GET","HEAD"],
+    types: {} as AlunoLojaGetHead,
+  },
+  {
+    params: [],
+    name: 'web.aluno.loja.carrinho',
+    path: '/aluno/loja/carrinho',
+    method: ["GET","HEAD"],
+    types: {} as AlunoLojaCarrinhoGetHead,
+  },
+  {
+    params: [],
+    name: 'web.aluno.loja.pedidos',
+    path: '/aluno/loja/pedidos',
+    method: ["GET","HEAD"],
+    types: {} as AlunoLojaPedidosGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.aluno.loja.store',
+    path: '/aluno/loja/:id',
+    method: ["GET","HEAD"],
+    types: {} as AlunoLojaIdGetHead,
+  },
+  {
+    params: [],
     name: 'api.v1.auth.login',
     path: '/api/v1/auth/login',
     method: ["POST"],
@@ -5430,6 +6042,27 @@ const routes = [
     path: '/api/v1/responsavel/profile',
     method: ["PUT"],
     types: {} as ApiV1ResponsavelProfilePut,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.createWalletTopUp',
+    path: '/api/v1/responsavel/students/:studentId/wallet-top-ups',
+    method: ["POST"],
+    types: {} as ApiV1ResponsavelStudentsIdWallettopupsPost,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.responsavel.api.listWalletTopUps',
+    path: '/api/v1/responsavel/students/:studentId/wallet-top-ups',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdWallettopupsGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.responsavel.api.showWalletTopUp',
+    path: '/api/v1/responsavel/wallet-top-ups/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelWallettopupsIdGetHead,
   },
   {
     params: [],
@@ -5661,6 +6294,13 @@ const routes = [
     path: '/api/v1/students/check-email',
     method: ["GET","HEAD"],
     types: {} as ApiV1StudentsCheckemailGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.students.lookupResponsible',
+    path: '/api/v1/students/lookup-responsible',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StudentsLookupresponsibleGetHead,
   },
   {
     params: ["id"],
@@ -6966,6 +7606,20 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.invoices.index',
+    path: '/api/v1/invoices',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1InvoicesGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.invoices.markPaid',
+    path: '/api/v1/invoices/:id/mark-paid',
+    method: ["POST"],
+    types: {} as ApiV1InvoicesIdMarkpaidPost,
+  },
+  {
+    params: [],
     name: 'api.v1.studentBalanceTransactions.index',
     path: '/api/v1/student-balance-transactions',
     method: ["GET","HEAD"],
@@ -7253,6 +7907,83 @@ const routes = [
   },
   {
     params: [],
+    name: 'api.v1.stores.index',
+    path: '/api/v1/stores',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoresGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.stores.store',
+    path: '/api/v1/stores',
+    method: ["POST"],
+    types: {} as ApiV1StoresPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.stores.show',
+    path: '/api/v1/stores/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoresIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.stores.update',
+    path: '/api/v1/stores/:id',
+    method: ["PUT"],
+    types: {} as ApiV1StoresIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.stores.destroy',
+    path: '/api/v1/stores/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1StoresIdDelete,
+  },
+  {
+    params: ["storeId"],
+    name: 'api.v1.stores.financialSettings.show',
+    path: '/api/v1/stores/:storeId/financial-settings',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoresIdFinancialsettingsGetHead,
+  },
+  {
+    params: ["storeId"],
+    name: 'api.v1.stores.financialSettings.upsert',
+    path: '/api/v1/stores/:storeId/financial-settings',
+    method: ["PUT"],
+    types: {} as ApiV1StoresIdFinancialsettingsPut,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeSettlements.index',
+    path: '/api/v1/store-settlements',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoresettlementsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeSettlements.store',
+    path: '/api/v1/store-settlements',
+    method: ["POST"],
+    types: {} as ApiV1StoresettlementsPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeSettlements.show',
+    path: '/api/v1/store-settlements/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoresettlementsIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeSettlements.updateStatus',
+    path: '/api/v1/store-settlements/:id/status',
+    method: ["PUT"],
+    types: {} as ApiV1StoresettlementsIdStatusPut,
+  },
+  {
+    params: [],
     name: 'api.v1.storeItems.index',
     path: '/api/v1/store-items',
     method: ["GET","HEAD"],
@@ -7341,6 +8072,188 @@ const routes = [
     path: '/api/v1/store-orders/:id/cancel',
     method: ["POST"],
     types: {} as ApiV1StoreordersIdCancelPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeInstallmentRules.index',
+    path: '/api/v1/store-installment-rules',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreinstallmentrulesGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeInstallmentRules.store',
+    path: '/api/v1/store-installment-rules',
+    method: ["POST"],
+    types: {} as ApiV1StoreinstallmentrulesPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeInstallmentRules.update',
+    path: '/api/v1/store-installment-rules/:id',
+    method: ["PUT"],
+    types: {} as ApiV1StoreinstallmentrulesIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeInstallmentRules.destroy',
+    path: '/api/v1/store-installment-rules/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1StoreinstallmentrulesIdDelete,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.store.show',
+    path: '/api/v1/store-owner/store',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreownerStoreGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.products.index',
+    path: '/api/v1/store-owner/products',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreownerProductsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.products.store',
+    path: '/api/v1/store-owner/products',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerProductsPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.products.update',
+    path: '/api/v1/store-owner/products/:id',
+    method: ["PUT"],
+    types: {} as ApiV1StoreownerProductsIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.products.destroy',
+    path: '/api/v1/store-owner/products/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1StoreownerProductsIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.products.toggleActive',
+    path: '/api/v1/store-owner/products/:id/toggle-active',
+    method: ["PATCH"],
+    types: {} as ApiV1StoreownerProductsIdToggleactivePatch,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.orders.index',
+    path: '/api/v1/store-owner/orders',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreownerOrdersGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.show',
+    path: '/api/v1/store-owner/orders/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreownerOrdersIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.approve',
+    path: '/api/v1/store-owner/orders/:id/approve',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerOrdersIdApprovePost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.reject',
+    path: '/api/v1/store-owner/orders/:id/reject',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerOrdersIdRejectPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.preparing',
+    path: '/api/v1/store-owner/orders/:id/preparing',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerOrdersIdPreparingPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.ready',
+    path: '/api/v1/store-owner/orders/:id/ready',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerOrdersIdReadyPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.deliver',
+    path: '/api/v1/store-owner/orders/:id/deliver',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerOrdersIdDeliverPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.financial.show',
+    path: '/api/v1/store-owner/financial-settings',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreownerFinancialsettingsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.financial.update',
+    path: '/api/v1/store-owner/financial-settings',
+    method: ["PUT"],
+    types: {} as ApiV1StoreownerFinancialsettingsPut,
+  },
+  {
+    params: [],
+    name: 'api.v1.storeOwner.settlements.index',
+    path: '/api/v1/store-owner/settlements',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StoreownerSettlementsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.marketplace.stores.index',
+    path: '/api/v1/marketplace/stores',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1MarketplaceStoresGetHead,
+  },
+  {
+    params: ["storeId"],
+    name: 'api.v1.marketplace.stores.items',
+    path: '/api/v1/marketplace/stores/:storeId/items',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1MarketplaceStoresIdItemsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.marketplace.installmentOptions',
+    path: '/api/v1/marketplace/installment-options',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1MarketplaceInstallmentoptionsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.marketplace.checkout',
+    path: '/api/v1/marketplace/checkout',
+    method: ["POST"],
+    types: {} as ApiV1MarketplaceCheckoutPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.marketplace.orders.index',
+    path: '/api/v1/marketplace/orders',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1MarketplaceOrdersGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.marketplace.orders.show',
+    path: '/api/v1/marketplace/orders/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1MarketplaceOrdersIdGetHead,
   },
   {
     params: [],
@@ -8069,6 +8982,13 @@ const routes = [
     path: '/api/v1/admin/schools/onboarding',
     method: ["POST"],
     types: {} as ApiV1AdminSchoolsOnboardingPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.admin.jobs.generateMissingPayments',
+    path: '/api/v1/admin/jobs/generate-missing-payments',
+    method: ["POST"],
+    types: {} as ApiV1AdminJobsGeneratemissingpaymentsPost,
   },
 ] as const;
 export const api = {

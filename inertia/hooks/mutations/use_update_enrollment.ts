@@ -16,16 +16,23 @@ interface UpdateEnrollmentParams {
 export function useUpdateEnrollment() {
   const queryClient = useQueryClient()
 
-  return useMutation({
-    mutationFn: async ({ studentId, enrollmentId, data }: UpdateEnrollmentParams) => {
+  const mutation = useMutation({
+    mutationFn: ({ studentId, enrollmentId, data }: UpdateEnrollmentParams) => {
       return tuyau
-        .$route('api.v1.students.enrollments.update', { id: studentId, enrollmentId } as any)
-        .$patch(data as any)
+        .$route('api.v1.students.enrollments.update', { id: studentId, enrollmentId })
+        .$patch(data)
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['student-enrollments', variables.studentId] })
-      queryClient.invalidateQueries({ queryKey: ['students'] })
-    },
   })
+
+  async function updateEnrollment(params: UpdateEnrollmentParams) {
+    const result = await mutation.mutateAsync(params)
+    queryClient.invalidateQueries({ queryKey: ['student-enrollments', params.studentId] })
+    queryClient.invalidateQueries({ queryKey: ['students'] })
+    queryClient.invalidateQueries({ queryKey: ['student-payments'] })
+    queryClient.invalidateQueries({ queryKey: ['student-pending-payments', params.studentId] })
+    return result
+  }
+
+  return { ...mutation, updateEnrollment }
 }

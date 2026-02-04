@@ -65,6 +65,8 @@ const UpdateEnrollmentController = () =>
   import('#controllers/students/update_enrollment_controller')
 const CheckDocumentController = () => import('#controllers/students/check_document_controller')
 const CheckEmailController = () => import('#controllers/students/check_email_controller')
+const LookupResponsibleController = () =>
+  import('#controllers/students/lookup_responsible_controller')
 
 // Responsibles
 const ListStudentResponsiblesController = () =>
@@ -387,6 +389,12 @@ const ListStudentPaymentsByStudentController = () =>
 const CreateAgreementController = () =>
   import('#controllers/agreements/create_agreement_controller')
 
+// Invoices
+const ListInvoicesController = () =>
+  import('#controllers/invoices/list_invoices_controller')
+const MarkStudentInvoicePaidController = () =>
+  import('#controllers/invoices/mark_invoice_paid_controller')
+
 // Asaas
 const AsaasWebhookController = () => import('#controllers/asaas/asaas_webhook_controller')
 
@@ -515,6 +523,29 @@ const DeleteAchievementController = () =>
 const UnlockAchievementController = () =>
   import('#controllers/achievements/unlock_achievement_controller')
 
+// Stores
+const ListStoresController = () => import('#controllers/stores/list_stores_controller')
+const ShowStoreController = () => import('#controllers/stores/show_store_controller')
+const CreateStoreController = () => import('#controllers/stores/create_store_controller')
+const UpdateStoreController = () => import('#controllers/stores/update_store_controller')
+const DeleteStoreController = () => import('#controllers/stores/delete_store_controller')
+
+// Store Financial Settings
+const ShowStoreFinancialSettingsController = () =>
+  import('#controllers/store_financial_settings/show_store_financial_settings_controller')
+const UpsertStoreFinancialSettingsController = () =>
+  import('#controllers/store_financial_settings/upsert_store_financial_settings_controller')
+
+// Store Settlements
+const ListStoreSettlementsController = () =>
+  import('#controllers/store_settlements/list_store_settlements_controller')
+const ShowStoreSettlementController = () =>
+  import('#controllers/store_settlements/show_store_settlement_controller')
+const CreateStoreSettlementController = () =>
+  import('#controllers/store_settlements/create_store_settlement_controller')
+const UpdateStoreSettlementStatusController = () =>
+  import('#controllers/store_settlements/update_store_settlement_status_controller')
+
 // Store Items
 const ListStoreItemsController = () =>
   import('#controllers/store_items/list_store_items_controller')
@@ -543,6 +574,64 @@ const DeliverStoreOrderController = () =>
   import('#controllers/store_orders/deliver_store_order_controller')
 const CancelStoreOrderController = () =>
   import('#controllers/store_orders/cancel_store_order_controller')
+
+// Store Installment Rules
+const ListStoreInstallmentRulesController = () =>
+  import('#controllers/store_installment_rules/list_store_installment_rules_controller')
+const CreateStoreInstallmentRuleController = () =>
+  import('#controllers/store_installment_rules/create_store_installment_rule_controller')
+const UpdateStoreInstallmentRuleController = () =>
+  import('#controllers/store_installment_rules/update_store_installment_rule_controller')
+const DeleteStoreInstallmentRuleController = () =>
+  import('#controllers/store_installment_rules/delete_store_installment_rule_controller')
+
+// Store Owner Controllers
+const ShowOwnStoreController = () =>
+  import('#controllers/store_owner/show_own_store_controller')
+const ListOwnProductsController = () =>
+  import('#controllers/store_owner/list_own_products_controller')
+const SOCreateProductController = () =>
+  import('#controllers/store_owner/create_product_controller')
+const SOUpdateProductController = () =>
+  import('#controllers/store_owner/update_product_controller')
+const SODeleteProductController = () =>
+  import('#controllers/store_owner/delete_product_controller')
+const SOToggleProductActiveController = () =>
+  import('#controllers/store_owner/toggle_product_active_controller')
+const ListOwnOrdersController = () =>
+  import('#controllers/store_owner/list_own_orders_controller')
+const SOShowOrderController = () =>
+  import('#controllers/store_owner/show_order_controller')
+const SOApproveOrderController = () =>
+  import('#controllers/store_owner/approve_order_controller')
+const SORejectOrderController = () =>
+  import('#controllers/store_owner/reject_order_controller')
+const SOMarkPreparingController = () =>
+  import('#controllers/store_owner/mark_preparing_controller')
+const SOMarkReadyController = () =>
+  import('#controllers/store_owner/mark_ready_controller')
+const SODeliverOrderController = () =>
+  import('#controllers/store_owner/deliver_order_controller')
+const SOShowFinancialSettingsController = () =>
+  import('#controllers/store_owner/show_financial_settings_controller')
+const SOUpdateFinancialSettingsController = () =>
+  import('#controllers/store_owner/update_financial_settings_controller')
+const SOListSettlementsController = () =>
+  import('#controllers/store_owner/list_settlements_controller')
+
+// Marketplace Controllers
+const ListMarketplaceStoresController = () =>
+  import('#controllers/marketplace/list_marketplace_stores_controller')
+const MPListStoreItemsController = () =>
+  import('#controllers/marketplace/list_store_items_controller')
+const GetInstallmentOptionsController = () =>
+  import('#controllers/marketplace/get_installment_options_controller')
+const MarketplaceCheckoutController = () =>
+  import('#controllers/marketplace/marketplace_checkout_controller')
+const ListMyOrdersController = () =>
+  import('#controllers/marketplace/list_my_orders_controller')
+const ShowMyOrderController = () =>
+  import('#controllers/marketplace/show_my_order_controller')
 
 // Student Gamifications
 const ListStudentGamificationsController = () =>
@@ -826,6 +915,9 @@ function registerStudentApiRoutes() {
       router.post('/enroll', [EnrollStudentController]).as('students.enroll')
       router.get('/check-document', [CheckDocumentController]).as('students.checkDocument')
       router.get('/check-email', [CheckEmailController]).as('students.checkEmail')
+      router
+        .get('/lookup-responsible', [LookupResponsibleController])
+        .as('students.lookupResponsible')
       router.get('/:id', [ShowStudentController]).as('students.show')
       router.put('/:id', [UpdateStudentController]).as('students.update')
       router.put('/:id/full', [FullUpdateStudentController]).as('students.fullUpdate')
@@ -1437,7 +1529,7 @@ function registerStudentPaymentApiRoutes() {
       router.get('/:id/boleto', [GetStudentPaymentBoletoController]).as('studentPayments.getBoleto')
     })
     .prefix('/student-payments')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerAgreementApiRoutes() {
@@ -1446,7 +1538,17 @@ function registerAgreementApiRoutes() {
       router.post('/', [CreateAgreementController]).as('agreements.store')
     })
     .prefix('/agreements')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
+}
+
+function registerInvoiceApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListInvoicesController]).as('invoices.index')
+      router.post('/:id/mark-paid', [MarkStudentInvoicePaidController]).as('invoices.markPaid')
+    })
+    .prefix('/invoices')
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerStudentBalanceTransactionApiRoutes() {
@@ -1586,6 +1688,39 @@ function registerAchievementApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerStoreApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListStoresController]).as('stores.index')
+      router.post('/', [CreateStoreController]).as('stores.store')
+      router.get('/:id', [ShowStoreController]).as('stores.show')
+      router.put('/:id', [UpdateStoreController]).as('stores.update')
+      router.delete('/:id', [DeleteStoreController]).as('stores.destroy')
+      router
+        .get('/:storeId/financial-settings', [ShowStoreFinancialSettingsController])
+        .as('stores.financialSettings.show')
+      router
+        .put('/:storeId/financial-settings', [UpsertStoreFinancialSettingsController])
+        .as('stores.financialSettings.upsert')
+    })
+    .prefix('/stores')
+    .use(middleware.auth())
+}
+
+function registerStoreSettlementApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListStoreSettlementsController]).as('storeSettlements.index')
+      router.post('/', [CreateStoreSettlementController]).as('storeSettlements.store')
+      router.get('/:id', [ShowStoreSettlementController]).as('storeSettlements.show')
+      router
+        .put('/:id/status', [UpdateStoreSettlementStatusController])
+        .as('storeSettlements.updateStatus')
+    })
+    .prefix('/store-settlements')
+    .use(middleware.auth())
+}
+
 function registerStoreItemApiRoutes() {
   router
     .group(() => {
@@ -1614,6 +1749,79 @@ function registerStoreOrderApiRoutes() {
       router.post('/:id/cancel', [CancelStoreOrderController]).as('storeOrders.cancel')
     })
     .prefix('/store-orders')
+    .use(middleware.auth())
+}
+
+function registerStoreInstallmentRuleApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListStoreInstallmentRulesController]).as('storeInstallmentRules.index')
+      router.post('/', [CreateStoreInstallmentRuleController]).as('storeInstallmentRules.store')
+      router
+        .put('/:id', [UpdateStoreInstallmentRuleController])
+        .as('storeInstallmentRules.update')
+      router
+        .delete('/:id', [DeleteStoreInstallmentRuleController])
+        .as('storeInstallmentRules.destroy')
+    })
+    .prefix('/store-installment-rules')
+    .use(middleware.auth())
+}
+
+function registerStoreOwnerApiRoutes() {
+  router
+    .group(() => {
+      // Store info
+      router.get('/store', [ShowOwnStoreController]).as('storeOwner.store.show')
+
+      // Products
+      router.get('/products', [ListOwnProductsController]).as('storeOwner.products.index')
+      router.post('/products', [SOCreateProductController]).as('storeOwner.products.store')
+      router.put('/products/:id', [SOUpdateProductController]).as('storeOwner.products.update')
+      router.delete('/products/:id', [SODeleteProductController]).as('storeOwner.products.destroy')
+      router
+        .patch('/products/:id/toggle-active', [SOToggleProductActiveController])
+        .as('storeOwner.products.toggleActive')
+
+      // Orders
+      router.get('/orders', [ListOwnOrdersController]).as('storeOwner.orders.index')
+      router.get('/orders/:id', [SOShowOrderController]).as('storeOwner.orders.show')
+      router.post('/orders/:id/approve', [SOApproveOrderController]).as('storeOwner.orders.approve')
+      router.post('/orders/:id/reject', [SORejectOrderController]).as('storeOwner.orders.reject')
+      router
+        .post('/orders/:id/preparing', [SOMarkPreparingController])
+        .as('storeOwner.orders.preparing')
+      router.post('/orders/:id/ready', [SOMarkReadyController]).as('storeOwner.orders.ready')
+      router.post('/orders/:id/deliver', [SODeliverOrderController]).as('storeOwner.orders.deliver')
+
+      // Financial
+      router
+        .get('/financial-settings', [SOShowFinancialSettingsController])
+        .as('storeOwner.financial.show')
+      router
+        .put('/financial-settings', [SOUpdateFinancialSettingsController])
+        .as('storeOwner.financial.update')
+      router.get('/settlements', [SOListSettlementsController]).as('storeOwner.settlements.index')
+    })
+    .prefix('/store-owner')
+    .use([middleware.auth(), middleware.storeOwner()])
+}
+
+function registerMarketplaceApiRoutes() {
+  router
+    .group(() => {
+      router.get('/stores', [ListMarketplaceStoresController]).as('marketplace.stores.index')
+      router
+        .get('/stores/:storeId/items', [MPListStoreItemsController])
+        .as('marketplace.stores.items')
+      router
+        .get('/installment-options', [GetInstallmentOptionsController])
+        .as('marketplace.installmentOptions')
+      router.post('/checkout', [MarketplaceCheckoutController]).as('marketplace.checkout')
+      router.get('/orders', [ListMyOrdersController]).as('marketplace.orders.index')
+      router.get('/orders/:id', [ShowMyOrderController]).as('marketplace.orders.show')
+    })
+    .prefix('/marketplace')
     .use(middleware.auth())
 }
 
@@ -2039,6 +2247,20 @@ function registerAdminOnboardingApiRoutes() {
     .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
 }
 
+const TriggerMissingPaymentsController = () =>
+  import('#controllers/admin/trigger_missing_payments_controller')
+
+function registerAdminJobsApiRoutes() {
+  router
+    .group(() => {
+      router
+        .post('/generate-missing-payments', [TriggerMissingPaymentsController])
+        .as('admin.jobs.generateMissingPayments')
+    })
+    .prefix('/admin/jobs')
+    .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
+}
+
 // =============================================================================
 // DASHBOARD API CONTROLLERS
 // =============================================================================
@@ -2077,6 +2299,12 @@ const GetResponsavelNotificationsController = () =>
   import('#controllers/responsavel/get_notifications_controller')
 const UpdateResponsavelProfileController = () =>
   import('#controllers/responsavel/update_profile_controller')
+const CreateWalletTopUpController = () =>
+  import('#controllers/wallet_top_ups/create_wallet_top_up_controller')
+const ListWalletTopUpsController = () =>
+  import('#controllers/wallet_top_ups/list_wallet_top_ups_controller')
+const ShowWalletTopUpController = () =>
+  import('#controllers/wallet_top_ups/show_wallet_top_up_controller')
 
 function registerDashboardApiRoutes() {
   router
@@ -2132,6 +2360,15 @@ function registerDashboardApiRoutes() {
         .as('studentGamification')
       router.get('/notifications', [GetResponsavelNotificationsController]).as('notifications')
       router.put('/profile', [UpdateResponsavelProfileController]).as('updateProfile')
+
+      // Wallet top-ups
+      router
+        .post('/students/:studentId/wallet-top-ups', [CreateWalletTopUpController])
+        .as('createWalletTopUp')
+      router
+        .get('/students/:studentId/wallet-top-ups', [ListWalletTopUpsController])
+        .as('listWalletTopUps')
+      router.get('/wallet-top-ups/:id', [ShowWalletTopUpController]).as('showWalletTopUp')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])
@@ -2174,12 +2411,20 @@ const ShowCantinaItensPageController = () =>
   import('#controllers/pages/escola/show_cantina_itens_page_controller')
 const ShowCantinaPedidosPageController = () =>
   import('#controllers/pages/escola/show_cantina_pedidos_page_controller')
-const ShowMensalidadesPageController = () =>
-  import('#controllers/pages/escola/show_mensalidades_page_controller')
+const ShowFaturasPageController = () =>
+  import('#controllers/pages/escola/show_faturas_page_controller')
+const ShowLojasPageController = () =>
+  import('#controllers/pages/escola/show_lojas_page_controller')
+const ShowLojaDetailPageController = () =>
+  import('#controllers/pages/escola/show_loja_detail_page_controller')
 const ShowFuncionariosPageController = () =>
   import('#controllers/pages/escola/show_funcionarios_page_controller')
 const ShowMatriculasPageController = () =>
   import('#controllers/pages/escola/show_matriculas_page_controller')
+const ShowNovaMatriculaPageController = () =>
+  import('#controllers/pages/escola/show_nova_matricula_page_controller')
+const ShowEditarAlunoPageController = () =>
+  import('#controllers/pages/escola/show_editar_aluno_page_controller')
 const ShowContratosPageController = () =>
   import('#controllers/pages/escola/show_contratos_page_controller')
 const ShowNovoContratoPageController = () =>
@@ -2315,6 +2560,8 @@ const ShowResponsavelDocumentosPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_documentos_page_controller')
 const ShowResponsavelOcorrenciasPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller')
+const ShowResponsavelLojaPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_loja_page_controller')
 
 // Admin Pages
 const ShowAdminDashboardPageController = () =>
@@ -2341,6 +2588,26 @@ const ShowSchoolDetailsPageController = () =>
   import('#controllers/pages/admin/show_school_details_page_controller')
 const ShowEditSchoolPageController = () =>
   import('#controllers/pages/admin/show_edit_school_page_controller')
+
+// Loja (Store Owner) page controllers
+const ShowLojaDashboardPageController = () =>
+  import('#controllers/pages/loja/show_loja_dashboard_page_controller')
+const ShowLojaProdutosPageController = () =>
+  import('#controllers/pages/loja/show_loja_produtos_page_controller')
+const ShowLojaPedidosPageController = () =>
+  import('#controllers/pages/loja/show_loja_pedidos_page_controller')
+const ShowLojaFinanceiroPageController = () =>
+  import('#controllers/pages/loja/show_loja_financeiro_page_controller')
+
+// Aluno (Student) page controllers
+const ShowAlunoLojaPageController = () =>
+  import('#controllers/pages/aluno/show_aluno_loja_page_controller')
+const ShowAlunoLojaStorePageController = () =>
+  import('#controllers/pages/aluno/show_aluno_loja_store_page_controller')
+const ShowAlunoCarrinhoPageController = () =>
+  import('#controllers/pages/aluno/show_aluno_carrinho_page_controller')
+const ShowAlunoPedidosPageController = () =>
+  import('#controllers/pages/aluno/show_aluno_pedidos_page_controller')
 
 // =============================================================================
 // PAGE ROUTE FUNCTIONS (Inertia)
@@ -2432,6 +2699,9 @@ function registerPageRoutes() {
             .get('/administrativo/alunos', [ShowAlunosPageController])
             .as('administrativo.alunos')
           router
+            .get('/administrativo/alunos/:id/editar', [ShowEditarAlunoPageController])
+            .as('administrativo.alunos.editar')
+          router
             .get('/administrativo/funcionarios', [ShowFuncionariosPageController])
             .as('administrativo.funcionarios')
           router
@@ -2440,6 +2710,9 @@ function registerPageRoutes() {
           router
             .get('/administrativo/matriculas', [ShowMatriculasPageController])
             .as('administrativo.matriculas')
+          router
+            .get('/administrativo/matriculas/nova', [ShowNovaMatriculaPageController])
+            .as('administrativo.matriculas.nova')
           router
             .get('/administrativo/contratos', [ShowContratosPageController])
             .as('administrativo.contratos')
@@ -2548,12 +2821,16 @@ function registerPageRoutes() {
 
           // Financeiro
           router
-            .get('/financeiro/mensalidades', [ShowMensalidadesPageController])
-            .as('financeiro.mensalidades')
-          router
             .get('/financeiro/inadimplencia', [ShowInadimplenciaPageController])
             .as('financeiro.inadimplencia')
           router.get('/financeiro/seguros', [ShowSegurosPageController]).as('financeiro.seguros')
+          router
+            .get('/financeiro/faturas', [ShowFaturasPageController])
+            .as('financeiro.faturas')
+
+          // Lojas
+          router.get('/lojas', [ShowLojasPageController]).as('lojas.index')
+          router.get('/lojas/:id', [ShowLojaDetailPageController]).as('lojas.show')
 
           // Gamificação
           router.get('/gamificacao', [ShowGamificacaoPageController]).as('gamificacao.index')
@@ -2601,6 +2878,7 @@ function registerPageRoutes() {
             .get('/notificacoes', [ShowResponsavelNotificacoesPageController])
             .as('notificacoes')
           router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')
+          router.get('/loja', [ShowResponsavelLojaPageController]).as('loja')
         })
         .prefix('/responsavel')
         .use([middleware.auth(), middleware.impersonation()])
@@ -2675,6 +2953,30 @@ function registerPageRoutes() {
           middleware.requireRole(['SUPER_ADMIN', 'ADMIN']),
         ])
         .as('admin')
+
+      // Store owner pages
+      router
+        .group(() => {
+          router.get('/', [ShowLojaDashboardPageController]).as('dashboard')
+          router.get('/produtos', [ShowLojaProdutosPageController]).as('produtos')
+          router.get('/pedidos', [ShowLojaPedidosPageController]).as('pedidos')
+          router.get('/financeiro', [ShowLojaFinanceiroPageController]).as('financeiro')
+        })
+        .prefix('/loja')
+        .use([middleware.auth(), middleware.storeOwner()])
+        .as('loja')
+
+      // Aluno pages (students)
+      router
+        .group(() => {
+          router.get('/loja', [ShowAlunoLojaPageController]).as('loja.index')
+          router.get('/loja/carrinho', [ShowAlunoCarrinhoPageController]).as('loja.carrinho')
+          router.get('/loja/pedidos', [ShowAlunoPedidosPageController]).as('loja.pedidos')
+          router.get('/loja/:id', [ShowAlunoLojaStorePageController]).as('loja.store')
+        })
+        .prefix('/aluno')
+        .use([middleware.auth()])
+        .as('aluno')
     })
     .as('web')
 }
@@ -2725,6 +3027,7 @@ router
     registerAssignmentApiRoutes()
     registerStudentPaymentApiRoutes()
     registerAgreementApiRoutes()
+    registerInvoiceApiRoutes()
     registerStudentBalanceTransactionApiRoutes()
     registerCanteenApiRoutes()
     registerCanteenReportApiRoutes()
@@ -2734,8 +3037,13 @@ router
     registerCanteenMealReservationApiRoutes()
     registerCanteenPurchaseApiRoutes()
     registerAchievementApiRoutes()
+    registerStoreApiRoutes()
+    registerStoreSettlementApiRoutes()
     registerStoreItemApiRoutes()
     registerStoreOrderApiRoutes()
+    registerStoreInstallmentRuleApiRoutes()
+    registerStoreOwnerApiRoutes()
+    registerMarketplaceApiRoutes()
     registerStudentGamificationApiRoutes()
     registerLeaderboardApiRoutes()
     registerGamificationEventApiRoutes()
@@ -2754,6 +3062,7 @@ router
     registerInsuranceApiRoutes()
     registerImpersonationApiRoutes()
     registerAdminOnboardingApiRoutes()
+    registerAdminJobsApiRoutes()
   })
   .prefix('/api/v1')
   .as('api.v1')

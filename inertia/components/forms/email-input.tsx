@@ -11,6 +11,7 @@ interface EmailInputProps {
   academicPeriodId?: string
   placeholder?: string
   className?: string
+  onValidationChange?: (isValid: boolean | null) => void
 }
 
 export function EmailInput({
@@ -20,6 +21,7 @@ export function EmailInput({
   academicPeriodId,
   placeholder = 'email@exemplo.com',
   className,
+  onValidationChange,
 }: EmailInputProps) {
   const { isValidating, validationResult, validateEmail } =
     useEmailValidation({ excludeUserId, academicPeriodId })
@@ -36,6 +38,15 @@ export function EmailInput({
       validateEmail(value)
     }
   }, [academicPeriodId])
+
+  useEffect(() => {
+    if (!onValidationChange) return
+    if (isValidating || !validationResult) {
+      onValidationChange(null)
+    } else {
+      onValidationChange(validationResult.isValid)
+    }
+  }, [isValidating, validationResult, onValidationChange])
 
   const handleBlur = () => {
     setHasBlurred(true)

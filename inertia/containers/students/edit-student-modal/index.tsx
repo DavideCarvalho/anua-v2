@@ -102,6 +102,14 @@ export function EditStudentModal({
     if (student && open && !isInitialized) {
       const studentData = student as StudentResponse
 
+      // Build a set of responsible IDs that are emergency contacts
+      const emergencyResponsibleIds = new Set<string>()
+      studentData.emergencyContacts?.forEach((c) => {
+        if (c.userId) {
+          emergencyResponsibleIds.add(c.userId)
+        }
+      })
+
       const mappedResponsibles =
         studentData.responsibles?.map((r) => ({
           id: r.responsibleId,
@@ -115,7 +123,21 @@ export function EditStudentModal({
             : new Date(),
           isPedagogical: r.isPedagogical || false,
           isFinancial: r.isFinancial || false,
+          isEmergencyContact: emergencyResponsibleIds.has(r.responsibleId || ''),
+          isExisting: true,
         })) || []
+
+      // Also match by name+phone for legacy data where userId may be missing
+      studentData.emergencyContacts?.forEach((c) => {
+        if (!c.userId) {
+          const idx = mappedResponsibles.findIndex(
+            (r) => r.name === c.name && r.phone === c.phone
+          )
+          if (idx >= 0) {
+            mappedResponsibles[idx].isEmergencyContact = true
+          }
+        }
+      })
 
       form.reset({
         basicInfo: {
