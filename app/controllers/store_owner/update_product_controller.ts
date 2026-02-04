@@ -1,0 +1,46 @@
+import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
+import StoreItem from '#models/store_item'
+import { updateStoreItemValidator } from '#validators/gamification'
+
+export default class UpdateProductController {
+  async handle({ storeOwnerStore, params, request, response }: HttpContext) {
+    const store = storeOwnerStore!
+    const item = await StoreItem.query()
+      .where('id', params.id)
+      .where('storeId', store.id)
+      .whereNull('deletedAt')
+      .first()
+
+    if (!item) {
+      return response.notFound({ message: 'Produto não encontrado' })
+    }
+
+    const data = await request.validateUsing(updateStoreItemValidator)
+
+    const effectivePaymentMode = data.paymentMode ?? item.paymentMode
+    if (effectivePaymentMode === 'HYBRID') {
+      const min = data.minPointsPercentage ?? item.minPointsPercentage ?? 0
+      const max = data.maxPointsPercentage ?? item.maxPointsPercentage ?? 100
+      if (min > max) {
+        return response.badRequest({
+          message: 'minPointsPercentage deve ser menor ou igual a maxPointsPercentage',
+        })
+      }
+    }
+
+    const { availableFrom, availableUntil, ...rest } = data
+    item.merge(rest)
+
+    if (availableFrom !== undefined) {
+      item.availableFrom = availableFrom ? DateTime.fromJSDate(availableFrom) : null
+    }
+    if (availableUntil !== undefined) {
+      item.availableUntil = availableUntil ? DateTime.fromJSDate(availableUntil) : null
+    }
+
+    await item.save()
+
+    return response.ok(item)
+  }
+}
