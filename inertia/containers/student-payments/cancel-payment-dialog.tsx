@@ -11,6 +11,7 @@ import {
 import { Button } from '~/components/ui/button'
 import { Textarea } from '~/components/ui/textarea'
 import { Label } from '~/components/ui/label'
+import { formatCurrency } from '~/lib/utils'
 import { useCancelStudentPayment } from '~/hooks/mutations/use_student_payment_mutations'
 
 interface CancelPaymentDialogProps {
@@ -56,7 +57,7 @@ export function CancelPaymentDialog({ payment, open, onOpenChange }: CancelPayme
         <div className="text-sm space-y-1">
           <p>Aluno: <span className="font-medium">{studentName}</span></p>
           <p>Referência: <span className="font-medium">{payment.month}/{payment.year}</span></p>
-          <p>Valor: <span className="font-medium">R$ {Number(payment.amount).toFixed(2)}</span></p>
+          <p>Valor: <span className="font-medium">{formatCurrency(Number(payment.amount))}</span></p>
         </div>
 
         <div className="space-y-2">

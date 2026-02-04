@@ -28,8 +28,8 @@ export default class RetryGamificationEventController {
 
     // Re-enqueue job for processing
     try {
-      const queueManager = await getQueueManager()
-      await queueManager.dispatch(ProcessGamificationEventJob, { eventId: event.id })
+      await getQueueManager()
+      await ProcessGamificationEventJob.dispatch({ eventId: event.id })
     } catch (error) {
       console.error('Failed to enqueue gamification event retry:', error)
     }

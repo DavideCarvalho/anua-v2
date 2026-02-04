@@ -6,6 +6,7 @@ import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { BalanceOverviewContainer } from '../../containers/responsavel/balance-overview-container'
 import { TransactionsHistoryContainer } from '../../containers/responsavel/transactions-history-container'
+import { TopUpHistoryContainer } from '../../containers/responsavel/topup-history-container'
 import { useSelectedStudent } from '../../hooks/use_selected_student'
 
 function NoStudentCard() {
@@ -27,7 +28,7 @@ function NoFinancialPermissionCard() {
     <Alert variant="destructive">
       <AlertCircle className="h-4 w-4" />
       <AlertDescription>
-        Voce nao tem permissao financeira para gerenciar o saldo deste aluno. Entre em contato
+        Você não tem permissão financeira para gerenciar o saldo deste aluno. Entre em contato
         com a secretaria da escola.
       </AlertDescription>
     </Alert>
@@ -54,6 +55,9 @@ function CreditoContent() {
     <div className="space-y-6">
       {/* Balance Overview */}
       <BalanceOverviewContainer studentId={student.id} />
+
+      {/* Top-Up History */}
+      <TopUpHistoryContainer studentId={student.id} />
 
       {/* Transactions History */}
       <TransactionsHistoryContainer studentId={student.id} />

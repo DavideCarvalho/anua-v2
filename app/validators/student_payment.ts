@@ -39,6 +39,8 @@ export const listStudentPaymentsValidator = vine.compile(
   vine.object({
     studentId: vine.string().trim().optional(),
     contractId: vine.string().trim().optional(),
+    classId: vine.string().trim().optional(),
+    search: vine.string().trim().optional(),
     status: vine.enum(['NOT_PAID', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'FAILED']).optional(),
     type: vine
       .enum(['ENROLLMENT', 'TUITION', 'CANTEEN', 'COURSE', 'AGREEMENT', 'STUDENT_LOAN', 'OTHER'])

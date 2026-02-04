@@ -1,36 +1,25 @@
 import { QueueManager } from '@boringnode/queue'
 import queueConfig from '#config/queue'
 
-// @boringnode/queue alpha version has unstable types
-// Using type assertion until types are stabilized
-type QueueManagerInstance = ReturnType<typeof createQueueManager>
-
-function createQueueManager() {
-  // @ts-expect-error - alpha version type issue
-  return new QueueManager(queueConfig)
-}
-
-let queueManager: QueueManagerInstance | null = null
+let initialized = false
 
 /**
- * Get the queue manager instance (singleton)
+ * Get the queue manager instance (singleton from @boringnode/queue)
  */
-export async function getQueueManager(): Promise<QueueManagerInstance> {
-  if (!queueManager) {
-    queueManager = createQueueManager()
-    await queueManager.init()
+export async function getQueueManager() {
+  if (!initialized) {
+    await QueueManager.init(queueConfig)
+    initialized = true
   }
-  return queueManager
+  return QueueManager
 }
 
 /**
  * Shutdown the queue manager
  */
 export async function shutdownQueueManager(): Promise<void> {
-  if (queueManager) {
-    await queueManager.shutdown()
-    queueManager = null
+  if (initialized) {
+    await QueueManager.destroy()
+    initialized = false
   }
 }
-
-export { queueManager }

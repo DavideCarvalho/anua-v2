@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
+import { Wallet, TrendingUp, TrendingDown, Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
 import { tuyau } from '../../lib/api'
+import { formatCurrency } from '../../lib/utils'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
+import { TopUpModal } from './topup-modal'
 
 function useBalanceQueryOptions(studentId: string) {
   return {
@@ -40,6 +44,7 @@ function BalanceOverviewSkeleton() {
 }
 
 function BalanceOverviewContent({ studentId }: { studentId: string }) {
+  const [topUpOpen, setTopUpOpen] = useState(false)
   const { data, isLoading, isError, error } = useQuery(useBalanceQueryOptions(studentId))
 
   if (isLoading) {
@@ -61,57 +66,57 @@ function BalanceOverviewContent({ studentId }: { studentId: string }) {
     return null
   }
 
-  const formatCurrency = (cents: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(cents / 100)
-  }
-
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {/* Saldo Atual */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-          <Wallet className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {formatCurrency(data.summary.currentBalance)}
-          </div>
-          <p className="text-xs text-muted-foreground">Disponível para uso</p>
-        </CardContent>
-      </Card>
+    <>
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Saldo Atual */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(data.summary.currentBalance)}
+            </div>
+            <p className="text-xs text-muted-foreground">Disponível para uso</p>
+            <Button size="sm" className="mt-2" onClick={() => setTopUpOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              Recarregar
+            </Button>
+          </CardContent>
+        </Card>
 
-      {/* Total de Créditos */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Créditos</CardTitle>
-          <TrendingUp className="h-4 w-4 text-green-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600">
-            {formatCurrency(data.summary.totalCredits)}
-          </div>
-          <p className="text-xs text-muted-foreground">Adicionados</p>
-        </CardContent>
-      </Card>
+        {/* Total de Créditos */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Créditos</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(data.summary.totalCredits)}
+            </div>
+            <p className="text-xs text-muted-foreground">Adicionados</p>
+          </CardContent>
+        </Card>
 
-      {/* Total de Débitos */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total de Débitos</CardTitle>
-          <TrendingDown className="h-4 w-4 text-red-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-red-600">
-            {formatCurrency(data.summary.totalDebits)}
-          </div>
-          <p className="text-xs text-muted-foreground">Gastos</p>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Total de Débitos */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Débitos</CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {formatCurrency(data.summary.totalDebits)}
+            </div>
+            <p className="text-xs text-muted-foreground">Gastos</p>
+          </CardContent>
+        </Card>
+      </div>
+      <TopUpModal studentId={studentId} open={topUpOpen} onOpenChange={setTopUpOpen} />
+    </>
   )
 }
 

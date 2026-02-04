@@ -1,0 +1,27 @@
+import { BaseModelDto } from '@adocasts.com/dto/base'
+import type StoreInstallmentRule from '#models/store_installment_rule'
+import type { DateTime } from 'luxon'
+
+export default class StoreInstallmentRuleDto extends BaseModelDto {
+  declare id: string
+  declare storeId: string
+  declare minAmount: number
+  declare maxInstallments: number
+  declare isActive: boolean
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
+
+  constructor(model?: StoreInstallmentRule) {
+    super()
+
+    if (!model) return
+
+    this.id = model.id
+    this.storeId = model.storeId
+    this.minAmount = model.minAmount
+    this.maxInstallments = model.maxInstallments
+    this.isActive = model.isActive
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
+  }
+}

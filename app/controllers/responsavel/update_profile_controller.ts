@@ -1,13 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import vine from '@vinejs/vine'
-
-const updateProfileValidator = vine.compile(
-  vine.object({
-    name: vine.string().trim().minLength(2).maxLength(255),
-    phone: vine.string().trim().optional(),
-  })
-)
+import { updateProfileValidator } from '#validators/responsavel'
 
 export default class UpdateProfileController {
   async handle({ request, response, effectiveUser }: HttpContext) {

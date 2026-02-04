@@ -19,8 +19,8 @@ export default class CreateGamificationEventController {
 
     // Enqueue job for processing
     try {
-      const queueManager = await getQueueManager()
-      await queueManager.dispatch(ProcessGamificationEventJob, { eventId: event.id })
+      await getQueueManager()
+      await ProcessGamificationEventJob.dispatch({ eventId: event.id })
     } catch (error) {
       console.error('Failed to enqueue gamification event:', error)
       // Event is still created, will be retried later

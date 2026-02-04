@@ -68,6 +68,7 @@ export type RoleName =
   | 'SCHOOL_ADMINISTRATIVE'
   | 'SCHOOL_TEACHER'
   | 'SCHOOL_CANTEEN'
+  | 'STORE_OWNER'
   | 'TEACHER'
   | 'STUDENT'
   | 'RESPONSIBLE'
@@ -100,4 +101,8 @@ export function isResponsible(user: UserDto | null): boolean {
 
 export function isStudent(user: UserDto | null): boolean {
   return hasRole(user, ['STUDENT'])
+}
+
+export function isStoreOwner(user: UserDto | null): boolean {
+  return hasRole(user, ['STORE_OWNER'])
 }

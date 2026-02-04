@@ -91,6 +91,7 @@ export const listAchievementsValidator = vine.compile(
 export const createStoreItemValidator = vine.compile(
   vine.object({
     schoolId: vine.string().trim(),
+    storeId: vine.string().trim().optional(),
     name: vine.string().trim().minLength(1).maxLength(255),
     description: vine.string().trim().maxLength(1000).optional(),
     price: vine.number().min(1), // Em pontos
@@ -191,12 +192,17 @@ export const createStoreOrderValidator = vine.compile(
   vine.object({
     studentId: vine.string().trim(),
     schoolId: vine.string().trim(),
+    storeId: vine.string().trim().optional(),
     items: vine.array(
       vine.object({
         storeItemId: vine.string().trim(),
         quantity: vine.number().min(1),
       })
     ),
+    paymentMode: vine.enum(['IMMEDIATE', 'DEFERRED']).optional(),
+    paymentMethod: vine.enum(['BALANCE', 'PIX', 'CASH', 'CARD']).optional(),
+    installments: vine.number().min(1).max(12).optional(),
+    dueDate: vine.date().optional(),
     pointsPaid: vine.number().min(0).optional(),
     moneyPaid: vine.number().min(0).optional(), // Em centavos
     notes: vine.string().trim().maxLength(500).optional(),

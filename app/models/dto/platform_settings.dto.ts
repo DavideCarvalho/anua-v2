@@ -6,6 +6,7 @@ export default class PlatformSettingsDto extends BaseModelDto {
   declare id: string
   declare defaultTrialDays: number
   declare defaultPricePerStudent: number
+  declare defaultStorePlatformFeePercentage: number
   declare createdAt: DateTime
   declare updatedAt: DateTime
 
@@ -17,6 +18,7 @@ export default class PlatformSettingsDto extends BaseModelDto {
     this.id = model.id
     this.defaultTrialDays = model.defaultTrialDays
     this.defaultPricePerStudent = model.defaultPricePerStudent
+    this.defaultStorePlatformFeePercentage = model.defaultStorePlatformFeePercentage
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
   }

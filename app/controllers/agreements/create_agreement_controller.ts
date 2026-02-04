@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import Agreement from '#models/agreement'
 import AgreementEarlyDiscount from '#models/agreement_early_discount'
+import Invoice from '#models/invoice'
 import StudentPayment from '#models/student_payment'
 import { createAgreementValidator } from '#validators/agreement'
 
@@ -10,31 +11,32 @@ export default class CreateAgreementController {
   async handle({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createAgreementValidator)
 
-    const payments = await StudentPayment.query()
-      .whereIn('id', payload.paymentIds)
-      .whereIn('status', ['NOT_PAID', 'PENDING', 'OVERDUE'])
+    const invoices = await Invoice.query()
+      .whereIn('id', payload.invoiceIds)
+      .whereIn('status', ['OPEN', 'PENDING', 'OVERDUE'])
+      .preload('payments')
       .preload('student')
 
-    if (payments.length === 0) {
-      return response.badRequest({ message: 'Nenhum pagamento válido selecionado' })
+    if (invoices.length === 0) {
+      return response.badRequest({ message: 'Nenhuma fatura válida selecionada' })
     }
 
-    if (payments.length !== payload.paymentIds.length) {
+    if (invoices.length !== payload.invoiceIds.length) {
       return response.badRequest({
-        message: 'Alguns pagamentos não foram encontrados ou já estão pagos/cancelados',
+        message: 'Algumas faturas não foram encontradas ou já estão pagas/canceladas',
       })
     }
 
-    const studentIds = new Set(payments.map((p) => p.studentId))
+    const studentIds = new Set(invoices.map((i) => i.studentId))
     if (studentIds.size > 1) {
       return response.badRequest({
-        message: 'Todos os pagamentos devem pertencer ao mesmo aluno',
+        message: 'Todas as faturas devem pertencer ao mesmo aluno',
       })
     }
 
-    const totalAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0)
-    const studentId = payments[0].studentId
-    const contractId = payments[0].contractId
+    const totalAmount = invoices.reduce((sum, i) => sum + Number(i.totalAmount), 0)
+    const studentId = invoices[0].studentId
+    const contractId = invoices[0].contractId
     const installmentAmount = Math.round(totalAmount / payload.installments)
 
     const trx = await db.transaction()
@@ -46,6 +48,10 @@ export default class CreateAgreementController {
           installments: payload.installments,
           startDate: DateTime.fromJSDate(payload.startDate),
           paymentDay: payload.paymentDay,
+          paymentMethod: payload.paymentMethod ?? null,
+          billingType: payload.billingType ?? 'UPFRONT',
+          finePercentage: payload.finePercentage ?? 0,
+          dailyInterestPercentage: payload.dailyInterestPercentage ?? 0,
         },
         { client: trx }
       )
@@ -63,20 +69,44 @@ export default class CreateAgreementController {
         }
       }
 
-      for (const payment of payments) {
-        payment.useTransaction(trx)
-        payment.status = 'CANCELLED'
-        payment.metadata = {
-          ...(payment.metadata || {}),
-          cancelReason: 'Substituído por acordo',
-          agreementId: agreement.id,
+      // Mark original invoices and their payments as renegotiated
+      for (const invoice of invoices) {
+        invoice.useTransaction(trx)
+        invoice.status = 'RENEGOTIATED'
+        await invoice.save()
+
+        for (const payment of invoice.payments) {
+          payment.useTransaction(trx)
+          payment.status = 'RENEGOTIATED'
+          payment.metadata = {
+            ...(payment.metadata || {}),
+            renegotiatedReason: 'Substituído por acordo',
+            agreementId: agreement.id,
+          }
+          await payment.save()
         }
-        await payment.save()
       }
 
+      // Generate new invoices with agreement payments
       const startDate = DateTime.fromJSDate(payload.startDate)
+
       for (let i = 0; i < payload.installments; i++) {
         const dueDate = startDate.plus({ months: i }).set({ day: payload.paymentDay })
+
+        const newInvoice = await Invoice.create(
+          {
+            studentId,
+            contractId,
+            type: 'MONTHLY',
+            month: dueDate.month,
+            year: dueDate.year,
+            dueDate,
+            status: 'OPEN',
+            totalAmount: installmentAmount,
+          },
+          { client: trx }
+        )
+
         await StudentPayment.create(
           {
             studentId,
@@ -85,13 +115,14 @@ export default class CreateAgreementController {
             month: dueDate.month,
             year: dueDate.year,
             type: 'AGREEMENT',
-            status: 'PENDING',
+            status: 'NOT_PAID',
             dueDate,
             installments: payload.installments,
             installmentNumber: i + 1,
             discountPercentage: 0,
             contractId,
             agreementId: agreement.id,
+            invoiceId: newInvoice.id,
           },
           { client: trx }
         )
@@ -102,8 +133,8 @@ export default class CreateAgreementController {
 
       return response.created({
         agreement,
-        cancelledPayments: payments.length,
-        newPayments: payload.installments,
+        cancelledInvoices: invoices.length,
+        newInvoices: payload.installments,
       })
     } catch (error) {
       await trx.rollback()

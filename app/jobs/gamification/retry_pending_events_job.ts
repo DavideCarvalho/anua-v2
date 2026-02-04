@@ -1,7 +1,6 @@
 import { Job } from '@boringnode/queue'
 import { DateTime } from 'luxon'
 import GamificationEvent from '#models/gamification_event'
-import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from './process_gamification_event_job.js'
 
 export default class RetryPendingEventsJob extends Job<void> {
@@ -37,15 +36,13 @@ export default class RetryPendingEventsJob extends Job<void> {
     let retriedCount = 0
     let failedCount = 0
 
-    const queueManager = await getQueueManager()
-
     for (const event of pendingEvents) {
       try {
         // Reset error and re-enqueue
         event.error = null
         await event.save()
 
-        await queueManager.dispatch(ProcessGamificationEventJob, {
+        await ProcessGamificationEventJob.dispatch({
           eventId: event.id,
         })
 

@@ -151,6 +151,18 @@ export async function fetchAsaasPayment(apiKey: string, paymentId: string) {
   })
 }
 
+interface AsaasPixQrCodeResponse {
+  encodedImage: string
+  payload: string
+  expirationDate: string
+}
+
+export async function fetchAsaasPixQrCode(apiKey: string, paymentId: string) {
+  return asaasRequest<AsaasPixQrCodeResponse>(apiKey, `/payments/${paymentId}/pixQrCode`, {
+    method: 'GET',
+  })
+}
+
 export async function sendAsaasPaymentEmail(apiKey: string, paymentId: string, email?: string) {
   return asaasRequest<Record<string, unknown>>(apiKey, `/payments/${paymentId}/notification`, {
     method: 'POST',

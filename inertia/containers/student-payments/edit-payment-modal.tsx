@@ -18,11 +18,13 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { CurrencyInput } from '~/components/ui/currency-input'
 import { Button } from '~/components/ui/button'
+import { formatCurrency } from '~/lib/utils'
 import { useUpdateStudentPayment } from '~/hooks/mutations/use_student_payment_mutations'
 
 const editPaymentSchema = z.object({
-  amount: z.coerce.number().positive('Valor deve ser maior que zero'),
+  amountReais: z.coerce.number().positive('Valor deve ser maior que zero'),
   dueDate: z.string().min(1, 'Data de vencimento é obrigatória'),
   discountPercentage: z.coerce.number().min(0).max(100, 'Desconto deve ser entre 0 e 100'),
 })
@@ -49,21 +51,21 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
   const form = useForm<EditPaymentFormData>({
     resolver: zodResolver(editPaymentSchema) as any,
     defaultValues: {
-      amount: Number(payment.amount),
+      amountReais: Number(payment.amount) / 100,
       dueDate: new Date(payment.dueDate).toISOString().split('T')[0],
       discountPercentage: payment.discountPercentage || 0,
     },
   })
 
-  const watchedAmount = form.watch('amount')
+  const watchedAmount = form.watch('amountReais')
   const watchedDiscount = form.watch('discountPercentage')
-  const finalAmount = watchedAmount - (watchedAmount * watchedDiscount) / 100
+  const finalAmountReais = watchedAmount - (watchedAmount * watchedDiscount) / 100
 
   async function onSubmit(data: EditPaymentFormData) {
     try {
       await updatePayment.mutateAsync({
         id: payment.id,
-        amount: data.amount,
+        amount: Math.round(data.amountReais * 100),
         dueDate: data.dueDate,
         discountPercentage: data.discountPercentage,
       })
@@ -93,12 +95,17 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="amount"
+              name="amountReais"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valor (R$)</FormLabel>
+                  <FormLabel>Valor</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" min="0" {...field} />
+                    <CurrencyInput
+                      value={field.value}
+                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -130,7 +137,7 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
                       <Input type="number" min="0" max="100" className="w-24" {...field} />
                     </FormControl>
                     <span className="text-sm text-muted-foreground">
-                      Valor final: <span className="font-medium text-foreground">R$ {finalAmount.toFixed(2)}</span>
+                      Valor final: <span className="font-medium text-foreground">{formatCurrency(Math.round(finalAmountReais * 100))}</span>
                     </span>
                   </div>
                   <FormMessage />

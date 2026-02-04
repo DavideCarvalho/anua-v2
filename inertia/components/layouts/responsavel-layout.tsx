@@ -20,6 +20,7 @@ import {
   Wallet,
   AlertTriangle,
   Clock,
+  ShoppingBag,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { SharedProps } from '../../lib/types'
@@ -64,6 +65,7 @@ const financialNavigation: NavItem[] = [
 const commonNavigation: NavItem[] = [
   { title: 'Gamificação', route: 'web.responsavel.gamificacao', href: '/responsavel/gamificacao', icon: Trophy },
   { title: 'Cantina', route: 'web.responsavel.cantina', href: '/responsavel/cantina', icon: UtensilsCrossed },
+  { title: 'Loja', route: 'web.responsavel.loja' as any, href: '/responsavel/loja', icon: ShoppingBag },
   { title: 'Perfil', route: 'web.responsavel.perfil', href: '/responsavel/perfil', icon: User },
 ]
 

@@ -116,7 +116,7 @@ function InsightDetailModal({
     switch (insight.id) {
       case 'overdue-payments':
       case 'upcoming-payments':
-        return '/escola/financeiro/mensalidades'
+        return '/escola/financeiro/faturas'
       case 'pending-documents':
       case 'pending-signatures':
       case 'pending-enrollments':

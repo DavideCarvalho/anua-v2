@@ -13,6 +13,9 @@ export default class PlatformSettings extends BaseModel {
   @column()
   declare defaultPricePerStudent: number
 
+  @column()
+  declare defaultStorePlatformFeePercentage: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

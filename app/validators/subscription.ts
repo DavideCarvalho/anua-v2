@@ -23,6 +23,7 @@ export const updatePlatformSettingsValidator = vine.compile(
   vine.object({
     defaultTrialDays: vine.number().min(0).optional(),
     defaultPricePerStudent: vine.number().min(0).optional(),
+    defaultStorePlatformFeePercentage: vine.number().min(0).max(100).optional(),
   })
 )
 

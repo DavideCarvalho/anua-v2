@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { CurrencyInput } from '~/components/ui/currency-input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { formatCurrency } from '~/lib/utils'
 import { useMarkPaymentAsPaid } from '~/hooks/mutations/use_student_payment_mutations'
 
 const markPaidSchema = z.object({
@@ -36,7 +38,7 @@ const markPaidSchema = z.object({
   paymentMethod: z.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER'], {
     message: 'Selecione o método de pagamento',
   }),
-  amountPaid: z.coerce.number().positive('Valor deve ser maior que zero'),
+  amountPaidReais: z.coerce.number().positive('Valor deve ser maior que zero'),
   observation: z.string().optional(),
 })
 
@@ -70,14 +72,14 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
     defaultValues: {
       paidAt: new Date().toISOString().split('T')[0],
       paymentMethod: undefined,
-      amountPaid: Number(payment.amount),
+      amountPaidReais: Number(payment.amount) / 100,
       observation: '',
     },
   })
 
-  const watchedAmount = form.watch('amountPaid')
-  const originalAmount = Number(payment.amount)
-  const isDifferentAmount = watchedAmount !== originalAmount && watchedAmount > 0
+  const watchedAmountReais = form.watch('amountPaidReais')
+  const originalAmountReais = Number(payment.amount) / 100
+  const isDifferentAmount = watchedAmountReais !== originalAmountReais && watchedAmountReais > 0
 
   async function onSubmit(data: MarkPaidFormData) {
     try {
@@ -85,7 +87,7 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
         id: payment.id,
         paidAt: data.paidAt,
         paymentMethod: data.paymentMethod,
-        amountPaid: data.amountPaid,
+        amountPaid: Math.round(data.amountPaidReais * 100),
         observation: data.observation || undefined,
       })
       toast.success('Pagamento registrado com sucesso')
@@ -108,7 +110,7 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
         <div className="text-sm text-muted-foreground space-y-1">
           <p>Aluno: <span className="font-medium text-foreground">{studentName}</span></p>
           <p>Referência: <span className="font-medium text-foreground">{payment.month}/{payment.year}</span></p>
-          <p>Valor: <span className="font-medium text-foreground">R$ {originalAmount.toFixed(2)}</span></p>
+          <p>Valor: <span className="font-medium text-foreground">{formatCurrency(Number(payment.amount))}</span></p>
         </div>
 
         <Form {...form}>
@@ -154,12 +156,17 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
 
             <FormField
               control={form.control}
-              name="amountPaid"
+              name="amountPaidReais"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Valor pago (R$)</FormLabel>
+                  <FormLabel>Valor pago</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" min="0" {...field} />
+                    <CurrencyInput
+                      value={field.value}
+                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                    />
                   </FormControl>
                   {isDifferentAmount && (
                     <Badge variant="secondary" className="gap-1">

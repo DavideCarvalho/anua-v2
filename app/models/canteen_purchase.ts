@@ -5,6 +5,7 @@ import Canteen from './canteen.js'
 import User from './user.js'
 import CanteenItemPurchased from './canteen_item_purchased.js'
 import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
+import StudentPayment from './student_payment.js'
 
 export type CanteenPaymentMethod = 'BALANCE' | 'CASH' | 'CARD' | 'PIX'
 export type CanteenPurchaseStatus = 'PENDING' | 'PAID' | 'CANCELLED'
@@ -34,6 +35,9 @@ export default class CanteenPurchase extends BaseModel {
   declare paidAt: DateTime | null
 
   @column()
+  declare studentPaymentId: string | null
+
+  @column()
   declare monthlyTransferId: string | null
 
   @belongsTo(() => CanteenMonthlyTransfer, { foreignKey: 'monthlyTransferId' })
@@ -51,6 +55,9 @@ export default class CanteenPurchase extends BaseModel {
 
   @belongsTo(() => Canteen, { foreignKey: 'canteenId' })
   declare canteen: BelongsTo<typeof Canteen>
+
+  @belongsTo(() => StudentPayment, { foreignKey: 'studentPaymentId' })
+  declare studentPayment: BelongsTo<typeof StudentPayment>
 
   @hasMany(() => CanteenItemPurchased, { foreignKey: 'canteenPurchaseId' })
   declare itemsPurchased: HasMany<typeof CanteenItemPurchased>

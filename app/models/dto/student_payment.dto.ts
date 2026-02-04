@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentPayment from '#models/student_payment'
 import type { DateTime } from 'luxon'
+import StudentDto from './student.dto.js'
 
 export default class StudentPaymentDto extends BaseModelDto {
   declare id: string
@@ -15,8 +16,9 @@ export default class StudentPaymentDto extends BaseModelDto {
     | 'COURSE'
     | 'AGREEMENT'
     | 'STUDENT_LOAN'
+    | 'STORE'
     | 'OTHER'
-  declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED'
+  declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED' | 'RENEGOTIATED'
   declare totalAmount: number
   declare dueDate: DateTime
   declare installments: number
@@ -35,6 +37,7 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare insuranceBillingId: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare student?: StudentDto
 
   constructor(studentPayment?: StudentPayment) {
     super()
@@ -66,5 +69,6 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.insuranceBillingId = studentPayment.insuranceBillingId
     this.createdAt = studentPayment.createdAt
     this.updatedAt = studentPayment.updatedAt
+    this.student = studentPayment.student ? new StudentDto(studentPayment.student) : undefined
   }
 }

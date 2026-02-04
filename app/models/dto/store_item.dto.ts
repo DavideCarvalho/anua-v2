@@ -6,6 +6,7 @@ import type { DateTime } from 'luxon'
 export default class StoreItemDto extends BaseModelDto {
   declare id: string
   declare schoolId: string
+  declare storeId: string | null
   declare canteenItemId: string | null
   declare name: string
   declare description: string | null
@@ -37,6 +38,7 @@ export default class StoreItemDto extends BaseModelDto {
 
     this.id = model.id
     this.schoolId = model.schoolId
+    this.storeId = model.storeId
     this.canteenItemId = model.canteenItemId
     this.name = model.name
     this.description = model.description

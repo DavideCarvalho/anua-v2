@@ -1,22 +1,31 @@
 import logger from '@adonisjs/core/services/logger'
 import StudentHasLevel from '#models/student_has_level'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
-import { getQueueManager } from '#services/queue_service'
+
+interface GenerateMissingPaymentsOptions {
+  schoolId?: string
+  inline?: boolean
+}
 
 /**
  * Job agendado para gerar pagamentos faltantes.
  * Executa diariamente e verifica se há alunos matriculados em períodos ativos
  * que ainda não têm pagamentos gerados.
+ * Aceita schoolId opcional para filtrar por escola.
+ * Aceita inline para executar direto sem despachar na fila.
  */
 export default class GenerateMissingPayments {
-  static async handle() {
+  static async handle(options: GenerateMissingPaymentsOptions = {}) {
     const startTime = Date.now()
-    logger.info('[SCHEDULER] Starting missing payments generation')
+    const { schoolId, inline = false } = options
+
+    logger.info('[SCHEDULER] Starting missing payments generation', {
+      schoolId: schoolId ?? 'all',
+      inline,
+    })
 
     try {
-      // Find all StudentHasLevel records in active academic periods
-      // that have contracts but no payments (only active enrollments)
-      const studentLevelsWithoutPayments = await StudentHasLevel.query()
+      const query = StudentHasLevel.query()
         .whereNull('deletedAt')
         .whereNotNull('contractId')
         .whereHas('academicPeriod', (periodQuery) => {
@@ -25,9 +34,17 @@ export default class GenerateMissingPayments {
         .whereDoesntHave('studentPayments', (paymentQuery) => {
           paymentQuery.whereIn('type', ['TUITION', 'COURSE', 'ENROLLMENT'])
         })
-        .preload('student', (query) => {
-          query.preload('user')
+        .preload('student', (q) => {
+          q.preload('user')
         })
+
+      if (schoolId) {
+        query.whereHas('level', (levelQuery) => {
+          levelQuery.where('schoolId', schoolId)
+        })
+      }
+
+      const studentLevelsWithoutPayments = await query
 
       logger.info(
         `[SCHEDULER] Found ${studentLevelsWithoutPayments.length} students without payments`
@@ -35,30 +52,50 @@ export default class GenerateMissingPayments {
 
       if (studentLevelsWithoutPayments.length === 0) {
         logger.info('[SCHEDULER] No missing payments to generate')
-        return
+        return { total: 0, dispatched: 0, errors: 0 }
       }
 
-      const queueManager = await getQueueManager()
       let dispatched = 0
       let errors = 0
 
-      for (const studentLevel of studentLevelsWithoutPayments) {
-        try {
-          await queueManager.dispatch(GenerateStudentPaymentsJob, {
-            studentHasLevelId: studentLevel.id,
-          })
-          dispatched++
+      if (inline) {
+        for (const studentLevel of studentLevelsWithoutPayments) {
+          try {
+            const job = new GenerateStudentPaymentsJob({ studentHasLevelId: studentLevel.id })
+            await job.execute()
+            dispatched++
 
-          logger.info('[SCHEDULER] Dispatched payment generation:', {
-            studentHasLevelId: studentLevel.id,
-            studentName: studentLevel.student?.user?.name,
-          })
-        } catch (error) {
-          errors++
-          logger.error('[SCHEDULER] Error dispatching job:', {
-            studentHasLevelId: studentLevel.id,
-            error: error instanceof Error ? error.message : String(error),
-          })
+            logger.info('[SCHEDULER] Generated payments inline:', {
+              studentHasLevelId: studentLevel.id,
+              studentName: studentLevel.student?.user?.name,
+            })
+          } catch (error) {
+            errors++
+            logger.error('[SCHEDULER] Error generating payments:', {
+              studentHasLevelId: studentLevel.id,
+              error: error instanceof Error ? error.message : String(error),
+            })
+          }
+        }
+      } else {
+        for (const studentLevel of studentLevelsWithoutPayments) {
+          try {
+            await GenerateStudentPaymentsJob.dispatch({
+              studentHasLevelId: studentLevel.id,
+            })
+            dispatched++
+
+            logger.info('[SCHEDULER] Dispatched payment generation:', {
+              studentHasLevelId: studentLevel.id,
+              studentName: studentLevel.student?.user?.name,
+            })
+          } catch (error) {
+            errors++
+            logger.error('[SCHEDULER] Error dispatching job:', {
+              studentHasLevelId: studentLevel.id,
+              error: error instanceof Error ? error.message : String(error),
+            })
+          }
         }
       }
 
@@ -68,6 +105,8 @@ export default class GenerateMissingPayments {
         errors,
         duration: `${duration}ms`,
       })
+
+      return { total: studentLevelsWithoutPayments.length, dispatched, errors }
     } catch (error) {
       logger.error('[SCHEDULER] Error in missing payments generation:', {
         error: error instanceof Error ? error.message : String(error),

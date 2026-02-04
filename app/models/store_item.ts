@@ -3,6 +3,7 @@ import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import CanteenItem from './canteen_item.js'
+import Store from './store.js'
 import StoreOrder from './store_order.js'
 
 export type StoreItemType =
@@ -36,6 +37,9 @@ export default class StoreItem extends BaseModel {
 
   @column()
   declare schoolId: string
+
+  @column()
+  declare storeId: string | null
 
   @column()
   declare canteenItemId: string | null
@@ -108,6 +112,9 @@ export default class StoreItem extends BaseModel {
 
   @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
+
+  @belongsTo(() => Store, { foreignKey: 'storeId' })
+  declare store: BelongsTo<typeof Store>
 
   @belongsTo(() => CanteenItem, { foreignKey: 'canteenItemId' })
   declare canteenItem: BelongsTo<typeof CanteenItem>

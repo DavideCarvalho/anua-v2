@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Plus, Trash2, Loader2 } from 'lucide-react'
 import {
@@ -26,14 +26,30 @@ import { Card, CardContent } from '~/components/ui/card'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Badge } from '~/components/ui/badge'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '~/components/ui/collapsible'
+import { formatCurrency } from '~/lib/utils'
 import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
-import { useCreateAgreement } from '~/hooks/mutations/use_agreement_mutations'
+import { useCreateAgreementMutationOptions } from '~/hooks/mutations/use_agreement_mutations'
 
 const ACTIONABLE_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE']
+
+const paymentMethodLabels: Record<string, string> = {
+  PIX: 'PIX',
+  BOLETO: 'Boleto',
+  CREDIT_CARD: 'Cartão de Crédito',
+  CASH: 'Dinheiro',
+  OTHER: 'Outro',
+}
 
 const statusLabels: Record<string, string> = {
   NOT_PAID: 'Não pago',
@@ -57,6 +73,10 @@ const agreementSchema = z.object({
   installments: z.coerce.number().min(1, 'Mínimo 1 parcela').max(36, 'Máximo 36 parcelas'),
   startDate: z.string().min(1, 'Data de início é obrigatória'),
   paymentDay: z.coerce.number().min(1, 'Mínimo dia 1').max(31, 'Máximo dia 31'),
+  paymentMethod: z.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER']).optional(),
+  billingType: z.enum(['UPFRONT', 'MONTHLY']),
+  finePercentage: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional(),
+  dailyInterestPercentage: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional(),
   earlyDiscounts: z.array(
     z.object({
       percentage: z.coerce.number().min(1, 'Mínimo 1%').max(100, 'Máximo 100%'),
@@ -78,7 +98,8 @@ interface CreateAgreementModalProps {
 }
 
 export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgreementModalProps) {
-  const createAgreement = useCreateAgreement()
+  const queryClient = useQueryClient()
+  const createAgreement = useMutation(useCreateAgreementMutationOptions())
   const [discountsOpen, setDiscountsOpen] = useState(false)
 
   const { data: paymentsData, isLoading } = useQuery({
@@ -101,6 +122,10 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
       installments: 3,
       startDate: new Date().toISOString().split('T')[0],
       paymentDay: 10,
+      paymentMethod: undefined,
+      billingType: 'UPFRONT' as const,
+      finePercentage: undefined,
+      dailyInterestPercentage: undefined,
       earlyDiscounts: [],
     },
   })
@@ -112,6 +137,9 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
         installments: 3,
         startDate: new Date().toISOString().split('T')[0],
         paymentDay: 10,
+        paymentMethod: undefined,
+        finePercentage: undefined,
+        dailyInterestPercentage: undefined,
         earlyDiscounts: [],
       })
       setDiscountsOpen(false)
@@ -122,6 +150,10 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   const installments = form.watch('installments')
   const startDateStr = form.watch('startDate')
   const paymentDay = form.watch('paymentDay')
+  const paymentMethod = form.watch('paymentMethod')
+  const billingType = form.watch('billingType')
+  const finePercentage = form.watch('finePercentage')
+  const dailyInterestPercentage = form.watch('dailyInterestPercentage')
   const earlyDiscounts = form.watch('earlyDiscounts')
 
   const totalAmount = useMemo(() => {
@@ -161,12 +193,19 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   async function onSubmit(data: AgreementFormData) {
     try {
       await createAgreement.mutateAsync({
-        paymentIds: data.selectedPaymentIds,
+        invoiceIds: data.selectedPaymentIds,
         installments: data.installments,
         startDate: data.startDate,
         paymentDay: data.paymentDay,
+        paymentMethod: data.paymentMethod,
+        billingType: data.billingType,
+        finePercentage: data.finePercentage,
+        dailyInterestPercentage: data.dailyInterestPercentage,
         earlyDiscounts: data.earlyDiscounts.length > 0 ? data.earlyDiscounts : undefined,
       })
+      await queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      await queryClient.invalidateQueries({ queryKey: ['student-pending-invoices'] })
+      await queryClient.invalidateQueries({ queryKey: ['student-payments'] })
       toast.success('Acordo criado com sucesso')
       onOpenChange(false)
     } catch {
@@ -224,7 +263,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">
-                            R$ {Number(p.amount).toFixed(2)}
+                            {formatCurrency(Number(p.amount))}
                           </span>
                           <Badge
                             variant="secondary"
@@ -244,7 +283,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                 <div className="text-sm text-muted-foreground">
                   {selectedIds.length} pagamento(s) selecionado(s) &mdash;{' '}
                   <span className="font-medium text-foreground">
-                    Total: R$ {totalAmount.toFixed(2)}
+                    Total: {formatCurrency(totalAmount)}
                   </span>
                 </div>
               </div>
@@ -300,11 +339,105 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Método de pagamento</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione (opcional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.entries(paymentMethodLabels).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="billingType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de cobrança</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="UPFRONT">À vista (gera todas)</SelectItem>
+                            <SelectItem value="MONTHLY">Mensal (gera mês a mês)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="finePercentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Multa por atraso (%)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            placeholder="Ex: 2"
+                            {...field}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="dailyInterestPercentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Juros ao dia (%)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            placeholder="Ex: 0.33"
+                            {...field}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 {installments > 0 && totalAmount > 0 && (
                   <p className="text-sm text-muted-foreground">
                     {installments} parcela(s) de{' '}
                     <span className="font-medium text-foreground">
-                      R$ {installmentAmount.toFixed(2)}
+                      {formatCurrency(installmentAmount)}
                     </span>
                   </p>
                 )}
@@ -386,10 +519,10 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                 <Card className="bg-muted/50">
                   <CardContent className="pt-4 text-sm space-y-1">
                     <p>
-                      Total: <span className="font-medium">R$ {totalAmount.toFixed(2)}</span>
+                      Total: <span className="font-medium">{formatCurrency(totalAmount)}</span>
                     </p>
                     <p>
-                      Parcelas: <span className="font-medium">{installments}x de R$ {installmentAmount.toFixed(2)}</span>
+                      Parcelas: <span className="font-medium">{installments}x de {formatCurrency(installmentAmount)}</span>
                     </p>
                     {startDateStr && (
                       <p>
@@ -400,6 +533,25 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                     <p>
                       Vencimento todo dia <span className="font-medium">{paymentDay}</span>
                     </p>
+                    {paymentMethod && (
+                      <p>
+                        Pagamento via{' '}
+                        <span className="font-medium">{paymentMethodLabels[paymentMethod]}</span>
+                      </p>
+                    )}
+                    <p>
+                      Cobrança:{' '}
+                      <span className="font-medium">
+                        {billingType === 'MONTHLY' ? 'Mensal (gera mês a mês)' : 'À vista (todas as parcelas)'}
+                      </span>
+                    </p>
+                    {(finePercentage || dailyInterestPercentage) && (
+                      <p>
+                        {finePercentage ? `Multa: ${finePercentage}%` : ''}
+                        {finePercentage && dailyInterestPercentage ? ' + ' : ''}
+                        {dailyInterestPercentage ? `Juros: ${dailyInterestPercentage}% ao dia` : ''}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               )}

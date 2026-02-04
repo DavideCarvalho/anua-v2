@@ -8,6 +8,7 @@ export default class StoreOrderDto extends BaseModelDto {
   declare orderNumber: string
   declare studentId: string
   declare schoolId: string
+  declare storeId: string | null
   declare status: StoreOrderStatus
   declare totalPrice: number
   declare totalPoints: number
@@ -25,6 +26,9 @@ export default class StoreOrderDto extends BaseModelDto {
   declare approvedBy: string | null
   declare preparedBy: string | null
   declare deliveredBy: string | null
+  declare paymentMode: 'IMMEDIATE' | 'DEFERRED' | null
+  declare paymentMethod: 'BALANCE' | 'PIX' | 'CASH' | 'CARD' | null
+  declare settlementId: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
 
@@ -37,6 +41,7 @@ export default class StoreOrderDto extends BaseModelDto {
     this.orderNumber = model.orderNumber
     this.studentId = model.studentId
     this.schoolId = model.schoolId
+    this.storeId = model.storeId
     this.status = model.status
     this.totalPrice = model.totalPrice
     this.totalPoints = model.totalPoints
@@ -54,6 +59,9 @@ export default class StoreOrderDto extends BaseModelDto {
     this.approvedBy = model.approvedBy
     this.preparedBy = model.preparedBy
     this.deliveredBy = model.deliveredBy
+    this.paymentMode = model.paymentMode
+    this.paymentMethod = model.paymentMethod
+    this.settlementId = model.settlementId
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
   }

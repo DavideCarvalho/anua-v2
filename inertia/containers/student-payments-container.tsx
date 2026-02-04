@@ -2,10 +2,22 @@ import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useStudentPaymentsQueryOptions } from '../hooks/queries/use_student_payments'
+import type { LucideIcon } from 'lucide-react'
+import {
+  useStudentPaymentsQueryOptions,
+  type StudentPaymentsResponse,
+} from '../hooks/queries/use_student_payments'
+import { useClassesQueryOptions, type ClassesResponse } from '../hooks/queries/use_classes'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +37,9 @@ import {
   AlertTriangle,
   Pencil,
   Handshake,
+  FilterX,
 } from 'lucide-react'
+import { formatCurrency } from '../lib/utils'
 import { EditPaymentModal } from './student-payments/edit-payment-modal'
 import { MarkPaidModal } from './student-payments/mark-paid-modal'
 import { CancelPaymentDialog } from './student-payments/cancel-payment-dialog'
@@ -85,7 +99,11 @@ type PaymentStatus = NonNullable<
   NonNullable<Parameters<typeof useStudentPaymentsQueryOptions>[0]>['status']
 >
 
-type StatusConfig = { label: string; className: string; icon: any }
+type PaymentType = NonNullable<
+  NonNullable<Parameters<typeof useStudentPaymentsQueryOptions>[0]>['type']
+>
+
+type StatusConfig = { label: string; className: string; icon: LucideIcon }
 
 const statusConfig: Record<PaymentStatus, StatusConfig> = {
   NOT_PAID: { label: 'Não pago', className: 'bg-yellow-100 text-yellow-700', icon: Clock },
@@ -95,6 +113,27 @@ const statusConfig: Record<PaymentStatus, StatusConfig> = {
   CANCELLED: { label: 'Cancelado', className: 'bg-gray-100 text-gray-700', icon: XCircle },
   FAILED: { label: 'Falhou', className: 'bg-gray-100 text-gray-700', icon: XCircle },
 }
+
+const typeLabels: Record<string, string> = {
+  ENROLLMENT: 'Matrícula',
+  TUITION: 'Mensalidade',
+  CANTEEN: 'Cantina',
+  COURSE: 'Curso',
+  AGREEMENT: 'Acordo',
+  STUDENT_LOAN: 'Empréstimo',
+  OTHER: 'Outro',
+}
+
+const monthLabels = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+]
+
+type Payment = StudentPaymentsResponse['data'][number]
+
+type ClassItem = ClassesResponse['data'][number]
+
+type PaginationMeta = StudentPaymentsResponse['meta']
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '-'
@@ -137,10 +176,10 @@ function StudentPaymentsContent({
   status?: PaymentStatus
   showSearch?: boolean
 }) {
-  const [selectedPayment, setSelectedPayment] = useState<any>(null)
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
 
-  function openModal(payment: any, modal: ModalType) {
+  function openModal(payment: Payment, modal: ModalType) {
     setSelectedPayment(payment)
     setActiveModal(modal)
   }
@@ -153,33 +192,151 @@ function StudentPaymentsContent({
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
+    status: parseAsString,
+    type: parseAsString,
+    month: parseAsInteger,
+    year: parseAsInteger,
+    classId: parseAsString,
     page: parseAsInteger.withDefault(1),
     limit: parseAsInteger.withDefault(20),
   })
 
-  const { search, page, limit } = filters
+  const { search, page, limit, status: filterStatus, type: filterType, month: filterMonth, year: filterYear, classId } = filters
+
+  const activeStatus = status || (filterStatus as PaymentStatus) || undefined
+
+  const { data: classesData } = useQuery(useClassesQueryOptions({ limit: 100 }))
+  const classes: ClassItem[] = classesData?.data ?? []
+
+  const hasActiveFilters = !!(filterStatus || filterType || filterMonth || filterYear || classId)
+
+  function clearFilters() {
+    setFilters({ status: null, type: null, month: null, year: null, classId: null, page: 1 })
+  }
 
   const { data, isLoading, error, refetch } = useQuery(
-    useStudentPaymentsQueryOptions({ page, limit, status, search: search || undefined })
+    useStudentPaymentsQueryOptions({
+      page,
+      limit,
+      status: activeStatus,
+      search: search || undefined,
+      type: (filterType as PaymentType) || undefined,
+      month: filterMonth || undefined,
+      year: filterYear || undefined,
+      classId: classId || undefined,
+    })
   )
 
-  const result = data as any
-  const payments = Array.isArray(result) ? result : result?.data || []
-  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
+  const payments: Payment[] = data?.data ?? []
+  const meta: PaginationMeta | undefined = data?.meta
 
   return (
     <div className="space-y-4">
       {showSearch && (
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative w-56">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar mensalidades..."
+              placeholder="Buscar aluno..."
               className="pl-9"
               value={search || ''}
               onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
             />
           </div>
+
+          {!status && (
+            <Select
+              value={filterStatus || '_all'}
+              onValueChange={(v) => setFilters({ status: v === '_all' ? null : v, page: 1 })}
+            >
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_all">Todos status</SelectItem>
+                {Object.entries(statusConfig).map(([value, config]) => (
+                  <SelectItem key={value} value={value}>
+                    {config.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <Select
+            value={filterType || '_all'}
+            onValueChange={(v) => setFilters({ type: v === '_all' ? null : v, page: 1 })}
+          >
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_all">Todos tipos</SelectItem>
+              {Object.entries(typeLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filterMonth?.toString() || '_all'}
+            onValueChange={(v) => setFilters({ month: v === '_all' ? null : Number(v), page: 1 })}
+          >
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_all">Todos meses</SelectItem>
+              {monthLabels.map((label, i) => (
+                <SelectItem key={i + 1} value={String(i + 1)}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filterYear?.toString() || '_all'}
+            onValueChange={(v) => setFilters({ year: v === '_all' ? null : Number(v), page: 1 })}
+          >
+            <SelectTrigger className="w-28">
+              <SelectValue placeholder="Ano" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_all">Todos anos</SelectItem>
+              {[2024, 2025, 2026].map((y) => (
+                <SelectItem key={y} value={String(y)}>
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={classId || '_all'}
+            onValueChange={(v) => setFilters({ classId: v === '_all' ? null : v, page: 1 })}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Turma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_all">Todas turmas</SelectItem>
+              {classes.map((cls) => (
+                <SelectItem key={cls.id} value={cls.id}>
+                  {cls.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+              <FilterX className="h-4 w-4 mr-1" />
+              Limpar
+            </Button>
+          )}
         </div>
       )}
 
@@ -216,7 +373,7 @@ function StudentPaymentsContent({
                 </tr>
               </thead>
               <tbody>
-                {payments.map((payment: any) => {
+                {payments.map((payment) => {
                   const config = statusConfig[(payment.status as PaymentStatus) || 'PENDING']
                   const StatusIcon = config.icon
 
@@ -225,12 +382,10 @@ function StudentPaymentsContent({
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                            {payment.student?.user?.name?.charAt(0) ||
-                              payment.student?.name?.charAt(0) ||
-                              'A'}
+                            {payment.student?.user?.name?.charAt(0) || 'A'}
                           </div>
                           <span className="font-medium">
-                            {payment.student?.user?.name || payment.student?.name || '-'}
+                            {payment.student?.user?.name || '-'}
                           </span>
                         </div>
                       </td>
@@ -238,7 +393,7 @@ function StudentPaymentsContent({
                         {payment.month}/{payment.year}
                       </td>
                       <td className="p-4 text-muted-foreground">{formatDate(payment.dueDate)}</td>
-                      <td className="p-4 font-semibold">R$ {Number(payment.amount || 0).toFixed(2)}</td>
+                      <td className="p-4 font-semibold">{formatCurrency(Number(payment.amount || 0))}</td>
                       <td className="p-4">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.className}`}

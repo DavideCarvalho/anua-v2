@@ -49,12 +49,12 @@ export default function EscolaDashboard() {
                 </div>
               </a>
               <a
-                href="/escola/financeiro/mensalidades"
+                href="/escola/financeiro/faturas"
                 className="flex items-center gap-2 rounded-lg border p-3 hover:bg-muted transition-colors"
               >
                 <DollarSign className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="font-medium">Mensalidades</p>
+                  <p className="font-medium">Faturas</p>
                   <p className="text-sm text-muted-foreground">
                     Acompanhar pagamentos e cobranças
                   </p>

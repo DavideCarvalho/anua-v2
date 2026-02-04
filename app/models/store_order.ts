@@ -4,7 +4,10 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import StoreOrderItem from './store_order_item.js'
 import School from './school.js'
+import Store from './store.js'
+import StoreSettlement from './store_settlement.js'
 import User from './user.js'
+import StudentPayment from './student_payment.js'
 
 export type StoreOrderStatus =
   | 'PENDING_PAYMENT'
@@ -30,6 +33,9 @@ export default class StoreOrder extends BaseModel {
 
   @column()
   declare schoolId: string
+
+  @column()
+  declare storeId: string | null
 
   @column()
   declare status: StoreOrderStatus
@@ -71,6 +77,9 @@ export default class StoreOrder extends BaseModel {
   declare internalNotes: string | null
 
   @column()
+  declare studentPaymentId: string | null
+
+  @column()
   declare cancellationReason: string | null
 
   @column()
@@ -81,6 +90,15 @@ export default class StoreOrder extends BaseModel {
 
   @column()
   declare deliveredBy: string | null
+
+  @column()
+  declare paymentMode: 'IMMEDIATE' | 'DEFERRED' | null
+
+  @column()
+  declare paymentMethod: 'BALANCE' | 'PIX' | 'CASH' | 'CARD' | null
+
+  @column()
+  declare settlementId: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -102,6 +120,15 @@ export default class StoreOrder extends BaseModel {
 
   @belongsTo(() => User, { foreignKey: 'deliveredBy' })
   declare deliverer: BelongsTo<typeof User>
+
+  @belongsTo(() => Store, { foreignKey: 'storeId' })
+  declare store: BelongsTo<typeof Store>
+
+  @belongsTo(() => StudentPayment, { foreignKey: 'studentPaymentId' })
+  declare studentPayment: BelongsTo<typeof StudentPayment>
+
+  @belongsTo(() => StoreSettlement, { foreignKey: 'settlementId' })
+  declare settlement: BelongsTo<typeof StoreSettlement>
 
   @hasMany(() => StoreOrderItem, { foreignKey: 'orderId' })
   declare items: HasMany<typeof StoreOrderItem>

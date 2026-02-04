@@ -1,11 +1,19 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { v7 as uuidv7 } from 'uuid'
 import Student from './student.js'
 import User from './user.js'
 
 export default class StudentBalanceTransaction extends BaseModel {
   static table = 'StudentBalanceTransaction'
+
+  @beforeCreate()
+  static assignId(model: StudentBalanceTransaction) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

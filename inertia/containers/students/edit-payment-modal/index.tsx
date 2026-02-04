@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { CreditCard, Loader2 } from 'lucide-react'
+import { CreditCard, Loader2, AlertTriangle } from 'lucide-react'
 import { z } from 'zod'
 import {
   Dialog,
@@ -45,6 +45,8 @@ import {
   ScholarshipSelector,
   DiscountComparison,
 } from '~/components/enrollment'
+import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
+import { formatCurrency } from '~/lib/utils'
 
 const schema = z.object({
   contractId: z.string().min(1, 'Selecione um contrato'),
@@ -81,7 +83,7 @@ function EnrollmentTabContent({
   studentId: string
   onSuccess?: () => void
 }) {
-  const updateEnrollment = useUpdateEnrollment()
+  const { updateEnrollment, isPending } = useUpdateEnrollment()
 
   // Use enrollment's contractId, or fallback to level's contractId
   const initialContractId = enrollment.contractId ?? (enrollment.level as any)?.contractId ?? ''
@@ -154,6 +156,63 @@ function EnrollmentTabContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractData?.paymentType])
 
+  // Fetch pending payments for this enrollment
+  const { data: pendingPaymentsData } = useQuery({
+    ...useStudentPendingPaymentsQueryOptions(studentId),
+    enabled: !!studentId,
+  })
+
+  const watchedInstallments = form.watch('installments')
+  const watchedPaymentDay = form.watch('paymentDay')
+
+  // Calculate impact preview
+  const impactPreview = useMemo(() => {
+    if (!pendingPaymentsData || !contractData) return null
+
+    const allPayments = pendingPaymentsData.data ?? []
+    const unpaidStatuses = ['NOT_PAID', 'PENDING', 'OVERDUE']
+    const affectedPayments = allPayments.filter(
+      (p) =>
+        p.studentHasLevelId === enrollment.id &&
+        unpaidStatuses.includes(p.status) &&
+        p.type !== 'ENROLLMENT'
+    )
+
+    if (affectedPayments.length === 0) return null
+
+    const currentAmount = affectedPayments[0]?.amount ?? 0
+    const currentDay = affectedPayments[0]?.dueDate
+      ? new Date(String(affectedPayments[0].dueDate)).getDate()
+      : null
+
+    const installments = contractData.paymentType === 'UPFRONT'
+      ? (watchedInstallments ?? contractData.installments)
+      : 1
+
+    let newInstallmentAmount: number
+    if (contractData.paymentType === 'UPFRONT') {
+      newInstallmentAmount = Math.floor(contractData.amount / installments)
+    } else {
+      newInstallmentAmount = contractData.amount
+    }
+    const newDiscountedAmount = Math.round(newInstallmentAmount * (1 - discountPercentage / 100))
+
+    const amountChanged = newDiscountedAmount !== currentAmount
+    const dayChanged = currentDay !== null && watchedPaymentDay !== currentDay
+
+    if (!amountChanged && !dayChanged) return null
+
+    return {
+      count: affectedPayments.length,
+      currentAmount,
+      newAmount: newDiscountedAmount,
+      amountChanged,
+      dayChanged,
+      currentDay,
+      newDay: watchedPaymentDay,
+    }
+  }, [pendingPaymentsData, contractData, enrollment.id, discountPercentage, watchedInstallments, watchedPaymentDay])
+
   const handleScholarshipChange = (
     newScholarshipId: string | null,
     scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
@@ -165,7 +224,7 @@ function EnrollmentTabContent({
 
   async function handleSubmit(data: FormData) {
     try {
-      await updateEnrollment.mutateAsync({
+      await updateEnrollment({
         studentId,
         enrollmentId: enrollment.id,
         data: {
@@ -323,9 +382,35 @@ function EnrollmentTabContent({
           </CardContent>
         </Card>
 
+        {/* Impact Preview */}
+        {impactPreview && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-amber-800">
+                    {impactPreview.count} {impactPreview.count === 1 ? 'parcela pendente sera atualizada' : 'parcelas pendentes serao atualizadas'}
+                  </p>
+                  {impactPreview.amountChanged && (
+                    <p className="text-amber-700">
+                      Valor: {formatCurrency(impactPreview.currentAmount)} → {formatCurrency(impactPreview.newAmount)}
+                    </p>
+                  )}
+                  {impactPreview.dayChanged && (
+                    <p className="text-amber-700">
+                      Vencimento: dia {impactPreview.currentDay} → dia {impactPreview.newDay}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex justify-end">
-          <Button type="submit" disabled={updateEnrollment.isPending}>
-            {updateEnrollment.isPending ? (
+          <Button type="submit" disabled={isPending}>
+            {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Salvando...

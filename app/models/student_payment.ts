@@ -3,6 +3,8 @@ import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, belongsTo, hasOne, beforeCreate } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
+import Contract from './contract.js'
+import Invoice from './invoice.js'
 import InsuranceBilling from './insurance_billing.js'
 import InsuranceClaim from './insurance_claim.js'
 
@@ -39,10 +41,11 @@ export default class StudentPayment extends BaseModel {
     | 'COURSE'
     | 'AGREEMENT'
     | 'STUDENT_LOAN'
+    | 'STORE'
     | 'OTHER'
 
   @column({ columnName: 'status' })
-  declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED'
+  declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED' | 'RENEGOTIATED'
 
   @column({ columnName: 'totalAmount' })
   declare totalAmount: number
@@ -89,6 +92,9 @@ export default class StudentPayment extends BaseModel {
   @column({ columnName: 'agreementId' })
   declare agreementId: string | null
 
+  @column({ columnName: 'invoiceId' })
+  declare invoiceId: string | null
+
   @column({ columnName: 'insuranceBillingId' })
   declare insuranceBillingId: string | null
 
@@ -99,6 +105,12 @@ export default class StudentPayment extends BaseModel {
   declare updatedAt: DateTime
 
   // Relationships
+  @belongsTo(() => Contract, { foreignKey: 'contractId' })
+  declare contract: BelongsTo<typeof Contract>
+
+  @belongsTo(() => Invoice, { foreignKey: 'invoiceId' })
+  declare invoice: BelongsTo<typeof Invoice>
+
   @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>
 

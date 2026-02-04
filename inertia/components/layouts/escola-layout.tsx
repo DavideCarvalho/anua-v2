@@ -9,6 +9,7 @@ import {
   Calendar,
   UtensilsCrossed,
   DollarSign,
+  ShoppingBag,
   Trophy,
   Settings,
   LogOut,
@@ -89,15 +90,21 @@ const navigation: NavItem[] = [
   },
   {
     title: 'Financeiro',
-    route: 'web.escola.financeiro.mensalidades',
+    route: 'web.escola.financeiro.faturas',
     href: '/escola/financeiro',
     icon: DollarSign,
     children: [
-      { title: 'Mensalidades', route: 'web.escola.financeiro.mensalidades', href: '/escola/financeiro/mensalidades' },
+      { title: 'Faturas', route: 'web.escola.financeiro.faturas', href: '/escola/financeiro/faturas' },
       { title: 'Inadimplência', route: 'web.escola.financeiro.inadimplencia', href: '/escola/financeiro/inadimplencia' },
       { title: 'Contratos', route: 'web.escola.administrativo.contratos', href: '/escola/administrativo/contratos' },
       { title: 'Bolsas', route: 'web.escola.administrativo.bolsas', href: '/escola/administrativo/bolsas' },
     ],
+  },
+  {
+    title: 'Lojas',
+    route: 'web.escola.lojas.index',
+    href: '/escola/lojas',
+    icon: ShoppingBag,
   },
   {
     title: 'Gamificação',

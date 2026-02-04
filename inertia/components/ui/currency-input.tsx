@@ -40,16 +40,24 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         return
       }
 
-      // Permite Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      // Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
       if (e.ctrlKey || e.metaKey) {
         return
       }
 
       e.preventDefault()
 
-      if (e.key === 'Backspace') {
-        const newCents = Math.floor(cents / 10)
-        onChange(String(newCents / 100))
+      // Delete ou Backspace com seleção: zera o campo
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        const input = inputRef.current
+        if (input && input.selectionStart !== input.selectionEnd) {
+          onChange('0')
+          return
+        }
+        if (e.key === 'Backspace') {
+          const newCents = Math.floor(cents / 10)
+          onChange(String(newCents / 100))
+        }
         return
       }
 
