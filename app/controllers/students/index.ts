@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import Student from '#models/student'
 
 export default class IndexStudentsController {
@@ -31,8 +32,10 @@ export default class IndexStudentsController {
     }
 
     const query = Student.query()
-      .whereHas('levels', (levelQuery) => {
-        levelQuery.whereNull('deletedAt')
+      .where((q) => {
+        q.whereDoesntHave('levels', () => {}).orWhereHas('levels', (levelQuery) => {
+          levelQuery.whereNull('deletedAt')
+        })
       })
       .preload('user')
       .preload('class')
@@ -73,6 +76,25 @@ export default class IndexStudentsController {
               }
             })
           })
+      })
+    } else {
+      // Por padrão, filtrar por períodos letivos em curso ou encerrados mas ainda ativos
+      const today = DateTime.now().toSQLDate()!
+      query.where((q) => {
+        q.whereDoesntHave('levels', () => {}).orWhereHas('levels', (slQuery) => {
+          slQuery.whereNull('deletedAt').whereHas('academicPeriod', (apQuery) => {
+            apQuery.where((ap) => {
+              // Em curso: hoje entre startDate e endDate
+              ap.where((inProgress) => {
+                inProgress.where('startDate', '<=', today).where('endDate', '>=', today)
+              })
+              // Ou encerrado mas ainda ativo
+              .orWhere((endedButActive) => {
+                endedButActive.where('endDate', '<', today).where('isActive', true)
+              })
+            })
+          })
+        })
       })
     }
 
