@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentPayment from '#models/student_payment'
 import type { DateTime } from 'luxon'
 import StudentDto from './student.dto.js'
+import StudentHasExtraClassDto from './student_has_extra_class.dto.js'
 
 export default class StudentPaymentDto extends BaseModelDto {
   declare id: string
@@ -48,6 +49,7 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare createdAt: DateTime
   declare updatedAt: DateTime
   declare student?: StudentDto
+  declare studentHasExtraClass?: StudentHasExtraClassDto
 
   constructor(studentPayment?: StudentPayment) {
     super()
@@ -82,5 +84,8 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.createdAt = studentPayment.createdAt
     this.updatedAt = studentPayment.updatedAt
     this.student = studentPayment.student ? new StudentDto(studentPayment.student) : undefined
+    this.studentHasExtraClass = studentPayment.studentHasExtraClass
+      ? new StudentHasExtraClassDto(studentPayment.studentHasExtraClass)
+      : undefined
   }
 }

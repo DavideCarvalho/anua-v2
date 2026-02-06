@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type ExtraClass from '#models/extra_class'
 import type { DateTime } from 'luxon'
 import ExtraClassScheduleDto from './extra_class_schedule.dto.js'
+import { ContractDto } from './contract.dto.js'
 
 export default class ExtraClassDto extends BaseModelDto {
   declare id: string
@@ -17,6 +18,8 @@ export default class ExtraClassDto extends BaseModelDto {
   declare createdAt: DateTime
   declare updatedAt: DateTime
   declare schedules?: ExtraClassScheduleDto[]
+  declare contract?: ContractDto
+  declare teacherName?: string
   declare enrollmentCount?: number
 
   constructor(model?: ExtraClass) {
@@ -37,6 +40,11 @@ export default class ExtraClassDto extends BaseModelDto {
     this.updatedAt = model.updatedAt
     this.schedules = model.schedules
       ? model.schedules.map((s) => new ExtraClassScheduleDto(s))
+      : undefined
+    this.contract = model.contract ? new ContractDto(model.contract) : undefined
+    this.teacherName = model.teacher?.user?.name
+    this.enrollmentCount = (model.$extras as any)?.enrollments_count
+      ? Number((model.$extras as any).enrollments_count)
       : undefined
   }
 }

@@ -31,7 +31,7 @@ const schema = z.object({
   paymentMethod: z.enum(['BOLETO', 'CREDIT_CARD', 'PIX'], {
     message: 'Selecione a forma de pagamento',
   }),
-  paymentDay: z.coerce.number().min(1).max(31, 'Dia deve ser entre 1 e 31'),
+  paymentDay: z.coerce.number().min(1, 'Selecione o dia de vencimento'),
   scholarshipId: z.string().optional(),
 })
 
@@ -53,7 +53,7 @@ export function EnrollStudentModal({
     defaultValues: {
       studentId: '',
       paymentMethod: 'BOLETO',
-      paymentDay: 5,
+      paymentDay: 0,
       scholarshipId: '',
     },
   })
@@ -64,6 +64,13 @@ export function EnrollStudentModal({
     ...useExtraClassQueryOptions(extraClassId),
     enabled: open,
   })
+
+  // Set first payment day as default when contract loads
+  const firstPaymentDay = extraClass?.contract?.paymentDays?.[0]?.day
+  const currentPaymentDay = form.watch('paymentDay')
+  if (firstPaymentDay && currentPaymentDay === 0) {
+    form.setValue('paymentDay', firstPaymentDay)
+  }
 
   const { data: studentsData } = useQuery({
     ...useStudentsQueryOptions({ limit: 100 }),
@@ -145,7 +152,21 @@ export function EnrollStudentModal({
 
             <div className="space-y-2">
               <Label>Dia do Vencimento</Label>
-              <Input type="number" {...form.register('paymentDay')} min={1} max={31} />
+              <Select
+                value={form.watch('paymentDay')?.toString()}
+                onValueChange={(v) => form.setValue('paymentDay', Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o dia" />
+                </SelectTrigger>
+                <SelectContent>
+                  {extraClass?.contract?.paymentDays?.map((pd: any) => (
+                    <SelectItem key={pd.day} value={pd.day.toString()}>
+                      Dia {pd.day}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {form.formState.errors.paymentDay && (
                 <p className="text-sm text-destructive">
                   {form.formState.errors.paymentDay.message}
@@ -160,7 +181,7 @@ export function EnrollStudentModal({
                 Contrato: {extraClass.contract.name}
               </p>
               <p className="text-sm font-medium">
-                Valor: R$ {(extraClass.contract.ammount / 100).toFixed(2)}
+                Valor: R$ {(extraClass.contract.amount / 100).toFixed(2)}
               </p>
             </div>
           )}

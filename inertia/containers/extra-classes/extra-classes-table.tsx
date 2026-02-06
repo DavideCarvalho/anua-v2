@@ -141,7 +141,7 @@ export function ExtraClassesTable({
                     <TableHead>Nome</TableHead>
                     <TableHead>Professor</TableHead>
                     <TableHead>Horarios</TableHead>
-                    <TableHead className="text-center">Vagas</TableHead>
+                    <TableHead className="text-center">Inscritos</TableHead>
                     <TableHead className="text-center">Status</TableHead>
                     <TableHead className="text-right">Acoes</TableHead>
                   </TableRow>
@@ -158,7 +158,7 @@ export function ExtraClassesTable({
                         </div>
                       </TableCell>
                       <TableCell>
-                        {ec.teacher?.user?.name ?? '-'}
+                        {ec.teacherName ?? '-'}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">

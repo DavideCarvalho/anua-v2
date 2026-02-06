@@ -8,7 +8,7 @@ export default class ShowExtraClassController {
       .where('id', params.id)
       .preload('schedules')
       .preload('teacher', (q) => q.preload('user'))
-      .preload('contract')
+      .preload('contract', (q) => q.preload('paymentDays'))
       .preload('academicPeriod')
       .withCount('enrollments', (q) => q.whereNull('cancelledAt'))
       .first()
