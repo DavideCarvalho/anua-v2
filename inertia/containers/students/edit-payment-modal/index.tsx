@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { CreditCard, Loader2, AlertTriangle, FileText } from 'lucide-react'
+import { CreditCard, Loader2, FileText } from 'lucide-react'
 import { z } from 'zod'
 import {
   Dialog,
@@ -173,59 +173,6 @@ function EnrollmentTabContent({
   })
 
   const watchedInstallments = form.watch('installments')
-  const watchedPaymentDay = form.watch('paymentDay')
-
-  // Calculate impact preview
-  const impactPreview = useMemo(() => {
-    if (!pendingPaymentsData || !contractData) return null
-
-    const allPayments = pendingPaymentsData.data ?? []
-    const unpaidStatuses = ['NOT_PAID', 'PENDING', 'OVERDUE']
-    const affectedPayments = allPayments.filter(
-      (p) =>
-        p.studentHasLevelId === enrollment.id &&
-        unpaidStatuses.includes(p.status) &&
-        p.type !== 'ENROLLMENT'
-    )
-
-    if (affectedPayments.length === 0) return null
-
-    const currentAmount = affectedPayments[0]?.amount ?? 0
-    const currentDay = (() => {
-      const d = affectedPayments[0]?.dueDate
-      if (!d) return null
-      // Extract day directly from ISO date string (YYYY-MM-DD...) to avoid timezone issues
-      const match = String(d).match(/^\d{4}-\d{2}-(\d{2})/)
-      return match ? parseInt(match[1], 10) : new Date(String(d)).getUTCDate()
-    })()
-
-    const installments = contractData.paymentType === 'UPFRONT'
-      ? (watchedInstallments ?? contractData.installments)
-      : 1
-
-    let newInstallmentAmount: number
-    if (contractData.paymentType === 'UPFRONT') {
-      newInstallmentAmount = Math.floor(contractData.amount / installments)
-    } else {
-      newInstallmentAmount = contractData.amount
-    }
-    const newDiscountedAmount = Math.round(newInstallmentAmount * (1 - discountPercentage / 100))
-
-    const amountChanged = newDiscountedAmount !== currentAmount
-    const dayChanged = currentDay !== null && watchedPaymentDay !== currentDay
-
-    if (!amountChanged && !dayChanged) return null
-
-    return {
-      count: affectedPayments.length,
-      currentAmount,
-      newAmount: newDiscountedAmount,
-      amountChanged,
-      dayChanged,
-      currentDay,
-      newDay: watchedPaymentDay,
-    }
-  }, [pendingPaymentsData, contractData, enrollment.id, discountPercentage, watchedInstallments, watchedPaymentDay])
 
   // Calculate invoice impact preview
   const invoiceImpact = useMemo(() => {
@@ -338,7 +285,7 @@ function EnrollmentTabContent({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form id="enrollment-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Contract Info Card */}
         {isLoadingContract ? (
           <Card>
@@ -477,70 +424,76 @@ function EnrollmentTabContent({
           </CardContent>
         </Card>
 
-        {/* Impact Preview */}
-        {impactPreview && (
+        {/* Invoice Impact Preview */}
+        {invoiceImpact && (
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-                <div className="space-y-1 text-sm">
+                <FileText className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <div className="space-y-2 text-sm w-full">
                   <p className="font-medium text-amber-800">
-                    {impactPreview.count} {impactPreview.count === 1 ? 'parcela pendente sera atualizada' : 'parcelas pendentes serao atualizadas'}
+                    {invoiceImpact.length} {invoiceImpact.length === 1 ? 'fatura será atualizada' : 'faturas serão atualizadas'}
                   </p>
-                  {impactPreview.amountChanged && (
-                    <p className="text-amber-700">
-                      Valor: {formatCurrency(impactPreview.currentAmount)} → {formatCurrency(impactPreview.newAmount)}
-                    </p>
-                  )}
-                  {impactPreview.dayChanged && (
-                    <p className="text-amber-700">
-                      Vencimento: dia {impactPreview.currentDay} → dia {impactPreview.newDay}
-                    </p>
-                  )}
+                  <div className="rounded border border-amber-200 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-amber-100">
+                        <tr>
+                          <th className="text-left px-3 py-1.5 font-medium text-amber-800">Fatura</th>
+                          <th className="text-right px-3 py-1.5 font-medium text-amber-800">Atual</th>
+                          <th className="text-right px-3 py-1.5 font-medium text-amber-800">Novo</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-amber-200">
+                        {[...invoiceImpact]
+                          .sort((a, b) => {
+                            const dateA = (a.year ?? 0) * 12 + (a.month ?? 0)
+                            const dateB = (b.year ?? 0) * 12 + (b.month ?? 0)
+                            return dateA - dateB
+                          })
+                          .map((inv) => (
+                            <tr key={inv.id} className="bg-white/50">
+                              <td className="px-3 py-1.5 text-amber-700">
+                                {inv.month?.toString().padStart(2, '0')}/{inv.year}
+                              </td>
+                              <td className="px-3 py-1.5 text-right text-amber-600 line-through">
+                                {formatCurrency(inv.currentTotal)}
+                              </td>
+                              <td className="px-3 py-1.5 text-right font-medium text-amber-800">
+                                {formatCurrency(inv.newTotal)}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Invoice Impact Preview */}
-        {invoiceImpact && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="pt-4 pb-3">
-              <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-                <div className="space-y-1 text-sm">
-                  <p className="font-medium text-blue-800">
-                    {invoiceImpact.length} {invoiceImpact.length === 1 ? 'fatura sera atualizada' : 'faturas serao atualizadas'}
-                  </p>
-                  {invoiceImpact.map((inv) => (
-                    <p key={inv.id} className="text-blue-700">
-                      Fatura {inv.month?.toString().padStart(2, '0')}/{inv.year}:{' '}
-                      {formatCurrency(inv.currentTotal)} → {formatCurrency(inv.newTotal)}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Spacer for sticky footer */}
+        <div className="h-16" />
+      </form>
 
-        <DialogFooter className="pt-4">
+      {/* Sticky Footer */}
+      <div className="absolute bottom-0 left-0 right-0 border-t bg-background p-4">
+        <DialogFooter>
           <Button type="button" variant="outline" onClick={onClose}>
             Fechar
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" form="enrollment-form" disabled={isPending}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Salvando...
               </>
             ) : (
-              'Salvar Alteracoes'
+              'Salvar Alterações'
             )}
           </Button>
         </DialogFooter>
-      </form>
+      </div>
     </Form>
   )
 }
