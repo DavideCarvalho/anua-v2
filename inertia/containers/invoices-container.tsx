@@ -271,7 +271,15 @@ const paymentTypeLabels: Record<string, string> = {
   AGREEMENT: 'Acordo',
   STUDENT_LOAN: 'Empréstimo',
   STORE: 'Loja',
+  EXTRA_CLASS: 'Aula Avulsa',
   OTHER: 'Outros',
+}
+
+function getPaymentTypeLabel(payment: any): string {
+  if (payment.type === 'EXTRA_CLASS' && payment.studentHasExtraClass?.extraClass?.name) {
+    return `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
+  }
+  return paymentTypeLabels[payment.type] || payment.type
 }
 
 const paymentStatusConfig: Record<string, { label: string; className: string }> = {
@@ -660,7 +668,6 @@ function InvoicesContent() {
                                     <tr className="text-xs text-muted-foreground">
                                       <th className="text-left py-2 px-3 font-medium">Tipo</th>
                                       <th className="text-left py-2 px-3 font-medium">Referência</th>
-                                      <th className="text-left py-2 px-3 font-medium">Vencimento</th>
                                       <th className="text-left py-2 px-3 font-medium">Valor</th>
                                       <th className="text-left py-2 px-3 font-medium">Status</th>
                                       <th className="text-right py-2 px-3 font-medium">Ações</th>
@@ -678,15 +685,12 @@ function InvoicesContent() {
                                           className="border-t border-muted text-sm"
                                         >
                                           <td className="py-2 px-3">
-                                            {paymentTypeLabels[payment.type] || payment.type}
+                                            {getPaymentTypeLabel(payment)}
                                           </td>
                                           <td className="py-2 px-3 text-muted-foreground">
                                             {payment.month && payment.year
                                               ? `${monthLabels[payment.month - 1]} ${payment.year}`
                                               : '-'}
-                                          </td>
-                                          <td className="py-2 px-3 text-muted-foreground">
-                                            {formatDate(payment.dueDate)}
                                           </td>
                                           <td className="py-2 px-3 font-medium">
                                             {formatCurrency(Number(payment.amount || 0))}

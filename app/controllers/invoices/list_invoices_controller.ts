@@ -23,7 +23,9 @@ export default class ListInvoicesController {
 
     const query = Invoice.query()
       .preload('student', (q) => q.preload('user'))
-      .preload('payments')
+      .preload('payments', (q) => {
+        q.preload('studentHasExtraClass', (eq) => eq.preload('extraClass'))
+      })
       .orderBy('dueDate', 'asc')
 
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
