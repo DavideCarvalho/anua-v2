@@ -25,7 +25,7 @@ export default class Invoice extends compose(BaseModel, Auditable) {
   declare studentId: string
 
   @column({ columnName: 'contractId' })
-  declare contractId: string
+  declare contractId: string | null
 
   @column({ columnName: 'type' })
   declare type: 'MONTHLY' | 'UPFRONT'

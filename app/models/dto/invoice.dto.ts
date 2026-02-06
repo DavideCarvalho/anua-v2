@@ -7,7 +7,7 @@ import StudentPaymentDto from './student_payment.dto.js'
 export default class InvoiceDto extends BaseModelDto {
   declare id: string
   declare studentId: string
-  declare contractId: string
+  declare contractId: string | null
   declare type: 'MONTHLY' | 'UPFRONT'
   declare month: number | null
   declare year: number | null
