@@ -75,9 +75,9 @@ export default class GenerateInvoices {
       await payment.refresh()
       if (payment.invoiceId) return
 
+      // Find invoice by student + month/year (not by contract)
       let invoice = await Invoice.query()
         .where('studentId', payment.studentId)
-        .where('contractId', payment.contractId)
         .where('month', payment.month)
         .where('year', payment.year)
         .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
@@ -92,14 +92,12 @@ export default class GenerateInvoices {
           .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
         invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
         await invoice.save()
-      } else if (payment.contractId) {
-        await payment.load('contract')
-        const invoiceType = payment.contract?.paymentType === 'UPFRONT' ? 'UPFRONT' : 'MONTHLY'
-
+      } else {
+        // Create invoice without contractId (aggregates all payment types)
         invoice = await Invoice.create({
           studentId: payment.studentId,
-          contractId: payment.contractId,
-          type: invoiceType,
+          contractId: null,
+          type: 'MONTHLY',
           month: payment.month,
           year: payment.year,
           dueDate: payment.dueDate,
@@ -156,27 +154,27 @@ export default class GenerateInvoices {
         return { created: 0, reconciled: 0, paymentsLinked: 0, errors: 0 }
       }
 
-      // 2) Agrupar payments por student:contract
+      // 2) Agrupar payments por student (não por contrato)
       const paymentGroups = new Map<string, StudentPayment[]>()
       for (const payment of allPayments) {
-        const key = `${payment.studentId}:${payment.contractId}`
+        const key = payment.studentId
         if (!paymentGroups.has(key)) {
           paymentGroups.set(key, [])
         }
         paymentGroups.get(key)!.push(payment)
       }
 
-      // 3) Buscar invoices já existentes para o mês (para os mesmos contratos)
-      const contractIds = [...new Set(allPayments.map((p) => p.contractId))]
+      // 3) Buscar invoices já existentes para o mês (por aluno)
+      const studentIds = [...new Set(allPayments.map((p) => p.studentId))]
       const existingInvoices = await Invoice.query()
-        .whereIn('contractId', contractIds)
+        .whereIn('studentId', studentIds)
         .where('month', month)
         .where('year', year)
         .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
 
       const invoiceMap = new Map<string, Invoice>()
       for (const inv of existingInvoices) {
-        invoiceMap.set(`${inv.studentId}:${inv.contractId}`, inv)
+        invoiceMap.set(inv.studentId, inv)
       }
 
       logger.info(
@@ -188,19 +186,14 @@ export default class GenerateInvoices {
       let paymentsLinked = 0
       let errors = 0
 
-      for (const [key, groupPayments] of paymentGroups) {
-        const [studentId, contractId] = key.split(':')
-
+      for (const [studentId, groupPayments] of paymentGroups) {
         const lock = locks.createLock(`invoice-reconcile:${studentId}`, '30s')
         const [executed] = await lock.run(async () => {
           const trx = await db.transaction()
           try {
-            const contract = groupPayments[0].contract
-
             // Re-query for fresh data (invoiceMap may be stale after waiting for lock)
             const freshExisting = await Invoice.query()
               .where('studentId', studentId)
-              .where('contractId', contractId)
               .where('month', month)
               .where('year', year)
               .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
@@ -241,8 +234,7 @@ export default class GenerateInvoices {
                 newTotal,
               })
             } else {
-              // CRIAÇÃO: invoice não existe, criar e vincular tudo
-              const invoiceType = contract.paymentType === 'UPFRONT' ? 'UPFRONT' : 'MONTHLY'
+              // CRIAÇÃO: invoice não existe, criar e vincular tudo (sem contractId)
               const totalAmount = unlinkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
               const earliestDueDate = unlinkedPayments.reduce(
                 (earliest, p) => (p.dueDate < earliest ? p.dueDate : earliest),
@@ -252,8 +244,8 @@ export default class GenerateInvoices {
               const invoice = await Invoice.create(
                 {
                   studentId,
-                  contractId,
-                  type: invoiceType,
+                  contractId: null,
+                  type: 'MONTHLY',
                   month,
                   year,
                   dueDate: earliestDueDate,
