@@ -1,6 +1,7 @@
 import { Job } from '@boringnode/queue'
 import StudentPayment from '#models/student_payment'
 import GenerateInvoices from '#start/jobs/generate_invoices'
+import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
 
 interface ReconcilePaymentInvoicePayload {
   paymentId: string
@@ -19,23 +20,36 @@ export default class ReconcilePaymentInvoiceJob extends Job<ReconcilePaymentInvo
   async execute(): Promise<void> {
     const { paymentId, triggeredBy, source } = this.payload
 
-    const payment = await StudentPayment.find(paymentId)
-    if (!payment) {
-      console.warn(`[RECONCILE] Payment ${paymentId} not found - skipping`)
-      return
-    }
-
-    // Store triggeredBy in metadata if provided
+    // Set audit context so auditable models know who triggered the change
     if (triggeredBy) {
-      payment.metadata = {
-        ...(payment.metadata || {}),
-        lastTriggeredBy: triggeredBy,
-        lastTriggeredAt: new Date().toISOString(),
-        lastTriggeredSource: source,
-      }
-      await payment.save()
+      setAuditContext({
+        userId: triggeredBy.id,
+        userName: triggeredBy.name,
+        source: source || 'Reconciliar Fatura',
+      })
     }
 
-    await GenerateInvoices.reconcilePayment(payment)
+    try {
+      const payment = await StudentPayment.find(paymentId)
+      if (!payment) {
+        console.warn(`[RECONCILE] Payment ${paymentId} not found - skipping`)
+        return
+      }
+
+      // Store triggeredBy in metadata if provided
+      if (triggeredBy) {
+        payment.metadata = {
+          ...(payment.metadata || {}),
+          lastTriggeredBy: triggeredBy,
+          lastTriggeredAt: new Date().toISOString(),
+          lastTriggeredSource: source,
+        }
+        await payment.save()
+      }
+
+      await GenerateInvoices.reconcilePayment(payment)
+    } finally {
+      clearAuditContext()
+    }
   }
 }

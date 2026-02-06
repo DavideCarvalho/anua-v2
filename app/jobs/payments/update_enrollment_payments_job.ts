@@ -7,6 +7,7 @@ import Scholarship from '#models/scholarship'
 import ContractPaymentDay from '#models/contract_payment_day'
 import Invoice from '#models/invoice'
 import { getQueueManager } from '#services/queue_service'
+import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
 
@@ -39,21 +40,35 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
 
     const { enrollmentId, triggeredBy } = this.payload
 
-    const enrollment = await StudentHasLevel.find(enrollmentId)
-    if (!enrollment) {
-      console.warn(`[UPDATE_ENROLLMENT_PAYMENTS] Enrollment ${enrollmentId} not found - skipping`)
-      return
+    // Set audit context so auditable models know who triggered the change
+    if (triggeredBy) {
+      setAuditContext({
+        userId: triggeredBy.id,
+        userName: triggeredBy.name,
+        source: 'Editar Matrícula',
+      })
     }
 
-    console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Found enrollment, processing...`)
+    try {
+      const enrollment = await StudentHasLevel.find(enrollmentId)
+      if (!enrollment) {
+        console.warn(`[UPDATE_ENROLLMENT_PAYMENTS] Enrollment ${enrollmentId} not found - skipping`)
+        return
+      }
 
-    await this.generatePaymentsIfMissing(enrollment)
-    await this.updateFuturePayments(enrollment)
-    await this.reconcileInvoices(enrollment, triggeredBy)
+      console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Found enrollment, processing...`)
 
-    console.log('========================================')
-    console.log(`[UPDATE_ENROLLMENT_PAYMENTS] JOB COMPLETED for ${enrollmentId}`)
-    console.log('========================================')
+      await this.generatePaymentsIfMissing(enrollment)
+      await this.updateFuturePayments(enrollment)
+      await this.reconcileInvoices(enrollment, triggeredBy)
+
+      console.log('========================================')
+      console.log(`[UPDATE_ENROLLMENT_PAYMENTS] JOB COMPLETED for ${enrollmentId}`)
+      console.log('========================================')
+    } finally {
+      // Always clear context when done
+      clearAuditContext()
+    }
   }
 
   private async generatePaymentsIfMissing(enrollment: StudentHasLevel) {
