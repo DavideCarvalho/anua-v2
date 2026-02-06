@@ -1,24 +1,12 @@
-import { useMemo } from 'react'
 import { Head, usePage } from '@inertiajs/react'
 import { ResponsavelLayout } from '../../../components/layouts/responsavel-layout'
 import { CartProvider } from '../../../contexts/cart-context'
 import { MarketplaceStoreDetailContainer } from '../../../containers/marketplace-store-detail-container'
+import { useSelectedStudent } from '../../../hooks/use_selected_student'
 
 export default function ResponsavelLojaStorePage() {
-  const { props, url } = usePage<{ storeId: string }>()
-
-  // Get studentId from URL query param
-  const studentId = useMemo(() => {
-    try {
-      const urlObj = typeof window !== 'undefined'
-        ? new URL(url, window.location.origin)
-        : new URL(`http://localhost${url}`)
-      return urlObj.searchParams.get('aluno') ?? undefined
-    } catch {
-      const match = url.match(/[?&]aluno=([^&]+)/)
-      return match ? match[1] : undefined
-    }
-  }, [url])
+  const { props } = usePage<{ storeId: string }>()
+  const { studentId } = useSelectedStudent()
 
   return (
     <ResponsavelLayout>

@@ -16,6 +16,7 @@ export function useSelectedStudent() {
 
   return {
     student: selectedStudent,
+    studentId: selectedStudent?.id,
     studentSlug: alunoSlug,
     setStudentSlug: setAlunoSlug,
     students,
