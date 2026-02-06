@@ -34,7 +34,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Outro',
 }
 
-export function MarketplaceStoreDetailContainer({ storeId, backHref = '/aluno/loja' }: { storeId: string; backHref?: string }) {
+interface MarketplaceStoreDetailContainerProps {
+  storeId: string
+  backHref?: string
+  studentId?: string
+}
+
+export function MarketplaceStoreDetailContainer({ storeId, backHref = '/aluno/loja', studentId }: MarketplaceStoreDetailContainerProps) {
   const { data, isLoading } = useQuery(useMarketplaceItemsQueryOptions(storeId))
   const cart = useCart()
 
@@ -79,7 +85,7 @@ export function MarketplaceStoreDetailContainer({ storeId, backHref = '/aluno/lo
                   Carrinho ({cart.totalItems} {cart.totalItems === 1 ? 'item' : 'itens'})
                 </SheetTitle>
               </SheetHeader>
-              <CartSheetContent backHref={backHref} hasOnlinePayment={hasOnlinePayment} />
+              <CartSheetContent backHref={backHref} hasOnlinePayment={hasOnlinePayment} studentId={studentId} />
             </SheetContent>
           </Sheet>
         )}

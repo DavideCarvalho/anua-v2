@@ -17,7 +17,13 @@ import { SheetClose } from '../components/ui/sheet'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { formatCurrency } from '../lib/utils'
 
-export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = false }: { backHref?: string; hasOnlinePayment?: boolean }) {
+interface CartSheetContentProps {
+  backHref?: string
+  hasOnlinePayment?: boolean
+  studentId?: string
+}
+
+export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = false, studentId }: CartSheetContentProps) {
   const cart = useCart()
   const [paymentOption, setPaymentOption] = useState<'IMMEDIATE' | 'BILL' | 'INSTALLMENTS'>('BILL')
   const [paymentMethod, setPaymentMethod] = useState<'BALANCE' | 'PIX'>('BALANCE')
@@ -66,6 +72,7 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
         installments: paymentOption === 'INSTALLMENTS' ? installments : (paymentOption === 'BILL' ? billInstallments : undefined),
         spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
         notes: notes || undefined,
+        studentId,
       })
       cart.clearCart()
       toast.success('Pedido realizado com sucesso!')
