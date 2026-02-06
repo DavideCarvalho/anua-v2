@@ -426,24 +426,24 @@ function EnrollmentTabContent({
 
         {/* Invoice Impact Preview */}
         {invoiceImpact && (
-          <Card className="border-amber-200 bg-amber-50">
+          <Card>
             <CardContent className="pt-4 pb-3">
               <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div className="space-y-2 text-sm w-full">
-                  <p className="font-medium text-amber-800">
+                  <p className="font-medium">
                     {invoiceImpact.length} {invoiceImpact.length === 1 ? 'fatura será atualizada' : 'faturas serão atualizadas'}
                   </p>
-                  <div className="rounded border border-amber-200 overflow-hidden">
+                  <div className="rounded border overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-amber-100">
+                      <thead className="bg-muted">
                         <tr>
-                          <th className="text-left px-3 py-1.5 font-medium text-amber-800">Fatura</th>
-                          <th className="text-right px-3 py-1.5 font-medium text-amber-800">Atual</th>
-                          <th className="text-right px-3 py-1.5 font-medium text-amber-800">Novo</th>
+                          <th className="text-left px-3 py-1.5 font-medium">Fatura</th>
+                          <th className="text-right px-3 py-1.5 font-medium">Atual</th>
+                          <th className="text-right px-3 py-1.5 font-medium">Novo</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-amber-200">
+                      <tbody className="divide-y">
                         {[...invoiceImpact]
                           .sort((a, b) => {
                             const dateA = (a.year ?? 0) * 12 + (a.month ?? 0)
@@ -451,14 +451,14 @@ function EnrollmentTabContent({
                             return dateA - dateB
                           })
                           .map((inv) => (
-                            <tr key={inv.id} className="bg-white/50">
-                              <td className="px-3 py-1.5 text-amber-700">
+                            <tr key={inv.id}>
+                              <td className="px-3 py-1.5">
                                 {inv.month?.toString().padStart(2, '0')}/{inv.year}
                               </td>
-                              <td className="px-3 py-1.5 text-right text-amber-600 line-through">
+                              <td className="px-3 py-1.5 text-right text-muted-foreground line-through">
                                 {formatCurrency(inv.currentTotal)}
                               </td>
-                              <td className="px-3 py-1.5 text-right font-medium text-amber-800">
+                              <td className="px-3 py-1.5 text-right font-medium">
                                 {formatCurrency(inv.newTotal)}
                               </td>
                             </tr>
