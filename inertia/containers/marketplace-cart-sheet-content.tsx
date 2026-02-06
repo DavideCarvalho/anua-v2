@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { router } from '@inertiajs/react'
 import { Trash2, Plus, Minus } from 'lucide-react'
 import { toast } from 'sonner'
+import { differenceInMonths } from 'date-fns'
 import { useCart } from '../contexts/cart-context'
 import { useInstallmentOptionsQueryOptions } from '../hooks/queries/use_marketplace'
+import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
 import { useMarketplaceCheckout } from '../hooks/mutations/use_marketplace_mutations'
 import { Button } from '../components/ui/button'
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group'
@@ -12,6 +14,7 @@ import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { Separator } from '../components/ui/separator'
 import { SheetClose } from '../components/ui/sheet'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { formatCurrency } from '../lib/utils'
 
 export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = false }: { backHref?: string; hasOnlinePayment?: boolean }) {
@@ -19,6 +22,7 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
   const [paymentOption, setPaymentOption] = useState<'IMMEDIATE' | 'BILL' | 'INSTALLMENTS'>('BILL')
   const [paymentMethod, setPaymentMethod] = useState<'BALANCE' | 'PIX'>('BALANCE')
   const [installments, setInstallments] = useState(2)
+  const [billInstallments, setBillInstallments] = useState(1)
   const [notes, setNotes] = useState('')
   const checkout = useMarketplaceCheckout()
 
@@ -27,6 +31,28 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
     enabled: paymentOption === 'INSTALLMENTS' && !!cart.storeId && cart.totalPrice > 0,
   })
   const installmentOptions = installmentData?.options ?? []
+
+  // Fetch active academic period to calculate max installments for BILL
+  const { data: academicPeriodsData } = useQuery({
+    ...useAcademicPeriodsQueryOptions({ isActive: true, limit: 1 }),
+    enabled: paymentOption === 'BILL',
+  })
+
+  // Calculate max installments based on months until end of academic period
+  const maxBillInstallments = useMemo(() => {
+    const activePeriod = academicPeriodsData?.data?.[0]
+    if (!activePeriod?.endDate) return 12 // fallback
+
+    const endDate = new Date(String(activePeriod.endDate))
+    const now = new Date()
+    const months = differenceInMonths(endDate, now)
+    return Math.max(1, months)
+  }, [academicPeriodsData])
+
+  // Reset billInstallments if it exceeds max
+  if (billInstallments > maxBillInstallments) {
+    setBillInstallments(maxBillInstallments)
+  }
 
   async function handleCheckout() {
     if (!cart.storeId) return
@@ -37,7 +63,7 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
         items: cart.items.map((i) => ({ storeItemId: i.storeItemId, quantity: i.quantity })),
         paymentMode: isDeferred ? 'DEFERRED' : 'IMMEDIATE',
         paymentMethod: paymentOption === 'IMMEDIATE' ? paymentMethod : undefined,
-        installments: paymentOption === 'INSTALLMENTS' ? installments : undefined,
+        installments: paymentOption === 'INSTALLMENTS' ? installments : (paymentOption === 'BILL' ? billInstallments : undefined),
         spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
         notes: notes || undefined,
       })
@@ -120,7 +146,7 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
                 <Label htmlFor="sheet-mode-bill" className="flex flex-col">
                   <span>Adicionar na mensalidade</span>
                   <span className="text-xs text-muted-foreground font-normal">
-                    Dividido nas mensalidades ate o final do periodo letivo
+                    Dividido nas próximas mensalidades
                   </span>
                 </Label>
               </div>
@@ -132,6 +158,30 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
               )}
             </RadioGroup>
           </div>
+
+          {paymentOption === 'BILL' && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Parcelas</Label>
+                <Select
+                  value={String(billInstallments)}
+                  onValueChange={(v) => setBillInstallments(Number(v))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: maxBillInstallments }, (_, i) => i + 1).map((num) => (
+                      <SelectItem key={num} value={String(num)}>
+                        {num}x de {formatCurrency(Math.ceil(cart.totalPrice / num))}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
           {paymentOption === 'IMMEDIATE' && (
             <>

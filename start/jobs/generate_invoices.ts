@@ -279,7 +279,7 @@ export default class GenerateInvoices {
 
         if (!executed) {
           errors++
-          logger.warn(`[INVOICES] Lock não adquirido para ${key}`)
+          logger.warn(`[INVOICES] Lock não adquirido para ${studentId}`)
         }
       }
 
