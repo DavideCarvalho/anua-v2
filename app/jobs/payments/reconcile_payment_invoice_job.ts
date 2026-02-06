@@ -3,6 +3,15 @@ import StudentPayment from '#models/student_payment'
 import GenerateInvoices from '#start/jobs/generate_invoices'
 import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
 
+// Map technical source names to friendly labels
+const SOURCE_LABELS: Record<string, string> = {
+  'student-payments.update': 'Editar Pagamento',
+  'student-payments.cancel': 'Cancelar Pagamento',
+  'student-payments.create': 'Criar Pagamento',
+  'extra-classes.enroll': 'Matricular em Aula Avulsa',
+  'update-enrollment-payments-job': 'Editar Matrícula',
+}
+
 interface ReconcilePaymentInvoicePayload {
   paymentId: string
   triggeredBy?: { id: string; name: string } | null
@@ -22,10 +31,11 @@ export default class ReconcilePaymentInvoiceJob extends Job<ReconcilePaymentInvo
 
     // Set audit context so auditable models know who triggered the change
     if (triggeredBy) {
+      const friendlySource = source ? (SOURCE_LABELS[source] ?? source) : 'Reconciliar Fatura'
       setAuditContext({
         userId: triggeredBy.id,
         userName: triggeredBy.name,
-        source: source || 'Reconciliar Fatura',
+        source: friendlySource,
       })
     }
 
