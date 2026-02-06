@@ -372,15 +372,18 @@ function EnrollmentTabContent({
               isLoading={false}
             />
 
-            {(discountPercentage > 0 || enrollmentDiscountPercentage > 0) && contractData && (
-              <DiscountComparison
-                originalEnrollmentFee={contractData.enrollmentValue ?? 0}
-                originalMonthlyFee={contractData.amount}
-                enrollmentDiscountPercentage={enrollmentDiscountPercentage}
-                monthlyDiscountPercentage={discountPercentage}
-                installments={contractData.paymentType === 'MONTHLY' ? 12 : form.watch('installments')}
-              />
-            )}
+            {/* Only show comparison when scholarship changed */}
+            {scholarshipId !== enrollment.scholarshipId &&
+              (discountPercentage > 0 || enrollmentDiscountPercentage > 0) &&
+              contractData && (
+                <DiscountComparison
+                  originalEnrollmentFee={contractData.enrollmentValue ?? 0}
+                  originalMonthlyFee={contractData.amount}
+                  enrollmentDiscountPercentage={enrollmentDiscountPercentage}
+                  monthlyDiscountPercentage={discountPercentage}
+                  installments={contractData.paymentType === 'MONTHLY' ? 12 : form.watch('installments')}
+                />
+              )}
           </CardContent>
         </Card>
 
