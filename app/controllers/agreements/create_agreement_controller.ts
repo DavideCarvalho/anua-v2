@@ -36,7 +36,8 @@ export default class CreateAgreementController {
 
     const totalAmount = invoices.reduce((sum, i) => sum + Number(i.totalAmount), 0)
     const studentId = invoices[0].studentId
-    const contractId = invoices[0].contractId
+    // Get contractId from first invoice that has one (may be null for aggregated invoices)
+    const contractId = invoices.find((i) => i.contractId)?.contractId ?? null
     const installmentAmount = Math.round(totalAmount / payload.installments)
 
     const trx = await db.transaction()
