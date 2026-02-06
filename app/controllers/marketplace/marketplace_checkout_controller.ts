@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
+import db from '@adonisjs/lucid/services/db'
 import StoreOrder from '#models/store_order'
 import StoreOrderItem from '#models/store_order_item'
 import StoreItem from '#models/store_item'
@@ -11,6 +12,9 @@ import StudentHasLevel from '#models/student_has_level'
 import AcademicPeriod from '#models/academic_period'
 import StudentHasResponsible from '#models/student_has_responsible'
 import { marketplaceCheckoutValidator } from '#validators/marketplace'
+import { getQueueManager } from '#services/queue_service'
+import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export default class MarketplaceCheckoutController {
   async handle({ request, response, effectiveUser }: HttpContext) {
@@ -121,64 +125,105 @@ export default class MarketplaceCheckoutController {
       })
     }
 
-    // 5. Payment flow (same as CreateStoreOrderController)
+    // 5. Payment flow - wrapped in transaction
     const paymentMode = payload.paymentMode ?? 'IMMEDIATE'
     const paymentMethod = payload.paymentMethod ?? null
     const now = DateTime.now()
 
-    let studentPaymentId: string | null = null
+    const trx = await db.transaction()
 
-    if (paymentMode === 'IMMEDIATE') {
-      if (paymentMethod === 'BALANCE') {
-        const student = await Student.findOrFail(studentId)
-        const latestTransaction = await StudentBalanceTransaction.query()
-          .where('studentId', student.id)
-          .where('status', 'COMPLETED')
-          .orderBy('createdAt', 'desc')
-          .first()
+    try {
+      if (paymentMode === 'IMMEDIATE') {
+        if (paymentMethod === 'BALANCE') {
+          const student = await Student.findOrFail(studentId)
+          const latestTransaction = await StudentBalanceTransaction.query()
+            .where('studentId', student.id)
+            .where('status', 'COMPLETED')
+            .orderBy('createdAt', 'desc')
+            .first()
 
-        const previousBalance = latestTransaction?.newBalance ?? student.balance ?? 0
+          const previousBalance = latestTransaction?.newBalance ?? student.balance ?? 0
 
-        if (previousBalance < totalMoney) {
-          return response.badRequest({
-            message: 'Saldo insuficiente',
-            balance: previousBalance,
-          })
+          if (previousBalance < totalMoney) {
+            await trx.rollback()
+            return response.badRequest({
+              message: 'Saldo insuficiente',
+              balance: previousBalance,
+            })
+          }
+
+          const newBalance = previousBalance - totalMoney
+
+          const order = await StoreOrder.create(
+            {
+              studentId,
+              schoolId,
+              storeId: payload.storeId,
+              totalPoints: totalMoney,
+              totalPrice: totalMoney,
+              totalMoney,
+              status: 'PENDING_APPROVAL',
+              paymentMode: 'IMMEDIATE',
+              paymentMethod: 'BALANCE',
+              paidAt: now,
+              studentNotes: payload.notes ?? null,
+            },
+            { client: trx }
+          )
+
+          await StudentBalanceTransaction.create(
+            {
+              studentId,
+              amount: totalMoney,
+              type: 'STORE_PURCHASE',
+              status: 'COMPLETED',
+              description: 'Compra na loja',
+              previousBalance,
+              newBalance,
+              storeOrderId: order.id,
+              paymentMethod: 'BALANCE',
+            },
+            { client: trx }
+          )
+
+          student.useTransaction(trx)
+          student.balance = newBalance
+          await student.save()
+
+          await this.createOrderItems(orderItems, order.id, storeItemMap, trx)
+          await this.decrementStock(orderItems, storeItemMap, trx)
+
+          await trx.commit()
+
+          await order.load('student')
+          await order.load('items', (q) => q.preload('storeItem'))
+          await order.load('store')
+
+          return response.created(order)
         }
 
-        const newBalance = previousBalance - totalMoney
+        // PIX, CASH, CARD
+        const order = await StoreOrder.create(
+          {
+            studentId,
+            schoolId,
+            storeId: payload.storeId,
+            totalPoints: totalMoney,
+            totalPrice: totalMoney,
+            totalMoney,
+            status: 'PENDING_APPROVAL',
+            paymentMode: 'IMMEDIATE',
+            paymentMethod,
+            paidAt: now,
+            studentNotes: payload.notes ?? null,
+          },
+          { client: trx }
+        )
 
-        const order = await StoreOrder.create({
-          studentId,
-          schoolId,
-          storeId: payload.storeId,
-          totalPoints: totalMoney,
-          totalPrice: totalMoney,
-          totalMoney,
-          status: 'PENDING_APPROVAL',
-          paymentMode: 'IMMEDIATE',
-          paymentMethod: 'BALANCE',
-          paidAt: now,
-          studentNotes: payload.notes ?? null,
-        })
+        await this.createOrderItems(orderItems, order.id, storeItemMap, trx)
+        await this.decrementStock(orderItems, storeItemMap, trx)
 
-        await StudentBalanceTransaction.create({
-          studentId,
-          amount: totalMoney,
-          type: 'STORE_PURCHASE',
-          status: 'COMPLETED',
-          description: 'Compra na loja',
-          previousBalance,
-          newBalance,
-          storeOrderId: order.id,
-          paymentMethod: 'BALANCE',
-        })
-
-        student.balance = newBalance
-        await student.save()
-
-        await this.createOrderItems(orderItems, order.id, storeItemMap)
-        await this.decrementStock(orderItems, storeItemMap)
+        await trx.commit()
 
         await order.load('student')
         await order.load('items', (q) => q.preload('storeItem'))
@@ -187,111 +232,118 @@ export default class MarketplaceCheckoutController {
         return response.created(order)
       }
 
-      // PIX, CASH, CARD
-      const order = await StoreOrder.create({
-        studentId,
-        schoolId,
-        storeId: payload.storeId,
-        totalPoints: totalMoney,
-        totalPrice: totalMoney,
-        totalMoney,
-        status: 'PENDING_APPROVAL',
-        paymentMode: 'IMMEDIATE',
-        paymentMethod,
-        paidAt: now,
-        studentNotes: payload.notes ?? null,
-      })
+      // DEFERRED payment
+      // Use installments from payload, or calculate from remaining months if spreadAcrossPeriod and no installments specified
+      let installments = payload.installments ?? 1
 
-      await this.createOrderItems(orderItems, order.id, storeItemMap)
-      await this.decrementStock(orderItems, storeItemMap)
+      if (payload.spreadAcrossPeriod && !payload.installments && studentHasLevel.academicPeriodId) {
+        const academicPeriod = await AcademicPeriod.find(studentHasLevel.academicPeriodId)
+        if (academicPeriod) {
+          const remainingMonths = Math.max(
+            1,
+            Math.ceil(academicPeriod.endDate.diff(now, 'months').months)
+          )
+          installments = remainingMonths
+        }
+      }
+
+      const dueDate = now.plus({ months: 1 }).set({ day: 10 })
+      const createdPayments: StudentPayment[] = []
+
+      const firstPayment = await StudentPayment.create(
+        {
+          studentId,
+          amount: installments === 1 ? totalMoney : Math.ceil(totalMoney / installments),
+          month: dueDate.month,
+          year: dueDate.year,
+          type: 'STORE',
+          status: 'NOT_PAID',
+          totalAmount: totalMoney,
+          dueDate,
+          installments,
+          installmentNumber: 1,
+          discountPercentage: 0,
+          contractId,
+          studentHasLevelId: studentHasLevel.id,
+        },
+        { client: trx }
+      )
+
+      const studentPaymentId = firstPayment.id
+      createdPayments.push(firstPayment)
+
+      for (let i = 2; i <= installments; i++) {
+        const installmentDueDate = dueDate.plus({ months: i - 1 })
+        const payment = await StudentPayment.create(
+          {
+            studentId,
+            amount:
+              i === installments
+                ? totalMoney - Math.ceil(totalMoney / installments) * (installments - 1)
+                : Math.ceil(totalMoney / installments),
+            month: installmentDueDate.month,
+            year: installmentDueDate.year,
+            type: 'STORE',
+            status: 'NOT_PAID',
+            totalAmount: totalMoney,
+            dueDate: installmentDueDate,
+            installments,
+            installmentNumber: i,
+            discountPercentage: 0,
+            contractId,
+            studentHasLevelId: studentHasLevel.id,
+          },
+          { client: trx }
+        )
+        createdPayments.push(payment)
+      }
+
+      const order = await StoreOrder.create(
+        {
+          studentId,
+          schoolId,
+          storeId: payload.storeId,
+          totalPoints: totalMoney,
+          totalPrice: totalMoney,
+          totalMoney,
+          status: 'PENDING_PAYMENT',
+          paymentMode: 'DEFERRED',
+          paymentMethod: null,
+          studentPaymentId,
+          studentNotes: payload.notes ?? null,
+        },
+        { client: trx }
+      )
+
+      await this.createOrderItems(orderItems, order.id, storeItemMap, trx)
+      await this.decrementStock(orderItems, storeItemMap, trx)
+
+      await trx.commit()
+
+      // Dispatch reconcile job for each payment (after commit)
+      try {
+        await getQueueManager()
+        for (const payment of createdPayments) {
+          await ReconcilePaymentInvoiceJob.dispatch({
+            paymentId: payment.id,
+            triggeredBy: { id: user.id, name: user.name ?? 'Unknown' },
+            source: 'marketplace-checkout',
+          })
+        }
+      } catch {
+        // Queue not available, payments will be reconciled by scheduler
+      }
 
       await order.load('student')
+      await order.load('studentPayment')
       await order.load('items', (q) => q.preload('storeItem'))
       await order.load('store')
 
       return response.created(order)
+    } catch (error) {
+      await trx.rollback()
+      throw error
     }
-
-    // DEFERRED payment
-    let installments = payload.installments ?? 1
-
-    // Spread across remaining months of the academic period
-    if (payload.spreadAcrossPeriod && studentHasLevel.academicPeriodId) {
-      const academicPeriod = await AcademicPeriod.find(studentHasLevel.academicPeriodId)
-      if (academicPeriod) {
-        const remainingMonths = Math.max(
-          1,
-          Math.ceil(academicPeriod.endDate.diff(now, 'months').months)
-        )
-        installments = remainingMonths
-      }
-    }
-
-    const dueDate = now.plus({ months: 1 }).set({ day: 10 })
-
-    const firstPayment = await StudentPayment.create({
-      studentId,
-      amount: installments === 1 ? totalMoney : Math.ceil(totalMoney / installments),
-      month: dueDate.month,
-      year: dueDate.year,
-      type: 'STORE',
-      status: 'NOT_PAID',
-      totalAmount: totalMoney,
-      dueDate,
-      installments,
-      installmentNumber: 1,
-      discountPercentage: 0,
-      contractId,
-      studentHasLevelId: studentHasLevel.id,
-    })
-
-    studentPaymentId = firstPayment.id
-
-    for (let i = 2; i <= installments; i++) {
-      const installmentDueDate = dueDate.plus({ months: i - 1 })
-      await StudentPayment.create({
-        studentId,
-        amount:
-          i === installments
-            ? totalMoney - Math.ceil(totalMoney / installments) * (installments - 1)
-            : Math.ceil(totalMoney / installments),
-        month: installmentDueDate.month,
-        year: installmentDueDate.year,
-        type: 'STORE',
-        status: 'NOT_PAID',
-        totalAmount: totalMoney,
-        dueDate: installmentDueDate,
-        installments,
-        installmentNumber: i,
-        discountPercentage: 0,
-        contractId,
-        studentHasLevelId: studentHasLevel.id,
-      })
-    }
-
-    const order = await StoreOrder.create({
-      studentId,
-      schoolId,
-      storeId: payload.storeId,
-      totalPoints: totalMoney,
-      totalPrice: totalMoney,
-      totalMoney,
-      status: 'PENDING_PAYMENT',
-      paymentMode: 'DEFERRED',
-      paymentMethod: null,
-      studentPaymentId,
-      studentNotes: payload.notes ?? null,
-    })
-
-    await this.createOrderItems(orderItems, order.id, storeItemMap)
-    await this.decrementStock(orderItems, storeItemMap)
-
-    await order.load('student')
-    await order.load('studentPayment')
-    await order.load('items', (q) => q.preload('storeItem'))
-    await order.load('store')
-
-    return response.created(order)
   }
 
   private async createOrderItems(
@@ -302,23 +354,27 @@ export default class MarketplaceCheckoutController {
       totalPrice: number
     }>,
     orderId: string,
-    storeItemMap: Map<string, StoreItem>
+    storeItemMap: Map<string, StoreItem>,
+    trx: TransactionClientContract
   ) {
     for (const item of orderItems) {
       const storeItem = storeItemMap.get(item.storeItemId)!
-      await StoreOrderItem.create({
-        orderId,
-        storeItemId: item.storeItemId,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        paymentMode: 'MONEY',
-        pointsToMoneyRate: 1,
-        pointsPaid: 0,
-        moneyPaid: item.totalPrice,
-        itemName: storeItem.name,
-        itemDescription: storeItem.description,
-        itemImageUrl: storeItem.imageUrl,
-      })
+      await StoreOrderItem.create(
+        {
+          orderId,
+          storeItemId: item.storeItemId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          paymentMode: 'MONEY_ONLY',
+          pointsToMoneyRate: 1,
+          pointsPaid: 0,
+          moneyPaid: item.totalPrice,
+          itemName: storeItem.name,
+          itemDescription: storeItem.description,
+          itemImageUrl: storeItem.imageUrl,
+        },
+        { client: trx }
+      )
     }
   }
 
@@ -329,11 +385,13 @@ export default class MarketplaceCheckoutController {
       unitPrice: number
       totalPrice: number
     }>,
-    storeItemMap: Map<string, StoreItem>
+    storeItemMap: Map<string, StoreItem>,
+    trx: TransactionClientContract
   ) {
     for (const item of orderItems) {
       const storeItem = storeItemMap.get(item.storeItemId)!
       if (storeItem.totalStock !== null) {
+        storeItem.useTransaction(trx)
         storeItem.totalStock -= item.quantity
         await storeItem.save()
       }

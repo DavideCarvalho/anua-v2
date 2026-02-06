@@ -298,7 +298,7 @@ export default class CreateStoreOrderController {
         storeItemId: item.storeItemId,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        paymentMode: 'MONEY',
+        paymentMode: 'MONEY_ONLY',
         pointsToMoneyRate: 1,
         pointsPaid: 0,
         moneyPaid: item.totalPrice,

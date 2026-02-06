@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import StoreOrderItem from './store_order_item.js'
@@ -8,6 +8,7 @@ import Store from './store.js'
 import StoreSettlement from './store_settlement.js'
 import User from './user.js'
 import StudentPayment from './student_payment.js'
+import { v7 as uuidv7 } from 'uuid'
 
 export type StoreOrderStatus =
   | 'PENDING_PAYMENT'
@@ -132,4 +133,17 @@ export default class StoreOrder extends BaseModel {
 
   @hasMany(() => StoreOrderItem, { foreignKey: 'orderId' })
   declare items: HasMany<typeof StoreOrderItem>
+
+  @beforeCreate()
+  static assignIdAndOrderNumber(model: StoreOrder) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+    if (!model.orderNumber) {
+      const now = new Date()
+      const datePart = now.toISOString().slice(0, 10).replace(/-/g, '')
+      const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase()
+      model.orderNumber = `ORD-${datePart}-${randomPart}`
+    }
+  }
 }

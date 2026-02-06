@@ -1,13 +1,21 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import StoreOrder from './store_order.js'
 import StoreItem from './store_item.js'
 
-export type PaymentMode = 'POINTS' | 'MONEY' | 'MIXED'
+export type PaymentMode = 'POINTS_ONLY' | 'MONEY_ONLY' | 'HYBRID'
 
 export default class StoreOrderItem extends BaseModel {
   static table = 'StoreOrderItem'
+
+  @beforeCreate()
+  static assignId(model: StoreOrderItem) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string
