@@ -38,7 +38,7 @@ export default class UpdateEnrollmentController {
     // Dispara job para atualizar pagamentos
     const user = ctx.auth?.user
     try {
-      const qm = await getQueueManager()
+      await getQueueManager()
       console.log(`[UPDATE_ENROLLMENT] QueueManager ready, dispatching...`)
 
       const dispatcher = UpdateEnrollmentPaymentsJob.dispatch({

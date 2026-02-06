@@ -61,7 +61,19 @@ export default class GenerateMissingPayments {
       if (inline) {
         for (const studentLevel of studentLevelsWithoutPayments) {
           try {
-            const job = new GenerateStudentPaymentsJob({ studentHasLevelId: studentLevel.id })
+            const job = new GenerateStudentPaymentsJob()
+            job.$hydrate(
+              { studentHasLevelId: studentLevel.id },
+              {
+                jobId: `inline-${studentLevel.id}`,
+                name: 'GenerateStudentPaymentsJob',
+                attempt: 1,
+                queue: 'payments',
+                priority: 5,
+                acquiredAt: new Date(),
+                stalledCount: 0,
+              }
+            )
             await job.execute()
             dispatched++
 

@@ -80,7 +80,7 @@ export default class QueueWork extends BaseCommand {
       await worker.init()
 
       // Get the adapter AFTER worker.init() to ensure we use the same instance as the worker
-      const adapter = QueueManager.use()
+      QueueManager.use()
       this.logger.info('QueueManager initialized via worker.init(), adapter obtained')
 
       // Debug: test if a specific job is registered
