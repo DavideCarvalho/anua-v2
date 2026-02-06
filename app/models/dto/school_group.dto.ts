@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SchoolGroup from '#models/school_group'
 import type { SchoolGroupType } from '#models/school_group'
 import type { DateTime } from 'luxon'
+import SchoolChainDto from './school_chain.dto.js'
 
 export default class SchoolGroupDto extends BaseModelDto {
   declare id: string
@@ -15,6 +16,7 @@ export default class SchoolGroupDto extends BaseModelDto {
   declare schoolChainId: string
   declare createdAt: DateTime
   declare updatedAt: DateTime | null
+  declare schoolChain?: SchoolChainDto
 
   constructor(model?: SchoolGroup) {
     super()
@@ -32,5 +34,6 @@ export default class SchoolGroupDto extends BaseModelDto {
     this.schoolChainId = model.schoolChainId
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.schoolChain = model.schoolChain ? new SchoolChainDto(model.schoolChain) : undefined
   }
 }

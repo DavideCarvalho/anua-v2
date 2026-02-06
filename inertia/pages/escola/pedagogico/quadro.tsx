@@ -28,17 +28,8 @@ import {
 } from '~/components/ui/table'
 import { ArrowLeft, Calendar, Printer } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-
-interface ClassOption {
-  id: string
-  name: string
-  level?: { name: string; course?: { name: string } }
-}
-
-interface AcademicPeriodOption {
-  id: string
-  name: string
-}
+import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
+import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
 
 interface CalendarSlot {
   id: string
@@ -65,18 +56,6 @@ const DAYS_OF_WEEK = [
   { key: 'FRIDAY', label: 'Sexta-feira', number: 5 },
 ]
 
-async function fetchClasses(): Promise<{ data: ClassOption[] }> {
-  const response = await fetch('/api/v1/classes?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch classes')
-  return response.json()
-}
-
-async function fetchAcademicPeriods(): Promise<{ data: AcademicPeriodOption[] }> {
-  const response = await fetch('/api/v1/academic-periods?limit=100&isActive=true')
-  if (!response.ok) throw new Error('Failed to fetch academic periods')
-  return response.json()
-}
-
 async function fetchSchedule(
   classId: string,
   academicPeriodId: string
@@ -94,15 +73,13 @@ export default function QuadroPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
 
-  const { data: classesData, isLoading: loadingClasses } = useQuery({
-    queryKey: ['classes'],
-    queryFn: fetchClasses,
-  })
+  const { data: classesData, isLoading: loadingClasses } = useQuery(
+    useClassesQueryOptions({ limit: 100 })
+  )
 
-  const { data: periodsData, isLoading: loadingPeriods } = useQuery({
-    queryKey: ['academicPeriods'],
-    queryFn: fetchAcademicPeriods,
-  })
+  const { data: periodsData, isLoading: loadingPeriods } = useQuery(
+    useAcademicPeriodsQueryOptions({ limit: 100 })
+  )
 
   const classes = classesData?.data ?? []
   const academicPeriods = periodsData?.data ?? []

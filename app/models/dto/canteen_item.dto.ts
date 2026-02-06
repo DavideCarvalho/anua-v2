@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenItem from '#models/canteen_item'
 import type { DateTime } from 'luxon'
+import CanteenDto from './canteen.dto.js'
 
 export default class CanteenItemDto extends BaseModelDto {
   declare id: string
@@ -12,6 +13,7 @@ export default class CanteenItemDto extends BaseModelDto {
   declare isActive: boolean
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare canteen?: CanteenDto
 
   constructor(canteenItem?: CanteenItem) {
     super()
@@ -27,5 +29,6 @@ export default class CanteenItemDto extends BaseModelDto {
     this.isActive = canteenItem.isActive
     this.createdAt = canteenItem.createdAt
     this.updatedAt = canteenItem.updatedAt
+    if (canteenItem.canteen) this.canteen = new CanteenDto(canteenItem.canteen)
   }
 }

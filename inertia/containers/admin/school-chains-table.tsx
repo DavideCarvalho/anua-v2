@@ -31,7 +31,7 @@ export function SchoolChainsTable({ onCreateChain, onViewSchools }: SchoolChains
   const { data } = useSuspenseQuery(useSchoolChainsQueryOptions({}))
   const deleteMutation = useDeleteSchoolChain()
 
-  const chains = Array.isArray(data) ? data : (data as any)?.data || []
+  const chains = data?.data ?? []
 
   if (chains.length === 0) {
     return (

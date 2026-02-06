@@ -34,8 +34,7 @@ export function useWalletTopUpsQueryOptions({
 export function useWalletTopUpQueryOptions(id: string) {
   return {
     queryKey: ['responsavel', 'wallet-top-up', id],
-    queryFn: () =>
-      tuyau.$route('api.v1.responsavel.api.showWalletTopUp', { id }).$get().unwrap(),
+    queryFn: () => tuyau.$route('api.v1.responsavel.api.showWalletTopUp', { id }).$get().unwrap(),
     enabled: !!id,
   }
 }

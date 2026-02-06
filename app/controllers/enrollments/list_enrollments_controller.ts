@@ -22,15 +22,13 @@ export default class ListEnrollmentsController {
       .preload('level')
       .preload('academicPeriod')
       .preload('scholarship')
-      .whereHas('student', (studentQuery) => {
-        studentQuery.whereHas('user', (userQuery) => {
-          userQuery.whereHas('userHasSchools', (schoolQuery) => {
-            schoolQuery.where('schoolId', schoolId)
-          })
+      .whereHas('academicPeriod', (apQuery) => {
+        apQuery.where('schoolId', schoolId)
+      })
+      .if(status, (builder) => {
+        builder.whereHas('student', (studentQuery) => {
+          studentQuery.where('enrollmentStatus', status!)
         })
-        if (status) {
-          studentQuery.where('enrollmentStatus', status)
-        }
       })
       .orderBy('createdAt', 'desc')
 

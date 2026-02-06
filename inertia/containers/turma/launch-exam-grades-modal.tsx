@@ -21,6 +21,7 @@ import { ScrollArea } from '~/components/ui/scroll-area'
 import { Checkbox } from '~/components/ui/checkbox'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { useClassStudentsQueryOptions } from '~/hooks/queries/use_class_students'
+import { useExamGradesQueryOptions } from '~/hooks/queries/use_exam_grades'
 
 interface LaunchExamGradesModalProps {
   examId: string
@@ -60,23 +61,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-
-async function fetchExistingGrades(
-  examId: string
-): Promise<{ studentId: string; score: number; attended: boolean }[]> {
-  const response = await fetch(`/api/v1/exams/${examId}/grades`)
-  if (!response.ok) {
-    if (response.status === 404) return []
-    throw new Error('Failed to fetch grades')
-  }
-  const data = await response.json()
-  const grades = Array.isArray(data) ? data : data.data || []
-  return grades.map((g: any) => ({
-    studentId: g.studentId,
-    score: g.score,
-    attended: g.attended,
-  }))
-}
 
 interface SaveGradePayload {
   examId: string
@@ -146,10 +130,19 @@ function LaunchExamGradesModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(studentsQueryOptions)
   const students = studentsResponse?.data || []
 
-  const { data: existingGrades, isLoading: isLoadingGrades } = useQuery({
-    queryKey: ['exam-grades', examId],
-    queryFn: () => fetchExistingGrades(examId),
-  })
+  const { data: examGradesResponse, isLoading: isLoadingGrades } = useQuery(
+    useExamGradesQueryOptions({ examId, limit: 1000 })
+  )
+
+  const existingGrades = (() => {
+    if (!examGradesResponse) return []
+    const grades = examGradesResponse ?? []
+    return grades.map((g: any) => ({
+      studentId: g.studentId,
+      score: g.score,
+      attended: g.attended,
+    }))
+  })()
 
   // Initialize form when data is loaded
   useEffect(() => {

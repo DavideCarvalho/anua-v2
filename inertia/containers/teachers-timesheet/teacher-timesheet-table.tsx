@@ -45,11 +45,7 @@ function TeacherTimesheetTableContent({
   )
 
   const rows = useMemo(() => {
-    if (Array.isArray(timesheet)) return timesheet
-    if (timesheet && typeof timesheet === 'object' && 'data' in timesheet && Array.isArray((timesheet as any).data)) {
-      return (timesheet as any).data
-    }
-    return []
+    return timesheet ?? []
   }, [timesheet])
 
   const isLoading = isLoadingPeriods || isLoadingTimesheet

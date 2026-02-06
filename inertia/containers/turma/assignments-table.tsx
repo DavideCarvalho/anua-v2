@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { format, isAfter, isBefore, isToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ClipboardList, Trash2, Loader2, FileText } from 'lucide-react'
@@ -22,6 +22,8 @@ import {
   TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { LaunchGradesModal } from './launch-grades-modal'
+import { useAssignmentsQueryOptions } from '~/hooks/queries/use_assignments'
+import { useDeleteAssignment } from '~/hooks/mutations/use_assignment_mutations'
 
 interface AssignmentsTableProps {
   classId: string
@@ -51,39 +53,6 @@ interface Assignment {
   }
 }
 
-interface PaginatedResponse {
-  data: Assignment[]
-  meta: {
-    total: number
-    perPage: number
-    currentPage: number
-    lastPage: number
-  }
-}
-
-async function fetchAssignments(
-  classId: string,
-  academicPeriodId: string,
-  page: number
-): Promise<PaginatedResponse> {
-  const response = await fetch(
-    `/api/v1/assignments?classId=${classId}&academicPeriodId=${academicPeriodId}&page=${page}&limit=10`
-  )
-  if (!response.ok) {
-    throw new Error('Failed to fetch assignments')
-  }
-  return response.json()
-}
-
-async function deleteAssignment(assignmentId: string): Promise<void> {
-  const response = await fetch(`/api/v1/assignments/${assignmentId}`, {
-    method: 'DELETE',
-  })
-  if (!response.ok) {
-    throw new Error('Failed to delete assignment')
-  }
-}
-
 function AssignmentsTableSkeleton() {
   return (
     <div className="flex items-center justify-center py-12">
@@ -107,33 +76,25 @@ function AssignmentsTableEmpty() {
 export function AssignmentsTable({ classId, courseId, academicPeriodId }: AssignmentsTableProps) {
   const [page, setPage] = useState(1)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
-  const queryClient = useQueryClient()
 
   const {
     data: response,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ['assignments', classId, academicPeriodId, page],
-    queryFn: () => fetchAssignments(classId, academicPeriodId, page),
-  })
+  } = useQuery(useAssignmentsQueryOptions({ classId, academicPeriodId, page, limit: 10 }))
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteAssignment,
-    onSuccess: () => {
-      toast.success('Atividade excluída com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['assignments', classId, academicPeriodId] })
-    },
-    onError: () => {
-      toast.error('Erro ao excluir atividade')
-    },
-  })
+  const deleteMutation = useDeleteAssignment()
 
-  const handleDelete = (assignmentId: string) => {
+  const handleDelete = async (assignmentId: string) => {
     if (!confirm('Tem certeza que deseja excluir esta atividade?')) {
       return
     }
-    deleteMutation.mutate(assignmentId)
+    try {
+      await deleteMutation.mutateAsync(assignmentId)
+      toast.success('Atividade excluida com sucesso!')
+    } catch {
+      toast.error('Erro ao excluir atividade')
+    }
   }
 
   if (isLoading) {
@@ -146,7 +107,8 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
     )
   }
 
-  const assignments = response.data || []
+  const assignments = (response as any).data || []
+  const meta = (response as any).meta as { total: number; perPage: number; currentPage: number; lastPage: number } | undefined
 
   if (assignments.length === 0) {
     return <AssignmentsTableEmpty />
@@ -236,10 +198,10 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
       </Table>
 
       {/* Pagination */}
-      {response.meta && response.meta.lastPage > 1 && (
+      {meta && meta.lastPage > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Página {response.meta.currentPage} de {response.meta.lastPage}
+            Página {meta.currentPage} de {meta.lastPage}
           </p>
           <div className="flex gap-2">
             <Button
@@ -254,7 +216,7 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => p + 1)}
-              disabled={page >= response.meta.lastPage}
+              disabled={page >= meta.lastPage}
             >
               Próximo
             </Button>

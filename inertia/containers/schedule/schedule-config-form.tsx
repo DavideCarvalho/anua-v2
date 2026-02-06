@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   Card,
@@ -14,6 +13,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Settings, Wand2 } from 'lucide-react'
+import { useGenerateClassSchedule } from '~/hooks/mutations/use_schedule_mutations'
 
 interface ScheduleConfig {
   startTime: string
@@ -57,25 +57,6 @@ interface ScheduleConfigFormProps {
   onGenerate: (result: GenerateResult) => void
 }
 
-async function generateSchedule(
-  classId: string,
-  academicPeriodId: string,
-  config: ScheduleConfig
-): Promise<GenerateResult> {
-  const response = await fetch(`/api/v1/schedules/class/${classId}/generate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ academicPeriodId, config }),
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error || 'Erro ao gerar grade')
-  }
-
-  return response.json()
-}
-
 export function ScheduleConfigForm({
   classId,
   academicPeriodId,
@@ -89,22 +70,7 @@ export function ScheduleConfigForm({
     breakDuration: 20,
   })
 
-  const generateMutation = useMutation({
-    mutationFn: () => generateSchedule(classId, academicPeriodId, config),
-    onSuccess: (result) => {
-      if (result.unscheduled.length > 0) {
-        toast.warning(
-          `Grade gerada com ${result.unscheduled.length} aula(s) não alocada(s). Arraste-as para os horários disponíveis.`
-        )
-      } else {
-        toast.success('Grade gerada com sucesso!')
-      }
-      onGenerate(result)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    },
-  })
+  const generateMutation = useGenerateClassSchedule()
 
   const handleChange = (field: keyof ScheduleConfig, value: string | number) => {
     setConfig((prev) => ({ ...prev, [field]: value }))
@@ -188,7 +154,26 @@ export function ScheduleConfigForm({
           {/* Generate button */}
           <div className="flex justify-end">
             <Button
-              onClick={() => generateMutation.mutate()}
+              onClick={() =>
+                generateMutation.mutate(
+                  { classId, academicPeriodId, config },
+                  {
+                    onSuccess: (result: any) => {
+                      if (result.unscheduled?.length > 0) {
+                        toast.warning(
+                          `Grade gerada com ${result.unscheduled.length} aula(s) não alocada(s). Arraste-as para os horários disponíveis.`
+                        )
+                      } else {
+                        toast.success('Grade gerada com sucesso!')
+                      }
+                      onGenerate(result)
+                    },
+                    onError: (error: Error) => {
+                      toast.error(error.message)
+                    },
+                  }
+                )
+              }
               disabled={generateMutation.isPending}
               size="lg"
             >

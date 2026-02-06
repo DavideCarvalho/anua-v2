@@ -5,6 +5,9 @@ import type { InferRequestType } from '@tuyau/client'
 const $createRoute = tuyau.$route('api.v1.classes.store')
 type CreateClassPayload = InferRequestType<typeof $createRoute.$post>
 
+const $createWithTeachersRoute = tuyau.$route('api.v1.classes.storeWithTeachers')
+type CreateClassWithTeachersPayload = InferRequestType<typeof $createWithTeachersRoute.$post>
+
 const $updateRoute = tuyau.$route('api.v1.classes.update')
 type UpdateClassPayload = InferRequestType<typeof $updateRoute.$put> & { id: string }
 
@@ -14,6 +17,19 @@ export function useCreateClass() {
   return useMutation({
     mutationFn: (data: CreateClassPayload) => {
       return tuyau.$route('api.v1.classes.store').$post(data).unwrap()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['classes'] })
+    },
+  })
+}
+
+export function useCreateClassWithTeachers() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (data: CreateClassWithTeachersPayload) => {
+      return tuyau.$route('api.v1.classes.storeWithTeachers').$post(data).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classes'] })

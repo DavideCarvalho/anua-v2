@@ -17,8 +17,16 @@ export default class StudentPaymentDto extends BaseModelDto {
     | 'AGREEMENT'
     | 'STUDENT_LOAN'
     | 'STORE'
+    | 'EXTRA_CLASS'
     | 'OTHER'
-  declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED' | 'RENEGOTIATED'
+  declare status:
+    | 'NOT_PAID'
+    | 'PENDING'
+    | 'PAID'
+    | 'OVERDUE'
+    | 'CANCELLED'
+    | 'FAILED'
+    | 'RENEGOTIATED'
   declare totalAmount: number
   declare dueDate: DateTime
   declare installments: number
@@ -34,7 +42,9 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare paymentGateway: 'ASAAS' | 'CUSTOM' | null
   declare metadata: Record<string, unknown> | null
   declare agreementId: string | null
+  declare invoiceId: string | null
   declare insuranceBillingId: string | null
+  declare studentHasExtraClassId: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
   declare student?: StudentDto
@@ -66,7 +76,9 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.paymentGateway = studentPayment.paymentGateway
     this.metadata = studentPayment.metadata
     this.agreementId = studentPayment.agreementId
+    this.invoiceId = studentPayment.invoiceId
     this.insuranceBillingId = studentPayment.insuranceBillingId
+    this.studentHasExtraClassId = studentPayment.studentHasExtraClassId
     this.createdAt = studentPayment.createdAt
     this.updatedAt = studentPayment.updatedAt
     this.student = studentPayment.student ? new StudentDto(studentPayment.student) : undefined

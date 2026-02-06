@@ -1,12 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@inertiajs/react'
 import { ShoppingCart, Plus, Minus, ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
-import { useMarketplaceItemsQueryOptions } from '../hooks/queries/use_marketplace'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../components/ui/sheet'
+import {
+  useMarketplaceItemsQueryOptions,
+  type MarketplaceItemsResponse,
+} from '../hooks/queries/use_marketplace'
 import { useCart } from '../contexts/cart-context'
+import { CartSheetContent } from './marketplace-cart-sheet-content'
 import { formatCurrency } from '../lib/utils'
+
+type MarketplaceItem = NonNullable<MarketplaceItemsResponse>['data'][number]
 
 const CATEGORY_LABELS: Record<string, string> = {
   CANTEEN_FOOD: 'Alimento',
@@ -21,11 +34,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Outro',
 }
 
-export function MarketplaceStoreDetailContainer({ storeId }: { storeId: string }) {
+export function MarketplaceStoreDetailContainer({ storeId, backHref = '/aluno/loja' }: { storeId: string; backHref?: string }) {
   const { data, isLoading } = useQuery(useMarketplaceItemsQueryOptions(storeId))
   const cart = useCart()
 
-  const items = (data as any)?.data ?? []
+  const items: MarketplaceItem[] = data?.data ?? []
+  const hasOnlinePayment: boolean = (data as any)?.hasOnlinePayment ?? false
 
   if (isLoading) {
     return (
@@ -35,16 +49,40 @@ export function MarketplaceStoreDetailContainer({ storeId }: { storeId: string }
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link
-          route={'web.aluno.loja.index' as any}
-          params={undefined as any}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar para lojas
-        </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Produtos</h1>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Link
+            href={backHref}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para lojas
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight">Produtos</h1>
+        </div>
+
+        {cart.totalItems > 0 && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="relative gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                Carrinho
+                <Badge variant="secondary" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
+                  {cart.totalItems}
+                </Badge>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col p-0">
+              <SheetHeader className="px-6 py-4 border-b">
+                <SheetTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Carrinho ({cart.totalItems} {cart.totalItems === 1 ? 'item' : 'itens'})
+                </SheetTitle>
+              </SheetHeader>
+              <CartSheetContent backHref={backHref} hasOnlinePayment={hasOnlinePayment} />
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -54,7 +92,7 @@ export function MarketplaceStoreDetailContainer({ storeId }: { storeId: string }
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {items.map((product: any) => {
+          {items.map((product) => {
             const inCart = cart.items.find((i) => i.storeItemId === product.id)
 
             return (

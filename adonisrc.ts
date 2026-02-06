@@ -63,12 +63,14 @@ export default defineConfig({
     () => import('@tuyau/core/tuyau_provider'),
     () => import('@adonisjs/mail/mail_provider'),
     () => import('@adonisjs/cache/cache_provider'),
+    () => import('@adonisjs/lock/lock_provider'),
     () => import('@adonisjs/drive/drive_provider'),
     () => import('@jrmc/adonis-attachment/attachment_provider'),
     {
       file: () => import('adonisjs-scheduler/scheduler_provider'),
       environment: ['console'],
     },
+    () => import('@stouder-io/adonis-auditing/auditing_provider'),
   ],
 
   /*
@@ -137,5 +139,8 @@ export default defineConfig({
   assetsBundler: false,
   hooks: {
     onBuildStarting: [() => import('@adonisjs/vite/build_hook')],
+  },
+  directories: {
+    audit_resolvers: 'app/audit_resolvers',
   },
 })

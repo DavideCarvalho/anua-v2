@@ -219,6 +219,10 @@ type EscolaPedagogicoPresencaGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_presenca_page_controller.ts').default['handle'], false>
 }
+type EscolaPedagogicoAulasavulsasGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_aulas_avulsas_page_controller.ts').default['handle'], false>
+}
 type EscolaPedagogicoCursosniveisGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_cursos_niveis_page_controller.ts').default['handle'], false>
@@ -358,6 +362,10 @@ type ResponsavelCreditoGetHead = {
 type ResponsavelLojaGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_loja_page_controller.ts').default['handle'], false>
+}
+type ResponsavelLojaIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_loja_store_page_controller.ts').default['handle'], false>
 }
 type AdminGetHead = {
   request: unknown
@@ -1362,6 +1370,54 @@ type ApiV1CommentsIdDelete = {
 type ApiV1CommentsIdLikePost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/comments/like_comment_controller.ts').default['handle'], false>
+}
+type ApiV1ExtraclassesGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['listExtraClassesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/list_extra_classes_controller.ts').default['handle'], true>
+}
+type ApiV1ExtraclassesPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['createExtraClassValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/create_extra_class_controller.ts').default['handle'], true>
+}
+type ApiV1ExtraclassesIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/show_extra_class_controller.ts').default['handle'], false>
+}
+type ApiV1ExtraclassesIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['updateExtraClassValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/update_extra_class_controller.ts').default['handle'], true>
+}
+type ApiV1ExtraclassesIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/delete_extra_class_controller.ts').default['handle'], false>
+}
+type ApiV1ExtraclassesIdEnrollPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['enrollExtraClassValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/enroll_extra_class_controller.ts').default['handle'], true>
+}
+type ApiV1ExtraclassesIdEnrollIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/cancel_extra_class_enrollment_controller.ts').default['handle'], false>
+}
+type ApiV1ExtraclassesIdStudentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/list_extra_class_students_controller.ts').default['handle'], false>
+}
+type ApiV1ExtraclassesIdAttendancePost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['createExtraClassAttendanceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/create_extra_class_attendance_controller.ts').default['handle'], true>
+}
+type ApiV1ExtraclassesIdAttendanceGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/list_extra_class_attendances_controller.ts').default['handle'], false>
+}
+type ApiV1ExtraclassesIdAttendanceIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['updateExtraClassAttendanceValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/update_extra_class_attendance_controller.ts').default['handle'], true>
+}
+type ApiV1ExtraclassesIdAttendanceSummaryGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/get_extra_class_attendance_summary_controller.ts').default['handle'], false>
 }
 type ApiV1AttendanceGetHead = {
   request: unknown
@@ -2600,6 +2656,12 @@ export interface ApiDefinition {
         '$get': EscolaPedagogicoPresencaGetHead;
         '$head': EscolaPedagogicoPresencaGetHead;
       };
+      'aulas-avulsas': {
+        '$url': {
+        };
+        '$get': EscolaPedagogicoAulasavulsasGetHead;
+        '$head': EscolaPedagogicoAulasavulsasGetHead;
+      };
       'cursos-niveis': {
         '$url': {
         };
@@ -2814,6 +2876,12 @@ export interface ApiDefinition {
       };
       '$get': ResponsavelLojaGetHead;
       '$head': ResponsavelLojaGetHead;
+      ':id': {
+        '$url': {
+        };
+        '$get': ResponsavelLojaIdGetHead;
+        '$head': ResponsavelLojaIdGetHead;
+      };
     };
   };
   'admin': {
@@ -4115,6 +4183,55 @@ export interface ApiDefinition {
             '$url': {
             };
             '$post': ApiV1CommentsIdLikePost;
+          };
+        };
+      };
+      'extra-classes': {
+        '$url': {
+        };
+        '$get': ApiV1ExtraclassesGetHead;
+        '$head': ApiV1ExtraclassesGetHead;
+        '$post': ApiV1ExtraclassesPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1ExtraclassesIdGetHead;
+          '$head': ApiV1ExtraclassesIdGetHead;
+          '$put': ApiV1ExtraclassesIdPut;
+          '$delete': ApiV1ExtraclassesIdDelete;
+          'enroll': {
+            '$url': {
+            };
+            '$post': ApiV1ExtraclassesIdEnrollPost;
+            ':enrollmentId': {
+              '$url': {
+              };
+              '$delete': ApiV1ExtraclassesIdEnrollIdDelete;
+            };
+          };
+          'students': {
+            '$url': {
+            };
+            '$get': ApiV1ExtraclassesIdStudentsGetHead;
+            '$head': ApiV1ExtraclassesIdStudentsGetHead;
+          };
+          'attendance': {
+            '$url': {
+            };
+            '$post': ApiV1ExtraclassesIdAttendancePost;
+            '$get': ApiV1ExtraclassesIdAttendanceGetHead;
+            '$head': ApiV1ExtraclassesIdAttendanceGetHead;
+            ':attendanceId': {
+              '$url': {
+              };
+              '$put': ApiV1ExtraclassesIdAttendanceIdPut;
+            };
+            'summary': {
+              '$url': {
+              };
+              '$get': ApiV1ExtraclassesIdAttendanceSummaryGetHead;
+              '$head': ApiV1ExtraclassesIdAttendanceSummaryGetHead;
+            };
           };
         };
       };
@@ -5429,6 +5546,13 @@ const routes = [
   },
   {
     params: [],
+    name: 'web.escola.pedagogico.aulasAvulsas',
+    path: '/escola/pedagogico/aulas-avulsas',
+    method: ["GET","HEAD"],
+    types: {} as EscolaPedagogicoAulasavulsasGetHead,
+  },
+  {
+    params: [],
     name: 'web.escola.pedagogico.cursosNiveis',
     path: '/escola/pedagogico/cursos-niveis',
     method: ["GET","HEAD"],
@@ -5671,6 +5795,13 @@ const routes = [
     path: '/responsavel/loja',
     method: ["GET","HEAD"],
     types: {} as ResponsavelLojaGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'web.responsavel.loja.store',
+    path: '/responsavel/loja/:id',
+    method: ["GET","HEAD"],
+    types: {} as ResponsavelLojaIdGetHead,
   },
   {
     params: [],
@@ -7428,6 +7559,90 @@ const routes = [
     path: '/api/v1/comments/:id/like',
     method: ["POST"],
     types: {} as ApiV1CommentsIdLikePost,
+  },
+  {
+    params: [],
+    name: 'api.v1.extraClasses.index',
+    path: '/api/v1/extra-classes',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ExtraclassesGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.extraClasses.store',
+    path: '/api/v1/extra-classes',
+    method: ["POST"],
+    types: {} as ApiV1ExtraclassesPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.show',
+    path: '/api/v1/extra-classes/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ExtraclassesIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.update',
+    path: '/api/v1/extra-classes/:id',
+    method: ["PUT"],
+    types: {} as ApiV1ExtraclassesIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.destroy',
+    path: '/api/v1/extra-classes/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1ExtraclassesIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.enroll',
+    path: '/api/v1/extra-classes/:id/enroll',
+    method: ["POST"],
+    types: {} as ApiV1ExtraclassesIdEnrollPost,
+  },
+  {
+    params: ["id","enrollmentId"],
+    name: 'api.v1.extraClasses.cancelEnrollment',
+    path: '/api/v1/extra-classes/:id/enroll/:enrollmentId',
+    method: ["DELETE"],
+    types: {} as ApiV1ExtraclassesIdEnrollIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.students',
+    path: '/api/v1/extra-classes/:id/students',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ExtraclassesIdStudentsGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.attendance.store',
+    path: '/api/v1/extra-classes/:id/attendance',
+    method: ["POST"],
+    types: {} as ApiV1ExtraclassesIdAttendancePost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.attendance.index',
+    path: '/api/v1/extra-classes/:id/attendance',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ExtraclassesIdAttendanceGetHead,
+  },
+  {
+    params: ["id","attendanceId"],
+    name: 'api.v1.extraClasses.attendance.update',
+    path: '/api/v1/extra-classes/:id/attendance/:attendanceId',
+    method: ["PUT"],
+    types: {} as ApiV1ExtraclassesIdAttendanceIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.extraClasses.attendance.summary',
+    path: '/api/v1/extra-classes/:id/attendance/summary',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ExtraclassesIdAttendanceSummaryGetHead,
   },
   {
     params: [],

@@ -46,9 +46,9 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 
 export function MarketplaceOrdersContainer() {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const { data, isLoading } = useQuery(
-    useMyOrdersQueryOptions({ status: (statusFilter || undefined) as any })
+    useMyOrdersQueryOptions({ status: statusFilter || undefined })
   )
-  const orders = (data as any)?.data ?? []
+  const orders = data?.data ?? []
 
   return (
     <div className="space-y-4">
@@ -95,7 +95,7 @@ export function MarketplaceOrdersContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order: any) => (
+                {orders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>
                       {new Date(order.createdAt).toLocaleDateString('pt-BR')}
@@ -103,7 +103,7 @@ export function MarketplaceOrdersContainer() {
                     <TableCell>{order.store?.name ?? '—'}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {order.items?.map((item: any) => (
+                        {order.items?.map((item) => (
                           <div key={item.id}>
                             {item.quantity}x {item.itemName ?? item.storeItem?.name ?? 'Item'}
                           </div>

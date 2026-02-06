@@ -67,6 +67,7 @@ const navigation: NavItem[] = [
     children: [
       { title: 'Turmas', route: 'web.escola.pedagogico.turmas', href: '/escola/pedagogico/turmas' },
       { title: 'Grade', route: 'web.escola.pedagogico.grade', href: '/escola/pedagogico/grade' },
+      { title: 'Aulas Avulsas', route: 'web.escola.pedagogico.aulasAvulsas', href: '/escola/pedagogico/aulas-avulsas' },
       { title: 'Ocorrências', route: 'web.escola.pedagogico.ocorrencias', href: '/escola/pedagogico/ocorrencias' },
     ],
   },

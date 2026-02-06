@@ -25,126 +25,92 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
+import {
+  useStoreInstallmentRulesQueryOptions,
+  type StoreInstallmentRulesResponse,
+} from '../../hooks/queries/use_stores'
+import { useCreateStoreInstallmentRuleMutationOptions } from '../../hooks/mutations/use_create_store_installment_rule'
+import { useUpdateStoreInstallmentRuleMutationOptions } from '../../hooks/mutations/use_update_store_installment_rule'
+import { useDeleteStoreInstallmentRuleMutationOptions } from '../../hooks/mutations/use_delete_store_installment_rule'
 
 interface StoreInstallmentRulesTabProps {
   storeId: string
 }
 
-async function fetchRules(storeId: string) {
-  const response = await fetch(`/api/v1/store-installment-rules?storeId=${storeId}`, {
-    credentials: 'include',
-  })
-  if (!response.ok) throw new Error('Failed to fetch rules')
-  return response.json()
-}
-
-async function createRule(data: { storeId: string; minAmount: number; maxInstallments: number }) {
-  const response = await fetch('/api/v1/store-installment-rules', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data),
-  })
-  if (!response.ok) throw new Error('Failed to create rule')
-  return response.json()
-}
-
-async function updateRule(id: string, data: { minAmount: number; maxInstallments: number }) {
-  const response = await fetch(`/api/v1/store-installment-rules/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data),
-  })
-  if (!response.ok) throw new Error('Failed to update rule')
-  return response.json()
-}
-
-async function deleteRule(id: string) {
-  const response = await fetch(`/api/v1/store-installment-rules/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  })
-  if (!response.ok) throw new Error('Failed to delete rule')
-}
+type InstallmentRule = NonNullable<StoreInstallmentRulesResponse>['data'][number]
 
 export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabProps) {
-  const queryClient = useQueryClient()
   const [createOpen, setCreateOpen] = useState(false)
-  const [editingRule, setEditingRule] = useState<any>(null)
+  const [editingRule, setEditingRule] = useState<InstallmentRule | null>(null)
   const [minAmount, setMinAmount] = useState('')
   const [maxInstallments, setMaxInstallments] = useState('')
 
-  const { data: rules, isLoading } = useQuery({
-    queryKey: ['storeInstallmentRules', storeId],
-    queryFn: () => fetchRules(storeId),
-  })
+  const queryClient = useQueryClient()
 
-  const createMutation = useMutation({
-    mutationFn: createRule,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules', storeId] })
+  const { data: rulesData, isLoading } = useQuery(
+    useStoreInstallmentRulesQueryOptions({ storeId })
+  )
+
+  const rulesList = rulesData?.data ?? []
+
+  const createMutation = useMutation(useCreateStoreInstallmentRuleMutationOptions())
+  const updateMutation = useMutation(useUpdateStoreInstallmentRuleMutationOptions())
+  const deleteMutation = useMutation(useDeleteStoreInstallmentRuleMutationOptions())
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault()
+    try {
+      await createMutation.mutateAsync({
+        storeId,
+        minAmount: Math.round(Number(minAmount) * 100),
+        maxInstallments: Number(maxInstallments),
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
       toast.success('Regra criada com sucesso!')
       setCreateOpen(false)
       setMinAmount('')
       setMaxInstallments('')
-    },
-    onError: () => {
+    } catch {
       toast.error('Erro ao criar regra.')
-    },
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, ...data }: { id: string; minAmount: number; maxInstallments: number }) =>
-      updateRule(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules', storeId] })
-      toast.success('Regra atualizada com sucesso!')
-      setEditingRule(null)
-      setMinAmount('')
-      setMaxInstallments('')
-    },
-    onError: () => {
-      toast.error('Erro ao atualizar regra.')
-    },
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteRule,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules', storeId] })
-      toast.success('Regra excluída com sucesso!')
-    },
-    onError: () => {
-      toast.error('Erro ao excluir regra.')
-    },
-  })
-
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault()
-    createMutation.mutate({
-      storeId,
-      minAmount: Math.round(Number(minAmount) * 100),
-      maxInstallments: Number(maxInstallments),
-    })
+    }
   }
 
-  const handleEdit = (rule: any) => {
+  const handleEdit = (rule: InstallmentRule) => {
     setEditingRule(rule)
     setMinAmount(String(rule.minAmount / 100))
     setMaxInstallments(String(rule.maxInstallments))
   }
 
-  const handleUpdate = (e: React.FormEvent) => {
+  async function handleUpdate(e: React.FormEvent) {
     e.preventDefault()
-    updateMutation.mutate({
-      id: editingRule.id,
-      minAmount: Math.round(Number(minAmount) * 100),
-      maxInstallments: Number(maxInstallments),
-    })
+    if (!editingRule) return
+    try {
+      await updateMutation.mutateAsync({
+        id: editingRule.id,
+        minAmount: Math.round(Number(minAmount) * 100),
+        maxInstallments: Number(maxInstallments),
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
+      toast.success('Regra atualizada com sucesso!')
+      setEditingRule(null)
+      setMinAmount('')
+      setMaxInstallments('')
+    } catch {
+      toast.error('Erro ao atualizar regra.')
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteMutation.mutateAsync(id)
+      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
+      toast.success('Regra excluída com sucesso!')
+    } catch {
+      toast.error('Erro ao excluir regra.')
+    }
   }
 
   return (
@@ -165,7 +131,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-          ) : !rules?.length ? (
+          ) : !rulesList.length ? (
             <div className="text-center py-8 text-muted-foreground">
               Nenhuma regra cadastrada. Sem regras, parcelamento não fica disponível.
             </div>
@@ -179,7 +145,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rules.map((rule: any) => (
+                {rulesList.map((rule) => (
                   <TableRow key={rule.id}>
                     <TableCell>{formatCurrency(rule.minAmount)}</TableCell>
                     <TableCell>{rule.maxInstallments}x</TableCell>
@@ -197,7 +163,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => deleteMutation.mutate(rule.id)}
+                            onClick={() => handleDelete(rule.id)}
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />

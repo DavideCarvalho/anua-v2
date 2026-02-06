@@ -69,7 +69,13 @@ export function useMarkPaymentAsPaid() {
         .$route('api.v1.studentPayments.markPaid', { id })
         .$post({
           paidAt,
-          paymentMethod: paymentMethod as 'PIX' | 'BOLETO' | 'CREDIT_CARD' | 'CASH' | 'OTHER' | undefined,
+          paymentMethod: paymentMethod as
+            | 'PIX'
+            | 'BOLETO'
+            | 'CREDIT_CARD'
+            | 'CASH'
+            | 'OTHER'
+            | undefined,
           amountPaid,
           observation,
         })
@@ -77,6 +83,7 @@ export function useMarkPaymentAsPaid() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['student-payments'] })
+      queryClient.invalidateQueries({ queryKey: ['invoices'] })
     },
   })
 }

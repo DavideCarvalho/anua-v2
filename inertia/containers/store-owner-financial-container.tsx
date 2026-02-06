@@ -20,12 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select'
+import { toast } from 'sonner'
 import {
   useOwnFinancialQueryOptions,
   useOwnSettlementsQueryOptions,
+  type OwnSettlementsResponse,
 } from '../hooks/queries/use_store_owner'
 import { useUpdateFinancialSettings } from '../hooks/mutations/use_store_owner_mutations'
 import { formatCurrency } from '../lib/utils'
+
+type Settlement = NonNullable<OwnSettlementsResponse>['data'][number]
 
 const SETTLEMENT_STATUS_LABELS: Record<string, string> = {
   PENDING: 'Pendente',
@@ -62,7 +66,6 @@ export function StoreOwnerFinancialContainer() {
   )
 
   const updateSettings = useUpdateFinancialSettings()
-  const settings = financialData as any
 
   const [pixKey, setPixKey] = useState('')
   const [pixKeyType, setPixKeyType] = useState('CPF')
@@ -70,25 +73,30 @@ export function StoreOwnerFinancialContainer() {
   const [accountHolder, setAccountHolder] = useState('')
 
   useEffect(() => {
-    if (settings) {
-      setPixKey(settings.pixKey ?? '')
-      setPixKeyType(settings.pixKeyType ?? 'CPF')
-      setBankName(settings.bankName ?? '')
-      setAccountHolder(settings.accountHolder ?? '')
+    if (financialData) {
+      setPixKey(financialData.pixKey ?? '')
+      setPixKeyType(financialData.pixKeyType ?? 'CPF')
+      setBankName(financialData.bankName ?? '')
+      setAccountHolder(financialData.accountHolder ?? '')
     }
-  }, [settings])
+  }, [financialData])
 
-  function handleSaveSettings(e: React.FormEvent) {
+  async function handleSaveSettings(e: React.FormEvent) {
     e.preventDefault()
-    updateSettings.mutate({
-      pixKey: pixKey || undefined,
-      pixKeyType: (pixKeyType || undefined) as any,
-      bankName: bankName || undefined,
-      accountHolder: accountHolder || undefined,
-    } as any)
+    try {
+      await updateSettings.mutateAsync({
+        pixKey: pixKey || undefined,
+        pixKeyType: pixKeyType || undefined,
+        bankName: bankName || undefined,
+        accountHolder: accountHolder || undefined,
+      })
+      toast.success('Dados salvos com sucesso!')
+    } catch {
+      toast.error('Erro ao salvar dados.')
+    }
   }
 
-  const settlements = (settlementsData as any)?.data ?? []
+  const settlements = settlementsData?.data ?? []
 
   return (
     <div className="space-y-6">
@@ -182,7 +190,7 @@ export function StoreOwnerFinancialContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {settlements.map((s: any) => (
+                {settlements.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell>
                       {String(s.month).padStart(2, '0')}/{s.year}

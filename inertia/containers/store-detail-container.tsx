@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { useQuery } from '@tanstack/react-query'
+import { useStoreQueryOptions } from '../hooks/queries/use_stores'
 import { StoreProductsTab } from './stores/store-products-tab'
 import { StoreOrdersTab } from './stores/store-orders-tab'
 import { StoreInstallmentRulesTab } from './stores/store-installment-rules-tab'
@@ -14,17 +15,8 @@ interface StoreDetailContainerProps {
   storeId: string
 }
 
-async function fetchStore(id: string) {
-  const response = await fetch(`/api/v1/stores/${id}`, { credentials: 'include' })
-  if (!response.ok) throw new Error('Failed to fetch store')
-  return response.json()
-}
-
 export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
-  const { data: store, isLoading } = useQuery({
-    queryKey: ['store', storeId],
-    queryFn: () => fetchStore(storeId),
-  })
+  const { data: store, isLoading } = useQuery(useStoreQueryOptions(storeId))
 
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Carregando...</div>

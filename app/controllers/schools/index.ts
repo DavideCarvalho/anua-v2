@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
+import SchoolDto from '#models/dto/school.dto'
 
 export default class IndexSchoolsController {
   async handle({ request, response }: HttpContext) {
@@ -58,6 +59,6 @@ export default class IndexSchoolsController {
       return response.ok(serialized)
     }
 
-    return response.ok(schools)
+    return SchoolDto.fromPaginator(schools)
   }
 }

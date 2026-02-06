@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSuspenseQuery, useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
@@ -139,9 +139,8 @@ function StudentsListContent({
     })
   )
 
-  const result = data as any
-  const students = Array.isArray(result) ? result : result?.data || []
-  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
+  const students = data?.data ?? []
+  const meta = data?.meta ?? null
 
   if (students.length === 0) {
     return (
@@ -308,6 +307,20 @@ export function StudentsListContainer() {
 
   const { search, academicPeriodId, courseId, classId, page, limit } = filters
 
+  const [searchInput, setSearchInput] = useState(search || '')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters({ search: searchInput || null, page: 1 })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  // Sync URL → input when filters are cleared externally
+  useEffect(() => {
+    setSearchInput(search || '')
+  }, [search])
+
   const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
   const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
   const [editPaymentStudent, setEditPaymentStudent] = useState<StudentAction | null>(null)
@@ -359,8 +372,8 @@ export function StudentsListContainer() {
           <Input
             placeholder="Buscar alunos..."
             className="pl-9"
-            value={search || ''}
-            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
         <Button className="ml-auto" asChild>

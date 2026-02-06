@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
 interface UpdateEnrollmentParams {
@@ -14,9 +14,7 @@ interface UpdateEnrollmentParams {
 }
 
 export function useUpdateEnrollment() {
-  const queryClient = useQueryClient()
-
-  const mutation = useMutation({
+  return useMutation({
     mutationFn: ({ studentId, enrollmentId, data }: UpdateEnrollmentParams) => {
       return tuyau
         .$route('api.v1.students.enrollments.update', { id: studentId, enrollmentId })
@@ -24,15 +22,4 @@ export function useUpdateEnrollment() {
         .unwrap()
     },
   })
-
-  async function updateEnrollment(params: UpdateEnrollmentParams) {
-    const result = await mutation.mutateAsync(params)
-    queryClient.invalidateQueries({ queryKey: ['student-enrollments', params.studentId] })
-    queryClient.invalidateQueries({ queryKey: ['students'] })
-    queryClient.invalidateQueries({ queryKey: ['student-payments'] })
-    queryClient.invalidateQueries({ queryKey: ['student-pending-payments', params.studentId] })
-    return result
-  }
-
-  return { ...mutation, updateEnrollment }
 }

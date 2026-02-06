@@ -10,6 +10,7 @@ import { useRouter } from '@tuyau/inertia/react'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Stepper } from '~/components/ui/stepper'
+import { useCreateAcademicPeriodMutation } from '~/hooks/mutations/use_create_academic_period'
 
 import { CalendarForm } from './components/calendar-form'
 import { CoursesForm } from './components/courses-form'
@@ -90,7 +91,7 @@ interface NewAcademicPeriodFormProps {
 export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriodFormProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const createMutation = useCreateAcademicPeriodMutation()
 
   const form = useForm<AcademicPeriodFormValues>({
     resolver: zodResolver(schema) as any,
@@ -127,40 +128,30 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
   }
 
   const handleSubmit = async (values: AcademicPeriodFormValues) => {
-    setIsSubmitting(true)
     try {
-      const response = await fetch('/api/v1/academic-periods', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          schoolId: values.schoolId,
-          name: values.calendar.name,
-          startDate: values.calendar.startDate.toISOString(),
-          endDate: values.calendar.endDate.toISOString(),
-          segment: values.calendar.segment,
-          enrollmentStartDate: values.calendar.enrollmentStartDate?.toISOString(),
-          enrollmentEndDate: values.calendar.enrollmentEndDate?.toISOString(),
-          courses: values.courses.map((course) => ({
-            courseId: course.id,
-            name: course.name,
-            levels: course.levels.map((level) => ({
-              levelId: level.id,
-              name: level.name,
-              order: level.order,
-              contractId: level.contractId,
-              classes: level.classes.map((cls) => ({
-                name: cls.name,
-                teachers: cls.teachers,
-              })),
+      await createMutation.mutateAsync({
+        schoolId: values.schoolId,
+        name: values.calendar.name,
+        startDate: values.calendar.startDate.toISOString(),
+        endDate: values.calendar.endDate.toISOString(),
+        segment: values.calendar.segment,
+        enrollmentStartDate: values.calendar.enrollmentStartDate?.toISOString(),
+        enrollmentEndDate: values.calendar.enrollmentEndDate?.toISOString(),
+        courses: values.courses.map((course) => ({
+          courseId: course.id,
+          name: course.name,
+          levels: course.levels.map((level) => ({
+            levelId: level.id,
+            name: level.name,
+            order: level.order,
+            contractId: level.contractId,
+            classes: level.classes.map((cls) => ({
+              name: cls.name,
+              teachers: cls.teachers,
             })),
           })),
-        }),
+        })),
       })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Erro ao criar período letivo')
-      }
 
       toast.success('Período letivo criado com sucesso!')
       onSuccess?.()
@@ -168,8 +159,6 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao criar período letivo')
       console.error(error)
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -197,8 +186,8 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
                     </Button>
                   )}
                   {currentStep === steps.length - 1 && (
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Criando...' : 'Criar Período Letivo'}
+                    <Button type="submit" disabled={createMutation.isPending}>
+                      {createMutation.isPending ? 'Criando...' : 'Criar Período Letivo'}
                     </Button>
                   )}
                 </div>

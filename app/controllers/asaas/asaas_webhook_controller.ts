@@ -132,8 +132,7 @@ export default class AsaasWebhookController {
       .first()
 
     const school = studentHasLevel?.level?.school
-    const expectedToken =
-      school?.asaasWebhookToken ?? school?.schoolChain?.asaasWebhookToken
+    const expectedToken = school?.asaasWebhookToken ?? school?.schoolChain?.asaasWebhookToken
 
     const webhookToken =
       request.header('x-asaas-webhook-token') ??

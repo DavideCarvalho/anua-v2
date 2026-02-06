@@ -48,6 +48,9 @@ export default class InvoiceDto extends BaseModelDto {
     this.createdAt = invoice.createdAt
     this.updatedAt = invoice.updatedAt
     this.student = invoice.student ? new StudentDto(invoice.student) : undefined
-    this.payments = invoice.payments?.map((p) => new StudentPaymentDto(p))
+    // Filter out cancelled/renegotiated payments from the main list
+    this.payments = invoice.payments
+      ?.filter((p) => !['CANCELLED', 'RENEGOTIATED'].includes(p.status))
+      .map((p) => new StudentPaymentDto(p))
   }
 }

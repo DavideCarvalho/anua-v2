@@ -6,25 +6,11 @@ const $route = tuyau.$route('api.v1.storeOrders.index')
 
 export type StoreOrdersResponse = InferResponseType<typeof $route.$get>
 
-interface UseStoreOrdersOptions {
-  schoolId?: string
-  studentId?: string
-  status?: string
-  search?: string
-  page?: number
-  limit?: number
-}
+type StoreOrdersQuery = NonNullable<Parameters<typeof $route.$get>[0]>['query']
 
-export function useStoreOrdersQueryOptions(options: UseStoreOrdersOptions = {}) {
-  const { schoolId, studentId, status, search, page = 1, limit = 20 } = options
-
+export function useStoreOrdersQueryOptions(query: StoreOrdersQuery = {}) {
   return {
-    queryKey: ['store-orders', { schoolId, studentId, status, search, page, limit }],
-    queryFn: () => {
-      return tuyau
-        .$route('api.v1.storeOrders.index')
-        .$get({ query: { schoolId, studentId, status, search, page, limit } as any })
-        .unwrap()
-    },
-  } satisfies QueryOptions<StoreOrdersResponse>
+    queryKey: ['store-orders', query],
+    queryFn: () => $route.$get({ query }).unwrap(),
+  } satisfies QueryOptions
 }

@@ -32,9 +32,9 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
   const removePaymentDay = useRemoveContractPaymentDay()
   const removeDiscount = useRemoveContractEarlyDiscount()
 
-  const paymentDays = Array.isArray(paymentDaysData) ? paymentDaysData : []
+  const paymentDays = paymentDaysData ?? []
   const interestConfig = interestData && typeof interestData === 'object' ? interestData : null
-  const discounts = Array.isArray(discountsData) ? discountsData : []
+  const discounts = discountsData ?? []
 
   return (
     <div className="space-y-6">

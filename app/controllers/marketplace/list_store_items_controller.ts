@@ -1,7 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
+import StoreItemDto from '#models/dto/store_item.dto'
 import Store from '#models/store'
+import School from '#models/school'
 
 export default class ListStoreItemsController {
   async handle({ params, request, response }: HttpContext) {
@@ -20,6 +22,9 @@ export default class ListStoreItemsController {
       return response.notFound({ message: 'Loja não encontrada' })
     }
 
+    const school = await School.find(store.schoolId)
+    const hasOnlinePayment = school?.paymentConfigStatus === 'ACTIVE'
+
     const now = DateTime.now()
     const query = StoreItem.query()
       .where('storeId', storeId)
@@ -36,6 +41,8 @@ export default class ListStoreItemsController {
     if (category) query.where('category', category)
 
     const items = await query.paginate(page, limit)
-    return response.ok(items)
+    const paginated = StoreItemDto.fromPaginator(items)
+
+    return { ...paginated, hasOnlinePayment }
   }
 }

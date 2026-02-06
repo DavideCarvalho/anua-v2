@@ -44,7 +44,7 @@ export function EditTeacherSubjectsModal({
     useSubjectsQueryOptions({ page: 1, limit: 100, schoolId })
   )
 
-  const subjects = Array.isArray(subjectsData) ? subjectsData : (subjectsData as any)?.data || []
+  const subjects = subjectsData?.data ?? []
 
   // Initialize selected subjects when teacher changes
   useEffect(() => {

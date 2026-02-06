@@ -11,6 +11,7 @@ import {
   ScheduleSubjectDto,
   SubjectWithTeacherDto,
 } from '#models/dto/student_schedule_response.dto'
+import StudentHasExtraClass from '#models/student_has_extra_class'
 
 const DAY_LABELS: Record<number, string> = {
   0: 'Domingo',
@@ -45,8 +46,17 @@ export default class GetStudentScheduleController {
     // Get student with class
     const student = await Student.query().where('id', studentId).preload('class').first()
 
-    if (!student || !student.classId) {
-      return response.notFound({ message: 'Aluno nao encontrado ou sem turma' })
+    if (!student) {
+      return response.notFound({ message: 'Aluno nao encontrado' })
+    }
+
+    if (!student.classId) {
+      return new StudentScheduleResponseDto({
+        className: null,
+        scheduleByDay: {},
+        subjects: [],
+        message: 'Aguardando a escola atribuir uma turma para o aluno',
+      })
     }
 
     // Find current active academic period for the student's school
@@ -143,10 +153,41 @@ export default class GetStudentScheduleController {
       scheduleByDay[dayKey].slots.push(slotDto)
     }
 
-    return new StudentScheduleResponseDto({
+    // Include extra class schedules
+    const extraClassEnrollments = await StudentHasExtraClass.query()
+      .where('studentId', studentId)
+      .whereNull('cancelledAt')
+      .preload('extraClass', (q) => {
+        q.where('isActive', true)
+        q.preload('schedules')
+        q.preload('teacher', (tq) => tq.preload('user'))
+      })
+
+    const extraClassSchedules: Array<{
+      extraClassName: string
+      teacherName: string
+      schedules: Array<{ weekDay: number; startTime: string; endTime: string }>
+    }> = []
+
+    for (const enrollment of extraClassEnrollments) {
+      if (!enrollment.extraClass) continue
+
+      extraClassSchedules.push({
+        extraClassName: enrollment.extraClass.name,
+        teacherName: enrollment.extraClass.teacher?.user?.name ?? '-',
+        schedules: enrollment.extraClass.schedules.map((s) => ({
+          weekDay: s.weekDay,
+          startTime: s.startTime,
+          endTime: s.endTime,
+        })),
+      })
+    }
+
+    return {
       className: student.class.name,
       scheduleByDay,
       subjects: Array.from(subjectsMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
-    })
+      extraClassSchedules,
+    }
   }
 }

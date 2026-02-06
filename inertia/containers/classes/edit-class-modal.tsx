@@ -226,7 +226,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
 
   // Combine API teachers with teachers from classData to ensure they appear in the list
   const teachers = useMemo(() => {
-    const apiTeachers = Array.isArray(teachersData) ? teachersData : teachersData?.data || []
+    const apiTeachers = teachersData?.data ?? []
 
     if (!classData?.teacherClasses) return apiTeachers
 

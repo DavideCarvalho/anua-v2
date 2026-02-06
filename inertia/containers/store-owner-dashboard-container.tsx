@@ -20,8 +20,6 @@ export function StoreOwnerDashboardContainer() {
     return <div className="text-center py-8 text-muted-foreground">Carregando...</div>
   }
 
-  const store = storeData as any
-
   return (
     <div className="space-y-6">
       {/* Store info */}
@@ -32,11 +30,11 @@ export function StoreOwnerDashboardContainer() {
               <Store className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle>{store?.name}</CardTitle>
-              <CardDescription>{store?.description || 'Sem descrição'}</CardDescription>
+              <CardTitle>{storeData?.name}</CardTitle>
+              <CardDescription>{storeData?.description || 'Sem descrição'}</CardDescription>
             </div>
-            <Badge variant={store?.isActive ? 'default' : 'outline'} className="ml-auto">
-              {store?.isActive ? 'Ativa' : 'Inativa'}
+            <Badge variant={storeData?.isActive ? 'default' : 'outline'} className="ml-auto">
+              {storeData?.isActive ? 'Ativa' : 'Inativa'}
             </Badge>
           </div>
         </CardHeader>
@@ -51,7 +49,7 @@ export function StoreOwnerDashboardContainer() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(productsData as any)?.meta?.total ?? 0}
+              {productsData?.meta?.total ?? 0}
             </div>
             <p className="text-xs text-muted-foreground">produtos cadastrados</p>
           </CardContent>
@@ -64,7 +62,7 @@ export function StoreOwnerDashboardContainer() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(pendingOrdersData as any)?.meta?.total ?? 0}
+              {pendingOrdersData?.meta?.total ?? 0}
             </div>
             <p className="text-xs text-muted-foreground">aguardando aprovação</p>
           </CardContent>
@@ -77,7 +75,7 @@ export function StoreOwnerDashboardContainer() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(allOrdersData as any)?.meta?.total ?? 0}
+              {allOrdersData?.meta?.total ?? 0}
             </div>
             <p className="text-xs text-muted-foreground">pedidos realizados</p>
           </CardContent>

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Loader2 } from 'lucide-react'
 
@@ -9,6 +10,7 @@ import {
 } from '~/components/ui/accordion'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { SubjectGradesTable } from './subject-grades-table'
+import { useClassQueryOptions } from '~/hooks/queries/use_class'
 
 interface GradesAccordionProps {
   classId: string
@@ -19,29 +21,6 @@ interface GradesAccordionProps {
 interface Subject {
   id: string
   name: string
-}
-
-async function fetchSubjectsForClass(classId: string): Promise<Subject[]> {
-  const response = await fetch(`/api/v1/classes/${classId}`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch class data')
-  }
-  const data = await response.json()
-
-  const subjects: Subject[] = []
-  const seen = new Set<string>()
-
-  for (const tc of data.teacherClasses || []) {
-    if (tc.subject && !seen.has(tc.subject.id)) {
-      seen.add(tc.subject.id)
-      subjects.push({
-        id: tc.subject.id,
-        name: tc.subject.name,
-      })
-    }
-  }
-
-  return subjects
 }
 
 function GradesAccordionSkeleton() {
@@ -65,10 +44,20 @@ function GradesAccordionEmpty() {
 }
 
 function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesAccordionProps) {
-  const { data: subjects, isLoading, isError } = useQuery({
-    queryKey: ['class-subjects-for-grades', classId],
-    queryFn: () => fetchSubjectsForClass(classId),
-  })
+  const { data: classData, isLoading, isError } = useQuery(useClassQueryOptions(classId))
+
+  const subjects = useMemo(() => {
+    if (!classData) return []
+    const result: Subject[] = []
+    const seen = new Set<string>()
+    for (const tc of (classData as any).teacherClasses || []) {
+      if (tc.subject && !seen.has(tc.subject.id)) {
+        seen.add(tc.subject.id)
+        result.push({ id: tc.subject.id, name: tc.subject.name })
+      }
+    }
+    return result
+  }, [classData])
 
   if (isLoading) {
     return <GradesAccordionSkeleton />

@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentHasAssignment from '#models/student_has_assignment'
 import type { DateTime } from 'luxon'
+import StudentDto from './student.dto.js'
 
 export default class StudentHasAssignmentDto extends BaseModelDto {
   declare id: string
@@ -10,6 +11,7 @@ export default class StudentHasAssignmentDto extends BaseModelDto {
   declare submittedAt: DateTime | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare student?: StudentDto
 
   constructor(model?: StudentHasAssignment) {
     super()
@@ -23,5 +25,6 @@ export default class StudentHasAssignmentDto extends BaseModelDto {
     this.submittedAt = model.submittedAt
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.student = model.student ? new StudentDto(model.student) : undefined
   }
 }

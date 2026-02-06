@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import CanteenItem from './canteen_item.js'
@@ -31,6 +32,13 @@ export type StoreItemPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'SEMESTER' | 'ANN
 
 export default class StoreItem extends BaseModel {
   static table = 'StoreItem'
+
+  @beforeCreate()
+  static assignId(item: StoreItem) {
+    if (!item.id) {
+      item.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

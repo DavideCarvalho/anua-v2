@@ -32,10 +32,7 @@ export default class CreateStoreOrderController {
     // 2. GUARD: Store exists, is active, same school (if storeId provided)
     let store: Store | null = null
     if (payload.storeId) {
-      store = await Store.query()
-        .where('id', payload.storeId)
-        .whereNull('deletedAt')
-        .first()
+      store = await Store.query().where('id', payload.storeId).whereNull('deletedAt').first()
 
       if (!store) {
         return response.notFound({ message: 'Store not found' })
@@ -52,9 +49,7 @@ export default class CreateStoreOrderController {
 
     // 3. GUARD: Items exist, active, belong to store (if storeId provided)
     const storeItemIds = payload.items.map((item) => item.storeItemId)
-    const storeItems = await StoreItem.query()
-      .whereIn('id', storeItemIds)
-      .whereNull('deletedAt')
+    const storeItems = await StoreItem.query().whereIn('id', storeItemIds).whereNull('deletedAt')
 
     const storeItemMap = new Map(storeItems.map((item) => [item.id, item]))
 
@@ -239,9 +234,10 @@ export default class CreateStoreOrderController {
       const installmentDueDate = dueDate.plus({ months: i - 1 })
       await StudentPayment.create({
         studentId: payload.studentId,
-        amount: i === installments
-          ? totalMoney - Math.ceil(totalMoney / installments) * (installments - 1)
-          : Math.ceil(totalMoney / installments),
+        amount:
+          i === installments
+            ? totalMoney - Math.ceil(totalMoney / installments) * (installments - 1)
+            : Math.ceil(totalMoney / installments),
         month: installmentDueDate.month,
         year: installmentDueDate.year,
         type: 'STORE',

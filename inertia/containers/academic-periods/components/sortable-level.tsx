@@ -16,33 +16,18 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
 import { FormControl, FormField, FormItem } from '~/components/ui/form'
+import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
+import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
 
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 import { NewClassModal } from './new-class-modal'
-
-interface Contract {
-  id: string
-  name: string
-}
 
 interface SortableLevelProps {
   id: string
   index: number
   courseIndex: number
-  contracts: Contract[]
+  contracts: Array<{ id: string; name: string }>
   onCreateContract: () => void
-}
-
-async function fetchTeachers(): Promise<{ data: Array<{ id: string; user: { name: string } }> }> {
-  const response = await fetch('/api/v1/teachers?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch teachers')
-  return response.json()
-}
-
-async function fetchSubjects(): Promise<{ data: Array<{ id: string; name: string }> }> {
-  const response = await fetch('/api/v1/subjects?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch subjects')
-  return response.json()
 }
 
 export function SortableLevel({
@@ -60,18 +45,11 @@ export function SortableLevel({
   const [showNewClassModal, setShowNewClassModal] = useState(false)
   const [editingClassIndex, setEditingClassIndex] = useState<number | null>(null)
 
-  const { data: teachersData } = useQuery({
-    queryKey: ['teachers'],
-    queryFn: fetchTeachers,
-  })
+  const { data: teachersData } = useQuery(useTeachersQueryOptions({ limit: 100 }))
+  const { data: subjectsData } = useQuery(useSubjectsQueryOptions({ limit: 100 }))
 
-  const { data: subjectsData } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: fetchSubjects,
-  })
-
-  const teachers = teachersData?.data || []
-  const subjects = subjectsData?.data || []
+  const teachers = teachersData?.data ?? []
+  const subjects = subjectsData?.data ?? []
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id })
 

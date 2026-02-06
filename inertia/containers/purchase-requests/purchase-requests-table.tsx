@@ -97,9 +97,8 @@ export function PurchaseRequestsTable({
 
   const deleteMutation = useDeletePurchaseRequestMutation()
 
-  const result = data as any
-  const rows = Array.isArray(result) ? result : result?.data || []
-  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
+  const rows = data?.data ?? []
+  const meta = data?.meta ?? null
 
   const handleDelete = async (id: string) => {
     toast.promise(deleteMutation.mutateAsync(id), {

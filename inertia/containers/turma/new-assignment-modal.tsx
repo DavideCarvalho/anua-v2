@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
@@ -26,6 +26,8 @@ import {
 } from '~/components/ui/select'
 import { DatePicker } from '~/components/ui/date-picker'
 import type { UserDto } from '~/lib/types'
+import { useClassQueryOptions } from '~/hooks/queries/use_class'
+import { useCreateAssignment } from '~/hooks/mutations/use_create_assignment'
 
 const schema = z.object({
   name: z.string().min(1, 'Qual o nome da atividade?'),
@@ -59,65 +61,6 @@ interface TeacherClass {
 
 const DIRECTOR_ROLES = ['SCHOOL_DIRECTOR', 'SCHOOL_COORDINATOR', 'ADMIN', 'SUPER_ADMIN']
 
-async function fetchSubjectsForClass(
-  classId: string,
-  user: UserDto | null
-): Promise<Subject[]> {
-  const response = await fetch(`/api/v1/classes/${classId}`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch class data')
-  }
-  const data = await response.json()
-
-  const isDirectorOrAdmin = user?.role?.name && DIRECTOR_ROLES.includes(user.role.name)
-
-  // Extract subjects from teacherClasses
-  const subjects: Subject[] = []
-  const seen = new Set<string>()
-
-  for (const tc of (data.teacherClasses || []) as TeacherClass[]) {
-    if (!tc.subject || seen.has(tc.subject.id)) continue
-
-    // Directors/coordinators can see all subjects
-    // Teachers only see subjects they teach
-    const canSeeSubject = isDirectorOrAdmin || tc.teacher?.user?.id === user?.id
-
-    if (canSeeSubject) {
-      seen.add(tc.subject.id)
-      subjects.push({
-        id: tc.subject.id,
-        name: tc.subject.name,
-        teacherId: tc.teacherId,
-      })
-    }
-  }
-
-  return subjects
-}
-
-interface CreateAssignmentPayload {
-  title: string
-  description?: string
-  maxScore: number
-  dueDate: Date
-  classId: string
-  subjectId: string
-  teacherId: string
-  academicPeriodId: string
-}
-
-async function createAssignment(payload: CreateAssignmentPayload): Promise<void> {
-  const response = await fetch('/api/v1/assignments', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to create assignment')
-  }
-}
-
 export function NewAssignmentModal({
   classId,
   academicPeriodId,
@@ -125,8 +68,6 @@ export function NewAssignmentModal({
   onOpenChange,
   user,
 }: NewAssignmentModalProps) {
-  const queryClient = useQueryClient()
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -138,11 +79,26 @@ export function NewAssignmentModal({
     },
   })
 
-  const { data: subjects, isLoading: isLoadingSubjects } = useQuery({
-    queryKey: ['class-subjects', classId, user?.id],
-    queryFn: () => fetchSubjectsForClass(classId, user),
-    enabled: open,
+  const { data: classData, isLoading: isLoadingSubjects } = useQuery({
+    ...useClassQueryOptions(classId),
+    enabled: open && !!classId,
   })
+
+  const subjects = useMemo(() => {
+    if (!classData) return []
+    const isDirectorOrAdmin = user?.role?.name && DIRECTOR_ROLES.includes(user.role.name)
+    const result: Subject[] = []
+    const seen = new Set<string>()
+    for (const tc of ((classData as any).teacherClasses || []) as TeacherClass[]) {
+      if (!tc.subject || seen.has(tc.subject.id)) continue
+      const canSeeSubject = isDirectorOrAdmin || tc.teacher?.user?.id === user?.id
+      if (canSeeSubject) {
+        seen.add(tc.subject.id)
+        result.push({ id: tc.subject.id, name: tc.subject.name, teacherId: tc.teacherId })
+      }
+    }
+    return result
+  }, [classData, user])
 
   // Auto-select first subject if only one
   useEffect(() => {
@@ -164,36 +120,31 @@ export function NewAssignmentModal({
     }
   }, [open, form, subjects])
 
-  const createMutation = useMutation({
-    mutationFn: createAssignment,
-    onSuccess: () => {
-      toast.success('Atividade criada com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['assignments', classId, academicPeriodId] })
-      onOpenChange(false)
-      form.reset()
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao criar atividade')
-    },
-  })
+  const createMutation = useCreateAssignment()
 
-  const onSubmit = form.handleSubmit((data) => {
+  const onSubmit = form.handleSubmit(async (data) => {
     const selectedSubject = subjects?.find((s) => s.id === data.subjectId)
     if (!selectedSubject) {
-      toast.error('Selecione uma matéria')
+      toast.error('Selecione uma materia')
       return
     }
 
-    createMutation.mutate({
-      title: data.name,
-      description: data.description,
-      maxScore: data.grade,
-      dueDate: data.dueDate,
-      classId,
-      subjectId: data.subjectId,
-      teacherId: selectedSubject.teacherId,
-      academicPeriodId,
-    })
+    try {
+      await createMutation.mutateAsync({
+        title: data.name,
+        description: data.description,
+        maxScore: data.grade,
+        dueDate: data.dueDate.toISOString(),
+        classId,
+        subjectId: data.subjectId,
+        teacherId: selectedSubject.teacherId,
+      })
+      toast.success('Atividade criada com sucesso!')
+      onOpenChange(false)
+      form.reset()
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao criar atividade')
+    }
   })
 
   return (

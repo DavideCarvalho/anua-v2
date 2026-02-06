@@ -1,11 +1,13 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { compose } from '@adonisjs/core/helpers'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Invoice from './invoice.js'
 import AgreementEarlyDiscount from './agreement_early_discount.js'
 
-export default class Agreement extends BaseModel {
+export default class Agreement extends compose(BaseModel, Auditable) {
   static table = 'Agreement'
 
   @beforeCreate()

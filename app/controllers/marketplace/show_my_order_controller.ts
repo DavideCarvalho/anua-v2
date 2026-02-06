@@ -3,8 +3,8 @@ import StoreOrder from '#models/store_order'
 import StudentHasResponsible from '#models/student_has_responsible'
 
 export default class ShowMyOrderController {
-  async handle({ auth, params, request, response }: HttpContext) {
-    const user = auth.user!
+  async handle({ params, request, response, effectiveUser }: HttpContext) {
+    const user = effectiveUser!
     const studentId = request.input('studentId')
 
     const order = await StoreOrder.query()

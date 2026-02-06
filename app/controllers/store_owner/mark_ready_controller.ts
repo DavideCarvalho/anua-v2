@@ -5,10 +5,7 @@ import StoreOrder from '#models/store_order'
 export default class MarkReadyController {
   async handle({ storeOwnerStore, params, response }: HttpContext) {
     const store = storeOwnerStore!
-    const order = await StoreOrder.query()
-      .where('id', params.id)
-      .where('storeId', store.id)
-      .first()
+    const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
       return response.notFound({ message: 'Pedido não encontrado' })

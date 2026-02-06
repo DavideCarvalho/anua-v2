@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, belongsTo, hasMany, hasOne, beforeCreate } from '@adonisjs/lucid/orm'
+import { compose } from '@adonisjs/core/helpers'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import ContractDocument from './contract_document.js'
@@ -11,7 +13,7 @@ import StudentHasLevel from './student_has_level.js'
 
 export type ContractPaymentType = 'MONTHLY' | 'UPFRONT'
 
-export default class Contract extends BaseModel {
+export default class Contract extends compose(BaseModel, Auditable) {
   static table = 'Contract'
 
   @beforeCreate()

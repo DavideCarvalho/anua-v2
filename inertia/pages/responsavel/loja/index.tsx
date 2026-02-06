@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react'
-import { ResponsavelLayout } from '../../components/layouts/responsavel-layout'
-import { ResponsavelMarketplaceContainer } from '../../containers/responsavel-marketplace-container'
+import { ResponsavelLayout } from '../../../components/layouts/responsavel-layout'
+import { ResponsavelMarketplaceContainer } from '../../../containers/responsavel-marketplace-container'
 
 export default function ResponsavelLojaPage() {
   return (

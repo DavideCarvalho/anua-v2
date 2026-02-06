@@ -7,6 +7,7 @@ import {
   DialogFooter,
 } from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
+import { CurrencyInput } from '../../components/ui/currency-input'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
@@ -17,55 +18,66 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { useCreateProduct } from '../../hooks/mutations/use_store_owner_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { useCreateStoreItemMutationOptions } from '../../hooks/mutations/use_create_store_item'
 
 interface Props {
+  storeId: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  onSuccess?: () => void
 }
 
 const CATEGORIES = [
   { value: 'SCHOOL_SUPPLY', label: 'Material Escolar' },
+  { value: 'PRIVILEGE', label: 'Privilégio' },
+  { value: 'HOMEWORK_PASS', label: 'Passe de Tarefa' },
   { value: 'UNIFORM', label: 'Uniforme' },
   { value: 'BOOK', label: 'Livro' },
   { value: 'MERCHANDISE', label: 'Mercadoria' },
   { value: 'DIGITAL', label: 'Digital' },
   { value: 'OTHER', label: 'Outro' },
-]
+] as const
 
-export function CreateProductModal({ open, onOpenChange, onSuccess }: Props) {
+export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: Props) {
+  const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [category, setCategory] = useState('OTHER')
+  const [category, setCategory] = useState<string>('OTHER')
   const [totalStock, setTotalStock] = useState('')
 
-  const createProduct = useCreateProduct()
+  const createMutation = useMutation(useCreateStoreItemMutationOptions())
 
-  function handleSubmit(e: React.FormEvent) {
+  function resetForm() {
+    setName('')
+    setDescription('')
+    setPrice('')
+    setCategory('OTHER')
+    setTotalStock('')
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
-    createProduct.mutate(
-      {
+    try {
+      await createMutation.mutateAsync({
+        storeId,
         name,
         description: description || undefined,
-        price: Number(price),
-        category: category as any,
+        price: Math.round(Number(price) * 100),
+        category,
         paymentMode: 'MONEY_ONLY',
         totalStock: totalStock ? Number(totalStock) : undefined,
-      } as any,
-      {
-        onSuccess: () => {
-          setName('')
-          setDescription('')
-          setPrice('')
-          setCategory('OTHER')
-          setTotalStock('')
-          onSuccess()
-        },
-      }
-    )
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+      toast.success('Produto criado com sucesso!')
+      resetForm()
+      onOpenChange(false)
+      onSuccess?.()
+    } catch {
+      toast.error('Erro ao criar produto.')
+    }
   }
 
   return (
@@ -76,36 +88,33 @@ export function CreateProductModal({ open, onOpenChange, onSuccess }: Props) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
+            <Label htmlFor="create-name">Nome</Label>
             <Input
-              id="name"
+              id="create-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Descricao</Label>
+            <Label htmlFor="create-description">Descrição</Label>
             <Textarea
-              id="description"
+              id="create-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Preco (centavos)</Label>
-              <Input
-                id="price"
-                type="number"
-                min="1"
+              <Label htmlFor="create-price">Preço</Label>
+              <CurrencyInput
+                id="create-price"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
+                onChange={setPrice}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
+              <Label htmlFor="create-category">Categoria</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
                   <SelectValue />
@@ -121,9 +130,9 @@ export function CreateProductModal({ open, onOpenChange, onSuccess }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="totalStock">Estoque (deixe vazio para ilimitado)</Label>
+            <Label htmlFor="create-totalStock">Estoque (deixe vazio para ilimitado)</Label>
             <Input
-              id="totalStock"
+              id="create-totalStock"
               type="number"
               min="0"
               value={totalStock}
@@ -134,8 +143,8 @@ export function CreateProductModal({ open, onOpenChange, onSuccess }: Props) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={createProduct.isPending}>
-              {createProduct.isPending ? 'Salvando...' : 'Criar Produto'}
+            <Button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Salvando...' : 'Criar Produto'}
             </Button>
           </DialogFooter>
         </form>

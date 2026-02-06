@@ -80,9 +80,8 @@ function LeaderboardsListContent() {
 
   const { data, isLoading, error, refetch } = useQuery(useLeaderboardsQueryOptions({ page, limit }))
 
-  const result = data as any
-  const leaderboards = Array.isArray(result) ? result : result?.data || []
-  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
+  const leaderboards = data?.data ?? []
+  const meta = data?.meta ?? null
 
   if (isLoading) {
     return <LeaderboardsSkeleton />

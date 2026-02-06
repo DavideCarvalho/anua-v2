@@ -3,8 +3,8 @@ import StoreOrder from '#models/store_order'
 import StudentHasResponsible from '#models/student_has_responsible'
 
 export default class ListMyOrdersController {
-  async handle({ auth, request, response }: HttpContext) {
-    const user = auth.user!
+  async handle({ request, response, effectiveUser }: HttpContext) {
+    const user = effectiveUser!
     const studentId = request.input('studentId')
     const page = request.input('page', 1)
     const limit = request.input('limit', 10)

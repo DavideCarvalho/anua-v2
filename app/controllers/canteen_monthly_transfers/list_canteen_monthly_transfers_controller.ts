@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
+import CanteenMonthlyTransferDto from '#models/dto/canteen_monthly_transfer.dto'
 import { listCanteenMonthlyTransfersValidator } from '#validators/canteen'
 
 export default class ListCanteenMonthlyTransfersController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(listCanteenMonthlyTransfersValidator)
 
     const page = payload.page ?? 1
@@ -29,6 +30,6 @@ export default class ListCanteenMonthlyTransfersController {
 
     const transfers = await query.paginate(page, limit)
 
-    return response.ok(transfers)
+    return CanteenMonthlyTransferDto.fromPaginator(transfers)
   }
 }

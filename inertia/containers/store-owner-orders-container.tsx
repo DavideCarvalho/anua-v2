@@ -26,7 +26,10 @@ import {
 } from '../components/ui/select'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
-import { useOwnOrdersQueryOptions } from '../hooks/queries/use_store_owner'
+import {
+  useOwnOrdersQueryOptions,
+  type OwnOrdersResponse,
+} from '../hooks/queries/use_store_owner'
 import {
   useApproveOrder,
   useRejectOrder,
@@ -35,6 +38,8 @@ import {
   useDeliverOrder,
 } from '../hooks/mutations/use_store_owner_mutations'
 import { formatCurrency } from '../lib/utils'
+
+type Order = NonNullable<OwnOrdersResponse>['data'][number]
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: 'Pagamento Pendente',
@@ -64,7 +69,7 @@ export function StoreOwnerOrdersContainer() {
 
   const { data, isLoading } = useQuery(
     useOwnOrdersQueryOptions({
-      status: (statusFilter || undefined) as any,
+      status: statusFilter || undefined,
       search: search || undefined,
     })
   )
@@ -75,7 +80,7 @@ export function StoreOwnerOrdersContainer() {
   const markReady = useMarkReady()
   const deliverOrder = useDeliverOrder()
 
-  const orders = (data as any)?.data ?? []
+  const orders = data?.data ?? []
 
   function handleReject(orderId: string) {
     const reason = prompt('Motivo da rejeição (opcional):')
@@ -133,7 +138,7 @@ export function StoreOwnerOrdersContainer() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order: any) => (
+              {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm">
                     {order.orderNumber}
@@ -141,7 +146,7 @@ export function StoreOwnerOrdersContainer() {
                   <TableCell>{order.student?.name ?? '—'}</TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {order.items?.map((item: any) => (
+                      {order.items?.map((item) => (
                         <div key={item.id}>
                           {item.quantity}x {item.storeItem?.name ?? 'Item'}
                         </div>

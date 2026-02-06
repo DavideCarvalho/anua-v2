@@ -114,8 +114,7 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
   })
 
   const allInvoices = useMemo(() => {
-    const result = invoicesData as any
-    const list = Array.isArray(result) ? result : result?.data || []
+    const list = (invoicesData as any)?.data ?? []
     return list
       .filter((inv: any) => ACTIONABLE_STATUSES.includes(inv.status))
       .sort((a: any, b: any) => {

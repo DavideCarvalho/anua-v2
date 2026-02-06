@@ -7,6 +7,7 @@ import {
   DialogFooter,
 } from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
+import { CurrencyInput } from '../../components/ui/currency-input'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
@@ -17,10 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
+import { toast } from 'sonner'
 import { useUpdateProduct } from '../../hooks/mutations/use_store_owner_mutations'
+import type { OwnProductsResponse } from '../../hooks/queries/use_store_owner'
+
+type Product = NonNullable<OwnProductsResponse>['data'][number]
 
 interface Props {
-  product: any
+  product: Product
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
@@ -38,7 +43,7 @@ const CATEGORIES = [
 export function EditProductModal({ product, open, onOpenChange, onSuccess }: Props) {
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
-  const [price, setPrice] = useState(String(product.price))
+  const [price, setPrice] = useState(String(product.price / 100))
   const [category, setCategory] = useState(product.category)
   const [totalStock, setTotalStock] = useState(
     product.totalStock !== null ? String(product.totalStock) : ''
@@ -49,25 +54,27 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
   useEffect(() => {
     setName(product.name)
     setDescription(product.description ?? '')
-    setPrice(String(product.price))
+    setPrice(String(product.price / 100))
     setCategory(product.category)
     setTotalStock(product.totalStock !== null ? String(product.totalStock) : '')
   }, [product])
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
-    updateProduct.mutate(
-      {
+    try {
+      await updateProduct.mutateAsync({
         id: product.id,
         name,
         description: description || undefined,
-        price: Number(price),
-        category: category as any,
+        price: Math.round(Number(price) * 100),
+        category,
         totalStock: totalStock ? Number(totalStock) : undefined,
-      } as any,
-      { onSuccess }
-    )
+      })
+      toast.success('Produto atualizado com sucesso!')
+      onSuccess()
+    } catch {
+      toast.error('Erro ao atualizar produto.')
+    }
   }
 
   return (
@@ -96,14 +103,11 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Preco (centavos)</Label>
-              <Input
+              <Label htmlFor="edit-price">Preço</Label>
+              <CurrencyInput
                 id="edit-price"
-                type="number"
-                min="1"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
+                onChange={setPrice}
               />
             </div>
             <div className="space-y-2">

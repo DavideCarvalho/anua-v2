@@ -10,17 +10,10 @@ import {
 import { Badge } from '../../components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '../../lib/utils'
+import { useStoreSettlementsQueryOptions } from '../../hooks/queries/use_stores'
 
 interface StoreSettlementsTabProps {
   storeId: string
-}
-
-async function fetchSettlements(storeId: string) {
-  const response = await fetch(`/api/v1/store-settlements?storeId=${storeId}`, {
-    credentials: 'include',
-  })
-  if (!response.ok) throw new Error('Failed to fetch settlements')
-  return response.json()
 }
 
 const statusLabels: Record<string, string> = {
@@ -33,10 +26,9 @@ const statusLabels: Record<string, string> = {
 }
 
 export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
-  const { data: settlements, isLoading } = useQuery({
-    queryKey: ['storeSettlements', storeId],
-    queryFn: () => fetchSettlements(storeId),
-  })
+  const { data: settlements, isLoading } = useQuery(useStoreSettlementsQueryOptions({ storeId }))
+
+  const settlementsList = settlements?.data ?? []
 
   return (
     <Card>
@@ -46,7 +38,7 @@ export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
       <CardContent>
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-        ) : !settlements?.data?.length ? (
+        ) : !settlementsList.length ? (
           <div className="text-center py-8 text-muted-foreground">
             Nenhum repasse encontrado
           </div>
@@ -54,16 +46,16 @@ export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Periodo</TableHead>
+                <TableHead>Período</TableHead>
                 <TableHead>Vendas</TableHead>
-                <TableHead>Comissao</TableHead>
+                <TableHead>Comissão</TableHead>
                 <TableHead>Taxa</TableHead>
                 <TableHead>Repasse</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {settlements.data.map((s: any) => (
+              {settlementsList.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>{String(s.month).padStart(2, '0')}/{s.year}</TableCell>
                   <TableCell>{formatCurrency(s.totalSalesAmount)}</TableCell>

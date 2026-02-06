@@ -1,6 +1,7 @@
 import { Job } from '@boringnode/queue'
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
+import locks from '@adonisjs/lock/services/main'
 import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import Contract from '#models/contract'
@@ -24,84 +25,94 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
 
   async execute(): Promise<void> {
     const { studentHasLevelId } = this.payload
-    const startTime = Date.now()
 
-    console.log('[WORKER] Starting payment generation:', {
-      studentHasLevelId,
-      timestamp: new Date().toISOString(),
+    const lock = locks.createLock(`payment-gen:${studentHasLevelId}`, '60s')
+    const [executed] = await lock.run(async () => {
+      const startTime = Date.now()
+
+      console.log('[WORKER] Starting payment generation:', {
+        studentHasLevelId,
+        timestamp: new Date().toISOString(),
+      })
+
+      try {
+        const studentHasLevel = await StudentHasLevel.query()
+          .where('id', studentHasLevelId)
+          .preload('contract', (query) => {
+            query.preload('paymentDays')
+          })
+          .preload('scholarship')
+          .preload('academicPeriod')
+          .preload('student', (query) => {
+            query.preload('user')
+          })
+          .first()
+
+        if (!studentHasLevel) {
+          console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} not found - skipping`)
+          return
+        }
+
+        if (studentHasLevel.deletedAt) {
+          console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} was soft-deleted - skipping`)
+          return
+        }
+
+        if (!studentHasLevel.contractId) {
+          console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} has no contract - skipping`)
+          return
+        }
+
+        const contract = studentHasLevel.contract
+        if (!contract) {
+          console.warn(`[WORKER] Contract not found for StudentHasLevel ${studentHasLevelId}`)
+          return
+        }
+
+        const academicPeriod = studentHasLevel.academicPeriod
+        if (!academicPeriod) {
+          console.warn(
+            `[WORKER] Academic period not found for StudentHasLevel ${studentHasLevelId}`
+          )
+          return
+        }
+
+        // Check if payments already exist for this StudentHasLevel
+        const existingPayments = await StudentPayment.query()
+          .where('studentHasLevelId', studentHasLevelId)
+          .where('type', 'TUITION')
+
+        if (existingPayments.length > 0) {
+          console.log(
+            `[WORKER] Payments already exist for StudentHasLevel ${studentHasLevelId} - skipping`
+          )
+          return
+        }
+
+        // Generate payments based on contract type
+        if (contract.paymentType === 'UPFRONT') {
+          await this.generateUpfrontPayments(studentHasLevel, contract)
+        } else {
+          await this.generateMonthlyPayments(studentHasLevel, contract, academicPeriod)
+        }
+
+        const duration = Date.now() - startTime
+        console.log('[WORKER] Payment generation completed:', {
+          studentHasLevelId,
+          studentName: studentHasLevel.student?.user?.name,
+          duration: `${duration}ms`,
+        })
+      } catch (error) {
+        console.error('[WORKER] Payment generation error:', {
+          studentHasLevelId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        throw error
+      }
     })
 
-    try {
-      const studentHasLevel = await StudentHasLevel.query()
-        .where('id', studentHasLevelId)
-        .preload('contract', (query) => {
-          query.preload('paymentDays')
-        })
-        .preload('scholarship')
-        .preload('academicPeriod')
-        .preload('student', (query) => {
-          query.preload('user')
-        })
-        .first()
-
-      if (!studentHasLevel) {
-        console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} not found - skipping`)
-        return
-      }
-
-      if (studentHasLevel.deletedAt) {
-        console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} was soft-deleted - skipping`)
-        return
-      }
-
-      if (!studentHasLevel.contractId) {
-        console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} has no contract - skipping`)
-        return
-      }
-
-      const contract = studentHasLevel.contract
-      if (!contract) {
-        console.warn(`[WORKER] Contract not found for StudentHasLevel ${studentHasLevelId}`)
-        return
-      }
-
-      const academicPeriod = studentHasLevel.academicPeriod
-      if (!academicPeriod) {
-        console.warn(`[WORKER] Academic period not found for StudentHasLevel ${studentHasLevelId}`)
-        return
-      }
-
-      // Check if payments already exist for this StudentHasLevel
-      const existingPayments = await StudentPayment.query()
-        .where('studentHasLevelId', studentHasLevelId)
-        .where('type', 'TUITION')
-
-      if (existingPayments.length > 0) {
-        console.log(
-          `[WORKER] Payments already exist for StudentHasLevel ${studentHasLevelId} - skipping`
-        )
-        return
-      }
-
-      // Generate payments based on contract type
-      if (contract.paymentType === 'UPFRONT') {
-        await this.generateUpfrontPayments(studentHasLevel, contract)
-      } else {
-        await this.generateMonthlyPayments(studentHasLevel, contract, academicPeriod)
-      }
-
-      const duration = Date.now() - startTime
-      console.log('[WORKER] Payment generation completed:', {
-        studentHasLevelId,
-        studentName: studentHasLevel.student?.user?.name,
-        duration: `${duration}ms`,
-      })
-    } catch (error) {
-      console.error('[WORKER] Payment generation error:', {
-        studentHasLevelId,
-        error: error instanceof Error ? error.message : String(error),
-      })
-      throw error
+    if (!executed) {
+      console.warn(`[WORKER] Lock não adquirido para ${studentHasLevelId} - pulando`)
     }
   }
 

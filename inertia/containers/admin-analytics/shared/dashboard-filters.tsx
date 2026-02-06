@@ -25,8 +25,9 @@ export function DashboardFilters({
   const schoolChainId = params.schoolChainId ?? ''
 
   const { data: schoolsRaw } = useQuery(useSchoolsQueryOptions())
-  const { data: chains } = useQuery(useSchoolChainsQueryOptions())
-  const schools = Array.isArray(schoolsRaw) ? schoolsRaw : (schoolsRaw as any)?.data || []
+  const { data: chainsRaw } = useQuery(useSchoolChainsQueryOptions())
+  const schools = schoolsRaw?.data ?? []
+  const chains = chainsRaw?.data ?? []
 
   function handleSchoolChange(value: string) {
     if (value && value !== 'all') {

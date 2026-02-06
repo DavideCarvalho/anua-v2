@@ -36,6 +36,7 @@ export default class GetImpersonationConfigController {
       .preload('userHasSchools', (uhsQuery) => {
         uhsQuery.preload('school')
       })
+      .preload('school')
 
     // Filtro por busca
     if (search) {
@@ -49,10 +50,12 @@ export default class GetImpersonationConfigController {
       query.where('roleId', roleFilter)
     }
 
-    // Filtro por escola (via UserHasSchool)
+    // Filtro por escola (via UserHasSchool OU User.schoolId)
     if (schoolFilter && schoolFilter !== 'all') {
-      query.whereHas('userHasSchools', (uhsQuery) => {
-        uhsQuery.where('schoolId', schoolFilter)
+      query.where((q) => {
+        q.whereHas('userHasSchools', (uhsQuery) => {
+          uhsQuery.where('schoolId', schoolFilter)
+        }).orWhere('schoolId', schoolFilter)
       })
     }
 
@@ -68,14 +71,14 @@ export default class GetImpersonationConfigController {
 
     return {
       users: users.all().map((u) => {
-        // Pegar a primeira escola do usuário via UserHasSchool
-        const firstSchool = u.userHasSchools?.[0]?.school
+        // Pegar escola via UserHasSchool ou fallback para User.school
+        const schoolName = u.userHasSchools?.[0]?.school?.name ?? u.school?.name ?? null
         return {
           id: u.id,
           name: u.name,
           email: u.email,
           role: u.role?.name,
-          school: firstSchool?.name ?? null,
+          school: schoolName,
         }
       }),
       meta: {

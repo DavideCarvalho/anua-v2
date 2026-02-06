@@ -110,10 +110,11 @@ module "queue_worker" {
   memory_limit  = "1Gi"
 
   env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
+    NODE_ENV          = var.environment
+    TZ                = "UTC"
+    LOG_LEVEL         = "info"
+    SESSION_DRIVER    = "cookie"
+    DISABLE_SCHEDULER = "1"
     # Database
     DB_HOST     = "34.39.158.54"
     DB_PORT     = "5432"

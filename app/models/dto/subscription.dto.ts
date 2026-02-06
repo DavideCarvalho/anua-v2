@@ -2,6 +2,9 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Subscription from '#models/subscription'
 import type { SubscriptionStatus, BillingCycle } from '#models/subscription'
 import type { DateTime } from 'luxon'
+import SchoolDto from './school.dto.js'
+import SchoolChainDto from './school_chain.dto.js'
+import SubscriptionPlanDto from './subscription_plan.dto.js'
 
 export default class SubscriptionDto extends BaseModelDto {
   declare id: string
@@ -27,6 +30,9 @@ export default class SubscriptionDto extends BaseModelDto {
   declare creditCardBrand: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare school?: SchoolDto
+  declare schoolChain?: SchoolChainDto
+  declare plan?: SubscriptionPlanDto
 
   constructor(subscription?: Subscription) {
     super()
@@ -56,5 +62,10 @@ export default class SubscriptionDto extends BaseModelDto {
     this.creditCardBrand = subscription.creditCardBrand
     this.createdAt = subscription.createdAt
     this.updatedAt = subscription.updatedAt
+    this.school = subscription.school ? new SchoolDto(subscription.school) : undefined
+    this.schoolChain = subscription.schoolChain
+      ? new SchoolChainDto(subscription.schoolChain)
+      : undefined
+    this.plan = subscription.plan ? new SubscriptionPlanDto(subscription.plan) : undefined
   }
 }

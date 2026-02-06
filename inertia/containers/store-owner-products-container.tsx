@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -19,9 +19,13 @@ import {
 } from '../components/ui/dropdown-menu'
 import { Badge } from '../components/ui/badge'
 import { Switch } from '../components/ui/switch'
-import { useOwnProductsQueryOptions } from '../hooks/queries/use_store_owner'
+import {
+  useOwnStoreQueryOptions,
+  useOwnProductsQueryOptions,
+  type OwnProductsResponse,
+} from '../hooks/queries/use_store_owner'
 import { useToggleProductActive, useDeleteProduct } from '../hooks/mutations/use_store_owner_mutations'
-import { CreateProductModal } from './store-owner/create-product-modal'
+import { CreateProductModal } from './stores/create-product-modal'
 import { EditProductModal } from './store-owner/edit-product-modal'
 import { formatCurrency } from '../lib/utils'
 
@@ -38,15 +42,19 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Outro',
 }
 
-export function StoreOwnerProductsContainer() {
-  const [createOpen, setCreateOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<any>(null)
+type Product = NonNullable<OwnProductsResponse>['data'][number]
 
+export function StoreOwnerProductsContainer() {
+  const queryClient = useQueryClient()
+  const [createOpen, setCreateOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
+  const { data: storeData } = useQuery(useOwnStoreQueryOptions())
   const { data, isLoading } = useQuery(useOwnProductsQueryOptions())
   const toggleActive = useToggleProductActive()
   const deleteProduct = useDeleteProduct()
 
-  const products = (data as any)?.data ?? []
+  const products = data?.data ?? []
 
   return (
     <>
@@ -81,7 +89,7 @@ export function StoreOwnerProductsContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product: any) => (
+                {products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="font-medium">{product.name}</div>
@@ -144,11 +152,14 @@ export function StoreOwnerProductsContainer() {
         </CardContent>
       </Card>
 
-      <CreateProductModal
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSuccess={() => setCreateOpen(false)}
-      />
+      {storeData?.id && (
+        <CreateProductModal
+          storeId={storeData.id}
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['storeOwner', 'products'] })}
+        />
+      )}
 
       {editingProduct && (
         <EditProductModal

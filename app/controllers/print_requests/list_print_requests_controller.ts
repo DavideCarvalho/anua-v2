@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PrintRequest from '#models/print_request'
+import PrintRequestDto from '#models/dto/print_request.dto'
 import { listPrintRequestsValidator } from '#validators/print_request'
 
 export default class ListPrintRequestsController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, auth }: HttpContext) {
     const payload = await request.validateUsing(listPrintRequestsValidator)
 
     const page = payload.page ?? 1
@@ -26,6 +27,6 @@ export default class ListPrintRequestsController {
 
     const results = await query.paginate(page, limit)
 
-    return response.ok(results)
+    return PrintRequestDto.fromPaginator(results)
   }
 }

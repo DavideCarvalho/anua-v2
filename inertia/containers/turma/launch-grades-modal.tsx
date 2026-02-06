@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, Save, Users } from 'lucide-react'
 
@@ -19,6 +19,8 @@ import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { useClassStudentsQueryOptions } from '~/hooks/queries/use_class_students'
+import { useAssignmentSubmissionsQueryOptions } from '~/hooks/queries/use_assignment_submissions'
+import { useBatchSaveGrades } from '~/hooks/mutations/use_batch_save_grades'
 
 interface LaunchGradesModalProps {
   assignmentId: string
@@ -59,45 +61,6 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 
-async function fetchExistingGrades(
-  assignmentId: string
-): Promise<{ studentId: string; grade: number | null; submittedAt: string | null }[]> {
-  const response = await fetch(`/api/v1/assignments/${assignmentId}/submissions`)
-  if (!response.ok) {
-    // If 404, return empty array (no submissions yet)
-    if (response.status === 404) return []
-    throw new Error('Failed to fetch grades')
-  }
-  const data = await response.json()
-  const submissions = Array.isArray(data) ? data : data.data || []
-  return submissions.map((s: any) => ({
-    studentId: s.studentId,
-    grade: s.grade,
-    submittedAt: s.submittedAt ? s.submittedAt.split('T')[0] : null,
-  }))
-}
-
-interface BatchSavePayload {
-  assignmentId: string
-  grades: {
-    studentId: string
-    grade: number | null
-    submittedAt: string | null
-  }[]
-}
-
-async function batchSaveGrades(payload: BatchSavePayload): Promise<void> {
-  const response = await fetch('/api/v1/grades/batch', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to save grades')
-  }
-}
-
 function LaunchGradesModalSkeleton() {
   return (
     <div className="py-12 text-center">
@@ -124,7 +87,6 @@ function LaunchGradesModalContent({
   academicPeriodId,
   onOpenChange,
 }: Omit<LaunchGradesModalProps, 'open'>) {
-  const queryClient = useQueryClient()
   const today = new Date().toISOString().split('T')[0]
 
   const form = useForm<FormValues>({
@@ -144,10 +106,19 @@ function LaunchGradesModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(studentsQueryOptions)
   const students = studentsResponse?.data || []
 
-  const { data: existingGrades, isLoading: isLoadingGrades } = useQuery({
-    queryKey: ['assignment-grades', assignmentId],
-    queryFn: () => fetchExistingGrades(assignmentId),
-  })
+  const { data: submissionsResponse, isLoading: isLoadingGrades } = useQuery(
+    useAssignmentSubmissionsQueryOptions({ assignmentId, limit: 1000 })
+  )
+
+  const existingGrades = (() => {
+    if (!submissionsResponse) return []
+    const submissions = submissionsResponse?.data ?? []
+    return submissions.map((s: any) => ({
+      studentId: s.studentId,
+      grade: s.grade,
+      submittedAt: s.submittedAt ? s.submittedAt.split('T')[0] : null,
+    }))
+  })()
 
   // Initialize form when data is loaded
   useEffect(() => {
@@ -170,19 +141,7 @@ function LaunchGradesModalContent({
     form.setValue('grades', formGrades)
   }, [students, existingGrades, form, today])
 
-  const saveMutation = useMutation({
-    mutationFn: batchSaveGrades,
-    onSuccess: () => {
-      toast.success('Notas salvas com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['subject-grades'] })
-      queryClient.invalidateQueries({ queryKey: ['assignments'] })
-      queryClient.invalidateQueries({ queryKey: ['assignment-grades', assignmentId] })
-      onOpenChange(false)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao salvar notas')
-    },
-  })
+  const saveMutation = useBatchSaveGrades()
 
   const grades = form.watch('grades')
   const isLoading = isLoadingStudents || isLoadingGrades
@@ -195,7 +154,7 @@ function LaunchGradesModalContent({
     return <LaunchGradesModalEmpty />
   }
 
-  function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues) {
     const gradesWithValues = data.grades.filter((g) => g.grade !== null)
 
     if (gradesWithValues.length === 0) {
@@ -203,14 +162,20 @@ function LaunchGradesModalContent({
       return
     }
 
-    saveMutation.mutate({
-      assignmentId,
-      grades: gradesWithValues.map((g) => ({
-        studentId: g.studentId,
-        grade: g.grade,
-        submittedAt: g.submittedAt,
-      })),
-    })
+    try {
+      await saveMutation.mutateAsync({
+        assignmentId,
+        grades: gradesWithValues.map((g) => ({
+          studentId: g.studentId,
+          grade: g.grade,
+          submittedAt: g.submittedAt,
+        })),
+      })
+      toast.success('Notas salvas com sucesso!')
+      onOpenChange(false)
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao salvar notas')
+    }
   }
 
   return (

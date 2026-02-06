@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { router } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@inertiajs/react'
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '../contexts/cart-context'
@@ -15,42 +15,39 @@ import { Textarea } from '../components/ui/textarea'
 import { Separator } from '../components/ui/separator'
 import { formatCurrency } from '../lib/utils'
 
-export function MarketplaceCartContainer() {
+export function MarketplaceCartContainer({ backHref = '/aluno/loja', hasOnlinePayment = false }: { backHref?: string; hasOnlinePayment?: boolean }) {
   const cart = useCart()
-  const [paymentMode, setPaymentMode] = useState<'IMMEDIATE' | 'DEFERRED'>('IMMEDIATE')
+  const [paymentOption, setPaymentOption] = useState<'IMMEDIATE' | 'BILL' | 'INSTALLMENTS'>('BILL')
   const [paymentMethod, setPaymentMethod] = useState<'BALANCE' | 'PIX'>('BALANCE')
-  const [installments, setInstallments] = useState(1)
+  const [installments, setInstallments] = useState(2)
   const [notes, setNotes] = useState('')
   const checkout = useMarketplaceCheckout()
 
   const { data: installmentData } = useQuery({
     ...useInstallmentOptionsQueryOptions(cart.storeId ?? '', cart.totalPrice),
-    enabled: paymentMode === 'DEFERRED' && !!cart.storeId && cart.totalPrice > 0,
+    enabled: paymentOption === 'INSTALLMENTS' && !!cart.storeId && cart.totalPrice > 0,
   })
-  const installmentOptions = (installmentData as any)?.options ?? []
+  const installmentOptions = installmentData?.options ?? []
 
-  function handleCheckout() {
+  async function handleCheckout() {
     if (!cart.storeId) return
-    checkout.mutate(
-      {
+    const isDeferred = paymentOption === 'BILL' || paymentOption === 'INSTALLMENTS'
+    try {
+      await checkout.mutateAsync({
         storeId: cart.storeId,
         items: cart.items.map((i) => ({ storeItemId: i.storeItemId, quantity: i.quantity })),
-        paymentMode,
-        paymentMethod: paymentMode === 'IMMEDIATE' ? paymentMethod : undefined,
-        installments: paymentMode === 'DEFERRED' ? installments : undefined,
+        paymentMode: isDeferred ? 'DEFERRED' : 'IMMEDIATE',
+        paymentMethod: paymentOption === 'IMMEDIATE' ? paymentMethod : undefined,
+        installments: paymentOption === 'INSTALLMENTS' ? installments : undefined,
+        spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
         notes: notes || undefined,
-      },
-      {
-        onSuccess: () => {
-          cart.clearCart()
-          toast.success('Pedido realizado com sucesso!')
-          router.visit('/aluno/loja/pedidos')
-        },
-        onError: (error: any) => {
-          toast.error(error?.message ?? 'Erro ao finalizar pedido')
-        },
-      }
-    )
+      })
+      cart.clearCart()
+      toast.success('Pedido realizado com sucesso!')
+      router.visit(backHref)
+    } catch {
+      toast.error('Erro ao finalizar pedido')
+    }
   }
 
   if (cart.items.length === 0) {
@@ -61,7 +58,7 @@ export function MarketplaceCartContainer() {
         <p className="text-sm text-muted-foreground mt-1">
           Adicione itens de uma loja para começar
         </p>
-        <Link route={'web.aluno.loja' as any}>
+        <Link href={backHref}>
           <Button variant="outline" className="mt-4">
             Explorar lojas
           </Button>
@@ -142,24 +139,37 @@ export function MarketplaceCartContainer() {
             <div className="space-y-3">
               <Label className="text-sm font-medium">Modo de pagamento</Label>
               <RadioGroup
-                value={paymentMode}
-                onValueChange={(v) => setPaymentMode(v as 'IMMEDIATE' | 'DEFERRED')}
+                value={paymentOption}
+                onValueChange={(v) => setPaymentOption(v as 'IMMEDIATE' | 'BILL' | 'INSTALLMENTS')}
               >
+                {hasOnlinePayment && (
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="IMMEDIATE" id="mode-immediate" />
+                    <Label htmlFor="mode-immediate">Pagar agora</Label>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="IMMEDIATE" id="mode-immediate" />
-                  <Label htmlFor="mode-immediate">Pagar agora</Label>
+                  <RadioGroupItem value="BILL" id="mode-bill" />
+                  <Label htmlFor="mode-bill" className="flex flex-col">
+                    <span>Adicionar na mensalidade</span>
+                    <span className="text-xs text-muted-foreground font-normal">
+                      Dividido nas mensalidades ate o final do periodo letivo
+                    </span>
+                  </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="DEFERRED" id="mode-deferred" />
-                  <Label htmlFor="mode-deferred">Parcelar</Label>
-                </div>
+                {hasOnlinePayment && (
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="INSTALLMENTS" id="mode-installments" />
+                    <Label htmlFor="mode-installments">Parcelar</Label>
+                  </div>
+                )}
               </RadioGroup>
             </div>
 
             <Separator />
 
             {/* Immediate: payment method */}
-            {paymentMode === 'IMMEDIATE' && (
+            {paymentOption === 'IMMEDIATE' && (
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Forma de pagamento</Label>
                 <RadioGroup
@@ -178,8 +188,8 @@ export function MarketplaceCartContainer() {
               </div>
             )}
 
-            {/* Deferred: installment options */}
-            {paymentMode === 'DEFERRED' && (
+            {/* Installments: installment options */}
+            {paymentOption === 'INSTALLMENTS' && (
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Parcelas</Label>
                 {installmentOptions.length > 0 ? (
@@ -187,7 +197,7 @@ export function MarketplaceCartContainer() {
                     value={String(installments)}
                     onValueChange={(v) => setInstallments(Number(v))}
                   >
-                    {installmentOptions.map((option: any) => (
+                    {installmentOptions.map((option) => (
                       <div key={option.installments} className="flex items-center space-x-2">
                         <RadioGroupItem
                           value={String(option.installments)}
@@ -201,7 +211,7 @@ export function MarketplaceCartContainer() {
                   </RadioGroup>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Carregando opções de parcelamento...
+                    Carregando opcoes de parcelamento...
                   </p>
                 )}
               </div>

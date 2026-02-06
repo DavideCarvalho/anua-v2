@@ -1,8 +1,9 @@
 import { BaseCommand, flags } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
-import { Worker } from '@boringnode/queue'
+import { Worker, QueueManager, Locator } from '@boringnode/queue'
 import { createServer } from 'node:http'
 import queueConfig from '#config/queue'
+import db from '@adonisjs/lucid/services/db'
 
 export default class QueueWork extends BaseCommand {
   static commandName = 'queue:work'
@@ -65,10 +66,53 @@ export default class QueueWork extends BaseCommand {
     process.on('SIGINT', shutdown)
 
     try {
+      // Log database connection info
+      const env = await import('#start/env')
+      this.logger.info(`DB_HOST: ${env.default.get('DB_HOST')}`)
+      this.logger.info(`DB_DATABASE: ${env.default.get('DB_DATABASE')}`)
+
+      // Test Lucid connection
+      const jobCount = await db.from('queue_jobs').count('* as total')
+      this.logger.info(`[Lucid] Jobs in queue_jobs: ${jobCount[0].total}`)
+
+      // Initialize worker (this also initializes QueueManager internally)
+      this.logger.info('Initializing worker (loading job handlers)...')
+      await worker.init()
+
+      // Get the adapter AFTER worker.init() to ensure we use the same instance as the worker
+      const adapter = QueueManager.use()
+      this.logger.info('QueueManager initialized via worker.init(), adapter obtained')
+
+      // Debug: test if a specific job is registered
+      const testJob = Locator.get('UpdateEnrollmentPaymentsJob')
+      this.logger.info(`UpdateEnrollmentPaymentsJob registered: ${testJob ? 'YES' : 'NO'}`)
+
+      // Add diagnostic polling - log EVERY run to track exactly what's happening
+      let diagCounter = 0
+
+      setInterval(async () => {
+        diagCounter++
+        try {
+          // Query ALL jobs in the table
+          const allJobs = await db.from('queue_jobs').select('id', 'queue', 'status', 'score')
+
+          // Log every 5th check OR when jobs exist
+          if (diagCounter % 5 === 0 || allJobs.length > 0) {
+            this.logger.info(
+              `[DIAG #${diagCounter}] Total jobs: ${allJobs.length}${allJobs.length > 0 ? ' → ' + JSON.stringify(allJobs.map((j: any) => ({ id: j.id.substring(0, 8), q: j.queue, s: j.status }))) : ''}`
+            )
+          }
+        } catch (e) {
+          this.logger.error(`[DIAG #${diagCounter}] Error: ${e}`)
+        }
+      }, 1000)
+
+      this.logger.info('Starting worker...')
       await worker.start(queuesToProcess)
-      this.logger.info('Queue worker started successfully')
+      this.logger.info('Queue worker stopped')
     } catch (error) {
       this.logger.error(`Failed to start queue worker: ${error}`)
+      console.error(error)
       this.exitCode = 1
     }
   }

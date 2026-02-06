@@ -40,7 +40,7 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
   const approveMutation = useMutation(useApproveTeacherAbsenceMutationOptions())
   const rejectMutation = useMutation(useRejectTeacherAbsenceMutationOptions())
 
-  const absences = Array.isArray(data) ? data : (data as any)?.data || []
+  const absences = data ?? []
 
   const handleApprove = async (absenceId: string) => {
     try {

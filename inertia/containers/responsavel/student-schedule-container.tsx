@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Clock, BookOpen, User, AlertCircle } from 'lucide-react'
+import { Clock, BookOpen, User, AlertCircle, Star } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -14,6 +14,22 @@ import {
 type ScheduleDay = NonNullable<StudentScheduleResponse['scheduleByDay']>[string]
 type ScheduleSlot = ScheduleDay['slots'][number]
 type Subject = StudentScheduleResponse['subjects'][number]
+
+interface ExtraClassScheduleData {
+  extraClassName: string
+  teacherName: string
+  schedules: Array<{ weekDay: number; startTime: string; endTime: string }>
+}
+
+const EXTRA_CLASS_DAY_LABELS: Record<number, string> = {
+  0: 'Dom',
+  1: 'Seg',
+  2: 'Ter',
+  3: 'Qua',
+  4: 'Qui',
+  5: 'Sex',
+  6: 'Sab',
+}
 
 interface StudentScheduleContainerProps {
   studentId: string
@@ -79,6 +95,19 @@ export function StudentScheduleContainer({
     return null
   }
 
+  // Se a API retornou uma mensagem (ex: aluno sem turma, sem período letivo, etc.)
+  if (data.message) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-semibold">Grade horaria indisponivel</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{data.message}</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const days = Object.entries(data.scheduleByDay || {})
   const hasSchedule = days.length > 0
 
@@ -125,6 +154,53 @@ export function StudentScheduleContainer({
                   )}
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Extra Class Schedules */}
+      {(data as any).extraClassSchedules && (data as any).extraClassSchedules.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Star className="h-5 w-5" />
+              Aulas Avulsas
+            </CardTitle>
+            <CardDescription>
+              {(data as any).extraClassSchedules.length} aula(s) extracurricular(es)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2">
+              {((data as any).extraClassSchedules as ExtraClassScheduleData[]).map(
+                (ec) => (
+                  <div
+                    key={ec.extraClassName}
+                    className="p-3 border rounded-lg border-purple-200 bg-purple-50"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-purple-900">{ec.extraClassName}</span>
+                      <Badge variant="outline" className="border-purple-300 text-purple-700">
+                        Avulsa
+                      </Badge>
+                    </div>
+                    {ec.teacherName && (
+                      <p className="text-sm text-purple-700 flex items-center gap-1 mb-2">
+                        <User className="h-3 w-3" />
+                        {ec.teacherName}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1">
+                      {ec.schedules.map((s, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                          {EXTRA_CLASS_DAY_LABELS[s.weekDay]} {s.startTime}-{s.endTime}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
             </div>
           </CardContent>
         </Card>

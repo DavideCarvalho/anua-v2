@@ -2,6 +2,11 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentHasLevel from '#models/student_has_level'
 import type { DocusealSignatureStatus } from '#models/student_has_level'
 import type { DateTime } from 'luxon'
+import AcademicPeriodDto from './academic_period.dto.js'
+import { ContractDto } from './contract.dto.js'
+import ScholarshipDto from './scholarship.dto.js'
+import LevelDto from './level.dto.js'
+import ClassDto from './class.dto.js'
 
 export default class StudentHasLevelDto extends BaseModelDto {
   declare id: string
@@ -24,6 +29,12 @@ export default class StudentHasLevelDto extends BaseModelDto {
   declare signedContractFilePath: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+
+  declare academicPeriod?: AcademicPeriodDto
+  declare contract?: ContractDto
+  declare scholarship?: ScholarshipDto
+  declare level?: LevelDto
+  declare class?: ClassDto
 
   constructor(model?: StudentHasLevel) {
     super()
@@ -50,5 +61,13 @@ export default class StudentHasLevelDto extends BaseModelDto {
     this.signedContractFilePath = model.signedContractFilePath
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+
+    this.academicPeriod = model.academicPeriod
+      ? new AcademicPeriodDto(model.academicPeriod)
+      : undefined
+    this.contract = model.contract ? new ContractDto(model.contract) : undefined
+    this.scholarship = model.scholarship ? new ScholarshipDto(model.scholarship) : undefined
+    this.level = model.level ? new LevelDto(model.level) : undefined
+    this.class = model.class ? new ClassDto(model.class) : undefined
   }
 }

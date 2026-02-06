@@ -14,6 +14,7 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { LaunchGradesModal } from './launch-grades-modal'
+import { useSubjectGradesQueryOptions } from '~/hooks/queries/use_subject_grades'
 
 interface SubjectGradesTableProps {
   classId: string
@@ -37,23 +38,6 @@ interface StudentGrade {
     }
     grade: number | null
   }[]
-}
-
-interface GradesResponse {
-  data: StudentGrade[]
-}
-
-async function fetchSubjectGrades(
-  classId: string,
-  subjectId: string,
-  courseId: string,
-  academicPeriodId: string
-): Promise<GradesResponse> {
-  const response = await fetch(`/api/v1/grades/class/${classId}/subject/${subjectId}?courseId=${courseId}&academicPeriodId=${academicPeriodId}`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch grades')
-  }
-  return response.json()
 }
 
 function GradesTableSkeleton() {
@@ -93,10 +77,9 @@ function SubjectGradesTableContent({ classId, subjectId, courseId, academicPerio
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedAssignment, setSelectedAssignment] = useState<SelectedAssignment | null>(null)
 
-  const { data: response, isLoading, isError } = useQuery({
-    queryKey: ['subject-grades', classId, subjectId, courseId, academicPeriodId],
-    queryFn: () => fetchSubjectGrades(classId, subjectId, courseId, academicPeriodId),
-  })
+  const { data: response, isLoading, isError } = useQuery(
+    useSubjectGradesQueryOptions({ classId, subjectId, courseId, academicPeriodId })
+  )
 
   const toggleRow = (studentId: string) => {
     const newExpanded = new Set(expandedRows)
@@ -116,7 +99,7 @@ function SubjectGradesTableContent({ classId, subjectId, courseId, academicPerio
     return <GradesTableError />
   }
 
-  const students = Array.isArray(response) ? response : response.data || []
+  const students = response?.data ?? []
 
   if (students.length === 0) {
     return <GradesTableEmpty />

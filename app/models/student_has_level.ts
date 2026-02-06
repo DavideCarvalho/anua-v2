@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, belongsTo, hasMany, beforeCreate, column } from '@adonisjs/lucid/orm'
+import { compose } from '@adonisjs/core/helpers'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import LevelAssignedToCourseHasAcademicPeriod from './level_assigned_to_course_has_academic_period.js'
@@ -13,7 +15,7 @@ import StudentPayment from './student_payment.js'
 
 export type DocusealSignatureStatus = 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED'
 
-export default class StudentHasLevel extends BaseModel {
+export default class StudentHasLevel extends compose(BaseModel, Auditable) {
   @beforeCreate()
   static assignId(model: StudentHasLevel) {
     if (!model.id) {

@@ -21,8 +21,8 @@ export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
 
   return {
     queryKey: ['students', { page, limit, search, classId, academicPeriodId, courseId, active }],
-    queryFn: async () => {
-      const response = await tuyau.api.v1.students.$get({
+    queryFn: () => {
+      return $route({
         query: {
           page,
           limit,
@@ -32,11 +32,7 @@ export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
           courseId,
           active,
         },
-      })
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar alunos')
-      }
-      return response.data
+      }).unwrap()
     },
   } satisfies QueryOptions
 }

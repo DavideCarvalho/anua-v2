@@ -107,7 +107,7 @@ function OnboardingFormContent() {
   })
 
   const schoolChainId = form.watch('schoolChainId')
-  const chainsList = Array.isArray(schoolChains) ? schoolChains : (schoolChains as any)?.data ?? []
+  const chainsList = schoolChains?.data ?? []
   const selectedChain = chainsList.find((chain: { id: string; subscriptionLevel?: string }) => chain.id === schoolChainId)
   const hasNetworkSubscription = selectedChain?.subscriptionLevel === 'NETWORK'
 

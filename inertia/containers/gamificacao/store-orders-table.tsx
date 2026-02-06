@@ -3,7 +3,7 @@ import { ShoppingCart, Check, X, Truck, Clock, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_store_orders'
+import { useStoreOrdersQueryOptions, type StoreOrdersResponse } from '../../hooks/queries/use_store_orders'
 import {
   useApproveStoreOrder,
   useRejectStoreOrder,
@@ -44,7 +44,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const rejectMutation = useRejectStoreOrder()
   const deliverMutation = useDeliverStoreOrder()
 
-  const orders = Array.isArray(data) ? data : (data as any)?.data || []
+  const orders = data?.data ?? []
 
   if (orders.length === 0) {
     return (
@@ -80,14 +80,14 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.map((order: any) => {
+            {orders.map((order) => {
               const config = statusConfig[order.status] || statusConfig.PENDING_APPROVAL
 
               return (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.student?.name || '-'}</TableCell>
                   <TableCell>
-                    {order.items?.map((item: any) => item.storeItem?.name).join(', ') ||
+                    {order.items?.map((item) => item.storeItem?.name).join(', ') ||
                       order.storeItem?.name ||
                       '-'}
                   </TableCell>

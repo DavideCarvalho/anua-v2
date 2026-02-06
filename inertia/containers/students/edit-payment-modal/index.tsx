@@ -2,9 +2,9 @@ import { useEffect, useMemo } from 'react'
 import { differenceInMonths } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { CreditCard, Loader2, AlertTriangle } from 'lucide-react'
+import { CreditCard, Loader2, AlertTriangle, FileText } from 'lucide-react'
 import { z } from 'zod'
 import {
   Dialog,
@@ -46,6 +46,7 @@ import {
   DiscountComparison,
 } from '~/components/enrollment'
 import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
+import { useStudentPendingInvoicesQueryOptions } from '~/hooks/queries/use_invoices'
 import { formatCurrency } from '~/lib/utils'
 
 const schema = z.object({
@@ -78,12 +79,15 @@ function EnrollmentTabContent({
   enrollment,
   studentId,
   onSuccess,
+  onClose,
 }: {
   enrollment: StudentEnrollment
   studentId: string
   onSuccess?: () => void
+  onClose: () => void
 }) {
-  const { updateEnrollment, isPending } = useUpdateEnrollment()
+  const queryClient = useQueryClient()
+  const { mutateAsync: updateEnrollment, isPending } = useUpdateEnrollment()
 
   // Use enrollment's contractId, or fallback to level's contractId
   const initialContractId = enrollment.contractId ?? (enrollment.level as any)?.contractId ?? ''
@@ -162,6 +166,12 @@ function EnrollmentTabContent({
     enabled: !!studentId,
   })
 
+  // Fetch pending invoices for this student
+  const { data: invoicesData } = useQuery({
+    ...useStudentPendingInvoicesQueryOptions(studentId),
+    enabled: !!studentId,
+  })
+
   const watchedInstallments = form.watch('installments')
   const watchedPaymentDay = form.watch('paymentDay')
 
@@ -181,9 +191,13 @@ function EnrollmentTabContent({
     if (affectedPayments.length === 0) return null
 
     const currentAmount = affectedPayments[0]?.amount ?? 0
-    const currentDay = affectedPayments[0]?.dueDate
-      ? new Date(String(affectedPayments[0].dueDate)).getDate()
-      : null
+    const currentDay = (() => {
+      const d = affectedPayments[0]?.dueDate
+      if (!d) return null
+      // Extract day directly from ISO date string (YYYY-MM-DD...) to avoid timezone issues
+      const match = String(d).match(/^\d{4}-\d{2}-(\d{2})/)
+      return match ? parseInt(match[1], 10) : new Date(String(d)).getUTCDate()
+    })()
 
     const installments = contractData.paymentType === 'UPFRONT'
       ? (watchedInstallments ?? contractData.installments)
@@ -213,6 +227,76 @@ function EnrollmentTabContent({
     }
   }, [pendingPaymentsData, contractData, enrollment.id, discountPercentage, watchedInstallments, watchedPaymentDay])
 
+  // Calculate invoice impact preview
+  const invoiceImpact = useMemo(() => {
+    if (!invoicesData || !pendingPaymentsData || !contractData) return null
+
+    const allPayments = pendingPaymentsData.data ?? []
+    const invoices = invoicesData.data ?? []
+    const unpaidStatuses = ['NOT_PAID', 'PENDING', 'OVERDUE']
+
+    // Get affected payments for this enrollment
+    const affectedPayments = allPayments.filter(
+      (p) =>
+        p.studentHasLevelId === enrollment.id &&
+        unpaidStatuses.includes(p.status) &&
+        p.type !== 'ENROLLMENT'
+    )
+
+    if (affectedPayments.length === 0) return null
+
+    // Calculate new payment amount (same logic as impactPreview)
+    const installments = contractData.paymentType === 'UPFRONT'
+      ? (watchedInstallments ?? contractData.installments)
+      : 1
+    let newInstallmentAmount: number
+    if (contractData.paymentType === 'UPFRONT') {
+      newInstallmentAmount = Math.floor(contractData.amount / installments)
+    } else {
+      newInstallmentAmount = contractData.amount
+    }
+    const newDiscountedAmount = Math.round(newInstallmentAmount * (1 - discountPercentage / 100))
+
+    // Find invoices affected by these payment changes
+    const affectedInvoices: Array<{
+      id: string
+      month: number | null
+      year: number | null
+      currentTotal: number
+      newTotal: number
+    }> = []
+
+    // Group affected payments by invoiceId
+    const paymentsByInvoice = new Map<string, typeof affectedPayments>()
+    for (const p of affectedPayments) {
+      if (!p.invoiceId) continue
+      if (!paymentsByInvoice.has(p.invoiceId)) paymentsByInvoice.set(p.invoiceId, [])
+      paymentsByInvoice.get(p.invoiceId)!.push(p)
+    }
+
+    for (const [invoiceId, invoicePayments] of paymentsByInvoice) {
+      const invoice = invoices.find((inv: any) => inv.id === invoiceId)
+      if (!invoice) continue
+
+      // Calculate: current invoice total - old payment amounts + new payment amounts
+      const oldSum = invoicePayments.reduce((s, p) => s + Number(p.amount), 0)
+      const newSum = invoicePayments.length * newDiscountedAmount
+      const newTotal = Number(invoice.totalAmount) - oldSum + newSum
+
+      if (newTotal !== Number(invoice.totalAmount)) {
+        affectedInvoices.push({
+          id: invoice.id,
+          month: invoice.month,
+          year: invoice.year,
+          currentTotal: Number(invoice.totalAmount),
+          newTotal,
+        })
+      }
+    }
+
+    return affectedInvoices.length > 0 ? affectedInvoices : null
+  }, [invoicesData, pendingPaymentsData, contractData, enrollment.id, discountPercentage, watchedInstallments])
+
   const handleScholarshipChange = (
     newScholarshipId: string | null,
     scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
@@ -236,8 +320,16 @@ function EnrollmentTabContent({
         },
       })
 
+      queryClient.invalidateQueries({ queryKey: ['student-enrollments', studentId] })
+      queryClient.invalidateQueries({ queryKey: ['students'] })
+      queryClient.invalidateQueries({ queryKey: ['student-payments'] })
+      queryClient.invalidateQueries({ queryKey: ['student-pending-payments', studentId] })
+      queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      queryClient.invalidateQueries({ queryKey: ['student-pending-invoices', studentId] })
+
       toast.success('Informacoes de pagamento atualizadas!')
       onSuccess?.()
+      onClose()
     } catch (error) {
       console.error('Error updating enrollment:', error)
       toast.error('Erro ao atualizar informacoes de pagamento')
@@ -408,7 +500,32 @@ function EnrollmentTabContent({
           </Card>
         )}
 
-        <div className="flex justify-end">
+        {/* Invoice Impact Preview */}
+        {invoiceImpact && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-start gap-2">
+                <FileText className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-blue-800">
+                    {invoiceImpact.length} {invoiceImpact.length === 1 ? 'fatura sera atualizada' : 'faturas serao atualizadas'}
+                  </p>
+                  {invoiceImpact.map((inv) => (
+                    <p key={inv.id} className="text-blue-700">
+                      Fatura {inv.month?.toString().padStart(2, '0')}/{inv.year}:{' '}
+                      {formatCurrency(inv.currentTotal)} → {formatCurrency(inv.newTotal)}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <DialogFooter className="pt-4">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Fechar
+          </Button>
           <Button type="submit" disabled={isPending}>
             {isPending ? (
               <>
@@ -419,7 +536,7 @@ function EnrollmentTabContent({
               'Salvar Alteracoes'
             )}
           </Button>
-        </div>
+        </DialogFooter>
       </form>
     </Form>
   )
@@ -516,6 +633,7 @@ export function EditPaymentModal({
                     enrollment={enrollment}
                     studentId={studentId}
                     onSuccess={handleSuccess}
+                    onClose={handleClose}
                   />
                 </TabsContent>
               ))}
@@ -523,14 +641,6 @@ export function EditPaymentModal({
           )}
         </div>
 
-        {/* Fixed Footer */}
-        <div className="p-6 pt-4 border-t bg-background shrink-0">
-          <DialogFooter>
-            <Button variant="outline" onClick={handleClose}>
-              Fechar
-            </Button>
-          </DialogFooter>
-        </div>
       </DialogContent>
     </Dialog>
   )

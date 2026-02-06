@@ -16,7 +16,9 @@ export default class GenerateInvoicesCommand extends BaseCommand {
   })
   declare schoolIds?: string
 
-  @flags.number({ description: 'Month to generate invoices for (1-12). Defaults to current month.' })
+  @flags.number({
+    description: 'Month to generate invoices for (1-12). Defaults to current month.',
+  })
   declare month?: number
 
   @flags.number({ description: 'Year to generate invoices for. Defaults to current year.' })
@@ -32,7 +34,10 @@ export default class GenerateInvoicesCommand extends BaseCommand {
     const { default: GenerateInvoices } = await import('#start/jobs/generate_invoices')
 
     const schoolIds = this.schoolIds
-      ? this.schoolIds.split(',').map((id) => id.trim()).filter(Boolean)
+      ? this.schoolIds
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean)
       : undefined
 
     this.logger.info(
@@ -67,7 +72,9 @@ export default class GenerateInvoicesCommand extends BaseCommand {
           return
         }
 
-        this.logger.info(`Found payments in ${monthYearPairs.length} month(s): ${monthYearPairs.map((p) => `${p.month}/${p.year}`).join(', ')}`)
+        this.logger.info(
+          `Found payments in ${monthYearPairs.length} month(s): ${monthYearPairs.map((p) => `${p.month}/${p.year}`).join(', ')}`
+        )
 
         let totalCreated = 0
         let totalReconciled = 0

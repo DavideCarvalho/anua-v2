@@ -18,9 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { useCreateStore } from '../../hooks/mutations/use_store_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
+import { useCreateStoreMutationOptions } from '../../hooks/mutations/use_create_store'
 import type { SharedProps } from '../../lib/types'
 
 interface CreateStoreModalProps {
@@ -31,7 +32,8 @@ interface CreateStoreModalProps {
 
 export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreModalProps) {
   const { props } = usePage<SharedProps>()
-  const createStore = useCreateStore()
+  const queryClient = useQueryClient()
+  const createStore = useMutation(useCreateStoreMutationOptions())
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -56,6 +58,7 @@ export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreM
             : undefined,
       })
 
+      queryClient.invalidateQueries({ queryKey: ['stores'] })
       toast.success('Loja criada com sucesso!')
       setName('')
       setDescription('')

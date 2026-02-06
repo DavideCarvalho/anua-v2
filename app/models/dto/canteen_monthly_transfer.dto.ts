@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
 import type { CanteenMonthlyTransferStatus } from '#models/canteen_monthly_transfer'
 import type { DateTime } from 'luxon'
+import CanteenDto from './canteen.dto.js'
 
 export default class CanteenMonthlyTransferDto extends BaseModelDto {
   declare id: string
@@ -13,6 +14,7 @@ export default class CanteenMonthlyTransferDto extends BaseModelDto {
   declare processedAt: DateTime | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare canteen?: CanteenDto
 
   constructor(canteenMonthlyTransfer?: CanteenMonthlyTransfer) {
     super()
@@ -28,5 +30,7 @@ export default class CanteenMonthlyTransferDto extends BaseModelDto {
     this.processedAt = canteenMonthlyTransfer.processedAt
     this.createdAt = canteenMonthlyTransfer.createdAt
     this.updatedAt = canteenMonthlyTransfer.updatedAt
+    if (canteenMonthlyTransfer.canteen)
+      this.canteen = new CanteenDto(canteenMonthlyTransfer.canteen)
   }
 }

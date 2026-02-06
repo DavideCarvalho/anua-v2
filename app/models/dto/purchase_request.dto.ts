@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type PurchaseRequest from '#models/purchase_request'
 import type { PurchaseRequestStatus } from '#models/purchase_request'
 import type { DateTime } from 'luxon'
+import UserDto from './user.dto.js'
 
 export default class PurchaseRequestDto extends BaseModelDto {
   declare id: string
@@ -26,6 +27,7 @@ export default class PurchaseRequestDto extends BaseModelDto {
   declare receiptPath: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime | null
+  declare requestingUser?: UserDto
 
   constructor(model?: PurchaseRequest) {
     super()
@@ -54,5 +56,6 @@ export default class PurchaseRequestDto extends BaseModelDto {
     this.receiptPath = model.receiptPath
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.requestingUser = model.requestingUser ? new UserDto(model.requestingUser) : undefined
   }
 }

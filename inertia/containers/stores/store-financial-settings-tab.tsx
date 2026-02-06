@@ -10,38 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { useStoreFinancialSettingsQueryOptions } from '../../hooks/queries/use_stores'
+import { useUpsertStoreFinancialSettingsMutationOptions } from '../../hooks/mutations/use_upsert_store_financial_settings'
 
 interface StoreFinancialSettingsTabProps {
   storeId: string
 }
 
-async function fetchSettings(storeId: string) {
-  const response = await fetch(`/api/v1/stores/${storeId}/financial-settings`, {
-    credentials: 'include',
-  })
-  if (response.status === 404) return null
-  if (!response.ok) throw new Error('Failed to fetch settings')
-  return response.json()
-}
-
-async function upsertSettings(storeId: string, data: Record<string, unknown>) {
-  const response = await fetch(`/api/v1/stores/${storeId}/financial-settings`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data),
-  })
-  if (!response.ok) throw new Error('Failed to save settings')
-  return response.json()
-}
-
 export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTabProps) {
   const queryClient = useQueryClient()
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ['storeFinancialSettings', storeId],
-    queryFn: () => fetchSettings(storeId),
-  })
+  const { data: settings, isLoading } = useQuery(useStoreFinancialSettingsQueryOptions(storeId))
 
   const [pixKey, setPixKey] = useState('')
   const [pixKeyType, setPixKeyType] = useState('')
@@ -57,20 +37,23 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
     }
   }, [settings])
 
-  const mutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) => upsertSettings(storeId, data),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['storeFinancialSettings', storeId] }),
-  })
+  const mutation = useMutation(useUpsertStoreFinancialSettingsMutationOptions())
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    mutation.mutate({
-      pixKey: pixKey || undefined,
-      pixKeyType: pixKeyType || undefined,
-      bankName: bankName || undefined,
-      accountHolder: accountHolder || undefined,
-    })
+    try {
+      await mutation.mutateAsync({
+        storeId,
+        pixKey: pixKey || undefined,
+        pixKeyType: pixKeyType || undefined,
+        bankName: bankName || undefined,
+        accountHolder: accountHolder || undefined,
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeFinancialSettings', storeId] })
+      toast.success('Configurações salvas com sucesso!')
+    } catch {
+      toast.error('Erro ao salvar configurações.')
+    }
   }
 
   if (isLoading) {
@@ -108,7 +91,7 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
                 <SelectItem value="CNPJ">CNPJ</SelectItem>
                 <SelectItem value="EMAIL">E-mail</SelectItem>
                 <SelectItem value="PHONE">Telefone</SelectItem>
-                <SelectItem value="RANDOM">Aleatoria</SelectItem>
+                <SelectItem value="RANDOM">Aleatória</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -136,10 +119,6 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? 'Salvando...' : 'Salvar'}
           </Button>
-
-          {mutation.isSuccess && (
-            <p className="text-sm text-green-600">Salvo com sucesso</p>
-          )}
         </form>
       </CardContent>
     </Card>

@@ -50,7 +50,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
     useSubjectsQueryOptions({ page: 1, limit: 100, schoolId })
   )
 
-  const subjects = Array.isArray(subjectsData) ? subjectsData : (subjectsData as any)?.data || []
+  const subjects = subjectsData?.data ?? []
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,

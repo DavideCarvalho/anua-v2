@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ClipboardList, Calendar, Trash2, Loader2, FileText } from 'lucide-react'
@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog'
 import { useExamsQueryOptions } from '../../hooks/queries/use_exams'
+import { useDeleteExam } from '../../hooks/mutations/use_exam_mutations'
 import { LaunchExamGradesModal } from '../turma/launch-exam-grades-modal'
 
 interface Exam {
@@ -53,16 +54,6 @@ interface Exam {
 interface ExamsListProps {
   classId?: string
   subjectId?: string
-}
-
-async function deleteExam(examId: string): Promise<void> {
-  const response = await fetch(`/api/v1/exams/${examId}`, {
-    method: 'DELETE',
-  })
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Erro ao excluir prova')
-  }
 }
 
 function ExamsListSkeleton() {
@@ -88,25 +79,22 @@ function ExamsListEmpty() {
 export function ExamsList({ classId, subjectId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
-  const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery(useExamsQueryOptions({ classId, subjectId }))
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteExam,
-    onSuccess: () => {
-      toast.success('Prova excluida com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['exams'] })
-      setExamToDelete(null)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao excluir prova')
-    },
-  })
+  const deleteMutation = useDeleteExam()
 
   const handleDelete = () => {
     if (!examToDelete) return
-    deleteMutation.mutate(examToDelete.id)
+    deleteMutation.mutate(examToDelete.id, {
+      onSuccess: () => {
+        toast.success('Prova excluida com sucesso!')
+        setExamToDelete(null)
+      },
+      onError: (error: Error) => {
+        toast.error(error.message || 'Erro ao excluir prova')
+      },
+    })
   }
 
   if (isLoading) {

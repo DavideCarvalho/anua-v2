@@ -14,6 +14,7 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Progress } from '~/components/ui/progress'
 import { ErrorBoundary } from '~/components/error-boundary'
+import { useAttendanceClassStudentsQueryOptions } from '~/hooks/queries/use_attendance_class_students'
 
 interface AttendancesTableProps {
   classId: string
@@ -32,35 +33,6 @@ interface StudentAttendance {
   lateCount: number
   justifiedCount: number
   attendancePercentage: number
-}
-
-interface PaginatedResponse {
-  data: StudentAttendance[]
-  meta: {
-    total: number
-    perPage: number
-    currentPage: number
-    lastPage: number
-  }
-}
-
-async function fetchClassStudentsAttendance(
-  classId: string,
-  courseId: string,
-  academicPeriodId: string,
-  page: number
-): Promise<PaginatedResponse> {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: '20',
-    courseId,
-    academicPeriodId,
-  })
-  const response = await fetch(`/api/v1/attendance/class/${classId}/students?${params}`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch attendance data')
-  }
-  return response.json()
 }
 
 function AttendancesTableSkeleton() {
@@ -96,10 +68,7 @@ function AttendancesTableContent({ classId, academicPeriodId, courseId }: Attend
     data: response,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ['class-students-attendance', classId, courseId, academicPeriodId, page],
-    queryFn: () => fetchClassStudentsAttendance(classId, courseId, academicPeriodId, page),
-  })
+  } = useQuery(useAttendanceClassStudentsQueryOptions({ classId, courseId, academicPeriodId, page }))
 
   if (isLoading) {
     return <AttendancesTableSkeleton />
@@ -111,14 +80,8 @@ function AttendancesTableContent({ classId, academicPeriodId, courseId }: Attend
     )
   }
 
-  // Handle both array and object responses
-  const attendances: StudentAttendance[] = Array.isArray(response)
-    ? response
-    : Array.isArray(response.data)
-      ? response.data
-      : []
-
-  const meta = !Array.isArray(response) ? response.meta : null
+  const attendances: StudentAttendance[] = response?.data ?? []
+  const meta = response?.meta ?? null
 
   if (attendances.length === 0) {
     return <AttendancesTableEmpty />

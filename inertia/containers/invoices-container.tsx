@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect, Fragment } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
@@ -7,6 +7,7 @@ import {
   useInvoicesQueryOptions,
   type InvoicesResponse,
 } from '../hooks/queries/use_invoices'
+import { useStudentsQueryOptions } from '../hooks/queries/use_students'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -38,28 +39,183 @@ import {
   Handshake,
   FilterX,
   RefreshCw,
+  Loader2,
+  X,
+  Users,
+  History,
 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
 import { Checkbox } from '../components/ui/checkbox'
+import { Badge } from '../components/ui/badge'
 import { formatCurrency } from '../lib/utils'
 import { MarkInvoicePaidModal } from './invoices/mark-invoice-paid-modal'
 import { CreateAgreementModal } from './invoices/create-agreement-modal'
+import { MarkPaidModal } from './student-payments/mark-paid-modal'
+import { AuditHistoryModal } from '../components/audit-history-modal'
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
+  return debouncedValue
+}
+
+type SelectedStudent = { id: string; name: string }
+
+function StudentMultiSelect({
+  selectedStudents,
+  onChange,
+}: {
+  selectedStudents: SelectedStudent[]
+  onChange: (students: SelectedStudent[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const { data: studentsData, isLoading } = useQuery({
+    ...useStudentsQueryOptions({
+      search: debouncedSearch || undefined,
+      limit: 15,
+    }),
+    enabled: open,
+  })
+
+  const students = studentsData?.data ?? []
+
+  const selectedIds = useMemo(() => new Set(selectedStudents.map((s) => s.id)), [selectedStudents])
+
+  const toggleStudent = useCallback(
+    (student: { id: string; user?: { name?: string } }) => {
+      const name = student.user?.name || '-'
+      if (selectedIds.has(student.id)) {
+        onChange(selectedStudents.filter((s) => s.id !== student.id))
+      } else {
+        onChange([...selectedStudents, { id: student.id, name }])
+      }
+    },
+    [selectedIds, selectedStudents, onChange]
+  )
+
+  const removeStudent = useCallback(
+    (id: string) => {
+      onChange(selectedStudents.filter((s) => s.id !== id))
+    },
+    [selectedStudents, onChange]
+  )
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="min-w-48 justify-between h-auto min-h-9">
+          {selectedStudents.length === 0 ? (
+            <span className="flex items-center gap-2 text-muted-foreground">
+              <Users className="h-4 w-4" />
+              Alunos
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 flex-wrap">
+              {selectedStudents.length === 1 ? (
+                <span className="truncate max-w-32">{selectedStudents[0].name}</span>
+              ) : (
+                <span>{selectedStudents.length} alunos</span>
+              )}
+            </span>
+          )}
+          <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0" align="start">
+        <div className="p-2 border-b">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              placeholder="Buscar por nome ou email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-9"
+            />
+          </div>
+        </div>
+
+        {selectedStudents.length > 0 && (
+          <div className="p-2 border-b flex flex-wrap gap-1">
+            {selectedStudents.map((s) => (
+              <Badge key={s.id} variant="secondary" className="gap-1 pr-1">
+                <span className="truncate max-w-24 text-xs">{s.name}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeStudent(s.id)
+                  }}
+                  className="rounded-full hover:bg-muted p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        <div className="max-h-48 overflow-y-auto p-1">
+          {isLoading && (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {!isLoading && students.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              {debouncedSearch ? 'Nenhum aluno encontrado' : 'Digite para buscar'}
+            </p>
+          )}
+
+          {!isLoading &&
+            students.map((student: any) => (
+              <label
+                key={student.id}
+                className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-muted"
+              >
+                <Checkbox
+                  checked={selectedIds.has(student.id)}
+                  onCheckedChange={() => toggleStudent(student)}
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate">{student.user?.name || '-'}</span>
+                  {student.user?.email && (
+                    <span className="text-xs text-muted-foreground truncate">
+                      {student.user.email}
+                    </span>
+                  )}
+                </div>
+              </label>
+            ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 // Loading Skeleton
 function InvoicesSkeleton() {
   return (
     <div className="border rounded-lg">
       <div className="p-4 border-b">
-        <div className="grid grid-cols-7 gap-4">
-          {Array.from({ length: 7 }).map((_, i) => (
+        <div className="grid grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-4 bg-muted animate-pulse rounded" />
           ))}
         </div>
       </div>
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} className="p-4 border-b last:border-0">
-          <div className="grid grid-cols-7 gap-4">
-            {Array.from({ length: 7 }).map((_, j) => (
+          <div className="grid grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, j) => (
               <div key={j} className="h-4 bg-muted animate-pulse rounded" />
             ))}
           </div>
@@ -96,7 +252,6 @@ function InvoicesErrorFallback({
 }
 
 type InvoiceStatus = 'OPEN' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'RENEGOTIATED'
-type InvoiceType = 'MONTHLY' | 'UPFRONT'
 type StatusConfig = { label: string; className: string; icon: LucideIcon }
 
 const statusConfig: Record<InvoiceStatus, StatusConfig> = {
@@ -108,9 +263,25 @@ const statusConfig: Record<InvoiceStatus, StatusConfig> = {
   RENEGOTIATED: { label: 'Renegociada', className: 'bg-purple-100 text-purple-700', icon: RefreshCw },
 }
 
-const typeLabels: Record<InvoiceType, string> = {
-  MONTHLY: 'Mensal',
-  UPFRONT: 'À vista',
+const paymentTypeLabels: Record<string, string> = {
+  ENROLLMENT: 'Matrícula',
+  TUITION: 'Mensalidade',
+  CANTEEN: 'Cantina',
+  COURSE: 'Curso',
+  AGREEMENT: 'Acordo',
+  STUDENT_LOAN: 'Empréstimo',
+  STORE: 'Loja',
+  OTHER: 'Outros',
+}
+
+const paymentStatusConfig: Record<string, { label: string; className: string }> = {
+  NOT_PAID: { label: 'Não pago', className: 'bg-gray-100 text-gray-700' },
+  PENDING: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-700' },
+  PAID: { label: 'Pago', className: 'bg-green-100 text-green-700' },
+  OVERDUE: { label: 'Vencido', className: 'bg-red-100 text-red-700' },
+  CANCELLED: { label: 'Cancelado', className: 'bg-gray-100 text-gray-700' },
+  FAILED: { label: 'Falhou', className: 'bg-red-100 text-red-700' },
+  RENEGOTIATED: { label: 'Renegociado', className: 'bg-purple-100 text-purple-700' },
 }
 
 const monthLabels = [
@@ -127,6 +298,7 @@ function formatDate(date: string | Date | null | undefined): string {
 }
 
 const ACTIONABLE_STATUSES: InvoiceStatus[] = ['OPEN', 'PENDING', 'OVERDUE']
+const ACTIONABLE_PAYMENT_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE']
 
 // Container Export
 export function InvoicesContainer() {
@@ -151,6 +323,13 @@ type ModalType = 'mark-paid' | 'agreement' | null
 function InvoicesContent() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
+  const [selectedStudents, setSelectedStudents] = useState<SelectedStudent[]>([])
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const [selectedPaymentForAction, setSelectedPaymentForAction] = useState<{
+    payment: any
+    student: any
+  } | null>(null)
+  const [historyInvoiceId, setHistoryInvoiceId] = useState<string | null>(null)
 
   function openModal(invoice: Invoice, modal: ModalType) {
     setSelectedInvoice(invoice)
@@ -166,15 +345,62 @@ function InvoicesContent() {
 
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
+    studentIds: parseAsArrayOf(parseAsString),
     status: parseAsArrayOf(parseAsString).withDefault(DEFAULT_STATUSES),
-    type: parseAsString,
     month: parseAsInteger,
     year: parseAsInteger,
     page: parseAsInteger.withDefault(1),
     limit: parseAsInteger.withDefault(20),
   })
 
-  const { search, page, limit, status: filterStatuses, type: filterType, month: filterMonth, year: filterYear } = filters
+  const { search, studentIds: filterStudentIds, page, limit, status: filterStatuses, month: filterMonth, year: filterYear } = filters
+
+  const { data, isLoading, error, refetch } = useQuery(
+    useInvoicesQueryOptions({
+      page,
+      limit,
+      studentIds:
+        filterStudentIds && filterStudentIds.length > 0
+          ? filterStudentIds.join(',')
+          : undefined,
+      status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
+      month: filterMonth || undefined,
+      year: filterYear || undefined,
+    })
+  )
+
+  // Hydrate selectedStudents from invoice data when URL has studentIds but UI state is empty
+  useEffect(() => {
+    if (
+      selectedStudents.length === 0 &&
+      filterStudentIds &&
+      filterStudentIds.length > 0 &&
+      data?.data &&
+      data.data.length > 0
+    ) {
+      const idsSet = new Set(filterStudentIds)
+      const seen = new Set<string>()
+      const hydrated: SelectedStudent[] = []
+      for (const invoice of data.data) {
+        const studentId = (invoice as any).studentId
+        if (studentId && idsSet.has(studentId) && !seen.has(studentId)) {
+          seen.add(studentId)
+          hydrated.push({ id: studentId, name: (invoice as any).student?.user?.name || '-' })
+        }
+      }
+      if (hydrated.length > 0) {
+        setSelectedStudents(hydrated)
+      }
+    }
+  }, [data, filterStudentIds, selectedStudents.length])
+
+  function handleStudentsChange(students: SelectedStudent[]) {
+    setSelectedStudents(students)
+    setFilters({
+      studentIds: students.length > 0 ? students.map((s) => s.id) : null,
+      page: 1,
+    })
+  }
 
   function toggleStatus(value: string) {
     const current = filterStatuses || []
@@ -188,22 +414,29 @@ function InvoicesContent() {
     filterStatuses.length === DEFAULT_STATUSES.length &&
     DEFAULT_STATUSES.every((s) => filterStatuses.includes(s))
 
-  const hasActiveFilters = !!(!isDefaultStatuses || filterType || filterMonth || filterYear)
+  const hasActiveFilters = !!(
+    !isDefaultStatuses ||
+    filterMonth ||
+    filterYear ||
+    (filterStudentIds && filterStudentIds.length > 0)
+  )
 
   function clearFilters() {
-    setFilters({ status: DEFAULT_STATUSES, type: null, month: null, year: null, page: 1 })
+    setSelectedStudents([])
+    setFilters({ status: DEFAULT_STATUSES, month: null, year: null, studentIds: null, page: 1 })
   }
 
-  const { data, isLoading, error, refetch } = useQuery(
-    useInvoicesQueryOptions({
-      page,
-      limit,
-      status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
-      type: (filterType as InvoiceType) || undefined,
-      month: filterMonth || undefined,
-      year: filterYear || undefined,
+  function toggleRow(id: string) {
+    setExpandedRows((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
     })
-  )
+  }
 
   const invoices: Invoice[] = data?.data ?? []
   const meta: PaginationMeta | undefined = data?.meta
@@ -211,6 +444,11 @@ function InvoicesContent() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
+        <StudentMultiSelect
+          selectedStudents={selectedStudents}
+          onChange={handleStudentsChange}
+        />
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-48 justify-between">
@@ -245,23 +483,6 @@ function InvoicesContent() {
             </div>
           </PopoverContent>
         </Popover>
-
-        <Select
-          value={filterType || '_all'}
-          onValueChange={(v) => setFilters({ type: v === '_all' ? null : v, page: 1 })}
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Tipo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">Todos tipos</SelectItem>
-            {Object.entries(typeLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         <Select
           value={filterMonth?.toString() || '_all'}
@@ -329,8 +550,8 @@ function InvoicesContent() {
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
+                  <th className="w-10 p-4" />
                   <th className="text-left p-4 font-medium">Aluno</th>
-                  <th className="text-left p-4 font-medium">Tipo</th>
                   <th className="text-left p-4 font-medium">Referência</th>
                   <th className="text-left p-4 font-medium">Vencimento</th>
                   <th className="text-left p-4 font-medium">Valor</th>
@@ -342,57 +563,170 @@ function InvoicesContent() {
                 {invoices.map((invoice) => {
                   const config = statusConfig[(invoice.status as InvoiceStatus) || 'OPEN']
                   const StatusIcon = config.icon
+                  const isExpanded = expandedRows.has(invoice.id)
+                  const payments = (invoice as any).payments ?? []
 
                   return (
-                    <tr key={invoice.id} className="border-t hover:bg-muted/30 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                            {(invoice as any).student?.user?.name?.charAt(0) || 'A'}
+                    <Fragment key={invoice.id}>
+                      <tr
+                        className="border-t hover:bg-muted/30 transition-colors cursor-pointer"
+                        onClick={() => toggleRow(invoice.id)}
+                      >
+                        <td className="p-4 w-10">
+                          <ChevronRight
+                            className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                          />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
+                              {(invoice as any).student?.user?.name?.charAt(0) || 'A'}
+                            </div>
+                            <div>
+                              <span className="font-medium">
+                                {(invoice as any).student?.user?.name || '-'}
+                              </span>
+                              {payments.length > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                  {payments.length} {payments.length === 1 ? 'item' : 'itens'}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <span className="font-medium">
-                            {(invoice as any).student?.user?.name || '-'}
+                        </td>
+                        <td className="p-4 text-muted-foreground">
+                          {invoice.month && invoice.year
+                            ? `${monthLabels[(invoice.month as number) - 1]} ${invoice.year}`
+                            : '-'}
+                        </td>
+                        <td className="p-4 text-muted-foreground">{formatDate(invoice.dueDate)}</td>
+                        <td className="p-4 font-semibold">{formatCurrency(Number(invoice.totalAmount || 0))}</td>
+                        <td className="p-4">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.className}`}
+                          >
+                            <StatusIcon className="h-3 w-3" />
+                            {config.label}
                           </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-muted-foreground">
-                        {typeLabels[(invoice.type as InvoiceType)] || invoice.type}
-                      </td>
-                      <td className="p-4 text-muted-foreground">
-                        {invoice.month && invoice.year ? `${invoice.month}/${invoice.year}` : '-'}
-                      </td>
-                      <td className="p-4 text-muted-foreground">{formatDate(invoice.dueDate)}</td>
-                      <td className="p-4 font-semibold">{formatCurrency(Number(invoice.totalAmount || 0))}</td>
-                      <td className="p-4">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.className}`}
-                        >
-                          <StatusIcon className="h-3 w-3" />
-                          {config.label}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        {ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openModal(invoice, 'mark-paid')}>
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Marcar como paga
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openModal(invoice, 'agreement')}>
-                                <Handshake className="h-4 w-4 mr-2" />
-                                Renegociar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          {ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openModal(invoice, 'mark-paid')}>
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Marcar como paga
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openModal(invoice, 'agreement')}>
+                                  <Handshake className="h-4 w-4 mr-2" />
+                                  Renegociar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setHistoryInvoiceId(invoice.id)}>
+                                  <History className="h-4 w-4 mr-2" />
+                                  Ver historico
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+                          {!ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setHistoryInvoiceId(invoice.id)}
+                              title="Ver historico"
+                            >
+                              <History className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+
+                      {isExpanded && (
+                        <tr key={`${invoice.id}-expanded`} className="border-t">
+                          <td colSpan={7} className="p-0">
+                            <div className="bg-muted/20 px-6 py-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                              {payments.length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-2">
+                                  Nenhum pagamento vinculado a esta fatura
+                                </p>
+                              ) : (
+                                <table className="w-full">
+                                  <thead>
+                                    <tr className="text-xs text-muted-foreground">
+                                      <th className="text-left py-2 px-3 font-medium">Tipo</th>
+                                      <th className="text-left py-2 px-3 font-medium">Referência</th>
+                                      <th className="text-left py-2 px-3 font-medium">Vencimento</th>
+                                      <th className="text-left py-2 px-3 font-medium">Valor</th>
+                                      <th className="text-left py-2 px-3 font-medium">Status</th>
+                                      <th className="text-right py-2 px-3 font-medium">Ações</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {payments.map((payment: any) => {
+                                      const pConfig = paymentStatusConfig[payment.status] ?? {
+                                        label: payment.status,
+                                        className: 'bg-gray-100 text-gray-700',
+                                      }
+                                      return (
+                                        <tr
+                                          key={payment.id}
+                                          className="border-t border-muted text-sm"
+                                        >
+                                          <td className="py-2 px-3">
+                                            {paymentTypeLabels[payment.type] || payment.type}
+                                          </td>
+                                          <td className="py-2 px-3 text-muted-foreground">
+                                            {payment.month && payment.year
+                                              ? `${monthLabels[payment.month - 1]} ${payment.year}`
+                                              : '-'}
+                                          </td>
+                                          <td className="py-2 px-3 text-muted-foreground">
+                                            {formatDate(payment.dueDate)}
+                                          </td>
+                                          <td className="py-2 px-3 font-medium">
+                                            {formatCurrency(Number(payment.amount || 0))}
+                                          </td>
+                                          <td className="py-2 px-3">
+                                            <span
+                                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${pConfig.className}`}
+                                            >
+                                              {pConfig.label}
+                                            </span>
+                                          </td>
+                                          <td className="py-2 px-3 text-right">
+                                            {ACTIONABLE_PAYMENT_STATUSES.includes(payment.status) && (
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 w-7 p-0"
+                                                title="Marcar como pago"
+                                                onClick={() =>
+                                                  setSelectedPaymentForAction({
+                                                    payment,
+                                                    student: (invoice as any).student,
+                                                  })
+                                                }
+                                              >
+                                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                              </Button>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      )
+                                    })}
+                                  </tbody>
+                                </table>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   )
                 })}
               </tbody>
@@ -443,6 +777,30 @@ function InvoicesContent() {
           invoice={selectedInvoice}
           open
           onOpenChange={(open) => !open && closeModal()}
+        />
+      )}
+
+      {selectedPaymentForAction && (
+        <MarkPaidModal
+          payment={{
+            ...selectedPaymentForAction.payment,
+            student: selectedPaymentForAction.student,
+          }}
+          open
+          onOpenChange={(open) => {
+            if (!open) setSelectedPaymentForAction(null)
+          }}
+        />
+      )}
+
+      {historyInvoiceId && (
+        <AuditHistoryModal
+          open={!!historyInvoiceId}
+          onOpenChange={(open) => {
+            if (!open) setHistoryInvoiceId(null)
+          }}
+          entityType="invoice"
+          entityId={historyInvoiceId}
         />
       )}
     </div>

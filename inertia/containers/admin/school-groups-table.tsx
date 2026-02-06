@@ -31,7 +31,7 @@ export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroups
   const { data } = useSuspenseQuery(useSchoolGroupsQueryOptions({ schoolChainId }))
   const deleteMutation = useDeleteSchoolGroup()
 
-  const groups = Array.isArray(data) ? data : (data as any)?.data || []
+  const groups = data?.data ?? []
 
   if (groups.length === 0) {
     return (

@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Student from '#models/student'
 import UserDto from './user.dto.js'
+import ClassDto from './class.dto.js'
 
 export default class StudentDto extends BaseModelDto {
   declare id: string
@@ -14,6 +15,7 @@ export default class StudentDto extends BaseModelDto {
   declare balance: number
   declare enrollmentStatus: string
   declare user?: UserDto
+  declare class?: ClassDto
 
   constructor(student?: Student) {
     super()
@@ -33,5 +35,6 @@ export default class StudentDto extends BaseModelDto {
     this.enrollmentStatus = student.enrollmentStatus
     // Note: Student model doesn't have createdAt/updatedAt - they come from User
     this.user = student.user ? new UserDto(student.user) : undefined
+    this.class = student.class ? new ClassDto(student.class) : undefined
   }
 }

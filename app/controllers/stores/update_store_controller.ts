@@ -4,10 +4,7 @@ import { updateStoreValidator } from '#validators/store'
 
 export default class UpdateStoreController {
   async handle({ params, request, response }: HttpContext) {
-    const store = await Store.query()
-      .where('id', params.id)
-      .whereNull('deletedAt')
-      .firstOrFail()
+    const store = await Store.query().where('id', params.id).whereNull('deletedAt').firstOrFail()
 
     const data = await request.validateUsing(updateStoreValidator)
 

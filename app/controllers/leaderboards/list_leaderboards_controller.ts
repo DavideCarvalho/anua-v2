@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Leaderboard from '#models/leaderboard'
+import LeaderboardDto from '#models/dto/leaderboard.dto'
 import { listLeaderboardsValidator } from '#validators/gamification'
 
 export default class ListLeaderboardsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const data = await request.validateUsing(listLeaderboardsValidator)
 
     const page = data.page ?? 1
@@ -47,6 +48,6 @@ export default class ListLeaderboardsController {
 
     const leaderboards = await query.paginate(page, limit)
 
-    return response.ok(leaderboards)
+    return LeaderboardDto.fromPaginator(leaderboards)
   }
 }

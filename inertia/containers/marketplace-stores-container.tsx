@@ -9,12 +9,14 @@ import {
   CardTitle,
 } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import { useMarketplaceStoresQueryOptions } from '../hooks/queries/use_marketplace'
+import { useMarketplaceStoresQueryOptions, type MarketplaceStoresResponse } from '../hooks/queries/use_marketplace'
+
+type MarketplaceStore = NonNullable<MarketplaceStoresResponse>['data'][number]
 
 export function MarketplaceStoresContainer() {
   const { data, isLoading } = useQuery(useMarketplaceStoresQueryOptions())
 
-  const stores = (data as any)?.data ?? []
+  const stores: MarketplaceStore[] = data?.data ?? []
 
   if (isLoading) {
     return (
@@ -36,11 +38,10 @@ export function MarketplaceStoresContainer() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {stores.map((store: any) => (
+      {stores.map((store) => (
         <Link
           key={store.id}
-          route={'web.aluno.loja.store' as any}
-          params={{ id: store.id } as any}
+          href={`/aluno/loja/${store.id}`}
         >
           <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
             <CardHeader>

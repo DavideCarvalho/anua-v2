@@ -16,15 +16,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
+import { useStoreItemsQueryOptions, type StoreItemResponse } from '../../hooks/queries/use_stores'
+import { useDeleteStoreItemMutationOptions } from '../../hooks/mutations/use_delete_store_item'
+import { CreateProductModal } from './create-product-modal'
 import { EditProductModal } from './edit-product-modal'
 
 const categoryLabels: Record<string, string> = {
-  CANTEEN_FOOD: 'Cantina - Comida',
-  CANTEEN_DRINK: 'Cantina - Bebida',
   SCHOOL_SUPPLY: 'Material Escolar',
   PRIVILEGE: 'Privilégio',
   HOMEWORK_PASS: 'Passe de Tarefa',
@@ -39,53 +40,41 @@ interface StoreProductsTabProps {
   storeId: string
 }
 
-async function fetchStoreItems(storeId: string) {
-  const response = await fetch(`/api/v1/store-items?storeId=${storeId}`, {
-    credentials: 'include',
-  })
-  if (!response.ok) throw new Error('Failed to fetch items')
-  return response.json()
-}
-
-async function deleteStoreItem(id: string) {
-  const response = await fetch(`/api/v1/store-items/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  })
-  if (!response.ok) throw new Error('Failed to delete item')
-  return response.json()
-}
-
 export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
   const queryClient = useQueryClient()
-  const [editingProduct, setEditingProduct] = useState<any>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<StoreItemResponse | null>(null)
 
-  const { data: items, isLoading } = useQuery({
-    queryKey: ['storeItems', storeId],
-    queryFn: () => fetchStoreItems(storeId),
-  })
+  const { data: items, isLoading } = useQuery(useStoreItemsQueryOptions({ storeId }))
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteStoreItem,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['storeItems', storeId] })
+  const deleteMutation = useMutation(useDeleteStoreItemMutationOptions())
+
+  async function handleDelete(id: string) {
+    try {
+      await deleteMutation.mutateAsync(id)
+      queryClient.invalidateQueries({ queryKey: ['storeItems'] })
       toast.success('Produto excluído com sucesso!')
-    },
-    onError: () => {
+    } catch {
       toast.error('Erro ao excluir produto.')
-    },
-  })
+    }
+  }
+
+  const itemsList = items?.data ?? []
 
   return (
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Produtos</CardTitle>
+          <Button size="sm" onClick={() => setShowCreateModal(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar Produto
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-          ) : !items?.data?.length ? (
+          ) : !itemsList.length ? (
             <div className="text-center py-8 text-muted-foreground">
               Nenhum produto cadastrado
             </div>
@@ -101,7 +90,7 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.data.map((item: any) => (
+                {itemsList.map((item) => (
                   <TableRow key={item.id} className={!item.isActive ? 'opacity-50' : undefined}>
                     <TableCell className="font-medium">
                       {item.name}
@@ -132,7 +121,7 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => deleteMutation.mutate(item.id)}
+                            onClick={() => handleDelete(item.id)}
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -148,6 +137,12 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
           )}
         </CardContent>
       </Card>
+
+      <CreateProductModal
+        storeId={storeId}
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+      />
 
       {editingProduct && (
         <EditProductModal

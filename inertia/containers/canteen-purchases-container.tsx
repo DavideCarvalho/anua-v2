@@ -100,9 +100,8 @@ function CanteenPurchasesContent() {
     useCanteenPurchasesQueryOptions({ page, limit, search: search || undefined })
   )
 
-  const result = data as any
-  const purchases = Array.isArray(result) ? result : result?.data || []
-  const meta = !Array.isArray(result) && result?.meta ? result.meta : null
+  const purchases = (data as any)?.data ?? []
+  const meta = (data as any)?.meta ?? null
 
   return (
     <div className="space-y-4">

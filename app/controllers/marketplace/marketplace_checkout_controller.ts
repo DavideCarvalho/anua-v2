@@ -8,12 +8,13 @@ import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import StudentHasLevel from '#models/student_has_level'
+import AcademicPeriod from '#models/academic_period'
 import StudentHasResponsible from '#models/student_has_responsible'
 import { marketplaceCheckoutValidator } from '#validators/marketplace'
 
 export default class MarketplaceCheckoutController {
-  async handle({ auth, request, response }: HttpContext) {
-    const user = auth.user!
+  async handle({ request, response, effectiveUser }: HttpContext) {
+    const user = effectiveUser!
     const payload = await request.validateUsing(marketplaceCheckoutValidator)
 
     // 1. Resolve studentId from auth
@@ -74,9 +75,7 @@ export default class MarketplaceCheckoutController {
 
     // 4. Validate items
     const storeItemIds = payload.items.map((i) => i.storeItemId)
-    const storeItems = await StoreItem.query()
-      .whereIn('id', storeItemIds)
-      .whereNull('deletedAt')
+    const storeItems = await StoreItem.query().whereIn('id', storeItemIds).whereNull('deletedAt')
 
     const storeItemMap = new Map(storeItems.map((item) => [item.id, item]))
 
@@ -214,7 +213,20 @@ export default class MarketplaceCheckoutController {
     }
 
     // DEFERRED payment
-    const installments = payload.installments ?? 1
+    let installments = payload.installments ?? 1
+
+    // Spread across remaining months of the academic period
+    if (payload.spreadAcrossPeriod && studentHasLevel.academicPeriodId) {
+      const academicPeriod = await AcademicPeriod.find(studentHasLevel.academicPeriodId)
+      if (academicPeriod) {
+        const remainingMonths = Math.max(
+          1,
+          Math.ceil(academicPeriod.endDate.diff(now, 'months').months)
+        )
+        installments = remainingMonths
+      }
+    }
+
     const dueDate = now.plus({ months: 1 }).set({ day: 10 })
 
     const firstPayment = await StudentPayment.create({

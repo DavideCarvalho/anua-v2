@@ -1,4 +1,5 @@
 import logger from '@adonisjs/core/services/logger'
+import locks from '@adonisjs/lock/services/main'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
@@ -21,6 +22,106 @@ interface GenerateInvoicesOptions {
  * Roda diariamente às 03:00 via scheduler, ou manualmente via command.
  */
 export default class GenerateInvoices {
+  /**
+   * Reconcilia a invoice de um pagamento individual.
+   * Vincula o pagamento a uma invoice existente ou cria uma nova.
+   * Chamado após criar/editar um pagamento para não depender do scheduler.
+   */
+  static async reconcilePayment(payment: StudentPayment) {
+    // Cancelled/renegotiated: only recalculate existing invoice total
+    if (['CANCELLED', 'RENEGOTIATED'].includes(payment.status)) {
+      if (payment.invoiceId) {
+        const invoice = await Invoice.query()
+          .where('id', payment.invoiceId)
+          .whereNotIn('status', ['PAID', 'CANCELLED'])
+          .first()
+
+        if (invoice) {
+          const linkedPayments = await StudentPayment.query()
+            .where('invoiceId', invoice.id)
+            .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+          invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+          await invoice.save()
+        }
+      }
+      return
+    }
+
+    if (payment.type === 'AGREEMENT') {
+      return
+    }
+
+    // Already linked — just recalculate the invoice total
+    if (payment.invoiceId) {
+      const invoice = await Invoice.query()
+        .where('id', payment.invoiceId)
+        .whereNotIn('status', ['PAID', 'CANCELLED'])
+        .first()
+
+      if (invoice) {
+        const linkedPayments = await StudentPayment.query()
+          .where('invoiceId', invoice.id)
+          .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+        invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+        await invoice.save()
+      }
+      return
+    }
+
+    // Critical section: find-or-create invoice (locked per student to prevent duplicates)
+    const lock = locks.createLock(`invoice-reconcile:${payment.studentId}`, '15s')
+    const [executed] = await lock.run(async () => {
+      // Re-read payment to get fresh data (another job may have linked it while we waited)
+      await payment.refresh()
+      if (payment.invoiceId) return
+
+      let invoice = await Invoice.query()
+        .where('studentId', payment.studentId)
+        .where('contractId', payment.contractId)
+        .where('month', payment.month)
+        .where('year', payment.year)
+        .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+        .first()
+
+      if (invoice) {
+        payment.invoiceId = invoice.id
+        await payment.save()
+
+        const linkedPayments = await StudentPayment.query()
+          .where('invoiceId', invoice.id)
+          .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+        invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+        await invoice.save()
+      } else if (payment.contractId) {
+        await payment.load('contract')
+        const invoiceType = payment.contract?.paymentType === 'UPFRONT' ? 'UPFRONT' : 'MONTHLY'
+
+        invoice = await Invoice.create({
+          studentId: payment.studentId,
+          contractId: payment.contractId,
+          type: invoiceType,
+          month: payment.month,
+          year: payment.year,
+          dueDate: payment.dueDate,
+          status: 'OPEN',
+          totalAmount: Number(payment.amount),
+        })
+        payment.invoiceId = invoice.id
+        await payment.save()
+
+        logger.info(`[INVOICES] Created invoice ${invoice.id} via reconcilePayment`, {
+          studentId: payment.studentId,
+          month: payment.month,
+          year: payment.year,
+        })
+      }
+    })
+
+    if (!executed) {
+      throw new Error(`Lock não adquirido para student ${payment.studentId}`)
+    }
+  }
+
   static async handle(options: GenerateInvoicesOptions = {}) {
     const startTime = Date.now()
     const now = DateTime.now()
@@ -88,93 +189,105 @@ export default class GenerateInvoices {
       let errors = 0
 
       for (const [key, groupPayments] of paymentGroups) {
-        const trx = await db.transaction()
-        try {
-          const [studentId, contractId] = key.split(':')
-          const contract = groupPayments[0].contract
-          const existingInvoice = invoiceMap.get(key)
+        const [studentId, contractId] = key.split(':')
 
-          // Pagamentos que ainda não estão vinculados a nenhuma invoice
-          const unlinkedPayments = groupPayments.filter((p) => !p.invoiceId)
+        const lock = locks.createLock(`invoice-reconcile:${studentId}`, '30s')
+        const [executed] = await lock.run(async () => {
+          const trx = await db.transaction()
+          try {
+            const contract = groupPayments[0].contract
 
-          if (unlinkedPayments.length === 0) {
-            await trx.rollback()
-            continue
-          }
+            // Re-query for fresh data (invoiceMap may be stale after waiting for lock)
+            const freshExisting = await Invoice.query()
+              .where('studentId', studentId)
+              .where('contractId', contractId)
+              .where('month', month)
+              .where('year', year)
+              .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+              .first()
 
-          if (existingInvoice) {
-            // RECONCILIAÇÃO: invoice já existe, vincular payments faltantes
-            for (const payment of unlinkedPayments) {
-              payment.useTransaction(trx)
-              payment.invoiceId = existingInvoice.id
-              await payment.save()
+            // Pagamentos que ainda não estão vinculados a nenhuma invoice
+            const unlinkedPayments = groupPayments.filter((p) => !p.invoiceId)
+
+            if (unlinkedPayments.length === 0) {
+              await trx.rollback()
+              return
             }
 
-            // Recalcular totalAmount com todos os payments
-            const linkedPayments = groupPayments.filter(
-              (p) => p.invoiceId === existingInvoice.id
-            )
-            const allLinked = [...linkedPayments, ...unlinkedPayments]
-            const newTotal = allLinked.reduce((sum, p) => sum + Number(p.amount), 0)
+            if (freshExisting) {
+              // RECONCILIAÇÃO: invoice já existe, vincular payments faltantes
+              for (const payment of unlinkedPayments) {
+                payment.useTransaction(trx)
+                payment.invoiceId = freshExisting.id
+                await payment.save()
+              }
 
-            existingInvoice.useTransaction(trx)
-            existingInvoice.totalAmount = newTotal
-            await existingInvoice.save()
+              // Recalcular totalAmount com todos os payments
+              const linkedPayments = groupPayments.filter((p) => p.invoiceId === freshExisting.id)
+              const allLinked = [...linkedPayments, ...unlinkedPayments]
+              const newTotal = allLinked.reduce((sum, p) => sum + Number(p.amount), 0)
 
-            await trx.commit()
-            reconciled++
-            paymentsLinked += unlinkedPayments.length
+              freshExisting.useTransaction(trx)
+              freshExisting.totalAmount = newTotal
+              await freshExisting.save()
 
-            logger.info(`[INVOICES] Reconciled invoice ${existingInvoice.id}`, {
-              studentId,
-              added: unlinkedPayments.length,
-              newTotal,
-            })
-          } else {
-            // CRIAÇÃO: invoice não existe, criar e vincular tudo
-            const invoiceType = contract.paymentType === 'UPFRONT' ? 'UPFRONT' : 'MONTHLY'
-            const totalAmount = unlinkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
-            const earliestDueDate = unlinkedPayments.reduce(
-              (earliest, p) => (p.dueDate < earliest ? p.dueDate : earliest),
-              unlinkedPayments[0].dueDate
-            )
+              await trx.commit()
+              reconciled++
+              paymentsLinked += unlinkedPayments.length
 
-            const invoice = await Invoice.create(
-              {
+              logger.info(`[INVOICES] Reconciled invoice ${freshExisting.id}`, {
                 studentId,
-                contractId,
-                type: invoiceType,
-                month,
-                year,
-                dueDate: earliestDueDate,
-                status: 'OPEN',
+                added: unlinkedPayments.length,
+                newTotal,
+              })
+            } else {
+              // CRIAÇÃO: invoice não existe, criar e vincular tudo
+              const invoiceType = contract.paymentType === 'UPFRONT' ? 'UPFRONT' : 'MONTHLY'
+              const totalAmount = unlinkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+              const earliestDueDate = unlinkedPayments.reduce(
+                (earliest, p) => (p.dueDate < earliest ? p.dueDate : earliest),
+                unlinkedPayments[0].dueDate
+              )
+
+              const invoice = await Invoice.create(
+                {
+                  studentId,
+                  contractId,
+                  type: invoiceType,
+                  month,
+                  year,
+                  dueDate: earliestDueDate,
+                  status: 'OPEN',
+                  totalAmount,
+                },
+                { client: trx }
+              )
+
+              for (const payment of unlinkedPayments) {
+                payment.useTransaction(trx)
+                payment.invoiceId = invoice.id
+                await payment.save()
+              }
+
+              await trx.commit()
+              created++
+              paymentsLinked += unlinkedPayments.length
+
+              logger.info(`[INVOICES] Created invoice ${invoice.id}`, {
+                studentId,
                 totalAmount,
-              },
-              { client: trx }
-            )
-
-            for (const payment of unlinkedPayments) {
-              payment.useTransaction(trx)
-              payment.invoiceId = invoice.id
-              await payment.save()
+                payments: unlinkedPayments.length,
+              })
             }
-
-            await trx.commit()
-            created++
-            paymentsLinked += unlinkedPayments.length
-
-            logger.info(`[INVOICES] Created invoice ${invoice.id}`, {
-              studentId,
-              totalAmount,
-              payments: unlinkedPayments.length,
-            })
+          } catch (error) {
+            await trx.rollback()
+            throw error
           }
-        } catch (error) {
-          await trx.rollback()
+        })
+
+        if (!executed) {
           errors++
-          logger.error(`[INVOICES] Error processing group ${key}:`, {
-            error: error instanceof Error ? error.message : String(error),
-          })
+          logger.warn(`[INVOICES] Lock não adquirido para ${key}`)
         }
       }
 

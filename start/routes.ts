@@ -330,6 +330,32 @@ const UpdateCommentController = () => import('#controllers/comments/update_comme
 const DeleteCommentController = () => import('#controllers/comments/delete_comment_controller')
 const LikeCommentController = () => import('#controllers/comments/like_comment_controller')
 
+// Extra Classes
+const ListExtraClassesController = () =>
+  import('#controllers/extra_classes/list_extra_classes_controller')
+const CreateExtraClassController = () =>
+  import('#controllers/extra_classes/create_extra_class_controller')
+const ShowExtraClassController = () =>
+  import('#controllers/extra_classes/show_extra_class_controller')
+const UpdateExtraClassController = () =>
+  import('#controllers/extra_classes/update_extra_class_controller')
+const DeleteExtraClassController = () =>
+  import('#controllers/extra_classes/delete_extra_class_controller')
+const EnrollExtraClassController = () =>
+  import('#controllers/extra_classes/enroll_extra_class_controller')
+const CancelExtraClassEnrollmentController = () =>
+  import('#controllers/extra_classes/cancel_extra_class_enrollment_controller')
+const ListExtraClassStudentsController = () =>
+  import('#controllers/extra_classes/list_extra_class_students_controller')
+const CreateExtraClassAttendanceController = () =>
+  import('#controllers/extra_classes/create_extra_class_attendance_controller')
+const ListExtraClassAttendancesController = () =>
+  import('#controllers/extra_classes/list_extra_class_attendances_controller')
+const UpdateExtraClassAttendanceController = () =>
+  import('#controllers/extra_classes/update_extra_class_attendance_controller')
+const GetExtraClassAttendanceSummaryController = () =>
+  import('#controllers/extra_classes/get_extra_class_attendance_summary_controller')
+
 // Attendance
 const ListAttendanceController = () => import('#controllers/attendance/list_attendance_controller')
 const ShowAttendanceController = () => import('#controllers/attendance/show_attendance_controller')
@@ -390,10 +416,14 @@ const CreateAgreementController = () =>
   import('#controllers/agreements/create_agreement_controller')
 
 // Invoices
-const ListInvoicesController = () =>
-  import('#controllers/invoices/list_invoices_controller')
+const ListInvoicesController = () => import('#controllers/invoices/list_invoices_controller')
 const MarkStudentInvoicePaidController = () =>
   import('#controllers/invoices/mark_invoice_paid_controller')
+
+// Audits
+const ListAuditsController = () => import('#controllers/audits/list_audits_controller')
+const ListStudentAuditHistoryController = () =>
+  import('#controllers/audits/list_student_audit_history_controller')
 
 // Asaas
 const AsaasWebhookController = () => import('#controllers/asaas/asaas_webhook_controller')
@@ -586,32 +616,21 @@ const DeleteStoreInstallmentRuleController = () =>
   import('#controllers/store_installment_rules/delete_store_installment_rule_controller')
 
 // Store Owner Controllers
-const ShowOwnStoreController = () =>
-  import('#controllers/store_owner/show_own_store_controller')
+const ShowOwnStoreController = () => import('#controllers/store_owner/show_own_store_controller')
 const ListOwnProductsController = () =>
   import('#controllers/store_owner/list_own_products_controller')
-const SOCreateProductController = () =>
-  import('#controllers/store_owner/create_product_controller')
-const SOUpdateProductController = () =>
-  import('#controllers/store_owner/update_product_controller')
-const SODeleteProductController = () =>
-  import('#controllers/store_owner/delete_product_controller')
+const SOCreateProductController = () => import('#controllers/store_owner/create_product_controller')
+const SOUpdateProductController = () => import('#controllers/store_owner/update_product_controller')
+const SODeleteProductController = () => import('#controllers/store_owner/delete_product_controller')
 const SOToggleProductActiveController = () =>
   import('#controllers/store_owner/toggle_product_active_controller')
-const ListOwnOrdersController = () =>
-  import('#controllers/store_owner/list_own_orders_controller')
-const SOShowOrderController = () =>
-  import('#controllers/store_owner/show_order_controller')
-const SOApproveOrderController = () =>
-  import('#controllers/store_owner/approve_order_controller')
-const SORejectOrderController = () =>
-  import('#controllers/store_owner/reject_order_controller')
-const SOMarkPreparingController = () =>
-  import('#controllers/store_owner/mark_preparing_controller')
-const SOMarkReadyController = () =>
-  import('#controllers/store_owner/mark_ready_controller')
-const SODeliverOrderController = () =>
-  import('#controllers/store_owner/deliver_order_controller')
+const ListOwnOrdersController = () => import('#controllers/store_owner/list_own_orders_controller')
+const SOShowOrderController = () => import('#controllers/store_owner/show_order_controller')
+const SOApproveOrderController = () => import('#controllers/store_owner/approve_order_controller')
+const SORejectOrderController = () => import('#controllers/store_owner/reject_order_controller')
+const SOMarkPreparingController = () => import('#controllers/store_owner/mark_preparing_controller')
+const SOMarkReadyController = () => import('#controllers/store_owner/mark_ready_controller')
+const SODeliverOrderController = () => import('#controllers/store_owner/deliver_order_controller')
 const SOShowFinancialSettingsController = () =>
   import('#controllers/store_owner/show_financial_settings_controller')
 const SOUpdateFinancialSettingsController = () =>
@@ -628,10 +647,8 @@ const GetInstallmentOptionsController = () =>
   import('#controllers/marketplace/get_installment_options_controller')
 const MarketplaceCheckoutController = () =>
   import('#controllers/marketplace/marketplace_checkout_controller')
-const ListMyOrdersController = () =>
-  import('#controllers/marketplace/list_my_orders_controller')
-const ShowMyOrderController = () =>
-  import('#controllers/marketplace/show_my_order_controller')
+const ListMyOrdersController = () => import('#controllers/marketplace/list_my_orders_controller')
+const ShowMyOrderController = () => import('#controllers/marketplace/show_my_order_controller')
 
 // Student Gamifications
 const ListStudentGamificationsController = () =>
@@ -1414,6 +1431,40 @@ function registerEnrollmentManagementApiRoutes() {
     .use(middleware.auth())
 }
 
+function registerExtraClassApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListExtraClassesController]).as('extraClasses.index')
+      router.post('/', [CreateExtraClassController]).as('extraClasses.store')
+      router.get('/:id', [ShowExtraClassController]).as('extraClasses.show')
+      router.put('/:id', [UpdateExtraClassController]).as('extraClasses.update')
+      router.delete('/:id', [DeleteExtraClassController]).as('extraClasses.destroy')
+
+      // Enrollment
+      router.post('/:id/enroll', [EnrollExtraClassController]).as('extraClasses.enroll')
+      router
+        .delete('/:id/enroll/:enrollmentId', [CancelExtraClassEnrollmentController])
+        .as('extraClasses.cancelEnrollment')
+      router.get('/:id/students', [ListExtraClassStudentsController]).as('extraClasses.students')
+
+      // Attendance
+      router
+        .post('/:id/attendance', [CreateExtraClassAttendanceController])
+        .as('extraClasses.attendance.store')
+      router
+        .get('/:id/attendance', [ListExtraClassAttendancesController])
+        .as('extraClasses.attendance.index')
+      router
+        .put('/:id/attendance/:attendanceId', [UpdateExtraClassAttendanceController])
+        .as('extraClasses.attendance.update')
+      router
+        .get('/:id/attendance/summary', [GetExtraClassAttendanceSummaryController])
+        .as('extraClasses.attendance.summary')
+    })
+    .prefix('/extra-classes')
+    .use([middleware.auth(), middleware.impersonation()])
+}
+
 function registerAttendanceApiRoutes() {
   router
     .group(() => {
@@ -1548,6 +1599,18 @@ function registerInvoiceApiRoutes() {
       router.post('/:id/mark-paid', [MarkStudentInvoicePaidController]).as('invoices.markPaid')
     })
     .prefix('/invoices')
+    .use([middleware.auth(), middleware.impersonation()])
+}
+
+function registerAuditApiRoutes() {
+  router
+    .group(() => {
+      router.get('/:entityType/:entityId', [ListAuditsController]).as('audits.show')
+      router
+        .get('/students/:studentId/history', [ListStudentAuditHistoryController])
+        .as('audits.studentHistory')
+    })
+    .prefix('/audits')
     .use([middleware.auth(), middleware.impersonation()])
 }
 
@@ -1757,9 +1820,7 @@ function registerStoreInstallmentRuleApiRoutes() {
     .group(() => {
       router.get('/', [ListStoreInstallmentRulesController]).as('storeInstallmentRules.index')
       router.post('/', [CreateStoreInstallmentRuleController]).as('storeInstallmentRules.store')
-      router
-        .put('/:id', [UpdateStoreInstallmentRuleController])
-        .as('storeInstallmentRules.update')
+      router.put('/:id', [UpdateStoreInstallmentRuleController]).as('storeInstallmentRules.update')
       router
         .delete('/:id', [DeleteStoreInstallmentRuleController])
         .as('storeInstallmentRules.destroy')
@@ -1822,7 +1883,7 @@ function registerMarketplaceApiRoutes() {
       router.get('/orders/:id', [ShowMyOrderController]).as('marketplace.orders.show')
     })
     .prefix('/marketplace')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
 }
 
 function registerStudentGamificationApiRoutes() {
@@ -2413,8 +2474,7 @@ const ShowCantinaPedidosPageController = () =>
   import('#controllers/pages/escola/show_cantina_pedidos_page_controller')
 const ShowFaturasPageController = () =>
   import('#controllers/pages/escola/show_faturas_page_controller')
-const ShowLojasPageController = () =>
-  import('#controllers/pages/escola/show_lojas_page_controller')
+const ShowLojasPageController = () => import('#controllers/pages/escola/show_lojas_page_controller')
 const ShowLojaDetailPageController = () =>
   import('#controllers/pages/escola/show_loja_detail_page_controller')
 const ShowFuncionariosPageController = () =>
@@ -2425,6 +2485,8 @@ const ShowNovaMatriculaPageController = () =>
   import('#controllers/pages/escola/show_nova_matricula_page_controller')
 const ShowEditarAlunoPageController = () =>
   import('#controllers/pages/escola/show_editar_aluno_page_controller')
+const ShowHistoricoFinanceiroPageController = () =>
+  import('#controllers/pages/escola/show_historico_financeiro_page_controller')
 const ShowContratosPageController = () =>
   import('#controllers/pages/escola/show_contratos_page_controller')
 const ShowNovoContratoPageController = () =>
@@ -2504,6 +2566,8 @@ const ShowEditProvaPageController = () =>
   import('#controllers/pages/escola/show_edit_prova_page_controller')
 const ShowPresencaPageController = () =>
   import('#controllers/pages/escola/show_presenca_page_controller')
+const ShowAulasAvulsasPageController = () =>
+  import('#controllers/pages/escola/show_aulas_avulsas_page_controller')
 const ShowCantinaCardapioPageController = () =>
   import('#controllers/pages/escola/show_cantina_cardapio_page_controller')
 const ShowCantinaPdvPageController = () =>
@@ -2562,6 +2626,8 @@ const ShowResponsavelOcorrenciasPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller')
 const ShowResponsavelLojaPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_loja_page_controller')
+const ShowResponsavelLojaStorePageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller')
 
 // Admin Pages
 const ShowAdminDashboardPageController = () =>
@@ -2702,6 +2768,11 @@ function registerPageRoutes() {
             .get('/administrativo/alunos/:id/editar', [ShowEditarAlunoPageController])
             .as('administrativo.alunos.editar')
           router
+            .get('/administrativo/alunos/historico-financeiro', [
+              ShowHistoricoFinanceiroPageController,
+            ])
+            .as('administrativo.alunos.historicoFinanceiro')
+          router
             .get('/administrativo/funcionarios', [ShowFuncionariosPageController])
             .as('administrativo.funcionarios')
           router
@@ -2801,6 +2872,9 @@ function registerPageRoutes() {
             .as('pedagogico.provas.edit')
           router.get('/pedagogico/presenca', [ShowPresencaPageController]).as('pedagogico.presenca')
           router
+            .get('/pedagogico/aulas-avulsas', [ShowAulasAvulsasPageController])
+            .as('pedagogico.aulasAvulsas')
+          router
             .get('/pedagogico/cursos-niveis', [ShowCursosNiveisPageController])
             .as('pedagogico.cursosNiveis')
 
@@ -2824,9 +2898,7 @@ function registerPageRoutes() {
             .get('/financeiro/inadimplencia', [ShowInadimplenciaPageController])
             .as('financeiro.inadimplencia')
           router.get('/financeiro/seguros', [ShowSegurosPageController]).as('financeiro.seguros')
-          router
-            .get('/financeiro/faturas', [ShowFaturasPageController])
-            .as('financeiro.faturas')
+          router.get('/financeiro/faturas', [ShowFaturasPageController]).as('financeiro.faturas')
 
           // Lojas
           router.get('/lojas', [ShowLojasPageController]).as('lojas.index')
@@ -2879,6 +2951,7 @@ function registerPageRoutes() {
             .as('notificacoes')
           router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')
           router.get('/loja', [ShowResponsavelLojaPageController]).as('loja')
+          router.get('/loja/:id', [ShowResponsavelLojaStorePageController]).as('loja.store')
         })
         .prefix('/responsavel')
         .use([middleware.auth(), middleware.impersonation()])
@@ -3023,11 +3096,13 @@ router
     registerNotificationPreferenceApiRoutes()
     registerPostApiRoutes()
     registerCommentApiRoutes()
+    registerExtraClassApiRoutes()
     registerAttendanceApiRoutes()
     registerAssignmentApiRoutes()
     registerStudentPaymentApiRoutes()
     registerAgreementApiRoutes()
     registerInvoiceApiRoutes()
+    registerAuditApiRoutes()
     registerStudentBalanceTransactionApiRoutes()
     registerCanteenApiRoutes()
     registerCanteenReportApiRoutes()

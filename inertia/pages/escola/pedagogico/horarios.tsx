@@ -22,17 +22,8 @@ import {
 import { ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { ScheduleGrid } from '~/containers/schedule/schedule-grid'
 import { ScheduleConfigForm } from '~/containers/schedule/schedule-config-form'
-
-interface ClassOption {
-  id: string
-  name: string
-  level?: { name: string; course?: { name: string } }
-}
-
-interface AcademicPeriodOption {
-  id: string
-  name: string
-}
+import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
+import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
 
 interface ScheduleData {
   calendar: { id: string; name: string; isActive: boolean } | null
@@ -43,18 +34,6 @@ interface ScheduleData {
     endTime: string
     isBreak: boolean
   }>
-}
-
-async function fetchClasses(academicPeriodId: string): Promise<{ data: ClassOption[] }> {
-  const response = await fetch(`/api/v1/classes?limit=100&academicPeriodId=${academicPeriodId}`)
-  if (!response.ok) throw new Error('Failed to fetch classes')
-  return response.json()
-}
-
-async function fetchAcademicPeriods(): Promise<{ data: AcademicPeriodOption[] }> {
-  const response = await fetch('/api/v1/academic-periods?limit=100&isActive=true')
-  if (!response.ok) throw new Error('Failed to fetch academic periods')
-  return response.json()
 }
 
 async function fetchSchedule(classId: string, academicPeriodId: string): Promise<ScheduleData> {
@@ -71,14 +50,12 @@ export default function HorariosPage() {
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
 
-  const { data: periodsData, isLoading: loadingPeriods } = useQuery({
-    queryKey: ['academicPeriods'],
-    queryFn: fetchAcademicPeriods,
-  })
+  const { data: periodsData, isLoading: loadingPeriods } = useQuery(
+    useAcademicPeriodsQueryOptions({ limit: 100 })
+  )
 
   const { data: classesData, isLoading: loadingClasses } = useQuery({
-    queryKey: ['classes', selectedAcademicPeriodId],
-    queryFn: () => fetchClasses(selectedAcademicPeriodId),
+    ...useClassesQueryOptions({ limit: 100, academicPeriodId: selectedAcademicPeriodId }),
     enabled: !!selectedAcademicPeriodId,
   })
 

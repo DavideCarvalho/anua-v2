@@ -1,14 +1,17 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, belongsTo, hasOne, beforeCreate } from '@adonisjs/lucid/orm'
+import { compose } from '@adonisjs/core/helpers'
+import { Auditable } from '@stouder-io/adonis-auditing'
 import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import Contract from './contract.js'
 import Invoice from './invoice.js'
 import InsuranceBilling from './insurance_billing.js'
 import InsuranceClaim from './insurance_claim.js'
+import StudentHasExtraClass from './student_has_extra_class.js'
 
-export default class StudentPayment extends BaseModel {
+export default class StudentPayment extends compose(BaseModel, Auditable) {
   static table = 'StudentPayment'
 
   @beforeCreate()
@@ -42,10 +45,18 @@ export default class StudentPayment extends BaseModel {
     | 'AGREEMENT'
     | 'STUDENT_LOAN'
     | 'STORE'
+    | 'EXTRA_CLASS'
     | 'OTHER'
 
   @column({ columnName: 'status' })
-  declare status: 'NOT_PAID' | 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED' | 'FAILED' | 'RENEGOTIATED'
+  declare status:
+    | 'NOT_PAID'
+    | 'PENDING'
+    | 'PAID'
+    | 'OVERDUE'
+    | 'CANCELLED'
+    | 'FAILED'
+    | 'RENEGOTIATED'
 
   @column({ columnName: 'totalAmount' })
   declare totalAmount: number
@@ -98,6 +109,9 @@ export default class StudentPayment extends BaseModel {
   @column({ columnName: 'insuranceBillingId' })
   declare insuranceBillingId: string | null
 
+  @column({ columnName: 'studentHasExtraClassId' })
+  declare studentHasExtraClassId: string | null
+
   @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
@@ -119,4 +133,7 @@ export default class StudentPayment extends BaseModel {
 
   @hasOne(() => InsuranceClaim, { foreignKey: 'insuranceClaimId' })
   declare insuranceClaim: HasOne<typeof InsuranceClaim>
+
+  @belongsTo(() => StudentHasExtraClass, { foreignKey: 'studentHasExtraClassId' })
+  declare studentHasExtraClass: BelongsTo<typeof StudentHasExtraClass>
 }

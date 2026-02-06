@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SubscriptionPlan from '#models/subscription_plan'
+import SubscriptionPlanDto from '#models/dto/subscription_plan.dto'
 import { listSubscriptionPlansValidator } from '#validators/subscription'
 
 export default class ListSubscriptionPlansController {
@@ -20,6 +21,6 @@ export default class ListSubscriptionPlansController {
 
     const plans = await query.paginate(page, limit)
 
-    return plans
+    return SubscriptionPlanDto.fromPaginator(plans)
   }
 }

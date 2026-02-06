@@ -53,7 +53,6 @@ export function ViewAbsencesModal({
   })
 
   const absences = useMemo(() => {
-    if (Array.isArray(data)) return data
     return data ?? []
   }, [data])
 

@@ -117,8 +117,8 @@ function EmployeesListContent({
     return <EmployeesListSkeleton />
   }
 
-  const users = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const users = data?.data ?? []
+  const meta = data?.meta ?? null
 
   if (users.length === 0) {
     return (

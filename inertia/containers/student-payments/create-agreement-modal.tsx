@@ -108,8 +108,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   })
 
   const allPayments = useMemo(() => {
-    const result = paymentsData as any
-    const list = Array.isArray(result) ? result : result?.data || []
+    const list = (paymentsData as any)?.data ?? []
     return list.filter(
       (p: any) => ACTIONABLE_STATUSES.includes(p.status) && p.type !== 'AGREEMENT'
     )

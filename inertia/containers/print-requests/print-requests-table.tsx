@@ -60,7 +60,7 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
   const printedMutation = useMarkPrintRequestPrinted()
   const reviewMutation = useReviewPrintRequest()
 
-  const requests = Array.isArray(data) ? data : (data as any)?.data || []
+  const requests = (data as any)?.data ?? []
 
   if (requests.length === 0) {
     return (

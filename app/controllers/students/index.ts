@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Student from '#models/student'
+import StudentDto from '#models/dto/student.dto'
 
 export default class IndexStudentsController {
   async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
@@ -88,10 +89,10 @@ export default class IndexStudentsController {
               ap.where((inProgress) => {
                 inProgress.where('startDate', '<=', today).where('endDate', '>=', today)
               })
-              // Ou encerrado mas ainda ativo
-              .orWhere((endedButActive) => {
-                endedButActive.where('endDate', '<', today).where('isActive', true)
-              })
+                // Ou encerrado mas ainda ativo
+                .orWhere((endedButActive) => {
+                  endedButActive.where('endDate', '<', today).where('isActive', true)
+                })
             })
           })
         })
@@ -104,6 +105,6 @@ export default class IndexStudentsController {
 
     const students = await query.paginate(page, limit)
 
-    return response.ok(students)
+    return StudentDto.fromPaginator(students)
   }
 }

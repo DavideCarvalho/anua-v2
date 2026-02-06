@@ -7,10 +7,7 @@ export default class UpdateFinancialSettingsController {
     const store = storeOwnerStore!
     const data = await request.validateUsing(updateOwnFinancialSettingsValidator)
 
-    const settings = await StoreFinancialSettings.updateOrCreate(
-      { storeId: store.id },
-      data
-    )
+    const settings = await StoreFinancialSettings.updateOrCreate({ storeId: store.id }, data)
 
     return response.ok(settings)
   }

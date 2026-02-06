@@ -1,6 +1,8 @@
 import { usePage } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
-import { useMarketplaceStoresQueryOptions } from '../hooks/queries/use_marketplace'
+import { useMarketplaceStoresQueryOptions, type MarketplaceStoresResponse } from '../hooks/queries/use_marketplace'
+
+type MarketplaceStore = NonNullable<MarketplaceStoresResponse>['data'][number]
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { ShoppingBag } from 'lucide-react'
@@ -23,7 +25,7 @@ export function ResponsavelMarketplaceContainer() {
   }
 
   const { data, isLoading } = useQuery(useMarketplaceStoresQueryOptions(selectedStudentId))
-  const stores = (data as any)?.data ?? []
+  const stores: MarketplaceStore[] = data?.data ?? []
 
   if (!selectedStudentId) {
     return (
@@ -57,8 +59,8 @@ export function ResponsavelMarketplaceContainer() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {stores.map((store: any) => (
-        <a key={store.id} href={'/aluno/loja/' + store.id}>
+      {stores.map((store) => (
+        <a key={store.id} href={'/responsavel/loja/' + store.id}>
           <Card className="transition-colors hover:border-primary/50 cursor-pointer">
             <CardHeader>
               <div className="flex items-center justify-between">

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useForm, useFieldArray, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { usePage } from '@inertiajs/react'
 import { Plus, Minus, Loader2, AlertCircle } from 'lucide-react'
@@ -26,6 +26,8 @@ import {
 } from '~/components/ui/select'
 import type { SharedProps } from '~/lib/types'
 import { useTeacherSubjectsQueryOptions } from '~/hooks/queries/use_teacher_subjects'
+import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
+import { useCreateClassWithTeachers } from '~/hooks/mutations/use_class_mutations'
 
 const createClassSchema = z.object({
   name: z.string().min(1, 'Qual o nome da turma?'),
@@ -51,12 +53,6 @@ interface CreateClassModalProps {
   onCreated?: (classId: string) => void
 }
 
-async function fetchTeachers(): Promise<{ data: Teacher[] }> {
-  const response = await fetch('/api/v1/teachers?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch teachers')
-  return response.json()
-}
-
 function SubjectTeacherRow({
   index,
   form,
@@ -80,9 +76,7 @@ function SubjectTeacherRow({
   })
 
   const teacherSubjects = useMemo(() => {
-    const rawData = Array.isArray(teacherSubjectsData)
-      ? teacherSubjectsData
-      : (teacherSubjectsData as any)?.data || []
+    const rawData = teacherSubjectsData ?? []
     // API returns TeacherHasSubject with nested subject, extract the subject info
     return rawData.map((item: { subject?: { id: string; name: string }; id: string; name?: string }) => {
       if (item.subject) {
@@ -184,7 +178,6 @@ function SubjectTeacherRow({
 }
 
 export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassModalProps) {
-  const queryClient = useQueryClient()
   const { props } = usePage<SharedProps>()
   const schoolId = props.user?.schoolId
 
@@ -202,12 +195,13 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
   })
 
   const { data: teachersData, isLoading: isLoadingTeachers } = useQuery({
-    queryKey: ['teachers'],
-    queryFn: fetchTeachers,
+    ...useTeachersQueryOptions({ limit: 100 }),
     enabled: open,
   })
 
-  const teachers = useMemo(() => teachersData?.data || [], [teachersData])
+  const teachers = useMemo(() => {
+    return (teachersData?.data ?? []) as Teacher[]
+  }, [teachersData])
 
   // Reset form when modal opens
   useEffect(() => {
@@ -219,42 +213,32 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
     }
   }, [open, form])
 
-  const createMutation = useMutation({
-    mutationFn: async (data: CreateClassFormValues) => {
-      const response = await fetch('/api/v1/classes/with-teachers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: data.name,
-          schoolId: schoolId || '',
-          subjectsWithTeachers: data.subjectsWithTeachers,
-        }),
-      })
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Erro ao criar turma')
-      }
-      return response.json()
-    },
-    onSuccess: (result) => {
-      toast.success('Turma criada com sucesso')
-      queryClient.invalidateQueries({ queryKey: ['classes'] })
-      onOpenChange(false)
-      if (onCreated && result.id) {
-        onCreated(result.id)
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao criar turma')
-    },
-  })
+  const createMutation = useCreateClassWithTeachers()
 
   const onSubmit = form.handleSubmit((data) => {
     if (!schoolId) {
       toast.error('Escola não encontrada')
       return
     }
-    createMutation.mutate(data)
+    createMutation.mutate(
+      {
+        name: data.name,
+        schoolId: schoolId || '',
+        subjectsWithTeachers: data.subjectsWithTeachers,
+      } as any,
+      {
+        onSuccess: (result: any) => {
+          toast.success('Turma criada com sucesso')
+          onOpenChange(false)
+          if (onCreated && result.id) {
+            onCreated(result.id)
+          }
+        },
+        onError: (error: Error) => {
+          toast.error(error.message || 'Erro ao criar turma')
+        },
+      }
+    )
   })
 
   return (

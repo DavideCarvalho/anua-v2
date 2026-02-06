@@ -70,7 +70,7 @@ export function StoreListContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {stores.map((store: any) => (
+                {stores.map((store) => (
                   <TableRow key={store.id}>
                     <TableCell>
                       <Link

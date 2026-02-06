@@ -1,9 +1,10 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles } from 'lucide-react'
+import { toast } from 'sonner'
 
-import { useStoreItemsQueryOptions } from '../../hooks/queries/use_store_items'
-import { useToggleStoreItem } from '../../hooks/mutations/use_toggle_store_item'
-import { useDeleteStoreItem } from '../../hooks/mutations/use_delete_store_item'
+import { useStoreItemsQueryOptions, type StoreItemsResponse } from '../../hooks/queries/use_store_items'
+import { useToggleStoreItemMutationOptions } from '../../hooks/mutations/use_toggle_store_item'
+import { useDeleteStoreItemMutationOptions } from '../../hooks/mutations/use_delete_store_item'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -57,11 +58,12 @@ const paymentModeLabels: Record<string, string> = {
 }
 
 export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps) {
+  const queryClient = useQueryClient()
   const { data } = useSuspenseQuery(useStoreItemsQueryOptions({ schoolId }))
-  const toggleMutation = useToggleStoreItem()
-  const deleteMutation = useDeleteStoreItem()
+  const toggleMutation = useMutation(useToggleStoreItemMutationOptions())
+  const deleteMutation = useMutation(useDeleteStoreItemMutationOptions())
 
-  const items = Array.isArray(data) ? data : (data as any)?.data || []
+  const items = data?.data ?? []
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -118,7 +120,7 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item: any) => (
+            {items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
@@ -167,7 +169,14 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
                 <TableCell className="text-center">
                   <Switch
                     checked={item.isActive}
-                    onCheckedChange={() => toggleMutation.mutate(item.id)}
+                    onCheckedChange={async () => {
+                      try {
+                        await toggleMutation.mutateAsync(item.id)
+                        queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+                      } catch {
+                        toast.error('Erro ao alterar status do item.')
+                      }
+                    }}
                     disabled={toggleMutation.isPending}
                   />
                 </TableCell>
@@ -183,7 +192,15 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
                       <DropdownMenuItem>Ver Pedidos</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => deleteMutation.mutate(item.id)}
+                        onClick={async () => {
+                          try {
+                            await deleteMutation.mutateAsync(item.id)
+                            queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+                            toast.success('Item excluído com sucesso!')
+                          } catch {
+                            toast.error('Erro ao excluir item.')
+                          }
+                        }}
                       >
                         Excluir
                       </DropdownMenuItem>

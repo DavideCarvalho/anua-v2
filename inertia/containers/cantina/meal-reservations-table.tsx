@@ -44,7 +44,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
   const updateStatusMutation = useUpdateCanteenMealReservationStatus()
   const cancelMutation = useCancelCanteenMealReservation()
 
-  const reservations = Array.isArray(data) ? data : (data as any)?.data || []
+  const reservations = (data as any)?.data ?? []
 
   if (reservations.length === 0) {
     return (

@@ -13,6 +13,7 @@ export const marketplaceCheckoutValidator = vine.compile(
     paymentMode: vine.enum(['IMMEDIATE', 'DEFERRED']).optional(),
     paymentMethod: vine.enum(['BALANCE', 'PIX', 'CASH', 'CARD']).optional(),
     installments: vine.number().min(1).max(24).optional(),
+    spreadAcrossPeriod: vine.boolean().optional(),
     notes: vine.string().trim().maxLength(500).optional(),
   })
 )

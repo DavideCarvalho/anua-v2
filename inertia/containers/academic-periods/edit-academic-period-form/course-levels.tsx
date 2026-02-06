@@ -30,6 +30,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
+import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
+import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
+import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
 import type {
   EditAcademicPeriodFormValues,
   LevelFormValues,
@@ -41,46 +44,13 @@ interface CourseLevelsProps {
   courseIndex: number
 }
 
-interface Contract {
-  id: string
-  name: string
-}
-
-interface Teacher {
-  id: string
-  user: { name: string }
-}
-
-interface Subject {
-  id: string
-  name: string
-}
-
-async function fetchContracts(): Promise<{ data: Contract[] }> {
-  const response = await fetch('/api/v1/contracts?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch contracts')
-  return response.json()
-}
-
-async function fetchTeachers(): Promise<{ data: Teacher[] }> {
-  const response = await fetch('/api/v1/teachers?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch teachers')
-  return response.json()
-}
-
-async function fetchSubjects(): Promise<{ data: Subject[] }> {
-  const response = await fetch('/api/v1/subjects?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch subjects')
-  return response.json()
-}
-
 interface SortableLevelItemProps {
   level: LevelFormValues
   courseIndex: number
   levelIndex: number
-  contracts: Contract[]
-  teachers: Teacher[]
-  subjects: Subject[]
+  contracts: Array<{ id: string; name: string }>
+  teachers: Array<{ id: string; user: { name: string } }>
+  subjects: Array<{ id: string; name: string }>
 }
 
 function SortableLevelItem({
@@ -280,24 +250,13 @@ export function CourseLevels({ courseIndex }: CourseLevelsProps) {
     name: `courses.${courseIndex}.levels`,
   })
 
-  const { data: contractsData } = useQuery({
-    queryKey: ['contracts'],
-    queryFn: fetchContracts,
-  })
+  const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
+  const { data: teachersData } = useQuery(useTeachersQueryOptions({ limit: 100 }))
+  const { data: subjectsData } = useQuery(useSubjectsQueryOptions({ limit: 100 }))
 
-  const { data: teachersData } = useQuery({
-    queryKey: ['teachers'],
-    queryFn: fetchTeachers,
-  })
-
-  const { data: subjectsData } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: fetchSubjects,
-  })
-
-  const contracts = contractsData?.data || []
-  const teachers = teachersData?.data || []
-  const subjects = subjectsData?.data || []
+  const contracts = contractsData?.data ?? []
+  const teachers = teachersData?.data ?? []
+  const subjects = subjectsData?.data ?? []
 
   const sensors = useSensors(
     useSensor(PointerSensor),

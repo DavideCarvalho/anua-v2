@@ -143,8 +143,8 @@ function TeachersListContent({
     useTeachersQueryOptions({ page, limit, search: search || undefined, active })
   )
 
-  const teachers = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const teachers = data?.data ?? []
+  const meta = data?.meta ?? null
 
   if (teachers.length === 0) {
     return (

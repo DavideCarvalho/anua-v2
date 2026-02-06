@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
+import StudentHasAssignmentDto from '#models/dto/student_has_assignment.dto'
 
 export default class ListAssignmentSubmissionsController {
   async handle({ params, request, response }: HttpContext) {
@@ -20,6 +21,6 @@ export default class ListAssignmentSubmissionsController {
       .orderBy('submittedAt', 'desc')
       .paginate(page, limit)
 
-    return response.ok(submissions)
+    return StudentHasAssignmentDto.fromPaginator(submissions)
   }
 }

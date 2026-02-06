@@ -1,6 +1,12 @@
 import env from '#start/env'
 import { knex } from '@boringnode/queue/drivers/knex_adapter'
 
+console.log('[QUEUE_CONFIG] Loading with:', {
+  host: env.get('DB_HOST'),
+  database: env.get('DB_DATABASE'),
+  user: env.get('DB_USER'),
+})
+
 const queueConfig = {
   /**
    * The default adapter to use for the queue.
@@ -20,6 +26,11 @@ const queueConfig = {
         password: env.get('DB_PASSWORD'),
         database: env.get('DB_DATABASE'),
       },
+      pool: {
+        min: 2,
+        max: 10, // Increased pool size for concurrency
+      },
+      debug: false, // Disable debug to reduce noise
     }),
   },
 
@@ -28,13 +39,13 @@ const queueConfig = {
    */
   worker: {
     concurrency: 5,
-    pollingInterval: '100ms',
+    idleDelay: '1s', // How long to wait between poll cycles when idle
   },
 
   /**
    * Job locations for auto-discovery
    */
-  locations: ['./app/jobs/**/*.js'],
+  locations: ['./app/jobs/**/*.{js,ts}'],
 }
 
 export default queueConfig

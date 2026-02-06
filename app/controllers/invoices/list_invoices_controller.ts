@@ -10,6 +10,8 @@ export default class ListInvoicesController {
 
     const {
       studentId,
+      studentIds,
+      search,
       contractId,
       status,
       type,
@@ -30,8 +32,26 @@ export default class ListInvoicesController {
       })
     }
 
-    if (studentId) {
+    if (studentIds) {
+      const ids = studentIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+      if (ids.length > 0) {
+        query.whereIn('studentId', ids)
+      }
+    } else if (studentId) {
       query.where('studentId', studentId)
+    }
+
+    if (search) {
+      query.whereHas('student', (sq) => {
+        sq.whereHas('user', (uq) => {
+          uq.where((sub) => {
+            sub.where('name', 'ilike', `%${search}%`).orWhere('email', 'ilike', `%${search}%`)
+          })
+        })
+      })
     }
 
     if (contractId) {
@@ -39,7 +59,10 @@ export default class ListInvoicesController {
     }
 
     if (status) {
-      const statuses = status.split(',').map((s) => s.trim()).filter(Boolean)
+      const statuses = status
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
       if (statuses.length === 1) {
         query.where('status', statuses[0])
       } else if (statuses.length > 1) {

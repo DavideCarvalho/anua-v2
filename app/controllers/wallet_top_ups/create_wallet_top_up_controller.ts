@@ -46,7 +46,9 @@ export default class CreateWalletTopUpController {
     const school = studentHasLevel.level.school
     const config = resolveAsaasConfig(school)
     if (!config) {
-      return response.badRequest({ message: 'Configuração de pagamento não encontrada para esta escola' })
+      return response.badRequest({
+        message: 'Configuração de pagamento não encontrada para esta escola',
+      })
     }
 
     const customerId = await getOrCreateAsaasCustomer(config.apiKey, effectiveUser)

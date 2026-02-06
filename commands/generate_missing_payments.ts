@@ -13,9 +13,8 @@ export default class GenerateMissingPaymentsCommand extends BaseCommand {
   declare schoolId?: string
 
   async run() {
-    const { default: GenerateMissingPayments } = await import(
-      '#start/jobs/generate_missing_payments'
-    )
+    const { default: GenerateMissingPayments } =
+      await import('#start/jobs/generate_missing_payments')
 
     const schoolId = this.schoolId || undefined
 

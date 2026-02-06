@@ -90,8 +90,7 @@ export const listAchievementsValidator = vine.compile(
 // ==========================================
 export const createStoreItemValidator = vine.compile(
   vine.object({
-    schoolId: vine.string().trim(),
-    storeId: vine.string().trim().optional(),
+    storeId: vine.string().trim(),
     name: vine.string().trim().minLength(1).maxLength(255),
     description: vine.string().trim().maxLength(1000).optional(),
     price: vine.number().min(1), // Em pontos
@@ -164,6 +163,7 @@ export const updateStoreItemValidator = vine.compile(
 export const listStoreItemsValidator = vine.compile(
   vine.object({
     schoolId: vine.string().trim().optional(),
+    storeId: vine.string().trim().optional(),
     category: vine
       .enum([
         'CANTEEN_FOOD',

@@ -39,7 +39,7 @@ export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableP
   const { data } = useSuspenseQuery(useSubscriptionPlansQueryOptions({}))
   const deleteMutation = useDeleteSubscriptionPlan()
 
-  const plans = Array.isArray(data) ? data : (data as any)?.data || []
+  const plans = data?.data ?? []
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

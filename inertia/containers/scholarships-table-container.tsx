@@ -123,8 +123,8 @@ function ScholarshipsTableContent({
 
   const toggleActive = useToggleScholarshipActiveMutation()
 
-  const rows = Array.isArray(data) ? data : data?.data || []
-  const meta = !Array.isArray(data) && data?.meta ? data.meta : null
+  const rows = data?.data ?? []
+  const meta = data?.meta ?? null
 
   return (
     <div className="space-y-4">

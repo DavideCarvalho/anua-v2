@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
+import PurchaseRequestDto from '#models/dto/purchase_request.dto'
 
 export default class ListPurchaseRequestsController {
   async handle({ request, response }: HttpContext) {
@@ -20,6 +21,6 @@ export default class ListPurchaseRequestsController {
 
     const purchaseRequests = await query.paginate(page, limit)
 
-    return response.ok(purchaseRequests)
+    return PurchaseRequestDto.fromPaginator(purchaseRequests)
   }
 }

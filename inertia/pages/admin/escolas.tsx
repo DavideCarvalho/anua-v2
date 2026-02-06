@@ -44,7 +44,7 @@ function EscolasContent({ search }: { search: string }) {
   const { data } = useSuspenseQuery(
     useSchoolsQueryOptions({ search: search || undefined })
   )
-  const schools: School[] = (Array.isArray(data) ? data : data?.data || []) as any
+  const schools: School[] = (data?.data ?? []) as any
 
   if (schools.length === 0) {
     return (

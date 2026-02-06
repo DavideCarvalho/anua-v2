@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type PrintRequest from '#models/print_request'
 import type { PrintRequestStatus } from '#models/print_request'
 import type { DateTime } from 'luxon'
+import UserDto from './user.dto.js'
 
 export default class PrintRequestDto extends BaseModelDto {
   declare id: string
@@ -15,6 +16,7 @@ export default class PrintRequestDto extends BaseModelDto {
   declare dueDate: DateTime
   declare createdAt: DateTime
   declare updatedAt: DateTime | null
+  declare user?: UserDto
 
   constructor(model?: PrintRequest) {
     super()
@@ -32,5 +34,6 @@ export default class PrintRequestDto extends BaseModelDto {
     this.dueDate = model.dueDate
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.user = model.user ? new UserDto(model.user) : undefined
   }
 }

@@ -7,6 +7,7 @@ import {
   DialogFooter,
 } from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
+import { CurrencyInput } from '../../components/ui/currency-input'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
@@ -19,9 +20,11 @@ import {
 } from '../../components/ui/select'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useUpdateStoreItemMutationOptions } from '../../hooks/mutations/use_update_store_item'
+import type { StoreItemResponse } from '../../hooks/queries/use_stores'
 
 interface Props {
-  product: any
+  product: StoreItemResponse
   storeId: string
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -36,24 +39,13 @@ const CATEGORIES = [
   { value: 'MERCHANDISE', label: 'Mercadoria' },
   { value: 'DIGITAL', label: 'Digital' },
   { value: 'OTHER', label: 'Outro' },
-]
-
-async function updateStoreItem(id: string, data: Record<string, unknown>) {
-  const response = await fetch(`/api/v1/store-items/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data),
-  })
-  if (!response.ok) throw new Error('Failed to update item')
-  return response.json()
-}
+] as const
 
 export function EditProductModal({ product, storeId, open, onOpenChange }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
-  const [price, setPrice] = useState(String(product.price))
+  const [price, setPrice] = useState(String(product.price / 100))
   const [category, setCategory] = useState(product.category)
   const [totalStock, setTotalStock] = useState(
     product.totalStock !== null && product.totalStock !== undefined
@@ -64,7 +56,7 @@ export function EditProductModal({ product, storeId, open, onOpenChange }: Props
   useEffect(() => {
     setName(product.name)
     setDescription(product.description ?? '')
-    setPrice(String(product.price))
+    setPrice(String(product.price / 100))
     setCategory(product.category)
     setTotalStock(
       product.totalStock !== null && product.totalStock !== undefined
@@ -73,27 +65,25 @@ export function EditProductModal({ product, storeId, open, onOpenChange }: Props
     )
   }, [product])
 
-  const updateMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) => updateStoreItem(product.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['storeItems', storeId] })
+  const updateMutation = useMutation(useUpdateStoreItemMutationOptions())
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    try {
+      await updateMutation.mutateAsync({
+        id: product.id,
+        name,
+        description: description || undefined,
+        price: Math.round(Number(price) * 100),
+        category,
+        totalStock: totalStock ? Number(totalStock) : undefined,
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeItems'] })
       toast.success('Produto atualizado com sucesso!')
       onOpenChange(false)
-    },
-    onError: () => {
+    } catch {
       toast.error('Erro ao atualizar produto.')
-    },
-  })
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    updateMutation.mutate({
-      name,
-      description: description || undefined,
-      price: Number(price),
-      category,
-      totalStock: totalStock ? Number(totalStock) : undefined,
-    })
+    }
   }
 
   return (
@@ -122,19 +112,16 @@ export function EditProductModal({ product, storeId, open, onOpenChange }: Props
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Preço (centavos)</Label>
-              <Input
+              <Label htmlFor="edit-price">Preço</Label>
+              <CurrencyInput
                 id="edit-price"
-                type="number"
-                min="1"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
+                onChange={setPrice}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-category">Categoria</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={(v) => setCategory(v as typeof category)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

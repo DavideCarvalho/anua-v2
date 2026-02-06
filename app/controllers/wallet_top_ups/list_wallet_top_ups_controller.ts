@@ -19,7 +19,9 @@ export default class ListWalletTopUpsController {
       .first()
 
     if (!relation) {
-      return response.forbidden({ message: 'Você não tem permissão para ver as recargas deste aluno' })
+      return response.forbidden({
+        message: 'Você não tem permissão para ver as recargas deste aluno',
+      })
     }
 
     const topUps = await WalletTopUp.query()

@@ -10,10 +10,7 @@ export default class CreateStoreSettlementController {
     const data = await request.validateUsing(createStoreSettlementValidator)
 
     // Verify store exists and is THIRD_PARTY
-    const store = await Store.query()
-      .where('id', data.storeId)
-      .whereNull('deletedAt')
-      .firstOrFail()
+    const store = await Store.query().where('id', data.storeId).whereNull('deletedAt').firstOrFail()
 
     if (store.type !== 'THIRD_PARTY') {
       return response.badRequest({
@@ -46,10 +43,10 @@ export default class CreateStoreSettlementController {
     const orders = await StoreOrder.query()
       .where('storeId', data.storeId)
       .whereNotNull('paidAt')
-      .whereRaw(
-        `EXTRACT(MONTH FROM "paidAt") = ? AND EXTRACT(YEAR FROM "paidAt") = ?`,
-        [data.month, data.year]
-      )
+      .whereRaw(`EXTRACT(MONTH FROM "paidAt") = ? AND EXTRACT(YEAR FROM "paidAt") = ?`, [
+        data.month,
+        data.year,
+      ])
       .whereNull('settlementId')
       .where('status', 'DELIVERED')
 

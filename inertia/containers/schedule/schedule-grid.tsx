@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useState, useMemo, useCallback } from 'react'
 import {
   DndContext,
@@ -31,6 +31,11 @@ import {
 } from '~/components/ui/table'
 import { Save, RefreshCw, AlertCircle } from 'lucide-react'
 import { cn } from '~/lib/utils'
+import { useClassScheduleQueryOptions } from '~/hooks/queries/use_class_schedule'
+import {
+  useValidateScheduleConflict,
+  useSaveClassSchedule,
+} from '~/hooks/mutations/use_schedule_mutations'
 
 interface ScheduleGridProps {
   classId: string
@@ -92,66 +97,7 @@ const DAYS_OF_WEEK: { key: DayOfWeek; label: string; number: number }[] = [
   { key: 'FRIDAY', label: 'Sexta', number: 5 },
 ]
 
-async function fetchSchedule(classId: string, academicPeriodId: string): Promise<ScheduleData> {
-  const response = await fetch(
-    `/api/v1/schedules/class/${classId}?academicPeriodId=${academicPeriodId}`
-  )
-  if (!response.ok) {
-    throw new Error('Failed to fetch schedule')
-  }
-  return response.json()
-}
-
-async function validateTeacherConflict(
-  teacherHasClassId: string,
-  classWeekDay: number,
-  startTime: string,
-  endTime: string,
-  academicPeriodId: string,
-  classId: string
-): Promise<{ hasConflict: boolean; reason?: string; teacherName?: string }> {
-  const response = await fetch('/api/v1/schedules/validate-conflict', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      teacherHasClassId,
-      classWeekDay,
-      startTime,
-      endTime,
-      academicPeriodId,
-      classId,
-    }),
-  })
-  if (!response.ok) {
-    throw new Error('Erro ao validar conflito')
-  }
-  return response.json()
-}
-
-async function saveSchedule(
-  classId: string,
-  academicPeriodId: string,
-  slots: Array<{
-    teacherHasClassId: string | null
-    classWeekDay: number
-    startTime: string
-    endTime: string
-  }>
-): Promise<void> {
-  const response = await fetch(`/api/v1/schedules/class/${classId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ academicPeriodId, slots }),
-  })
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    const errorMessage = errorData.error || 'Erro ao salvar horários'
-    throw new Error(errorMessage)
-  }
-}
-
 export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleGridProps) {
-  const queryClient = useQueryClient()
   const [localSlots, setLocalSlots] = useState<CalendarSlot[]>([])
   const [_isDirty, setIsDirty] = useState(false)
 
@@ -161,33 +107,12 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     error,
     refetch,
   } = useQuery({
-    queryKey: ['schedule', classId, academicPeriodId],
-    queryFn: () => fetchSchedule(classId, academicPeriodId),
+    ...useClassScheduleQueryOptions(classId, { academicPeriodId }),
     enabled: !!classId && !!academicPeriodId,
-  })
+  }) as { data: ScheduleData | undefined; isLoading: boolean; error: Error | null; refetch: () => void }
 
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      saveSchedule(
-        classId,
-        academicPeriodId,
-        localSlots.map((s) => ({
-          teacherHasClassId: s.teacherHasClassId,
-          classWeekDay: s.classWeekDay,
-          startTime: s.startTime,
-          endTime: s.endTime,
-        }))
-      ),
-    onSuccess: () => {
-      toast.success('Horários salvos com sucesso!')
-      setIsDirty(false)
-      queryClient.invalidateQueries({ queryKey: ['schedule', classId, academicPeriodId] })
-    },
-    onError: (error: Error) => {
-      const errorMessage = error.message || 'Erro ao salvar horários'
-      toast.error(errorMessage)
-    },
-  })
+  const saveMutation = useSaveClassSchedule()
+  const validateConflictMutation = useValidateScheduleConflict()
 
   // Initialize local slots when data changes
   useMemo(() => {
@@ -248,8 +173,29 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       )
     }
 
-    saveMutation.mutate()
-  }, [pendingClasses, localSlots, saveMutation])
+    saveMutation.mutate(
+      {
+        classId,
+        academicPeriodId,
+        slots: localSlots.map((s) => ({
+          teacherHasClassId: s.teacherHasClassId,
+          classWeekDay: s.classWeekDay,
+          startTime: s.startTime,
+          endTime: s.endTime,
+        })),
+      },
+      {
+        onSuccess: () => {
+          toast.success('Horários salvos com sucesso!')
+          setIsDirty(false)
+        },
+        onError: (error: Error) => {
+          const errorMessage = error.message || 'Erro ao salvar horários'
+          toast.error(errorMessage)
+        },
+      }
+    )
+  }, [pendingClasses, localSlots, saveMutation, classId, academicPeriodId])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
@@ -298,14 +244,14 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
         // Validar conflito de professor
         try {
-          const validation = await validateTeacherConflict(
+          const validation = await validateConflictMutation.mutateAsync({
             teacherHasClassId,
-            dayNumber,
+            classWeekDay: dayNumber,
             startTime,
             endTime,
             academicPeriodId,
-            classId
-          )
+            classId,
+          }) as any
           if (validation.hasConflict) {
             toast.error(validation.reason || 'Conflito de horário detectado')
             return
@@ -365,14 +311,14 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       // Validar se a aula do slot ativo pode ir para o slot de destino
       if (overSlot.teacherHasClassId) {
         try {
-          const validation = await validateTeacherConflict(
-            overSlot.teacherHasClassId,
-            activeDayNum,
-            activeStart,
-            activeEnd,
+          const validation = await validateConflictMutation.mutateAsync({
+            teacherHasClassId: overSlot.teacherHasClassId,
+            classWeekDay: activeDayNum,
+            startTime: activeStart,
+            endTime: activeEnd,
             academicPeriodId,
-            classId
-          )
+            classId,
+          }) as any
           if (validation.hasConflict) {
             toast.error(
               `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`
@@ -388,14 +334,14 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       // Validar se a aula do slot de destino pode ir para o slot ativo
       if (activeSlot.teacherHasClassId) {
         try {
-          const validation = await validateTeacherConflict(
-            activeSlot.teacherHasClassId,
-            overDayNum,
-            overStart,
-            overEnd,
+          const validation = await validateConflictMutation.mutateAsync({
+            teacherHasClassId: activeSlot.teacherHasClassId,
+            classWeekDay: overDayNum,
+            startTime: overStart,
+            endTime: overEnd,
             academicPeriodId,
-            classId
-          )
+            classId,
+          }) as any
           if (validation.hasConflict) {
             toast.error(
               `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`

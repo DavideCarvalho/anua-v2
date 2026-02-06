@@ -3,6 +3,8 @@ import vine from '@vinejs/vine'
 export const listInvoicesValidator = vine.compile(
   vine.object({
     studentId: vine.string().trim().optional(),
+    studentIds: vine.string().trim().optional(),
+    search: vine.string().trim().optional(),
     contractId: vine.string().trim().optional(),
     status: vine.string().trim().optional(),
     type: vine.enum(['MONTHLY', 'UPFRONT']).optional(),

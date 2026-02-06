@@ -10,22 +10,15 @@ import {
 import { Badge } from '../../components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '../../lib/utils'
+import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_stores'
 
 interface StoreOrdersTabProps {
   storeId: string
 }
 
-async function fetchStoreOrders(storeId: string) {
-  const response = await fetch(`/api/v1/store-orders?storeId=${storeId}`, {
-    credentials: 'include',
-  })
-  if (!response.ok) throw new Error('Failed to fetch orders')
-  return response.json()
-}
-
 const statusLabels: Record<string, string> = {
   PENDING_PAYMENT: 'Aguardando Pgto',
-  PENDING_APPROVAL: 'Aguardando Aprovacao',
+  PENDING_APPROVAL: 'Aguardando Aprovação',
   APPROVED: 'Aprovado',
   PREPARING: 'Preparando',
   READY: 'Pronto',
@@ -46,10 +39,9 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
 }
 
 export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['storeOrders', storeId],
-    queryFn: () => fetchStoreOrders(storeId),
-  })
+  const { data: orders, isLoading } = useQuery(useStoreOrdersQueryOptions({ storeId }))
+
+  const ordersList = orders?.data ?? []
 
   return (
     <Card>
@@ -59,7 +51,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
       <CardContent>
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-        ) : !orders?.data?.length ? (
+        ) : !ordersList.length ? (
           <div className="text-center py-8 text-muted-foreground">
             Nenhum pedido encontrado
           </div>
@@ -75,12 +67,12 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.data.map((order: any) => (
+              {ordersList.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm">
                     {order.orderNumber}
                   </TableCell>
-                  <TableCell>{order.student?.user?.name ?? '\u2014'}</TableCell>
+                  <TableCell>{order.student?.user?.name ?? '—'}</TableCell>
                   <TableCell>{formatCurrency(order.totalMoney)}</TableCell>
                   <TableCell>
                     <Badge variant="outline">

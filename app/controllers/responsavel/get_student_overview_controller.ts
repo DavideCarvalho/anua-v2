@@ -152,21 +152,19 @@ export default class GetStudentOverviewController {
       }
     }
 
-    // Saldo da cantina - calcular baseado nas transações de saldo
-    const balanceResult = await db.rawQuery(
+    // Saldo da cantina - pegar o newBalance da transação mais recente completada
+    const latestTransaction = await db.rawQuery(
       `
-      SELECT
-        COALESCE(SUM(CASE WHEN type = 'CREDIT' AND status = 'COMPLETED' THEN amount ELSE 0 END), 0) as total_credits,
-        COALESCE(SUM(CASE WHEN type = 'DEBIT' AND status = 'COMPLETED' THEN amount ELSE 0 END), 0) as total_debits
-      FROM student_balance_transactions
-      WHERE student_id = :studentId
+      SELECT "newBalance"
+      FROM "StudentBalanceTransaction"
+      WHERE "studentId" = :studentId AND status = 'COMPLETED'
+      ORDER BY "createdAt" DESC
+      LIMIT 1
       `,
       { studentId }
     )
 
-    const totalCredits = Number(balanceResult.rows[0]?.total_credits || 0)
-    const totalDebits = Number(balanceResult.rows[0]?.total_debits || 0)
-    const canteenBalance = totalCredits - totalDebits
+    const canteenBalance = Number(latestTransaction.rows[0]?.newBalance || 0)
 
     // Calcular total gasto na cantina
     const purchases = await CanteenPurchase.query()

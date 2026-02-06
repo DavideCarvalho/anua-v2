@@ -1,15 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { MutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
-export function useDeleteStoreItem() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
+export function useDeleteStoreItemMutationOptions() {
+  return {
     mutationFn: (id: string) => {
-      return tuyau.$route('api.v1.storeItems.destroy', { id }).$delete({}).unwrap()
+      return tuyau.$route('api.v1.storeItems.destroy', { id }).$delete().unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['store-items'] })
-    },
-  })
+  } satisfies MutationOptions
 }

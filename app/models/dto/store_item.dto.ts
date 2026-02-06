@@ -2,6 +2,8 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StoreItem from '#models/store_item'
 import type { StoreItemPaymentMode, StoreItemCategory, StoreItemPeriod } from '#models/store_item'
 import type { DateTime } from 'luxon'
+import SchoolDto from './school.dto.js'
+import CanteenItemDto from './canteen_item.dto.js'
 
 export default class StoreItemDto extends BaseModelDto {
   declare id: string
@@ -30,6 +32,8 @@ export default class StoreItemDto extends BaseModelDto {
   declare createdAt: DateTime
   declare updatedAt: DateTime
   declare deletedAt: DateTime | null
+  declare school?: SchoolDto
+  declare canteenItem?: CanteenItemDto
 
   constructor(model?: StoreItem) {
     super()
@@ -62,5 +66,7 @@ export default class StoreItemDto extends BaseModelDto {
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
     this.deletedAt = model.deletedAt
+    this.school = model.school ? new SchoolDto(model.school) : undefined
+    this.canteenItem = model.canteenItem ? new CanteenItemDto(model.canteenItem) : undefined
   }
 }

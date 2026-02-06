@@ -31,16 +31,12 @@ import {
   FormLabel,
   FormMessage,
 } from '~/components/ui/form'
+import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
 
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 import { SortableLevel } from './sortable-level'
 
 type Segment = AcademicPeriodFormValues['calendar']['segment']
-
-interface Contract {
-  id: string
-  name: string
-}
 
 function getDefaultCourseName(segment: Segment): string {
   switch (segment) {
@@ -108,23 +104,13 @@ function getLevelLabel(segment: Segment): string {
   }
 }
 
-async function fetchContracts(): Promise<{ data: Contract[] }> {
-  const response = await fetch('/api/v1/contracts?limit=100')
-  if (!response.ok) throw new Error('Failed to fetch contracts')
-  return response.json()
-}
-
 export function CoursesForm() {
   const form = useFormContext<AcademicPeriodFormValues>()
   const segment = form.watch('calendar.segment')
   const courses = form.watch('courses') || []
 
-  const { data: contractsData } = useQuery({
-    queryKey: ['contracts'],
-    queryFn: fetchContracts,
-  })
-
-  const contracts = contractsData?.data || []
+  const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
+  const contracts = contractsData?.data ?? []
 
   const {
     fields: courseFields,

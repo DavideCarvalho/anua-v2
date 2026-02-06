@@ -62,13 +62,13 @@ export class SubjectWithTeacherDto extends BaseModelDto {
 }
 
 export class StudentScheduleResponseDto extends BaseModelDto {
-  declare className: string
+  declare className: string | null
   declare scheduleByDay: Record<string, ScheduleDayDto>
   declare subjects: SubjectWithTeacherDto[]
   declare message?: string
 
   constructor(data: {
-    className: string
+    className: string | null
     scheduleByDay: Record<string, ScheduleDayDto>
     subjects: SubjectWithTeacherDto[]
     message?: string

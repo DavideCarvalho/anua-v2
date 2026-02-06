@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreItem from '#models/store_item'
+import StoreItemDto from '#models/dto/store_item.dto'
 import { listStoreItemsValidator } from '#validators/gamification'
 
 export default class ListStoreItemsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const data = await request.validateUsing(listStoreItemsValidator)
 
     const page = data.page ?? 1
@@ -14,6 +15,10 @@ export default class ListStoreItemsController {
       .preload('canteenItem')
       .whereNull('deletedAt')
       .orderBy('name', 'asc')
+
+    if (data.storeId) {
+      query.where('storeId', data.storeId)
+    }
 
     if (data.schoolId) {
       query.where('schoolId', data.schoolId)
@@ -33,6 +38,6 @@ export default class ListStoreItemsController {
 
     const storeItems = await query.paginate(page, limit)
 
-    return response.ok(storeItems)
+    return StoreItemDto.fromPaginator(storeItems)
   }
 }
