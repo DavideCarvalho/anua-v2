@@ -79,6 +79,10 @@ type EscolaAdministrativoAlunosIdEditarGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_editar_aluno_page_controller.ts').default['handle'], false>
 }
+type EscolaAdministrativoAlunosHistoricofinanceiroGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_historico_financeiro_page_controller.ts').default['handle'], false>
+}
 type EscolaAdministrativoFuncionariosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_funcionarios_page_controller.ts').default['handle'], false>
@@ -539,6 +543,10 @@ type ApiV1ResponsavelStudentsIdPaymentsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_payments_controller.ts').default['handle'], false>
 }
+type ApiV1ResponsavelStudentsIdInvoicesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_invoices_controller.ts').default['handle'], false>
+}
 type ApiV1ResponsavelStudentsIdBalanceGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_balance_controller.ts').default['handle'], false>
@@ -767,7 +775,7 @@ type ApiV1StudentsIdBalancetransactionsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_balance_transactions/list_student_balance_by_student_controller.ts').default['handle'], false>
 }
-type ApiV1StudentsIdResponsiblesGetHead = {
+type ApiV1ResponsiblesStudentsIdResponsiblesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsibles/list_student_responsibles_controller.ts').default['handle'], false>
 }
@@ -775,7 +783,7 @@ type ApiV1ResponsiblesPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/responsible.ts')['assignResponsibleValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsibles/assign_responsible_controller.ts').default['handle'], true>
 }
-type ApiV1ResponsiblesIdPut = {
+type ApiV1ResponsiblesIdPatch = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/responsible.ts')['updateResponsibleAssignmentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsibles/update_responsible_assignment_controller.ts').default['handle'], true>
 }
@@ -935,10 +943,6 @@ type ApiV1LevelassignmentsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/level_assignment.ts')['createLevelAssignmentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/level_assignments/create_level_assignment_controller.ts').default['handle'], true>
 }
-type ApiV1ClassesSidebarGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/get_classes_for_sidebar_controller.ts').default['handle'], false>
-}
 type ApiV1ClassesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/list_classes_controller.ts').default['handle'], false>
@@ -955,6 +959,10 @@ type ApiV1ClassesSlugIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/show_class_by_slug_controller.ts').default['handle'], false>
 }
+type ApiV1ClassesSidebarGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/get_classes_for_sidebar_controller.ts').default['handle'], false>
+}
 type ApiV1ClassesIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/show_class_controller.ts').default['handle'], false>
@@ -963,13 +971,13 @@ type ApiV1ClassesIdPut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['updateClassValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_controller.ts').default['handle'], true>
 }
-type ApiV1ClassesIdTeachersPut = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['updateClassWithTeachersValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_with_teachers_controller.ts').default['handle'], true>
-}
 type ApiV1ClassesIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/delete_class_controller.ts').default['handle'], false>
+}
+type ApiV1ClassesIdTeachersPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/class.ts')['updateClassWithTeachersValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/update_class_with_teachers_controller.ts').default['handle'], true>
 }
 type ApiV1ClassesIdStudentsGetHead = {
   request: unknown
@@ -979,13 +987,13 @@ type ApiV1ClassesIdStudentsCountGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/classes/count_class_students_controller.ts').default['handle'], false>
 }
-type ApiV1ClassesIdSubjectsGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/subjects/list_subjects_for_class_controller.ts').default['handle'], false>
-}
 type ApiV1ClassesIdStudentstatusGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/get_student_status_controller.ts').default['handle'], false>
+}
+type ApiV1ClassesIdSubjectsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/subjects/list_subjects_for_class_controller.ts').default['handle'], false>
 }
 type ApiV1SubjectsGetHead = {
   request: unknown
@@ -1239,7 +1247,7 @@ type ApiV1EventsIdParticipantsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['registerParticipantValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/register_participant_controller.ts').default['handle'], true>
 }
-type ApiV1EventsIdParticipantsIdPut = {
+type ApiV1EventsIdParticipantsIdPatch = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/event.ts')['updateParticipantStatusValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/update_participant_status_controller.ts').default['handle'], true>
 }
@@ -1251,14 +1259,6 @@ type ApiV1EventsIdParticipantsIdConfirmPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/event_participants/confirm_attendance_controller.ts').default['handle'], false>
 }
-type ApiV1EventsIdConsentsGetHead = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['listEventConsentsValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_event_consents_controller.ts').default['handle'], true>
-}
-type ApiV1EventsIdConsentsPost = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['requestConsentValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/request_consent_controller.ts').default['handle'], true>
-}
 type ApiV1ParentalconsentsPendingGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_pending_consents_controller.ts').default['handle'], false>
@@ -1266,6 +1266,14 @@ type ApiV1ParentalconsentsPendingGetHead = {
 type ApiV1ParentalconsentsHistoryGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['listConsentHistoryValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_consent_history_controller.ts').default['handle'], true>
+}
+type ApiV1ParentalconsentsEventsIdConsentsGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['listEventConsentsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/list_event_consents_controller.ts').default['handle'], true>
+}
+type ApiV1ParentalconsentsRequestPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['requestConsentValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/parental_consents/request_consent_controller.ts').default['handle'], true>
 }
 type ApiV1ParentalconsentsIdRespondPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/consent.ts')['respondConsentValidator']>>
@@ -1291,7 +1299,7 @@ type ApiV1EnrollmentsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/enrollment.ts')['listEnrollmentsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/enrollments/list_enrollments_controller.ts').default['handle'], true>
 }
-type ApiV1EnrollmentsDocumentsIdStatusPut = {
+type ApiV1EnrollmentsDocumentsIdStatusPatch = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/enrollment.ts')['updateDocumentStatusValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/enrollments/update_document_status_controller.ts').default['handle'], true>
 }
@@ -1347,7 +1355,7 @@ type ApiV1PostsIdLikePost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/like_post_controller.ts').default['handle'], false>
 }
-type ApiV1PostsIdLikeDelete = {
+type ApiV1PostsIdUnlikePost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/posts/unlike_post_controller.ts').default['handle'], false>
 }
@@ -1395,7 +1403,7 @@ type ApiV1ExtraclassesIdEnrollPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/extra_class.ts')['enrollExtraClassValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/enroll_extra_class_controller.ts').default['handle'], true>
 }
-type ApiV1ExtraclassesIdEnrollIdDelete = {
+type ApiV1ExtraclassesIdEnrollIdPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/extra_classes/cancel_extra_class_enrollment_controller.ts').default['handle'], false>
 }
@@ -1431,10 +1439,6 @@ type ApiV1AttendanceBatchPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/attendance.ts')['batchCreateAttendanceValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/batch_create_attendance_controller.ts').default['handle'], true>
 }
-type ApiV1AttendanceClassIdStudentsGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_class_students_attendance_controller.ts').default['handle'], false>
-}
 type ApiV1AttendanceAvailabledatesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_attendance_available_dates_controller.ts').default['handle'], false>
@@ -1446,6 +1450,10 @@ type ApiV1AttendanceIdGetHead = {
 type ApiV1AttendanceIdPut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/attendance.ts')['updateAttendanceValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/update_attendance_controller.ts').default['handle'], true>
+}
+type ApiV1AttendanceClassIdStudentsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_class_students_attendance_controller.ts').default['handle'], false>
 }
 type ApiV1AssignmentsGetHead = {
   request: unknown
@@ -1475,7 +1483,7 @@ type ApiV1AssignmentsIdSubmissionsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/assignment.ts')['submitAssignmentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/assignments/submit_assignment_controller.ts').default['handle'], true>
 }
-type ApiV1AssignmentsIdSubmissionsIdPut = {
+type ApiV1AssignmentsIdSubmissionsIdPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/assignment.ts')['gradeSubmissionValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/assignments/grade_submission_controller.ts').default['handle'], true>
 }
@@ -1527,6 +1535,14 @@ type ApiV1InvoicesIdMarkpaidPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/invoice.ts')['markInvoicePaidValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/invoices/mark_invoice_paid_controller.ts').default['handle'], true>
 }
+type ApiV1AuditsIdIdGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/audit.ts')['listAuditsValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/audits/list_audits_controller.ts').default['handle'], true>
+}
+type ApiV1AuditsStudentsIdHistoryGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/audits/list_student_audit_history_controller.ts').default['handle'], false>
+}
 type ApiV1StudentbalancetransactionsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_balance_transaction.ts')['listStudentBalanceTransactionsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_balance_transactions/list_student_balance_transactions_controller.ts').default['handle'], true>
@@ -1538,6 +1554,14 @@ type ApiV1StudentbalancetransactionsPost = {
 type ApiV1StudentbalancetransactionsIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_balance_transactions/show_student_balance_transaction_controller.ts').default['handle'], false>
+}
+type ApiV1StudentbalancetransactionsIdBalancetransactionsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_balance_transactions/list_student_balance_by_student_controller.ts').default['handle'], false>
+}
+type ApiV1StudentbalancetransactionsIdBalanceGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/student_balance_transactions/get_student_balance_controller.ts').default['handle'], false>
 }
 type ApiV1CanteensGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['listCanteensValidator']>>
@@ -1579,7 +1603,7 @@ type ApiV1CanteenmonthlytransfersIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_monthly_transfers/show_canteen_monthly_transfer_controller.ts').default['handle'], false>
 }
-type ApiV1CanteenmonthlytransfersIdStatusPut = {
+type ApiV1CanteenmonthlytransfersIdStatusPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['updateCanteenMonthlyTransferStatusValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_monthly_transfers/update_canteen_monthly_transfer_status_controller.ts').default['handle'], true>
 }
@@ -1603,7 +1627,7 @@ type ApiV1CanteenitemsIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/delete_canteen_item_controller.ts').default['handle'], false>
 }
-type ApiV1CanteenitemsIdToggleactiveGetHead = {
+type ApiV1CanteenitemsIdToggleactivePatch = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/toggle_canteen_item_active_controller.ts').default['handle'], false>
 }
@@ -1639,7 +1663,7 @@ type ApiV1CanteenmealreservationsIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_meal_reservations/show_canteen_meal_reservation_controller.ts').default['handle'], false>
 }
-type ApiV1CanteenmealreservationsIdStatusPut = {
+type ApiV1CanteenmealreservationsIdStatusPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['updateCanteenMealReservationStatusValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_meal_reservations/update_canteen_meal_reservation_status_controller.ts').default['handle'], true>
 }
@@ -1659,7 +1683,7 @@ type ApiV1CanteenpurchasesIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_purchases/show_canteen_purchase_controller.ts').default['handle'], false>
 }
-type ApiV1CanteenpurchasesIdStatusPut = {
+type ApiV1CanteenpurchasesIdStatusPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['updateCanteenPurchaseStatusValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_purchases/update_canteen_purchase_status_controller.ts').default['handle'], true>
 }
@@ -1782,10 +1806,6 @@ type ApiV1StoreordersIdRejectPost = {
 type ApiV1StoreordersIdDeliverPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/deliver_store_order_controller.ts').default['handle'], false>
-}
-type ApiV1StoreordersIdCancelPost = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/cancel_store_order_controller.ts').default['handle'], false>
 }
 type ApiV1StoreinstallmentrulesGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['listStoreInstallmentRulesValidator']>>
@@ -2436,6 +2456,12 @@ export interface ApiDefinition {
             '$get': EscolaAdministrativoAlunosIdEditarGetHead;
             '$head': EscolaAdministrativoAlunosIdEditarGetHead;
           };
+        };
+        'historico-financeiro': {
+          '$url': {
+          };
+          '$get': EscolaAdministrativoAlunosHistoricofinanceiroGetHead;
+          '$head': EscolaAdministrativoAlunosHistoricofinanceiroGetHead;
         };
       };
       'funcionarios': {
@@ -3151,6 +3177,12 @@ export interface ApiDefinition {
               '$get': ApiV1ResponsavelStudentsIdPaymentsGetHead;
               '$head': ApiV1ResponsavelStudentsIdPaymentsGetHead;
             };
+            'invoices': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdInvoicesGetHead;
+              '$head': ApiV1ResponsavelStudentsIdInvoicesGetHead;
+            };
             'balance': {
               '$url': {
               };
@@ -3471,12 +3503,6 @@ export interface ApiDefinition {
             '$get': ApiV1StudentsIdBalancetransactionsGetHead;
             '$head': ApiV1StudentsIdBalancetransactionsGetHead;
           };
-          'responsibles': {
-            '$url': {
-            };
-            '$get': ApiV1StudentsIdResponsiblesGetHead;
-            '$head': ApiV1StudentsIdResponsiblesGetHead;
-          };
           'gamification': {
             'stats': {
               '$url': {
@@ -3488,13 +3514,23 @@ export interface ApiDefinition {
         };
       };
       'responsibles': {
+        'students': {
+          ':studentId': {
+            'responsibles': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsiblesStudentsIdResponsiblesGetHead;
+              '$head': ApiV1ResponsiblesStudentsIdResponsiblesGetHead;
+            };
+          };
+        };
         '$url': {
         };
         '$post': ApiV1ResponsiblesPost;
         ':id': {
           '$url': {
           };
-          '$put': ApiV1ResponsiblesIdPut;
+          '$patch': ApiV1ResponsiblesIdPatch;
           '$delete': ApiV1ResponsiblesIdDelete;
         };
       };
@@ -3652,12 +3688,6 @@ export interface ApiDefinition {
         '$post': ApiV1LevelassignmentsPost;
       };
       'classes': {
-        'sidebar': {
-          '$url': {
-          };
-          '$get': ApiV1ClassesSidebarGetHead;
-          '$head': ApiV1ClassesSidebarGetHead;
-        };
         '$url': {
         };
         '$get': ApiV1ClassesGetHead;
@@ -3676,18 +3706,24 @@ export interface ApiDefinition {
             '$head': ApiV1ClassesSlugIdGetHead;
           };
         };
+        'sidebar': {
+          '$url': {
+          };
+          '$get': ApiV1ClassesSidebarGetHead;
+          '$head': ApiV1ClassesSidebarGetHead;
+        };
         ':id': {
           '$url': {
           };
           '$get': ApiV1ClassesIdGetHead;
           '$head': ApiV1ClassesIdGetHead;
           '$put': ApiV1ClassesIdPut;
+          '$delete': ApiV1ClassesIdDelete;
           'teachers': {
             '$url': {
             };
             '$put': ApiV1ClassesIdTeachersPut;
           };
-          '$delete': ApiV1ClassesIdDelete;
           'students': {
             '$url': {
             };
@@ -4030,7 +4066,7 @@ export interface ApiDefinition {
             ':participantId': {
               '$url': {
               };
-              '$put': ApiV1EventsIdParticipantsIdPut;
+              '$patch': ApiV1EventsIdParticipantsIdPatch;
               '$delete': ApiV1EventsIdParticipantsIdDelete;
               'confirm': {
                 '$url': {
@@ -4038,13 +4074,6 @@ export interface ApiDefinition {
                 '$post': ApiV1EventsIdParticipantsIdConfirmPost;
               };
             };
-          };
-          'consents': {
-            '$url': {
-            };
-            '$get': ApiV1EventsIdConsentsGetHead;
-            '$head': ApiV1EventsIdConsentsGetHead;
-            '$post': ApiV1EventsIdConsentsPost;
           };
         };
       };
@@ -4060,6 +4089,21 @@ export interface ApiDefinition {
           };
           '$get': ApiV1ParentalconsentsHistoryGetHead;
           '$head': ApiV1ParentalconsentsHistoryGetHead;
+        };
+        'events': {
+          ':eventId': {
+            'consents': {
+              '$url': {
+              };
+              '$get': ApiV1ParentalconsentsEventsIdConsentsGetHead;
+              '$head': ApiV1ParentalconsentsEventsIdConsentsGetHead;
+            };
+          };
+        };
+        'request': {
+          '$url': {
+          };
+          '$post': ApiV1ParentalconsentsRequestPost;
         };
         ':id': {
           'respond': {
@@ -4108,7 +4152,7 @@ export interface ApiDefinition {
             'status': {
               '$url': {
               };
-              '$put': ApiV1EnrollmentsDocumentsIdStatusPut;
+              '$patch': ApiV1EnrollmentsDocumentsIdStatusPatch;
             };
           };
         };
@@ -4160,7 +4204,11 @@ export interface ApiDefinition {
             '$url': {
             };
             '$post': ApiV1PostsIdLikePost;
-            '$delete': ApiV1PostsIdLikeDelete;
+          };
+          'unlike': {
+            '$url': {
+            };
+            '$post': ApiV1PostsIdUnlikePost;
           };
         };
         ':postId': {
@@ -4206,7 +4254,7 @@ export interface ApiDefinition {
             ':enrollmentId': {
               '$url': {
               };
-              '$delete': ApiV1ExtraclassesIdEnrollIdDelete;
+              '$post': ApiV1ExtraclassesIdEnrollIdPost;
             };
           };
           'students': {
@@ -4246,16 +4294,6 @@ export interface ApiDefinition {
           };
           '$post': ApiV1AttendanceBatchPost;
         };
-        'class': {
-          ':classId': {
-            'students': {
-              '$url': {
-              };
-              '$get': ApiV1AttendanceClassIdStudentsGetHead;
-              '$head': ApiV1AttendanceClassIdStudentsGetHead;
-            };
-          };
-        };
         'available-dates': {
           '$url': {
           };
@@ -4268,6 +4306,16 @@ export interface ApiDefinition {
           '$get': ApiV1AttendanceIdGetHead;
           '$head': ApiV1AttendanceIdGetHead;
           '$put': ApiV1AttendanceIdPut;
+        };
+        'class': {
+          ':classId': {
+            'students': {
+              '$url': {
+              };
+              '$get': ApiV1AttendanceClassIdStudentsGetHead;
+              '$head': ApiV1AttendanceClassIdStudentsGetHead;
+            };
+          };
         };
       };
       'assignments': {
@@ -4292,7 +4340,7 @@ export interface ApiDefinition {
             ':submissionId': {
               '$url': {
               };
-              '$put': ApiV1AssignmentsIdSubmissionsIdPut;
+              '$post': ApiV1AssignmentsIdSubmissionsIdPost;
             };
           };
         };
@@ -4355,6 +4403,26 @@ export interface ApiDefinition {
           };
         };
       };
+      'audits': {
+        ':entityType': {
+          ':entityId': {
+            '$url': {
+            };
+            '$get': ApiV1AuditsIdIdGetHead;
+            '$head': ApiV1AuditsIdIdGetHead;
+          };
+        };
+        'students': {
+          ':studentId': {
+            'history': {
+              '$url': {
+              };
+              '$get': ApiV1AuditsStudentsIdHistoryGetHead;
+              '$head': ApiV1AuditsStudentsIdHistoryGetHead;
+            };
+          };
+        };
+      };
       'student-balance-transactions': {
         '$url': {
         };
@@ -4366,6 +4434,20 @@ export interface ApiDefinition {
           };
           '$get': ApiV1StudentbalancetransactionsIdGetHead;
           '$head': ApiV1StudentbalancetransactionsIdGetHead;
+        };
+        ':studentId': {
+          'balance-transactions': {
+            '$url': {
+            };
+            '$get': ApiV1StudentbalancetransactionsIdBalancetransactionsGetHead;
+            '$head': ApiV1StudentbalancetransactionsIdBalancetransactionsGetHead;
+          };
+          'balance': {
+            '$url': {
+            };
+            '$get': ApiV1StudentbalancetransactionsIdBalanceGetHead;
+            '$head': ApiV1StudentbalancetransactionsIdBalanceGetHead;
+          };
         };
       };
       'canteens': {
@@ -4411,7 +4493,7 @@ export interface ApiDefinition {
           'status': {
             '$url': {
             };
-            '$put': ApiV1CanteenmonthlytransfersIdStatusPut;
+            '$post': ApiV1CanteenmonthlytransfersIdStatusPost;
           };
         };
       };
@@ -4431,8 +4513,7 @@ export interface ApiDefinition {
           'toggle-active': {
             '$url': {
             };
-            '$get': ApiV1CanteenitemsIdToggleactiveGetHead;
-            '$head': ApiV1CanteenitemsIdToggleactiveGetHead;
+            '$patch': ApiV1CanteenitemsIdToggleactivePatch;
           };
         };
       };
@@ -4465,7 +4546,7 @@ export interface ApiDefinition {
           'status': {
             '$url': {
             };
-            '$put': ApiV1CanteenmealreservationsIdStatusPut;
+            '$post': ApiV1CanteenmealreservationsIdStatusPost;
           };
           '$delete': ApiV1CanteenmealreservationsIdDelete;
         };
@@ -4484,7 +4565,7 @@ export interface ApiDefinition {
           'status': {
             '$url': {
             };
-            '$put': ApiV1CanteenpurchasesIdStatusPut;
+            '$post': ApiV1CanteenpurchasesIdStatusPost;
           };
           'cancel': {
             '$url': {
@@ -4600,11 +4681,6 @@ export interface ApiDefinition {
             '$url': {
             };
             '$post': ApiV1StoreordersIdDeliverPost;
-          };
-          'cancel': {
-            '$url': {
-            };
-            '$post': ApiV1StoreordersIdCancelPost;
           };
         };
       };
@@ -5298,6 +5374,13 @@ const routes = [
     path: '/escola/administrativo/alunos/:id/editar',
     method: ["GET","HEAD"],
     types: {} as EscolaAdministrativoAlunosIdEditarGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.administrativo.alunos.historicoFinanceiro',
+    path: '/escola/administrativo/alunos/historico-financeiro',
+    method: ["GET","HEAD"],
+    types: {} as EscolaAdministrativoAlunosHistoricofinanceiroGetHead,
   },
   {
     params: [],
@@ -6106,6 +6189,13 @@ const routes = [
   },
   {
     params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentInvoices',
+    path: '/api/v1/responsavel/students/:studentId/invoices',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdInvoicesGetHead,
+  },
+  {
+    params: ["studentId"],
     name: 'api.v1.responsavel.api.studentBalance',
     path: '/api/v1/responsavel/students/:studentId/balance',
     method: ["GET","HEAD"],
@@ -6506,9 +6596,9 @@ const routes = [
   {
     params: ["studentId"],
     name: 'api.v1.responsibles.listByStudent',
-    path: '/api/v1/students/:studentId/responsibles',
+    path: '/api/v1/responsibles/students/:studentId/responsibles',
     method: ["GET","HEAD"],
-    types: {} as ApiV1StudentsIdResponsiblesGetHead,
+    types: {} as ApiV1ResponsiblesStudentsIdResponsiblesGetHead,
   },
   {
     params: [],
@@ -6521,8 +6611,8 @@ const routes = [
     params: ["id"],
     name: 'api.v1.responsibles.updateAssignment',
     path: '/api/v1/responsibles/:id',
-    method: ["PUT"],
-    types: {} as ApiV1ResponsiblesIdPut,
+    method: ["PATCH"],
+    types: {} as ApiV1ResponsiblesIdPatch,
   },
   {
     params: ["id"],
@@ -6799,13 +6889,6 @@ const routes = [
   },
   {
     params: [],
-    name: 'api.v1.classes.sidebar',
-    path: '/api/v1/classes/sidebar',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1ClassesSidebarGetHead,
-  },
-  {
-    params: [],
     name: 'api.v1.classes.index',
     path: '/api/v1/classes',
     method: ["GET","HEAD"],
@@ -6833,6 +6916,13 @@ const routes = [
     types: {} as ApiV1ClassesSlugIdGetHead,
   },
   {
+    params: [],
+    name: 'api.v1.classes.sidebar',
+    path: '/api/v1/classes/sidebar',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ClassesSidebarGetHead,
+  },
+  {
     params: ["id"],
     name: 'api.v1.classes.show',
     path: '/api/v1/classes/:id',
@@ -6848,17 +6938,17 @@ const routes = [
   },
   {
     params: ["id"],
-    name: 'api.v1.classes.updateWithTeachers',
-    path: '/api/v1/classes/:id/teachers',
-    method: ["PUT"],
-    types: {} as ApiV1ClassesIdTeachersPut,
-  },
-  {
-    params: ["id"],
     name: 'api.v1.classes.destroy',
     path: '/api/v1/classes/:id',
     method: ["DELETE"],
     types: {} as ApiV1ClassesIdDelete,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.classes.updateWithTeachers',
+    path: '/api/v1/classes/:id/teachers',
+    method: ["PUT"],
+    types: {} as ApiV1ClassesIdTeachersPut,
   },
   {
     params: ["id"],
@@ -6875,18 +6965,18 @@ const routes = [
     types: {} as ApiV1ClassesIdStudentsCountGetHead,
   },
   {
-    params: ["classId"],
-    name: 'api.v1.classes.subjects',
-    path: '/api/v1/classes/:classId/subjects',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1ClassesIdSubjectsGetHead,
-  },
-  {
     params: ["id"],
     name: 'api.v1.classes.studentStatus',
     path: '/api/v1/classes/:id/student-status',
     method: ["GET","HEAD"],
     types: {} as ApiV1ClassesIdStudentstatusGetHead,
+  },
+  {
+    params: ["classId"],
+    name: 'api.v1.classes.subjects',
+    path: '/api/v1/classes/:classId/subjects',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ClassesIdSubjectsGetHead,
   },
   {
     params: [],
@@ -7107,7 +7197,7 @@ const routes = [
   },
   {
     params: ["id"],
-    name: 'api.v1.exams.saveGrade',
+    name: 'api.v1.exams.grades.store',
     path: '/api/v1/exams/:id/grades',
     method: ["POST"],
     types: {} as ApiV1ExamsIdGradesPost,
@@ -7333,8 +7423,8 @@ const routes = [
     params: ["eventId","participantId"],
     name: 'api.v1.events.participants.updateStatus',
     path: '/api/v1/events/:eventId/participants/:participantId',
-    method: ["PUT"],
-    types: {} as ApiV1EventsIdParticipantsIdPut,
+    method: ["PATCH"],
+    types: {} as ApiV1EventsIdParticipantsIdPatch,
   },
   {
     params: ["eventId","participantId"],
@@ -7351,20 +7441,6 @@ const routes = [
     types: {} as ApiV1EventsIdParticipantsIdConfirmPost,
   },
   {
-    params: ["eventId"],
-    name: 'api.v1.events.consents.index',
-    path: '/api/v1/events/:eventId/consents',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1EventsIdConsentsGetHead,
-  },
-  {
-    params: ["eventId"],
-    name: 'api.v1.events.consents.request',
-    path: '/api/v1/events/:eventId/consents',
-    method: ["POST"],
-    types: {} as ApiV1EventsIdConsentsPost,
-  },
-  {
     params: [],
     name: 'api.v1.consents.pending',
     path: '/api/v1/parental-consents/pending',
@@ -7377,6 +7453,20 @@ const routes = [
     path: '/api/v1/parental-consents/history',
     method: ["GET","HEAD"],
     types: {} as ApiV1ParentalconsentsHistoryGetHead,
+  },
+  {
+    params: ["eventId"],
+    name: 'api.v1.events.consents.index',
+    path: '/api/v1/parental-consents/events/:eventId/consents',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ParentalconsentsEventsIdConsentsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.events.consents.request',
+    path: '/api/v1/parental-consents/request',
+    method: ["POST"],
+    types: {} as ApiV1ParentalconsentsRequestPost,
   },
   {
     params: ["id"],
@@ -7424,8 +7514,8 @@ const routes = [
     params: ["id"],
     name: 'api.v1.enrollments.documents.updateStatus',
     path: '/api/v1/enrollments/documents/:id/status',
-    method: ["PUT"],
-    types: {} as ApiV1EnrollmentsDocumentsIdStatusPut,
+    method: ["PATCH"],
+    types: {} as ApiV1EnrollmentsDocumentsIdStatusPatch,
   },
   {
     params: [],
@@ -7521,9 +7611,9 @@ const routes = [
   {
     params: ["id"],
     name: 'api.v1.posts.unlike',
-    path: '/api/v1/posts/:id/like',
-    method: ["DELETE"],
-    types: {} as ApiV1PostsIdLikeDelete,
+    path: '/api/v1/posts/:id/unlike',
+    method: ["POST"],
+    types: {} as ApiV1PostsIdUnlikePost,
   },
   {
     params: ["postId"],
@@ -7604,10 +7694,10 @@ const routes = [
   },
   {
     params: ["id","enrollmentId"],
-    name: 'api.v1.extraClasses.cancelEnrollment',
+    name: 'api.v1.extraClasses.enroll.cancel',
     path: '/api/v1/extra-classes/:id/enroll/:enrollmentId',
-    method: ["DELETE"],
-    types: {} as ApiV1ExtraclassesIdEnrollIdDelete,
+    method: ["POST"],
+    types: {} as ApiV1ExtraclassesIdEnrollIdPost,
   },
   {
     params: ["id"],
@@ -7666,13 +7756,6 @@ const routes = [
     types: {} as ApiV1AttendanceBatchPost,
   },
   {
-    params: ["classId"],
-    name: 'api.v1.attendance.classStudents',
-    path: '/api/v1/attendance/class/:classId/students',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1AttendanceClassIdStudentsGetHead,
-  },
-  {
     params: [],
     name: 'api.v1.attendance.availableDates',
     path: '/api/v1/attendance/available-dates',
@@ -7692,6 +7775,13 @@ const routes = [
     path: '/api/v1/attendance/:id',
     method: ["PUT"],
     types: {} as ApiV1AttendanceIdPut,
+  },
+  {
+    params: ["classId"],
+    name: 'api.v1.attendance.classStudents',
+    path: '/api/v1/attendance/class/:classId/students',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AttendanceClassIdStudentsGetHead,
   },
   {
     params: [],
@@ -7744,10 +7834,10 @@ const routes = [
   },
   {
     params: ["id","submissionId"],
-    name: 'api.v1.assignments.grade',
+    name: 'api.v1.assignments.submissions.grade',
     path: '/api/v1/assignments/:id/submissions/:submissionId',
-    method: ["PUT"],
-    types: {} as ApiV1AssignmentsIdSubmissionsIdPut,
+    method: ["POST"],
+    types: {} as ApiV1AssignmentsIdSubmissionsIdPost,
   },
   {
     params: [],
@@ -7834,6 +7924,20 @@ const routes = [
     types: {} as ApiV1InvoicesIdMarkpaidPost,
   },
   {
+    params: ["entityType","entityId"],
+    name: 'api.v1.audits.index',
+    path: '/api/v1/audits/:entityType/:entityId',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AuditsIdIdGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.audits.studentHistory',
+    path: '/api/v1/audits/students/:studentId/history',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AuditsStudentsIdHistoryGetHead,
+  },
+  {
     params: [],
     name: 'api.v1.studentBalanceTransactions.index',
     path: '/api/v1/student-balance-transactions',
@@ -7853,6 +7957,20 @@ const routes = [
     path: '/api/v1/student-balance-transactions/:id',
     method: ["GET","HEAD"],
     types: {} as ApiV1StudentbalancetransactionsIdGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.studentBalanceTransactions.byStudent',
+    path: '/api/v1/student-balance-transactions/:studentId/balance-transactions',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StudentbalancetransactionsIdBalancetransactionsGetHead,
+  },
+  {
+    params: ["studentId"],
+    name: 'api.v1.studentBalanceTransactions.balance',
+    path: '/api/v1/student-balance-transactions/:studentId/balance',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1StudentbalancetransactionsIdBalanceGetHead,
   },
   {
     params: [],
@@ -7928,8 +8046,8 @@ const routes = [
     params: ["id"],
     name: 'api.v1.canteenMonthlyTransfers.updateStatus',
     path: '/api/v1/canteen-monthly-transfers/:id/status',
-    method: ["PUT"],
-    types: {} as ApiV1CanteenmonthlytransfersIdStatusPut,
+    method: ["POST"],
+    types: {} as ApiV1CanteenmonthlytransfersIdStatusPost,
   },
   {
     params: [],
@@ -7970,8 +8088,8 @@ const routes = [
     params: ["id"],
     name: 'api.v1.canteenItems.toggleActive',
     path: '/api/v1/canteen-items/:id/toggle-active',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1CanteenitemsIdToggleactiveGetHead,
+    method: ["PATCH"],
+    types: {} as ApiV1CanteenitemsIdToggleactivePatch,
   },
   {
     params: [],
@@ -8033,8 +8151,8 @@ const routes = [
     params: ["id"],
     name: 'api.v1.canteenMealReservations.updateStatus',
     path: '/api/v1/canteen-meal-reservations/:id/status',
-    method: ["PUT"],
-    types: {} as ApiV1CanteenmealreservationsIdStatusPut,
+    method: ["POST"],
+    types: {} as ApiV1CanteenmealreservationsIdStatusPost,
   },
   {
     params: ["id"],
@@ -8068,8 +8186,8 @@ const routes = [
     params: ["id"],
     name: 'api.v1.canteenPurchases.updateStatus',
     path: '/api/v1/canteen-purchases/:id/status',
-    method: ["PUT"],
-    types: {} as ApiV1CanteenpurchasesIdStatusPut,
+    method: ["POST"],
+    types: {} as ApiV1CanteenpurchasesIdStatusPost,
   },
   {
     params: ["id"],
@@ -8280,13 +8398,6 @@ const routes = [
     path: '/api/v1/store-orders/:id/deliver',
     method: ["POST"],
     types: {} as ApiV1StoreordersIdDeliverPost,
-  },
-  {
-    params: ["id"],
-    name: 'api.v1.storeOrders.cancel',
-    path: '/api/v1/store-orders/:id/cancel',
-    method: ["POST"],
-    types: {} as ApiV1StoreordersIdCancelPost,
   },
   {
     params: [],
