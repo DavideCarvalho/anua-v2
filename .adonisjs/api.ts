@@ -1876,8 +1876,12 @@ type ApiV1StoreownerOrdersIdReadyPost = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/mark_ready_controller.ts').default['handle'], false>
 }
 type ApiV1StoreownerOrdersIdDeliverPost = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/deliver_order_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['deliverStoreOrderValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/deliver_order_controller.ts').default['handle'], true>
+}
+type ApiV1StoreownerOrdersIdCancelPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['cancelStoreOrderValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_owner/cancel_order_controller.ts').default['handle'], true>
 }
 type ApiV1StoreownerFinancialsettingsGetHead = {
   request: unknown
@@ -4765,6 +4769,11 @@ export interface ApiDefinition {
               '$url': {
               };
               '$post': ApiV1StoreownerOrdersIdDeliverPost;
+            };
+            'cancel': {
+              '$url': {
+              };
+              '$post': ApiV1StoreownerOrdersIdCancelPost;
             };
           };
         };
@@ -8533,6 +8542,13 @@ const routes = [
     path: '/api/v1/store-owner/orders/:id/deliver',
     method: ["POST"],
     types: {} as ApiV1StoreownerOrdersIdDeliverPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOwner.orders.cancel',
+    path: '/api/v1/store-owner/orders/:id/cancel',
+    method: ["POST"],
+    types: {} as ApiV1StoreownerOrdersIdCancelPost,
   },
   {
     params: [],

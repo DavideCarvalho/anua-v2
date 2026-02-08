@@ -3,9 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Check,
   X,
-  ChefHat,
-  PackageCheck,
   Truck,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -18,6 +17,14 @@ import {
   TableRow,
 } from '../components/ui/table'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -26,6 +33,8 @@ import {
 } from '../components/ui/select'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Textarea } from '../components/ui/textarea'
 import {
   useOwnOrdersQueryOptions,
   type OwnOrdersResponse,
@@ -33,11 +42,11 @@ import {
 import {
   useApproveOrder,
   useRejectOrder,
-  useMarkPreparing,
-  useMarkReady,
   useDeliverOrder,
+  useCancelOrder,
 } from '../hooks/mutations/use_store_owner_mutations'
 import { formatCurrency } from '../lib/utils'
+import { toast } from 'sonner'
 
 type Order = NonNullable<OwnOrdersResponse>['data'][number]
 
@@ -63,6 +72,217 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 
   REJECTED: 'destructive',
 }
 
+function OrderActions({ order }: { order: Order }) {
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const [deliverDialogOpen, setDeliverDialogOpen] = useState(false)
+  const [deliveredAt, setDeliveredAt] = useState(() => new Date().toISOString().split('T')[0])
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+
+  const approveOrder = useApproveOrder()
+  const rejectOrder = useRejectOrder()
+  const deliverOrder = useDeliverOrder()
+  const cancelOrder = useCancelOrder()
+
+  const isPending =
+    approveOrder.isPending ||
+    rejectOrder.isPending ||
+    deliverOrder.isPending ||
+    cancelOrder.isPending
+
+  const handleApprove = async () => {
+    try {
+      await approveOrder.mutateAsync(order.id)
+      toast.success('Pedido aprovado com sucesso!')
+    } catch {
+      toast.error('Erro ao aprovar pedido')
+    }
+  }
+
+  const handleReject = async () => {
+    try {
+      await rejectOrder.mutateAsync({ id: order.id, reason: rejectReason })
+      toast.success('Pedido rejeitado')
+      setRejectDialogOpen(false)
+      setRejectReason('')
+    } catch {
+      toast.error('Erro ao rejeitar pedido')
+    }
+  }
+
+  const handleDeliver = async () => {
+    try {
+      await deliverOrder.mutateAsync({ id: order.id, deliveredAt })
+      toast.success('Pedido marcado como entregue!')
+      setDeliverDialogOpen(false)
+    } catch {
+      toast.error('Erro ao atualizar pedido')
+    }
+  }
+
+  const handleCancel = async () => {
+    try {
+      await cancelOrder.mutateAsync({ id: order.id, reason: cancelReason })
+      toast.success('Pedido cancelado')
+      setCancelDialogOpen(false)
+      setCancelReason('')
+    } catch {
+      toast.error('Erro ao cancelar pedido')
+    }
+  }
+
+  const canApprove = order.status === 'PENDING_APPROVAL'
+  const canReject = order.status === 'PENDING_APPROVAL'
+  const canDeliver = ['APPROVED', 'PREPARING', 'READY'].includes(order.status)
+  const canCancel = ['APPROVED', 'PREPARING', 'READY'].includes(order.status)
+
+  if (!canApprove && !canReject && !canDeliver && !canCancel) {
+    return null
+  }
+
+  return (
+    <>
+      <div className="flex gap-1">
+        {canApprove && (
+          <Button
+            size="sm"
+            variant="default"
+            onClick={handleApprove}
+            disabled={isPending}
+          >
+            {approveOrder.isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Check className="h-3 w-3 mr-1" />}
+            Aprovar
+          </Button>
+        )}
+        {canReject && (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => setRejectDialogOpen(true)}
+            disabled={isPending}
+          >
+            <X className="h-3 w-3 mr-1" />
+            Rejeitar
+          </Button>
+        )}
+        {canDeliver && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setDeliverDialogOpen(true)}
+            disabled={isPending}
+          >
+            <Truck className="h-3 w-3 mr-1" />
+            Entregar
+          </Button>
+        )}
+        {canCancel && (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => setCancelDialogOpen(true)}
+            disabled={isPending}
+          >
+            <X className="h-3 w-3 mr-1" />
+            Cancelar
+          </Button>
+        )}
+      </div>
+
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rejeitar Pedido</DialogTitle>
+            <DialogDescription>
+              Informe o motivo da rejeição do pedido {order.orderNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Motivo da rejeição..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Voltar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={!rejectReason.trim() || rejectOrder.isPending}
+            >
+              {rejectOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Rejeitar Pedido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deliverDialogOpen} onOpenChange={setDeliverDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Marcar como Entregue</DialogTitle>
+            <DialogDescription>
+              Informe a data de entrega do pedido {order.orderNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor={`deliveredAt-${order.id}`}>Data de entrega</Label>
+            <Input
+              id={`deliveredAt-${order.id}`}
+              type="date"
+              value={deliveredAt}
+              onChange={(e) => setDeliveredAt(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeliverDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleDeliver}
+              disabled={deliverOrder.isPending}
+            >
+              {deliverOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirmar Entrega
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar Pedido</DialogTitle>
+            <DialogDescription>
+              Informe o motivo do cancelamento do pedido {order.orderNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Motivo do cancelamento..."
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+              Voltar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={!cancelReason.trim() || cancelOrder.isPending}
+            >
+              {cancelOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancelar Pedido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
 export function StoreOwnerOrdersContainer() {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [search, setSearch] = useState('')
@@ -74,18 +294,7 @@ export function StoreOwnerOrdersContainer() {
     })
   )
 
-  const approveOrder = useApproveOrder()
-  const rejectOrder = useRejectOrder()
-  const markPreparing = useMarkPreparing()
-  const markReady = useMarkReady()
-  const deliverOrder = useDeliverOrder()
-
   const orders = data?.data ?? []
-
-  function handleReject(orderId: string) {
-    const reason = prompt('Motivo da rejeição (opcional):')
-    rejectOrder.mutate({ id: orderId, reason: reason ?? undefined })
-  }
 
   return (
     <Card>
@@ -160,61 +369,7 @@ export function StoreOwnerOrdersContainer() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
-                      {order.status === 'PENDING_APPROVAL' && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => approveOrder.mutate(order.id)}
-                            disabled={approveOrder.isPending}
-                          >
-                            <Check className="h-3 w-3 mr-1" />
-                            Aprovar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleReject(order.id)}
-                            disabled={rejectOrder.isPending}
-                          >
-                            <X className="h-3 w-3 mr-1" />
-                            Rejeitar
-                          </Button>
-                        </>
-                      )}
-                      {order.status === 'APPROVED' && (
-                        <Button
-                          size="sm"
-                          onClick={() => markPreparing.mutate(order.id)}
-                          disabled={markPreparing.isPending}
-                        >
-                          <ChefHat className="h-3 w-3 mr-1" />
-                          Preparar
-                        </Button>
-                      )}
-                      {order.status === 'PREPARING' && (
-                        <Button
-                          size="sm"
-                          onClick={() => markReady.mutate(order.id)}
-                          disabled={markReady.isPending}
-                        >
-                          <PackageCheck className="h-3 w-3 mr-1" />
-                          Pronto
-                        </Button>
-                      )}
-                      {['APPROVED', 'PREPARING', 'READY'].includes(order.status) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => deliverOrder.mutate(order.id)}
-                          disabled={deliverOrder.isPending}
-                        >
-                          <Truck className="h-3 w-3 mr-1" />
-                          Entregar
-                        </Button>
-                      )}
-                    </div>
+                    <OrderActions order={order} />
                   </TableCell>
                 </TableRow>
               ))}

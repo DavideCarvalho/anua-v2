@@ -101,8 +101,19 @@ export function useMarkReady() {
 export function useDeliverOrder() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) =>
-      tuyau.$route('api.v1.storeOwner.orders.deliver', { id }).$post().unwrap(),
+    mutationFn: ({ id, deliveredAt }: { id: string; deliveredAt?: string }) =>
+      tuyau.$route('api.v1.storeOwner.orders.deliver', { id }).$post({ deliveredAt }).unwrap(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
+    },
+  })
+}
+
+export function useCancelOrder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      tuyau.$route('api.v1.storeOwner.orders.cancel', { id }).$post({ reason }).unwrap(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
     },

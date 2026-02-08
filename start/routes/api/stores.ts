@@ -93,6 +93,7 @@ const SORejectOrderController = () => import('#controllers/store_owner/reject_or
 const SOMarkPreparingController = () => import('#controllers/store_owner/mark_preparing_controller')
 const SOMarkReadyController = () => import('#controllers/store_owner/mark_ready_controller')
 const SODeliverOrderController = () => import('#controllers/store_owner/deliver_order_controller')
+const SOCancelOrderController = () => import('#controllers/store_owner/cancel_order_controller')
 const SOShowFinancialSettingsController = () =>
   import('#controllers/store_owner/show_financial_settings_controller')
 const SOUpdateFinancialSettingsController = () =>
@@ -217,6 +218,7 @@ export function registerStoreOwnerApiRoutes() {
         .as('storeOwner.orders.preparing')
       router.post('/orders/:id/ready', [SOMarkReadyController]).as('storeOwner.orders.ready')
       router.post('/orders/:id/deliver', [SODeliverOrderController]).as('storeOwner.orders.deliver')
+      router.post('/orders/:id/cancel', [SOCancelOrderController]).as('storeOwner.orders.cancel')
 
       // Financial
       router
