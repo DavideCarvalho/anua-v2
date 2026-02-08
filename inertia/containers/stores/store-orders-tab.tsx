@@ -40,15 +40,14 @@ import {
   useApproveStoreOrder,
   useRejectStoreOrder,
   useDeliverStoreOrder,
+  useCancelStoreOrder,
 } from '../../hooks/mutations/use_store_order_actions'
-import { useMarkPreparing, useMarkReady } from '../../hooks/mutations/use_store_owner_mutations'
+import { Label } from '../../components/ui/label'
 import {
   MoreHorizontal,
   CheckCircle,
   XCircle,
-  Package,
   Truck,
-  ChefHat,
   Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -117,19 +116,21 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
 function OrderActions({ order }: { order: Order }) {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
+  const [deliverDialogOpen, setDeliverDialogOpen] = useState(false)
+  const [deliveredAt, setDeliveredAt] = useState(() => new Date().toISOString().split('T')[0])
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
 
   const approveMutation = useApproveStoreOrder()
   const rejectMutation = useRejectStoreOrder()
-  const preparingMutation = useMarkPreparing()
-  const readyMutation = useMarkReady()
   const deliverMutation = useDeliverStoreOrder()
+  const cancelMutation = useCancelStoreOrder()
 
   const isPending =
     approveMutation.isPending ||
     rejectMutation.isPending ||
-    preparingMutation.isPending ||
-    readyMutation.isPending ||
-    deliverMutation.isPending
+    deliverMutation.isPending ||
+    cancelMutation.isPending
 
   const handleApprove = async () => {
     try {
@@ -151,43 +152,35 @@ function OrderActions({ order }: { order: Order }) {
     }
   }
 
-  const handlePreparing = async () => {
-    try {
-      await preparingMutation.mutateAsync(order.id)
-      toast.success('Pedido em preparação!')
-    } catch {
-      toast.error('Erro ao atualizar pedido')
-    }
-  }
-
-  const handleReady = async () => {
-    try {
-      await readyMutation.mutateAsync(order.id)
-      toast.success('Pedido pronto para entrega!')
-    } catch {
-      toast.error('Erro ao atualizar pedido')
-    }
-  }
-
   const handleDeliver = async () => {
     try {
-      await deliverMutation.mutateAsync(order.id)
+      await deliverMutation.mutateAsync({ id: order.id, deliveredAt })
       toast.success('Pedido marcado como entregue!')
+      setDeliverDialogOpen(false)
     } catch {
       toast.error('Erro ao atualizar pedido')
+    }
+  }
+
+  const handleCancel = async () => {
+    try {
+      await cancelMutation.mutateAsync({ id: order.id, reason: cancelReason })
+      toast.success('Pedido cancelado')
+      setCancelDialogOpen(false)
+      setCancelReason('')
+    } catch {
+      toast.error('Erro ao cancelar pedido')
     }
   }
 
   // Determina quais ações estão disponíveis baseado no status
   const canApprove = ['PENDING_PAYMENT', 'PENDING_APPROVAL'].includes(order.status)
   const canReject = ['PENDING_PAYMENT', 'PENDING_APPROVAL'].includes(order.status)
-  const canPrepare = order.status === 'APPROVED'
-  const canReady = order.status === 'PREPARING'
-  const canDeliver = order.status === 'READY'
-  const canCancel = false
+  const canDeliver = ['APPROVED', 'PREPARING', 'READY'].includes(order.status)
+  const canCancel = ['APPROVED', 'PREPARING', 'READY'].includes(order.status)
 
   // Se não há ações disponíveis, não mostra o dropdown
-  if (!canApprove && !canReject && !canPrepare && !canReady && !canDeliver && !canCancel) {
+  if (!canApprove && !canReject && !canDeliver && !canCancel) {
     return null
   }
 
@@ -210,20 +203,8 @@ function OrderActions({ order }: { order: Order }) {
               Aprovar Pedido
             </DropdownMenuItem>
           )}
-          {canPrepare && (
-            <DropdownMenuItem onClick={handlePreparing}>
-              <ChefHat className="h-4 w-4 mr-2 text-blue-600" />
-              Iniciar Preparo
-            </DropdownMenuItem>
-          )}
-          {canReady && (
-            <DropdownMenuItem onClick={handleReady}>
-              <Package className="h-4 w-4 mr-2 text-yellow-600" />
-              Marcar como Pronto
-            </DropdownMenuItem>
-          )}
           {canDeliver && (
-            <DropdownMenuItem onClick={handleDeliver}>
+            <DropdownMenuItem onClick={() => setDeliverDialogOpen(true)}>
               <Truck className="h-4 w-4 mr-2 text-green-600" />
               Marcar como Entregue
             </DropdownMenuItem>
@@ -232,6 +213,12 @@ function OrderActions({ order }: { order: Order }) {
             <DropdownMenuItem onClick={() => setRejectDialogOpen(true)}>
               <XCircle className="h-4 w-4 mr-2 text-red-600" />
               Rejeitar Pedido
+            </DropdownMenuItem>
+          )}
+          {canCancel && (
+            <DropdownMenuItem onClick={() => setCancelDialogOpen(true)}>
+              <XCircle className="h-4 w-4 mr-2 text-red-600" />
+              Cancelar Pedido
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -252,7 +239,7 @@ function OrderActions({ order }: { order: Order }) {
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
-              Cancelar
+              Voltar
             </Button>
             <Button
               variant="destructive"
@@ -261,6 +248,67 @@ function OrderActions({ order }: { order: Order }) {
             >
               {rejectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Rejeitar Pedido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deliverDialogOpen} onOpenChange={setDeliverDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Marcar como Entregue</DialogTitle>
+            <DialogDescription>
+              Informe a data de entrega do pedido {order.orderNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="deliveredAt">Data de entrega</Label>
+            <Input
+              id="deliveredAt"
+              type="date"
+              value={deliveredAt}
+              onChange={(e) => setDeliveredAt(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeliverDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleDeliver}
+              disabled={deliverMutation.isPending}
+            >
+              {deliverMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirmar Entrega
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar Pedido</DialogTitle>
+            <DialogDescription>
+              Informe o motivo do cancelamento do pedido {order.orderNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Motivo do cancelamento..."
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+              Voltar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={!cancelReason.trim() || cancelMutation.isPending}
+            >
+              {cancelMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cancelar Pedido
             </Button>
           </DialogFooter>
         </DialogContent>

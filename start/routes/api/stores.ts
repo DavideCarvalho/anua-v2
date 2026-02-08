@@ -64,6 +64,8 @@ const RejectStoreOrderController = () =>
   import('#controllers/store_orders/reject_store_order_controller')
 const DeliverStoreOrderController = () =>
   import('#controllers/store_orders/deliver_store_order_controller')
+const CancelStoreOrderController = () =>
+  import('#controllers/store_orders/cancel_store_order_controller')
 
 // Store Installment Rules
 const ListStoreInstallmentRulesController = () =>
@@ -170,6 +172,7 @@ export function registerStoreOrderApiRoutes() {
       router.post('/:id/approve', [ApproveStoreOrderController]).as('storeOrders.approve')
       router.post('/:id/reject', [RejectStoreOrderController]).as('storeOrders.reject')
       router.post('/:id/deliver', [DeliverStoreOrderController]).as('storeOrders.deliver')
+      router.post('/:id/cancel', [CancelStoreOrderController]).as('storeOrders.cancel')
     })
     .prefix('/store-orders')
     .use(middleware.auth())

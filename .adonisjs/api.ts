@@ -1804,8 +1804,12 @@ type ApiV1StoreordersIdRejectPost = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/reject_store_order_controller.ts').default['handle'], true>
 }
 type ApiV1StoreordersIdDeliverPost = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/deliver_store_order_controller.ts').default['handle'], false>
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['deliverStoreOrderValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/deliver_store_order_controller.ts').default['handle'], true>
+}
+type ApiV1StoreordersIdCancelPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['cancelStoreOrderValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/store_orders/cancel_store_order_controller.ts').default['handle'], true>
 }
 type ApiV1StoreinstallmentrulesGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/store.ts')['listStoreInstallmentRulesValidator']>>
@@ -4681,6 +4685,11 @@ export interface ApiDefinition {
             '$url': {
             };
             '$post': ApiV1StoreordersIdDeliverPost;
+          };
+          'cancel': {
+            '$url': {
+            };
+            '$post': ApiV1StoreordersIdCancelPost;
           };
         };
       };
@@ -8398,6 +8407,13 @@ const routes = [
     path: '/api/v1/store-orders/:id/deliver',
     method: ["POST"],
     types: {} as ApiV1StoreordersIdDeliverPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.storeOrders.cancel',
+    path: '/api/v1/store-orders/:id/cancel',
+    method: ["POST"],
+    types: {} as ApiV1StoreordersIdCancelPost,
   },
   {
     params: [],

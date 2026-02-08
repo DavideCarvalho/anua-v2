@@ -2,8 +2,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { ShoppingCart, Check, X, Truck, Clock, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toast } from 'sonner'
 
-import { useStoreOrdersQueryOptions, type StoreOrdersResponse } from '../../hooks/queries/use_store_orders'
+import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_store_orders'
 import {
   useApproveStoreOrder,
   useRejectStoreOrder,
@@ -45,6 +46,33 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const deliverMutation = useDeliverStoreOrder()
 
   const orders = data?.data ?? []
+
+  const handleApprove = async (id: string) => {
+    try {
+      await approveMutation.mutateAsync(id)
+      toast.success('Pedido aprovado!')
+    } catch {
+      toast.error('Erro ao aprovar pedido')
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    try {
+      await rejectMutation.mutateAsync({ id, reason: 'Rejeitado' })
+      toast.success('Pedido rejeitado')
+    } catch {
+      toast.error('Erro ao rejeitar pedido')
+    }
+  }
+
+  const handleDeliver = async (id: string) => {
+    try {
+      await deliverMutation.mutateAsync({ id })
+      toast.success('Pedido marcado como entregue!')
+    } catch {
+      toast.error('Erro ao entregar pedido')
+    }
+  }
 
   if (orders.length === 0) {
     return (
@@ -114,7 +142,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => approveMutation.mutate(order.id)}
+                            onClick={() => handleApprove(order.id)}
                             disabled={approveMutation.isPending}
                           >
                             <Check className="h-4 w-4 text-green-600" />
@@ -122,7 +150,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => rejectMutation.mutate({ id: order.id })}
+                            onClick={() => handleReject(order.id)}
                             disabled={rejectMutation.isPending}
                           >
                             <X className="h-4 w-4 text-red-600" />
@@ -133,7 +161,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => deliverMutation.mutate(order.id)}
+                          onClick={() => handleDeliver(order.id)}
                           disabled={deliverMutation.isPending}
                         >
                           <Truck className="h-4 w-4 mr-1" />

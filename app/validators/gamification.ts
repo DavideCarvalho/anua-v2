@@ -256,6 +256,18 @@ export const rejectStoreOrderValidator = vine.compile(
   })
 )
 
+export const cancelStoreOrderValidator = vine.compile(
+  vine.object({
+    reason: vine.string().trim().minLength(1).maxLength(500),
+  })
+)
+
+export const deliverStoreOrderValidator = vine.compile(
+  vine.object({
+    deliveredAt: vine.string().trim().optional(),
+  })
+)
+
 // ==========================================
 // Gamification Event Validators
 // ==========================================

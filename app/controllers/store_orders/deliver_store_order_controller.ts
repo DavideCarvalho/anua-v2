@@ -2,10 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
 import StoreOrderDto from '#models/dto/store_order.dto'
+import { deliverStoreOrderValidator } from '#validators/gamification'
 
 export default class DeliverStoreOrderController {
-  async handle({ params, auth, response }: HttpContext) {
+  async handle({ params, request, auth, response }: HttpContext) {
     const { id } = params
+    const payload = await request.validateUsing(deliverStoreOrderValidator)
 
     const order = await StoreOrder.find(id)
 
@@ -21,7 +23,9 @@ export default class DeliverStoreOrderController {
     }
 
     order.status = 'DELIVERED'
-    order.deliveredAt = DateTime.now()
+    order.deliveredAt = payload.deliveredAt
+      ? DateTime.fromISO(payload.deliveredAt)
+      : DateTime.now()
     order.deliveredBy = auth.user?.id ?? null
 
     await order.save()
