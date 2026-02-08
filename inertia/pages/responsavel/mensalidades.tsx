@@ -1,71 +1,27 @@
 import { Head } from '@inertiajs/react'
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { DollarSign, User, XCircle } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
-import { Button } from '../../components/ui/button'
 
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { StudentSelectorWithData } from '../../components/responsavel/student-selector'
+import { useSelectedStudent } from '../../hooks/use_selected_student'
 import {
   StudentPaymentsContainer,
   StudentPaymentsContainerSkeleton,
 } from '../../containers/responsavel/student-payments-container'
 
-function StudentSelector({
-  students,
-  selectedId,
-  onSelect,
-}: {
-  students: Array<{ id: string; name: string; className: string }>
-  selectedId: string | null
-  onSelect: (id: string) => void
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {students.map((student) => (
-        <Button
-          key={student.id}
-          variant={selectedId === student.id ? 'default' : 'outline'}
-          onClick={() => onSelect(student.id)}
-          className="gap-2"
-        >
-          <User className="h-4 w-4" />
-          {student.name}
-          <span className="text-xs opacity-70">({student.className})</span>
-        </Button>
-      ))}
-    </div>
-  )
-}
-
 function MensalidadesContent() {
-  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
-  const students = data?.students ?? []
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    students.length > 0 ? students[0].id : null
-  )
+  const { student, studentId, students, isLoaded, setDefaultStudent } = useSelectedStudent()
 
-  const selectedStudent = students.find((s) => s.id === selectedStudentId)
+  useEffect(() => {
+    setDefaultStudent()
+  }, [setDefaultStudent])
 
-  if (isLoading) {
+  if (!isLoaded) {
     return <MensalidadesSkeleton />
-  }
-
-  if (isError) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <XCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar dados</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
-          </p>
-        </CardContent>
-      </Card>
-    )
   }
 
   if (students.length === 0) {
@@ -88,21 +44,15 @@ function MensalidadesContent() {
         <Card>
           <CardContent className="py-4">
             <p className="mb-3 text-sm font-medium">Selecione um aluno:</p>
-            <StudentSelector
-              students={students}
-              selectedId={selectedStudentId}
-              onSelect={setSelectedStudentId}
-            />
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <StudentSelectorWithData />
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {selectedStudentId && selectedStudent && (
-        <StudentPaymentsContainer
-          studentId={selectedStudentId}
-          studentName={selectedStudent.name}
-        />
-      )}
+      {studentId && student && <StudentPaymentsContainer studentId={studentId} />}
     </div>
   )
 }
