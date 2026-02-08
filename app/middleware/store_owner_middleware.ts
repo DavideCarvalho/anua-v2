@@ -13,7 +13,7 @@ import Store from '#models/store'
 export default class StoreOwnerMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
     const { auth, request, response } = ctx
-    const user = auth.user
+    const user = ctx.effectiveUser ?? auth.user
 
     if (!user) {
       return response.unauthorized({ message: 'Não autenticado' })
