@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StoreOrder from '#models/store_order'
 import type { StoreOrderStatus } from '#models/store_order'
 import type { DateTime } from 'luxon'
+import StudentDto from './student.dto.js'
 
 export default class StoreOrderDto extends BaseModelDto {
   declare id: string
@@ -31,6 +32,7 @@ export default class StoreOrderDto extends BaseModelDto {
   declare settlementId: string | null
   declare createdAt: DateTime
   declare updatedAt: DateTime
+  declare student?: StudentDto
 
   constructor(model?: StoreOrder) {
     super()
@@ -64,5 +66,6 @@ export default class StoreOrderDto extends BaseModelDto {
     this.settlementId = model.settlementId
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
+    this.student = model.student ? new StudentDto(model.student) : undefined
   }
 }

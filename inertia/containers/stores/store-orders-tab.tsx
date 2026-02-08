@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import {
   Table,
@@ -8,12 +9,87 @@ import {
   TableRow,
 } from '../../components/ui/table'
 import { Badge } from '../../components/ui/badge'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog'
+import { Textarea } from '../../components/ui/textarea'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '../../lib/utils'
 import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_stores'
+import {
+  useApproveStoreOrder,
+  useRejectStoreOrder,
+  useDeliverStoreOrder,
+} from '../../hooks/mutations/use_store_order_actions'
+import { useMarkPreparing, useMarkReady } from '../../hooks/mutations/use_store_owner_mutations'
+import {
+  MoreHorizontal,
+  CheckCircle,
+  XCircle,
+  Package,
+  Truck,
+  ChefHat,
+  Loader2,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { useQueryStates, parseAsString } from 'nuqs'
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
+  return debouncedValue
+}
 
 interface StoreOrdersTabProps {
   storeId: string
+}
+
+type StoreOrderStatus =
+  | 'PENDING_PAYMENT'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'PREPARING'
+  | 'READY'
+  | 'DELIVERED'
+  | 'CANCELED'
+  | 'REJECTED'
+
+type StoreOrderPaymentMode = 'IMMEDIATE' | 'DEFERRED'
+
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  totalMoney: number
+  paymentMode: 'IMMEDIATE' | 'DEFERRED' | null
+  student?: {
+    user?: {
+      name?: string
+    }
+  }
 }
 
 const statusLabels: Record<string, string> = {
@@ -38,8 +114,188 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
   REJECTED: 'destructive',
 }
 
+function OrderActions({ order }: { order: Order }) {
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+
+  const approveMutation = useApproveStoreOrder()
+  const rejectMutation = useRejectStoreOrder()
+  const preparingMutation = useMarkPreparing()
+  const readyMutation = useMarkReady()
+  const deliverMutation = useDeliverStoreOrder()
+
+  const isPending =
+    approveMutation.isPending ||
+    rejectMutation.isPending ||
+    preparingMutation.isPending ||
+    readyMutation.isPending ||
+    deliverMutation.isPending
+
+  const handleApprove = async () => {
+    try {
+      await approveMutation.mutateAsync(order.id)
+      toast.success('Pedido aprovado com sucesso!')
+    } catch {
+      toast.error('Erro ao aprovar pedido')
+    }
+  }
+
+  const handleReject = async () => {
+    try {
+      await rejectMutation.mutateAsync({ id: order.id, reason: rejectReason })
+      toast.success('Pedido rejeitado')
+      setRejectDialogOpen(false)
+      setRejectReason('')
+    } catch {
+      toast.error('Erro ao rejeitar pedido')
+    }
+  }
+
+  const handlePreparing = async () => {
+    try {
+      await preparingMutation.mutateAsync(order.id)
+      toast.success('Pedido em preparação!')
+    } catch {
+      toast.error('Erro ao atualizar pedido')
+    }
+  }
+
+  const handleReady = async () => {
+    try {
+      await readyMutation.mutateAsync(order.id)
+      toast.success('Pedido pronto para entrega!')
+    } catch {
+      toast.error('Erro ao atualizar pedido')
+    }
+  }
+
+  const handleDeliver = async () => {
+    try {
+      await deliverMutation.mutateAsync(order.id)
+      toast.success('Pedido marcado como entregue!')
+    } catch {
+      toast.error('Erro ao atualizar pedido')
+    }
+  }
+
+  // Determina quais ações estão disponíveis baseado no status
+  const canApprove = ['PENDING_PAYMENT', 'PENDING_APPROVAL'].includes(order.status)
+  const canReject = ['PENDING_PAYMENT', 'PENDING_APPROVAL'].includes(order.status)
+  const canPrepare = order.status === 'APPROVED'
+  const canReady = order.status === 'PREPARING'
+  const canDeliver = order.status === 'READY'
+  const canCancel = false
+
+  // Se não há ações disponíveis, não mostra o dropdown
+  if (!canApprove && !canReject && !canPrepare && !canReady && !canDeliver && !canCancel) {
+    return null
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" disabled={isPending}>
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MoreHorizontal className="h-4 w-4" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {canApprove && (
+            <DropdownMenuItem onClick={handleApprove}>
+              <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+              Aprovar Pedido
+            </DropdownMenuItem>
+          )}
+          {canPrepare && (
+            <DropdownMenuItem onClick={handlePreparing}>
+              <ChefHat className="h-4 w-4 mr-2 text-blue-600" />
+              Iniciar Preparo
+            </DropdownMenuItem>
+          )}
+          {canReady && (
+            <DropdownMenuItem onClick={handleReady}>
+              <Package className="h-4 w-4 mr-2 text-yellow-600" />
+              Marcar como Pronto
+            </DropdownMenuItem>
+          )}
+          {canDeliver && (
+            <DropdownMenuItem onClick={handleDeliver}>
+              <Truck className="h-4 w-4 mr-2 text-green-600" />
+              Marcar como Entregue
+            </DropdownMenuItem>
+          )}
+          {canReject && (
+            <DropdownMenuItem onClick={() => setRejectDialogOpen(true)}>
+              <XCircle className="h-4 w-4 mr-2 text-red-600" />
+              Rejeitar Pedido
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rejeitar Pedido</DialogTitle>
+            <DialogDescription>
+              Informe o motivo da rejeição do pedido {order.orderNumber}.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Motivo da rejeição..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+              disabled={!rejectReason.trim() || rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Rejeitar Pedido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
 export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
-  const { data: orders, isLoading } = useQuery(useStoreOrdersQueryOptions({ storeId }))
+  const [filters, setFilters] = useQueryStates({
+    search: parseAsString,
+    status: parseAsString,
+    paymentMode: parseAsString,
+  })
+
+  const { search, status, paymentMode } = filters
+  const [searchInput, setSearchInput] = useState(search ?? '')
+  const debouncedSearch = useDebounce(searchInput, 300)
+
+  useEffect(() => {
+    setSearchInput(search ?? '')
+  }, [search])
+
+  useEffect(() => {
+    setFilters({ search: debouncedSearch ? debouncedSearch : null })
+  }, [debouncedSearch, setFilters])
+
+  const { data: orders, isLoading } = useQuery(
+    useStoreOrdersQueryOptions({
+      storeId,
+      status: (status as StoreOrderStatus | null) || undefined,
+      paymentMode: (paymentMode as StoreOrderPaymentMode | null) || undefined,
+      search: search || undefined,
+    })
+  )
 
   const ordersList = orders?.data ?? []
 
@@ -48,13 +304,60 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
       <CardHeader>
         <CardTitle>Pedidos</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-sm">
+            <Input
+              placeholder="Buscar por aluno..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </div>
+          <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+            <Select
+              value={paymentMode ?? 'all'}
+              onValueChange={(value) =>
+                setFilters({
+                  paymentMode: value === 'all' ? null : (value as StoreOrderPaymentMode),
+                })
+              }
+            >
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Pagamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="IMMEDIATE">Imediato</SelectItem>
+                <SelectItem value="DEFERRED">Na Fatura</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={status ?? 'all'}
+              onValueChange={(value) =>
+                setFilters({ status: value === 'all' ? null : (value as StoreOrderStatus) })
+              }
+            >
+              <SelectTrigger className="w-full md:w-[220px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="PENDING_PAYMENT">Aguardando Pgto</SelectItem>
+                <SelectItem value="PENDING_APPROVAL">Aguardando Aprovação</SelectItem>
+                <SelectItem value="APPROVED">Aprovado</SelectItem>
+                <SelectItem value="PREPARING">Preparando</SelectItem>
+                <SelectItem value="READY">Pronto</SelectItem>
+                <SelectItem value="DELIVERED">Entregue</SelectItem>
+                <SelectItem value="CANCELED">Cancelado</SelectItem>
+                <SelectItem value="REJECTED">Rejeitado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !ordersList.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum pedido encontrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -64,14 +367,13 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
                 <TableHead>Total</TableHead>
                 <TableHead>Pagamento</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ordersList.map((order) => (
+              {ordersList.map((order: Order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">
-                    {order.orderNumber}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
                   <TableCell>{order.student?.user?.name ?? '—'}</TableCell>
                   <TableCell>{formatCurrency(order.totalMoney)}</TableCell>
                   <TableCell>
@@ -83,6 +385,9 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
                     <Badge variant={statusVariants[order.status] ?? 'outline'}>
                       {statusLabels[order.status] ?? order.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <OrderActions order={order} />
                   </TableCell>
                 </TableRow>
               ))}

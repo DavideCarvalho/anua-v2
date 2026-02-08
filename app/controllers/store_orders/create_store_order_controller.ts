@@ -259,7 +259,7 @@ export default class CreateStoreOrderController {
       totalPoints,
       totalPrice: totalMoney,
       totalMoney,
-      status: 'PENDING_PAYMENT',
+      status: 'PENDING_APPROVAL',
       paymentMode: 'DEFERRED',
       paymentMethod: null,
       studentPaymentId,

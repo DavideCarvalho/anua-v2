@@ -212,7 +212,9 @@ export const createStoreOrderValidator = vine.compile(
 export const listStoreOrdersValidator = vine.compile(
   vine.object({
     schoolId: vine.string().trim().optional(),
+    storeId: vine.string().trim().optional(),
     studentId: vine.string().trim().optional(),
+    paymentMode: vine.enum(['IMMEDIATE', 'DEFERRED']).optional(),
     status: vine
       .enum([
         'PENDING_PAYMENT',

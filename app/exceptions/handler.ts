@@ -1,6 +1,8 @@
 import app from '@adonisjs/core/services/app'
 import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import { Exception } from '@adonisjs/core/exceptions'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
+import CheckoutException from './checkout_exception.js'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -30,7 +32,48 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
-    return super.handle(error, ctx)
+    const accepts = ctx.request.accepts(['html', 'json'])
+    if (accepts === 'html') {
+      return super.handle(error, ctx)
+    }
+
+    if (error instanceof CheckoutException) {
+      return ctx.response.status(error.status).json({
+        code: error.code,
+        description: error.description,
+        ...(error.meta && { meta: error.meta }),
+      })
+    }
+
+    const validationMessages = (error as { messages?: unknown }).messages
+    if (validationMessages) {
+      return ctx.response.status(422).json({
+        code: 'VALIDATION_ERROR',
+        description: 'Validation failed',
+        meta: { messages: validationMessages },
+      })
+    }
+
+    if (error instanceof Exception) {
+      const description =
+        app.inProduction && error.status >= 500 ? 'Internal server error' : error.message
+
+      return ctx.response.status(error.status).json({
+        code: (error as { code?: string }).code ?? error.name ?? 'ERROR',
+        description,
+      })
+    }
+
+    const status = (error as { status?: number }).status ?? 500
+    const description =
+      app.inProduction && status >= 500
+        ? 'Internal server error'
+        : ((error as { message?: string }).message ?? 'Internal server error')
+
+    return ctx.response.status(status).json({
+      code: 'INTERNAL_SERVER_ERROR',
+      description,
+    })
   }
 
   /**

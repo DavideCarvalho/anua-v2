@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
+import StoreOrderDto from '#models/dto/store_order.dto'
 
 export default class DeliverStoreOrderController {
   async handle({ params, auth, response }: HttpContext) {
@@ -25,11 +26,13 @@ export default class DeliverStoreOrderController {
 
     await order.save()
 
-    await order.load('student')
+    await order.load('student', (studentQuery) => {
+      studentQuery.preload('user')
+    })
     await order.load('items', (query) => {
       query.preload('storeItem')
     })
 
-    return response.ok(order)
+    return response.ok(new StoreOrderDto(order))
   }
 }
