@@ -13,10 +13,6 @@ export default class SchedulerServe extends BaseCommand {
   }
 
   async run() {
-    this.logger.info('Starting scheduler with health check server...')
-
-    // Start a simple HTTP server for Cloud Run health checks
-    // Cloud Run sets PORT=8080 by default
     const healthPort = process.env.PORT || 8080
     const healthServer = createServer((req, res) => {
       if (req.url === '/' || req.url === '/health') {
@@ -28,11 +24,8 @@ export default class SchedulerServe extends BaseCommand {
       }
     })
 
-    healthServer.listen(healthPort, () => {
-      this.logger.info(`Health check server listening on port ${healthPort}`)
-    })
+    healthServer.listen(healthPort)
 
-    // Spawn the actual scheduler:run command
     const scheduler = spawn('node', ['ace', 'scheduler:run'], {
       stdio: 'inherit',
       cwd: process.cwd(),
@@ -44,14 +37,11 @@ export default class SchedulerServe extends BaseCommand {
     })
 
     scheduler.on('exit', (code) => {
-      this.logger.info(`Scheduler exited with code ${code}`)
       healthServer.close()
       process.exit(code || 0)
     })
 
-    // Handle graceful shutdown
     const shutdown = () => {
-      this.logger.info('Shutting down...')
       scheduler.kill('SIGTERM')
       healthServer.close()
     }

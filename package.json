@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
-    "dev": "concurrently -k -n server,queue,scheduler -c blue,magenta,yellow \"node ace serve --hmr\" \"PORT=3334 DISABLE_SCHEDULER=1 NODE_DEBUG=boringnode:queue node ace queue:work\" \"node ace scheduler:run\"",
+    "dev": "concurrently -k -n server,queue,scheduler -c blue,magenta,yellow \"node ace serve --hmr\" \"PORT=3334 DISABLE_SCHEDULER=1 node ace queue:work\" \"node ace scheduler:run\"",
     "dev:server": "node ace serve --hmr",
     "dev:queue": "DISABLE_SCHEDULER=1 node ace queue:work",
     "dev:scheduler": "node ace scheduler:run",

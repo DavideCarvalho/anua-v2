@@ -14,7 +14,9 @@ export default class CheckQueue extends BaseCommand {
     const jobs = await db.from('queue_jobs').select('*')
     this.logger.info(`Jobs found: ${jobs.length}`)
     for (const j of jobs) {
-      this.logger.info(JSON.stringify({ id: j.id, queue: j.queue, status: j.status, score: j.score }))
+      this.logger.info(
+        JSON.stringify({ id: j.id, queue: j.queue, status: j.status, score: j.score })
+      )
     }
   }
 }

@@ -1,4 +1,5 @@
 import { Job } from '@boringnode/queue'
+import locks from '@adonisjs/lock/services/main'
 import StudentPayment from '#models/student_payment'
 import GenerateInvoices from '#start/jobs/generate_invoices'
 import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
@@ -23,7 +24,11 @@ export default class ReconcilePaymentInvoiceJob extends Job<ReconcilePaymentInvo
 
   static options = {
     queue: 'payments',
-    maxRetries: 3,
+    maxRetries: 5,
+    backoff: {
+      type: 'exponential',
+      delay: 1000,
+    },
   }
 
   async execute(): Promise<void> {
@@ -40,24 +45,32 @@ export default class ReconcilePaymentInvoiceJob extends Job<ReconcilePaymentInvo
     }
 
     try {
-      const payment = await StudentPayment.find(paymentId)
-      if (!payment) {
-        console.warn(`[RECONCILE] Payment ${paymentId} not found - skipping`)
-        return
-      }
-
-      // Store triggeredBy in metadata if provided
-      if (triggeredBy) {
-        payment.metadata = {
-          ...(payment.metadata || {}),
-          lastTriggeredBy: triggeredBy,
-          lastTriggeredAt: new Date().toISOString(),
-          lastTriggeredSource: source,
+      const lock = locks.createLock(`reconcile-payment:${paymentId}`, '30s')
+      const [executed] = await lock.run(async () => {
+        const payment = await StudentPayment.find(paymentId)
+        if (!payment) {
+          console.warn(`[RECONCILE] Payment ${paymentId} not found - skipping`)
+          return
         }
-        await payment.save()
-      }
 
-      await GenerateInvoices.reconcilePayment(payment)
+        // Store triggeredBy in metadata if provided
+        if (triggeredBy) {
+          payment.metadata = {
+            ...(payment.metadata || {}),
+            lastTriggeredBy: triggeredBy,
+            lastTriggeredAt: new Date().toISOString(),
+            lastTriggeredSource: source,
+          }
+          await payment.save()
+        }
+
+        await GenerateInvoices.reconcilePayment(payment)
+      })
+
+      if (!executed) {
+        console.warn(`[RECONCILE] Lock not acquired for payment ${paymentId} - retrying`)
+        throw new Error(`Lock not acquired for payment ${paymentId}`)
+      }
     } finally {
       clearAuditContext()
     }

@@ -16,7 +16,8 @@ export default class ReconcileStudentInvoicesCommand extends BaseCommand {
   declare studentId: string
 
   @flags.number({
-    description: 'Month to reconcile (1-12). If not specified, reconciles all months with payments.',
+    description:
+      'Month to reconcile (1-12). If not specified, reconciles all months with payments.',
   })
   declare month?: number
 
@@ -31,10 +32,7 @@ export default class ReconcileStudentInvoicesCommand extends BaseCommand {
 
     // Verify student exists
     const { default: Student } = await import('#models/student')
-    const student = await Student.query()
-      .where('id', this.studentId)
-      .preload('user')
-      .first()
+    const student = await Student.query().where('id', this.studentId).preload('user').first()
 
     if (!student) {
       this.logger.error(`Student not found: ${this.studentId}`)
@@ -73,10 +71,14 @@ export default class ReconcileStudentInvoicesCommand extends BaseCommand {
       try {
         await GenerateInvoices.reconcilePayment(payment)
         reconciled++
-        this.logger.info(`  ✓ Payment ${payment.id} (${payment.month}/${payment.year} - ${payment.type})`)
+        this.logger.info(
+          `  ✓ Payment ${payment.id} (${payment.month}/${payment.year} - ${payment.type})`
+        )
       } catch (error) {
         errors++
-        this.logger.error(`  ✗ Payment ${payment.id}: ${error instanceof Error ? error.message : String(error)}`)
+        this.logger.error(
+          `  ✗ Payment ${payment.id}: ${error instanceof Error ? error.message : String(error)}`
+        )
       }
     }
 

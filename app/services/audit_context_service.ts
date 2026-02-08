@@ -39,10 +39,7 @@ export function clearAuditContext(): void {
  * Helper to run a function with a specific audit context.
  * Automatically clears the context when done.
  */
-export async function withAuditContext<T>(
-  context: AuditContext,
-  fn: () => Promise<T>
-): Promise<T> {
+export async function withAuditContext<T>(context: AuditContext, fn: () => Promise<T>): Promise<T> {
   setAuditContext(context)
   try {
     return await fn()

@@ -71,6 +71,7 @@ export default defineConfig({
       environment: ['console'],
     },
     () => import('@stouder-io/adonis-auditing/auditing_provider'),
+    () => import('#providers/queue_provider'),
   ],
 
   /*
