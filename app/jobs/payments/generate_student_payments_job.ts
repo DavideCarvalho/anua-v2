@@ -21,6 +21,8 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
   static options = {
     queue: 'payments',
     maxRetries: 3,
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {

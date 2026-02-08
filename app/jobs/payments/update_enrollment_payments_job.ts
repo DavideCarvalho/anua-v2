@@ -26,8 +26,8 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     retry: {
       maxRetries: 3,
     },
-    removeOnComplete: { age: '24h' }, // Keep completed jobs for 24h
-    removeOnFail: { age: '24h' }, // Keep failed jobs for 24h
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {

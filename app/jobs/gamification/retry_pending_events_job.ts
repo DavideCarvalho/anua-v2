@@ -9,6 +9,8 @@ export default class RetryPendingEventsJob extends Job<void> {
   static options = {
     queue: 'gamification',
     maxRetries: 1,
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {

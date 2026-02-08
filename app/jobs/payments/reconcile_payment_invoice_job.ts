@@ -29,6 +29,8 @@ export default class ReconcilePaymentInvoiceJob extends Job<ReconcilePaymentInvo
       type: 'exponential',
       delay: 1000,
     },
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {

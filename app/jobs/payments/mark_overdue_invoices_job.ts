@@ -9,6 +9,8 @@ export default class MarkOverdueInvoicesJob extends Job<MarkOverdueInvoicesPaylo
   static options = {
     queue: 'payments',
     maxRetries: 2,
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {

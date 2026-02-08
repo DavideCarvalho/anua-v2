@@ -13,6 +13,8 @@ export default class GenerateInvoicesJob extends Job<GenerateInvoicesPayload> {
   static options = {
     queue: 'payments',
     maxRetries: 2,
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {

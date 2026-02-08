@@ -6,6 +6,8 @@ export default class UpdateStreaksJob extends Job<void> {
   static options = {
     queue: 'gamification',
     maxRetries: 3,
+    removeOnComplete: { count: 1000 },
+    removeOnFail: { count: 1000 },
   }
 
   async execute(): Promise<void> {
