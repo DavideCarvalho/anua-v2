@@ -10,6 +10,7 @@ import Level from './level.js'
 import AcademicPeriod from './academic_period.js'
 import Contract from './contract.js'
 import Scholarship from './scholarship.js'
+import IndividualDiscount from './individual_discount.js'
 import Class_ from './class.js'
 import StudentPayment from './student_payment.js'
 
@@ -115,4 +116,77 @@ export default class StudentHasLevel extends compose(BaseModel, Auditable) {
 
   @hasMany(() => StudentPayment, { foreignKey: 'studentHasLevelId' })
   declare studentPayments: HasMany<typeof StudentPayment>
+
+  @hasMany(() => IndividualDiscount, { foreignKey: 'studentHasLevelId' })
+  declare individualDiscounts: HasMany<typeof IndividualDiscount>
+
+  /**
+   * Get the total discount for enrollment considering both scholarship and individual discounts
+   */
+  async getTotalEnrollmentDiscount(
+    originalValue: number
+  ): Promise<{ value: number; percentage: number }> {
+    let discountedValue = originalValue
+
+    // Apply scholarship discount first if exists
+    if (this.scholarship) {
+      discountedValue = this.scholarship.calculateDiscountedEnrollmentValue(discountedValue)
+    }
+
+    // Apply individual discounts
+    const individualDiscounts = await IndividualDiscount.query()
+      .where('studentHasLevelId', this.id)
+      .where('isActive', true)
+      .whereNull('deletedAt')
+
+    for (const discount of individualDiscounts) {
+      if (discount.isValid()) {
+        discountedValue = discount.calculateDiscountedEnrollmentValue(discountedValue)
+      }
+    }
+
+    const totalDiscountValue = originalValue - discountedValue
+    const totalDiscountPercentage =
+      originalValue > 0 ? Math.round((totalDiscountValue / originalValue) * 100) : 0
+
+    return {
+      value: Math.max(0, discountedValue),
+      percentage: totalDiscountPercentage,
+    }
+  }
+
+  /**
+   * Get the total discount for monthly fee considering both scholarship and individual discounts
+   */
+  async getTotalMonthlyDiscount(
+    originalValue: number
+  ): Promise<{ value: number; percentage: number }> {
+    let discountedValue = originalValue
+
+    // Apply scholarship discount first if exists
+    if (this.scholarship) {
+      discountedValue = this.scholarship.calculateDiscountedMonthlyValue(discountedValue)
+    }
+
+    // Apply individual discounts
+    const individualDiscounts = await IndividualDiscount.query()
+      .where('studentHasLevelId', this.id)
+      .where('isActive', true)
+      .whereNull('deletedAt')
+
+    for (const discount of individualDiscounts) {
+      if (discount.isValid()) {
+        discountedValue = discount.calculateDiscountedMonthlyValue(discountedValue)
+      }
+    }
+
+    const totalDiscountValue = originalValue - discountedValue
+    const totalDiscountPercentage =
+      originalValue > 0 ? Math.round((totalDiscountValue / originalValue) * 100) : 0
+
+    return {
+      value: Math.max(0, discountedValue),
+      percentage: totalDiscountPercentage,
+    }
+  }
 }

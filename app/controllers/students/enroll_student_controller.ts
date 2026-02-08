@@ -13,6 +13,7 @@ import StudentEmergencyContact from '#models/student_emergency_contact'
 import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasAcademicPeriod from '#models/student_has_academic_period'
 import StudentHasLevel from '#models/student_has_level'
+import IndividualDiscount from '#models/individual_discount'
 import AcademicPeriod from '#models/academic_period'
 import Class_ from '#models/class'
 import Level from '#models/level'
@@ -23,7 +24,7 @@ import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments
 
 export default class EnrollStudentController {
   async handle(ctx: HttpContext) {
-    const { request, response } = ctx
+    const { request, response, auth } = ctx
 
     const data = await request.validateUsing(enrollStudentValidator)
 
@@ -377,6 +378,42 @@ export default class EnrollStudentController {
               { client: trx }
             )
             createdStudentHasLevelId = studentHasLevel.id
+
+            // Create individual discounts if provided
+            if (data.billing.individualDiscounts && data.billing.individualDiscounts.length > 0) {
+              for (const discountData of data.billing.individualDiscounts) {
+                await IndividualDiscount.create(
+                  {
+                    id: uuidv7(),
+                    name: discountData.name,
+                    description: discountData.description || null,
+                    discountType: discountData.discountType,
+                    discountPercentage:
+                      discountData.discountType === 'PERCENTAGE'
+                        ? (discountData.discountPercentage ?? 0)
+                        : null,
+                    enrollmentDiscountPercentage:
+                      discountData.discountType === 'PERCENTAGE'
+                        ? (discountData.enrollmentDiscountPercentage ?? 0)
+                        : null,
+                    discountValue:
+                      discountData.discountType === 'FLAT'
+                        ? (discountData.discountValue ?? 0)
+                        : null,
+                    enrollmentDiscountValue:
+                      discountData.discountType === 'FLAT'
+                        ? (discountData.enrollmentDiscountValue ?? 0)
+                        : null,
+                    isActive: true,
+                    schoolId: schoolId,
+                    studentId: student.id,
+                    studentHasLevelId: studentHasLevel.id,
+                    createdById: auth.user!.id,
+                  },
+                  { client: trx }
+                )
+              }
+            }
           }
         }
       }

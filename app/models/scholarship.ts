@@ -5,6 +5,7 @@ import School from './school.js'
 import SchoolPartner from './school_partner.js'
 
 export type ScholarshipType = 'PHILANTHROPIC' | 'DISCOUNT' | 'COMPANY_PARTNERSHIP' | 'FREE'
+export type DiscountType = 'PERCENTAGE' | 'FLAT'
 
 export default class Scholarship extends BaseModel {
   static table = 'Scholarship'
@@ -34,6 +35,15 @@ export default class Scholarship extends BaseModel {
   @column({ columnName: 'discountPercentage' })
   declare discountPercentage: number
 
+  @column({ columnName: 'enrollmentDiscountValue' })
+  declare enrollmentDiscountValue: number | null
+
+  @column({ columnName: 'discountValue' })
+  declare discountValue: number | null
+
+  @column({ columnName: 'discountType' })
+  declare discountType: DiscountType
+
   @column({ columnName: 'type' })
   declare type: ScholarshipType
 
@@ -51,4 +61,44 @@ export default class Scholarship extends BaseModel {
 
   @belongsTo(() => SchoolPartner, { foreignKey: 'schoolPartnerId' })
   declare schoolPartner: BelongsTo<typeof SchoolPartner>
+
+  /**
+   * Calculate discounted enrollment value based on discount type
+   */
+  calculateDiscountedEnrollmentValue(originalValue: number): number {
+    if (this.discountType === 'FLAT' && this.enrollmentDiscountValue) {
+      return Math.max(0, originalValue - this.enrollmentDiscountValue)
+    }
+    return Math.round(originalValue * (1 - this.enrollmentDiscountPercentage / 100))
+  }
+
+  /**
+   * Calculate discounted monthly value based on discount type
+   */
+  calculateDiscountedMonthlyValue(originalValue: number): number {
+    if (this.discountType === 'FLAT' && this.discountValue) {
+      return Math.max(0, originalValue - this.discountValue)
+    }
+    return Math.round(originalValue * (1 - this.discountPercentage / 100))
+  }
+
+  /**
+   * Get the effective discount percentage for display
+   */
+  getEffectiveEnrollmentDiscountPercentage(originalValue: number): number {
+    if (this.discountType === 'FLAT' && this.enrollmentDiscountValue) {
+      return Math.round((this.enrollmentDiscountValue / originalValue) * 100)
+    }
+    return this.enrollmentDiscountPercentage
+  }
+
+  /**
+   * Get the effective discount percentage for monthly fee
+   */
+  getEffectiveDiscountPercentage(originalValue: number): number {
+    if (this.discountType === 'FLAT' && this.discountValue) {
+      return Math.round((this.discountValue / originalValue) * 100)
+    }
+    return this.discountPercentage
+  }
 }

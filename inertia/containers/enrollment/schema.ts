@@ -170,6 +170,23 @@ export const enrollmentSchema = z.object({
     scholarshipId: z.string().nullable().optional(),
     discountPercentage: z.number().min(0).max(100).optional().default(0),
     enrollmentDiscountPercentage: z.number().min(0).max(100).optional().default(0),
+
+    // Individual Discounts
+    individualDiscounts: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          name: z.string().min(1, 'Nome do desconto é obrigatório'),
+          description: z.string().optional(),
+          discountType: z.enum(['PERCENTAGE', 'FLAT']),
+          discountPercentage: z.number().min(0).max(100).optional(),
+          enrollmentDiscountPercentage: z.number().min(0).max(100).optional(),
+          discountValue: z.number().min(0).optional(),
+          enrollmentDiscountValue: z.number().min(0).optional(),
+        })
+      )
+      .optional()
+      .default([]),
   }),
 })
 

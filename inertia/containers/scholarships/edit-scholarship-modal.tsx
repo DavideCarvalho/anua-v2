@@ -31,10 +31,13 @@ import { useUpdateScholarshipMutation } from '../../hooks/mutations/use_update_s
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  discountPercentage: z.preprocess((v) => Number(v), z.number().min(0).max(100)),
+  discountType: z.enum(['PERCENTAGE', 'FLAT']),
+  discountPercentage: z.preprocess((v) => Number(v), z.number().min(0).max(100)).optional(),
   enrollmentDiscountPercentage: z
     .preprocess((v) => Number(v), z.number().min(0).max(100))
     .optional(),
+  discountValue: z.preprocess((v) => Number(v), z.number().min(0)).optional(),
+  enrollmentDiscountValue: z.preprocess((v) => Number(v), z.number().min(0)).optional(),
   type: z.enum(['PHILANTHROPIC', 'DISCOUNT', 'COMPANY_PARTNERSHIP', 'FREE']),
   description: z.string().optional(),
   schoolPartnerId: z.string().optional(),
@@ -72,8 +75,11 @@ export function EditScholarshipModal({
     resolver: zodResolver(schema) as any,
     defaultValues: {
       name: '',
+      discountType: 'PERCENTAGE',
       discountPercentage: 0,
       enrollmentDiscountPercentage: 0,
+      discountValue: 0,
+      enrollmentDiscountValue: 0,
       type: 'PHILANTHROPIC',
       description: '',
       schoolPartnerId: undefined,
@@ -81,13 +87,19 @@ export function EditScholarshipModal({
     },
   })
 
+  const discountType = form.watch('discountType')
+  const isFlat = discountType === 'FLAT'
+
   useEffect(() => {
     if (!scholarship) return
 
     form.reset({
       name: scholarship.name,
-      discountPercentage: scholarship.discountPercentage,
+      discountType: scholarship.discountType ?? 'PERCENTAGE',
+      discountPercentage: scholarship.discountPercentage ?? 0,
       enrollmentDiscountPercentage: scholarship.enrollmentDiscountPercentage ?? 0,
+      discountValue: scholarship.discountValue ?? 0,
+      enrollmentDiscountValue: scholarship.enrollmentDiscountValue ?? 0,
       type: scholarship.type,
       description: scholarship.description ?? '',
       schoolPartnerId: scholarship.schoolPartnerId ?? undefined,
@@ -96,18 +108,27 @@ export function EditScholarshipModal({
   }, [scholarship, form])
 
   async function handleSubmit(values: FormValues) {
+    const payload: any = {
+      name: values.name,
+      discountType: values.discountType,
+      type: values.type,
+      description: values.description,
+      schoolPartnerId: values.schoolPartnerId,
+      code: values.code || undefined,
+    }
+
+    if (values.discountType === 'PERCENTAGE') {
+      payload.discountPercentage = values.discountPercentage ?? 0
+      payload.enrollmentDiscountPercentage = values.enrollmentDiscountPercentage ?? 0
+    } else {
+      payload.discountValue = values.discountValue ?? 0
+      payload.enrollmentDiscountValue = values.enrollmentDiscountValue ?? 0
+    }
+
     const promise = updateScholarship
       .mutateAsync({
         params: { id: scholarshipId },
-        body: {
-          name: values.name,
-          discountPercentage: values.discountPercentage,
-          enrollmentDiscountPercentage: values.enrollmentDiscountPercentage ?? 0,
-          type: values.type,
-          description: values.description,
-          schoolPartnerId: values.schoolPartnerId,
-          code: values.code || undefined,
-        },
+        body: payload,
       })
       .then(() => {
         toast.success('Bolsa editada com sucesso!')
@@ -149,40 +170,109 @@ export function EditScholarshipModal({
 
             <FormField
               control={form.control}
-              name="discountPercentage"
+              name="discountType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Desconto (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
+                  <FormLabel>Tipo de Desconto</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de desconto" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="PERCENTAGE">Porcentagem (%)</SelectItem>
+                      <SelectItem value="FLAT">Valor Fixo (R$)</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="enrollmentDiscountPercentage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Desconto Matrícula (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      value={field.value ?? 0}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isFlat ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="discountValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Mensalidade (R$)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="enrollmentDiscountValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Matrícula (R$)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            ) : (
+              <>
+                <FormField
+                  control={form.control}
+                  name="discountPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Mensalidade (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="enrollmentDiscountPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Matrícula (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             <FormField
               control={form.control}
@@ -208,7 +298,6 @@ export function EditScholarshipModal({
               )}
             />
 
-
             <FormField
               control={form.control}
               name="code"
@@ -216,11 +305,7 @@ export function EditScholarshipModal({
                 <FormItem>
                   <FormLabel>Código (opcional)</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Ex: XPTO20"
-                      disabled={autoGenerateCode}
-                    />
+                    <Input {...field} placeholder="Ex: XPTO20" disabled={autoGenerateCode} />
                   </FormControl>
                   <div className="flex items-center gap-2 mt-2">
                     <Checkbox

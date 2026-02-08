@@ -1,13 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import {
   Select,
   SelectContent,
@@ -29,6 +23,7 @@ import {
   DiscountComparison,
   RequiredDocumentsList,
 } from '~/components/enrollment'
+import { IndividualDiscountsSection } from '../components/individual-discounts-section'
 import type { AcademicPeriodSegment } from '~/lib/formatters'
 import type { EnrollmentFormData, PaymentMethod } from '../schema'
 
@@ -45,9 +40,7 @@ export function BillingStep() {
   const courseId = form.watch('billing.courseId')
   const levelId = form.watch('billing.levelId')
 
-  const { data: academicPeriodsData } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 50 })
-  )
+  const { data: academicPeriodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 50 }))
 
   const { data: coursesData, isLoading: isLoadingCourses } = useQuery({
     ...useAcademicPeriodCoursesQueryOptions(academicPeriodId),
@@ -93,8 +86,7 @@ export function BillingStep() {
     const endDate = new Date(String(selectedPeriod.endDate))
     const now = new Date()
     const monthsDiff =
-      (endDate.getFullYear() - now.getFullYear()) * 12 +
-      (endDate.getMonth() - now.getMonth())
+      (endDate.getFullYear() - now.getFullYear()) * 12 + (endDate.getMonth() - now.getMonth())
     return Math.min(Math.max(monthsDiff, 1), contractData.installments)
   }, [selectedPeriod?.endDate, contractData])
 
@@ -326,12 +318,17 @@ export function BillingStep() {
                 originalMonthlyFee={contractData.amount}
                 enrollmentDiscountPercentage={enrollmentDiscountPercentage}
                 monthlyDiscountPercentage={discountPercentage}
-                installments={contractData.paymentType === 'MONTHLY' ? 12 : form.watch('billing.installments')}
+                installments={
+                  contractData.paymentType === 'MONTHLY' ? 12 : form.watch('billing.installments')
+                }
               />
             )}
           </CardContent>
         </Card>
       )}
+
+      {/* Individual Discounts */}
+      {contractData && <IndividualDiscountsSection />}
 
       {/* Payment Info - Only show if contract exists */}
       {contractData && (
@@ -383,7 +380,9 @@ export function BillingStep() {
                       </FormControl>
                       <SelectContent>
                         {(contractData.paymentDays?.length
-                          ? contractData.paymentDays.map((pd: { day: number }) => pd.day).sort((a: number, b: number) => a - b)
+                          ? contractData.paymentDays
+                              .map((pd: { day: number }) => pd.day)
+                              .sort((a: number, b: number) => a - b)
                           : [5, 10, 15, 20]
                         ).map((day: number) => (
                           <SelectItem key={day} value={day.toString()}>

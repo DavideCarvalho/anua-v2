@@ -31,10 +31,13 @@ import { useSchoolPartnersForSelectQueryOptions } from '../../hooks/queries/use_
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  discountPercentage: z.preprocess((v) => Number(v), z.number().min(0).max(100)),
+  discountType: z.enum(['PERCENTAGE', 'FLAT']),
+  discountPercentage: z.preprocess((v) => Number(v), z.number().min(0).max(100)).optional(),
   enrollmentDiscountPercentage: z
     .preprocess((v) => Number(v), z.number().min(0).max(100))
     .optional(),
+  discountValue: z.preprocess((v) => Number(v), z.number().min(0)).optional(),
+  enrollmentDiscountValue: z.preprocess((v) => Number(v), z.number().min(0)).optional(),
   type: z.enum(['PHILANTHROPIC', 'DISCOUNT', 'COMPANY_PARTNERSHIP', 'FREE']),
   description: z.string().optional(),
   schoolPartnerId: z.string().optional(),
@@ -64,29 +67,42 @@ export function NewScholarshipModal({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
     defaultValues: {
+      discountType: 'PERCENTAGE',
       discountPercentage: 0,
       enrollmentDiscountPercentage: 0,
+      discountValue: 0,
+      enrollmentDiscountValue: 0,
       type: 'PHILANTHROPIC',
       code: '',
     },
   })
 
+  const discountType = form.watch('discountType')
+  const isFlat = discountType === 'FLAT'
+
   async function handleSubmit(values: FormValues) {
-    const promise = createScholarship
-      .mutateAsync({
-        name: values.name,
-        discountPercentage: values.discountPercentage,
-        enrollmentDiscountPercentage: values.enrollmentDiscountPercentage ?? 0,
-        type: values.type,
-        description: values.description,
-        schoolPartnerId: values.schoolPartnerId,
-        code: values.code || undefined,
-      })
-      .then(() => {
-        form.reset()
-        onSubmit()
-        toast.success('Bolsa criada com sucesso!')
-      })
+    const payload: any = {
+      name: values.name,
+      discountType: values.discountType,
+      type: values.type,
+      description: values.description,
+      schoolPartnerId: values.schoolPartnerId,
+      code: values.code || undefined,
+    }
+
+    if (values.discountType === 'PERCENTAGE') {
+      payload.discountPercentage = values.discountPercentage ?? 0
+      payload.enrollmentDiscountPercentage = values.enrollmentDiscountPercentage ?? 0
+    } else {
+      payload.discountValue = values.discountValue ?? 0
+      payload.enrollmentDiscountValue = values.enrollmentDiscountValue ?? 0
+    }
+
+    const promise = createScholarship.mutateAsync(payload).then(() => {
+      form.reset()
+      onSubmit()
+      toast.success('Bolsa criada com sucesso!')
+    })
 
     toast.promise(promise, {
       loading: 'Criando bolsa...',
@@ -121,40 +137,109 @@ export function NewScholarshipModal({
 
             <FormField
               control={form.control}
-              name="discountPercentage"
+              name="discountType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Desconto Mensalidade (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
+                  <FormLabel>Tipo de Desconto</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de desconto" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="PERCENTAGE">Porcentagem (%)</SelectItem>
+                      <SelectItem value="FLAT">Valor Fixo (R$)</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="enrollmentDiscountPercentage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Desconto Matrícula (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      value={field.value ?? 0}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isFlat ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="discountValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Mensalidade (R$)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="enrollmentDiscountValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Matrícula (R$)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            ) : (
+              <>
+                <FormField
+                  control={form.control}
+                  name="discountPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Mensalidade (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="enrollmentDiscountPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Matrícula (%)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             <FormField
               control={form.control}

@@ -11,6 +11,9 @@ export default class UpdateScholarshipController {
       return response.notFound({ message: 'Bolsa não encontrada' })
     }
 
+    const discountType = payload.discountType ?? scholarship.discountType
+    const isFlat = discountType === 'FLAT'
+
     scholarship.merge({
       name: payload.name ?? scholarship.name,
       type: payload.type ?? scholarship.type,
@@ -22,6 +25,17 @@ export default class UpdateScholarshipController {
         payload.enrollmentDiscountPercentage !== undefined
           ? payload.enrollmentDiscountPercentage
           : scholarship.enrollmentDiscountPercentage,
+      discountValue: isFlat
+        ? payload.discountValue !== undefined
+          ? payload.discountValue
+          : scholarship.discountValue
+        : null,
+      enrollmentDiscountValue: isFlat
+        ? payload.enrollmentDiscountValue !== undefined
+          ? payload.enrollmentDiscountValue
+          : scholarship.enrollmentDiscountValue
+        : null,
+      discountType,
       description:
         payload.description !== undefined ? (payload.description ?? null) : scholarship.description,
       schoolPartnerId:

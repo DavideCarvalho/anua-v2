@@ -8,11 +8,16 @@ import {
 import { Label } from '~/components/ui/label'
 import { GraduationCap } from 'lucide-react'
 
+type DiscountType = 'PERCENTAGE' | 'FLAT'
+
 interface Scholarship {
   id: string
   name: string
   discountPercentage: number
   enrollmentDiscountPercentage: number
+  discountValue: number | null
+  enrollmentDiscountValue: number | null
+  discountType: DiscountType
   type: string
 }
 
@@ -46,26 +51,33 @@ export function ScholarshipSelector({
         <GraduationCap className="h-4 w-4" />
         Aplicar Bolsa (opcional)
       </Label>
-      <Select
-        value={value || 'none'}
-        onValueChange={handleChange}
-        disabled={disabled || isLoading}
-      >
+      <Select value={value || 'none'} onValueChange={handleChange} disabled={disabled || isLoading}>
         <SelectTrigger>
-          <SelectValue
-            placeholder={isLoading ? 'Carregando bolsas...' : 'Selecione uma bolsa'}
-          />
+          <SelectValue placeholder={isLoading ? 'Carregando bolsas...' : 'Selecione uma bolsa'} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">Sem bolsa</SelectItem>
-          {scholarships.map((scholarship) => (
-            <SelectItem key={scholarship.id} value={scholarship.id}>
-              {scholarship.name} ({scholarship.discountPercentage}% mensalidade
-              {scholarship.enrollmentDiscountPercentage > 0 &&
-                `, ${scholarship.enrollmentDiscountPercentage}% matrícula`}
-              )
-            </SelectItem>
-          ))}
+          {scholarships.map((scholarship) => {
+            const isFlat = scholarship.discountType === 'FLAT'
+            const monthlyDiscount =
+              isFlat && scholarship.discountValue
+                ? `R$ ${(scholarship.discountValue / 100).toFixed(2).replace('.', ',')}`
+                : `${scholarship.discountPercentage}%`
+            const enrollmentDiscount =
+              isFlat && scholarship.enrollmentDiscountValue
+                ? `R$ ${(scholarship.enrollmentDiscountValue / 100).toFixed(2).replace('.', ',')}`
+                : `${scholarship.enrollmentDiscountPercentage}%`
+
+            return (
+              <SelectItem key={scholarship.id} value={scholarship.id}>
+                {scholarship.name} ({monthlyDiscount} mensalidade
+                {scholarship.enrollmentDiscountPercentage > 0 || scholarship.enrollmentDiscountValue
+                  ? `, ${enrollmentDiscount} matrícula`
+                  : ''}
+                )
+              </SelectItem>
+            )
+          })}
         </SelectContent>
       </Select>
     </div>

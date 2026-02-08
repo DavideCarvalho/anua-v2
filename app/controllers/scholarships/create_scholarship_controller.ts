@@ -11,12 +11,18 @@ export default class CreateScholarshipController {
       return response.badRequest({ message: 'Usuário não possui escola' })
     }
 
+    const discountType = payload.discountType ?? 'PERCENTAGE'
+    const isFlat = discountType === 'FLAT'
+
     const scholarship = await Scholarship.create({
       schoolId,
       name: payload.name,
       type: payload.type,
-      discountPercentage: payload.discountPercentage,
-      enrollmentDiscountPercentage: payload.enrollmentDiscountPercentage ?? 0,
+      discountPercentage: isFlat ? 0 : (payload.discountPercentage ?? 0),
+      enrollmentDiscountPercentage: isFlat ? 0 : (payload.enrollmentDiscountPercentage ?? 0),
+      discountValue: isFlat ? (payload.discountValue ?? 0) : null,
+      enrollmentDiscountValue: isFlat ? (payload.enrollmentDiscountValue ?? 0) : null,
+      discountType,
       description: payload.description ?? null,
       schoolPartnerId: payload.schoolPartnerId ?? null,
       code: payload.code ?? null,

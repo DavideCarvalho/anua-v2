@@ -123,27 +123,27 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
     const now = DateTime.now()
     const installments = studentHasLevel.installments ?? contract.installments ?? 1
     const paymentDay = await this.getPaymentDay(studentHasLevel, contract)
-    const discountPercentage = studentHasLevel.scholarship?.discountPercentage ?? 0
 
     // Calculate installment amount
     const totalAmount = contract.ammount
     const installmentAmount = Math.floor(totalAmount / installments)
-    const discountedAmount = Math.round(installmentAmount * (1 - discountPercentage / 100))
+
+    // Calculate total discounted amount using the new methods
+    const { value: discountedInstallmentAmount, percentage: discountPercentage } =
+      await studentHasLevel.getTotalMonthlyDiscount(installmentAmount)
 
     console.log('[WORKER] Generating upfront payments:', {
       studentHasLevelId: studentHasLevel.id,
       installments,
       installmentAmount,
-      discountedAmount,
+      discountedInstallmentAmount,
+      discountPercentage,
     })
 
     // Generate enrollment payment (first payment)
     const enrollmentValue = contract.enrollmentValue ?? installmentAmount
-    const enrollmentDiscountPercentage =
-      studentHasLevel.scholarship?.enrollmentDiscountPercentage ?? 0
-    const discountedEnrollmentValue = Math.round(
-      enrollmentValue * (1 - enrollmentDiscountPercentage / 100)
-    )
+    const { value: discountedEnrollmentValue, percentage: enrollmentDiscountPercentage } =
+      await studentHasLevel.getTotalEnrollmentDiscount(enrollmentValue)
 
     await StudentPayment.create({
       id: uuidv7(),
@@ -172,7 +172,7 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
         studentHasLevelId: studentHasLevel.id,
         contractId: contract.id,
         type: 'COURSE',
-        amount: discountedAmount,
+        amount: discountedInstallmentAmount,
         totalAmount: installmentAmount,
         month: dueDate.month,
         year: dueDate.year,
@@ -196,10 +196,12 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
   ): Promise<void> {
     const now = DateTime.now()
     const paymentDay = await this.getPaymentDay(studentHasLevel, contract)
-    const discountPercentage = studentHasLevel.scholarship?.discountPercentage ?? 0
 
     const monthlyAmount = contract.ammount
-    const discountedAmount = Math.round(monthlyAmount * (1 - discountPercentage / 100))
+
+    // Calculate total discounted amount using the new methods
+    const { value: discountedAmount, percentage: discountPercentage } =
+      await studentHasLevel.getTotalMonthlyDiscount(monthlyAmount)
 
     // Determine start date (either now or academic period start, whichever is later)
     const startDate =
@@ -214,6 +216,7 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
       monthsDiff,
       monthlyAmount,
       discountedAmount,
+      discountPercentage,
       startDate: startDate.toISODate(),
       endDate: endDate.toISODate(),
     })

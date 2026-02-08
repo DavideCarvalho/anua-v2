@@ -187,6 +187,20 @@ export const enrollStudentValidator = vine.compile(
       installments: vine.number().min(1).max(12).optional(),
       enrollmentInstallments: vine.number().min(1).max(12).optional(),
       scholarshipId: vine.string().trim().optional().nullable(),
+      individualDiscounts: vine
+        .array(
+          vine.object({
+            id: vine.string().uuid().optional(),
+            name: vine.string().trim(),
+            description: vine.string().trim().optional(),
+            discountType: vine.enum(['PERCENTAGE', 'FLAT']),
+            discountPercentage: vine.number().min(0).max(100).optional(),
+            enrollmentDiscountPercentage: vine.number().min(0).max(100).optional(),
+            discountValue: vine.number().min(0).optional(),
+            enrollmentDiscountValue: vine.number().min(0).optional(),
+          })
+        )
+        .optional(),
     }),
   })
 )

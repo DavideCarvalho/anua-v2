@@ -7,6 +7,8 @@ const scholarshipTypeEnum = vine.enum([
   'FREE',
 ] as const)
 
+const discountTypeEnum = vine.enum(['PERCENTAGE', 'FLAT'] as const)
+
 export const listScholarshipsValidator = vine.compile(
   vine.object({
     schoolId: vine.string().trim().optional(),
@@ -20,8 +22,11 @@ export const listScholarshipsValidator = vine.compile(
 export const createScholarshipValidator = vine.compile(
   vine.object({
     name: vine.string().trim(),
-    discountPercentage: vine.number().min(0).max(100),
+    discountPercentage: vine.number().min(0).max(100).optional(),
     enrollmentDiscountPercentage: vine.number().min(0).max(100).optional(),
+    discountValue: vine.number().min(0).optional(),
+    enrollmentDiscountValue: vine.number().min(0).optional(),
+    discountType: discountTypeEnum.optional(),
     type: scholarshipTypeEnum,
     description: vine.string().trim().optional(),
     schoolPartnerId: vine.string().trim().optional(),
@@ -34,6 +39,9 @@ export const updateScholarshipValidator = vine.compile(
     name: vine.string().trim().optional(),
     discountPercentage: vine.number().min(0).max(100).optional(),
     enrollmentDiscountPercentage: vine.number().min(0).max(100).optional(),
+    discountValue: vine.number().min(0).optional(),
+    enrollmentDiscountValue: vine.number().min(0).optional(),
+    discountType: discountTypeEnum.optional(),
     type: scholarshipTypeEnum.optional(),
     description: vine.string().trim().optional(),
     schoolPartnerId: vine.string().trim().optional(),
