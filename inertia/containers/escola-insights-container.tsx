@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Brain,
   CheckCircle2,
+  Package,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -34,6 +35,7 @@ const iconMap: Record<string, LucideIcon> = {
   'file-signature': FileSignature,
   'user-clock': Clock,
   'user-x': UserX,
+  'package': Package,
 }
 
 // Priority colors
@@ -123,6 +125,8 @@ function InsightDetailModal({
         return '/escola/administrativo/alunos'
       case 'high-absence-rate':
         return '/escola/pedagogico/frequencia'
+      case 'pending-delivery-orders':
+        return '/escola/lojas'
       default:
         return null
     }
@@ -149,7 +153,8 @@ function InsightDetailModal({
           <div className="text-center py-6">
             <div className="text-4xl font-bold mb-2">{insight.value}</div>
             <p className="text-sm text-muted-foreground">
-              {insight.type === 'financial' && 'pagamento(s)'}
+              {insight.id === 'pending-delivery-orders' && 'pedido(s)'}
+              {insight.type === 'financial' && insight.id !== 'pending-delivery-orders' && 'pagamento(s)'}
               {insight.type === 'enrollment' && 'pendência(s)'}
               {insight.type === 'academic' && 'aluno(s)'}
             </p>

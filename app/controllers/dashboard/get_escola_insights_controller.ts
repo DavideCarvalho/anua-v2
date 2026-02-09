@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
 import StudentDocument from '#models/student_document'
 import StudentHasLevel from '#models/student_has_level'
+import StoreOrder from '#models/store_order'
 import db from '@adonisjs/lucid/services/db'
 
 type InsightPriority = 'high' | 'medium' | 'low'
@@ -247,6 +248,43 @@ export default class GetEscolaInsightsController {
         icon: 'user-x',
         metadata: {
           studentIds: studentsWithHighAbsence.map((s) => s.studentId),
+        },
+      })
+    }
+
+    // ============================================
+    // STORE INSIGHTS
+    // ============================================
+
+    // 7. Store orders pending delivery (APPROVED but not yet delivered)
+    const pendingDeliveryOrders = await StoreOrder.query()
+      .where('schoolId', schoolId)
+      .where('status', 'APPROVED')
+
+    if (pendingDeliveryOrders.length > 0) {
+      let totalDaysWaiting = 0
+      for (const order of pendingDeliveryOrders) {
+        const approvedDate = order.approvedAt ?? order.updatedAt
+        const daysWaiting = Math.floor(today.diff(approvedDate, 'days').days)
+        totalDaysWaiting += daysWaiting
+      }
+      const avgDaysWaiting = Math.round(totalDaysWaiting / pendingDeliveryOrders.length)
+
+      let priority: InsightPriority = 'low'
+      if (avgDaysWaiting >= 7) priority = 'high'
+      else if (avgDaysWaiting >= 3) priority = 'medium'
+
+      insights.push({
+        id: 'pending-delivery-orders',
+        type: 'financial',
+        priority,
+        title: 'Pedidos Pendentes de Entrega',
+        value: pendingDeliveryOrders.length,
+        description: `${pendingDeliveryOrders.length} pedido(s) aprovado(s) aguardando entrega (média ${avgDaysWaiting} dias)`,
+        icon: 'package',
+        metadata: {
+          avgDaysWaiting,
+          orderIds: pendingDeliveryOrders.map((o) => o.id),
         },
       })
     }
