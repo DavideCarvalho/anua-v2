@@ -8,6 +8,7 @@ resource "google_project_service" "required_apis" {
     "artifactregistry.googleapis.com",
     "secretmanager.googleapis.com",
     "iamcredentials.googleapis.com",
+    "cloudscheduler.googleapis.com",
   ])
 
   service            = each.key

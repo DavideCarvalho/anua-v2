@@ -52,7 +52,7 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy all services to Cloud Run (parallel)
+      - name: Deploy services and update jobs (parallel)
         run: |
           # Deploy API
           gcloud run services update ${{ env.SERVICE_NAME }} \
@@ -70,11 +70,20 @@ jobs:
             --platform=managed \
             --quiet &
 
-          # Deploy Scheduler
-          gcloud run services update production-anua-v2-scheduler \
+          # Update Cloud Run Jobs with new image
+          gcloud run jobs update production-anua-v2-dispatch-missing-payments \
             --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --region=${{ env.REGION }} \
-            --platform=managed \
+            --quiet &
+
+          gcloud run jobs update production-anua-v2-dispatch-invoices \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --quiet &
+
+          gcloud run jobs update production-anua-v2-dispatch-overdue \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
             --quiet &
 
           # Wait for all deployments to complete
@@ -85,4 +94,3 @@ jobs:
           echo "Deployed services:"
           echo "API: $(gcloud run services describe ${{ env.SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')"
           echo "Queue Worker: $(gcloud run services describe production-anua-v2-queue-worker --region=${{ env.REGION }} --format='value(status.url)')"
-          echo "Scheduler: $(gcloud run services describe production-anua-v2-scheduler --region=${{ env.REGION }} --format='value(status.url)')"
