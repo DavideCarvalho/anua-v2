@@ -127,3 +127,18 @@ export async function hasRecentCode(email: string): Promise<boolean> {
 
   return !!hasRecent
 }
+
+/**
+ * Limpa estado de verificacao para um email (codigo + rate limit)
+ * Util quando o envio de email falha apos gerar o OTP.
+ */
+export async function clearVerificationState(email: string): Promise<void> {
+  const codes = getVerificationCodesNamespace()
+  const rateLimit = getRateLimitNamespace()
+  const normalizedEmail = email.toLowerCase().trim()
+
+  await Promise.all([
+    codes.delete({ key: normalizedEmail }),
+    rateLimit.delete({ key: normalizedEmail }),
+  ])
+}
