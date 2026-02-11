@@ -35,7 +35,6 @@ export default class ShowTurmaSituacaoPageController {
       return response.notFound('Curso não está vinculado a este período letivo')
     }
 
-    // Find the class by slug
     const classRecord = await Class_.query().where('slug', classSlug).first()
 
     if (!classRecord) {
