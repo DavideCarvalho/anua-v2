@@ -150,9 +150,9 @@ export default class GetStudentOccurrencesController {
       resolved: Number(summaryRow?.total || 0) - Number(unacknowledgedRow?.count || 0),
       dismissed: 0,
       critical: 0,
-      high: Number(summaryRow?.behavior || 0),
-      medium: Number(summaryRow?.performance || 0) + Number(summaryRow?.absence || 0),
-      low: Number(summaryRow?.late || 0) + Number(summaryRow?.other || 0),
+      high: 0,
+      medium: Number(summaryRow?.total || 0),
+      low: 0,
       unacknowledged: Number(unacknowledgedRow?.count || 0),
     })
 
