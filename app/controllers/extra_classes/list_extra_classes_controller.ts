@@ -4,7 +4,7 @@ import ExtraClassDto from '#models/dto/extra_class.dto'
 import { listExtraClassesValidator } from '#validators/extra_class'
 
 export default class ListExtraClassesController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, selectedSchoolIds }: HttpContext) {
     const data = await request.validateUsing(listExtraClassesValidator)
 
     const page = data.page ?? 1
@@ -18,8 +18,18 @@ export default class ListExtraClassesController {
       .withCount('enrollments', (q) => q.whereNull('cancelledAt'))
       .orderBy('name', 'asc')
 
+    let schoolIds = selectedSchoolIds
+
     if (data.schoolId) {
-      query.where('schoolId', data.schoolId)
+      if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
+        schoolIds = [data.schoolId]
+      } else {
+        schoolIds = selectedSchoolIds.includes(data.schoolId) ? [data.schoolId] : []
+      }
+    }
+
+    if (schoolIds && schoolIds.length > 0) {
+      query.whereIn('schoolId', schoolIds)
     }
 
     if (data.academicPeriodId) {
