@@ -25,7 +25,8 @@ export type NotificationType =
   | 'STORE_ORDER_STATUS'
   | 'ABSENCE_REPORTED'
   | 'SCHEDULE_CHANGED'
-  | 'GENERAL_ANNOUNCEMENT'
+  | 'SYSTEM_ANNOUNCEMENT'
+  | 'MAINTENANCE_SCHEDULED'
 
 export default class Notification extends BaseModel {
   static table = 'Notification'

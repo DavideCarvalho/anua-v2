@@ -34,11 +34,17 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
   PAYMENT_RECEIVED: CreditCard,
   PAYMENT_OVERDUE: CreditCard,
   EVENT_CREATED: MessageSquare,
+  SYSTEM_ANNOUNCEMENT: Bell,
   GENERAL_ANNOUNCEMENT: Bell,
 }
 
 function NotificacoesContent() {
-  const { data: rawNotificationsData, isLoading, isError, error } = useQuery(useNotificationsQueryOptions())
+  const {
+    data: rawNotificationsData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery(useNotificationsQueryOptions())
   const notificationsData = rawNotificationsData as any
 
   if (isLoading) {
@@ -50,7 +56,8 @@ function NotificacoesContent() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Erro ao carregar notificações: {error instanceof Error ? error.message : 'Erro desconhecido'}
+          Erro ao carregar notificações:{' '}
+          {error instanceof Error ? error.message : 'Erro desconhecido'}
         </AlertDescription>
       </Alert>
     )

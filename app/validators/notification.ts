@@ -23,7 +23,8 @@ const notificationTypes = [
   'STORE_ORDER_STATUS',
   'ABSENCE_REPORTED',
   'SCHEDULE_CHANGED',
-  'GENERAL_ANNOUNCEMENT',
+  'SYSTEM_ANNOUNCEMENT',
+  'MAINTENANCE_SCHEDULED',
 ] as const
 
 const notificationChannels = ['IN_APP', 'EMAIL', 'PUSH', 'SMS', 'WHATSAPP'] as const

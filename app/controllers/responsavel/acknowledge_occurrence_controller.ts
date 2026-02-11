@@ -61,7 +61,7 @@ export default class AcknowledgeOccurrenceController {
       await Notification.create({
         id: randomUUID(),
         userId: teacherHasClass.teacherId,
-        type: 'SYSTEM_ANNOUNCEMENT' as Notification['type'],
+        type: 'SYSTEM_ANNOUNCEMENT',
         title: 'Ocorrencia reconhecida por responsavel',
         message: 'Um responsavel confirmou a leitura de uma ocorrencia registrada.',
         data: {

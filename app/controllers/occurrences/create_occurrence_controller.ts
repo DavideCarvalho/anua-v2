@@ -65,7 +65,7 @@ export default class CreateOccurrenceController {
         Notification.create({
           id: randomUUID(),
           userId: relation.responsibleId,
-          type: 'GENERAL_ANNOUNCEMENT',
+          type: 'SYSTEM_ANNOUNCEMENT',
           title: 'Nova ocorrencia registrada',
           message: `Foi registrada uma ocorrencia para ${student.user?.name || 'o aluno'}.`,
           data: {
