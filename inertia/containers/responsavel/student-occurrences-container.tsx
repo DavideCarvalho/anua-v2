@@ -48,25 +48,25 @@ interface StudentOccurrencesContainerProps {
 }
 
 const TYPE_CONFIG = {
-  BEHAVIORAL: { label: 'Comportamental', icon: AlertTriangle, color: 'text-yellow-600' },
-  ACADEMIC: { label: 'Academica', icon: Info, color: 'text-blue-600' },
-  HEALTH: { label: 'Saude', icon: AlertCircle, color: 'text-red-600' },
-  ATTENDANCE: { label: 'Frequencia', icon: Clock, color: 'text-purple-600' },
-  OTHER: { label: 'Outro', icon: Info, color: 'text-gray-600' },
+  BEHAVIORAL: { label: 'Comportamental', icon: AlertTriangle, color: 'text-foreground' },
+  ACADEMIC: { label: 'Academica', icon: Info, color: 'text-primary' },
+  HEALTH: { label: 'Saude', icon: AlertCircle, color: 'text-destructive' },
+  ATTENDANCE: { label: 'Frequencia', icon: Clock, color: 'text-muted-foreground' },
+  OTHER: { label: 'Outro', icon: Info, color: 'text-muted-foreground' },
 }
 
 const SEVERITY_CONFIG = {
-  LOW: { label: 'Baixa', className: 'bg-green-100 text-green-700 border-green-200' },
-  MEDIUM: { label: 'Media', className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  HIGH: { label: 'Alta', className: 'bg-orange-100 text-orange-700 border-orange-200' },
-  CRITICAL: { label: 'Critica', className: 'bg-red-100 text-red-700 border-red-200' },
+  LOW: { label: 'Baixa', variant: 'secondary' as const },
+  MEDIUM: { label: 'Media', variant: 'outline' as const },
+  HIGH: { label: 'Alta', variant: 'default' as const },
+  CRITICAL: { label: 'Critica', variant: 'destructive' as const },
 }
 
 const STATUS_CONFIG = {
-  OPEN: { label: 'Aberta', icon: AlertCircle, className: 'bg-yellow-100 text-yellow-700' },
-  IN_PROGRESS: { label: 'Em andamento', icon: Clock, className: 'bg-blue-100 text-blue-700' },
-  RESOLVED: { label: 'Resolvida', icon: CheckCircle2, className: 'bg-green-100 text-green-700' },
-  DISMISSED: { label: 'Arquivada', icon: XCircle, className: 'bg-gray-100 text-gray-700' },
+  OPEN: { label: 'Aberta', icon: AlertCircle, variant: 'secondary' as const },
+  IN_PROGRESS: { label: 'Em andamento', icon: Clock, variant: 'outline' as const },
+  RESOLVED: { label: 'Resolvida', icon: CheckCircle2, variant: 'default' as const },
+  DISMISSED: { label: 'Arquivada', icon: XCircle, variant: 'outline' as const },
 }
 
 export function StudentOccurrencesContainer({
@@ -136,8 +136,8 @@ export function StudentOccurrencesContainer({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-blue-600" />
+              <div className="rounded-lg bg-primary/10 p-2">
+                <AlertTriangle className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.summary.total}</p>
@@ -150,8 +150,8 @@ export function StudentOccurrencesContainer({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
+              <div className="p-2 rounded-lg bg-muted">
+                <AlertCircle className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.summary.open}</p>
@@ -164,8 +164,8 @@ export function StudentOccurrencesContainer({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Clock className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Clock className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.summary.inProgress}</p>
@@ -178,8 +178,8 @@ export function StudentOccurrencesContainer({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <div className="p-2 rounded-lg bg-primary/10">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.summary.resolved}</p>
@@ -192,8 +192,8 @@ export function StudentOccurrencesContainer({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertOctagon className="h-5 w-5 text-red-600" />
+              <div className="p-2 rounded-lg bg-destructive/10">
+                <AlertOctagon className="h-5 w-5 text-destructive" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{data.summary.critical + data.summary.high}</p>
@@ -272,7 +272,7 @@ export function StudentOccurrencesContainer({
         <CardContent>
           {!hasOccurrences ? (
             <div className="py-12 text-center">
-              <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
+              <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
               <h3 className="mt-4 text-lg font-semibold">Nenhuma ocorrencia</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {typeFilter !== 'all' || statusFilter !== 'all' || severityFilter !== 'all'
@@ -299,7 +299,7 @@ export function StudentOccurrencesContainer({
                     value={occurrence.id}
                     className={cn(
                       'border rounded-lg px-4',
-                      needsAcknowledgment && 'border-yellow-300 bg-yellow-50'
+                      needsAcknowledgment && 'border-primary/30 bg-primary/5'
                     )}
                   >
                     <AccordionTrigger className="hover:no-underline py-4">
@@ -309,17 +309,17 @@ export function StudentOccurrencesContainer({
                             <TypeIcon className={cn('h-4 w-4', typeConfig?.color)} />
                             <span className="font-medium text-left">{occurrence.title}</span>
                             {needsAcknowledgment && (
-                              <Badge variant="outline" className="bg-yellow-100 text-yellow-700">
+                              <Badge variant="secondary">
                                 <Eye className="h-3 w-3 mr-1" />
                                 Pendente
                               </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant="outline" className={severityConfig?.className}>
+                            <Badge variant={severityConfig?.variant ?? 'outline'}>
                               {severityConfig?.label}
                             </Badge>
-                            <Badge variant="outline" className={statusConfig?.className}>
+                            <Badge variant={statusConfig?.variant ?? 'outline'}>
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {statusConfig?.label}
                             </Badge>
@@ -332,7 +332,9 @@ export function StudentOccurrencesContainer({
                       <div className="space-y-4 pt-2">
                         <div>
                           <h4 className="text-sm font-medium text-muted-foreground">Descricao</h4>
-                          <p className="mt-1 text-sm whitespace-pre-wrap">{occurrence.description}</p>
+                          <p className="mt-1 text-sm whitespace-pre-wrap">
+                            {occurrence.description}
+                          </p>
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-3">
@@ -357,15 +359,13 @@ export function StudentOccurrencesContainer({
                         </div>
 
                         {occurrence.resolutionNotes && (
-                          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                            <h4 className="text-sm font-medium text-green-800">
-                              Resolucao
-                            </h4>
-                            <p className="mt-1 text-sm text-green-700">
+                          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                            <h4 className="text-sm font-medium text-primary">Resolucao</h4>
+                            <p className="mt-1 text-sm text-foreground">
                               {occurrence.resolutionNotes}
                             </p>
                             {occurrence.resolverName && (
-                              <p className="mt-2 text-xs text-green-600">
+                              <p className="mt-2 text-xs text-muted-foreground">
                                 Resolvido por {occurrence.resolverName} em{' '}
                                 {brazilianDateFormatter(String(occurrence.resolvedAt))}
                               </p>
