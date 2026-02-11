@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import ListClassesResponseDto from './dtos/list_classes_response.dto.js'
-import db from '@adonisjs/lucid/services/db'
 
 export default class ListClassesController {
   async handle(ctx: HttpContext) {
@@ -43,15 +42,13 @@ export default class ListClassesController {
     }
 
     if (academicPeriodId) {
-      // Find levels that belong to this academic period through the chain:
-      // AcademicPeriod -> CourseHasAcademicPeriod -> LevelAssignedToCourseHasAcademicPeriod -> Level
-      const levelIds = db
-        .from('LevelAssignedToCourseHasAcademicPeriod as la')
-        .innerJoin('CourseHasAcademicPeriod as ca', 'la.courseHasAcademicPeriodId', 'ca.id')
-        .where('ca.academicPeriodId', academicPeriodId)
-        .select('la.levelId')
-
-      query.whereIn('levelId', levelIds)
+      query.whereHas('academicPeriods', (periodQ) => {
+        periodQ.where('AcademicPeriod.id', academicPeriodId).whereNull('AcademicPeriod.deletedAt')
+      })
+    } else {
+      query.whereHas('academicPeriods', (periodQ) => {
+        periodQ.where('AcademicPeriod.isActive', true).whereNull('AcademicPeriod.deletedAt')
+      })
     }
 
     const classes = await query.paginate(page, limit)
