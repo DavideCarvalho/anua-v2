@@ -1,6 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Occurrence from '#models/occurrence'
+import Notification from '#models/notification'
+import TeacherHasClass from '#models/teacher_has_class'
+import ResponsibleUserAcceptedOccurence from '#models/responsible_user_accepted_occurence'
 import StudentHasResponsible from '#models/student_has_responsible'
+import { randomUUID } from 'node:crypto'
 
 export default class AcknowledgeOccurrenceController {
   async handle({ params, response, effectiveUser }: HttpContext) {
@@ -32,13 +36,51 @@ export default class AcknowledgeOccurrenceController {
       return response.notFound({ message: 'Ocorrencia nao encontrada' })
     }
 
-    // Note: The Occurrence model doesn't have acknowledgment fields
-    // This controller returns the occurrence data for viewing purposes
-    // Acknowledgment tracking would need to be implemented via a separate table
-    // or by adding fields to the Occurrence model
+    const existingAcknowledgement = await ResponsibleUserAcceptedOccurence.query()
+      .where('responsibleUserId', effectiveUser.id)
+      .where('occurenceId', occurrence.id)
+      .first()
+
+    if (!existingAcknowledgement) {
+      await ResponsibleUserAcceptedOccurence.create({
+        id: randomUUID(),
+        responsibleUserId: effectiveUser.id,
+        occurenceId: occurrence.id,
+      })
+    }
+
+    const teacherHasClass = await TeacherHasClass.query()
+      .where('id', occurrence.teacherHasClassId)
+      .first()
+
+    if (
+      !existingAcknowledgement &&
+      teacherHasClass?.teacherId &&
+      teacherHasClass.teacherId !== effectiveUser.id
+    ) {
+      await Notification.create({
+        id: randomUUID(),
+        userId: teacherHasClass.teacherId,
+        type: 'SYSTEM_ANNOUNCEMENT' as Notification['type'],
+        title: 'Ocorrencia reconhecida por responsavel',
+        message: 'Um responsavel confirmou a leitura de uma ocorrencia registrada.',
+        data: {
+          occurrenceId: occurrence.id,
+          studentId,
+          kind: 'occurrence_acknowledged',
+        },
+        isRead: false,
+        sentViaInApp: true,
+        sentViaEmail: false,
+        sentViaPush: false,
+        sentViaSms: false,
+        sentViaWhatsApp: false,
+        actionUrl: '/escola/pedagogico/ocorrencias',
+      })
+    }
 
     return response.ok({
-      message: 'Ocorrencia visualizada com sucesso',
+      message: 'Ocorrencia reconhecida com sucesso',
       occurrence: {
         id: occurrence.id,
         type: occurrence.type,

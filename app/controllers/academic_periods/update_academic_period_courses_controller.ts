@@ -6,6 +6,7 @@ import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_co
 import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
+import Level from '#models/level'
 import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
 
@@ -23,7 +24,10 @@ export default class UpdateAcademicPeriodCoursesController {
         courseId: string
         levels: Array<{
           id?: string
-          levelId: string
+          levelId?: string
+          name: string
+          order: number
+          contractId?: string
           isActive?: boolean
           classes?: Array<{
             id?: string
@@ -108,34 +112,71 @@ export default class UpdateAcademicPeriodCoursesController {
 
         // Create or update level assignments
         for (const levelData of courseData.levels) {
+          let levelId = levelData.levelId
+
+          if (!levelId) {
+            const existingLevel = await Level.query()
+              .where('schoolId', academicPeriod.schoolId)
+              .where('name', levelData.name)
+              .useTransaction(trx)
+              .first()
+
+            if (existingLevel) {
+              existingLevel.order = levelData.order
+              existingLevel.contractId = levelData.contractId ?? null
+              await existingLevel.save()
+              levelId = existingLevel.id
+            } else {
+              const newLevel = new Level()
+              newLevel.useTransaction(trx)
+              newLevel.id = uuidv7()
+              newLevel.name = levelData.name
+              newLevel.order = levelData.order
+              newLevel.contractId = levelData.contractId ?? null
+              newLevel.schoolId = academicPeriod.schoolId
+              newLevel.isActive = true
+              await newLevel.save()
+              levelId = newLevel.id
+            }
+          } else {
+            await Level.query()
+              .where('id', levelId)
+              .useTransaction(trx)
+              .update({
+                order: levelData.order,
+                contractId: levelData.contractId ?? null,
+              })
+          }
+
           if (levelData.id) {
             // Update existing
             await LevelAssignedToCourseHasAcademicPeriod.query()
               .where('id', levelData.id)
               .useTransaction(trx)
               .update({
+                levelId,
                 isActive: levelData.isActive ?? true,
               })
           } else {
             // Create new
             const la = new LevelAssignedToCourseHasAcademicPeriod()
             la.useTransaction(trx)
-            la.levelId = levelData.levelId
+            la.levelId = levelId
             la.courseHasAcademicPeriodId = cap.id
             la.isActive = levelData.isActive ?? true
             await la.save()
           }
 
           // Handle classes for this level
-          if (levelData.classes) {
+          if (levelData.classes && levelId) {
             // Get existing classes for this level in this academic period
             const existingClassesInPeriod = await ClassHasAcademicPeriod.query()
               .where('academicPeriodId', academicPeriod.id)
-              .preload('class', (q) => q.where('levelId', levelData.levelId))
+              .preload('class', (q) => q.where('levelId', levelId))
               .useTransaction(trx)
 
             const existingClassIds = existingClassesInPeriod
-              .filter((chap) => chap.class?.levelId === levelData.levelId)
+              .filter((chap) => chap.class?.levelId === levelId)
               .map((chap) => chap.classId)
 
             const incomingClassIds = levelData.classes
@@ -176,7 +217,7 @@ export default class UpdateAcademicPeriodCoursesController {
                 classEntity.useTransaction(trx)
                 classEntity.id = uuidv7()
                 classEntity.name = classData.name
-                classEntity.levelId = levelData.levelId
+                classEntity.levelId = levelId
                 classEntity.schoolId = academicPeriod.schoolId
                 classEntity.isArchived = false
                 await classEntity.save()
@@ -284,6 +325,7 @@ export default class UpdateAcademicPeriodCoursesController {
       courseId: cap.courseId,
       name: cap.course.name,
       levels: cap.levelAssignments
+        .filter((la) => la.isActive)
         .map((la) => {
           const levelClasses = classesMap.get(la.levelId) || []
           return {

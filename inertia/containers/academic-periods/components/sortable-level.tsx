@@ -5,7 +5,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
-import { GripVertical, Plus, Check, MoreVertical, ChevronDown } from 'lucide-react'
+import { GripVertical, Plus, Check, MoreVertical, ChevronDown, Trash2 } from 'lucide-react'
 
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -15,6 +15,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
 import { FormControl, FormField, FormItem } from '~/components/ui/form'
 import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
 import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
@@ -28,6 +39,7 @@ interface SortableLevelProps {
   courseIndex: number
   contracts: Array<{ id: string; name: string }>
   onCreateContract: () => void
+  onDeleteLevel: () => void
 }
 
 export function SortableLevel({
@@ -36,6 +48,7 @@ export function SortableLevel({
   courseIndex,
   contracts,
   onCreateContract,
+  onDeleteLevel,
 }: SortableLevelProps) {
   const { setValue, watch, control } = useFormContext<AcademicPeriodFormValues>()
   const contractId = watch(`courses.${courseIndex}.levels.${index}.contractId`)
@@ -63,7 +76,10 @@ export function SortableLevel({
     transition,
   }
 
-  const handleSaveClass = (data: { name: string; teachers: Array<{ teacherId: string; subjectId: string; subjectQuantity: number }> }) => {
+  const handleSaveClass = (data: {
+    name: string
+    teachers: Array<{ teacherId: string; subjectId: string; subjectQuantity: number }>
+  }) => {
     if (editingClassIndex !== null) {
       setValue(`courses.${courseIndex}.levels.${index}.classes.${editingClassIndex}`, data)
       setEditingClassIndex(null)
@@ -132,6 +148,36 @@ export function SortableLevel({
             <Plus className="mr-2 h-4 w-4" />
             Nova Turma
           </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir nível?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Essa ação vai remover o nível e as turmas vinculadas deste formulário.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={onDeleteLevel}
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 

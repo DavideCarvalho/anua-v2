@@ -9,9 +9,10 @@ interface Step {
 interface StepperProps {
   steps: Step[]
   currentStep: number
+  onStepClick?: (stepIndex: number) => void
 }
 
-export function Stepper({ steps, currentStep }: StepperProps) {
+export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
   return (
     <div className="flex items-center justify-center">
       {steps.map((step, index) => {
@@ -20,13 +21,19 @@ export function Stepper({ steps, currentStep }: StepperProps) {
 
         return (
           <div key={step.title} className="flex items-center">
-            <div className="flex flex-col items-center">
+            <button
+              type="button"
+              onClick={() => onStepClick?.(index)}
+              disabled={!onStepClick || isCurrent}
+              className="flex flex-col items-center disabled:cursor-default"
+            >
               <div
                 className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-medium',
+                  'flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors',
                   isCompleted && 'border-primary bg-primary text-primary-foreground',
                   isCurrent && 'border-primary text-primary',
-                  !isCompleted && !isCurrent && 'border-muted-foreground/25 text-muted-foreground'
+                  !isCompleted && !isCurrent && 'border-muted-foreground/25 text-muted-foreground',
+                  onStepClick && !isCurrent && 'hover:border-primary hover:text-primary'
                 )}
               >
                 {isCompleted ? <Check className="h-5 w-5" /> : index + 1}
@@ -43,7 +50,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                 </p>
                 <p className="text-xs text-muted-foreground">{step.description}</p>
               </div>
-            </div>
+            </button>
             {index < steps.length - 1 && (
               <div
                 className={cn(

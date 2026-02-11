@@ -6,29 +6,29 @@ import { ArrowLeft, Loader2 } from 'lucide-react'
 import { EscolaLayout } from '~/components/layouts'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
-import { tuyau } from '~/lib/api'
 import { EditAcademicPeriodForm } from '~/containers/academic-periods/edit-academic-period-form'
+import { useAcademicPeriodQueryOptions } from '~/hooks/queries/use_academic_period'
+import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
 
 interface Props {
   academicPeriodId: string
 }
 
 export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['academic-period', academicPeriodId, 'with-courses'],
-    queryFn: async () => {
-      // Fetch period data
-      const period = await tuyau.api.v1['academic-periods']({ id: academicPeriodId }).$get().unwrap()
+  const periodQuery = useQuery(useAcademicPeriodQueryOptions(academicPeriodId))
+  const coursesQuery = useQuery(
+    useAcademicPeriodCoursesQueryOptions(academicPeriodId, { isActive: true })
+  )
 
-      // Fetch courses
-      const courses = await tuyau.api.v1['academic-periods']({ id: academicPeriodId }).courses.$get().unwrap()
-
-      return {
-        ...period,
-        courses,
-      }
-    },
-  })
+  const isLoading = periodQuery.isLoading || coursesQuery.isLoading
+  const error = periodQuery.error || coursesQuery.error
+  const data =
+    periodQuery.data && coursesQuery.data
+      ? {
+          ...periodQuery.data,
+          courses: coursesQuery.data,
+        }
+      : undefined
 
   return (
     <EscolaLayout>
@@ -43,9 +43,7 @@ export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
           </Link>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Editar Período Letivo</h1>
-            {data && (
-              <p className="text-muted-foreground">{data.name}</p>
-            )}
+            {data && <p className="text-muted-foreground">{data.name}</p>}
           </div>
         </div>
 
@@ -73,7 +71,9 @@ export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
               slug: data.slug,
               startDate: String(data.startDate),
               endDate: String(data.endDate),
-              enrollmentStartDate: data.enrollmentStartDate ? String(data.enrollmentStartDate) : null,
+              enrollmentStartDate: data.enrollmentStartDate
+                ? String(data.enrollmentStartDate)
+                : null,
               enrollmentEndDate: data.enrollmentEndDate ? String(data.enrollmentEndDate) : null,
               isActive: data.isActive,
               isClosed: data.isClosed,

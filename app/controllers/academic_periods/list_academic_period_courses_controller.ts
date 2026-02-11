@@ -3,7 +3,17 @@ import AcademicPeriod from '#models/academic_period'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 
 export default class ListAcademicPeriodCoursesController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, request, response }: HttpContext) {
+    const qs = request.qs() as Record<string, any>
+    const rawIsActive = qs['levels.isActive'] ?? qs.levels?.isActive ?? qs.isActive
+
+    const levelsIsActive =
+      rawIsActive !== undefined
+        ? rawIsActive === true ||
+          String(rawIsActive).toLowerCase() === 'true' ||
+          rawIsActive === '1'
+        : undefined
+
     const academicPeriod = await AcademicPeriod.query()
       .where('id', params.id)
       .preload('courseAcademicPeriods', (courseQuery) => {
@@ -47,6 +57,7 @@ export default class ListAcademicPeriodCoursesController {
       courseId: cap.courseId,
       name: cap.course.name,
       levels: cap.levelAssignments
+        .filter((la) => (levelsIsActive === undefined ? true : la.isActive === levelsIsActive))
         .map((la) => {
           const levelClasses = classesMap.get(la.levelId) || []
           return {

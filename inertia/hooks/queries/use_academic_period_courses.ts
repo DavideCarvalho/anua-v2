@@ -1,11 +1,19 @@
 import { tuyau } from '../../lib/api'
+import type { QueryOptions } from '@tanstack/react-query'
+import type { InferResponseType } from '@tuyau/client'
 
-export function useAcademicPeriodCoursesQueryOptions(academicPeriodId: string) {
+const $route = tuyau.api.v1['academic-periods']
+
+type AcademicPeriodCoursesGet = ReturnType<typeof $route>['courses']['$get']
+export type AcademicPeriodCoursesResponse = InferResponseType<AcademicPeriodCoursesGet>
+type AcademicPeriodCoursesQuery = NonNullable<Parameters<AcademicPeriodCoursesGet>[0]>['query']
+
+export function useAcademicPeriodCoursesQueryOptions(
+  academicPeriodId: string,
+  query: AcademicPeriodCoursesQuery = {}
+) {
   return {
-    queryKey: ['academic-period', academicPeriodId, 'courses'],
-    queryFn: () => {
-      return tuyau.api.v1['academic-periods']({ id: academicPeriodId }).courses.$get().unwrap()
-    },
-    enabled: !!academicPeriodId,
-  }
+    queryKey: ['academic-period', academicPeriodId, 'courses', query],
+    queryFn: () => $route({ id: academicPeriodId }).courses.$get({ query }).unwrap(),
+  } satisfies QueryOptions<AcademicPeriodCoursesResponse>
 }

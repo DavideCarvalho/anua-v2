@@ -46,7 +46,7 @@ export const classSchema = z.object({
 
 export const levelSchema = z.object({
   id: z.string().optional(),
-  levelId: z.string(),
+  levelId: z.string().optional(),
   name: z.string(),
   order: z.number(),
   contractId: z.string().nullable().optional(),

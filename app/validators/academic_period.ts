@@ -91,7 +91,10 @@ export const updateCoursesValidator = vine.compile(
         levels: vine.array(
           vine.object({
             id: vine.string().optional(),
-            levelId: vine.string(),
+            levelId: vine.string().optional(),
+            name: vine.string().trim(),
+            order: vine.number(),
+            contractId: vine.string().optional(),
             isActive: vine.boolean().optional(),
             classes: vine
               .array(

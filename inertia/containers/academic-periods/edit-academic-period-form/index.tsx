@@ -109,14 +109,17 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
         .unwrap()
 
       // Update courses
-      await tuyau.api.v1['academic-periods']({ id: academicPeriod.id }).courses
-        .$put({
+      await tuyau.api.v1['academic-periods']({ id: academicPeriod.id })
+        .courses.$put({
           courses: data.courses.map((course) => ({
             id: course.id,
             courseId: course.courseId,
             levels: course.levels.map((level) => ({
               id: level.id,
-              levelId: level.levelId,
+              levelId: level.levelId ?? '',
+              name: level.name,
+              order: level.order,
+              contractId: level.contractId ?? undefined,
               isActive: level.isActive,
               classes: level.classes?.map((cls) => ({
                 id: cls.id,
@@ -130,9 +133,26 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
               })),
             })),
           })),
-      }).unwrap()
+        })
+        .unwrap()
     },
     onSuccess: () => {
+      const currentValues = form.getValues()
+      const activeOnlyCourses = currentValues.courses.map((course) => ({
+        ...course,
+        levels: course.levels
+          .filter((level) => level.isActive)
+          .map((level, index) => ({
+            ...level,
+            order: index,
+          })),
+      }))
+
+      form.reset({
+        ...currentValues,
+        courses: activeOnlyCourses,
+      })
+
       toast.success('Período letivo atualizado com sucesso')
       queryClient.invalidateQueries({ queryKey: ['academic-period'] })
       queryClient.invalidateQueries({ queryKey: ['academic-periods'] })
@@ -158,6 +178,17 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     setCurrentStep((prev) => Math.max(prev - 1, 0))
   }
 
+  const handleStepClick = async (stepIndex: number) => {
+    if (stepIndex === currentStep) return
+
+    if (stepIndex > currentStep && currentStep === 0) {
+      const valid = await form.trigger('calendar')
+      if (!valid) return
+    }
+
+    setCurrentStep(stepIndex)
+  }
+
   const handleSubmit = form.handleSubmit((data) => {
     updatePeriodMutation.mutate(data)
   })
@@ -165,9 +196,9 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit} className="space-y-8">
-        <Stepper steps={steps} currentStep={currentStep} />
+        <Stepper steps={steps} currentStep={currentStep} onStepClick={handleStepClick} />
 
-        <div className="min-h-[400px]">
+        <div className="min-h-[400px] overflow-x-hidden">
           {currentStep === 0 && <CalendarForm />}
           {currentStep === 1 && <CoursesForm />}
         </div>

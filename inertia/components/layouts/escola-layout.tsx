@@ -26,6 +26,7 @@ import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
 import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
+import { NotificationBell } from '../notifications/notification-bell'
 import { api } from '../../../.adonisjs/api'
 import type { RouteName } from '@tuyau/client'
 
@@ -50,12 +51,28 @@ const navigation: NavItem[] = [
     href: '/escola/administrativo',
     icon: Users,
     children: [
-      { title: 'Alunos', route: 'web.escola.administrativo.alunos', href: '/escola/administrativo/alunos' },
-      { title: 'Funcionários', route: 'web.escola.administrativo.funcionarios', href: '/escola/administrativo/funcionarios' },
-      { title: 'Professores', route: 'web.escola.administrativo.professores', href: '/escola/administrativo/professores' },
+      {
+        title: 'Alunos',
+        route: 'web.escola.administrativo.alunos',
+        href: '/escola/administrativo/alunos',
+      },
+      {
+        title: 'Funcionários',
+        route: 'web.escola.administrativo.funcionarios',
+        href: '/escola/administrativo/funcionarios',
+      },
+      {
+        title: 'Professores',
+        route: 'web.escola.administrativo.professores',
+        href: '/escola/administrativo/professores',
+      },
       // { title: 'Matrículas', route: 'web.escola.administrativo.matriculas', href: '/escola/administrativo/matriculas' },
       // { title: 'Parceiros', route: 'web.escola.administrativo.parceiros', href: '/escola/administrativo/parceiros' },
-      { title: 'Matérias', route: 'web.escola.administrativo.materias', href: '/escola/administrativo/materias' },
+      {
+        title: 'Matérias',
+        route: 'web.escola.administrativo.materias',
+        href: '/escola/administrativo/materias',
+      },
       // { title: 'Folha de Ponto', route: 'web.escola.administrativo.folhaDePonto', href: '/escola/administrativo/folha-de-ponto' },
     ],
   },
@@ -67,8 +84,16 @@ const navigation: NavItem[] = [
     children: [
       { title: 'Turmas', route: 'web.escola.pedagogico.turmas', href: '/escola/pedagogico/turmas' },
       { title: 'Grade', route: 'web.escola.pedagogico.grade', href: '/escola/pedagogico/grade' },
-      { title: 'Aulas Avulsas', route: 'web.escola.pedagogico.aulasAvulsas', href: '/escola/pedagogico/aulas-avulsas' },
-      { title: 'Ocorrências', route: 'web.escola.pedagogico.ocorrencias', href: '/escola/pedagogico/ocorrencias' },
+      {
+        title: 'Aulas Avulsas',
+        route: 'web.escola.pedagogico.aulasAvulsas',
+        href: '/escola/pedagogico/aulas-avulsas',
+      },
+      {
+        title: 'Ocorrências',
+        route: 'web.escola.pedagogico.ocorrencias',
+        href: '/escola/pedagogico/ocorrencias',
+      },
     ],
   },
   {
@@ -95,10 +120,26 @@ const navigation: NavItem[] = [
     href: '/escola/financeiro',
     icon: DollarSign,
     children: [
-      { title: 'Faturas', route: 'web.escola.financeiro.faturas', href: '/escola/financeiro/faturas' },
-      { title: 'Inadimplência', route: 'web.escola.financeiro.inadimplencia', href: '/escola/financeiro/inadimplencia' },
-      { title: 'Contratos', route: 'web.escola.administrativo.contratos', href: '/escola/administrativo/contratos' },
-      { title: 'Bolsas', route: 'web.escola.administrativo.bolsas', href: '/escola/administrativo/bolsas' },
+      {
+        title: 'Faturas',
+        route: 'web.escola.financeiro.faturas',
+        href: '/escola/financeiro/faturas',
+      },
+      {
+        title: 'Inadimplência',
+        route: 'web.escola.financeiro.inadimplencia',
+        href: '/escola/financeiro/inadimplencia',
+      },
+      {
+        title: 'Contratos',
+        route: 'web.escola.administrativo.contratos',
+        href: '/escola/administrativo/contratos',
+      },
+      {
+        title: 'Bolsas',
+        route: 'web.escola.administrativo.bolsas',
+        href: '/escola/administrativo/bolsas',
+      },
     ],
   },
   {
@@ -200,99 +241,105 @@ export function EscolaLayout({ children }: PropsWithChildren) {
 
   return (
     <PostHogProvider>
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <ImpersonationBanner />
-      <div className="flex flex-1 overflow-hidden">
-        {/* Mobile sidebar backdrop */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar */}
-        <aside
-          className={cn(
-            'fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto',
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      <div className="h-screen flex flex-col bg-background overflow-hidden">
+        <ImpersonationBanner />
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          {/* Mobile sidebar backdrop */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
           )}
-        >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-14 items-center border-b px-4">
-            <Link route="web.escola.dashboard" className="flex items-center gap-2">
-              <School className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">Anua</span>
-            </Link>
-            <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
-              <X className="h-5 w-5" />
-            </button>
-          </div>
 
-          {/* School switcher */}
-          <SchoolGroupSwitcher />
-
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
-            <div className="space-y-1">
-              {navigation.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.children?.some((child) => pathname === child.href) ?? false)
-                return (
-                  <NavItemComponent
-                    key={item.href}
-                    item={item}
-                    isActive={isActive}
-                    pathname={pathname}
-                  />
-                )
-              })}
-            </div>
-
-            {/* Academic Periods with Classes */}
-            <div className="mt-4 border-t pt-4">
-              <SidebarAcademicPeriods />
-            </div>
-          </nav>
-
-          {/* User section */}
-          <div className="border-t p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
+          {/* Sidebar */}
+          <aside
+            className={cn(
+              'fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto',
+              sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            )}
+          >
+            <div className="flex h-full flex-col">
+              {/* Logo */}
+              <div className="flex h-14 items-center border-b px-4">
+                <Link route="web.escola.dashboard" className="flex items-center gap-2">
+                  <School className="h-6 w-6 text-primary" />
+                  <span className="font-bold text-lg">Anua</span>
+                </Link>
+                <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{formatRoleName(user?.role?.name)}</p>
+
+              {/* School switcher */}
+              <SchoolGroupSwitcher />
+
+              {/* Navigation */}
+              <nav className="flex-1 overflow-y-auto px-3 py-4">
+                <div className="space-y-1">
+                  {navigation.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.children?.some((child) => pathname === child.href) ?? false)
+                    return (
+                      <NavItemComponent
+                        key={item.href}
+                        item={item}
+                        isActive={isActive}
+                        pathname={pathname}
+                      />
+                    )
+                  })}
+                </div>
+
+                {/* Academic Periods with Classes */}
+                <div className="mt-4 border-t pt-4">
+                  <SidebarAcademicPeriods />
+                </div>
+              </nav>
+
+              {/* User section */}
+              <div className="border-t p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {formatRoleName(user?.role?.name)}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  route="api.v1.auth.logout"
+                  className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </Link>
               </div>
             </div>
-            <Link
-              route="api.v1.auth.logout"
-              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
-            </Link>
+          </aside>
+
+          {/* Main content */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:pl-0">
+            {/* Top bar */}
+            <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 lg:px-6">
+              <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </button>
+
+              <div className="ml-auto">
+                <NotificationBell allNotificationsRoute="web.escola.notificacoes" />
+              </div>
+            </header>
+
+            {/* Page content */}
+            <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
           </div>
-        </div>
-      </aside>
-
-        {/* Main content */}
-        <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
-          {/* Top bar */}
-          <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 lg:px-6">
-            <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </button>
-          </header>
-
-          {/* Page content */}
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
         </div>
       </div>
-    </div>
     </PostHogProvider>
   )
 }

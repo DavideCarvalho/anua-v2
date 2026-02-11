@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -24,13 +24,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Card, CardContent, CardHeader } from '~/components/ui/card'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
 
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
@@ -55,7 +49,9 @@ function getDefaultCourseName(segment: Segment): string {
   }
 }
 
-function getDefaultLevels(segment: Segment): Array<{ name: string; order: number; classes: never[]; contractId?: string }> {
+function getDefaultLevels(
+  segment: Segment
+): Array<{ name: string; order: number; classes: never[]; contractId?: string }> {
   switch (segment) {
     case 'KINDERGARTEN':
       return [
@@ -108,6 +104,11 @@ export function CoursesForm() {
   const form = useFormContext<AcademicPeriodFormValues>()
   const segment = form.watch('calendar.segment')
   const courses = form.watch('courses') || []
+  const [lastDeletedLevel, setLastDeletedLevel] = useState<{
+    courseIndex: number
+    level: { name: string; order: number; classes: any[]; contractId?: string }
+    levelIndex: number
+  } | null>(null)
 
   const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
   const contracts = contractsData?.data ?? []
@@ -183,6 +184,48 @@ export function CoursesForm() {
     ])
   }
 
+  const removeLevel = (courseIndex: number, levelIndex: number) => {
+    const levels = form.getValues(`courses.${courseIndex}.levels`) || []
+    const levelToDelete = levels[levelIndex]
+
+    if (!levelToDelete) return
+
+    setLastDeletedLevel({
+      courseIndex,
+      level: levelToDelete,
+      levelIndex,
+    })
+
+    const updatedLevels = levels
+      .filter((_, idx) => idx !== levelIndex)
+      .map((level, idx) => ({
+        ...level,
+        order: idx,
+      }))
+
+    form.setValue(`courses.${courseIndex}.levels`, updatedLevels)
+  }
+
+  const undoDeleteLevel = () => {
+    if (!lastDeletedLevel) return
+
+    const levels = form.getValues(`courses.${lastDeletedLevel.courseIndex}.levels`) || []
+    const insertIndex = Math.min(lastDeletedLevel.levelIndex, levels.length)
+    const restoredLevels = [...levels]
+
+    restoredLevels.splice(insertIndex, 0, {
+      ...lastDeletedLevel.level,
+    })
+
+    const reorderedLevels = restoredLevels.map((level, idx) => ({
+      ...level,
+      order: idx,
+    }))
+
+    form.setValue(`courses.${lastDeletedLevel.courseIndex}.levels`, reorderedLevels)
+    setLastDeletedLevel(null)
+  }
+
   const handleCreateContract = () => {
     toast.info('Funcionalidade de criar contrato ainda não implementada')
   }
@@ -239,7 +282,9 @@ export function CoursesForm() {
                           <FormControl>
                             <Input
                               placeholder={
-                                canAddMultipleCourses ? 'Ex: Administração' : 'Ex: Ensino Fundamental'
+                                canAddMultipleCourses
+                                  ? 'Ex: Administração'
+                                  : 'Ex: Ensino Fundamental'
                               }
                               {...field}
                             />
@@ -265,15 +310,27 @@ export function CoursesForm() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">{levelLabel}s</Label>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => addLevel(courseIndex)}
-                      >
-                        <Plus className="mr-2 h-3 w-3" />
-                        Adicionar {levelLabel}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {lastDeletedLevel?.courseIndex === courseIndex && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={undoDeleteLevel}
+                          >
+                            Desfazer exclusão
+                          </Button>
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addLevel(courseIndex)}
+                        >
+                          <Plus className="mr-2 h-3 w-3" />
+                          Adicionar {levelLabel}
+                        </Button>
+                      </div>
                     </div>
 
                     <DndContext
@@ -294,6 +351,7 @@ export function CoursesForm() {
                               courseIndex={courseIndex}
                               contracts={contracts}
                               onCreateContract={handleCreateContract}
+                              onDeleteLevel={() => removeLevel(courseIndex, levelIndex)}
                             />
                           ))}
                         </div>

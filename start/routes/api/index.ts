@@ -40,6 +40,7 @@ import { registerPostApiRoutes, registerCommentApiRoutes } from './posts.js'
 import { registerExtraClassApiRoutes } from './extra_classes.js'
 import { registerAttendanceApiRoutes } from './attendance.js'
 import { registerAssignmentApiRoutes } from './assignments.js'
+import { registerOccurrenceApiRoutes } from './occurrences.js'
 import {
   registerStudentPaymentApiRoutes,
   registerAgreementApiRoutes,
@@ -136,6 +137,7 @@ export function registerApiRoutes() {
   registerExtraClassApiRoutes()
   registerAttendanceApiRoutes()
   registerAssignmentApiRoutes()
+  registerOccurrenceApiRoutes()
   registerStudentPaymentApiRoutes()
   registerAgreementApiRoutes()
   registerInvoiceApiRoutes()
