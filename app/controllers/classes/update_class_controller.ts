@@ -3,8 +3,11 @@ import Class_ from '#models/class'
 import { updateClassValidator } from '#validators/class'
 
 export default class UpdateClassController {
-  async handle({ params, request, response }: HttpContext) {
-    const classEntity = await Class_.find(params.id)
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+    const classEntity = await Class_.query()
+      .where('id', params.id)
+      .whereIn('schoolId', selectedSchoolIds ?? [])
+      .first()
 
     if (!classEntity) {
       return response.notFound({ message: 'Turma não encontrada' })

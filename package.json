@@ -76,6 +76,7 @@
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/drive": "^3.4.1",
     "@adonisjs/inertia": "^3.1.1",
+    "@adonisjs/limiter": "^2.4.0",
     "@adonisjs/lock": "^1.1.1",
     "@adonisjs/lucid": "^21.8.2",
     "@adonisjs/lucid-slugify": "^3.0.0",

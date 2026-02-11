@@ -1,8 +1,16 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 
 export default class PlatformSettings extends BaseModel {
   static table = 'PlatformSettings'
+
+  @beforeCreate()
+  static assignId(model: PlatformSettings) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

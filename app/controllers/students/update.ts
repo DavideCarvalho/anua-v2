@@ -7,8 +7,14 @@ import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_co
 import { updateStudentValidator } from '#validators/student'
 
 export default class UpdateStudentController {
-  async handle({ params, request, response }: HttpContext) {
-    const student = await Student.query().where('id', params.id).preload('user').first()
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+    const student = await Student.query()
+      .where('id', params.id)
+      .whereHas('class', (classQuery) => {
+        classQuery.whereIn('schoolId', selectedSchoolIds ?? [])
+      })
+      .preload('user')
+      .first()
 
     if (!student) {
       return response.notFound({ message: 'Aluno não encontrado' })

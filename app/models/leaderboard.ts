@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import Class from './class.js'
@@ -18,6 +19,13 @@ export type LeaderboardPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ACADEMIC_PERIO
 
 export default class Leaderboard extends BaseModel {
   static table = 'Leaderboard'
+
+  @beforeCreate()
+  static assignId(model: Leaderboard) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

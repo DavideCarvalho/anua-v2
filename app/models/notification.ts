@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
@@ -30,6 +31,13 @@ export type NotificationType =
 
 export default class Notification extends BaseModel {
   static table = 'Notification'
+
+  @beforeCreate()
+  static assignId(notification: Notification) {
+    if (!notification.id) {
+      notification.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

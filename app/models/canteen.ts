@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import User from './user.js'
@@ -10,6 +11,13 @@ import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
 
 export default class Canteen extends BaseModel {
   static table = 'Canteen'
+
+  @beforeCreate()
+  static assignId(model: Canteen) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

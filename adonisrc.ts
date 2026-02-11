@@ -72,6 +72,7 @@ export default defineConfig({
     },
     () => import('@stouder-io/adonis-auditing/auditing_provider'),
     () => import('#providers/queue_provider'),
+    () => import('@adonisjs/limiter/limiter_provider'),
   ],
 
   /*

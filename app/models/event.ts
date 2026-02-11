@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import School from './school.js'
@@ -20,6 +21,13 @@ export type EventPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
 
 export default class Event extends BaseModel {
   static table = 'Event'
+
+  @beforeCreate()
+  static assignId(model: Event) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

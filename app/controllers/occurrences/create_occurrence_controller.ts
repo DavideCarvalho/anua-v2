@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
-import { randomUUID } from 'node:crypto'
+import db from '@adonisjs/lucid/services/db'
 import Occurrence from '#models/occurrence'
 import Student from '#models/student'
 import StudentHasResponsible from '#models/student_has_responsible'
@@ -42,48 +42,59 @@ export default class CreateOccurrenceController {
       })
     }
 
-    const occurrence = await Occurrence.create({
-      id: randomUUID(),
-      studentId: payload.studentId,
-      teacherHasClassId: payload.teacherHasClassId,
-      type: payload.type,
-      text: payload.text,
-      date: DateTime.fromJSDate(payload.date),
-    })
+    const recipientUserIds = student.isSelfResponsible
+      ? [student.id]
+      : [
+          ...new Set(
+            (
+              await StudentHasResponsible.query()
+                .where('studentId', payload.studentId)
+                .where('isPedagogical', true)
+            ).map((relation) => relation.responsibleId)
+          ),
+        ]
 
-    const pedagogicalResponsibles = await StudentHasResponsible.query()
-      .where('studentId', payload.studentId)
-      .where('isPedagogical', true)
-
-    const responsibles =
-      pedagogicalResponsibles.length > 0
-        ? pedagogicalResponsibles
-        : await StudentHasResponsible.query().where('studentId', payload.studentId)
-
-    await Promise.all(
-      responsibles.map((relation) =>
-        Notification.create({
-          id: randomUUID(),
-          userId: relation.responsibleId,
-          type: 'SYSTEM_ANNOUNCEMENT',
-          title: 'Nova ocorrencia registrada',
-          message: `Foi registrada uma ocorrencia para ${student.user?.name || 'o aluno'}.`,
-          data: {
-            occurrenceId: occurrence.id,
-            studentId: payload.studentId,
-            type: payload.type,
-            kind: 'occurrence_created',
-          },
-          isRead: false,
-          sentViaInApp: true,
-          sentViaEmail: false,
-          sentViaPush: false,
-          sentViaSms: false,
-          sentViaWhatsApp: false,
-          actionUrl: `/responsavel/ocorrencias?aluno=${payload.studentId}`,
-        })
+    const occurrence = await db.transaction(async (trx) => {
+      const createdOccurrence = await Occurrence.create(
+        {
+          studentId: payload.studentId,
+          teacherHasClassId: payload.teacherHasClassId,
+          type: payload.type,
+          text: payload.text,
+          date: DateTime.fromJSDate(payload.date),
+        },
+        { client: trx }
       )
-    )
+
+      await Promise.all(
+        recipientUserIds.map((responsibleId) =>
+          Notification.create(
+            {
+              userId: responsibleId,
+              type: 'SYSTEM_ANNOUNCEMENT',
+              title: 'Nova ocorrencia registrada',
+              message: `Foi registrada uma ocorrencia para ${student.user?.name || 'o aluno'}.`,
+              data: {
+                occurrenceId: createdOccurrence.id,
+                studentId: payload.studentId,
+                type: payload.type,
+                kind: 'occurrence_created',
+              },
+              isRead: false,
+              sentViaInApp: true,
+              sentViaEmail: false,
+              sentViaPush: false,
+              sentViaSms: false,
+              sentViaWhatsApp: false,
+              actionUrl: `/responsavel/ocorrencias?aluno=${payload.studentId}`,
+            },
+            { client: trx }
+          )
+        )
+      )
+
+      return createdOccurrence
+    })
 
     return response.created(new OccurrenceDto(occurrence))
   }

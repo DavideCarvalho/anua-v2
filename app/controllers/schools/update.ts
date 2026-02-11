@@ -3,8 +3,11 @@ import School from '#models/school'
 import { updateSchoolValidator } from '#validators/school'
 
 export default class UpdateSchoolController {
-  async handle({ params, request, response }: HttpContext) {
-    const school = await School.find(params.id)
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+    const school = await School.query()
+      .where('id', params.id)
+      .whereIn('id', selectedSchoolIds ?? [])
+      .first()
 
     if (!school) {
       return response.notFound({ message: 'Escola não encontrada' })

@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
+import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import TeacherHasClass from './teacher_has_class.js'
@@ -9,6 +10,13 @@ export type OccurenceType = 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'O
 
 export default class Occurrence extends BaseModel {
   static table = 'Occurence'
+
+  @beforeCreate()
+  static assignId(occurrence: Occurrence) {
+    if (!occurrence.id) {
+      occurrence.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true, columnName: 'id' })
   declare id: string

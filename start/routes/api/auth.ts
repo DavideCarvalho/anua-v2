@@ -1,5 +1,6 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import { throttleAuth, throttleApi } from '#start/limiter'
 
 // Auth
 const LoginController = () => import('#controllers/auth/login')
@@ -17,6 +18,7 @@ export function registerAuthApiRoutes() {
       router.post('/verify-code', [VerifyCodeController]).as('auth.verifyCode')
     })
     .prefix('/auth')
+    .use(throttleAuth)
 
   // Protected
   router
@@ -26,4 +28,5 @@ export function registerAuthApiRoutes() {
     })
     .prefix('/auth')
     .use(middleware.auth())
+    .use(throttleApi)
 }

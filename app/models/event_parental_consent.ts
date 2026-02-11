@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Event from './event.js'
 import Student from './student.js'
@@ -9,6 +10,13 @@ export type ParentalConsentStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'EXPIRED
 
 export default class EventParentalConsent extends BaseModel {
   static table = 'EventParentalConsent'
+
+  @beforeCreate()
+  static assignId(model: EventParentalConsent) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

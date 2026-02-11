@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import SchoolGroup from './school_group.js'
@@ -9,6 +10,13 @@ export type SubscriptionLevel = 'NETWORK' | 'INDIVIDUAL'
 
 export default class SchoolChain extends BaseModel {
   static table = 'SchoolChain'
+
+  @beforeCreate()
+  static assignId(model: SchoolChain) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

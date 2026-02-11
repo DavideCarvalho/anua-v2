@@ -3,10 +3,14 @@ import Scholarship from '#models/scholarship'
 import { updateScholarshipValidator } from '#validators/scholarship'
 
 export default class UpdateScholarshipController {
-  async handle({ request, params, response }: HttpContext) {
+  async handle({ request, params, response, selectedSchoolIds }: HttpContext) {
     const payload = await request.validateUsing(updateScholarshipValidator)
 
-    const scholarship = await Scholarship.find(params.id)
+    const scholarship = await Scholarship.query()
+      .where('id', params.id)
+      .whereIn('schoolId', selectedSchoolIds ?? [])
+      .first()
+
     if (!scholarship) {
       return response.notFound({ message: 'Bolsa não encontrada' })
     }

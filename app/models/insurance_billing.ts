@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import StudentPayment from './student_payment.js'
@@ -8,6 +9,13 @@ export type InsuranceBillingStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED
 
 export default class InsuranceBilling extends BaseModel {
   static table = 'InsuranceBilling'
+
+  @beforeCreate()
+  static assignId(model: InsuranceBilling) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

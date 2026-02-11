@@ -4,8 +4,14 @@ import User from '#models/user'
 import { updateUserValidator } from '#validators/user'
 
 export default class UpdateUserController {
-  async handle({ params, request, response }: HttpContext) {
-    const user = await User.query().where('id', params.id).whereNull('deletedAt').first()
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+    const user = await User.query()
+      .where('id', params.id)
+      .whereNull('deletedAt')
+      .whereHas('userHasSchools', (schoolQuery) => {
+        schoolQuery.whereIn('schoolId', selectedSchoolIds ?? [])
+      })
+      .first()
 
     if (!user) {
       return response.notFound({ message: 'Usuário não encontrado' })

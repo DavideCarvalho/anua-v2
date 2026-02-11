@@ -3,10 +3,22 @@ import UserHasSchool from '#models/user_has_school'
 import { updateUserSchoolValidator } from '#validators/user_school'
 
 export default class UpdateUserSchoolController {
-  async handle({ request, params, response }: HttpContext) {
+  async handle({ request, params, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
+    const user = effectiveUser ?? auth.user
+
+    if (!user) {
+      return response.unauthorized({ message: 'Usuário não autenticado' })
+    }
+
     const payload = await request.validateUsing(updateUserSchoolValidator)
 
-    const assignment = await UserHasSchool.find(params.id)
+    const assignment = await UserHasSchool.query()
+      .where('id', params.id)
+      .where((query) => {
+        query.where('userId', user.id).orWhereIn('schoolId', selectedSchoolIds ?? [])
+      })
+      .first()
+
     if (!assignment) {
       return response.notFound({ message: 'Relacionamento usuário-escola não encontrado' })
     }

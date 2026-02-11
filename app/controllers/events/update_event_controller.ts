@@ -4,11 +4,14 @@ import { updateEventValidator } from '#validators/event'
 import { DateTime } from 'luxon'
 
 export default class UpdateEventController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
     const { id } = params
     const data = await request.validateUsing(updateEventValidator)
 
-    const event = await Event.find(id)
+    const event = await Event.query()
+      .where('id', id)
+      .whereIn('schoolId', selectedSchoolIds ?? [])
+      .first()
 
     if (!event) {
       return response.notFound({ message: 'Event not found' })

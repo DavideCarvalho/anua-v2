@@ -4,7 +4,6 @@ import Notification from '#models/notification'
 import TeacherHasClass from '#models/teacher_has_class'
 import ResponsibleUserAcceptedOccurence from '#models/responsible_user_accepted_occurence'
 import StudentHasResponsible from '#models/student_has_responsible'
-import { randomUUID } from 'node:crypto'
 
 export default class AcknowledgeOccurrenceController {
   async handle({ params, response, effectiveUser }: HttpContext) {
@@ -43,7 +42,6 @@ export default class AcknowledgeOccurrenceController {
 
     if (!existingAcknowledgement) {
       await ResponsibleUserAcceptedOccurence.create({
-        id: randomUUID(),
         responsibleUserId: effectiveUser.id,
         occurenceId: occurrence.id,
       })
@@ -59,7 +57,6 @@ export default class AcknowledgeOccurrenceController {
       teacherHasClass.teacherId !== effectiveUser.id
     ) {
       await Notification.create({
-        id: randomUUID(),
         userId: teacherHasClass.teacherId,
         type: 'SYSTEM_ANNOUNCEMENT',
         title: 'Ocorrencia reconhecida por responsavel',

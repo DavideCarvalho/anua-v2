@@ -1,9 +1,17 @@
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeCreate, column, belongsTo } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 
 export default class StudentAddress extends BaseModel {
   static table = 'StudentAddress'
+
+  @beforeCreate()
+  static assignId(model: StudentAddress) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import User from './user.js'
@@ -7,6 +8,13 @@ import ContractDocument from './contract_document.js'
 
 export default class StudentDocument extends BaseModel {
   static table = 'StudentDocument'
+
+  @beforeCreate()
+  static assignId(model: StudentDocument) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   @column({ isPrimary: true })
   declare id: string

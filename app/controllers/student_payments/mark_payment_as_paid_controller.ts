@@ -4,11 +4,18 @@ import StudentPayment from '#models/student_payment'
 import { markPaymentAsPaidValidator } from '#validators/student_payment'
 
 export default class MarkPaymentAsPaidController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(markPaymentAsPaidValidator)
 
-    const payment = await StudentPayment.find(id)
+    const payment = await StudentPayment.query()
+      .where('id', id)
+      .whereHas('student', (studentQuery) => {
+        studentQuery.whereHas('class', (classQuery) => {
+          classQuery.whereIn('schoolId', selectedSchoolIds ?? [])
+        })
+      })
+      .first()
 
     if (!payment) {
       return response.notFound({ message: 'Student payment not found' })

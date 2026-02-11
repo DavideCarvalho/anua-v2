@@ -3,8 +3,16 @@ import Teacher from '#models/teacher'
 import { updateTeacherValidator } from '#validators/teacher'
 
 export default class UpdateTeacherController {
-  async handle({ params, request, response }: HttpContext) {
-    const teacher = await Teacher.query().where('id', params.id).preload('user').first()
+  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+    const teacher = await Teacher.query()
+      .where('id', params.id)
+      .whereHas('teacherClasses', (teacherClassQuery) => {
+        teacherClassQuery.whereHas('class', (classQuery) => {
+          classQuery.whereIn('schoolId', selectedSchoolIds ?? [])
+        })
+      })
+      .preload('user')
+      .first()
 
     if (!teacher) {
       return response.notFound({ message: 'Professor não encontrado' })

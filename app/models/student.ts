@@ -1,4 +1,5 @@
-import { BaseModel, column, belongsTo, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeCreate, column, belongsTo, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import StudentDocument from './student_document.js'
@@ -17,6 +18,13 @@ export type EnrollmentStatus = 'PENDING_DOCUMENT_REVIEW' | 'REGISTERED'
 
 export default class Student extends BaseModel {
   static table = 'Student'
+
+  @beforeCreate()
+  static assignId(model: Student) {
+    if (!model.id) {
+      model.id = uuidv7()
+    }
+  }
 
   // Same ID as User (1:1 relationship)
   @column({ isPrimary: true, columnName: 'id' })
