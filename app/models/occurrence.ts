@@ -10,28 +10,28 @@ export type OccurenceType = 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'O
 export default class Occurrence extends BaseModel {
   static table = 'Occurence'
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'teacherHasClassId' })
   declare teacherHasClassId: string
 
-  @column()
+  @column({ columnName: 'type' })
   declare type: OccurenceType
 
-  @column()
+  @column({ columnName: 'text' })
   declare text: string
 
-  @column.date()
+  @column.date({ columnName: 'date' })
   declare date: DateTime
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

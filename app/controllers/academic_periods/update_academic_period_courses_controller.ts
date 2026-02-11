@@ -186,6 +186,16 @@ export default class UpdateAcademicPeriodCoursesController {
             // Delete removed classes from this academic period
             const classesToRemove = existingClassIds.filter((id) => !incomingClassIds.includes(id))
             if (classesToRemove.length > 0) {
+              await TeacherHasClass.query()
+                .whereIn('classId', classesToRemove)
+                .useTransaction(trx)
+                .update({ isActive: false })
+
+              await Class_.query()
+                .whereIn('id', classesToRemove)
+                .useTransaction(trx)
+                .update({ isArchived: true })
+
               await ClassHasAcademicPeriod.query()
                 .where('academicPeriodId', academicPeriod.id)
                 .whereIn('classId', classesToRemove)
@@ -209,6 +219,7 @@ export default class UpdateAcademicPeriodCoursesController {
                 }
 
                 existingClass.name = classData.name
+                existingClass.isArchived = false
                 await existingClass.save()
                 classEntity = existingClass
               } else {
@@ -250,7 +261,7 @@ export default class UpdateAcademicPeriodCoursesController {
                   await TeacherHasClass.query()
                     .whereIn('id', teachersToRemove)
                     .useTransaction(trx)
-                    .delete()
+                    .update({ isActive: false })
                 }
 
                 // Create or update teachers
@@ -264,6 +275,7 @@ export default class UpdateAcademicPeriodCoursesController {
                         teacherId: teacherData.teacherId,
                         subjectId: teacherData.subjectId,
                         subjectQuantity: teacherData.subjectQuantity,
+                        isActive: true,
                       })
                   } else {
                     // Create new
@@ -301,6 +313,7 @@ export default class UpdateAcademicPeriodCoursesController {
       .where('academicPeriodId', academicPeriod.id)
       .preload('class', (classQuery) => {
         classQuery.preload('teacherClasses', (teacherClassQuery) => {
+          teacherClassQuery.where('isActive', true)
           teacherClassQuery.preload('teacher', (teacherQuery) => {
             teacherQuery.preload('user')
           })

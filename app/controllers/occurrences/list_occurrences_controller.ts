@@ -14,8 +14,15 @@ export default class ListOccurrencesController {
     const payload = await request.validateUsing(listOccurrencesValidator)
     const page = payload.page ?? 1
     const limit = Math.min(payload.limit ?? 20, 100)
+    const orderBy = payload.orderBy ?? 'date'
+    const direction = payload.direction ?? 'desc'
 
     const query = Occurrence.query()
+      .select('Occurence.*')
+      .leftJoin('Student as sort_student', 'sort_student.id', 'Occurence.studentId')
+      .leftJoin('User as sort_student_user', 'sort_student_user.id', 'sort_student.id')
+      .leftJoin('TeacherHasClass as sort_thc', 'sort_thc.id', 'Occurence.teacherHasClassId')
+      .leftJoin('Class as sort_class', 'sort_class.id', 'sort_thc.classId')
       .preload('student', (studentQuery) => {
         studentQuery.preload('user')
       })
@@ -26,21 +33,22 @@ export default class ListOccurrencesController {
           .preload('teacher', (teacherQuery) => teacherQuery.preload('user'))
       })
       .withCount('acknowledgements')
-      .whereHas('teacherHasClass', (teacherClassQuery) => {
-        teacherClassQuery.whereHas('class', (classQuery) => {
-          classQuery.whereIn('schoolId', selectedSchoolIds)
-        })
-      })
-      .orderBy('date', 'desc')
-      .orderBy('createdAt', 'desc')
+      .whereIn('sort_class.schoolId', selectedSchoolIds)
 
     if (payload.type) {
       query.where('type', payload.type)
     }
 
     if (payload.classId) {
-      query.whereHas('teacherHasClass', (teacherClassQuery) => {
-        teacherClassQuery.where('classId', payload.classId!)
+      query.where('sort_thc.classId', payload.classId)
+    }
+
+    if (payload.academicPeriodId) {
+      query.whereExists((periodQuery) => {
+        periodQuery
+          .from('ClassHasAcademicPeriod as chap')
+          .whereRaw('chap."classId" = sort_class.id')
+          .where('chap.academicPeriodId', payload.academicPeriodId!)
       })
     }
 
@@ -55,12 +63,8 @@ export default class ListOccurrencesController {
     if (payload.search) {
       query.where((whereQuery) => {
         whereQuery
-          .whereILike('text', `%${payload.search}%`)
-          .orWhereHas('student', (studentQuery) => {
-            studentQuery.whereHas('user', (userQuery) => {
-              userQuery.whereILike('name', `%${payload.search}%`)
-            })
-          })
+          .whereILike('Occurence.text', `%${payload.search}%`)
+          .orWhereILike('sort_student_user.name', `%${payload.search}%`)
       })
     }
 
@@ -71,6 +75,18 @@ export default class ListOccurrencesController {
     if (payload.endDate) {
       query.where('date', '<=', DateTime.fromJSDate(payload.endDate).toISODate()!)
     }
+
+    if (orderBy === 'student') {
+      query.orderBy('sort_student_user.name', direction)
+    } else if (orderBy === 'class') {
+      query.orderBy('sort_class.name', direction)
+    } else if (orderBy === 'type') {
+      query.orderBy('Occurence.type', direction)
+    } else {
+      query.orderBy('Occurence.date', direction)
+    }
+
+    query.orderBy('Occurence.createdAt', 'desc')
 
     const occurrences = await query.paginate(page, limit)
 

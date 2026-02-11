@@ -1,6 +1,8 @@
 import vine from '@vinejs/vine'
 
 const occurrenceTypes = ['BEHAVIOR', 'PERFORMANCE', 'ABSENCE', 'LATE', 'OTHER'] as const
+const occurrenceSortFields = ['date', 'student', 'class', 'type'] as const
+const sortDirections = ['asc', 'desc'] as const
 
 export const listOccurrencesValidator = vine.compile(
   vine.object({
@@ -8,11 +10,14 @@ export const listOccurrencesValidator = vine.compile(
     limit: vine.number().positive().optional(),
     type: vine.enum(occurrenceTypes).optional(),
     classId: vine.string().trim().optional(),
+    academicPeriodId: vine.string().trim().optional(),
     studentId: vine.string().trim().optional(),
     teacherHasClassId: vine.string().trim().optional(),
     search: vine.string().trim().optional(),
     startDate: vine.date({ formats: ['iso8601'] }).optional(),
     endDate: vine.date({ formats: ['iso8601'] }).optional(),
+    orderBy: vine.enum(occurrenceSortFields).optional(),
+    direction: vine.enum(sortDirections).optional(),
   })
 )
 

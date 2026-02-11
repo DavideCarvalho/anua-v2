@@ -15,19 +15,19 @@ export default class ResponsibleUserAcceptedOccurence extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'responsibleUserId' })
   declare responsibleUserId: string
 
-  @column()
+  @column({ columnName: 'occurenceId' })
   declare occurenceId: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => User, { foreignKey: 'responsibleUserId' })
