@@ -48,18 +48,11 @@ interface StudentOccurrencesContainerProps {
 }
 
 const TYPE_CONFIG = {
-  BEHAVIORAL: { label: 'Comportamental', icon: AlertTriangle, color: 'text-foreground' },
-  ACADEMIC: { label: 'Academica', icon: Info, color: 'text-primary' },
-  HEALTH: { label: 'Saude', icon: AlertCircle, color: 'text-destructive' },
-  ATTENDANCE: { label: 'Frequencia', icon: Clock, color: 'text-muted-foreground' },
+  BEHAVIOR: { label: 'Comportamento', icon: AlertTriangle, color: 'text-foreground' },
+  PERFORMANCE: { label: 'Desempenho', icon: Info, color: 'text-primary' },
+  ABSENCE: { label: 'Falta', icon: AlertCircle, color: 'text-destructive' },
+  LATE: { label: 'Atraso', icon: Clock, color: 'text-muted-foreground' },
   OTHER: { label: 'Outro', icon: Info, color: 'text-muted-foreground' },
-}
-
-const SEVERITY_CONFIG = {
-  LOW: { label: 'Baixa', variant: 'secondary' as const },
-  MEDIUM: { label: 'Media', variant: 'outline' as const },
-  HIGH: { label: 'Alta', variant: 'default' as const },
-  CRITICAL: { label: 'Critica', variant: 'destructive' as const },
 }
 
 const STATUS_CONFIG = {
@@ -219,10 +212,10 @@ export function StudentOccurrencesContainer({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="BEHAVIORAL">Comportamental</SelectItem>
-                <SelectItem value="ACADEMIC">Academica</SelectItem>
-                <SelectItem value="HEALTH">Saude</SelectItem>
-                <SelectItem value="ATTENDANCE">Frequencia</SelectItem>
+                <SelectItem value="BEHAVIOR">Comportamento</SelectItem>
+                <SelectItem value="PERFORMANCE">Desempenho</SelectItem>
+                <SelectItem value="ABSENCE">Falta</SelectItem>
+                <SelectItem value="LATE">Atraso</SelectItem>
                 <SelectItem value="OTHER">Outro</SelectItem>
               </SelectContent>
             </Select>
@@ -284,8 +277,6 @@ export function StudentOccurrencesContainer({
             <Accordion type="single" collapsible className="space-y-2">
               {data.occurrences.map((occurrence: Occurrence) => {
                 const typeConfig = TYPE_CONFIG[occurrence.type as keyof typeof TYPE_CONFIG]
-                const severityConfig =
-                  SEVERITY_CONFIG[occurrence.severity as keyof typeof SEVERITY_CONFIG]
                 const statusConfig = STATUS_CONFIG[occurrence.status as keyof typeof STATUS_CONFIG]
                 const TypeIcon = typeConfig?.icon || Info
                 const StatusIcon = statusConfig?.icon || AlertCircle
@@ -316,9 +307,6 @@ export function StudentOccurrencesContainer({
                             )}
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant={severityConfig?.variant ?? 'outline'}>
-                              {severityConfig?.label}
-                            </Badge>
                             <Badge variant={statusConfig?.variant ?? 'outline'}>
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {statusConfig?.label}
