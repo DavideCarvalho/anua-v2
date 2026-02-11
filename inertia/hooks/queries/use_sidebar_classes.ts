@@ -7,10 +7,14 @@ const $route = tuyau.api.v1.classes.sidebar.$get
 
 export type SidebarClassesResponse = InferResponseType<typeof $route>
 
-export function useSidebarClassesQueryOptions() {
+interface SidebarClassesQuery {
+  isActive?: boolean
+}
+
+export function useSidebarClassesQueryOptions(query: SidebarClassesQuery = { isActive: true }) {
   return {
-    queryKey: ['sidebar-classes'],
-    queryFn: () => $route().unwrap(),
+    queryKey: ['sidebar-classes', query],
+    queryFn: () => $route({ query } as any).unwrap(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   }
 }
@@ -25,6 +29,14 @@ interface AcademicPeriodInfo {
   id: string
   name: string
   slug: string
+  isActive: boolean
+}
+
+interface LevelInfo {
+  id: string
+  name: string
+  slug: string
+  order: number | null
 }
 
 interface ClassInfo {
@@ -33,9 +45,14 @@ interface ClassInfo {
   slug: string
 }
 
+interface LevelGroup {
+  level: LevelInfo
+  classes: ClassInfo[]
+}
+
 interface CourseGroup {
   course: CourseInfo
-  classes: ClassInfo[]
+  levels: Record<string, LevelGroup>
 }
 
 interface PeriodGroup {
@@ -45,8 +62,8 @@ interface PeriodGroup {
 
 export type SidebarData = Record<string, PeriodGroup>
 
-export function useSidebarClasses() {
-  const query = useQuery(useSidebarClassesQueryOptions())
+export function useSidebarClasses(options: SidebarClassesQuery = { isActive: true }) {
+  const query = useQuery(useSidebarClassesQueryOptions(options))
 
   const groupedData = useMemo<SidebarData>(() => {
     if (!query.data?.data) return {}
@@ -65,11 +82,20 @@ export function useSidebarClasses() {
       if (!acc[periodSlug].courses[courseSlug]) {
         acc[periodSlug].courses[courseSlug] = {
           course: item.course,
+          levels: {},
+        }
+      }
+
+      const levelId = item.level.id
+
+      if (!acc[periodSlug].courses[courseSlug].levels[levelId]) {
+        acc[periodSlug].courses[courseSlug].levels[levelId] = {
+          level: item.level,
           classes: [],
         }
       }
 
-      acc[periodSlug].courses[courseSlug].classes.push({
+      acc[periodSlug].courses[courseSlug].levels[levelId].classes.push({
         id: item.id,
         name: item.name,
         slug: item.slug,

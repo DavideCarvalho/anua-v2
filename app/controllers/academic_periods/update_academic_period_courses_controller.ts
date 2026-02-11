@@ -8,7 +8,6 @@ import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
-import string from '@adonisjs/core/helpers/string'
 
 export default class UpdateAcademicPeriodCoursesController {
   async handle({ params, request, response }: HttpContext) {
@@ -169,7 +168,6 @@ export default class UpdateAcademicPeriodCoursesController {
                 }
 
                 existingClass.name = classData.name
-                existingClass.slug = string.slug(classData.name, { lower: true })
                 await existingClass.save()
                 classEntity = existingClass
               } else {
@@ -178,7 +176,6 @@ export default class UpdateAcademicPeriodCoursesController {
                 classEntity.useTransaction(trx)
                 classEntity.id = uuidv7()
                 classEntity.name = classData.name
-                classEntity.slug = string.slug(classData.name, { lower: true })
                 classEntity.levelId = levelData.levelId
                 classEntity.schoolId = academicPeriod.schoolId
                 classEntity.isArchived = false

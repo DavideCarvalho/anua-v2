@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -28,18 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
 import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
 import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
 import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
-import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
 import { useUpdateStudent } from '~/hooks/mutations/use_student_mutations'
-import {
-  getCourseLabels,
-  getLevelLabels,
-  type AcademicPeriodSegment,
-} from '~/lib/formatters'
+import { getCourseLabels, getLevelLabels, type AcademicPeriodSegment } from '~/lib/formatters'
 
 const schema = z.object({
   academicPeriodId: z.string().min(1, 'Selecione o período letivo'),
@@ -62,11 +58,19 @@ interface LevelAssignedToCourseAcademicPeriod {
 }
 
 interface StudentLevel {
-  classId: string
+  classId: string | null
   academicPeriodId?: string | null
   levelId?: string | null
   class?: StudentClass
   levelAssignedToCourseAcademicPeriod?: LevelAssignedToCourseAcademicPeriod
+}
+
+function getEnrollmentAcademicPeriodId(level: StudentLevel) {
+  return (
+    level.levelAssignedToCourseAcademicPeriod?.courseHasAcademicPeriod?.academicPeriodId ||
+    level.academicPeriodId ||
+    ''
+  )
 }
 
 interface StudentClass {
@@ -112,9 +116,9 @@ export function ChangeStudentCourseModal({
   // Track previous open state to detect transitions
   const prevOpenRef = useRef(false)
   const prevStudentIdRef = useRef(studentId)
+  const prevActivePeriodIdRef = useRef('')
 
-  // Track current enrollment data extracted from student
-  const [currentEnrollment, setCurrentEnrollment] = useState<CurrentEnrollment | null>(null)
+  const [activePeriodId, setActivePeriodId] = useState('')
 
   // Track initialization state for cascading form fields
   const [initState, setInitState] = useState<InitState>({
@@ -147,7 +151,7 @@ export function ChangeStudentCourseModal({
   const levelId = form.watch('levelId')
 
   const { data: academicPeriodsData, isLoading: isLoadingPeriods } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 50 })
+    useAcademicPeriodsQueryOptions({ limit: 50, isActive: true })
   )
 
   const { data: coursesData, isLoading: isLoadingCourses } = useQuery({
@@ -155,16 +159,19 @@ export function ChangeStudentCourseModal({
     enabled: !!academicPeriodId,
   })
 
-  const { data: classesData, isLoading: isLoadingClasses } = useQuery({
-    ...useClassesQueryOptions({ levelId, academicPeriodId, limit: 50 }),
-    enabled: !!levelId && !!academicPeriodId,
-  })
-
   const academicPeriods = academicPeriodsData?.data ?? []
   const courses = coursesData ?? []
   const selectedCourse = courses.find((c) => c.courseId === courseId)
   const levels = selectedCourse?.levels ?? []
-  const classes = classesData?.data ?? []
+  const selectedLevel = levels.find((l) => l.levelId === levelId)
+  const classes = useMemo(() => {
+    const levelClasses =
+      (selectedLevel as { classes?: Array<{ id: string; name: string }> } | undefined)?.classes ??
+      []
+
+    const uniqueById = new Map(levelClasses.map((cls) => [cls.id, cls]))
+    return Array.from(uniqueById.values())
+  }, [selectedLevel])
 
   // Get segment from selected academic period for dynamic labels
   const selectedPeriod = academicPeriods.find((p) => p.id === academicPeriodId)
@@ -172,53 +179,91 @@ export function ChangeStudentCourseModal({
   const courseLabels = getCourseLabels(segment)
   const levelLabels = getLevelLabels(segment)
 
+  const studentData = student as StudentData | undefined
+
+  const enrollmentPeriods = useMemo(() => {
+    if (!studentData?.levels?.length) return []
+
+    const uniquePeriodIds = Array.from(
+      new Set(studentData.levels.map((l) => getEnrollmentAcademicPeriodId(l)).filter(Boolean))
+    ) as string[]
+
+    if (uniquePeriodIds.length === 0) return []
+
+    return uniquePeriodIds
+      .map((id) => {
+        const period = academicPeriods.find((p) => p.id === id && p.isActive)
+        return {
+          id,
+          name: period?.name ?? 'Período letivo',
+          startDate: period?.startDate ? new Date(String(period.startDate)) : null,
+        }
+      })
+      .filter(
+        (period) => period.startDate !== null || academicPeriods.some((p) => p.id === period.id)
+      )
+      .sort((a, b) => {
+        if (!a.startDate && !b.startDate) return 0
+        if (!a.startDate) return 1
+        if (!b.startDate) return -1
+        return b.startDate.getTime() - a.startDate.getTime()
+      })
+  }, [studentData?.levels, academicPeriods])
+
+  useEffect(() => {
+    if (!open) {
+      setActivePeriodId('')
+      return
+    }
+
+    if (!activePeriodId && enrollmentPeriods.length > 0) {
+      setActivePeriodId(enrollmentPeriods[0].id)
+    }
+  }, [open, activePeriodId, enrollmentPeriods])
+
   // Step 1: Extract current enrollment data from student
   // Use the student's current classId as the source of truth
-  useEffect(() => {
-    if (student && open && !currentEnrollment) {
-      const studentData = student as StudentData
+  const currentEnrollment = useMemo<CurrentEnrollment | null>(() => {
+    if (!student || !open) return null
 
-      // Use current classId from student, not from levels array which may have old data
-      const currentClassId = studentData.classId || studentData.class?.id
-      const currentLevelId = studentData.class?.levelId
+    const studentData = student as StudentData
 
-      // Find enrollment that matches current class, or use the first one as fallback for period/course info
-      const matchingEnrollment = studentData.levels?.find(l => l.classId === currentClassId)
-      const fallbackEnrollment = studentData.levels?.[0]
-      const enrollment = matchingEnrollment || fallbackEnrollment
+    const periodEnrollment = activePeriodId
+      ? studentData.levels?.find((l) => getEnrollmentAcademicPeriodId(l) === activePeriodId)
+      : undefined
 
-      console.log('DEBUG student classId:', currentClassId)
-      console.log('DEBUG student class:', studentData.class)
-      console.log('DEBUG enrollment:', enrollment)
+    // Use current classId from student, not from levels array which may have old data
+    const currentClassId = periodEnrollment?.classId || studentData.classId || studentData.class?.id
+    const currentLevelId = periodEnrollment?.class?.levelId || studentData.class?.levelId
 
-      if (currentClassId) {
-        const lacap = enrollment?.levelAssignedToCourseAcademicPeriod
-        const chap = lacap?.courseHasAcademicPeriod
+    // Find enrollment that matches current class, or use the first one as fallback for period/course info
+    const matchingEnrollment = studentData.levels?.find(
+      (l) =>
+        l.classId === currentClassId &&
+        (!activePeriodId || getEnrollmentAcademicPeriodId(l) === activePeriodId)
+    )
+    const fallbackEnrollment = studentData.levels?.[0]
+    const enrollment = matchingEnrollment || periodEnrollment || fallbackEnrollment
 
-        const extracted = {
-          academicPeriodId: chap?.academicPeriodId || enrollment?.academicPeriodId || '',
-          courseId: chap?.courseId || '',
-          levelId: currentLevelId || lacap?.levelId || enrollment?.levelId || '',
-          classId: currentClassId,
-        }
-        console.log('DEBUG extracted enrollment:', extracted)
-        setCurrentEnrollment(extracted)
-      }
+    if (!currentClassId) return null
+
+    const lacap = enrollment?.levelAssignedToCourseAcademicPeriod
+    const chap = lacap?.courseHasAcademicPeriod
+    const enrollmentAcademicPeriodId = enrollment ? getEnrollmentAcademicPeriodId(enrollment) : ''
+
+    return {
+      academicPeriodId:
+        activePeriodId || chap?.academicPeriodId || enrollmentAcademicPeriodId || '',
+      courseId: chap?.courseId || '',
+      levelId: currentLevelId || lacap?.levelId || enrollment?.levelId || '',
+      classId: currentClassId,
     }
-  }, [student, open, currentEnrollment])
+  }, [student, open, activePeriodId])
 
   // Step 2: Set academic period when enrollment data is available
   useEffect(() => {
-    console.log('Step 2 check:', {
-      hasEnrollment: !!currentEnrollment,
-      academicPeriodSet: initState.academicPeriodSet,
-      periodsCount: academicPeriods.length,
-      lookingFor: currentEnrollment?.academicPeriodId,
-      available: academicPeriods.map((p) => p.id),
-    })
     if (currentEnrollment && !initState.academicPeriodSet && academicPeriods.length > 0) {
       const exists = academicPeriods.some((p) => p.id === currentEnrollment.academicPeriodId)
-      console.log('Step 2 exists:', exists)
       if (exists) {
         form.setValue('academicPeriodId', currentEnrollment.academicPeriodId, {
           shouldValidate: true,
@@ -282,9 +327,9 @@ export function ChangeStudentCourseModal({
   useEffect(() => {
     const justOpened = open && !prevOpenRef.current
     const studentChanged = studentId !== prevStudentIdRef.current
+    const activePeriodChanged = open && activePeriodId !== prevActivePeriodIdRef.current
 
-    if (justOpened || studentChanged) {
-      setCurrentEnrollment(null)
+    if (justOpened || studentChanged || activePeriodChanged) {
       setInitState({
         academicPeriodSet: false,
         courseSet: false,
@@ -297,7 +342,8 @@ export function ChangeStudentCourseModal({
     // Update refs
     prevOpenRef.current = open
     prevStudentIdRef.current = studentId
-  }, [open, form, studentId])
+    prevActivePeriodIdRef.current = activePeriodId
+  }, [open, form, studentId, activePeriodId])
 
   async function handleSubmit(data: FormData) {
     try {
@@ -321,7 +367,6 @@ export function ChangeStudentCourseModal({
 
   function handleClose() {
     form.reset()
-    setCurrentEnrollment(null)
     setInitState({
       academicPeriodSet: false,
       courseSet: false,
@@ -331,10 +376,15 @@ export function ChangeStudentCourseModal({
     onOpenChange(false)
   }
 
-  const studentData = student as StudentData | undefined
   // Get class from the most recent StudentHasLevel that has a class
   const currentStudentLevel = studentData?.levels?.find((l) => l.classId && l.class)
-  const currentClass = currentStudentLevel?.class ?? studentData?.class
+  const selectedStudentLevel = activePeriodId
+    ? studentData?.levels?.find(
+        (l) => getEnrollmentAcademicPeriodId(l) === activePeriodId && l.class
+      )
+    : undefined
+  const currentClass =
+    selectedStudentLevel?.class ?? currentStudentLevel?.class ?? studentData?.class
 
   if (isLoadingStudent) {
     return (
@@ -388,6 +438,21 @@ export function ChangeStudentCourseModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            {enrollmentPeriods.length > 1 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Período da Matrícula</p>
+                <Tabs value={activePeriodId} onValueChange={setActivePeriodId} className="w-full">
+                  <TabsList className="w-full justify-start">
+                    {enrollmentPeriods.map((period) => (
+                      <TabsTrigger key={period.id} value={period.id}>
+                        {period.name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="academicPeriodId"
@@ -403,7 +468,7 @@ export function ChangeStudentCourseModal({
                       form.setValue('classId', '')
                     }}
                     value={field.value}
-                    disabled={isLoadingPeriods}
+                    disabled={isLoadingPeriods || enrollmentPeriods.length > 1}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -518,7 +583,7 @@ export function ChangeStudentCourseModal({
                     key={`class-${field.value}`}
                     onValueChange={field.onChange}
                     value={field.value}
-                    disabled={!levelId || isLoadingClasses}
+                    disabled={!levelId || isLoadingCourses}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -526,7 +591,7 @@ export function ChangeStudentCourseModal({
                           placeholder={
                             !levelId
                               ? `Selecione ${levelLabels.definite.toLowerCase()} primeiro`
-                              : isLoadingClasses
+                              : isLoadingCourses
                                 ? 'Carregando...'
                                 : 'Selecione a turma'
                           }

@@ -8,6 +8,7 @@ import {
   hasMany,
   manyToMany,
 } from '@adonisjs/lucid/orm'
+import { slugify } from '@adonisjs/lucid-slugify'
 import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Level from './level.js'
 import School from './school.js'
@@ -36,6 +37,11 @@ export default class Class_ extends BaseModel {
   declare name: string
 
   @column({ columnName: 'slug' })
+  @slugify({
+    strategy: 'dbIncrement',
+    fields: ['name'],
+    allowUpdates: true,
+  })
   declare slug: string
 
   @column({ columnName: 'schoolId' })

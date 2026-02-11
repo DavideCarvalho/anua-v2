@@ -10,6 +10,14 @@ interface AcademicPeriodInfo {
   id: string
   name: string
   slug: string
+  isActive: boolean
+}
+
+interface LevelInfo {
+  id: string
+  name: string
+  slug: string
+  order: number | null
 }
 
 interface SidebarClassData {
@@ -18,6 +26,7 @@ interface SidebarClassData {
   slug: string
   course: CourseInfo
   academicPeriod: AcademicPeriodInfo
+  level: LevelInfo
 }
 
 export class SidebarClassDto extends BaseDto {
@@ -26,6 +35,7 @@ export class SidebarClassDto extends BaseDto {
   declare slug: string
   declare course: CourseInfo
   declare academicPeriod: AcademicPeriodInfo
+  declare level: LevelInfo
 
   constructor(data: SidebarClassData) {
     super()
@@ -34,6 +44,7 @@ export class SidebarClassDto extends BaseDto {
     this.slug = data.slug
     this.course = data.course
     this.academicPeriod = data.academicPeriod
+    this.level = data.level
   }
 }
 

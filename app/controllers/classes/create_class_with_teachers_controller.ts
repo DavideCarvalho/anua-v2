@@ -1,18 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { v7 as uuidv7 } from 'uuid'
 import Class_ from '#models/class'
-
-function slugify(text: string): string {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/-+/g, '-') // Replace multiple - with single -
-}
 import TeacherHasClass from '#models/teacher_has_class'
 import { createClassWithTeachersValidator } from '#validators/class'
 
@@ -22,12 +10,10 @@ export default class CreateClassWithTeachersController {
 
     // Create the class
     const classId = uuidv7()
-    const slug = slugify(payload.name)
 
     const classEntity = await Class_.create({
       id: classId,
       name: payload.name,
-      slug,
       schoolId: payload.schoolId,
       isArchived: false,
     })

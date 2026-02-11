@@ -10,18 +10,26 @@ interface SidebarClassRow {
   classId: string
   className: string
   classSlug: string
+  levelId: string
+  levelName: string
+  levelSlug: string
+  levelOrder: number | null
   courseId: string
   courseName: string
   courseSlug: string
   academicPeriodId: string
   academicPeriodName: string
   academicPeriodSlug: string
+  academicPeriodIsActive: boolean
 }
 
 export default class GetClassesForSidebarController {
   async handle(ctx: HttpContext) {
-    const { auth } = ctx
+    const { auth, request } = ctx
     const user = ctx.effectiveUser ?? auth.user!
+    const isActiveParam = request.input('isActive')
+    const shouldFilterActive =
+      isActiveParam === undefined ? true : String(isActiveParam).toLowerCase() === 'true'
 
     // Get schools the user has access to
     const userSchoolsResult = await db.rawQuery<{ rows: UserSchoolRow[] }>(
@@ -42,12 +50,17 @@ export default class GetClassesForSidebarController {
         c.id as "classId",
         c.name as "className",
         c.slug as "classSlug",
+        l.id as "levelId",
+        l.name as "levelName",
+        l.slug as "levelSlug",
+        l."order" as "levelOrder",
         co.id as "courseId",
         co.name as "courseName",
         co.slug as "courseSlug",
         ap.id as "academicPeriodId",
         ap.name as "academicPeriodName",
-        ap.slug as "academicPeriodSlug"
+        ap.slug as "academicPeriodSlug",
+        ap."isActive" as "academicPeriodIsActive"
       FROM "Class" c
       JOIN "ClassHasAcademicPeriod" chap_class ON chap_class."classId" = c.id
       JOIN "AcademicPeriod" ap ON chap_class."academicPeriodId" = ap.id
@@ -58,13 +71,14 @@ export default class GetClassesForSidebarController {
         AND chap."academicPeriodId" = ap.id
       JOIN "Course" co ON chap."courseId" = co.id
       WHERE c."schoolId" = ANY(:schoolIds)
-        AND ap."isActive" = true
         AND c."isArchived" = false
+        AND (:shouldFilterActive = false OR ap."isActive" = true)
       ORDER BY ap.name, co.name, c.name
     `
 
     const result = await db.rawQuery<{ rows: SidebarClassRow[] }>(query, {
       schoolIds,
+      shouldFilterActive,
     })
 
     const classes = result.rows.map((row) => ({
@@ -80,6 +94,13 @@ export default class GetClassesForSidebarController {
         id: row.academicPeriodId,
         name: row.academicPeriodName,
         slug: row.academicPeriodSlug,
+        isActive: row.academicPeriodIsActive,
+      },
+      level: {
+        id: row.levelId,
+        name: row.levelName,
+        slug: row.levelSlug,
+        order: row.levelOrder,
       },
     }))
 

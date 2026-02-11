@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
-import string from '@adonisjs/core/helpers/string'
 import db from '@adonisjs/lucid/services/db'
 import AcademicPeriod from '#models/academic_period'
 import Course from '#models/course'
@@ -144,7 +143,6 @@ export default class CreateAcademicPeriodController {
                 const classEntity = new Class_()
                 classEntity.useTransaction(trx)
                 classEntity.name = classData.name
-                classEntity.slug = string.slug(classData.name, { lower: true })
                 classEntity.levelId = level.id
                 classEntity.schoolId = schoolId
                 classEntity.isArchived = false
