@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react'
-import { ArrowLeft } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowLeft, ShoppingCart } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
@@ -10,12 +11,14 @@ import { StoreOrdersTab } from './stores/store-orders-tab'
 import { StoreInstallmentRulesTab } from './stores/store-installment-rules-tab'
 import { StoreFinancialSettingsTab } from './stores/store-financial-settings-tab'
 import { StoreSettlementsTab } from './stores/store-settlements-tab'
+import { CreateStoreSaleModal } from './stores/create-store-sale-modal'
 
 interface StoreDetailContainerProps {
   storeId: string
 }
 
 export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
+  const [createSaleOpen, setCreateSaleOpen] = useState(false)
   const { data: store, isLoading } = useQuery(useStoreQueryOptions(storeId))
 
   if (isLoading) {
@@ -45,11 +48,14 @@ export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
                 {store.isActive ? 'Ativa' : 'Inativa'}
               </Badge>
             </div>
-            {store.description && (
-              <p className="text-muted-foreground">{store.description}</p>
-            )}
+            {store.description && <p className="text-muted-foreground">{store.description}</p>}
           </div>
         </div>
+
+        <Button onClick={() => setCreateSaleOpen(true)}>
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Nova venda
+        </Button>
       </div>
 
       <Tabs defaultValue="products">
@@ -58,9 +64,7 @@ export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
           <TabsTrigger value="orders">Pedidos</TabsTrigger>
           <TabsTrigger value="installment-rules">Parcelamento</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
-          {store.type === 'THIRD_PARTY' && (
-            <TabsTrigger value="settlements">Repasses</TabsTrigger>
-          )}
+          {store.type === 'THIRD_PARTY' && <TabsTrigger value="settlements">Repasses</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="products">
@@ -85,6 +89,13 @@ export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
           </TabsContent>
         )}
       </Tabs>
+
+      <CreateStoreSaleModal
+        open={createSaleOpen}
+        onOpenChange={setCreateSaleOpen}
+        storeId={storeId}
+        schoolId={store.schoolId}
+      />
     </div>
   )
 }

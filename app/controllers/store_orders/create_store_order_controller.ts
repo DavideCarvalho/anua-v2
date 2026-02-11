@@ -9,9 +9,10 @@ import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import StudentHasLevel from '#models/student_has_level'
 import { createStoreOrderValidator } from '#validators/gamification'
+import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 
 export default class CreateStoreOrderController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser }: HttpContext) {
     const payload = await request.validateUsing(createStoreOrderValidator)
 
     // 1. GUARD: Student has active StudentHasLevel (extract contractId)
@@ -268,6 +269,7 @@ export default class CreateStoreOrderController {
 
     await this.createOrderItems(orderItems, order.id, storeItemMap)
     await this.decrementStock(orderItems, storeItemMap)
+    await this.dispatchPostCheckoutJobs(order, effectiveUser ?? auth.user ?? null)
 
     await order.load('student')
     await order.load('studentPayment')
@@ -279,6 +281,49 @@ export default class CreateStoreOrderController {
     }
 
     return response.created(order)
+  }
+
+  private async dispatchPostCheckoutJobs(
+    order: StoreOrder,
+    triggeredBy: { id: string; name?: string | null } | null
+  ): Promise<void> {
+    if (order.paymentMode !== 'DEFERRED') return
+
+    try {
+      if (!order.studentPaymentId) return
+
+      const rootPayment = await StudentPayment.find(order.studentPaymentId)
+      if (!rootPayment) return
+
+      const paymentsQuery = StudentPayment.query()
+        .where('studentId', order.studentId)
+        .where('type', 'STORE')
+        .where('status', 'NOT_PAID')
+        .where('contractId', rootPayment.contractId)
+        .where('totalAmount', rootPayment.totalAmount)
+        .where('installments', rootPayment.installments)
+        .whereBetween('installmentNumber', [1, rootPayment.installments])
+
+      if (rootPayment.studentHasLevelId) {
+        paymentsQuery.where('studentHasLevelId', rootPayment.studentHasLevelId)
+      } else {
+        paymentsQuery.whereNull('studentHasLevelId')
+      }
+
+      const payments = await paymentsQuery
+
+      for (const payment of payments) {
+        await ReconcilePaymentInvoiceJob.dispatch({
+          paymentId: payment.id,
+          triggeredBy: triggeredBy
+            ? { id: triggeredBy.id, name: triggeredBy.name ?? 'Unknown' }
+            : undefined,
+          source: 'school-store-sale',
+        })
+      }
+    } catch {
+      // Queue not available, payments will be reconciled by scheduler
+    }
   }
 
   private async createOrderItems(
