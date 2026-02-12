@@ -24,6 +24,13 @@ export function registerPublicPageRoutes() {
     ])
     .as('matriculaOnline')
 
+  // External redirects
+  router
+    .get('/agendar', async ({ response }) => {
+      return response.redirect('https://cal.com/davi-de-carvalho-ylsmtp/introducao-anua')
+    })
+    .as('agendar')
+
   // Auth pages
   router.get('/sign-in', [ShowSignInPageController]).as('auth.signIn')
   router.get('/login', [ShowSignInPageController]).as('auth.login') // Alias
