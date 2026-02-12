@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowUserController {
   async handle({ params, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class ShowUserController {
       .first()
 
     if (!user) {
-      return response.notFound({ message: 'Usuário não encontrado' })
+      throw AppException.notFound('Usuário não encontrado')
     }
 
     return response.ok(user)

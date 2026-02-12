@@ -1,4 +1,11 @@
-import { BaseModel, beforeCreate, column, belongsTo, manyToMany, hasMany } from '@adonisjs/lucid/orm'
+import {
+  BaseModel,
+  beforeCreate,
+  column,
+  belongsTo,
+  manyToMany,
+  hasMany,
+} from '@adonisjs/lucid/orm'
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, ManyToMany, HasMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'

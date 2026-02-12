@@ -4,9 +4,10 @@ import StoreItem from '#models/store_item'
 import StoreItemDto from '#models/dto/store_item.dto'
 import Store from '#models/store'
 import School from '#models/school'
+import AppException from '#exceptions/app_exception'
 
 export default class ListStoreItemsController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const { storeId } = params
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
@@ -19,7 +20,7 @@ export default class ListStoreItemsController {
       .first()
 
     if (!store) {
-      return response.notFound({ message: 'Loja não encontrada' })
+      throw AppException.notFound('Loja não encontrada')
     }
 
     const school = await School.find(store.schoolId)

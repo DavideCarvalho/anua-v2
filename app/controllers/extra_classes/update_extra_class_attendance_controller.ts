@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasExtraClassAttendance from '#models/student_has_extra_class_attendance'
 import { updateExtraClassAttendanceValidator } from '#validators/extra_class'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateExtraClassAttendanceController {
   async handle({ params, request, response }: HttpContext) {
@@ -14,7 +15,7 @@ export default class UpdateExtraClassAttendanceController {
       .first()
 
     if (!studentAttendance) {
-      return response.notFound({ message: 'Registro de frequência não encontrado' })
+      throw AppException.notFound('Registro de frequência não encontrado')
     }
 
     studentAttendance.status = data.status

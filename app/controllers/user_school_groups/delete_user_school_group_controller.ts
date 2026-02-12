@@ -1,12 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchoolGroup from '#models/user_has_school_group'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteUserSchoolGroupController {
   async handle({ params, response, auth, effectiveUser }: HttpContext) {
     const user = effectiveUser ?? auth.user
 
     if (!user) {
-      return response.unauthorized({ message: 'Usuário não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const assignment = await UserHasSchoolGroup.query()
@@ -17,7 +18,7 @@ export default class DeleteUserSchoolGroupController {
       .first()
 
     if (!assignment) {
-      return response.notFound({ message: 'Relacionamento usuário-grupo não encontrado' })
+      throw AppException.notFound('Relacionamento usuário-grupo não encontrado')
     }
 
     await assignment.delete()

@@ -12,6 +12,8 @@ import StudentMedication from '#models/student_medication'
 import StudentEmergencyContact from '#models/student_emergency_contact'
 import StudentHasResponsible from '#models/student_has_responsible'
 import { fullUpdateStudentValidator } from '#validators/student'
+import AppException from '#exceptions/app_exception'
+import type { EmergencyContactRelationship } from '#models/student_emergency_contact'
 
 export default class FullUpdateStudentController {
   async handle(ctx: HttpContext) {
@@ -27,19 +29,10 @@ export default class FullUpdateStudentController {
       .first()
 
     if (!student) {
-      return response.notFound({ message: 'Aluno não encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
-    let data
-    try {
-      data = await request.validateUsing(fullUpdateStudentValidator)
-    } catch (error: any) {
-      console.error('Validation error:', error.messages || error)
-      return response.unprocessableEntity({
-        message: 'Erro de validação',
-        errors: error.messages || error,
-      })
-    }
+    const data = await request.validateUsing(fullUpdateStudentValidator)
 
     // Helper function to check if a date represents an adult (18+)
     const isAdult = (birthDateStr: string): boolean => {
@@ -56,19 +49,17 @@ export default class FullUpdateStudentController {
     // If student is adult, document and phone are required
     if (studentIsAdult) {
       if (!data.basicInfo.documentNumber) {
-        return response.badRequest({ message: 'Documento é obrigatório para maiores de idade' })
+        throw AppException.badRequest('Documento é obrigatório para maiores de idade')
       }
       if (!data.basicInfo.phone) {
-        return response.badRequest({ message: 'Telefone é obrigatório para maiores de idade' })
+        throw AppException.badRequest('Telefone é obrigatório para maiores de idade')
       }
     }
 
     // Check if all responsibles are adults
     for (const responsible of data.responsibles) {
       if (!isAdult(responsible.birthDate)) {
-        return response.badRequest({
-          message: `Responsável "${responsible.name}" deve ser maior de idade`,
-        })
+        throw AppException.badRequest(`Responsável "${responsible.name}" deve ser maior de idade`)
       }
     }
 
@@ -82,24 +73,22 @@ export default class FullUpdateStudentController {
         (r) => r.documentNumber.replace(/\D/g, '') === studentDoc
       )
       if (conflictWithResponsible) {
-        return response.badRequest({
-          message: `Documento do aluno não pode ser igual ao do responsável "${conflictWithResponsible.name}"`,
-        })
+        throw AppException.badRequest(
+          `Documento do aluno não pode ser igual ao do responsável "${conflictWithResponsible.name}"`
+        )
       }
     }
 
     // Check if any responsible documents are duplicated
     const uniqueDocs = new Set(responsibleDocs)
     if (uniqueDocs.size !== responsibleDocs.length) {
-      return response.badRequest({
-        message: 'Cada responsável deve ter um documento único',
-      })
+      throw AppException.badRequest('Cada responsável deve ter um documento único')
     }
 
     // Get STUDENT_RESPONSIBLE role for creating responsibles
     const responsibleRole = await Role.findBy('name', 'STUDENT_RESPONSIBLE')
     if (!responsibleRole && !data.basicInfo.isSelfResponsible && data.responsibles.length > 0) {
-      return response.internalServerError({ message: 'Role STUDENT_RESPONSIBLE não encontrada' })
+      throw AppException.internalServerError('Role STUDENT_RESPONSIBLE não encontrada')
     }
 
     const trx = await db.transaction()
@@ -307,7 +296,7 @@ export default class FullUpdateStudentController {
             userId,
             name: contact.name,
             phone: contact.phone,
-            relationship: contact.relationship as any,
+            relationship: contact.relationship as EmergencyContactRelationship,
             order: contact.order,
           },
           { client: trx }

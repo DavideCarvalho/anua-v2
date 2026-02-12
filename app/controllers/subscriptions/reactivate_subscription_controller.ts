@@ -3,13 +3,14 @@ import { DateTime } from 'luxon'
 import Subscription from '#models/subscription'
 import SubscriptionStatusHistory from '#models/subscription_status_history'
 import { reactivateSubscriptionValidator } from '#validators/subscription'
+import AppException from '#exceptions/app_exception'
 
 export default class ReactivateSubscriptionController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const subscription = await Subscription.find(params.id)
 
     if (!subscription) {
-      return response.notFound({ message: 'Subscription not found' })
+      throw AppException.notFound('Subscription not found')
     }
 
     const data = await request.validateUsing(reactivateSubscriptionValidator)

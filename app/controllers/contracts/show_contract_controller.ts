@@ -1,15 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
 import { ContractDto } from '#models/dto/contract.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowContractController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params }: HttpContext) {
     const { id } = params
 
     const contract = await Contract.find(id)
 
     if (!contract) {
-      return response.notFound({ message: 'Contract not found' })
+      throw AppException.contractNotFound()
     }
 
     await contract.load('school')

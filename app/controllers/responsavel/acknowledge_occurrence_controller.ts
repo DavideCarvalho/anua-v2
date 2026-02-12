@@ -4,11 +4,12 @@ import Notification from '#models/notification'
 import TeacherHasClass from '#models/teacher_has_class'
 import ResponsibleUserAcceptedOccurence from '#models/responsible_user_accepted_occurence'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AppException from '#exceptions/app_exception'
 
 export default class AcknowledgeOccurrenceController {
   async handle({ params, response, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId, occurrenceId } = params
@@ -20,9 +21,7 @@ export default class AcknowledgeOccurrenceController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para reconhecer esta ocorrencia',
-      })
+      throw AppException.forbidden('Você não tem permissão para reconhecer esta ocorrência')
     }
 
     // Find the occurrence
@@ -32,7 +31,7 @@ export default class AcknowledgeOccurrenceController {
       .first()
 
     if (!occurrence) {
-      return response.notFound({ message: 'Ocorrencia nao encontrada' })
+      throw AppException.notFound('Ocorrência não encontrada')
     }
 
     const existingAcknowledgement = await ResponsibleUserAcceptedOccurence.query()
@@ -59,8 +58,8 @@ export default class AcknowledgeOccurrenceController {
       await Notification.create({
         userId: teacherHasClass.teacherId,
         type: 'SYSTEM_ANNOUNCEMENT',
-        title: 'Ocorrencia reconhecida por responsavel',
-        message: 'Um responsavel confirmou a leitura de uma ocorrencia registrada.',
+        title: 'Ocorrência reconhecida por responsável',
+        message: 'Um responsável confirmou a leitura de uma ocorrência registrada.',
         data: {
           occurrenceId: occurrence.id,
           studentId,
@@ -77,7 +76,7 @@ export default class AcknowledgeOccurrenceController {
     }
 
     return response.ok({
-      message: 'Ocorrencia reconhecida com sucesso',
+      message: 'Ocorrência reconhecida com sucesso',
       occurrence: {
         id: occurrence.id,
         type: occurrence.type,

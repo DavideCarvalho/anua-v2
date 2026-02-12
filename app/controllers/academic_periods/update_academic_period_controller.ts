@@ -3,14 +3,15 @@ import { DateTime } from 'luxon'
 import AcademicPeriod from '#models/academic_period'
 import { updateAcademicPeriodValidator } from '#validators/academic_period'
 import AcademicPeriodDto from '#models/dto/academic_period.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateAcademicPeriodController {
-  async handle({ request, params, response }: HttpContext) {
+  async handle({ request, params }: HttpContext) {
     const payload = await request.validateUsing(updateAcademicPeriodValidator)
 
     const academicPeriod = await AcademicPeriod.find(params.id)
     if (!academicPeriod) {
-      return response.notFound({ message: 'Período letivo não encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     academicPeriod.merge({

@@ -1,18 +1,19 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { updateProfileValidator } from '#validators/responsavel'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateProfileController {
   async handle({ request, response, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const data = await request.validateUsing(updateProfileValidator)
 
     const user = await User.find(effectiveUser.id)
     if (!user) {
-      return response.notFound({ message: 'Usuario nao encontrado' })
+      throw AppException.notFound('Usuário não encontrado')
     }
 
     user.merge({

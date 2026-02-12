@@ -7,14 +7,7 @@ import TeacherHasSubject from '#models/teacher_has_subject'
 import UserHasSchool from '#models/user_has_school'
 import { createTeacherValidator } from '#validators/teacher'
 import TeacherDto from '#models/dto/teacher.dto'
-
-class ConflictError extends Error {
-  status = 409
-  constructor(message: string) {
-    super(message)
-    this.name = 'ConflictError'
-  }
-}
+import AppException from '#exceptions/app_exception'
 
 class InternalError extends Error {
   status = 500
@@ -31,7 +24,7 @@ export default class CreateTeacherController {
     // Check if user already exists
     const existingUser = await User.findBy('email', data.email)
     if (existingUser) {
-      throw new ConflictError('Já existe um usuário com este email')
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     // Get teacher role

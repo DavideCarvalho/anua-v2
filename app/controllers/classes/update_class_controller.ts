@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 import Class_ from '#models/class'
+import ClassDto from '#models/dto/class.dto'
 import { updateClassValidator } from '#validators/class'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateClassController {
   async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
@@ -10,14 +13,22 @@ export default class UpdateClassController {
       .first()
 
     if (!classEntity) {
-      return response.notFound({ message: 'Turma não encontrada' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     const data = await request.validateUsing(updateClassValidator)
 
-    classEntity.merge(data)
-    await classEntity.save()
+    // Usa transaction e extrai campos explicitamente (evita mass assignment)
+    const updatedClass = await db.transaction(async (trx) => {
+      classEntity.merge({
+        name: data.name ?? classEntity.name,
+        isArchived: data.status === 'ARCHIVED',
+      })
 
-    return response.ok(classEntity)
+      await classEntity.useTransaction(trx).save()
+      return classEntity
+    })
+
+    return response.ok(new ClassDto(updatedClass))
   }
 }

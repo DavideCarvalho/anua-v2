@@ -8,12 +8,11 @@ import Notification from '#models/notification'
 import TeacherHasClass from '#models/teacher_has_class'
 import OccurrenceDto from '#models/dto/occurrence.dto'
 import { createOccurrenceValidator } from '#validators/occurrence'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateOccurrenceController {
   async handle({ request, response, selectedSchoolIds }: HttpContext) {
-    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
-      return response.badRequest({ message: 'Usuario sem escola selecionada' })
-    }
+    const scopedSchoolIds = selectedSchoolIds ?? []
 
     const payload = await request.validateUsing(createOccurrenceValidator)
 
@@ -23,36 +22,30 @@ export default class CreateOccurrenceController {
       .first()
 
     if (!teacherHasClass || !teacherHasClass.classId || !teacherHasClass.class) {
-      return response.badRequest({ message: 'Vinculo professor/turma invalido' })
+      throw AppException.badRequest('Vínculo professor/turma inválido')
     }
 
-    if (!selectedSchoolIds.includes(teacherHasClass.class.schoolId)) {
-      return response.forbidden({ message: 'Sem permissao para registrar ocorrencia nesta escola' })
+    if (!scopedSchoolIds.includes(teacherHasClass.class.schoolId)) {
+      throw AppException.forbidden('Sem permissão para registrar ocorrência nesta escola')
     }
 
     const student = await Student.query().where('id', payload.studentId).preload('user').first()
 
     if (!student) {
-      return response.notFound({ message: 'Aluno nao encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     if (!student.classId || student.classId !== teacherHasClass.classId) {
-      return response.badRequest({
-        message: 'Aluno nao pertence a turma selecionada para a ocorrencia',
-      })
+      throw AppException.badRequest('Aluno não pertence à turma selecionada para a ocorrência')
     }
+
+    const pedagogicalResponsibles = await StudentHasResponsible.query()
+      .where('studentId', payload.studentId)
+      .where('isPedagogical', true)
 
     const recipientUserIds = student.isSelfResponsible
       ? [student.id]
-      : [
-          ...new Set(
-            (
-              await StudentHasResponsible.query()
-                .where('studentId', payload.studentId)
-                .where('isPedagogical', true)
-            ).map((relation) => relation.responsibleId)
-          ),
-        ]
+      : [...new Set(pedagogicalResponsibles.map((relation) => relation.responsibleId))]
 
     const occurrence = await db.transaction(async (trx) => {
       const createdOccurrence = await Occurrence.create(
@@ -72,8 +65,8 @@ export default class CreateOccurrenceController {
             {
               userId: responsibleId,
               type: 'SYSTEM_ANNOUNCEMENT',
-              title: 'Nova ocorrencia registrada',
-              message: `Foi registrada uma ocorrencia para ${student.user?.name || 'o aluno'}.`,
+              title: 'Nova ocorrência registrada',
+              message: `Foi registrada uma ocorrência para ${student.user?.name || 'o aluno'}.`,
               data: {
                 occurrenceId: createdOccurrence.id,
                 studentId: payload.studentId,

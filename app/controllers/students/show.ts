@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Student from '#models/student'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowStudentController {
   async handle({ params, response }: HttpContext) {
@@ -32,7 +33,7 @@ export default class ShowStudentController {
       .first()
 
     if (!student) {
-      return response.notFound({ message: 'Aluno não encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     return response.ok(student)

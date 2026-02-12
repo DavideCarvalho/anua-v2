@@ -9,6 +9,7 @@ import {
   SubmissionDto,
   AssignmentsSummaryDto,
 } from '#models/dto/student_assignments_response.dto'
+import AppException from '#exceptions/app_exception'
 
 interface AssignmentRow {
   id: string
@@ -39,9 +40,9 @@ interface SummaryRow {
 }
 
 export default class GetStudentAssignmentsController {
-  async handle({ params, response, request, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -54,9 +55,7 @@ export default class GetStudentAssignmentsController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver as atividades deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver as atividades deste aluno')
     }
 
     // Build the base query

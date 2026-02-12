@@ -3,6 +3,7 @@ import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import { Exception } from '@adonisjs/core/exceptions'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
 import CheckoutException from './checkout_exception.js'
+import AppException from './app_exception.js'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -38,6 +39,14 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     }
 
     if (error instanceof CheckoutException) {
+      return ctx.response.status(error.status).json({
+        code: error.code,
+        description: error.description,
+        ...(error.meta && { meta: error.meta }),
+      })
+    }
+
+    if (error instanceof AppException) {
       return ctx.response.status(error.status).json({
         code: error.code,
         description: error.description,

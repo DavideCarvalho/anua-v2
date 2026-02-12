@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import User from '#models/user'
 import { verifyCode } from '#services/otp_service'
 import { verifyCodeValidator } from '#validators/auth'
+import AppException from '#exceptions/app_exception'
 
 export default class VerifyCodeController {
   async handle({ request, response, auth }: HttpContext) {
@@ -13,18 +14,18 @@ export default class VerifyCodeController {
       const isValid = await verifyCode(email, code)
 
       if (!isValid) {
-        return response.badRequest({
-          message: 'Código inválido ou expirado.',
-        })
+        throw AppException.invalidOrExpiredCode()
       }
 
       // Find the user and log them in
-      const user = await User.findByOrFail('email', email)
+      const user = await User.findBy('email', email)
+
+      if (!user) {
+        throw AppException.invalidOrExpiredCode()
+      }
 
       if (!user.active) {
-        return response.forbidden({
-          message: 'Sua conta está inativa.',
-        })
+        throw AppException.forbidden('Sua conta está inativa.')
       }
 
       await auth.use('web').login(user)
@@ -45,10 +46,12 @@ export default class VerifyCodeController {
           .firstOrFail(),
       })
     } catch (error) {
+      if (error instanceof AppException) {
+        throw error
+      }
+
       console.error('[OTP] Error verifying code:', error)
-      return response.internalServerError({
-        message: 'Erro ao verificar código. Tente novamente.',
-      })
+      throw error
     }
   }
 }

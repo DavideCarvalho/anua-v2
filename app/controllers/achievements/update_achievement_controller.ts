@@ -3,6 +3,7 @@ import Achievement from '#models/achievement'
 import type { AchievementCategory } from '#models/achievement'
 import { updateAchievementValidator } from '#validators/gamification'
 import AchievementDto from '#models/dto/achievement.dto'
+import AppException from '#exceptions/app_exception'
 
 // Map validator category to model category
 const categoryMap: Record<string, AchievementCategory> = {
@@ -14,11 +15,11 @@ const categoryMap: Record<string, AchievementCategory> = {
 }
 
 export default class UpdateAchievementController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const achievement = await Achievement.find(params.id)
 
     if (!achievement) {
-      return response.notFound({ message: 'Conquista nao encontrada' })
+      throw AppException.notFound('Conquista não encontrada')
     }
 
     const payload = await request.validateUsing(updateAchievementValidator)

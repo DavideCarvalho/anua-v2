@@ -63,6 +63,10 @@ const ShowNotificacoesPreferenciasPageController = () =>
   import('#controllers/pages/escola/show_notificacoes_preferencias_page_controller')
 const ShowEventosPageController = () =>
   import('#controllers/pages/escola/show_eventos_page_controller')
+const ShowNovoEventoPageController = () =>
+  import('#controllers/pages/escola/show_novo_evento_page_controller')
+const ShowEditarEventoPageController = () =>
+  import('#controllers/pages/escola/show_editar_evento_page_controller')
 const ShowEventoAutorizacoesPageController = () =>
   import('#controllers/pages/escola/show_evento_autorizacoes_page_controller')
 const ShowMuralPageController = () => import('#controllers/pages/escola/show_mural_page_controller')
@@ -254,6 +258,8 @@ export function registerEscolaPageRoutes() {
 
       // Eventos
       router.get('/eventos', [ShowEventosPageController]).as('eventos')
+      router.get('/eventos/novo', [ShowNovoEventoPageController]).as('eventos.novo')
+      router.get('/eventos/:eventId/editar', [ShowEditarEventoPageController]).as('eventos.editar')
       router
         .get('/eventos/:eventId/autorizacoes', [ShowEventoAutorizacoesPageController])
         .as('eventos.autorizacoes')

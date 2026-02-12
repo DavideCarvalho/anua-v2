@@ -5,13 +5,14 @@ import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteClassController {
   async handle({ params, response }: HttpContext) {
     const classEntity = await Class_.find(params.id)
 
     if (!classEntity) {
-      return response.notFound({ message: 'Turma não encontrada' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     await db.transaction(async (trx) => {

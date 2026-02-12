@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowMyOrderController {
   async handle({ params, request, response, effectiveUser }: HttpContext) {
@@ -16,7 +17,7 @@ export default class ShowMyOrderController {
       .first()
 
     if (!order) {
-      return response.notFound({ message: 'Pedido nao encontrado' })
+      throw AppException.storeOrderNotFound()
     }
 
     // Verify access: student owns order or responsible is linked
@@ -35,6 +36,6 @@ export default class ShowMyOrderController {
       }
     }
 
-    return response.forbidden({ message: 'Acesso negado' })
+    throw AppException.forbidden('Acesso negado')
   }
 }

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
 import { listParticipantsValidator } from '#validators/event'
+import AppException from '#exceptions/app_exception'
 
 export default class ListEventParticipantsController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class ListEventParticipantsController {
     const event = await Event.find(eventId)
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     const query = EventParticipant.query().where('eventId', eventId).preload('user')

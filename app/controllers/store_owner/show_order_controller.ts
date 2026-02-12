@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowOrderController {
   async handle({ storeOwnerStore, params, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class ShowOrderController {
       .first()
 
     if (!order) {
-      return response.notFound({ message: 'Pedido não encontrado' })
+      throw AppException.storeOrderNotFound()
     }
 
     return response.ok(order)

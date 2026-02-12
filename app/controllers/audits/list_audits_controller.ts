@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { listAuditsValidator } from '#validators/audit'
 import AuditDto from '#models/dto/audit.dto'
+import AppException from '#exceptions/app_exception'
 
 const ENTITY_MAP: Record<string, string> = {
   'invoice': 'Invoice',
@@ -13,14 +14,14 @@ const ENTITY_MAP: Record<string, string> = {
 
 export default class ListAuditsController {
   async handle(ctx: HttpContext) {
-    const { params, response } = ctx
+    const { params } = ctx
     await ctx.request.validateUsing(listAuditsValidator)
 
     const { entityType, entityId } = params
     const auditableType = ENTITY_MAP[entityType]
 
     if (!auditableType) {
-      return response.badRequest({ error: 'Invalid entity type' })
+      throw AppException.badRequest('Tipo de entidade inválido')
     }
 
     const audits = await db

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -32,8 +33,12 @@ import {
 } from '../../components/ui/select'
 import { Switch } from '../../components/ui/switch'
 import { Textarea } from '../../components/ui/textarea'
+import { Checkbox } from '../../components/ui/checkbox'
 
 import { useCreateEventMutation } from '../../hooks/mutations/use_create_event'
+import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use_academic_periods'
+import { useLevelsQueryOptions } from '../../hooks/queries/use_levels'
+import { useClassesQueryOptions } from '../../hooks/queries/use_classes'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
@@ -62,44 +67,71 @@ const EventVisibility = {
   STUDENTS_ONLY: 'STUDENTS_ONLY',
 } as const
 
-const formSchema = z.object({
-  title: z.string().min(1, 'Titulo e obrigatorio').max(255),
-  description: z.string().optional(),
-  type: z.enum([
-    EventType.ACADEMIC_EVENT,
-    EventType.EXAM,
-    EventType.ASSIGNMENT,
-    EventType.FIELD_TRIP,
-    EventType.PARENTS_MEETING,
-    EventType.CULTURAL_EVENT,
-    EventType.SPORTS_EVENT,
-    EventType.HOLIDAY,
-    EventType.OTHER,
-  ]),
-  visibility: z.enum([
-    EventVisibility.PUBLIC,
-    EventVisibility.SCHOOL_ONLY,
-    EventVisibility.STAFF_ONLY,
-    EventVisibility.PARENTS_ONLY,
-    EventVisibility.STUDENTS_ONLY,
-  ]).default(EventVisibility.SCHOOL_ONLY),
-  priority: z.enum([
-    EventPriority.LOW,
-    EventPriority.NORMAL,
-    EventPriority.HIGH,
-    EventPriority.URGENT,
-  ]).default(EventPriority.NORMAL),
-  startsAt: z.string().min(1, 'Data de inicio e obrigatoria'),
-  endsAt: z.string().optional(),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  isAllDay: z.boolean().default(false),
-  location: z.string().max(255).optional(),
-  isOnline: z.boolean().default(false),
-  onlineUrl: z.string().url('URL invalida').optional().or(z.literal('')),
-  isExternal: z.boolean().default(false),
-  requiresParentalConsent: z.boolean().default(false),
-})
+const formSchema = z
+  .object({
+    title: z.string().min(1, 'Titulo e obrigatorio').max(255),
+    description: z.string().optional(),
+    type: z.enum([
+      EventType.ACADEMIC_EVENT,
+      EventType.EXAM,
+      EventType.ASSIGNMENT,
+      EventType.FIELD_TRIP,
+      EventType.PARENTS_MEETING,
+      EventType.CULTURAL_EVENT,
+      EventType.SPORTS_EVENT,
+      EventType.HOLIDAY,
+      EventType.OTHER,
+    ]),
+    visibility: z
+      .enum([
+        EventVisibility.PUBLIC,
+        EventVisibility.SCHOOL_ONLY,
+        EventVisibility.STAFF_ONLY,
+        EventVisibility.PARENTS_ONLY,
+        EventVisibility.STUDENTS_ONLY,
+      ])
+      .default(EventVisibility.SCHOOL_ONLY),
+    priority: z
+      .enum([EventPriority.LOW, EventPriority.NORMAL, EventPriority.HIGH, EventPriority.URGENT])
+      .default(EventPriority.NORMAL),
+    startsAt: z.string().min(1, 'Data de inicio e obrigatoria'),
+    endsAt: z.string().optional(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+    isAllDay: z.boolean().default(false),
+    location: z.string().max(255).optional(),
+    isOnline: z.boolean().default(false),
+    onlineUrl: z.string().url('URL invalida').optional().or(z.literal('')),
+    isExternal: z.boolean().default(false),
+    requiresParentalConsent: z.boolean().default(false),
+    hasAdditionalCosts: z.boolean().default(false),
+    additionalCostAmount: z.coerce.number().positive('Informe um valor maior que zero').optional(),
+    additionalCostDescription: z.string().max(255).optional(),
+    audienceWholeSchool: z.boolean().default(true),
+    audienceAcademicPeriodIds: z.array(z.string()).default([]),
+    audienceLevelIds: z.array(z.string()).default([]),
+    audienceClassIds: z.array(z.string()).default([]),
+  })
+  .superRefine((values, ctx) => {
+    if (values.audienceWholeSchool) {
+      return
+    }
+
+    const hasAnyAudience =
+      values.audienceAcademicPeriodIds.length > 0 ||
+      values.audienceLevelIds.length > 0 ||
+      values.audienceClassIds.length > 0
+
+    if (hasAnyAudience) {
+      return
+    }
+
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Selecione ao menos um periodo letivo, ano ou turma',
+      path: ['audienceAcademicPeriodIds'],
+    })
+  })
 
 type FormValues = z.infer<typeof formSchema>
 
@@ -111,6 +143,13 @@ interface NewEventModalProps {
 
 export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalProps) {
   const createEventMutation = useCreateEventMutation()
+  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
+  const { data: levelsData } = useQuery(useLevelsQueryOptions({ schoolId, limit: 100 }))
+  const { data: classesData } = useQuery(useClassesQueryOptions({ schoolId, limit: 200 }))
+
+  const academicPeriods = periodsData?.data ?? []
+  const levels = levelsData?.data ?? []
+  const classes = classesData?.data ?? []
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -130,6 +169,13 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
       onlineUrl: '',
       isExternal: false,
       requiresParentalConsent: false,
+      hasAdditionalCosts: false,
+      additionalCostAmount: undefined,
+      additionalCostDescription: '',
+      audienceWholeSchool: true,
+      audienceAcademicPeriodIds: [],
+      audienceLevelIds: [],
+      audienceClassIds: [],
     },
   })
 
@@ -152,6 +198,17 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
         visibility: values.visibility as any,
         location: values.location,
         requiresParentalConsent: values.requiresParentalConsent,
+        hasAdditionalCosts: values.hasAdditionalCosts,
+        additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : undefined,
+        additionalCostDescription: values.hasAdditionalCosts
+          ? values.additionalCostDescription
+          : undefined,
+        audienceWholeSchool: values.audienceWholeSchool,
+        audienceAcademicPeriodIds: values.audienceWholeSchool
+          ? []
+          : values.audienceAcademicPeriodIds,
+        audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
+        audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
         schoolId,
         startsAt: new Date(values.startsAt).toISOString(),
         endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
@@ -170,8 +227,12 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
+        onPointerDownOutside={(event) => event.preventDefault()}
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <DialogHeader className="sticky top-0 z-10 border-b bg-background pb-4">
           <DialogTitle>Criar Novo Evento</DialogTitle>
           <DialogDescription>Preencha as informacoes do evento abaixo.</DialogDescription>
         </DialogHeader>
@@ -276,7 +337,9 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
                         <SelectItem value={EventVisibility.PUBLIC}>Publico</SelectItem>
                         <SelectItem value={EventVisibility.SCHOOL_ONLY}>Escola</SelectItem>
                         <SelectItem value={EventVisibility.STAFF_ONLY}>Apenas Equipe</SelectItem>
-                        <SelectItem value={EventVisibility.PARENTS_ONLY}>Apenas Responsaveis</SelectItem>
+                        <SelectItem value={EventVisibility.PARENTS_ONLY}>
+                          Apenas Responsaveis
+                        </SelectItem>
                         <SelectItem value={EventVisibility.STUDENTS_ONLY}>Apenas Alunos</SelectItem>
                       </SelectContent>
                     </Select>
@@ -285,6 +348,117 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="audienceWholeSchool"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Publico: escola inteira</FormLabel>
+                    <FormDescription>
+                      Marque para enviar para todos os alunos da escola
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {!form.watch('audienceWholeSchool') && (
+              <div className="space-y-4 rounded-lg border p-4">
+                <div>
+                  <h3 className="text-sm font-medium">Publico segmentado</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Voce pode combinar periodos letivos, anos e turmas
+                  </p>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="audienceAcademicPeriodIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Periodos letivos</FormLabel>
+                      <div className="max-h-28 space-y-2 overflow-y-auto rounded-md border p-3">
+                        {academicPeriods.map((period) => (
+                          <label key={period.id} className="flex items-center gap-2 text-sm">
+                            <Checkbox
+                              checked={field.value.includes(period.id)}
+                              onCheckedChange={(checked) => {
+                                field.onChange(
+                                  checked
+                                    ? [...field.value, period.id]
+                                    : field.value.filter((id) => id !== period.id)
+                                )
+                              }}
+                            />
+                            <span>{period.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="audienceLevelIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Anos</FormLabel>
+                      <div className="max-h-28 space-y-2 overflow-y-auto rounded-md border p-3">
+                        {levels.map((level) => (
+                          <label key={level.id} className="flex items-center gap-2 text-sm">
+                            <Checkbox
+                              checked={field.value.includes(level.id)}
+                              onCheckedChange={(checked) => {
+                                field.onChange(
+                                  checked
+                                    ? [...field.value, level.id]
+                                    : field.value.filter((id) => id !== level.id)
+                                )
+                              }}
+                            />
+                            <span>{level.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="audienceClassIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Turmas</FormLabel>
+                      <div className="max-h-36 space-y-2 overflow-y-auto rounded-md border p-3">
+                        {classes.map((classItem) => (
+                          <label key={classItem.id} className="flex items-center gap-2 text-sm">
+                            <Checkbox
+                              checked={field.value.includes(classItem.id)}
+                              onCheckedChange={(checked) => {
+                                field.onChange(
+                                  checked
+                                    ? [...field.value, classItem.id]
+                                    : field.value.filter((id) => id !== classItem.id)
+                                )
+                              }}
+                            />
+                            <span>{classItem.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -444,7 +618,9 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
                       <FormLabel>Autorizacao dos Pais</FormLabel>
-                      <FormDescription>Requer autorizacao dos pais para menores de 18 anos</FormDescription>
+                      <FormDescription>
+                        Requer autorizacao dos pais para menores de 18 anos
+                      </FormDescription>
                     </div>
                     <FormControl>
                       <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -454,7 +630,74 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
               />
             )}
 
-            <DialogFooter>
+            <FormField
+              control={form.control}
+              name="hasAdditionalCosts"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Evento Pago</FormLabel>
+                    <FormDescription>
+                      Habilite para registrar custo adicional no evento
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked)
+
+                        if (!checked) {
+                          form.setValue('additionalCostAmount', undefined)
+                          form.setValue('additionalCostDescription', '')
+                        }
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {form.watch('hasAdditionalCosts') && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="additionalCostAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor adicional (R$) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="1"
+                          step="1"
+                          placeholder="Ex: 50"
+                          value={field.value ?? ''}
+                          onChange={(event) => field.onChange(event.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="additionalCostDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descricao do custo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Transporte e ingresso" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            <DialogFooter className="sticky bottom-0 z-10 border-t bg-background pt-4">
               <Button
                 type="button"
                 variant="outline"

@@ -8,6 +8,7 @@ import {
   BalanceSummaryDto,
   BalancePaginationMetaDto,
 } from '#models/dto/student_balance_response.dto'
+import AppException from '#exceptions/app_exception'
 
 interface BalanceRow {
   total_credits: string | number
@@ -15,9 +16,9 @@ interface BalanceRow {
 }
 
 export default class GetStudentBalanceController {
-  async handle({ params, request, response, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -31,9 +32,7 @@ export default class GetStudentBalanceController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver o saldo deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver o saldo deste aluno')
     }
 
     // Get transactions

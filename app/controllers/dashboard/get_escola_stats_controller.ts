@@ -6,13 +6,22 @@ import StudentPayment from '#models/student_payment'
 import AcademicPeriod from '#models/academic_period'
 
 export default class GetEscolaStatsController {
-  async handle({ response, selectedSchoolIds }: HttpContext) {
-    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
-      return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
+  async handle({ selectedSchoolIds }: HttpContext) {
+    const scopedSchoolIds = selectedSchoolIds ?? []
+    if (scopedSchoolIds.length === 0) {
+      return {
+        totalStudents: 0,
+        activeStudents: 0,
+        activeAcademicPeriods: 0,
+        totalTeachers: 0,
+        monthlyRevenue: 0,
+        pendingPayments: 0,
+        attendanceRate: 0,
+      }
     }
 
     // Para stats, usar a primeira escola selecionada (ou agregar todas)
-    const schoolId = selectedSchoolIds[0]
+    const schoolId = scopedSchoolIds[0]
 
     const totalStudents = await Student.query()
       .whereHas('user', (q) => {

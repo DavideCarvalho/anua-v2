@@ -4,6 +4,7 @@ import StoreOrder from '#models/store_order'
 import StoreItem from '#models/store_item'
 import StudentPayment from '#models/student_payment'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class RejectOrderController {
   async handle({ storeOwnerStore, params, request, response, auth }: HttpContext) {
@@ -15,13 +16,11 @@ export default class RejectOrderController {
       .first()
 
     if (!order) {
-      return response.notFound({ message: 'Pedido não encontrado' })
+      throw AppException.storeOrderNotFound()
     }
 
     if (order.status !== 'PENDING_APPROVAL') {
-      return response.badRequest({
-        message: `Não é possível rejeitar pedido com status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('reject', order.status)
     }
 
     const { reason } = request.only(['reason'])

@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import User from '#models/user'
 import { createUserValidator } from '#validators/user'
 import string from '@adonisjs/core/helpers/string'
+import AppException from '#exceptions/app_exception'
 
 export default class StoreUserController {
   async handle({ request, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class StoreUserController {
 
     const existingUser = await User.findBy('email', data.email)
     if (existingUser) {
-      return response.conflict({ message: 'Já existe um usuário com este email' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const slug = string.slug(data.name, { lower: true })

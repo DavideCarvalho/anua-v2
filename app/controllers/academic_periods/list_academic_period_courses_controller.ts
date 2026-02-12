@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
+import AppException from '#exceptions/app_exception'
 
 export default class ListAcademicPeriodCoursesController {
   async handle({ params, request, response }: HttpContext) {
@@ -25,7 +26,7 @@ export default class ListAcademicPeriodCoursesController {
       .first()
 
     if (!academicPeriod) {
-      return response.notFound({ message: 'Período letivo não encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     // Get all classes for this academic period

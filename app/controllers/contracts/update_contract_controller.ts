@@ -3,16 +3,17 @@ import { DateTime } from 'luxon'
 import { updateContractValidator } from '#validators/contract'
 import Contract from '#models/contract'
 import ContractPaymentDay from '#models/contract_payment_day'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateContractController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(updateContractValidator)
 
     const contract = await Contract.find(id)
 
     if (!contract) {
-      return response.notFound({ message: 'Contract not found' })
+      throw AppException.contractNotFound()
     }
 
     const { endDate, amount, paymentDays, ...rest } = payload

@@ -57,3 +57,15 @@ export const throttleGlobal = limiter.define('global', (ctx: HttpContext) => {
     .every('1 minute')
     .usingKey(`ip_${ctx.request.ip()}`) as HttpLimiter<any>
 })
+
+/**
+ * Rate limiter for webhooks
+ * 60 requests per minute per IP
+ */
+export const throttleWebhook = limiter.define('webhook', (ctx: HttpContext) => {
+  return limiter
+    .allowRequests(60)
+    .every('1 minute')
+    .blockFor('10 minutes')
+    .usingKey(`ip_${ctx.request.ip()}`) as HttpLimiter<any>
+})

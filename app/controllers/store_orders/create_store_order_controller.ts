@@ -10,6 +10,7 @@ import StudentBalanceTransaction from '#models/student_balance_transaction'
 import StudentHasLevel from '#models/student_has_level'
 import { createStoreOrderValidator } from '#validators/gamification'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateStoreOrderController {
   async handle({ request, response, auth, effectiveUser }: HttpContext) {
@@ -23,9 +24,7 @@ export default class CreateStoreOrderController {
       .first()
 
     if (!studentHasLevel || !studentHasLevel.contractId) {
-      return response.badRequest({
-        message: 'Student does not have an active enrollment with a contract',
-      })
+      throw AppException.badRequest('Aluno não possui matrícula ativa com contrato')
     }
 
     const contractId = studentHasLevel.contractId
@@ -36,15 +35,15 @@ export default class CreateStoreOrderController {
       store = await Store.query().where('id', payload.storeId).whereNull('deletedAt').first()
 
       if (!store) {
-        return response.notFound({ message: 'Store not found' })
+        throw AppException.notFound('Loja não encontrada')
       }
 
       if (!store.isActive) {
-        return response.badRequest({ message: 'Store is not active' })
+        throw AppException.badRequest('Loja inativa')
       }
 
       if (store.schoolId !== payload.schoolId) {
-        return response.badRequest({ message: 'Store does not belong to this school' })
+        throw AppException.badRequest('A loja não pertence a esta escola')
       }
     }
 
@@ -67,28 +66,22 @@ export default class CreateStoreOrderController {
       const storeItem = storeItemMap.get(item.storeItemId)
 
       if (!storeItem) {
-        return response.notFound({
-          message: `Store item not found: ${item.storeItemId}`,
-        })
+        throw AppException.notFound(`Item da loja não encontrado: ${item.storeItemId}`)
       }
 
       if (!storeItem.isActive) {
-        return response.badRequest({
-          message: `Store item is not available: ${storeItem.name}`,
-        })
+        throw AppException.badRequest(`Item da loja indisponível: ${storeItem.name}`)
       }
 
       if (payload.storeId && storeItem.storeId && storeItem.storeId !== payload.storeId) {
-        return response.badRequest({
-          message: `Item ${storeItem.name} does not belong to the specified store`,
-        })
+        throw AppException.badRequest(`Item ${storeItem.name} não pertence à loja informada`)
       }
 
       // 4. GUARD: Stock check
       if (storeItem.totalStock !== null && storeItem.totalStock < item.quantity) {
-        return response.badRequest({
-          message: `Insufficient stock for ${storeItem.name}. Available: ${storeItem.totalStock}`,
-        })
+        throw AppException.badRequest(
+          `Estoque insuficiente para ${storeItem.name}. Disponível: ${storeItem.totalStock}`
+        )
       }
 
       const itemTotal = storeItem.price * item.quantity
@@ -124,10 +117,7 @@ export default class CreateStoreOrderController {
         const previousBalance = latestTransaction?.newBalance ?? student.balance ?? 0
 
         if (previousBalance < totalMoney) {
-          return response.badRequest({
-            message: 'Saldo insuficiente',
-            balance: previousBalance,
-          })
+          throw AppException.badRequest(`Saldo insuficiente. Saldo atual: ${previousBalance}`)
         }
 
         const newBalance = previousBalance - totalMoney

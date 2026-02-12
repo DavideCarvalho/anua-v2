@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Absence from '#models/absence'
 import Teacher from '#models/teacher'
 import { getTeacherAbsencesValidator } from '#validators/teacher_timesheet'
+import AppException from '#exceptions/app_exception'
 
 export default class GetTeacherAbsencesController {
   async handle({ request, response, auth }: HttpContext) {
@@ -14,7 +15,7 @@ export default class GetTeacherAbsencesController {
 
     const teacher = await Teacher.query().where('id', teacherId).where('schoolId', schoolId).first()
     if (!teacher) {
-      return response.notFound({ message: 'Professor não encontrado' })
+      throw AppException.notFound('Professor não encontrado')
     }
 
     // Minimal: return absences linked to teacher's userId within month/year.

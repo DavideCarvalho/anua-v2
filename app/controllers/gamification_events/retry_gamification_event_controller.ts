@@ -2,21 +2,19 @@ import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
 import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
+import AppException from '#exceptions/app_exception'
 
 export default class RetryGamificationEventController {
   async handle({ params, response }: HttpContext) {
     const event = await GamificationEvent.find(params.id)
 
     if (!event) {
-      return response.notFound({ message: 'Gamification event not found' })
+      throw AppException.notFound('Evento de gamificação não encontrado')
     }
 
     // Only allow retry for events with errors (not processed and has error)
     if (event.processed || !event.error) {
-      return response.badRequest({
-        message: 'Only failed events can be retried',
-        processed: event.processed,
-      })
+      throw AppException.badRequest('Apenas eventos com falha podem ser reprocessados')
     }
 
     // Reset for reprocessing

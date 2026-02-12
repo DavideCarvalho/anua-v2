@@ -6,6 +6,7 @@ import ExtraClassSchedule from '#models/extra_class_schedule'
 import ExtraClassAttendance from '#models/extra_class_attendance'
 import StudentHasExtraClassAttendance from '#models/student_has_extra_class_attendance'
 import { createExtraClassAttendanceValidator } from '#validators/extra_class'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateExtraClassAttendanceController {
   async handle({ params, request, response }: HttpContext) {
@@ -13,7 +14,7 @@ export default class CreateExtraClassAttendanceController {
 
     const extraClass = await ExtraClass.find(params.id)
     if (!extraClass) {
-      return response.notFound({ message: 'Aula avulsa não encontrada' })
+      throw AppException.notFound('Aula avulsa não encontrada')
     }
 
     const attendanceDate = DateTime.fromJSDate(data.date)
@@ -25,9 +26,9 @@ export default class CreateExtraClassAttendanceController {
       .first()
 
     if (!schedule) {
-      return response.badRequest({
-        message: 'Não há horário cadastrado para esta aula avulsa neste dia da semana',
-      })
+      throw AppException.badRequest(
+        'Não há horário cadastrado para esta aula avulsa neste dia da semana'
+      )
     }
 
     const trx = await db.transaction()

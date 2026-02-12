@@ -4,6 +4,7 @@ import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
 import { registerParticipantValidator } from '#validators/event'
 import { randomUUID } from 'node:crypto'
+import AppException from '#exceptions/app_exception'
 
 export default class RegisterParticipantController {
   async handle({ params, request, response }: HttpContext) {
@@ -13,17 +14,17 @@ export default class RegisterParticipantController {
     const event = await Event.query().where('id', eventId).withCount('participants').first()
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     // Check if event is published
     if (event.status !== 'PUBLISHED') {
-      return response.badRequest({ message: 'Can only register for published events' })
+      throw AppException.badRequest('Só é possível registrar participantes em eventos publicados')
     }
 
     // Check if event has capacity
     if (event.maxParticipants && event.$extras.participants_count >= event.maxParticipants) {
-      return response.badRequest({ message: 'Event is at full capacity' })
+      throw AppException.badRequest('O evento atingiu a capacidade máxima')
     }
 
     // Check if user is already registered
@@ -34,7 +35,7 @@ export default class RegisterParticipantController {
       .first()
 
     if (existingParticipant) {
-      return response.badRequest({ message: 'User is already registered for this event' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const participant = await EventParticipant.create({

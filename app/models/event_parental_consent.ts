@@ -21,52 +21,52 @@ export default class EventParentalConsent extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'eventId' })
   declare eventId: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'responsibleId' })
   declare responsibleId: string
 
   @column()
   declare status: ParentalConsentStatus
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'respondedAt' })
   declare respondedAt: DateTime | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'expiresAt' })
   declare expiresAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'approvalNotes' })
   declare approvalNotes: string | null
 
-  @column()
+  @column({ columnName: 'denialReason' })
   declare denialReason: string | null
 
   @column()
   declare signature: string | null
 
-  @column()
+  @column({ columnName: 'ipAddress' })
   declare ipAddress: string | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'emailSentAt' })
   declare emailSentAt: DateTime | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'reminderSentAt' })
   declare reminderSentAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'reminderCount' })
   declare reminderCount: number
 
   @column()
   declare metadata: Record<string, unknown> | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

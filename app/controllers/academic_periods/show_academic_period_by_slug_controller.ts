@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
 import AcademicPeriodDto from '#models/dto/academic_period.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowAcademicPeriodBySlugController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const include = request.qs().include?.split(',') ?? []
     const includeCourses = include.includes('courses')
 
@@ -21,7 +22,7 @@ export default class ShowAcademicPeriodBySlugController {
     const academicPeriod = await query.first()
 
     if (!academicPeriod) {
-      return response.notFound({ message: 'Período letivo não encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     return new AcademicPeriodDto(academicPeriod)

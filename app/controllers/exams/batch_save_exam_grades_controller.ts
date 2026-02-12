@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import { batchSaveExamGradesValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
+import AppException from '#exceptions/app_exception'
 
 export default class BatchSaveExamGradesController {
   async handle({ params, request, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class BatchSaveExamGradesController {
     const exam = await Exam.find(id)
 
     if (!exam) {
-      return response.notFound({ message: 'Exam not found' })
+      throw AppException.notFound('Prova não encontrada')
     }
 
     const results = []

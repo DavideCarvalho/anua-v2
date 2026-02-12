@@ -5,6 +5,7 @@ import Student from '#models/student'
 import StudentHasLevel from '#models/student_has_level'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { updateStudentValidator } from '#validators/student'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateStudentController {
   async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
@@ -17,7 +18,7 @@ export default class UpdateStudentController {
       .first()
 
     if (!student) {
-      return response.notFound({ message: 'Aluno não encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     const data = await request.validateUsing(updateStudentValidator)
@@ -26,7 +27,7 @@ export default class UpdateStudentController {
     if (data.email && data.email !== student.user.email) {
       const existingUser = await User.findBy('email', data.email)
       if (existingUser) {
-        return response.conflict({ message: 'Já existe um usuário com este email' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 

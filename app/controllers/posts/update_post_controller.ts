@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 import Post from '#models/post'
+import PostDto from '#models/dto/post.dto'
 import { updatePostValidator } from '#validators/post'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdatePostController {
   async handle({ params, request, response, auth }: HttpContext) {
@@ -10,21 +13,26 @@ export default class UpdatePostController {
     const post = await Post.find(id)
 
     if (!post) {
-      return response.notFound({ message: 'Post not found' })
+      throw AppException.notFound('Post não encontrado')
     }
 
     // Only author can update their post - model uses userId not authorId
     if (post.userId !== auth.user!.id) {
-      return response.forbidden({ message: 'You can only edit your own posts' })
+      throw AppException.forbidden('Você só pode editar seus próprios posts')
     }
 
-    post.merge(data)
-    await post.save()
+    const updatedPost = await db.transaction(async (trx) => {
+      post.merge({
+        content: data.content ?? post.content,
+      })
+      await post.useTransaction(trx).save()
+      return post
+    })
 
     // Model uses user relationship, not author
-    await post.load('user')
-    await post.load('school')
+    await updatedPost.load('user')
+    await updatedPost.load('school')
 
-    return response.ok(post)
+    return response.ok(new PostDto(updatedPost))
   }
 }

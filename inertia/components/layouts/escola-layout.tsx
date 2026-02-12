@@ -90,6 +90,11 @@ const navigation: NavItem[] = [
         href: '/escola/pedagogico/aulas-avulsas',
       },
       {
+        title: 'Eventos',
+        route: 'web.escola.eventos',
+        href: '/escola/eventos',
+      },
+      {
         title: 'Ocorrências',
         route: 'web.escola.pedagogico.ocorrencias',
         href: '/escola/pedagogico/ocorrencias',

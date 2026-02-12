@@ -2,16 +2,17 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
 import StudentPayment from '#models/student_payment'
 import { fetchAsaasPayment, resolveAsaasConfig } from '#services/asaas_service'
+import AppException from '#exceptions/app_exception'
 
 export default class GetStudentPaymentBoletoController {
   async handle({ params, response }: HttpContext) {
     const payment = await StudentPayment.find(params.id)
     if (!payment) {
-      return response.notFound({ message: 'Pagamento não encontrado' })
+      throw AppException.notFound('Pagamento não encontrado')
     }
 
     if (!payment.paymentGatewayId) {
-      return response.badRequest({ message: 'Pagamento não possui cobrança no Asaas' })
+      throw AppException.badRequest('Pagamento não possui cobrança no Asaas')
     }
 
     const contract = await Contract.query()
@@ -20,14 +21,12 @@ export default class GetStudentPaymentBoletoController {
       .first()
 
     if (!contract?.school) {
-      return response.notFound({ message: 'Contrato ou escola não encontrados' })
+      throw AppException.notFound('Contrato ou escola não encontrados')
     }
 
     const config = resolveAsaasConfig(contract.school)
     if (!config) {
-      return response.badRequest({
-        message: 'Configuração do Asaas não encontrada para esta escola',
-      })
+      throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
 
     const details = await fetchAsaasPayment(config.apiKey, payment.paymentGatewayId)

@@ -2,13 +2,14 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Teacher from '#models/teacher'
 import TeacherHasClass from '#models/teacher_has_class'
 import { assignTeacherToClassValidator } from '#validators/teacher'
+import AppException from '#exceptions/app_exception'
 
 export default class AssignTeacherToClassController {
   async handle({ params, request, response }: HttpContext) {
     const teacher = await Teacher.find(params.id)
 
     if (!teacher) {
-      return response.notFound({ message: 'Professor não encontrado' })
+      throw AppException.notFound('Professor não encontrado')
     }
 
     const data = await request.validateUsing(assignTeacherToClassValidator)

@@ -12,21 +12,22 @@ import {
   SubjectWithTeacherDto,
 } from '#models/dto/student_schedule_response.dto'
 import StudentHasExtraClass from '#models/student_has_extra_class'
+import AppException from '#exceptions/app_exception'
 
 const DAY_LABELS: Record<number, string> = {
   0: 'Domingo',
   1: 'Segunda-feira',
-  2: 'Terca-feira',
+  2: 'Terça-feira',
   3: 'Quarta-feira',
   4: 'Quinta-feira',
   5: 'Sexta-feira',
-  6: 'Sabado',
+  6: 'Sábado',
 }
 
 export default class GetStudentScheduleController {
-  async handle({ params, response, effectiveUser }: HttpContext) {
+  async handle({ params, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -38,16 +39,14 @@ export default class GetStudentScheduleController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver o horario deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver o horário deste aluno')
     }
 
     // Get student with class
     const student = await Student.query().where('id', studentId).preload('class').first()
 
     if (!student) {
-      return response.notFound({ message: 'Aluno nao encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     if (!student.classId) {
@@ -70,7 +69,7 @@ export default class GetStudentScheduleController {
         className: student.class.name,
         scheduleByDay: {},
         subjects: [],
-        message: 'Nenhum periodo letivo ativo encontrado',
+        message: 'Nenhum período letivo ativo encontrado',
       })
     }
 
@@ -87,7 +86,7 @@ export default class GetStudentScheduleController {
         className: student.class.name,
         scheduleByDay: {},
         subjects: [],
-        message: 'Horario nao definido para esta turma',
+        message: 'Horário não definido para esta turma',
       })
     }
 

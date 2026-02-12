@@ -8,6 +8,7 @@ import {
   MissingDocumentDto,
   DocumentsSummaryDto,
 } from '#models/dto/student_documents_response.dto'
+import AppException from '#exceptions/app_exception'
 
 interface DocumentRow {
   id: string
@@ -41,9 +42,9 @@ interface SummaryRow {
 }
 
 export default class GetStudentDocumentsController {
-  async handle({ params, response, effectiveUser }: HttpContext) {
+  async handle({ params, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -55,9 +56,7 @@ export default class GetStudentDocumentsController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver os documentos deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver os documentos deste aluno')
     }
 
     // Get student's documents with contract document info

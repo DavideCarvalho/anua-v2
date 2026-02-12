@@ -2,11 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Invoice from '#models/invoice'
 import StudentHasResponsible from '#models/student_has_responsible'
 import InvoiceDto from '#models/dto/invoice.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class GetStudentInvoicesController {
-  async handle({ params, request, response, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -19,9 +20,7 @@ export default class GetStudentInvoicesController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver as faturas deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver as faturas deste aluno')
     }
 
     const query = Invoice.query()

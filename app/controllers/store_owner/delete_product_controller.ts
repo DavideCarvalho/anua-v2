@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteProductController {
   async handle({ storeOwnerStore, params, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class DeleteProductController {
       .first()
 
     if (!item) {
-      return response.notFound({ message: 'Produto não encontrado' })
+      throw AppException.notFound('Produto nao encontrado')
     }
 
     item.deletedAt = DateTime.now()

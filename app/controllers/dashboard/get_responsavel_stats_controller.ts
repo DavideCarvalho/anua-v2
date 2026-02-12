@@ -3,12 +3,13 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import Class from '#models/class'
 import StudentGamification from '#models/student_gamification'
 import Notification from '#models/notification'
+import AppException from '#exceptions/app_exception'
 
 export default class GetResponsavelStatsController {
-  async handle({ auth, response, effectiveUser }: HttpContext) {
+  async handle({ auth, effectiveUser }: HttpContext) {
     const user = effectiveUser ?? auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const studentRelations = await StudentHasResponsible.query()

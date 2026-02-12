@@ -3,11 +3,12 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import WalletTopUp from '#models/wallet_top_up'
 import WalletTopUpDto from '#models/dto/wallet_top_up.dto'
 import { listWalletTopUpsValidator } from '#validators/wallet_top_up'
+import AppException from '#exceptions/app_exception'
 
 export default class ListWalletTopUpsController {
-  async handle({ params, request, response, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -19,9 +20,7 @@ export default class ListWalletTopUpsController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Você não tem permissão para ver as recargas deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver as recargas deste aluno')
     }
 
     const topUps = await WalletTopUp.query()

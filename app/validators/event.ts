@@ -2,16 +2,39 @@ import vine from '@vinejs/vine'
 
 // Event Types
 const eventTypes = [
-  'ACADEMIC',
-  'SOCIAL',
-  'SPORTS',
-  'CULTURAL',
+  'ACADEMIC_EVENT',
+  'EXAM',
+  'ASSIGNMENT',
   'FIELD_TRIP',
-  'MEETING',
-  'GRADUATION',
+  'PARENTS_MEETING',
+  'SCHOOL_CONFERENCE',
+  'CULTURAL_EVENT',
+  'SPORTS_EVENT',
+  'ARTS_SHOW',
+  'SCIENCE_FAIR',
+  'TALENT_SHOW',
+  'COMMUNITY_EVENT',
+  'FUNDRAISING',
+  'VOLUNTEER_DAY',
+  'SCHOOL_PARTY',
+  'STAFF_MEETING',
+  'TRAINING',
+  'SCHOOL_BOARD',
+  'HEALTH_CHECK',
+  'VACCINATION_DAY',
+  'MENTAL_HEALTH',
+  'OTHER',
 ] as const
-const eventStatuses = ['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED'] as const
-const eventVisibilities = ['PUBLIC', 'SCHOOL_ONLY', 'CLASS_ONLY', 'INVITE_ONLY'] as const
+const eventStatuses = ['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED', 'POSTPONED'] as const
+const eventVisibilities = [
+  'PUBLIC',
+  'INTERNAL',
+  'STAFF_ONLY',
+  'PARENTS_ONLY',
+  'STUDENTS_ONLY',
+  'SPECIFIC_CLASSES',
+  'SPECIFIC_LEVELS',
+] as const
 const participationStatuses = ['INVITED', 'CONFIRMED', 'DECLINED', 'ATTENDED', 'ABSENT'] as const
 
 // Create Event Validator
@@ -26,9 +49,18 @@ export const createEventValidator = vine.compile(
     requiresParentalConsent: vine.boolean().optional(),
     hasAdditionalCosts: vine.boolean().optional(),
     additionalCostAmount: vine.number().positive().optional(),
+    additionalCostInstallments: vine.number().min(1).max(12).optional(),
     additionalCostDescription: vine.string().trim().optional(),
-    startsAt: vine.date(),
-    endsAt: vine.date().optional(),
+    audienceWholeSchool: vine.boolean().optional(),
+    audienceAcademicPeriodIds: vine.array(vine.string().trim()).optional(),
+    audienceLevelIds: vine.array(vine.string().trim()).optional(),
+    audienceClassIds: vine.array(vine.string().trim()).optional(),
+    isAllDay: vine.boolean().optional(),
+    startTime: vine.string().trim().optional().nullable(),
+    endTime: vine.string().trim().optional().nullable(),
+    isExternal: vine.boolean().optional(),
+    startsAt: vine.string().trim(),
+    endsAt: vine.string().trim().optional(),
     schoolId: vine.string(),
   })
 )
@@ -45,9 +77,18 @@ export const updateEventValidator = vine.compile(
     requiresParentalConsent: vine.boolean().optional(),
     hasAdditionalCosts: vine.boolean().optional(),
     additionalCostAmount: vine.number().positive().optional().nullable(),
+    additionalCostInstallments: vine.number().min(1).max(12).optional().nullable(),
     additionalCostDescription: vine.string().trim().optional().nullable(),
-    startsAt: vine.date().optional(),
-    endsAt: vine.date().optional().nullable(),
+    audienceWholeSchool: vine.boolean().optional(),
+    audienceAcademicPeriodIds: vine.array(vine.string().trim()).optional(),
+    audienceLevelIds: vine.array(vine.string().trim()).optional(),
+    audienceClassIds: vine.array(vine.string().trim()).optional(),
+    isAllDay: vine.boolean().optional(),
+    startTime: vine.string().trim().optional().nullable(),
+    endTime: vine.string().trim().optional().nullable(),
+    isExternal: vine.boolean().optional(),
+    startsAt: vine.string().trim().optional(),
+    endsAt: vine.string().trim().optional().nullable(),
   })
 )
 
@@ -58,8 +99,8 @@ export const listEventsValidator = vine.compile(
     type: vine.enum(eventTypes).optional(),
     status: vine.enum(eventStatuses).optional(),
     visibility: vine.enum(eventVisibilities).optional(),
-    startDate: vine.date().optional(),
-    endDate: vine.date().optional(),
+    startDate: vine.string().trim().optional(),
+    endDate: vine.string().trim().optional(),
     page: vine.number().optional(),
     limit: vine.number().optional(),
   })

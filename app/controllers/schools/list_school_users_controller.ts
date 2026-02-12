@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import UserHasSchool from '#models/user_has_school'
+import AppException from '#exceptions/app_exception'
 
 export default class ListSchoolUsersController {
   async handle({ params, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class ListSchoolUsersController {
 
     const school = await School.find(schoolId)
     if (!school) {
-      return response.notFound({ message: 'Escola não encontrada' })
+      throw AppException.notFound('Escola não encontrada')
     }
 
     // Buscar todos os usuários vinculados à escola

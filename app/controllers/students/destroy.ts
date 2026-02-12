@@ -6,6 +6,7 @@ import Student from '#models/student'
 import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import Invoice from '#models/invoice'
+import AppException from '#exceptions/app_exception'
 
 export default class DestroyStudentController {
   async handle({ params, request, response }: HttpContext) {
@@ -14,7 +15,7 @@ export default class DestroyStudentController {
 
     const student = await Student.find(studentId)
     if (!student) {
-      return response.notFound({ message: 'Aluno não encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     // Soft delete StudentHasLevel records
@@ -27,7 +28,7 @@ export default class DestroyStudentController {
     const studentLevels = await levelQuery
 
     if (studentLevels.length === 0) {
-      return response.notFound({ message: 'Nenhuma matrícula ativa encontrada' })
+      throw AppException.notFound('Nenhuma matrícula ativa encontrada')
     }
 
     const now = DateTime.now()

@@ -5,6 +5,7 @@ import StudentPayment from '#models/student_payment'
 import { rejectStoreOrderValidator } from '#validators/gamification'
 import StoreOrderDto from '#models/dto/store_order.dto'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class RejectStoreOrderController {
   async handle({ params, request, response, auth }: HttpContext) {
@@ -14,13 +15,11 @@ export default class RejectStoreOrderController {
     const order = await StoreOrder.query().where('id', id).preload('items').first()
 
     if (!order) {
-      return response.notFound({ message: 'Store order not found' })
+      throw AppException.storeOrderNotFound()
     }
 
     if (order.status === 'DELIVERED' || order.status === 'CANCELED') {
-      return response.badRequest({
-        message: `Cannot reject order with status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('reject', order.status)
     }
 
     // Restore stock for all items

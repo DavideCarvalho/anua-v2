@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
 import { createStoreItemValidator } from '#validators/gamification'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateProductController {
   async handle({ storeOwnerStore, request, response }: HttpContext) {
@@ -12,9 +13,9 @@ export default class CreateProductController {
       const min = data.minPointsPercentage ?? 0
       const max = data.maxPointsPercentage ?? 100
       if (min > max) {
-        return response.badRequest({
-          message: 'minPointsPercentage deve ser menor ou igual a maxPointsPercentage',
-        })
+        throw AppException.badRequest(
+          'minPointsPercentage deve ser menor ou igual a maxPointsPercentage'
+        )
       }
     }
 

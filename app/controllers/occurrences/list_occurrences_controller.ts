@@ -7,9 +7,7 @@ import { listOccurrencesValidator } from '#validators/occurrence'
 
 export default class ListOccurrencesController {
   async handle({ request, response, selectedSchoolIds }: HttpContext) {
-    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
-      return response.badRequest({ message: 'Usuario sem escola selecionada' })
-    }
+    const scopedSchoolIds = selectedSchoolIds ?? []
 
     const payload = await request.validateUsing(listOccurrencesValidator)
     const page = payload.page ?? 1
@@ -33,7 +31,12 @@ export default class ListOccurrencesController {
           .preload('teacher', (teacherQuery) => teacherQuery.preload('user'))
       })
       .withCount('acknowledgements')
-      .whereIn('sort_class.schoolId', selectedSchoolIds)
+
+    if (scopedSchoolIds.length > 0) {
+      query.whereIn('sort_class.schoolId', scopedSchoolIds)
+    } else {
+      query.whereRaw('1 = 0')
+    }
 
     if (payload.type) {
       query.where('type', payload.type)

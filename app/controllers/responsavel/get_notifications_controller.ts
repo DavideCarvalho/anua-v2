@@ -1,11 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Notification from '#models/notification'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AppException from '#exceptions/app_exception'
 
 export default class GetNotificationsController {
   async handle({ request, response, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const page = request.input('page', 1)

@@ -4,6 +4,7 @@ import string from '@adonisjs/core/helpers/string'
 import ExtraClass from '#models/extra_class'
 import ExtraClassSchedule from '#models/extra_class_schedule'
 import { updateExtraClassValidator } from '#validators/extra_class'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateExtraClassController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class UpdateExtraClassController {
 
     const extraClass = await ExtraClass.find(params.id)
     if (!extraClass) {
-      return response.notFound({ message: 'Aula avulsa não encontrada' })
+      throw AppException.notFound('Aula avulsa não encontrada')
     }
 
     const trx = await db.transaction()

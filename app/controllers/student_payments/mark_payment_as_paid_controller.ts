@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
 import { markPaymentAsPaidValidator } from '#validators/student_payment'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkPaymentAsPaidController {
   async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
@@ -18,7 +19,7 @@ export default class MarkPaymentAsPaidController {
       .first()
 
     if (!payment) {
-      return response.notFound({ message: 'Student payment not found' })
+      throw AppException.notFound('Student payment not found')
     }
 
     payment.status = 'PAID'

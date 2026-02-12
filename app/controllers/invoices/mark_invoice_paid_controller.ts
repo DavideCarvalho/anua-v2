@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import Invoice from '#models/invoice'
 import { markInvoicePaidValidator } from '#validators/invoice'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkInvoicePaidController {
   async handle({ request, response, params }: HttpContext) {
@@ -10,11 +11,11 @@ export default class MarkInvoicePaidController {
     const invoice = await Invoice.findOrFail(params.id)
 
     if (invoice.status === 'PAID') {
-      return response.conflict({ message: 'Invoice já está paga' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     if (invoice.status === 'CANCELLED') {
-      return response.conflict({ message: 'Invoice está cancelada' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const trx = await db.transaction()

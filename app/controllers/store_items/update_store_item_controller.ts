@@ -2,13 +2,14 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
 import { updateStoreItemValidator } from '#validators/gamification'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateStoreItemController {
   async handle({ params, request, response }: HttpContext) {
     const storeItem = await StoreItem.query().where('id', params.id).whereNull('deletedAt').first()
 
     if (!storeItem) {
-      return response.notFound({ message: 'Item da loja não encontrado' })
+      throw AppException.notFound('Item da loja nao encontrado')
     }
 
     const data = await request.validateUsing(updateStoreItemValidator)
@@ -20,9 +21,9 @@ export default class UpdateStoreItemController {
       const maxPercentage = data.maxPointsPercentage ?? storeItem.maxPointsPercentage ?? 100
 
       if (minPercentage > maxPercentage) {
-        return response.badRequest({
-          message: 'A porcentagem mínima de pontos não pode ser maior que a porcentagem máxima',
-        })
+        throw AppException.badRequest(
+          'A porcentagem minima de pontos nao pode ser maior que a porcentagem maxima'
+        )
       }
     }
 

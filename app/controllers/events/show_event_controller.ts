@@ -1,5 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
+import EventDto from '#models/dto/event.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowEventController {
   async handle({ params, response }: HttpContext) {
@@ -9,6 +11,7 @@ export default class ShowEventController {
       .where('id', id)
       .preload('organizer')
       .preload('school')
+      .preload('eventAudiences')
       .preload('participants', (query) => {
         query.preload('user')
       })
@@ -16,9 +19,9 @@ export default class ShowEventController {
       .first()
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
-    return response.ok(event)
+    return response.ok(new EventDto(event))
   }
 }

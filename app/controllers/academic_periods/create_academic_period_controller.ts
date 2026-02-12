@@ -11,19 +11,15 @@ import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import { createAcademicPeriodValidator } from '#validators/academic_period'
 import AcademicPeriodDto from '#models/dto/academic_period.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateAcademicPeriodController {
-  async handle({ request, response, auth }: HttpContext) {
-    let payload
-    try {
-      payload = await request.validateUsing(createAcademicPeriodValidator)
-    } catch (error) {
-      return response.badRequest({ message: 'Erro de validação', errors: error.messages })
-    }
+  async handle({ request, auth }: HttpContext) {
+    const payload = await request.validateUsing(createAcademicPeriodValidator)
 
     const schoolId = payload.schoolId ?? auth.user?.schoolId
     if (!schoolId) {
-      return response.badRequest({ message: 'Usuário não possui escola' })
+      throw AppException.badRequest('Usuário não possui escola')
     }
 
     const result = await db.transaction(async (trx) => {
@@ -60,7 +56,7 @@ export default class CreateAcademicPeriodController {
               .useTransaction(trx)
               .first()
             if (!existingCourse) {
-              throw new Error(`Curso não encontrado: ${courseData.courseId}`)
+              throw AppException.notFound(`Curso não encontrado: ${courseData.courseId}`)
             }
             course = existingCourse
           } else {
@@ -102,7 +98,7 @@ export default class CreateAcademicPeriodController {
                 .useTransaction(trx)
                 .first()
               if (!existingLevel) {
-                throw new Error(`Série não encontrada: ${levelData.levelId}`)
+                throw AppException.notFound(`Série não encontrada: ${levelData.levelId}`)
               }
               level = existingLevel
             } else {

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AppException from '#exceptions/app_exception'
 
 export default class ListMyOrdersController {
   async handle({ request, response, effectiveUser }: HttpContext) {
@@ -20,7 +21,7 @@ export default class ListMyOrdersController {
         .first()
 
       if (!relation) {
-        return response.forbidden({ message: 'Voce nao e responsavel por este aluno' })
+        throw AppException.forbidden('Você não é responsável por este aluno')
       }
       resolvedStudentId = studentId
     } else {

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
 import StoreOrderDto from '#models/dto/store_order.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ApproveStoreOrderController {
   async handle({ params, auth, response }: HttpContext) {
@@ -10,13 +11,11 @@ export default class ApproveStoreOrderController {
     const order = await StoreOrder.find(id)
 
     if (!order) {
-      return response.notFound({ message: 'Store order not found' })
+      throw AppException.storeOrderNotFound()
     }
 
     if (!['PENDING_PAYMENT', 'PENDING_APPROVAL'].includes(order.status)) {
-      return response.badRequest({
-        message: `Cannot approve order with status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('approve', order.status)
     }
 
     order.status = 'APPROVED'

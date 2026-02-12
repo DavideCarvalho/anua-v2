@@ -4,6 +4,7 @@ import StoreItem from '#models/store_item'
 import StudentPayment from '#models/student_payment'
 import { cancelStoreOrderValidator } from '#validators/gamification'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class CancelOrderController {
   async handle({ storeOwnerStore, params, request, response, auth }: HttpContext) {
@@ -17,13 +18,11 @@ export default class CancelOrderController {
       .first()
 
     if (!order) {
-      return response.notFound({ message: 'Pedido não encontrado' })
+      throw AppException.storeOrderNotFound()
     }
 
     if (['DELIVERED', 'CANCELED', 'REJECTED'].includes(order.status)) {
-      return response.badRequest({
-        message: `Não é possível cancelar pedido com status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('cancel', order.status)
     }
 
     // Restore stock for all items

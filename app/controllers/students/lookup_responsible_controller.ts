@@ -2,17 +2,18 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Role from '#models/role'
 import UserDto from '#models/dto/user.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class LookupResponsibleController {
   async handle({ request, response }: HttpContext) {
     const { documentNumber, schoolId } = request.qs()
 
     if (!documentNumber) {
-      return response.badRequest({ message: 'Número do documento é obrigatório' })
+      throw AppException.badRequest('Número do documento é obrigatório')
     }
 
     if (!schoolId) {
-      return response.badRequest({ message: 'Escola é obrigatória' })
+      throw AppException.badRequest('Escola é obrigatória')
     }
 
     const cleanedDocument = documentNumber.replace(/\D/g, '')
@@ -20,7 +21,7 @@ export default class LookupResponsibleController {
     const responsibleRole = await Role.query().where('name', 'STUDENT_RESPONSIBLE').first()
 
     if (!responsibleRole) {
-      return response.internalServerError({ message: 'Role STUDENT_RESPONSIBLE não encontrada' })
+      throw AppException.internalServerError('Role STUDENT_RESPONSIBLE não encontrada')
     }
 
     const user = await User.query()
@@ -30,7 +31,7 @@ export default class LookupResponsibleController {
       .first()
 
     if (!user) {
-      return response.notFound({ message: 'Responsável não encontrado' })
+      throw AppException.notFound('Responsável não encontrado')
     }
 
     return response.ok(new UserDto(user))

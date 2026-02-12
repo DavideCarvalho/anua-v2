@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreInstallmentRule from '#models/store_installment_rule'
+import AppException from '#exceptions/app_exception'
 
 export default class GetInstallmentOptionsController {
   async handle({ request, response }: HttpContext) {
@@ -7,7 +8,7 @@ export default class GetInstallmentOptionsController {
     const amount = request.input('amount')
 
     if (!storeId || !amount) {
-      return response.badRequest({ message: 'storeId e amount são obrigatórios' })
+      throw AppException.badRequest('storeId e amount são obrigatórios')
     }
 
     const rules = await StoreInstallmentRule.query()

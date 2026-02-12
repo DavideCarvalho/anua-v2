@@ -1,8 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Subscription from '#models/subscription'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowSubscriptionController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params }: HttpContext) {
     const subscription = await Subscription.query()
       .where('id', params.id)
       .preload('school')
@@ -12,7 +13,7 @@ export default class ShowSubscriptionController {
       .first()
 
     if (!subscription) {
-      return response.notFound({ message: 'Subscription not found' })
+      throw AppException.notFound('Subscription not found')
     }
 
     return subscription

@@ -1,13 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 import Subject from '#models/subject'
+import SubjectDto from '#models/dto/subject.dto'
 import { updateSubjectValidator } from '#validators/subject'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateSubjectController {
   async handle({ params, request, response }: HttpContext) {
     const subject = await Subject.find(params.id)
 
     if (!subject) {
-      return response.notFound({ message: 'Disciplina não encontrada' })
+      throw AppException.notFound('Disciplina não encontrada')
     }
 
     const data = await request.validateUsing(updateSubjectValidator)
@@ -20,13 +23,23 @@ export default class UpdateSubjectController {
         .first()
 
       if (existingSubject) {
-        return response.conflict({ message: 'Já existe uma disciplina com este slug nesta escola' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 
-    subject.merge(data)
-    await subject.save()
+    const updatedSubject = await db.transaction(async (trx) => {
+      subject.merge({
+        name: data.name ?? subject.name,
+        slug: data.slug ?? subject.slug,
+        quantityNeededScheduled:
+          data.quantityNeededScheduled !== undefined
+            ? data.quantityNeededScheduled
+            : subject.quantityNeededScheduled,
+      })
+      await subject.useTransaction(trx).save()
+      return subject
+    })
 
-    return response.ok(subject)
+    return response.ok(new SubjectDto(updatedSubject))
   }
 }

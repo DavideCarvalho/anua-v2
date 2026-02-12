@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
 import { updateUserValidator } from '#validators/user'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateUserController {
   async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
@@ -14,7 +15,7 @@ export default class UpdateUserController {
       .first()
 
     if (!user) {
-      return response.notFound({ message: 'Usuário não encontrado' })
+      throw AppException.notFound('Usuário não encontrado')
     }
 
     const data = await request.validateUsing(updateUserValidator)
@@ -22,7 +23,7 @@ export default class UpdateUserController {
     if (data.email && data.email !== user.email) {
       const existingUser = await User.findBy('email', data.email)
       if (existingUser) {
-        return response.conflict({ message: 'Já existe um usuário com este email' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 

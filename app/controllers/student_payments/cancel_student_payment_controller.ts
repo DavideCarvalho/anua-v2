@@ -4,6 +4,7 @@ import StudentPaymentDto from '#models/dto/student_payment.dto'
 import { cancelStudentPaymentValidator } from '#validators/student_payment'
 import { getQueueManager } from '#services/queue_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class CancelStudentPaymentController {
   async handle(ctx: HttpContext) {
@@ -15,7 +16,7 @@ export default class CancelStudentPaymentController {
     const payment = await StudentPayment.find(id)
 
     if (!payment) {
-      return response.notFound({ message: 'Student payment not found' })
+      throw AppException.notFound('Student payment not found')
     }
 
     payment.status = 'CANCELLED'

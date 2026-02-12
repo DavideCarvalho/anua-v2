@@ -4,12 +4,13 @@ import Student from '#models/student'
 import User from '#models/user'
 import StudentHasLevel from '#models/student_has_level'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AppException from '#exceptions/app_exception'
 
 export default class ListMarketplaceStoresController {
   async handle({ auth, request, response, effectiveUser }: HttpContext) {
     const user = effectiveUser ?? auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
     const studentIdOrSlug = request.input('studentId')
 
@@ -20,7 +21,7 @@ export default class ListMarketplaceStoresController {
       // Resolve slug to actual student ID
       const resolvedStudentId = await this.resolveStudentId(studentIdOrSlug)
       if (!resolvedStudentId) {
-        return response.notFound({ message: 'Aluno não encontrado' })
+        throw AppException.notFound('Aluno não encontrado')
       }
 
       // Responsible buying for a specific child
@@ -30,7 +31,7 @@ export default class ListMarketplaceStoresController {
         .first()
 
       if (!relation) {
-        return response.forbidden({ message: 'Você não é responsável por este aluno' })
+        throw AppException.forbidden('Você não é responsável por este aluno')
       }
 
       schoolIds = await this.getStudentSchoolIds(resolvedStudentId)
@@ -38,7 +39,7 @@ export default class ListMarketplaceStoresController {
       // Student buying for themselves
       const student = await Student.find(user.id)
       if (!student) {
-        return response.forbidden({ message: 'Usuário não é um aluno' })
+        throw AppException.forbidden('Usuário não é um aluno')
       }
       schoolIds = await this.getStudentSchoolIds(user.id)
     }

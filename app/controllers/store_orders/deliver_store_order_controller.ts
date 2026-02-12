@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
 import StoreOrderDto from '#models/dto/store_order.dto'
 import { deliverStoreOrderValidator } from '#validators/gamification'
+import AppException from '#exceptions/app_exception'
 
 export default class DeliverStoreOrderController {
   async handle({ params, request, auth, response }: HttpContext) {
@@ -12,20 +13,16 @@ export default class DeliverStoreOrderController {
     const order = await StoreOrder.find(id)
 
     if (!order) {
-      return response.notFound({ message: 'Store order not found' })
+      throw AppException.storeOrderNotFound()
     }
 
     const allowedStatuses = ['APPROVED', 'PREPARING', 'READY']
     if (!allowedStatuses.includes(order.status)) {
-      return response.badRequest({
-        message: `Cannot deliver order with status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('deliver', order.status)
     }
 
     order.status = 'DELIVERED'
-    order.deliveredAt = payload.deliveredAt
-      ? DateTime.fromISO(payload.deliveredAt)
-      : DateTime.now()
+    order.deliveredAt = payload.deliveredAt ? DateTime.fromISO(payload.deliveredAt) : DateTime.now()
     order.deliveredBy = auth.user?.id ?? null
 
     await order.save()

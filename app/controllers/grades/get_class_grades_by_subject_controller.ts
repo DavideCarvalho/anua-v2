@@ -3,6 +3,7 @@ import Assignment from '#models/assignment'
 import TeacherHasClass from '#models/teacher_has_class'
 import StudentHasAssignment from '#models/student_has_assignment'
 import { getStudents } from '#services/class_students_service'
+import AppException from '#exceptions/app_exception'
 
 interface StudentGradeData {
   id: string
@@ -29,7 +30,7 @@ export default class GetClassGradesBySubjectController {
     const academicPeriodId = request.input('academicPeriodId')
 
     if (!courseId || !academicPeriodId) {
-      return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
+      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
     }
 
     // Get the school's calculation algorithm
@@ -40,7 +41,7 @@ export default class GetClassGradesBySubjectController {
       .first()
 
     if (!teacherHasClass) {
-      return response.notFound({ message: 'Matéria não encontrada para esta turma' })
+      throw AppException.notFound('Matéria não encontrada para esta turma')
     }
 
     const school = teacherHasClass.class?.school

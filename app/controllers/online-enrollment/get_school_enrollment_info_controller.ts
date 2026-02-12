@@ -5,6 +5,7 @@ import Course from '#models/course'
 import Level from '#models/level'
 import Contract from '#models/contract'
 import ContractDocument from '#models/contract_document'
+import AppException from '#exceptions/app_exception'
 
 export default class GetSchoolEnrollmentInfoController {
   async handle({ params, response }: HttpContext) {
@@ -14,7 +15,7 @@ export default class GetSchoolEnrollmentInfoController {
     const school = await School.query().where('slug', schoolSlug).first()
 
     if (!school) {
-      return response.notFound({ message: 'Escola não encontrada' })
+      throw AppException.notFound('Escola não encontrada')
     }
 
     // Find academic period by slug
@@ -24,18 +25,16 @@ export default class GetSchoolEnrollmentInfoController {
       .first()
 
     if (!academicPeriod) {
-      return response.notFound({ message: 'Período letivo não encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     // Check if enrollment is open
     const now = new Date()
     if (academicPeriod.enrollmentStartDate && academicPeriod.enrollmentStartDate.toJSDate() > now) {
-      return response.badRequest({
-        message: 'Matrículas ainda não foram abertas para este período',
-      })
+      throw AppException.badRequest('Matrículas ainda não foram abertas para este período')
     }
     if (academicPeriod.enrollmentEndDate && academicPeriod.enrollmentEndDate.toJSDate() < now) {
-      return response.badRequest({ message: 'Matrículas encerradas para este período' })
+      throw AppException.badRequest('Matrículas encerradas para este período')
     }
 
     // Find course by slug
@@ -45,14 +44,14 @@ export default class GetSchoolEnrollmentInfoController {
       .first()
 
     if (!course) {
-      return response.notFound({ message: 'Curso não encontrado' })
+      throw AppException.notFound('Curso não encontrado')
     }
 
     // Get initial level for this course in this academic period
     const levels = await Level.query().where('courseId', course.id).orderBy('order', 'asc')
 
     if (levels.length === 0) {
-      return response.badRequest({ message: 'Nenhum nível disponível para este curso' })
+      throw AppException.badRequest('Nenhum nível disponível para este curso')
     }
 
     const initialLevel = levels[0]

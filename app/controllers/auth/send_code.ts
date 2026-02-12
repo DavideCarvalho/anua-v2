@@ -65,9 +65,7 @@ export default class SendCodeController {
       })
     } catch (error) {
       console.error('[OTP] Error sending code:', error)
-      return response.internalServerError({
-        message: 'Erro ao enviar codigo. Tente novamente.',
-      })
+      throw error
     }
   }
 }

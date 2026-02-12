@@ -4,11 +4,12 @@ import StudentHasAttendance from '#models/student_has_attendance'
 import StudentPayment from '#models/student_payment'
 import CanteenPurchase from '#models/canteen_purchase'
 import db from '@adonisjs/lucid/services/db'
+import AppException from '#exceptions/app_exception'
 
 export default class GetStudentOverviewController {
   async handle({ params, response, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -28,9 +29,7 @@ export default class GetStudentOverviewController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Você não tem permissão para ver os dados deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver os dados deste aluno')
     }
 
     const student = relation.student

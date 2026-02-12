@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import StudentHasLevel from '#models/student_has_level'
 import StudentDto from '#models/dto/student.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ListClassStudentsController {
   async handle({ params, request, response }: HttpContext) {
@@ -10,12 +11,12 @@ export default class ListClassStudentsController {
     const academicPeriodId = request.input('academicPeriodId')
 
     if (!courseId || !academicPeriodId) {
-      return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
+      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
     }
 
     const classEntity = await Class_.find(classId)
     if (!classEntity) {
-      return response.notFound({ message: 'Turma não encontrada' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     const page = request.input('page', 1)

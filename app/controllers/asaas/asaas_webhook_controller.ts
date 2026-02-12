@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { Request } from '@adonisjs/core/http'
 import type { Response } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
+import { timingSafeEqual } from 'node:crypto'
 import db from '@adonisjs/lucid/services/db'
 import Contract from '#models/contract'
 import Student from '#models/student'
@@ -9,6 +10,7 @@ import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import WalletTopUp from '#models/wallet_top_up'
+import AppException from '#exceptions/app_exception'
 
 type AsaasWebhookEvent =
   | 'PAYMENT_CONFIRMED'
@@ -36,34 +38,39 @@ interface AsaasWebhookPayload {
 export default class AsaasWebhookController {
   async handle({ request, response }: HttpContext) {
     const payload = request.body() as AsaasWebhookPayload
+    const webhookToken = this.getWebhookToken(request)
+
+    if (!webhookToken) {
+      throw AppException.invalidWebhookToken()
+    }
 
     if (!payload?.event || !payload?.payment?.id) {
-      return response.badRequest({ message: 'Payload inválido' })
+      throw AppException.invalidWebhookPayload()
     }
 
     if (!payload.payment.externalReference) {
-      return response.badRequest({ message: 'External reference não informado' })
+      throw AppException.missingExternalReference()
     }
 
     // Try StudentPayment first (existing behavior)
     const payment = await StudentPayment.find(payload.payment.externalReference)
     if (payment) {
-      return this.handleStudentPayment(payment, payload, request, response)
+      return this.handleStudentPayment(payment, payload, webhookToken, response)
     }
 
     // Try WalletTopUp
     const topUp = await WalletTopUp.find(payload.payment.externalReference)
     if (topUp) {
-      return this.handleWalletTopUp(topUp, payload, request, response)
+      return this.handleWalletTopUp(topUp, payload, webhookToken, response)
     }
 
-    return response.notFound({ message: 'Pagamento não encontrado' })
+    throw AppException.notFound('Pagamento nao encontrado')
   }
 
   private async handleStudentPayment(
     payment: StudentPayment,
     payload: AsaasWebhookPayload,
-    request: Request,
+    webhookToken: string,
     response: Response
   ) {
     const contract = await Contract.query()
@@ -72,15 +79,12 @@ export default class AsaasWebhookController {
       .first()
 
     const expectedToken =
-      contract?.school?.asaasWebhookToken ?? contract?.school?.schoolChain?.asaasWebhookToken
+      contract?.school?.asaasWebhookToken ??
+      contract?.school?.schoolChain?.asaasWebhookToken ??
+      null
 
-    const webhookToken =
-      request.header('x-asaas-webhook-token') ??
-      request.header('asaas-webhook-token') ??
-      request.header('asaas-token')
-
-    if (expectedToken && webhookToken !== expectedToken) {
-      return response.forbidden({ message: 'Token do webhook inválido' })
+    if (!this.isWebhookTokenValid(expectedToken, webhookToken)) {
+      throw AppException.invalidWebhookToken()
     }
 
     payment.paymentGateway = 'ASAAS'
@@ -120,7 +124,7 @@ export default class AsaasWebhookController {
   private async handleWalletTopUp(
     topUp: WalletTopUp,
     payload: AsaasWebhookPayload,
-    request: Request,
+    webhookToken: string,
     response: Response
   ) {
     // Validate webhook token via student's school
@@ -132,15 +136,11 @@ export default class AsaasWebhookController {
       .first()
 
     const school = studentHasLevel?.level?.school
-    const expectedToken = school?.asaasWebhookToken ?? school?.schoolChain?.asaasWebhookToken
+    const expectedToken =
+      school?.asaasWebhookToken ?? school?.schoolChain?.asaasWebhookToken ?? null
 
-    const webhookToken =
-      request.header('x-asaas-webhook-token') ??
-      request.header('asaas-webhook-token') ??
-      request.header('asaas-token')
-
-    if (expectedToken && webhookToken !== expectedToken) {
-      return response.forbidden({ message: 'Token do webhook inválido' })
+    if (!this.isWebhookTokenValid(expectedToken, webhookToken)) {
+      throw AppException.invalidWebhookToken()
     }
 
     switch (payload.event) {
@@ -204,5 +204,25 @@ export default class AsaasWebhookController {
     }
 
     return response.ok({ success: true, topUpId: topUp.id, event: payload.event })
+  }
+
+  private getWebhookToken(request: Request): string | null {
+    const token = request.header('x-asaas-webhook-token')
+    return token?.trim() || null
+  }
+
+  private isWebhookTokenValid(expectedToken: string | null, receivedToken: string): boolean {
+    if (!expectedToken) {
+      return false
+    }
+
+    const expected = Buffer.from(expectedToken)
+    const received = Buffer.from(receivedToken)
+
+    if (expected.length !== received.length) {
+      return false
+    }
+
+    return timingSafeEqual(expected, received)
   }
 }

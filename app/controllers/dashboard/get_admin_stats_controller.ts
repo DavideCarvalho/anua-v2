@@ -4,18 +4,19 @@ import Student from '#models/student'
 import Teacher from '#models/teacher'
 import Subscription from '#models/subscription'
 import SubscriptionInvoice from '#models/subscription_invoice'
+import AppException from '#exceptions/app_exception'
 
 export default class GetAdminStatsController {
-  async handle({ auth, response }: HttpContext) {
+  async handle({ auth }: HttpContext) {
     const user = auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     await user.load('role')
     const roleName = user.role?.name
     if (roleName !== 'SUPER_ADMIN' && roleName !== 'ADMIN') {
-      return response.forbidden({ message: 'Acesso negado' })
+      throw AppException.forbidden('Acesso negado')
     }
 
     const totalSchools = await School.query().count('* as total').first()

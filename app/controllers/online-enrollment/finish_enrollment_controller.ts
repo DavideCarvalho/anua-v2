@@ -12,6 +12,7 @@ import db from '@adonisjs/lucid/services/db'
 import { finishEnrollmentValidator } from '#validators/enrollment'
 import { v7 as uuidv7 } from 'uuid'
 import { DateTime } from 'luxon'
+import AppException from '#exceptions/app_exception'
 
 export default class FinishEnrollmentController {
   async handle({ request, response }: HttpContext) {
@@ -250,9 +251,9 @@ export default class FinishEnrollmentController {
     } catch (error) {
       await trx.rollback()
       console.error('Enrollment error:', error)
-      return response.internalServerError({
-        message: 'Erro ao processar matrícula. Por favor, tente novamente.',
-      })
+      throw AppException.internalServerError(
+        'Erro ao processar matrícula. Por favor, tente novamente.'
+      )
     }
   }
 }

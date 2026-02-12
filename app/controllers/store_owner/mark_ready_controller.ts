@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkReadyController {
   async handle({ storeOwnerStore, params, response }: HttpContext) {
@@ -8,13 +9,11 @@ export default class MarkReadyController {
     const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
-      return response.notFound({ message: 'Pedido não encontrado' })
+      throw AppException.storeOrderNotFound()
     }
 
     if (order.status !== 'PREPARING') {
-      return response.badRequest({
-        message: `Não é possível marcar como pronto pedido com status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('mark-ready', order.status)
     }
 
     order.status = 'READY'

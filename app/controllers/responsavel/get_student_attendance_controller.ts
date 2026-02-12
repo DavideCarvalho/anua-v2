@@ -6,11 +6,12 @@ import {
   AttendanceRecordDto,
   AttendanceSummaryDto,
 } from '#models/dto/student_attendance_response.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class GetStudentAttendanceController {
-  async handle({ params, request, response, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -24,9 +25,7 @@ export default class GetStudentAttendanceController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver a frequencia deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver a frequência deste aluno')
     }
 
     // Get attendance records from StudentHasAttendance which links to Attendance and CalendarSlot

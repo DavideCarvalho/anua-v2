@@ -1,7 +1,9 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Event from '#models/event'
 import type { EventType, EventStatus, EventVisibility, EventPriority } from '#models/event'
+import type EventAudience from '#models/event_audience'
 import type { DateTime } from 'luxon'
+import { resolveEventAudienceConfig } from '#services/events/event_audience_service'
 
 export default class EventDto extends BaseModelDto {
   declare id: string
@@ -28,6 +30,10 @@ export default class EventDto extends BaseModelDto {
   declare requiresRegistration: boolean
   declare registrationDeadline: DateTime | null
   declare requiresParentalConsent: boolean
+  declare hasAdditionalCosts: boolean
+  declare additionalCostAmount: number | null
+  declare additionalCostInstallments: number | null
+  declare additionalCostDescription: string | null
   declare allowComments: boolean
   declare sendNotifications: boolean
   declare isRecurring: boolean
@@ -38,6 +44,10 @@ export default class EventDto extends BaseModelDto {
   declare metadata: Record<string, unknown> | null
   declare schoolId: string
   declare createdBy: string
+  declare audienceWholeSchool: boolean
+  declare audienceAcademicPeriodIds: string[]
+  declare audienceLevelIds: string[]
+  declare audienceClassIds: string[]
   declare createdAt: DateTime
   declare updatedAt: DateTime
 
@@ -70,6 +80,10 @@ export default class EventDto extends BaseModelDto {
     this.requiresRegistration = model.requiresRegistration
     this.registrationDeadline = model.registrationDeadline
     this.requiresParentalConsent = model.requiresParentalConsent
+    this.hasAdditionalCosts = model.hasAdditionalCosts
+    this.additionalCostAmount = model.additionalCostAmount
+    this.additionalCostInstallments = model.additionalCostInstallments
+    this.additionalCostDescription = model.additionalCostDescription
     this.allowComments = model.allowComments
     this.sendNotifications = model.sendNotifications
     this.isRecurring = model.isRecurring
@@ -80,6 +94,13 @@ export default class EventDto extends BaseModelDto {
     this.metadata = model.metadata
     this.schoolId = model.schoolId
     this.createdBy = model.createdBy
+
+    const audience = resolveEventAudienceConfig(model.$preloaded.eventAudiences as EventAudience[])
+    this.audienceWholeSchool = audience.audienceWholeSchool
+    this.audienceAcademicPeriodIds = audience.audienceAcademicPeriodIds
+    this.audienceLevelIds = audience.audienceLevelIds
+    this.audienceClassIds = audience.audienceClassIds
+
     this.createdAt = model.createdAt
     this.updatedAt = model.updatedAt
   }

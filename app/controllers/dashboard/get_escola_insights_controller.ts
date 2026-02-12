@@ -21,12 +21,16 @@ interface Insight {
 }
 
 export default class GetEscolaInsightsController {
-  async handle({ response, selectedSchoolIds }: HttpContext) {
-    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
-      return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
+  async handle({ selectedSchoolIds }: HttpContext) {
+    const scopedSchoolIds = selectedSchoolIds ?? []
+    if (scopedSchoolIds.length === 0) {
+      return {
+        insights: [],
+        total: 0,
+      }
     }
 
-    const schoolId = selectedSchoolIds[0]
+    const schoolId = scopedSchoolIds[0]
     const today = DateTime.now()
     const insights: Insight[] = []
 

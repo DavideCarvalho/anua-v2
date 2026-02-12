@@ -1,8 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Subscription from '#models/subscription'
+import AppException from '#exceptions/app_exception'
 
 export default class GetChainSubscriptionController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params }: HttpContext) {
     const { schoolChainId } = params
 
     const subscription = await Subscription.query()
@@ -14,7 +15,7 @@ export default class GetChainSubscriptionController {
       .first()
 
     if (!subscription) {
-      return response.notFound({ message: 'Subscription not found for this school chain' })
+      throw AppException.notFound('Subscription not found for this school chain')
     }
 
     return subscription

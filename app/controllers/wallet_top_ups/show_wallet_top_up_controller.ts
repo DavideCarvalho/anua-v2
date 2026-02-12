@@ -1,20 +1,21 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import WalletTopUp from '#models/wallet_top_up'
 import WalletTopUpDto from '#models/dto/wallet_top_up.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowWalletTopUpController {
-  async handle({ params, response, effectiveUser }: HttpContext) {
+  async handle({ params, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const topUp = await WalletTopUp.find(params.id)
     if (!topUp) {
-      return response.notFound({ message: 'Recarga não encontrada' })
+      throw AppException.notFound('Recarga não encontrada')
     }
 
     if (topUp.responsibleUserId !== effectiveUser.id) {
-      return response.forbidden({ message: 'Você não tem permissão para ver esta recarga' })
+      throw AppException.forbidden('Você não tem permissão para ver esta recarga')
     }
 
     return new WalletTopUpDto(topUp)

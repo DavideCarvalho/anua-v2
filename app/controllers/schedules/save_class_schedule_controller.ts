@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import db from '@adonisjs/lucid/services/db'
+import AppException from '#exceptions/app_exception'
 
 interface SlotInput {
   teacherHasClassId: string | null
@@ -20,11 +21,11 @@ export default class SaveClassScheduleController {
     }
 
     if (!academicPeriodId) {
-      return response.badRequest({ error: 'academicPeriodId is required' })
+      throw AppException.badRequest('academicPeriodId é obrigatório')
     }
 
     if (!slots || !Array.isArray(slots)) {
-      return response.badRequest({ error: 'slots array is required' })
+      throw AppException.badRequest('slots deve ser um array')
     }
 
     try {
@@ -76,7 +77,7 @@ export default class SaveClassScheduleController {
       return response.ok({ success: true })
     } catch (error) {
       console.error('Error saving schedule:', error)
-      return response.internalServerError({ error: 'Failed to save schedule' })
+      throw AppException.internalServerError('Falha ao salvar grade de horários')
     }
   }
 }

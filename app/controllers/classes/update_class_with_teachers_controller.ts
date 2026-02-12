@@ -4,13 +4,14 @@ import Class_ from '#models/class'
 import TeacherHasClass from '#models/teacher_has_class'
 import { v7 as uuidv7 } from 'uuid'
 import { updateClassWithTeachersValidator } from '#validators/class'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateClassWithTeachersController {
   async handle({ params, request, response }: HttpContext) {
     const classEntity = await Class_.find(params.id)
 
     if (!classEntity) {
-      return response.notFound({ message: 'Turma não encontrada' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     const payload = await request.validateUsing(updateClassWithTeachersValidator)

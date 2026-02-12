@@ -9,13 +9,14 @@ import TeacherHasClass from '#models/teacher_has_class'
 import Level from '#models/level'
 import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateAcademicPeriodCoursesController {
   async handle({ params, request, response }: HttpContext) {
     const academicPeriod = await AcademicPeriod.find(params.id)
 
     if (!academicPeriod) {
-      return response.notFound({ message: 'Periodo letivo nao encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     const payload: {

@@ -21,6 +21,8 @@ import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_co
 import { enrollStudentValidator } from '#validators/student'
 import { getQueueManager } from '#services/queue_service'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
+import AppException from '#exceptions/app_exception'
+import type { EmergencyContactRelationship } from '#models/student_emergency_contact'
 
 export default class EnrollStudentController {
   async handle(ctx: HttpContext) {
@@ -43,19 +45,17 @@ export default class EnrollStudentController {
     // If student is adult, document and phone are required
     if (studentIsAdult) {
       if (!data.basicInfo.documentNumber) {
-        return response.badRequest({ message: 'Documento é obrigatório para maiores de idade' })
+        throw AppException.badRequest('Documento é obrigatório para maiores de idade')
       }
       if (!data.basicInfo.phone) {
-        return response.badRequest({ message: 'Telefone é obrigatório para maiores de idade' })
+        throw AppException.badRequest('Telefone é obrigatório para maiores de idade')
       }
     }
 
     // Check if all responsibles are adults
     for (const responsible of data.responsibles) {
       if (!isAdult(responsible.birthDate)) {
-        return response.badRequest({
-          message: `Responsável "${responsible.name}" deve ser maior de idade`,
-        })
+        throw AppException.badRequest(`Responsável "${responsible.name}" deve ser maior de idade`)
       }
     }
 
@@ -69,24 +69,22 @@ export default class EnrollStudentController {
         (r) => r.documentNumber.replace(/\D/g, '') === studentDoc
       )
       if (conflictWithResponsible) {
-        return response.badRequest({
-          message: `Documento do aluno não pode ser igual ao do responsável "${conflictWithResponsible.name}"`,
-        })
+        throw AppException.badRequest(
+          `Documento do aluno não pode ser igual ao do responsável "${conflictWithResponsible.name}"`
+        )
       }
     }
 
     // Check if any responsible documents are duplicated
     const uniqueDocs = new Set(responsibleDocs)
     if (uniqueDocs.size !== responsibleDocs.length) {
-      return response.badRequest({
-        message: 'Cada responsável deve ter um documento único',
-      })
+      throw AppException.badRequest('Cada responsável deve ter um documento único')
     }
 
     // Get school from the academic period
     const academicPeriod = await AcademicPeriod.find(data.billing.academicPeriodId)
     if (!academicPeriod) {
-      return response.badRequest({ message: 'Período letivo não encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
     const schoolId = academicPeriod.schoolId
 
@@ -99,9 +97,7 @@ export default class EnrollStudentController {
         .first()
 
       if (existingEmailUser) {
-        return response.conflict({
-          message: `Email "${studentEmail}" já está cadastrado para ${existingEmailUser.name}`,
-        })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 
@@ -111,9 +107,7 @@ export default class EnrollStudentController {
       .filter(Boolean) as string[]
     const uniqueEmails = new Set(responsibleEmails)
     if (uniqueEmails.size !== responsibleEmails.length) {
-      return response.badRequest({
-        message: 'Cada responsável deve ter um email único',
-      })
+      throw AppException.badRequest('Cada responsável deve ter um e-mail único')
     }
 
     // Check if responsible emails conflict with existing users (different document = conflict)
@@ -130,9 +124,7 @@ export default class EnrollStudentController {
         const respDoc = responsible.documentNumber?.replace(/\D/g, '') || ''
         const existingDoc = existingUser.documentNumber?.replace(/\D/g, '') || ''
         if (!respDoc || !existingDoc || respDoc !== existingDoc) {
-          return response.conflict({
-            message: `Email "${respEmail}" já está cadastrado para ${existingUser.name}`,
-          })
+          throw AppException.operationFailedWithProvidedData(409)
         }
       }
     }
@@ -150,22 +142,20 @@ export default class EnrollStudentController {
         .first()
 
       if (existingEnrollment) {
-        return response.conflict({
-          message: 'Este aluno já está matriculado neste período letivo',
-        })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 
     // Get STUDENT role
     const studentRole = await Role.findBy('name', 'STUDENT')
     if (!studentRole) {
-      return response.internalServerError({ message: 'Role STUDENT não encontrada' })
+      throw AppException.internalServerError('Role STUDENT não encontrada')
     }
 
     // Get STUDENT_RESPONSIBLE role for creating responsibles
     const responsibleRole = await Role.findBy('name', 'STUDENT_RESPONSIBLE')
     if (!responsibleRole && !data.basicInfo.isSelfResponsible && data.responsibles.length > 0) {
-      return response.internalServerError({ message: 'Role STUDENT_RESPONSIBLE não encontrada' })
+      throw AppException.internalServerError('Role STUDENT_RESPONSIBLE não encontrada')
     }
 
     const trx = await db.transaction()
@@ -322,7 +312,7 @@ export default class EnrollStudentController {
             userId: contactUserId,
             name: contact.name,
             phone: contact.phone,
-            relationship: contact.relationship as any,
+            relationship: contact.relationship as EmergencyContactRelationship,
             order: contact.order,
           },
           { client: trx }

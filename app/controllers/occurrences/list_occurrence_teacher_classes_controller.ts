@@ -4,16 +4,20 @@ import OccurrenceTeacherClassDto from '#models/dto/occurrence_teacher_class.dto'
 
 export default class ListOccurrenceTeacherClassesController {
   async handle({ request, response, selectedSchoolIds }: HttpContext) {
-    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
-      return response.badRequest({ message: 'Usuario sem escola selecionada' })
-    }
+    const scopedSchoolIds = selectedSchoolIds ?? []
 
     const academicPeriodId = request.input('academicPeriodId') as string | undefined
 
     const query = TeacherHasClass.query()
       .where('isActive', true)
       .whereHas('class', (classQuery) => {
-        classQuery.whereIn('schoolId', selectedSchoolIds).where('isArchived', false)
+        if (scopedSchoolIds.length > 0) {
+          classQuery.whereIn('schoolId', scopedSchoolIds)
+        } else {
+          classQuery.whereRaw('1 = 0')
+        }
+
+        classQuery.where('isArchived', false)
 
         if (academicPeriodId) {
           classQuery.whereHas('academicPeriods', (periodQuery) => {

@@ -5,6 +5,7 @@ import StudentPayment from '#models/student_payment'
 import { cancelStoreOrderValidator } from '#validators/gamification'
 import StoreOrderDto from '#models/dto/store_order.dto'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class CancelStoreOrderController {
   async handle({ params, request, response, auth }: HttpContext) {
@@ -14,13 +15,15 @@ export default class CancelStoreOrderController {
     const order = await StoreOrder.query().where('id', id).preload('items').first()
 
     if (!order) {
-      return response.notFound({ message: 'Store order not found' })
+      throw AppException.storeOrderNotFound()
     }
 
-    if (order.status === 'DELIVERED' || order.status === 'CANCELED' || order.status === 'REJECTED') {
-      return response.badRequest({
-        message: `Cannot cancel order with status: ${order.status}`,
-      })
+    if (
+      order.status === 'DELIVERED' ||
+      order.status === 'CANCELED' ||
+      order.status === 'REJECTED'
+    ) {
+      throw AppException.storeOrderInvalidStatus('cancel', order.status)
     }
 
     // Restore stock for all items

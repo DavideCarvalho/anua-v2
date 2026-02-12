@@ -7,11 +7,12 @@ import {
   PaymentsSummaryDto,
   PaginationMetaDto,
 } from '#models/dto/student_payments_response.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class GetStudentPaymentsController {
-  async handle({ params, request, response, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -25,9 +26,7 @@ export default class GetStudentPaymentsController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver os pagamentos deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver os pagamentos deste aluno')
     }
 
     // Get payments

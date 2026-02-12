@@ -6,6 +6,7 @@ import {
   OccurrenceDto,
   OccurrencesSummaryDto,
 } from '#models/dto/student_occurrences_response.dto'
+import AppException from '#exceptions/app_exception'
 
 interface OccurrenceRow {
   id: string
@@ -32,9 +33,9 @@ interface UnacknowledgedRow {
 }
 
 export default class GetStudentOccurrencesController {
-  async handle({ params, response, request, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -47,14 +48,12 @@ export default class GetStudentOccurrencesController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver as ocorrencias deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver as ocorrências deste aluno')
     }
 
     // Build filters
     let typeFilter = ''
-    const queryParams: Record<string, string> = { studentId, odersResponsibleId: effectiveUser.id }
+    const queryParams: Record<string, string> = { studentId, responsibleId: effectiveUser.id }
 
     if (type) {
       typeFilter = `AND o.type = :type`
@@ -79,7 +78,7 @@ export default class GetStudentOccurrencesController {
       LEFT JOIN "Subject" s ON thc."subjectId" = s.id
       LEFT JOIN "ResponsibleUserAcceptedOccurence" ack
         ON ack."occurenceId" = o.id
-        AND ack."responsibleUserId" = :odersResponsibleId
+        AND ack."responsibleUserId" = :responsibleId
       WHERE o."studentId" = :studentId
         ${typeFilter}
       ORDER BY o.date DESC, o."createdAt" DESC
@@ -165,11 +164,11 @@ export default class GetStudentOccurrencesController {
 
 function getOccurrenceTitle(type: string): string {
   const titles: Record<string, string> = {
-    BEHAVIOR: 'Ocorrencia de Comportamento',
-    PERFORMANCE: 'Ocorrencia de Desempenho',
+    BEHAVIOR: 'Ocorrência de comportamento',
+    PERFORMANCE: 'Ocorrência de desempenho',
     ABSENCE: 'Falta',
     LATE: 'Atraso',
-    OTHER: 'Outra Ocorrencia',
+    OTHER: 'Outra ocorrência',
   }
-  return titles[type] || 'Ocorrencia'
+  return titles[type] || 'Ocorrência'
 }

@@ -11,6 +11,10 @@ const SOURCE_LABELS: Record<string, string> = {
   'student-payments.create': 'Criar Pagamento',
   'extra-classes.enroll': 'Matricular em Aula Avulsa',
   'update-enrollment-payments-job': 'Editar Matrícula',
+  'events.parental-consent.approved': 'Autorizar Participação em Evento',
+  'events.parental-consent.denied': 'Não Autorizar Participação em Evento',
+  'events.cancel': 'Cancelar Evento',
+  'events.update': 'Atualizar Evento',
 }
 
 interface ReconcilePaymentInvoicePayload {

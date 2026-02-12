@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
+import AppException from '#exceptions/app_exception'
 
 export default class CompleteEventController {
   async handle({ params, response }: HttpContext) {
@@ -8,13 +9,13 @@ export default class CompleteEventController {
     const event = await Event.find(id)
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     if (event.status !== 'PUBLISHED') {
-      return response.badRequest({
-        message: `Cannot complete event with status '${event.status}'. Only published events can be completed.`,
-      })
+      throw AppException.badRequest(
+        `Não é possível concluir evento com status '${event.status}'. Apenas eventos publicados podem ser concluídos.`
+      )
     }
 
     event.status = 'COMPLETED'

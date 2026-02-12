@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowPostController {
   async handle({ params, response, auth }: HttpContext) {
@@ -17,7 +18,7 @@ export default class ShowPostController {
       .first()
 
     if (!post) {
-      return response.notFound({ message: 'Post not found' })
+      throw AppException.notFound('Post não encontrado')
     }
 
     // Check if current user liked the post

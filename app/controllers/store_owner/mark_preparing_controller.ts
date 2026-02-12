@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
 import StoreOrderDto from '#models/dto/store_order.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkPreparingController {
   async handle({ storeOwnerStore, params, auth, response }: HttpContext) {
@@ -9,13 +10,11 @@ export default class MarkPreparingController {
     const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
-      return response.notFound({ message: 'Pedido não encontrado' })
+      throw AppException.storeOrderNotFound()
     }
 
     if (order.status !== 'APPROVED') {
-      return response.badRequest({
-        message: `Não é possível preparar pedido com status: ${order.status}`,
-      })
+      throw AppException.storeOrderInvalidStatus('prepare', order.status)
     }
 
     order.status = 'PREPARING'

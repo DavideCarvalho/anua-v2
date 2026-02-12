@@ -8,6 +8,7 @@ import {
   GradesSummaryDto,
 } from '#models/dto/student_grades_response.dto'
 import { DateTime } from 'luxon'
+import AppException from '#exceptions/app_exception'
 
 interface SubjectGradeRow {
   subject_id: string
@@ -41,9 +42,9 @@ interface OverallSummaryRow {
 type DateValue = string | Date | DateTime | null
 
 export default class GetStudentGradesController {
-  async handle({ params, response, effectiveUser }: HttpContext) {
+  async handle({ params, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -55,7 +56,7 @@ export default class GetStudentGradesController {
       .first()
 
     if (!relation) {
-      return response.forbidden({ message: 'Voce nao tem permissao para ver as notas deste aluno' })
+      throw AppException.forbidden('Você não tem permissão para ver as notas deste aluno')
     }
 
     // Get student's grades grouped by subject

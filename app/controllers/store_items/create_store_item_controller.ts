@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
 import Store from '#models/store'
 import { createStoreItemValidator } from '#validators/gamification'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateStoreItemController {
   async handle({ request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class CreateStoreItemController {
     // Resolver schoolId a partir da loja
     const store = await Store.find(data.storeId)
     if (!store) {
-      return response.notFound({ message: 'Loja não encontrada' })
+      throw AppException.notFound('Loja nao encontrada')
     }
     const schoolId = store.schoolId
 
@@ -21,9 +22,9 @@ export default class CreateStoreItemController {
       const maxPercentage = data.maxPointsPercentage ?? 100
 
       if (minPercentage > maxPercentage) {
-        return response.badRequest({
-          message: 'A porcentagem mínima de pontos não pode ser maior que a porcentagem máxima',
-        })
+        throw AppException.badRequest(
+          'A porcentagem minima de pontos nao pode ser maior que a porcentagem maxima'
+        )
       }
     }
 

@@ -2,9 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "nodenext",
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "isolatedModules": true,
@@ -23,9 +21,7 @@
     "declaration": false,
     "sourceMap": true,
     "emitDecoratorMetadata": true,
-    "types": [
-      "@types/node"
-    ],
+    "types": ["@types/node"],
     "rootDir": "./",
     "outDir": "./build",
     "useDefineForClassFields": true,
@@ -35,20 +31,12 @@
     "resolvePackageJsonImports": true,
     "preserveConstEnums": true,
     "paths": {
-      "#audit_resolvers/*": [
-        "./app/audit_resolvers/*.js"
-      ]
+      "#audit_resolvers/*": ["./app/audit_resolvers/*.js"],
+      "#lib/*": ["./app/lib/*.js"]
     }
   },
   "ts-node": {
     "swc": true
   },
-  "exclude": [
-    "./inertia/**/*",
-    "node_modules",
-    "build",
-    "tests",
-    "bin/test.ts",
-    "./build"
-  ]
+  "exclude": ["./inertia/**/*", "node_modules", "build", "tests", "bin/test.ts", "./build"]
 }

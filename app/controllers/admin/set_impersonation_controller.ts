@@ -1,15 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
+import AppException from '#exceptions/app_exception'
 
 /**
  * Controller para ativar impersonation
  * Permite que SUPER_ADMIN personifique outros usuários
  */
 export default class SetImpersonationController {
-  async handle({ auth, request, response, session }: HttpContext) {
+  async handle({ auth, request, session }: HttpContext) {
     const user = auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     await user.load('role')
@@ -17,24 +18,24 @@ export default class SetImpersonationController {
 
     // Apenas SUPER_ADMIN pode personificar
     if (roleName !== 'SUPER_ADMIN') {
-      return response.forbidden({ message: 'Apenas SUPER_ADMIN pode personificar usuários' })
+      throw AppException.forbidden('Apenas SUPER_ADMIN pode personificar usuários')
     }
 
     const { userId } = request.only(['userId'])
 
     if (!userId) {
-      return response.badRequest({ message: 'userId é obrigatório' })
+      throw AppException.badRequest('userId é obrigatório')
     }
 
     // Verificar se usuário alvo existe
     const targetUser = await User.find(userId)
     if (!targetUser) {
-      return response.notFound({ message: 'Usuário não encontrado' })
+      throw AppException.notFound('Usuário não encontrado')
     }
 
     // Não permitir auto-personificação
     if (userId === user.id) {
-      return response.badRequest({ message: 'Não é possível personificar a si mesmo' })
+      throw AppException.badRequest('Não é possível personificar a si mesmo')
     }
 
     // Armazenar impersonation na sessão do AdonisJS

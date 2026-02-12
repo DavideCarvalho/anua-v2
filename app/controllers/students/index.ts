@@ -2,9 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Student from '#models/student'
 import StudentDto from '#models/dto/student.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class IndexStudentsController {
-  async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({ request, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
@@ -15,7 +16,7 @@ export default class IndexStudentsController {
 
     const user = effectiveUser ?? auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     await user.load('role')
@@ -27,10 +28,6 @@ export default class IndexStudentsController {
         ? [request.input('schoolId')]
         : selectedSchoolIds
       : selectedSchoolIds
-
-    if ((!schoolIds || schoolIds.length === 0) && !isAdmin) {
-      return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
-    }
 
     const query = Student.query()
       .where((q) => {
@@ -56,6 +53,8 @@ export default class IndexStudentsController {
       query.whereHas('user', (userQuery) => {
         userQuery.whereIn('schoolId', schoolIds)
       })
+    } else if (!isAdmin) {
+      query.whereRaw('1 = 0')
     }
 
     if (classId) {

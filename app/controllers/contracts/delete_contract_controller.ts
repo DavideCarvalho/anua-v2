@@ -3,6 +3,7 @@ import Contract from '#models/contract'
 import ContractPaymentDay from '#models/contract_payment_day'
 import ContractInterestConfig from '#models/contract_interest_config'
 import ContractEarlyDiscount from '#models/contract_early_discount'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteContractController {
   async handle({ params, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class DeleteContractController {
     const contract = await Contract.find(id)
 
     if (!contract) {
-      return response.notFound({ message: 'Contract not found' })
+      throw AppException.contractNotFound()
     }
 
     // Delete related records first

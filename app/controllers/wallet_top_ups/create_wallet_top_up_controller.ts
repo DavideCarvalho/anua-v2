@@ -13,11 +13,12 @@ import {
 } from '#services/asaas_service'
 import { createWalletTopUpValidator } from '#validators/wallet_top_up'
 import { DateTime } from 'luxon'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateWalletTopUpController {
   async handle({ request, response, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const payload = await request.validateUsing(createWalletTopUpValidator)
@@ -29,7 +30,7 @@ export default class CreateWalletTopUpController {
       .first()
 
     if (!relation) {
-      return response.forbidden({ message: 'Você não tem permissão financeira para este aluno' })
+      throw AppException.forbidden('Você não tem permissão financeira para este aluno')
     }
 
     const studentHasLevel = await StudentHasLevel.query()
@@ -40,15 +41,13 @@ export default class CreateWalletTopUpController {
       .first()
 
     if (!studentHasLevel?.level?.school) {
-      return response.notFound({ message: 'Matrícula ou escola não encontrada' })
+      throw AppException.notFound('Matrícula ou escola não encontrada')
     }
 
     const school = studentHasLevel.level.school
     const config = resolveAsaasConfig(school)
     if (!config) {
-      return response.badRequest({
-        message: 'Configuração de pagamento não encontrada para esta escola',
-      })
+      throw AppException.badRequest('Configuração de pagamento não encontrada para esta escola')
     }
 
     const customerId = await getOrCreateAsaasCustomer(config.apiKey, effectiveUser)

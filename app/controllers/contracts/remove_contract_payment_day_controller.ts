@@ -1,8 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractPaymentDay from '#models/contract_payment_day'
+import AppException from '#exceptions/app_exception'
 
 export default class RemoveContractPaymentDayController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params }: HttpContext) {
     const { contractId, id } = params
 
     const paymentDay = await ContractPaymentDay.query()
@@ -11,7 +12,7 @@ export default class RemoveContractPaymentDayController {
       .first()
 
     if (!paymentDay) {
-      return response.notFound({ message: 'Payment day not found' })
+      throw AppException.notFound('Payment day not found')
     }
 
     await paymentDay.delete()

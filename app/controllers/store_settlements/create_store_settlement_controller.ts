@@ -4,6 +4,7 @@ import StoreOrder from '#models/store_order'
 import StoreSettlement from '#models/store_settlement'
 import StoreFinancialSettings from '#models/store_financial_settings'
 import { createStoreSettlementValidator } from '#validators/store'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateStoreSettlementController {
   async handle({ request, response }: HttpContext) {
@@ -13,9 +14,7 @@ export default class CreateStoreSettlementController {
     const store = await Store.query().where('id', data.storeId).whereNull('deletedAt').firstOrFail()
 
     if (store.type !== 'THIRD_PARTY') {
-      return response.badRequest({
-        message: 'Settlements are only for third-party stores',
-      })
+      throw AppException.badRequest('Liquidações são permitidas apenas para lojas de terceiros')
     }
 
     // Check if settlement already exists for this month/year
@@ -26,9 +25,7 @@ export default class CreateStoreSettlementController {
       .first()
 
     if (existing) {
-      return response.conflict({
-        message: 'Settlement already exists for this store/month/year',
-      })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     // Get financial settings

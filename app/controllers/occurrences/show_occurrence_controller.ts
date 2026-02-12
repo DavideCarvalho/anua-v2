@@ -2,12 +2,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Occurrence from '#models/occurrence'
 import StudentHasResponsible from '#models/student_has_responsible'
 import OccurrenceSchoolListItemDto from '#models/dto/occurrence_school_list_item.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowOccurrenceController {
   async handle({ params, response, selectedSchoolIds }: HttpContext) {
-    if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
-      return response.badRequest({ message: 'Usuario sem escola selecionada' })
-    }
+    const scopedSchoolIds = selectedSchoolIds ?? []
 
     const occurrence = await Occurrence.query()
       .where('id', params.id)
@@ -21,13 +20,17 @@ export default class ShowOccurrenceController {
       .withCount('acknowledgements')
       .whereHas('teacherHasClass', (teacherClassQuery) => {
         teacherClassQuery.whereHas('class', (classQuery) => {
-          classQuery.whereIn('schoolId', selectedSchoolIds)
+          if (scopedSchoolIds.length > 0) {
+            classQuery.whereIn('schoolId', scopedSchoolIds)
+          } else {
+            classQuery.whereRaw('1 = 0')
+          }
         })
       })
       .first()
 
     if (!occurrence) {
-      return response.notFound({ message: 'Ocorrencia nao encontrada' })
+      throw AppException.notFound('Ocorrência não encontrada')
     }
 
     const pedagogicalResponsibleCount = await StudentHasResponsible.query()

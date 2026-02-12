@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Role from '#models/role'
 import School from '#models/school'
+import AppException from '#exceptions/app_exception'
 
 /**
  * Controller para retornar usuários disponíveis para personificação
@@ -9,10 +10,10 @@ import School from '#models/school'
  * Usa UserHasSchool para relacionamento usuário-escola
  */
 export default class GetImpersonationConfigController {
-  async handle({ auth, request, response }: HttpContext) {
+  async handle({ auth, request }: HttpContext) {
     const user = auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     await user.load('role')
@@ -20,7 +21,7 @@ export default class GetImpersonationConfigController {
 
     // Apenas SUPER_ADMIN pode ver configurações
     if (roleName !== 'SUPER_ADMIN') {
-      return response.forbidden({ message: 'Acesso negado' })
+      throw AppException.forbidden('Acesso negado')
     }
 
     const { search, roleFilter, schoolFilter, page = 1, limit = 20 } = request.qs()

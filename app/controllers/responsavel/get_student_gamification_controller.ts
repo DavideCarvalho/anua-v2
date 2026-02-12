@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AppException from '#exceptions/app_exception'
 
 interface GamificationRow {
   id: string
@@ -34,9 +35,9 @@ interface PointTransactionRow {
 }
 
 export default class GetStudentGamificationController {
-  async handle({ params, response, effectiveUser }: HttpContext) {
+  async handle({ params, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
-      return response.unauthorized({ message: 'Nao autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
@@ -48,9 +49,7 @@ export default class GetStudentGamificationController {
       .first()
 
     if (!relation) {
-      return response.forbidden({
-        message: 'Voce nao tem permissao para ver a gamificacao deste aluno',
-      })
+      throw AppException.forbidden('Você não tem permissão para ver a gamificação deste aluno')
     }
 
     // Get student's gamification stats

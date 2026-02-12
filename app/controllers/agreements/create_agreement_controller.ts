@@ -6,6 +6,7 @@ import AgreementEarlyDiscount from '#models/agreement_early_discount'
 import Invoice from '#models/invoice'
 import StudentPayment from '#models/student_payment'
 import { createAgreementValidator } from '#validators/agreement'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateAgreementController {
   async handle({ request, response }: HttpContext) {
@@ -18,20 +19,18 @@ export default class CreateAgreementController {
       .preload('student')
 
     if (invoices.length === 0) {
-      return response.badRequest({ message: 'Nenhuma fatura válida selecionada' })
+      throw AppException.badRequest('Nenhuma fatura válida selecionada')
     }
 
     if (invoices.length !== payload.invoiceIds.length) {
-      return response.badRequest({
-        message: 'Algumas faturas não foram encontradas ou já estão pagas/canceladas',
-      })
+      throw AppException.badRequest(
+        'Algumas faturas não foram encontradas ou já estão pagas/canceladas'
+      )
     }
 
     const studentIds = new Set(invoices.map((i) => i.studentId))
     if (studentIds.size > 1) {
-      return response.badRequest({
-        message: 'Todas as faturas devem pertencer ao mesmo aluno',
-      })
+      throw AppException.badRequest('Todas as faturas devem pertencer ao mesmo aluno')
     }
 
     const totalAmount = invoices.reduce((sum, i) => sum + Number(i.totalAmount), 0)

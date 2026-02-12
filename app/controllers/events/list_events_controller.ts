@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import { listEventsValidator } from '#validators/event'
+import { DateTime } from 'luxon'
+import EventDto from '#models/dto/event.dto'
 
 export default class ListEventsController {
   async handle(ctx: HttpContext) {
@@ -19,10 +21,14 @@ export default class ListEventsController {
     // Use schoolId from request (for admins) or selectedSchoolIds from middleware
     const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
 
-    const query = Event.query().preload('organizer').preload('school').withCount('participants')
+    const query = Event.query()
+      .preload('organizer')
+      .preload('school')
+      .preload('eventAudiences')
+      .withCount('participants')
 
     if (schoolIds && schoolIds.length > 0) {
-      query.whereIn('schoolId', schoolIds)
+      query.whereIn('Event.schoolId', schoolIds)
     }
 
     if (type) {
@@ -38,15 +44,21 @@ export default class ListEventsController {
     }
 
     if (startDate) {
-      query.where('startsAt', '>=', startDate)
+      const parsedStartDate = DateTime.fromISO(startDate)
+      if (parsedStartDate.isValid) {
+        query.where('Event.startDate', '>=', parsedStartDate.toSQL())
+      }
     }
 
     if (endDate) {
-      query.where('startsAt', '<=', endDate)
+      const parsedEndDate = DateTime.fromISO(endDate)
+      if (parsedEndDate.isValid) {
+        query.where('Event.startDate', '<=', parsedEndDate.toSQL())
+      }
     }
 
-    const events = await query.orderBy('startsAt', 'desc').paginate(page, limit)
+    const events = await query.orderBy('Event.startDate', 'desc').paginate(page, limit)
 
-    return response.ok(events)
+    return response.ok(EventDto.fromPaginator(events))
   }
 }

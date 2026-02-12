@@ -9,6 +9,7 @@ import {
   resolveAsaasConfig,
 } from '#services/asaas_service'
 import { createAsaasChargeValidator } from '#validators/asaas'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateStudentPaymentAsaasChargeController {
   async handle({ params, request, response }: HttpContext) {
@@ -16,12 +17,12 @@ export default class CreateStudentPaymentAsaasChargeController {
 
     const payment = await StudentPayment.find(params.id)
     if (!payment) {
-      return response.notFound({ message: 'Pagamento não encontrado' })
+      throw AppException.notFound('Pagamento não encontrado')
     }
 
     const student = await Student.query().where('id', payment.studentId).preload('user').first()
     if (!student || !student.user) {
-      return response.notFound({ message: 'Aluno não encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     const contract = await Contract.query()
@@ -30,14 +31,12 @@ export default class CreateStudentPaymentAsaasChargeController {
       .first()
 
     if (!contract?.school) {
-      return response.notFound({ message: 'Contrato ou escola não encontrados' })
+      throw AppException.notFound('Contrato ou escola não encontrados')
     }
 
     const config = resolveAsaasConfig(contract.school)
     if (!config) {
-      return response.badRequest({
-        message: 'Configuração do Asaas não encontrada para esta escola',
-      })
+      throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
 
     if (payment.paymentGatewayId) {
@@ -53,7 +52,7 @@ export default class CreateStudentPaymentAsaasChargeController {
 
     const dueDate = payment.dueDate?.toISODate()
     if (!dueDate) {
-      return response.badRequest({ message: 'Data de vencimento inválida' })
+      throw AppException.badRequest('Data de vencimento inválida')
     }
 
     const totalAmount = payment.totalAmount ?? payment.amount

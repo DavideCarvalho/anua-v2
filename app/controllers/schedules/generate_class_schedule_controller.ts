@@ -5,6 +5,7 @@ import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import TeacherHasClass from '#models/teacher_has_class'
 import TeacherAvailability from '#models/teacher_availability'
+import AppException from '#exceptions/app_exception'
 
 interface ScheduleConfig {
   startTime: string // "07:30"
@@ -116,7 +117,7 @@ export default class GenerateClassScheduleController {
     }
 
     if (!academicPeriodId || !config) {
-      return response.badRequest({ error: 'academicPeriodId and config are required' })
+      throw AppException.badRequest('academicPeriodId e config são obrigatórios')
     }
 
     // Get all teacher-class assignments for this class
@@ -138,16 +139,14 @@ export default class GenerateClassScheduleController {
       const hasInactive = Number(inactiveCount[0].$extras.total) > 0
 
       if (hasInactive) {
-        return response.badRequest({
-          error:
-            'As atribuições de professor/matéria desta turma estão inativas. Edite a turma e salve novamente para reativá-las.',
-        })
+        throw AppException.badRequest(
+          'As atribuições de professor/matéria desta turma estão inativas. Edite a turma e salve novamente para reativá-las.'
+        )
       }
 
-      return response.badRequest({
-        error:
-          'Nenhum professor/matéria atribuído a esta turma. Configure as atribuições primeiro.',
-      })
+      throw AppException.badRequest(
+        'Nenhum professor/matéria atribuído a esta turma. Configure as atribuições primeiro.'
+      )
     }
 
     // Get teacher availabilities

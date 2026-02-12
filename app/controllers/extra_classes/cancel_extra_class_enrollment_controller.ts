@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import StudentHasExtraClass from '#models/student_has_extra_class'
 import StudentPayment from '#models/student_payment'
 import Invoice from '#models/invoice'
+import AppException from '#exceptions/app_exception'
 
 export default class CancelExtraClassEnrollmentController {
   async handle({ params, response }: HttpContext) {
@@ -13,7 +14,7 @@ export default class CancelExtraClassEnrollmentController {
       .first()
 
     if (!enrollment) {
-      return response.notFound({ message: 'Inscrição não encontrada' })
+      throw AppException.notFound('Inscrição não encontrada')
     }
 
     enrollment.cancelledAt = DateTime.now()

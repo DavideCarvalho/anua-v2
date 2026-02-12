@@ -8,6 +8,7 @@ import Attendance from '#models/attendance'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import { getStudents } from '#services/class_students_service'
+import AppException from '#exceptions/app_exception'
 
 type StudentStatus = 'APPROVED' | 'AT_RISK_GRADE' | 'AT_RISK_ATTENDANCE' | 'FAILED' | 'IN_PROGRESS'
 
@@ -31,31 +32,31 @@ export default class GetStudentStatusController {
     const academicPeriodId = request.input('academicPeriodId')
 
     if (!subjectId) {
-      return response.badRequest({ message: 'subjectId é obrigatório' })
+      throw AppException.badRequest('subjectId é obrigatório')
     }
 
     if (!courseId || !academicPeriodId) {
-      return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
+      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
     }
 
     // Find the class
     const classEntity = await Class_.query().where('id', classId).preload('school').first()
 
     if (!classEntity) {
-      return response.notFound({ message: 'Turma não encontrada' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     // Get the academic period from the parameter
     const academicPeriod = await AcademicPeriod.find(academicPeriodId)
 
     if (!academicPeriod) {
-      return response.notFound({ message: 'Período letivo não encontrado' })
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     // Get school configuration
     const school = await School.find(classEntity.schoolId)
     if (!school) {
-      return response.notFound({ message: 'Escola não encontrada' })
+      throw AppException.notFound('Escola não encontrada')
     }
 
     const minimumGrade = academicPeriod.minimumGradeOverride ?? school.minimumGrade ?? 6

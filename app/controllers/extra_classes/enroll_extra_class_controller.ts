@@ -10,6 +10,7 @@ import Scholarship from '#models/scholarship'
 import { enrollExtraClassValidator } from '#validators/extra_class'
 import { getQueueManager } from '#services/queue_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import AppException from '#exceptions/app_exception'
 
 export default class EnrollExtraClassController {
   async handle(ctx: HttpContext) {
@@ -18,7 +19,7 @@ export default class EnrollExtraClassController {
 
     const extraClass = await ExtraClass.find(params.id)
     if (!extraClass || !extraClass.isActive) {
-      return response.notFound({ message: 'Aula avulsa não encontrada' })
+      throw AppException.notFound('Aula avulsa não encontrada')
     }
 
     // Check capacity
@@ -30,7 +31,7 @@ export default class EnrollExtraClassController {
 
       const total = Number(enrolledCount[0].$extras.total)
       if (total >= extraClass.maxStudents) {
-        return response.conflict({ message: 'Vagas esgotadas para esta aula avulsa' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 
@@ -42,7 +43,7 @@ export default class EnrollExtraClassController {
       .first()
 
     if (existing) {
-      return response.conflict({ message: 'Aluno já está inscrito nesta aula avulsa' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const contractId = data.contractId ?? extraClass.contractId

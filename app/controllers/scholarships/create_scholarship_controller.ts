@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Scholarship from '#models/scholarship'
 import { createScholarshipValidator } from '#validators/scholarship'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateScholarshipController {
   async handle({ request, response, auth }: HttpContext) {
@@ -8,7 +9,7 @@ export default class CreateScholarshipController {
 
     const schoolId = auth.user?.schoolId
     if (!schoolId) {
-      return response.badRequest({ message: 'Usuário não possui escola' })
+      throw AppException.badRequest('Usuário não possui escola')
     }
 
     const discountType = payload.discountType ?? 'PERCENTAGE'

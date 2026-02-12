@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteEventController {
   async handle({ params, response }: HttpContext) {
@@ -8,18 +9,18 @@ export default class DeleteEventController {
     const event = await Event.find(id)
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     // Only allow deletion of draft events
     if (event.status !== 'DRAFT') {
-      return response.badRequest({
-        message: 'Only draft events can be deleted. Cancel the event instead.',
-      })
+      throw AppException.badRequest(
+        'Apenas eventos em rascunho podem ser excluídos. Cancele o evento em vez disso.'
+      )
     }
 
     await event.delete()
 
-    return response.ok({ message: 'Event deleted successfully' })
+    return response.ok({ message: 'Evento excluído com sucesso' })
   }
 }

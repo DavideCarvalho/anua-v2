@@ -3,30 +3,31 @@ import Achievement from '#models/achievement'
 import GamificationEvent from '#models/gamification_event'
 import StudentGamification from '#models/student_gamification'
 import GamificationEventDto from '#models/dto/gamification_event.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class UnlockAchievementController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const { studentId, achievementId } = request.only(['studentId', 'achievementId'])
 
     if (!studentId || !achievementId) {
-      return response.badRequest({ message: 'studentId e achievementId sao obrigatorios' })
+      throw AppException.badRequest('studentId e achievementId são obrigatórios')
     }
 
     const achievement = await Achievement.find(achievementId)
 
     if (!achievement) {
-      return response.notFound({ message: 'Conquista nao encontrada' })
+      throw AppException.notFound('Conquista não encontrada')
     }
 
     if (!achievement.isActive) {
-      return response.badRequest({ message: 'Conquista nao esta ativa' })
+      throw AppException.badRequest('Conquista não está ativa')
     }
 
     // Check if student gamification exists
     const studentGamification = await StudentGamification.findBy('studentId', studentId)
 
     if (!studentGamification) {
-      return response.notFound({ message: 'Perfil de gamificacao do aluno nao encontrado' })
+      throw AppException.notFound('Perfil de gamificação do aluno não encontrado')
     }
 
     // Check if achievement was already unlocked (based on recurrence period)
@@ -40,7 +41,7 @@ export default class UnlockAchievementController {
         .first()
 
       if (existingUnlock) {
-        return response.conflict({ message: 'Conquista ja foi desbloqueada para este aluno' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 

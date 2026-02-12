@@ -2,14 +2,15 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
 import { listContractsValidator } from '#validators/contract'
 import { ContractDto } from '#models/dto/contract.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class ListContractsController {
-  async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({ request, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
     const payload = await request.validateUsing(listContractsValidator)
 
     const user = effectiveUser ?? auth.user
     if (!user) {
-      return response.unauthorized({ message: 'Não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     await user.load('role')
@@ -23,7 +24,7 @@ export default class ListContractsController {
       : selectedSchoolIds
 
     if ((!schoolIds || schoolIds.length === 0) && !isAdmin) {
-      return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
+      throw AppException.badRequest('Usuário não vinculado a uma escola')
     }
 
     const page = payload.page || 1

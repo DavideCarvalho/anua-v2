@@ -3,6 +3,7 @@ import Class_ from '#models/class'
 import StudentHasLevel from '#models/student_has_level'
 import db from '@adonisjs/lucid/services/db'
 import GetClassStudentsAttendanceResponseDto from './dtos/get_class_students_attendance_response.dto.js'
+import AppException from '#exceptions/app_exception'
 
 export default class GetClassStudentsAttendanceController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,12 +12,12 @@ export default class GetClassStudentsAttendanceController {
     const academicPeriodId = request.input('academicPeriodId')
 
     if (!courseId || !academicPeriodId) {
-      return response.badRequest({ message: 'courseId e academicPeriodId são obrigatórios' })
+      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
     }
 
     const classEntity = await Class_.find(classId)
     if (!classEntity) {
-      return response.notFound({ message: 'Turma não encontrada' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     const page = request.input('page', 1)
@@ -55,7 +56,16 @@ export default class GetClassStudentsAttendanceController {
         : []
 
     // Create a map for quick lookup
-    const summaryMap = new Map<string, any>()
+    interface AttendanceSummaryRow {
+      studentId: string
+      total_classes: string | number
+      present_count: string | number
+      absent_count: string | number
+      late_count: string | number
+      justified_count: string | number
+    }
+
+    const summaryMap = new Map<string, AttendanceSummaryRow>()
     for (const row of attendanceSummary) {
       summaryMap.set(row.studentId, row)
     }

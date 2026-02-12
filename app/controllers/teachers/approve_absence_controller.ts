@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Absence from '#models/absence'
 import { approveAbsenceValidator } from '#validators/teacher_timesheet'
+import AppException from '#exceptions/app_exception'
 
 export default class ApproveAbsenceController {
   async handle({ request, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class ApproveAbsenceController {
 
     const absence = await Absence.find(absenceId)
     if (!absence) {
-      return response.notFound({ message: 'Falta não encontrada' })
+      throw AppException.notFound('Falta não encontrada')
     }
 
     absence.status = 'APPROVED'

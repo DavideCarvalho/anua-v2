@@ -5,6 +5,7 @@ import User from '#models/user'
 import Student from '#models/student'
 import { createStudentValidator } from '#validators/student'
 import string from '@adonisjs/core/helpers/string'
+import AppException from '#exceptions/app_exception'
 
 export default class StoreStudentController {
   async handle({ request, response }: HttpContext) {
@@ -14,7 +15,7 @@ export default class StoreStudentController {
     if (data.email) {
       const existingUser = await User.findBy('email', data.email)
       if (existingUser) {
-        return response.conflict({ message: 'Já existe um usuário com este email' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 

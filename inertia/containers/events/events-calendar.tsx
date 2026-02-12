@@ -1,21 +1,13 @@
 import type { View } from 'react-big-calendar'
 import { useCallback, useMemo, useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  endOfMonth,
-  endOfWeek,
-  format,
-  getDay,
-  parse,
-  startOfMonth,
-  startOfWeek,
-} from 'date-fns'
+import { endOfMonth, endOfWeek, format, getDay, parse, startOfMonth, startOfWeek } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar, ShieldAlert } from 'lucide-react'
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'
 
 import { useEventsQueryOptions } from '../../hooks/queries/use_events'
-import { EditEventModal } from './edit-event-modal'
+import { EventDetailsModal } from './event-details-modal'
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import './calendar.css'
@@ -29,8 +21,8 @@ interface APIEvent {
   status: string
   visibility: string
   priority: string
-  startsAt: string
-  endsAt: string | null
+  startDate: string
+  endDate: string | null
   startTime: string | null
   endTime: string | null
   isAllDay: boolean
@@ -104,7 +96,7 @@ interface EventsCalendarProps {
 }
 
 export function EventsCalendar({ schoolId }: EventsCalendarProps) {
-  const [editEventId, setEditEventId] = useState<string | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<APIEvent | null>(null)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [view, setView] = useState<View>('month')
 
@@ -139,14 +131,14 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
     return events.map((event: APIEvent) => ({
       id: event.id,
       title: event.title,
-      start: new Date(event.startsAt),
-      end: event.endsAt ? new Date(event.endsAt) : new Date(event.startsAt),
+      start: new Date(event.startDate),
+      end: event.endDate ? new Date(event.endDate) : new Date(event.startDate),
       resource: event,
     }))
   }, [events])
 
   const handleSelectEvent = useCallback((event: CalendarEvent) => {
-    setEditEventId(event.id)
+    setSelectedEvent(event.resource)
   }, [])
 
   const handleNavigate = useCallback((newDate: Date) => {
@@ -158,29 +150,26 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
   }, [])
 
   // Estilo dos eventos baseado no tipo
-  const eventStyleGetter = useCallback(
-    (event: CalendarEvent): { className: string } => {
-      const eventType = event.resource.type
+  const eventStyleGetter = useCallback((event: CalendarEvent): { className: string } => {
+    const eventType = event.resource.type
 
-      const colorMap: Record<string, string> = {
-        EXAM: 'bg-red-500',
-        ASSIGNMENT: 'bg-blue-500',
-        ACADEMIC_EVENT: 'bg-green-500',
-        FIELD_TRIP: 'bg-yellow-500',
-        PARENTS_MEETING: 'bg-purple-500',
-        SPORTS_EVENT: 'bg-orange-500',
-        CULTURAL_EVENT: 'bg-pink-500',
-        HOLIDAY: 'bg-gray-500',
-      }
+    const colorMap: Record<string, string> = {
+      EXAM: 'bg-red-500',
+      ASSIGNMENT: 'bg-blue-500',
+      ACADEMIC_EVENT: 'bg-green-500',
+      FIELD_TRIP: 'bg-yellow-500',
+      PARENTS_MEETING: 'bg-purple-500',
+      SPORTS_EVENT: 'bg-orange-500',
+      CULTURAL_EVENT: 'bg-pink-500',
+      HOLIDAY: 'bg-gray-500',
+    }
 
-      const backgroundColor = colorMap[eventType] || 'bg-primary'
+    const backgroundColor = colorMap[eventType] || 'bg-primary'
 
-      return {
-        className: `${backgroundColor} text-white border-0 rounded-md px-1`,
-      }
-    },
-    []
-  )
+    return {
+      className: `${backgroundColor} text-white border-0 rounded-md px-1`,
+    }
+  }, [])
 
   return (
     <>
@@ -188,22 +177,13 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
         <div>
           <h2 className="text-lg font-semibold">
             {events.length} evento{events.length !== 1 ? 's' : ''}{' '}
-            {view === 'month' && (
-              <>em {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</>
-            )}
+            {view === 'month' && <>em {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</>}
             {view === 'week' && (
-              <>
-                na semana de{' '}
-                {format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')}
-              </>
+              <>na semana de {format(startOfWeek(currentDate, { locale: ptBR }), 'dd/MM')}</>
             )}
-            {view === 'day' && (
-              <>em {format(currentDate, "dd 'de' MMMM", { locale: ptBR })}</>
-            )}
+            {view === 'day' && <>em {format(currentDate, "dd 'de' MMMM", { locale: ptBR })}</>}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Clique em um evento para editar
-          </p>
+          <p className="text-sm text-muted-foreground">Clique em um evento para ver detalhes</p>
         </div>
 
         <div className="h-[700px]">
@@ -228,14 +208,11 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
         </div>
       </div>
 
-      {/* Modal de edição */}
-      {editEventId && (
-        <EditEventModal
-          open={!!editEventId}
-          onOpenChange={(open) => !open && setEditEventId(null)}
-          eventId={editEventId}
-        />
-      )}
+      <EventDetailsModal
+        open={!!selectedEvent}
+        onOpenChange={(open) => !open && setSelectedEvent(null)}
+        event={selectedEvent}
+      />
     </>
   )
 }

@@ -18,13 +18,13 @@ export default class EventParticipant extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'eventId' })
   declare eventId: string
 
-  @column()
+  @column({ columnName: 'userId' })
   declare userId: string
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'registrationDate' })
   declare registrationDate: DateTime
 
   @column()
@@ -33,10 +33,10 @@ export default class EventParticipant extends BaseModel {
   @column()
   declare notes: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

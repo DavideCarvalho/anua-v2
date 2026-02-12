@@ -4,6 +4,7 @@ import { createExamValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import Class_ from '#models/class'
 import AcademicPeriod from '#models/academic_period'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateExamController {
   async handle({ request, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class CreateExamController {
     // Get the school from the class
     const classRecord = await Class_.find(payload.classId)
     if (!classRecord) {
-      return response.notFound({ message: 'Class not found' })
+      throw AppException.notFound('Turma não encontrada')
     }
 
     // Use provided academicPeriodId or fall back to active period
@@ -26,7 +27,7 @@ export default class CreateExamController {
         .first()
 
       if (!academicPeriod) {
-        return response.notFound({ message: 'No active academic period found' })
+        throw AppException.notFound('Nenhum período letivo ativo encontrado')
       }
 
       academicPeriodId = academicPeriod.id
