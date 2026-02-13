@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import TeacherHasClass from '#models/teacher_has_class'
 import TeacherAvailability from '#models/teacher_availability'
 import db from '@adonisjs/lucid/services/db'
+import AppException from '#exceptions/app_exception'
 
 const DAYS_OF_WEEK = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
@@ -18,10 +19,9 @@ export default class ValidateTeacherScheduleConflictController {
       ])
 
     if (!teacherHasClassId || !classWeekDay || !startTime || !endTime || !academicPeriodId) {
-      return response.badRequest({
-        error:
-          'teacherHasClassId, classWeekDay, startTime, endTime, and academicPeriodId are required',
-      })
+      throw AppException.badRequest(
+        'teacherHasClassId, classWeekDay, startTime, endTime e academicPeriodId são obrigatórios'
+      )
     }
 
     // Get teacher from teacherHasClass
@@ -33,7 +33,7 @@ export default class ValidateTeacherScheduleConflictController {
       .first()
 
     if (!teacherHasClass) {
-      return response.badRequest({ error: 'TeacherHasClass not found' })
+      throw AppException.notFound('Vínculo professor-turma não encontrado')
     }
 
     const teacherId = teacherHasClass.teacherId

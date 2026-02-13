@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { saveExamGradeValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
+import AppException from '#exceptions/app_exception'
 
 export default class SaveExamGradeController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class SaveExamGradeController {
     const exam = await Exam.find(id)
 
     if (!exam) {
-      return response.notFound({ message: 'Exam not found' })
+      throw AppException.notFound('Prova não encontrada')
     }
 
     const grade = await ExamGrade.create({

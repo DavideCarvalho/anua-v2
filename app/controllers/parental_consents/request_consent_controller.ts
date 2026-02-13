@@ -5,6 +5,7 @@ import Student from '#models/student'
 import { v7 as uuidv7 } from 'uuid'
 import db from '@adonisjs/lucid/services/db'
 import { requestConsentValidator } from '#validators/consent'
+import AppException from '#exceptions/app_exception'
 
 export default class RequestConsentController {
   async handle({ params, request, response }: HttpContext) {
@@ -13,16 +14,16 @@ export default class RequestConsentController {
 
     const event = await Event.find(eventId)
     if (!event) {
-      return response.notFound({ message: 'Evento não encontrado' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     if (!event.requiresParentalConsent) {
-      return response.badRequest({ message: 'Este evento não requer autorização parental' })
+      throw AppException.badRequest('Este evento não requer autorização parental')
     }
 
     const student = await Student.find(studentId)
     if (!student) {
-      return response.notFound({ message: 'Aluno não encontrado' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     // Verify responsible is linked to student
@@ -33,7 +34,7 @@ export default class RequestConsentController {
       .first()
 
     if (!isResponsible) {
-      return response.badRequest({ message: 'Responsável não vinculado ao aluno' })
+      throw AppException.badRequest('Responsável não vinculado ao aluno')
     }
 
     // Check if consent already exists
@@ -43,9 +44,7 @@ export default class RequestConsentController {
       .first()
 
     if (existingConsent) {
-      return response.badRequest({
-        message: 'Já existe uma solicitação de autorização para este aluno',
-      })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const consent = await EventParentalConsent.create({

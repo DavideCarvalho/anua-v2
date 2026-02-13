@@ -3,6 +3,7 @@ import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
 import Class_ from '#models/class'
+import AppException from '#exceptions/app_exception'
 
 interface ActivityItem {
   id: string
@@ -28,7 +29,7 @@ export default class GetCourseActivityFeedController {
       .first()
 
     if (!courseAcademicPeriod) {
-      return response.notFound({ message: 'Curso não encontrado neste período letivo' })
+      throw AppException.notFound('Curso não encontrado neste período letivo')
     }
 
     // Get the level IDs assigned to this course in this academic period

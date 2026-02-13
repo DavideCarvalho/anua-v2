@@ -2,9 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SchoolUsageMetrics from '#models/school_usage_metrics'
 import { getSchoolUsageMetricsValidator } from '#validators/subscription'
+import AppException from '#exceptions/app_exception'
 
 export default class GetSchoolUsageMetricsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(getSchoolUsageMetricsValidator)
 
     const { schoolId, month, year } = payload
@@ -21,9 +22,9 @@ export default class GetSchoolUsageMetricsController {
       .first()
 
     if (!metrics) {
-      return response.notFound({
-        message: 'School usage metrics not found for the specified period',
-      })
+      throw AppException.notFound(
+        'Métricas de uso da escola não encontradas para o período informado'
+      )
     }
 
     return metrics

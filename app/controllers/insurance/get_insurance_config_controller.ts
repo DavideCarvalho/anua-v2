@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import SchoolChain from '#models/school_chain'
 import { getInsuranceConfigValidator } from '#validators/insurance'
+import AppException from '#exceptions/app_exception'
 
 export default class GetInsuranceConfigController {
   async handle({ request, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class GetInsuranceConfigController {
     const school = await School.query().where('id', schoolId).preload('schoolChain').first()
 
     if (!school) {
-      return response.notFound({ message: 'Escola não encontrada' })
+      throw AppException.notFound('Escola não encontrada')
     }
 
     // Resolve hierarchical configuration

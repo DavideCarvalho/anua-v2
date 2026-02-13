@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
 import GamificationEvent from '#models/gamification_event'
+import AppException from '#exceptions/app_exception'
 
 export default class GetStudentStatsController {
   async handle({ params, response }: HttpContext) {
@@ -14,7 +15,7 @@ export default class GetStudentStatsController {
       .first()
 
     if (!gamification) {
-      return response.notFound({ message: 'Student gamification profile not found' })
+      throw AppException.notFound('Perfil de gamificação do aluno não encontrado')
     }
 
     // Get all events for this student

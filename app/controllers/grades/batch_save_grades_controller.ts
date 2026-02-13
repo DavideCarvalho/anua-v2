@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
 import { batchSaveGradesValidator } from '#validators/grades'
+import AppException from '#exceptions/app_exception'
 
 export default class BatchSaveGradesController {
   async handle({ request, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class BatchSaveGradesController {
 
     const assignment = await Assignment.find(payload.assignmentId)
     if (!assignment) {
-      return response.notFound({ message: 'Atividade não encontrada' })
+      throw AppException.notFound('Atividade não encontrada')
     }
 
     const results = []

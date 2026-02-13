@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
+import AppException from '#exceptions/app_exception'
 
 export default class GetCourseDashboardMetricsController {
   async handle({ params, response }: HttpContext) {
@@ -17,7 +18,7 @@ export default class GetCourseDashboardMetricsController {
       .first()
 
     if (!courseAcademicPeriod) {
-      return response.notFound({ message: 'Curso não encontrado neste período letivo' })
+      throw AppException.notFound('Curso não encontrado neste período letivo')
     }
 
     // Get the level IDs assigned to this course in this academic period

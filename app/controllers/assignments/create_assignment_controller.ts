@@ -5,19 +5,11 @@ import TeacherHasClass from '#models/teacher_has_class'
 import AcademicPeriod from '#models/academic_period'
 import Class_ from '#models/class'
 import { createAssignmentValidator } from '#validators/assignment'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateAssignmentController {
   async handle({ request, response }: HttpContext) {
-    let payload
-    try {
-      payload = await request.validateUsing(createAssignmentValidator)
-    } catch (error) {
-      console.error('Validation error:', error)
-      return response.badRequest({
-        message: 'Validation failed',
-        errors: error.messages || error.message,
-      })
-    }
+    const payload = await request.validateUsing(createAssignmentValidator)
 
     // Find the TeacherHasClass record that links teacher, class, and subject
     const teacherHasClass = await TeacherHasClass.query()
@@ -27,9 +19,7 @@ export default class CreateAssignmentController {
       .first()
 
     if (!teacherHasClass) {
-      return response.notFound({
-        message: 'Teacher-class-subject association not found',
-      })
+      throw AppException.notFound('Vínculo professor-turma-disciplina não encontrado')
     }
 
     // Use provided academicPeriodId or fall back to active period
@@ -39,7 +29,7 @@ export default class CreateAssignmentController {
       // Get the school from the class to find the active academic period
       const classRecord = await Class_.find(payload.classId)
       if (!classRecord) {
-        return response.notFound({ message: 'Class not found' })
+        throw AppException.notFound('Turma não encontrada')
       }
 
       // Find active academic period for this school
@@ -49,7 +39,7 @@ export default class CreateAssignmentController {
         .first()
 
       if (!academicPeriod) {
-        return response.notFound({ message: 'No active academic period found' })
+        throw AppException.notFound('Nenhum período letivo ativo encontrado')
       }
 
       academicPeriodId = academicPeriod.id
