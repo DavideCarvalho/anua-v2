@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import EventParentalConsent from '#models/event_parental_consent'
 import Event from '#models/event'
 import { listEventConsentsValidator } from '#validators/consent'
+import AppException from '#exceptions/app_exception'
 
 export default class ListEventConsentsController {
   async handle({ params, request, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class ListEventConsentsController {
 
     const event = await Event.find(eventId)
     if (!event) {
-      return response.notFound({ message: 'Evento não encontrado' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     const query = EventParentalConsent.query()

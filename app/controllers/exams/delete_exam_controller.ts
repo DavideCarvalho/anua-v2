@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Exam from '#models/exam'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteExamController {
   async handle({ params, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class DeleteExamController {
     const exam = await Exam.find(id)
 
     if (!exam) {
-      return response.notFound({ message: 'Exam not found' })
+      throw AppException.notFound('Prova não encontrada')
     }
 
     await exam.delete()

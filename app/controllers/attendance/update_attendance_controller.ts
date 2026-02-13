@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
 import { updateAttendanceValidator } from '#validators/attendance'
+import AppException from '#exceptions/app_exception'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
@@ -19,7 +20,7 @@ export default class UpdateAttendanceController {
       .first()
 
     if (!studentAttendance) {
-      return response.notFound({ message: 'Attendance record not found' })
+      throw AppException.notFound('Registro de presença não encontrado')
     }
 
     const data = await request.validateUsing(updateAttendanceValidator)

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
+import AppException from '#exceptions/app_exception'
 
 export default class CancelRegistrationController {
   async handle({ params, response }: HttpContext) {
@@ -9,12 +10,12 @@ export default class CancelRegistrationController {
     const event = await Event.find(eventId)
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     // Don't allow cancellation for completed events
     if (event.status === 'COMPLETED') {
-      return response.badRequest({ message: 'Cannot cancel registration for completed events' })
+      throw AppException.badRequest('Não é possível cancelar inscrição em eventos concluídos')
     }
 
     const participant = await EventParticipant.query()
@@ -23,11 +24,11 @@ export default class CancelRegistrationController {
       .first()
 
     if (!participant) {
-      return response.notFound({ message: 'Participant not found for this event' })
+      throw AppException.notFound('Participante não encontrado para este evento')
     }
 
     await participant.delete()
 
-    return response.ok({ message: 'Registration cancelled successfully' })
+    return response.ok({ message: 'Inscrição cancelada com sucesso' })
   }
 }

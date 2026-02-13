@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchool from '#models/user_has_school'
 import UserSchoolSelection from '#models/user_school_selection'
 import { toggleSchoolSelectionValidator } from '#validators/school_switcher'
+import AppException from '#exceptions/app_exception'
 
 export default class ToggleSchoolSelectionController {
   async handle(ctx: HttpContext) {
@@ -17,7 +18,7 @@ export default class ToggleSchoolSelectionController {
       .first()
 
     if (!userHasSchool) {
-      return response.forbidden({ message: 'Você não tem acesso a esta escola' })
+      throw AppException.forbidden('Você não tem acesso a esta escola')
     }
 
     // Check if already selected

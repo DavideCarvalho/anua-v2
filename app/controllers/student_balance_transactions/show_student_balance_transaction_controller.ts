@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowStudentBalanceTransactionController {
   async handle({ params, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class ShowStudentBalanceTransactionController {
       .first()
 
     if (!transaction) {
-      return response.notFound({ message: 'Student balance transaction not found' })
+      throw AppException.notFound('Transação de saldo do aluno não encontrada')
     }
 
     return response.ok(transaction)

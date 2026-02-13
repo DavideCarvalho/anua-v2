@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Comment from '#models/comment'
 import { updateCommentValidator } from '#validators/post'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateCommentController {
   async handle({ params, request, response, auth }: HttpContext) {
@@ -10,12 +11,12 @@ export default class UpdateCommentController {
     const comment = await Comment.find(id)
 
     if (!comment) {
-      return response.notFound({ message: 'Comment not found' })
+      throw AppException.notFound('Comentário não encontrado')
     }
 
     // Only author can update their comment
     if (comment.userId !== auth.user!.id) {
-      return response.forbidden({ message: 'You can only edit your own comments' })
+      throw AppException.forbidden('Você só pode editar seus próprios comentários')
     }
 
     comment.comment = data.content

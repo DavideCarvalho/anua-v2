@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
 import SchoolGroup from '#models/school_group'
 import { createSchoolGroupValidator } from '#validators/school_group'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateSchoolGroupController {
   async handle({ request, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class CreateSchoolGroupController {
 
     const schoolChain = await SchoolChain.find(payload.schoolChainId)
     if (!schoolChain) {
-      return response.notFound({ message: 'Rede de escolas não encontrada' })
+      throw AppException.notFound('Rede de escolas não encontrada')
     }
 
     const schoolGroup = await SchoolGroup.create({

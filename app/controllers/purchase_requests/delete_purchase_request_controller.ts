@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
+import AppException from '#exceptions/app_exception'
 
 export default class DeletePurchaseRequestController {
   async handle({ params, response, auth }: HttpContext) {
@@ -8,23 +9,23 @@ export default class DeletePurchaseRequestController {
     const purchaseRequest = await PurchaseRequest.find(id)
 
     if (!purchaseRequest) {
-      return response.notFound({ message: 'Purchase request not found' })
+      throw AppException.notFound('Solicitação de compra não encontrada')
     }
 
     // Only the requesting user can delete their own request
     if (purchaseRequest.requestingUserId !== auth.user!.id) {
-      return response.forbidden({ message: 'You can only delete your own purchase requests' })
+      throw AppException.forbidden('Você só pode excluir suas próprias solicitações de compra')
     }
 
     // Can only delete if status is REQUESTED
     if (purchaseRequest.status !== 'REQUESTED') {
-      return response.badRequest({
-        message: 'Cannot delete a purchase request that has already been processed',
-      })
+      throw AppException.badRequest(
+        'Não é possível excluir uma solicitação de compra que já foi processada'
+      )
     }
 
     await purchaseRequest.delete()
 
-    return response.ok({ message: 'Purchase request deleted successfully' })
+    return response.ok({ message: 'Solicitação de compra excluída com sucesso' })
   }
 }

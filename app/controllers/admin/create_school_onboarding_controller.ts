@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { createSchoolOnboardingValidator } from '#validators/onboarding'
 import { v7 as uuidv7 } from 'uuid'
+import AppException from '#exceptions/app_exception'
 
 interface SchoolRow {
   id: string
@@ -42,9 +43,7 @@ export default class CreateSchoolOnboardingController {
 
     const platformSettings = platformSettingsResult.rows[0]
     if (!platformSettings) {
-      return response.internalServerError({
-        message: 'Configurações da plataforma não encontradas',
-      })
+      throw AppException.internalServerError('Configurações da plataforma não encontradas')
     }
 
     // Verificar se a escola já existe com este nome
@@ -54,9 +53,7 @@ export default class CreateSchoolOnboardingController {
     )
 
     if (existingSchoolResult.rows.length > 0) {
-      return response.conflict({
-        message: 'Já existe uma escola com este nome',
-      })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     // Verificar se já existe usuário com este email
@@ -71,9 +68,7 @@ export default class CreateSchoolOnboardingController {
     )
 
     if (directorRoleResult.rows.length === 0) {
-      return response.internalServerError({
-        message: 'Role de diretor não encontrada no sistema',
-      })
+      throw AppException.internalServerError('Role de diretor não encontrada no sistema')
     }
 
     const directorRole = directorRoleResult.rows[0]

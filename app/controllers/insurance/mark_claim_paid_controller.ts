@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceClaim from '#models/insurance_claim'
 import { DateTime } from 'luxon'
 import { markClaimPaidValidator } from '#validators/insurance'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkClaimPaidController {
   async handle({ request, response }: HttpContext) {
@@ -10,13 +11,11 @@ export default class MarkClaimPaidController {
     const claim = await InsuranceClaim.find(claimId)
 
     if (!claim) {
-      return response.notFound({ message: 'Sinistro não encontrado' })
+      throw AppException.notFound('Sinistro não encontrado')
     }
 
     if (claim.status !== 'APPROVED') {
-      return response.badRequest({
-        message: 'Apenas sinistros aprovados podem ser marcados como pagos',
-      })
+      throw AppException.badRequest('Apenas sinistros aprovados podem ser marcados como pagos')
     }
 
     claim.status = 'PAID'

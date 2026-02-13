@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceBilling from '#models/insurance_billing'
 import { getBillingDetailsValidator } from '#validators/insurance'
+import AppException from '#exceptions/app_exception'
 
 export default class GetBillingDetailsController {
   async handle({ request, response }: HttpContext) {
@@ -17,7 +18,7 @@ export default class GetBillingDetailsController {
       .first()
 
     if (!billing) {
-      return response.notFound({ message: 'Faturamento não encontrado' })
+      throw AppException.notFound('Faturamento não encontrado')
     }
 
     return response.ok({

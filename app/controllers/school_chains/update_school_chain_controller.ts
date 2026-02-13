@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
 import { updateSchoolChainValidator } from '#validators/school_chain'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateSchoolChainController {
   async handle({ request, params, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class UpdateSchoolChainController {
 
     const schoolChain = await SchoolChain.find(params.id)
     if (!schoolChain) {
-      return response.notFound({ message: 'Rede de escolas não encontrada' })
+      throw AppException.notFound('Rede de escolas não encontrada')
     }
 
     if (payload.slug && payload.slug !== schoolChain.slug) {
@@ -18,7 +19,7 @@ export default class UpdateSchoolChainController {
         .first()
 
       if (existing) {
-        return response.conflict({ message: 'Já existe uma rede com este slug' })
+        throw AppException.operationFailedWithProvidedData(409)
       }
     }
 

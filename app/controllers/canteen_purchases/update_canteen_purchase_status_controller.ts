@@ -4,6 +4,7 @@ import CanteenPurchase from '#models/canteen_purchase'
 import Student from '#models/student'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { updateCanteenPurchaseStatusValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateCanteenPurchaseStatusController {
   async handle({ params, request, response }: HttpContext) {
@@ -13,7 +14,7 @@ export default class UpdateCanteenPurchaseStatusController {
     const purchase = await CanteenPurchase.find(id)
 
     if (!purchase) {
-      return response.notFound({ message: 'Canteen purchase not found' })
+      throw AppException.notFound('Compra da cantina não encontrada')
     }
 
     purchase.status = payload.status
@@ -31,7 +32,7 @@ export default class UpdateCanteenPurchaseStatusController {
         if (!existingTransaction) {
           const student = await Student.find(purchase.userId)
           if (!student) {
-            return response.badRequest({ message: 'Aluno não encontrado para débito' })
+            throw AppException.badRequest('Aluno não encontrado para débito')
           }
 
           const latestTransaction = await StudentBalanceTransaction.query()
@@ -43,7 +44,7 @@ export default class UpdateCanteenPurchaseStatusController {
           const previousBalance = latestTransaction?.newBalance ?? student.balance ?? 0
 
           if (previousBalance < purchase.totalAmount) {
-            return response.badRequest({ message: 'Saldo insuficiente', balance: previousBalance })
+            throw AppException.badRequest(`Saldo insuficiente. Saldo atual: ${previousBalance}`)
           }
 
           const newBalance = previousBalance - purchase.totalAmount

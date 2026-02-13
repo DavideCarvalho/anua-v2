@@ -1,13 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SubscriptionInvoice from '#models/subscription_invoice'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkInvoicePaidController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params }: HttpContext) {
     const invoice = await SubscriptionInvoice.find(params.id)
 
     if (!invoice) {
-      return response.notFound({ message: 'Subscription invoice not found' })
+      throw AppException.notFound('Fatura de assinatura não encontrada')
     }
 
     invoice.status = 'PAID'

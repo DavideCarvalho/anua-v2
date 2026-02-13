@@ -3,9 +3,10 @@ import AcademicPeriod from '#models/academic_period'
 import Course from '#models/course'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import Class_ from '#models/class'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowTurmaProvasPageController {
-  async handle({ inertia, params, response }: HttpContext) {
+  async handle({ inertia, params }: HttpContext) {
     const academicPeriodSlug = params.slug
     const courseSlug = params.cursoSlug
     const classSlug = params.turmaSlug
@@ -13,13 +14,13 @@ export default class ShowTurmaProvasPageController {
     const academicPeriod = await AcademicPeriod.query().where('slug', academicPeriodSlug).first()
 
     if (!academicPeriod) {
-      return response.notFound('Período letivo não encontrado')
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     const course = await Course.query().where('slug', courseSlug).first()
 
     if (!course) {
-      return response.notFound('Curso não encontrado')
+      throw AppException.notFound('Curso não encontrado')
     }
 
     const courseAcademicPeriod = await CourseHasAcademicPeriod.query()
@@ -28,13 +29,13 @@ export default class ShowTurmaProvasPageController {
       .first()
 
     if (!courseAcademicPeriod) {
-      return response.notFound('Curso não está vinculado a este período letivo')
+      throw AppException.notFound('Curso não está vinculado a este período letivo')
     }
 
     const classRecord = await Class_.query().where('slug', classSlug).first()
 
     if (!classRecord) {
-      return response.notFound('Turma não encontrada')
+      throw AppException.notFound('Turma não encontrada')
     }
 
     return inertia.render(

@@ -3,9 +3,10 @@ import { createResponsibleAddressValidator } from '#validators/responsible'
 import ResponsibleAddress from '#models/responsible_address'
 import User from '#models/user'
 import { ResponsibleAddressDto } from '#models/dto/responsible_address.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateResponsibleAddressController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(createResponsibleAddressValidator)
 
     // Verificar se o usuário existe
@@ -17,9 +18,7 @@ export default class CreateResponsibleAddressController {
       .first()
 
     if (existingAddress) {
-      return response.conflict({
-        message: 'Este responsável já possui um endereço cadastrado',
-      })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const address = await ResponsibleAddress.create(payload)

@@ -4,6 +4,7 @@ import CanteenMeal from '#models/canteen_meal'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
 import Student from '#models/student'
 import { createCanteenMealReservationValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateCanteenMealReservationController {
   async handle({ request, response }: HttpContext) {
@@ -12,17 +13,17 @@ export default class CreateCanteenMealReservationController {
     // Validator provides userId, model expects studentId
     const student = await Student.find(payload.userId)
     if (!student) {
-      return response.badRequest({ message: 'Reservas disponiveis apenas para alunos' })
+      throw AppException.badRequest('Reservas disponíveis apenas para alunos')
     }
 
     // Validator provides canteenMealId, model expects mealId
     const meal = await CanteenMeal.find(payload.canteenMealId)
     if (!meal) {
-      return response.notFound({ message: 'Refeicao nao encontrada' })
+      throw AppException.notFound('Refeição não encontrada')
     }
 
     if (!meal.isActive) {
-      return response.badRequest({ message: 'Refeicao inativa' })
+      throw AppException.badRequest('Refeição inativa')
     }
 
     if (meal.maxServings) {
@@ -35,10 +36,7 @@ export default class CreateCanteenMealReservationController {
       const reservedQuantity = Number(reservedCount?.$extras.total) || 0
 
       if (reservedQuantity >= meal.maxServings) {
-        return response.badRequest({
-          message: 'Limite de reservas excedido',
-          available: meal.maxServings - reservedQuantity,
-        })
+        throw AppException.badRequest('Limite de reservas excedido')
       }
     }
 

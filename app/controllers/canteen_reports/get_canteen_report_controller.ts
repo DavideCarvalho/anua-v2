@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import { getCanteenReportValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class GetCanteenReportController {
   async handle({ request, response }: HttpContext) {
@@ -19,7 +20,7 @@ export default class GetCanteenReportController {
     const endSql = end.toSQL()
 
     if (!startSql || !endSql) {
-      return response.badRequest({ message: 'Período inválido' })
+      throw AppException.badRequest('Período inválido')
     }
 
     const summary = await db

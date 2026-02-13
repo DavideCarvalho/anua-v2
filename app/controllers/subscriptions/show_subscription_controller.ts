@@ -13,7 +13,7 @@ export default class ShowSubscriptionController {
       .first()
 
     if (!subscription) {
-      throw AppException.notFound('Subscription not found')
+      throw AppException.notFound('Assinatura não encontrada')
     }
 
     return subscription

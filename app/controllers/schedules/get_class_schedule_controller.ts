@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import TeacherHasClass from '#models/teacher_has_class'
+import AppException from '#exceptions/app_exception'
 
 export default class GetClassScheduleController {
   async handle({ params, request, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class GetClassScheduleController {
     const academicPeriodId = request.input('academicPeriodId')
 
     if (!academicPeriodId) {
-      return response.badRequest({ error: 'academicPeriodId is required' })
+      throw AppException.badRequest('academicPeriodId é obrigatório')
     }
 
     // Find active calendar for this class and period

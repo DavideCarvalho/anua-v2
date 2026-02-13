@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
 import { markAsBoughtValidator } from '#validators/purchase_request'
 import { DateTime } from 'luxon'
+import AppException from '#exceptions/app_exception'
 
 export default class MarkAsBoughtController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,14 +12,14 @@ export default class MarkAsBoughtController {
     const purchaseRequest = await PurchaseRequest.find(id)
 
     if (!purchaseRequest) {
-      return response.notFound({ message: 'Purchase request not found' })
+      throw AppException.notFound('Solicitação de compra não encontrada')
     }
 
     // Can only mark as bought if status is APPROVED
     if (purchaseRequest.status !== 'APPROVED') {
-      return response.badRequest({
-        message: 'Can only mark as bought purchase requests with APPROVED status',
-      })
+      throw AppException.badRequest(
+        'Só é possível marcar como comprada uma solicitação com status APPROVED'
+      )
     }
 
     purchaseRequest.status = 'BOUGHT'

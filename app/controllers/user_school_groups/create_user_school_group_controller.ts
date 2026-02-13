@@ -3,6 +3,7 @@ import User from '#models/user'
 import SchoolGroup from '#models/school_group'
 import UserHasSchoolGroup from '#models/user_has_school_group'
 import { createUserSchoolGroupValidator } from '#validators/user_school_group'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateUserSchoolGroupController {
   async handle({ request, response }: HttpContext) {
@@ -10,12 +11,12 @@ export default class CreateUserSchoolGroupController {
 
     const user = await User.find(payload.userId)
     if (!user) {
-      return response.notFound({ message: 'Usuário não encontrado' })
+      throw AppException.notFound('Usuário não encontrado')
     }
 
     const schoolGroup = await SchoolGroup.find(payload.schoolGroupId)
     if (!schoolGroup) {
-      return response.notFound({ message: 'Grupo escolar não encontrado' })
+      throw AppException.notFound('Grupo escolar não encontrado')
     }
 
     const existing = await UserHasSchoolGroup.query()
@@ -24,7 +25,7 @@ export default class CreateUserSchoolGroupController {
       .first()
 
     if (existing) {
-      return response.conflict({ message: 'Usuário já possui acesso a este grupo' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const assignment = await UserHasSchoolGroup.create({

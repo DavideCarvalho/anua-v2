@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
 import GamificationEvent from '#models/gamification_event'
 import { addPointsValidator } from '#validators/gamification'
+import AppException from '#exceptions/app_exception'
 
 function calculateLevel(totalPoints: number): { level: number; progress: number } {
   // Each level requires levelNumber * 100 points
@@ -25,13 +26,13 @@ export default class AddPointsController {
 
     const gamification = await StudentGamification.find(payload.studentGamificationId)
     if (!gamification) {
-      return response.notFound({ message: 'Student gamification not found' })
+      throw AppException.notFound('Gamificação do aluno não encontrada')
     }
 
     // Calculate new total points
     const newTotalPoints = gamification.totalPoints + payload.points
     if (newTotalPoints < 0) {
-      return response.badRequest({ message: 'Insufficient points for this operation' })
+      throw AppException.badRequest('Pontos insuficientes para esta operação')
     }
 
     // Calculate new level and progress

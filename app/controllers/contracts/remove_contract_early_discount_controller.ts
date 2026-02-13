@@ -12,7 +12,7 @@ export default class RemoveContractEarlyDiscountController {
       .first()
 
     if (!earlyDiscount) {
-      throw AppException.notFound('Early discount not found')
+      throw AppException.notFound('Desconto por antecipação não encontrado')
     }
 
     await earlyDiscount.delete()

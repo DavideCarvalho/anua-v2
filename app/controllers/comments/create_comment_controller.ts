@@ -3,6 +3,7 @@ import Post from '#models/post'
 import Comment from '#models/comment'
 import { createCommentValidator } from '#validators/post'
 import { randomUUID } from 'node:crypto'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateCommentController {
   async handle({ params, request, response, auth }: HttpContext) {
@@ -12,7 +13,7 @@ export default class CreateCommentController {
     const post = await Post.find(postId)
 
     if (!post) {
-      return response.notFound({ message: 'Post not found' })
+      throw AppException.notFound('Post não encontrado')
     }
 
     const comment = await Comment.create({

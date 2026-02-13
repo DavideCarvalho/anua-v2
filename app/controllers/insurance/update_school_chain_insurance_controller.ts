@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
 import { updateSchoolChainInsuranceValidator } from '#validators/insurance'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateSchoolChainInsuranceController {
   async handle({ request, response }: HttpContext) {
@@ -15,7 +16,7 @@ export default class UpdateSchoolChainInsuranceController {
     const chain = await SchoolChain.find(chainId)
 
     if (!chain) {
-      return response.notFound({ message: 'Rede não encontrada' })
+      throw AppException.notFound('Rede não encontrada')
     }
 
     if (hasInsuranceByDefault !== undefined) {

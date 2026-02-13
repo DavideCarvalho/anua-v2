@@ -4,12 +4,7 @@ import { createLevelValidator } from '#validators/level'
 
 export default class CreateLevelController {
   async handle({ request, response }: HttpContext) {
-    let data
-    try {
-      data = await request.validateUsing(createLevelValidator)
-    } catch (error) {
-      return response.badRequest({ message: 'Erro de validação', errors: error.messages })
-    }
+    const data = await request.validateUsing(createLevelValidator)
 
     const level = await Level.create({
       ...data,

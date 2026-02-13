@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
 import Comment from '#models/comment'
 import { listCommentsValidator } from '#validators/post'
+import AppException from '#exceptions/app_exception'
 
 export default class ListPostCommentsController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class ListPostCommentsController {
     const post = await Post.find(postId)
 
     if (!post) {
-      return response.notFound({ message: 'Post not found' })
+      throw AppException.notFound('Post não encontrado')
     }
 
     // Get comments for the post

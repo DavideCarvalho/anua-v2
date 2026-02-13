@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowCanteenMonthlyTransferController {
   async handle({ params, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class ShowCanteenMonthlyTransferController {
       .first()
 
     if (!transfer) {
-      return response.notFound({ message: 'Transferência não encontrada' })
+      throw AppException.notFound('Transferência não encontrada')
     }
 
     return response.ok(transfer)

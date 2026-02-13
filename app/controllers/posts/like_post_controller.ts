@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
 import UserLikedPost from '#models/user_liked_post'
 import { randomUUID } from 'node:crypto'
+import AppException from '#exceptions/app_exception'
 
 export default class LikePostController {
   async handle({ params, response, auth }: HttpContext) {
@@ -10,7 +11,7 @@ export default class LikePostController {
     const post = await Post.find(id)
 
     if (!post) {
-      return response.notFound({ message: 'Post not found' })
+      throw AppException.notFound('Post não encontrado')
     }
 
     // Check if already liked
@@ -20,7 +21,7 @@ export default class LikePostController {
       .first()
 
     if (existingLike) {
-      return response.badRequest({ message: 'You already liked this post' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     await UserLikedPost.create({
@@ -33,7 +34,7 @@ export default class LikePostController {
     const likesCount = await UserLikedPost.query().where('postId', id).count('* as total')
 
     return response.ok({
-      message: 'Post liked successfully',
+      message: 'Post curtido com sucesso',
       likesCount: Number(likesCount[0].$extras.total),
     })
   }

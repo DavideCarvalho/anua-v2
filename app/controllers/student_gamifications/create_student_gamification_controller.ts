@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
 import Student from '#models/student'
 import { createStudentGamificationValidator } from '#validators/student_gamification'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateStudentGamificationController {
   async handle({ request, response }: HttpContext) {
@@ -10,13 +11,13 @@ export default class CreateStudentGamificationController {
     // Check if student exists
     const student = await Student.find(payload.studentId)
     if (!student) {
-      return response.notFound({ message: 'Student not found' })
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     // Check if gamification profile already exists for this student
     const existingGamification = await StudentGamification.findBy('studentId', payload.studentId)
     if (existingGamification) {
-      return response.conflict({ message: 'Gamification profile already exists for this student' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const gamification = await StudentGamification.create({

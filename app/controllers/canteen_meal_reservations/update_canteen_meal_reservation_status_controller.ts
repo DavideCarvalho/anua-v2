@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
 import type { CanteenMealReservationStatus } from '#models/canteen_meal_reservation'
 import { updateCanteenMealReservationStatusValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): CanteenMealReservationStatus {
@@ -17,7 +18,7 @@ export default class UpdateCanteenMealReservationStatusController {
 
     const reservation = await CanteenMealReservation.find(params.id)
     if (!reservation) {
-      return response.notFound({ message: 'Reserva nao encontrada' })
+      throw AppException.notFound('Reserva não encontrada')
     }
 
     const modelStatus = mapStatus(payload.status)

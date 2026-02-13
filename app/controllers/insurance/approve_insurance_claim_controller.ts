@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceClaim from '#models/insurance_claim'
 import { DateTime } from 'luxon'
 import { approveInsuranceClaimValidator } from '#validators/insurance'
+import AppException from '#exceptions/app_exception'
 
 export default class ApproveInsuranceClaimController {
   async handle({ auth, request, response }: HttpContext) {
@@ -11,13 +12,11 @@ export default class ApproveInsuranceClaimController {
     const claim = await InsuranceClaim.find(claimId)
 
     if (!claim) {
-      return response.notFound({ message: 'Sinistro não encontrado' })
+      throw AppException.notFound('Sinistro não encontrado')
     }
 
     if (claim.status !== 'PENDING') {
-      return response.badRequest({
-        message: 'Apenas sinistros pendentes podem ser aprovados',
-      })
+      throw AppException.badRequest('Apenas sinistros pendentes podem ser aprovados')
     }
 
     claim.status = 'APPROVED'

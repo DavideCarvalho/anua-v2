@@ -4,12 +4,7 @@ import { createLevelAssignmentValidator } from '#validators/level_assignment'
 
 export default class CreateLevelAssignmentController {
   async handle({ request, response }: HttpContext) {
-    let data
-    try {
-      data = await request.validateUsing(createLevelAssignmentValidator)
-    } catch (error) {
-      return response.badRequest({ message: 'Erro de validação', errors: error.messages })
-    }
+    const data = await request.validateUsing(createLevelAssignmentValidator)
 
     const levelAssignment = await LevelAssignedToCourseHasAcademicPeriod.create({
       ...data,

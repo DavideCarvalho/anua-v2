@@ -3,6 +3,7 @@ import StudentDocument from '#models/student_document'
 import Student from '#models/student'
 import { DateTime } from 'luxon'
 import { updateDocumentStatusValidator } from '#validators/enrollment'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateDocumentStatusController {
   async handle({ auth, params, request, response }: HttpContext) {
@@ -13,11 +14,11 @@ export default class UpdateDocumentStatusController {
     const document = await StudentDocument.find(id)
 
     if (!document) {
-      return response.notFound({ message: 'Documento não encontrado' })
+      throw AppException.notFound('Documento não encontrado')
     }
 
     if (status === 'REJECTED' && !rejectionReason) {
-      return response.badRequest({ message: 'Motivo da rejeição é obrigatório' })
+      throw AppException.badRequest('Motivo da rejeição é obrigatório')
     }
 
     document.status = status

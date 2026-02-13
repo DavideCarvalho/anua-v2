@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Attendance from '#models/attendance'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowAttendanceController {
   async handle({ params, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class ShowAttendanceController {
       .first()
 
     if (!attendance) {
-      return response.notFound({ message: 'Attendance not found' })
+      throw AppException.notFound('Chamada não encontrada')
     }
 
     return response.ok(attendance)

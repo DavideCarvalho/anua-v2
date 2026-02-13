@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
 import { submitAssignmentValidator } from '#validators/assignment'
+import AppException from '#exceptions/app_exception'
 
 export default class SubmitAssignmentController {
   async handle({ params, request, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class SubmitAssignmentController {
     const assignment = await Assignment.find(id)
 
     if (!assignment) {
-      return response.notFound({ message: 'Assignment not found' })
+      throw AppException.notFound('Atividade não encontrada')
     }
 
     // Check if student already submitted
@@ -22,7 +23,7 @@ export default class SubmitAssignmentController {
       .first()
 
     if (existingSubmission) {
-      return response.conflict({ message: 'Student already submitted this assignment' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const submission = await StudentHasAssignment.create({

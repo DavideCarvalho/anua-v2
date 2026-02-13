@@ -6,6 +6,7 @@ import User from '#models/user'
 import Role from '#models/role'
 import UserHasSchool from '#models/user_has_school'
 import { updateDirectorValidator } from '#validators/school'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateSchoolDirectorController {
   async handle({ params, request, response }: HttpContext) {
@@ -13,23 +14,21 @@ export default class UpdateSchoolDirectorController {
 
     const school = await School.find(schoolId)
     if (!school) {
-      return response.notFound({ message: 'Escola não encontrada' })
+      throw AppException.notFound('Escola não encontrada')
     }
 
     const data = await request.validateUsing(updateDirectorValidator)
 
     if (!data.existingUserId && !data.newDirector) {
-      return response.badRequest({
-        message: 'Informe um usuário existente ou dados para criar um novo diretor',
-      })
+      throw AppException.badRequest(
+        'Informe um usuário existente ou dados para criar um novo diretor'
+      )
     }
 
     // Buscar role de SCHOOL_DIRECTOR
     const directorRole = await Role.findBy('name', 'SCHOOL_DIRECTOR')
     if (!directorRole) {
-      return response.internalServerError({
-        message: 'Role de diretor não encontrada no sistema',
-      })
+      throw AppException.internalServerError('Role de diretor não encontrada no sistema')
     }
 
     // Remover diretor atual (mudar role para SCHOOL_ADMINISTRATIVE)
@@ -60,7 +59,7 @@ export default class UpdateSchoolDirectorController {
       // Promover usuário existente a diretor
       const user = await User.find(data.existingUserId)
       if (!user) {
-        return response.notFound({ message: 'Usuário não encontrado' })
+        throw AppException.notFound('Usuário não encontrado')
       }
 
       // Verificar se usuário está vinculado à escola
@@ -150,7 +149,7 @@ export default class UpdateSchoolDirectorController {
         newDirectorUser = (await User.find(userId))!
       }
     } else {
-      return response.badRequest({ message: 'Dados inválidos' })
+      throw AppException.badRequest('Dados inválidos')
     }
 
     return response.ok({

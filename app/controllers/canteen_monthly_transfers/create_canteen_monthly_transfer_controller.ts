@@ -5,6 +5,7 @@ import Canteen from '#models/canteen'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
 import CanteenPurchase from '#models/canteen_purchase'
 import { createCanteenMonthlyTransferValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateCanteenMonthlyTransferController {
   async handle({ request, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class CreateCanteenMonthlyTransferController {
 
     const canteen = await Canteen.find(payload.canteenId)
     if (!canteen) {
-      return response.notFound({ message: 'Cantina não encontrada' })
+      throw AppException.notFound('Cantina não encontrada')
     }
 
     const existing = await CanteenMonthlyTransfer.query()
@@ -22,7 +23,7 @@ export default class CreateCanteenMonthlyTransferController {
       .first()
 
     if (existing) {
-      return response.conflict({ message: 'Transferência mensal já existe' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const periodStart = DateTime.fromObject({
@@ -36,7 +37,7 @@ export default class CreateCanteenMonthlyTransferController {
     const endSql = periodEnd.toSQL()
 
     if (!startSql || !endSql) {
-      return response.badRequest({ message: 'Período inválido' })
+      throw AppException.badRequest('Período inválido')
     }
 
     const purchases = await CanteenPurchase.query()
@@ -46,7 +47,7 @@ export default class CreateCanteenMonthlyTransferController {
       .whereBetween('createdAt', [startSql, endSql])
 
     if (purchases.length === 0) {
-      return response.badRequest({ message: 'Nenhuma compra pendente de repasse' })
+      throw AppException.badRequest('Nenhuma compra pendente de repasse')
     }
 
     const totalAmount = purchases.reduce((total, purchase) => total + purchase.totalAmount, 0)

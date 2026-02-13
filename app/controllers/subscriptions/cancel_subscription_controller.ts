@@ -10,7 +10,7 @@ export default class CancelSubscriptionController {
     const subscription = await Subscription.find(params.id)
 
     if (!subscription) {
-      throw AppException.notFound('Subscription not found')
+      throw AppException.notFound('Assinatura não encontrada')
     }
 
     const data = await request.validateUsing(cancelSubscriptionValidator)

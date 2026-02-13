@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SchoolPartner from '#models/school_partner'
 import { createSchoolPartnerValidator } from '#validators/school_partner'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateSchoolPartnerController {
   async handle({ request, response, auth }: HttpContext) {
@@ -9,7 +10,7 @@ export default class CreateSchoolPartnerController {
 
     const schoolId = auth.user?.schoolId
     if (!schoolId) {
-      return response.badRequest({ message: 'Usuário não possui escola' })
+      throw AppException.badRequest('Usuário não possui escola')
     }
 
     const partner = await SchoolPartner.create({

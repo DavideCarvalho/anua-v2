@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowPurchaseRequestController {
   async handle({ params, response }: HttpContext) {
@@ -12,7 +13,7 @@ export default class ShowPurchaseRequestController {
       .first()
 
     if (!purchaseRequest) {
-      return response.notFound({ message: 'Purchase request not found' })
+      throw AppException.notFound('Solicitação de compra não encontrada')
     }
 
     return response.ok(purchaseRequest)

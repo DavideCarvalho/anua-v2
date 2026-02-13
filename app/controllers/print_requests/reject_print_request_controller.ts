@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PrintRequest from '#models/print_request'
 import { rejectPrintRequestValidator } from '#validators/print_request'
+import AppException from '#exceptions/app_exception'
 
 export default class RejectPrintRequestController {
   async handle({ params, request, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class RejectPrintRequestController {
 
     const printRequest = await PrintRequest.find(params.id)
     if (!printRequest) {
-      return response.notFound({ message: 'Solicitação não encontrada' })
+      throw AppException.notFound('Solicitação não encontrada')
     }
 
     printRequest.status = 'REJECTED'

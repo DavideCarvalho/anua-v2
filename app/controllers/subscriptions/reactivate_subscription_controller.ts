@@ -10,7 +10,7 @@ export default class ReactivateSubscriptionController {
     const subscription = await Subscription.find(params.id)
 
     if (!subscription) {
-      throw AppException.notFound('Subscription not found')
+      throw AppException.notFound('Assinatura não encontrada')
     }
 
     const data = await request.validateUsing(reactivateSubscriptionValidator)
@@ -27,7 +27,7 @@ export default class ReactivateSubscriptionController {
       subscriptionId: subscription.id,
       fromStatus: previousStatus,
       toStatus: 'ACTIVE',
-      reason: data.reason ?? 'Subscription reactivated',
+      reason: data.reason ?? 'Assinatura reativada',
       changedAt: now,
     })
 

@@ -31,7 +31,7 @@ export default class CreateSubscriptionController {
       subscriptionId: subscription.id,
       fromStatus: null,
       toStatus: 'TRIAL',
-      reason: 'Subscription created',
+      reason: 'Assinatura criada',
       changedAt: now,
     })
 

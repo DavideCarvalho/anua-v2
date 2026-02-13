@@ -12,7 +12,7 @@ export default class ShowContractInterestConfigController {
       .first()
 
     if (!interestConfig) {
-      throw AppException.notFound('Interest config not found')
+      throw AppException.notFound('Configuração de juros não encontrada')
     }
 
     return new ContractInterestConfigDto(interestConfig)

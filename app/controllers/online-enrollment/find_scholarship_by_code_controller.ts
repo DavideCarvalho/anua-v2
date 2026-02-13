@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Scholarship from '#models/scholarship'
 import { findScholarshipValidator } from '#validators/online_enrollment'
+import AppException from '#exceptions/app_exception'
 
 export default class FindScholarshipByCodeController {
   async handle({ request, response }: HttpContext) {
@@ -13,7 +14,7 @@ export default class FindScholarshipByCodeController {
       .first()
 
     if (!scholarship) {
-      return response.notFound({ message: 'Bolsa não encontrada ou inválida' })
+      throw AppException.notFound('Bolsa não encontrada ou inválida')
     }
 
     return response.ok({

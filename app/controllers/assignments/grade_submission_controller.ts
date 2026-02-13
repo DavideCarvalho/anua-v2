@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
 import { gradeSubmissionValidator } from '#validators/assignment'
+import AppException from '#exceptions/app_exception'
 
 export default class GradeSubmissionController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class GradeSubmissionController {
     const assignment = await Assignment.find(id)
 
     if (!assignment) {
-      return response.notFound({ message: 'Assignment not found' })
+      throw AppException.notFound('Atividade não encontrada')
     }
 
     const submission = await StudentHasAssignment.query()
@@ -20,7 +21,7 @@ export default class GradeSubmissionController {
       .first()
 
     if (!submission) {
-      return response.notFound({ message: 'Submission not found' })
+      throw AppException.notFound('Entrega não encontrada')
     }
 
     submission.grade = payload.grade

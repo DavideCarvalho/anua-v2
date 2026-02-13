@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import PrintRequest from '#models/print_request'
 import { createPrintRequestValidator } from '#validators/print_request'
+import AppException from '#exceptions/app_exception'
 
 export default class CreatePrintRequestController {
   async handle({ request, response, auth }: HttpContext) {
@@ -9,7 +10,7 @@ export default class CreatePrintRequestController {
 
     const userId = auth.user?.id
     if (!userId) {
-      return response.unauthorized({ message: 'Usuário não autenticado' })
+      throw AppException.invalidCredentials()
     }
 
     const printRequest = await PrintRequest.create({

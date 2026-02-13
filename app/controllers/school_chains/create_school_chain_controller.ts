@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
 import { createSchoolChainValidator } from '#validators/school_chain'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateSchoolChainController {
   async handle({ request, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class CreateSchoolChainController {
 
     const existing = await SchoolChain.findBy('slug', payload.slug)
     if (existing) {
-      return response.conflict({ message: 'Já existe uma rede com este slug' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const schoolChain = await SchoolChain.create({

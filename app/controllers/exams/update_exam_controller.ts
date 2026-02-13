@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { updateExamValidator } from '#validators/exam'
 import Exam from '#models/exam'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateExamController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class UpdateExamController {
     const exam = await Exam.find(id)
 
     if (!exam) {
-      return response.notFound({ message: 'Exam not found' })
+      throw AppException.notFound('Prova não encontrada')
     }
 
     const updateData: Record<string, unknown> = { ...payload }

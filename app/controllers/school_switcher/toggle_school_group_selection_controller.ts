@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchoolGroup from '#models/user_has_school_group'
 import UserSchoolGroupSelection from '#models/user_school_group_selection'
 import { toggleSchoolGroupSelectionValidator } from '#validators/school_switcher'
+import AppException from '#exceptions/app_exception'
 
 export default class ToggleSchoolGroupSelectionController {
   async handle(ctx: HttpContext) {
@@ -17,7 +18,7 @@ export default class ToggleSchoolGroupSelectionController {
       .first()
 
     if (!userHasSchoolGroup) {
-      return response.forbidden({ message: 'Você não tem acesso a este grupo' })
+      throw AppException.forbidden('Você não tem acesso a este grupo')
     }
 
     // Check if already selected

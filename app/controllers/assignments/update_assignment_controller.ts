@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
 import { updateAssignmentValidator } from '#validators/assignment'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateAssignmentController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class UpdateAssignmentController {
     const assignment = await Assignment.find(id)
 
     if (!assignment) {
-      return response.notFound({ message: 'Assignment not found' })
+      throw AppException.notFound('Atividade não encontrada')
     }
 
     const updateData: Record<string, unknown> = {}

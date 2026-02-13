@@ -89,7 +89,7 @@ export default class UpdateNotificationPreferencesController {
     }
 
     return response.ok({
-      message: 'Preferences updated successfully',
+      message: 'Preferências atualizadas com sucesso',
       preferences: results,
     })
   }

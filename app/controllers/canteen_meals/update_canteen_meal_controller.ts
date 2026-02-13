@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenMeal from '#models/canteen_meal'
 import { updateCanteenMealValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateCanteenMealController {
   async handle({ params, request, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class UpdateCanteenMealController {
 
     const meal = await CanteenMeal.find(params.id)
     if (!meal) {
-      return response.notFound({ message: 'Refeicao nao encontrada' })
+      throw AppException.notFound('Refeição não encontrada')
     }
 
     meal.merge({

@@ -2,13 +2,14 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Student from '#models/student'
 import { checkExistingValidator } from '#validators/online_enrollment'
+import AppException from '#exceptions/app_exception'
 
 export default class CheckExistingStudentController {
   async handle({ request, response }: HttpContext) {
     const { document, email, levelId } = await request.validateUsing(checkExistingValidator)
 
     if (!document && !email) {
-      return response.badRequest({ message: 'Informe o documento ou email' })
+      throw AppException.badRequest('Informe o documento ou e-mail')
     }
 
     let existingUser: User | null = null

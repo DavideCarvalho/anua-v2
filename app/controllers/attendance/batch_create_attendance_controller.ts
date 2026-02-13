@@ -5,6 +5,7 @@ import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
 import { batchCreateAttendanceValidator } from '#validators/attendance'
+import AppException from '#exceptions/app_exception'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
@@ -24,9 +25,7 @@ export default class BatchCreateAttendanceController {
       .first()
 
     if (!calendar) {
-      return response.badRequest({
-        message: 'Nenhum calendário ativo encontrado para esta turma e período.',
-      })
+      throw AppException.badRequest('Nenhum calendário ativo encontrado para esta turma e período.')
     }
 
     // Load all slots for this subject once
@@ -45,16 +44,14 @@ export default class BatchCreateAttendanceController {
         .first()
 
       if (!hasAnySlots) {
-        return response.badRequest({
-          message:
-            'Nenhum horário configurado para esta turma neste período. Configure a grade de horários (quadro de horários) antes de registrar presenças.',
-        })
+        throw AppException.badRequest(
+          'Nenhum horário configurado para esta turma neste período. Configure a grade de horários antes de registrar presenças.'
+        )
       }
 
-      return response.badRequest({
-        message:
-          'Nenhum horário encontrado para esta matéria no calendário da turma. Verifique se a matéria está configurada no quadro de horários.',
-      })
+      throw AppException.badRequest(
+        'Nenhum horário encontrado para esta matéria no calendário da turma. Verifique se a matéria está configurada no quadro de horários.'
+      )
     }
 
     const results: { attendance: Attendance; studentAttendances: StudentHasAttendance[] }[] = []

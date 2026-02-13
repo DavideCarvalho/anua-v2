@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import CanteenPurchase from '#models/canteen_purchase'
 import Student from '#models/student'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
+import AppException from '#exceptions/app_exception'
 
 export default class CancelCanteenPurchaseController {
   async handle({ params, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class CancelCanteenPurchaseController {
     const purchase = await CanteenPurchase.find(id)
 
     if (!purchase) {
-      return response.notFound({ message: 'Canteen purchase not found' })
+      throw AppException.notFound('Compra da cantina não encontrada')
     }
 
     if (purchase.paymentMethod === 'BALANCE') {
@@ -30,7 +31,7 @@ export default class CancelCanteenPurchaseController {
         if (!refundExists) {
           const student = await Student.find(purchase.userId)
           if (!student) {
-            return response.badRequest({ message: 'Aluno não encontrado para reembolso' })
+            throw AppException.badRequest('Aluno não encontrado para reembolso')
           }
 
           const latestTransaction = await StudentBalanceTransaction.query()

@@ -4,9 +4,10 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import User from '#models/user'
 import Student from '#models/student'
 import { StudentHasResponsibleDto } from '#models/dto/student_has_responsible.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class AssignResponsibleController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(assignResponsibleValidator)
 
     // Verificar se o estudante existe
@@ -22,7 +23,7 @@ export default class AssignResponsibleController {
       .first()
 
     if (existingAssignment) {
-      return response.conflict({ message: 'Este usuário já é responsável por este aluno' })
+      throw AppException.operationFailedWithProvidedData(409)
     }
 
     const assignment = await StudentHasResponsible.create({

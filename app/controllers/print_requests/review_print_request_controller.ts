@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import PrintRequest from '#models/print_request'
 import { reviewPrintRequestValidator } from '#validators/print_request'
+import AppException from '#exceptions/app_exception'
 
 export default class ReviewPrintRequestController {
   async handle({ params, request, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class ReviewPrintRequestController {
 
     const printRequest = await PrintRequest.find(params.id)
     if (!printRequest) {
-      return response.notFound({ message: 'Solicitação não encontrada' })
+      throw AppException.notFound('Solicitação não encontrada')
     }
 
     printRequest.merge({

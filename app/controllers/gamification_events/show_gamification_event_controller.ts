@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowGamificationEventController {
   async handle({ params, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class ShowGamificationEventController {
       .first()
 
     if (!event) {
-      return response.notFound({ message: 'Gamification event not found' })
+      throw AppException.notFound('Evento de gamificação não encontrado')
     }
 
     return response.ok(event)

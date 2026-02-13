@@ -4,9 +4,10 @@ import Course from '#models/course'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import Class_ from '#models/class'
 import TeacherHasClass from '#models/teacher_has_class'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowTurmaSituacaoPageController {
-  async handle({ inertia, params, response, auth }: HttpContext) {
+  async handle({ inertia, params, auth }: HttpContext) {
     const academicPeriodSlug = params.slug
     const courseSlug = params.cursoSlug
     const classSlug = params.turmaSlug
@@ -15,14 +16,14 @@ export default class ShowTurmaSituacaoPageController {
     const academicPeriod = await AcademicPeriod.query().where('slug', academicPeriodSlug).first()
 
     if (!academicPeriod) {
-      return response.notFound('Período letivo não encontrado')
+      throw AppException.notFound('Período letivo não encontrado')
     }
 
     // Find the course by slug
     const course = await Course.query().where('slug', courseSlug).first()
 
     if (!course) {
-      return response.notFound('Curso não encontrado')
+      throw AppException.notFound('Curso não encontrado')
     }
 
     // Verify that the course is assigned to this academic period
@@ -32,13 +33,13 @@ export default class ShowTurmaSituacaoPageController {
       .first()
 
     if (!courseAcademicPeriod) {
-      return response.notFound('Curso não está vinculado a este período letivo')
+      throw AppException.notFound('Curso não está vinculado a este período letivo')
     }
 
     const classRecord = await Class_.query().where('slug', classSlug).first()
 
     if (!classRecord) {
-      return response.notFound('Turma não encontrada')
+      throw AppException.notFound('Turma não encontrada')
     }
 
     // Get subjects for this class (teacher-class associations)

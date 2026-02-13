@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
+import AppException from '#exceptions/app_exception'
 
 export default class DeleteAssignmentController {
   async handle({ params, response }: HttpContext) {
@@ -8,7 +9,7 @@ export default class DeleteAssignmentController {
     const assignment = await Assignment.find(id)
 
     if (!assignment) {
-      return response.notFound({ message: 'Assignment not found' })
+      throw AppException.notFound('Atividade não encontrada')
     }
 
     await assignment.delete()

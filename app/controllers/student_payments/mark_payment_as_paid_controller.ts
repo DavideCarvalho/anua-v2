@@ -19,7 +19,7 @@ export default class MarkPaymentAsPaidController {
       .first()
 
     if (!payment) {
-      throw AppException.notFound('Student payment not found')
+      throw AppException.notFound('Pagamento do aluno não encontrado')
     }
 
     payment.status = 'PAID'

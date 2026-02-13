@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
 import CanteenPurchase from '#models/canteen_purchase'
 import { updateCanteenMonthlyTransferStatusValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateCanteenMonthlyTransferStatusController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class UpdateCanteenMonthlyTransferStatusController {
 
     const transfer = await CanteenMonthlyTransfer.find(params.id)
     if (!transfer) {
-      return response.notFound({ message: 'Transferência não encontrada' })
+      throw AppException.notFound('Transferência não encontrada')
     }
 
     const trx = await db.transaction()

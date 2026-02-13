@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SchoolPartner from '#models/school_partner'
 import { updateSchoolPartnerValidator } from '#validators/school_partner'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateSchoolPartnerController {
   async handle({ request, params, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class UpdateSchoolPartnerController {
 
     const partner = await SchoolPartner.find(params.id)
     if (!partner) {
-      return response.notFound({ message: 'Parceiro não encontrado' })
+      throw AppException.notFound('Parceiro não encontrado')
     }
 
     partner.merge({

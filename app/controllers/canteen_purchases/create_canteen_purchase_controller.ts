@@ -6,6 +6,7 @@ import CanteenItemPurchased from '#models/canteen_item_purchased'
 import Student from '#models/student'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { createCanteenPurchaseValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateCanteenPurchaseController {
   async handle({ request, response }: HttpContext) {
@@ -18,10 +19,9 @@ export default class CreateCanteenPurchaseController {
     if (canteenItems.length !== itemIds.length) {
       const foundIds = canteenItems.map((item) => item.id)
       const missingOrInactiveIds = itemIds.filter((id) => !foundIds.includes(id))
-      return response.badRequest({
-        message: 'Some items do not exist or are not active',
-        invalidItems: missingOrInactiveIds,
-      })
+      throw AppException.badRequest(
+        `Itens inválidos ou inativos: ${missingOrInactiveIds.join(', ')}`
+      )
     }
 
     // Create a map for quick price lookup
@@ -41,7 +41,7 @@ export default class CreateCanteenPurchaseController {
     if (payload.paymentMethod === 'BALANCE') {
       studentForBalance = await Student.find(payload.userId)
       if (!studentForBalance) {
-        return response.badRequest({ message: 'Saldo disponível apenas para alunos' })
+        throw AppException.badRequest('Saldo disponível apenas para alunos')
       }
 
       const latestTransaction = await StudentBalanceTransaction.query()
@@ -52,7 +52,7 @@ export default class CreateCanteenPurchaseController {
 
       previousBalance = latestTransaction?.newBalance ?? studentForBalance.balance ?? 0
       if (previousBalance < totalAmount) {
-        return response.badRequest({ message: 'Saldo insuficiente', balance: previousBalance })
+        throw AppException.badRequest(`Saldo insuficiente. Saldo atual: ${previousBalance}`)
       }
 
       newBalance = previousBalance - totalAmount

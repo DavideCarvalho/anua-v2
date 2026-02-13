@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
 import { rejectPurchaseRequestValidator } from '#validators/purchase_request'
+import AppException from '#exceptions/app_exception'
 
 export default class RejectPurchaseRequestController {
   async handle({ params, request, response }: HttpContext) {
@@ -10,14 +11,14 @@ export default class RejectPurchaseRequestController {
     const purchaseRequest = await PurchaseRequest.find(id)
 
     if (!purchaseRequest) {
-      return response.notFound({ message: 'Purchase request not found' })
+      throw AppException.notFound('Solicitação de compra não encontrada')
     }
 
     // Can only reject if status is REQUESTED
     if (purchaseRequest.status !== 'REQUESTED') {
-      return response.badRequest({
-        message: 'Can only reject purchase requests with REQUESTED status',
-      })
+      throw AppException.badRequest(
+        'Só é possível rejeitar solicitações de compra com status REQUESTED'
+      )
     }
 
     purchaseRequest.status = 'REJECTED'

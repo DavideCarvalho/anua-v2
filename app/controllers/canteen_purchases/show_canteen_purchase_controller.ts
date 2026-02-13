@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenPurchase from '#models/canteen_purchase'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowCanteenPurchaseController {
   async handle({ params, response }: HttpContext) {
@@ -15,7 +16,7 @@ export default class ShowCanteenPurchaseController {
       .first()
 
     if (!purchase) {
-      return response.notFound({ message: 'Canteen purchase not found' })
+      throw AppException.notFound('Compra da cantina não encontrada')
     }
 
     return response.ok(purchase)

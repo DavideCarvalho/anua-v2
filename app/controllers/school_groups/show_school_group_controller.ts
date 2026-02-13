@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolGroup from '#models/school_group'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowSchoolGroupController {
   async handle({ params, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class ShowSchoolGroupController {
       .first()
 
     if (!schoolGroup) {
-      return response.notFound({ message: 'Grupo escolar não encontrado' })
+      throw AppException.notFound('Grupo escolar não encontrado')
     }
 
     return response.ok(schoolGroup)

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowLevelController {
   async handle({ params, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class ShowLevelController {
       .first()
 
     if (!level) {
-      return response.notFound({ message: 'Nível não encontrado' })
+      throw AppException.notFound('Nível não encontrado')
     }
 
     return response.ok(level)

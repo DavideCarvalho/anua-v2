@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
+import AppException from '#exceptions/app_exception'
 
 export default class ConfirmAttendanceController {
   async handle({ params, response }: HttpContext) {
@@ -9,14 +10,14 @@ export default class ConfirmAttendanceController {
     const event = await Event.find(eventId)
 
     if (!event) {
-      return response.notFound({ message: 'Event not found' })
+      throw AppException.notFound('Evento não encontrado')
     }
 
     // Can only confirm attendance for published or completed events
     if (event.status !== 'PUBLISHED' && event.status !== 'COMPLETED') {
-      return response.badRequest({
-        message: 'Can only confirm attendance for published or completed events',
-      })
+      throw AppException.badRequest(
+        'Só é possível confirmar presença para eventos publicados ou concluídos'
+      )
     }
 
     const participant = await EventParticipant.query()
@@ -25,7 +26,7 @@ export default class ConfirmAttendanceController {
       .first()
 
     if (!participant) {
-      return response.notFound({ message: 'Participant not found for this event' })
+      throw AppException.notFound('Participante não encontrado para este evento')
     }
 
     participant.status = 'ATTENDED'

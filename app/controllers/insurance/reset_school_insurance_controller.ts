@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import { resetSchoolInsuranceValidator } from '#validators/insurance'
+import AppException from '#exceptions/app_exception'
 
 export default class ResetSchoolInsuranceController {
   async handle({ request, response }: HttpContext) {
@@ -9,7 +10,7 @@ export default class ResetSchoolInsuranceController {
     const school = await School.find(schoolId)
 
     if (!school) {
-      return response.notFound({ message: 'Escola não encontrada' })
+      throw AppException.notFound('Escola não encontrada')
     }
 
     // Reset to inherit from chain

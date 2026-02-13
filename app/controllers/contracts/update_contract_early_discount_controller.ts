@@ -15,7 +15,7 @@ export default class UpdateContractEarlyDiscountController {
       .first()
 
     if (!earlyDiscount) {
-      throw AppException.notFound('Early discount not found')
+      throw AppException.notFound('Desconto por antecipação não encontrado')
     }
 
     earlyDiscount.merge(payload)

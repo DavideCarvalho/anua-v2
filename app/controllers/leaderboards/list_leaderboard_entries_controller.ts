@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Leaderboard from '#models/leaderboard'
 import LeaderboardEntry from '#models/leaderboard_entry'
+import AppException from '#exceptions/app_exception'
 
 export default class ListLeaderboardEntriesController {
   async handle({ params, request, response }: HttpContext) {
@@ -11,7 +12,7 @@ export default class ListLeaderboardEntriesController {
     const leaderboard = await Leaderboard.find(params.id)
 
     if (!leaderboard) {
-      return response.notFound({ message: 'Leaderboard não encontrado' })
+      throw AppException.notFound('Ranking não encontrado')
     }
 
     const entries = await LeaderboardEntry.query()

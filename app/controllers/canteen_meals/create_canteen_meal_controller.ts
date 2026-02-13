@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Canteen from '#models/canteen'
 import CanteenMeal from '#models/canteen_meal'
 import { createCanteenMealValidator } from '#validators/canteen'
+import AppException from '#exceptions/app_exception'
 
 export default class CreateCanteenMealController {
   async handle({ request, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class CreateCanteenMealController {
 
     const canteen = await Canteen.find(payload.canteenId)
     if (!canteen) {
-      return response.notFound({ message: 'Cantina nao encontrada' })
+      throw AppException.notFound('Cantina não encontrada')
     }
 
     const meal = await CanteenMeal.create({

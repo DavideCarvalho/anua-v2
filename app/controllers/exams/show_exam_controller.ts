@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Exam from '#models/exam'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowExamController {
   async handle({ params, response }: HttpContext) {
@@ -16,7 +17,7 @@ export default class ShowExamController {
       .first()
 
     if (!exam) {
-      return response.notFound({ message: 'Exam not found' })
+      throw AppException.notFound('Prova não encontrada')
     }
 
     return response.ok(exam)

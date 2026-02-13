@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowCanteenMealReservationController {
   async handle({ params, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class ShowCanteenMealReservationController {
       .first()
 
     if (!reservation) {
-      return response.notFound({ message: 'Reserva nao encontrada' })
+      throw AppException.notFound('Reserva não encontrada')
     }
 
     return response.ok(reservation)

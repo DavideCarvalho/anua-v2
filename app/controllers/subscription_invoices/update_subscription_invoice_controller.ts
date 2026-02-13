@@ -2,13 +2,14 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SubscriptionInvoice from '#models/subscription_invoice'
 import { updateSubscriptionInvoiceValidator } from '#validators/subscription'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateSubscriptionInvoiceController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const invoice = await SubscriptionInvoice.find(params.id)
 
     if (!invoice) {
-      return response.notFound({ message: 'Subscription invoice not found' })
+      throw AppException.notFound('Fatura de assinatura não encontrada')
     }
 
     const data = await request.validateUsing(updateSubscriptionInvoiceValidator)

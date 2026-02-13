@@ -12,7 +12,7 @@ export default class RemoveContractPaymentDayController {
       .first()
 
     if (!paymentDay) {
-      throw AppException.notFound('Payment day not found')
+      throw AppException.notFound('Dia de pagamento não encontrado')
     }
 
     await paymentDay.delete()

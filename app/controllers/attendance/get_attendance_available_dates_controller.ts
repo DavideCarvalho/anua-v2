@@ -5,6 +5,7 @@ import AcademicPeriodHoliday from '#models/academic_period_holiday'
 import Attendance from '#models/attendance'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
+import AppException from '#exceptions/app_exception'
 
 const WEEKDAY_LABELS: Record<number, string> = {
   1: 'Segunda-feira',
@@ -37,9 +38,7 @@ export default class GetAttendanceAvailableDatesController {
     const subjectId = request.input('subjectId')
 
     if (!classId || !academicPeriodId || !subjectId) {
-      return response.badRequest({
-        message: 'classId, academicPeriodId e subjectId são obrigatórios.',
-      })
+      throw AppException.badRequest('classId, academicPeriodId e subjectId são obrigatórios.')
     }
 
     const calendar = await Calendar.query()

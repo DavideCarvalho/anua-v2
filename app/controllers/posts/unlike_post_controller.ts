@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
 import UserLikedPost from '#models/user_liked_post'
+import AppException from '#exceptions/app_exception'
 
 export default class UnlikePostController {
   async handle({ params, response, auth }: HttpContext) {
@@ -9,7 +10,7 @@ export default class UnlikePostController {
     const post = await Post.find(id)
 
     if (!post) {
-      return response.notFound({ message: 'Post not found' })
+      throw AppException.notFound('Post não encontrado')
     }
 
     const like = await UserLikedPost.query()
@@ -18,7 +19,7 @@ export default class UnlikePostController {
       .first()
 
     if (!like) {
-      return response.badRequest({ message: 'You have not liked this post' })
+      throw AppException.badRequest('Você ainda não curtiu este post')
     }
 
     await like.delete()
@@ -27,7 +28,7 @@ export default class UnlikePostController {
     const likesCount = await UserLikedPost.query().where('postId', id).count('* as total')
 
     return response.ok({
-      message: 'Post unliked successfully',
+      message: 'Curtida removida com sucesso',
       likesCount: Number(likesCount[0].$extras.total),
     })
   }

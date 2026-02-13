@@ -15,7 +15,7 @@ export default class GetChainSubscriptionController {
       .first()
 
     if (!subscription) {
-      throw AppException.notFound('Subscription not found for this school chain')
+      throw AppException.notFound('Assinatura não encontrada para esta rede escolar')
     }
 
     return subscription

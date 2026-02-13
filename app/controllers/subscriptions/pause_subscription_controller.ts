@@ -10,7 +10,7 @@ export default class PauseSubscriptionController {
     const subscription = await Subscription.find(params.id)
 
     if (!subscription) {
-      throw AppException.notFound('Subscription not found')
+      throw AppException.notFound('Assinatura não encontrada')
     }
 
     const data = await request.validateUsing(pauseSubscriptionValidator)
@@ -26,7 +26,7 @@ export default class PauseSubscriptionController {
       subscriptionId: subscription.id,
       fromStatus: previousStatus,
       toStatus: 'PAUSED',
-      reason: data.reason ?? 'Subscription paused',
+      reason: data.reason ?? 'Assinatura pausada',
       changedAt: now,
     })
 

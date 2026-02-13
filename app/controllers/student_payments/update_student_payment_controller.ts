@@ -17,7 +17,7 @@ export default class UpdateStudentPaymentController {
     const payment = await StudentPayment.find(id)
 
     if (!payment) {
-      throw AppException.notFound('Student payment not found')
+      throw AppException.notFound('Pagamento do aluno não encontrado')
     }
 
     const updateData = {

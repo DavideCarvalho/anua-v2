@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
+import AppException from '#exceptions/app_exception'
 
 export default class ShowSchoolChainController {
   async handle({ params, response }: HttpContext) {
@@ -10,7 +11,7 @@ export default class ShowSchoolChainController {
       .first()
 
     if (!schoolChain) {
-      return response.notFound({ message: 'Rede de escolas não encontrada' })
+      throw AppException.notFound('Rede de escolas não encontrada')
     }
 
     return response.ok(schoolChain)
