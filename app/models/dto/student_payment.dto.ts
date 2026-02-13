@@ -33,6 +33,8 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare installments: number
   declare installmentNumber: number
   declare discountPercentage: number
+  declare discountType: 'PERCENTAGE' | 'FLAT'
+  declare discountValue: number
   declare paidAt: DateTime | null
   declare emailSentAt: DateTime | null
   declare contractId: string
@@ -68,6 +70,8 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.installments = studentPayment.installments
     this.installmentNumber = studentPayment.installmentNumber
     this.discountPercentage = studentPayment.discountPercentage
+    this.discountType = studentPayment.discountType
+    this.discountValue = studentPayment.discountValue
     this.paidAt = studentPayment.paidAt
     this.emailSentAt = studentPayment.emailSentAt
     this.contractId = studentPayment.contractId

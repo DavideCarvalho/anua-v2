@@ -6,6 +6,7 @@ import { updateEnrollmentValidator } from '#validators/student_enrollment'
 import { getQueueManager } from '#services/queue_service'
 import UpdateEnrollmentPaymentsJob from '#jobs/payments/update_enrollment_payments_job'
 import db from '@adonisjs/lucid/services/db'
+import IndividualDiscount from '#models/individual_discount'
 
 export default class UpdateEnrollmentController {
   async handle(ctx: HttpContext) {
@@ -34,6 +35,15 @@ export default class UpdateEnrollmentController {
     }
 
     await enrollment.save()
+
+    // Business rule: scholarship and individual discounts are mutually exclusive
+    if (payload.scholarshipId) {
+      await IndividualDiscount.query()
+        .where('studentHasLevelId', enrollment.id)
+        .where('isActive', true)
+        .whereNull('deletedAt')
+        .update({ isActive: false })
+    }
 
     // Dispara job para atualizar pagamentos
     const user = ctx.auth?.user

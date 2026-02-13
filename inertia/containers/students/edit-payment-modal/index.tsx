@@ -52,7 +52,7 @@ import { formatCurrency } from '~/lib/utils'
 const schema = z.object({
   contractId: z.string().min(1, 'Selecione um contrato'),
   scholarshipId: z.string().nullable(),
-  paymentMethod: z.enum(['BOLETO', 'CREDIT_CARD', 'PIX']),
+  paymentMethod: z.enum(['BOLETO', 'PIX']),
   paymentDay: z.number().min(1).max(31),
   installments: z.number().min(1).max(12),
   discountPercentage: z.number().min(0).max(100).optional(),
@@ -63,7 +63,6 @@ type FormData = z.infer<typeof schema>
 
 const PaymentMethodLabels = {
   BOLETO: 'Boleto',
-  CREDIT_CARD: 'Cartao de Credito',
   PIX: 'PIX',
 }
 
@@ -97,7 +96,7 @@ function EnrollmentTabContent({
     defaultValues: {
       contractId: initialContractId,
       scholarshipId: enrollment.scholarshipId ?? null,
-      paymentMethod: enrollment.paymentMethod ?? 'BOLETO',
+      paymentMethod: enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO',
       paymentDay: enrollment.paymentDay ?? 5,
       installments: enrollment.installments ?? 12,
       discountPercentage: 0,
@@ -126,7 +125,9 @@ function EnrollmentTabContent({
   // Get available payment days from contract
   const availablePaymentDays = useMemo(() => {
     if (!contractData?.paymentDays?.length) return [5, 10, 15, 20] // fallback
-    return contractData.paymentDays.map((pd: { day: number }) => pd.day).sort((a: number, b: number) => a - b)
+    return contractData.paymentDays
+      .map((pd: { day: number }) => pd.day)
+      .sort((a: number, b: number) => a - b)
   }, [contractData?.paymentDays])
 
   // Calculate max installments based on flexibleInstallments
@@ -147,7 +148,10 @@ function EnrollmentTabContent({
   useEffect(() => {
     if (enrollment.scholarship) {
       form.setValue('discountPercentage', enrollment.scholarship.discountPercentage)
-      form.setValue('enrollmentDiscountPercentage', enrollment.scholarship.enrollmentDiscountPercentage)
+      form.setValue(
+        'enrollmentDiscountPercentage',
+        enrollment.scholarship.enrollmentDiscountPercentage
+      )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enrollment.id])
@@ -193,9 +197,10 @@ function EnrollmentTabContent({
     if (affectedPayments.length === 0) return null
 
     // Calculate new payment amount (same logic as impactPreview)
-    const installments = contractData.paymentType === 'UPFRONT'
-      ? (watchedInstallments ?? contractData.installments)
-      : 1
+    const installments =
+      contractData.paymentType === 'UPFRONT'
+        ? (watchedInstallments ?? contractData.installments)
+        : 1
     let newInstallmentAmount: number
     if (contractData.paymentType === 'UPFRONT') {
       newInstallmentAmount = Math.floor(contractData.amount / installments)
@@ -242,7 +247,14 @@ function EnrollmentTabContent({
     }
 
     return affectedInvoices.length > 0 ? affectedInvoices : null
-  }, [invoicesData, pendingPaymentsData, contractData, enrollment.id, discountPercentage, watchedInstallments])
+  }, [
+    invoicesData,
+    pendingPaymentsData,
+    contractData,
+    enrollment.id,
+    discountPercentage,
+    watchedInstallments,
+  ])
 
   const handleScholarshipChange = (
     newScholarshipId: string | null,
@@ -255,16 +267,40 @@ function EnrollmentTabContent({
 
   async function handleSubmit(data: FormData) {
     try {
+      const updateData: {
+        contractId?: string
+        scholarshipId?: string | null
+        paymentMethod?: 'BOLETO' | 'PIX'
+        paymentDay?: number
+        installments?: number
+      } = {}
+
+      if (data.contractId !== initialContractId) {
+        updateData.contractId = data.contractId
+      }
+
+      if (data.scholarshipId !== (enrollment.scholarshipId ?? null)) {
+        updateData.scholarshipId = data.scholarshipId
+      }
+
+      const currentPaymentMethod = enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO'
+      if (data.paymentMethod !== currentPaymentMethod) {
+        updateData.paymentMethod = data.paymentMethod
+      }
+
+      if (data.paymentDay !== (enrollment.paymentDay ?? 5)) {
+        updateData.paymentDay = data.paymentDay
+      }
+
+      const currentInstallments = enrollment.installments ?? 12
+      if (data.installments !== currentInstallments) {
+        updateData.installments = data.installments
+      }
+
       await updateEnrollment({
         studentId,
         enrollmentId: enrollment.id,
-        data: {
-          contractId: data.contractId,
-          scholarshipId: data.scholarshipId,
-          paymentMethod: data.paymentMethod,
-          paymentDay: data.paymentDay,
-          installments: data.installments,
-        },
+        data: updateData,
       })
 
       queryClient.invalidateQueries({ queryKey: ['student-enrollments', studentId] })
@@ -328,7 +364,9 @@ function EnrollmentTabContent({
                   originalMonthlyFee={contractData.amount}
                   enrollmentDiscountPercentage={enrollmentDiscountPercentage}
                   monthlyDiscountPercentage={discountPercentage}
-                  installments={contractData.paymentType === 'MONTHLY' ? 12 : form.watch('installments')}
+                  installments={
+                    contractData.paymentType === 'MONTHLY' ? 12 : form.watch('installments')
+                  }
                 />
               )}
           </CardContent>
@@ -337,7 +375,9 @@ function EnrollmentTabContent({
         {/* Payment Info */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <div className={`grid gap-4 ${contractData?.paymentType === 'UPFRONT' ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <div
+              className={`grid gap-4 ${contractData?.paymentType === 'UPFRONT' ? 'grid-cols-3' : 'grid-cols-2'}`}
+            >
               <FormField
                 control={form.control}
                 name="paymentMethod"
@@ -351,7 +391,7 @@ function EnrollmentTabContent({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {(['BOLETO', 'CREDIT_CARD', 'PIX'] as const).map((method) => (
+                        {(['BOLETO', 'PIX'] as const).map((method) => (
                           <SelectItem key={method} value={method}>
                             {PaymentMethodLabels[method]}
                           </SelectItem>
@@ -432,7 +472,10 @@ function EnrollmentTabContent({
                 <FileText className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                 <div className="space-y-2 text-sm w-full">
                   <p className="font-medium">
-                    {invoiceImpact.length} {invoiceImpact.length === 1 ? 'fatura será atualizada' : 'faturas serão atualizadas'}
+                    {invoiceImpact.length}{' '}
+                    {invoiceImpact.length === 1
+                      ? 'fatura será atualizada'
+                      : 'faturas serão atualizadas'}
                   </p>
                   <div className="rounded border overflow-hidden">
                     <table className="w-full text-sm">
@@ -513,11 +556,13 @@ export function EditPaymentModal({
   // Group enrollments by academic period
   const enrollmentsByPeriod = useMemo(() => {
     if (!enrollments) return []
-    return enrollments.filter((e: StudentEnrollment) => e.academicPeriod).sort((a: StudentEnrollment, b: StudentEnrollment) => {
-      const dateA = new Date(String(a.academicPeriod?.startDate ?? 0))
-      const dateB = new Date(String(b.academicPeriod?.startDate ?? 0))
-      return dateB.getTime() - dateA.getTime()
-    })
+    return enrollments
+      .filter((e: StudentEnrollment) => e.academicPeriod)
+      .sort((a: StudentEnrollment, b: StudentEnrollment) => {
+        const dateA = new Date(String(a.academicPeriod?.startDate ?? 0))
+        const dateB = new Date(String(b.academicPeriod?.startDate ?? 0))
+        return dateB.getTime() - dateA.getTime()
+      })
   }, [enrollments])
 
   const defaultTab = enrollmentsByPeriod[0]?.academicPeriodId ?? ''
@@ -574,10 +619,7 @@ export function EditPaymentModal({
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="w-full justify-start">
                 {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
-                  <TabsTrigger
-                    key={enrollment.id}
-                    value={enrollment.academicPeriodId ?? ''}
-                  >
+                  <TabsTrigger key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
                     {enrollment.academicPeriod?.name ?? 'Periodo'}
                   </TabsTrigger>
                 ))}
@@ -596,7 +638,6 @@ export function EditPaymentModal({
             </Tabs>
           )}
         </div>
-
       </DialogContent>
     </Dialog>
   )

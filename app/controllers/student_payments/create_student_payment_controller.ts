@@ -24,6 +24,8 @@ export default class CreateStudentPaymentController {
       installments: payload.installments ?? 1,
       installmentNumber: payload.installmentNumber ?? 1,
       discountPercentage: payload.discountPercentage ?? 0,
+      discountType: payload.discountType ?? 'PERCENTAGE',
+      discountValue: payload.discountValue ?? 0,
       contractId: payload.contractId,
       classHasAcademicPeriodId: payload.classHasAcademicPeriodId ?? null,
       studentHasLevelId: payload.studentHasLevelId ?? null,

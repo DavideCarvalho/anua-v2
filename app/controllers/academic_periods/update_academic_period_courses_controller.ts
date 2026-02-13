@@ -10,9 +10,10 @@ import Level from '#models/level'
 import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
 import AppException from '#exceptions/app_exception'
+import { dispatchEnrollmentPaymentUpdatesForLevelContracts } from '#services/payments/dispatch_enrollment_payment_updates_service'
 
 export default class UpdateAcademicPeriodCoursesController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, auth }: HttpContext) {
     const academicPeriod = await AcademicPeriod.find(params.id)
 
     if (!academicPeriod) {
@@ -43,6 +44,8 @@ export default class UpdateAcademicPeriodCoursesController {
         }>
       }>
     } = await request.validateUsing(updateCoursesValidator)
+
+    const changedLevelContracts = new Map<string, string | null>()
 
     await db.transaction(async (trx) => {
       // Get existing course-academic period relationships
@@ -105,6 +108,57 @@ export default class UpdateAcademicPeriodCoursesController {
         // Delete removed level assignments
         const lasToDelete = existingLaIds.filter((id) => !incomingLaIds.includes(id))
         if (lasToDelete.length > 0) {
+          const deletedLevelIds = existingLas
+            .filter((la) => lasToDelete.includes(la.id))
+            .map((la) => la.levelId)
+
+          const levelsStillUsedInPeriod = await LevelAssignedToCourseHasAcademicPeriod.query()
+            .join(
+              'CourseHasAcademicPeriod',
+              'LevelAssignedToCourseHasAcademicPeriod.courseHasAcademicPeriodId',
+              'CourseHasAcademicPeriod.id'
+            )
+            .where('CourseHasAcademicPeriod.academicPeriodId', academicPeriod.id)
+            .whereIn('LevelAssignedToCourseHasAcademicPeriod.levelId', deletedLevelIds)
+            .where('LevelAssignedToCourseHasAcademicPeriod.isActive', true)
+            .whereNot('LevelAssignedToCourseHasAcademicPeriod.courseHasAcademicPeriodId', cap.id)
+            .select('LevelAssignedToCourseHasAcademicPeriod.levelId')
+            .useTransaction(trx)
+
+          const stillUsedLevelIds = new Set(levelsStillUsedInPeriod.map((row) => row.levelId))
+          const levelIdsToArchive = deletedLevelIds.filter(
+            (levelId) => !stillUsedLevelIds.has(levelId)
+          )
+
+          if (levelIdsToArchive.length > 0) {
+            const classIdsToArchive = await ClassHasAcademicPeriod.query()
+              .where('academicPeriodId', academicPeriod.id)
+              .whereHas('class', (classQuery) => {
+                classQuery.whereIn('levelId', levelIdsToArchive).where('isArchived', false)
+              })
+              .select('classId')
+              .useTransaction(trx)
+
+            const classIds = classIdsToArchive.map((row) => row.classId)
+
+            if (classIds.length > 0) {
+              await TeacherHasClass.query()
+                .whereIn('classId', classIds)
+                .useTransaction(trx)
+                .update({ isActive: false })
+
+              await Class_.query().whereIn('id', classIds).useTransaction(trx).update({
+                isArchived: true,
+              })
+
+              await ClassHasAcademicPeriod.query()
+                .where('academicPeriodId', academicPeriod.id)
+                .whereIn('classId', classIds)
+                .useTransaction(trx)
+                .delete()
+            }
+          }
+
           await LevelAssignedToCourseHasAcademicPeriod.query()
             .whereIn('id', lasToDelete)
             .useTransaction(trx)
@@ -123,8 +177,13 @@ export default class UpdateAcademicPeriodCoursesController {
               .first()
 
             if (existingLevel) {
+              const nextContractId = levelData.contractId ?? null
+              if (existingLevel.contractId !== nextContractId) {
+                changedLevelContracts.set(existingLevel.id, nextContractId)
+              }
+
               existingLevel.order = levelData.order
-              existingLevel.contractId = levelData.contractId ?? null
+              existingLevel.contractId = nextContractId
               await existingLevel.save()
               levelId = existingLevel.id
             } else {
@@ -140,13 +199,21 @@ export default class UpdateAcademicPeriodCoursesController {
               levelId = newLevel.id
             }
           } else {
-            await Level.query()
+            const existingLevel = await Level.query()
               .where('id', levelId)
               .useTransaction(trx)
-              .update({
-                order: levelData.order,
-                contractId: levelData.contractId ?? null,
-              })
+              .first()
+
+            if (existingLevel) {
+              const nextContractId = levelData.contractId ?? null
+              if (existingLevel.contractId !== nextContractId) {
+                changedLevelContracts.set(existingLevel.id, nextContractId)
+              }
+
+              existingLevel.order = levelData.order
+              existingLevel.contractId = nextContractId
+              await existingLevel.save()
+            }
           }
 
           if (levelData.id) {
@@ -297,6 +364,16 @@ export default class UpdateAcademicPeriodCoursesController {
         }
       }
     })
+
+    try {
+      await dispatchEnrollmentPaymentUpdatesForLevelContracts({
+        academicPeriodId: academicPeriod.id,
+        levelContracts: changedLevelContracts,
+        triggeredBy: auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null,
+      })
+    } catch (error) {
+      console.error('[UPDATE_ACADEMIC_PERIOD_COURSES] Failed to dispatch payment updates:', error)
+    }
 
     // Return updated data
     const updatedPeriod = await AcademicPeriod.query()

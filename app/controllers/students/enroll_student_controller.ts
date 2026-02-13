@@ -350,6 +350,8 @@ export default class EnrollStudentController {
             // Get the Level's default contractId as fallback
             const level = await Level.find(classRecord.levelId)
             const contractId = data.billing.contractId || level?.contractId || null
+            const hasIndividualDiscounts =
+              !!data.billing.individualDiscounts && data.billing.individualDiscounts.length > 0
 
             const studentHasLevel = await StudentHasLevel.create(
               {
@@ -359,7 +361,7 @@ export default class EnrollStudentController {
                 levelId: classRecord.levelId,
                 classId: data.billing.classId,
                 contractId,
-                scholarshipId: data.billing.scholarshipId || null,
+                scholarshipId: hasIndividualDiscounts ? null : data.billing.scholarshipId || null,
                 paymentMethod: data.billing.paymentMethod || null,
                 installments: data.billing.installments || null,
                 enrollmentInstallments: data.billing.enrollmentInstallments || null,

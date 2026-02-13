@@ -73,6 +73,12 @@ export default class StudentPayment extends compose(BaseModel, Auditable) {
   @column({ columnName: 'discountPercentage' })
   declare discountPercentage: number
 
+  @column({ columnName: 'discountType' })
+  declare discountType: 'PERCENTAGE' | 'FLAT'
+
+  @column({ columnName: 'discountValue' })
+  declare discountValue: number
+
   @column.date({ columnName: 'paidAt' })
   declare paidAt: DateTime | null
 

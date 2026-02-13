@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Class_ from '#models/class'
 import TeacherHasClass from '#models/teacher_has_class'
+import Calendar from '#models/calendar'
 import { v7 as uuidv7 } from 'uuid'
 import { updateClassWithTeachersValidator } from '#validators/class'
 import AppException from '#exceptions/app_exception'
@@ -36,6 +37,7 @@ export default class UpdateClassWithTeachersController {
       subjectQuantity: number
       isActive: boolean
     }> = []
+    let shouldInvalidateSchedule = false
 
     for (const item of payload.subjectsWithTeachers) {
       const key = `${item.teacherId}:${item.subjectId}`
@@ -43,8 +45,12 @@ export default class UpdateClassWithTeachersController {
 
       const existing = existingMap.get(key)
       if (existing) {
+        if (existing.subjectQuantity !== item.quantity || !existing.isActive) {
+          shouldInvalidateSchedule = true
+        }
         toUpdate.push({ id: existing.id, subjectQuantity: item.quantity })
       } else {
+        shouldInvalidateSchedule = true
         toCreate.push({
           id: uuidv7(),
           classId: classEntity.id,
@@ -60,6 +66,14 @@ export default class UpdateClassWithTeachersController {
     const toDeactivateIds = existingAssignments
       .filter((a) => !activeKeys.has(`${a.teacherId}:${a.subjectId}`))
       .map((a) => a.id)
+
+    if (
+      existingAssignments.some(
+        (a) => a.isActive && !activeKeys.has(`${a.teacherId}:${a.subjectId}`)
+      )
+    ) {
+      shouldInvalidateSchedule = true
+    }
 
     // Update class name
     classEntity.name = payload.name
@@ -81,6 +95,12 @@ export default class UpdateClassWithTeachersController {
     // Create new assignments
     for (const create of toCreate) {
       await TeacherHasClass.create(create)
+    }
+
+    if (shouldInvalidateSchedule) {
+      await Calendar.query().where('classId', classEntity.id).where('isActive', true).update({
+        isActive: false,
+      })
     }
 
     // Return updated class with teachers

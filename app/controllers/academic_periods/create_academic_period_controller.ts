@@ -12,6 +12,7 @@ import TeacherHasClass from '#models/teacher_has_class'
 import { createAcademicPeriodValidator } from '#validators/academic_period'
 import AcademicPeriodDto from '#models/dto/academic_period.dto'
 import AppException from '#exceptions/app_exception'
+import { dispatchEnrollmentPaymentUpdatesForLevelContracts } from '#services/payments/dispatch_enrollment_payment_updates_service'
 
 export default class CreateAcademicPeriodController {
   async handle({ request, auth }: HttpContext) {
@@ -21,6 +22,8 @@ export default class CreateAcademicPeriodController {
     if (!schoolId) {
       throw AppException.badRequest('Usuário não possui escola')
     }
+
+    const changedLevelContracts = new Map<string, string | null>()
 
     const result = await db.transaction(async (trx) => {
       // 1. Create Academic Period
@@ -100,6 +103,15 @@ export default class CreateAcademicPeriodController {
               if (!existingLevel) {
                 throw AppException.notFound(`Série não encontrada: ${levelData.levelId}`)
               }
+
+              const nextContractId = levelData.contractId ?? null
+              if (existingLevel.contractId !== nextContractId) {
+                changedLevelContracts.set(existingLevel.id, nextContractId)
+              }
+
+              existingLevel.contractId = nextContractId
+              existingLevel.order = levelData.order
+              await existingLevel.save()
               level = existingLevel
             } else {
               // Try to find existing level by name and school
@@ -110,6 +122,14 @@ export default class CreateAcademicPeriodController {
                 .first()
 
               if (existingLevel) {
+                const nextContractId = levelData.contractId ?? null
+                if (existingLevel.contractId !== nextContractId) {
+                  changedLevelContracts.set(existingLevel.id, nextContractId)
+                }
+
+                existingLevel.contractId = nextContractId
+                existingLevel.order = levelData.order
+                await existingLevel.save()
                 level = existingLevel
               } else {
                 // Create new level
@@ -170,9 +190,22 @@ export default class CreateAcademicPeriodController {
         }
       }
 
-      return new AcademicPeriodDto(academicPeriod)
+      return {
+        academicPeriodId: academicPeriod.id,
+        dto: new AcademicPeriodDto(academicPeriod),
+      }
     })
 
-    return result
+    try {
+      await dispatchEnrollmentPaymentUpdatesForLevelContracts({
+        academicPeriodId: result.academicPeriodId,
+        levelContracts: changedLevelContracts,
+        triggeredBy: auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null,
+      })
+    } catch (error) {
+      console.error('[CREATE_ACADEMIC_PERIOD] Failed to dispatch payment updates:', error)
+    }
+
+    return result.dto
   }
 }

@@ -125,6 +125,10 @@ export function BillingStep() {
     scholarshipId: string | null,
     scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
   ) => {
+    if (scholarshipId) {
+      form.setValue('billing.individualDiscounts', [])
+    }
+
     form.setValue('billing.scholarshipId', scholarshipId)
     form.setValue('billing.discountPercentage', scholarship?.discountPercentage ?? 0)
     form.setValue(
@@ -136,6 +140,8 @@ export function BillingStep() {
   const selectedScholarshipId = form.watch('billing.scholarshipId')
   const discountPercentage = form.watch('billing.discountPercentage') ?? 0
   const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
+  const individualDiscounts = form.watch('billing.individualDiscounts') ?? []
+  const hasIndividualDiscounts = individualDiscounts.length > 0
 
   return (
     <div className="space-y-6 py-4">
@@ -309,8 +315,15 @@ export function BillingStep() {
               scholarships={scholarships}
               value={selectedScholarshipId ?? null}
               onChange={handleScholarshipChange}
+              disabled={hasIndividualDiscounts}
               isLoading={isLoadingScholarships}
             />
+
+            {hasIndividualDiscounts && (
+              <p className="text-xs text-muted-foreground">
+                Bolsa desativada: existe desconto individual aplicado para este aluno.
+              </p>
+            )}
 
             {(discountPercentage > 0 || enrollmentDiscountPercentage > 0) && (
               <DiscountComparison

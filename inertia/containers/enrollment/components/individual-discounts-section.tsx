@@ -21,6 +21,11 @@ export function IndividualDiscountsSection() {
   })
 
   const addDiscount = () => {
+    // Business rule: either scholarship OR individual discounts
+    form.setValue('billing.scholarshipId', null)
+    form.setValue('billing.discountPercentage', 0)
+    form.setValue('billing.enrollmentDiscountPercentage', 0)
+
     append({
       name: '',
       description: '',

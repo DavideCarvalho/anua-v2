@@ -20,8 +20,31 @@ export default class UpdateStudentPaymentController {
       throw AppException.notFound('Pagamento do aluno não encontrado')
     }
 
+    const nextDiscountType = payload.discountType ?? payment.discountType
+    const nextDiscountPercentage = payload.discountPercentage ?? payment.discountPercentage
+    const nextDiscountValue = payload.discountValue ?? payment.discountValue
+
+    let nextAmount = payload.amount ?? payment.amount
+    const hasDiscountChange =
+      payload.discountType !== undefined ||
+      payload.discountPercentage !== undefined ||
+      payload.discountValue !== undefined
+
+    if (payload.amount !== undefined || hasDiscountChange) {
+      if (nextDiscountType === 'FLAT') {
+        nextAmount = Math.max(0, nextAmount - nextDiscountValue)
+      } else {
+        nextAmount = Math.max(0, Math.round(nextAmount * (1 - nextDiscountPercentage / 100)))
+      }
+    }
+
     const updateData = {
       ...payload,
+      amount: nextAmount,
+      totalAmount: nextAmount,
+      discountType: nextDiscountType,
+      discountPercentage: nextDiscountType === 'PERCENTAGE' ? nextDiscountPercentage : 0,
+      discountValue: nextDiscountType === 'FLAT' ? nextDiscountValue : 0,
       dueDate: payload.dueDate ? DateTime.fromJSDate(payload.dueDate) : undefined,
     }
 

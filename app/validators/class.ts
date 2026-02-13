@@ -31,6 +31,15 @@ export const updateClassValidator = vine.compile(
     description: vine.string().trim().maxLength(1000).optional().nullable(),
     maxStudents: vine.number().min(1).optional().nullable(),
     status: vine.enum(['ACTIVE', 'INACTIVE', 'ARCHIVED']).optional(),
+    subjectsWithTeachers: vine
+      .array(
+        vine.object({
+          teacherId: vine.string().trim(),
+          subjectId: vine.string().trim(),
+          quantity: vine.number().min(1).max(20),
+        })
+      )
+      .optional(),
   })
 )
 

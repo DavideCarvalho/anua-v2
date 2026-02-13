@@ -20,6 +20,8 @@ export const createStudentPaymentValidator = vine.compile(
     installments: vine.number().min(1).optional(),
     installmentNumber: vine.number().min(1).optional(),
     discountPercentage: vine.number().min(0).max(100).optional(),
+    discountType: vine.enum(['PERCENTAGE', 'FLAT']).optional(),
+    discountValue: vine.number().min(0).optional(),
     contractId: vine.string().trim(),
     classHasAcademicPeriodId: vine.string().trim().optional(),
     studentHasLevelId: vine.string().trim().optional(),
@@ -31,6 +33,8 @@ export const updateStudentPaymentValidator = vine.compile(
     amount: vine.number().positive().optional(),
     dueDate: vine.date().optional(),
     discountPercentage: vine.number().min(0).max(100).optional(),
+    discountType: vine.enum(['PERCENTAGE', 'FLAT']).optional(),
+    discountValue: vine.number().min(0).optional(),
     status: vine.enum(['NOT_PAID', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED', 'FAILED']).optional(),
   })
 )

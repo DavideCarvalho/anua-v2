@@ -7,7 +7,7 @@ interface UpdateEnrollmentParams {
   data: {
     contractId?: string
     scholarshipId?: string | null
-    paymentMethod?: 'BOLETO' | 'CREDIT_CARD' | 'PIX'
+    paymentMethod?: 'BOLETO' | 'PIX'
     paymentDay?: number
     installments?: number
   }

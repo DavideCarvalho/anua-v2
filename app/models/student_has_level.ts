@@ -121,28 +121,27 @@ export default class StudentHasLevel extends compose(BaseModel, Auditable) {
   declare individualDiscounts: HasMany<typeof IndividualDiscount>
 
   /**
-   * Get the total discount for enrollment considering both scholarship and individual discounts
+   * Get the total enrollment discount respecting exclusivity rules.
+   * Priority: individual discounts > scholarship.
    */
   async getTotalEnrollmentDiscount(
     originalValue: number
   ): Promise<{ value: number; percentage: number }> {
     let discountedValue = originalValue
 
-    // Apply scholarship discount first if exists
-    if (this.scholarship) {
-      discountedValue = this.scholarship.calculateDiscountedEnrollmentValue(discountedValue)
-    }
-
-    // Apply individual discounts
     const individualDiscounts = await IndividualDiscount.query()
       .where('studentHasLevelId', this.id)
       .where('isActive', true)
       .whereNull('deletedAt')
 
-    for (const discount of individualDiscounts) {
-      if (discount.isValid()) {
+    const validIndividualDiscounts = individualDiscounts.filter((discount) => discount.isValid())
+
+    if (validIndividualDiscounts.length > 0) {
+      for (const discount of validIndividualDiscounts) {
         discountedValue = discount.calculateDiscountedEnrollmentValue(discountedValue)
       }
+    } else if (this.scholarship) {
+      discountedValue = this.scholarship.calculateDiscountedEnrollmentValue(discountedValue)
     }
 
     const totalDiscountValue = originalValue - discountedValue
@@ -156,28 +155,27 @@ export default class StudentHasLevel extends compose(BaseModel, Auditable) {
   }
 
   /**
-   * Get the total discount for monthly fee considering both scholarship and individual discounts
+   * Get the total monthly discount respecting exclusivity rules.
+   * Priority: individual discounts > scholarship.
    */
   async getTotalMonthlyDiscount(
     originalValue: number
   ): Promise<{ value: number; percentage: number }> {
     let discountedValue = originalValue
 
-    // Apply scholarship discount first if exists
-    if (this.scholarship) {
-      discountedValue = this.scholarship.calculateDiscountedMonthlyValue(discountedValue)
-    }
-
-    // Apply individual discounts
     const individualDiscounts = await IndividualDiscount.query()
       .where('studentHasLevelId', this.id)
       .where('isActive', true)
       .whereNull('deletedAt')
 
-    for (const discount of individualDiscounts) {
-      if (discount.isValid()) {
+    const validIndividualDiscounts = individualDiscounts.filter((discount) => discount.isValid())
+
+    if (validIndividualDiscounts.length > 0) {
+      for (const discount of validIndividualDiscounts) {
         discountedValue = discount.calculateDiscountedMonthlyValue(discountedValue)
       }
+    } else if (this.scholarship) {
+      discountedValue = this.scholarship.calculateDiscountedMonthlyValue(discountedValue)
     }
 
     const totalDiscountValue = originalValue - discountedValue
