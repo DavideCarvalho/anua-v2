@@ -123,6 +123,37 @@ export default class School extends BaseModel {
   @column({ columnName: 'enablePaymentNotifications' })
   declare enablePaymentNotifications: boolean
 
+  // NFS-e config
+  @column({ columnName: 'nfseEnabled' })
+  declare nfseEnabled: boolean
+
+  @column({ columnName: 'nfseMunicipalServiceCode' })
+  declare nfseMunicipalServiceCode: string | null
+
+  @column({ columnName: 'nfseMunicipalServiceName' })
+  declare nfseMunicipalServiceName: string | null
+
+  @column({ columnName: 'nfseIssPercentage' })
+  declare nfseIssPercentage: number | null
+
+  @column({ columnName: 'nfseCofinsPercentage' })
+  declare nfseCofinsPercentage: number | null
+
+  @column({ columnName: 'nfsePisPercentage' })
+  declare nfsePisPercentage: number | null
+
+  @column({ columnName: 'nfseCsllPercentage' })
+  declare nfseCsllPercentage: number | null
+
+  @column({ columnName: 'nfseInssPercentage' })
+  declare nfseInssPercentage: number | null
+
+  @column({ columnName: 'nfseIrPercentage' })
+  declare nfseIrPercentage: number | null
+
+  @column({ columnName: 'nfseDeductions' })
+  declare nfseDeductions: number | null
+
   // Academic settings
   @column({ columnName: 'minimumGrade' })
   declare minimumGrade: number

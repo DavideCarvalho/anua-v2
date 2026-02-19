@@ -1,5 +1,5 @@
 import { registerAuthApiRoutes } from './auth.js'
-import { registerAsaasWebhookApiRoutes } from './asaas.js'
+import { registerAsaasWebhookApiRoutes, registerAsaasSubaccountApiRoutes } from './asaas.js'
 import { registerSchoolApiRoutes } from './schools.js'
 import {
   registerUserApiRoutes,
@@ -105,6 +105,7 @@ export function registerApiRoutes() {
   registerResponsavelDashboardApiRoutes()
   registerAdminStatsApiRoutes()
   registerAsaasWebhookApiRoutes()
+  registerAsaasSubaccountApiRoutes()
   registerSchoolApiRoutes()
   registerUserApiRoutes()
   registerUserSchoolApiRoutes()

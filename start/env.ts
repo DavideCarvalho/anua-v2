@@ -56,4 +56,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   DRIVE_DISK: Env.schema.enum(['fs', 'gcs'] as const),
   GCS_BUCKET: Env.schema.string.optional(),
   GCS_KEY_FILENAME: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Asaas payment gateway
+  |----------------------------------------------------------
+  */
+  ASAAS_API_KEY: Env.schema.string(),
+  ASAAS_WEBHOOK_URL: Env.schema.string(),
+  ASAAS_WEBHOOK_TOKEN: Env.schema.string(),
 })

@@ -13,16 +13,16 @@ export default class SendStudentPaymentBoletoEmailController {
 
     const payment = await StudentPayment.find(params.id)
     if (!payment) {
-      throw AppException.notFound('Pagamento nao encontrado')
+      throw AppException.notFound('Pagamento não encontrado')
     }
 
     if (!payment.paymentGatewayId) {
-      throw AppException.badRequest('Pagamento nao possui cobranca no Asaas')
+      throw AppException.badRequest('Pagamento não possui cobrança no Asaas')
     }
 
     const student = await Student.query().where('id', payment.studentId).preload('user').first()
     if (!student?.user) {
-      throw AppException.notFound('Aluno nao encontrado')
+      throw AppException.notFound('Aluno não encontrado')
     }
 
     const contract = await Contract.query()
@@ -31,17 +31,17 @@ export default class SendStudentPaymentBoletoEmailController {
       .first()
 
     if (!contract?.school) {
-      throw AppException.notFound('Contrato ou escola nao encontrados')
+      throw AppException.notFound('Contrato ou escola não encontrados')
     }
 
     const config = resolveAsaasConfig(contract.school)
     if (!config) {
-      throw AppException.badRequest('Configuracao do Asaas nao encontrada para esta escola')
+      throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
 
     const email = payload.email ?? student.user.email
     if (!email) {
-      throw AppException.notFound('Email do destinatario nao encontrado')
+      throw AppException.notFound('E-mail do destinatário não encontrado')
     }
 
     await sendAsaasPaymentEmail(config.apiKey, payment.paymentGatewayId, email)

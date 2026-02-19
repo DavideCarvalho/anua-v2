@@ -34,6 +34,8 @@ const GetResponsavelNotificationsController = () =>
   import('#controllers/responsavel/get_notifications_controller')
 const UpdateResponsavelProfileController = () =>
   import('#controllers/responsavel/update_profile_controller')
+const CreateInvoiceAsaasChargeController = () =>
+  import('#controllers/invoices/create_invoice_asaas_charge_controller')
 const CreateWalletTopUpController = () =>
   import('#controllers/wallet_top_ups/create_wallet_top_up_controller')
 const ListWalletTopUpsController = () =>
@@ -89,6 +91,11 @@ export function registerResponsavelApiRoutes() {
         .as('studentGamification')
       router.get('/notifications', [GetResponsavelNotificationsController]).as('notifications')
       router.put('/profile', [UpdateResponsavelProfileController]).as('updateProfile')
+
+      // Invoice checkout (Asaas on-demand charge)
+      router
+        .post('/invoices/:id/checkout', [CreateInvoiceAsaasChargeController])
+        .as('invoiceCheckout')
 
       // Wallet top-ups
       router

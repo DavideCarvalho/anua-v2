@@ -70,6 +70,30 @@ resource "google_secret_manager_secret" "smtp_password" {
   }
 }
 
+resource "google_secret_manager_secret" "asaas_api_key" {
+  secret_id = "${var.environment}-${var.project_name}-asaas-api-key"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "asaas_webhook_url" {
+  secret_id = "${var.environment}-${var.project_name}-asaas-webhook-url"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "asaas_webhook_token" {
+  secret_id = "${var.environment}-${var.project_name}-asaas-webhook-token"
+
+  replication {
+    auto {}
+  }
+}
+
 # Grant Cloud Run access to secrets
 resource "google_secret_manager_secret_iam_member" "app_key_access" {
   secret_id = google_secret_manager_secret.app_key.id
@@ -85,6 +109,24 @@ resource "google_secret_manager_secret_iam_member" "db_password_access" {
 
 resource "google_secret_manager_secret_iam_member" "smtp_password_access" {
   secret_id = google_secret_manager_secret.smtp_password.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "asaas_api_key_access" {
+  secret_id = google_secret_manager_secret.asaas_api_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "asaas_webhook_url_access" {
+  secret_id = google_secret_manager_secret.asaas_webhook_url.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "asaas_webhook_token_access" {
+  secret_id = google_secret_manager_secret.asaas_webhook_token.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }

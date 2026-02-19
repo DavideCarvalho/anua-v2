@@ -45,6 +45,18 @@ export default class Invoice extends compose(BaseModel, Auditable) {
   @column({ columnName: 'totalAmount' })
   declare totalAmount: number
 
+  @column({ columnName: 'baseAmount' })
+  declare baseAmount: number
+
+  @column({ columnName: 'discountAmount' })
+  declare discountAmount: number
+
+  @column({ columnName: 'fineAmount' })
+  declare fineAmount: number
+
+  @column({ columnName: 'interestAmount' })
+  declare interestAmount: number
+
   @column({ columnName: 'netAmountReceived' })
   declare netAmountReceived: number | null
 
@@ -60,8 +72,46 @@ export default class Invoice extends compose(BaseModel, Auditable) {
   @column({ columnName: 'paymentGateway' })
   declare paymentGateway: 'ASAAS' | 'CUSTOM' | null
 
+  @column({ columnName: 'invoiceUrl' })
+  declare invoiceUrl: string | null
+
   @column({ columnName: 'observation' })
   declare observation: string | null
+
+  @column.dateTime({ columnName: 'lastNotifiedAt' })
+  declare lastNotifiedAt: DateTime | null
+
+  // NFS-e fields
+  @column({ columnName: 'nfseId' })
+  declare nfseId: string | null
+
+  @column({ columnName: 'nfseStatus' })
+  declare nfseStatus:
+    | 'SCHEDULED'
+    | 'AUTHORIZED'
+    | 'PROCESSING_CANCELLATION'
+    | 'CANCELLED'
+    | 'CANCELLATION_DENIED'
+    | 'ERROR'
+    | null
+
+  @column({ columnName: 'nfseNumber' })
+  declare nfseNumber: string | null
+
+  @column({ columnName: 'nfsePdfUrl' })
+  declare nfsePdfUrl: string | null
+
+  @column({ columnName: 'nfseXmlUrl' })
+  declare nfseXmlUrl: string | null
+
+  @column({ columnName: 'nfseRpsNumber' })
+  declare nfseRpsNumber: string | null
+
+  @column.dateTime({ columnName: 'nfseIssuedAt' })
+  declare nfseIssuedAt: DateTime | null
+
+  @column({ columnName: 'nfseErrorMessage' })
+  declare nfseErrorMessage: string | null
 
   @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime

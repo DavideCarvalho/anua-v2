@@ -43,6 +43,7 @@ import {
   X,
   Users,
   History,
+  Download,
 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
 import { Checkbox } from '../components/ui/checkbox'
@@ -206,16 +207,16 @@ function InvoicesSkeleton() {
   return (
     <div className="border rounded-lg">
       <div className="p-4 border-b">
-        <div className="grid grid-cols-6 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-8 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="h-4 bg-muted animate-pulse rounded" />
           ))}
         </div>
       </div>
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} className="p-4 border-b last:border-0">
-          <div className="grid grid-cols-6 gap-4">
-            {Array.from({ length: 6 }).map((_, j) => (
+          <div className="grid grid-cols-8 gap-4">
+            {Array.from({ length: 8 }).map((_, j) => (
               <div key={j} className="h-4 bg-muted animate-pulse rounded" />
             ))}
           </div>
@@ -263,23 +264,35 @@ const statusConfig: Record<InvoiceStatus, StatusConfig> = {
   RENEGOTIATED: { label: 'Renegociada', className: 'bg-purple-100 text-purple-700', icon: RefreshCw },
 }
 
-const paymentTypeLabels: Record<string, string> = {
-  ENROLLMENT: 'Matrícula',
-  TUITION: 'Mensalidade',
-  CANTEEN: 'Cantina',
-  COURSE: 'Curso',
-  AGREEMENT: 'Acordo',
-  STUDENT_LOAN: 'Empréstimo',
-  STORE: 'Loja',
-  EXTRA_CLASS: 'Aula Avulsa',
-  OTHER: 'Outros',
-}
+function getPaymentDescription(payment: InvoicePayment): string {
+  const contractName = payment.contract?.name
+  const installmentInfo =
+    payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
 
-function getPaymentTypeLabel(payment: any): string {
-  if (payment.type === 'EXTRA_CLASS' && payment.studentHasExtraClass?.extraClass?.name) {
-    return `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
+  switch (payment.type) {
+    case 'TUITION':
+      return 'Mensalidade'
+    case 'ENROLLMENT':
+      return contractName
+        ? `Matrícula - ${contractName}${installmentInfo}`
+        : `Matrícula${installmentInfo}`
+    case 'EXTRA_CLASS':
+      return payment.studentHasExtraClass?.extraClass?.name
+        ? `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
+        : 'Aula Avulsa'
+    case 'COURSE':
+      return contractName ? `Curso - ${contractName}` : 'Curso'
+    case 'STORE':
+      return 'Loja'
+    case 'CANTEEN':
+      return 'Cantina'
+    case 'AGREEMENT':
+      return 'Acordo'
+    case 'STUDENT_LOAN':
+      return 'Empréstimo'
+    default:
+      return 'Outro'
   }
-  return paymentTypeLabels[payment.type] || payment.type
 }
 
 const paymentStatusConfig: Record<string, { label: string; className: string }> = {
@@ -298,11 +311,21 @@ const monthLabels = [
 ]
 
 type Invoice = InvoicesResponse['data'][number]
+type InvoicePayment = NonNullable<Invoice['payments']>[number]
 type PaginationMeta = InvoicesResponse['meta']
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('pt-BR')
+}
+
+const nfseStatusConfig: Record<string, { label: string; className: string }> = {
+  AUTHORIZED: { label: 'NFS-e', className: 'bg-green-100 text-green-700' },
+  SCHEDULED: { label: 'NFS-e pendente', className: 'bg-yellow-100 text-yellow-700' },
+  ERROR: { label: 'NFS-e erro', className: 'bg-red-100 text-red-700' },
+  CANCELLED: { label: 'NFS-e cancelada', className: 'bg-gray-100 text-gray-700' },
+  PROCESSING_CANCELLATION: { label: 'NFS-e cancelando', className: 'bg-gray-100 text-gray-700' },
+  CANCELLATION_DENIED: { label: 'NFS-e canc. negada', className: 'bg-gray-100 text-gray-700' },
 }
 
 const ACTIONABLE_STATUSES: InvoiceStatus[] = ['OPEN', 'PENDING', 'OVERDUE']
@@ -361,7 +384,7 @@ function InvoicesContent() {
     limit: parseAsInteger.withDefault(20),
   })
 
-  const { search, studentIds: filterStudentIds, page, limit, status: filterStatuses, month: filterMonth, year: filterYear } = filters
+  const { studentIds: filterStudentIds, page, limit, status: filterStatuses, month: filterMonth, year: filterYear } = filters
 
   const { data, isLoading, error, refetch } = useQuery(
     useInvoicesQueryOptions({
@@ -562,7 +585,9 @@ function InvoicesContent() {
                   <th className="text-left p-4 font-medium">Aluno</th>
                   <th className="text-left p-4 font-medium">Referência</th>
                   <th className="text-left p-4 font-medium">Vencimento</th>
-                  <th className="text-left p-4 font-medium">Valor</th>
+                  <th className="text-right p-4 font-medium">Valor Base</th>
+                  <th className="text-right p-4 font-medium">Descontos</th>
+                  <th className="text-right p-4 font-medium">Valor Final</th>
                   <th className="text-left p-4 font-medium">Status</th>
                   <th className="text-right p-4 font-medium">Ações</th>
                 </tr>
@@ -608,14 +633,35 @@ function InvoicesContent() {
                             : '-'}
                         </td>
                         <td className="p-4 text-muted-foreground">{formatDate(invoice.dueDate)}</td>
-                        <td className="p-4 font-semibold">{formatCurrency(Number(invoice.totalAmount || 0))}</td>
+                        <td className="p-4 text-right text-muted-foreground">
+                          {formatCurrency(Number((invoice as any).baseAmount || 0))}
+                        </td>
+                        <td className="p-4 text-right">
+                          {Number((invoice as any).totalDiscount || 0) > 0 ? (
+                            <span className="text-green-600">
+                              -{formatCurrency(Number((invoice as any).totalDiscount))}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-right font-semibold">{formatCurrency(Number(invoice.totalAmount || 0))}</td>
                         <td className="p-4">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.className}`}
-                          >
-                            <StatusIcon className="h-3 w-3" />
-                            {config.label}
-                          </span>
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium w-fit ${config.className}`}
+                            >
+                              <StatusIcon className="h-3 w-3" />
+                              {config.label}
+                            </span>
+                            {invoice.nfseStatus && nfseStatusConfig[invoice.nfseStatus] && (
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium w-fit ${nfseStatusConfig[invoice.nfseStatus].className}`}
+                              >
+                                {nfseStatusConfig[invoice.nfseStatus].label}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
                           {ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
@@ -638,25 +684,62 @@ function InvoicesContent() {
                                   <History className="h-4 w-4 mr-2" />
                                   Ver historico
                                 </DropdownMenuItem>
+                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={invoice.nfsePdfUrl} target="_blank" rel="noopener noreferrer">
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Baixar NFS-e (PDF)
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
+                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={invoice.nfseXmlUrl} target="_blank" rel="noopener noreferrer">
+                                      <FileText className="h-4 w-4 mr-2" />
+                                      Baixar NFS-e (XML)
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
                           {!ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setHistoryInvoiceId(invoice.id)}
-                              title="Ver historico"
-                            >
-                              <History className="h-4 w-4" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setHistoryInvoiceId(invoice.id)}>
+                                  <History className="h-4 w-4 mr-2" />
+                                  Ver historico
+                                </DropdownMenuItem>
+                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={invoice.nfsePdfUrl} target="_blank" rel="noopener noreferrer">
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Baixar NFS-e (PDF)
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
+                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
+                                  <DropdownMenuItem asChild>
+                                    <a href={invoice.nfseXmlUrl} target="_blank" rel="noopener noreferrer">
+                                      <FileText className="h-4 w-4 mr-2" />
+                                      Baixar NFS-e (XML)
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </td>
                       </tr>
 
                       {isExpanded && (
                         <tr key={`${invoice.id}-expanded`} className="border-t">
-                          <td colSpan={7} className="p-0">
+                          <td colSpan={9} className="p-0">
                             <div className="bg-muted/20 px-6 py-3 animate-in fade-in slide-in-from-top-2 duration-200">
                               {payments.length === 0 ? (
                                 <p className="text-sm text-muted-foreground py-2">
@@ -685,7 +768,7 @@ function InvoicesContent() {
                                           className="border-t border-muted text-sm"
                                         >
                                           <td className="py-2 px-3">
-                                            {getPaymentTypeLabel(payment)}
+                                            {getPaymentDescription(payment)}
                                           </td>
                                           <td className="py-2 px-3 text-muted-foreground">
                                             {payment.month && payment.year

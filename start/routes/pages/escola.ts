@@ -136,6 +136,8 @@ const ShowGamificacaoConquistasPageController = () =>
   import('#controllers/pages/escola/show_gamificacao_conquistas_page_controller')
 const ShowGamificacaoRecompensasPageController = () =>
   import('#controllers/pages/escola/show_gamificacao_recompensas_page_controller')
+const ShowConfiguracaoPagamentosPageController = () =>
+  import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller')
 const ShowConfiguracoesPageController = () =>
   import('#controllers/pages/escola/show_configuracoes_page_controller')
 
@@ -279,7 +281,7 @@ export function registerEscolaPageRoutes() {
       router.get('/pedagogico/horarios', [ShowHorariosPageController]).as('pedagogico.horarios')
       router.get('/pedagogico/quadro', [ShowQuadroPageController]).as('pedagogico.quadro')
       router
-        .get('/pedagogico/ocorrencias', [ShowOcorrenciasPageController])
+        .get('/pedagogico/registro-diario', [ShowOcorrenciasPageController])
         .as('pedagogico.ocorrencias')
       router
         .get('/pedagogico/atividades', [ShowAtividadesPageController])
@@ -320,6 +322,9 @@ export function registerEscolaPageRoutes() {
         .as('financeiro.inadimplencia')
       router.get('/financeiro/seguros', [ShowSegurosPageController]).as('financeiro.seguros')
       router.get('/financeiro/faturas', [ShowFaturasPageController]).as('financeiro.faturas')
+      router
+        .get('/financeiro/configuracao-pagamentos', [ShowConfiguracaoPagamentosPageController])
+        .as('financeiro.configuracaoPagamentos')
 
       // Lojas
       router.get('/lojas', [ShowLojasPageController]).as('lojas.index')
@@ -341,6 +346,11 @@ export function registerEscolaPageRoutes() {
       router.get('/configuracoes', [ShowConfiguracoesPageController]).as('configuracoes')
     })
     .prefix('/escola')
-    .use([middleware.auth(), middleware.impersonation(), middleware.requireSchool()])
+    .use([
+      middleware.auth(),
+      middleware.impersonation(),
+      middleware.requireSchool(),
+      middleware.escolaTeacherScope(),
+    ])
     .as('escola')
 }

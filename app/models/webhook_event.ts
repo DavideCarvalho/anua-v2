@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, beforeCreate } from '@adonisjs/lucid/orm'
 
-export type WebhookProvider = 'STRIPE' | 'ASAAS' | 'PIX' | 'OTHER'
+export type WebhookProvider = 'ASAAS' | 'ASAAS_RECARGA' | 'DOCUSEAL'
 export type WebhookEventStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
 
 export default class WebhookEvent extends BaseModel {
@@ -15,36 +15,36 @@ export default class WebhookEvent extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'eventId' })
   declare eventId: string
 
-  @column()
+  @column({ columnName: 'provider' })
   declare provider: WebhookProvider
 
-  @column()
+  @column({ columnName: 'eventType' })
   declare eventType: string
 
-  @column()
+  @column({ columnName: 'payload' })
   declare payload: Record<string, unknown>
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: WebhookEventStatus
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'processedAt' })
   declare processedAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'error' })
   declare error: string | null
 
-  @column()
+  @column({ columnName: 'attempts' })
   declare attempts: number
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 }

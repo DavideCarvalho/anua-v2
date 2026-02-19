@@ -1,8 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Invoice from '#models/invoice'
+import Contract from '#models/contract'
 import StudentHasResponsible from '#models/student_has_responsible'
 import InvoiceDto from '#models/dto/invoice.dto'
 import AppException from '#exceptions/app_exception'
+import { resolveAsaasConfig } from '#services/asaas_service'
 
 export default class GetStudentInvoicesController {
   async handle({ params, request, effectiveUser }: HttpContext) {
@@ -31,6 +33,7 @@ export default class GetStudentInvoicesController {
       .preload('student', (q) => q.preload('user'))
       .preload('payments', (q) => {
         q.whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+        q.preload('contract')
         q.preload('studentHasExtraClass', (eq) => eq.preload('extraClass'))
       })
       .orderBy('year', 'asc')
@@ -70,9 +73,24 @@ export default class GetStudentInvoicesController {
       overdueCount: allInvoices.filter((i) => i.status === 'OVERDUE').length,
     }
 
+    // Check if school has Asaas enabled via the first invoice's contract
+    let asaasEnabled = false
+    const firstInvoice = invoices.all().find((i) => i.payments?.length > 0)
+    if (firstInvoice) {
+      const contract = await Contract.query()
+        .where('id', firstInvoice.payments[0].contractId)
+        .preload('school', (sq) => sq.preload('schoolChain'))
+        .first()
+
+      if (contract?.school && contract.school.paymentConfigStatus === 'ACTIVE') {
+        asaasEnabled = !!resolveAsaasConfig(contract.school)
+      }
+    }
+
     return {
       ...InvoiceDto.fromPaginator(invoices),
       summary,
+      asaasEnabled,
     }
   }
 }

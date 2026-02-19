@@ -48,6 +48,18 @@ module "api" {
       secret_id = data.terraform_remote_state.storage.outputs.smtp_password_secret_id
       version   = "latest"
     }
+    ASAAS_API_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_api_key_secret_id
+      version   = "latest"
+    }
+    ASAAS_WEBHOOK_URL = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_url_secret_id
+      version   = "latest"
+    }
+    ASAAS_WEBHOOK_TOKEN = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_token_secret_id
+      version   = "latest"
+    }
   }
 }
 
@@ -141,6 +153,18 @@ module "queue_worker" {
     }
     SMTP_PASSWORD = {
       secret_id = data.terraform_remote_state.storage.outputs.smtp_password_secret_id
+      version   = "latest"
+    }
+    ASAAS_API_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_api_key_secret_id
+      version   = "latest"
+    }
+    ASAAS_WEBHOOK_URL = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_url_secret_id
+      version   = "latest"
+    }
+    ASAAS_WEBHOOK_TOKEN = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_token_secret_id
       version   = "latest"
     }
   }
@@ -270,6 +294,166 @@ module "dispatch_overdue" {
   memory_limit = "512Mi"
 }
 
+module "dispatch_occurrence_ack_reminders" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-occurrence-ack-reminders"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:send-occurrence-ack-reminders"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
+}
+
+module "dispatch_asaas_charges" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-asaas-charges"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:create-invoice-asaas-charges"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
+}
+
+module "dispatch_invoice_interest" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-invoice-interest"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:apply-invoice-interest"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
+}
+
+module "dispatch_invoice_notifications" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-invoice-notifications"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:send-invoice-notifications"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
+}
+
 # ==============================================================================
 # SERVICE ACCOUNT - CLOUD SCHEDULER
 # ==============================================================================
@@ -318,7 +502,51 @@ module "scheduler_overdue" {
   project_id            = var.project_id
   region                = var.region
   job_name              = "${var.environment}-${var.project_name}-dispatch-overdue"
-  schedule              = "0 6 * * *"
+  schedule              = "0 5 * * *"
   cloud_run_job_name    = module.dispatch_overdue.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_asaas_charges" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-asaas-charges"
+  schedule              = "0 6 * * *"
+  cloud_run_job_name    = module.dispatch_asaas_charges.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_invoice_interest" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-invoice-interest"
+  schedule              = "30 5 * * *"
+  cloud_run_job_name    = module.dispatch_invoice_interest.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_invoice_notifications" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-invoice-notifications"
+  schedule              = "30 6 * * *"
+  cloud_run_job_name    = module.dispatch_invoice_notifications.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_occurrence_ack_reminders" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-occurrence-ack-reminders"
+  schedule              = "0 9 * * 1-5"
+  cloud_run_job_name    = module.dispatch_occurrence_ack_reminders.job_name
   service_account_email = google_service_account.scheduler.email
 }

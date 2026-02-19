@@ -56,6 +56,37 @@ export default class SchoolChain extends BaseModel {
   @column()
   declare enablePaymentNotifications: boolean
 
+  // NFS-e config
+  @column()
+  declare nfseEnabled: boolean
+
+  @column()
+  declare nfseMunicipalServiceCode: string | null
+
+  @column()
+  declare nfseMunicipalServiceName: string | null
+
+  @column()
+  declare nfseIssPercentage: number | null
+
+  @column()
+  declare nfseCofinsPercentage: number | null
+
+  @column()
+  declare nfsePisPercentage: number | null
+
+  @column()
+  declare nfseCsllPercentage: number | null
+
+  @column()
+  declare nfseInssPercentage: number | null
+
+  @column()
+  declare nfseIrPercentage: number | null
+
+  @column()
+  declare nfseDeductions: number | null
+
   // Insurance config
   @column()
   declare hasInsuranceByDefault: boolean

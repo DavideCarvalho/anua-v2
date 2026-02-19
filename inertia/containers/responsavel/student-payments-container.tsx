@@ -1,7 +1,8 @@
-import { CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react'
+import { CheckCircle, Clock, AlertTriangle, XCircle, ExternalLink, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useQuery } from '@tanstack/react-query'
+import { useCreateInvoiceCheckout } from '../../hooks/mutations/use_create_invoice_checkout'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -14,7 +15,44 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useResponsavelStudentInvoicesQueryOptions } from '../../hooks/queries/use_responsavel_student_invoices'
+import {
+  useResponsavelStudentInvoicesQueryOptions,
+  type ResponsavelStudentInvoicesResponse,
+} from '../../hooks/queries/use_responsavel_student_invoices'
+
+type ResponsavelInvoice = ResponsavelStudentInvoicesResponse['data'][number]
+type ResponsavelPayment = NonNullable<ResponsavelInvoice['payments']>[number]
+
+function getPaymentDescription(payment: ResponsavelPayment): string {
+  const contractName = payment.contract?.name
+  const installmentInfo =
+    payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
+
+  switch (payment.type) {
+    case 'TUITION':
+      return 'Mensalidade'
+    case 'ENROLLMENT':
+      return contractName
+        ? `Matrícula - ${contractName}${installmentInfo}`
+        : `Matrícula${installmentInfo}`
+    case 'EXTRA_CLASS':
+      return payment.studentHasExtraClass?.extraClass?.name
+        ? `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
+        : 'Aula Avulsa'
+    case 'COURSE':
+      return contractName ? `Curso - ${contractName}` : 'Curso'
+    case 'STORE':
+      return 'Loja'
+    case 'CANTEEN':
+      return 'Cantina'
+    case 'AGREEMENT':
+      return 'Acordo'
+    case 'STUDENT_LOAN':
+      return 'Empréstimo'
+    default:
+      return 'Outro'
+  }
+}
 
 interface StudentPaymentsContainerProps {
   studentId: string
@@ -24,6 +62,7 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
   const { data, isLoading, isError, error } = useQuery(
     useResponsavelStudentInvoicesQueryOptions({ studentId })
   )
+  const checkoutMutation = useCreateInvoiceCheckout()
 
   if (isLoading) {
     return <StudentPaymentsContainerSkeleton />
@@ -55,7 +94,7 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
   }
 
   const getInvoiceStatusBadge = (status: string, dueDate: string) => {
-    const isOverdue = status === 'OPEN' && new Date(dueDate) < new Date()
+    const isOverdue = (status === 'OPEN' || status === 'PENDING') && new Date(dueDate) < new Date()
 
     if (status === 'PAID') {
       return (
@@ -110,23 +149,6 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
     )
   }
 
-  const getPaymentLabel = (payment: any) => {
-    if (payment.type === 'EXTRA_CLASS') {
-      const extraName = payment.studentHasExtraClass?.extraClass?.name
-      return extraName ? `Aula Avulsa - ${extraName}` : 'Aula Avulsa'
-    }
-
-    if (payment.type === 'TUITION') return 'Mensalidade'
-    if (payment.type === 'STORE') return 'Loja'
-    if (payment.type === 'CANTEEN') return 'Cantina'
-    if (payment.type === 'COURSE') return 'Curso'
-    if (payment.type === 'ENROLLMENT') return 'Matrícula'
-    if (payment.type === 'AGREEMENT') return 'Acordo'
-    if (payment.type === 'STUDENT_LOAN') return 'Empréstimo'
-
-    return 'Outro'
-  }
-
   return (
     <div className="space-y-6">
       {/* Invoices */}
@@ -157,6 +179,40 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
                           {formatCurrency(invoice.totalAmount)}
                         </span>
                         {getInvoiceStatusBadge(invoice.status, String(invoice.dueDate))}
+                        {invoice.status !== 'PAID' && invoice.status !== 'CANCELLED' && (
+                          invoice.invoiceUrl && invoice.status === 'PENDING' ? (
+                            <a
+                              href={invoice.invoiceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Pagar fatura
+                            </a>
+                          ) : data.asaasEnabled && (invoice.status === 'OPEN' || invoice.status === 'OVERDUE') ? (
+                            <button
+                              onClick={() => {
+                                checkoutMutation.mutate(invoice.id, {
+                                  onSuccess: (result) => {
+                                    if (result.invoiceUrl) {
+                                      window.open(result.invoiceUrl, '_blank')
+                                    }
+                                  },
+                                })
+                              }}
+                              disabled={checkoutMutation.isPending}
+                              className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+                            >
+                              {checkoutMutation.isPending ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <ExternalLink className="h-3 w-3" />
+                              )}
+                              Pagar fatura
+                            </button>
+                          ) : null
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -174,7 +230,7 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
                         {(invoice.payments ?? []).map((payment: any) => (
                           <TableRow key={payment.id}>
                             <TableCell className="font-medium">
-                              {getPaymentLabel(payment)}
+                              {getPaymentDescription(payment)}
                             </TableCell>
                             <TableCell>
                               {format(new Date(payment.dueDate), "MMMM 'de' yyyy", {

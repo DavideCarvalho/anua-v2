@@ -164,6 +164,9 @@ importers:
       adonisjs-scheduler:
         specifier: 2.7.0
         version: 2.7.0(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0))
+      adonisjs-server-stats:
+        specifier: ^1.1.3
+        version: 1.1.3(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0))(@adonisjs/lucid@21.8.2(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0))(@vinejs/vine@4.3.0)(luxon@3.7.2)(pg@8.18.0))(edge.js@6.4.0)
       canvas-confetti:
         specifier: 1.9.4
         version: 1.9.4
@@ -3110,6 +3113,30 @@ packages:
     resolution: {integrity: sha512-Twy3MN8X1Xe0Qsx5ab8vwccHRo7Fe2y/X4nY25rvlPnMP2mptiQc/QCYlk3ZW6ZtEgIpsUtbDF5OLqJpy/3wjQ==}
     peerDependencies:
       '@adonisjs/core': ^6.2.0 || ^7.0.0-0
+
+  adonisjs-server-stats@1.1.3:
+    resolution: {integrity: sha512-ND2cp8+Vv59z1FKE1yuClrO4CeVRZJkdOIjb9uVTKwKvOmX/e3D331Waie3rLapENxAXCUxAq9gprKIStTL5vg==}
+    peerDependencies:
+      '@adonisjs/core': ^6.0.0 || ^7.0.0-next || ^7.0.0
+      '@adonisjs/lucid': '*'
+      '@adonisjs/redis': '*'
+      '@adonisjs/transmit': '*'
+      '@julr/adonisjs-prometheus': '*'
+      bullmq: '*'
+      edge.js: '*'
+    peerDependenciesMeta:
+      '@adonisjs/lucid':
+        optional: true
+      '@adonisjs/redis':
+        optional: true
+      '@adonisjs/transmit':
+        optional: true
+      '@julr/adonisjs-prometheus':
+        optional: true
+      bullmq:
+        optional: true
+      edge.js:
+        optional: true
 
   agent-base@6.0.2:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
@@ -8940,6 +8967,13 @@ snapshots:
       luxon: 3.7.2
       node-cron: 3.0.3
       string-width: 7.2.0
+
+  adonisjs-server-stats@1.1.3(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0))(@adonisjs/lucid@21.8.2(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0))(@vinejs/vine@4.3.0)(luxon@3.7.2)(pg@8.18.0))(edge.js@6.4.0):
+    dependencies:
+      '@adonisjs/core': 6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0)
+    optionalDependencies:
+      '@adonisjs/lucid': 21.8.2(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.9.3))(@vinejs/vine@4.3.0)(edge.js@6.4.0))(@vinejs/vine@4.3.0)(luxon@3.7.2)(pg@8.18.0)
+      edge.js: 6.4.0
 
   agent-base@6.0.2:
     dependencies:

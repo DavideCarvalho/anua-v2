@@ -22,3 +22,18 @@ output "smtp_password_secret_id" {
   description = "Secret ID for SMTP_PASSWORD"
   value       = google_secret_manager_secret.smtp_password.secret_id
 }
+
+output "asaas_api_key_secret_id" {
+  description = "Secret ID for ASAAS_API_KEY"
+  value       = google_secret_manager_secret.asaas_api_key.secret_id
+}
+
+output "asaas_webhook_url_secret_id" {
+  description = "Secret ID for ASAAS_WEBHOOK_URL"
+  value       = google_secret_manager_secret.asaas_webhook_url.secret_id
+}
+
+output "asaas_webhook_token_secret_id" {
+  description = "Secret ID for ASAAS_WEBHOOK_TOKEN"
+  value       = google_secret_manager_secret.asaas_webhook_token.secret_id
+}
