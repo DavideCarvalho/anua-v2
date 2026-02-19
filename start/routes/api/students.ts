@@ -14,6 +14,8 @@ const ListStudentEnrollmentsController = () =>
   import('#controllers/students/list_enrollments_controller')
 const UpdateEnrollmentController = () =>
   import('#controllers/students/update_enrollment_controller')
+const CancelEnrollmentController = () =>
+  import('#controllers/students/cancel_enrollment_controller')
 const CheckDocumentController = () => import('#controllers/students/check_document_controller')
 const CheckEmailController = () => import('#controllers/students/check_email_controller')
 const LookupResponsibleController = () =>
@@ -66,6 +68,9 @@ export function registerStudentApiRoutes() {
       router
         .patch('/:id/enrollments/:enrollmentId', [UpdateEnrollmentController])
         .as('students.enrollments.update')
+      router
+        .delete('/:id/enrollments/:enrollmentId', [CancelEnrollmentController])
+        .as('students.enrollments.cancel')
       router
         .get('/:studentId/attendance', [GetStudentAttendanceController])
         .as('students.attendance')

@@ -7,6 +7,7 @@ export default class ListEnrollmentsController {
 
     const enrollments = await StudentHasLevel.query()
       .where('studentId', studentId)
+      .whereNull('deletedAt')
       .preload('academicPeriod')
       .preload('contract')
       .preload('scholarship')

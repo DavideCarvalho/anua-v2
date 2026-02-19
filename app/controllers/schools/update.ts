@@ -47,6 +47,35 @@ export default class UpdateSchoolController {
           data.minimumAttendancePercentage !== undefined
             ? data.minimumAttendancePercentage
             : school.minimumAttendancePercentage,
+        nfseEnabled: data.nfseEnabled !== undefined ? data.nfseEnabled : school.nfseEnabled,
+        nfseMunicipalServiceCode:
+          data.nfseMunicipalServiceCode !== undefined
+            ? data.nfseMunicipalServiceCode
+            : school.nfseMunicipalServiceCode,
+        nfseMunicipalServiceName:
+          data.nfseMunicipalServiceName !== undefined
+            ? data.nfseMunicipalServiceName
+            : school.nfseMunicipalServiceName,
+        nfseIssPercentage:
+          data.nfseIssPercentage !== undefined ? data.nfseIssPercentage : school.nfseIssPercentage,
+        nfseCofinsPercentage:
+          data.nfseCofinsPercentage !== undefined
+            ? data.nfseCofinsPercentage
+            : school.nfseCofinsPercentage,
+        nfsePisPercentage:
+          data.nfsePisPercentage !== undefined ? data.nfsePisPercentage : school.nfsePisPercentage,
+        nfseCsllPercentage:
+          data.nfseCsllPercentage !== undefined
+            ? data.nfseCsllPercentage
+            : school.nfseCsllPercentage,
+        nfseInssPercentage:
+          data.nfseInssPercentage !== undefined
+            ? data.nfseInssPercentage
+            : school.nfseInssPercentage,
+        nfseIrPercentage:
+          data.nfseIrPercentage !== undefined ? data.nfseIrPercentage : school.nfseIrPercentage,
+        nfseDeductions:
+          data.nfseDeductions !== undefined ? data.nfseDeductions : school.nfseDeductions,
       })
 
       await school.useTransaction(trx).save()

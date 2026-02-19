@@ -1,4 +1,5 @@
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
 
 // Schools
 const IndexSchoolsController = () => import('#controllers/schools/index')
@@ -20,7 +21,10 @@ export function registerSchoolApiRoutes() {
       router.post('/', [StoreSchoolController]).as('schools.store')
       router.get('/slug/:slug', [ShowSchoolBySlugController]).as('schools.showBySlug')
       router.get('/:id', [ShowSchoolController]).as('schools.show')
-      router.put('/:id', [UpdateSchoolController]).as('schools.update')
+      router
+        .put('/:id', [UpdateSchoolController])
+        .as('schools.update')
+        .use([middleware.auth(), middleware.impersonation()])
       router.delete('/:id', [DestroySchoolController]).as('schools.destroy')
       router.post('/:id/logo', [UploadSchoolLogoController]).as('schools.uploadLogo')
       router.get('/:id/users', [ListSchoolUsersController]).as('schools.users')

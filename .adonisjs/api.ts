@@ -787,6 +787,10 @@ type ApiV1StudentsIdEnrollmentsIdPatch = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_enrollment.ts')['updateEnrollmentValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/update_enrollment_controller.ts').default['handle'], true>
 }
+type ApiV1StudentsIdEnrollmentsIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/students/cancel_enrollment_controller.ts').default['handle'], false>
+}
 type ApiV1StudentsIdAttendanceGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/attendance/get_student_attendance_controller.ts').default['handle'], false>
@@ -3571,6 +3575,7 @@ export interface ApiDefinition {
               '$url': {
               };
               '$patch': ApiV1StudentsIdEnrollmentsIdPatch;
+              '$delete': ApiV1StudentsIdEnrollmentsIdDelete;
             };
           };
         };
@@ -6745,6 +6750,13 @@ const routes = [
     path: '/api/v1/students/:id/enrollments/:enrollmentId',
     method: ["PATCH"],
     types: {} as ApiV1StudentsIdEnrollmentsIdPatch,
+  },
+  {
+    params: ["id","enrollmentId"],
+    name: 'api.v1.students.enrollments.cancel',
+    path: '/api/v1/students/:id/enrollments/:enrollmentId',
+    method: ["DELETE"],
+    types: {} as ApiV1StudentsIdEnrollmentsIdDelete,
   },
   {
     params: ["studentId"],

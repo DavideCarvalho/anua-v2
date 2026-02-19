@@ -165,7 +165,18 @@ export default class ImpersonationMiddleware {
     const sessionSelectedIds = session.get('selectedSchoolIds') as string[] | undefined
     if (sessionSelectedIds && sessionSelectedIds.length > 0) {
       // Filtrar para garantir que só inclui escolas que o usuário tem acesso
-      ctx.selectedSchoolIds = sessionSelectedIds.filter((id) => schools.some((s) => s.id === id))
+      const filteredSelectedIds = sessionSelectedIds.filter((id) =>
+        schools.some((s) => s.id === id)
+      )
+
+      // Se nenhuma seleção da sessão for válida para o usuário efetivo,
+      // voltar para todas as escolas disponíveis e atualizar a sessão.
+      if (filteredSelectedIds.length > 0) {
+        ctx.selectedSchoolIds = filteredSelectedIds
+      } else {
+        ctx.selectedSchoolIds = schools.map((s) => s.id)
+        session.put('selectedSchoolIds', ctx.selectedSchoolIds)
+      }
     } else {
       // Por padrão, seleciona todas as escolas do usuário
       ctx.selectedSchoolIds = schools.map((s) => s.id)

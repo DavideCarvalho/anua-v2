@@ -35,6 +35,7 @@ import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/us
 import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
 import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
 import { useUpdateStudent } from '~/hooks/mutations/use_student_mutations'
+import { useCancelEnrollment } from '~/hooks/mutations/use_update_enrollment'
 import { getCourseLabels, getLevelLabels, type AcademicPeriodSegment } from '~/lib/formatters'
 
 const schema = z.object({
@@ -58,6 +59,7 @@ interface LevelAssignedToCourseAcademicPeriod {
 }
 
 interface StudentLevel {
+  id: string
   classId: string | null
   academicPeriodId?: string | null
   levelId?: string | null
@@ -135,6 +137,7 @@ export function ChangeStudentCourseModal({
   })
 
   const updateStudent = useUpdateStudent()
+  const cancelEnrollment = useCancelEnrollment()
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -383,13 +386,41 @@ export function ChangeStudentCourseModal({
         (l) => getEnrollmentAcademicPeriodId(l) === activePeriodId && l.class
       )
     : undefined
+  const selectedEnrollment = activePeriodId
+    ? studentData?.levels?.find((l) => getEnrollmentAcademicPeriodId(l) === activePeriodId)
+    : studentData?.levels?.[0]
   const currentClass =
     selectedStudentLevel?.class ?? currentStudentLevel?.class ?? studentData?.class
+
+  async function handleCancelEnrollment() {
+    if (!selectedEnrollment?.id) {
+      toast.error('Matrícula não encontrada para este período')
+      return
+    }
+
+    const confirmed = window.confirm(
+      'Tem certeza que deseja cancelar esta matrícula? As faturas futuras serão recalculadas automaticamente.'
+    )
+    if (!confirmed) return
+
+    try {
+      await cancelEnrollment.mutateAsync({
+        studentId,
+        enrollmentId: selectedEnrollment.id,
+      })
+      toast.success('Matrícula cancelada com sucesso!')
+      onOpenChange(false)
+      onSuccess?.()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao cancelar matrícula'
+      toast.error(errorMessage)
+    }
+  }
 
   if (isLoadingStudent) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-[560px]">
           <DialogHeader>
             <DialogTitle>Alterar Turma</DialogTitle>
           </DialogHeader>
@@ -404,7 +435,7 @@ export function ChangeStudentCourseModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[85vh] overflow-x-hidden overflow-y-auto sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Alterar Turma</DialogTitle>
         </DialogHeader>
@@ -442,9 +473,13 @@ export function ChangeStudentCourseModal({
               <div className="space-y-2">
                 <p className="text-sm font-medium">Período da Matrícula</p>
                 <Tabs value={activePeriodId} onValueChange={setActivePeriodId} className="w-full">
-                  <TabsList className="w-full justify-start">
+                  <TabsList className="h-auto w-full flex-wrap justify-start gap-1">
                     {enrollmentPeriods.map((period) => (
-                      <TabsTrigger key={period.id} value={period.id}>
+                      <TabsTrigger
+                        key={period.id}
+                        value={period.id}
+                        className="max-w-full whitespace-normal break-words text-left"
+                      >
                         {period.name}
                       </TabsTrigger>
                     ))}
@@ -611,11 +646,25 @@ export function ChangeStudentCourseModal({
               )}
             />
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleClose}>
+            <DialogFooter className="flex-wrap gap-2 sm:justify-end sm:space-x-0">
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleCancelEnrollment}
+                disabled={cancelEnrollment.isPending || !selectedEnrollment?.id}
+                className="w-full sm:w-auto"
+              >
+                {cancelEnrollment.isPending ? 'Cancelando matrícula...' : 'Cancelar matrícula'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={updateStudent.isPending}>
+              <Button type="submit" disabled={updateStudent.isPending} className="w-full sm:w-auto">
                 {updateStudent.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

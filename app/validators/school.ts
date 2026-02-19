@@ -56,6 +56,17 @@ export const updateSchoolValidator = vine.compile(
     insurancePercentage: vine.number().min(3).max(100).optional().nullable(),
     insuranceCoveragePercentage: vine.number().min(0).max(100).optional().nullable(),
     insuranceClaimWaitingDays: vine.number().min(1).optional().nullable(),
+    // NFS-e fields
+    nfseEnabled: vine.boolean().optional(),
+    nfseMunicipalServiceCode: vine.string().trim().maxLength(64).optional().nullable(),
+    nfseMunicipalServiceName: vine.string().trim().maxLength(255).optional().nullable(),
+    nfseIssPercentage: vine.number().min(0).max(100).optional().nullable(),
+    nfseCofinsPercentage: vine.number().min(0).max(100).optional().nullable(),
+    nfsePisPercentage: vine.number().min(0).max(100).optional().nullable(),
+    nfseCsllPercentage: vine.number().min(0).max(100).optional().nullable(),
+    nfseInssPercentage: vine.number().min(0).max(100).optional().nullable(),
+    nfseIrPercentage: vine.number().min(0).max(100).optional().nullable(),
+    nfseDeductions: vine.number().min(0).optional().nullable(),
   })
 )
 

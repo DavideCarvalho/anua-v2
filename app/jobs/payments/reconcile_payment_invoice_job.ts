@@ -15,6 +15,7 @@ const SOURCE_LABELS: Record<string, string> = {
   'events.parental-consent.denied': 'Não Autorizar Participação em Evento',
   'events.cancel': 'Cancelar Evento',
   'events.update': 'Atualizar Evento',
+  'students.enrollments.cancel': 'Cancelar Matrícula',
 }
 
 interface ReconcilePaymentInvoicePayload {

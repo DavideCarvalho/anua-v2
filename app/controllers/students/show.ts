@@ -23,6 +23,7 @@ export default class ShowStudentController {
       })
       .preload('levels', (levelsQuery) => {
         levelsQuery
+          .whereNull('deletedAt')
           .preload('class')
           .preload('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
             lacapQuery.preload('courseHasAcademicPeriod', (chapQuery) => {
