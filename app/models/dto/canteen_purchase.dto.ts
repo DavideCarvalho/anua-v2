@@ -13,10 +13,10 @@ export default class CanteenPurchaseDto extends BaseModelDto {
   declare totalAmount: number
   declare paymentMethod: CanteenPaymentMethod
   declare status: CanteenPurchaseStatus
-  declare paidAt: Date | null
+  declare paidAt: DateTime | null
   declare monthlyTransferId: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare user?: UserDto
   declare canteen?: CanteenDto
   declare itemsPurchased?: CanteenItemPurchasedDto[]
@@ -32,10 +32,10 @@ export default class CanteenPurchaseDto extends BaseModelDto {
     this.totalAmount = canteenPurchase.totalAmount
     this.paymentMethod = canteenPurchase.paymentMethod
     this.status = canteenPurchase.status
-    this.paidAt = canteenPurchase.paidAt?.toJSDate() ?? null
+    this.paidAt = canteenPurchase.paidAt
     this.monthlyTransferId = canteenPurchase.monthlyTransferId
-    this.createdAt = canteenPurchase.createdAt.toJSDate()
-    this.updatedAt = canteenPurchase.updatedAt.toJSDate()
+    this.createdAt = canteenPurchase.createdAt
+    this.updatedAt = canteenPurchase.updatedAt
     if (canteenPurchase.user) this.user = new UserDto(canteenPurchase.user)
     if (canteenPurchase.canteen) this.canteen = new CanteenDto(canteenPurchase.canteen)
     if (canteenPurchase.itemsPurchased)

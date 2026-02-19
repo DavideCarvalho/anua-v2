@@ -6,7 +6,7 @@ export default class ExamDto extends BaseModelDto {
   declare id: string
   declare title: string
   declare description: string | null
-  declare scheduledDate: Date
+  declare scheduledDate: DateTime
   declare maxScore: number
   declare weight: number
   declare type: string
@@ -17,8 +17,8 @@ export default class ExamDto extends BaseModelDto {
   declare subjectId: string | null
   declare teacherId: string
   declare academicPeriodId: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare class: { id: string; name: string } | null
   declare subject: { id: string; name: string } | null
   declare teacher: { id: string } | null
@@ -44,8 +44,8 @@ export default class ExamDto extends BaseModelDto {
     this.subjectId = exam.subjectId
     this.teacherId = exam.teacherId
     this.academicPeriodId = exam.academicPeriodId
-    this.createdAt = exam.createdAt.toJSDate()
-    this.updatedAt = exam.updatedAt.toJSDate()
+    this.createdAt = exam.createdAt
+    this.updatedAt = exam.updatedAt
     this.class = exam.class ? { id: exam.class.id, name: exam.class.name } : null
     this.subject = exam.subject ? { id: exam.subject.id, name: exam.subject.name } : null
     this.teacher = exam.teacher ? { id: exam.teacher.id } : null

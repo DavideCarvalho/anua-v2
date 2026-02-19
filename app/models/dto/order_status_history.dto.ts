@@ -10,7 +10,7 @@ export default class OrderStatusHistoryDto extends BaseModelDto {
   declare toStatus: OrderStatus
   declare changedBy: string | null
   declare notes: string | null
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(orderStatusHistory?: OrderStatusHistory) {
     super()
@@ -23,6 +23,6 @@ export default class OrderStatusHistoryDto extends BaseModelDto {
     this.toStatus = orderStatusHistory.toStatus
     this.changedBy = orderStatusHistory.changedBy
     this.notes = orderStatusHistory.notes
-    this.createdAt = orderStatusHistory.createdAt.toJSDate()
+    this.createdAt = orderStatusHistory.createdAt
   }
 }

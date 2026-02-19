@@ -9,8 +9,8 @@ export default class StudentMedicationDto extends BaseModelDto {
   declare dosage: string
   declare frequency: string
   declare instructions: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(studentMedication?: StudentMedication) {
     super()
@@ -23,7 +23,7 @@ export default class StudentMedicationDto extends BaseModelDto {
     this.dosage = studentMedication.dosage
     this.frequency = studentMedication.frequency
     this.instructions = studentMedication.instructions
-    this.createdAt = studentMedication.createdAt.toJSDate()
-    this.updatedAt = studentMedication.updatedAt.toJSDate()
+    this.createdAt = studentMedication.createdAt
+    this.updatedAt = studentMedication.updatedAt
   }
 }

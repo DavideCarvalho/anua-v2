@@ -11,11 +11,11 @@ export default class StudentDocumentDto extends BaseModelDto {
   declare size: number
   declare status: 'PENDING' | 'APPROVED' | 'REJECTED'
   declare reviewedBy: string | null
-  declare reviewedAt: Date | null
+  declare reviewedAt: DateTime | null
   declare rejectionReason: string | null
   declare contractDocumentId: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: StudentDocument) {
     super()
@@ -30,10 +30,10 @@ export default class StudentDocumentDto extends BaseModelDto {
     this.size = model.size
     this.status = model.status
     this.reviewedBy = model.reviewedBy
-    this.reviewedAt = model.reviewedAt?.toJSDate() ?? null
+    this.reviewedAt = model.reviewedAt
     this.rejectionReason = model.rejectionReason
     this.contractDocumentId = model.contractDocumentId
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

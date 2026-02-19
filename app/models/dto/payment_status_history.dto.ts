@@ -10,7 +10,7 @@ export default class PaymentStatusHistoryDto extends BaseModelDto {
   declare newStatus: PaymentStatus
   declare changedBy: string
   declare observation: string | null
-  declare changedAt: Date
+  declare changedAt: DateTime
 
   constructor(model?: PaymentStatusHistory) {
     super()
@@ -23,6 +23,6 @@ export default class PaymentStatusHistoryDto extends BaseModelDto {
     this.newStatus = model.newStatus
     this.changedBy = model.changedBy
     this.observation = model.observation
-    this.changedAt = model.changedAt.toJSDate()
+    this.changedAt = model.changedAt
   }
 }

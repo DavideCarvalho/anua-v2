@@ -6,7 +6,7 @@ import type { DateTime } from 'luxon'
 export default class CanteenMealDto extends BaseModelDto {
   declare id: string
   declare canteenId: string
-  declare date: Date
+  declare date: DateTime
   declare mealType: MealType
   declare name: string
   declare description: string | null
@@ -14,8 +14,8 @@ export default class CanteenMealDto extends BaseModelDto {
   declare maxServings: number | null
   declare availableServings: number | null
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(canteenMeal?: CanteenMeal) {
     super()
@@ -24,7 +24,7 @@ export default class CanteenMealDto extends BaseModelDto {
 
     this.id = canteenMeal.id
     this.canteenId = canteenMeal.canteenId
-    this.date = canteenMeal.date.toJSDate()
+    this.date = canteenMeal.date
     this.mealType = canteenMeal.mealType
     this.name = canteenMeal.name
     this.description = canteenMeal.description
@@ -32,7 +32,7 @@ export default class CanteenMealDto extends BaseModelDto {
     this.maxServings = canteenMeal.maxServings
     this.availableServings = canteenMeal.availableServings
     this.isActive = canteenMeal.isActive
-    this.createdAt = canteenMeal.createdAt.toJSDate()
-    this.updatedAt = canteenMeal.updatedAt.toJSDate()
+    this.createdAt = canteenMeal.createdAt
+    this.updatedAt = canteenMeal.updatedAt
   }
 }

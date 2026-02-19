@@ -16,8 +16,8 @@ export default class SchoolUsageMetricsDto extends BaseModelDto {
   declare totalRevenue: number
   declare totalEnrollments: number
   declare loginCount: number
-  declare lastActivityAt: Date | null
-  declare createdAt: Date
+  declare lastActivityAt: DateTime | null
+  declare createdAt: DateTime
 
   constructor(model?: SchoolUsageMetrics) {
     super()
@@ -37,7 +37,7 @@ export default class SchoolUsageMetricsDto extends BaseModelDto {
     this.totalRevenue = model.totalRevenue
     this.totalEnrollments = model.totalEnrollments
     this.loginCount = model.loginCount
-    this.lastActivityAt = model.lastActivityAt?.toJSDate() ?? null
-    this.createdAt = model.createdAt.toJSDate()
+    this.lastActivityAt = model.lastActivityAt
+    this.createdAt = model.createdAt
   }
 }

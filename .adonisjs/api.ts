@@ -159,14 +159,6 @@ type EscolaEventosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_eventos_page_controller.ts').default['handle'], false>
 }
-type EscolaEventosNovoGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_novo_evento_page_controller.ts').default['handle'], false>
-}
-type EscolaEventosIdEditarGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_editar_evento_page_controller.ts').default['handle'], false>
-}
 type EscolaEventosIdAutorizacoesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_evento_autorizacoes_page_controller.ts').default['handle'], false>
@@ -199,7 +191,7 @@ type EscolaPedagogicoQuadroGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_quadro_page_controller.ts').default['handle'], false>
 }
-type EscolaPedagogicoRegistrodiarioGetHead = {
+type EscolaPedagogicoOcorrenciasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_ocorrencias_page_controller.ts').default['handle'], false>
 }
@@ -279,10 +271,6 @@ type EscolaFinanceiroFaturasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_faturas_page_controller.ts').default['handle'], false>
 }
-type EscolaFinanceiroConfiguracaopagamentosGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_configuracao_pagamentos_page_controller.ts').default['handle'], false>
-}
 type EscolaLojasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_lojas_page_controller.ts').default['handle'], false>
@@ -359,7 +347,7 @@ type ResponsavelDocumentosGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_documentos_page_controller.ts').default['handle'], false>
 }
-type ResponsavelRegistrodiarioGetHead = {
+type ResponsavelOcorrenciasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller.ts').default['handle'], false>
 }
@@ -539,10 +527,6 @@ type ApiV1EscolaInsightsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_escola_insights_controller.ts').default['handle'], false>
 }
-type ApiV1EscolaTeacherdashboardGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_escola_teacher_dashboard_controller.ts').default['handle'], false>
-}
 type ApiV1ResponsavelStatsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_responsavel_stats_controller.ts').default['handle'], false>
@@ -603,10 +587,6 @@ type ApiV1ResponsavelProfilePut = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/responsavel.ts')['updateProfileValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/update_profile_controller.ts').default['handle'], true>
 }
-type ApiV1ResponsavelInvoicesIdCheckoutPost = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/invoices/create_invoice_asaas_charge_controller.ts').default['handle'], false>
-}
 type ApiV1ResponsavelStudentsIdWallettopupsPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/wallet_top_up.ts')['createWalletTopUpValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/wallet_top_ups/create_wallet_top_up_controller.ts').default['handle'], true>
@@ -626,14 +606,6 @@ type ApiV1AdminStatsGetHead = {
 type ApiV1AsaasWebhookPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/asaas/asaas_webhook_controller.ts').default['handle'], false>
-}
-type ApiV1AsaasSubaccountsPost = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/asaas_subaccount.ts')['createAsaasSubaccountValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/asaas/create_asaas_subaccount_controller.ts').default['handle'], true>
-}
-type ApiV1AsaasSubaccountsStatusGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/asaas/get_asaas_payment_config_controller.ts').default['handle'], false>
 }
 type ApiV1SchoolsGetHead = {
   request: unknown
@@ -1514,22 +1486,6 @@ type ApiV1AssignmentsIdSubmissionsPost = {
 type ApiV1AssignmentsIdSubmissionsIdPost = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/assignment.ts')['gradeSubmissionValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/assignments/grade_submission_controller.ts').default['handle'], true>
-}
-type ApiV1OccurrencesGetHead = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/occurrence.ts')['listOccurrencesValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/occurrences/list_occurrences_controller.ts').default['handle'], true>
-}
-type ApiV1OccurrencesPost = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/occurrence.ts')['createOccurrenceValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/occurrences/create_occurrence_controller.ts').default['handle'], true>
-}
-type ApiV1OccurrencesTeacherclassesGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/occurrences/list_occurrence_teacher_classes_controller.ts').default['handle'], false>
-}
-type ApiV1OccurrencesIdGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/occurrences/show_occurrence_controller.ts').default['handle'], false>
 }
 type ApiV1StudentpaymentsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/student_payment.ts')['listStudentPaymentsValidator']>>
@@ -2634,19 +2590,7 @@ export interface ApiDefinition {
       };
       '$get': EscolaEventosGetHead;
       '$head': EscolaEventosGetHead;
-      'novo': {
-        '$url': {
-        };
-        '$get': EscolaEventosNovoGetHead;
-        '$head': EscolaEventosNovoGetHead;
-      };
       ':eventId': {
-        'editar': {
-          '$url': {
-          };
-          '$get': EscolaEventosIdEditarGetHead;
-          '$head': EscolaEventosIdEditarGetHead;
-        };
         'autorizacoes': {
           '$url': {
           };
@@ -2698,11 +2642,11 @@ export interface ApiDefinition {
         '$get': EscolaPedagogicoQuadroGetHead;
         '$head': EscolaPedagogicoQuadroGetHead;
       };
-      'registro-diario': {
+      'ocorrencias': {
         '$url': {
         };
-        '$get': EscolaPedagogicoRegistrodiarioGetHead;
-        '$head': EscolaPedagogicoRegistrodiarioGetHead;
+        '$get': EscolaPedagogicoOcorrenciasGetHead;
+        '$head': EscolaPedagogicoOcorrenciasGetHead;
       };
       'atividades': {
         '$url': {
@@ -2822,12 +2766,6 @@ export interface ApiDefinition {
         '$get': EscolaFinanceiroFaturasGetHead;
         '$head': EscolaFinanceiroFaturasGetHead;
       };
-      'configuracao-pagamentos': {
-        '$url': {
-        };
-        '$get': EscolaFinanceiroConfiguracaopagamentosGetHead;
-        '$head': EscolaFinanceiroConfiguracaopagamentosGetHead;
-      };
     };
     'lojas': {
       '$url': {
@@ -2943,11 +2881,11 @@ export interface ApiDefinition {
       '$get': ResponsavelDocumentosGetHead;
       '$head': ResponsavelDocumentosGetHead;
     };
-    'registro-diario': {
+    'ocorrencias': {
       '$url': {
       };
-      '$get': ResponsavelRegistrodiarioGetHead;
-      '$head': ResponsavelRegistrodiarioGetHead;
+      '$get': ResponsavelOcorrenciasGetHead;
+      '$head': ResponsavelOcorrenciasGetHead;
     };
     'perfil': {
       '$url': {
@@ -3219,12 +3157,6 @@ export interface ApiDefinition {
           '$get': ApiV1EscolaInsightsGetHead;
           '$head': ApiV1EscolaInsightsGetHead;
         };
-        'teacher-dashboard': {
-          '$url': {
-          };
-          '$get': ApiV1EscolaTeacherdashboardGetHead;
-          '$head': ApiV1EscolaTeacherdashboardGetHead;
-        };
       };
       'responsavel': {
         'stats': {
@@ -3328,15 +3260,6 @@ export interface ApiDefinition {
           };
           '$put': ApiV1ResponsavelProfilePut;
         };
-        'invoices': {
-          ':id': {
-            'checkout': {
-              '$url': {
-              };
-              '$post': ApiV1ResponsavelInvoicesIdCheckoutPost;
-            };
-          };
-        };
         'wallet-top-ups': {
           ':id': {
             '$url': {
@@ -3391,17 +3314,6 @@ export interface ApiDefinition {
           '$url': {
           };
           '$post': ApiV1AsaasWebhookPost;
-        };
-        'subaccounts': {
-          '$url': {
-          };
-          '$post': ApiV1AsaasSubaccountsPost;
-          'status': {
-            '$url': {
-            };
-            '$get': ApiV1AsaasSubaccountsStatusGetHead;
-            '$head': ApiV1AsaasSubaccountsStatusGetHead;
-          };
         };
       };
       'schools': {
@@ -4441,25 +4353,6 @@ export interface ApiDefinition {
           };
         };
       };
-      'occurrences': {
-        '$url': {
-        };
-        '$get': ApiV1OccurrencesGetHead;
-        '$head': ApiV1OccurrencesGetHead;
-        '$post': ApiV1OccurrencesPost;
-        'teacher-classes': {
-          '$url': {
-          };
-          '$get': ApiV1OccurrencesTeacherclassesGetHead;
-          '$head': ApiV1OccurrencesTeacherclassesGetHead;
-        };
-        ':id': {
-          '$url': {
-          };
-          '$get': ApiV1OccurrencesIdGetHead;
-          '$head': ApiV1OccurrencesIdGetHead;
-        };
-      };
       'student-payments': {
         '$url': {
         };
@@ -5383,13 +5276,6 @@ const routes = [
   },
   {
     params: [],
-    name: 'web.agendar',
-    path: '/agendar',
-    method: ["GET","HEAD"],
-    types: {} as unknown,
-  },
-  {
-    params: [],
     name: 'web.auth.signIn',
     path: '/sign-in',
     method: ["GET","HEAD"],
@@ -5648,20 +5534,6 @@ const routes = [
     types: {} as EscolaEventosGetHead,
   },
   {
-    params: [],
-    name: 'web.escola.eventos.novo',
-    path: '/escola/eventos/novo',
-    method: ["GET","HEAD"],
-    types: {} as EscolaEventosNovoGetHead,
-  },
-  {
-    params: ["eventId"],
-    name: 'web.escola.eventos.editar',
-    path: '/escola/eventos/:eventId/editar',
-    method: ["GET","HEAD"],
-    types: {} as EscolaEventosIdEditarGetHead,
-  },
-  {
     params: ["eventId"],
     name: 'web.escola.eventos.autorizacoes',
     path: '/escola/eventos/:eventId/autorizacoes',
@@ -5720,9 +5592,9 @@ const routes = [
   {
     params: [],
     name: 'web.escola.pedagogico.ocorrencias',
-    path: '/escola/pedagogico/registro-diario',
+    path: '/escola/pedagogico/ocorrencias',
     method: ["GET","HEAD"],
-    types: {} as EscolaPedagogicoRegistrodiarioGetHead,
+    types: {} as EscolaPedagogicoOcorrenciasGetHead,
   },
   {
     params: [],
@@ -5856,13 +5728,6 @@ const routes = [
     path: '/escola/financeiro/faturas',
     method: ["GET","HEAD"],
     types: {} as EscolaFinanceiroFaturasGetHead,
-  },
-  {
-    params: [],
-    name: 'web.escola.financeiro.configuracaoPagamentos',
-    path: '/escola/financeiro/configuracao-pagamentos',
-    method: ["GET","HEAD"],
-    types: {} as EscolaFinanceiroConfiguracaopagamentosGetHead,
   },
   {
     params: [],
@@ -6000,9 +5865,9 @@ const routes = [
   {
     params: [],
     name: 'web.responsavel.ocorrencias',
-    path: '/responsavel/registro-diario',
+    path: '/responsavel/ocorrencias',
     method: ["GET","HEAD"],
-    types: {} as ResponsavelRegistrodiarioGetHead,
+    types: {} as ResponsavelOcorrenciasGetHead,
   },
   {
     params: [],
@@ -6314,13 +6179,6 @@ const routes = [
   },
   {
     params: [],
-    name: 'api.v1.dashboard.escolaTeacherDashboard',
-    path: '/api/v1/escola/teacher-dashboard',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1EscolaTeacherdashboardGetHead,
-  },
-  {
-    params: [],
     name: 'api.v1.dashboard.responsavelStats',
     path: '/api/v1/responsavel/stats',
     method: ["GET","HEAD"],
@@ -6425,13 +6283,6 @@ const routes = [
     types: {} as ApiV1ResponsavelProfilePut,
   },
   {
-    params: ["id"],
-    name: 'api.v1.responsavel.api.invoiceCheckout',
-    path: '/api/v1/responsavel/invoices/:id/checkout',
-    method: ["POST"],
-    types: {} as ApiV1ResponsavelInvoicesIdCheckoutPost,
-  },
-  {
     params: ["studentId"],
     name: 'api.v1.responsavel.api.createWalletTopUp',
     path: '/api/v1/responsavel/students/:studentId/wallet-top-ups',
@@ -6465,20 +6316,6 @@ const routes = [
     path: '/api/v1/asaas/webhook',
     method: ["POST"],
     types: {} as ApiV1AsaasWebhookPost,
-  },
-  {
-    params: [],
-    name: 'api.v1.asaas.subaccounts.create',
-    path: '/api/v1/asaas/subaccounts',
-    method: ["POST"],
-    types: {} as ApiV1AsaasSubaccountsPost,
-  },
-  {
-    params: [],
-    name: 'api.v1.asaas.subaccounts.status',
-    path: '/api/v1/asaas/subaccounts/status',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1AsaasSubaccountsStatusGetHead,
   },
   {
     params: [],
@@ -8019,34 +7856,6 @@ const routes = [
     path: '/api/v1/assignments/:id/submissions/:submissionId',
     method: ["POST"],
     types: {} as ApiV1AssignmentsIdSubmissionsIdPost,
-  },
-  {
-    params: [],
-    name: 'api.v1.occurrences.index',
-    path: '/api/v1/occurrences',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1OccurrencesGetHead,
-  },
-  {
-    params: [],
-    name: 'api.v1.occurrences.store',
-    path: '/api/v1/occurrences',
-    method: ["POST"],
-    types: {} as ApiV1OccurrencesPost,
-  },
-  {
-    params: [],
-    name: 'api.v1.occurrences.teacherClasses',
-    path: '/api/v1/occurrences/teacher-classes',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1OccurrencesTeacherclassesGetHead,
-  },
-  {
-    params: ["id"],
-    name: 'api.v1.occurrences.show',
-    path: '/api/v1/occurrences/:id',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1OccurrencesIdGetHead,
   },
   {
     params: [],

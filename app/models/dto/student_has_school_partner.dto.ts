@@ -7,12 +7,12 @@ export default class StudentHasSchoolPartnerDto extends BaseModelDto {
   declare studentId: string
   declare schoolPartnerId: string
   declare academicPeriodId: string
-  declare startDate: Date
-  declare endDate: Date | null
+  declare startDate: DateTime
+  declare endDate: DateTime | null
   declare isActive: boolean
   declare userId: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: StudentHasSchoolPartner) {
     super()
@@ -23,11 +23,11 @@ export default class StudentHasSchoolPartnerDto extends BaseModelDto {
     this.studentId = model.studentId
     this.schoolPartnerId = model.schoolPartnerId
     this.academicPeriodId = model.academicPeriodId
-    this.startDate = model.startDate.toJSDate()
-    this.endDate = model.endDate?.toJSDate() ?? null
+    this.startDate = model.startDate
+    this.endDate = model.endDate
     this.isActive = model.isActive
     this.userId = model.userId
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

@@ -12,8 +12,8 @@ export default class CourseDto extends BaseModelDto {
   declare enrollmentMinimumAge: number | null
   declare enrollmentMaximumAge: number | null
   declare maxStudentsPerClass: number | null
-  declare createdAt: Date
-  declare updatedAt: Date | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime | null
 
   constructor(model?: Course) {
     super()
@@ -29,7 +29,7 @@ export default class CourseDto extends BaseModelDto {
     this.enrollmentMinimumAge = model.enrollmentMinimumAge
     this.enrollmentMaximumAge = model.enrollmentMaximumAge
     this.maxStudentsPerClass = model.maxStudentsPerClass
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt?.toJSDate() ?? null
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

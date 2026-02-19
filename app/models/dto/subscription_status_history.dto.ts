@@ -8,7 +8,7 @@ export default class SubscriptionStatusHistoryDto extends BaseModelDto {
   declare fromStatus: string | null
   declare toStatus: string
   declare reason: string | null
-  declare changedAt: Date
+  declare changedAt: DateTime
 
   constructor(subscriptionStatusHistory?: SubscriptionStatusHistory) {
     super()
@@ -20,6 +20,6 @@ export default class SubscriptionStatusHistoryDto extends BaseModelDto {
     this.fromStatus = subscriptionStatusHistory.fromStatus
     this.toStatus = subscriptionStatusHistory.toStatus
     this.reason = subscriptionStatusHistory.reason
-    this.changedAt = subscriptionStatusHistory.changedAt.toJSDate()
+    this.changedAt = subscriptionStatusHistory.changedAt
   }
 }

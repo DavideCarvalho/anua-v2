@@ -12,8 +12,8 @@ export default class SubscriptionInvoiceDto extends BaseModelDto {
   declare activeStudents: number
   declare amount: number
   declare status: SubscriptionInvoiceStatus
-  declare dueDate: Date
-  declare paidAt: Date | null
+  declare dueDate: DateTime
+  declare paidAt: DateTime | null
   declare invoiceUrl: string | null
   declare paymentGatewayId: string | null
   declare description: string | null
@@ -21,8 +21,8 @@ export default class SubscriptionInvoiceDto extends BaseModelDto {
   declare creditCardLastFourDigits: string | null
   declare creditCardBrand: string | null
   declare metadata: Record<string, unknown> | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(subscriptionInvoice?: SubscriptionInvoice) {
     super()
@@ -37,8 +37,8 @@ export default class SubscriptionInvoiceDto extends BaseModelDto {
     this.activeStudents = subscriptionInvoice.activeStudents
     this.amount = subscriptionInvoice.amount
     this.status = subscriptionInvoice.status
-    this.dueDate = subscriptionInvoice.dueDate.toJSDate()
-    this.paidAt = subscriptionInvoice.paidAt?.toJSDate() ?? null
+    this.dueDate = subscriptionInvoice.dueDate
+    this.paidAt = subscriptionInvoice.paidAt
     this.invoiceUrl = subscriptionInvoice.invoiceUrl
     this.paymentGatewayId = subscriptionInvoice.paymentGatewayId
     this.description = subscriptionInvoice.description
@@ -46,7 +46,7 @@ export default class SubscriptionInvoiceDto extends BaseModelDto {
     this.creditCardLastFourDigits = subscriptionInvoice.creditCardLastFourDigits
     this.creditCardBrand = subscriptionInvoice.creditCardBrand
     this.metadata = subscriptionInvoice.metadata
-    this.createdAt = subscriptionInvoice.createdAt.toJSDate()
-    this.updatedAt = subscriptionInvoice.updatedAt.toJSDate()
+    this.createdAt = subscriptionInvoice.createdAt
+    this.updatedAt = subscriptionInvoice.updatedAt
   }
 }

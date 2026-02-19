@@ -6,8 +6,8 @@ export default class CoordinatorHasLevelDto extends BaseModelDto {
   declare id: string
   declare coordinatorId: string
   declare levelAssignedToCourseHasAcademicPeriodId: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: CoordinatorHasLevel) {
     super()
@@ -17,7 +17,7 @@ export default class CoordinatorHasLevelDto extends BaseModelDto {
     this.id = model.id
     this.coordinatorId = model.coordinatorId
     this.levelAssignedToCourseHasAcademicPeriodId = model.levelAssignedToCourseHasAcademicPeriodId
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

@@ -8,13 +8,13 @@ export default class LeaderboardDto extends BaseModelDto {
   declare name: string
   declare type: LeaderboardType
   declare period: LeaderboardPeriod
-  declare startDate: Date
-  declare endDate: Date
+  declare startDate: DateTime
+  declare endDate: DateTime
   declare schoolId: string | null
   declare classId: string | null
   declare subjectId: string | null
   declare isActive: boolean
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(leaderboard?: Leaderboard) {
     super()
@@ -25,12 +25,12 @@ export default class LeaderboardDto extends BaseModelDto {
     this.name = leaderboard.name
     this.type = leaderboard.type
     this.period = leaderboard.period
-    this.startDate = leaderboard.startDate.toJSDate()
-    this.endDate = leaderboard.endDate.toJSDate()
+    this.startDate = leaderboard.startDate
+    this.endDate = leaderboard.endDate
     this.schoolId = leaderboard.schoolId
     this.classId = leaderboard.classId
     this.subjectId = leaderboard.subjectId
     this.isActive = leaderboard.isActive
-    this.createdAt = leaderboard.createdAt.toJSDate()
+    this.createdAt = leaderboard.createdAt
   }
 }

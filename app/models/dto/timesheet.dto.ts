@@ -10,9 +10,9 @@ export default class TimesheetDto extends BaseModelDto {
   declare month: number
   declare year: number
   declare status: TimesheetStatus
-  declare closedAt: Date | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare closedAt: DateTime | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: Timesheet) {
     super()
@@ -25,8 +25,8 @@ export default class TimesheetDto extends BaseModelDto {
     this.month = model.month
     this.year = model.year
     this.status = model.status
-    this.closedAt = model.closedAt?.toJSDate() ?? null
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.closedAt = model.closedAt
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

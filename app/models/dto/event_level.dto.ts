@@ -6,7 +6,7 @@ export default class EventLevelDto extends BaseModelDto {
   declare id: string
   declare eventId: string
   declare levelId: string
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(eventLevel?: EventLevel) {
     super()
@@ -16,6 +16,6 @@ export default class EventLevelDto extends BaseModelDto {
     this.id = eventLevel.id
     this.eventId = eventLevel.eventId
     this.levelId = eventLevel.levelId
-    this.createdAt = eventLevel.createdAt.toJSDate()
+    this.createdAt = eventLevel.createdAt
   }
 }

@@ -7,8 +7,8 @@ export default class ClassScheduleDto extends BaseModelDto {
   declare classId: string
   declare name: string
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: ClassSchedule) {
     super()
@@ -19,7 +19,7 @@ export default class ClassScheduleDto extends BaseModelDto {
     this.classId = model.classId
     this.name = model.name
     this.isActive = model.isActive
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

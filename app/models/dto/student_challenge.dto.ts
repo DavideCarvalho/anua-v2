@@ -8,8 +8,8 @@ export default class StudentChallengeDto extends BaseModelDto {
   declare challengeId: string
   declare progress: number
   declare isCompleted: boolean
-  declare completedAt: Date | null
-  declare startedAt: Date
+  declare completedAt: DateTime | null
+  declare startedAt: DateTime
 
   constructor(model?: StudentChallenge) {
     super()
@@ -21,7 +21,7 @@ export default class StudentChallengeDto extends BaseModelDto {
     this.challengeId = model.challengeId
     this.progress = model.progress
     this.isCompleted = model.isCompleted
-    this.completedAt = model.completedAt?.toJSDate() ?? null
-    this.startedAt = model.startedAt.toJSDate()
+    this.completedAt = model.completedAt
+    this.startedAt = model.startedAt
   }
 }

@@ -12,8 +12,8 @@ export default class FixedClassDto extends BaseModelDto {
   declare classWeekDay: string
   declare startTime: string
   declare endTime: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(fixedClass?: FixedClass) {
     super()
@@ -29,7 +29,7 @@ export default class FixedClassDto extends BaseModelDto {
     this.classWeekDay = fixedClass.classWeekDay
     this.startTime = fixedClass.startTime
     this.endTime = fixedClass.endTime
-    this.createdAt = fixedClass.createdAt.toJSDate()
-    this.updatedAt = fixedClass.updatedAt.toJSDate()
+    this.createdAt = fixedClass.createdAt
+    this.updatedAt = fixedClass.updatedAt
   }
 }

@@ -24,11 +24,11 @@ export default class StudentHasLevelDto extends BaseModelDto {
   declare paymentDay: number | null
   declare docusealSubmissionId: string | null
   declare docusealSignatureStatus: DocusealSignatureStatus | null
-  declare documentSignedAt: Date | null
+  declare documentSignedAt: DateTime | null
   declare enrollmentPaymentId: string | null
   declare signedContractFilePath: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   declare academicPeriod?: AcademicPeriodDto
   declare contract?: ContractDto
@@ -56,11 +56,11 @@ export default class StudentHasLevelDto extends BaseModelDto {
     this.paymentDay = model.paymentDay
     this.docusealSubmissionId = model.docusealSubmissionId
     this.docusealSignatureStatus = model.docusealSignatureStatus
-    this.documentSignedAt = model.documentSignedAt?.toJSDate() ?? null
+    this.documentSignedAt = model.documentSignedAt
     this.enrollmentPaymentId = model.enrollmentPaymentId
     this.signedContractFilePath = model.signedContractFilePath
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
 
     this.academicPeriod = model.academicPeriod
       ? new AcademicPeriodDto(model.academicPeriod)

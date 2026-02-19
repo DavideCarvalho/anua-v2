@@ -6,8 +6,8 @@ export default class ResponsibleUserAcceptedOccurenceDto extends BaseModelDto {
   declare id: string
   declare responsibleUserId: string
   declare occurenceId: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: ResponsibleUserAcceptedOccurence) {
     super()
@@ -17,7 +17,7 @@ export default class ResponsibleUserAcceptedOccurenceDto extends BaseModelDto {
     this.id = model.id
     this.responsibleUserId = model.responsibleUserId
     this.occurenceId = model.occurenceId
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

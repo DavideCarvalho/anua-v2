@@ -8,8 +8,8 @@ export default class StoreInstallmentRuleDto extends BaseModelDto {
   declare minAmount: number
   declare maxInstallments: number
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: StoreInstallmentRule) {
     super()
@@ -21,7 +21,7 @@ export default class StoreInstallmentRuleDto extends BaseModelDto {
     this.minAmount = model.minAmount
     this.maxInstallments = model.maxInstallments
     this.isActive = model.isActive
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

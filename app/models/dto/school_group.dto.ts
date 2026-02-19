@@ -14,8 +14,8 @@ export default class SchoolGroupDto extends BaseModelDto {
   declare insuranceCoveragePercentage: number | null
   declare insuranceClaimWaitingDays: number | null
   declare schoolChainId: string
-  declare createdAt: Date
-  declare updatedAt: Date | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime | null
   declare schoolChain?: SchoolChainDto
 
   constructor(model?: SchoolGroup) {
@@ -32,8 +32,8 @@ export default class SchoolGroupDto extends BaseModelDto {
     this.insuranceCoveragePercentage = model.insuranceCoveragePercentage
     this.insuranceClaimWaitingDays = model.insuranceClaimWaitingDays
     this.schoolChainId = model.schoolChainId
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt?.toJSDate() ?? null
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
     this.schoolChain = model.schoolChain ? new SchoolChainDto(model.schoolChain) : undefined
   }
 }

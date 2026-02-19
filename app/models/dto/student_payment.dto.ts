@@ -29,14 +29,14 @@ export default class StudentPaymentDto extends BaseModelDto {
     | 'FAILED'
     | 'RENEGOTIATED'
   declare totalAmount: number
-  declare dueDate: Date
+  declare dueDate: DateTime
   declare installments: number
   declare installmentNumber: number
   declare discountPercentage: number
   declare discountType: 'PERCENTAGE' | 'FLAT'
   declare discountValue: number
-  declare paidAt: Date | null
-  declare emailSentAt: Date | null
+  declare paidAt: DateTime | null
+  declare emailSentAt: DateTime | null
   declare contractId: string
   declare classHasAcademicPeriodId: string | null
   declare studentHasLevelId: string | null
@@ -48,11 +48,10 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare invoiceId: string | null
   declare insuranceBillingId: string | null
   declare studentHasExtraClassId: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare student?: StudentDto
   declare studentHasExtraClass?: StudentHasExtraClassDto
-  declare contract?: { name: string }
 
   constructor(studentPayment?: StudentPayment) {
     super()
@@ -67,14 +66,14 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.type = studentPayment.type
     this.status = studentPayment.status
     this.totalAmount = studentPayment.totalAmount
-    this.dueDate = studentPayment.dueDate.toJSDate()
+    this.dueDate = studentPayment.dueDate
     this.installments = studentPayment.installments
     this.installmentNumber = studentPayment.installmentNumber
     this.discountPercentage = studentPayment.discountPercentage
     this.discountType = studentPayment.discountType
     this.discountValue = studentPayment.discountValue
-    this.paidAt = studentPayment.paidAt?.toJSDate() ?? null
-    this.emailSentAt = studentPayment.emailSentAt?.toJSDate() ?? null
+    this.paidAt = studentPayment.paidAt
+    this.emailSentAt = studentPayment.emailSentAt
     this.contractId = studentPayment.contractId
     this.classHasAcademicPeriodId = studentPayment.classHasAcademicPeriodId
     this.studentHasLevelId = studentPayment.studentHasLevelId
@@ -86,12 +85,11 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.invoiceId = studentPayment.invoiceId
     this.insuranceBillingId = studentPayment.insuranceBillingId
     this.studentHasExtraClassId = studentPayment.studentHasExtraClassId
-    this.createdAt = studentPayment.createdAt.toJSDate()
-    this.updatedAt = studentPayment.updatedAt.toJSDate()
+    this.createdAt = studentPayment.createdAt
+    this.updatedAt = studentPayment.updatedAt
     this.student = studentPayment.student ? new StudentDto(studentPayment.student) : undefined
     this.studentHasExtraClass = studentPayment.studentHasExtraClass
       ? new StudentHasExtraClassDto(studentPayment.studentHasExtraClass)
       : undefined
-    this.contract = studentPayment.contract ? { name: studentPayment.contract.name } : undefined
   }
 }

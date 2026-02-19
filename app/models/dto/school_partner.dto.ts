@@ -11,11 +11,11 @@ export default class SchoolPartnerDto extends BaseModelDto {
   declare phone: string | null
   declare contactName: string | null
   declare discountPercentage: number
-  declare partnershipStartDate: Date
-  declare partnershipEndDate: Date | null
+  declare partnershipStartDate: DateTime
+  declare partnershipEndDate: DateTime | null
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: SchoolPartner) {
     super()
@@ -30,10 +30,10 @@ export default class SchoolPartnerDto extends BaseModelDto {
     this.phone = model.phone
     this.contactName = model.contactName
     this.discountPercentage = model.discountPercentage
-    this.partnershipStartDate = model.partnershipStartDate.toJSDate()
-    this.partnershipEndDate = model.partnershipEndDate?.toJSDate() ?? null
+    this.partnershipStartDate = model.partnershipStartDate
+    this.partnershipEndDate = model.partnershipEndDate
     this.isActive = model.isActive
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

@@ -28,8 +28,8 @@ export class SubmissionDto extends BaseModelDto {
   declare score: number | null
   declare feedback: string | null
   declare status: string
-  declare submittedAt: Date | string | null
-  declare gradedAt: Date | string | null
+  declare submittedAt: DateTime | string | null
+  declare gradedAt: DateTime | string | null
 
   constructor(data: {
     id: string
@@ -44,8 +44,8 @@ export class SubmissionDto extends BaseModelDto {
     this.score = data.score
     this.feedback = data.feedback
     this.status = data.status
-    this.submittedAt = data.submittedAt.toJSDate()
-    this.gradedAt = data.gradedAt.toJSDate()
+    this.submittedAt = data.submittedAt
+    this.gradedAt = data.gradedAt
   }
 }
 
@@ -55,7 +55,7 @@ export class AssignmentDto extends BaseModelDto {
   declare description: string | null
   declare instructions: string | null
   declare maxScore: number
-  declare dueDate: Date | string
+  declare dueDate: DateTime | string
   declare subject: SubjectFilterDto
   declare teacher: TeacherDto
   declare submission: SubmissionDto | null
@@ -79,7 +79,7 @@ export class AssignmentDto extends BaseModelDto {
     this.description = data.description
     this.instructions = data.instructions
     this.maxScore = data.maxScore
-    this.dueDate = data.dueDate.toJSDate()
+    this.dueDate = data.dueDate
     this.subject = data.subject
     this.teacher = data.teacher
     this.submission = data.submission

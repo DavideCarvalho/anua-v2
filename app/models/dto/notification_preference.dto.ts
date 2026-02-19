@@ -12,8 +12,8 @@ export default class NotificationPreferenceDto extends BaseModelDto {
   declare enablePush: boolean
   declare enableSms: boolean
   declare enableWhatsApp: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(notificationPreference?: NotificationPreference) {
     super()
@@ -28,7 +28,7 @@ export default class NotificationPreferenceDto extends BaseModelDto {
     this.enablePush = notificationPreference.enablePush
     this.enableSms = notificationPreference.enableSms
     this.enableWhatsApp = notificationPreference.enableWhatsApp
-    this.createdAt = notificationPreference.createdAt.toJSDate()
-    this.updatedAt = notificationPreference.updatedAt.toJSDate()
+    this.createdAt = notificationPreference.createdAt
+    this.updatedAt = notificationPreference.updatedAt
   }
 }

@@ -13,8 +13,8 @@ export default class TeacherHasClassDto extends BaseModelDto {
   declare endTime: string | null
   declare teacherAvailabilityId: string | null
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: TeacherHasClass) {
     super()
@@ -31,7 +31,7 @@ export default class TeacherHasClassDto extends BaseModelDto {
     this.endTime = model.endTime
     this.teacherAvailabilityId = model.teacherAvailabilityId
     this.isActive = model.isActive
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

@@ -6,10 +6,10 @@ export default class AgreementDto extends BaseModelDto {
   declare id: string
   declare totalAmount: number
   declare installments: number
-  declare startDate: Date
+  declare startDate: DateTime
   declare paymentDay: number
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(agreement?: Agreement) {
     super()
@@ -19,9 +19,9 @@ export default class AgreementDto extends BaseModelDto {
     this.id = agreement.id
     this.totalAmount = agreement.totalAmount
     this.installments = agreement.installments
-    this.startDate = agreement.startDate.toJSDate()
+    this.startDate = agreement.startDate
     this.paymentDay = agreement.paymentDay
-    this.createdAt = agreement.createdAt.toJSDate()
-    this.updatedAt = agreement.updatedAt.toJSDate()
+    this.createdAt = agreement.createdAt
+    this.updatedAt = agreement.updatedAt
   }
 }

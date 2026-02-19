@@ -16,7 +16,7 @@ export default class StoreOrderItemDto extends BaseModelDto {
   declare itemName: string
   declare itemDescription: string | null
   declare itemImageUrl: string | null
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(model?: StoreOrderItem) {
     super()
@@ -35,6 +35,6 @@ export default class StoreOrderItemDto extends BaseModelDto {
     this.itemName = model.itemName
     this.itemDescription = model.itemDescription
     this.itemImageUrl = model.itemImageUrl
-    this.createdAt = model.createdAt.toJSDate()
+    this.createdAt = model.createdAt
   }
 }

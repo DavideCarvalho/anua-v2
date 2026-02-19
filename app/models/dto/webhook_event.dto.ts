@@ -10,11 +10,11 @@ export default class WebhookEventDto extends BaseModelDto {
   declare eventType: string
   declare payload: Record<string, unknown>
   declare status: WebhookEventStatus
-  declare processedAt: Date | null
+  declare processedAt: DateTime | null
   declare error: string | null
   declare attempts: number
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: WebhookEvent) {
     super()
@@ -27,10 +27,10 @@ export default class WebhookEventDto extends BaseModelDto {
     this.eventType = model.eventType
     this.payload = model.payload
     this.status = model.status
-    this.processedAt = model.processedAt?.toJSDate() ?? null
+    this.processedAt = model.processedAt
     this.error = model.error
     this.attempts = model.attempts
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

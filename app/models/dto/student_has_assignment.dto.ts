@@ -8,9 +8,9 @@ export default class StudentHasAssignmentDto extends BaseModelDto {
   declare studentId: string
   declare assignmentId: string
   declare grade: number | null
-  declare submittedAt: Date | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare submittedAt: DateTime | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare student?: StudentDto
 
   constructor(model?: StudentHasAssignment) {
@@ -22,9 +22,9 @@ export default class StudentHasAssignmentDto extends BaseModelDto {
     this.studentId = model.studentId
     this.assignmentId = model.assignmentId
     this.grade = model.grade
-    this.submittedAt = model.submittedAt?.toJSDate() ?? null
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.submittedAt = model.submittedAt
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
     this.student = model.student ? new StudentDto(model.student) : undefined
   }
 }

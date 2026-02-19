@@ -9,7 +9,7 @@ export default class AuditLogDto extends BaseModelDto {
   declare entity: string
   declare entityId: string
   declare details: Record<string, unknown> | null
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(auditLog?: AuditLog) {
     super()
@@ -22,6 +22,6 @@ export default class AuditLogDto extends BaseModelDto {
     this.entity = auditLog.entity
     this.entityId = auditLog.entityId
     this.details = auditLog.details
-    this.createdAt = auditLog.createdAt.toJSDate()
+    this.createdAt = auditLog.createdAt
   }
 }

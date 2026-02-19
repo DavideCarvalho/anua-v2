@@ -13,12 +13,12 @@ export default class ChallengeDto extends BaseModelDto {
   declare criteria: Record<string, unknown>
   declare isRecurring: boolean
   declare recurrencePeriod: RecurrencePeriod | null
-  declare startDate: Date | null
-  declare endDate: Date | null
+  declare startDate: DateTime | null
+  declare endDate: DateTime | null
   declare schoolId: string | null
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(challenge?: Challenge) {
     super()
@@ -34,11 +34,11 @@ export default class ChallengeDto extends BaseModelDto {
     this.criteria = challenge.criteria
     this.isRecurring = challenge.isRecurring
     this.recurrencePeriod = challenge.recurrencePeriod
-    this.startDate = challenge.startDate?.toJSDate() ?? null
-    this.endDate = challenge.endDate?.toJSDate() ?? null
+    this.startDate = challenge.startDate
+    this.endDate = challenge.endDate
     this.schoolId = challenge.schoolId
     this.isActive = challenge.isActive
-    this.createdAt = challenge.createdAt.toJSDate()
-    this.updatedAt = challenge.updatedAt.toJSDate()
+    this.createdAt = challenge.createdAt
+    this.updatedAt = challenge.updatedAt
   }
 }

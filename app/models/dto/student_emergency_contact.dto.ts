@@ -11,8 +11,8 @@ export default class StudentEmergencyContactDto extends BaseModelDto {
   declare phone: string
   declare relationship: EmergencyContactRelationship
   declare order: number
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: StudentEmergencyContact) {
     super()
@@ -26,7 +26,7 @@ export default class StudentEmergencyContactDto extends BaseModelDto {
     this.phone = model.phone
     this.relationship = model.relationship
     this.order = model.order
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

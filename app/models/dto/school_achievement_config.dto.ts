@@ -7,8 +7,8 @@ export default class SchoolAchievementConfigDto extends BaseModelDto {
   declare schoolId: string
   declare achievementId: string
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: SchoolAchievementConfig) {
     super()
@@ -19,7 +19,7 @@ export default class SchoolAchievementConfigDto extends BaseModelDto {
     this.schoolId = model.schoolId
     this.achievementId = model.achievementId
     this.isActive = model.isActive
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

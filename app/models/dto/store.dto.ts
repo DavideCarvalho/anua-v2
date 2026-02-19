@@ -12,9 +12,9 @@ export default class StoreDto extends BaseModelDto {
   declare type: StoreType
   declare commissionPercentage: number | null
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
-  declare deletedAt: Date | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
+  declare deletedAt: DateTime | null
   declare owner: { id: string; name: string } | null
 
   constructor(store?: Store) {
@@ -30,9 +30,9 @@ export default class StoreDto extends BaseModelDto {
     this.type = store.type
     this.commissionPercentage = store.commissionPercentage
     this.isActive = store.isActive
-    this.createdAt = store.createdAt.toJSDate()
-    this.updatedAt = store.updatedAt.toJSDate()
-    this.deletedAt = store.deletedAt?.toJSDate() ?? null
+    this.createdAt = store.createdAt
+    this.updatedAt = store.updatedAt
+    this.deletedAt = store.deletedAt
     this.owner = store.owner ? { id: store.owner.id, name: store.owner.name } : null
   }
 }

@@ -9,18 +9,18 @@ export default class EventParentalConsentDto extends BaseModelDto {
   declare studentId: string
   declare responsibleId: string
   declare status: ParentalConsentStatus
-  declare respondedAt: Date | null
-  declare expiresAt: Date | null
+  declare respondedAt: DateTime | null
+  declare expiresAt: DateTime | null
   declare approvalNotes: string | null
   declare denialReason: string | null
   declare signature: string | null
   declare ipAddress: string | null
-  declare emailSentAt: Date | null
-  declare reminderSentAt: Date | null
+  declare emailSentAt: DateTime | null
+  declare reminderSentAt: DateTime | null
   declare reminderCount: number
   declare metadata: Record<string, unknown> | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(eventParentalConsent?: EventParentalConsent) {
     super()
@@ -32,17 +32,17 @@ export default class EventParentalConsentDto extends BaseModelDto {
     this.studentId = eventParentalConsent.studentId
     this.responsibleId = eventParentalConsent.responsibleId
     this.status = eventParentalConsent.status
-    this.respondedAt = eventParentalConsent.respondedAt?.toJSDate() ?? null
-    this.expiresAt = eventParentalConsent.expiresAt?.toJSDate() ?? null
+    this.respondedAt = eventParentalConsent.respondedAt
+    this.expiresAt = eventParentalConsent.expiresAt
     this.approvalNotes = eventParentalConsent.approvalNotes
     this.denialReason = eventParentalConsent.denialReason
     this.signature = eventParentalConsent.signature
     this.ipAddress = eventParentalConsent.ipAddress
-    this.emailSentAt = eventParentalConsent.emailSentAt?.toJSDate() ?? null
-    this.reminderSentAt = eventParentalConsent.reminderSentAt?.toJSDate() ?? null
+    this.emailSentAt = eventParentalConsent.emailSentAt
+    this.reminderSentAt = eventParentalConsent.reminderSentAt
     this.reminderCount = eventParentalConsent.reminderCount
     this.metadata = eventParentalConsent.metadata
-    this.createdAt = eventParentalConsent.createdAt.toJSDate()
-    this.updatedAt = eventParentalConsent.updatedAt.toJSDate()
+    this.createdAt = eventParentalConsent.createdAt
+    this.updatedAt = eventParentalConsent.updatedAt
   }
 }

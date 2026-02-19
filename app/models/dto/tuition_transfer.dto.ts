@@ -16,10 +16,10 @@ export default class TuitionTransferDto extends BaseModelDto {
   declare pixTransactionStatus: string | null
   declare failureReason: string | null
   declare retryCount: number
-  declare lastRetryAt: Date | null
-  declare processedAt: Date | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare lastRetryAt: DateTime | null
+  declare processedAt: DateTime | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: TuitionTransfer) {
     super()
@@ -38,9 +38,9 @@ export default class TuitionTransferDto extends BaseModelDto {
     this.pixTransactionStatus = model.pixTransactionStatus
     this.failureReason = model.failureReason
     this.retryCount = model.retryCount
-    this.lastRetryAt = model.lastRetryAt?.toJSDate() ?? null
-    this.processedAt = model.processedAt?.toJSDate() ?? null
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.lastRetryAt = model.lastRetryAt
+    this.processedAt = model.processedAt
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

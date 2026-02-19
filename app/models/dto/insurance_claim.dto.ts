@@ -6,20 +6,20 @@ import type { DateTime } from 'luxon'
 export default class InsuranceClaimDto extends BaseModelDto {
   declare id: string
   declare studentPaymentId: string
-  declare claimDate: Date
+  declare claimDate: DateTime
   declare overdueAmount: number
   declare coveragePercentage: number
   declare coveredAmount: number
   declare status: InsuranceClaimStatus
-  declare approvedAt: Date | null
+  declare approvedAt: DateTime | null
   declare approvedBy: string | null
-  declare paidAt: Date | null
-  declare rejectedAt: Date | null
+  declare paidAt: DateTime | null
+  declare rejectedAt: DateTime | null
   declare rejectedBy: string | null
   declare rejectionReason: string | null
   declare notes: string | null
-  declare createdAt: Date
-  declare updatedAt: Date | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime | null
 
   constructor(insuranceClaim?: InsuranceClaim) {
     super()
@@ -28,19 +28,19 @@ export default class InsuranceClaimDto extends BaseModelDto {
 
     this.id = insuranceClaim.id
     this.studentPaymentId = insuranceClaim.studentPaymentId
-    this.claimDate = insuranceClaim.claimDate.toJSDate()
+    this.claimDate = insuranceClaim.claimDate
     this.overdueAmount = insuranceClaim.overdueAmount
     this.coveragePercentage = insuranceClaim.coveragePercentage
     this.coveredAmount = insuranceClaim.coveredAmount
     this.status = insuranceClaim.status
-    this.approvedAt = insuranceClaim.approvedAt?.toJSDate() ?? null
+    this.approvedAt = insuranceClaim.approvedAt
     this.approvedBy = insuranceClaim.approvedBy
-    this.paidAt = insuranceClaim.paidAt?.toJSDate() ?? null
-    this.rejectedAt = insuranceClaim.rejectedAt?.toJSDate() ?? null
+    this.paidAt = insuranceClaim.paidAt
+    this.rejectedAt = insuranceClaim.rejectedAt
     this.rejectedBy = insuranceClaim.rejectedBy
     this.rejectionReason = insuranceClaim.rejectionReason
     this.notes = insuranceClaim.notes
-    this.createdAt = insuranceClaim.createdAt.toJSDate()
-    this.updatedAt = insuranceClaim.updatedAt?.toJSDate() ?? null
+    this.createdAt = insuranceClaim.createdAt
+    this.updatedAt = insuranceClaim.updatedAt
   }
 }

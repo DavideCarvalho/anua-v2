@@ -14,13 +14,13 @@ export default class StoreSettlementDto extends BaseModelDto {
   declare transferAmount: number
   declare status: StoreSettlementStatus
   declare approvedBy: string | null
-  declare approvedAt: Date | null
-  declare processedAt: Date | null
+  declare approvedAt: DateTime | null
+  declare processedAt: DateTime | null
   declare pixTransactionId: string | null
   declare failureReason: string | null
   declare notes: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(settlement?: StoreSettlement) {
     super()
@@ -37,12 +37,12 @@ export default class StoreSettlementDto extends BaseModelDto {
     this.transferAmount = settlement.transferAmount
     this.status = settlement.status
     this.approvedBy = settlement.approvedBy
-    this.approvedAt = settlement.approvedAt?.toJSDate() ?? null
-    this.processedAt = settlement.processedAt?.toJSDate() ?? null
+    this.approvedAt = settlement.approvedAt
+    this.processedAt = settlement.processedAt
     this.pixTransactionId = settlement.pixTransactionId
     this.failureReason = settlement.failureReason
     this.notes = settlement.notes
-    this.createdAt = settlement.createdAt.toJSDate()
-    this.updatedAt = settlement.updatedAt.toJSDate()
+    this.createdAt = settlement.createdAt
+    this.updatedAt = settlement.updatedAt
   }
 }

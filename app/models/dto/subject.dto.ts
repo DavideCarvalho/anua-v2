@@ -9,8 +9,8 @@ export default class SubjectDto extends BaseModelDto {
   declare slug: string
   declare quantityNeededScheduled: number
   declare schoolId: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare school?: SchoolDto
 
   constructor(subject?: Subject) {
@@ -23,8 +23,8 @@ export default class SubjectDto extends BaseModelDto {
     this.slug = subject.slug
     this.quantityNeededScheduled = subject.quantityNeededScheduled
     this.schoolId = subject.schoolId
-    this.createdAt = subject.createdAt.toJSDate()
-    this.updatedAt = subject.updatedAt.toJSDate()
+    this.createdAt = subject.createdAt
+    this.updatedAt = subject.updatedAt
     this.school = subject.school ? new SchoolDto(subject.school) : undefined
   }
 }

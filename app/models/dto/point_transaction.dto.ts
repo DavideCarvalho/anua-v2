@@ -12,7 +12,7 @@ export default class PointTransactionDto extends BaseModelDto {
   declare reason: string | null
   declare relatedEntityType: string | null
   declare relatedEntityId: string | null
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(model?: PointTransaction) {
     super()
@@ -27,6 +27,6 @@ export default class PointTransactionDto extends BaseModelDto {
     this.reason = model.reason
     this.relatedEntityType = model.relatedEntityType
     this.relatedEntityId = model.relatedEntityId
-    this.createdAt = model.createdAt.toJSDate()
+    this.createdAt = model.createdAt
   }
 }

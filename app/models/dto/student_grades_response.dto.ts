@@ -40,9 +40,9 @@ export class RecentAssignmentDto extends BaseModelDto {
   declare maxScore: number
   declare score: number | null
   declare status: string
-  declare dueDate: Date | null
-  declare submittedAt: Date | null
-  declare gradedAt: Date | null
+  declare dueDate: DateTime | null
+  declare submittedAt: DateTime | null
+  declare gradedAt: DateTime | null
 
   constructor(data: {
     assignmentId: string
@@ -62,9 +62,9 @@ export class RecentAssignmentDto extends BaseModelDto {
     this.maxScore = data.maxScore
     this.score = data.score
     this.status = data.status
-    this.dueDate = data.dueDate?.toJSDate() ?? null
-    this.submittedAt = data.submittedAt?.toJSDate() ?? null
-    this.gradedAt = data.gradedAt?.toJSDate() ?? null
+    this.dueDate = data.dueDate
+    this.submittedAt = data.submittedAt
+    this.gradedAt = data.gradedAt
   }
 }
 

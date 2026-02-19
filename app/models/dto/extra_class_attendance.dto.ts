@@ -7,10 +7,10 @@ export default class ExtraClassAttendanceDto extends BaseModelDto {
   declare id: string
   declare extraClassId: string
   declare extraClassScheduleId: string
-  declare date: Date
+  declare date: DateTime
   declare note: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare studentAttendances?: StudentHasExtraClassAttendanceDto[]
 
   constructor(model?: ExtraClassAttendance) {
@@ -20,10 +20,10 @@ export default class ExtraClassAttendanceDto extends BaseModelDto {
     this.id = model.id
     this.extraClassId = model.extraClassId
     this.extraClassScheduleId = model.extraClassScheduleId
-    this.date = model.date.toJSDate()
+    this.date = model.date
     this.note = model.note
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
     this.studentAttendances = model.studentAttendances
       ? model.studentAttendances.map((sa) => new StudentHasExtraClassAttendanceDto(sa))
       : undefined

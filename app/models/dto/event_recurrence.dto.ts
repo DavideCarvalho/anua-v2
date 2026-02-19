@@ -9,9 +9,9 @@ export default class EventRecurrenceDto extends BaseModelDto {
   declare interval: number
   declare daysOfWeek: number[] | null
   declare dayOfMonth: number | null
-  declare endDate: Date | null
+  declare endDate: DateTime | null
   declare occurrences: number | null
-  declare createdAt: Date
+  declare createdAt: DateTime
 
   constructor(eventRecurrence?: EventRecurrence) {
     super()
@@ -24,8 +24,8 @@ export default class EventRecurrenceDto extends BaseModelDto {
     this.interval = eventRecurrence.interval
     this.daysOfWeek = eventRecurrence.daysOfWeek
     this.dayOfMonth = eventRecurrence.dayOfMonth
-    this.endDate = eventRecurrence.endDate?.toJSDate() ?? null
+    this.endDate = eventRecurrence.endDate
     this.occurrences = eventRecurrence.occurrences
-    this.createdAt = eventRecurrence.createdAt.toJSDate()
+    this.createdAt = eventRecurrence.createdAt
   }
 }

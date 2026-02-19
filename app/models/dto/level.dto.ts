@@ -12,8 +12,8 @@ export default class LevelDto extends BaseModelDto {
   declare schoolId: string
   declare contractId: string | null
   declare isActive: boolean
-  declare createdAt: Date
-  declare updatedAt: Date | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime | null
   declare school?: SchoolDto
   declare classes?: ClassDto[]
 
@@ -29,8 +29,8 @@ export default class LevelDto extends BaseModelDto {
     this.schoolId = level.schoolId
     this.contractId = level.contractId
     this.isActive = level.isActive
-    this.createdAt = level.createdAt.toJSDate()
-    this.updatedAt = level.updatedAt?.toJSDate() ?? null
+    this.createdAt = level.createdAt
+    this.updatedAt = level.updatedAt
     this.school = level.school ? new SchoolDto(level.school) : undefined
     this.classes = level.classes?.map((c) => new ClassDto(c))
   }

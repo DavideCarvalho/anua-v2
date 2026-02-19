@@ -8,8 +8,8 @@ export default class ExtraClassScheduleDto extends BaseModelDto {
   declare weekDay: number
   declare startTime: string
   declare endTime: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: ExtraClassSchedule) {
     super()
@@ -20,7 +20,7 @@ export default class ExtraClassScheduleDto extends BaseModelDto {
     this.weekDay = model.weekDay
     this.startTime = model.startTime
     this.endTime = model.endTime
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

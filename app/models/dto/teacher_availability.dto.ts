@@ -8,8 +8,8 @@ export default class TeacherAvailabilityDto extends BaseModelDto {
   declare day: string
   declare startTime: string
   declare endTime: string
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: TeacherAvailability) {
     super()
@@ -21,7 +21,7 @@ export default class TeacherAvailabilityDto extends BaseModelDto {
     this.day = model.day
     this.startTime = model.startTime
     this.endTime = model.endTime
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

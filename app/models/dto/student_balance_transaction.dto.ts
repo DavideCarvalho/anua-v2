@@ -16,8 +16,8 @@ export default class StudentBalanceTransactionDto extends BaseModelDto {
   declare responsibleId: string | null
   declare paymentGatewayId: string | null
   declare paymentMethod: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: StudentBalanceTransaction) {
     super()
@@ -37,7 +37,7 @@ export default class StudentBalanceTransactionDto extends BaseModelDto {
     this.responsibleId = model.responsibleId
     this.paymentGatewayId = model.paymentGatewayId
     this.paymentMethod = model.paymentMethod
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

@@ -6,8 +6,8 @@ export default class SchoolGamificationSettingsDto extends BaseModelDto {
   declare id: string
   declare schoolId: string
   declare pointsToMoneyRate: number
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: SchoolGamificationSettings) {
     super()
@@ -17,7 +17,7 @@ export default class SchoolGamificationSettingsDto extends BaseModelDto {
     this.id = model.id
     this.schoolId = model.schoolId
     this.pointsToMoneyRate = model.pointsToMoneyRate
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

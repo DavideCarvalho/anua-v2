@@ -12,10 +12,10 @@ export default class StudentHasExtraClassDto extends BaseModelDto {
   declare scholarshipId: string | null
   declare paymentMethod: 'BOLETO' | 'CREDIT_CARD' | 'PIX'
   declare paymentDay: number
-  declare enrolledAt: Date
-  declare cancelledAt: Date | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare enrolledAt: DateTime
+  declare cancelledAt: DateTime | null
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
   declare student?: StudentDto
   declare extraClass?: ExtraClassDto
 
@@ -30,10 +30,10 @@ export default class StudentHasExtraClassDto extends BaseModelDto {
     this.scholarshipId = model.scholarshipId
     this.paymentMethod = model.paymentMethod
     this.paymentDay = model.paymentDay
-    this.enrolledAt = model.enrolledAt.toJSDate()
-    this.cancelledAt = model.cancelledAt?.toJSDate() ?? null
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.enrolledAt = model.enrolledAt
+    this.cancelledAt = model.cancelledAt
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
     this.student = model.student ? new StudentDto(model.student) : undefined
     this.extraClass = model.extraClass ? new ExtraClassDto(model.extraClass) : undefined
   }

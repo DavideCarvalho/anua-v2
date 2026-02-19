@@ -9,8 +9,8 @@ export default class ClassDto extends BaseModelDto {
   declare schoolId: string
   declare levelId: string | null
   declare isArchived: boolean
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: Class_) {
     super()
@@ -23,7 +23,7 @@ export default class ClassDto extends BaseModelDto {
     this.schoolId = model.schoolId
     this.levelId = model.levelId
     this.isArchived = model.isArchived
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

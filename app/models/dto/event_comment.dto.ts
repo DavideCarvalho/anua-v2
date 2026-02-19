@@ -8,8 +8,8 @@ export default class EventCommentDto extends BaseModelDto {
   declare userId: string
   declare content: string
   declare parentId: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(eventComment?: EventComment) {
     super()
@@ -21,7 +21,7 @@ export default class EventCommentDto extends BaseModelDto {
     this.userId = eventComment.userId
     this.content = eventComment.content
     this.parentId = eventComment.parentId
-    this.createdAt = eventComment.createdAt.toJSDate()
-    this.updatedAt = eventComment.updatedAt.toJSDate()
+    this.createdAt = eventComment.createdAt
+    this.updatedAt = eventComment.updatedAt
   }
 }

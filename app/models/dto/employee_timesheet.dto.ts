@@ -8,10 +8,10 @@ export default class EmployeeTimesheetDto extends BaseModelDto {
   declare timesheetId: string
   declare userId: string
   declare status: EmployeeTimesheetStatus
-  declare closedAt: Date | null
+  declare closedAt: DateTime | null
   declare observations: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: EmployeeTimesheet) {
     super()
@@ -22,9 +22,9 @@ export default class EmployeeTimesheetDto extends BaseModelDto {
     this.timesheetId = model.timesheetId
     this.userId = model.userId
     this.status = model.status
-    this.closedAt = model.closedAt?.toJSDate() ?? null
+    this.closedAt = model.closedAt
     this.observations = model.observations
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }

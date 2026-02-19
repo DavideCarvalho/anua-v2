@@ -7,8 +7,8 @@ export default class StudentCanteenCategoryRestrictionDto extends BaseModelDto {
   declare studentId: string
   declare category: string
   declare createdBy: string | null
-  declare createdAt: Date
-  declare updatedAt: Date
+  declare createdAt: DateTime
+  declare updatedAt: DateTime
 
   constructor(model?: StudentCanteenCategoryRestriction) {
     super()
@@ -19,7 +19,7 @@ export default class StudentCanteenCategoryRestrictionDto extends BaseModelDto {
     this.studentId = model.studentId
     this.category = model.category
     this.createdBy = model.createdBy
-    this.createdAt = model.createdAt.toJSDate()
-    this.updatedAt = model.updatedAt.toJSDate()
+    this.createdAt = model.createdAt
+    this.updatedAt = model.updatedAt
   }
 }
