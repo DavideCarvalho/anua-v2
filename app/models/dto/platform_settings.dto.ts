@@ -7,8 +7,8 @@ export default class PlatformSettingsDto extends BaseModelDto {
   declare defaultTrialDays: number
   declare defaultPricePerStudent: number
   declare defaultStorePlatformFeePercentage: number
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: PlatformSettings) {
     super()
@@ -19,7 +19,7 @@ export default class PlatformSettingsDto extends BaseModelDto {
     this.defaultTrialDays = model.defaultTrialDays
     this.defaultPricePerStudent = model.defaultPricePerStudent
     this.defaultStorePlatformFeePercentage = model.defaultStorePlatformFeePercentage
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

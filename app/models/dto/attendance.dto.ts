@@ -5,10 +5,10 @@ import type { DateTime } from 'luxon'
 export default class AttendanceDto extends BaseModelDto {
   declare id: string
   declare note: string | null
-  declare date: DateTime
+  declare date: Date
   declare calendarSlotId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(attendance?: Attendance) {
     super()
@@ -17,9 +17,9 @@ export default class AttendanceDto extends BaseModelDto {
 
     this.id = attendance.id
     this.note = attendance.note
-    this.date = attendance.date
+    this.date = attendance.date.toJSDate()
     this.calendarSlotId = attendance.calendarSlotId
-    this.createdAt = attendance.createdAt
-    this.updatedAt = attendance.updatedAt
+    this.createdAt = attendance.createdAt.toJSDate()
+    this.updatedAt = attendance.updatedAt.toJSDate()
   }
 }

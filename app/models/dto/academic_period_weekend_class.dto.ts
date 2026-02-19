@@ -5,9 +5,9 @@ import type { DateTime } from 'luxon'
 export default class AcademicPeriodWeekendClassDto extends BaseModelDto {
   declare id: string
   declare academicPeriodId: string
-  declare date: DateTime
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare date: Date
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(academicPeriodWeekendClass?: AcademicPeriodWeekendClass) {
     super()
@@ -16,8 +16,8 @@ export default class AcademicPeriodWeekendClassDto extends BaseModelDto {
 
     this.id = academicPeriodWeekendClass.id
     this.academicPeriodId = academicPeriodWeekendClass.academicPeriodId
-    this.date = academicPeriodWeekendClass.date
-    this.createdAt = academicPeriodWeekendClass.createdAt
-    this.updatedAt = academicPeriodWeekendClass.updatedAt
+    this.date = academicPeriodWeekendClass.date.toJSDate()
+    this.createdAt = academicPeriodWeekendClass.createdAt.toJSDate()
+    this.updatedAt = academicPeriodWeekendClass.updatedAt.toJSDate()
   }
 }

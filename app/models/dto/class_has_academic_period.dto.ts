@@ -6,8 +6,8 @@ export default class ClassHasAcademicPeriodDto extends BaseModelDto {
   declare id: string
   declare classId: string
   declare academicPeriodId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: ClassHasAcademicPeriod) {
     super()
@@ -17,7 +17,7 @@ export default class ClassHasAcademicPeriodDto extends BaseModelDto {
     this.id = model.id
     this.classId = model.classId
     this.academicPeriodId = model.academicPeriodId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

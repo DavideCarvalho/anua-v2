@@ -6,8 +6,8 @@ export default class UserLikedPostDto extends BaseModelDto {
   declare id: string
   declare userId: string
   declare postId: number
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: UserLikedPost) {
     super()
@@ -17,7 +17,7 @@ export default class UserLikedPostDto extends BaseModelDto {
     this.id = model.id
     this.userId = model.userId
     this.postId = model.postId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

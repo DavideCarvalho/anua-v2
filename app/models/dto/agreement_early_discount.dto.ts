@@ -7,8 +7,8 @@ export default class AgreementEarlyDiscountDto extends BaseModelDto {
   declare agreementId: string
   declare percentage: number
   declare daysBeforeDeadline: number
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(agreementEarlyDiscount?: AgreementEarlyDiscount) {
     super()
@@ -19,7 +19,7 @@ export default class AgreementEarlyDiscountDto extends BaseModelDto {
     this.agreementId = agreementEarlyDiscount.agreementId
     this.percentage = agreementEarlyDiscount.percentage
     this.daysBeforeDeadline = agreementEarlyDiscount.daysBeforeDeadline
-    this.createdAt = agreementEarlyDiscount.createdAt
-    this.updatedAt = agreementEarlyDiscount.updatedAt
+    this.createdAt = agreementEarlyDiscount.createdAt.toJSDate()
+    this.updatedAt = agreementEarlyDiscount.updatedAt.toJSDate()
   }
 }

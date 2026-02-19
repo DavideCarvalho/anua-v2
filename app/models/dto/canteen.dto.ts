@@ -6,8 +6,8 @@ export default class CanteenDto extends BaseModelDto {
   declare id: string
   declare schoolId: string
   declare responsibleUserId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(canteen?: Canteen) {
     super()
@@ -17,7 +17,7 @@ export default class CanteenDto extends BaseModelDto {
     this.id = canteen.id
     this.schoolId = canteen.schoolId
     this.responsibleUserId = canteen.responsibleUserId
-    this.createdAt = canteen.createdAt
-    this.updatedAt = canteen.updatedAt
+    this.createdAt = canteen.createdAt.toJSDate()
+    this.updatedAt = canteen.updatedAt.toJSDate()
   }
 }

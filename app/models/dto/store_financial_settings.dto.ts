@@ -11,8 +11,8 @@ export default class StoreFinancialSettingsDto extends BaseModelDto {
   declare pixKeyType: PixKeyType | null
   declare bankName: string | null
   declare accountHolder: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(settings?: StoreFinancialSettings) {
     super()
@@ -26,7 +26,7 @@ export default class StoreFinancialSettingsDto extends BaseModelDto {
     this.pixKeyType = settings.pixKeyType
     this.bankName = settings.bankName
     this.accountHolder = settings.accountHolder
-    this.createdAt = settings.createdAt
-    this.updatedAt = settings.updatedAt
+    this.createdAt = settings.createdAt.toJSDate()
+    this.updatedAt = settings.updatedAt.toJSDate()
   }
 }

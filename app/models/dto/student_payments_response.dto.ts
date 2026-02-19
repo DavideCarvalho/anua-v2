@@ -5,8 +5,8 @@ export class StudentPaymentDto extends BaseModelDto {
   declare id: string
   declare type: string
   declare amount: number
-  declare dueDate: DateTime | string
-  declare paidAt: DateTime | string | null
+  declare dueDate: Date | string
+  declare paidAt: Date | string | null
   declare status: string
   declare paymentGateway: string | null
   declare paymentGatewayId: string | null
@@ -25,8 +25,8 @@ export class StudentPaymentDto extends BaseModelDto {
     this.id = data.id
     this.type = data.type
     this.amount = data.amount
-    this.dueDate = data.dueDate
-    this.paidAt = data.paidAt
+    this.dueDate = data.dueDate.toJSDate()
+    this.paidAt = data.paidAt.toJSDate()
     this.status = data.status
     this.paymentGateway = data.paymentGateway
     this.paymentGatewayId = data.paymentGatewayId

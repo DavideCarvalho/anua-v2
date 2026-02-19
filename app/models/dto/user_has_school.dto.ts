@@ -7,8 +7,8 @@ export default class UserHasSchoolDto extends BaseModelDto {
   declare userId: string
   declare schoolId: string
   declare isDefault: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date | null
 
   constructor(model?: UserHasSchool) {
     super()
@@ -19,7 +19,7 @@ export default class UserHasSchoolDto extends BaseModelDto {
     this.userId = model.userId
     this.schoolId = model.schoolId
     this.isDefault = model.isDefault
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt?.toJSDate() ?? null
   }
 }

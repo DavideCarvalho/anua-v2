@@ -10,11 +10,11 @@ export default class CanteenMealReservationDto extends BaseModelDto {
   declare mealId: string
   declare studentId: string
   declare status: CanteenMealReservationStatus
-  declare reservedAt: DateTime
-  declare servedAt: DateTime | null
-  declare cancelledAt: DateTime | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare reservedAt: Date
+  declare servedAt: Date | null
+  declare cancelledAt: Date | null
+  declare createdAt: Date
+  declare updatedAt: Date
   declare meal?: CanteenMealDto
   declare student?: StudentDto
 
@@ -27,11 +27,11 @@ export default class CanteenMealReservationDto extends BaseModelDto {
     this.mealId = canteenMealReservation.mealId
     this.studentId = canteenMealReservation.studentId
     this.status = canteenMealReservation.status
-    this.reservedAt = canteenMealReservation.reservedAt
-    this.servedAt = canteenMealReservation.servedAt
-    this.cancelledAt = canteenMealReservation.cancelledAt
-    this.createdAt = canteenMealReservation.createdAt
-    this.updatedAt = canteenMealReservation.updatedAt
+    this.reservedAt = canteenMealReservation.reservedAt.toJSDate()
+    this.servedAt = canteenMealReservation.servedAt?.toJSDate() ?? null
+    this.cancelledAt = canteenMealReservation.cancelledAt?.toJSDate() ?? null
+    this.createdAt = canteenMealReservation.createdAt.toJSDate()
+    this.updatedAt = canteenMealReservation.updatedAt.toJSDate()
     if (canteenMealReservation.meal) this.meal = new CanteenMealDto(canteenMealReservation.meal)
     if (canteenMealReservation.student)
       this.student = new StudentDto(canteenMealReservation.student)

@@ -10,9 +10,9 @@ export default class GamificationEventDto extends BaseModelDto {
   declare studentId: string
   declare metadata: Record<string, unknown>
   declare processed: boolean
-  declare processedAt: DateTime | null
+  declare processedAt: Date | null
   declare error: string | null
-  declare createdAt: DateTime
+  declare createdAt: Date
 
   constructor(gamificationEvent?: GamificationEvent) {
     super()
@@ -26,8 +26,8 @@ export default class GamificationEventDto extends BaseModelDto {
     this.studentId = gamificationEvent.studentId
     this.metadata = gamificationEvent.metadata
     this.processed = gamificationEvent.processed
-    this.processedAt = gamificationEvent.processedAt
+    this.processedAt = gamificationEvent.processedAt?.toJSDate() ?? null
     this.error = gamificationEvent.error
-    this.createdAt = gamificationEvent.createdAt
+    this.createdAt = gamificationEvent.createdAt.toJSDate()
   }
 }

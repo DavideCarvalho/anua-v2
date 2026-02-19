@@ -6,8 +6,8 @@ export default class UserSchoolGroupSelectionDto extends BaseModelDto {
   declare id: string
   declare userId: string
   declare schoolGroupId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: UserSchoolGroupSelection) {
     super()
@@ -17,7 +17,7 @@ export default class UserSchoolGroupSelectionDto extends BaseModelDto {
     this.id = model.id
     this.userId = model.userId
     this.schoolGroupId = model.schoolGroupId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

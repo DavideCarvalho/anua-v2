@@ -12,9 +12,9 @@ export default class WalletTopUpDto extends BaseModelDto {
   declare paymentGateway: string
   declare paymentGatewayId: string | null
   declare paymentMethod: string | null
-  declare paidAt: DateTime | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare paidAt: Date | null
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: WalletTopUp) {
     super()
@@ -29,8 +29,8 @@ export default class WalletTopUpDto extends BaseModelDto {
     this.paymentGateway = model.paymentGateway
     this.paymentGatewayId = model.paymentGatewayId
     this.paymentMethod = model.paymentMethod
-    this.paidAt = model.paidAt
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.paidAt = model.paidAt?.toJSDate() ?? null
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

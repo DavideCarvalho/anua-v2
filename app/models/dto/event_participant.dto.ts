@@ -6,11 +6,11 @@ export default class EventParticipantDto extends BaseModelDto {
   declare id: string
   declare eventId: string
   declare userId: string
-  declare registrationDate: DateTime
+  declare registrationDate: Date
   declare status: string
   declare notes: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(eventParticipant?: EventParticipant) {
     super()
@@ -20,10 +20,10 @@ export default class EventParticipantDto extends BaseModelDto {
     this.id = eventParticipant.id
     this.eventId = eventParticipant.eventId
     this.userId = eventParticipant.userId
-    this.registrationDate = eventParticipant.registrationDate
+    this.registrationDate = eventParticipant.registrationDate.toJSDate()
     this.status = eventParticipant.status
     this.notes = eventParticipant.notes
-    this.createdAt = eventParticipant.createdAt
-    this.updatedAt = eventParticipant.updatedAt
+    this.createdAt = eventParticipant.createdAt.toJSDate()
+    this.updatedAt = eventParticipant.updatedAt.toJSDate()
   }
 }

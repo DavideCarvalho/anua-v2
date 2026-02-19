@@ -8,8 +8,8 @@ export default class CourseHasAcademicPeriodDto extends BaseModelDto {
   declare id: string
   declare courseId: string
   declare academicPeriodId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date | null
   declare course?: CourseDto
   declare levelAssignments?: LevelAssignedToCourseHasAcademicPeriodDto[]
 
@@ -21,8 +21,8 @@ export default class CourseHasAcademicPeriodDto extends BaseModelDto {
     this.id = model.id
     this.courseId = model.courseId
     this.academicPeriodId = model.academicPeriodId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt?.toJSDate() ?? null
     this.course = model.course ? new CourseDto(model.course) : undefined
     this.levelAssignments = model.levelAssignments
       ? LevelAssignedToCourseHasAcademicPeriodDto.fromArray(model.levelAssignments)

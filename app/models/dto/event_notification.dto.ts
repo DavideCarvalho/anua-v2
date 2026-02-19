@@ -9,11 +9,11 @@ export default class EventNotificationDto extends BaseModelDto {
   declare type: string
   declare title: string
   declare message: string
-  declare scheduledFor: DateTime | null
+  declare scheduledFor: Date | null
   declare isSent: boolean
   declare sentVia: string[] | null
-  declare sentAt: DateTime | null
-  declare createdAt: DateTime
+  declare sentAt: Date | null
+  declare createdAt: Date
 
   constructor(eventNotification?: EventNotification) {
     super()
@@ -26,10 +26,10 @@ export default class EventNotificationDto extends BaseModelDto {
     this.type = eventNotification.type
     this.title = eventNotification.title
     this.message = eventNotification.message
-    this.scheduledFor = eventNotification.scheduledFor
+    this.scheduledFor = eventNotification.scheduledFor?.toJSDate() ?? null
     this.isSent = eventNotification.isSent
     this.sentVia = eventNotification.sentVia
-    this.sentAt = eventNotification.sentAt
-    this.createdAt = eventNotification.createdAt
+    this.sentAt = eventNotification.sentAt?.toJSDate() ?? null
+    this.createdAt = eventNotification.createdAt.toJSDate()
   }
 }

@@ -15,8 +15,8 @@ export default class ExtraClassDto extends BaseModelDto {
   declare teacherId: string
   declare maxStudents: number | null
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare schedules?: ExtraClassScheduleDto[]
   declare contract?: ContractDto
   declare teacherName?: string
@@ -36,8 +36,8 @@ export default class ExtraClassDto extends BaseModelDto {
     this.teacherId = model.teacherId
     this.maxStudents = model.maxStudents
     this.isActive = model.isActive
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
     this.schedules = model.schedules
       ? model.schedules.map((s) => new ExtraClassScheduleDto(s))
       : undefined

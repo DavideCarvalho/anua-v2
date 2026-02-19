@@ -11,9 +11,9 @@ export default class CanteenMonthlyTransferDto extends BaseModelDto {
   declare year: number
   declare totalAmount: number
   declare status: CanteenMonthlyTransferStatus
-  declare processedAt: DateTime | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare processedAt: Date | null
+  declare createdAt: Date
+  declare updatedAt: Date
   declare canteen?: CanteenDto
 
   constructor(canteenMonthlyTransfer?: CanteenMonthlyTransfer) {
@@ -27,9 +27,9 @@ export default class CanteenMonthlyTransferDto extends BaseModelDto {
     this.year = canteenMonthlyTransfer.year
     this.totalAmount = canteenMonthlyTransfer.totalAmount
     this.status = canteenMonthlyTransfer.status
-    this.processedAt = canteenMonthlyTransfer.processedAt
-    this.createdAt = canteenMonthlyTransfer.createdAt
-    this.updatedAt = canteenMonthlyTransfer.updatedAt
+    this.processedAt = canteenMonthlyTransfer.processedAt?.toJSDate() ?? null
+    this.createdAt = canteenMonthlyTransfer.createdAt.toJSDate()
+    this.updatedAt = canteenMonthlyTransfer.updatedAt.toJSDate()
     if (canteenMonthlyTransfer.canteen)
       this.canteen = new CanteenDto(canteenMonthlyTransfer.canteen)
   }

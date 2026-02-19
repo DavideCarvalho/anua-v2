@@ -7,8 +7,8 @@ export default class CalendarSlotContentDto extends BaseModelDto {
   declare title: string
   declare content: string
   declare calendarSlotId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(calendarSlotContent?: CalendarSlotContent) {
     super()
@@ -19,7 +19,7 @@ export default class CalendarSlotContentDto extends BaseModelDto {
     this.title = calendarSlotContent.title
     this.content = calendarSlotContent.content
     this.calendarSlotId = calendarSlotContent.calendarSlotId
-    this.createdAt = calendarSlotContent.createdAt
-    this.updatedAt = calendarSlotContent.updatedAt
+    this.createdAt = calendarSlotContent.createdAt.toJSDate()
+    this.updatedAt = calendarSlotContent.updatedAt.toJSDate()
   }
 }

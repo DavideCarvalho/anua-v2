@@ -14,8 +14,8 @@ export default class EventDto extends BaseModelDto {
   declare status: EventStatus
   declare visibility: EventVisibility
   declare priority: EventPriority
-  declare startDate: DateTime
-  declare endDate: DateTime | null
+  declare startDate: Date
+  declare endDate: Date | null
   declare startTime: string | null
   declare endTime: string | null
   declare isAllDay: boolean
@@ -28,7 +28,7 @@ export default class EventDto extends BaseModelDto {
   declare maxParticipants: number | null
   declare currentParticipants: number
   declare requiresRegistration: boolean
-  declare registrationDeadline: DateTime | null
+  declare registrationDeadline: Date | null
   declare requiresParentalConsent: boolean
   declare hasAdditionalCosts: boolean
   declare additionalCostAmount: number | null
@@ -48,8 +48,8 @@ export default class EventDto extends BaseModelDto {
   declare audienceAcademicPeriodIds: string[]
   declare audienceLevelIds: string[]
   declare audienceClassIds: string[]
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: Event) {
     super()
@@ -64,8 +64,8 @@ export default class EventDto extends BaseModelDto {
     this.status = model.status
     this.visibility = model.visibility
     this.priority = model.priority
-    this.startDate = model.startDate
-    this.endDate = model.endDate
+    this.startDate = model.startDate.toJSDate()
+    this.endDate = model.endDate?.toJSDate() ?? null
     this.startTime = model.startTime
     this.endTime = model.endTime
     this.isAllDay = model.isAllDay
@@ -78,7 +78,7 @@ export default class EventDto extends BaseModelDto {
     this.maxParticipants = model.maxParticipants
     this.currentParticipants = model.currentParticipants
     this.requiresRegistration = model.requiresRegistration
-    this.registrationDeadline = model.registrationDeadline
+    this.registrationDeadline = model.registrationDeadline?.toJSDate() ?? null
     this.requiresParentalConsent = model.requiresParentalConsent
     this.hasAdditionalCosts = model.hasAdditionalCosts
     this.additionalCostAmount = model.additionalCostAmount
@@ -101,7 +101,7 @@ export default class EventDto extends BaseModelDto {
     this.audienceLevelIds = audience.audienceLevelIds
     this.audienceClassIds = audience.audienceClassIds
 
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

@@ -9,7 +9,7 @@ export default class StudentPaymentEmailNotificationDto extends BaseModelDto {
   declare recipients: Record<string, unknown>
   declare daysOverdue: number | null
   declare metadata: Record<string, unknown> | null
-  declare sentAt: DateTime
+  declare sentAt: Date
 
   constructor(studentPaymentEmailNotification?: StudentPaymentEmailNotification) {
     super()
@@ -22,6 +22,6 @@ export default class StudentPaymentEmailNotificationDto extends BaseModelDto {
     this.recipients = studentPaymentEmailNotification.recipients
     this.daysOverdue = studentPaymentEmailNotification.daysOverdue
     this.metadata = studentPaymentEmailNotification.metadata
-    this.sentAt = studentPaymentEmailNotification.sentAt
+    this.sentAt = studentPaymentEmailNotification.sentAt.toJSDate()
   }
 }

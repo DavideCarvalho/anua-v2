@@ -10,8 +10,8 @@ export default class StudentHasExtraClassAttendanceDto extends BaseModelDto {
   declare extraClassAttendanceId: string
   declare status: ExtraClassAttendanceStatus
   declare justification: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare student?: StudentDto
 
   constructor(model?: StudentHasExtraClassAttendance) {
@@ -23,8 +23,8 @@ export default class StudentHasExtraClassAttendanceDto extends BaseModelDto {
     this.extraClassAttendanceId = model.extraClassAttendanceId
     this.status = model.status
     this.justification = model.justification
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
     this.student = model.student ? new StudentDto(model.student) : undefined
   }
 }

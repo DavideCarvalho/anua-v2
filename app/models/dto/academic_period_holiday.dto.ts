@@ -4,10 +4,10 @@ import type { DateTime } from 'luxon'
 
 export default class AcademicPeriodHolidayDto extends BaseModelDto {
   declare id: string
-  declare date: DateTime
+  declare date: Date
   declare academicPeriodId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(academicPeriodHoliday?: AcademicPeriodHoliday) {
     super()
@@ -15,9 +15,9 @@ export default class AcademicPeriodHolidayDto extends BaseModelDto {
     if (!academicPeriodHoliday) return
 
     this.id = academicPeriodHoliday.id
-    this.date = academicPeriodHoliday.date
+    this.date = academicPeriodHoliday.date.toJSDate()
     this.academicPeriodId = academicPeriodHoliday.academicPeriodId
-    this.createdAt = academicPeriodHoliday.createdAt
-    this.updatedAt = academicPeriodHoliday.updatedAt
+    this.createdAt = academicPeriodHoliday.createdAt.toJSDate()
+    this.updatedAt = academicPeriodHoliday.updatedAt.toJSDate()
   }
 }

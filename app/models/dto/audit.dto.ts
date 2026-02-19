@@ -27,7 +27,7 @@ export default class AuditDto {
   declare oldValues: Record<string, unknown> | null
   declare newValues: Record<string, unknown> | null
   declare metadata: AuditMetadata | null
-  declare createdAt: DateTime
+  declare createdAt: Date
 
   constructor(row: AuditRow) {
     this.id = row.id

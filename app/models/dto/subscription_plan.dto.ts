@@ -15,8 +15,8 @@ export default class SubscriptionPlanDto extends BaseModelDto {
   declare maxSchoolsInChain: number | null
   declare features: Record<string, unknown>
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(subscriptionPlan?: SubscriptionPlan) {
     super()
@@ -34,7 +34,7 @@ export default class SubscriptionPlanDto extends BaseModelDto {
     this.maxSchoolsInChain = subscriptionPlan.maxSchoolsInChain
     this.features = subscriptionPlan.features
     this.isActive = subscriptionPlan.isActive
-    this.createdAt = subscriptionPlan.createdAt
-    this.updatedAt = subscriptionPlan.updatedAt
+    this.createdAt = subscriptionPlan.createdAt.toJSDate()
+    this.updatedAt = subscriptionPlan.updatedAt.toJSDate()
   }
 }

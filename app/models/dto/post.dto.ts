@@ -8,8 +8,8 @@ export default class PostDto extends BaseModelDto {
   declare content: string
   declare userId: string
   declare schoolId: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: Post) {
     super()
@@ -21,7 +21,7 @@ export default class PostDto extends BaseModelDto {
     this.content = model.content
     this.userId = model.userId
     this.schoolId = model.schoolId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

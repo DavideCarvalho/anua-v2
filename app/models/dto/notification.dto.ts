@@ -11,17 +11,17 @@ export default class NotificationDto extends BaseModelDto {
   declare message: string
   declare data: Record<string, unknown> | null
   declare isRead: boolean
-  declare readAt: DateTime | null
+  declare readAt: Date | null
   declare sentViaInApp: boolean
   declare sentViaEmail: boolean
   declare sentViaPush: boolean
   declare sentViaSms: boolean
   declare sentViaWhatsApp: boolean
-  declare emailSentAt: DateTime | null
+  declare emailSentAt: Date | null
   declare emailError: string | null
   declare actionUrl: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(notification?: Notification) {
     super()
@@ -35,16 +35,16 @@ export default class NotificationDto extends BaseModelDto {
     this.message = notification.message
     this.data = notification.data
     this.isRead = notification.isRead
-    this.readAt = notification.readAt
+    this.readAt = notification.readAt?.toJSDate() ?? null
     this.sentViaInApp = notification.sentViaInApp
     this.sentViaEmail = notification.sentViaEmail
     this.sentViaPush = notification.sentViaPush
     this.sentViaSms = notification.sentViaSms
     this.sentViaWhatsApp = notification.sentViaWhatsApp
-    this.emailSentAt = notification.emailSentAt
+    this.emailSentAt = notification.emailSentAt?.toJSDate() ?? null
     this.emailError = notification.emailError
     this.actionUrl = notification.actionUrl
-    this.createdAt = notification.createdAt
-    this.updatedAt = notification.updatedAt
+    this.createdAt = notification.createdAt.toJSDate()
+    this.updatedAt = notification.updatedAt.toJSDate()
   }
 }
