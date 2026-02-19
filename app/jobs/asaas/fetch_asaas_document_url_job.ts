@@ -1,6 +1,8 @@
 import { Job } from '@boringnode/queue'
+import app from '@adonisjs/core/services/app'
 import School from '#models/school'
-import { fetchAsaasDocumentStatus } from '#services/asaas_service'
+import AppException from '#exceptions/app_exception'
+import AsaasService from '#services/asaas_service'
 
 interface FetchAsaasDocumentUrlPayload {
   schoolId: string
@@ -17,6 +19,7 @@ export default class FetchAsaasDocumentUrlJob extends Job<FetchAsaasDocumentUrlP
   }
 
   async execute(): Promise<void> {
+    const asaasService = await app.container.make(AsaasService)
     const school = await School.find(this.payload.schoolId)
     if (!school) {
       return
@@ -31,7 +34,7 @@ export default class FetchAsaasDocumentUrlJob extends Job<FetchAsaasDocumentUrlP
       return
     }
 
-    const docStatus = await fetchAsaasDocumentStatus(school.asaasApiKey)
+    const docStatus = await asaasService.fetchAsaasDocumentStatus(school.asaasApiKey)
 
     if (docStatus.onboardingUrl) {
       school.asaasDocumentUrl = docStatus.onboardingUrl
@@ -46,6 +49,8 @@ export default class FetchAsaasDocumentUrlJob extends Job<FetchAsaasDocumentUrlP
     }
 
     // Asaas hasn't generated the URL yet — throw to trigger retry
-    throw new Error(`Document status not yet resolved for school ${school.id}. Will retry.`)
+    throw AppException.internalServerError(
+      `Document status not yet resolved for school ${school.id}. Will retry.`
+    )
   }
 }

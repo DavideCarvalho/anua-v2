@@ -1,17 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 import Contract from '#models/contract'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
-import {
-  createAsaasPayment,
-  fetchAsaasPayment,
-  getOrCreateAsaasCustomer,
-  resolveAsaasConfig,
-} from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 import { createAsaasChargeValidator } from '#validators/asaas'
 import AppException from '#exceptions/app_exception'
 
+@inject()
 export default class CreateStudentPaymentAsaasChargeController {
+  constructor(private asaasService: AsaasService) {}
+
   async handle({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(createAsaasChargeValidator)
 
@@ -34,13 +33,16 @@ export default class CreateStudentPaymentAsaasChargeController {
       throw AppException.notFound('Contrato ou escola não encontrados')
     }
 
-    const config = resolveAsaasConfig(contract.school)
+    const config = this.asaasService.resolveAsaasConfig(contract.school)
     if (!config) {
       throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
 
     if (payment.paymentGatewayId) {
-      const existingPayment = await fetchAsaasPayment(config.apiKey, payment.paymentGatewayId)
+      const existingPayment = await this.asaasService.fetchAsaasPayment(
+        config.apiKey,
+        payment.paymentGatewayId
+      )
       payment.invoiceUrl =
         existingPayment.bankSlipUrl ?? existingPayment.invoiceUrl ?? payment.invoiceUrl
       await payment.save()
@@ -48,7 +50,7 @@ export default class CreateStudentPaymentAsaasChargeController {
       return response.ok(payment)
     }
 
-    const customerId = await getOrCreateAsaasCustomer(config.apiKey, student.user)
+    const customerId = await this.asaasService.getOrCreateAsaasCustomer(config.apiKey, student.user)
 
     const dueDate = payment.dueDate?.toISODate()
     if (!dueDate) {
@@ -58,7 +60,7 @@ export default class CreateStudentPaymentAsaasChargeController {
     const totalAmount = payment.totalAmount ?? payment.amount
     const value = totalAmount / 100
 
-    const charge = await createAsaasPayment(config.apiKey, {
+    const charge = await this.asaasService.createAsaasPayment(config.apiKey, {
       customer: customerId,
       billingType: payload.billingType ?? 'BOLETO',
       value,

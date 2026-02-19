@@ -1,8 +1,9 @@
 import logger from '@adonisjs/core/services/logger'
+import app from '@adonisjs/core/services/app'
 import { DateTime } from 'luxon'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
-import { resolveAsaasConfig, resolveNfseConfig, createAsaasNfse } from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 
 interface EmitNfseOptions {
   invoiceId: string
@@ -10,6 +11,7 @@ interface EmitNfseOptions {
 
 export default class EmitNfse {
   static async handle({ invoiceId }: EmitNfseOptions) {
+    const asaasService = await app.container.make(AsaasService)
     const invoice = await Invoice.query()
       .where('id', invoiceId)
       .preload('student', (q) => q.preload('user'))
@@ -67,14 +69,14 @@ export default class EmitNfse {
     }
 
     // Resolve Asaas config (need API key)
-    const asaasConfig = resolveAsaasConfig(school)
+    const asaasConfig = asaasService.resolveAsaasConfig(school)
     if (!asaasConfig) {
       logger.info(`[EMIT_NFSE] No Asaas config for school ${school.id} - skipping`)
       return
     }
 
     // Resolve NFS-e config
-    const nfseConfig = resolveNfseConfig(school)
+    const nfseConfig = asaasService.resolveNfseConfig(school)
     if (!nfseConfig) {
       logger.info(`[EMIT_NFSE] NFS-e not enabled for school ${school.id} - skipping`)
       return
@@ -92,7 +94,7 @@ export default class EmitNfse {
     const effectiveDate = (invoice.paidAt ?? DateTime.now()).toISODate()!
 
     try {
-      const nfse = await createAsaasNfse(asaasConfig.apiKey, {
+      const nfse = await asaasService.createAsaasNfse(asaasConfig.apiKey, {
         payment: invoice.paymentGatewayId,
         serviceDescription,
         effectiveDate,

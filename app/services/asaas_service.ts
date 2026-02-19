@@ -1,3 +1,4 @@
+import AppException from '#exceptions/app_exception'
 import type School from '#models/school'
 import type SchoolChain from '#models/school_chain'
 import type User from '#models/user'
@@ -63,48 +64,16 @@ interface AsaasPaymentDetailsResponse {
   bankSlipUrl?: string
 }
 
+interface AsaasPixQrCodeResponse {
+  encodedImage: string
+  payload: string
+  expirationDate: string
+}
+
 interface AsaasRequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: unknown
 }
-
-function getAsaasBaseUrl(apiKey?: string): string {
-  // Explicit env var override takes priority
-  const envUrl = process.env.ASAAS_URL ?? process.env.ASAAS_API_URL
-  if (envUrl) return envUrl
-
-  // Auto-detect sandbox vs production from api key
-  const key = apiKey || process.env.ASAAS_API_KEY || ''
-  return key.includes('_hmlg_') ? ASAAS_SANDBOX_URL : ASAAS_PRODUCTION_URL
-}
-
-async function asaasRequest<T>(apiKey: string, path: string, options: AsaasRequestOptions) {
-  const response = await fetch(`${getAsaasBaseUrl(apiKey)}${path}`, {
-    method: options.method,
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'access_token': apiKey,
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  })
-
-  if (!response.ok) {
-    const errorBody = await response.text()
-    let errors: Array<{ code: string; description: string }> = []
-    try {
-      const parsed = JSON.parse(errorBody)
-      errors = parsed.errors ?? []
-    } catch {
-      errors = [{ code: 'UNKNOWN', description: errorBody }]
-    }
-    throw new AsaasApiError(response.status, errors)
-  }
-
-  return (await response.json()) as T
-}
-
-// --- NFS-e types ---
 
 export interface NfseConfig {
   enabled: boolean
@@ -131,114 +100,6 @@ export interface AsaasNfseResponse {
   xmlUrl?: string
   effectiveDate?: string
 }
-
-// --- Config resolution ---
-
-export function resolveAsaasConfig(
-  school: School & { schoolChain?: SchoolChain | null }
-): AsaasConfig | null {
-  const chain = (school.$preloaded.schoolChain as SchoolChain | undefined) ?? school.schoolChain
-
-  if (chain?.asaasApiKey && !chain.allowSchoolsToOverridePaymentConfig) {
-    return {
-      apiKey: chain.asaasApiKey,
-      accountId: chain.asaasAccountId ?? null,
-      source: 'chain',
-    }
-  }
-
-  if (school.asaasApiKey) {
-    return {
-      apiKey: school.asaasApiKey,
-      accountId: school.asaasAccountId ?? null,
-      source: 'school',
-    }
-  }
-
-  if (chain?.asaasApiKey) {
-    return {
-      apiKey: chain.asaasApiKey,
-      accountId: chain.asaasAccountId ?? null,
-      source: 'chain',
-    }
-  }
-
-  return null
-}
-
-export async function getOrCreateAsaasCustomer(apiKey: string, user: User) {
-  if (user.asaasCustomerId) {
-    return user.asaasCustomerId
-  }
-
-  if (!user.documentNumber) {
-    throw new Error('Documento do usuário é obrigatório para gerar cobrança')
-  }
-
-  const payload: AsaasCustomerPayload = {
-    name: user.name,
-    cpfCnpj: user.documentNumber,
-    email: user.email,
-    phone: user.phone,
-    externalReference: user.id,
-  }
-
-  const customer = await asaasRequest<AsaasCustomerResponse>(apiKey, '/customers', {
-    method: 'POST',
-    body: payload,
-  })
-
-  user.asaasCustomerId = customer.id
-  await user.save()
-
-  return customer.id
-}
-
-export async function createAsaasPayment(apiKey: string, payload: AsaasPaymentPayload) {
-  return asaasRequest<AsaasPaymentResponse>(apiKey, '/payments', {
-    method: 'POST',
-    body: {
-      ...payload,
-      postalService: payload.postalService ?? false,
-    },
-  })
-}
-
-export async function fetchAsaasPayment(apiKey: string, paymentId: string) {
-  return asaasRequest<AsaasPaymentDetailsResponse>(apiKey, `/payments/${paymentId}`, {
-    method: 'GET',
-  })
-}
-
-interface AsaasPixQrCodeResponse {
-  encodedImage: string
-  payload: string
-  expirationDate: string
-}
-
-export async function fetchAsaasPixQrCode(apiKey: string, paymentId: string) {
-  return asaasRequest<AsaasPixQrCodeResponse>(apiKey, `/payments/${paymentId}/pixQrCode`, {
-    method: 'GET',
-  })
-}
-
-export async function deleteAsaasPayment(apiKey: string, paymentId: string) {
-  return asaasRequest<{ deleted: boolean }>(apiKey, `/payments/${paymentId}`, {
-    method: 'DELETE',
-  })
-}
-
-export async function sendAsaasPaymentEmail(apiKey: string, paymentId: string, email?: string) {
-  return asaasRequest<Record<string, unknown>>(apiKey, `/payments/${paymentId}/notification`, {
-    method: 'POST',
-    body: {
-      notificationType: 'EMAIL',
-      email,
-    },
-  })
-}
-
-// --- Subaccount management ---
 
 export interface AsaasSubaccountPayload {
   name: string
@@ -275,18 +136,6 @@ interface AsaasSubaccountResponse {
   apiKey: string
 }
 
-export async function createAsaasSubaccount(payload: AsaasSubaccountPayload) {
-  const masterApiKey = process.env.ASAAS_API_KEY
-  if (!masterApiKey) {
-    throw new Error('ASAAS_API_KEY is not configured')
-  }
-
-  return asaasRequest<AsaasSubaccountResponse>(masterApiKey, '/accounts', {
-    method: 'POST',
-    body: payload,
-  })
-}
-
 interface AsaasDocumentsResponse {
   data: Array<{
     id: string
@@ -301,131 +150,281 @@ export interface AsaasDocumentStatus {
   allApproved: boolean
 }
 
-/**
- * Fetches document status from Asaas for a subaccount.
- *
- * NOTE: In sandbox, documents are auto-approved with `onboardingUrl: null`.
- * In production, Asaas generates an onboardingUrl for the school to upload docs.
- * The caller should check `allApproved` to handle the sandbox case (skip doc upload).
- *
- * Asaas recommends waiting at least 15s after account creation before calling this.
- * See: https://docs.asaas.com/docs/detalhamento-do-fluxo-de-aprovação-de-subcontas
- */
-export function resolveNfseConfig(
-  school: School & { schoolChain?: SchoolChain | null }
-): NfseConfig | null {
-  const chain = (school.$preloaded.schoolChain as SchoolChain | undefined) ?? school.schoolChain
+export default class AsaasService {
+  private getAsaasBaseUrl(apiKey?: string): string {
+    const envUrl = process.env.ASAAS_URL ?? process.env.ASAAS_API_URL
+    if (envUrl) return envUrl
 
-  // Determine source: chain-first if override is disabled, else school, else chain fallback
-  let source: School | SchoolChain | null = null
-  if (chain?.nfseEnabled && !chain.allowSchoolsToOverridePaymentConfig) {
-    source = chain
-  } else if (school.nfseEnabled) {
-    source = school
-  } else if (chain?.nfseEnabled) {
-    source = chain
+    const key = apiKey || process.env.ASAAS_API_KEY || ''
+    if (key.includes('_hmlg_')) return ASAAS_SANDBOX_URL
+    return ASAAS_PRODUCTION_URL
   }
 
-  if (!source) return null
-
-  // Mandatory fields
-  const code = source.nfseMunicipalServiceCode
-  const name = source.nfseMunicipalServiceName
-  const iss = source.nfseIssPercentage
-
-  if (!code || !name || iss === null || iss === undefined) return null
-
-  return {
-    enabled: true,
-    municipalServiceCode: code,
-    municipalServiceName: name,
-    taxes: {
-      iss: Number(iss),
-      cofins:
-        source.nfseCofinsPercentage !== null && source.nfseCofinsPercentage !== undefined
-          ? Number(source.nfseCofinsPercentage)
-          : undefined,
-      pis:
-        source.nfsePisPercentage !== null && source.nfsePisPercentage !== undefined
-          ? Number(source.nfsePisPercentage)
-          : undefined,
-      csll:
-        source.nfseCsllPercentage !== null && source.nfseCsllPercentage !== undefined
-          ? Number(source.nfseCsllPercentage)
-          : undefined,
-      inss:
-        source.nfseInssPercentage !== null && source.nfseInssPercentage !== undefined
-          ? Number(source.nfseInssPercentage)
-          : undefined,
-      ir:
-        source.nfseIrPercentage !== null && source.nfseIrPercentage !== undefined
-          ? Number(source.nfseIrPercentage)
-          : undefined,
-    },
-    deductions:
-      source.nfseDeductions !== null && source.nfseDeductions !== undefined
-        ? source.nfseDeductions
-        : undefined,
-  }
-}
-
-// --- NFS-e API functions ---
-
-export async function createAsaasNfse(
-  apiKey: string,
-  data: {
-    payment: string
-    serviceDescription: string
-    observations?: string
-    effectiveDate: string
-    municipalServiceId?: string
-    municipalServiceCode: string
-    municipalServiceName: string
-    taxes: {
-      retainIss: boolean
-      iss: number
-      cofins?: number
-      pis?: number
-      csll?: number
-      inss?: number
-      ir?: number
+  private getMasterApiKey(): string {
+    const key = process.env.ASAAS_API_KEY
+    if (!key) {
+      throw AppException.internalServerError('ASAAS_API_KEY is not configured')
     }
-    deductions?: number
+    return key
   }
-) {
-  return asaasRequest<AsaasNfseResponse>(apiKey, '/invoices', {
-    method: 'POST',
-    body: data,
-  })
-}
 
-export async function fetchAsaasNfse(apiKey: string, nfseId: string) {
-  return asaasRequest<AsaasNfseResponse>(apiKey, `/invoices/${nfseId}`, {
-    method: 'GET',
-  })
-}
+  private async asaasRequest<T>(apiKey: string, path: string, options: AsaasRequestOptions) {
+    const response = await fetch(`${this.getAsaasBaseUrl(apiKey)}${path}`, {
+      method: options.method,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'access_token': apiKey,
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    })
 
-export async function cancelAsaasNfse(apiKey: string, nfseId: string) {
-  return asaasRequest<{ deleted: boolean }>(apiKey, `/invoices/${nfseId}`, {
-    method: 'DELETE',
-  })
-}
+    if (!response.ok) {
+      const errorBody = await response.text()
+      let errors: Array<{ code: string; description: string }> = []
 
-export async function fetchAsaasDocumentStatus(apiKey: string): Promise<AsaasDocumentStatus> {
-  const response = await asaasRequest<AsaasDocumentsResponse>(apiKey, '/myAccount/documents', {
-    method: 'GET',
-  })
+      try {
+        const parsed = JSON.parse(errorBody)
+        errors = parsed.errors ?? []
+      } catch {
+        errors = [{ code: 'UNKNOWN', description: errorBody }]
+      }
 
-  let onboardingUrl: string | null = null
-  const allApproved =
-    response.data.length > 0 && response.data.every((doc) => doc.status === 'APPROVED')
+      throw new AsaasApiError(response.status, errors)
+    }
 
-  for (const doc of response.data) {
-    if (doc.onboardingUrl) {
-      onboardingUrl = doc.onboardingUrl
-      break
+    return (await response.json()) as T
+  }
+
+  resolveAsaasConfig(school: School & { schoolChain?: SchoolChain | null }): AsaasConfig | null {
+    const chain = (school.$preloaded.schoolChain as SchoolChain | undefined) ?? school.schoolChain
+
+    if (chain?.asaasApiKey && !chain.allowSchoolsToOverridePaymentConfig) {
+      return {
+        apiKey: chain.asaasApiKey,
+        accountId: chain.asaasAccountId ?? null,
+        source: 'chain',
+      }
+    }
+
+    if (school.asaasApiKey) {
+      return {
+        apiKey: school.asaasApiKey,
+        accountId: school.asaasAccountId ?? null,
+        source: 'school',
+      }
+    }
+
+    if (chain?.asaasApiKey) {
+      return {
+        apiKey: chain.asaasApiKey,
+        accountId: chain.asaasAccountId ?? null,
+        source: 'chain',
+      }
+    }
+
+    return null
+  }
+
+  async getOrCreateAsaasCustomer(apiKey: string, user: User) {
+    if (user.asaasCustomerId) return user.asaasCustomerId
+
+    if (!user.documentNumber) {
+      throw AppException.badRequest('Documento do usuário é obrigatório para gerar cobrança')
+    }
+
+    const payload: AsaasCustomerPayload = {
+      name: user.name,
+      cpfCnpj: user.documentNumber,
+      email: user.email,
+      phone: user.phone,
+      externalReference: user.id,
+    }
+
+    const customer = await this.asaasRequest<AsaasCustomerResponse>(apiKey, '/customers', {
+      method: 'POST',
+      body: payload,
+    })
+
+    user.asaasCustomerId = customer.id
+    await user.save()
+
+    return customer.id
+  }
+
+  async createAsaasPayment(apiKey: string, payload: AsaasPaymentPayload) {
+    return this.asaasRequest<AsaasPaymentResponse>(apiKey, '/payments', {
+      method: 'POST',
+      body: {
+        ...payload,
+        postalService: payload.postalService ?? false,
+      },
+    })
+  }
+
+  async fetchAsaasPayment(apiKey: string, paymentId: string) {
+    return this.asaasRequest<AsaasPaymentDetailsResponse>(apiKey, `/payments/${paymentId}`, {
+      method: 'GET',
+    })
+  }
+
+  async fetchAsaasPixQrCode(apiKey: string, paymentId: string) {
+    return this.asaasRequest<AsaasPixQrCodeResponse>(apiKey, `/payments/${paymentId}/pixQrCode`, {
+      method: 'GET',
+    })
+  }
+
+  async deleteAsaasPayment(apiKey: string, paymentId: string) {
+    return this.asaasRequest<{ deleted: boolean }>(apiKey, `/payments/${paymentId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async sendAsaasPaymentEmail(apiKey: string, paymentId: string, email?: string) {
+    return this.asaasRequest<Record<string, unknown>>(
+      apiKey,
+      `/payments/${paymentId}/notification`,
+      {
+        method: 'POST',
+        body: {
+          notificationType: 'EMAIL',
+          email,
+        },
+      }
+    )
+  }
+
+  async createAsaasSubaccount(payload: AsaasSubaccountPayload) {
+    const masterApiKey = this.getMasterApiKey()
+
+    return this.asaasRequest<AsaasSubaccountResponse>(masterApiKey, '/accounts', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
+  async updateAsaasSubaccount(accountId: string, payload: AsaasSubaccountPayload) {
+    const masterApiKey = this.getMasterApiKey()
+
+    return this.asaasRequest<Record<string, unknown>>(masterApiKey, `/accounts/${accountId}`, {
+      method: 'PUT',
+      body: payload,
+    })
+  }
+
+  resolveNfseConfig(school: School & { schoolChain?: SchoolChain | null }): NfseConfig | null {
+    const chain = (school.$preloaded.schoolChain as SchoolChain | undefined) ?? school.schoolChain
+
+    let source: School | SchoolChain | null = null
+    if (chain?.nfseEnabled && !chain.allowSchoolsToOverridePaymentConfig) {
+      source = chain
+    } else if (school.nfseEnabled) {
+      source = school
+    } else if (chain?.nfseEnabled) {
+      source = chain
+    }
+
+    if (!source) return null
+
+    const code = source.nfseMunicipalServiceCode
+    const name = source.nfseMunicipalServiceName
+    const iss = source.nfseIssPercentage
+    if (!code || !name || iss === null || iss === undefined) return null
+
+    return {
+      enabled: true,
+      municipalServiceCode: code,
+      municipalServiceName: name,
+      taxes: {
+        iss: Number(iss),
+        cofins:
+          source.nfseCofinsPercentage !== null && source.nfseCofinsPercentage !== undefined
+            ? Number(source.nfseCofinsPercentage)
+            : undefined,
+        pis:
+          source.nfsePisPercentage !== null && source.nfsePisPercentage !== undefined
+            ? Number(source.nfsePisPercentage)
+            : undefined,
+        csll:
+          source.nfseCsllPercentage !== null && source.nfseCsllPercentage !== undefined
+            ? Number(source.nfseCsllPercentage)
+            : undefined,
+        inss:
+          source.nfseInssPercentage !== null && source.nfseInssPercentage !== undefined
+            ? Number(source.nfseInssPercentage)
+            : undefined,
+        ir:
+          source.nfseIrPercentage !== null && source.nfseIrPercentage !== undefined
+            ? Number(source.nfseIrPercentage)
+            : undefined,
+      },
+      deductions:
+        source.nfseDeductions !== null && source.nfseDeductions !== undefined
+          ? source.nfseDeductions
+          : undefined,
     }
   }
 
-  return { onboardingUrl, allApproved }
+  async createAsaasNfse(
+    apiKey: string,
+    data: {
+      payment: string
+      serviceDescription: string
+      observations?: string
+      effectiveDate: string
+      municipalServiceId?: string
+      municipalServiceCode: string
+      municipalServiceName: string
+      taxes: {
+        retainIss: boolean
+        iss: number
+        cofins?: number
+        pis?: number
+        csll?: number
+        inss?: number
+        ir?: number
+      }
+      deductions?: number
+    }
+  ) {
+    return this.asaasRequest<AsaasNfseResponse>(apiKey, '/invoices', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async fetchAsaasNfse(apiKey: string, nfseId: string) {
+    return this.asaasRequest<AsaasNfseResponse>(apiKey, `/invoices/${nfseId}`, {
+      method: 'GET',
+    })
+  }
+
+  async cancelAsaasNfse(apiKey: string, nfseId: string) {
+    return this.asaasRequest<{ deleted: boolean }>(apiKey, `/invoices/${nfseId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async fetchAsaasDocumentStatus(apiKey: string): Promise<AsaasDocumentStatus> {
+    const response = await this.asaasRequest<AsaasDocumentsResponse>(
+      apiKey,
+      '/myAccount/documents',
+      {
+        method: 'GET',
+      }
+    )
+
+    let onboardingUrl: string | null = null
+    const allApproved =
+      response.data.length > 0 && response.data.every((doc) => doc.status === 'APPROVED')
+
+    for (const doc of response.data) {
+      if (doc.onboardingUrl) {
+        onboardingUrl = doc.onboardingUrl
+        break
+      }
+    }
+
+    return { onboardingUrl, allApproved }
+  }
 }

@@ -1,4 +1,5 @@
 import logger from '@adonisjs/core/services/logger'
+import app from '@adonisjs/core/services/app'
 import locks from '@adonisjs/lock/services/main'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
@@ -6,12 +7,7 @@ import Invoice from '#models/invoice'
 import Contract from '#models/contract'
 import StudentHasLevel from '#models/student_has_level'
 import type StudentPayment from '#models/student_payment'
-import {
-  resolveAsaasConfig,
-  getOrCreateAsaasCustomer,
-  createAsaasPayment,
-  type AsaasConfig,
-} from '#services/asaas_service'
+import AsaasService, { type AsaasConfig } from '#services/asaas_service'
 import type School from '#models/school'
 
 interface CreateInvoiceAsaasChargesOptions {
@@ -31,6 +27,7 @@ interface CreateInvoiceAsaasChargesOptions {
  */
 export default class CreateInvoiceAsaasCharges {
   static async handle(options: CreateInvoiceAsaasChargesOptions = {}) {
+    const asaasService = await app.container.make(AsaasService)
     const startTime = Date.now()
     const now = DateTime.now()
     const month = options.month ?? now.month
@@ -131,7 +128,7 @@ export default class CreateInvoiceAsaasCharges {
 
             const schoolId = school.id
             if (!schoolConfigCache.has(schoolId)) {
-              schoolConfigCache.set(schoolId, resolveAsaasConfig(school))
+              schoolConfigCache.set(schoolId, asaasService.resolveAsaasConfig(school))
             }
             const config = schoolConfigCache.get(schoolId)!
 
@@ -154,7 +151,7 @@ export default class CreateInvoiceAsaasCharges {
             const billingType = await this.resolveBillingType(invoice)
 
             // 5) Criar/buscar customer no Asaas
-            const customerId = await getOrCreateAsaasCustomer(config.apiKey, user)
+            const customerId = await asaasService.getOrCreateAsaasCustomer(config.apiKey, user)
 
             // 6) Criar cobrança no Asaas
             const dueDate = freshInvoice.dueDate?.toISODate()
@@ -171,7 +168,7 @@ export default class CreateInvoiceAsaasCharges {
             const schoolName = school.name
             const chargeDescription = `${schoolName} - Fatura ${String(freshInvoice.month).padStart(2, '0')}/${freshInvoice.year}\n${paymentDescriptions}`
 
-            const charge = await createAsaasPayment(config.apiKey, {
+            const charge = await asaasService.createAsaasPayment(config.apiKey, {
               customer: customerId,
               billingType,
               value: freshInvoice.totalAmount / 100, // cents → BRL

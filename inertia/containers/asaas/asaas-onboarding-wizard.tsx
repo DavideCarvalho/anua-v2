@@ -6,19 +6,8 @@ import { z } from 'zod'
 import { Loader2, ExternalLink, CheckCircle2, FileText, Building2, MapPin } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../../components/ui/dialog'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '../../components/ui/form'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
 import { MaskedInput } from '../../components/ui/masked-input'
 import {
@@ -61,6 +50,7 @@ interface AsaasOnboardingWizardProps {
   onOpenChange: (open: boolean) => void
   documentUrl?: string | null
   paymentConfigStatus?: string | null
+  hasAsaasAccount?: boolean
 }
 
 export function AsaasOnboardingWizard({
@@ -68,6 +58,7 @@ export function AsaasOnboardingWizard({
   onOpenChange,
   documentUrl,
   paymentConfigStatus,
+  hasAsaasAccount = false,
 }: AsaasOnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [maxVisitedStep, setMaxVisitedStep] = useState(0)
@@ -102,6 +93,20 @@ export function AsaasOnboardingWizard({
   }))
 
   const isConclusionStep = currentStep === 3
+  const dialogTitle = hasAsaasAccount
+    ? 'Atualizar Conta de Pagamento'
+    : 'Configurar Conta de Pagamento'
+  const loadingMessage = hasAsaasAccount
+    ? 'Atualizando conta de pagamento...'
+    : 'Criando conta de pagamento...'
+  const successMessage = hasAsaasAccount
+    ? 'Dados da conta atualizados com sucesso!'
+    : 'Conta criada com sucesso!'
+  const completionTitle = hasAsaasAccount
+    ? 'Conta Atualizada com Sucesso!'
+    : 'Conta Criada com Sucesso!'
+  const submitButtonLabel = hasAsaasAccount ? 'Atualizar Conta' : 'Criar Conta'
+  const submittingButtonLabel = hasAsaasAccount ? 'Atualizando conta...' : 'Criando conta...'
 
   async function validateCurrentStep(): Promise<boolean> {
     let isValid = false
@@ -188,9 +193,7 @@ export function AsaasOnboardingWizard({
         email: values.email,
         cpfCnpj: digitsOnly(values.cpfCnpj),
         companyType: values.companyType,
-        birthDate: values.birthDate
-          ? values.birthDate.split('/').reverse().join('-')
-          : undefined,
+        birthDate: values.birthDate ? values.birthDate.split('/').reverse().join('-') : undefined,
         phone: values.phone ? digitsOnly(values.phone) : undefined,
         mobilePhone: values.mobilePhone ? digitsOnly(values.mobilePhone) : undefined,
         address: values.address,
@@ -201,7 +204,7 @@ export function AsaasOnboardingWizard({
         incomeValue: values.incomeValue,
       }),
       {
-        loading: 'Criando conta de pagamento...',
+        loading: loadingMessage,
         success: () => {
           setIsSubmitted(true)
           const updatedStatus = [...stepsStatus]
@@ -210,9 +213,9 @@ export function AsaasOnboardingWizard({
           setStepsStatus(updatedStatus)
           setCurrentStep(3)
           setMaxVisitedStep(3)
-          return 'Conta criada com sucesso!'
+          return successMessage
         },
-        error: (err) => err?.message || 'Erro ao criar conta de pagamento',
+        error: (err) => err?.message || 'Erro ao salvar conta de pagamento',
       }
     )
   }
@@ -240,21 +243,14 @@ export function AsaasOnboardingWizard({
         {/* Fixed Header with Stepper */}
         <div className="p-6 pb-4 border-b shrink-0">
           <DialogHeader>
-            <DialogTitle>Configurar Conta de Pagamento</DialogTitle>
+            <DialogTitle>{dialogTitle}</DialogTitle>
           </DialogHeader>
 
-          <Stepper
-            currentStep={currentStep}
-            steps={steps}
-            onStepClick={handleStepClick}
-          />
+          <Stepper currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
         </div>
 
         <FormProvider {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col flex-1 min-h-0"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {/* Step 0: Intro */}
@@ -283,8 +279,8 @@ export function AsaasOnboardingWizard({
                   </div>
 
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-                    Apos criar a conta, voce precisara enviar documentos de identificacao para ativacao.
-                    O processo de aprovacao leva em media 1-2 dias uteis.
+                    Apos criar a conta, voce precisara enviar documentos de identificacao para
+                    ativacao. O processo de aprovacao leva em media 1-2 dias uteis.
                   </div>
                 </div>
               )}
@@ -334,7 +330,10 @@ export function AsaasOnboardingWizard({
                       const formatCpfCnpj = (raw: string) => {
                         const d = raw.replace(/\D/g, '').slice(0, 14)
                         if (d.length > 11) {
-                          return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5')
+                          return d.replace(
+                            /(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/,
+                            '$1.$2.$3/$4-$5'
+                          )
                         }
                         return d.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4')
                       }
@@ -566,7 +565,7 @@ export function AsaasOnboardingWizard({
                       <CheckCircle2 className="h-16 w-16 text-green-500" />
 
                       <div className="text-center space-y-2">
-                        <h3 className="text-lg font-semibold">Conta Criada com Sucesso!</h3>
+                        <h3 className="text-lg font-semibold">{completionTitle}</h3>
                         <p className="text-sm text-muted-foreground">
                           {paymentConfigStatus === 'ACTIVE'
                             ? 'Sua conta foi aprovada e esta pronta para uso!'
@@ -607,7 +606,9 @@ export function AsaasOnboardingWizard({
 
                       <div className="rounded-lg border divide-y">
                         <div className="p-4 space-y-2">
-                          <h4 className="text-sm font-medium text-muted-foreground">Dados do Titular</h4>
+                          <h4 className="text-sm font-medium text-muted-foreground">
+                            Dados do Titular
+                          </h4>
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                             <span className="text-muted-foreground">Nome</span>
                             <span>{form.getValues('name')}</span>
@@ -617,7 +618,14 @@ export function AsaasOnboardingWizard({
                             <span>{form.getValues('cpfCnpj')}</span>
                             <span className="text-muted-foreground">Tipo</span>
                             <span>
-                              {{ INDIVIDUAL: 'Pessoa Fisica', MEI: 'MEI', LIMITED: 'Ltda / S.A.', ASSOCIATION: 'Associacao' }[form.getValues('companyType')]}
+                              {
+                                {
+                                  INDIVIDUAL: 'Pessoa Fisica',
+                                  MEI: 'MEI',
+                                  LIMITED: 'Ltda / S.A.',
+                                  ASSOCIATION: 'Associacao',
+                                }[form.getValues('companyType')]
+                              }
                             </span>
                             {form.getValues('birthDate') && (
                               <>
@@ -626,7 +634,12 @@ export function AsaasOnboardingWizard({
                               </>
                             )}
                             <span className="text-muted-foreground">Renda/Faturamento</span>
-                            <span>R$ {Number(form.getValues('incomeValue')).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <span>
+                              R${' '}
+                              {Number(form.getValues('incomeValue')).toLocaleString('pt-BR', {
+                                minimumFractionDigits: 2,
+                              })}
+                            </span>
                             {form.getValues('phone') && (
                               <>
                                 <span className="text-muted-foreground">Telefone</span>
@@ -648,7 +661,9 @@ export function AsaasOnboardingWizard({
                             <span className="text-muted-foreground">CEP</span>
                             <span>{form.getValues('postalCode')}</span>
                             <span className="text-muted-foreground">Endereco</span>
-                            <span>{form.getValues('address')}, {form.getValues('addressNumber')}</span>
+                            <span>
+                              {form.getValues('address')}, {form.getValues('addressNumber')}
+                            </span>
                             {form.getValues('complement') && (
                               <>
                                 <span className="text-muted-foreground">Complemento</span>
@@ -677,7 +692,12 @@ export function AsaasOnboardingWizard({
                 Anterior
               </Button>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={handleClose} disabled={createMutation.isPending}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={createMutation.isPending}
+                >
                   {isSubmitted ? 'Fechar' : 'Cancelar'}
                 </Button>
                 {isConclusionStep && !isSubmitted && (
@@ -689,10 +709,10 @@ export function AsaasOnboardingWizard({
                     {createMutation.isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Criando conta...
+                        {submittingButtonLabel}
                       </>
                     ) : (
-                      'Criar Conta'
+                      submitButtonLabel
                     )}
                   </Button>
                 )}

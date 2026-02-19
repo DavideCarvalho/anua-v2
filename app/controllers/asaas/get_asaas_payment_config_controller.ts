@@ -1,11 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 import logger from '@adonisjs/core/services/logger'
 import School from '#models/school'
 import AppException from '#exceptions/app_exception'
-import { fetchAsaasDocumentStatus } from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 
+@inject()
 export default class GetAsaasPaymentConfigController {
-  async handle({ response, selectedSchoolIds }: HttpContext) {
+  constructor(private asaasService: AsaasService) {}
+
+  async handle(ctx: HttpContext) {
+    const { response, selectedSchoolIds } = ctx
     const school = await School.query()
       .whereIn('id', selectedSchoolIds ?? [])
       .first()
@@ -20,7 +25,7 @@ export default class GetAsaasPaymentConfigController {
     // If account exists but pending, try fetching fresh document status
     if (school.asaasApiKey && school.paymentConfigStatus === 'PENDING_DOCUMENTS') {
       try {
-        const docStatus = await fetchAsaasDocumentStatus(school.asaasApiKey)
+        const docStatus = await this.asaasService.fetchAsaasDocumentStatus(school.asaasApiKey)
 
         if (docStatus.onboardingUrl) {
           school.asaasDocumentUrl = docStatus.onboardingUrl

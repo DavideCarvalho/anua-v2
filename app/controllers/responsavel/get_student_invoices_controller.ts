@@ -1,12 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
 import StudentHasResponsible from '#models/student_has_responsible'
 import InvoiceDto from '#models/dto/invoice.dto'
 import AppException from '#exceptions/app_exception'
-import { resolveAsaasConfig } from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 
+@inject()
 export default class GetStudentInvoicesController {
+  constructor(private asaasService: AsaasService) {}
+
   async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
@@ -83,7 +87,7 @@ export default class GetStudentInvoicesController {
         .first()
 
       if (contract?.school && contract.school.paymentConfigStatus === 'ACTIVE') {
-        asaasEnabled = !!resolveAsaasConfig(contract.school)
+        asaasEnabled = !!this.asaasService.resolveAsaasConfig(contract.school)
       }
     }
 

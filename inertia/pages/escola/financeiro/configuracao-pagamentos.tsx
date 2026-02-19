@@ -149,6 +149,9 @@ export default function ConfiguracaoPagamentosPage() {
     enabled: !!schoolId,
   })
   const updateSchool = useUpdateSchool()
+  const hasAsaasAccount = Boolean(data?.hasAsaasAccount)
+  const accountActionLabel = hasAsaasAccount ? 'Atualizar dados da conta' : 'Configurar Conta'
+  const accountActionVariant = hasAsaasAccount ? 'outline' : 'default'
 
   useEffect(() => {
     if (!schoolData) return
@@ -265,12 +268,10 @@ export default function ConfiguracaoPagamentosPage() {
 
             {/* Actions based on status */}
             <div className="flex gap-3">
-              {!data?.hasAsaasAccount && (
-                <Button onClick={() => setWizardOpen(true)}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Configurar Conta
-                </Button>
-              )}
+              <Button variant={accountActionVariant} onClick={() => setWizardOpen(true)}>
+                <Settings className="mr-2 h-4 w-4" />
+                {accountActionLabel}
+              </Button>
 
               {(status === 'PENDING_DOCUMENTS' || status === 'PENDING_APPROVAL') &&
                 data?.documentUrl && (
@@ -483,6 +484,7 @@ export default function ConfiguracaoPagamentosPage() {
         onOpenChange={setWizardOpen}
         documentUrl={data?.documentUrl}
         paymentConfigStatus={data?.paymentConfigStatus}
+        hasAsaasAccount={Boolean(data?.hasAsaasAccount)}
       />
     </EscolaLayout>
   )

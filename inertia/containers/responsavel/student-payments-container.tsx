@@ -15,15 +15,9 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import {
-  useResponsavelStudentInvoicesQueryOptions,
-  type ResponsavelStudentInvoicesResponse,
-} from '../../hooks/queries/use_responsavel_student_invoices'
+import { useResponsavelStudentInvoicesQueryOptions } from '../../hooks/queries/use_responsavel_student_invoices'
 
-type ResponsavelInvoice = ResponsavelStudentInvoicesResponse['data'][number]
-type ResponsavelPayment = NonNullable<ResponsavelInvoice['payments']>[number]
-
-function getPaymentDescription(payment: ResponsavelPayment): string {
+function getPaymentDescription(payment: any): string {
   const contractName = payment.contract?.name
   const installmentInfo =
     payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
@@ -93,8 +87,72 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
     }).format(value / 100)
   }
 
+  const isInvoiceOverdue = (status: string, dueDate: string) => {
+    return (status === 'OPEN' || status === 'PENDING') && new Date(dueDate) < new Date()
+  }
+
+  const isInvoiceFinalized = (status: string) => status === 'PAID' || status === 'CANCELLED'
+
+  const canOpenExistingInvoiceUrl = (invoice: any, isOverdue: boolean) => {
+    if (!invoice.invoiceUrl) return false
+    return invoice.status === 'PENDING' || invoice.status === 'OVERDUE' || isOverdue
+  }
+
+  const canCreateCheckout = (invoice: any, isOverdue: boolean) => {
+    if (!data.asaasEnabled) return false
+    return invoice.status === 'OPEN' || invoice.status === 'OVERDUE' || isOverdue
+  }
+
+  const handleCreateCheckout = (invoiceId: string) => {
+    checkoutMutation.mutate(invoiceId, {
+      onSuccess: (result) => {
+        if (result.invoiceUrl) {
+          window.open(result.invoiceUrl, '_blank')
+        }
+      },
+    })
+  }
+
+  const renderPayInvoiceAction = (invoice: any) => {
+    const isOverdue = isInvoiceOverdue(invoice.status, String(invoice.dueDate))
+    if (isInvoiceFinalized(invoice.status)) return null
+
+    if (canOpenExistingInvoiceUrl(invoice, isOverdue)) {
+      return (
+        <a
+          href={invoice.invoiceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Pagar fatura
+        </a>
+      )
+    }
+
+    if (canCreateCheckout(invoice, isOverdue)) {
+      return (
+        <button
+          onClick={() => handleCreateCheckout(invoice.id)}
+          disabled={checkoutMutation.isPending}
+          className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+        >
+          {checkoutMutation.isPending ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <ExternalLink className="h-3 w-3" />
+          )}
+          Pagar fatura
+        </button>
+      )
+    }
+
+    return null
+  }
+
   const getInvoiceStatusBadge = (status: string, dueDate: string) => {
-    const isOverdue = (status === 'OPEN' || status === 'PENDING') && new Date(dueDate) < new Date()
+    const isOverdue = isInvoiceOverdue(status, dueDate)
 
     if (status === 'PAID') {
       return (
@@ -162,94 +220,63 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
             <div className="py-8 text-center text-muted-foreground">Nenhuma fatura encontrada</div>
           ) : (
             <div className="space-y-4">
-              {data.data.map((invoice: any) => (
-                <Card key={invoice.id} className="border">
-                  <CardHeader className="pb-2">
-                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                      <div>
-                        <CardTitle className="text-base">
-                          {format(new Date(invoice.dueDate), "MMMM 'de' yyyy", { locale: ptBR })}
-                        </CardTitle>
-                        <CardDescription>
-                          Vencimento {format(new Date(invoice.dueDate), 'dd/MM/yyyy')}
-                        </CardDescription>
+              {data.data.map((invoice: any) => {
+                return (
+                  <Card key={invoice.id} className="border">
+                    <CardHeader className="pb-2">
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <CardTitle className="text-base">
+                            {format(new Date(invoice.dueDate), "MMMM 'de' yyyy", { locale: ptBR })}
+                          </CardTitle>
+                          <CardDescription>
+                            Vencimento {format(new Date(invoice.dueDate), 'dd/MM/yyyy')}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold">
+                            {formatCurrency(invoice.totalAmount)}
+                          </span>
+                          {getInvoiceStatusBadge(invoice.status, String(invoice.dueDate))}
+                          {renderPayInvoiceAction(invoice)}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold">
-                          {formatCurrency(invoice.totalAmount)}
-                        </span>
-                        {getInvoiceStatusBadge(invoice.status, String(invoice.dueDate))}
-                        {invoice.status !== 'PAID' && invoice.status !== 'CANCELLED' && (
-                          invoice.invoiceUrl && invoice.status === 'PENDING' ? (
-                            <a
-                              href={invoice.invoiceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                              Pagar fatura
-                            </a>
-                          ) : data.asaasEnabled && (invoice.status === 'OPEN' || invoice.status === 'OVERDUE') ? (
-                            <button
-                              onClick={() => {
-                                checkoutMutation.mutate(invoice.id, {
-                                  onSuccess: (result) => {
-                                    if (result.invoiceUrl) {
-                                      window.open(result.invoiceUrl, '_blank')
-                                    }
-                                  },
-                                })
-                              }}
-                              disabled={checkoutMutation.isPending}
-                              className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-                            >
-                              {checkoutMutation.isPending ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : (
-                                <ExternalLink className="h-3 w-3" />
-                              )}
-                              Pagar fatura
-                            </button>
-                          ) : null
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Tipo</TableHead>
-                          <TableHead>Referência</TableHead>
-                          <TableHead className="text-right">Valor</TableHead>
-                          <TableHead className="text-center">Status</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(invoice.payments ?? []).map((payment: any) => (
-                          <TableRow key={payment.id}>
-                            <TableCell className="font-medium">
-                              {getPaymentDescription(payment)}
-                            </TableCell>
-                            <TableCell>
-                              {format(new Date(payment.dueDate), "MMMM 'de' yyyy", {
-                                locale: ptBR,
-                              })}
-                            </TableCell>
-                            <TableCell className="text-right font-medium">
-                              {formatCurrency(payment.amount)}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {getPaymentStatusBadge(payment.status)}
-                            </TableCell>
+                    </CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead>Referência</TableHead>
+                            <TableHead className="text-right">Valor</TableHead>
+                            <TableHead className="text-center">Status</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              ))}
+                        </TableHeader>
+                        <TableBody>
+                          {(invoice.payments ?? []).map((payment: any) => (
+                            <TableRow key={payment.id}>
+                              <TableCell className="font-medium">
+                                {getPaymentDescription(payment)}
+                              </TableCell>
+                              <TableCell>
+                                {format(new Date(payment.dueDate), "MMMM 'de' yyyy", {
+                                  locale: ptBR,
+                                })}
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                {formatCurrency(payment.amount)}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {getPaymentStatusBadge(payment.status)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           )}
         </CardContent>

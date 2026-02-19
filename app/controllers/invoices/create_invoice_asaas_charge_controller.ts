@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
@@ -6,16 +7,14 @@ import StudentHasLevel from '#models/student_has_level'
 import StudentHasResponsible from '#models/student_has_responsible'
 import AppException from '#exceptions/app_exception'
 import type StudentPayment from '#models/student_payment'
-import {
-  createAsaasPayment,
-  deleteAsaasPayment,
-  fetchAsaasPayment,
-  getOrCreateAsaasCustomer,
-  resolveAsaasConfig,
-} from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 
+@inject()
 export default class CreateInvoiceAsaasChargeController {
-  async handle({ params, response, effectiveUser }: HttpContext) {
+  constructor(private asaasService: AsaasService) {}
+
+  async handle(ctx: HttpContext) {
+    const { params, response, effectiveUser } = ctx
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
@@ -58,14 +57,17 @@ export default class CreateInvoiceAsaasChargeController {
       throw AppException.notFound('Escola não encontrada')
     }
 
-    const config = resolveAsaasConfig(contract.school)
+    const config = this.asaasService.resolveAsaasConfig(contract.school)
     if (!config) {
       throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
 
     // Idempotency: if charge already exists, check if value matches
     if (invoice.paymentGatewayId) {
-      const existing = await fetchAsaasPayment(config.apiKey, invoice.paymentGatewayId)
+      const existing = await this.asaasService.fetchAsaasPayment(
+        config.apiKey,
+        invoice.paymentGatewayId
+      )
       const expectedValue = invoice.totalAmount / 100
 
       // If value matches, refresh URL and return
@@ -76,7 +78,7 @@ export default class CreateInvoiceAsaasChargeController {
       }
 
       // Value mismatch — cancel stale charge and fall through to create new one
-      await deleteAsaasPayment(config.apiKey, invoice.paymentGatewayId)
+      await this.asaasService.deleteAsaasPayment(config.apiKey, invoice.paymentGatewayId)
       invoice.paymentGatewayId = null
       invoice.invoiceUrl = null
       invoice.paymentGateway = null
@@ -95,7 +97,10 @@ export default class CreateInvoiceAsaasChargeController {
     const billingType = await this.resolveBillingType(invoice)
 
     // Get or create Asaas customer using the responsible's data
-    const customerId = await getOrCreateAsaasCustomer(config.apiKey, effectiveUser)
+    const customerId = await this.asaasService.getOrCreateAsaasCustomer(
+      config.apiKey,
+      effectiveUser
+    )
 
     // Build rich description for the Asaas charge
     const paymentDescriptions = invoice.payments
@@ -105,7 +110,7 @@ export default class CreateInvoiceAsaasChargeController {
     const chargeDescription = `${schoolName} - Fatura ${String(invoice.month).padStart(2, '0')}/${invoice.year}\n${paymentDescriptions}`
 
     // Create charge — totalAmount already includes fine/interest from daily reconciliation
-    const charge = await createAsaasPayment(config.apiKey, {
+    const charge = await this.asaasService.createAsaasPayment(config.apiKey, {
       customer: customerId,
       billingType,
       value: invoice.totalAmount / 100,

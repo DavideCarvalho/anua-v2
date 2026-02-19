@@ -32,7 +32,7 @@ export function useCreateAsaasSubaccount() {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null)
-        throw new Error(errorBody?.description || 'Erro ao criar subconta Asaas')
+        throw new Error(errorBody?.description || 'Erro ao salvar dados da subconta Asaas')
       }
 
       return response.json()

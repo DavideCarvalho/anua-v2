@@ -1,21 +1,19 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 import { v7 as uuidv7 } from 'uuid'
 import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasLevel from '#models/student_has_level'
 import WalletTopUp from '#models/wallet_top_up'
 import WalletTopUpDto from '#models/dto/wallet_top_up.dto'
-import {
-  createAsaasPayment,
-  fetchAsaasPayment,
-  fetchAsaasPixQrCode,
-  getOrCreateAsaasCustomer,
-  resolveAsaasConfig,
-} from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 import { createWalletTopUpValidator } from '#validators/wallet_top_up'
 import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
 
+@inject()
 export default class CreateWalletTopUpController {
+  constructor(private asaasService: AsaasService) {}
+
   async handle({ request, response, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
@@ -45,12 +43,15 @@ export default class CreateWalletTopUpController {
     }
 
     const school = studentHasLevel.level.school
-    const config = resolveAsaasConfig(school)
+    const config = this.asaasService.resolveAsaasConfig(school)
     if (!config) {
       throw AppException.badRequest('Configuração de pagamento não encontrada para esta escola')
     }
 
-    const customerId = await getOrCreateAsaasCustomer(config.apiKey, effectiveUser)
+    const customerId = await this.asaasService.getOrCreateAsaasCustomer(
+      config.apiKey,
+      effectiveUser
+    )
     const topUpId = uuidv7()
     const dueDate = DateTime.now().toISODate()!
 
@@ -66,7 +67,7 @@ export default class CreateWalletTopUpController {
       paymentMethod: payload.paymentMethod,
     })
 
-    const charge = await createAsaasPayment(config.apiKey, {
+    const charge = await this.asaasService.createAsaasPayment(config.apiKey, {
       customer: customerId,
       billingType: payload.paymentMethod,
       value: payload.amount / 100,
@@ -88,11 +89,11 @@ export default class CreateWalletTopUpController {
 
     if (payload.paymentMethod === 'PIX') {
       try {
-        const pixData = await fetchAsaasPixQrCode(config.apiKey, charge.id)
+        const pixData = await this.asaasService.fetchAsaasPixQrCode(config.apiKey, charge.id)
         paymentDetails.pixQrCodeImage = pixData.encodedImage
         paymentDetails.pixCopyPaste = pixData.payload
       } catch {
-        const details = await fetchAsaasPayment(config.apiKey, charge.id)
+        const details = await this.asaasService.fetchAsaasPayment(config.apiKey, charge.id)
         paymentDetails.invoiceUrl = details.invoiceUrl ?? null
       }
     }

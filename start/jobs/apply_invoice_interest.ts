@@ -1,11 +1,12 @@
 import logger from '@adonisjs/core/services/logger'
+import app from '@adonisjs/core/services/app'
 import locks from '@adonisjs/lock/services/main'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
 import ContractInterestConfig from '#models/contract_interest_config'
-import { resolveAsaasConfig, deleteAsaasPayment } from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 import type School from '#models/school'
 
 interface ApplyInvoiceInterestOptions {
@@ -25,6 +26,7 @@ interface ApplyInvoiceInterestOptions {
  */
 export default class ApplyInvoiceInterest {
   static async handle(options: ApplyInvoiceInterestOptions = {}) {
+    const asaasService = await app.container.make(AsaasService)
     const startTime = Date.now()
     const today = DateTime.now().startOf('day')
 
@@ -183,9 +185,9 @@ export default class ApplyInvoiceInterest {
 
                 const school = schoolCache.get(contractId)
                 if (school) {
-                  const asaasConfig = resolveAsaasConfig(school)
+                  const asaasConfig = asaasService.resolveAsaasConfig(school)
                   if (asaasConfig) {
-                    await deleteAsaasPayment(asaasConfig.apiKey, hadCharge)
+                    await asaasService.deleteAsaasPayment(asaasConfig.apiKey, hadCharge)
                     chargesCancelled++
                     logger.info(
                       `[INTEREST] Cancelled stale Asaas charge ${hadCharge} for invoice ${freshInvoice.id}`

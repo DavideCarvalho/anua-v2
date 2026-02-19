@@ -1,13 +1,17 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
 import Contract from '#models/contract'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
-import { resolveAsaasConfig, sendAsaasPaymentEmail } from '#services/asaas_service'
+import AsaasService from '#services/asaas_service'
 import { sendAsaasBoletoEmailValidator } from '#validators/asaas'
 import AppException from '#exceptions/app_exception'
 
+@inject()
 export default class SendStudentPaymentBoletoEmailController {
+  constructor(private asaasService: AsaasService) {}
+
   async handle({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(sendAsaasBoletoEmailValidator)
 
@@ -34,7 +38,7 @@ export default class SendStudentPaymentBoletoEmailController {
       throw AppException.notFound('Contrato ou escola não encontrados')
     }
 
-    const config = resolveAsaasConfig(contract.school)
+    const config = this.asaasService.resolveAsaasConfig(contract.school)
     if (!config) {
       throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
@@ -44,7 +48,7 @@ export default class SendStudentPaymentBoletoEmailController {
       throw AppException.notFound('E-mail do destinatário não encontrado')
     }
 
-    await sendAsaasPaymentEmail(config.apiKey, payment.paymentGatewayId, email)
+    await this.asaasService.sendAsaasPaymentEmail(config.apiKey, payment.paymentGatewayId, email)
 
     payment.emailSentAt = DateTime.now()
     await payment.save()
