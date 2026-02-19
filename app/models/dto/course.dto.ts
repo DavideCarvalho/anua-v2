@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Course from '#models/course'
-import type { DateTime } from 'luxon'
 
 export default class CourseDto extends BaseModelDto {
   declare id: string
@@ -12,8 +11,8 @@ export default class CourseDto extends BaseModelDto {
   declare enrollmentMinimumAge: number | null
   declare enrollmentMaximumAge: number | null
   declare maxStudentsPerClass: number | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date | null
 
   constructor(model?: Course) {
     super()
@@ -29,7 +28,7 @@ export default class CourseDto extends BaseModelDto {
     this.enrollmentMinimumAge = model.enrollmentMinimumAge
     this.enrollmentMaximumAge = model.enrollmentMaximumAge
     this.maxStudentsPerClass = model.maxStudentsPerClass
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt ? model.updatedAt.toJSDate() : null
   }
 }

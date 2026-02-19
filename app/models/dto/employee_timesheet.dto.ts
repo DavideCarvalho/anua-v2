@@ -1,17 +1,16 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type EmployeeTimesheet from '#models/employee_timesheet'
 import type { EmployeeTimesheetStatus } from '#models/employee_timesheet'
-import type { DateTime } from 'luxon'
 
 export default class EmployeeTimesheetDto extends BaseModelDto {
   declare id: string
   declare timesheetId: string
   declare userId: string
   declare status: EmployeeTimesheetStatus
-  declare closedAt: DateTime | null
+  declare closedAt: Date | null
   declare observations: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: EmployeeTimesheet) {
     super()
@@ -22,9 +21,9 @@ export default class EmployeeTimesheetDto extends BaseModelDto {
     this.timesheetId = model.timesheetId
     this.userId = model.userId
     this.status = model.status
-    this.closedAt = model.closedAt
+    this.closedAt = model.closedAt ? model.closedAt.toJSDate() : null
     this.observations = model.observations
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

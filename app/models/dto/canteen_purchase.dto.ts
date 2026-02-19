@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenPurchase from '#models/canteen_purchase'
 import type { CanteenPaymentMethod, CanteenPurchaseStatus } from '#models/canteen_purchase'
-import type { DateTime } from 'luxon'
 import UserDto from './user.dto.js'
 import CanteenDto from './canteen.dto.js'
 import CanteenItemPurchasedDto from './canteen_item_purchased.dto.js'
@@ -13,10 +12,10 @@ export default class CanteenPurchaseDto extends BaseModelDto {
   declare totalAmount: number
   declare paymentMethod: CanteenPaymentMethod
   declare status: CanteenPurchaseStatus
-  declare paidAt: DateTime | null
+  declare paidAt: Date | null
   declare monthlyTransferId: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare user?: UserDto
   declare canteen?: CanteenDto
   declare itemsPurchased?: CanteenItemPurchasedDto[]
@@ -32,10 +31,10 @@ export default class CanteenPurchaseDto extends BaseModelDto {
     this.totalAmount = canteenPurchase.totalAmount
     this.paymentMethod = canteenPurchase.paymentMethod
     this.status = canteenPurchase.status
-    this.paidAt = canteenPurchase.paidAt
+    this.paidAt = canteenPurchase.paidAt ? canteenPurchase.paidAt.toJSDate() : null
     this.monthlyTransferId = canteenPurchase.monthlyTransferId
-    this.createdAt = canteenPurchase.createdAt
-    this.updatedAt = canteenPurchase.updatedAt
+    this.createdAt = canteenPurchase.createdAt.toJSDate()
+    this.updatedAt = canteenPurchase.updatedAt.toJSDate()
     if (canteenPurchase.user) this.user = new UserDto(canteenPurchase.user)
     if (canteenPurchase.canteen) this.canteen = new CanteenDto(canteenPurchase.canteen)
     if (canteenPurchase.itemsPurchased)

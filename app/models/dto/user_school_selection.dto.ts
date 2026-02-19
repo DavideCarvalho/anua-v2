@@ -1,13 +1,12 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type UserSchoolSelection from '#models/user_school_selection'
-import type { DateTime } from 'luxon'
 
 export default class UserSchoolSelectionDto extends BaseModelDto {
   declare id: string
   declare userId: string
   declare schoolId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: UserSchoolSelection) {
     super()
@@ -17,7 +16,7 @@ export default class UserSchoolSelectionDto extends BaseModelDto {
     this.id = model.id
     this.userId = model.userId
     this.schoolId = model.schoolId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type EventAttachment from '#models/event_attachment'
-import type { DateTime } from 'luxon'
 
 export default class EventAttachmentDto extends BaseModelDto {
   declare id: string
@@ -11,7 +10,7 @@ export default class EventAttachmentDto extends BaseModelDto {
   declare size: number
   declare url: string
   declare description: string | null
-  declare createdAt: DateTime
+  declare createdAt: Date
 
   constructor(eventAttachment?: EventAttachment) {
     super()
@@ -26,6 +25,6 @@ export default class EventAttachmentDto extends BaseModelDto {
     this.size = eventAttachment.size
     this.url = eventAttachment.url
     this.description = eventAttachment.description
-    this.createdAt = eventAttachment.createdAt
+    this.createdAt = eventAttachment.createdAt.toJSDate()
   }
 }

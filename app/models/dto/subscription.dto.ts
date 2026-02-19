@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Subscription from '#models/subscription'
 import type { SubscriptionStatus, BillingCycle } from '#models/subscription'
-import type { DateTime } from 'luxon'
 import SchoolDto from './school.dto.js'
 import SchoolChainDto from './school_chain.dto.js'
 import SubscriptionPlanDto from './subscription_plan.dto.js'
@@ -13,12 +12,12 @@ export default class SubscriptionDto extends BaseModelDto {
   declare schoolChainId: string | null
   declare status: SubscriptionStatus
   declare billingCycle: BillingCycle
-  declare currentPeriodStart: DateTime
-  declare currentPeriodEnd: DateTime
-  declare trialEndsAt: DateTime | null
-  declare canceledAt: DateTime | null
-  declare pausedAt: DateTime | null
-  declare blockedAt: DateTime | null
+  declare currentPeriodStart: Date
+  declare currentPeriodEnd: Date
+  declare trialEndsAt: Date | null
+  declare canceledAt: Date | null
+  declare pausedAt: Date | null
+  declare blockedAt: Date | null
   declare pricePerStudent: number
   declare activeStudents: number
   declare monthlyAmount: number
@@ -28,8 +27,8 @@ export default class SubscriptionDto extends BaseModelDto {
   declare creditCardHolderName: string | null
   declare creditCardLastFourDigits: string | null
   declare creditCardBrand: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare school?: SchoolDto
   declare schoolChain?: SchoolChainDto
   declare plan?: SubscriptionPlanDto
@@ -45,12 +44,12 @@ export default class SubscriptionDto extends BaseModelDto {
     this.schoolChainId = subscription.schoolChainId
     this.status = subscription.status
     this.billingCycle = subscription.billingCycle
-    this.currentPeriodStart = subscription.currentPeriodStart
-    this.currentPeriodEnd = subscription.currentPeriodEnd
-    this.trialEndsAt = subscription.trialEndsAt
-    this.canceledAt = subscription.canceledAt
-    this.pausedAt = subscription.pausedAt
-    this.blockedAt = subscription.blockedAt
+    this.currentPeriodStart = subscription.currentPeriodStart.toJSDate()
+    this.currentPeriodEnd = subscription.currentPeriodEnd.toJSDate()
+    this.trialEndsAt = subscription.trialEndsAt ? subscription.trialEndsAt.toJSDate() : null
+    this.canceledAt = subscription.canceledAt ? subscription.canceledAt.toJSDate() : null
+    this.pausedAt = subscription.pausedAt ? subscription.pausedAt.toJSDate() : null
+    this.blockedAt = subscription.blockedAt ? subscription.blockedAt.toJSDate() : null
     this.pricePerStudent = subscription.pricePerStudent
     this.activeStudents = subscription.activeStudents
     this.monthlyAmount = subscription.monthlyAmount
@@ -60,8 +59,8 @@ export default class SubscriptionDto extends BaseModelDto {
     this.creditCardHolderName = subscription.creditCardHolderName
     this.creditCardLastFourDigits = subscription.creditCardLastFourDigits
     this.creditCardBrand = subscription.creditCardBrand
-    this.createdAt = subscription.createdAt
-    this.updatedAt = subscription.updatedAt
+    this.createdAt = subscription.createdAt.toJSDate()
+    this.updatedAt = subscription.updatedAt.toJSDate()
     this.school = subscription.school ? new SchoolDto(subscription.school) : undefined
     this.schoolChain = subscription.schoolChain
       ? new SchoolChainDto(subscription.schoolChain)

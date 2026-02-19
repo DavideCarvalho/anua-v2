@@ -1,13 +1,12 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SchoolHasGroup from '#models/school_has_group'
-import type { DateTime } from 'luxon'
 
 export default class SchoolHasGroupDto extends BaseModelDto {
   declare id: string
   declare schoolId: string
   declare schoolGroupId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: SchoolHasGroup) {
     super()
@@ -17,7 +16,7 @@ export default class SchoolHasGroupDto extends BaseModelDto {
     this.id = model.id
     this.schoolId = model.schoolId
     this.schoolGroupId = model.schoolGroupId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

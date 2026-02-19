@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SubscriptionStatusHistory from '#models/subscription_status_history'
-import type { DateTime } from 'luxon'
 
 export default class SubscriptionStatusHistoryDto extends BaseModelDto {
   declare id: string
@@ -8,7 +7,7 @@ export default class SubscriptionStatusHistoryDto extends BaseModelDto {
   declare fromStatus: string | null
   declare toStatus: string
   declare reason: string | null
-  declare changedAt: DateTime
+  declare changedAt: Date
 
   constructor(subscriptionStatusHistory?: SubscriptionStatusHistory) {
     super()
@@ -20,6 +19,6 @@ export default class SubscriptionStatusHistoryDto extends BaseModelDto {
     this.fromStatus = subscriptionStatusHistory.fromStatus
     this.toStatus = subscriptionStatusHistory.toStatus
     this.reason = subscriptionStatusHistory.reason
-    this.changedAt = subscriptionStatusHistory.changedAt
+    this.changedAt = subscriptionStatusHistory.changedAt.toJSDate()
   }
 }

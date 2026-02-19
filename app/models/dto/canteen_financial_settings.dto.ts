@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenFinancialSettings from '#models/canteen_financial_settings'
 import type { PixKeyType } from '#models/canteen_financial_settings'
-import type { DateTime } from 'luxon'
 
 export default class CanteenFinancialSettingsDto extends BaseModelDto {
   declare id: string
@@ -11,8 +10,8 @@ export default class CanteenFinancialSettingsDto extends BaseModelDto {
   declare pixKeyType: PixKeyType | null
   declare bankName: string | null
   declare accountHolder: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(canteenFinancialSettings?: CanteenFinancialSettings) {
     super()
@@ -26,7 +25,7 @@ export default class CanteenFinancialSettingsDto extends BaseModelDto {
     this.pixKeyType = canteenFinancialSettings.pixKeyType
     this.bankName = canteenFinancialSettings.bankName
     this.accountHolder = canteenFinancialSettings.accountHolder
-    this.createdAt = canteenFinancialSettings.createdAt
-    this.updatedAt = canteenFinancialSettings.updatedAt
+    this.createdAt = canteenFinancialSettings.createdAt.toJSDate()
+    this.updatedAt = canteenFinancialSettings.updatedAt.toJSDate()
   }
 }

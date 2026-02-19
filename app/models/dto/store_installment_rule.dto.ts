@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StoreInstallmentRule from '#models/store_installment_rule'
-import type { DateTime } from 'luxon'
 
 export default class StoreInstallmentRuleDto extends BaseModelDto {
   declare id: string
@@ -8,8 +7,8 @@ export default class StoreInstallmentRuleDto extends BaseModelDto {
   declare minAmount: number
   declare maxInstallments: number
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: StoreInstallmentRule) {
     super()
@@ -21,7 +20,7 @@ export default class StoreInstallmentRuleDto extends BaseModelDto {
     this.minAmount = model.minAmount
     this.maxInstallments = model.maxInstallments
     this.isActive = model.isActive
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

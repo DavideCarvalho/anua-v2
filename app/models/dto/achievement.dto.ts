@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Achievement from '#models/achievement'
 import type { AchievementCategory, AchievementRarity, RecurrencePeriod } from '#models/achievement'
-import type { DateTime } from 'luxon'
 import SchoolDto from './school.dto.js'
 
 export default class AchievementDto extends BaseModelDto {
@@ -20,9 +19,9 @@ export default class AchievementDto extends BaseModelDto {
   declare schoolId: string | null
   declare schoolChainId: string | null
   declare isActive: boolean
-  declare deletedAt: DateTime | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare deletedAt: Date | null
+  declare createdAt: Date
+  declare updatedAt: Date
   declare school?: SchoolDto
 
   constructor(achievement?: Achievement) {
@@ -45,9 +44,9 @@ export default class AchievementDto extends BaseModelDto {
     this.schoolId = achievement.schoolId
     this.schoolChainId = achievement.schoolChainId
     this.isActive = achievement.isActive
-    this.deletedAt = achievement.deletedAt
-    this.createdAt = achievement.createdAt
-    this.updatedAt = achievement.updatedAt
+    this.deletedAt = achievement.deletedAt ? achievement.deletedAt.toJSDate() : null
+    this.createdAt = achievement.createdAt.toJSDate()
+    this.updatedAt = achievement.updatedAt.toJSDate()
     this.school = achievement.school ? new SchoolDto(achievement.school) : undefined
   }
 }

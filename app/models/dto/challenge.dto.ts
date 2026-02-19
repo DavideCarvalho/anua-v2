@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Challenge from '#models/challenge'
 import type { ChallengeCategory, RecurrencePeriod } from '#models/challenge'
-import type { DateTime } from 'luxon'
 
 export default class ChallengeDto extends BaseModelDto {
   declare id: string
@@ -13,12 +12,12 @@ export default class ChallengeDto extends BaseModelDto {
   declare criteria: Record<string, unknown>
   declare isRecurring: boolean
   declare recurrencePeriod: RecurrencePeriod | null
-  declare startDate: DateTime | null
-  declare endDate: DateTime | null
+  declare startDate: Date | null
+  declare endDate: Date | null
   declare schoolId: string | null
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(challenge?: Challenge) {
     super()
@@ -34,11 +33,11 @@ export default class ChallengeDto extends BaseModelDto {
     this.criteria = challenge.criteria
     this.isRecurring = challenge.isRecurring
     this.recurrencePeriod = challenge.recurrencePeriod
-    this.startDate = challenge.startDate
-    this.endDate = challenge.endDate
+    this.startDate = challenge.startDate ? challenge.startDate.toJSDate() : null
+    this.endDate = challenge.endDate ? challenge.endDate.toJSDate() : null
     this.schoolId = challenge.schoolId
     this.isActive = challenge.isActive
-    this.createdAt = challenge.createdAt
-    this.updatedAt = challenge.updatedAt
+    this.createdAt = challenge.createdAt.toJSDate()
+    this.updatedAt = challenge.updatedAt.toJSDate()
   }
 }

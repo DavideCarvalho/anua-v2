@@ -1,14 +1,13 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SchoolChainAchievementConfig from '#models/school_chain_achievement_config'
-import type { DateTime } from 'luxon'
 
 export default class SchoolChainAchievementConfigDto extends BaseModelDto {
   declare id: string
   declare schoolChainId: string
   declare achievementId: string
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: SchoolChainAchievementConfig) {
     super()
@@ -19,7 +18,7 @@ export default class SchoolChainAchievementConfigDto extends BaseModelDto {
     this.schoolChainId = model.schoolChainId
     this.achievementId = model.achievementId
     this.isActive = model.isActive
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

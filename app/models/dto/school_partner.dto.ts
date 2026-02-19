@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SchoolPartner from '#models/school_partner'
-import type { DateTime } from 'luxon'
 
 export default class SchoolPartnerDto extends BaseModelDto {
   declare id: string
@@ -11,11 +10,11 @@ export default class SchoolPartnerDto extends BaseModelDto {
   declare phone: string | null
   declare contactName: string | null
   declare discountPercentage: number
-  declare partnershipStartDate: DateTime
-  declare partnershipEndDate: DateTime | null
+  declare partnershipStartDate: Date
+  declare partnershipEndDate: Date | null
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: SchoolPartner) {
     super()
@@ -30,10 +29,10 @@ export default class SchoolPartnerDto extends BaseModelDto {
     this.phone = model.phone
     this.contactName = model.contactName
     this.discountPercentage = model.discountPercentage
-    this.partnershipStartDate = model.partnershipStartDate
-    this.partnershipEndDate = model.partnershipEndDate
+    this.partnershipStartDate = model.partnershipStartDate.toJSDate()
+    this.partnershipEndDate = model.partnershipEndDate ? model.partnershipEndDate.toJSDate() : null
     this.isActive = model.isActive
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

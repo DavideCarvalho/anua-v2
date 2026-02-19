@@ -7,7 +7,7 @@ export class BalanceTransactionDto extends BaseModelDto {
   declare amount: number
   declare description: string | null
   declare status: string
-  declare createdAt: DateTime | string
+  declare createdAt: Date
 
   constructor(data: {
     id: string
@@ -23,7 +23,8 @@ export class BalanceTransactionDto extends BaseModelDto {
     this.amount = data.amount
     this.description = data.description
     this.status = data.status
-    this.createdAt = data.createdAt
+    this.createdAt =
+      typeof data.createdAt === 'string' ? new Date(data.createdAt) : data.createdAt.toJSDate()
   }
 }
 

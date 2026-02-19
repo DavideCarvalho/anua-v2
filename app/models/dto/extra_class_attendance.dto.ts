@@ -1,16 +1,15 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type ExtraClassAttendance from '#models/extra_class_attendance'
-import type { DateTime } from 'luxon'
 import StudentHasExtraClassAttendanceDto from './student_has_extra_class_attendance.dto.js'
 
 export default class ExtraClassAttendanceDto extends BaseModelDto {
   declare id: string
   declare extraClassId: string
   declare extraClassScheduleId: string
-  declare date: DateTime
+  declare date: Date
   declare note: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare studentAttendances?: StudentHasExtraClassAttendanceDto[]
 
   constructor(model?: ExtraClassAttendance) {
@@ -20,10 +19,10 @@ export default class ExtraClassAttendanceDto extends BaseModelDto {
     this.id = model.id
     this.extraClassId = model.extraClassId
     this.extraClassScheduleId = model.extraClassScheduleId
-    this.date = model.date
+    this.date = model.date.toJSDate()
     this.note = model.note
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
     this.studentAttendances = model.studentAttendances
       ? model.studentAttendances.map((sa) => new StudentHasExtraClassAttendanceDto(sa))
       : undefined

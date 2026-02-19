@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon'
-
 interface AuditMetadata {
   ip_address?: string
   user_agent?: string
@@ -27,7 +25,7 @@ export default class AuditDto {
   declare oldValues: Record<string, unknown> | null
   declare newValues: Record<string, unknown> | null
   declare metadata: AuditMetadata | null
-  declare createdAt: DateTime
+  declare createdAt: Date
 
   constructor(row: AuditRow) {
     this.id = row.id
@@ -37,10 +35,7 @@ export default class AuditDto {
     this.oldValues = row.old_values
     this.newValues = row.new_values
     this.metadata = row.metadata
-    this.createdAt =
-      row.created_at instanceof Date
-        ? DateTime.fromJSDate(row.created_at)
-        : DateTime.fromISO(row.created_at as string)
+    this.createdAt = row.created_at instanceof Date ? row.created_at : new Date(row.created_at)
   }
 
   static fromArray(rows: AuditRow[]): AuditDto[] {

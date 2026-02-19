@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SchoolGroup from '#models/school_group'
 import type { SchoolGroupType } from '#models/school_group'
-import type { DateTime } from 'luxon'
 import SchoolChainDto from './school_chain.dto.js'
 
 export default class SchoolGroupDto extends BaseModelDto {
@@ -14,8 +13,8 @@ export default class SchoolGroupDto extends BaseModelDto {
   declare insuranceCoveragePercentage: number | null
   declare insuranceClaimWaitingDays: number | null
   declare schoolChainId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date | null
   declare schoolChain?: SchoolChainDto
 
   constructor(model?: SchoolGroup) {
@@ -32,8 +31,8 @@ export default class SchoolGroupDto extends BaseModelDto {
     this.insuranceCoveragePercentage = model.insuranceCoveragePercentage
     this.insuranceClaimWaitingDays = model.insuranceClaimWaitingDays
     this.schoolChainId = model.schoolChainId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt ? model.updatedAt.toJSDate() : null
     this.schoolChain = model.schoolChain ? new SchoolChainDto(model.schoolChain) : undefined
   }
 }

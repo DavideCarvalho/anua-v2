@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenItemPurchased from '#models/canteen_item_purchased'
-import type { DateTime } from 'luxon'
 
 export default class CanteenItemPurchasedDto extends BaseModelDto {
   declare id: string
@@ -9,8 +8,8 @@ export default class CanteenItemPurchasedDto extends BaseModelDto {
   declare quantity: number
   declare unitPrice: number
   declare totalPrice: number
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(canteenItemPurchased?: CanteenItemPurchased) {
     super()
@@ -23,7 +22,7 @@ export default class CanteenItemPurchasedDto extends BaseModelDto {
     this.quantity = canteenItemPurchased.quantity
     this.unitPrice = canteenItemPurchased.unitPrice
     this.totalPrice = canteenItemPurchased.totalPrice
-    this.createdAt = canteenItemPurchased.createdAt
-    this.updatedAt = canteenItemPurchased.updatedAt
+    this.createdAt = canteenItemPurchased.createdAt.toJSDate()
+    this.updatedAt = canteenItemPurchased.updatedAt.toJSDate()
   }
 }

@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentPayment from '#models/student_payment'
-import type { DateTime } from 'luxon'
 import StudentDto from './student.dto.js'
 import StudentHasExtraClassDto from './student_has_extra_class.dto.js'
 
@@ -29,14 +28,14 @@ export default class StudentPaymentDto extends BaseModelDto {
     | 'FAILED'
     | 'RENEGOTIATED'
   declare totalAmount: number
-  declare dueDate: DateTime
+  declare dueDate: Date
   declare installments: number
   declare installmentNumber: number
   declare discountPercentage: number
   declare discountType: 'PERCENTAGE' | 'FLAT'
   declare discountValue: number
-  declare paidAt: DateTime | null
-  declare emailSentAt: DateTime | null
+  declare paidAt: Date | null
+  declare emailSentAt: Date | null
   declare contractId: string
   declare classHasAcademicPeriodId: string | null
   declare studentHasLevelId: string | null
@@ -48,8 +47,8 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare invoiceId: string | null
   declare insuranceBillingId: string | null
   declare studentHasExtraClassId: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare student?: StudentDto
   declare studentHasExtraClass?: StudentHasExtraClassDto
 
@@ -66,14 +65,14 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.type = studentPayment.type
     this.status = studentPayment.status
     this.totalAmount = studentPayment.totalAmount
-    this.dueDate = studentPayment.dueDate
+    this.dueDate = studentPayment.dueDate.toJSDate()
     this.installments = studentPayment.installments
     this.installmentNumber = studentPayment.installmentNumber
     this.discountPercentage = studentPayment.discountPercentage
     this.discountType = studentPayment.discountType
     this.discountValue = studentPayment.discountValue
-    this.paidAt = studentPayment.paidAt
-    this.emailSentAt = studentPayment.emailSentAt
+    this.paidAt = studentPayment.paidAt ? studentPayment.paidAt.toJSDate() : null
+    this.emailSentAt = studentPayment.emailSentAt ? studentPayment.emailSentAt.toJSDate() : null
     this.contractId = studentPayment.contractId
     this.classHasAcademicPeriodId = studentPayment.classHasAcademicPeriodId
     this.studentHasLevelId = studentPayment.studentHasLevelId
@@ -85,8 +84,8 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.invoiceId = studentPayment.invoiceId
     this.insuranceBillingId = studentPayment.insuranceBillingId
     this.studentHasExtraClassId = studentPayment.studentHasExtraClassId
-    this.createdAt = studentPayment.createdAt
-    this.updatedAt = studentPayment.updatedAt
+    this.createdAt = studentPayment.createdAt.toJSDate()
+    this.updatedAt = studentPayment.updatedAt.toJSDate()
     this.student = studentPayment.student ? new StudentDto(studentPayment.student) : undefined
     this.studentHasExtraClass = studentPayment.studentHasExtraClass
       ? new StudentHasExtraClassDto(studentPayment.studentHasExtraClass)

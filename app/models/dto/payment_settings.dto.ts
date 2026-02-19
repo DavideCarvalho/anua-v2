@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type PaymentSettings from '#models/payment_settings'
-import type { DateTime } from 'luxon'
 
 export default class PaymentSettingsDto extends BaseModelDto {
   declare id: string
@@ -11,8 +10,8 @@ export default class PaymentSettingsDto extends BaseModelDto {
   declare isActive: boolean
   declare schoolId: string | null
   declare schoolChainId: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(paymentSettings?: PaymentSettings) {
     super()
@@ -27,7 +26,7 @@ export default class PaymentSettingsDto extends BaseModelDto {
     this.isActive = paymentSettings.isActive
     this.schoolId = paymentSettings.schoolId
     this.schoolChainId = paymentSettings.schoolChainId
-    this.createdAt = paymentSettings.createdAt
-    this.updatedAt = paymentSettings.updatedAt
+    this.createdAt = paymentSettings.createdAt.toJSDate()
+    this.updatedAt = paymentSettings.updatedAt.toJSDate()
   }
 }

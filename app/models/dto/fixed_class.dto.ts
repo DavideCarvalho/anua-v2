@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type FixedClass from '#models/fixed_class'
-import type { DateTime } from 'luxon'
 
 export default class FixedClassDto extends BaseModelDto {
   declare id: string
@@ -12,8 +11,8 @@ export default class FixedClassDto extends BaseModelDto {
   declare classWeekDay: string
   declare startTime: string
   declare endTime: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(fixedClass?: FixedClass) {
     super()
@@ -29,7 +28,7 @@ export default class FixedClassDto extends BaseModelDto {
     this.classWeekDay = fixedClass.classWeekDay
     this.startTime = fixedClass.startTime
     this.endTime = fixedClass.endTime
-    this.createdAt = fixedClass.createdAt
-    this.updatedAt = fixedClass.updatedAt
+    this.createdAt = fixedClass.createdAt.toJSDate()
+    this.updatedAt = fixedClass.updatedAt.toJSDate()
   }
 }

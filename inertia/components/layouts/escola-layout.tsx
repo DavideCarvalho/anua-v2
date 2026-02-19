@@ -208,8 +208,7 @@ function NavItemComponent({
             {item.children!.map((child) => (
               <Link
                 key={child.route}
-                route={child.route as any}
-                params={undefined as any}
+                route={child.route}
                 className={cn(
                   'block rounded-lg px-3 py-2 text-sm transition-colors',
                   pathname === child.href
@@ -228,8 +227,7 @@ function NavItemComponent({
 
   return (
     <Link
-      route={item.route as any}
-      params={undefined as any}
+      route={item.route}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         pathname === item.href

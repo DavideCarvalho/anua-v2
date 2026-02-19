@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StoreOrder from '#models/store_order'
 import type { StoreOrderStatus } from '#models/store_order'
-import type { DateTime } from 'luxon'
 import StudentDto from './student.dto.js'
 
 export default class StoreOrderDto extends BaseModelDto {
@@ -14,13 +13,13 @@ export default class StoreOrderDto extends BaseModelDto {
   declare totalPrice: number
   declare totalPoints: number
   declare totalMoney: number
-  declare paidAt: DateTime | null
-  declare approvedAt: DateTime | null
-  declare preparingAt: DateTime | null
-  declare readyAt: DateTime | null
-  declare deliveredAt: DateTime | null
-  declare canceledAt: DateTime | null
-  declare estimatedReadyAt: DateTime | null
+  declare paidAt: Date | null
+  declare approvedAt: Date | null
+  declare preparingAt: Date | null
+  declare readyAt: Date | null
+  declare deliveredAt: Date | null
+  declare canceledAt: Date | null
+  declare estimatedReadyAt: Date | null
   declare studentNotes: string | null
   declare internalNotes: string | null
   declare cancellationReason: string | null
@@ -30,8 +29,8 @@ export default class StoreOrderDto extends BaseModelDto {
   declare paymentMode: 'IMMEDIATE' | 'DEFERRED' | null
   declare paymentMethod: 'BALANCE' | 'PIX' | 'CASH' | 'CARD' | null
   declare settlementId: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare student?: StudentDto
 
   constructor(model?: StoreOrder) {
@@ -48,13 +47,13 @@ export default class StoreOrderDto extends BaseModelDto {
     this.totalPrice = model.totalPrice
     this.totalPoints = model.totalPoints
     this.totalMoney = model.totalMoney
-    this.paidAt = model.paidAt
-    this.approvedAt = model.approvedAt
-    this.preparingAt = model.preparingAt
-    this.readyAt = model.readyAt
-    this.deliveredAt = model.deliveredAt
-    this.canceledAt = model.canceledAt
-    this.estimatedReadyAt = model.estimatedReadyAt
+    this.paidAt = model.paidAt ? model.paidAt.toJSDate() : null
+    this.approvedAt = model.approvedAt ? model.approvedAt.toJSDate() : null
+    this.preparingAt = model.preparingAt ? model.preparingAt.toJSDate() : null
+    this.readyAt = model.readyAt ? model.readyAt.toJSDate() : null
+    this.deliveredAt = model.deliveredAt ? model.deliveredAt.toJSDate() : null
+    this.canceledAt = model.canceledAt ? model.canceledAt.toJSDate() : null
+    this.estimatedReadyAt = model.estimatedReadyAt ? model.estimatedReadyAt.toJSDate() : null
     this.studentNotes = model.studentNotes
     this.internalNotes = model.internalNotes
     this.cancellationReason = model.cancellationReason
@@ -64,8 +63,8 @@ export default class StoreOrderDto extends BaseModelDto {
     this.paymentMode = model.paymentMode
     this.paymentMethod = model.paymentMethod
     this.settlementId = model.settlementId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
     this.student = model.student ? new StudentDto(model.student) : undefined
   }
 }

@@ -24,8 +24,8 @@ export class StudentDocumentDto extends BaseModelDto {
   declare size: number
   declare status: string
   declare rejectionReason: string | null
-  declare reviewedAt: DateTime | string | null
-  declare createdAt: DateTime | string
+  declare reviewedAt: Date | null
+  declare createdAt: Date
   declare documentType: DocumentTypeDto
   declare reviewerName: string | null
 
@@ -51,7 +51,12 @@ export class StudentDocumentDto extends BaseModelDto {
     this.status = data.status
     this.rejectionReason = data.rejectionReason
     this.reviewedAt = data.reviewedAt
-    this.createdAt = data.createdAt
+      ? typeof data.reviewedAt === 'string'
+        ? new Date(data.reviewedAt)
+        : data.reviewedAt.toJSDate()
+      : null
+    this.createdAt =
+      typeof data.createdAt === 'string' ? new Date(data.createdAt) : data.createdAt.toJSDate()
     this.documentType = data.documentType
     this.reviewerName = data.reviewerName
   }

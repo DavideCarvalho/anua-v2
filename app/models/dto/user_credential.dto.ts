@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type UserCredential from '#models/user_credential'
-import type { DateTime } from 'luxon'
 
 export default class UserCredentialDto extends BaseModelDto {
   declare id: string
@@ -10,8 +9,8 @@ export default class UserCredentialDto extends BaseModelDto {
   declare counter: number
   declare deviceName: string | null
   declare transports: string[] | null
-  declare createdAt: DateTime
-  declare lastUsedAt: DateTime
+  declare createdAt: Date
+  declare lastUsedAt: Date
 
   constructor(model?: UserCredential) {
     super()
@@ -25,7 +24,7 @@ export default class UserCredentialDto extends BaseModelDto {
     this.counter = model.counter
     this.deviceName = model.deviceName
     this.transports = model.transports
-    this.createdAt = model.createdAt
-    this.lastUsedAt = model.lastUsedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.lastUsedAt = model.lastUsedAt.toJSDate()
   }
 }

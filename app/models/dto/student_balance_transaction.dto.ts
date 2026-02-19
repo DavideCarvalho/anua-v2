@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentBalanceTransaction from '#models/student_balance_transaction'
-import type { DateTime } from 'luxon'
 
 export default class StudentBalanceTransactionDto extends BaseModelDto {
   declare id: string
@@ -16,8 +15,8 @@ export default class StudentBalanceTransactionDto extends BaseModelDto {
   declare responsibleId: string | null
   declare paymentGatewayId: string | null
   declare paymentMethod: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: StudentBalanceTransaction) {
     super()
@@ -37,7 +36,7 @@ export default class StudentBalanceTransactionDto extends BaseModelDto {
     this.responsibleId = model.responsibleId
     this.paymentGatewayId = model.paymentGatewayId
     this.paymentMethod = model.paymentMethod
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

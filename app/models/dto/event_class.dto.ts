@@ -1,12 +1,11 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type EventClass from '#models/event_class'
-import type { DateTime } from 'luxon'
 
 export default class EventClassDto extends BaseModelDto {
   declare id: string
   declare eventId: string
   declare classId: string
-  declare createdAt: DateTime
+  declare createdAt: Date
 
   constructor(eventClass?: EventClass) {
     super()
@@ -16,6 +15,6 @@ export default class EventClassDto extends BaseModelDto {
     this.id = eventClass.id
     this.eventId = eventClass.eventId
     this.classId = eventClass.classId
-    this.createdAt = eventClass.createdAt
+    this.createdAt = eventClass.createdAt.toJSDate()
   }
 }

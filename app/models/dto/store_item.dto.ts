@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StoreItem from '#models/store_item'
 import type { StoreItemPaymentMode, StoreItemCategory, StoreItemPeriod } from '#models/store_item'
-import type { DateTime } from 'luxon'
 import SchoolDto from './school.dto.js'
 import CanteenItemDto from './canteen_item.dto.js'
 
@@ -25,13 +24,13 @@ export default class StoreItemDto extends BaseModelDto {
   declare preparationTimeMinutes: number | null
   declare requiresApproval: boolean
   declare pickupLocation: string | null
-  declare availableFrom: DateTime | null
-  declare availableUntil: DateTime | null
+  declare availableFrom: Date | null
+  declare availableUntil: Date | null
   declare isActive: boolean
   declare metadata: Record<string, unknown> | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
-  declare deletedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date
+  declare deletedAt: Date | null
   declare school?: SchoolDto
   declare canteenItem?: CanteenItemDto
 
@@ -59,13 +58,13 @@ export default class StoreItemDto extends BaseModelDto {
     this.preparationTimeMinutes = model.preparationTimeMinutes
     this.requiresApproval = model.requiresApproval
     this.pickupLocation = model.pickupLocation
-    this.availableFrom = model.availableFrom
-    this.availableUntil = model.availableUntil
+    this.availableFrom = model.availableFrom ? model.availableFrom.toJSDate() : null
+    this.availableUntil = model.availableUntil ? model.availableUntil.toJSDate() : null
     this.isActive = model.isActive
     this.metadata = model.metadata
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
-    this.deletedAt = model.deletedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
+    this.deletedAt = model.deletedAt ? model.deletedAt.toJSDate() : null
     this.school = model.school ? new SchoolDto(model.school) : undefined
     this.canteenItem = model.canteenItem ? new CanteenItemDto(model.canteenItem) : undefined
   }

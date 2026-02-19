@@ -1,13 +1,12 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type ResponsibleUserAcceptedOccurence from '#models/responsible_user_accepted_occurence'
-import type { DateTime } from 'luxon'
 
 export default class ResponsibleUserAcceptedOccurenceDto extends BaseModelDto {
   declare id: string
   declare responsibleUserId: string
   declare occurenceId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: ResponsibleUserAcceptedOccurence) {
     super()
@@ -17,7 +16,7 @@ export default class ResponsibleUserAcceptedOccurenceDto extends BaseModelDto {
     this.id = model.id
     this.responsibleUserId = model.responsibleUserId
     this.occurenceId = model.occurenceId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

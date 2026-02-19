@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type ExtraClassSchedule from '#models/extra_class_schedule'
-import type { DateTime } from 'luxon'
 
 export default class ExtraClassScheduleDto extends BaseModelDto {
   declare id: string
@@ -8,8 +7,8 @@ export default class ExtraClassScheduleDto extends BaseModelDto {
   declare weekDay: number
   declare startTime: string
   declare endTime: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: ExtraClassSchedule) {
     super()
@@ -20,7 +19,7 @@ export default class ExtraClassScheduleDto extends BaseModelDto {
     this.weekDay = model.weekDay
     this.startTime = model.startTime
     this.endTime = model.endTime
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

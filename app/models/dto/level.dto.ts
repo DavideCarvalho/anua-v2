@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Level from '#models/level'
-import type { DateTime } from 'luxon'
 import SchoolDto from './school.dto.js'
 import ClassDto from './class.dto.js'
 
@@ -12,8 +11,8 @@ export default class LevelDto extends BaseModelDto {
   declare schoolId: string
   declare contractId: string | null
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date | null
   declare school?: SchoolDto
   declare classes?: ClassDto[]
 
@@ -29,8 +28,8 @@ export default class LevelDto extends BaseModelDto {
     this.schoolId = level.schoolId
     this.contractId = level.contractId
     this.isActive = level.isActive
-    this.createdAt = level.createdAt
-    this.updatedAt = level.updatedAt
+    this.createdAt = level.createdAt.toJSDate()
+    this.updatedAt = level.updatedAt ? level.updatedAt.toJSDate() : null
     this.school = level.school ? new SchoolDto(level.school) : undefined
     this.classes = level.classes?.map((c) => new ClassDto(c))
   }

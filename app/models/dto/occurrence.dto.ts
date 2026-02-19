@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Occurrence from '#models/occurrence'
 import type { OccurenceType } from '#models/occurrence'
-import type { DateTime } from 'luxon'
 
 export default class OccurrenceDto extends BaseModelDto {
   declare id: string
@@ -9,9 +8,9 @@ export default class OccurrenceDto extends BaseModelDto {
   declare teacherHasClassId: string
   declare type: OccurenceType
   declare text: string
-  declare date: DateTime
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare date: Date
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(occurrence?: Occurrence) {
     super()
@@ -23,8 +22,8 @@ export default class OccurrenceDto extends BaseModelDto {
     this.teacherHasClassId = occurrence.teacherHasClassId
     this.type = occurrence.type
     this.text = occurrence.text
-    this.date = occurrence.date
-    this.createdAt = occurrence.createdAt
-    this.updatedAt = occurrence.updatedAt
+    this.date = occurrence.date.toJSDate()
+    this.createdAt = occurrence.createdAt.toJSDate()
+    this.updatedAt = occurrence.updatedAt.toJSDate()
   }
 }

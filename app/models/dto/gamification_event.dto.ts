@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type GamificationEvent from '#models/gamification_event'
-import type { DateTime } from 'luxon'
 
 export default class GamificationEventDto extends BaseModelDto {
   declare id: string
@@ -10,9 +9,9 @@ export default class GamificationEventDto extends BaseModelDto {
   declare studentId: string
   declare metadata: Record<string, unknown>
   declare processed: boolean
-  declare processedAt: DateTime | null
+  declare processedAt: Date | null
   declare error: string | null
-  declare createdAt: DateTime
+  declare createdAt: Date
 
   constructor(gamificationEvent?: GamificationEvent) {
     super()
@@ -27,7 +26,9 @@ export default class GamificationEventDto extends BaseModelDto {
     this.metadata = gamificationEvent.metadata
     this.processed = gamificationEvent.processed
     this.processedAt = gamificationEvent.processedAt
+      ? gamificationEvent.processedAt.toJSDate()
+      : null
     this.error = gamificationEvent.error
-    this.createdAt = gamificationEvent.createdAt
+    this.createdAt = gamificationEvent.createdAt.toJSDate()
   }
 }

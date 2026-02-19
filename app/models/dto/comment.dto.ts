@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Comment from '#models/comment'
-import type { DateTime } from 'luxon'
 
 export default class CommentDto extends BaseModelDto {
   declare id: number
@@ -8,8 +7,8 @@ export default class CommentDto extends BaseModelDto {
   declare postId: number
   declare comment: string
   declare userId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: Comment) {
     super()
@@ -21,7 +20,7 @@ export default class CommentDto extends BaseModelDto {
     this.postId = model.postId
     this.comment = model.comment
     this.userId = model.userId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

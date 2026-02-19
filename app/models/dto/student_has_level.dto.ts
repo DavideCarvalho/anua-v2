@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentHasLevel from '#models/student_has_level'
 import type { DocusealSignatureStatus } from '#models/student_has_level'
-import type { DateTime } from 'luxon'
 import AcademicPeriodDto from './academic_period.dto.js'
 import { ContractDto } from './contract.dto.js'
 import ScholarshipDto from './scholarship.dto.js'
@@ -24,11 +23,11 @@ export default class StudentHasLevelDto extends BaseModelDto {
   declare paymentDay: number | null
   declare docusealSubmissionId: string | null
   declare docusealSignatureStatus: DocusealSignatureStatus | null
-  declare documentSignedAt: DateTime | null
+  declare documentSignedAt: Date | null
   declare enrollmentPaymentId: string | null
   declare signedContractFilePath: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   declare academicPeriod?: AcademicPeriodDto
   declare contract?: ContractDto
@@ -56,11 +55,11 @@ export default class StudentHasLevelDto extends BaseModelDto {
     this.paymentDay = model.paymentDay
     this.docusealSubmissionId = model.docusealSubmissionId
     this.docusealSignatureStatus = model.docusealSignatureStatus
-    this.documentSignedAt = model.documentSignedAt
+    this.documentSignedAt = model.documentSignedAt ? model.documentSignedAt.toJSDate() : null
     this.enrollmentPaymentId = model.enrollmentPaymentId
     this.signedContractFilePath = model.signedContractFilePath
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
 
     this.academicPeriod = model.academicPeriod
       ? new AcademicPeriodDto(model.academicPeriod)

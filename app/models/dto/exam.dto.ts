@@ -1,12 +1,11 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Exam from '#models/exam'
-import type { DateTime } from 'luxon'
 
 export default class ExamDto extends BaseModelDto {
   declare id: string
   declare title: string
   declare description: string | null
-  declare scheduledDate: DateTime
+  declare scheduledDate: Date
   declare maxScore: number
   declare weight: number
   declare type: string
@@ -17,8 +16,8 @@ export default class ExamDto extends BaseModelDto {
   declare subjectId: string | null
   declare teacherId: string
   declare academicPeriodId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
   declare class: { id: string; name: string } | null
   declare subject: { id: string; name: string } | null
   declare teacher: { id: string } | null
@@ -33,7 +32,7 @@ export default class ExamDto extends BaseModelDto {
     this.id = exam.id
     this.title = exam.title
     this.description = exam.description
-    this.scheduledDate = exam.examDate
+    this.scheduledDate = exam.examDate.toJSDate()
     this.maxScore = exam.maxScore
     this.weight = exam.weight
     this.type = exam.type
@@ -44,8 +43,8 @@ export default class ExamDto extends BaseModelDto {
     this.subjectId = exam.subjectId
     this.teacherId = exam.teacherId
     this.academicPeriodId = exam.academicPeriodId
-    this.createdAt = exam.createdAt
-    this.updatedAt = exam.updatedAt
+    this.createdAt = exam.createdAt.toJSDate()
+    this.updatedAt = exam.updatedAt.toJSDate()
     this.class = exam.class ? { id: exam.class.id, name: exam.class.name } : null
     this.subject = exam.subject ? { id: exam.subject.id, name: exam.subject.name } : null
     this.teacher = exam.teacher ? { id: exam.teacher.id } : null

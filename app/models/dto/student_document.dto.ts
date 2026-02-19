@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentDocument from '#models/student_document'
-import type { DateTime } from 'luxon'
 
 export default class StudentDocumentDto extends BaseModelDto {
   declare id: string
@@ -11,11 +10,11 @@ export default class StudentDocumentDto extends BaseModelDto {
   declare size: number
   declare status: 'PENDING' | 'APPROVED' | 'REJECTED'
   declare reviewedBy: string | null
-  declare reviewedAt: DateTime | null
+  declare reviewedAt: Date | null
   declare rejectionReason: string | null
   declare contractDocumentId: string
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(model?: StudentDocument) {
     super()
@@ -30,10 +29,10 @@ export default class StudentDocumentDto extends BaseModelDto {
     this.size = model.size
     this.status = model.status
     this.reviewedBy = model.reviewedBy
-    this.reviewedAt = model.reviewedAt
+    this.reviewedAt = model.reviewedAt ? model.reviewedAt.toJSDate() : null
     this.rejectionReason = model.rejectionReason
     this.contractDocumentId = model.contractDocumentId
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
   }
 }

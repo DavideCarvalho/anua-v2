@@ -1,12 +1,11 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenMeal from '#models/canteen_meal'
 import type { MealType } from '#models/canteen_meal'
-import type { DateTime } from 'luxon'
 
 export default class CanteenMealDto extends BaseModelDto {
   declare id: string
   declare canteenId: string
-  declare date: DateTime
+  declare date: Date
   declare mealType: MealType
   declare name: string
   declare description: string | null
@@ -14,8 +13,8 @@ export default class CanteenMealDto extends BaseModelDto {
   declare maxServings: number | null
   declare availableServings: number | null
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(canteenMeal?: CanteenMeal) {
     super()
@@ -24,7 +23,7 @@ export default class CanteenMealDto extends BaseModelDto {
 
     this.id = canteenMeal.id
     this.canteenId = canteenMeal.canteenId
-    this.date = canteenMeal.date
+    this.date = canteenMeal.date.toJSDate()
     this.mealType = canteenMeal.mealType
     this.name = canteenMeal.name
     this.description = canteenMeal.description
@@ -32,7 +31,7 @@ export default class CanteenMealDto extends BaseModelDto {
     this.maxServings = canteenMeal.maxServings
     this.availableServings = canteenMeal.availableServings
     this.isActive = canteenMeal.isActive
-    this.createdAt = canteenMeal.createdAt
-    this.updatedAt = canteenMeal.updatedAt
+    this.createdAt = canteenMeal.createdAt.toJSDate()
+    this.updatedAt = canteenMeal.updatedAt.toJSDate()
   }
 }

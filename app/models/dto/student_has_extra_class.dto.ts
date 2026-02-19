@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentHasExtraClass from '#models/student_has_extra_class'
-import type { DateTime } from 'luxon'
 import StudentDto from './student.dto.js'
 import ExtraClassDto from './extra_class.dto.js'
 
@@ -12,10 +11,10 @@ export default class StudentHasExtraClassDto extends BaseModelDto {
   declare scholarshipId: string | null
   declare paymentMethod: 'BOLETO' | 'CREDIT_CARD' | 'PIX'
   declare paymentDay: number
-  declare enrolledAt: DateTime
-  declare cancelledAt: DateTime | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare enrolledAt: Date
+  declare cancelledAt: Date | null
+  declare createdAt: Date
+  declare updatedAt: Date
   declare student?: StudentDto
   declare extraClass?: ExtraClassDto
 
@@ -30,10 +29,10 @@ export default class StudentHasExtraClassDto extends BaseModelDto {
     this.scholarshipId = model.scholarshipId
     this.paymentMethod = model.paymentMethod
     this.paymentDay = model.paymentDay
-    this.enrolledAt = model.enrolledAt
-    this.cancelledAt = model.cancelledAt
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.enrolledAt = model.enrolledAt.toJSDate()
+    this.cancelledAt = model.cancelledAt ? model.cancelledAt.toJSDate() : null
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt.toJSDate()
     this.student = model.student ? new StudentDto(model.student) : undefined
     this.extraClass = model.extraClass ? new ExtraClassDto(model.extraClass) : undefined
   }

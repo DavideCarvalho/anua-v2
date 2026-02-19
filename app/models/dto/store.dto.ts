@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Store from '#models/store'
 import type { StoreType } from '#models/store'
-import type { DateTime } from 'luxon'
 
 export default class StoreDto extends BaseModelDto {
   declare id: string
@@ -12,9 +11,9 @@ export default class StoreDto extends BaseModelDto {
   declare type: StoreType
   declare commissionPercentage: number | null
   declare isActive: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
-  declare deletedAt: DateTime | null
+  declare createdAt: Date
+  declare updatedAt: Date
+  declare deletedAt: Date | null
   declare owner: { id: string; name: string } | null
 
   constructor(store?: Store) {
@@ -30,9 +29,9 @@ export default class StoreDto extends BaseModelDto {
     this.type = store.type
     this.commissionPercentage = store.commissionPercentage
     this.isActive = store.isActive
-    this.createdAt = store.createdAt
-    this.updatedAt = store.updatedAt
-    this.deletedAt = store.deletedAt
+    this.createdAt = store.createdAt.toJSDate()
+    this.updatedAt = store.updatedAt.toJSDate()
+    this.deletedAt = store.deletedAt ? store.deletedAt.toJSDate() : null
     this.owner = store.owner ? { id: store.owner.id, name: store.owner.name } : null
   }
 }

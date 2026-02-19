@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StoreSettlement from '#models/store_settlement'
 import type { StoreSettlementStatus } from '#models/store_settlement'
-import type { DateTime } from 'luxon'
 
 export default class StoreSettlementDto extends BaseModelDto {
   declare id: string
@@ -14,13 +13,13 @@ export default class StoreSettlementDto extends BaseModelDto {
   declare transferAmount: number
   declare status: StoreSettlementStatus
   declare approvedBy: string | null
-  declare approvedAt: DateTime | null
-  declare processedAt: DateTime | null
+  declare approvedAt: Date | null
+  declare processedAt: Date | null
   declare pixTransactionId: string | null
   declare failureReason: string | null
   declare notes: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(settlement?: StoreSettlement) {
     super()
@@ -37,12 +36,12 @@ export default class StoreSettlementDto extends BaseModelDto {
     this.transferAmount = settlement.transferAmount
     this.status = settlement.status
     this.approvedBy = settlement.approvedBy
-    this.approvedAt = settlement.approvedAt
-    this.processedAt = settlement.processedAt
+    this.approvedAt = settlement.approvedAt ? settlement.approvedAt.toJSDate() : null
+    this.processedAt = settlement.processedAt ? settlement.processedAt.toJSDate() : null
     this.pixTransactionId = settlement.pixTransactionId
     this.failureReason = settlement.failureReason
     this.notes = settlement.notes
-    this.createdAt = settlement.createdAt
-    this.updatedAt = settlement.updatedAt
+    this.createdAt = settlement.createdAt.toJSDate()
+    this.updatedAt = settlement.updatedAt.toJSDate()
   }
 }

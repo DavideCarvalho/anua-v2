@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type NotificationPreference from '#models/notification_preference'
 import type { NotificationType } from '#models/notification'
-import type { DateTime } from 'luxon'
 
 export default class NotificationPreferenceDto extends BaseModelDto {
   declare id: string
@@ -12,8 +11,8 @@ export default class NotificationPreferenceDto extends BaseModelDto {
   declare enablePush: boolean
   declare enableSms: boolean
   declare enableWhatsApp: boolean
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(notificationPreference?: NotificationPreference) {
     super()
@@ -28,7 +27,7 @@ export default class NotificationPreferenceDto extends BaseModelDto {
     this.enablePush = notificationPreference.enablePush
     this.enableSms = notificationPreference.enableSms
     this.enableWhatsApp = notificationPreference.enableWhatsApp
-    this.createdAt = notificationPreference.createdAt
-    this.updatedAt = notificationPreference.updatedAt
+    this.createdAt = notificationPreference.createdAt.toJSDate()
+    this.updatedAt = notificationPreference.updatedAt.toJSDate()
   }
 }

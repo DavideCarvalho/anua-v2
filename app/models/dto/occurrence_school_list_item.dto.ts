@@ -46,8 +46,8 @@ export default class OccurrenceSchoolListItemDto extends BaseModelDto {
     this.id = base.id
     this.type = base.type
     this.text = base.text
-    this.date = base.date?.toISODate() ?? null
-    this.createdAt = base.createdAt?.toISO() ?? null
+    this.date = base.date ? base.date.toISOString().split('T')[0] : null
+    this.createdAt = base.createdAt ? base.createdAt.toISOString() : null
     this.student = {
       id: data.occurrence.studentId,
       name: data.studentName,

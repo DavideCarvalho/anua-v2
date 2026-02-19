@@ -1,6 +1,5 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Calendar from '#models/calendar'
-import type { DateTime } from 'luxon'
 
 export default class CalendarDto extends BaseModelDto {
   declare id: string
@@ -11,8 +10,8 @@ export default class CalendarDto extends BaseModelDto {
   declare isCanceled: boolean
   declare isApproved: boolean
   declare canceledForNextCalendarId: string | null
-  declare createdAt: DateTime
-  declare updatedAt: DateTime
+  declare createdAt: Date
+  declare updatedAt: Date
 
   constructor(calendar?: Calendar) {
     super()
@@ -27,7 +26,7 @@ export default class CalendarDto extends BaseModelDto {
     this.isCanceled = calendar.isCanceled
     this.isApproved = calendar.isApproved
     this.canceledForNextCalendarId = calendar.canceledForNextCalendarId
-    this.createdAt = calendar.createdAt
-    this.updatedAt = calendar.updatedAt
+    this.createdAt = calendar.createdAt.toJSDate()
+    this.updatedAt = calendar.updatedAt.toJSDate()
   }
 }

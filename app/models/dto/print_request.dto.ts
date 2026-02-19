@@ -1,7 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type PrintRequest from '#models/print_request'
 import type { PrintRequestStatus } from '#models/print_request'
-import type { DateTime } from 'luxon'
 import UserDto from './user.dto.js'
 
 export default class PrintRequestDto extends BaseModelDto {
@@ -13,9 +12,9 @@ export default class PrintRequestDto extends BaseModelDto {
   declare frontAndBack: boolean
   declare rejectedFeedback: string | null
   declare quantity: number
-  declare dueDate: DateTime
-  declare createdAt: DateTime
-  declare updatedAt: DateTime | null
+  declare dueDate: Date
+  declare createdAt: Date
+  declare updatedAt: Date | null
   declare user?: UserDto
 
   constructor(model?: PrintRequest) {
@@ -31,9 +30,9 @@ export default class PrintRequestDto extends BaseModelDto {
     this.frontAndBack = model.frontAndBack
     this.rejectedFeedback = model.rejectedFeedback
     this.quantity = model.quantity
-    this.dueDate = model.dueDate
-    this.createdAt = model.createdAt
-    this.updatedAt = model.updatedAt
+    this.dueDate = model.dueDate.toJSDate()
+    this.createdAt = model.createdAt.toJSDate()
+    this.updatedAt = model.updatedAt ? model.updatedAt.toJSDate() : null
     this.user = model.user ? new UserDto(model.user) : undefined
   }
 }
