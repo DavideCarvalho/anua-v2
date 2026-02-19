@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 interface CreateOccurrencePayload {
   studentId: string
   teacherHasClassId: string
-  type: 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'OTHER'
+  type: 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'PRAISE' | 'OTHER'
   text: string
   date: string
 }
@@ -24,7 +24,7 @@ export function useCreateOccurrence() {
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null)
-        throw new Error(errorBody?.message || 'Erro ao criar ocorrencia')
+        throw new Error(errorBody?.message || 'Erro ao criar registro diario')
       }
 
       return response.json()

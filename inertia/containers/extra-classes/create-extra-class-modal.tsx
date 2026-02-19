@@ -41,7 +41,7 @@ const DAY_OPTIONS = [
 const schema = z.object({
   name: z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
   description: z.string().optional(),
-  academicPeriodId: z.string().min(1, 'Selecione o periodo letivo'),
+  academicPeriodId: z.string().min(1, 'Selecione o período letivo'),
   contractId: z.string().min(1, 'Selecione o contrato'),
   teacherId: z.string().min(1, 'Selecione o professor'),
   maxStudents: z.coerce.number().positive().optional().or(z.literal('')),
@@ -138,7 +138,7 @@ export function CreateExtraClassModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Periodo Letivo</Label>
+              <Label>Período Letivo</Label>
               <Select
                 value={form.watch('academicPeriodId')}
                 onValueChange={(v) => form.setValue('academicPeriodId', v)}
@@ -213,11 +213,7 @@ export function CreateExtraClassModal({
 
             <div className="space-y-2">
               <Label>Limite de Vagas</Label>
-              <Input
-                type="number"
-                {...form.register('maxStudents')}
-                placeholder="Ilimitado"
-              />
+              <Input type="number" {...form.register('maxStudents')} placeholder="Ilimitado" />
             </div>
           </div>
 
@@ -235,9 +231,7 @@ export function CreateExtraClassModal({
               </Button>
             </div>
             {form.formState.errors.schedules?.message && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.schedules.message}
-              </p>
+              <p className="text-sm text-destructive">{form.formState.errors.schedules.message}</p>
             )}
             <div className="space-y-2">
               {fields.map((field, index) => (
@@ -271,12 +265,7 @@ export function CreateExtraClassModal({
                     className="w-20"
                   />
                   {fields.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => remove(index)}
-                    >
+                    <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   )}

@@ -45,9 +45,7 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Aulas Avulsas</h1>
-            <p className="text-muted-foreground">
-              Gerencie aulas extracurriculares da escola
-            </p>
+            <p className="text-muted-foreground">Gerencie aulas extracurriculares da escola</p>
           </div>
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -57,13 +55,10 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
 
         <div className="flex items-end gap-4">
           <div className="space-y-2">
-            <Label>Periodo Letivo</Label>
-            <Select
-              value={selectedAcademicPeriodId}
-              onValueChange={setSelectedAcademicPeriodId}
-            >
+            <Label>Período Letivo</Label>
+            <Select value={selectedAcademicPeriodId} onValueChange={setSelectedAcademicPeriodId}>
               <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Todos os periodos" />
+                <SelectValue placeholder="Todos os períodos" />
               </SelectTrigger>
               <SelectContent>
                 {academicPeriods.map((ap) => (
@@ -86,11 +81,7 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
           onStudents={setStudentsExtraClassId}
         />
 
-        <CreateExtraClassModal
-          schoolId={schoolId}
-          open={createOpen}
-          onOpenChange={setCreateOpen}
-        />
+        <CreateExtraClassModal schoolId={schoolId} open={createOpen} onOpenChange={setCreateOpen} />
 
         {editId && (
           <EditExtraClassModal

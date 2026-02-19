@@ -3,7 +3,6 @@ import { DateTime } from 'luxon'
 import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import Contract from '#models/contract'
-import Scholarship from '#models/scholarship'
 import ContractPaymentDay from '#models/contract_payment_day'
 import Invoice from '#models/invoice'
 import { getQueueManager } from '#services/queue_service'
@@ -54,6 +53,10 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
       if (!enrollment) {
         console.warn(`[UPDATE_ENROLLMENT_PAYMENTS] Enrollment ${enrollmentId} not found - skipping`)
         return
+      }
+
+      if (enrollment.scholarshipId) {
+        await enrollment.load('scholarship')
       }
 
       console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Found enrollment, processing...`)
@@ -118,12 +121,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     const contract = await Contract.find(enrollment.contractId)
     if (!contract) return
 
-    const scholarship = enrollment.scholarshipId
-      ? await Scholarship.find(enrollment.scholarshipId)
-      : null
-
     const paymentDay = await this.getPaymentDay(enrollment, contract)
-    const discountPercentage = scholarship?.discountPercentage ?? 0
 
     const futurePayments = await StudentPayment.query()
       .where('studentHasLevelId', enrollment.id)
@@ -134,15 +132,9 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     if (futurePayments.length === 0) return
 
     if (contract.paymentType === 'UPFRONT') {
-      await this.updateUpfrontPayments(
-        enrollment,
-        contract,
-        futurePayments,
-        paymentDay,
-        discountPercentage
-      )
+      await this.updateUpfrontPayments(enrollment, contract, futurePayments, paymentDay)
     } else {
-      await this.updateMonthlyPayments(contract, futurePayments, paymentDay, discountPercentage)
+      await this.updateMonthlyPayments(enrollment, contract, futurePayments, paymentDay)
     }
   }
 
@@ -150,13 +142,13 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     enrollment: StudentHasLevel,
     contract: Contract,
     futurePayments: StudentPayment[],
-    paymentDay: number,
-    discountPercentage: number
+    paymentDay: number
   ) {
     const installments = enrollment.installments ?? contract.installments ?? 1
     const totalAmount = contract.ammount
     const installmentAmount = Math.floor(totalAmount / installments)
-    const discountedAmount = Math.round(installmentAmount * (1 - discountPercentage / 100))
+    const { value: discountedAmount, percentage: discountPercentage } =
+      await enrollment.getTotalMonthlyDiscount(installmentAmount)
 
     const allPayments = await StudentPayment.query()
       .where('studentHasLevelId', enrollment.id)
@@ -230,13 +222,14 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
   }
 
   private async updateMonthlyPayments(
+    enrollment: StudentHasLevel,
     contract: Contract,
     futurePayments: StudentPayment[],
-    paymentDay: number,
-    discountPercentage: number
+    paymentDay: number
   ) {
     const monthlyAmount = contract.ammount
-    const discountedAmount = Math.round(monthlyAmount * (1 - discountPercentage / 100))
+    const { value: discountedAmount, percentage: discountPercentage } =
+      await enrollment.getTotalMonthlyDiscount(monthlyAmount)
 
     for (const payment of futurePayments) {
       const dueDate = payment.dueDate.set({

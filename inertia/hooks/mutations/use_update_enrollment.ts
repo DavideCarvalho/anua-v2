@@ -1,16 +1,15 @@
 import { useMutation } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
+import type { InferRequestType } from '@tuyau/client'
+
+const $route = tuyau.$route('api.v1.students.enrollments.update')
+
+export type UpdateEnrollmentPayload = InferRequestType<typeof $route.$patch>
 
 interface UpdateEnrollmentParams {
   studentId: string
   enrollmentId: string
-  data: {
-    contractId?: string
-    scholarshipId?: string | null
-    paymentMethod?: 'BOLETO' | 'PIX'
-    paymentDay?: number
-    installments?: number
-  }
+  data: UpdateEnrollmentPayload
 }
 
 export function useUpdateEnrollment() {

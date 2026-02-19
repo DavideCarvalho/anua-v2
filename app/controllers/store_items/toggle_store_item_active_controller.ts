@@ -7,7 +7,7 @@ export default class ToggleStoreItemActiveController {
     const storeItem = await StoreItem.query().where('id', params.id).whereNull('deletedAt').first()
 
     if (!storeItem) {
-      throw AppException.notFound('Item da loja nao encontrado')
+      throw AppException.notFound('Item da loja não encontrado')
     }
 
     storeItem.isActive = !storeItem.isActive

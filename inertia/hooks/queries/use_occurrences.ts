@@ -2,7 +2,7 @@ import type { QueryOptions } from '@tanstack/react-query'
 
 export interface OccurrenceItem {
   id: string
-  type: 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'OTHER'
+  type: 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'PRAISE' | 'OTHER'
   text: string
   date: string
   createdAt: string
@@ -54,7 +54,7 @@ interface OccurrenceTeacherClassesResponse {
 interface UseOccurrencesParams {
   page?: number
   limit?: number
-  type?: 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'OTHER'
+  type?: 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'PRAISE' | 'OTHER'
   classId?: string
   academicPeriodId?: string
   studentId?: string
@@ -117,7 +117,7 @@ export function useOccurrencesQueryOptions(params: UseOccurrencesParams = {}) {
     queryFn: async (): Promise<OccurrencesResponse> => {
       const response = await fetch(`/api/v1/occurrences?${queryParams.toString()}`)
       if (!response.ok) {
-        throw new Error('Erro ao buscar ocorrencias')
+        throw new Error('Erro ao buscar registros diarios')
       }
       return response.json()
     },
@@ -137,7 +137,7 @@ export function useOccurrenceTeacherClassesQueryOptions(params?: { academicPerio
         `/api/v1/occurrences/teacher-classes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
       )
       if (!response.ok) {
-        throw new Error('Erro ao buscar turmas e materias para ocorrencias')
+        throw new Error('Erro ao buscar turmas e materias para registros diarios')
       }
       return response.json()
     },
@@ -150,7 +150,7 @@ export function useOccurrenceDetailQueryOptions(occurrenceId: string | null) {
     queryFn: async (): Promise<OccurrenceDetailResponse> => {
       const response = await fetch(`/api/v1/occurrences/${occurrenceId}`)
       if (!response.ok) {
-        throw new Error('Erro ao buscar detalhes da ocorrencia')
+        throw new Error('Erro ao buscar detalhes do registro diario')
       }
       return response.json()
     },

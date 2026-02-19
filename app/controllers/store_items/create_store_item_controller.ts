@@ -12,7 +12,7 @@ export default class CreateStoreItemController {
     // Resolver schoolId a partir da loja
     const store = await Store.find(data.storeId)
     if (!store) {
-      throw AppException.notFound('Loja nao encontrada')
+      throw AppException.notFound('Loja não encontrada')
     }
     const schoolId = store.schoolId
 
@@ -23,7 +23,7 @@ export default class CreateStoreItemController {
 
       if (minPercentage > maxPercentage) {
         throw AppException.badRequest(
-          'A porcentagem minima de pontos nao pode ser maior que a porcentagem maxima'
+          'A porcentagem mínima de pontos não pode ser maior que a porcentagem máxima'
         )
       }
     }

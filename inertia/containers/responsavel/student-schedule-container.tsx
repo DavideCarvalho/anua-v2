@@ -173,34 +173,36 @@ export function StudentScheduleContainer({
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2">
-              {((data as any).extraClassSchedules as ExtraClassScheduleData[]).map(
-                (ec) => (
-                  <div
-                    key={ec.extraClassName}
-                    className="p-3 border rounded-lg border-purple-200 bg-purple-50"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-purple-900">{ec.extraClassName}</span>
-                      <Badge variant="outline" className="border-purple-300 text-purple-700">
-                        Avulsa
-                      </Badge>
-                    </div>
-                    {ec.teacherName && (
-                      <p className="text-sm text-purple-700 flex items-center gap-1 mb-2">
-                        <User className="h-3 w-3" />
-                        {ec.teacherName}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-1">
-                      {ec.schedules.map((s, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs bg-purple-100 text-purple-800">
-                          {EXTRA_CLASS_DAY_LABELS[s.weekDay]} {s.startTime}-{s.endTime}
-                        </Badge>
-                      ))}
-                    </div>
+              {((data as any).extraClassSchedules as ExtraClassScheduleData[]).map((ec) => (
+                <div
+                  key={ec.extraClassName}
+                  className="p-3 border rounded-lg border-purple-200 bg-purple-50"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-purple-900">{ec.extraClassName}</span>
+                    <Badge variant="outline" className="border-purple-300 text-purple-700">
+                      Avulsa
+                    </Badge>
                   </div>
-                )
-              )}
+                  {ec.teacherName && (
+                    <p className="text-sm text-purple-700 flex items-center gap-1 mb-2">
+                      <User className="h-3 w-3" />
+                      {ec.teacherName}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-1">
+                    {ec.schedules.map((s, i) => (
+                      <Badge
+                        key={i}
+                        variant="secondary"
+                        className="text-xs bg-purple-100 text-purple-800"
+                      >
+                        {EXTRA_CLASS_DAY_LABELS[s.weekDay]} {s.startTime}-{s.endTime}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -219,9 +221,9 @@ export function StudentScheduleContainer({
           {!hasSchedule ? (
             <div className="py-12 text-center">
               <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">Horario nao definido</h3>
+              <h3 className="mt-4 text-lg font-semibold">Horário não definido</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                A grade horaria ainda nao foi configurada para esta turma.
+                A grade horária ainda não foi configurada para esta turma.
               </p>
             </div>
           ) : (
@@ -325,7 +327,9 @@ export function StudentScheduleContainer({
                               <div className="text-right">
                                 <p className="font-medium">{slot.subject.name}</p>
                                 {slot.teacherName && (
-                                  <p className="text-xs text-muted-foreground">{slot.teacherName}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {slot.teacherName}
+                                  </p>
                                 )}
                               </div>
                             ) : (

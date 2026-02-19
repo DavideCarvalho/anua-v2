@@ -27,6 +27,12 @@ export default class GetClassesForSidebarController {
   async handle(ctx: HttpContext) {
     const { auth, request } = ctx
     const user = ctx.effectiveUser ?? auth.user!
+
+    if (user.roleId && !user.$preloaded.role) {
+      await user.load('role')
+    }
+
+    const isSchoolTeacher = user.role?.name === 'SCHOOL_TEACHER'
     const isActiveParam = request.input('isActive')
     const shouldFilterActive =
       isActiveParam === undefined ? true : String(isActiveParam).toLowerCase() === 'true'
@@ -45,6 +51,10 @@ export default class GetClassesForSidebarController {
 
     // Query to get classes with their course and academic period info
     // Using ClassHasAcademicPeriod for direct class-period linkage
+    const teacherJoin = isSchoolTeacher
+      ? 'JOIN "TeacherHasClass" thc ON thc."classId" = c.id AND thc."isActive" = true AND thc."teacherId" = :teacherId'
+      : ''
+
     const query = `
       SELECT DISTINCT
         c.id as "classId",
@@ -62,6 +72,7 @@ export default class GetClassesForSidebarController {
         ap.slug as "academicPeriodSlug",
         ap."isActive" as "academicPeriodIsActive"
       FROM "Class" c
+      ${teacherJoin}
       JOIN "ClassHasAcademicPeriod" chap_class ON chap_class."classId" = c.id
       JOIN "AcademicPeriod" ap ON chap_class."academicPeriodId" = ap.id
       JOIN "Level" l ON c."levelId" = l.id
@@ -79,6 +90,7 @@ export default class GetClassesForSidebarController {
     const result = await db.rawQuery<{ rows: SidebarClassRow[] }>(query, {
       schoolIds,
       shouldFilterActive,
+      teacherId: isSchoolTeacher ? user.id : null,
     })
 
     const classes = result.rows.map((row) => ({

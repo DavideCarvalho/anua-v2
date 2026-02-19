@@ -73,7 +73,7 @@ export async function syncEventAudience(
 
   if (!audienceWholeSchool && shouldDefaultToWholeSchool) {
     throw new EventAudienceValidationError(
-      'Selecione pelo menos um periodo letivo, ano ou turma, ou marque escola inteira'
+      'Selecione pelo menos um período letivo, ano ou turma, ou marque escola inteira'
     )
   }
 
@@ -136,7 +136,7 @@ async function validateAudienceIds(
       .select('id')
 
     if (rows.length !== input.audienceAcademicPeriodIds.length) {
-      throw new EventAudienceValidationError('Periodo letivo invalido para a escola selecionada')
+      throw new EventAudienceValidationError('Período letivo inválido para a escola selecionada')
     }
   }
 
@@ -148,7 +148,7 @@ async function validateAudienceIds(
       .select('id')
 
     if (rows.length !== input.audienceLevelIds.length) {
-      throw new EventAudienceValidationError('Ano invalido para a escola selecionada')
+      throw new EventAudienceValidationError('Ano inválido para a escola selecionada')
     }
   }
 

@@ -1,12 +1,27 @@
 import { Head, usePage } from '@inertiajs/react'
 import { useState } from 'react'
-import { UserCheck, Filter, Calendar, Save, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
+import {
+  UserCheck,
+  Filter,
+  Calendar,
+  Save,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertTriangle,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Button } from '../../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Badge } from '../../../components/ui/badge'
 import {
   Select,
@@ -41,9 +56,7 @@ export default function PresencaPage() {
   const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({})
   const [isSaving, setIsSaving] = useState(false)
 
-  const filteredStudents = selectedClass
-    ? students.filter((s) => s.classId === selectedClass)
-    : []
+  const filteredStudents = selectedClass ? students.filter((s) => s.classId === selectedClass) : []
 
   const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
     setAttendance((prev) => ({ ...prev, [studentId]: status }))
@@ -58,7 +71,13 @@ export default function PresencaPage() {
     }, 1000)
   }
 
-  const getStatusButton = (studentId: string, status: AttendanceStatus, icon: React.ReactNode, _label: string, color: string) => {
+  const getStatusButton = (
+    studentId: string,
+    status: AttendanceStatus,
+    icon: React.ReactNode,
+    _label: string,
+    color: string
+  ) => {
     const isSelected = attendance[studentId] === status
     return (
       <Button
@@ -214,7 +233,7 @@ export default function PresencaPage() {
                               {attendance[student.id] === 'JUSTIFIED' && 'Justificado'}
                             </Badge>
                           ) : (
-                            <Badge variant="outline">Nao registrado</Badge>
+                            <Badge variant="outline">Não registrado</Badge>
                           )}
                         </TableCell>
                         <TableCell>

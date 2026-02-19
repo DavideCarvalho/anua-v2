@@ -71,7 +71,7 @@ export default class AcknowledgeOccurrenceController {
         sentViaPush: false,
         sentViaSms: false,
         sentViaWhatsApp: false,
-        actionUrl: '/escola/pedagogico/ocorrencias',
+        actionUrl: '/escola/pedagogico/registro-diario',
       })
     }
 

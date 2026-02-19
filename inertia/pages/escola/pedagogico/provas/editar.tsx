@@ -33,12 +33,12 @@ export default function EditarProvaPage({ examId }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>Editar Prova</CardTitle>
-          <CardDescription>Atualize as informacoes da prova</CardDescription>
+          <CardDescription>Atualize as informações da prova</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading && <p className="text-sm text-muted-foreground">Carregando prova...</p>}
           {!isLoading && !exam && (
-            <p className="text-sm text-muted-foreground">Nao foi possivel carregar a prova.</p>
+            <p className="text-sm text-muted-foreground">Não foi possível carregar a prova.</p>
           )}
           {!isLoading && exam && (
             <div className="space-y-4">

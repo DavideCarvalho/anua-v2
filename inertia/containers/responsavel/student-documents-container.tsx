@@ -101,8 +101,9 @@ export function StudentDocumentsContainer({
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Documentos pendentes</AlertTitle>
           <AlertDescription>
-            Existem {data.summary.requiredMissing} documento{data.summary.requiredMissing > 1 ? 's obrigatorios' : ' obrigatorio'}{' '}
-            pendente{data.summary.requiredMissing > 1 ? 's' : ''} de envio.
+            Existem {data.summary.requiredMissing} documento
+            {data.summary.requiredMissing > 1 ? 's obrigatorios' : ' obrigatorio'} pendente
+            {data.summary.requiredMissing > 1 ? 's' : ''} de envio.
           </AlertDescription>
         </Alert>
       )}
@@ -227,7 +228,7 @@ export function StudentDocumentsContainer({
               <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-semibold">Nenhum documento</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Ainda nao foram enviados documentos para este aluno.
+                Ainda não foram enviados documentos para este aluno.
               </p>
             </div>
           ) : (
@@ -249,7 +250,10 @@ export function StudentDocumentsContainer({
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium">{doc.documentType.name}</span>
-                          <Badge variant="outline" className={cn('text-xs', statusConfig?.className)}>
+                          <Badge
+                            variant="outline"
+                            className={cn('text-xs', statusConfig?.className)}
+                          >
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {statusConfig?.label || doc.status}
                           </Badge>
@@ -267,7 +271,8 @@ export function StudentDocumentsContainer({
                         )}
                         {doc.reviewedAt && doc.reviewerName && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            Revisado por {doc.reviewerName} em {brazilianDateFormatter(String(doc.reviewedAt))}
+                            Revisado por {doc.reviewerName} em{' '}
+                            {brazilianDateFormatter(String(doc.reviewedAt))}
                           </p>
                         )}
                       </div>

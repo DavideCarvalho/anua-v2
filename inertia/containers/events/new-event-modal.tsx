@@ -128,7 +128,7 @@ const formSchema = z
 
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Selecione ao menos um periodo letivo, ano ou turma',
+      message: 'Selecione ao menos um período letivo, ano ou turma',
       path: ['audienceAcademicPeriodIds'],
     })
   })
@@ -234,7 +234,7 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
       >
         <DialogHeader className="sticky top-0 z-10 border-b bg-background pb-4">
           <DialogTitle>Criar Novo Evento</DialogTitle>
-          <DialogDescription>Preencha as informacoes do evento abaixo.</DialogDescription>
+          <DialogDescription>Preencha as informações do evento abaixo.</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -381,7 +381,7 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
                   name="audienceAcademicPeriodIds"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Periodos letivos</FormLabel>
+                      <FormLabel>Períodos letivos</FormLabel>
                       <div className="max-h-28 space-y-2 overflow-y-auto rounded-md border p-3">
                         {academicPeriods.map((period) => (
                           <label key={period.id} className="flex items-center gap-2 text-sm">

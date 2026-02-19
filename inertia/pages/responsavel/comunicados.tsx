@@ -41,7 +41,7 @@ function ComunicadosContent() {
           <Bell className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum comunicado</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Voce nao possui comunicados ou notificacoes.
+            Você não possui comunicados ou notificações.
           </p>
         </CardContent>
       </Card>
@@ -112,9 +112,7 @@ export default function ComunicadosPage() {
             <Bell className="h-6 w-6" />
             Comunicados
           </h1>
-          <p className="text-muted-foreground">
-            Comunicados e notificacoes da escola
-          </p>
+          <p className="text-muted-foreground">Comunicados e notificacoes da escola</p>
         </div>
 
         <ErrorBoundary

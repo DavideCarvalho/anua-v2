@@ -6,12 +6,17 @@ import { toast } from 'sonner'
 import { Link, router } from '@inertiajs/react'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { EnrollmentSidebar, type StepStatus, type EnrollmentStep } from '../enrollment/enrollment-sidebar'
+import {
+  EnrollmentSidebar,
+  type StepStatus,
+  type EnrollmentStep,
+} from '../enrollment/enrollment-sidebar'
 import { StudentInfoStep } from '../enrollment/steps/student-step'
 import { ResponsiblesStep } from '../enrollment/steps/responsibles-step'
 import { AddressStep } from '../enrollment/steps/address-step'
 import { MedicalInfoStep } from '../enrollment/steps/medical-step'
 import { ReviewStep } from './steps/review-step'
+import { EditPaymentSection } from '../students/edit-payment-modal'
 import { editStudentSchema, type EditStudentFormData } from '../students/edit-student-modal/schema'
 import { EmergencyContactRelationship } from '../enrollment/schema'
 import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
@@ -22,6 +27,7 @@ const STEPS_CONFIG = [
   { title: 'Responsáveis', description: 'Dados dos responsáveis' },
   { title: 'Endereço', description: 'Localização do aluno' },
   { title: 'Informações Médicas', description: 'Condições e documentos' },
+  { title: 'Cobrança', description: 'Dados financeiros' },
   { title: 'Revisão', description: 'Confirme os dados' },
 ]
 
@@ -33,9 +39,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
   // ── State ─────────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(0)
   const [maxVisitedStep, setMaxVisitedStep] = useState(0)
-  const [stepsStatus, setStepsStatus] = useState<StepStatus[]>(
-    STEPS_CONFIG.map(() => 'pending')
-  )
+  const [stepsStatus, setStepsStatus] = useState<StepStatus[]>(STEPS_CONFIG.map(() => 'pending'))
   const [isInitialized, setIsInitialized] = useState(false)
 
   const fullUpdateStudent = useFullUpdateStudent()
@@ -317,9 +321,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
             if (isValid) {
               const studentDoc =
                 form.getValues('basicInfo.documentNumber')?.replace(/\D/g, '') || ''
-              const respDocs = responsibles.map(
-                (r) => r.documentNumber?.replace(/\D/g, '') || ''
-              )
+              const respDocs = responsibles.map((r) => r.documentNumber?.replace(/\D/g, '') || '')
 
               const hasStudentConflict = respDocs.some((doc) => doc && doc === studentDoc)
               if (hasStudentConflict) {
@@ -355,7 +357,9 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
         break
       case 3: {
         const emergencyContacts = form.getValues('medicalInfo.emergencyContacts')
-        const hasEmergencyGuardians = form.getValues('responsibles').some((r) => r.isEmergencyContact)
+        const hasEmergencyGuardians = form
+          .getValues('responsibles')
+          .some((r) => r.isEmergencyContact)
         if (emergencyContacts.length === 0 && !hasEmergencyGuardians && !isSelfResponsible) {
           form.setError('root', {
             message: 'Adicione pelo menos um contato de emergência',
@@ -367,6 +371,9 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
         break
       }
       case 4:
+        isValid = true
+        break
+      case 5:
         isValid = true
         break
     }
@@ -466,7 +473,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
   }
 
   // ── Derived state ─────────────────────────────────────────────────────
-  const isLastStep = currentStep === 4
+  const isLastStep = currentStep === 5
 
   // ── Loading state ─────────────────────────────────────────────────────
   if (isLoading) {
@@ -495,10 +502,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
       </div>
 
       <FormProvider {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="flex flex-1 flex-col min-h-0"
-        >
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-1 flex-col min-h-0">
           {/* Sidebar + Content */}
           <div className="flex flex-1 min-h-0 relative">
             <EnrollmentSidebar
@@ -514,7 +518,13 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
               {currentStep === 1 && <ResponsiblesStep academicPeriodId={academicPeriodId} />}
               {currentStep === 2 && <AddressStep />}
               {currentStep === 3 && <MedicalInfoStep />}
-              {currentStep === 4 && <ReviewStep onGoToStep={(step) => setCurrentStep(step)} />}
+              {currentStep === 4 && (
+                <EditPaymentSection
+                  studentId={studentId}
+                  studentName={form.watch('basicInfo.name') || 'Aluno'}
+                />
+              )}
+              {currentStep === 5 && <ReviewStep onGoToStep={(step) => setCurrentStep(step)} />}
             </div>
           </div>
 

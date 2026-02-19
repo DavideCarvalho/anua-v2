@@ -61,7 +61,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-
 interface SaveGradePayload {
   examId: string
   studentId: string
@@ -69,10 +68,7 @@ interface SaveGradePayload {
   absent: boolean
 }
 
-async function batchSaveExamGrades(
-  examId: string,
-  grades: SaveGradePayload[]
-): Promise<void> {
+async function batchSaveExamGrades(examId: string, grades: SaveGradePayload[]): Promise<void> {
   await tuyau
     .$route('api.v1.exams.batchSaveGrades', { id: examId })
     .$post({
@@ -148,15 +144,13 @@ function LaunchExamGradesModalContent({
   useEffect(() => {
     if (!students || students.length === 0) return
 
-    const gradesMap = new Map(
-      (existingGrades || []).map((g) => [g.studentId, g])
-    )
+    const gradesMap = new Map((existingGrades || []).map((g) => [g.studentId, g]))
 
     const formGrades: StudentGrade[] = students.map((student: Student) => {
       const existing = gradesMap.get(student.id)
       return {
         studentId: student.id,
-        name: student.user?.name || 'Nome nao disponivel',
+        name: student.user?.name || 'Nome não disponível',
         score: existing?.score ?? null,
         absent: existing ? !existing.attended : false,
       }

@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { useQuery, useQueryClient, useMutation, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { usePage } from '@inertiajs/react'
+import {
+  useQuery,
+  useQueryClient,
+  useMutation,
+  QueryErrorResetBoundary,
+} from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { toast } from 'sonner'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
@@ -37,6 +43,7 @@ import {
 import { EditClassModal } from './classes/edit-class-modal'
 import { CreateClassModal } from './classes/create-class-modal'
 import { tuyau } from '../lib/api'
+import type { SharedProps } from '../lib/types'
 
 interface ClassItem {
   id: string
@@ -111,7 +118,10 @@ export function ClassesListContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ClassesListErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <ClassesListErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <ClassesListContent />
@@ -123,6 +133,8 @@ export function ClassesListContainer() {
 
 function ClassesListContent() {
   const queryClient = useQueryClient()
+  const { props } = usePage<SharedProps>()
+  const isSchoolTeacher = props.user?.role?.name === 'SCHOOL_TEACHER'
 
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
@@ -205,10 +217,12 @@ function ClassesListContent() {
             onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
-        <Button className="ml-auto" onClick={() => setCreateModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Turma
-        </Button>
+        {!isSchoolTeacher && (
+          <Button className="ml-auto" onClick={() => setCreateModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Turma
+          </Button>
+        )}
       </div>
 
       {isLoading && <ClassesListSkeleton />}
@@ -235,29 +249,32 @@ function ClassesListContent() {
                     <div>
                       <h3 className="font-semibold text-lg">{classItem.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {classItem.level?.name || 'Sem série'} - {classItem.level?.course?.name || ''}
+                        {classItem.level?.name || 'Sem série'} -{' '}
+                        {classItem.level?.course?.name || ''}
                       </p>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditClass(classItem)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Editar turma
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleDeleteClass(classItem)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Excluir turma
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {!isSchoolTeacher && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditClass(classItem)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar turma
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteClass(classItem)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir turma
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                   <div className="mt-4 flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-1">
@@ -310,9 +327,15 @@ function ClassesListContent() {
         </div>
       )}
 
-      <EditClassModal open={editModalOpen} onOpenChange={setEditModalOpen} classData={selectedClass} />
+      <EditClassModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        classData={selectedClass}
+      />
 
-      <CreateClassModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      {!isSchoolTeacher && (
+        <CreateClassModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

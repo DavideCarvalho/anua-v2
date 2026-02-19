@@ -4,7 +4,8 @@ import ListClassesResponseDto from './dtos/list_classes_response.dto.js'
 
 export default class ListClassesController {
   async handle(ctx: HttpContext) {
-    const { request, selectedSchoolIds } = ctx
+    const { auth, request, selectedSchoolIds } = ctx
+    const user = ctx.effectiveUser ?? auth.user!
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
@@ -24,6 +25,16 @@ export default class ListClassesController {
         })
       })
       .orderBy('name', 'asc')
+
+    if (user.roleId && !user.$preloaded.role) {
+      await user.load('role')
+    }
+
+    if (user.role?.name === 'SCHOOL_TEACHER') {
+      query.whereHas('teacherClasses', (teacherClassQuery) => {
+        teacherClassQuery.where('teacherId', user.id).where('isActive', true)
+      })
+    }
 
     if (search) {
       query.whereILike('name', `%${search}%`)

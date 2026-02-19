@@ -95,9 +95,9 @@ const navigation: NavItem[] = [
         href: '/escola/eventos',
       },
       {
-        title: 'Ocorrências',
+        title: 'Registro diário',
         route: 'web.escola.pedagogico.ocorrencias',
-        href: '/escola/pedagogico/ocorrencias',
+        href: '/escola/pedagogico/registro-diario',
       },
     ],
   },
@@ -144,6 +144,11 @@ const navigation: NavItem[] = [
         title: 'Bolsas',
         route: 'web.escola.administrativo.bolsas',
         href: '/escola/administrativo/bolsas',
+      },
+      {
+        title: 'Configuração',
+        route: 'web.escola.financeiro.configuracaoPagamentos',
+        href: '/escola/financeiro/configuracao-pagamentos',
       },
     ],
   },
@@ -243,6 +248,10 @@ export function EscolaLayout({ children }: PropsWithChildren) {
   const user = props.user
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = url.split('?')[0]
+  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
+  const visibleNavigation = isSchoolTeacher
+    ? navigation.filter((item) => item.title === 'Pedagógico')
+    : navigation
 
   return (
     <PostHogProvider>
@@ -282,7 +291,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
               {/* Navigation */}
               <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <div className="space-y-1">
-                  {navigation.map((item) => {
+                  {visibleNavigation.map((item) => {
                     const isActive =
                       pathname === item.href ||
                       (item.children?.some((child) => pathname === child.href) ?? false)

@@ -80,7 +80,7 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
               {isLoading
                 ? 'Carregando...'
                 : unreadCount > 0
-                  ? `${unreadCount} nao lida${unreadCount > 1 ? 's' : ''}`
+                  ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`
                   : 'Tudo em dia'}
             </p>
           </div>

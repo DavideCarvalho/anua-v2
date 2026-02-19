@@ -12,7 +12,7 @@ export default class ToggleProductActiveController {
       .first()
 
     if (!item) {
-      throw AppException.notFound('Produto nao encontrado')
+      throw AppException.notFound('Produto não encontrado')
     }
 
     item.isActive = !item.isActive

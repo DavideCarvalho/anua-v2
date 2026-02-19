@@ -56,7 +56,7 @@ export function registerResponsavelPageRoutes() {
       router.get('/atividades', [ShowResponsavelAtividadesPageController]).as('atividades')
       router.get('/horario', [ShowResponsavelHorarioPageController]).as('horario')
       router.get('/documentos', [ShowResponsavelDocumentosPageController]).as('documentos')
-      router.get('/ocorrencias', [ShowResponsavelOcorrenciasPageController]).as('ocorrencias')
+      router.get('/registro-diario', [ShowResponsavelOcorrenciasPageController]).as('ocorrencias')
       router.get('/perfil', [ShowResponsavelPerfilPageController]).as('perfil')
       router.get('/notificacoes', [ShowResponsavelNotificacoesPageController]).as('notificacoes')
       router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')

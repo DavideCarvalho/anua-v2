@@ -8,11 +8,19 @@ import { updateStudentValidator } from '#validators/student'
 import AppException from '#exceptions/app_exception'
 
 export default class UpdateStudentController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response }: HttpContext) {
     const student = await Student.query()
       .where('id', params.id)
-      .whereHas('class', (classQuery) => {
-        classQuery.whereIn('schoolId', selectedSchoolIds ?? [])
+      .whereHas('levels', (levelQuery) => {
+        levelQuery
+          .whereNull('deletedAt')
+          .whereHas('levelAssignedToCourseAcademicPeriod', (lacap) => {
+            lacap.whereHas('courseHasAcademicPeriod', (chap) => {
+              chap.whereHas('academicPeriod', (academicPeriodQuery) => {
+                academicPeriodQuery.where('isActive', true).whereNull('deletedAt')
+              })
+            })
+          })
       })
       .preload('user')
       .first()

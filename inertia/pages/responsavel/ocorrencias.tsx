@@ -25,34 +25,29 @@ function OcorrenciasContent() {
           <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Voce nao possui alunos vinculados a sua conta.
+            Você não possui alunos vinculados à sua conta.
           </p>
         </CardContent>
       </Card>
     )
   }
 
-  return (
-    <StudentOccurrencesContainer
-      studentId={student.id}
-      studentName={student.name}
-    />
-  )
+  return <StudentOccurrencesContainer studentId={student.id} studentName={student.name} />
 }
 
 export default function OcorrenciasPage() {
   return (
     <ResponsavelLayout>
-      <Head title="Ocorrencias" />
+      <Head title="Registro diario" />
 
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <AlertTriangle className="h-6 w-6" />
-            Ocorrencias
+            Registro diario
           </h1>
           <p className="text-muted-foreground">
-            Acompanhe as ocorrencias registradas para seus filhos
+            Acompanhe os registros diarios registrados para seus filhos
           </p>
         </div>
 

@@ -13,7 +13,7 @@ export default class DeleteProductController {
       .first()
 
     if (!item) {
-      throw AppException.notFound('Produto nao encontrado')
+      throw AppException.notFound('Produto não encontrado')
     }
 
     item.deletedAt = DateTime.now()

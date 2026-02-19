@@ -18,7 +18,12 @@ export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps
   const maxCount = Math.max(...distribution.map((d: any) => d.count), 1)
 
   const getBarColor = (range: string) => {
-    if (range.includes('0-') || range.includes('1-') || range.includes('2-') || range.includes('3-')) {
+    if (
+      range.includes('0-') ||
+      range.includes('1-') ||
+      range.includes('2-') ||
+      range.includes('3-')
+    ) {
       return 'bg-red-500'
     }
     if (range.includes('4-') || range.includes('5-')) {
@@ -38,16 +43,14 @@ export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps
             <BarChart3 className="h-5 w-5" />
             Distribuicao de Notas
           </CardTitle>
-          <CardDescription>
-            Distribuicao das notas por faixa
-          </CardDescription>
+          <CardDescription>Distribuicao das notas por faixa</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="py-12 text-center">
             <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Sem dados</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Ainda nao ha notas registradas para exibir a distribuicao.
+              Ainda não há notas registradas para exibir a distribuição.
             </p>
           </div>
         </CardContent>
@@ -62,9 +65,7 @@ export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps
           <BarChart3 className="h-5 w-5" />
           Distribuicao de Notas
         </CardTitle>
-        <CardDescription>
-          Distribuicao das notas por faixa
-        </CardDescription>
+        <CardDescription>Distribuicao das notas por faixa</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

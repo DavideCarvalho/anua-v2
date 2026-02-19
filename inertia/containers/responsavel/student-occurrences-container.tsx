@@ -11,6 +11,7 @@ import {
   Filter,
   Eye,
   Bell,
+  Heart,
 } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
@@ -52,6 +53,7 @@ const TYPE_CONFIG = {
   PERFORMANCE: { label: 'Desempenho', icon: Info, color: 'text-primary' },
   ABSENCE: { label: 'Falta', icon: AlertCircle, color: 'text-destructive' },
   LATE: { label: 'Atraso', icon: Clock, color: 'text-muted-foreground' },
+  PRAISE: { label: 'Elogio ao aluno', icon: Heart, color: 'text-emerald-600' },
   OTHER: { label: 'Outro', icon: Info, color: 'text-muted-foreground' },
 }
 
@@ -89,7 +91,7 @@ export function StudentOccurrencesContainer({
       <Card className="border-destructive">
         <CardContent className="py-12 text-center">
           <XCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar ocorrencias</h3>
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar registros diarios</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
           </p>
@@ -111,13 +113,13 @@ export function StudentOccurrencesContainer({
 
   return (
     <div className="space-y-6">
-      {/* Alert for unacknowledged occurrences */}
+      {/* Alert for unacknowledged records */}
       {hasUnacknowledged && (
         <Alert variant="destructive">
           <Bell className="h-4 w-4" />
           <AlertTitle>Atencao</AlertTitle>
           <AlertDescription>
-            Existem {data.summary.unacknowledged} ocorrencia
+            Existem {data.summary.unacknowledged} registro
             {data.summary.unacknowledged > 1 ? 's' : ''} pendente
             {data.summary.unacknowledged > 1 ? 's' : ''} de reconhecimento.
           </AlertDescription>
@@ -216,6 +218,7 @@ export function StudentOccurrencesContainer({
                 <SelectItem value="PERFORMANCE">Desempenho</SelectItem>
                 <SelectItem value="ABSENCE">Falta</SelectItem>
                 <SelectItem value="LATE">Atraso</SelectItem>
+                <SelectItem value="PRAISE">Elogio ao aluno</SelectItem>
                 <SelectItem value="OTHER">Outro</SelectItem>
               </SelectContent>
             </Select>
@@ -254,23 +257,23 @@ export function StudentOccurrencesContainer({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Ocorrencias de {studentName}
+            Registro diario de {studentName}
           </CardTitle>
           <CardDescription>
             {hasOccurrences
-              ? `${data.occurrences.length} ocorrencia${data.occurrences.length > 1 ? 's' : ''} encontrada${data.occurrences.length > 1 ? 's' : ''}`
-              : 'Nenhuma ocorrencia registrada'}
+              ? `${data.occurrences.length} registro${data.occurrences.length > 1 ? 's' : ''} encontrado${data.occurrences.length > 1 ? 's' : ''}`
+              : 'Nenhum registro diario registrado'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!hasOccurrences ? (
             <div className="py-12 text-center">
               <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-              <h3 className="mt-4 text-lg font-semibold">Nenhuma ocorrencia</h3>
+              <h3 className="mt-4 text-lg font-semibold">Nenhum registro diario</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {typeFilter !== 'all' || statusFilter !== 'all' || severityFilter !== 'all'
                   ? 'Tente ajustar os filtros'
-                  : 'Otimo! Nao ha ocorrencias registradas para este aluno'}
+                  : 'Ótimo! Não há ocorrências registradas para este aluno'}
               </p>
             </div>
           ) : (
@@ -338,7 +341,7 @@ export function StudentOccurrencesContainer({
                           </div>
                           <div>
                             <h4 className="text-sm font-medium text-muted-foreground">
-                              Data da Ocorrencia
+                              Data do registro
                             </h4>
                             <p className="mt-1 text-sm">
                               {brazilianDateFormatter(occurrence.occurrenceDate)}
@@ -370,7 +373,7 @@ export function StudentOccurrencesContainer({
                               <Eye className="h-4 w-4 mr-2" />
                               {acknowledgeMutation.isPending
                                 ? 'Reconhecendo...'
-                                : 'Reconhecer Ocorrencia'}
+                                : 'Reconhecer registro'}
                             </Button>
                           </div>
                         )}

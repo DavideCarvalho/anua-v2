@@ -9,7 +9,7 @@ export default class UpdateStoreItemController {
     const storeItem = await StoreItem.query().where('id', params.id).whereNull('deletedAt').first()
 
     if (!storeItem) {
-      throw AppException.notFound('Item da loja nao encontrado')
+      throw AppException.notFound('Item da loja não encontrado')
     }
 
     const data = await request.validateUsing(updateStoreItemValidator)
@@ -22,7 +22,7 @@ export default class UpdateStoreItemController {
 
       if (minPercentage > maxPercentage) {
         throw AppException.badRequest(
-          'A porcentagem minima de pontos nao pode ser maior que a porcentagem maxima'
+          'A porcentagem mínima de pontos não pode ser maior que a porcentagem máxima'
         )
       }
     }

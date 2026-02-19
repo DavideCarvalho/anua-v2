@@ -24,9 +24,7 @@ export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) 
           <div className="py-12 text-center">
             <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Nenhuma publicacao</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ainda nao ha publicacoes no mural.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Ainda não há publicações no mural.</p>
           </div>
         </CardContent>
       </Card>
@@ -36,11 +34,7 @@ export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) 
   return (
     <div className="space-y-4">
       {posts.map((post: any) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          currentUserId={currentUserId}
-        />
+        <PostCard key={post.id} post={post} currentUserId={currentUserId} />
       ))}
     </div>
   )

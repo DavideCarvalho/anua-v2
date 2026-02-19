@@ -78,7 +78,7 @@ export default function VendasPage() {
             ) : (
               <Card>
                 <CardContent className="py-10 text-center text-muted-foreground">
-                  Cantina nao encontrada no contexto.
+                  Cantina não encontrada no contexto.
                 </CardContent>
               </Card>
             )}

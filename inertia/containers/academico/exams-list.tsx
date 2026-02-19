@@ -69,9 +69,7 @@ function ExamsListEmpty() {
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <FileText className="h-12 w-12 text-muted-foreground" />
       <h3 className="mt-4 text-lg font-semibold">Nenhuma prova encontrada</h3>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Crie uma nova prova para comecar.
-      </p>
+      <p className="mt-2 text-sm text-muted-foreground">Crie uma nova prova para comecar.</p>
     </div>
   )
 }
@@ -102,9 +100,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
   }
 
   if (isError || !data) {
-    return (
-      <div className="text-center text-destructive py-8">Erro ao carregar provas</div>
-    )
+    return <div className="text-center text-destructive py-8">Erro ao carregar provas</div>
   }
 
   const exams: Exam[] = (data?.data ?? []) as any
@@ -194,7 +190,9 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
                       className="flex items-center gap-2"
                       onClick={() => {
                         if (!exam.courseId) {
-                          toast.error('Não foi possível identificar o curso da turma. Verifique se a turma está vinculada a um curso.')
+                          toast.error(
+                            'Não foi possível identificar o curso da turma. Verifique se a turma está vinculada a um curso.'
+                          )
                           return
                         }
                         setSelectedExam(exam)
@@ -220,7 +218,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
                         {hasGrades && (
                           <TooltipContent>
                             <p>
-                              Nao e possivel excluir. Existem {exam.gradesCount} nota(s) lancada(s).
+                              Não é possível excluir. Existem {exam.gradesCount} nota(s) lançada(s).
                             </p>
                           </TooltipContent>
                         )}
@@ -254,7 +252,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir prova</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a prova "{examToDelete?.title}"? Esta acao nao pode ser
+              Tem certeza que deseja excluir a prova "{examToDelete?.title}"? Esta ação não pode ser
               desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -264,11 +262,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Excluir'
-              )}
+              {deleteMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

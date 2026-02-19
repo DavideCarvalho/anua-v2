@@ -94,9 +94,9 @@ const pedagogicalNavigation: NavItem[] = [
     requiresPedagogical: true,
   },
   {
-    title: 'Ocorrências',
+    title: 'Registro diário',
     route: 'web.responsavel.ocorrencias',
-    href: '/responsavel/ocorrencias',
+    href: '/responsavel/registro-diario',
     icon: AlertTriangle,
     requiresPedagogical: true,
   },

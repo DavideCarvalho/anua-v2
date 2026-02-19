@@ -25,19 +25,14 @@ function CantinaContent() {
           <UtensilsCrossed className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Voce nao possui alunos vinculados a sua conta.
+            Você não possui alunos vinculados à sua conta.
           </p>
         </CardContent>
       </Card>
     )
   }
 
-  return (
-    <StudentBalanceContainer
-      studentId={student.id}
-      studentName={student.name}
-    />
-  )
+  return <StudentBalanceContainer studentId={student.id} studentName={student.name} />
 }
 
 export default function CantinaPage() {
@@ -51,9 +46,7 @@ export default function CantinaPage() {
             <UtensilsCrossed className="h-6 w-6" />
             Cantina
           </h1>
-          <p className="text-muted-foreground">
-            Acompanhe o saldo e as compras na cantina
-          </p>
+          <p className="text-muted-foreground">Acompanhe o saldo e as compras na cantina</p>
         </div>
 
         <ErrorBoundary

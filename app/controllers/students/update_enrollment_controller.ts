@@ -24,7 +24,9 @@ export default class UpdateEnrollmentController {
       .preload('class')
       .firstOrFail()
 
-    enrollment.merge(payload)
+    const { individualDiscount, ...enrollmentPayload } = payload
+
+    enrollment.merge(enrollmentPayload)
 
     // Se não tem contractId, pega do Level
     if (!enrollment.contractId && enrollment.levelId) {
@@ -43,6 +45,47 @@ export default class UpdateEnrollmentController {
         .where('isActive', true)
         .whereNull('deletedAt')
         .update({ isActive: false })
+    }
+
+    if (individualDiscount !== undefined) {
+      const schoolId = enrollment.academicPeriod?.schoolId ?? ctx.auth.user?.schoolId
+      if (!schoolId || !ctx.auth.user) {
+        return response.badRequest({
+          message: 'Não foi possível identificar a escola para aplicar o desconto individual',
+        })
+      }
+
+      await IndividualDiscount.query()
+        .where('studentHasLevelId', enrollment.id)
+        .where('isActive', true)
+        .whereNull('deletedAt')
+        .update({ isActive: false })
+
+      if (individualDiscount) {
+        await IndividualDiscount.create({
+          name: individualDiscount.name || 'Desconto personalizado',
+          description: 'Configurado na edição de pagamento',
+          discountType: individualDiscount.discountType,
+          discountPercentage:
+            individualDiscount.discountType === 'PERCENTAGE'
+              ? (individualDiscount.discountPercentage ?? 0)
+              : null,
+          enrollmentDiscountPercentage: 0,
+          discountValue:
+            individualDiscount.discountType === 'FLAT'
+              ? (individualDiscount.discountValue ?? 0)
+              : null,
+          enrollmentDiscountValue: null,
+          isActive: true,
+          schoolId,
+          studentId: enrollment.studentId,
+          studentHasLevelId: enrollment.id,
+          createdById: ctx.auth.user!.id,
+        })
+
+        enrollment.scholarshipId = null
+        await enrollment.save()
+      }
     }
 
     // Dispara job para atualizar pagamentos

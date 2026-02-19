@@ -10,6 +10,9 @@ export default class ListEnrollmentsController {
       .preload('academicPeriod')
       .preload('contract')
       .preload('scholarship')
+      .preload('individualDiscounts', (query) => {
+        query.where('isActive', true).whereNull('deletedAt').orderBy('createdAt', 'desc')
+      })
       .preload('level')
       .preload('class')
       .orderBy('createdAt', 'desc')

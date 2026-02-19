@@ -24,19 +24,14 @@ function FrequenciaContent() {
           <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Voce nao possui alunos vinculados a sua conta.
+            Você não possui alunos vinculados à sua conta.
           </p>
         </CardContent>
       </Card>
     )
   }
 
-  return (
-    <StudentAttendanceContainer
-      studentId={student.id}
-      studentName={student.name}
-    />
-  )
+  return <StudentAttendanceContainer studentId={student.id} studentName={student.name} />
 }
 
 export default function FrequenciaPage() {
@@ -50,9 +45,7 @@ export default function FrequenciaPage() {
             <Calendar className="h-6 w-6" />
             Frequencia
           </h1>
-          <p className="text-muted-foreground">
-            Acompanhe a frequencia escolar dos seus filhos
-          </p>
+          <p className="text-muted-foreground">Acompanhe a frequencia escolar dos seus filhos</p>
         </div>
 
         <FrequenciaContent />

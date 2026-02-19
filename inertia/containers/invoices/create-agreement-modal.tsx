@@ -94,7 +94,7 @@ interface CreateAgreementModalProps {
     status: string
     month: number | null
     year: number | null
-    dueDate: string | null
+    dueDate: string | Date | null
     student?: { id?: string; user?: { name?: string }; name?: string }
   }
   open: boolean

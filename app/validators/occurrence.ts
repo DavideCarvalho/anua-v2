@@ -1,6 +1,6 @@
 import vine from '@vinejs/vine'
 
-const occurrenceTypes = ['BEHAVIOR', 'PERFORMANCE', 'ABSENCE', 'LATE', 'OTHER'] as const
+const occurrenceTypes = ['BEHAVIOR', 'PERFORMANCE', 'ABSENCE', 'LATE', 'PRAISE', 'OTHER'] as const
 const occurrenceSortFields = ['date', 'student', 'class', 'type'] as const
 const sortDirections = ['asc', 'desc'] as const
 

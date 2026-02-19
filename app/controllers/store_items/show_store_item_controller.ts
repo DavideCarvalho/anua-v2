@@ -12,7 +12,7 @@ export default class ShowStoreItemController {
       .first()
 
     if (!storeItem) {
-      throw AppException.notFound('Item da loja nao encontrado')
+      throw AppException.notFound('Item da loja não encontrado')
     }
 
     return response.ok(storeItem)

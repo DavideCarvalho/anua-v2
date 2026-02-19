@@ -91,7 +91,7 @@ export default function GamificacaoPage() {
         ) : (
           <Card>
             <CardContent className="py-10 text-center text-muted-foreground">
-              Escola nao encontrada no contexto do usuario.
+              Escola não encontrada no contexto do usuário.
             </CardContent>
           </Card>
         )}

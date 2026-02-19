@@ -62,7 +62,7 @@ export default function PerfilPage() {
             <User className="h-6 w-6" />
             Meu Perfil
           </h1>
-          <p className="text-muted-foreground">Visualize e gerencie suas informacoes</p>
+          <p className="text-muted-foreground">Visualize e gerencie suas informações</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -121,9 +121,7 @@ export default function PerfilPage() {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Notificacoes Push</p>
-                  <p className="text-sm text-muted-foreground">
-                    Receba notificacoes no navegador
-                  </p>
+                  <p className="text-sm text-muted-foreground">Receba notificacoes no navegador</p>
                 </div>
                 <Badge variant="outline">Ativo</Badge>
               </div>
@@ -139,9 +137,7 @@ export default function PerfilPage() {
                   <form onSubmit={handleEditProfile}>
                     <DialogHeader>
                       <DialogTitle>Editar Perfil</DialogTitle>
-                      <DialogDescription>
-                        Atualize suas informacoes pessoais
-                      </DialogDescription>
+                      <DialogDescription>Atualize suas informações pessoais</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
@@ -169,7 +165,7 @@ export default function PerfilPage() {
                         <Label htmlFor="email">Email</Label>
                         <Input id="email" value={user?.email || ''} disabled />
                         <p className="text-xs text-muted-foreground">
-                          O email nao pode ser alterado
+                          O e-mail não pode ser alterado
                         </p>
                       </div>
                     </div>
@@ -199,7 +195,7 @@ export default function PerfilPage() {
               <Shield className="h-5 w-5" />
               Seguranca
             </CardTitle>
-            <CardDescription>Informacoes sobre a seguranca da sua conta</CardDescription>
+            <CardDescription>Informações sobre a segurança da sua conta</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg">

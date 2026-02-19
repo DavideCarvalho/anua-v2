@@ -254,8 +254,8 @@ export function StudentAssignmentsContainer({
             Atividades de {studentName}
           </CardTitle>
           <CardDescription>
-            {data.assignments.length} atividade{data.assignments.length !== 1 ? 's' : ''}{' '}
-            encontrada{data.assignments.length !== 1 ? 's' : ''}
+            {data.assignments.length} atividade{data.assignments.length !== 1 ? 's' : ''} encontrada
+            {data.assignments.length !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -266,7 +266,7 @@ export function StudentAssignmentsContainer({
               <p className="mt-2 text-sm text-muted-foreground">
                 {statusFilter !== 'all' || subjectFilter !== 'all'
                   ? 'Tente ajustar os filtros'
-                  : 'Ainda nao ha atividades para este aluno'}
+                  : 'Ainda não há atividades para este aluno'}
               </p>
             </div>
           ) : (

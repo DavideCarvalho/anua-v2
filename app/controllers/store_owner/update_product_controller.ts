@@ -14,7 +14,7 @@ export default class UpdateProductController {
       .first()
 
     if (!item) {
-      throw AppException.notFound('Produto nao encontrado')
+      throw AppException.notFound('Produto não encontrado')
     }
 
     const data = await request.validateUsing(updateStoreItemValidator)

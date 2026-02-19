@@ -219,7 +219,7 @@ export function registerClassApiRoutes() {
       router.get('/:classId/subjects', [ListSubjectsForClassController]).as('classes.subjects')
     })
     .prefix('/classes')
-    .use([middleware.auth(), middleware.impersonation()])
+    .use([middleware.auth(), middleware.impersonation(), middleware.escolaTeacherClasses()])
 }
 
 export function registerSubjectApiRoutes() {

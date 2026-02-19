@@ -38,7 +38,7 @@ function GamificacaoContent() {
           <Trophy className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Voce nao possui alunos vinculados a sua conta.
+            Você não possui alunos vinculados à sua conta.
           </p>
         </CardContent>
       </Card>
@@ -56,7 +56,9 @@ function GamificacaoContent() {
                 <Medal className="h-5 w-5 text-yellow-500" />
                 {student.name}
               </CardTitle>
-              <CardDescription>{student.className} - {student.courseName}</CardDescription>
+              <CardDescription>
+                {student.className} - {student.courseName}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center">
@@ -90,8 +92,8 @@ function GamificacaoContent() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            O sistema de gamificacao incentiva os alunos a terem um bom desempenho
-            academico e comportamental. Os pontos sao acumulados atraves de:
+            O sistema de gamificacao incentiva os alunos a terem um bom desempenho academico e
+            comportamental. Os pontos sao acumulados atraves de:
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
             <li>Entrega de atividades no prazo</li>
@@ -140,9 +142,7 @@ export default function GamificacaoPage() {
             <Trophy className="h-6 w-6" />
             Gamificacao
           </h1>
-          <p className="text-muted-foreground">
-            Acompanhe os pontos e conquistas dos seus filhos
-          </p>
+          <p className="text-muted-foreground">Acompanhe os pontos e conquistas dos seus filhos</p>
         </div>
 
         <ErrorBoundary

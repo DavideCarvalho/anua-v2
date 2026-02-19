@@ -3,12 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Users, Loader2 } from 'lucide-react'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
@@ -169,16 +164,13 @@ export function ExtraClassStudentsTable({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog
-        open={!!cancelTarget}
-        onOpenChange={(open) => !open && setCancelTarget(null)}
-      >
+      <AlertDialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancelar inscricao?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa acao cancelara a inscricao de {cancelTarget?.student?.user?.name} e todas
-              as parcelas futuras nao pagas.
+              Essa acao cancelara a inscricao de {cancelTarget?.student?.user?.name} e todas as
+              parcelas futuras não pagas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -187,9 +179,7 @@ export function ExtraClassStudentsTable({
               onClick={handleCancel}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {cancelMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {cancelMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirmar Cancelamento
             </AlertDialogAction>
           </AlertDialogFooter>

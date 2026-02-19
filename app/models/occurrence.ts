@@ -6,7 +6,7 @@ import Student from './student.js'
 import TeacherHasClass from './teacher_has_class.js'
 import ResponsibleUserAcceptedOccurence from './responsible_user_accepted_occurence.js'
 
-export type OccurenceType = 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'OTHER'
+export type OccurenceType = 'BEHAVIOR' | 'PERFORMANCE' | 'ABSENCE' | 'LATE' | 'PRAISE' | 'OTHER'
 
 export default class Occurrence extends BaseModel {
   static table = 'Occurence'

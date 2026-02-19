@@ -70,15 +70,16 @@ const TYPE_OPTIONS = [
   { value: 'PERFORMANCE', label: 'Desempenho' },
   { value: 'ABSENCE', label: 'Falta' },
   { value: 'LATE', label: 'Atraso' },
+  { value: 'PRAISE', label: 'Elogio ao aluno' },
   { value: 'OTHER', label: 'Outro' },
 ] as const
 
 const schema = z.object({
   studentId: z.string().min(1, 'Selecione um aluno'),
   teacherHasClassId: z.string().min(1, 'Selecione turma e materia'),
-  type: z.enum(['BEHAVIOR', 'PERFORMANCE', 'ABSENCE', 'LATE', 'OTHER']),
+  type: z.enum(['BEHAVIOR', 'PERFORMANCE', 'ABSENCE', 'LATE', 'PRAISE', 'OTHER']),
   date: z.string().min(1, 'Informe a data'),
-  text: z.string().min(3, 'Descreva a ocorrencia').max(2000, 'Texto muito longo'),
+  text: z.string().min(3, 'Descreva o registro diario').max(2000, 'Texto muito longo'),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -212,7 +213,7 @@ function NewOccurrenceModal({
 
   const onSubmit = (values: FormValues) => {
     if (!selectedAcademicPeriodId) {
-      toast.error('Selecione o periodo letivo')
+      toast.error('Selecione o período letivo')
       return
     }
 
@@ -233,7 +234,7 @@ function NewOccurrenceModal({
 
     createMutation.mutate(values, {
       onSuccess: () => {
-        toast.success('Ocorrencia registrada com sucesso')
+        toast.success('Registro diario criado com sucesso')
         form.reset({
           studentId: '',
           teacherHasClassId: '',
@@ -248,7 +249,7 @@ function NewOccurrenceModal({
         onOpenChange(false)
       },
       onError: (error: any) => {
-        toast.error(error?.message || 'Erro ao registrar ocorrencia')
+        toast.error(error?.message || 'Erro ao criar registro diario')
       },
     })
   }
@@ -257,13 +258,15 @@ function NewOccurrenceModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Nova ocorrencia</DialogTitle>
-          <DialogDescription>Registre uma ocorrencia e notifique os responsaveis</DialogDescription>
+          <DialogTitle>Novo registro diario</DialogTitle>
+          <DialogDescription>
+            Registre um fato do dia ou um elogio ao aluno e notifique os responsaveis
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Periodo letivo</Label>
+            <Label>Período letivo</Label>
             <SearchableSingleSelect
               value={selectedAcademicPeriodId}
               onValueChange={(value) => {
@@ -276,8 +279,8 @@ function NewOccurrenceModal({
               }}
               options={academicPeriodOptions}
               placeholder="Selecione"
-              searchPlaceholder="Buscar periodo letivo..."
-              emptyMessage="Nenhum periodo encontrado"
+              searchPlaceholder="Buscar período letivo..."
+              emptyMessage="Nenhum período encontrado"
             />
           </div>
 
@@ -421,7 +424,7 @@ function NewOccurrenceModal({
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
               {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Registrar ocorrencia
+              Registrar
             </Button>
           </DialogFooter>
         </form>
@@ -645,20 +648,22 @@ export default function OcorrenciasPage() {
 
   return (
     <EscolaLayout>
-      <Head title="Ocorrencias" />
+      <Head title="Registro diario" />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <AlertTriangle className="h-6 w-6" />
-              Ocorrencias
+              Registro diario
             </h1>
-            <p className="text-muted-foreground">Registre e acompanhe ocorrencias pedagogicas</p>
+            <p className="text-muted-foreground">
+              Registre e acompanhe os registros diarios pedagogicos
+            </p>
           </div>
           <Button onClick={() => setNewModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nova ocorrencia
+            Novo registro
           </Button>
         </div>
 
@@ -783,7 +788,7 @@ export default function OcorrenciasPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Lista de ocorrencias</CardTitle>
+            <CardTitle>Lista de registros diarios</CardTitle>
             <CardDescription>
               {meta ? `${meta.total} registro${meta.total > 1 ? 's' : ''}` : 'Carregando...'}
             </CardDescription>
@@ -797,7 +802,7 @@ export default function OcorrenciasPage() {
               </div>
             ) : rows.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
-                Nenhuma ocorrencia encontrada.
+                Nenhum registro diario encontrado.
               </div>
             ) : (
               <>
@@ -865,11 +870,20 @@ export default function OcorrenciasPage() {
                             </p>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge
-                              variant={occurrence.acknowledgedCount > 0 ? 'default' : 'secondary'}
-                            >
-                              {occurrence.acknowledgedCount}/{occurrence.totalResponsibles}
-                            </Badge>
+                            {occurrence.type === 'PRAISE' ? (
+                              <Badge variant="outline">Nao requer</Badge>
+                            ) : (
+                              <Badge
+                                variant={
+                                  occurrence.totalResponsibles > 0 &&
+                                  occurrence.acknowledgedCount >= occurrence.totalResponsibles
+                                    ? 'default'
+                                    : 'secondary'
+                                }
+                              >
+                                {occurrence.acknowledgedCount}/{occurrence.totalResponsibles}
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
@@ -928,7 +942,7 @@ export default function OcorrenciasPage() {
       >
         <SheetContent side="right" className="w-[520px] sm:max-w-[520px]">
           <SheetHeader>
-            <SheetTitle>Detalhe da ocorrencia</SheetTitle>
+            <SheetTitle>Detalhe do registro diario</SheetTitle>
             <SheetDescription>
               Acompanhamento do registro e ciencia dos responsaveis
             </SheetDescription>
@@ -961,11 +975,15 @@ export default function OcorrenciasPage() {
                   <p className="text-xs font-medium text-muted-foreground">
                     Ciencia dos responsaveis
                   </p>
-                  <p className="mt-2 text-sm">
-                    <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span> de{' '}
-                    <span className="font-semibold">{occurrenceDetail.totalResponsibles}</span>{' '}
-                    responsavel(is) reconheceram.
-                  </p>
+                  {occurrenceDetail.type === 'PRAISE' ? (
+                    <p className="mt-2 text-sm">Elogio nao exige reconhecimento do responsavel.</p>
+                  ) : (
+                    <p className="mt-2 text-sm">
+                      <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span> de{' '}
+                      <span className="font-semibold">{occurrenceDetail.totalResponsibles}</span>{' '}
+                      responsavel(is) reconheceram.
+                    </p>
+                  )}
                 </div>
               </>
             )}

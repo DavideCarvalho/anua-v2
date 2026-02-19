@@ -5,6 +5,8 @@ import { middleware } from '#start/kernel'
 const GetEscolaStatsController = () => import('#controllers/dashboard/get_escola_stats_controller')
 const GetEscolaInsightsController = () =>
   import('#controllers/dashboard/get_escola_insights_controller')
+const GetEscolaTeacherDashboardController = () =>
+  import('#controllers/dashboard/get_escola_teacher_dashboard_controller')
 
 export function registerDashboardApiRoutes() {
   router
@@ -15,4 +17,8 @@ export function registerDashboardApiRoutes() {
     .get('/escola/insights', [GetEscolaInsightsController])
     .use([middleware.auth(), middleware.impersonation()])
     .as('dashboard.escolaInsights')
+  router
+    .get('/escola/teacher-dashboard', [GetEscolaTeacherDashboardController])
+    .use([middleware.auth(), middleware.impersonation()])
+    .as('dashboard.escolaTeacherDashboard')
 }

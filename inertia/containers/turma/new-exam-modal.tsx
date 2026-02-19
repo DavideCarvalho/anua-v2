@@ -40,7 +40,7 @@ const examTypes = [
 const schema = z.object({
   title: z.string().min(1, 'Qual o nome da prova?'),
   scheduledDate: z.date({ message: 'Quando e a data da prova?' }),
-  maxScore: z.number({ message: 'Qual a pontuacao maxima?' }).min(0),
+  maxScore: z.number({ message: 'Qual a pontuação máxima?' }).min(0),
   type: z.enum(['WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT', 'QUIZ'], {
     message: 'Qual o tipo da prova?',
   }),
@@ -172,11 +172,7 @@ export function NewExamModal({
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="title">Nome da prova *</Label>
-              <Input
-                id="title"
-                {...form.register('title')}
-                placeholder="Ex: Prova de Matematica"
-              />
+              <Input id="title" {...form.register('title')} placeholder="Ex: Prova de Matematica" />
               {form.formState.errors.title && (
                 <p className="text-sm text-destructive">{form.formState.errors.title.message}</p>
               )}
@@ -218,9 +214,7 @@ export function NewExamModal({
                 <Label>Tipo de prova *</Label>
                 <Select
                   value={form.watch('type')}
-                  onValueChange={(value) =>
-                    form.setValue('type', value as FormValues['type'])
-                  }
+                  onValueChange={(value) => form.setValue('type', value as FormValues['type'])}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo" />

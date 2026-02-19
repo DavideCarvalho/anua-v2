@@ -29,8 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { Input } from '~/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Card, CardContent } from '~/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Skeleton } from '~/components/ui/skeleton'
 import {
@@ -39,25 +40,63 @@ import {
 } from '~/hooks/queries/use_student_enrollments'
 import { useContractQueryOptions } from '~/hooks/queries/use_contract'
 import { useScholarshipsQueryOptions } from '~/hooks/queries/use_scholarships'
-import { useUpdateEnrollment } from '~/hooks/mutations/use_update_enrollment'
+import {
+  useUpdateEnrollment,
+  type UpdateEnrollmentPayload,
+} from '~/hooks/mutations/use_update_enrollment'
 import {
   ContractDetailsCard,
+  RequiredDocumentsList,
   ScholarshipSelector,
-  DiscountComparison,
 } from '~/components/enrollment'
 import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
 import { useStudentPendingInvoicesQueryOptions } from '~/hooks/queries/use_invoices'
 import { formatCurrency } from '~/lib/utils'
 
-const schema = z.object({
-  contractId: z.string().min(1, 'Selecione um contrato'),
-  scholarshipId: z.string().nullable(),
-  paymentMethod: z.enum(['BOLETO', 'PIX']),
-  paymentDay: z.number().min(1).max(31),
-  installments: z.number().min(1).max(12),
-  discountPercentage: z.number().min(0).max(100).optional(),
-  enrollmentDiscountPercentage: z.number().min(0).max(100).optional(),
-})
+const schema = z
+  .object({
+    contractId: z.string().min(1, 'Selecione um contrato'),
+    benefitMode: z.enum(['NONE', 'SCHOLARSHIP', 'INDIVIDUAL']),
+    scholarshipId: z.string().nullable(),
+    paymentMethod: z.enum(['BOLETO', 'PIX']),
+    paymentDay: z.number().min(1).max(31),
+    installments: z.number().min(1).max(12),
+    individualDiscountType: z.enum(['PERCENTAGE', 'FLAT']),
+    individualDiscountPercentage: z.number().min(0).max(100).optional(),
+    individualDiscountValueReais: z.number().min(0).optional(),
+    discountPercentage: z.number().min(0).max(100).optional(),
+    enrollmentDiscountPercentage: z.number().min(0).max(100).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.benefitMode === 'SCHOLARSHIP' && !data.scholarshipId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['scholarshipId'],
+        message: 'Selecione uma bolsa',
+      })
+    }
+
+    if (data.benefitMode === 'INDIVIDUAL') {
+      if (
+        data.individualDiscountType === 'PERCENTAGE' &&
+        (data.individualDiscountPercentage ?? 0) <= 0
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['individualDiscountPercentage'],
+          message: 'Informe um percentual maior que 0',
+        })
+      }
+
+      if (data.individualDiscountType === 'FLAT' && (data.individualDiscountValueReais ?? 0) <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['individualDiscountValueReais'],
+          message: 'Informe um valor maior que 0',
+        })
+      }
+    }
+  })
 
 type FormData = z.infer<typeof schema>
 
@@ -74,19 +113,51 @@ interface EditPaymentModalProps {
   onSuccess?: () => void
 }
 
-function EnrollmentTabContent({
+export function EnrollmentTabContent({
   enrollment,
   studentId,
   onSuccess,
   onClose,
+  embedded = false,
 }: {
   enrollment: StudentEnrollment
   studentId: string
   onSuccess?: () => void
-  onClose: () => void
+  onClose?: () => void
+  embedded?: boolean
 }) {
   const queryClient = useQueryClient()
   const { mutateAsync: updateEnrollment, isPending } = useUpdateEnrollment()
+
+  const currentIndividualDiscount = useMemo(() => {
+    const discounts = ((enrollment as any).individualDiscounts ?? []) as Array<{
+      discountType: 'PERCENTAGE' | 'FLAT'
+      discountPercentage?: number | null
+      discountValue?: number | null
+    }>
+
+    return discounts[0] ?? null
+  }, [enrollment])
+
+  const hasValidIndividualDiscount =
+    !!currentIndividualDiscount &&
+    ((currentIndividualDiscount.discountType === 'PERCENTAGE' &&
+      (currentIndividualDiscount.discountPercentage ?? 0) > 0) ||
+      (currentIndividualDiscount.discountType === 'FLAT' &&
+        (currentIndividualDiscount.discountValue ?? 0) > 0))
+
+  const initialIndividualDiscountType = currentIndividualDiscount?.discountType ?? 'PERCENTAGE'
+  const initialIndividualDiscountPercentage = currentIndividualDiscount?.discountPercentage ?? 0
+  const initialIndividualDiscountValueReais =
+    currentIndividualDiscount?.discountType === 'FLAT'
+      ? Number(currentIndividualDiscount.discountValue ?? 0) / 100
+      : 0
+
+  const initialBenefitMode: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL' = hasValidIndividualDiscount
+    ? 'INDIVIDUAL'
+    : enrollment.scholarshipId
+      ? 'SCHOLARSHIP'
+      : 'NONE'
 
   // Use enrollment's contractId, or fallback to level's contractId
   const initialContractId = enrollment.contractId ?? (enrollment.level as any)?.contractId ?? ''
@@ -95,19 +166,26 @@ function EnrollmentTabContent({
     resolver: zodResolver(schema),
     defaultValues: {
       contractId: initialContractId,
+      benefitMode: initialBenefitMode,
       scholarshipId: enrollment.scholarshipId ?? null,
       paymentMethod: enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO',
       paymentDay: enrollment.paymentDay ?? 5,
       installments: enrollment.installments ?? 12,
+      individualDiscountType: initialIndividualDiscountType,
+      individualDiscountPercentage: initialIndividualDiscountPercentage,
+      individualDiscountValueReais: initialIndividualDiscountValueReais,
       discountPercentage: 0,
       enrollmentDiscountPercentage: 0,
     },
   })
 
   const contractId = form.watch('contractId') || initialContractId
+  const benefitMode = form.watch('benefitMode')
   const scholarshipId = form.watch('scholarshipId')
+  const individualDiscountType = form.watch('individualDiscountType')
+  const individualDiscountPercentage = form.watch('individualDiscountPercentage') ?? 0
+  const individualDiscountValueReais = form.watch('individualDiscountValueReais') ?? 0
   const discountPercentage = form.watch('discountPercentage') ?? 0
-  const enrollmentDiscountPercentage = form.watch('enrollmentDiscountPercentage') ?? 0
 
   // Fetch contract details
   const { data: contractData, isLoading: isLoadingContract } = useQuery({
@@ -207,7 +285,14 @@ function EnrollmentTabContent({
     } else {
       newInstallmentAmount = contractData.amount
     }
-    const newDiscountedAmount = Math.round(newInstallmentAmount * (1 - discountPercentage / 100))
+    const newDiscountedAmount =
+      benefitMode === 'SCHOLARSHIP'
+        ? Math.round(newInstallmentAmount * (1 - discountPercentage / 100))
+        : benefitMode === 'INDIVIDUAL' && individualDiscountType === 'PERCENTAGE'
+          ? Math.round(newInstallmentAmount * (1 - individualDiscountPercentage / 100))
+          : benefitMode === 'INDIVIDUAL' && individualDiscountType === 'FLAT'
+            ? Math.max(0, newInstallmentAmount - Math.round(individualDiscountValueReais * 100))
+            : newInstallmentAmount
 
     // Find invoices affected by these payment changes
     const affectedInvoices: Array<{
@@ -252,7 +337,11 @@ function EnrollmentTabContent({
     pendingPaymentsData,
     contractData,
     enrollment.id,
+    benefitMode,
     discountPercentage,
+    individualDiscountType,
+    individualDiscountPercentage,
+    individualDiscountValueReais,
     watchedInstallments,
   ])
 
@@ -267,20 +356,15 @@ function EnrollmentTabContent({
 
   async function handleSubmit(data: FormData) {
     try {
-      const updateData: {
-        contractId?: string
-        scholarshipId?: string | null
-        paymentMethod?: 'BOLETO' | 'PIX'
-        paymentDay?: number
-        installments?: number
-      } = {}
+      const updateData: UpdateEnrollmentPayload = {}
 
       if (data.contractId !== initialContractId) {
         updateData.contractId = data.contractId
       }
 
-      if (data.scholarshipId !== (enrollment.scholarshipId ?? null)) {
-        updateData.scholarshipId = data.scholarshipId
+      const desiredScholarshipId = data.benefitMode === 'SCHOLARSHIP' ? data.scholarshipId : null
+      if (desiredScholarshipId !== (enrollment.scholarshipId ?? null)) {
+        updateData.scholarshipId = desiredScholarshipId
       }
 
       const currentPaymentMethod = enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO'
@@ -297,6 +381,32 @@ function EnrollmentTabContent({
         updateData.installments = data.installments
       }
 
+      const individualDiscountChanged =
+        data.benefitMode !== initialBenefitMode ||
+        data.individualDiscountType !== initialIndividualDiscountType ||
+        (data.individualDiscountType === 'PERCENTAGE' &&
+          (data.individualDiscountPercentage ?? 0) !== initialIndividualDiscountPercentage) ||
+        (data.individualDiscountType === 'FLAT' &&
+          (data.individualDiscountValueReais ?? 0) !== initialIndividualDiscountValueReais)
+
+      if (individualDiscountChanged) {
+        if (data.benefitMode !== 'INDIVIDUAL') {
+          updateData.individualDiscount = null
+        } else if (data.individualDiscountType === 'PERCENTAGE') {
+          updateData.individualDiscount = {
+            name: 'Desconto personalizado',
+            discountType: 'PERCENTAGE',
+            discountPercentage: data.individualDiscountPercentage ?? 0,
+          }
+        } else {
+          updateData.individualDiscount = {
+            name: 'Desconto personalizado',
+            discountType: 'FLAT',
+            discountValue: Math.round((data.individualDiscountValueReais ?? 0) * 100),
+          }
+        }
+      }
+
       await updateEnrollment({
         studentId,
         enrollmentId: enrollment.id,
@@ -310,18 +420,20 @@ function EnrollmentTabContent({
       queryClient.invalidateQueries({ queryKey: ['invoices'] })
       queryClient.invalidateQueries({ queryKey: ['student-pending-invoices', studentId] })
 
-      toast.success('Informacoes de pagamento atualizadas!')
+      toast.success('Informações de pagamento atualizadas!')
       onSuccess?.()
-      onClose()
+      onClose?.()
     } catch (error) {
       console.error('Error updating enrollment:', error)
-      toast.error('Erro ao atualizar informacoes de pagamento')
+      toast.error('Erro ao atualizar informações de pagamento')
     }
   }
 
+  const formId = `enrollment-form-${enrollment.id}`
+
   return (
     <Form {...form}>
-      <form id="enrollment-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form id={formId} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Contract Info Card */}
         {isLoadingContract ? (
           <Card>
@@ -345,35 +457,152 @@ function EnrollmentTabContent({
           />
         ) : null}
 
-        {/* Scholarship Selector */}
+        {/* Benefit */}
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <ScholarshipSelector
-              scholarships={scholarships}
-              value={scholarshipId}
-              onChange={handleScholarshipChange}
-              isLoading={false}
+            <FormField
+              control={form.control}
+              name="benefitMode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Benefício</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL') => {
+                      field.onChange(value)
+
+                      if (value !== 'SCHOLARSHIP') {
+                        form.setValue('scholarshipId', null)
+                        form.setValue('discountPercentage', 0)
+                        form.setValue('enrollmentDiscountPercentage', 0)
+                      }
+
+                      if (value !== 'INDIVIDUAL') {
+                        form.setValue('individualDiscountType', 'PERCENTAGE')
+                        form.setValue('individualDiscountPercentage', 0)
+                        form.setValue('individualDiscountValueReais', 0)
+                      }
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="NONE">Sem benefício</SelectItem>
+                      <SelectItem value="SCHOLARSHIP">Bolsa</SelectItem>
+                      <SelectItem value="INDIVIDUAL">Desconto individual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            {/* Only show comparison when scholarship changed */}
-            {scholarshipId !== enrollment.scholarshipId &&
-              (discountPercentage > 0 || enrollmentDiscountPercentage > 0) &&
-              contractData && (
-                <DiscountComparison
-                  originalEnrollmentFee={contractData.enrollmentValue ?? 0}
-                  originalMonthlyFee={contractData.amount}
-                  enrollmentDiscountPercentage={enrollmentDiscountPercentage}
-                  monthlyDiscountPercentage={discountPercentage}
-                  installments={
-                    contractData.paymentType === 'MONTHLY' ? 12 : form.watch('installments')
-                  }
+            {benefitMode === 'NONE' && (
+              <p className="text-xs text-muted-foreground">
+                Nenhum benefício aplicado. Mensalidades seguem o valor original do contrato.
+              </p>
+            )}
+
+            {benefitMode === 'SCHOLARSHIP' && (
+              <ScholarshipSelector
+                scholarships={scholarships}
+                value={scholarshipId}
+                onChange={handleScholarshipChange}
+                isLoading={false}
+              />
+            )}
+
+            {benefitMode === 'INDIVIDUAL' && (
+              <div className="grid grid-cols-3 gap-3 items-end">
+                <FormField
+                  control={form.control}
+                  name="individualDiscountType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Desconto Individual</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={(value: 'PERCENTAGE' | 'FLAT') => {
+                          field.onChange(value)
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="PERCENTAGE">Percentual (%)</SelectItem>
+                          <SelectItem value="FLAT">Valor fixo (R$)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              )}
+
+                {individualDiscountType === 'PERCENTAGE' && (
+                  <FormField
+                    control={form.control}
+                    name="individualDiscountPercentage"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Percentual da mensalidade (%)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={field.value ?? 0}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {individualDiscountType === 'FLAT' && (
+                  <FormField
+                    control={form.control}
+                    name="individualDiscountValueReais"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Valor da mensalidade (R$)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={field.value ?? 0}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
+            )}
+
+            {contractData && (
+              <p className="text-xs text-muted-foreground">
+                Escolha apenas uma opção de benefício por matrícula: bolsa ou desconto individual.
+              </p>
+            )}
           </CardContent>
         </Card>
 
         {/* Payment Info */}
         <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Informações de Pagamento</CardTitle>
+          </CardHeader>
           <CardContent className="pt-6 space-y-4">
             <div
               className={`grid gap-4 ${contractData?.paymentType === 'UPFRONT' ? 'grid-cols-3' : 'grid-cols-2'}`}
@@ -383,7 +612,7 @@ function EnrollmentTabContent({
                 name="paymentMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Forma de Pagamento</FormLabel>
+                    <FormLabel>Forma de Pagamento*</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -408,7 +637,7 @@ function EnrollmentTabContent({
                 name="paymentDay"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dia de Vencimento</FormLabel>
+                    <FormLabel>Dia de Vencimento*</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
                       value={field.value?.toString()}
@@ -437,7 +666,7 @@ function EnrollmentTabContent({
                   name="installments"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Parcelas</FormLabel>
+                      <FormLabel>Parcelas*</FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(Number(value))}
                         value={field.value?.toString()}
@@ -515,29 +744,113 @@ function EnrollmentTabContent({
           </Card>
         )}
 
-        {/* Spacer for sticky footer */}
-        <div className="h-16" />
+        {contractData?.contractDocuments && contractData.contractDocuments.length > 0 && (
+          <RequiredDocumentsList documents={contractData.contractDocuments} />
+        )}
+
+        {!embedded && <div className="h-16" />}
+
+        {embedded && (
+          <DialogFooter>
+            <Button type="submit" form={formId} disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar Alterações'
+              )}
+            </Button>
+          </DialogFooter>
+        )}
       </form>
 
-      {/* Sticky Footer */}
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-background p-4">
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Fechar
-          </Button>
-          <Button type="submit" form="enrollment-form" disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              'Salvar Alterações'
-            )}
-          </Button>
-        </DialogFooter>
-      </div>
+      {!embedded && (
+        <div className="absolute bottom-0 left-0 right-0 border-t bg-background p-4">
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Fechar
+            </Button>
+            <Button type="submit" form={formId} disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar Alterações'
+              )}
+            </Button>
+          </DialogFooter>
+        </div>
+      )}
     </Form>
+  )
+}
+
+export function EditPaymentSection({
+  studentId,
+  studentName: _studentName,
+  onSuccess,
+}: Omit<EditPaymentModalProps, 'open' | 'onOpenChange'>) {
+  const { data: enrollments, isLoading } = useQuery({
+    ...useStudentEnrollmentsQueryOptions(studentId),
+    enabled: !!studentId,
+  })
+
+  const enrollmentsByPeriod = useMemo(() => {
+    if (!enrollments) return []
+    return enrollments
+      .filter((e: StudentEnrollment) => e.academicPeriod)
+      .sort((a: StudentEnrollment, b: StudentEnrollment) => {
+        const dateA = new Date(String(a.academicPeriod?.startDate ?? 0))
+        const dateB = new Date(String(b.academicPeriod?.startDate ?? 0))
+        return dateB.getTime() - dateA.getTime()
+      })
+  }, [enrollments])
+
+  const defaultTab = enrollmentsByPeriod[0]?.academicPeriodId ?? ''
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (enrollmentsByPeriod.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        Este aluno não possui matrículas ativas.
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 py-4">
+      <Tabs defaultValue={defaultTab} className="w-full">
+        <TabsList className="w-full justify-start">
+          {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
+            <TabsTrigger key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
+              {enrollment.academicPeriod?.name ?? 'Período'}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
+          <TabsContent key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
+            <EnrollmentTabContent
+              enrollment={enrollment}
+              studentId={studentId}
+              onSuccess={onSuccess}
+              embedded
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
   )
 }
 
@@ -613,14 +926,14 @@ export function EditPaymentModal({
             </div>
           ) : enrollmentsByPeriod.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              Este aluno nao possui matriculas ativas.
+              Este aluno não possui matrículas ativas.
             </div>
           ) : (
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="w-full justify-start">
                 {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
                   <TabsTrigger key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
-                    {enrollment.academicPeriod?.name ?? 'Periodo'}
+                    {enrollment.academicPeriod?.name ?? 'Período'}
                   </TabsTrigger>
                 ))}
               </TabsList>

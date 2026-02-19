@@ -48,7 +48,9 @@ export default class GetStudentOccurrencesController {
       .first()
 
     if (!relation) {
-      throw AppException.forbidden('Você não tem permissão para ver as ocorrências deste aluno')
+      throw AppException.forbidden(
+        'Você não tem permissão para ver os registros diários deste aluno'
+      )
     }
 
     // Build filters
@@ -108,6 +110,7 @@ export default class GetStudentOccurrencesController {
       SELECT COUNT(*) as count
       FROM "Occurence" o
       WHERE o."studentId" = :studentId
+        AND o.type <> 'PRAISE'
         AND NOT EXISTS (
           SELECT 1 FROM "ResponsibleUserAcceptedOccurence" ack
           WHERE ack."occurenceId" = o.id
@@ -117,27 +120,29 @@ export default class GetStudentOccurrencesController {
       { studentId, responsibleId: effectiveUser.id }
     )
 
-    const occurrencesList = (occurrences.rows as OccurrenceRow[]).map(
-      (row) =>
-        new OccurrenceDto({
-          id: row.id,
-          type: row.type,
-          severity: 'MEDIUM', // Default since table doesn't have severity
-          status: row.acknowledged_at ? 'RESOLVED' : 'OPEN',
-          title: getOccurrenceTitle(row.type),
-          description: row.text,
-          resolutionNotes: null,
-          occurrenceDate: row.date,
-          resolvedAt: null,
-          responsibleNotified: true,
-          responsibleNotifiedAt: row.created_at,
-          responsibleAcknowledged: !!row.acknowledged_at,
-          responsibleAcknowledgedAt: row.acknowledged_at,
-          createdAt: row.created_at,
-          reporterName: row.teacher_name || 'Professor',
-          resolverName: null,
-        })
-    )
+    const occurrencesList = (occurrences.rows as OccurrenceRow[]).map((row) => {
+      const requiresAcknowledgement = row.type !== 'PRAISE'
+      const isAcknowledged = requiresAcknowledgement ? !!row.acknowledged_at : true
+
+      return new OccurrenceDto({
+        id: row.id,
+        type: row.type,
+        severity: 'MEDIUM', // Default since table doesn't have severity
+        status: isAcknowledged ? 'RESOLVED' : 'OPEN',
+        title: getOccurrenceTitle(row.type),
+        description: row.text,
+        resolutionNotes: null,
+        occurrenceDate: row.date,
+        resolvedAt: null,
+        responsibleNotified: true,
+        responsibleNotifiedAt: row.created_at,
+        responsibleAcknowledged: isAcknowledged,
+        responsibleAcknowledgedAt: requiresAcknowledgement ? row.acknowledged_at : row.created_at,
+        createdAt: row.created_at,
+        reporterName: row.teacher_name || 'Professor',
+        resolverName: null,
+      })
+    })
 
     const summaryRow = summary.rows[0] as SummaryRow | undefined
     const unacknowledgedRow = unacknowledged.rows[0] as UnacknowledgedRow | undefined
@@ -164,11 +169,12 @@ export default class GetStudentOccurrencesController {
 
 function getOccurrenceTitle(type: string): string {
   const titles: Record<string, string> = {
-    BEHAVIOR: 'Ocorrência de comportamento',
-    PERFORMANCE: 'Ocorrência de desempenho',
+    BEHAVIOR: 'Registro de comportamento',
+    PERFORMANCE: 'Registro de desempenho',
     ABSENCE: 'Falta',
     LATE: 'Atraso',
-    OTHER: 'Outra ocorrência',
+    PRAISE: 'Elogio ao aluno',
+    OTHER: 'Outro registro diário',
   }
-  return titles[type] || 'Ocorrência'
+  return titles[type] || 'Registro diário'
 }

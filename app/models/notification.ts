@@ -39,58 +39,58 @@ export default class Notification extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'userId' })
   declare userId: string
 
-  @column()
+  @column({ columnName: 'type' })
   declare type: NotificationType
 
-  @column()
+  @column({ columnName: 'title' })
   declare title: string
 
-  @column()
+  @column({ columnName: 'message' })
   declare message: string
 
-  @column()
+  @column({ columnName: 'data' })
   declare data: Record<string, unknown> | null
 
-  @column()
+  @column({ columnName: 'isRead' })
   declare isRead: boolean
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'readAt' })
   declare readAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'sentViaInApp' })
   declare sentViaInApp: boolean
 
-  @column()
+  @column({ columnName: 'sentViaEmail' })
   declare sentViaEmail: boolean
 
-  @column()
+  @column({ columnName: 'sentViaPush' })
   declare sentViaPush: boolean
 
-  @column()
+  @column({ columnName: 'sentViaSms' })
   declare sentViaSms: boolean
 
-  @column()
+  @column({ columnName: 'sentViaWhatsApp' })
   declare sentViaWhatsApp: boolean
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'emailSentAt' })
   declare emailSentAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'emailError' })
   declare emailError: string | null
 
-  @column()
+  @column({ columnName: 'actionUrl' })
   declare actionUrl: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

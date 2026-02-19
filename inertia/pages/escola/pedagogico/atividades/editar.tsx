@@ -36,12 +36,12 @@ export default function EditarAtividadePage({ assignmentId }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>Editar Atividade</CardTitle>
-          <CardDescription>Atualize as informacoes da atividade</CardDescription>
+          <CardDescription>Atualize as informações da atividade</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading && <p className="text-sm text-muted-foreground">Carregando atividade...</p>}
           {!isLoading && !assignment && (
-            <p className="text-sm text-muted-foreground">Nao foi possivel carregar a atividade.</p>
+            <p className="text-sm text-muted-foreground">Não foi possível carregar a atividade.</p>
           )}
           {!isLoading && assignment && (
             <div className="space-y-4">

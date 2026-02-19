@@ -73,12 +73,12 @@ export default function ProvaDetalhesPage({ examId }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>Detalhes da Prova</CardTitle>
-          <CardDescription>Visualize as informacoes da prova selecionada</CardDescription>
+          <CardDescription>Visualize as informações da prova selecionada</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading && <p className="text-sm text-muted-foreground">Carregando prova...</p>}
           {!isLoading && !exam && (
-            <p className="text-sm text-muted-foreground">Nao foi possivel carregar a prova.</p>
+            <p className="text-sm text-muted-foreground">Não foi possível carregar a prova.</p>
           )}
           {!isLoading && exam && (
             <div className="space-y-4">

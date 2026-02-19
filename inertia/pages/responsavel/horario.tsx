@@ -80,7 +80,7 @@ function HorarioContent() {
           <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Voce nao possui alunos vinculados a sua conta.
+            Você não possui alunos vinculados à sua conta.
           </p>
         </CardContent>
       </Card>
@@ -141,9 +141,7 @@ export default function HorarioPage() {
             <Clock className="h-6 w-6" />
             Horario
           </h1>
-          <p className="text-muted-foreground">
-            Consulte a grade horaria dos seus filhos
-          </p>
+          <p className="text-muted-foreground">Consulte a grade horaria dos seus filhos</p>
         </div>
 
         <ErrorBoundary
