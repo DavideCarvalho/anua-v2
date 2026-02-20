@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog'
-import { cn } from '../lib/utils'
+import { cn, formatCurrency } from '../lib/utils'
 
 // Icon mapping
 const iconMap: Record<string, LucideIcon> = {
@@ -60,16 +60,41 @@ const priorityConfig = {
   },
 }
 
+function getMetadataNumber(
+  metadata: Record<string, unknown> | undefined,
+  key: string
+): number | null {
+  if (!metadata) return null
+  const value = metadata[key]
+  if (typeof value !== 'number' || Number.isNaN(value)) return null
+  return value
+}
+
+function formatInsightDescription(insight: Insight): string {
+  if (insight.id === 'overdue-payments') {
+    const totalAmountInCents = getMetadataNumber(insight.metadata, 'totalAmount')
+    const avgDaysOverdue = getMetadataNumber(insight.metadata, 'avgDaysOverdue')
+
+    if (totalAmountInCents !== null && avgDaysOverdue !== null) {
+      return `${formatCurrency(totalAmountInCents)} em atraso (média ${avgDaysOverdue} dias)`
+    }
+  }
+
+  if (insight.id === 'upcoming-payments') {
+    const totalAmountInCents = getMetadataNumber(insight.metadata, 'totalAmount')
+    if (totalAmountInCents !== null) {
+      return `${formatCurrency(totalAmountInCents)} vencem nos próximos 7 dias`
+    }
+  }
+
+  return insight.description
+}
+
 // Individual Insight Item
-function InsightItem({
-  insight,
-  onClick,
-}: {
-  insight: Insight
-  onClick: () => void
-}) {
+function InsightItem({ insight, onClick }: { insight: Insight; onClick: () => void }) {
   const Icon = iconMap[insight.icon] || AlertCircle
   const config = priorityConfig[insight.priority]
+  const displayDescription = formatInsightDescription(insight)
 
   return (
     <button
@@ -89,9 +114,7 @@ function InsightItem({
             <span className="font-medium text-sm">{insight.title}</span>
             <span className="text-lg font-bold">{insight.value}</span>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5 truncate">
-            {insight.description}
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{displayDescription}</p>
         </div>
       </div>
     </button>
@@ -112,6 +135,7 @@ function InsightDetailModal({
 
   const Icon = iconMap[insight.icon] || AlertCircle
   const config = priorityConfig[insight.priority]
+  const displayDescription = formatInsightDescription(insight)
 
   // Build action URL based on insight type
   const getActionUrl = () => {
@@ -144,7 +168,7 @@ function InsightDetailModal({
             </div>
             <div>
               <DialogTitle>{insight.title}</DialogTitle>
-              <DialogDescription>{insight.description}</DialogDescription>
+              <DialogDescription>{displayDescription}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -154,7 +178,9 @@ function InsightDetailModal({
             <div className="text-4xl font-bold mb-2">{insight.value}</div>
             <p className="text-sm text-muted-foreground">
               {insight.id === 'pending-delivery-orders' && 'pedido(s)'}
-              {insight.type === 'financial' && insight.id !== 'pending-delivery-orders' && 'pagamento(s)'}
+              {insight.type === 'financial' &&
+                insight.id !== 'pending-delivery-orders' &&
+                'pagamento(s)'}
               {insight.type === 'enrollment' && 'pendência(s)'}
               {insight.type === 'academic' && 'aluno(s)'}
             </p>

@@ -76,7 +76,7 @@ export default class GetEscolaInsightsController {
         priority,
         title: 'Pagamentos Vencidos',
         value: overduePayments.length,
-        description: `R$ ${totalOverdue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em atraso (média ${avgDaysOverdue} dias)`,
+        description: `Em atraso (média ${avgDaysOverdue} dias)`,
         icon: 'alert-triangle',
         metadata: {
           totalAmount: totalOverdue,
@@ -110,7 +110,7 @@ export default class GetEscolaInsightsController {
         priority: 'low',
         title: 'Pagamentos Próximos',
         value: upcomingPayments.length,
-        description: `R$ ${totalUpcoming.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} vencem nos próximos 7 dias`,
+        description: 'Vencem nos próximos 7 dias',
         icon: 'calendar-clock',
         metadata: {
           totalAmount: totalUpcoming,
