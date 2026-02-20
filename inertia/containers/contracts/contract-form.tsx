@@ -303,8 +303,9 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
         enrollmentValueInstallments: values.enrollmentValueInstallments,
         amount: Math.round(Number(values.amount) * 100),
         paymentType: values.paymentType,
-        installments: values.installments,
-        flexibleInstallments: values.flexibleInstallments,
+        installments: values.paymentType === 'MONTHLY' ? 1 : values.installments,
+        flexibleInstallments:
+          values.paymentType === 'UPFRONT' ? values.flexibleInstallments : false,
       }
 
       if (isEditing && initialData) {

@@ -13,12 +13,16 @@ export default class CreateContractController {
     const { amount, paymentDays, interestConfig, earlyDiscounts, ...payload } =
       await request.validateUsing(createContractValidator)
 
+    const isMonthly = payload.paymentType === 'MONTHLY'
+
     const trx = await db.transaction()
 
     try {
       const contract = await Contract.create(
         {
           ...payload,
+          flexibleInstallments: isMonthly ? false : payload.flexibleInstallments,
+          installments: isMonthly ? 1 : payload.installments,
           ammount: amount, // typo no banco: ammount ao invés de amount
           endDate: payload.endDate ? DateTime.fromJSDate(payload.endDate) : null,
         },

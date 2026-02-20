@@ -9,7 +9,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { router } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useContractsQueryOptions } from '../hooks/queries/use_contracts'
+import { useContractsQueryOptions, type ContractsResponse } from '../hooks/queries/use_contracts'
 import { deleteContractMutationOptions } from '../hooks/mutations/use_contract_mutations'
 import { toast } from 'sonner'
 import { Card, CardContent } from '../components/ui/card'
@@ -49,11 +49,15 @@ interface ContractItem {
   name: string
   description?: string
   enrollmentValue?: number
-  ammount?: number
+  enrollmentValueInstallments?: number
+  amount?: number
+  paymentType?: 'MONTHLY' | 'UPFRONT'
   installments?: number
   flexibleInstallments?: boolean
   isActive?: boolean
 }
+
+type ContractsMeta = ContractsResponse extends { meta: infer T } ? T : null
 
 // Loading Skeleton
 function ContractsListSkeleton() {
@@ -110,6 +114,45 @@ function formatCurrency(valueInCents: number | null | undefined): string {
     style: 'currency',
     currency: 'BRL',
   }).format(valueInCents / 100)
+}
+
+function getInstallmentsLabel(contract: ContractItem): string {
+  if (contract.paymentType === 'MONTHLY') return 'Mensal'
+  if (contract.flexibleInstallments) return 'Flexível'
+  if (typeof contract.installments === 'number' && contract.installments > 0) {
+    return `${contract.installments}x`
+  }
+  return '-'
+}
+
+function getTuitionLabel(contract: ContractItem): string {
+  const valueLabel = formatCurrency(contract.amount)
+  const installmentsLabel = getInstallmentsLabel(contract)
+
+  if (installmentsLabel === '-' || installmentsLabel === 'Mensal') {
+    return `${valueLabel} (mensal)`
+  }
+
+  if (installmentsLabel === 'Flexível') {
+    return `${valueLabel} (à vista - parcelas flexíveis)`
+  }
+
+  return `${valueLabel} (à vista - ${installmentsLabel})`
+}
+
+function getEnrollmentLabel(contract: ContractItem): string {
+  const valueLabel = formatCurrency(contract.enrollmentValue)
+
+  if (!contract.enrollmentValue || contract.enrollmentValue <= 0) {
+    return valueLabel
+  }
+
+  const installments = contract.enrollmentValueInstallments ?? 1
+  if (installments <= 1) {
+    return valueLabel
+  }
+
+  return `${valueLabel} (em até ${installments}x)`
 }
 
 // Container Export
@@ -177,8 +220,8 @@ function ContractsListContent() {
     }
   }
 
-  const contracts = data?.data ?? []
-  const meta = data?.meta ?? null
+  const contracts: ContractItem[] = (data?.data ?? []) as ContractItem[]
+  const meta: ContractsMeta = (data?.meta ?? null) as ContractsMeta
 
   return (
     <div className="space-y-4">
@@ -223,12 +266,11 @@ function ContractsListContent() {
                   <th className="text-left p-4 font-medium">Nome</th>
                   <th className="text-left p-4 font-medium">Matrícula</th>
                   <th className="text-left p-4 font-medium">Mensalidade</th>
-                  <th className="text-left p-4 font-medium">Parcelas</th>
                   <th className="text-right p-4 font-medium">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {contracts.map((contract: any) => (
+                {contracts.map((contract) => (
                   <tr key={contract.id} className="border-t hover:bg-muted/30 transition-colors">
                     <td className="p-4">
                       <div>
@@ -240,21 +282,8 @@ function ContractsListContent() {
                         )}
                       </div>
                     </td>
-                    <td className="p-4 text-muted-foreground">
-                      {formatCurrency(contract.enrollmentValue)}
-                    </td>
-                    <td className="p-4 text-muted-foreground">
-                      {formatCurrency(contract.ammount)}
-                    </td>
-                    <td className="p-4 text-muted-foreground">
-                      {contract.flexibleInstallments ? (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          Flexível
-                        </span>
-                      ) : (
-                        `${contract.installments}x`
-                      )}
-                    </td>
+                    <td className="p-4 text-muted-foreground">{getEnrollmentLabel(contract)}</td>
+                    <td className="p-4 text-muted-foreground">{getTuitionLabel(contract)}</td>
                     <td className="p-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

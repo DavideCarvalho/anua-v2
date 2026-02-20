@@ -19,12 +19,15 @@ export default class UpdateContractController {
     }
 
     const { endDate, amount, paymentDays, earlyDiscounts, ...rest } = payload
+    const nextPaymentType = rest.paymentType ?? contract.paymentType
+    const isMonthly = nextPaymentType === 'MONTHLY'
     const trx = await db.transaction()
 
     try {
       contract.useTransaction(trx)
       contract.merge({
         ...rest,
+        ...(isMonthly && { flexibleInstallments: false, installments: 1 }),
         ...(amount !== undefined && { ammount: amount }), // typo no banco: ammount ao invés de amount
         ...(endDate !== undefined && { endDate: endDate ? DateTime.fromJSDate(endDate) : null }),
       })
