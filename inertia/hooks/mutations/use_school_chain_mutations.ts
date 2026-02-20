@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.schoolChains.createSchoolChain')
-type CreateSchoolChainPayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.schoolChains.createSchoolChain')
+type CreateSchoolChainPayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
 
 export function useCreateSchoolChain() {
   const queryClient = useQueryClient()
@@ -31,8 +31,10 @@ export function useDeleteSchoolChain() {
   })
 }
 
-const $createGroupRoute = tuyau.$route('api.v1.schoolGroups.createSchoolGroup')
-type CreateSchoolGroupPayload = InferRequestType<typeof $createGroupRoute.$post>
+const resolveCreateGroupRoute = () => tuyau.$route('api.v1.schoolGroups.createSchoolGroup')
+type CreateSchoolGroupPayload = InferRequestType<
+  ReturnType<typeof resolveCreateGroupRoute>['$post']
+>
 
 export function useCreateSchoolGroup() {
   const queryClient = useQueryClient()

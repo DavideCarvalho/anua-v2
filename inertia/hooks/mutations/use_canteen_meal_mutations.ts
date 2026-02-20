@@ -2,11 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.canteenMeals.store')
-type CreateCanteenMealPayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.canteenMeals.store')
+type CreateCanteenMealPayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
 
-const $updateRoute = tuyau.$route('api.v1.canteenMeals.update')
-type UpdateCanteenMealPayload = InferRequestType<typeof $updateRoute.$put> & { id: string }
+const resolveUpdateRoute = () => tuyau.$route('api.v1.canteenMeals.update')
+type UpdateCanteenMealPayload = InferRequestType<ReturnType<typeof resolveUpdateRoute>['$put']> & {
+  id: string
+}
 
 export function useCreateCanteenMeal() {
   const queryClient = useQueryClient()

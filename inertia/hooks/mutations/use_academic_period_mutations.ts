@@ -2,13 +2,13 @@ import type { MutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $updateRoute = tuyau.$route('api.v1.academicPeriods.updateAcademicPeriod')
-type UpdateAcademicPeriodPayload = InferRequestType<typeof $updateRoute.$put>
+const resolveUpdateRoute = () => tuyau.$route('api.v1.academicPeriods.updateAcademicPeriod')
+type UpdateAcademicPeriodPayload = InferRequestType<ReturnType<typeof resolveUpdateRoute>['$put']>
 
 export function useUpdateAcademicPeriodMutationOptions() {
   return {
     mutationFn: (payload: UpdateAcademicPeriodPayload) => {
-      return $updateRoute.$put(payload).unwrap()
+      return resolveUpdateRoute().$put(payload).unwrap()
     },
   } satisfies MutationOptions<unknown, Error, UpdateAcademicPeriodPayload>
 }

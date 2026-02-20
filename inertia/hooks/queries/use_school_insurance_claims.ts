@@ -1,9 +1,10 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.insurance.school.claims')
-
-export type SchoolInsuranceClaimsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.insurance.school.claims')
+export type SchoolInsuranceClaimsResponse = InferResponseType<
+  ReturnType<typeof resolveRoute>['$get']
+>
 
 export function useSchoolInsuranceClaimsQueryOptions(
   schoolId: string,
@@ -13,7 +14,9 @@ export function useSchoolInsuranceClaimsQueryOptions(
   return {
     queryKey: ['insurance', 'school', schoolId, 'claims', status, limit],
     queryFn: () => {
-      return $route.$get({ params: { schoolId }, query: { status, limit } } as any).unwrap()
+      return resolveRoute()
+        .$get({ params: { schoolId }, query: { status, limit } } as any)
+        .unwrap()
     },
     enabled: !!schoolId,
   }

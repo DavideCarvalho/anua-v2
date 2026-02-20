@@ -2,9 +2,9 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.teachers.$get
+const resolveRoute = () => tuyau.api.v1.teachers.$get
 
-export type TeachersResponse = InferResponseType<typeof $route>
+export type TeachersResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 interface UseTeachersParams {
   page?: number

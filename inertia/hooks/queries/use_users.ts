@@ -2,9 +2,9 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.users.$get
+const resolveRoute = () => tuyau.api.v1.users.$get
 
-export type UsersResponse = InferResponseType<typeof $route>
+export type UsersResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 interface UseUsersParams {
   page?: number

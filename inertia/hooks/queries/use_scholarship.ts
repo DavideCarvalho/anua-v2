@@ -4,9 +4,9 @@ import type { InferResponseType } from '@tuyau/client'
 
 type ScholarshipParams = Parameters<typeof tuyau.api.v1.scholarships>[0]
 
-const $route = tuyau.api.v1.scholarships({ id: '' }).$get
+const resolveRoute = () => tuyau.api.v1.scholarships({ id: '' }).$get
 
-export type ScholarshipResponse = InferResponseType<typeof $route>
+export type ScholarshipResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 export function useScholarshipQueryOptions(params: ScholarshipParams) {
   return {

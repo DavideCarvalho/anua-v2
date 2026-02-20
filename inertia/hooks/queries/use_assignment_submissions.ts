@@ -2,9 +2,10 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.assignments.submissions')
-
-export type AssignmentSubmissionsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.assignments.submissions')
+export type AssignmentSubmissionsResponse = InferResponseType<
+  ReturnType<typeof resolveRoute>['$get']
+>
 
 interface UseAssignmentSubmissionsOptions {
   assignmentId: string
@@ -19,7 +20,7 @@ export function useAssignmentSubmissionsQueryOptions(options: UseAssignmentSubmi
     queryKey: ['assignment-submissions', { assignmentId, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.assignments.submissions', { id: assignmentId })
+        .resolveRoute()('api.v1.assignments.submissions', { id: assignmentId })
         .$get({ query: { page, limit } })
         .unwrap()
     },

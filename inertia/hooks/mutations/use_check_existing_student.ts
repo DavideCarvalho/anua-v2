@@ -1,8 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation } from '@tanstack/react-query'
 
-const $route = tuyau.$route('api.v1.enrollment.checkExisting')
-
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.enrollment.checkExisting')
 type CheckExistingBody = {
   document?: string
   email?: string
@@ -12,7 +11,9 @@ type CheckExistingBody = {
 export function useCheckExistingStudentMutation() {
   return useMutation({
     mutationFn: (data: CheckExistingBody) => {
-      return $route.$post(data as any).unwrap()
+      return resolveRoute()
+        .$post(data as any)
+        .unwrap()
     },
   })
 }

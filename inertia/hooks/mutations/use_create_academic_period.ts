@@ -1,16 +1,16 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const $route = tuyau.api.v1['academic-periods'].$post
+const resolveRoute = () => tuyau.api.v1['academic-periods'].$post
 
-type CreateAcademicPeriodBody = Parameters<typeof $route>[0]
+type CreateAcademicPeriodBody = Parameters<ReturnType<typeof resolveRoute>>[0]
 
 export function useCreateAcademicPeriodMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (body: CreateAcademicPeriodBody) => {
-      return $route(body).unwrap()
+      return resolveRoute()(body).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['academic-periods'] })

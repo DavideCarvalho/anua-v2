@@ -3,8 +3,8 @@ import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
 // Subscription Plan mutations
-const $createPlanRoute = tuyau.$route('api.v1.subscriptionPlans.store')
-type CreatePlanPayload = InferRequestType<typeof $createPlanRoute.$post>
+const resolveCreatePlanRoute = () => tuyau.$route('api.v1.subscriptionPlans.store')
+type CreatePlanPayload = InferRequestType<ReturnType<typeof resolveCreatePlanRoute>['$post']>
 
 export function useCreateSubscriptionPlan() {
   const queryClient = useQueryClient()

@@ -3,9 +3,10 @@ import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
 // List student gamifications
-const $listRoute = tuyau.$route('api.v1.studentGamifications.index')
-
-export type StudentGamificationsResponse = InferResponseType<typeof $listRoute.$get>
+const resolveListRoute = () => tuyau.$route('api.v1.studentGamifications.index')
+export type StudentGamificationsResponse = InferResponseType<
+  ReturnType<typeof resolveListRoute>['$get']
+>
 
 interface UseStudentGamificationsOptions {
   schoolId?: string
@@ -32,9 +33,10 @@ export function useStudentGamifications(options: UseStudentGamificationsOptions 
 }
 
 // Get single student gamification
-const $showRoute = tuyau.$route('api.v1.studentGamifications.show')
-
-export type StudentGamificationResponse = InferResponseType<typeof $showRoute.$get>
+const resolveShowRoute = () => tuyau.$route('api.v1.studentGamifications.show')
+export type StudentGamificationResponse = InferResponseType<
+  ReturnType<typeof resolveShowRoute>['$get']
+>
 
 export function useStudentGamificationQueryOptions(id: string) {
   return {
@@ -51,9 +53,10 @@ export function useStudentGamification(id: string) {
 }
 
 // Get gamification ranking
-const $rankingRoute = tuyau.$route('api.v1.studentGamifications.ranking')
-
-export type GamificationRankingResponse = InferResponseType<typeof $rankingRoute.$get>
+const resolveRankingRoute = () => tuyau.$route('api.v1.studentGamifications.ranking')
+export type GamificationRankingResponse = InferResponseType<
+  ReturnType<typeof resolveRankingRoute>['$get']
+>
 
 interface UseGamificationRankingOptions {
   schoolId?: string
@@ -80,9 +83,10 @@ export function useGamificationRanking(options: UseGamificationRankingOptions = 
 }
 
 // Get student gamification stats
-const $statsRoute = tuyau.$route('api.v1.students.gamificationStats')
-
-export type StudentGamificationStatsResponse = InferResponseType<typeof $statsRoute.$get>
+const resolveStatsRoute = () => tuyau.$route('api.v1.students.gamificationStats')
+export type StudentGamificationStatsResponse = InferResponseType<
+  ReturnType<typeof resolveStatsRoute>['$get']
+>
 
 export function useStudentGamificationStatsQueryOptions(studentId: string) {
   return {

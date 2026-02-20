@@ -2,8 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.gamificationEvents.store')
-type CreateGamificationEventPayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.gamificationEvents.store')
+type CreateGamificationEventPayload = InferRequestType<
+  ReturnType<typeof resolveCreateRoute>['$post']
+>
 
 export function useCreateGamificationEvent() {
   const queryClient = useQueryClient()

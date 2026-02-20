@@ -1,9 +1,8 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const $route = tuyau.$route('api.v1.contracts.uploadDocusealTemplate')
-
-type UploadBody = Parameters<typeof $route.$post>[0]
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.contracts.uploadDocusealTemplate')
+type UploadBody = Parameters<ReturnType<typeof resolveRoute>['$post']>[0]
 
 type UploadParams = {
   contractId: string
@@ -16,7 +15,7 @@ export function useUploadContractDocusealTemplateMutation() {
   return useMutation({
     mutationFn: ({ contractId, body }: UploadParams) => {
       return tuyau
-        .$route('api.v1.contracts.uploadDocusealTemplate', { contractId })
+        .resolveRoute()('api.v1.contracts.uploadDocusealTemplate', { contractId })
         .$post(body)
         .unwrap()
     },

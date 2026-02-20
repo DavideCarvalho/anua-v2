@@ -4,9 +4,9 @@ import type { InferResponseType } from '@tuyau/client'
 
 type SchoolPartnerParams = Parameters<(typeof tuyau.api.v1)['school-partners']>[0]
 
-const $route = tuyau.api.v1['school-partners']({ id: '' }).$get
+const resolveRoute = () => tuyau.api.v1['school-partners']({ id: '' }).$get
 
-export type SchoolPartnerResponse = InferResponseType<typeof $route>
+export type SchoolPartnerResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 export function useSchoolPartnerQueryOptions(params: SchoolPartnerParams) {
   return {

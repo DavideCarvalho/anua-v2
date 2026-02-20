@@ -2,9 +2,8 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.attendance.index')
-
-export type AttendanceListResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.attendance.index')
+export type AttendanceListResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseAttendanceListOptions {
   classId?: string
@@ -22,7 +21,7 @@ export function useAttendanceListQueryOptions(options: UseAttendanceListOptions 
     queryKey: ['attendance', 'list', { page, limit, ...filters }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.attendance.index')
+        .resolveRoute()('api.v1.attendance.index')
         .$get({ query: { page, limit, ...filters } })
         .unwrap()
     },

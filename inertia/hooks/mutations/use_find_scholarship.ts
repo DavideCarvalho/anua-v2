@@ -1,8 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation } from '@tanstack/react-query'
 
-const $route = tuyau.$route('api.v1.enrollment.findScholarship')
-
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.enrollment.findScholarship')
 type FindScholarshipBody = {
   code: string
   schoolId: string
@@ -11,7 +10,9 @@ type FindScholarshipBody = {
 export function useFindScholarshipMutation() {
   return useMutation({
     mutationFn: (data: FindScholarshipBody) => {
-      return $route.$post(data as any).unwrap()
+      return resolveRoute()
+        .$post(data as any)
+        .unwrap()
     },
   })
 }

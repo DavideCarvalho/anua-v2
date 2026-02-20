@@ -3,9 +3,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 type SchoolPartnerParams = Parameters<(typeof tuyau.api.v1)['school-partners']>[0]
 
-const $route = tuyau.api.v1['school-partners']({ id: '' }).$put
+const resolveRoute = () => tuyau.api.v1['school-partners']({ id: '' }).$put
 
-type UpdateSchoolPartnerBody = Parameters<typeof $route>[0]
+type UpdateSchoolPartnerBody = Parameters<ReturnType<typeof resolveRoute>>[0]
 
 export function useUpdateSchoolPartnerMutation() {
   const queryClient = useQueryClient()

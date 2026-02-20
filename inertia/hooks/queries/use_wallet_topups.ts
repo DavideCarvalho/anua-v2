@@ -1,13 +1,11 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $listRoute = tuyau.$route('api.v1.responsavel.api.listWalletTopUps')
+const resolveListRoute = () => tuyau.$route('api.v1.responsavel.api.listWalletTopUps')
+export type WalletTopUpsResponse = InferResponseType<ReturnType<typeof resolveListRoute>['$get']>
 
-export type WalletTopUpsResponse = InferResponseType<typeof $listRoute.$get>
-
-const $showRoute = tuyau.$route('api.v1.responsavel.api.showWalletTopUp')
-
-export type WalletTopUpResponse = InferResponseType<typeof $showRoute.$get>
+const resolveShowRoute = () => tuyau.$route('api.v1.responsavel.api.showWalletTopUp')
+export type WalletTopUpResponse = InferResponseType<ReturnType<typeof resolveShowRoute>['$get']>
 
 interface UseWalletTopUpsOptions {
   studentId: string

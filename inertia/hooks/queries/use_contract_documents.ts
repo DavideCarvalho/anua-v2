@@ -3,9 +3,8 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.contractDocuments.index')
-
-export type ContractDocumentsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.contractDocuments.index')
+export type ContractDocumentsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseContractDocumentsOptions {
   contractId?: string
@@ -20,7 +19,7 @@ export function useContractDocumentsQueryOptions(options: UseContractDocumentsOp
     queryKey: ['contract-documents', { contractId, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.contractDocuments.index')
+        .resolveRoute()('api.v1.contractDocuments.index')
         .$get({ query: { contractId, page, limit } })
         .unwrap()
     },

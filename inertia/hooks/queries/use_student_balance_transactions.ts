@@ -2,9 +2,10 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.studentBalanceTransactions.index')
-
-export type StudentBalanceTransactionsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.studentBalanceTransactions.index')
+export type StudentBalanceTransactionsResponse = InferResponseType<
+  ReturnType<typeof resolveRoute>['$get']
+>
 
 interface UseStudentBalanceTransactionsOptions {
   studentId?: string
@@ -22,7 +23,7 @@ export function useStudentBalanceTransactionsQueryOptions(
     queryKey: ['student-balance-transactions', { studentId, type, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.studentBalanceTransactions.index')
+        .resolveRoute()('api.v1.studentBalanceTransactions.index')
         .$get({ query: { studentId, type, page, limit } as any })
         .unwrap()
     },
@@ -34,15 +35,16 @@ export function useStudentBalanceTransactions(options: UseStudentBalanceTransact
 }
 
 // Get single transaction
-const $showRoute = tuyau.$route('api.v1.studentBalanceTransactions.show')
-
-export type StudentBalanceTransactionResponse = InferResponseType<typeof $showRoute.$get>
+const resolveShowRoute = () => tuyau.resolveRoute()('api.v1.studentBalanceTransactions.show')
+export type StudentBalanceTransactionResponse = InferResponseType<
+  ReturnType<typeof resolveShowRoute>['$get']
+>
 
 export function useStudentBalanceTransactionQueryOptions(id: string) {
   return {
     queryKey: ['student-balance-transaction', id],
     queryFn: () => {
-      return tuyau.$route('api.v1.studentBalanceTransactions.show', { id }).$get().unwrap()
+      return tuyau.resolveRoute()('api.v1.studentBalanceTransactions.show', { id }).$get().unwrap()
     },
     enabled: !!id,
   }

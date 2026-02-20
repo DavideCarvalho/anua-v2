@@ -2,15 +2,14 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.storeItems.index')
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.storeItems.index')
+export type StoreItemsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
-export type StoreItemsResponse = InferResponseType<typeof $route.$get>
-
-type StoreItemsQuery = NonNullable<Parameters<typeof $route.$get>[0]>['query']
+type StoreItemsQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>['$get']>[0]>['query']
 
 export function useStoreItemsQueryOptions(query: StoreItemsQuery = {}) {
   return {
     queryKey: ['store-items', query],
-    queryFn: () => $route.$get({ query }).unwrap(),
+    queryFn: () => resolveRoute().$get({ query }).unwrap(),
   } satisfies QueryOptions
 }

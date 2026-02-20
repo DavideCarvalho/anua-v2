@@ -1,53 +1,47 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { MutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-// Create Contract
-const $createContractRoute = tuyau.$route('api.v1.contracts.store')
-type CreateContractPayload = InferRequestType<typeof $createContractRoute.$post>
+const resolveCreateContractRoute = () => tuyau.$route('api.v1.contracts.store')
+type CreateContractPayload = InferRequestType<
+  ReturnType<typeof resolveCreateContractRoute>['$post']
+>
 
-export function useCreateContractMutation() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (data: CreateContractPayload) => {
-      return tuyau.$route('api.v1.contracts.store').$post(data).unwrap()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contracts'] })
-    },
-  })
-}
-
-// Update Contract
-const $updateContractRoute = tuyau.$route('api.v1.contracts.update')
-type UpdateContractPayload = InferRequestType<typeof $updateContractRoute.$put> & {
+const resolveUpdateContractRoute = () => tuyau.$route('api.v1.contracts.update')
+type UpdateContractPayload = InferRequestType<
+  ReturnType<typeof resolveUpdateContractRoute>['$put']
+> & {
   id: string
 }
 
-export function useUpdateContractMutation() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ id, ...data }: UpdateContractPayload) => {
-      return tuyau.$route('api.v1.contracts.update', { id }).$put(data).unwrap()
+export function createContractMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  CreateContractPayload
+> {
+  return {
+    mutationFn: (data) => {
+      return tuyau.$route('api.v1.contracts.store').$post(data).unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contracts'] })
-    },
-  })
+  }
 }
 
-// Delete Contract
-export function useDeleteContractMutation() {
-  const queryClient = useQueryClient()
+export function updateContractMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  UpdateContractPayload
+> {
+  return {
+    mutationFn: ({ id, ...data }) => {
+      return tuyau.$route('api.v1.contracts.update', { id }).$put(data).unwrap()
+    },
+  }
+}
 
-  return useMutation({
-    mutationFn: (contractId: string) => {
+export function deleteContractMutationOptions(): MutationOptions<unknown, Error, string> {
+  return {
+    mutationFn: (contractId) => {
       return tuyau.$route('api.v1.contracts.destroy', { id: contractId }).$delete().unwrap()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contracts'] })
-    },
-  })
+  }
 }

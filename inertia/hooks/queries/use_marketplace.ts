@@ -3,21 +3,26 @@ import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // Marketplace stores
-const $storesRoute = tuyau.api.v1.marketplace.stores.$get
+const resolveStoresRoute = () => tuyau.api.v1.marketplace.stores.$get
 
-export type MarketplaceStoresResponse = InferResponseType<typeof $storesRoute>
+export type MarketplaceStoresResponse = InferResponseType<ReturnType<typeof resolveStoresRoute>>
 
 export function useMarketplaceStoresQueryOptions(studentId?: string) {
   return {
     queryKey: ['marketplace', 'stores', { studentId }],
-    queryFn: () => $storesRoute({ query: { studentId } }).unwrap(),
+    queryFn: () => {
+      const route = resolveStoresRoute()
+      return route({ query: { studentId } }).unwrap()
+    },
   } satisfies QueryOptions
 }
 
 // Store items
-const marketplaceItemsRoute = tuyau.$route('api.v1.marketplace.stores.items')
+const resolveMarketplaceItemsRoute = () => tuyau.$route('api.v1.marketplace.stores.items')
 
-export type MarketplaceItemsResponse = InferResponseType<typeof marketplaceItemsRoute.$get>
+export type MarketplaceItemsResponse = InferResponseType<
+  ReturnType<typeof resolveMarketplaceItemsRoute>['$get']
+>
 
 export function useMarketplaceItemsQueryOptions(
   storeId: string,
@@ -39,14 +44,19 @@ export function useMarketplaceItemsQueryOptions(
 }
 
 // Installment options
-const installmentOptionsRoute = tuyau.api.v1.marketplace['installment-options'].$get
+const resolveInstallmentOptionsRoute = () => tuyau.api.v1.marketplace['installment-options'].$get
 
-export type InstallmentOptionsResponse = InferResponseType<typeof installmentOptionsRoute>
+export type InstallmentOptionsResponse = InferResponseType<
+  ReturnType<typeof resolveInstallmentOptionsRoute>
+>
 
 export function useInstallmentOptionsQueryOptions(storeId: string, amount: number) {
   return {
     queryKey: ['marketplace', 'installmentOptions', storeId, amount],
-    queryFn: () => installmentOptionsRoute({ query: { storeId, amount } }).unwrap(),
+    queryFn: () => {
+      const route = resolveInstallmentOptionsRoute()
+      return route({ query: { storeId, amount } }).unwrap()
+    },
     enabled: !!storeId && amount > 0,
   } satisfies QueryOptions
 }

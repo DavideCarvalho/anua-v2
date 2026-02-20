@@ -1,10 +1,10 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const $route = tuyau.api.v1.scholarships({ id: '' }).$put
+const resolveRoute = () => tuyau.api.v1.scholarships({ id: '' }).$put
 
 type ScholarshipParams = Parameters<typeof tuyau.api.v1.scholarships>[0]
-type UpdateScholarshipBody = Parameters<typeof $route>[0]
+type UpdateScholarshipBody = Parameters<ReturnType<typeof resolveRoute>>[0]
 
 export function useUpdateScholarshipMutation() {
   const queryClient = useQueryClient()

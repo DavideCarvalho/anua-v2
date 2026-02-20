@@ -3,9 +3,8 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.userSchoolGroups.listUserSchoolGroups')
-
-export type UserSchoolGroupsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.userSchoolGroups.listUserSchoolGroups')
+export type UserSchoolGroupsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseUserSchoolGroupsOptions {
   userId?: string
@@ -20,7 +19,7 @@ export function useUserSchoolGroupsQueryOptions(options: UseUserSchoolGroupsOpti
     queryKey: ['user-school-groups', { userId, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.userSchoolGroups.listUserSchoolGroups')
+        .resolveRoute()('api.v1.userSchoolGroups.listUserSchoolGroups')
         .$get({ query: { userId, page, limit } })
         .unwrap()
     },

@@ -2,11 +2,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.subscriptionInvoices.store')
-type CreateSubscriptionInvoicePayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.subscriptionInvoices.store')
+type CreateSubscriptionInvoicePayload = InferRequestType<
+  ReturnType<typeof resolveCreateRoute>['$post']
+>
 
-const $updateRoute = tuyau.$route('api.v1.subscriptionInvoices.update')
-type UpdateSubscriptionInvoicePayload = InferRequestType<typeof $updateRoute.$put> & { id: string }
+const resolveUpdateRoute = () => tuyau.$route('api.v1.subscriptionInvoices.update')
+type UpdateSubscriptionInvoicePayload = InferRequestType<
+  ReturnType<typeof resolveUpdateRoute>['$put']
+> & { id: string }
 
 export function useCreateSubscriptionInvoice() {
   const queryClient = useQueryClient()

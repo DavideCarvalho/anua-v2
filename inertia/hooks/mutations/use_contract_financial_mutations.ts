@@ -1,112 +1,94 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { MutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
-// Payment Days
 interface AddPaymentDayPayload {
   contractId: string
   day: number
 }
 
-export function useAddContractPaymentDay() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ contractId, day }: AddPaymentDayPayload) => {
+export function addContractPaymentDayMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  AddPaymentDayPayload
+> {
+  return {
+    mutationFn: ({ contractId, day }) => {
       return tuyau
         .$route('api.v1.contracts.paymentDays.store', { contractId })
         .$post({ contractId, day })
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['contract-payment-days', variables.contractId],
-      })
-    },
-  })
+  }
 }
 
-export function useRemoveContractPaymentDay() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ contractId, id }: { contractId: string; id: string }) => {
+export function removeContractPaymentDayMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  { contractId: string; id: string }
+> {
+  return {
+    mutationFn: ({ contractId, id }) => {
       return tuyau
         .$route('api.v1.contracts.paymentDays.destroy', { contractId, id })
         .$delete({})
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['contract-payment-days', variables.contractId],
-      })
-    },
-  })
+  }
 }
 
-// Interest Config
 interface UpdateInterestPayload {
   contractId: string
   delayInterestPercentage?: number
   delayInterestPerDayDelayed?: number
 }
 
-export function useUpdateContractInterestConfig() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ contractId, ...data }: UpdateInterestPayload) => {
+export function updateContractInterestConfigMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  UpdateInterestPayload
+> {
+  return {
+    mutationFn: ({ contractId, ...data }) => {
       return tuyau
         .$route('api.v1.contracts.interestConfig.update', { contractId })
         .$put(data)
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['contract-interest-config', variables.contractId],
-      })
-    },
-  })
+  }
 }
 
-// Early Discounts
 interface AddDiscountPayload {
   contractId: string
   percentage: number
   daysBeforeDeadline: number
 }
 
-export function useAddContractEarlyDiscount() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ contractId, percentage, daysBeforeDeadline }: AddDiscountPayload) => {
+export function addContractEarlyDiscountMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  AddDiscountPayload
+> {
+  return {
+    mutationFn: ({ contractId, percentage, daysBeforeDeadline }) => {
       return tuyau
         .$route('api.v1.contracts.earlyDiscounts.store', { contractId })
         .$post({ contractId, percentage, daysBeforeDeadline })
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['contract-early-discounts', variables.contractId],
-      })
-    },
-  })
+  }
 }
 
-export function useRemoveContractEarlyDiscount() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ contractId, id }: { contractId: string; id: string }) => {
+export function removeContractEarlyDiscountMutationOptions(): MutationOptions<
+  unknown,
+  Error,
+  { contractId: string; id: string }
+> {
+  return {
+    mutationFn: ({ contractId, id }) => {
       return tuyau
         .$route('api.v1.contracts.earlyDiscounts.destroy', { contractId, id })
         .$delete({})
         .unwrap()
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ['contract-early-discounts', variables.contractId],
-      })
-    },
-  })
+  }
 }

@@ -2,15 +2,15 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.escola.stats.$get
+const resolveRoute = () => tuyau.api.v1.escola.stats.$get
 
-export type EscolaStats = InferResponseType<typeof $route>
+export type EscolaStats = InferResponseType<ReturnType<typeof resolveRoute>>
 
 export function useEscolaStatsQueryOptions() {
   return {
     queryKey: ['escola', 'stats'],
     queryFn: async () => {
-      const response = await $route()
+      const response = await resolveRoute()()
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar estatísticas')
       }

@@ -10,9 +10,9 @@ type SerializedResponse<T> = T extends { serialize: () => infer U }
 
 type ExamParams = Parameters<typeof tuyau.api.v1.exams>[0]
 
-const $route = tuyau.api.v1.exams({ id: '' }).$get
+const resolveRoute = () => tuyau.api.v1.exams({ id: '' }).$get
 
-export type ExamResponse = InferResponseType<typeof $route>
+export type ExamResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 export type ExamData = SerializedResponse<ExamResponse>
 
 export function useExamQueryOptions(params: ExamParams) {

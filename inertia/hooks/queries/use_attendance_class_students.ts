@@ -2,9 +2,10 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.attendance.classStudents')
-
-export type AttendanceClassStudentsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.attendance.classStudents')
+export type AttendanceClassStudentsResponse = InferResponseType<
+  ReturnType<typeof resolveRoute>['$get']
+>
 
 interface UseAttendanceClassStudentsOptions {
   classId: string
@@ -21,7 +22,7 @@ export function useAttendanceClassStudentsQueryOptions(options: UseAttendanceCla
     queryKey: ['class-students-attendance', { classId, courseId, academicPeriodId, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.attendance.classStudents', { classId })
+        .resolveRoute()('api.v1.attendance.classStudents', { classId })
         .$get({ query: { page, limit, courseId, academicPeriodId } })
         .unwrap()
     },

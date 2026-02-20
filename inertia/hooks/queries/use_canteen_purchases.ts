@@ -2,11 +2,11 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1['canteen-purchases'].$get
+const resolveRoute = () => tuyau.api.v1['canteen-purchases'].$get
 
-export type CanteenPurchasesResponse = InferResponseType<typeof $route>
+export type CanteenPurchasesResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
-type CanteenPurchasesQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+type CanteenPurchasesQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function useCanteenPurchasesQueryOptions(query: CanteenPurchasesQuery = {}) {
   const mergedQuery: CanteenPurchasesQuery = {
@@ -18,7 +18,7 @@ export function useCanteenPurchasesQueryOptions(query: CanteenPurchasesQuery = {
   return {
     queryKey: ['canteen-purchases', mergedQuery],
     queryFn: () => {
-      return $route({ query: mergedQuery }).unwrap()
+      return resolveRoute()({ query: mergedQuery }).unwrap()
     },
   } satisfies QueryOptions<CanteenPurchasesResponse>
 }

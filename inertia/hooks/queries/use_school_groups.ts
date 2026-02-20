@@ -2,9 +2,8 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.schoolGroups.listSchoolGroups')
-
-export type SchoolGroupsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.schoolGroups.listSchoolGroups')
+export type SchoolGroupsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseSchoolGroupsOptions {
   schoolChainId?: string
@@ -20,7 +19,7 @@ export function useSchoolGroupsQueryOptions(options: UseSchoolGroupsOptions = {}
     queryKey: ['school-groups', { schoolChainId, search, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.schoolGroups.listSchoolGroups')
+        .resolveRoute()('api.v1.schoolGroups.listSchoolGroups')
         .$get({ query: { schoolChainId, search, page, limit } })
         .unwrap()
     },

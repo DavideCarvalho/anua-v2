@@ -2,11 +2,12 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.consents.history')
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.consents.history')
+export type ConsentHistoryResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
-export type ConsentHistoryResponse = InferResponseType<typeof $route.$get>
-
-type ConsentHistoryQuery = NonNullable<Parameters<typeof $route.$get>[0]>['query']
+type ConsentHistoryQuery = NonNullable<
+  Parameters<ReturnType<typeof resolveRoute>['$get']>[0]
+>['query']
 
 export function useConsentHistoryQueryOptions(query: ConsentHistoryQuery = {}) {
   const mergedQuery: ConsentHistoryQuery = {
@@ -18,7 +19,7 @@ export function useConsentHistoryQueryOptions(query: ConsentHistoryQuery = {}) {
   return {
     queryKey: ['parental-consents', 'history', mergedQuery],
     queryFn: () => {
-      return $route.$get({ query: mergedQuery }).unwrap()
+      return resolveRoute().$get({ query: mergedQuery }).unwrap()
     },
   } satisfies QueryOptions<ConsentHistoryResponse>
 }

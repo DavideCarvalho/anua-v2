@@ -1,9 +1,8 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.leaderboards.entries')
-
-export type LeaderboardEntriesResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.leaderboards.entries')
+export type LeaderboardEntriesResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseLeaderboardEntriesOptions {
   leaderboardId: string
@@ -18,7 +17,7 @@ export function useLeaderboardEntriesQueryOptions(options: UseLeaderboardEntries
     queryKey: ['leaderboard-entries', leaderboardId, { page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.leaderboards.entries', { id: leaderboardId })
+        .resolveRoute()('api.v1.leaderboards.entries', { id: leaderboardId })
         .$get({ query: { page, limit } })
         .unwrap()
     },

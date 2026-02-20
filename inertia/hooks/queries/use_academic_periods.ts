@@ -2,11 +2,11 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1['academic-periods'].$get
+const resolveRoute = () => tuyau.api.v1['academic-periods'].$get
 
-export type AcademicPeriodsResponse = InferResponseType<typeof $route>
+export type AcademicPeriodsResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
-type AcademicPeriodsQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+type AcademicPeriodsQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function useAcademicPeriodsQueryOptions(query: AcademicPeriodsQuery = {}) {
   const mergedQuery: AcademicPeriodsQuery = {
@@ -17,6 +17,6 @@ export function useAcademicPeriodsQueryOptions(query: AcademicPeriodsQuery = {})
 
   return {
     queryKey: ['academic-periods', mergedQuery],
-    queryFn: () => $route({ query: mergedQuery }).unwrap(),
+    queryFn: () => resolveRoute()({ query: mergedQuery }).unwrap(),
   } satisfies QueryOptions
 }

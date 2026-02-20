@@ -2,11 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.leaderboards.store')
-type CreateLeaderboardPayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.leaderboards.store')
+type CreateLeaderboardPayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
 
-const $updateRoute = tuyau.$route('api.v1.leaderboards.update')
-type UpdateLeaderboardPayload = InferRequestType<typeof $updateRoute.$put> & { id: string }
+const resolveUpdateRoute = () => tuyau.$route('api.v1.leaderboards.update')
+type UpdateLeaderboardPayload = InferRequestType<ReturnType<typeof resolveUpdateRoute>['$put']> & {
+  id: string
+}
 
 export function useCreateLeaderboard() {
   const queryClient = useQueryClient()

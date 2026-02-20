@@ -2,11 +2,11 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1['school-partners'].$get
+const resolveRoute = () => tuyau.api.v1['school-partners'].$get
 
-export type SchoolPartnersForSelectResponse = InferResponseType<typeof $route>
+export type SchoolPartnersForSelectResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
-type SchoolPartnersQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+type SchoolPartnersQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function useSchoolPartnersForSelectQueryOptions(query: SchoolPartnersQuery = {}) {
   // For select we usually want all, but keep pagination defaults.
@@ -19,7 +19,7 @@ export function useSchoolPartnersForSelectQueryOptions(query: SchoolPartnersQuer
   return {
     queryKey: ['school-partners', 'select', mergedQuery],
     queryFn: () => {
-      return $route({ query: mergedQuery }).unwrap()
+      return resolveRoute()({ query: mergedQuery }).unwrap()
     },
   } satisfies QueryOptions<SchoolPartnersForSelectResponse>
 }

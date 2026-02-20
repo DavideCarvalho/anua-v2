@@ -1,8 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const $route = tuyau.$route('api.v1.enrollment.finish')
-
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.enrollment.finish')
 type StudentInfo = {
   name: string
   email: string
@@ -90,7 +89,9 @@ export function useFinishEnrollmentMutation() {
 
   return useMutation({
     mutationFn: (data: FinishEnrollmentData) => {
-      return $route.$post(data as any).unwrap()
+      return resolveRoute()
+        .$post(data as any)
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analytics', 'enrollments'] })

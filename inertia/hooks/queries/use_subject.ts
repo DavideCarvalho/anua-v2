@@ -4,9 +4,9 @@ import type { InferResponseType } from '@tuyau/client'
 
 type SubjectParams = Parameters<typeof tuyau.api.v1.subjects>[0]
 
-const $route = tuyau.api.v1.subjects({ id: '' }).$get
+const resolveRoute = () => tuyau.api.v1.subjects({ id: '' }).$get
 
-export type SubjectResponse = InferResponseType<typeof $route>
+export type SubjectResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 export function useSubjectQueryOptions(params: SubjectParams) {
   return {

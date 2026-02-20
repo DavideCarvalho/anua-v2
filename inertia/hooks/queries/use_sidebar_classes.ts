@@ -3,9 +3,9 @@ import type { InferResponseType } from '@tuyau/client'
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
-const $route = tuyau.api.v1.classes.sidebar.$get
+const resolveRoute = () => tuyau.api.v1.classes.sidebar.$get
 
-export type SidebarClassesResponse = InferResponseType<typeof $route>
+export type SidebarClassesResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 interface SidebarClassesQuery {
   isActive?: boolean
@@ -14,7 +14,7 @@ interface SidebarClassesQuery {
 export function useSidebarClassesQueryOptions(query: SidebarClassesQuery = { isActive: true }) {
   return {
     queryKey: ['sidebar-classes', query],
-    queryFn: () => $route({ query } as any).unwrap(),
+    queryFn: () => resolveRoute()({ query } as any).unwrap(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   }
 }

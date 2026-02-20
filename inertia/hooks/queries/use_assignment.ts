@@ -10,9 +10,9 @@ type SerializedResponse<T> = T extends { serialize: () => infer U }
 
 type AssignmentParams = Parameters<typeof tuyau.api.v1.assignments>[0]
 
-const $route = tuyau.api.v1.assignments({ id: '' }).$get
+const resolveRoute = () => tuyau.api.v1.assignments({ id: '' }).$get
 
-export type AssignmentResponse = InferResponseType<typeof $route>
+export type AssignmentResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 export type AssignmentData = SerializedResponse<AssignmentResponse>
 
 export function useAssignmentQueryOptions(params: AssignmentParams) {

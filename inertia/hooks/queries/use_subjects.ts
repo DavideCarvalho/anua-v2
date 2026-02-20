@@ -2,11 +2,11 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.subjects.$get
+const resolveRoute = () => tuyau.api.v1.subjects.$get
 
-export type SubjectsResponse = InferResponseType<typeof $route>
+export type SubjectsResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
-type SubjectsQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+type SubjectsQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function useSubjectsQueryOptions(query: SubjectsQuery = {}) {
   const mergedQuery: SubjectsQuery = {
@@ -18,7 +18,7 @@ export function useSubjectsQueryOptions(query: SubjectsQuery = {}) {
   return {
     queryKey: ['subjects', mergedQuery],
     queryFn: () => {
-      return $route({ query: mergedQuery }).unwrap()
+      return resolveRoute()({ query: mergedQuery }).unwrap()
     },
   } satisfies QueryOptions<SubjectsResponse>
 }

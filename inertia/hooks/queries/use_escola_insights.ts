@@ -1,9 +1,9 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.escola.insights.$get
+const resolveRoute = () => tuyau.api.v1.escola.insights.$get
 
-export type EscolaInsightsResponse = InferResponseType<typeof $route>
+export type EscolaInsightsResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
 export type Insight = {
   id: string
@@ -20,7 +20,7 @@ export function useEscolaInsightsQueryOptions() {
   return {
     queryKey: ['escola', 'insights'],
     queryFn: async () => {
-      const response = await $route()
+      const response = await resolveRoute()()
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar insights')
       }

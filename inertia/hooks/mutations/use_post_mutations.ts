@@ -2,11 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.posts.store')
-type CreatePostPayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.posts.store')
+type CreatePostPayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
 
-const $updateRoute = tuyau.$route('api.v1.posts.update')
-type UpdatePostPayload = InferRequestType<typeof $updateRoute.$put> & { id: string }
+const resolveUpdateRoute = () => tuyau.$route('api.v1.posts.update')
+type UpdatePostPayload = InferRequestType<ReturnType<typeof resolveUpdateRoute>['$put']> & {
+  id: string
+}
 
 export function useCreatePost() {
   const queryClient = useQueryClient()
@@ -74,8 +76,10 @@ export function useUnlikePost() {
 }
 
 // Comments
-const $createCommentRoute = tuyau.$route('api.v1.posts.comments.store')
-type CreateCommentPayload = InferRequestType<typeof $createCommentRoute.$post> & { postId: string }
+const resolveCreateCommentRoute = () => tuyau.$route('api.v1.posts.comments.store')
+type CreateCommentPayload = InferRequestType<
+  ReturnType<typeof resolveCreateCommentRoute>['$post']
+> & { postId: string }
 
 export function useCreateComment() {
   const queryClient = useQueryClient()

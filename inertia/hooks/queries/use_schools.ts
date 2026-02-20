@@ -1,11 +1,11 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.schools.index')
-const $showRoute = tuyau.$route('api.v1.schools.show')
+type SchoolsIndexRoute = ReturnType<typeof tuyau.$route<'api.v1.schools.index'>>
+type SchoolsShowRoute = ReturnType<typeof tuyau.$route<'api.v1.schools.show'>>
 
-export type SchoolsResponse = InferResponseType<typeof $route.$get>
-export type SchoolResponse = InferResponseType<typeof $showRoute.$get>
+export type SchoolsResponse = InferResponseType<SchoolsIndexRoute['$get']>
+export type SchoolResponse = InferResponseType<SchoolsShowRoute['$get']>
 
 interface UseSchoolsOptions {
   page?: number
@@ -19,14 +19,20 @@ export function useSchoolsQueryOptions(options: UseSchoolsOptions = {}) {
 
   return {
     queryKey: ['schools', { page, limit, search, includeUsers }],
-    queryFn: () => $route.$get({ query: { page, limit, search, includeUsers } }).unwrap(),
+    queryFn: () => {
+      const route = tuyau.$route('api.v1.schools.index')
+      return route.$get({ query: { page, limit, search, includeUsers } }).unwrap()
+    },
   }
 }
 
 export function useSchoolQueryOptions(schoolId: string) {
   return {
     queryKey: ['school', schoolId],
-    queryFn: () => (tuyau.api.v1.schools as any)({ id: schoolId }).$get().unwrap(),
+    queryFn: () => {
+      const route = tuyau.$route('api.v1.schools.show', { id: schoolId })
+      return route.$get().unwrap()
+    },
     enabled: !!schoolId,
   }
 }

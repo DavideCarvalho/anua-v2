@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tuyau/inertia/react'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 
@@ -30,11 +31,22 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import {
-  useCreateContractMutation,
-  useUpdateContractMutation,
+  createContractMutationOptions,
+  updateContractMutationOptions,
 } from '../../hooks/mutations/use_contract_mutations'
-import { useUpdateContractInterestConfig } from '../../hooks/mutations/use_contract_financial_mutations'
+import { updateContractInterestConfigMutationOptions } from '../../hooks/mutations/use_contract_financial_mutations'
 import type { ContractResponse } from '../../hooks/queries/use_contract'
+
+function toNumber(value: unknown) {
+  if (value === '' || value === undefined || value === null) return undefined
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+  if (typeof value === 'string') {
+    const normalized = value.replace(',', '.').trim()
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+  return undefined
+}
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -51,18 +63,12 @@ const formSchema = z.object({
   paymentDays: z.array(z.number()).min(1, 'Selecione pelo menos um dia de vencimento'),
 
   // Interest and discounts
-  interestPercentage: z.preprocess(
-    (v) => (v === '' || v === undefined ? undefined : Number(v)),
-    z.number().min(0).max(100).optional()
-  ),
-  interestPerDay: z.preprocess(
-    (v) => (v === '' || v === undefined ? undefined : Number(v)),
-    z.number().min(0).max(100).optional()
-  ),
+  interestPercentage: z.preprocess((v) => toNumber(v), z.number().min(0).max(100).optional()),
+  interestPerDay: z.preprocess((v) => toNumber(v), z.number().min(0).max(100).optional()),
   earlyDiscounts: z.array(
     z.object({
-      daysBeforeDeadline: z.number().min(1),
-      percentage: z.number().min(0).max(100),
+      daysBeforeDeadline: z.preprocess((v) => toNumber(v), z.number().min(1)),
+      percentage: z.preprocess((v) => toNumber(v), z.number().min(0).max(100)),
     })
   ),
 
@@ -150,12 +156,13 @@ const steps = [
 
 export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [currentStep, setCurrentStep] = useState(0)
   const isEditing = !!initialData
 
-  const createContract = useCreateContractMutation()
-  const updateContract = useUpdateContractMutation()
-  const updateInterestConfig = useUpdateContractInterestConfig()
+  const createContract = useMutation(createContractMutationOptions())
+  const updateContract = useMutation(updateContractMutationOptions())
+  const updateInterestConfig = useMutation(updateContractInterestConfigMutationOptions())
 
   const isSubmitting =
     createContract.isPending || updateContract.isPending || updateInterestConfig.isPending
@@ -189,7 +196,13 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       paymentDays: initialData?.paymentDays?.map((p: { day: number }) => p.day) || [10],
       interestPercentage: defaultInterestPercentage,
       interestPerDay: defaultInterestPerDay,
-      earlyDiscounts: initialData?.earlyDiscounts || [],
+      earlyDiscounts:
+        initialData?.earlyDiscounts?.map(
+          (discount: { daysBeforeDeadline: unknown; percentage: unknown }) => ({
+            daysBeforeDeadline: Number(discount.daysBeforeDeadline),
+            percentage: Number(discount.percentage),
+          })
+        ) || [],
       contractDocuments:
         initialData?.contractDocuments?.map(
           (doc: { id: string; name: string; description?: string; required: boolean }) => ({
@@ -218,29 +231,63 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
     }).format(value)
   }
 
-  const handleNext = async () => {
+  const getFieldsToValidateByStep = (stepIndex: number): (keyof FormValues)[] => {
     let fieldsToValidate: (keyof FormValues)[] = []
 
-    if (currentStep === 0) {
+    if (stepIndex === 0) {
       fieldsToValidate = ['name']
-    } else if (currentStep === 1) {
+    } else if (stepIndex === 1) {
       fieldsToValidate = ['amount', 'paymentType', 'paymentDays']
       if (form.getValues('paymentType') === 'UPFRONT' && !form.getValues('flexibleInstallments')) {
         fieldsToValidate.push('installments')
       }
+    } else if (stepIndex === 2) {
+      fieldsToValidate = ['interestPercentage', 'interestPerDay', 'earlyDiscounts']
+    } else if (stepIndex === 3) {
+      fieldsToValidate = ['contractDocuments']
     }
+
+    return fieldsToValidate
+  }
+
+  const validateStep = async (stepIndex: number) => {
+    const fieldsToValidate = getFieldsToValidateByStep(stepIndex)
 
     const isValid = await form.trigger(fieldsToValidate)
     if (!isValid) {
       toast.error('Preencha todos os campos obrigatórios')
-      return
+      return false
     }
 
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
+    return true
+  }
+
+  const handleNext = async () => {
+    const isValid = await validateStep(currentStep)
+    if (!isValid) return
+
+    const nextStep = Math.min(currentStep + 1, steps.length - 1)
+    setCurrentStep(nextStep)
   }
 
   const handleBack = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0))
+  }
+
+  const handleStepClick = async (stepIndex: number) => {
+    if (stepIndex === currentStep) {
+      return
+    }
+
+    if (stepIndex < currentStep) {
+      setCurrentStep(stepIndex)
+      return
+    }
+
+    const isValid = await validateStep(currentStep)
+    if (!isValid) return
+
+    setCurrentStep(stepIndex)
   }
 
   async function onSubmit(values: FormValues) {
@@ -265,6 +312,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
           id: initialData.id,
           ...basePayload,
           paymentDays: values.paymentDays,
+          earlyDiscounts: values.earlyDiscounts,
         })
 
         // Update interest config if provided
@@ -275,6 +323,15 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
             delayInterestPerDayDelayed: values.interestPerDay || 0,
           })
         }
+
+        await queryClient.invalidateQueries({ queryKey: ['contracts'] })
+        await queryClient.invalidateQueries({ queryKey: ['contract', initialData.id] })
+        await queryClient.invalidateQueries({
+          queryKey: ['contract-interest-config', initialData.id],
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ['contract-early-discounts', initialData.id],
+        })
 
         toast.success('Contrato atualizado com sucesso!')
       } else {
@@ -293,6 +350,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
         }
 
         await createContract.mutateAsync(payload)
+        await queryClient.invalidateQueries({ queryKey: ['contracts'] })
         toast.success('Contrato criado com sucesso!')
       }
 
@@ -332,7 +390,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
 
   return (
     <div className="space-y-8">
-      <Stepper steps={steps} currentStep={currentStep} onStepClick={setCurrentStep} />
+      <Stepper steps={steps} currentStep={currentStep} onStepClick={handleStepClick} />
 
       <Card>
         <CardContent className="pt-6">

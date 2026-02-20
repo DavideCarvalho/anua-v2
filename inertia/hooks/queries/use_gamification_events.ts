@@ -2,9 +2,8 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.gamificationEvents.index')
-
-export type GamificationEventsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.gamificationEvents.index')
+export type GamificationEventsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseGamificationEventsOptions {
   studentId?: string
@@ -21,7 +20,7 @@ export function useGamificationEventsQueryOptions(options: UseGamificationEvents
     queryKey: ['gamification-events', { studentId, type, status, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.gamificationEvents.index')
+        .resolveRoute()('api.v1.gamificationEvents.index')
         .$get({ query: { studentId, type, status, page, limit } as any })
         .unwrap()
     },
@@ -33,15 +32,16 @@ export function useGamificationEvents(options: UseGamificationEventsOptions = {}
 }
 
 // Get single event
-const $showRoute = tuyau.$route('api.v1.gamificationEvents.show')
-
-export type GamificationEventResponse = InferResponseType<typeof $showRoute.$get>
+const resolveShowRoute = () => tuyau.resolveRoute()('api.v1.gamificationEvents.show')
+export type GamificationEventResponse = InferResponseType<
+  ReturnType<typeof resolveShowRoute>['$get']
+>
 
 export function useGamificationEventQueryOptions(id: string) {
   return {
     queryKey: ['gamification-event', id],
     queryFn: () => {
-      return tuyau.$route('api.v1.gamificationEvents.show', { id }).$get().unwrap()
+      return tuyau.resolveRoute()('api.v1.gamificationEvents.show', { id }).$get().unwrap()
     },
     enabled: !!id,
   }

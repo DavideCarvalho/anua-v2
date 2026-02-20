@@ -8,12 +8,12 @@ type SerializedResponse<T> = T extends { serialize: () => infer U }
     ? U
     : T
 
-const $route = tuyau.api.v1.assignments.$get
+const resolveRoute = () => tuyau.api.v1.assignments.$get
 
-export type AssignmentsResponse = InferResponseType<typeof $route>
+export type AssignmentsResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 export type AssignmentsData = SerializedResponse<AssignmentsResponse>
 
-type AssignmentsQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+type AssignmentsQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function useAssignmentsQueryOptions(query: AssignmentsQuery = {}) {
   const mergedQuery: AssignmentsQuery = {
@@ -25,7 +25,7 @@ export function useAssignmentsQueryOptions(query: AssignmentsQuery = {}) {
   return {
     queryKey: ['assignments', mergedQuery],
     queryFn: () => {
-      return $route({ query: mergedQuery })
+      return resolveRoute()({ query: mergedQuery })
         .unwrap()
         .then((response) => {
           if (response && typeof response === 'object') {

@@ -1,9 +1,8 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.posts.comments.index')
-
-export type PostCommentsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.posts.comments.index')
+export type PostCommentsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 export function usePostCommentsQueryOptions(
   params: { postId: string },
@@ -19,7 +18,7 @@ export function usePostCommentsQueryOptions(
     queryKey: ['posts', params.postId, 'comments', mergedQuery],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.posts.comments.index', { postId: params.postId })
+        .resolveRoute()('api.v1.posts.comments.index', { postId: params.postId })
         .$get({ query: mergedQuery } as any)
         .unwrap()
     },

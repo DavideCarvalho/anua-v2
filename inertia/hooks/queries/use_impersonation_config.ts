@@ -2,9 +2,9 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.admin.impersonation.config.$get
+const resolveRoute = () => tuyau.api.v1.admin.impersonation.config.$get
 
-export type ImpersonationConfig = InferResponseType<typeof $route>
+export type ImpersonationConfig = InferResponseType<ReturnType<typeof resolveRoute>>
 
 interface ImpersonationConfigParams {
   search?: string
@@ -20,7 +20,7 @@ export function useImpersonationConfigQueryOptions(params: ImpersonationConfigPa
   return {
     queryKey: ['impersonation', 'config', { search, roleFilter, schoolFilter, page, limit }],
     queryFn: async () => {
-      const response = await $route({
+      const response = await resolveRoute()({
         query: {
           search,
           roleFilter,

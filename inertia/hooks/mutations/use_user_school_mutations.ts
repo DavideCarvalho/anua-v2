@@ -2,11 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $createRoute = tuyau.$route('api.v1.userSchools.createUserSchool')
-type CreateUserSchoolPayload = InferRequestType<typeof $createRoute.$post>
+const resolveCreateRoute = () => tuyau.$route('api.v1.userSchools.createUserSchool')
+type CreateUserSchoolPayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
 
-const $updateRoute = tuyau.$route('api.v1.userSchools.updateUserSchool')
-type UpdateUserSchoolPayload = InferRequestType<typeof $updateRoute.$put> & { id: string }
+const resolveUpdateRoute = () => tuyau.$route('api.v1.userSchools.updateUserSchool')
+type UpdateUserSchoolPayload = InferRequestType<ReturnType<typeof resolveUpdateRoute>['$put']> & {
+  id: string
+}
 
 export function useCreateUserSchool() {
   const queryClient = useQueryClient()

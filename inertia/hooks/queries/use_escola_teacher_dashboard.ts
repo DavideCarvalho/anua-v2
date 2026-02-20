@@ -1,6 +1,6 @@
 import { tuyau } from '../../lib/api'
 
-const $route = tuyau.api.v1.escola.teacherDashboard.$get
+const resolveRoute = () => tuyau.api.v1.escola.teacherDashboard.$get
 
 export type TeacherDashboardResponse = {
   stats: {
@@ -28,7 +28,7 @@ export function useEscolaTeacherDashboardQueryOptions() {
   return {
     queryKey: ['escola', 'teacher-dashboard'],
     queryFn: async () => {
-      const response = await $route()
+      const response = await resolveRoute()()
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar dashboard')
       }

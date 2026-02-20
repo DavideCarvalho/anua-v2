@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import {
+  useMutation,
+  useQuery,
+  QueryErrorResetBoundary,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { router } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useContractsQueryOptions } from '../hooks/queries/use_contracts'
-import { useDeleteContractMutation } from '../hooks/mutations/use_contract_mutations'
+import { deleteContractMutationOptions } from '../hooks/mutations/use_contract_mutations'
+import { toast } from 'sonner'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -114,7 +120,10 @@ export function ContractsListContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ContractsListErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <ContractsListErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <ContractsListContent />
@@ -125,6 +134,7 @@ export function ContractsListContainer() {
 }
 
 function ContractsListContent() {
+  const queryClient = useQueryClient()
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
@@ -141,7 +151,7 @@ function ContractsListContent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [contractToDelete, setContractToDelete] = useState<ContractItem | null>(null)
 
-  const deleteContract = useDeleteContractMutation()
+  const deleteContract = useMutation(deleteContractMutationOptions())
 
   const handleEdit = (contract: ContractItem) => {
     router.visit(`/escola/administrativo/contratos/${contract.id}/editar`)
@@ -156,8 +166,11 @@ function ContractsListContent() {
     if (!contractToDelete) return
     try {
       await deleteContract.mutateAsync(contractToDelete.id)
+      await queryClient.invalidateQueries({ queryKey: ['contracts'] })
+      toast.success('Contrato removido com sucesso')
     } catch (error) {
       console.error('Error deleting contract:', error)
+      toast.error('Erro ao remover contrato')
     } finally {
       setIsDeleteModalOpen(false)
       setContractToDelete(null)
@@ -189,9 +202,7 @@ function ContractsListContent() {
 
       {isLoading && <ContractsListSkeleton />}
 
-      {error && (
-        <ContractsListErrorFallback error={error} resetErrorBoundary={() => refetch()} />
-      )}
+      {error && <ContractsListErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
 
       {!isLoading && !error && contracts.length === 0 && (
         <Card>

@@ -1,15 +1,15 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.admin.impersonation.status.$get
+const resolveRoute = () => tuyau.api.v1.admin.impersonation.status.$get
 
-export type ImpersonationStatus = InferResponseType<typeof $route>
+export type ImpersonationStatus = InferResponseType<ReturnType<typeof resolveRoute>>
 
 export function useImpersonationStatusQueryOptions() {
   return {
     queryKey: ['impersonation', 'status'],
     queryFn: async () => {
-      const response = await $route()
+      const response = await resolveRoute()()
       if (response.error) {
         throw new Error(
           (response.error as any).value?.message || 'Erro ao carregar status de personificação'

@@ -3,22 +3,25 @@ import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // --- Stores list ---
-const storesListRoute = tuyau.api.v1.stores.$get
-export type StoresListResponse = InferResponseType<typeof storesListRoute>
+const resolveStoresListRoute = () => tuyau.api.v1.stores.$get
+type StoresListGet = ReturnType<typeof resolveStoresListRoute>
+export type StoresListResponse = InferResponseType<StoresListGet>
 
-export function useStoresQueryOptions(
-  query?: NonNullable<Parameters<typeof storesListRoute>[0]>['query']
-) {
+export function useStoresQueryOptions(query?: NonNullable<Parameters<StoresListGet>[0]>['query']) {
   const mergedQuery = { page: 1, limit: 20, ...query }
   return {
     queryKey: ['stores', mergedQuery],
-    queryFn: () => storesListRoute({ query: mergedQuery }).unwrap(),
+    queryFn: () => {
+      const route = resolveStoresListRoute()
+      return route({ query: mergedQuery }).unwrap()
+    },
   } satisfies QueryOptions
 }
 
 // --- Store detail ---
-const storeShowRoute = tuyau.$route('api.v1.stores.show')
-export type StoreDetailResponse = InferResponseType<typeof storeShowRoute.$get>
+const resolveStoreShowRoute = () => tuyau.$route('api.v1.stores.show')
+type StoreShowGet = ReturnType<typeof resolveStoreShowRoute>['$get']
+export type StoreDetailResponse = InferResponseType<StoreShowGet>
 
 export function useStoreQueryOptions(id: string) {
   return {
@@ -29,50 +32,62 @@ export function useStoreQueryOptions(id: string) {
 }
 
 // --- Store items ---
-const storeItemsListRoute = tuyau.api.v1['store-items'].$get
-export type StoreItemsResponse = InferResponseType<typeof storeItemsListRoute>
-type StoreItemsQuery = NonNullable<Parameters<typeof storeItemsListRoute>[0]>['query']
+const resolveStoreItemsListRoute = () => tuyau.api.v1['store-items'].$get
+type StoreItemsListGet = ReturnType<typeof resolveStoreItemsListRoute>
+export type StoreItemsResponse = InferResponseType<StoreItemsListGet>
+type StoreItemsQuery = NonNullable<Parameters<StoreItemsListGet>[0]>['query']
 
 export function useStoreItemsQueryOptions(query: StoreItemsQuery) {
   return {
     queryKey: ['storeItems', query],
-    queryFn: () => storeItemsListRoute({ query }).unwrap(),
+    queryFn: () => {
+      const route = resolveStoreItemsListRoute()
+      return route({ query }).unwrap()
+    },
   } satisfies QueryOptions
 }
 
 // --- Store item detail (for type export) ---
-const storeItemShowRoute = tuyau.$route('api.v1.storeItems.show')
-export type StoreItemResponse = InferResponseType<typeof storeItemShowRoute.$get>
+const resolveStoreItemShowRoute = () => tuyau.$route('api.v1.storeItems.show')
+type StoreItemShowGet = ReturnType<typeof resolveStoreItemShowRoute>['$get']
+export type StoreItemResponse = InferResponseType<StoreItemShowGet>
 
 // --- Store orders ---
-const storeOrdersRoute = tuyau.api.v1['store-orders'].$get
-export type StoreOrdersResponse = InferResponseType<typeof storeOrdersRoute>
-type StoreOrdersQuery = NonNullable<Parameters<typeof storeOrdersRoute>[0]>['query']
+const resolveStoreOrdersRoute = () => tuyau.api.v1['store-orders'].$get
+type StoreOrdersGet = ReturnType<typeof resolveStoreOrdersRoute>
+export type StoreOrdersResponse = InferResponseType<StoreOrdersGet>
+type StoreOrdersQuery = NonNullable<Parameters<StoreOrdersGet>[0]>['query']
 
 export function useStoreOrdersQueryOptions(query: StoreOrdersQuery) {
   return {
     queryKey: ['storeOrders', query],
-    queryFn: () => storeOrdersRoute({ query }).unwrap(),
+    queryFn: () => {
+      const route = resolveStoreOrdersRoute()
+      return route({ query }).unwrap()
+    },
   } satisfies QueryOptions
 }
 
 // --- Store settlements ---
-const storeSettlementsRoute = tuyau.api.v1['store-settlements'].$get
-export type StoreSettlementsResponse = InferResponseType<typeof storeSettlementsRoute>
-type StoreSettlementsQuery = NonNullable<Parameters<typeof storeSettlementsRoute>[0]>['query']
+const resolveStoreSettlementsRoute = () => tuyau.api.v1['store-settlements'].$get
+type StoreSettlementsGet = ReturnType<typeof resolveStoreSettlementsRoute>
+export type StoreSettlementsResponse = InferResponseType<StoreSettlementsGet>
+type StoreSettlementsQuery = NonNullable<Parameters<StoreSettlementsGet>[0]>['query']
 
 export function useStoreSettlementsQueryOptions(query: StoreSettlementsQuery) {
   return {
     queryKey: ['storeSettlements', query],
-    queryFn: () => storeSettlementsRoute({ query }).unwrap(),
+    queryFn: () => {
+      const route = resolveStoreSettlementsRoute()
+      return route({ query }).unwrap()
+    },
   } satisfies QueryOptions
 }
 
 // --- Financial settings ---
-const financialSettingsShowRoute = tuyau.$route('api.v1.stores.financialSettings.show')
-export type StoreFinancialSettingsResponse = InferResponseType<
-  typeof financialSettingsShowRoute.$get
->
+const resolveFinancialSettingsShowRoute = () => tuyau.$route('api.v1.stores.financialSettings.show')
+type FinancialSettingsShowGet = ReturnType<typeof resolveFinancialSettingsShowRoute>['$get']
+export type StoreFinancialSettingsResponse = InferResponseType<FinancialSettingsShowGet>
 
 export function useStoreFinancialSettingsQueryOptions(storeId: string) {
   return {
@@ -84,13 +99,17 @@ export function useStoreFinancialSettingsQueryOptions(storeId: string) {
 }
 
 // --- Installment rules ---
-const installmentRulesRoute = tuyau.api.v1['store-installment-rules'].$get
-export type StoreInstallmentRulesResponse = InferResponseType<typeof installmentRulesRoute>
-type InstallmentRulesQuery = NonNullable<Parameters<typeof installmentRulesRoute>[0]>['query']
+const resolveInstallmentRulesRoute = () => tuyau.api.v1['store-installment-rules'].$get
+type InstallmentRulesGet = ReturnType<typeof resolveInstallmentRulesRoute>
+export type StoreInstallmentRulesResponse = InferResponseType<InstallmentRulesGet>
+type InstallmentRulesQuery = NonNullable<Parameters<InstallmentRulesGet>[0]>['query']
 
 export function useStoreInstallmentRulesQueryOptions(query: InstallmentRulesQuery) {
   return {
     queryKey: ['storeInstallmentRules', query],
-    queryFn: () => installmentRulesRoute({ query }).unwrap(),
+    queryFn: () => {
+      const route = resolveInstallmentRulesRoute()
+      return route({ query }).unwrap()
+    },
   } satisfies QueryOptions
 }

@@ -2,11 +2,11 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.api.v1.invoices.$get
+const resolveRoute = () => tuyau.api.v1.invoices.$get
 
-export type InvoicesResponse = InferResponseType<typeof $route>
+export type InvoicesResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 
-type InvoicesQuery = NonNullable<Parameters<typeof $route>[0]>['query']
+type InvoicesQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function useInvoicesQueryOptions(query: InvoicesQuery = {}) {
   const mergedQuery: InvoicesQuery = {
@@ -18,7 +18,7 @@ export function useInvoicesQueryOptions(query: InvoicesQuery = {}) {
   return {
     queryKey: ['invoices', mergedQuery],
     queryFn: () => {
-      return $route({ query: mergedQuery }).unwrap()
+      return resolveRoute()({ query: mergedQuery }).unwrap()
     },
   } satisfies QueryOptions
 }

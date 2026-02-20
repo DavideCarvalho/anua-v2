@@ -3,9 +3,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 type SubjectParams = Parameters<typeof tuyau.api.v1.subjects>[0]
 
-const $route = tuyau.api.v1.subjects({ id: '' }).$put
+const resolveRoute = () => tuyau.api.v1.subjects({ id: '' }).$put
 
-type UpdateSubjectBody = Parameters<typeof $route>[0]
+type UpdateSubjectBody = Parameters<ReturnType<typeof resolveRoute>>[0]
 
 export function useUpdateSubjectMutation() {
   const queryClient = useQueryClient()

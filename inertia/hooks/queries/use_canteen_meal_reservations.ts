@@ -2,9 +2,10 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.canteenMealReservations.index')
-
-export type CanteenMealReservationsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.canteenMealReservations.index')
+export type CanteenMealReservationsResponse = InferResponseType<
+  ReturnType<typeof resolveRoute>['$get']
+>
 
 interface UseCanteenMealReservationsOptions {
   canteenId?: string
@@ -28,7 +29,7 @@ export function useCanteenMealReservationsQueryOptions(
     ],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.canteenMealReservations.index')
+        .resolveRoute()('api.v1.canteenMealReservations.index')
         .$get({ query: { canteenId, mealId, studentId, status, date, page, limit } as any })
         .unwrap()
     },

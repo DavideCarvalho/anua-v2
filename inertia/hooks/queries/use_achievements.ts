@@ -2,9 +2,8 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.achievements.index')
-
-export type AchievementsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.achievements.index')
+export type AchievementsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseAchievementsOptions {
   schoolId?: string
@@ -21,7 +20,7 @@ export function useAchievementsQueryOptions(options: UseAchievementsOptions = {}
     queryKey: ['achievements', { schoolId, category, isActive, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.achievements.index')
+        .resolveRoute()('api.v1.achievements.index')
         .$get({ query: { schoolId, category, isActive, page, limit } })
         .unwrap()
     },
@@ -33,15 +32,14 @@ export function useAchievements(options: UseAchievementsOptions = {}) {
 }
 
 // Get single achievement
-const $showRoute = tuyau.$route('api.v1.achievements.show')
-
-export type AchievementResponse = InferResponseType<typeof $showRoute.$get>
+const resolveShowRoute = () => tuyau.resolveRoute()('api.v1.achievements.show')
+export type AchievementResponse = InferResponseType<ReturnType<typeof resolveShowRoute>['$get']>
 
 export function useAchievementQueryOptions(id: string) {
   return {
     queryKey: ['achievement', id],
     queryFn: () => {
-      return tuyau.$route('api.v1.achievements.show', { id }).$get().unwrap()
+      return tuyau.resolveRoute()('api.v1.achievements.show', { id }).$get().unwrap()
     },
     enabled: !!id,
   }

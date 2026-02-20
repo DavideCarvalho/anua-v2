@@ -2,9 +2,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.schools.show')
+type SchoolShowRoute = ReturnType<typeof tuyau.$route<'api.v1.schools.show'>>
 
-export type SchoolResponse = InferResponseType<typeof $route.$get>
+export type SchoolResponse = InferResponseType<SchoolShowRoute['$get']>
 
 export function useSchoolQueryOptions(id: string) {
   return {
@@ -21,9 +21,9 @@ export function useSchool(id: string) {
 }
 
 // Get school by slug
-const $slugRoute = tuyau.$route('api.v1.schools.showBySlug')
+type SchoolBySlugRoute = ReturnType<typeof tuyau.$route<'api.v1.schools.showBySlug'>>
 
-export type SchoolBySlugResponse = InferResponseType<typeof $slugRoute.$get>
+export type SchoolBySlugResponse = InferResponseType<SchoolBySlugRoute['$get']>
 
 export function useSchoolBySlugQueryOptions(slug: string) {
   return {

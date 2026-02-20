@@ -2,9 +2,10 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.canteenMonthlyTransfers.index')
-
-export type CanteenMonthlyTransfersResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.canteenMonthlyTransfers.index')
+export type CanteenMonthlyTransfersResponse = InferResponseType<
+  ReturnType<typeof resolveRoute>['$get']
+>
 
 interface UseCanteenMonthlyTransfersOptions {
   canteenId?: string
@@ -24,7 +25,7 @@ export function useCanteenMonthlyTransfersQueryOptions(
     queryKey: ['canteen-monthly-transfers', { canteenId, month, year, status, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.canteenMonthlyTransfers.index')
+        .resolveRoute()('api.v1.canteenMonthlyTransfers.index')
         .$get({ query: { canteenId, month, year, status, page, limit } as any })
         .unwrap()
     },

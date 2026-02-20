@@ -3,23 +3,23 @@ import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // Own store
-const $storeRoute = tuyau.api.v1['store-owner'].store.$get
+const resolveStoreRoute = () => tuyau.api.v1['store-owner'].store.$get
 
-export type OwnStoreResponse = InferResponseType<typeof $storeRoute>
+export type OwnStoreResponse = InferResponseType<ReturnType<typeof resolveStoreRoute>>
 
 export function useOwnStoreQueryOptions() {
   return {
     queryKey: ['storeOwner', 'store'],
-    queryFn: () => $storeRoute().unwrap(),
+    queryFn: () => resolveStoreRoute()().unwrap(),
   } satisfies QueryOptions
 }
 
 // Own products
-const $productsRoute = tuyau.api.v1['store-owner'].products.$get
+const resolveProductsRoute = () => tuyau.api.v1['store-owner'].products.$get
 
-export type OwnProductsResponse = InferResponseType<typeof $productsRoute>
+export type OwnProductsResponse = InferResponseType<ReturnType<typeof resolveProductsRoute>>
 
-type ProductsQuery = NonNullable<Parameters<typeof $productsRoute>[0]>['query']
+type ProductsQuery = NonNullable<Parameters<ReturnType<typeof resolveProductsRoute>>[0]>['query']
 
 export function useOwnProductsQueryOptions(query: ProductsQuery = {}) {
   const mergedQuery: ProductsQuery = {
@@ -29,16 +29,16 @@ export function useOwnProductsQueryOptions(query: ProductsQuery = {}) {
   }
   return {
     queryKey: ['storeOwner', 'products', mergedQuery],
-    queryFn: () => $productsRoute({ query: mergedQuery }).unwrap(),
+    queryFn: () => resolveProductsRoute()({ query: mergedQuery }).unwrap(),
   } satisfies QueryOptions
 }
 
 // Own orders
-const $ordersRoute = tuyau.api.v1['store-owner'].orders.$get
+const resolveOrdersRoute = () => tuyau.api.v1['store-owner'].orders.$get
 
-export type OwnOrdersResponse = InferResponseType<typeof $ordersRoute>
+export type OwnOrdersResponse = InferResponseType<ReturnType<typeof resolveOrdersRoute>>
 
-type OrdersQuery = NonNullable<Parameters<typeof $ordersRoute>[0]>['query']
+type OrdersQuery = NonNullable<Parameters<ReturnType<typeof resolveOrdersRoute>>[0]>['query']
 
 export function useOwnOrdersQueryOptions(query: OrdersQuery = {}) {
   const mergedQuery: OrdersQuery = {
@@ -48,28 +48,30 @@ export function useOwnOrdersQueryOptions(query: OrdersQuery = {}) {
   }
   return {
     queryKey: ['storeOwner', 'orders', mergedQuery],
-    queryFn: () => $ordersRoute({ query: mergedQuery }).unwrap(),
+    queryFn: () => resolveOrdersRoute()({ query: mergedQuery }).unwrap(),
   } satisfies QueryOptions
 }
 
 // Financial settings
-const $financialRoute = tuyau.api.v1['store-owner']['financial-settings'].$get
+const resolveFinancialRoute = () => tuyau.api.v1['store-owner']['financial-settings'].$get
 
-export type OwnFinancialResponse = InferResponseType<typeof $financialRoute>
+export type OwnFinancialResponse = InferResponseType<ReturnType<typeof resolveFinancialRoute>>
 
 export function useOwnFinancialQueryOptions() {
   return {
     queryKey: ['storeOwner', 'financial'],
-    queryFn: () => $financialRoute().unwrap(),
+    queryFn: () => resolveFinancialRoute()().unwrap(),
   } satisfies QueryOptions
 }
 
 // Settlements
-const $settlementsRoute = tuyau.api.v1['store-owner'].settlements.$get
+const resolveSettlementsRoute = () => tuyau.api.v1['store-owner'].settlements.$get
 
-export type OwnSettlementsResponse = InferResponseType<typeof $settlementsRoute>
+export type OwnSettlementsResponse = InferResponseType<ReturnType<typeof resolveSettlementsRoute>>
 
-type SettlementsQuery = NonNullable<Parameters<typeof $settlementsRoute>[0]>['query']
+type SettlementsQuery = NonNullable<
+  Parameters<ReturnType<typeof resolveSettlementsRoute>>[0]
+>['query']
 
 export function useOwnSettlementsQueryOptions(query: SettlementsQuery = {}) {
   const mergedQuery: SettlementsQuery = {
@@ -79,6 +81,6 @@ export function useOwnSettlementsQueryOptions(query: SettlementsQuery = {}) {
   }
   return {
     queryKey: ['storeOwner', 'settlements', mergedQuery],
-    queryFn: () => $settlementsRoute({ query: mergedQuery }).unwrap(),
+    queryFn: () => resolveSettlementsRoute()({ query: mergedQuery }).unwrap(),
   } satisfies QueryOptions
 }

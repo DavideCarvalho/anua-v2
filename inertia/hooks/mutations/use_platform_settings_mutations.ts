@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const $updateRoute = tuyau.$route('api.v1.platformSettings.update')
-type UpdatePlatformSettingsPayload = InferRequestType<typeof $updateRoute.$put>
+const resolveUpdateRoute = () => tuyau.$route('api.v1.platformSettings.update')
+type UpdatePlatformSettingsPayload = InferRequestType<ReturnType<typeof resolveUpdateRoute>['$put']>
 
 export function useUpdatePlatformSettings() {
   const queryClient = useQueryClient()

@@ -2,9 +2,8 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.levels.index')
-
-export type LevelsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.levels.index')
+export type LevelsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseLevelsOptions {
   courseId?: string
@@ -22,7 +21,7 @@ export function useLevelsQueryOptions(options: UseLevelsOptions = {}) {
     queryKey: ['levels', { courseId, schoolId, academicPeriodId, search, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.levels.index')
+        .resolveRoute()('api.v1.levels.index')
         .$get({ query: { courseId, schoolId, academicPeriodId, search, page, limit } })
         .unwrap()
     },

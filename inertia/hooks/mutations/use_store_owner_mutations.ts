@@ -3,11 +3,13 @@ import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
 // Product mutations
-const $createProduct = tuyau.$route('api.v1.storeOwner.products.store')
-type CreateProductPayload = InferRequestType<typeof $createProduct.$post>
+const resolveCreateProduct = () => tuyau.$route('api.v1.storeOwner.products.store')
+type CreateProductPayload = InferRequestType<ReturnType<typeof resolveCreateProduct>['$post']>
 
-const $updateProduct = tuyau.$route('api.v1.storeOwner.products.update')
-type UpdateProductPayload = InferRequestType<typeof $updateProduct.$put> & { id: string }
+const resolveUpdateProduct = () => tuyau.$route('api.v1.storeOwner.products.update')
+type UpdateProductPayload = InferRequestType<ReturnType<typeof resolveUpdateProduct>['$put']> & {
+  id: string
+}
 
 export function useCreateProduct() {
   const qc = useQueryClient()
@@ -121,8 +123,8 @@ export function useCancelOrder() {
 }
 
 // Financial settings mutation
-const $updateFinancial = tuyau.$route('api.v1.storeOwner.financial.update')
-type UpdateFinancialPayload = InferRequestType<typeof $updateFinancial.$put>
+const resolveUpdateFinancial = () => tuyau.$route('api.v1.storeOwner.financial.update')
+type UpdateFinancialPayload = InferRequestType<ReturnType<typeof resolveUpdateFinancial>['$put']>
 
 export function useUpdateFinancialSettings() {
   const qc = useQueryClient()

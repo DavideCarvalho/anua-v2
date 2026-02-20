@@ -2,9 +2,8 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const $route = tuyau.$route('api.v1.canteenMeals.index')
-
-export type CanteenMealsResponse = InferResponseType<typeof $route.$get>
+const resolveRoute = () => tuyau.resolveRoute()('api.v1.canteenMeals.index')
+export type CanteenMealsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseCanteenMealsOptions {
   canteenId?: string
@@ -21,7 +20,7 @@ export function useCanteenMealsQueryOptions(options: UseCanteenMealsOptions = {}
     queryKey: ['canteen-meals', { canteenId, startDate, endDate, page, limit }],
     queryFn: () => {
       return tuyau
-        .$route('api.v1.canteenMeals.index')
+        .resolveRoute()('api.v1.canteenMeals.index')
         .$get({ query: { canteenId, startDate, endDate, page, limit } })
         .unwrap()
     },
@@ -33,15 +32,14 @@ export function useCanteenMeals(options: UseCanteenMealsOptions = {}) {
 }
 
 // Get single meal
-const $showRoute = tuyau.$route('api.v1.canteenMeals.show')
-
-export type CanteenMealResponse = InferResponseType<typeof $showRoute.$get>
+const resolveShowRoute = () => tuyau.resolveRoute()('api.v1.canteenMeals.show')
+export type CanteenMealResponse = InferResponseType<ReturnType<typeof resolveShowRoute>['$get']>
 
 export function useCanteenMealQueryOptions(id: string) {
   return {
     queryKey: ['canteen-meal', id],
     queryFn: () => {
-      return tuyau.$route('api.v1.canteenMeals.show', { id }).$get().unwrap()
+      return tuyau.resolveRoute()('api.v1.canteenMeals.show', { id }).$get().unwrap()
     },
     enabled: !!id,
   }
