@@ -32,11 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '~/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { formatCurrency } from '~/lib/utils'
 import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
 import { useCreateAgreementMutationOptions } from '~/hooks/mutations/use_agreement_mutations'
@@ -46,9 +42,6 @@ const ACTIONABLE_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE']
 const paymentMethodLabels: Record<string, string> = {
   PIX: 'PIX',
   BOLETO: 'Boleto',
-  CREDIT_CARD: 'Cartão de Crédito',
-  CASH: 'Dinheiro',
-  OTHER: 'Outro',
 }
 
 const statusLabels: Record<string, string> = {
@@ -73,8 +66,7 @@ const agreementSchema = z.object({
   installments: z.coerce.number().min(1, 'Mínimo 1 parcela').max(36, 'Máximo 36 parcelas'),
   startDate: z.string().min(1, 'Data de início é obrigatória'),
   paymentDay: z.coerce.number().min(1, 'Mínimo dia 1').max(31, 'Máximo dia 31'),
-  paymentMethod: z.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER']).optional(),
-  billingType: z.enum(['UPFRONT', 'MONTHLY']),
+  paymentMethod: z.enum(['PIX', 'BOLETO']).optional(),
   finePercentage: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional(),
   dailyInterestPercentage: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional(),
   earlyDiscounts: z.array(
@@ -109,9 +101,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
 
   const allPayments = useMemo(() => {
     const list = (paymentsData as any)?.data ?? []
-    return list.filter(
-      (p: any) => ACTIONABLE_STATUSES.includes(p.status) && p.type !== 'AGREEMENT'
-    )
+    return list.filter((p: any) => ACTIONABLE_STATUSES.includes(p.status) && p.type !== 'AGREEMENT')
   }, [paymentsData])
 
   const form = useForm<AgreementFormData>({
@@ -122,7 +112,6 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
       startDate: new Date().toISOString().split('T')[0],
       paymentDay: 10,
       paymentMethod: undefined,
-      billingType: 'UPFRONT' as const,
       finePercentage: undefined,
       dailyInterestPercentage: undefined,
       earlyDiscounts: [],
@@ -150,7 +139,6 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   const startDateStr = form.watch('startDate')
   const paymentDay = form.watch('paymentDay')
   const paymentMethod = form.watch('paymentMethod')
-  const billingType = form.watch('billingType')
   const finePercentage = form.watch('finePercentage')
   const dailyInterestPercentage = form.watch('dailyInterestPercentage')
   const earlyDiscounts = form.watch('earlyDiscounts')
@@ -197,7 +185,6 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
         startDate: data.startDate,
         paymentDay: data.paymentDay,
         paymentMethod: data.paymentMethod,
-        billingType: data.billingType,
         finePercentage: data.finePercentage,
         dailyInterestPercentage: data.dailyInterestPercentage,
         earlyDiscounts: data.earlyDiscounts.length > 0 ? data.earlyDiscounts : undefined,
@@ -212,8 +199,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
     }
   }
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -255,7 +241,9 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                       />
                       <div className="flex-1 flex items-center justify-between">
                         <div className="text-sm">
-                          <span className="font-medium">{p.month}/{p.year}</span>
+                          <span className="font-medium">
+                            {p.month}/{p.year}
+                          </span>
                           <span className="text-muted-foreground ml-2">
                             Venc: {formatDate(p.dueDate)}
                           </span>
@@ -264,10 +252,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                           <span className="text-sm font-medium">
                             {formatCurrency(Number(p.amount))}
                           </span>
-                          <Badge
-                            variant="secondary"
-                            className={statusClasses[p.status] || ''}
-                          >
+                          <Badge variant="secondary" className={statusClasses[p.status] || ''}>
                             {statusLabels[p.status] || p.status}
                           </Badge>
                         </div>
@@ -338,7 +323,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <FormField
                     control={form.control}
                     name="paymentMethod"
@@ -357,28 +342,6 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                                 {label}
                               </SelectItem>
                             ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="billingType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de cobrança</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="UPFRONT">À vista (gera todas)</SelectItem>
-                            <SelectItem value="MONTHLY">Mensal (gera mês a mês)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -521,7 +484,10 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                       Total: <span className="font-medium">{formatCurrency(totalAmount)}</span>
                     </p>
                     <p>
-                      Parcelas: <span className="font-medium">{installments}x de {formatCurrency(installmentAmount)}</span>
+                      Parcelas:{' '}
+                      <span className="font-medium">
+                        {installments}x de {formatCurrency(installmentAmount)}
+                      </span>
                     </p>
                     {startDateStr && (
                       <p>
@@ -539,10 +505,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                       </p>
                     )}
                     <p>
-                      Cobrança:{' '}
-                      <span className="font-medium">
-                        {billingType === 'MONTHLY' ? 'Mensal (gera mês a mês)' : 'À vista (todas as parcelas)'}
-                      </span>
+                      Cobrança: <span className="font-medium">À vista (todas as parcelas)</span>
                     </p>
                     {(finePercentage || dailyInterestPercentage) && (
                       <p>

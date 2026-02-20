@@ -49,7 +49,7 @@ export default class CreateAgreementController {
           startDate: DateTime.fromJSDate(payload.startDate),
           paymentDay: payload.paymentDay,
           paymentMethod: payload.paymentMethod ?? null,
-          billingType: payload.billingType ?? 'UPFRONT',
+          billingType: 'UPFRONT',
           finePercentage: payload.finePercentage ?? 0,
           dailyInterestPercentage: payload.dailyInterestPercentage ?? 0,
         },

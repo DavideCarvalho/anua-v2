@@ -6,8 +6,7 @@ interface CreateAgreementPayload {
   installments: number
   startDate: string
   paymentDay: number
-  paymentMethod?: 'PIX' | 'BOLETO' | 'CREDIT_CARD' | 'CASH' | 'OTHER'
-  billingType?: 'UPFRONT' | 'MONTHLY'
+  paymentMethod?: 'PIX' | 'BOLETO'
   finePercentage?: number
   dailyInterestPercentage?: number
   earlyDiscounts?: { percentage: number; daysBeforeDeadline: number }[]

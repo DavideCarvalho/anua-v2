@@ -3,10 +3,7 @@ import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
 import type { LucideIcon } from 'lucide-react'
-import {
-  useInvoicesQueryOptions,
-  type InvoicesResponse,
-} from '../hooks/queries/use_invoices'
+import { useInvoicesQueryOptions, type InvoicesResponse } from '../hooks/queries/use_invoices'
 import { useStudentsQueryOptions } from '../hooks/queries/use_students'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -261,7 +258,11 @@ const statusConfig: Record<InvoiceStatus, StatusConfig> = {
   PAID: { label: 'Paga', className: 'bg-green-100 text-green-700', icon: CheckCircle },
   OVERDUE: { label: 'Vencida', className: 'bg-red-100 text-red-700', icon: AlertTriangle },
   CANCELLED: { label: 'Cancelada', className: 'bg-gray-100 text-gray-700', icon: XCircle },
-  RENEGOTIATED: { label: 'Renegociada', className: 'bg-purple-100 text-purple-700', icon: RefreshCw },
+  RENEGOTIATED: {
+    label: 'Renegociada',
+    className: 'bg-purple-100 text-purple-700',
+    icon: RefreshCw,
+  },
 }
 
 function getPaymentDescription(payment: InvoicePayment): string {
@@ -306,8 +307,18 @@ const paymentStatusConfig: Record<string, { label: string; className: string }> 
 }
 
 const monthLabels = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ]
 
 type Invoice = InvoicesResponse['data'][number]
@@ -384,16 +395,21 @@ function InvoicesContent() {
     limit: parseAsInteger.withDefault(20),
   })
 
-  const { studentIds: filterStudentIds, page, limit, status: filterStatuses, month: filterMonth, year: filterYear } = filters
+  const {
+    studentIds: filterStudentIds,
+    page,
+    limit,
+    status: filterStatuses,
+    month: filterMonth,
+    year: filterYear,
+  } = filters
 
   const { data, isLoading, error, refetch } = useQuery(
     useInvoicesQueryOptions({
       page,
       limit,
       studentIds:
-        filterStudentIds && filterStudentIds.length > 0
-          ? filterStudentIds.join(',')
-          : undefined,
+        filterStudentIds && filterStudentIds.length > 0 ? filterStudentIds.join(',') : undefined,
       status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
       month: filterMonth || undefined,
       year: filterYear || undefined,
@@ -435,9 +451,7 @@ function InvoicesContent() {
 
   function toggleStatus(value: string) {
     const current = filterStatuses || []
-    const next = current.includes(value)
-      ? current.filter((s) => s !== value)
-      : [...current, value]
+    const next = current.includes(value) ? current.filter((s) => s !== value) : [...current, value]
     setFilters({ status: next.length > 0 ? next : null, page: 1 })
   }
 
@@ -475,10 +489,7 @@ function InvoicesContent() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <StudentMultiSelect
-          selectedStudents={selectedStudents}
-          onChange={handleStudentsChange}
-        />
+        <StudentMultiSelect selectedStudents={selectedStudents} onChange={handleStudentsChange} />
 
         <Popover>
           <PopoverTrigger asChild>
@@ -550,7 +561,12 @@ function InvoicesContent() {
         </Select>
 
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="text-muted-foreground"
+          >
             <FilterX className="h-4 w-4 mr-1" />
             Limpar
           </Button>
@@ -559,9 +575,7 @@ function InvoicesContent() {
 
       {isLoading && <InvoicesSkeleton />}
 
-      {error && (
-        <InvoicesErrorFallback error={error} resetErrorBoundary={() => refetch()} />
-      )}
+      {error && <InvoicesErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
 
       {!isLoading && !error && invoices.length === 0 && (
         <Card>
@@ -645,7 +659,9 @@ function InvoicesContent() {
                             <span className="text-muted-foreground">-</span>
                           )}
                         </td>
-                        <td className="p-4 text-right font-semibold">{formatCurrency(Number(invoice.totalAmount || 0))}</td>
+                        <td className="p-4 text-right font-semibold">
+                          {formatCurrency(Number(invoice.totalAmount || 0))}
+                        </td>
                         <td className="p-4">
                           <div className="flex flex-col gap-1">
                             <span
@@ -686,7 +702,11 @@ function InvoicesContent() {
                                 </DropdownMenuItem>
                                 {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
                                   <DropdownMenuItem asChild>
-                                    <a href={invoice.nfsePdfUrl} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                      href={invoice.nfsePdfUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <Download className="h-4 w-4 mr-2" />
                                       Baixar NFS-e (PDF)
                                     </a>
@@ -694,7 +714,11 @@ function InvoicesContent() {
                                 )}
                                 {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
                                   <DropdownMenuItem asChild>
-                                    <a href={invoice.nfseXmlUrl} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                      href={invoice.nfseXmlUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <FileText className="h-4 w-4 mr-2" />
                                       Baixar NFS-e (XML)
                                     </a>
@@ -717,7 +741,11 @@ function InvoicesContent() {
                                 </DropdownMenuItem>
                                 {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
                                   <DropdownMenuItem asChild>
-                                    <a href={invoice.nfsePdfUrl} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                      href={invoice.nfsePdfUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <Download className="h-4 w-4 mr-2" />
                                       Baixar NFS-e (PDF)
                                     </a>
@@ -725,7 +753,11 @@ function InvoicesContent() {
                                 )}
                                 {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
                                   <DropdownMenuItem asChild>
-                                    <a href={invoice.nfseXmlUrl} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                      href={invoice.nfseXmlUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <FileText className="h-4 w-4 mr-2" />
                                       Baixar NFS-e (XML)
                                     </a>
@@ -750,7 +782,9 @@ function InvoicesContent() {
                                   <thead>
                                     <tr className="text-xs text-muted-foreground">
                                       <th className="text-left py-2 px-3 font-medium">Tipo</th>
-                                      <th className="text-left py-2 px-3 font-medium">Referência</th>
+                                      <th className="text-left py-2 px-3 font-medium">
+                                        Referência
+                                      </th>
                                       <th className="text-left py-2 px-3 font-medium">Valor</th>
                                       <th className="text-left py-2 px-3 font-medium">Status</th>
                                       <th className="text-right py-2 px-3 font-medium">Ações</th>
@@ -786,7 +820,9 @@ function InvoicesContent() {
                                             </span>
                                           </td>
                                           <td className="py-2 px-3 text-right">
-                                            {ACTIONABLE_PAYMENT_STATUSES.includes(payment.status) && (
+                                            {ACTIONABLE_PAYMENT_STATUSES.includes(
+                                              payment.status
+                                            ) && (
                                               <Button
                                                 variant="ghost"
                                                 size="sm"
