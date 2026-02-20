@@ -19,7 +19,7 @@ interface ApplyInvoiceInterestOptions {
  * Roda diariamente às 05:30 (após MarkOverdueInvoices às 05:00).
  *
  * - delayInterestPercentage = multa fixa % (aplicada uma vez sobre o baseAmount)
- * - delayInterestPerDayDelayed = juros diários em centavos
+ * - delayInterestPerDayDelayed = juros diários em percentual
  *
  * Idempotente: usa lock por invoice e verifica valores antes de atualizar.
  * Se o valor mudar e a invoice tem charge no Asaas, cancela o charge antigo.
@@ -122,8 +122,10 @@ export default class ApplyInvoiceInterest {
               (baseAmount * interestConfig.delayInterestPercentage) / 100
             )
 
-            // Daily interest: centavos per day * days overdue
-            const interestAmount = interestConfig.delayInterestPerDayDelayed * diasAtraso
+            // Daily interest: (baseAmount * percentual ao dia) * dias overdue
+            const interestAmount = Math.round(
+              (baseAmount * interestConfig.delayInterestPerDayDelayed * diasAtraso) / 100
+            )
 
             const newTotal = baseAmount + fineAmount + interestAmount
 

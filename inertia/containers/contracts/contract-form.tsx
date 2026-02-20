@@ -122,7 +122,9 @@ function SimulatorBox({ amount }: { amount: number }) {
             min="0"
             max={periodMonths - 1}
             value={elapsedMonths}
-            onChange={(e) => setElapsedMonths(Math.min(periodMonths - 1, Math.max(0, Number(e.target.value))))}
+            onChange={(e) =>
+              setElapsedMonths(Math.min(periodMonths - 1, Math.max(0, Number(e.target.value))))
+            }
             className="h-8 text-sm"
           />
         </div>
@@ -158,6 +160,18 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   const isSubmitting =
     createContract.isPending || updateContract.isPending || updateInterestConfig.isPending
 
+  const defaultInterestPercentage =
+    initialData?.interestConfig?.delayInterestPercentage !== undefined &&
+    initialData?.interestConfig?.delayInterestPercentage !== null
+      ? Number(initialData.interestConfig.delayInterestPercentage)
+      : undefined
+
+  const defaultInterestPerDay =
+    initialData?.interestConfig?.delayInterestPerDayDelayed !== undefined &&
+    initialData?.interestConfig?.delayInterestPerDayDelayed !== null
+      ? Number(initialData.interestConfig.delayInterestPerDayDelayed)
+      : undefined
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
@@ -173,16 +187,18 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
       installments: initialData?.installments || 12,
       flexibleInstallments: initialData?.flexibleInstallments || false,
       paymentDays: initialData?.paymentDays?.map((p: { day: number }) => p.day) || [10],
-      interestPercentage: initialData?.interestConfig?.delayInterestPercentage || undefined,
-      interestPerDay: initialData?.interestConfig?.delayInterestPerDayDelayed || undefined,
+      interestPercentage: defaultInterestPercentage,
+      interestPerDay: defaultInterestPerDay,
       earlyDiscounts: initialData?.earlyDiscounts || [],
       contractDocuments:
-        initialData?.contractDocuments?.map((doc: { id: string; name: string; description?: string; required: boolean }) => ({
-          id: doc.id,
-          name: doc.name,
-          description: doc.description || '',
-          required: doc.required,
-        })) || [],
+        initialData?.contractDocuments?.map(
+          (doc: { id: string; name: string; description?: string; required: boolean }) => ({
+            id: doc.id,
+            name: doc.name,
+            description: doc.description || '',
+            required: doc.required,
+          })
+        ) || [],
     },
   })
 
@@ -422,7 +438,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                             />
                           </FormControl>
                           <FormDescription>
-                            As mensalidades serão geradas automaticamente até o final do período letivo
+                            As mensalidades serão geradas automaticamente até o final do período
+                            letivo
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -477,15 +494,15 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-end gap-3 space-y-0 pb-2">
                               <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
+                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                               </FormControl>
                               <div>
-                                <FormLabel className="font-normal">Calcular parcelas automaticamente</FormLabel>
+                                <FormLabel className="font-normal">
+                                  Calcular parcelas automaticamente
+                                </FormLabel>
                                 <FormDescription>
-                                  O número de parcelas será calculado com base no tempo restante até o fim do período letivo
+                                  O número de parcelas será calculado com base no tempo restante até
+                                  o fim do período letivo
                                 </FormDescription>
                               </div>
                             </FormItem>
@@ -712,13 +729,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                                 <FormItem className="flex-1">
                                   <FormLabel>Desconto (%)</FormLabel>
                                   <FormControl>
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      min="0"
-                                      max="100"
-                                      {...field}
-                                    />
+                                    <Input type="number" step="0.01" min="0" max="100" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -795,10 +806,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                                     <FormItem>
                                       <FormLabel>Descrição</FormLabel>
                                       <FormControl>
-                                        <Input
-                                          placeholder="Descrição opcional"
-                                          {...field}
-                                        />
+                                        <Input placeholder="Descrição opcional" {...field} />
                                       </FormControl>
                                       <FormMessage />
                                     </FormItem>
@@ -833,7 +841,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                                       Documento obrigatório
                                     </FormLabel>
                                     <FormDescription>
-                                      Se marcado, a matrícula não poderá ser concluída sem este documento
+                                      Se marcado, a matrícula não poderá ser concluída sem este
+                                      documento
                                     </FormDescription>
                                   </div>
                                 </FormItem>
@@ -853,14 +862,17 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   <div>
                     <h3 className="text-lg font-medium mb-2">Revise as informações do contrato</h3>
                     <p className="text-sm text-muted-foreground">
-                      Confira se todos os dados estão corretos antes de {isEditing ? 'salvar' : 'criar'} o contrato.
+                      Confira se todos os dados estão corretos antes de{' '}
+                      {isEditing ? 'salvar' : 'criar'} o contrato.
                     </p>
                   </div>
 
                   {/* Informações Básicas */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-sm text-muted-foreground">Informações Básicas</h4>
+                      <h4 className="font-medium text-sm text-muted-foreground">
+                        Informações Básicas
+                      </h4>
                       <Button
                         type="button"
                         variant="ghost"
@@ -921,7 +933,10 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                       <div>
                         <p className="text-xs text-muted-foreground">Dias de Vencimento</p>
                         <p className="font-medium">
-                          {form.getValues('paymentDays').map((d) => `Dia ${d}`).join(', ') || '-'}
+                          {form
+                            .getValues('paymentDays')
+                            .map((d) => `Dia ${d}`)
+                            .join(', ') || '-'}
                         </p>
                       </div>
                     </div>
@@ -940,7 +955,9 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   {/* Juros e Descontos */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-sm text-muted-foreground">Juros e Descontos</h4>
+                      <h4 className="font-medium text-sm text-muted-foreground">
+                        Juros e Descontos
+                      </h4>
                       <Button
                         type="button"
                         variant="ghost"
@@ -970,11 +987,14 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                     </div>
                     {earlyDiscounts.length > 0 && (
                       <div className="border-t pt-3 mt-3">
-                        <p className="text-xs text-muted-foreground mb-2">Descontos por Antecipação</p>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Descontos por Antecipação
+                        </p>
                         <div className="space-y-1">
                           {earlyDiscounts.map((discount, index) => (
                             <p key={index} className="text-sm">
-                              {discount.percentage}% de desconto para pagamento {discount.daysBeforeDeadline} dias antes
+                              {discount.percentage}% de desconto para pagamento{' '}
+                              {discount.daysBeforeDeadline} dias antes
                             </p>
                           ))}
                         </div>
@@ -985,7 +1005,9 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   {/* Documentos */}
                   <div className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-sm text-muted-foreground">Documentos Exigidos</h4>
+                      <h4 className="font-medium text-sm text-muted-foreground">
+                        Documentos Exigidos
+                      </h4>
                       <Button
                         type="button"
                         variant="ghost"
