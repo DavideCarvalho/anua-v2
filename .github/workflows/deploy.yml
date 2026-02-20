@@ -60,7 +60,7 @@ jobs:
             --region=${{ env.REGION }} \
             --platform=managed \
             --set-env-vars="NODE_ENV=production,HOST=0.0.0.0,TZ=UTC,LOG_LEVEL=info,SESSION_DRIVER=cookie,DB_HOST=34.39.158.54,DB_PORT=5432,DB_USER=app_user,DB_DATABASE=school_super_app,SMTP_HOST=smtp.resend.com,SMTP_PORT=465,SMTP_USER=resend,SMTP_FROM_EMAIL=Anuá <dont-reply@transactional.anuaapp.com.br>,DRIVE_DISK=gcs,GCS_BUCKET=${{ env.PROJECT_ID }}-uploads" \
-            --set-secrets="APP_KEY=production-anua-v2-app-key:latest,DB_PASSWORD=production-anua-v2-db-password:latest,SMTP_PASSWORD=production-anua-v2-smtp-password:latest" \
+            --set-secrets="APP_KEY=production-anua-v2-app-key:latest,DB_PASSWORD=production-anua-v2-db-password:latest,SMTP_PASSWORD=production-anua-v2-smtp-password:latest,ASAAS_API_KEY=production-anua-v2-asaas-api-key:latest,ASAAS_WEBHOOK_URL=production-anua-v2-asaas-webhook-url:latest,ASAAS_WEBHOOK_TOKEN=production-anua-v2-asaas-webhook-token:latest" \
             --quiet &
 
           # Deploy Queue Worker
