@@ -112,6 +112,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
         '[UPDATE_ENROLLMENT_PAYMENTS] Failed to dispatch payment generation job:',
         error
       )
+      throw error
     }
   }
 
@@ -330,6 +331,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
         }
       } catch (error) {
         console.error('[UPDATE_ENROLLMENT_PAYMENTS] Failed to dispatch reconcile jobs:', error)
+        throw error
       }
     }
   }
