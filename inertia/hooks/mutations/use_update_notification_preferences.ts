@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.notificationPreferences.update')
+const resolveRoute = () => tuyau.$route('api.v1.notificationPreferences.update')
 type UpdatePreferencesBody = NonNullable<Parameters<ReturnType<typeof resolveRoute>['$put']>[0]>
 
 export function useUpdateNotificationPreferencesMutation() {

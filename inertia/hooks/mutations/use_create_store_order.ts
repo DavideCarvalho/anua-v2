@@ -2,7 +2,7 @@ import type { InferRequestType } from '@tuyau/client'
 import type { MutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.storeOrders.store')
+const resolveRoute = () => tuyau.$route('api.v1.storeOrders.store')
 export type CreateStoreOrderPayload = InferRequestType<ReturnType<typeof resolveRoute>['$post']>
 
 export function useCreateStoreOrderMutationOptions() {

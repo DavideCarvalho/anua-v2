@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.students.enrollments.update')
+const resolveRoute = () => tuyau.$route('api.v1.students.enrollments.update')
 export type UpdateEnrollmentPayload = InferRequestType<ReturnType<typeof resolveRoute>['$patch']>
 
 interface UpdateEnrollmentParams {
@@ -17,7 +17,7 @@ export function useUpdateEnrollment() {
   return useMutation({
     mutationFn: ({ studentId, enrollmentId, data }: UpdateEnrollmentParams) => {
       return tuyau
-        .resolveRoute()('api.v1.students.enrollments.update', { id: studentId, enrollmentId })
+        .$route('api.v1.students.enrollments.update', { id: studentId, enrollmentId })
         .$patch(data)
         .unwrap()
     },
@@ -39,7 +39,7 @@ export function useCancelEnrollment() {
   return useMutation({
     mutationFn: ({ studentId, enrollmentId }: CancelEnrollmentParams) => {
       return tuyau
-        .resolveRoute()('api.v1.students.enrollments.cancel', { id: studentId, enrollmentId })
+        .$route('api.v1.students.enrollments.cancel', { id: studentId, enrollmentId })
         .$delete({})
         .unwrap()
     },

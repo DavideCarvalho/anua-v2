@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.insurance.updateChain')
+const resolveRoute = () => tuyau.$route('api.v1.insurance.updateChain')
 type UpdateSchoolChainInsuranceData = {
   chainId: string
   hasInsuranceByDefault?: boolean

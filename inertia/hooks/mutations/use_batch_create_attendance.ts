@@ -2,7 +2,7 @@ import type { MutationOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 import { tuyau } from '../../lib/api'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.attendance.batch')
+const resolveRoute = () => tuyau.$route('api.v1.attendance.batch')
 export type BatchCreateAttendanceResponse = InferResponseType<
   ReturnType<typeof resolveRoute>['$post']
 >

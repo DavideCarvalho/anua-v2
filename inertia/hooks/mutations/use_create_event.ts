@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.events.store')
+const resolveRoute = () => tuyau.$route('api.v1.events.store')
 type CreateEventBody = NonNullable<Parameters<ReturnType<typeof resolveRoute>['$post']>[0]>
 
 export function useCreateEventMutation() {

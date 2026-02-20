@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.printRequests.createPrintRequest')
+const resolveRoute = () => tuyau.$route('api.v1.printRequests.createPrintRequest')
 export type CreatePrintRequestBody = Parameters<ReturnType<typeof resolveRoute>['$post']>[0]
 
 export function useCreatePrintRequestMutation() {

@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { InferRequestType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.posts.update')
+const resolveRoute = () => tuyau.$route('api.v1.posts.update')
 type UpdatePostBody = InferRequestType<ReturnType<typeof resolveRoute>['$put']>
 
 export function useUpdatePostMutation() {
@@ -10,7 +10,7 @@ export function useUpdatePostMutation() {
 
   return useMutation({
     mutationFn: ({ id, ...body }: UpdatePostBody & { id: string }) => {
-      return tuyau.resolveRoute()('api.v1.posts.update', { id }).$put(body).unwrap()
+      return tuyau.$route('api.v1.posts.update', { id }).$put(body).unwrap()
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })

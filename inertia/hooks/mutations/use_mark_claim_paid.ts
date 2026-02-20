@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.insurance.claims.markPaid')
+const resolveRoute = () => tuyau.$route('api.v1.insurance.claims.markPaid')
 type MarkClaimPaidData = {
   claimId: string
   notes?: string

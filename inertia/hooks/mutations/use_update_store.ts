@@ -2,7 +2,7 @@ import type { MutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.stores.update')
+const resolveRoute = () => tuyau.$route('api.v1.stores.update')
 export type UpdateStorePayload = InferRequestType<ReturnType<typeof resolveRoute>['$put']> & {
   id: string
 }
@@ -10,7 +10,7 @@ export type UpdateStorePayload = InferRequestType<ReturnType<typeof resolveRoute
 export function useUpdateStoreMutationOptions() {
   return {
     mutationFn: ({ id, ...data }: UpdateStorePayload) => {
-      return tuyau.resolveRoute()('api.v1.stores.update', { id }).$put(data).unwrap()
+      return tuyau.$route('api.v1.stores.update', { id }).$put(data).unwrap()
     },
   } satisfies MutationOptions
 }
