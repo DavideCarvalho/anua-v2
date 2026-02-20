@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Plus, Trash2, Loader2 } from 'lucide-react'
+import { Plus, Trash2, Loader2, ChevronDown } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -64,20 +64,35 @@ function formatDate(date: string | Date | null | undefined): string {
 const agreementSchema = z.object({
   selectedInvoiceIds: z.array(z.string()).min(1, 'Selecione pelo menos uma fatura'),
   installments: z.coerce.number().min(1, 'Mínimo 1 parcela').max(36, 'Máximo 36 parcelas'),
-  startDate: z.string().min(1, 'Data de início é obrigatória'),
+  startMonth: z.string().min(1, 'Mês de início é obrigatório'),
   paymentDay: z.coerce.number().min(1, 'Mínimo dia 1').max(31, 'Máximo dia 31'),
   paymentMethod: z.enum(['PIX', 'BOLETO']).optional(),
+  renegotiationDiscountType: z.enum(['PERCENTAGE', 'FLAT']).optional(),
+  renegotiationDiscountValue: z.coerce.number().min(1, 'Mínimo 1').optional(),
   finePercentage: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional(),
   dailyInterestPercentage: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional(),
   earlyDiscounts: z.array(
     z.object({
-      percentage: z.coerce.number().min(1, 'Mínimo 1%').max(100, 'Máximo 100%'),
+      discountType: z.enum(['PERCENTAGE', 'FLAT']),
+      percentage: z.coerce.number().min(1, 'Mínimo 1%').max(100, 'Máximo 100%').optional(),
+      flatAmount: z.coerce.number().min(1, 'Mínimo R$ 0,01').optional(),
       daysBeforeDeadline: z.coerce.number().min(1, 'Mínimo 1 dia').max(30, 'Máximo 30 dias'),
     })
   ),
 })
 
 type AgreementFormData = z.infer<typeof agreementSchema>
+
+function getDiscountAmountInCents(
+  installmentAmount: number,
+  discount: AgreementFormData['earlyDiscounts'][number]
+): number {
+  if (discount.discountType === 'PERCENTAGE') {
+    return Math.max(0, Math.round((installmentAmount * Number(discount.percentage ?? 0)) / 100))
+  }
+
+  return Math.max(0, Math.round(Number(discount.flatAmount ?? 0) * 100))
+}
 
 interface CreateAgreementModalProps {
   invoice: {
@@ -121,9 +136,11 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
     defaultValues: {
       selectedInvoiceIds: [invoice.id],
       installments: 3,
-      startDate: new Date().toISOString().split('T')[0],
+      startMonth: new Date().toISOString().slice(0, 7),
       paymentDay: 10,
       paymentMethod: undefined,
+      renegotiationDiscountType: undefined,
+      renegotiationDiscountValue: undefined,
       finePercentage: undefined,
       dailyInterestPercentage: undefined,
       earlyDiscounts: [],
@@ -135,9 +152,11 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
       form.reset({
         selectedInvoiceIds: [invoice.id],
         installments: 3,
-        startDate: new Date().toISOString().split('T')[0],
+        startMonth: new Date().toISOString().slice(0, 7),
         paymentDay: 10,
         paymentMethod: undefined,
+        renegotiationDiscountType: undefined,
+        renegotiationDiscountValue: undefined,
         finePercentage: undefined,
         dailyInterestPercentage: undefined,
         earlyDiscounts: [],
@@ -148,9 +167,11 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
 
   const selectedIds = form.watch('selectedInvoiceIds')
   const installments = form.watch('installments')
-  const startDateStr = form.watch('startDate')
+  const startMonthStr = form.watch('startMonth')
   const paymentDay = form.watch('paymentDay')
   const paymentMethod = form.watch('paymentMethod')
+  const renegotiationDiscountType = form.watch('renegotiationDiscountType')
+  const renegotiationDiscountValue = form.watch('renegotiationDiscountValue')
   const finePercentage = form.watch('finePercentage')
   const dailyInterestPercentage = form.watch('dailyInterestPercentage')
   const earlyDiscounts = form.watch('earlyDiscounts')
@@ -161,7 +182,25 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
       .reduce((sum: number, inv: any) => sum + Number(inv.totalAmount), 0)
   }, [allInvoices, selectedIds])
 
-  const installmentAmount = installments > 0 ? totalAmount / installments : 0
+  const renegotiationDiscountAmount = useMemo(() => {
+    if (!renegotiationDiscountType || !renegotiationDiscountValue) return 0
+
+    if (renegotiationDiscountType === 'PERCENTAGE') {
+      return Math.min(
+        totalAmount,
+        Math.round((totalAmount * Number(renegotiationDiscountValue)) / 100)
+      )
+    }
+
+    return Math.min(totalAmount, Math.round(Number(renegotiationDiscountValue) * 100))
+  }, [renegotiationDiscountType, renegotiationDiscountValue, totalAmount])
+  const netTotalAmount = Math.max(0, totalAmount - renegotiationDiscountAmount)
+  const netInstallmentAmount = installments > 0 ? netTotalAmount / installments : 0
+  const bestDiscountAmount = earlyDiscounts.reduce((maxDiscount, discount) => {
+    const discountAmount = getDiscountAmountInCents(netInstallmentAmount, discount)
+    return discountAmount > maxDiscount ? discountAmount : maxDiscount
+  }, 0)
+  const discountedInstallmentAmount = Math.max(0, netInstallmentAmount - bestDiscountAmount)
 
   function toggleInvoice(invoiceId: string) {
     const current = form.getValues('selectedInvoiceIds')
@@ -178,7 +217,10 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
 
   function addDiscount() {
     const current = form.getValues('earlyDiscounts')
-    form.setValue('earlyDiscounts', [...current, { percentage: 5, daysBeforeDeadline: 5 }])
+    form.setValue('earlyDiscounts', [
+      ...current,
+      { discountType: 'PERCENTAGE', percentage: 5, flatAmount: undefined, daysBeforeDeadline: 5 },
+    ])
   }
 
   function removeDiscount(index: number) {
@@ -194,12 +236,31 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
       await createAgreement.mutateAsync({
         invoiceIds: data.selectedInvoiceIds,
         installments: data.installments,
-        startDate: data.startDate,
+        startDate: `${data.startMonth}-01`,
         paymentDay: data.paymentDay,
         paymentMethod: data.paymentMethod,
+        renegotiationDiscountType: data.renegotiationDiscountType,
+        renegotiationDiscountValue:
+          data.renegotiationDiscountType === 'FLAT'
+            ? Math.round(Number(data.renegotiationDiscountValue ?? 0) * 100)
+            : data.renegotiationDiscountValue,
         finePercentage: data.finePercentage,
         dailyInterestPercentage: data.dailyInterestPercentage,
-        earlyDiscounts: data.earlyDiscounts.length > 0 ? data.earlyDiscounts : undefined,
+        earlyDiscounts:
+          data.earlyDiscounts.length > 0
+            ? data.earlyDiscounts.map((discount) => ({
+                discountType: discount.discountType,
+                percentage:
+                  discount.discountType === 'PERCENTAGE'
+                    ? Number(discount.percentage ?? 0)
+                    : undefined,
+                flatAmount:
+                  discount.discountType === 'FLAT'
+                    ? Math.round(Number(discount.flatAmount ?? 0) * 100)
+                    : undefined,
+                daysBeforeDeadline: discount.daysBeforeDeadline,
+              }))
+            : undefined,
       })
       await queryClient.invalidateQueries({ queryKey: ['invoices'] })
       await queryClient.invalidateQueries({ queryKey: ['student-pending-invoices'] })
@@ -214,7 +275,7 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[600px] h-[90vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="max-w-150 h-[90vh] flex flex-col p-0 overflow-hidden">
         <div className="p-6 pb-4 border-b shrink-0">
           <DialogHeader>
             <DialogTitle>Criar Acordo de Pagamento</DialogTitle>
@@ -303,14 +364,14 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
 
                   <FormField
                     control={form.control}
-                    name="startDate"
+                    name="startMonth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Data de início</FormLabel>
+                        <FormLabel>Mês de início</FormLabel>
                         <FormControl>
                           <Input
-                            type="date"
-                            min={new Date().toISOString().split('T')[0]}
+                            type="month"
+                            min={new Date().toISOString().slice(0, 7)}
                             {...field}
                           />
                         </FormControl>
@@ -359,6 +420,54 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
                       </FormItem>
                     )}
                   />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="renegotiationDiscountType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Desconto da renegociação</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Sem desconto" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="PERCENTAGE">Percentual (%)</SelectItem>
+                              <SelectItem value="FLAT">Valor fixo (R$)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="renegotiationDiscountValue"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor do desconto</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min="1"
+                              step={renegotiationDiscountType === 'PERCENTAGE' ? '0.01' : '0.01'}
+                              placeholder={
+                                renegotiationDiscountType === 'PERCENTAGE' ? 'Ex: 10' : 'Ex: 150,00'
+                              }
+                              disabled={!renegotiationDiscountType}
+                              {...field}
+                              value={field.value ?? ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -373,6 +482,7 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
                             type="number"
                             min="0"
                             max="100"
+                            step="0.01"
                             placeholder="Ex: 2"
                             {...field}
                             value={field.value ?? ''}
@@ -410,7 +520,7 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
                   <p className="text-sm text-muted-foreground">
                     {installments} parcela(s) de{' '}
                     <span className="font-medium text-foreground">
-                      {formatCurrency(installmentAmount)}
+                      {formatCurrency(netInstallmentAmount)}
                     </span>
                   </p>
                 )}
@@ -419,33 +529,92 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
               {/* Section 3: Early payment discounts */}
               <Collapsible open={discountsOpen} onOpenChange={setDiscountsOpen}>
                 <CollapsibleTrigger asChild>
-                  <Button type="button" variant="ghost" className="w-full justify-start p-0 h-auto">
-                    <h3 className="text-sm font-medium">
-                      Descontos por pagamento antecipado
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-auto w-full items-center justify-between px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="text-left">
+                        <p className="text-sm font-medium">Descontos da parcela (opcional)</p>
+                        <p className="text-xs text-muted-foreground">
+                          Clique para configurar desconto percentual ou valor fixo
+                        </p>
+                      </div>
                       {earlyDiscounts.length > 0 && (
-                        <Badge variant="secondary" className="ml-2">
-                          {earlyDiscounts.length}
-                        </Badge>
+                        <Badge variant="secondary">{earlyDiscounts.length}</Badge>
                       )}
-                    </h3>
+                    </div>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${discountsOpen ? 'rotate-180' : ''}`}
+                    />
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-3 mt-3">
-                  {earlyDiscounts.map((_discount, index) => (
+                  {earlyDiscounts.map((discount, index) => (
                     <div key={index} className="flex items-end gap-3">
                       <FormField
                         control={form.control}
-                        name={`earlyDiscounts.${index}.percentage`}
+                        name={`earlyDiscounts.${index}.discountType`}
                         render={({ field }) => (
                           <FormItem className="flex-1">
-                            <FormLabel>Desconto (%)</FormLabel>
-                            <FormControl>
-                              <Input type="number" min="1" max="100" {...field} />
-                            </FormControl>
+                            <FormLabel>Tipo de desconto</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="PERCENTAGE">Percentual (%)</SelectItem>
+                                <SelectItem value="FLAT">Valor fixo (R$)</SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+                      {discount.discountType === 'PERCENTAGE' ? (
+                        <FormField
+                          control={form.control}
+                          name={`earlyDiscounts.${index}.percentage`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Desconto (%)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  max="100"
+                                  {...field}
+                                  value={field.value ?? ''}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ) : (
+                        <FormField
+                          control={form.control}
+                          name={`earlyDiscounts.${index}.flatAmount`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Desconto (R$)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="0.01"
+                                  step="0.01"
+                                  {...field}
+                                  value={field.value ?? ''}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                       <FormField
                         control={form.control}
                         name={`earlyDiscounts.${index}.daysBeforeDeadline`}
@@ -474,8 +643,10 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
                     <div className="text-xs text-muted-foreground space-y-1">
                       {earlyDiscounts.map((d, i) => (
                         <p key={i}>
-                          {d.percentage}% de desconto se pago até {d.daysBeforeDeadline} dia(s)
-                          antes do vencimento
+                          {d.discountType === 'PERCENTAGE'
+                            ? `${d.percentage}% de desconto`
+                            : `${formatCurrency(Math.round(Number(d.flatAmount ?? 0) * 100))} de desconto`}{' '}
+                          se pago até {d.daysBeforeDeadline} dia(s) antes do vencimento
                         </p>
                       ))}
                     </div>
@@ -492,18 +663,39 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
                 <Card className="bg-muted/50">
                   <CardContent className="pt-4 text-sm space-y-1">
                     <p>
-                      Total: <span className="font-medium">{formatCurrency(totalAmount)}</span>
+                      Total original:{' '}
+                      <span className="font-medium">{formatCurrency(totalAmount)}</span>
+                    </p>
+                    {renegotiationDiscountAmount > 0 && (
+                      <p>
+                        Desconto da renegociação:{' '}
+                        <span className="font-medium">
+                          -{formatCurrency(renegotiationDiscountAmount)}
+                        </span>
+                      </p>
+                    )}
+                    <p>
+                      Total renegociado:{' '}
+                      <span className="font-medium">{formatCurrency(netTotalAmount)}</span>
                     </p>
                     <p>
                       Parcelas:{' '}
                       <span className="font-medium">
-                        {installments}x de {formatCurrency(installmentAmount)}
+                        {installments}x de {formatCurrency(netInstallmentAmount)}
                       </span>
                     </p>
-                    {startDateStr && (
+                    {earlyDiscounts.length > 0 && (
+                      <p>
+                        Parcela com melhor desconto:{' '}
+                        <span className="font-medium">
+                          {formatCurrency(discountedInstallmentAmount)}
+                        </span>
+                      </p>
+                    )}
+                    {startMonthStr && (
                       <p>
                         Primeira parcela em:{' '}
-                        <span className="font-medium">{formatDate(startDateStr)}</span>
+                        <span className="font-medium">{formatDate(`${startMonthStr}-01`)}</span>
                       </p>
                     )}
                     <p>

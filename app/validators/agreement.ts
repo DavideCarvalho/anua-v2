@@ -7,12 +7,16 @@ export const createAgreementValidator = vine.compile(
     startDate: vine.date(),
     paymentDay: vine.number().min(1).max(31),
     paymentMethod: vine.enum(['PIX', 'BOLETO']).optional(),
+    renegotiationDiscountType: vine.enum(['PERCENTAGE', 'FLAT']).optional().nullable(),
+    renegotiationDiscountValue: vine.number().min(1).optional().nullable(),
     finePercentage: vine.number().min(0).max(100).optional(),
     dailyInterestPercentage: vine.number().min(0).max(100).optional(),
     earlyDiscounts: vine
       .array(
         vine.object({
-          percentage: vine.number().min(1).max(100),
+          discountType: vine.enum(['PERCENTAGE', 'FLAT']),
+          percentage: vine.number().min(1).max(100).optional().nullable(),
+          flatAmount: vine.number().min(1).optional().nullable(),
           daysBeforeDeadline: vine.number().min(1).max(30),
         })
       )

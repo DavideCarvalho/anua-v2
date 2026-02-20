@@ -7,9 +7,16 @@ interface CreateAgreementPayload {
   startDate: string
   paymentDay: number
   paymentMethod?: 'PIX' | 'BOLETO'
+  renegotiationDiscountType?: 'PERCENTAGE' | 'FLAT'
+  renegotiationDiscountValue?: number
   finePercentage?: number
   dailyInterestPercentage?: number
-  earlyDiscounts?: { percentage: number; daysBeforeDeadline: number }[]
+  earlyDiscounts?: {
+    discountType: 'PERCENTAGE' | 'FLAT'
+    percentage?: number
+    flatAmount?: number
+    daysBeforeDeadline: number
+  }[]
 }
 
 export function useCreateAgreementMutationOptions() {

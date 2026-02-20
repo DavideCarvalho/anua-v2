@@ -16,6 +16,7 @@ const SOURCE_LABELS: Record<string, string> = {
   'events.cancel': 'Cancelar Evento',
   'events.update': 'Atualizar Evento',
   'students.enrollments.cancel': 'Cancelar Matrícula',
+  'agreements.create': 'Criar Acordo de Pagamento',
 }
 
 interface ReconcilePaymentInvoicePayload {

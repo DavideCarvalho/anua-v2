@@ -30,8 +30,16 @@ export default class ListInvoicesController {
       .orderBy('dueDate', 'asc')
 
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
-      query.whereHas('contract', (q) => {
-        q.whereIn('schoolId', selectedSchoolIds)
+      query.where((scopedQuery) => {
+        scopedQuery.whereHas('contract', (q) => {
+          q.whereIn('schoolId', selectedSchoolIds)
+        })
+
+        scopedQuery.orWhereHas('payments', (paymentsQuery) => {
+          paymentsQuery.whereHas('contract', (contractQuery) => {
+            contractQuery.whereIn('schoolId', selectedSchoolIds)
+          })
+        })
       })
     }
 

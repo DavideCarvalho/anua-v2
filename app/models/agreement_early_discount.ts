@@ -21,7 +21,13 @@ export default class AgreementEarlyDiscount extends BaseModel {
   declare agreementId: string
 
   @column()
-  declare percentage: number
+  declare discountType: 'PERCENTAGE' | 'FLAT'
+
+  @column()
+  declare percentage: number | null
+
+  @column()
+  declare flatAmount: number | null
 
   @column()
   declare daysBeforeDeadline: number
