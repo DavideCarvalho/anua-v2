@@ -256,6 +256,61 @@ export function EnrollmentTabContent({
 
   const watchedInstallments = form.watch('installments')
 
+  const baseContractAmount = useMemo(() => {
+    if (!contractData) return 0
+
+    if (contractData.paymentType === 'UPFRONT') {
+      const installments = watchedInstallments ?? contractData.installments
+      return Math.floor(contractData.amount / installments)
+    }
+
+    return contractData.amount
+  }, [contractData, watchedInstallments])
+
+  const benefitImpact = useMemo(() => {
+    if (!contractData || benefitMode === 'NONE') return null
+
+    let discountAmount = 0
+    let discountDescription = ''
+
+    if (benefitMode === 'SCHOLARSHIP') {
+      discountAmount = Math.round(baseContractAmount * (discountPercentage / 100))
+      discountDescription = `${discountPercentage}% (bolsa)`
+    }
+
+    if (benefitMode === 'INDIVIDUAL' && individualDiscountType === 'PERCENTAGE') {
+      discountAmount = Math.round(baseContractAmount * (individualDiscountPercentage / 100))
+      discountDescription = `${individualDiscountPercentage}% (desconto individual)`
+    }
+
+    if (benefitMode === 'INDIVIDUAL' && individualDiscountType === 'FLAT') {
+      discountAmount = Math.round(individualDiscountValueReais * 100)
+      discountDescription = `${formatCurrency(discountAmount)} (desconto individual)`
+    }
+
+    const discountedAmount = Math.max(0, baseContractAmount - discountAmount)
+    const baseAmountLabel =
+      contractData.paymentType === 'UPFRONT'
+        ? 'Valor base da parcela no contrato'
+        : 'Valor base da mensalidade no contrato'
+
+    return {
+      baseAmountLabel,
+      baseAmount: baseContractAmount,
+      discountAmount,
+      discountDescription,
+      discountedAmount,
+    }
+  }, [
+    contractData,
+    benefitMode,
+    baseContractAmount,
+    discountPercentage,
+    individualDiscountType,
+    individualDiscountPercentage,
+    individualDiscountValueReais,
+  ])
+
   // Calculate invoice impact preview
   const invoiceImpact = useMemo(() => {
     if (!invoicesData || !pendingPaymentsData || !contractData) return null
@@ -587,6 +642,32 @@ export function EnrollmentTabContent({
                     )}
                   />
                 )}
+              </div>
+            )}
+
+            {benefitImpact && (
+              <div className="rounded-md border bg-muted/40 p-3 text-xs space-y-1">
+                <p>
+                  {benefitImpact.baseAmountLabel}:{' '}
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(benefitImpact.baseAmount)}
+                  </span>
+                </p>
+                <p>
+                  Desconto aplicado:{' '}
+                  <span className="font-medium text-foreground">
+                    -{formatCurrency(benefitImpact.discountAmount)}
+                  </span>{' '}
+                  <span className="text-muted-foreground">
+                    ({benefitImpact.discountDescription})
+                  </span>
+                </p>
+                <p>
+                  Valor final:{' '}
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(benefitImpact.discountedAmount)}
+                  </span>
+                </p>
               </div>
             )}
 
