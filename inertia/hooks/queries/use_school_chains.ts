@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.schoolChains.listSchoolChains')
+const resolveRoute = () => tuyau.$route('api.v1.schoolChains.listSchoolChains')
 export type SchoolChainsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseSchoolChainsOptions {

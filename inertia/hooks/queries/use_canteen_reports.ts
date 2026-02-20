@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.canteenReports.summary')
+const resolveRoute = () => tuyau.$route('api.v1.canteenReports.summary')
 export type CanteenReportResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseCanteenReportOptions {
@@ -19,7 +19,7 @@ export function useCanteenReportQueryOptions(options: UseCanteenReportOptions) {
     queryKey: ['canteen-report', { canteenId, startDate, endDate, topItemsLimit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.canteenReports.summary')
+        .$route('api.v1.canteenReports.summary')
         .$get({ query: { canteenId, startDate, endDate, topItemsLimit } })
         .unwrap()
     },

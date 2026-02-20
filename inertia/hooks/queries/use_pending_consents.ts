@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.consents.pending')
+const resolveRoute = () => tuyau.$route('api.v1.consents.pending')
 export type PendingConsentsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 export function usePendingConsentsQueryOptions() {

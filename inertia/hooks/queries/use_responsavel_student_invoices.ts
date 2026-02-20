@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.responsavel.api.studentInvoices')
+const resolveRoute = () => tuyau.$route('api.v1.responsavel.api.studentInvoices')
 export type ResponsavelStudentInvoicesResponse = InferResponseType<
   ReturnType<typeof resolveRoute>['$get']
 >
@@ -21,7 +21,7 @@ export function useResponsavelStudentInvoicesQueryOptions({
     queryKey: ['responsavel', 'student-invoices', studentId, { page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.responsavel.api.studentInvoices', { studentId })
+        .$route('api.v1.responsavel.api.studentInvoices', { studentId })
         .$get({ query: { page, limit } })
         .unwrap()
     },

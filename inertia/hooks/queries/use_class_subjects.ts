@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.classes.subjects')
+const resolveRoute = () => tuyau.$route('api.v1.classes.subjects')
 export type ClassSubjectsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseClassSubjectsOptions {
@@ -18,7 +18,7 @@ export function useClassSubjectsQueryOptions(options: UseClassSubjectsOptions) {
     queryKey: ['class-subjects', { classId, page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.classes.subjects', { classId })
+        .$route('api.v1.classes.subjects', { classId })
         .$get({ query: { page, limit } })
         .unwrap()
     },

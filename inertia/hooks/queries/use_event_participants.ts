@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.events.participants.index')
+const resolveRoute = () => tuyau.$route('api.v1.events.participants.index')
 export type EventParticipantsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseEventParticipantsOptions {
@@ -19,7 +19,7 @@ export function useEventParticipantsQueryOptions(options: UseEventParticipantsOp
     queryKey: ['event-participants', { eventId, status, page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.events.participants.index', { eventId })
+        .$route('api.v1.events.participants.index', { eventId })
         .$get({ query: { status, page, limit } as any })
         .unwrap()
     },

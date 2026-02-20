@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.analytics.attendance.trends')
+const resolveRoute = () => tuyau.$route('api.v1.analytics.attendance.trends')
 export type AttendanceTrendsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 type AttendanceTrendsQuery = NonNullable<
@@ -13,7 +13,7 @@ export function useAttendanceTrendsQueryOptions(query: AttendanceTrendsQuery = {
   return {
     queryKey: ['analytics', 'attendance', 'trends', query],
     queryFn: () => {
-      return tuyau.resolveRoute()('api.v1.analytics.attendance.trends').$get({ query }).unwrap()
+      return tuyau.$route('api.v1.analytics.attendance.trends').$get({ query }).unwrap()
     },
   } satisfies QueryOptions<AttendanceTrendsResponse>
 }

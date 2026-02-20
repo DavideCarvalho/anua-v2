@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.insurance.school.billings')
+const resolveRoute = () => tuyau.$route('api.v1.insurance.school.billings')
 export type SchoolInsuranceBillingsResponse = InferResponseType<
   ReturnType<typeof resolveRoute>['$get']
 >

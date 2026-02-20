@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.responsavel.api.studentAttendance')
+const resolveRoute = () => tuyau.$route('api.v1.responsavel.api.studentAttendance')
 export type StudentAttendanceResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseStudentAttendanceOptions {
@@ -19,7 +19,7 @@ export function useStudentAttendanceQueryOptions({
     queryKey: ['responsavel', 'student-attendance', studentId, { page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.responsavel.api.studentAttendance', { studentId })
+        .$route('api.v1.responsavel.api.studentAttendance', { studentId })
         .$get({ query: { page, limit } })
         .unwrap()
     },

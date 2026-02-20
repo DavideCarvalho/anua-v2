@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.grades.distribution')
+const resolveRoute = () => tuyau.$route('api.v1.grades.distribution')
 export type GradeDistributionResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 type GradeDistributionQuery = NonNullable<
@@ -13,7 +13,7 @@ export function useGradeDistributionQueryOptions(query: GradeDistributionQuery =
   return {
     queryKey: ['grades', 'distribution', query],
     queryFn: () => {
-      return tuyau.resolveRoute()('api.v1.grades.distribution').$get({ query }).unwrap()
+      return tuyau.$route('api.v1.grades.distribution').$get({ query }).unwrap()
     },
   } satisfies QueryOptions<GradeDistributionResponse>
 }

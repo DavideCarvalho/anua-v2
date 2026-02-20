@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.attendance.availableDates')
+const resolveRoute = () => tuyau.$route('api.v1.attendance.availableDates')
 export type AttendanceAvailableDatesResponse = InferResponseType<
   ReturnType<typeof resolveRoute>['$get']
 >

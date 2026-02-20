@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.classes.students')
+const resolveRoute = () => tuyau.$route('api.v1.classes.students')
 export type ClassStudentsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseClassStudentsOptions {
@@ -20,7 +20,7 @@ export function useClassStudentsQueryOptions(options: UseClassStudentsOptions) {
     queryKey: ['class-students', { classId, courseId, academicPeriodId, page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.classes.students', { id: classId })
+        .$route('api.v1.classes.students', { id: classId })
         .$get({ query: { page, limit, courseId, academicPeriodId } })
         .unwrap()
     },
@@ -33,7 +33,7 @@ export function useClassStudents(options: UseClassStudentsOptions) {
 }
 
 // Students count
-const resolveCountRoute = () => tuyau.resolveRoute()('api.v1.classes.studentsCount')
+const resolveCountRoute = () => tuyau.$route('api.v1.classes.studentsCount')
 export type ClassStudentsCountResponse = InferResponseType<
   ReturnType<typeof resolveCountRoute>['$get']
 >
@@ -42,7 +42,7 @@ export function useClassStudentsCountQueryOptions(classId: string) {
   return {
     queryKey: ['class-students-count', classId],
     queryFn: () => {
-      return tuyau.resolveRoute()('api.v1.classes.studentsCount', { id: classId }).$get().unwrap()
+      return tuyau.$route('api.v1.classes.studentsCount', { id: classId }).$get().unwrap()
     },
     enabled: !!classId,
   }

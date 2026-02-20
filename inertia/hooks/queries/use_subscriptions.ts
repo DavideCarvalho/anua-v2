@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.subscriptions.index')
+const resolveRoute = () => tuyau.$route('api.v1.subscriptions.index')
 export type SubscriptionsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseSubscriptionsOptions {
@@ -20,7 +20,7 @@ export function useSubscriptionsQueryOptions(options: UseSubscriptionsOptions = 
     queryKey: ['subscriptions', { status, schoolId, schoolChainId, page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.subscriptions.index')
+        .$route('api.v1.subscriptions.index')
         .$get({ query: { status, schoolId, schoolChainId, page, limit } as any })
         .unwrap()
     },

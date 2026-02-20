@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.exams.grades')
+const resolveRoute = () => tuyau.$route('api.v1.exams.grades')
 export type ExamGradesResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseExamGradesOptions {
@@ -18,7 +18,7 @@ export function useExamGradesQueryOptions(options: UseExamGradesOptions) {
     queryKey: ['exam-grades', { examId, page, limit }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.exams.grades', { id: examId })
+        .$route('api.v1.exams.grades', { id: examId })
         .$get({ query: { page, limit } })
         .unwrap()
     },

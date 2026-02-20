@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.grades.academicOverview')
+const resolveRoute = () => tuyau.$route('api.v1.grades.academicOverview')
 export type AcademicOverviewResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 type AcademicOverviewQuery = NonNullable<
@@ -13,7 +13,7 @@ export function useAcademicOverviewQueryOptions(query: AcademicOverviewQuery = {
   return {
     queryKey: ['grades', 'academic-overview', query],
     queryFn: () => {
-      return tuyau.resolveRoute()('api.v1.grades.academicOverview').$get({ query }).unwrap()
+      return tuyau.$route('api.v1.grades.academicOverview').$get({ query }).unwrap()
     },
   } satisfies QueryOptions<AcademicOverviewResponse>
 }

@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.purchaseRequests.index')
+const resolveRoute = () => tuyau.$route('api.v1.purchaseRequests.index')
 export type PurchaseRequestsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 type PurchaseRequestsQuery = NonNullable<
@@ -19,10 +19,7 @@ export function usePurchaseRequestsQueryOptions(query: PurchaseRequestsQuery = {
   return {
     queryKey: ['purchase-requests', mergedQuery],
     queryFn: () => {
-      return tuyau
-        .resolveRoute()('api.v1.purchaseRequests.index')
-        .$get({ query: mergedQuery })
-        .unwrap()
+      return tuyau.$route('api.v1.purchaseRequests.index').$get({ query: mergedQuery }).unwrap()
     },
   } satisfies QueryOptions<PurchaseRequestsResponse>
 }

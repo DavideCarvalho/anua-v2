@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.grades.classSubject')
+const resolveRoute = () => tuyau.$route('api.v1.grades.classSubject')
 export type SubjectGradesResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseSubjectGradesOptions {
@@ -19,7 +19,7 @@ export function useSubjectGradesQueryOptions(options: UseSubjectGradesOptions) {
     queryKey: ['subject-grades', { classId, subjectId, courseId, academicPeriodId }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.grades.classSubject', { classId, subjectId })
+        .$route('api.v1.grades.classSubject', { classId, subjectId })
         .$get({ query: { courseId, academicPeriodId } })
         .unwrap()
     },

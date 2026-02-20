@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.events.consents.index')
+const resolveRoute = () => tuyau.$route('api.v1.events.consents.index')
 export type EventConsentsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 export function useEventConsentsQueryOptions(eventId: string, query: Record<string, any> = {}) {
@@ -9,7 +9,7 @@ export function useEventConsentsQueryOptions(eventId: string, query: Record<stri
     queryKey: ['events', eventId, 'consents', query],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.events.consents.index', { eventId })
+        .$route('api.v1.events.consents.index', { eventId })
         .$get({ query } as any)
         .unwrap()
     },

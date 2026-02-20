@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.analytics.canteen.topItems')
+const resolveRoute = () => tuyau.$route('api.v1.analytics.canteen.topItems')
 export type CanteenTopItemsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 type CanteenTopItemsQuery = NonNullable<
@@ -13,7 +13,7 @@ export function useCanteenTopItemsQueryOptions(query: CanteenTopItemsQuery = {})
   return {
     queryKey: ['analytics', 'canteen', 'top-items', query],
     queryFn: () => {
-      return tuyau.resolveRoute()('api.v1.analytics.canteen.topItems').$get({ query }).unwrap()
+      return tuyau.$route('api.v1.analytics.canteen.topItems').$get({ query }).unwrap()
     },
   } satisfies QueryOptions<CanteenTopItemsResponse>
 }

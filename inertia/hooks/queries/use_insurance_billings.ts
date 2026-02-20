@@ -2,7 +2,7 @@ import { tuyau } from '../../lib/api'
 import type { QueryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.insurance.billings.index')
+const resolveRoute = () => tuyau.$route('api.v1.insurance.billings.index')
 export type InsuranceBillingsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 type InsuranceBillingsQuery = NonNullable<

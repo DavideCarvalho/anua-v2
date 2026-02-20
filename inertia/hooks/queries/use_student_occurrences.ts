@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.responsavel.api.studentOccurrences')
+const resolveRoute = () => tuyau.$route('api.v1.responsavel.api.studentOccurrences')
 export type StudentOccurrencesResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 export function useStudentOccurrencesQueryOptions(
@@ -12,7 +12,7 @@ export function useStudentOccurrencesQueryOptions(
     queryKey: ['responsavel', 'students', studentId, 'occurrences', filters],
     queryFn: async () => {
       const response = await tuyau
-        .resolveRoute()('api.v1.responsavel.api.studentOccurrences', { studentId })
+        .$route('api.v1.responsavel.api.studentOccurrences', { studentId })
         .$get({
           query: {
             type: filters?.type,

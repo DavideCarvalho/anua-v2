@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.responsavel.api.studentOverview')
+const resolveRoute = () => tuyau.$route('api.v1.responsavel.api.studentOverview')
 export type StudentOverview = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 export function useStudentOverviewQueryOptions(studentId: string) {
@@ -9,7 +9,7 @@ export function useStudentOverviewQueryOptions(studentId: string) {
     queryKey: ['responsavel', 'student', studentId, 'overview'],
     queryFn: async () => {
       const response = await tuyau
-        .resolveRoute()('api.v1.responsavel.api.studentOverview', { studentId })
+        .$route('api.v1.responsavel.api.studentOverview', { studentId })
         .$get()
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar dados')

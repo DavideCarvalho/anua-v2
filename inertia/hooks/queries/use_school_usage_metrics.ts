@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
-const resolveRoute = () => tuyau.resolveRoute()('api.v1.schoolUsageMetrics.show')
+const resolveRoute = () => tuyau.$route('api.v1.schoolUsageMetrics.show')
 export type SchoolUsageMetricsResponse = InferResponseType<ReturnType<typeof resolveRoute>['$get']>
 
 interface UseSchoolUsageMetricsOptions {
@@ -18,7 +18,7 @@ export function useSchoolUsageMetricsQueryOptions(options: UseSchoolUsageMetrics
     queryKey: ['school-usage-metrics', { schoolId, month, year }],
     queryFn: () => {
       return tuyau
-        .resolveRoute()('api.v1.schoolUsageMetrics.show')
+        .$route('api.v1.schoolUsageMetrics.show')
         .$get({ query: { schoolId, month, year } })
         .unwrap()
     },
