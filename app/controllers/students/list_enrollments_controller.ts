@@ -8,6 +8,13 @@ export default class ListEnrollmentsController {
     const enrollments = await StudentHasLevel.query()
       .where('studentId', studentId)
       .whereNull('deletedAt')
+      .whereHas('levelAssignedToCourseAcademicPeriod', (lacapQuery) => {
+        lacapQuery.whereHas('courseHasAcademicPeriod', (chapQuery) => {
+          chapQuery.whereHas('academicPeriod', (academicPeriodQuery) => {
+            academicPeriodQuery.where('isActive', true).whereNull('deletedAt')
+          })
+        })
+      })
       .preload('academicPeriod')
       .preload('contract')
       .preload('scholarship')
