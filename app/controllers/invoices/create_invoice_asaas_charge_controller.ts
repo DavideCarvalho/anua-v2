@@ -51,6 +51,7 @@ export default class CreateInvoiceAsaasChargeController {
     const contract = await Contract.query()
       .where('id', contractId)
       .preload('school', (sq) => sq.preload('schoolChain'))
+      .preload('earlyDiscounts')
       .first()
 
     if (!contract?.school) {
@@ -62,16 +63,35 @@ export default class CreateInvoiceAsaasChargeController {
       throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
     }
 
+    const checkoutPricing = this.resolveCheckoutPricing(invoice, contract)
+    const expectedValue = checkoutPricing.totalAmount / 100
+
+    const discountSourcesByEnrollmentId = await this.resolveDiscountSourcesByEnrollmentId(invoice)
+    const paymentDescriptions = invoice.payments
+      .map((p) => `- ${this.describePayment(p, discountSourcesByEnrollmentId)}`)
+      .join('\n')
+    const discountDescription =
+      checkoutPricing.discountAmount > 0
+        ? `\nDesconto antecipacao: -${this.formatCurrency(checkoutPricing.discountAmount)}${checkoutPricing.discountPercentage > 0 ? ` (${checkoutPricing.discountPercentage}%)` : ''}`
+        : ''
+    const schoolName = contract.school.name
+    const chargeDescription = `${schoolName} - Fatura ${String(invoice.month).padStart(2, '0')}/${invoice.year}\n${paymentDescriptions}${discountDescription}`
+
     // Idempotency: if charge already exists, check if value matches
     if (invoice.paymentGatewayId) {
       const existing = await this.asaasService.fetchAsaasPayment(
         config.apiKey,
         invoice.paymentGatewayId
       )
-      const expectedValue = invoice.totalAmount / 100
 
-      // If value matches, refresh URL and return
-      if (existing.value === expectedValue) {
+      // If value and description match, refresh URL and return
+      if (
+        this.areValuesEquivalent(existing.value, expectedValue) &&
+        this.areDescriptionsEquivalent(existing.description, chargeDescription)
+      ) {
+        invoice.baseAmount = checkoutPricing.baseAmount
+        invoice.discountAmount = checkoutPricing.discountAmount
+        invoice.totalAmount = checkoutPricing.totalAmount
         invoice.invoiceUrl = existing.bankSlipUrl ?? existing.invoiceUrl ?? invoice.invoiceUrl
         await invoice.save()
         return response.ok({ invoiceUrl: invoice.invoiceUrl })
@@ -83,6 +103,9 @@ export default class CreateInvoiceAsaasChargeController {
       invoice.invoiceUrl = null
       invoice.paymentGateway = null
       invoice.paymentMethod = null
+      invoice.baseAmount = checkoutPricing.baseAmount
+      invoice.discountAmount = checkoutPricing.discountAmount
+      invoice.totalAmount = checkoutPricing.totalAmount
       await invoice.save()
     }
 
@@ -102,23 +125,19 @@ export default class CreateInvoiceAsaasChargeController {
       effectiveUser
     )
 
-    // Build rich description for the Asaas charge
-    const paymentDescriptions = invoice.payments
-      .map((p) => `- ${this.describePayment(p)}`)
-      .join('\n')
-    const schoolName = contract.school.name
-    const chargeDescription = `${schoolName} - Fatura ${String(invoice.month).padStart(2, '0')}/${invoice.year}\n${paymentDescriptions}`
-
     // Create charge — totalAmount already includes fine/interest from daily reconciliation
     const charge = await this.asaasService.createAsaasPayment(config.apiKey, {
       customer: customerId,
       billingType,
-      value: invoice.totalAmount / 100,
+      value: expectedValue,
       dueDate: DateTime.now().toISODate()!,
       description: chargeDescription,
       externalReference: invoice.id,
     })
 
+    invoice.baseAmount = checkoutPricing.baseAmount
+    invoice.discountAmount = checkoutPricing.discountAmount
+    invoice.totalAmount = checkoutPricing.totalAmount
     invoice.paymentGateway = 'ASAAS'
     invoice.paymentGatewayId = charge.id
     invoice.invoiceUrl = charge.bankSlipUrl ?? charge.invoiceUrl ?? null
@@ -168,34 +187,185 @@ export default class CreateInvoiceAsaasChargeController {
     }
   }
 
-  private describePayment(payment: StudentPayment): string {
+  private async resolveDiscountSourcesByEnrollmentId(
+    invoice: Invoice
+  ): Promise<Map<string, 'BOLSA' | 'INDIVIDUAL'>> {
+    const enrollmentIds = invoice.payments
+      .map((payment) => payment.studentHasLevelId)
+      .filter((id): id is string => id !== null)
+
+    if (enrollmentIds.length === 0) {
+      return new Map()
+    }
+
+    const enrollments = await StudentHasLevel.query()
+      .whereIn('id', enrollmentIds)
+      .preload('scholarship')
+      .preload('individualDiscounts')
+
+    const sourceByEnrollmentId = new Map<string, 'BOLSA' | 'INDIVIDUAL'>()
+
+    for (const enrollment of enrollments) {
+      const hasIndividualDiscount = enrollment.individualDiscounts.some((discount) => {
+        if (discount.deletedAt || !discount.isValid()) {
+          return false
+        }
+
+        return (
+          Number(discount.discountPercentage ?? 0) > 0 ||
+          Number(discount.discountValue ?? 0) > 0 ||
+          Number(discount.enrollmentDiscountPercentage ?? 0) > 0 ||
+          Number(discount.enrollmentDiscountValue ?? 0) > 0
+        )
+      })
+
+      if (hasIndividualDiscount) {
+        sourceByEnrollmentId.set(enrollment.id, 'INDIVIDUAL')
+        continue
+      }
+
+      const scholarship = enrollment.scholarship
+      const hasScholarshipDiscount =
+        !!scholarship &&
+        (Number(scholarship.discountPercentage ?? 0) > 0 ||
+          Number(scholarship.discountValue ?? 0) > 0 ||
+          Number(scholarship.enrollmentDiscountPercentage ?? 0) > 0 ||
+          Number(scholarship.enrollmentDiscountValue ?? 0) > 0)
+
+      if (hasScholarshipDiscount) {
+        sourceByEnrollmentId.set(enrollment.id, 'BOLSA')
+      }
+    }
+
+    return sourceByEnrollmentId
+  }
+
+  private describePayment(
+    payment: StudentPayment,
+    discountSourcesByEnrollmentId: Map<string, 'BOLSA' | 'INDIVIDUAL'>
+  ): string {
     const contractName = payment.contract?.name
     const installmentInfo =
       payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
 
-    switch (payment.type) {
-      case 'TUITION':
-        return 'Mensalidade'
-      case 'ENROLLMENT':
-        return contractName
-          ? `Matrícula - ${contractName}${installmentInfo}`
-          : `Matrícula${installmentInfo}`
-      case 'EXTRA_CLASS':
-        return payment.studentHasExtraClass?.extraClass?.name
-          ? `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
-          : 'Aula Avulsa'
-      case 'COURSE':
-        return contractName ? `Curso - ${contractName}` : 'Curso'
-      case 'STORE':
-        return 'Loja'
-      case 'CANTEEN':
-        return 'Cantina'
-      case 'AGREEMENT':
-        return 'Acordo'
-      case 'STUDENT_LOAN':
-        return 'Empréstimo'
-      default:
-        return 'Outro'
+    const baseDescription = (() => {
+      switch (payment.type) {
+        case 'TUITION':
+          return 'Mensalidade'
+        case 'ENROLLMENT':
+          return contractName
+            ? `Matrícula - ${contractName}${installmentInfo}`
+            : `Matrícula${installmentInfo}`
+        case 'EXTRA_CLASS':
+          return payment.studentHasExtraClass?.extraClass?.name
+            ? `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
+            : 'Aula Avulsa'
+        case 'COURSE':
+          return contractName ? `Curso - ${contractName}` : 'Curso'
+        case 'STORE':
+          return 'Loja'
+        case 'CANTEEN':
+          return 'Cantina'
+        case 'AGREEMENT':
+          return 'Acordo'
+        case 'STUDENT_LOAN':
+          return 'Empréstimo'
+        default:
+          return 'Outro'
+      }
+    })()
+
+    const amountDescription = this.formatCurrency(Number(payment.amount))
+    const discountApplied = Math.max(0, Number(payment.totalAmount) - Number(payment.amount))
+
+    if (discountApplied <= 0) {
+      return `${baseDescription} - ${amountDescription}`
     }
+
+    const source = payment.studentHasLevelId
+      ? discountSourcesByEnrollmentId.get(payment.studentHasLevelId)
+      : undefined
+    const sourceLabel =
+      source === 'BOLSA'
+        ? 'desconto bolsa'
+        : source === 'INDIVIDUAL'
+          ? 'desconto individual'
+          : 'desconto'
+    const percentageSuffix =
+      Number(payment.discountPercentage) > 0 ? ` (${Number(payment.discountPercentage)}%)` : ''
+
+    return `${baseDescription} - ${amountDescription} (${sourceLabel}: -${this.formatCurrency(discountApplied)}${percentageSuffix})`
+  }
+
+  private resolveCheckoutPricing(
+    invoice: Invoice,
+    contract: Contract
+  ): {
+    baseAmount: number
+    discountAmount: number
+    discountPercentage: number
+    totalAmount: number
+  } {
+    const baseAmountFromPayments = invoice.payments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0
+    )
+    const baseAmount = baseAmountFromPayments > 0 ? baseAmountFromPayments : invoice.totalAmount
+
+    const today = DateTime.now().startOf('day')
+    const dueDate = invoice.dueDate.startOf('day')
+    const daysUntilDue = Math.floor(dueDate.diff(today, 'days').days)
+
+    let discountAmount = 0
+    let discountPercentage = 0
+    const surchargeAmount = Math.max(
+      0,
+      Number(invoice.fineAmount ?? 0) + Number(invoice.interestAmount ?? 0)
+    )
+
+    if (daysUntilDue > 0 && contract.earlyDiscounts?.length) {
+      const eligibleDiscounts = contract.earlyDiscounts.filter(
+        (discount) =>
+          discount.percentage > 0 && daysUntilDue >= Number(discount.daysBeforeDeadline ?? 0)
+      )
+
+      if (eligibleDiscounts.length > 0) {
+        const bestPercentage = eligibleDiscounts.reduce(
+          (max, discount) => Math.max(max, Number(discount.percentage)),
+          0
+        )
+        discountPercentage = bestPercentage
+        discountAmount = Math.round((baseAmount * bestPercentage) / 100)
+      }
+    }
+
+    const boundedDiscountAmount = Math.max(0, Math.min(baseAmount, discountAmount))
+    const totalAmount = Math.max(0, baseAmount + surchargeAmount - boundedDiscountAmount)
+
+    return {
+      baseAmount,
+      discountAmount: boundedDiscountAmount,
+      discountPercentage,
+      totalAmount,
+    }
+  }
+
+  private formatCurrency(valueInCents: number): string {
+    return (valueInCents / 100).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+  }
+
+  private areDescriptionsEquivalent(current?: string, next?: string): boolean {
+    const normalizedCurrent = (current ?? '').replace(/\s+/g, ' ').trim()
+    const normalizedNext = (next ?? '').replace(/\s+/g, ' ').trim()
+    return normalizedCurrent.length > 0 && normalizedCurrent === normalizedNext
+  }
+
+  private areValuesEquivalent(current: number, next: number): boolean {
+    const currentInCents = Math.round(Number(current) * 100)
+    const nextInCents = Math.round(Number(next) * 100)
+    return currentInCents === nextInCents
   }
 }

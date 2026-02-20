@@ -62,6 +62,7 @@ interface AsaasPaymentDetailsResponse {
   value: number
   invoiceUrl?: string
   bankSlipUrl?: string
+  description?: string
 }
 
 interface AsaasPixQrCodeResponse {
