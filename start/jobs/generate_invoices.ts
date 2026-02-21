@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
 import Invoice from '#models/invoice'
+import Contract from '#models/contract'
 
 interface GenerateInvoicesOptions {
   schoolIds?: string[]
@@ -22,12 +23,83 @@ interface GenerateInvoicesOptions {
  * Roda diariamente às 03:00 via scheduler, ou manualmente via command.
  */
 export default class GenerateInvoices {
+  private static calculateEarlyDiscountPercentage(
+    contract: Contract | null,
+    dueDate: DateTime,
+    today: DateTime = DateTime.now().startOf('day')
+  ): number {
+    if (!contract?.earlyDiscounts?.length) return 0
+
+    const daysUntilDue = Math.floor(dueDate.startOf('day').diff(today, 'days').days)
+    if (daysUntilDue <= 0) return 0
+
+    return contract.earlyDiscounts
+      .filter(
+        (discount) =>
+          Number(discount.percentage) > 0 &&
+          daysUntilDue >= Number(discount.daysBeforeDeadline ?? 0)
+      )
+      .reduce((max, discount) => Math.max(max, Number(discount.percentage)), 0)
+  }
+
+  private static calculateInvoiceTotals({
+    payments,
+    dueDate,
+    contract,
+    fineAmount = 0,
+    interestAmount = 0,
+    today = DateTime.now().startOf('day'),
+  }: {
+    payments: StudentPayment[]
+    dueDate: DateTime
+    contract: Contract | null
+    fineAmount?: number
+    interestAmount?: number
+    today?: DateTime
+  }) {
+    const baseAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0)
+    const discountPercentage = this.calculateEarlyDiscountPercentage(contract, dueDate, today)
+    const discountAmount = Math.round((baseAmount * discountPercentage) / 100)
+    const boundedDiscountAmount = Math.max(0, Math.min(baseAmount, discountAmount))
+
+    const totalAmount = Math.max(
+      0,
+      baseAmount + Number(fineAmount || 0) + Number(interestAmount || 0) - boundedDiscountAmount
+    )
+
+    return {
+      baseAmount,
+      discountAmount: boundedDiscountAmount,
+      totalAmount,
+    }
+  }
+
+  private static async resolveContractWithDiscounts(
+    contractId: string | null,
+    cache: Map<string, Contract | null>
+  ): Promise<Contract | null> {
+    if (!contractId) return null
+
+    if (cache.has(contractId)) {
+      return cache.get(contractId) ?? null
+    }
+
+    const contract = await Contract.query()
+      .where('id', contractId)
+      .preload('earlyDiscounts')
+      .first()
+    cache.set(contractId, contract ?? null)
+    return contract ?? null
+  }
+
   /**
    * Reconcilia a invoice de um pagamento individual.
    * Vincula o pagamento a uma invoice existente ou cria uma nova.
    * Chamado após criar/editar um pagamento para não depender do scheduler.
    */
   static async reconcilePayment(payment: StudentPayment) {
+    const contractCache = new Map<string, Contract | null>()
+
     // Cancelled/renegotiated: only recalculate existing invoice total
     if (['CANCELLED', 'RENEGOTIATED'].includes(payment.status)) {
       if (payment.invoiceId) {
@@ -40,7 +112,23 @@ export default class GenerateInvoices {
           const linkedPayments = await StudentPayment.query()
             .where('invoiceId', invoice.id)
             .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-          invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+
+          const contract = await this.resolveContractWithDiscounts(
+            linkedPayments[0]?.contractId ?? null,
+            contractCache
+          )
+          const totals = this.calculateInvoiceTotals({
+            payments: linkedPayments,
+            dueDate: invoice.dueDate,
+            contract,
+            fineAmount: invoice.fineAmount,
+            interestAmount: invoice.interestAmount,
+          })
+
+          invoice.baseAmount = totals.baseAmount
+          invoice.discountAmount = totals.discountAmount
+          invoice.totalAmount = totals.totalAmount
+          invoice.contractId = invoice.contractId ?? linkedPayments[0]?.contractId ?? null
           await invoice.save()
         }
       }
@@ -62,7 +150,23 @@ export default class GenerateInvoices {
         const linkedPayments = await StudentPayment.query()
           .where('invoiceId', invoice.id)
           .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-        invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+
+        const contract = await this.resolveContractWithDiscounts(
+          linkedPayments[0]?.contractId ?? null,
+          contractCache
+        )
+        const totals = this.calculateInvoiceTotals({
+          payments: linkedPayments,
+          dueDate: invoice.dueDate,
+          contract,
+          fineAmount: invoice.fineAmount,
+          interestAmount: invoice.interestAmount,
+        })
+
+        invoice.baseAmount = totals.baseAmount
+        invoice.discountAmount = totals.discountAmount
+        invoice.totalAmount = totals.totalAmount
+        invoice.contractId = invoice.contractId ?? linkedPayments[0]?.contractId ?? null
         await invoice.save()
       }
       return
@@ -90,19 +194,44 @@ export default class GenerateInvoices {
         const linkedPayments = await StudentPayment.query()
           .where('invoiceId', invoice.id)
           .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-        invoice.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+
+        const contract = await this.resolveContractWithDiscounts(
+          linkedPayments[0]?.contractId ?? null,
+          contractCache
+        )
+        const totals = this.calculateInvoiceTotals({
+          payments: linkedPayments,
+          dueDate: invoice.dueDate,
+          contract,
+          fineAmount: invoice.fineAmount,
+          interestAmount: invoice.interestAmount,
+        })
+
+        invoice.baseAmount = totals.baseAmount
+        invoice.discountAmount = totals.discountAmount
+        invoice.totalAmount = totals.totalAmount
+        invoice.contractId = invoice.contractId ?? linkedPayments[0]?.contractId ?? null
         await invoice.save()
       } else {
         // Create invoice without contractId (aggregates all payment types)
+        const contract = await this.resolveContractWithDiscounts(payment.contractId, contractCache)
+        const totals = this.calculateInvoiceTotals({
+          payments: [payment],
+          dueDate: payment.dueDate,
+          contract,
+        })
+
         invoice = await Invoice.create({
           studentId: payment.studentId,
-          contractId: null,
+          contractId: payment.contractId ?? null,
           type: 'MONTHLY',
           month: payment.month,
           year: payment.year,
           dueDate: payment.dueDate,
           status: 'OPEN',
-          totalAmount: Number(payment.amount),
+          baseAmount: totals.baseAmount,
+          discountAmount: totals.discountAmount,
+          totalAmount: totals.totalAmount,
         })
         payment.invoiceId = invoice.id
         await payment.save()
@@ -185,6 +314,7 @@ export default class GenerateInvoices {
       let reconciled = 0
       let paymentsLinked = 0
       let errors = 0
+      const contractCache = new Map<string, Contract | null>()
 
       for (const [studentId, groupPayments] of paymentGroups) {
         const lock = locks.createLock(`invoice-reconcile:${studentId}`, '30s')
@@ -203,7 +333,55 @@ export default class GenerateInvoices {
             const unlinkedPayments = groupPayments.filter((p) => !p.invoiceId)
 
             if (unlinkedPayments.length === 0) {
-              await trx.rollback()
+              if (!freshExisting) {
+                await trx.rollback()
+                return
+              }
+
+              const linkedPayments = groupPayments.filter((p) => p.invoiceId === freshExisting.id)
+              if (linkedPayments.length === 0) {
+                await trx.rollback()
+                return
+              }
+
+              const contract = await this.resolveContractWithDiscounts(
+                linkedPayments[0]?.contractId ?? null,
+                contractCache
+              )
+              const totals = this.calculateInvoiceTotals({
+                payments: linkedPayments,
+                dueDate: freshExisting.dueDate,
+                contract,
+                fineAmount: freshExisting.fineAmount,
+                interestAmount: freshExisting.interestAmount,
+              })
+
+              const changed =
+                freshExisting.baseAmount !== totals.baseAmount ||
+                freshExisting.discountAmount !== totals.discountAmount ||
+                freshExisting.totalAmount !== totals.totalAmount ||
+                (!freshExisting.contractId && !!linkedPayments[0]?.contractId)
+
+              if (!changed) {
+                await trx.rollback()
+                return
+              }
+
+              freshExisting.useTransaction(trx)
+              freshExisting.baseAmount = totals.baseAmount
+              freshExisting.discountAmount = totals.discountAmount
+              freshExisting.totalAmount = totals.totalAmount
+              freshExisting.contractId =
+                freshExisting.contractId ?? linkedPayments[0]?.contractId ?? null
+              await freshExisting.save()
+
+              await trx.commit()
+              reconciled++
+
+              logger.info(`[INVOICES] Recalculated invoice ${freshExisting.id}`, {
+                studentId,
+                newTotal: totals.totalAmount,
+              })
               return
             }
 
@@ -218,10 +396,24 @@ export default class GenerateInvoices {
               // Recalcular totalAmount com todos os payments
               const linkedPayments = groupPayments.filter((p) => p.invoiceId === freshExisting.id)
               const allLinked = [...linkedPayments, ...unlinkedPayments]
-              const newTotal = allLinked.reduce((sum, p) => sum + Number(p.amount), 0)
+              const contract = await this.resolveContractWithDiscounts(
+                allLinked[0]?.contractId ?? null,
+                contractCache
+              )
+              const totals = this.calculateInvoiceTotals({
+                payments: allLinked,
+                dueDate: freshExisting.dueDate,
+                contract,
+                fineAmount: freshExisting.fineAmount,
+                interestAmount: freshExisting.interestAmount,
+              })
 
               freshExisting.useTransaction(trx)
-              freshExisting.totalAmount = newTotal
+              freshExisting.baseAmount = totals.baseAmount
+              freshExisting.discountAmount = totals.discountAmount
+              freshExisting.totalAmount = totals.totalAmount
+              freshExisting.contractId =
+                freshExisting.contractId ?? allLinked[0]?.contractId ?? null
               await freshExisting.save()
 
               await trx.commit()
@@ -231,26 +423,37 @@ export default class GenerateInvoices {
               logger.info(`[INVOICES] Reconciled invoice ${freshExisting.id}`, {
                 studentId,
                 added: unlinkedPayments.length,
-                newTotal,
+                newTotal: totals.totalAmount,
               })
             } else {
               // CRIAÇÃO: invoice não existe, criar e vincular tudo (sem contractId)
-              const totalAmount = unlinkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
               const earliestDueDate = unlinkedPayments.reduce(
                 (earliest, p) => (p.dueDate < earliest ? p.dueDate : earliest),
                 unlinkedPayments[0].dueDate
               )
 
+              const contract = await this.resolveContractWithDiscounts(
+                unlinkedPayments[0]?.contractId ?? null,
+                contractCache
+              )
+              const totals = this.calculateInvoiceTotals({
+                payments: unlinkedPayments,
+                dueDate: earliestDueDate,
+                contract,
+              })
+
               const invoice = await Invoice.create(
                 {
                   studentId,
-                  contractId: null,
+                  contractId: unlinkedPayments[0]?.contractId ?? null,
                   type: 'MONTHLY',
                   month,
                   year,
                   dueDate: earliestDueDate,
                   status: 'OPEN',
-                  totalAmount,
+                  baseAmount: totals.baseAmount,
+                  discountAmount: totals.discountAmount,
+                  totalAmount: totals.totalAmount,
                 },
                 { client: trx }
               )
@@ -267,7 +470,7 @@ export default class GenerateInvoices {
 
               logger.info(`[INVOICES] Created invoice ${invoice.id}`, {
                 studentId,
-                totalAmount,
+                totalAmount: totals.totalAmount,
                 payments: unlinkedPayments.length,
               })
             }

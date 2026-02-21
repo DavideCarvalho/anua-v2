@@ -54,7 +54,6 @@ export default class GenerateInvoicesCommand extends BaseCommand {
           .select('month', 'year')
           .whereNotIn('type', ['AGREEMENT'])
           .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-          .whereNull('invoiceId')
           .groupBy('month', 'year')
           .orderBy('year', 'asc')
           .orderBy('month', 'asc')
@@ -68,7 +67,7 @@ export default class GenerateInvoicesCommand extends BaseCommand {
         const monthYearPairs = await query
 
         if (monthYearPairs.length === 0) {
-          this.logger.info('No unlinked payments found for any month.')
+          this.logger.info('No eligible payments found for any month.')
           return
         }
 

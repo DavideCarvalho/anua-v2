@@ -41,10 +41,7 @@ export default class ApplyInvoiceInterest {
     let errors = 0
 
     try {
-      const invoiceQuery = Invoice.query()
-        .where('status', 'OVERDUE')
-        .where('totalAmount', '>', 0)
-        .whereNotNull('contractId')
+      const invoiceQuery = Invoice.query().where('status', 'OVERDUE').where('totalAmount', '>', 0)
 
       if (options.schoolId) {
         invoiceQuery.whereHas('payments', (q) => {
@@ -78,7 +75,7 @@ export default class ApplyInvoiceInterest {
               .preload('payments', (q) => q.whereNotIn('status', ['CANCELLED', 'RENEGOTIATED']))
               .first()
 
-            if (!freshInvoice || !freshInvoice.contractId) {
+            if (!freshInvoice) {
               skipped++
               return
             }
@@ -88,15 +85,22 @@ export default class ApplyInvoiceInterest {
               return
             }
 
-            // Resolve interest config
-            if (!interestConfigCache.has(freshInvoice.contractId)) {
-              const config = await ContractInterestConfig.query()
-                .where('contractId', freshInvoice.contractId)
-                .first()
-              interestConfigCache.set(freshInvoice.contractId, config)
+            const effectiveContractId =
+              freshInvoice.contractId ?? freshInvoice.payments[0]?.contractId ?? null
+            if (!effectiveContractId) {
+              skipped++
+              return
             }
 
-            const interestConfig = interestConfigCache.get(freshInvoice.contractId)
+            // Resolve interest config
+            if (!interestConfigCache.has(effectiveContractId)) {
+              const config = await ContractInterestConfig.query()
+                .where('contractId', effectiveContractId)
+                .first()
+              interestConfigCache.set(effectiveContractId, config)
+            }
+
+            const interestConfig = interestConfigCache.get(effectiveContractId)
             if (!interestConfig) {
               skipped++
               return
