@@ -4,7 +4,8 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { useEscolaStatsQueryOptions } from '../hooks/queries/use_escola_stats'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
-import { Users, GraduationCap, DollarSign, TrendingUp, AlertCircle } from 'lucide-react'
+import { Users, GraduationCap, DollarSign, TrendingUp, AlertCircle, CircleHelp } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip'
 
 // Loading Skeleton
 function EscolaStatsSkeleton() {
@@ -66,7 +67,8 @@ function EscolaStatsContent() {
         <CardContent>
           <div className="text-2xl font-bold">{stats.activeStudents}</div>
           <p className="text-xs text-muted-foreground">
-            Em {stats.activeAcademicPeriods} {stats.activeAcademicPeriods === 1 ? 'período letivo ativo' : 'períodos letivos ativos'}
+            Em {stats.activeAcademicPeriods}{' '}
+            {stats.activeAcademicPeriods === 1 ? 'período letivo ativo' : 'períodos letivos ativos'}
           </p>
         </CardContent>
       </Card>
@@ -84,7 +86,27 @@ function EscolaStatsContent() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Previsão de Receita</CardTitle>
+          <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+            Previsão de Receita
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Como a previsão de receita é calculada"
+                  >
+                    <CircleHelp className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-xs leading-relaxed">
+                  Considera pagamentos previstos do mês (mensalidade, matrícula, loja, cantina, aula
+                  extra e outros). Não considera multas por atraso nem descontos por pagamento no
+                  prazo.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

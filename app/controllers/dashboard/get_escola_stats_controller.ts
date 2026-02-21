@@ -58,37 +58,25 @@ export default class GetEscolaStatsController {
       .count('* as total')
       .first()
 
-    // Previsão de receita mensal: soma de todos os StudentPayments dos alunos ativos
-    // no mês/ano atual, apenas se existir um período letivo ativo (isActive=true, start<=hoje<=end)
-    // excluindo pagamentos cancelados ou renegociados
+    // Previsão de receita mensal: soma dos StudentPayments do mês/ano atual da escola
+    // (inclui mensalidade, matrícula, loja, cantina, aula extra, cursos etc.)
+    // excluindo pagamentos cancelados, renegociados e acordos
     const now = DateTime.now()
 
-    // Verifica se existe período letivo ativo para a data atual
-    const hasActivePeriod = await AcademicPeriod.query()
-      .where('schoolId', schoolId)
-      .where('isActive', true)
-      .whereNull('deletedAt')
-      .where('startDate', '<=', now.toSQLDate())
-      .where('endDate', '>=', now.toSQLDate())
+    const revenueResult = await StudentPayment.query()
+      .where('month', now.month)
+      .where('year', now.year)
+      .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+      .whereNotIn('type', ['AGREEMENT'])
+      .whereHas('student', (studentQuery) => {
+        studentQuery.whereHas('user', (userQuery) => {
+          userQuery.where('schoolId', schoolId).whereNull('deletedAt')
+        })
+      })
+      .sum('amount as total')
       .first()
 
-    let monthlyRevenue = 0
-    if (hasActivePeriod) {
-      // Soma os pagamentos do mês/ano atual (usa índice em studentId+month+year)
-      const revenueResult = await StudentPayment.query()
-        .where('month', now.month)
-        .where('year', now.year)
-        .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-        .whereHas('student', (studentQuery) => {
-          studentQuery.whereHas('user', (userQuery) => {
-            userQuery.where('schoolId', schoolId).whereNull('deletedAt')
-          })
-        })
-        .sum('amount as total')
-        .first()
-
-      monthlyRevenue = Number(revenueResult?.$extras.total || 0)
-    }
+    const monthlyRevenue = Number(revenueResult?.$extras.total || 0)
 
     const pendingPayments = await StudentPayment.query()
       .whereHas('student', (studentQ) => {
