@@ -37,6 +37,7 @@ const markPaidSchema = z.object({
     message: 'Selecione o método de pagamento',
   }),
   netAmountReceivedReais: z.coerce.number().min(0, 'Valor deve ser zero ou maior'),
+  paidAt: z.string().min(1, 'Informe a data do pagamento'),
   observation: z.string().optional(),
 })
 
@@ -71,6 +72,7 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
     defaultValues: {
       paymentMethod: undefined,
       netAmountReceivedReais: Number(invoice.totalAmount) / 100,
+      paidAt: new Date().toISOString().slice(0, 10),
       observation: '',
     },
   })
@@ -81,6 +83,7 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
         id: invoice.id,
         paymentMethod: data.paymentMethod,
         netAmountReceived: Math.round(data.netAmountReceivedReais * 100),
+        paidAt: data.paidAt,
         observation: data.observation || undefined,
       })
       await queryClient.invalidateQueries({ queryKey: ['invoices'] })
@@ -92,8 +95,7 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
     }
   }
 
-  const studentName =
-    invoice.student?.user?.name || invoice.student?.name || 'Aluno'
+  const studentName = invoice.student?.user?.name || invoice.student?.name || 'Aluno'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,11 +105,23 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
         </DialogHeader>
 
         <div className="text-sm text-muted-foreground space-y-1">
-          <p>Aluno: <span className="font-medium text-foreground">{studentName}</span></p>
+          <p>
+            Aluno: <span className="font-medium text-foreground">{studentName}</span>
+          </p>
           {invoice.month && invoice.year && (
-            <p>Referência: <span className="font-medium text-foreground">{invoice.month}/{invoice.year}</span></p>
+            <p>
+              Referência:{' '}
+              <span className="font-medium text-foreground">
+                {invoice.month}/{invoice.year}
+              </span>
+            </p>
           )}
-          <p>Valor total: <span className="font-medium text-foreground">{formatCurrency(Number(invoice.totalAmount))}</span></p>
+          <p>
+            Valor total:{' '}
+            <span className="font-medium text-foreground">
+              {formatCurrency(Number(invoice.totalAmount))}
+            </span>
+          </p>
         </div>
 
         <Form {...form}>
@@ -154,6 +168,20 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
                   <p className="text-xs text-muted-foreground">
                     Valor efetivamente recebido após taxas
                   </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="paidAt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data do pagamento</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useRef, useEffect, Fragment } from 'rea
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
+import { DateTime } from 'luxon'
 import type { LucideIcon } from 'lucide-react'
 import { useInvoicesQueryOptions, type InvoicesResponse } from '../hooks/queries/use_invoices'
 import { useStudentsQueryOptions } from '../hooks/queries/use_students'
@@ -83,7 +84,7 @@ function StudentMultiSelect({
     enabled: open,
   })
 
-  const students = studentsData?.data ?? []
+  const students: StudentOption[] = (studentsData?.data ?? []) as StudentOption[]
 
   const selectedIds = useMemo(() => new Set(selectedStudents.map((s) => s.id)), [selectedStudents])
 
@@ -175,7 +176,7 @@ function StudentMultiSelect({
           )}
 
           {!isLoading &&
-            students.map((student: any) => (
+            students.map((student) => (
               <label
                 key={student.id}
                 className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-muted"
@@ -266,8 +267,8 @@ const statusConfig: Record<InvoiceStatus, StatusConfig> = {
   },
 }
 
-function getPaymentDescription(payment: InvoicePayment): string {
-  const contractName = (payment as any).contract?.name
+function getPaymentDescription(payment: InvoicePaymentRecord): string {
+  const contractName = payment.contract?.name
   const installmentInfo =
     payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
 
@@ -325,10 +326,53 @@ const monthLabels = [
 type Invoice = InvoicesResponse['data'][number]
 type InvoicePayment = NonNullable<Invoice['payments']>[number]
 type PaginationMeta = InvoicesResponse['meta']
+type StudentOption = { id: string; user?: { name?: string; email?: string } }
+type AcademicPeriodOption = { id: string; name: string }
+
+type InvoicePaymentRecord = InvoicePayment & {
+  contract?: { name?: string }
+}
+
+type InvoiceRecord = Invoice & {
+  studentId?: string
+  student?: { user?: { name?: string } }
+  payments?: InvoicePaymentRecord[]
+  baseAmount?: number | string | null
+  discountAmount?: number | string | null
+  fineAmount?: number | string | null
+  interestAmount?: number | string | null
+  nfseStatus?: string | null
+  nfsePdfUrl?: string | null
+  nfseXmlUrl?: string | null
+}
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('pt-BR')
+
+  if (typeof date === 'string') {
+    const datePart = date.slice(0, 10)
+    const match = datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (match) {
+      return `${match[3]}/${match[2]}/${match[1]}`
+    }
+    return new Date(date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+  }
+
+  return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+}
+
+function getDaysOverdue(dueDate: string | Date | null | undefined): number {
+  if (!dueDate) return 0
+
+  const parsed =
+    typeof dueDate === 'string' ? DateTime.fromISO(dueDate) : DateTime.fromJSDate(dueDate)
+  if (!parsed.isValid) return 0
+
+  const today = DateTime.now().startOf('day')
+  const due = parsed.startOf('day')
+  const days = Math.floor(today.diff(due, 'days').days)
+
+  return Math.max(days, 0)
 }
 
 const nfseStatusConfig: Record<string, { label: string; className: string }> = {
@@ -369,8 +413,8 @@ function InvoicesContent() {
   const [selectedStudents, setSelectedStudents] = useState<SelectedStudent[]>([])
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedPaymentForAction, setSelectedPaymentForAction] = useState<{
-    payment: any
-    student: any
+    payment: InvoicePaymentRecord
+    student: InvoiceRecord['student']
   } | null>(null)
   const [historyInvoiceId, setHistoryInvoiceId] = useState<string | null>(null)
 
@@ -410,7 +454,8 @@ function InvoicesContent() {
   const { data: academicPeriodsData } = useQuery({
     ...useAcademicPeriodsQueryOptions({ limit: 100 }),
   })
-  const academicPeriods = academicPeriodsData?.data ?? []
+  const academicPeriods: AcademicPeriodOption[] = (academicPeriodsData?.data ??
+    []) as AcademicPeriodOption[]
 
   const { data, isLoading, error, refetch } = useQuery(
     useInvoicesQueryOptions({
@@ -438,10 +483,13 @@ function InvoicesContent() {
       const seen = new Set<string>()
       const hydrated: SelectedStudent[] = []
       for (const invoice of data.data) {
-        const studentId = (invoice as any).studentId
+        const studentId = (invoice as InvoiceRecord).studentId
         if (studentId && idsSet.has(studentId) && !seen.has(studentId)) {
           seen.add(studentId)
-          hydrated.push({ id: studentId, name: (invoice as any).student?.user?.name || '-' })
+          hydrated.push({
+            id: studentId,
+            name: (invoice as InvoiceRecord).student?.user?.name || '-',
+          })
         }
       }
       if (hydrated.length > 0) {
@@ -500,7 +548,7 @@ function InvoicesContent() {
     })
   }
 
-  const invoices: Invoice[] = data?.data ?? []
+  const invoices: InvoiceRecord[] = (data?.data ?? []) as InvoiceRecord[]
   const meta: PaginationMeta | undefined = data?.meta
 
   return (
@@ -552,7 +600,7 @@ function InvoicesContent() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os períodos</SelectItem>
-            {academicPeriods.map((period: any) => (
+            {academicPeriods.map((period) => (
               <SelectItem key={period.id} value={period.id}>
                 {period.name}
               </SelectItem>
@@ -626,273 +674,370 @@ function InvoicesContent() {
       {!isLoading && !error && invoices.length > 0 && (
         <div className="space-y-4">
           <div className="border rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="w-10 p-4" />
-                  <th className="text-left p-4 font-medium">Aluno</th>
-                  <th className="text-left p-4 font-medium">Referência</th>
-                  <th className="text-left p-4 font-medium">Vencimento</th>
-                  <th className="text-right p-4 font-medium">Valor Base</th>
-                  <th className="text-right p-4 font-medium">Descontos</th>
-                  <th className="text-right p-4 font-medium">Valor Final</th>
-                  <th className="text-left p-4 font-medium">Status</th>
-                  <th className="text-right p-4 font-medium">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoices.map((invoice) => {
-                  const config = statusConfig[(invoice.status as InvoiceStatus) || 'OPEN']
-                  const StatusIcon = config.icon
-                  const isExpanded = expandedRows.has(invoice.id)
-                  const payments = (invoice as any).payments ?? []
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[980px] md:min-w-0">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="w-10 p-4" />
+                    <th className="text-left p-4 font-medium">Aluno</th>
+                    <th className="text-left p-4 font-medium">Referência</th>
+                    <th className="text-left p-4 font-medium">Vencimento</th>
+                    <th className="text-right p-4 font-medium hidden md:table-cell">Valor Base</th>
+                    <th className="text-right p-4 font-medium hidden md:table-cell">Descontos</th>
+                    <th className="text-right p-4 font-medium hidden md:table-cell">Encargos</th>
+                    <th className="text-right p-4 font-medium">Valor Final</th>
+                    <th className="text-left p-4 font-medium">Status</th>
+                    <th className="text-right p-4 font-medium">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((invoice) => {
+                    const config = statusConfig[(invoice.status as InvoiceStatus) || 'OPEN']
+                    const StatusIcon = config.icon
+                    const isExpanded = expandedRows.has(invoice.id)
+                    const payments = invoice.payments ?? []
+                    const discountAmount = Number(invoice.discountAmount || 0)
+                    const fineAmount = Number(invoice.fineAmount || 0)
+                    const interestAmount = Number(invoice.interestAmount || 0)
+                    const surchargeTotal = fineAmount + interestAmount
+                    const daysOverdue = getDaysOverdue(invoice.dueDate)
 
-                  return (
-                    <Fragment key={invoice.id}>
-                      <tr
-                        className="border-t hover:bg-muted/30 transition-colors cursor-pointer"
-                        onClick={() => toggleRow(invoice.id)}
-                      >
-                        <td className="p-4 w-10">
-                          <ChevronRight
-                            className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                          />
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                              {(invoice as any).student?.user?.name?.charAt(0) || 'A'}
-                            </div>
-                            <div>
-                              <span className="font-medium">
-                                {(invoice as any).student?.user?.name || '-'}
-                              </span>
-                              {payments.length > 0 && (
-                                <p className="text-xs text-muted-foreground">
-                                  {payments.length} {payments.length === 1 ? 'item' : 'itens'}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-4 text-muted-foreground">
-                          {invoice.month && invoice.year
-                            ? `${monthLabels[(invoice.month as number) - 1]} ${invoice.year}`
-                            : '-'}
-                        </td>
-                        <td className="p-4 text-muted-foreground">{formatDate(invoice.dueDate)}</td>
-                        <td className="p-4 text-right text-muted-foreground">
-                          {formatCurrency(Number((invoice as any).baseAmount || 0))}
-                        </td>
-                        <td className="p-4 text-right">
-                          {Number((invoice as any).totalDiscount || 0) > 0 ? (
-                            <span className="text-green-600">
-                              -{formatCurrency(Number((invoice as any).totalDiscount))}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </td>
-                        <td className="p-4 text-right font-semibold">
-                          {formatCurrency(Number(invoice.totalAmount || 0))}
-                        </td>
-                        <td className="p-4">
-                          <div className="flex flex-col gap-1">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium w-fit ${config.className}`}
-                            >
-                              <StatusIcon className="h-3 w-3" />
-                              {config.label}
-                            </span>
-                            {(invoice as any).nfseStatus &&
-                              nfseStatusConfig[(invoice as any).nfseStatus] && (
-                                <span
-                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium w-fit ${nfseStatusConfig[(invoice as any).nfseStatus].className}`}
-                                >
-                                  {nfseStatusConfig[(invoice as any).nfseStatus].label}
+                    return (
+                      <Fragment key={invoice.id}>
+                        <tr
+                          className="border-t hover:bg-muted/30 transition-colors cursor-pointer"
+                          onClick={() => toggleRow(invoice.id)}
+                        >
+                          <td className="p-4 w-10">
+                            <ChevronRight
+                              className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                            />
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
+                                {invoice.student?.user?.name?.charAt(0) || 'A'}
+                              </div>
+                              <div>
+                                <span className="font-medium">
+                                  {invoice.student?.user?.name || '-'}
                                 </span>
-                              )}
-                          </div>
-                        </td>
-                        <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          {ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => openModal(invoice, 'mark-paid')}>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Marcar como paga
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openModal(invoice, 'agreement')}>
-                                  <Handshake className="h-4 w-4 mr-2" />
-                                  Renegociar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setHistoryInvoiceId(invoice.id)}>
-                                  <History className="h-4 w-4 mr-2" />
-                                  Ver historico
-                                </DropdownMenuItem>
-                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
-                                  (invoice as any).nfsePdfUrl && (
-                                    <DropdownMenuItem asChild>
-                                      <a
-                                        href={(invoice as any).nfsePdfUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        <Download className="h-4 w-4 mr-2" />
-                                        Baixar NFS-e (PDF)
-                                      </a>
-                                    </DropdownMenuItem>
-                                  )}
-                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
-                                  (invoice as any).nfseXmlUrl && (
-                                    <DropdownMenuItem asChild>
-                                      <a
-                                        href={(invoice as any).nfseXmlUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        <FileText className="h-4 w-4 mr-2" />
-                                        Baixar NFS-e (XML)
-                                      </a>
-                                    </DropdownMenuItem>
-                                  )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
-                          {!ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setHistoryInvoiceId(invoice.id)}>
-                                  <History className="h-4 w-4 mr-2" />
-                                  Ver historico
-                                </DropdownMenuItem>
-                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
-                                  (invoice as any).nfsePdfUrl && (
-                                    <DropdownMenuItem asChild>
-                                      <a
-                                        href={(invoice as any).nfsePdfUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        <Download className="h-4 w-4 mr-2" />
-                                        Baixar NFS-e (PDF)
-                                      </a>
-                                    </DropdownMenuItem>
-                                  )}
-                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
-                                  (invoice as any).nfseXmlUrl && (
-                                    <DropdownMenuItem asChild>
-                                      <a
-                                        href={(invoice as any).nfseXmlUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        <FileText className="h-4 w-4 mr-2" />
-                                        Baixar NFS-e (XML)
-                                      </a>
-                                    </DropdownMenuItem>
-                                  )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
-                        </td>
-                      </tr>
-
-                      {isExpanded && (
-                        <tr key={`${invoice.id}-expanded`} className="border-t">
-                          <td colSpan={9} className="p-0">
-                            <div className="bg-muted/20 px-6 py-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                              {payments.length === 0 ? (
-                                <p className="text-sm text-muted-foreground py-2">
-                                  Nenhum pagamento vinculado a esta fatura
-                                </p>
-                              ) : (
-                                <table className="w-full">
-                                  <thead>
-                                    <tr className="text-xs text-muted-foreground">
-                                      <th className="text-left py-2 px-3 font-medium">Tipo</th>
-                                      <th className="text-left py-2 px-3 font-medium">
-                                        Referência
-                                      </th>
-                                      <th className="text-left py-2 px-3 font-medium">Valor</th>
-                                      <th className="text-left py-2 px-3 font-medium">Status</th>
-                                      <th className="text-right py-2 px-3 font-medium">Ações</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {payments.map((payment: any) => {
-                                      const pConfig = paymentStatusConfig[payment.status] ?? {
-                                        label: payment.status,
-                                        className: 'bg-gray-100 text-gray-700',
-                                      }
-                                      return (
-                                        <tr
-                                          key={payment.id}
-                                          className="border-t border-muted text-sm"
-                                        >
-                                          <td className="py-2 px-3">
-                                            {getPaymentDescription(payment)}
-                                          </td>
-                                          <td className="py-2 px-3 text-muted-foreground">
-                                            {payment.month && payment.year
-                                              ? `${monthLabels[payment.month - 1]} ${payment.year}`
-                                              : '-'}
-                                          </td>
-                                          <td className="py-2 px-3 font-medium">
-                                            {formatCurrency(Number(payment.amount || 0))}
-                                          </td>
-                                          <td className="py-2 px-3">
-                                            <span
-                                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${pConfig.className}`}
-                                            >
-                                              {pConfig.label}
-                                            </span>
-                                          </td>
-                                          <td className="py-2 px-3 text-right">
-                                            {ACTIONABLE_PAYMENT_STATUSES.includes(
-                                              payment.status
-                                            ) && (
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-7 w-7 p-0"
-                                                title="Marcar como pago"
-                                                onClick={() =>
-                                                  setSelectedPaymentForAction({
-                                                    payment,
-                                                    student: (invoice as any).student,
-                                                  })
-                                                }
-                                              >
-                                                <CheckCircle className="h-4 w-4 text-green-600" />
-                                              </Button>
-                                            )}
-                                          </td>
-                                        </tr>
-                                      )
-                                    })}
-                                  </tbody>
-                                </table>
-                              )}
+                                {payments.length > 0 && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {payments.length} {payments.length === 1 ? 'item' : 'itens'}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </td>
+                          <td className="p-4 text-muted-foreground">
+                            {invoice.month && invoice.year
+                              ? `${monthLabels[(invoice.month as number) - 1]} ${invoice.year}`
+                              : '-'}
+                          </td>
+                          <td className="p-4 text-muted-foreground">
+                            {formatDate(invoice.dueDate)}
+                          </td>
+                          <td className="p-4 text-right text-muted-foreground hidden md:table-cell">
+                            {formatCurrency(Number(invoice.baseAmount || 0))}
+                          </td>
+                          <td className="p-4 text-right hidden md:table-cell">
+                            {discountAmount > 0 ? (
+                              <span className="text-green-600">
+                                -{formatCurrency(discountAmount)}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="p-4 text-right hidden md:table-cell">
+                            {surchargeTotal > 0 ? (
+                              <div className="inline-flex flex-col items-end gap-0.5">
+                                <span className="font-medium text-orange-600">
+                                  +{formatCurrency(surchargeTotal)}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground">
+                                  multa {formatCurrency(fineAmount)} + juros{' '}
+                                  {formatCurrency(interestAmount)}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="p-4 text-right font-semibold">
+                            <div className="inline-flex flex-col items-end gap-0.5">
+                              <span>{formatCurrency(Number(invoice.totalAmount || 0))}</span>
+                              <div className="md:hidden text-[11px] font-normal text-muted-foreground">
+                                <span>Base {formatCurrency(Number(invoice.baseAmount || 0))}</span>
+                                {discountAmount > 0 && (
+                                  <span className="ml-2 text-green-600">
+                                    - {formatCurrency(discountAmount)}
+                                  </span>
+                                )}
+                                {surchargeTotal > 0 && (
+                                  <span className="ml-2 text-orange-600">
+                                    + {formatCurrency(surchargeTotal)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex flex-col gap-1">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium w-fit ${config.className}`}
+                              >
+                                <StatusIcon className="h-3 w-3" />
+                                {config.label}
+                              </span>
+                              {invoice.status === 'OVERDUE' && daysOverdue > 0 && (
+                                <span className="text-[10px] text-orange-700">
+                                  {daysOverdue} dias de atraso
+                                </span>
+                              )}
+                              {invoice.nfseStatus &&
+                                nfseStatusConfig[
+                                  invoice.nfseStatus as keyof typeof nfseStatusConfig
+                                ] && (
+                                  <span
+                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium w-fit ${nfseStatusConfig[invoice.nfseStatus as keyof typeof nfseStatusConfig].className}`}
+                                  >
+                                    {
+                                      nfseStatusConfig[
+                                        invoice.nfseStatus as keyof typeof nfseStatusConfig
+                                      ].label
+                                    }
+                                  </span>
+                                )}
+                            </div>
+                          </td>
+                          <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            {ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => openModal(invoice, 'mark-paid')}>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Marcar como paga
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openModal(invoice, 'agreement')}>
+                                    <Handshake className="h-4 w-4 mr-2" />
+                                    Renegociar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setHistoryInvoiceId(invoice.id)}>
+                                    <History className="h-4 w-4 mr-2" />
+                                    Ver historico
+                                  </DropdownMenuItem>
+                                  {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={invoice.nfsePdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (PDF)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                  {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={invoice.nfseXmlUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <FileText className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (XML)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                            {!ACTIONABLE_STATUSES.includes(invoice.status as InvoiceStatus) && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => setHistoryInvoiceId(invoice.id)}>
+                                    <History className="h-4 w-4 mr-2" />
+                                    Ver historico
+                                  </DropdownMenuItem>
+                                  {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={invoice.nfsePdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (PDF)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                  {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={invoice.nfseXmlUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <FileText className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (XML)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </td>
                         </tr>
-                      )}
-                    </Fragment>
-                  )
-                })}
-              </tbody>
-            </table>
+
+                        {isExpanded && (
+                          <tr key={`${invoice.id}-expanded`} className="border-t">
+                            <td colSpan={10} className="p-0">
+                              <div className="bg-muted/20 px-6 py-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                                {payments.length === 0 ? (
+                                  <p className="text-sm text-muted-foreground py-2">
+                                    Nenhum pagamento vinculado a esta fatura
+                                  </p>
+                                ) : (
+                                  <div className="space-y-3">
+                                    <div className="rounded-md border bg-background px-4 py-3">
+                                      <p className="text-xs font-medium text-muted-foreground mb-2">
+                                        Composição da fatura
+                                      </p>
+                                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 text-sm">
+                                        <div className="flex items-center justify-between gap-3 lg:block">
+                                          <span className="text-muted-foreground">Valor base</span>
+                                          <p className="font-medium text-foreground">
+                                            {formatCurrency(Number(invoice.baseAmount || 0))}
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 lg:block">
+                                          <span className="text-muted-foreground">Desconto</span>
+                                          <p className="font-medium text-green-600">
+                                            {discountAmount > 0
+                                              ? `-${formatCurrency(discountAmount)}`
+                                              : '-'}
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 lg:block">
+                                          <span className="text-muted-foreground">Multa</span>
+                                          <p className="font-medium text-orange-600">
+                                            {fineAmount > 0
+                                              ? `+${formatCurrency(fineAmount)}`
+                                              : '-'}
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 lg:block">
+                                          <span className="text-muted-foreground">Juros</span>
+                                          <p className="font-medium text-orange-600">
+                                            {interestAmount > 0
+                                              ? `+${formatCurrency(interestAmount)}`
+                                              : '-'}
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 lg:block lg:border-l lg:pl-4">
+                                          <span className="text-muted-foreground">Total atual</span>
+                                          <p className="font-semibold text-foreground">
+                                            {formatCurrency(Number(invoice.totalAmount || 0))}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <table className="w-full">
+                                      <thead>
+                                        <tr className="text-xs text-muted-foreground">
+                                          <th className="text-left py-2 px-3 font-medium">Tipo</th>
+                                          <th className="text-left py-2 px-3 font-medium">
+                                            Referência
+                                          </th>
+                                          <th className="text-left py-2 px-3 font-medium">Valor</th>
+                                          <th className="text-left py-2 px-3 font-medium">
+                                            Status
+                                          </th>
+                                          <th className="text-right py-2 px-3 font-medium">
+                                            Ações
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {payments.map((payment) => {
+                                          const pConfig = paymentStatusConfig[payment.status] ?? {
+                                            label: payment.status,
+                                            className: 'bg-gray-100 text-gray-700',
+                                          }
+                                          return (
+                                            <tr
+                                              key={payment.id}
+                                              className="border-t border-muted text-sm"
+                                            >
+                                              <td className="py-2 px-3">
+                                                {getPaymentDescription(payment)}
+                                              </td>
+                                              <td className="py-2 px-3 text-muted-foreground">
+                                                {payment.month && payment.year
+                                                  ? `${monthLabels[payment.month - 1]} ${payment.year}`
+                                                  : '-'}
+                                              </td>
+                                              <td className="py-2 px-3 font-medium">
+                                                {formatCurrency(Number(payment.amount || 0))}
+                                              </td>
+                                              <td className="py-2 px-3">
+                                                <span
+                                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${pConfig.className}`}
+                                                >
+                                                  {pConfig.label}
+                                                </span>
+                                              </td>
+                                              <td className="py-2 px-3 text-right">
+                                                {ACTIONABLE_PAYMENT_STATUSES.includes(
+                                                  payment.status
+                                                ) && (
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 w-7 p-0"
+                                                    title="Marcar como pago"
+                                                    onClick={() =>
+                                                      setSelectedPaymentForAction({
+                                                        payment,
+                                                        student: invoice.student,
+                                                      })
+                                                    }
+                                                  >
+                                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                                                  </Button>
+                                                )}
+                                              </td>
+                                            </tr>
+                                          )
+                                        })}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {meta && (

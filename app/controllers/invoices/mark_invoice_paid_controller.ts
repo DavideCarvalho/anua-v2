@@ -21,9 +21,11 @@ export default class MarkInvoicePaidController {
     const trx = await db.transaction()
 
     try {
+      const paidAt = DateTime.fromJSDate(payload.paidAt)
+
       invoice.useTransaction(trx)
       invoice.status = 'PAID'
-      invoice.paidAt = DateTime.now()
+      invoice.paidAt = paidAt
       invoice.paymentMethod = payload.paymentMethod
       invoice.netAmountReceived = payload.netAmountReceived
       invoice.observation = payload.observation ?? null
@@ -36,7 +38,7 @@ export default class MarkInvoicePaidController {
         .whereNot('status', 'CANCELLED')
         .update({
           status: 'PAID',
-          paidAt: DateTime.now().toSQL(),
+          paidAt: paidAt.toSQL(),
           updatedAt: DateTime.now().toSQL(),
         })
 

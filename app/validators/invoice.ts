@@ -20,6 +20,7 @@ export const markInvoicePaidValidator = vine.compile(
   vine.object({
     paymentMethod: vine.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER']),
     netAmountReceived: vine.number().min(0),
+    paidAt: vine.date(),
     observation: vine.string().trim().optional(),
   })
 )
