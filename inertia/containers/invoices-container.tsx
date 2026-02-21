@@ -7,6 +7,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useInvoicesQueryOptions, type InvoicesResponse } from '../hooks/queries/use_invoices'
 import { useStudentsQueryOptions } from '../hooks/queries/use_students'
 import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
+import { tuyau } from '../lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -43,6 +44,9 @@ import {
   Users,
   History,
   Download,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
 import { Checkbox } from '../components/ui/checkbox'
@@ -67,9 +71,15 @@ type SelectedStudent = { id: string; name: string }
 function StudentMultiSelect({
   selectedStudents,
   onChange,
+  academicPeriodId,
+  courseId,
+  classId,
 }: {
   selectedStudents: SelectedStudent[]
   onChange: (students: SelectedStudent[]) => void
+  academicPeriodId?: string | null
+  courseId?: string | null
+  classId?: string | null
 }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -79,6 +89,9 @@ function StudentMultiSelect({
   const { data: studentsData, isLoading } = useQuery({
     ...useStudentsQueryOptions({
       search: debouncedSearch || undefined,
+      academicPeriodId: academicPeriodId || undefined,
+      courseId: courseId || undefined,
+      classId: classId || undefined,
       limit: 15,
     }),
     enabled: open,
@@ -328,6 +341,13 @@ type InvoicePayment = NonNullable<Invoice['payments']>[number]
 type PaginationMeta = InvoicesResponse['meta']
 type StudentOption = { id: string; user?: { name?: string; email?: string } }
 type AcademicPeriodOption = { id: string; name: string }
+type CourseLevel = {
+  id: string
+  levelId: string
+  name: string
+  classes: { id: string; name: string }[]
+}
+type AcademicPeriodCourse = { id: string; courseId: string; name: string; levels: CourseLevel[] }
 
 type InvoicePaymentRecord = InvoicePayment & {
   contract?: { name?: string }
@@ -406,6 +426,14 @@ export function InvoicesContainer() {
 }
 
 type ModalType = 'mark-paid' | 'agreement' | null
+type SortableColumn =
+  | 'dueDate'
+  | 'baseAmount'
+  | 'discountAmount'
+  | 'totalAmount'
+  | 'status'
+  | 'month'
+  | 'year'
 
 function InvoicesContent() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
@@ -435,6 +463,10 @@ function InvoicesContent() {
     studentIds: parseAsArrayOf(parseAsString),
     status: parseAsArrayOf(parseAsString).withDefault(DEFAULT_STATUSES),
     academicPeriodId: parseAsString,
+    courseId: parseAsString,
+    classId: parseAsString,
+    sortBy: parseAsString,
+    sortDirection: parseAsString,
     month: parseAsInteger,
     year: parseAsInteger,
     page: parseAsInteger.withDefault(1),
@@ -447,6 +479,10 @@ function InvoicesContent() {
     limit,
     status: filterStatuses,
     academicPeriodId: filterAcademicPeriodId,
+    courseId: filterCourseId,
+    classId: filterClassId,
+    sortBy: filterSortBy,
+    sortDirection: filterSortDirection,
     month: filterMonth,
     year: filterYear,
   } = filters
@@ -457,6 +493,44 @@ function InvoicesContent() {
   const academicPeriods: AcademicPeriodOption[] = (academicPeriodsData?.data ??
     []) as AcademicPeriodOption[]
 
+  const { data: coursesData } = useQuery({
+    queryKey: ['invoice-academic-period-courses', filterAcademicPeriodId],
+    queryFn: async () => {
+      const response = await tuyau.api.v1['academic-periods']({
+        id: filterAcademicPeriodId!,
+      }).courses.$get()
+      if (response.error) throw new Error('Erro ao carregar cursos')
+      return response.data as AcademicPeriodCourse[]
+    },
+    enabled: !!filterAcademicPeriodId,
+  })
+  const courses = coursesData ?? []
+
+  const classes = useMemo(() => {
+    if (!filterCourseId || courses.length === 0) return []
+    const selectedCourse = courses.find((course) => course.courseId === filterCourseId)
+    if (!selectedCourse) return []
+
+    return selectedCourse.levels.flatMap((level) =>
+      level.classes.map((cls) => ({ ...cls, levelName: level.name }))
+    )
+  }, [courses, filterCourseId])
+
+  const sortableColumns: SortableColumn[] = [
+    'dueDate',
+    'baseAmount',
+    'discountAmount',
+    'totalAmount',
+    'status',
+    'month',
+    'year',
+  ]
+  const activeSortBy: SortableColumn =
+    filterSortBy && sortableColumns.includes(filterSortBy as SortableColumn)
+      ? (filterSortBy as SortableColumn)
+      : 'dueDate'
+  const activeSortDirection: 'asc' | 'desc' = filterSortDirection === 'desc' ? 'desc' : 'asc'
+
   const { data, isLoading, error, refetch } = useQuery(
     useInvoicesQueryOptions({
       page,
@@ -465,10 +539,36 @@ function InvoicesContent() {
         filterStudentIds && filterStudentIds.length > 0 ? filterStudentIds.join(',') : undefined,
       status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
       academicPeriodId: filterAcademicPeriodId || undefined,
+      courseId: filterCourseId || undefined,
+      classId: filterClassId || undefined,
+      sortBy: activeSortBy,
+      sortDirection: activeSortDirection,
       month: filterMonth || undefined,
       year: filterYear || undefined,
     })
   )
+
+  function toggleSort(column: SortableColumn) {
+    if (activeSortBy !== column) {
+      setFilters({ sortBy: column, sortDirection: 'asc', page: 1 })
+      return
+    }
+
+    setFilters({
+      sortBy: column,
+      sortDirection: activeSortDirection === 'asc' ? 'desc' : 'asc',
+      page: 1,
+    })
+  }
+
+  function sortIcon(column: SortableColumn) {
+    if (activeSortBy !== column) return <ArrowUpDown className="h-3.5 w-3.5" />
+    return activeSortDirection === 'asc' ? (
+      <ArrowUp className="h-3.5 w-3.5" />
+    ) : (
+      <ArrowDown className="h-3.5 w-3.5" />
+    )
+  }
 
   // Hydrate selectedStudents from invoice data when URL has studentIds but UI state is empty
   useEffect(() => {
@@ -521,6 +621,8 @@ function InvoicesContent() {
     filterMonth ||
     filterYear ||
     filterAcademicPeriodId ||
+    filterCourseId ||
+    filterClassId ||
     (filterStudentIds && filterStudentIds.length > 0)
   )
 
@@ -529,6 +631,10 @@ function InvoicesContent() {
     setFilters({
       status: DEFAULT_STATUSES,
       academicPeriodId: null,
+      courseId: null,
+      classId: null,
+      sortBy: 'dueDate',
+      sortDirection: 'asc',
       month: null,
       year: null,
       studentIds: null,
@@ -554,7 +660,13 @@ function InvoicesContent() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <StudentMultiSelect selectedStudents={selectedStudents} onChange={handleStudentsChange} />
+        <StudentMultiSelect
+          selectedStudents={selectedStudents}
+          onChange={handleStudentsChange}
+          academicPeriodId={filterAcademicPeriodId}
+          courseId={filterCourseId}
+          classId={filterClassId}
+        />
 
         <Popover>
           <PopoverTrigger asChild>
@@ -593,7 +705,14 @@ function InvoicesContent() {
 
         <Select
           value={filterAcademicPeriodId || 'all'}
-          onValueChange={(v) => setFilters({ academicPeriodId: v === 'all' ? null : v, page: 1 })}
+          onValueChange={(v) =>
+            setFilters({
+              academicPeriodId: v === 'all' ? null : v,
+              courseId: null,
+              classId: null,
+              page: 1,
+            })
+          }
         >
           <SelectTrigger className="w-56">
             <SelectValue placeholder="Período letivo" />
@@ -603,6 +722,48 @@ function InvoicesContent() {
             {academicPeriods.map((period) => (
               <SelectItem key={period.id} value={period.id}>
                 {period.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filterCourseId || 'all'}
+          onValueChange={(v) =>
+            setFilters({
+              courseId: v === 'all' ? null : v,
+              classId: null,
+              page: 1,
+            })
+          }
+          disabled={!filterAcademicPeriodId}
+        >
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="Curso" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os cursos</SelectItem>
+            {courses.map((course) => (
+              <SelectItem key={course.courseId} value={course.courseId}>
+                {course.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filterClassId || 'all'}
+          onValueChange={(v) => setFilters({ classId: v === 'all' ? null : v, page: 1 })}
+          disabled={!filterCourseId}
+        >
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="Turma" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as turmas</SelectItem>
+            {classes.map((cls) => (
+              <SelectItem key={cls.id} value={cls.id}>
+                {cls.name} ({cls.levelName})
               </SelectItem>
             ))}
           </SelectContent>
@@ -681,12 +842,57 @@ function InvoicesContent() {
                     <th className="w-10 p-4" />
                     <th className="text-left p-4 font-medium">Aluno</th>
                     <th className="text-left p-4 font-medium">Referência</th>
-                    <th className="text-left p-4 font-medium">Vencimento</th>
-                    <th className="text-right p-4 font-medium hidden md:table-cell">Valor Base</th>
-                    <th className="text-right p-4 font-medium hidden md:table-cell">Descontos</th>
+                    <th className="text-left p-4 font-medium">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        onClick={() => toggleSort('dueDate')}
+                      >
+                        Vencimento
+                        {sortIcon('dueDate')}
+                      </button>
+                    </th>
+                    <th className="text-right p-4 font-medium hidden md:table-cell">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        onClick={() => toggleSort('baseAmount')}
+                      >
+                        Valor Base
+                        {sortIcon('baseAmount')}
+                      </button>
+                    </th>
+                    <th className="text-right p-4 font-medium hidden md:table-cell">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        onClick={() => toggleSort('discountAmount')}
+                      >
+                        Descontos
+                        {sortIcon('discountAmount')}
+                      </button>
+                    </th>
                     <th className="text-right p-4 font-medium hidden md:table-cell">Encargos</th>
-                    <th className="text-right p-4 font-medium">Valor Final</th>
-                    <th className="text-left p-4 font-medium">Status</th>
+                    <th className="text-right p-4 font-medium">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        onClick={() => toggleSort('totalAmount')}
+                      >
+                        Valor Final
+                        {sortIcon('totalAmount')}
+                      </button>
+                    </th>
+                    <th className="text-left p-4 font-medium">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        onClick={() => toggleSort('status')}
+                      >
+                        Status
+                        {sortIcon('status')}
+                      </button>
+                    </th>
                     <th className="text-right p-4 font-medium">Ações</th>
                   </tr>
                 </thead>

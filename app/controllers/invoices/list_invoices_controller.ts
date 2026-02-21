@@ -14,8 +14,12 @@ export default class ListInvoicesController {
       search,
       contractId,
       academicPeriodId,
+      courseId,
+      classId,
       status,
       type,
+      sortBy = 'dueDate',
+      sortDirection = 'asc',
       month,
       year,
       page = 1,
@@ -28,7 +32,6 @@ export default class ListInvoicesController {
         q.preload('contract')
         q.preload('studentHasExtraClass', (eq) => eq.preload('extraClass'))
       })
-      .orderBy('dueDate', 'asc')
 
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
       query.where((scopedQuery) => {
@@ -78,6 +81,26 @@ export default class ListInvoicesController {
       })
     }
 
+    if (courseId) {
+      query.whereHas('payments', (paymentsQuery) => {
+        paymentsQuery.whereHas('studentHasLevel', (enrollmentQuery) => {
+          enrollmentQuery.whereHas('levelAssignedToCourseAcademicPeriod', (levelCourseQuery) => {
+            levelCourseQuery.whereHas('courseHasAcademicPeriod', (coursePeriodQuery) => {
+              coursePeriodQuery.where('courseId', courseId)
+            })
+          })
+        })
+      })
+    }
+
+    if (classId) {
+      query.whereHas('payments', (paymentsQuery) => {
+        paymentsQuery.whereHas('studentHasLevel', (enrollmentQuery) => {
+          enrollmentQuery.where('classId', classId)
+        })
+      })
+    }
+
     if (status) {
       const statuses = status
         .split(',')
@@ -101,6 +124,20 @@ export default class ListInvoicesController {
     if (year) {
       query.where('year', year)
     }
+
+    const sortableColumns = new Set([
+      'dueDate',
+      'baseAmount',
+      'discountAmount',
+      'totalAmount',
+      'status',
+      'month',
+      'year',
+    ])
+
+    const orderByColumn = sortableColumns.has(sortBy) ? sortBy : 'dueDate'
+    const orderByDirection = sortDirection === 'desc' ? 'desc' : 'asc'
+    query.orderBy(orderByColumn, orderByDirection)
 
     const invoices = await query.paginate(page, limit)
 
