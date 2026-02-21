@@ -2,13 +2,7 @@ import { Head } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { useState } from 'react'
 import { EscolaLayout } from '~/components/layouts'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
 import {
@@ -56,10 +50,7 @@ const DAYS_OF_WEEK = [
   { key: 'FRIDAY', label: 'Sexta-feira', number: 5 },
 ]
 
-async function fetchSchedule(
-  classId: string,
-  academicPeriodId: string
-): Promise<ScheduleData> {
+async function fetchSchedule(classId: string, academicPeriodId: string): Promise<ScheduleData> {
   const response = await fetch(
     `/api/v1/schedules/class/${classId}?academicPeriodId=${academicPeriodId}`
   )
@@ -73,13 +64,14 @@ export default function QuadroPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
 
-  const { data: classesData, isLoading: loadingClasses } = useQuery(
-    useClassesQueryOptions({ limit: 100 })
-  )
-
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
     useAcademicPeriodsQueryOptions({ limit: 100 })
   )
+
+  const { data: classesData, isLoading: loadingClasses } = useQuery({
+    ...useClassesQueryOptions({ limit: 100, academicPeriodId: selectedAcademicPeriodId }),
+    enabled: !!selectedAcademicPeriodId,
+  })
 
   const classes = classesData?.data ?? []
   const academicPeriods = periodsData?.data ?? []
@@ -93,9 +85,7 @@ export default function QuadroPage() {
 
   // Get unique time slots
   const timeSlots = scheduleData?.slots
-    ? Array.from(
-        new Set(scheduleData.slots.map((s) => `${s.startTime}-${s.endTime}`))
-      ).sort()
+    ? Array.from(new Set(scheduleData.slots.map((s) => `${s.startTime}-${s.endTime}`))).sort()
     : []
 
   const handlePrint = () => {
@@ -138,33 +128,13 @@ export default function QuadroPage() {
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Turma</Label>
-                <Select
-                  value={selectedClassId}
-                  onValueChange={setSelectedClassId}
-                  disabled={loadingClasses}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={loadingClasses ? 'Carregando...' : 'Selecione uma turma'}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {classes.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                        {c.level?.name && ` - ${c.level.name}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label>Período Letivo</Label>
                 <Select
                   value={selectedAcademicPeriodId}
-                  onValueChange={setSelectedAcademicPeriodId}
+                  onValueChange={(value) => {
+                    setSelectedAcademicPeriodId(value)
+                    setSelectedClassId('')
+                  }}
                   disabled={loadingPeriods}
                 >
                   <SelectTrigger>
@@ -176,6 +146,35 @@ export default function QuadroPage() {
                     {academicPeriods.map((ap) => (
                       <SelectItem key={ap.id} value={ap.id}>
                         {ap.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Turma</Label>
+                <Select
+                  value={selectedClassId}
+                  onValueChange={setSelectedClassId}
+                  disabled={!selectedAcademicPeriodId || loadingClasses}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !selectedAcademicPeriodId
+                          ? 'Selecione um período primeiro'
+                          : loadingClasses
+                            ? 'Carregando...'
+                            : 'Selecione uma turma'
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                        {c.level?.name && ` - ${c.level.name}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -221,9 +220,7 @@ export default function QuadroPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-32 border bg-muted font-bold">
-                          Horário
-                        </TableHead>
+                        <TableHead className="w-32 border bg-muted font-bold">Horário</TableHead>
                         {DAYS_OF_WEEK.map((day) => (
                           <TableHead
                             key={day.key}
@@ -262,10 +259,7 @@ export default function QuadroPage() {
                               }
 
                               return (
-                                <TableCell
-                                  key={day.key}
-                                  className="border text-center"
-                                >
+                                <TableCell key={day.key} className="border text-center">
                                   {slot?.teacherHasClass ? (
                                     <div>
                                       <p className="font-medium text-primary">
