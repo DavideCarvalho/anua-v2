@@ -189,7 +189,7 @@ export default function QuadroPage() {
           <Card className="border-yellow-200 bg-yellow-50 print:hidden">
             <CardContent className="pt-6">
               <p className="text-sm text-yellow-800">
-                Selecione uma turma e um período letivo para visualizar o quadro de horários.
+                Selecione um período letivo e uma turma para visualizar o quadro de horários.
               </p>
             </CardContent>
           </Card>
