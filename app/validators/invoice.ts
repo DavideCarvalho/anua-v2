@@ -12,7 +12,16 @@ export const listInvoicesValidator = vine.compile(
     status: vine.string().trim().optional(),
     type: vine.enum(['MONTHLY', 'UPFRONT']).optional(),
     sortBy: vine
-      .enum(['dueDate', 'baseAmount', 'discountAmount', 'totalAmount', 'status', 'month', 'year'])
+      .enum([
+        'dueDate',
+        'reference',
+        'baseAmount',
+        'discountAmount',
+        'totalAmount',
+        'status',
+        'month',
+        'year',
+      ])
       .optional(),
     sortDirection: vine.enum(['asc', 'desc']).optional(),
     month: vine.number().min(1).max(12).optional(),

@@ -117,16 +117,37 @@ export default class ListInvoicesController {
       query.where('type', type)
     }
 
-    if (month) {
-      query.where('month', month)
-    }
+    if (month && year) {
+      query.where((referenceQuery) => {
+        referenceQuery
+          .where((invoiceReferenceQuery) => {
+            invoiceReferenceQuery.where('month', month).where('year', year)
+          })
+          .orWhereHas('payments', (paymentsQuery) => {
+            paymentsQuery.where('month', month).where('year', year)
+          })
+      })
+    } else {
+      if (month) {
+        query.where((referenceQuery) => {
+          referenceQuery.where('month', month).orWhereHas('payments', (paymentsQuery) => {
+            paymentsQuery.where('month', month)
+          })
+        })
+      }
 
-    if (year) {
-      query.where('year', year)
+      if (year) {
+        query.where((referenceQuery) => {
+          referenceQuery.where('year', year).orWhereHas('payments', (paymentsQuery) => {
+            paymentsQuery.where('year', year)
+          })
+        })
+      }
     }
 
     const sortableColumns = new Set([
       'dueDate',
+      'reference',
       'baseAmount',
       'discountAmount',
       'totalAmount',
@@ -137,7 +158,11 @@ export default class ListInvoicesController {
 
     const orderByColumn = sortableColumns.has(sortBy) ? sortBy : 'dueDate'
     const orderByDirection = sortDirection === 'desc' ? 'desc' : 'asc'
-    query.orderBy(orderByColumn, orderByDirection)
+    if (orderByColumn === 'reference') {
+      query.orderBy('year', orderByDirection).orderBy('month', orderByDirection)
+    } else {
+      query.orderBy(orderByColumn, orderByDirection)
+    }
 
     const invoices = await query.paginate(page, limit)
 

@@ -428,6 +428,7 @@ export function InvoicesContainer() {
 type ModalType = 'mark-paid' | 'agreement' | null
 type SortableColumn =
   | 'dueDate'
+  | 'reference'
   | 'baseAmount'
   | 'discountAmount'
   | 'totalAmount'
@@ -518,6 +519,7 @@ function InvoicesContent() {
 
   const sortableColumns: SortableColumn[] = [
     'dueDate',
+    'reference',
     'baseAmount',
     'discountAmount',
     'totalAmount',
@@ -525,11 +527,12 @@ function InvoicesContent() {
     'month',
     'year',
   ]
-  const activeSortBy: SortableColumn =
+  const activeSortBy: SortableColumn | null =
     filterSortBy && sortableColumns.includes(filterSortBy as SortableColumn)
       ? (filterSortBy as SortableColumn)
-      : 'dueDate'
-  const activeSortDirection: 'asc' | 'desc' = filterSortDirection === 'desc' ? 'desc' : 'asc'
+      : null
+  const activeSortDirection: 'asc' | 'desc' | null =
+    activeSortBy === null ? null : filterSortDirection === 'desc' ? 'desc' : 'asc'
 
   const { data, isLoading, error, refetch } = useQuery(
     useInvoicesQueryOptions({
@@ -541,8 +544,8 @@ function InvoicesContent() {
       academicPeriodId: filterAcademicPeriodId || undefined,
       courseId: filterCourseId || undefined,
       classId: filterClassId || undefined,
-      sortBy: activeSortBy,
-      sortDirection: activeSortDirection,
+      sortBy: activeSortBy || undefined,
+      sortDirection: activeSortDirection || undefined,
       month: filterMonth || undefined,
       year: filterYear || undefined,
     })
@@ -554,9 +557,14 @@ function InvoicesContent() {
       return
     }
 
+    if (activeSortDirection === 'asc') {
+      setFilters({ sortBy: column, sortDirection: 'desc', page: 1 })
+      return
+    }
+
     setFilters({
-      sortBy: column,
-      sortDirection: activeSortDirection === 'asc' ? 'desc' : 'asc',
+      sortBy: null,
+      sortDirection: null,
       page: 1,
     })
   }
@@ -841,11 +849,20 @@ function InvoicesContent() {
                   <tr>
                     <th className="w-10 p-4" />
                     <th className="text-left p-4 font-medium">Aluno</th>
-                    <th className="text-left p-4 font-medium">Referência</th>
                     <th className="text-left p-4 font-medium">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
+                        onClick={() => toggleSort('reference')}
+                      >
+                        Referência
+                        {sortIcon('reference')}
+                      </button>
+                    </th>
+                    <th className="text-left p-4 font-medium">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
                         onClick={() => toggleSort('dueDate')}
                       >
                         Vencimento
@@ -855,7 +872,7 @@ function InvoicesContent() {
                     <th className="text-right p-4 font-medium hidden md:table-cell">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
                         onClick={() => toggleSort('baseAmount')}
                       >
                         Valor Base
@@ -865,7 +882,7 @@ function InvoicesContent() {
                     <th className="text-right p-4 font-medium hidden md:table-cell">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
                         onClick={() => toggleSort('discountAmount')}
                       >
                         Descontos
@@ -876,7 +893,7 @@ function InvoicesContent() {
                     <th className="text-right p-4 font-medium">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
                         onClick={() => toggleSort('totalAmount')}
                       >
                         Valor Final
@@ -886,7 +903,7 @@ function InvoicesContent() {
                     <th className="text-left p-4 font-medium">
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 hover:text-foreground"
+                        className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
                         onClick={() => toggleSort('status')}
                       >
                         Status
