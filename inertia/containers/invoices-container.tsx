@@ -5,6 +5,7 @@ import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'n
 import type { LucideIcon } from 'lucide-react'
 import { useInvoicesQueryOptions, type InvoicesResponse } from '../hooks/queries/use_invoices'
 import { useStudentsQueryOptions } from '../hooks/queries/use_students'
+import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -266,7 +267,7 @@ const statusConfig: Record<InvoiceStatus, StatusConfig> = {
 }
 
 function getPaymentDescription(payment: InvoicePayment): string {
-  const contractName = payment.contract?.name
+  const contractName = (payment as any).contract?.name
   const installmentInfo =
     payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
 
@@ -389,6 +390,7 @@ function InvoicesContent() {
     search: parseAsString,
     studentIds: parseAsArrayOf(parseAsString),
     status: parseAsArrayOf(parseAsString).withDefault(DEFAULT_STATUSES),
+    academicPeriodId: parseAsString,
     month: parseAsInteger,
     year: parseAsInteger,
     page: parseAsInteger.withDefault(1),
@@ -400,9 +402,15 @@ function InvoicesContent() {
     page,
     limit,
     status: filterStatuses,
+    academicPeriodId: filterAcademicPeriodId,
     month: filterMonth,
     year: filterYear,
   } = filters
+
+  const { data: academicPeriodsData } = useQuery({
+    ...useAcademicPeriodsQueryOptions({ limit: 100 }),
+  })
+  const academicPeriods = academicPeriodsData?.data ?? []
 
   const { data, isLoading, error, refetch } = useQuery(
     useInvoicesQueryOptions({
@@ -411,6 +419,7 @@ function InvoicesContent() {
       studentIds:
         filterStudentIds && filterStudentIds.length > 0 ? filterStudentIds.join(',') : undefined,
       status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
+      academicPeriodId: filterAcademicPeriodId || undefined,
       month: filterMonth || undefined,
       year: filterYear || undefined,
     })
@@ -463,12 +472,20 @@ function InvoicesContent() {
     !isDefaultStatuses ||
     filterMonth ||
     filterYear ||
+    filterAcademicPeriodId ||
     (filterStudentIds && filterStudentIds.length > 0)
   )
 
   function clearFilters() {
     setSelectedStudents([])
-    setFilters({ status: DEFAULT_STATUSES, month: null, year: null, studentIds: null, page: 1 })
+    setFilters({
+      status: DEFAULT_STATUSES,
+      academicPeriodId: null,
+      month: null,
+      year: null,
+      studentIds: null,
+      page: 1,
+    })
   }
 
   function toggleRow(id: string) {
@@ -525,6 +542,23 @@ function InvoicesContent() {
             </div>
           </PopoverContent>
         </Popover>
+
+        <Select
+          value={filterAcademicPeriodId || 'all'}
+          onValueChange={(v) => setFilters({ academicPeriodId: v === 'all' ? null : v, page: 1 })}
+        >
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="Período letivo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os períodos</SelectItem>
+            {academicPeriods.map((period: any) => (
+              <SelectItem key={period.id} value={period.id}>
+                {period.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <Select
           value={filterMonth?.toString() || '_all'}
@@ -670,13 +704,14 @@ function InvoicesContent() {
                               <StatusIcon className="h-3 w-3" />
                               {config.label}
                             </span>
-                            {invoice.nfseStatus && nfseStatusConfig[invoice.nfseStatus] && (
-                              <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium w-fit ${nfseStatusConfig[invoice.nfseStatus].className}`}
-                              >
-                                {nfseStatusConfig[invoice.nfseStatus].label}
-                              </span>
-                            )}
+                            {(invoice as any).nfseStatus &&
+                              nfseStatusConfig[(invoice as any).nfseStatus] && (
+                                <span
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium w-fit ${nfseStatusConfig[(invoice as any).nfseStatus].className}`}
+                                >
+                                  {nfseStatusConfig[(invoice as any).nfseStatus].label}
+                                </span>
+                              )}
                           </div>
                         </td>
                         <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
@@ -700,30 +735,32 @@ function InvoicesContent() {
                                   <History className="h-4 w-4 mr-2" />
                                   Ver historico
                                 </DropdownMenuItem>
-                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
-                                  <DropdownMenuItem asChild>
-                                    <a
-                                      href={invoice.nfsePdfUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <Download className="h-4 w-4 mr-2" />
-                                      Baixar NFS-e (PDF)
-                                    </a>
-                                  </DropdownMenuItem>
-                                )}
-                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
-                                  <DropdownMenuItem asChild>
-                                    <a
-                                      href={invoice.nfseXmlUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <FileText className="h-4 w-4 mr-2" />
-                                      Baixar NFS-e (XML)
-                                    </a>
-                                  </DropdownMenuItem>
-                                )}
+                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
+                                  (invoice as any).nfsePdfUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={(invoice as any).nfsePdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (PDF)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
+                                  (invoice as any).nfseXmlUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={(invoice as any).nfseXmlUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <FileText className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (XML)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
@@ -739,30 +776,32 @@ function InvoicesContent() {
                                   <History className="h-4 w-4 mr-2" />
                                   Ver historico
                                 </DropdownMenuItem>
-                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfsePdfUrl && (
-                                  <DropdownMenuItem asChild>
-                                    <a
-                                      href={invoice.nfsePdfUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <Download className="h-4 w-4 mr-2" />
-                                      Baixar NFS-e (PDF)
-                                    </a>
-                                  </DropdownMenuItem>
-                                )}
-                                {invoice.nfseStatus === 'AUTHORIZED' && invoice.nfseXmlUrl && (
-                                  <DropdownMenuItem asChild>
-                                    <a
-                                      href={invoice.nfseXmlUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <FileText className="h-4 w-4 mr-2" />
-                                      Baixar NFS-e (XML)
-                                    </a>
-                                  </DropdownMenuItem>
-                                )}
+                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
+                                  (invoice as any).nfsePdfUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={(invoice as any).nfsePdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Download className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (PDF)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                {(invoice as any).nfseStatus === 'AUTHORIZED' &&
+                                  (invoice as any).nfseXmlUrl && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={(invoice as any).nfseXmlUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <FileText className="h-4 w-4 mr-2" />
+                                        Baixar NFS-e (XML)
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}

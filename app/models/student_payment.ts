@@ -10,6 +10,7 @@ import Invoice from './invoice.js'
 import InsuranceBilling from './insurance_billing.js'
 import InsuranceClaim from './insurance_claim.js'
 import StudentHasExtraClass from './student_has_extra_class.js'
+import StudentHasLevel from './student_has_level.js'
 
 export default class StudentPayment extends compose(BaseModel, Auditable) {
   static table = 'StudentPayment'
@@ -142,4 +143,7 @@ export default class StudentPayment extends compose(BaseModel, Auditable) {
 
   @belongsTo(() => StudentHasExtraClass, { foreignKey: 'studentHasExtraClassId' })
   declare studentHasExtraClass: BelongsTo<typeof StudentHasExtraClass>
+
+  @belongsTo(() => StudentHasLevel, { foreignKey: 'studentHasLevelId' })
+  declare studentHasLevel: BelongsTo<typeof StudentHasLevel>
 }

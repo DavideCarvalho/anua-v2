@@ -6,6 +6,7 @@ export const listInvoicesValidator = vine.compile(
     studentIds: vine.string().trim().optional(),
     search: vine.string().trim().optional(),
     contractId: vine.string().trim().optional(),
+    academicPeriodId: vine.string().trim().optional(),
     status: vine.string().trim().optional(),
     type: vine.enum(['MONTHLY', 'UPFRONT']).optional(),
     month: vine.number().min(1).max(12).optional(),

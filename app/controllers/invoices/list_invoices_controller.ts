@@ -13,6 +13,7 @@ export default class ListInvoicesController {
       studentIds,
       search,
       contractId,
+      academicPeriodId,
       status,
       type,
       month,
@@ -67,6 +68,14 @@ export default class ListInvoicesController {
 
     if (contractId) {
       query.where('contractId', contractId)
+    }
+
+    if (academicPeriodId) {
+      query.whereHas('payments', (paymentsQuery) => {
+        paymentsQuery.whereHas('studentHasLevel', (enrollmentQuery) => {
+          enrollmentQuery.where('academicPeriodId', academicPeriodId)
+        })
+      })
     }
 
     if (status) {
