@@ -178,9 +178,7 @@ export default class UpdateAcademicPeriodCoursesController {
 
             if (existingLevel) {
               const nextContractId = levelData.contractId ?? null
-              if (existingLevel.contractId !== nextContractId) {
-                changedLevelContracts.set(existingLevel.id, nextContractId)
-              }
+              changedLevelContracts.set(existingLevel.id, nextContractId)
 
               existingLevel.order = levelData.order
               existingLevel.contractId = nextContractId
@@ -196,6 +194,7 @@ export default class UpdateAcademicPeriodCoursesController {
               newLevel.schoolId = academicPeriod.schoolId
               newLevel.isActive = true
               await newLevel.save()
+              changedLevelContracts.set(newLevel.id, newLevel.contractId)
               levelId = newLevel.id
             }
           } else {
@@ -206,9 +205,7 @@ export default class UpdateAcademicPeriodCoursesController {
 
             if (existingLevel) {
               const nextContractId = levelData.contractId ?? null
-              if (existingLevel.contractId !== nextContractId) {
-                changedLevelContracts.set(existingLevel.id, nextContractId)
-              }
+              changedLevelContracts.set(existingLevel.id, nextContractId)
 
               existingLevel.order = levelData.order
               existingLevel.contractId = nextContractId
