@@ -401,17 +401,56 @@ function getPaymentDiscountAmount(payment: InvoicePaymentRecord): number {
   return Math.max(0, originalAmount - chargedAmount)
 }
 
+function getPaymentDiscountLabel(payment: InvoicePaymentRecord): string {
+  const source = (payment as InvoicePaymentRecord & { discountSource?: string | null })
+    .discountSource
+
+  if (source === 'INDIVIDUAL') {
+    if (payment.discountType === 'FLAT' && Number(payment.discountValue || 0) > 0) {
+      return 'desconto individual (fixo)'
+    }
+
+    if (payment.discountType === 'PERCENTAGE' && Number(payment.discountPercentage || 0) > 0) {
+      return `desconto individual (${Number(payment.discountPercentage)}%)`
+    }
+
+    return 'desconto individual'
+  }
+
+  if (source === 'SCHOLARSHIP') {
+    if (payment.discountType === 'PERCENTAGE' && Number(payment.discountPercentage || 0) > 0) {
+      return `bolsa (${Number(payment.discountPercentage)}%)`
+    }
+
+    return 'bolsa'
+  }
+
+  return 'itens'
+}
+
 function getInvoiceDiscountBreakdown(invoice: InvoiceRecord) {
   const payments = invoice.payments ?? []
-  const discountsFromPayments = payments.reduce((sum, payment) => {
-    return sum + getPaymentDiscountAmount(payment)
-  }, 0)
+  const paymentDiscountsByLabel = new Map<string, number>()
+
+  for (const payment of payments) {
+    const discountAmount = getPaymentDiscountAmount(payment)
+    if (discountAmount <= 0) continue
+
+    const label = getPaymentDiscountLabel(payment)
+    paymentDiscountsByLabel.set(label, (paymentDiscountsByLabel.get(label) || 0) + discountAmount)
+  }
+
+  const discountsFromPayments = [...paymentDiscountsByLabel.values()].reduce(
+    (sum, value) => sum + value,
+    0
+  )
 
   const earlyDiscount = Number(invoice.discountAmount || 0)
   const totalDiscount = discountsFromPayments + earlyDiscount
 
   return {
     discountsFromPayments,
+    paymentDiscountsByLabel,
     earlyDiscount,
     totalDiscount,
   }
@@ -946,8 +985,11 @@ function InvoicesContent() {
                     const interestAmount = Number(invoice.interestAmount || 0)
                     const surchargeTotal = fineAmount + interestAmount
                     const daysOverdue = getDaysOverdue(invoice.dueDate)
-                    const { discountsFromPayments, earlyDiscount, totalDiscount } =
+                    const { paymentDiscountsByLabel, earlyDiscount, totalDiscount } =
                       getInvoiceDiscountBreakdown(invoice)
+                    const paymentDiscountParts = [...paymentDiscountsByLabel.entries()].map(
+                      ([label, amount]) => `${label} ${formatCurrency(amount)}`
+                    )
 
                     return (
                       <Fragment key={invoice.id}>
@@ -995,10 +1037,10 @@ function InvoicesContent() {
                                   -{formatCurrency(totalDiscount)}
                                 </span>
                                 <span className="text-[11px] text-muted-foreground">
-                                  {discountsFromPayments > 0
-                                    ? `itens ${formatCurrency(discountsFromPayments)}`
-                                    : null}
-                                  {discountsFromPayments > 0 && earlyDiscount > 0 ? ' + ' : ''}
+                                  {paymentDiscountParts.join(' + ')}
+                                  {paymentDiscountParts.length > 0 && earlyDiscount > 0
+                                    ? ' + '
+                                    : ''}
                                   {earlyDiscount > 0
                                     ? `antecipação ${formatCurrency(earlyDiscount)}`
                                     : null}
@@ -1189,10 +1231,9 @@ function InvoicesContent() {
                                                 -{formatCurrency(totalDiscount)}
                                               </p>
                                               <p className="text-xs text-muted-foreground">
-                                                {discountsFromPayments > 0
-                                                  ? `itens ${formatCurrency(discountsFromPayments)}`
-                                                  : null}
-                                                {discountsFromPayments > 0 && earlyDiscount > 0
+                                                {paymentDiscountParts.join(' + ')}
+                                                {paymentDiscountParts.length > 0 &&
+                                                earlyDiscount > 0
                                                   ? ' + '
                                                   : ''}
                                                 {earlyDiscount > 0

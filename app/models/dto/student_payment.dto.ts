@@ -47,6 +47,7 @@ export default class StudentPaymentDto extends BaseModelDto {
   declare invoiceId: string | null
   declare insuranceBillingId: string | null
   declare studentHasExtraClassId: string | null
+  declare discountSource: 'INDIVIDUAL' | 'SCHOLARSHIP' | 'UNKNOWN' | null
   declare createdAt: Date
   declare updatedAt: Date
   declare student?: StudentDto
@@ -84,6 +85,21 @@ export default class StudentPaymentDto extends BaseModelDto {
     this.invoiceId = studentPayment.invoiceId
     this.insuranceBillingId = studentPayment.insuranceBillingId
     this.studentHasExtraClassId = studentPayment.studentHasExtraClassId
+
+    const hasIndividualDiscount =
+      (studentPayment.studentHasLevel as any)?.individualDiscounts?.length > 0
+    const hasScholarship = !!(studentPayment.studentHasLevel as any)?.scholarshipId
+
+    if (hasIndividualDiscount) {
+      this.discountSource = 'INDIVIDUAL'
+    } else if (hasScholarship) {
+      this.discountSource = 'SCHOLARSHIP'
+    } else if (studentPayment.discountPercentage > 0 || studentPayment.discountValue > 0) {
+      this.discountSource = 'UNKNOWN'
+    } else {
+      this.discountSource = null
+    }
+
     this.createdAt = studentPayment.createdAt.toJSDate()
     this.updatedAt = studentPayment.updatedAt.toJSDate()
     this.student = studentPayment.student ? new StudentDto(studentPayment.student) : undefined

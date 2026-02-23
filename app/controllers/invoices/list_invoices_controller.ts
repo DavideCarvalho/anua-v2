@@ -31,6 +31,12 @@ export default class ListInvoicesController {
       .preload('payments', (q) => {
         q.preload('contract')
         q.preload('studentHasExtraClass', (eq) => eq.preload('extraClass'))
+        q.preload('studentHasLevel', (enrollmentQuery) => {
+          enrollmentQuery.preload('scholarship')
+          enrollmentQuery.preload('individualDiscounts', (discountQuery) => {
+            discountQuery.where('isActive', true).whereNull('deletedAt')
+          })
+        })
       })
 
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
