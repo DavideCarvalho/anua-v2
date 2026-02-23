@@ -16,6 +16,13 @@ public/assets
 npm-debug.log
 yarn-error.log
 
+# Runtime logs
+logs/*
+!logs/.gitkeep
+
+# Server stats persisted debug cache
+.adonisjs/server-stats/
+
 # Editors specific
 .fleet
 .idea

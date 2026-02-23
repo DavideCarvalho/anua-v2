@@ -55,7 +55,7 @@ import { formatCurrency } from '~/lib/utils'
 
 const schema = z
   .object({
-    contractId: z.string().min(1, 'Selecione um contrato'),
+    contractId: z.string().optional(),
     benefitMode: z.enum(['NONE', 'SCHOLARSHIP', 'INDIVIDUAL']),
     scholarshipId: z.string().nullable(),
     paymentMethod: z.enum(['BOLETO', 'PIX']),
@@ -413,7 +413,7 @@ export function EnrollmentTabContent({
     try {
       const updateData: UpdateEnrollmentPayload = {}
 
-      if (data.contractId !== initialContractId) {
+      if (data.contractId && data.contractId !== initialContractId) {
         updateData.contractId = data.contractId
       }
 
@@ -484,11 +484,19 @@ export function EnrollmentTabContent({
     }
   }
 
+  function handleInvalidSubmit() {
+    toast.error('Revise os campos obrigatórios antes de salvar')
+  }
+
   const formId = `enrollment-form-${enrollment.id}`
 
   return (
     <Form {...form}>
-      <form id={formId} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form
+        id={formId}
+        onSubmit={form.handleSubmit(handleSubmit, handleInvalidSubmit)}
+        className="space-y-4"
+      >
         {/* Contract Info Card */}
         {isLoadingContract ? (
           <Card>

@@ -20,6 +20,7 @@ const TriggerMissingPaymentsController = () =>
 
 // Admin stats
 const GetAdminStatsController = () => import('#controllers/dashboard/get_admin_stats_controller')
+const GetServerStatsController = () => import('#controllers/admin/get_server_stats_controller')
 
 export function registerImpersonationApiRoutes() {
   router
@@ -62,7 +63,10 @@ export function registerAdminJobsApiRoutes() {
 
 export function registerAdminStatsApiRoutes() {
   router
-    .get('/admin/stats', [GetAdminStatsController])
+    .group(() => {
+      router.get('/stats', [GetAdminStatsController]).as('dashboard.adminStats')
+      router.get('/server-stats', [GetServerStatsController]).as('dashboard.serverStats')
+    })
+    .prefix('/admin')
     .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
-    .as('dashboard.adminStats')
 }
