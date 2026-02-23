@@ -61,8 +61,12 @@ export default class GetCourseClassesController {
       return response.ok([])
     }
 
-    // Get all classes for these levels
+    // Get all classes for these levels that are linked to this academic period
     const classesQuery = Class_.query().whereIn('levelId', levelIds).where('isArchived', false)
+
+    classesQuery.whereHas('academicPeriods', (academicPeriodQuery) => {
+      academicPeriodQuery.where('AcademicPeriod.id', academicPeriodId)
+    })
 
     if (isSchoolTeacher) {
       classesQuery.whereHas('teacherClasses', (teacherClassQuery) => {
