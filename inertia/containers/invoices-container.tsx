@@ -395,6 +395,28 @@ function getDaysOverdue(dueDate: string | Date | null | undefined): number {
   return Math.max(days, 0)
 }
 
+function getPaymentDiscountAmount(payment: InvoicePaymentRecord): number {
+  const originalAmount = Number(payment.totalAmount || 0)
+  const chargedAmount = Number(payment.amount || 0)
+  return Math.max(0, originalAmount - chargedAmount)
+}
+
+function getInvoiceDiscountBreakdown(invoice: InvoiceRecord) {
+  const payments = invoice.payments ?? []
+  const discountsFromPayments = payments.reduce((sum, payment) => {
+    return sum + getPaymentDiscountAmount(payment)
+  }, 0)
+
+  const earlyDiscount = Number(invoice.discountAmount || 0)
+  const totalDiscount = discountsFromPayments + earlyDiscount
+
+  return {
+    discountsFromPayments,
+    earlyDiscount,
+    totalDiscount,
+  }
+}
+
 const nfseStatusConfig: Record<string, { label: string; className: string }> = {
   AUTHORIZED: { label: 'NFS-e', className: 'bg-green-100 text-green-700' },
   SCHEDULED: { label: 'NFS-e pendente', className: 'bg-yellow-100 text-yellow-700' },
@@ -924,6 +946,8 @@ function InvoicesContent() {
                     const interestAmount = Number(invoice.interestAmount || 0)
                     const surchargeTotal = fineAmount + interestAmount
                     const daysOverdue = getDaysOverdue(invoice.dueDate)
+                    const { discountsFromPayments, earlyDiscount, totalDiscount } =
+                      getInvoiceDiscountBreakdown(invoice)
 
                     return (
                       <Fragment key={invoice.id}>
@@ -965,10 +989,21 @@ function InvoicesContent() {
                             {formatCurrency(Number(invoice.baseAmount || 0))}
                           </td>
                           <td className="p-4 text-right hidden md:table-cell">
-                            {discountAmount > 0 ? (
-                              <span className="text-green-600">
-                                -{formatCurrency(discountAmount)}
-                              </span>
+                            {totalDiscount > 0 ? (
+                              <div className="inline-flex flex-col items-end gap-0.5">
+                                <span className="font-medium text-green-600">
+                                  -{formatCurrency(totalDiscount)}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground">
+                                  {discountsFromPayments > 0
+                                    ? `itens ${formatCurrency(discountsFromPayments)}`
+                                    : null}
+                                  {discountsFromPayments > 0 && earlyDiscount > 0 ? ' + ' : ''}
+                                  {earlyDiscount > 0
+                                    ? `antecipação ${formatCurrency(earlyDiscount)}`
+                                    : null}
+                                </span>
+                              </div>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
@@ -1148,11 +1183,26 @@ function InvoicesContent() {
                                         </div>
                                         <div className="flex items-center justify-between gap-3 lg:block">
                                           <span className="text-muted-foreground">Desconto</span>
-                                          <p className="font-medium text-green-600">
-                                            {discountAmount > 0
-                                              ? `-${formatCurrency(discountAmount)}`
-                                              : '-'}
-                                          </p>
+                                          {totalDiscount > 0 ? (
+                                            <div className="inline-flex flex-col items-end gap-0.5 lg:items-start">
+                                              <p className="font-medium text-green-600">
+                                                -{formatCurrency(totalDiscount)}
+                                              </p>
+                                              <p className="text-xs text-muted-foreground">
+                                                {discountsFromPayments > 0
+                                                  ? `itens ${formatCurrency(discountsFromPayments)}`
+                                                  : null}
+                                                {discountsFromPayments > 0 && earlyDiscount > 0
+                                                  ? ' + '
+                                                  : ''}
+                                                {earlyDiscount > 0
+                                                  ? `antecipação ${formatCurrency(earlyDiscount)}`
+                                                  : null}
+                                              </p>
+                                            </div>
+                                          ) : (
+                                            <p className="font-medium text-green-600">-</p>
+                                          )}
                                         </div>
                                         <div className="flex items-center justify-between gap-3 lg:block">
                                           <span className="text-muted-foreground">Multa</span>
@@ -1188,6 +1238,9 @@ function InvoicesContent() {
                                           </th>
                                           <th className="text-left py-2 px-3 font-medium">Valor</th>
                                           <th className="text-left py-2 px-3 font-medium">
+                                            Desconto
+                                          </th>
+                                          <th className="text-left py-2 px-3 font-medium">
                                             Status
                                           </th>
                                           <th className="text-right py-2 px-3 font-medium">
@@ -1201,6 +1254,8 @@ function InvoicesContent() {
                                             label: payment.status,
                                             className: 'bg-gray-100 text-gray-700',
                                           }
+                                          const paymentDiscountAmount =
+                                            getPaymentDiscountAmount(payment)
                                           return (
                                             <tr
                                               key={payment.id}
@@ -1216,6 +1271,15 @@ function InvoicesContent() {
                                               </td>
                                               <td className="py-2 px-3 font-medium">
                                                 {formatCurrency(Number(payment.amount || 0))}
+                                              </td>
+                                              <td className="py-2 px-3">
+                                                {paymentDiscountAmount > 0 ? (
+                                                  <span className="font-medium text-green-600">
+                                                    -{formatCurrency(paymentDiscountAmount)}
+                                                  </span>
+                                                ) : (
+                                                  <span className="text-muted-foreground">-</span>
+                                                )}
                                               </td>
                                               <td className="py-2 px-3">
                                                 <span

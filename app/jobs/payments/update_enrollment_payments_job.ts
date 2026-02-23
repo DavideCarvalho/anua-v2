@@ -9,6 +9,7 @@ import { getQueueManager } from '#services/queue_service'
 import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
+import GenerateInvoices from '#start/jobs/generate_invoices'
 
 const UNPAID_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE'] as const
 
@@ -283,21 +284,19 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
         .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
         .orderBy('dueDate', 'asc')
 
-      const newTotalAmount = allLinkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
       const newDueDate = allLinkedPayments.length > 0 ? allLinkedPayments[0].dueDate : null
+      const anchorPayment = allLinkedPayments[0]
 
-      const totalChanged = invoice.totalAmount !== newTotalAmount
       const dueDateChanged = newDueDate && invoice.dueDate?.toISODate() !== newDueDate.toISODate()
 
-      if (totalChanged || dueDateChanged) {
-        invoice.totalAmount = newTotalAmount
-        if (newDueDate) {
-          invoice.dueDate = newDueDate
-        }
+      if (dueDateChanged && newDueDate) {
+        invoice.dueDate = newDueDate
         await invoice.save()
-        console.log(
-          `[UPDATE_ENROLLMENT_PAYMENTS] Updated invoice ${invoiceId}: totalAmount=${newTotalAmount}`
-        )
+      }
+
+      if (anchorPayment) {
+        await GenerateInvoices.reconcilePayment(anchorPayment)
+        console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Reconciled invoice ${invoiceId}`)
       }
     }
 
