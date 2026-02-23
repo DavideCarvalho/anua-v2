@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react'
+import { usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
@@ -20,12 +21,16 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Label } from '~/components/ui/label'
+import type { SharedProps } from '~/lib/types'
 
 interface Props {
   schoolId: string
 }
 
 export default function AulasAvulsasPage({ schoolId }: Props) {
+  const { props } = usePage<SharedProps>()
+  const isSchoolTeacher = props.user?.role?.name === 'SCHOOL_TEACHER'
+
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [enrollExtraClassId, setEnrollExtraClassId] = useState<string | null>(null)
@@ -47,10 +52,12 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
             <h1 className="text-2xl font-bold tracking-tight">Aulas Avulsas</h1>
             <p className="text-muted-foreground">Gerencie aulas extracurriculares da escola</p>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Aula Avulsa
-          </Button>
+          {!isSchoolTeacher && (
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Aula Avulsa
+            </Button>
+          )}
         </div>
 
         <div className="flex items-end gap-4">
@@ -79,11 +86,18 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
           onAttendance={setAttendanceExtraClassId}
           onSummary={setSummaryExtraClassId}
           onStudents={setStudentsExtraClassId}
+          isSchoolTeacher={isSchoolTeacher}
         />
 
-        <CreateExtraClassModal schoolId={schoolId} open={createOpen} onOpenChange={setCreateOpen} />
+        {!isSchoolTeacher && (
+          <CreateExtraClassModal
+            schoolId={schoolId}
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+          />
+        )}
 
-        {editId && (
+        {!isSchoolTeacher && editId && (
           <EditExtraClassModal
             extraClassId={editId}
             open={!!editId}
@@ -91,7 +105,7 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
           />
         )}
 
-        {enrollExtraClassId && (
+        {!isSchoolTeacher && enrollExtraClassId && (
           <EnrollStudentModal
             extraClassId={enrollExtraClassId}
             open={!!enrollExtraClassId}

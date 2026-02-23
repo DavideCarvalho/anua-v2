@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import {
@@ -54,6 +53,7 @@ interface ExtraClassesTableProps {
   onAttendance: (id: string) => void
   onSummary: (id: string) => void
   onStudents: (id: string) => void
+  isSchoolTeacher?: boolean
 }
 
 export function ExtraClassesTable({
@@ -64,6 +64,7 @@ export function ExtraClassesTable({
   onAttendance,
   onSummary,
   onStudents,
+  isSchoolTeacher = false,
 }: ExtraClassesTableProps) {
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
@@ -128,9 +129,7 @@ export function ExtraClassesTable({
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Clock className="h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Nenhuma aula avulsa</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Crie uma aula avulsa para comecar.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Crie uma aula avulsa para comecar.</p>
           </div>
         ) : (
           <>
@@ -153,13 +152,13 @@ export function ExtraClassesTable({
                         <div>
                           {ec.name}
                           {ec.academicPeriod && (
-                            <p className="text-xs text-muted-foreground">{ec.academicPeriod.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {ec.academicPeriod.name}
+                            </p>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {ec.teacherName ?? '-'}
-                      </TableCell>
+                      <TableCell>{ec.teacher?.user?.name ?? '-'}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {ec.schedules.map((s) => (
@@ -171,7 +170,13 @@ export function ExtraClassesTable({
                       </TableCell>
                       <TableCell className="text-center">
                         {ec.maxStudents ? (
-                          <span className={ec.enrollmentCount >= ec.maxStudents ? 'text-destructive font-medium' : ''}>
+                          <span
+                            className={
+                              ec.enrollmentCount >= ec.maxStudents
+                                ? 'text-destructive font-medium'
+                                : ''
+                            }
+                          >
                             {ec.enrollmentCount}/{ec.maxStudents}
                           </span>
                         ) : (
@@ -191,18 +196,22 @@ export function ExtraClassesTable({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => onEdit(ec.id)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
+                            {!isSchoolTeacher && (
+                              <DropdownMenuItem onClick={() => onEdit(ec.id)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => onStudents(ec.id)}>
                               <Users className="mr-2 h-4 w-4" />
                               Alunos Inscritos
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onEnroll(ec.id)}>
-                              <UserPlus className="mr-2 h-4 w-4" />
-                              Inscrever Aluno
-                            </DropdownMenuItem>
+                            {!isSchoolTeacher && (
+                              <DropdownMenuItem onClick={() => onEnroll(ec.id)}>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Inscrever Aluno
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={() => onAttendance(ec.id)}>
                               <ClipboardList className="mr-2 h-4 w-4" />
                               Lancar Frequencia
@@ -211,7 +220,7 @@ export function ExtraClassesTable({
                               <BarChart3 className="mr-2 h-4 w-4" />
                               Resumo Frequencia
                             </DropdownMenuItem>
-                            {ec.isActive && (
+                            {!isSchoolTeacher && ec.isActive && (
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => handleDeactivate(ec.id)}

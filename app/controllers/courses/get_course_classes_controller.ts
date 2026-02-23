@@ -30,8 +30,16 @@ interface ClassExpanded {
 }
 
 export default class GetCourseClassesController {
-  async handle({ params, response }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { auth, params, response } = ctx
+    const user = ctx.effectiveUser ?? auth.user!
     const { courseId, academicPeriodId } = params
+
+    if (user.roleId && !user.$preloaded.role) {
+      await user.load('role')
+    }
+
+    const isSchoolTeacher = user.role?.name === 'SCHOOL_TEACHER'
 
     // First, verify that the course-academic period combination exists
     const courseAcademicPeriod = await CourseHasAcademicPeriod.query()
@@ -54,9 +62,15 @@ export default class GetCourseClassesController {
     }
 
     // Get all classes for these levels
-    const classes = await Class_.query()
-      .whereIn('levelId', levelIds)
-      .where('isArchived', false)
+    const classesQuery = Class_.query().whereIn('levelId', levelIds).where('isArchived', false)
+
+    if (isSchoolTeacher) {
+      classesQuery.whereHas('teacherClasses', (teacherClassQuery) => {
+        teacherClassQuery.where('teacherId', user.id).where('isActive', true)
+      })
+    }
+
+    const classes = await classesQuery
       .preload('students')
       .preload('teacherClasses', (query) => {
         query.where('isActive', true)

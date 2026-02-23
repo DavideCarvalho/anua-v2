@@ -1,6 +1,6 @@
 import { tuyau } from '../../lib/api'
 
-const resolveRoute = () => tuyau.api.v1.escola.teacherDashboard.$get
+const resolveRoute = () => tuyau.api.v1.escola['teacher-dashboard'].$get
 
 export type TeacherDashboardResponse = {
   stats: {
