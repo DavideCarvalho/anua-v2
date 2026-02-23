@@ -59,13 +59,31 @@ const schema = z
     benefitMode: z.enum(['NONE', 'SCHOLARSHIP', 'INDIVIDUAL']),
     scholarshipId: z.string().nullable(),
     paymentMethod: z.enum(['BOLETO', 'PIX']),
-    paymentDay: z.number().min(1).max(31),
-    installments: z.number().min(1).max(12),
+    paymentDay: z
+      .number()
+      .min(1, 'O dia de vencimento deve ser entre 1 e 31')
+      .max(31, 'O dia de vencimento deve ser entre 1 e 31'),
+    installments: z
+      .number()
+      .min(1, 'As parcelas devem ser entre 1 e 12')
+      .max(12, 'As parcelas devem ser entre 1 e 12'),
     individualDiscountType: z.enum(['PERCENTAGE', 'FLAT']),
-    individualDiscountPercentage: z.number().min(0).max(100).optional(),
+    individualDiscountPercentage: z
+      .number()
+      .min(0, 'O percentual deve ser entre 0 e 100')
+      .max(100, 'O percentual deve ser entre 0 e 100')
+      .optional(),
     individualDiscountValueReais: z.number().min(0).optional(),
-    discountPercentage: z.number().min(0).max(100).optional(),
-    enrollmentDiscountPercentage: z.number().min(0).max(100).optional(),
+    discountPercentage: z
+      .number()
+      .min(0, 'O percentual deve ser entre 0 e 100')
+      .max(100, 'O percentual deve ser entre 0 e 100')
+      .optional(),
+    enrollmentDiscountPercentage: z
+      .number()
+      .min(0, 'O percentual deve ser entre 0 e 100')
+      .max(100, 'O percentual deve ser entre 0 e 100')
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (data.benefitMode === 'SCHOLARSHIP' && !data.scholarshipId) {
@@ -495,6 +513,7 @@ export function EnrollmentTabContent({
       <form
         id={formId}
         onSubmit={form.handleSubmit(handleSubmit, handleInvalidSubmit)}
+        noValidate
         className="space-y-4"
       >
         {/* Contract Info Card */}
@@ -590,6 +609,13 @@ export function EnrollmentTabContent({
                         value={field.value}
                         onValueChange={(value: 'PERCENTAGE' | 'FLAT') => {
                           field.onChange(value)
+
+                          if (value === 'PERCENTAGE') {
+                            form.setValue('individualDiscountValueReais', 0)
+                            return
+                          }
+
+                          form.setValue('individualDiscountPercentage', 0)
                         }}
                       >
                         <FormControl>
@@ -618,7 +644,6 @@ export function EnrollmentTabContent({
                           <Input
                             type="number"
                             min={0}
-                            max={100}
                             value={field.value ?? 0}
                             onChange={(e) => field.onChange(Number(e.target.value))}
                           />
