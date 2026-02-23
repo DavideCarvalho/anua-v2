@@ -120,6 +120,23 @@ export default class StudentHasLevel extends compose(BaseModel, Auditable) {
   @hasMany(() => IndividualDiscount, { foreignKey: 'studentHasLevelId' })
   declare individualDiscounts: HasMany<typeof IndividualDiscount>
 
+  async getEffectiveContractId(): Promise<string | null> {
+    if (this.contractId) {
+      return this.contractId
+    }
+
+    if (!this.levelId) {
+      return null
+    }
+
+    if (!this.$preloaded.level) {
+      const level = await Level.find(this.levelId)
+      return level?.contractId ?? null
+    }
+
+    return this.level?.contractId ?? null
+  }
+
   /**
    * Get the total enrollment discount respecting exclusivity rules.
    * Priority: individual discounts > scholarship.

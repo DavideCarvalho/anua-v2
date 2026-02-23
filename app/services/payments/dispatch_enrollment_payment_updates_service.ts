@@ -13,6 +13,11 @@ interface DispatchEnrollmentPaymentUpdatesInput {
   triggeredBy?: TriggeredByPayload | null
 }
 
+interface DispatchEnrollmentPaymentUpdatesForContractInput {
+  contractId: string
+  triggeredBy?: TriggeredByPayload | null
+}
+
 export async function dispatchEnrollmentPaymentUpdatesForLevelContracts({
   academicPeriodId,
   levelContracts,
@@ -59,6 +64,34 @@ export async function dispatchEnrollmentPaymentUpdatesForLevelContracts({
   for (const enrollmentId of enrollmentIdsToUpdate) {
     await UpdateEnrollmentPaymentsJob.dispatch({
       enrollmentId,
+      triggeredBy,
+    })
+  }
+}
+
+export async function dispatchEnrollmentPaymentUpdatesForContract({
+  contractId,
+  triggeredBy,
+}: DispatchEnrollmentPaymentUpdatesForContractInput) {
+  const enrollments = await StudentHasLevel.query()
+    .where((query) => {
+      query.where('contractId', contractId).orWhere((subQuery) => {
+        subQuery.whereNull('contractId').whereHas('level', (levelQuery) => {
+          levelQuery.where('contractId', contractId)
+        })
+      })
+    })
+    .whereNull('deletedAt')
+
+  if (enrollments.length === 0) {
+    return
+  }
+
+  await getQueueManager()
+
+  for (const enrollment of enrollments) {
+    await UpdateEnrollmentPaymentsJob.dispatch({
+      enrollmentId: enrollment.id,
       triggeredBy,
     })
   }

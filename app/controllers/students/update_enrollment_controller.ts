@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasLevel from '#models/student_has_level'
-import Level from '#models/level'
 import StudentHasLevelDto from '#models/dto/student_has_level.dto'
 import { updateEnrollmentValidator } from '#validators/student_enrollment'
 import { getQueueManager } from '#services/queue_service'
@@ -27,14 +26,6 @@ export default class UpdateEnrollmentController {
     const { individualDiscount, ...enrollmentPayload } = payload
 
     enrollment.merge(enrollmentPayload)
-
-    // Se não tem contractId, pega do Level
-    if (!enrollment.contractId && enrollment.levelId) {
-      const level = await Level.find(enrollment.levelId)
-      if (level?.contractId) {
-        enrollment.contractId = level.contractId
-      }
-    }
 
     await enrollment.save()
 

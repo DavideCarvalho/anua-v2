@@ -62,8 +62,13 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
 
       console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Found enrollment, processing...`)
 
-      await this.generatePaymentsIfMissing(enrollment)
-      await this.updateFuturePayments(enrollment)
+      const effectiveContractId = await enrollment.getEffectiveContractId()
+      const effectiveContract = effectiveContractId
+        ? await Contract.find(effectiveContractId)
+        : null
+
+      await this.generatePaymentsIfMissing(enrollment, effectiveContractId)
+      await this.updateFuturePayments(enrollment, effectiveContract)
       await this.reconcileInvoices(enrollment, triggeredBy)
 
       console.log('========================================')
@@ -75,8 +80,11 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     }
   }
 
-  private async generatePaymentsIfMissing(enrollment: StudentHasLevel) {
-    if (!enrollment.contractId) return
+  private async generatePaymentsIfMissing(
+    enrollment: StudentHasLevel,
+    effectiveContractId: string | null
+  ) {
+    if (!effectiveContractId) return
 
     const existingPayments = await StudentPayment.query()
       .where('studentHasLevelId', enrollment.id)
@@ -117,10 +125,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     }
   }
 
-  private async updateFuturePayments(enrollment: StudentHasLevel) {
-    if (!enrollment.contractId) return
-
-    const contract = await Contract.find(enrollment.contractId)
+  private async updateFuturePayments(enrollment: StudentHasLevel, contract: Contract | null) {
     if (!contract) return
 
     const paymentDay = await this.getPaymentDay(enrollment, contract)

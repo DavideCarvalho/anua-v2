@@ -40,9 +40,7 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
       try {
         const studentHasLevel = await StudentHasLevel.query()
           .where('id', studentHasLevelId)
-          .preload('contract', (query) => {
-            query.preload('paymentDays')
-          })
+          .preload('level')
           .preload('scholarship')
           .preload('academicPeriod')
           .preload('student', (query) => {
@@ -60,14 +58,24 @@ export default class GenerateStudentPaymentsJob extends Job<GenerateStudentPayme
           return
         }
 
-        if (!studentHasLevel.contractId) {
-          console.warn(`[WORKER] StudentHasLevel ${studentHasLevelId} has no contract - skipping`)
+        const effectiveContractId = await studentHasLevel.getEffectiveContractId()
+
+        if (!effectiveContractId) {
+          console.warn(
+            `[WORKER] StudentHasLevel ${studentHasLevelId} has no effective contract - skipping`
+          )
           return
         }
 
-        const contract = studentHasLevel.contract
+        const contract = await Contract.query()
+          .where('id', effectiveContractId)
+          .preload('paymentDays')
+          .first()
+
         if (!contract) {
-          console.warn(`[WORKER] Contract not found for StudentHasLevel ${studentHasLevelId}`)
+          console.warn(
+            `[WORKER] Effective contract ${effectiveContractId} not found for StudentHasLevel ${studentHasLevelId}`
+          )
           return
         }
 

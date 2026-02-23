@@ -2,7 +2,7 @@ import vine from '@vinejs/vine'
 
 export const updateEnrollmentValidator = vine.compile(
   vine.object({
-    contractId: vine.string().trim().optional(),
+    contractId: vine.string().trim().nullable().optional(),
     scholarshipId: vine.string().trim().nullable().optional(),
     paymentMethod: vine.enum(['BOLETO', 'PIX'] as const).optional(),
     paymentDay: vine.number().min(1).max(31).optional(),

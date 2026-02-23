@@ -39,6 +39,7 @@ import {
   type StudentEnrollment,
 } from '~/hooks/queries/use_student_enrollments'
 import { useContractQueryOptions } from '~/hooks/queries/use_contract'
+import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
 import { useScholarshipsQueryOptions } from '~/hooks/queries/use_scholarships'
 import {
   useUpdateEnrollment,
@@ -55,7 +56,7 @@ import { formatCurrency } from '~/lib/utils'
 
 const schema = z
   .object({
-    contractId: z.string().optional(),
+    contractId: z.string().min(1, 'Selecione um contrato'),
     benefitMode: z.enum(['NONE', 'SCHOLARSHIP', 'INDIVIDUAL']),
     scholarshipId: z.string().nullable(),
     paymentMethod: z.enum(['BOLETO', 'PIX']),
@@ -123,6 +124,8 @@ const PaymentMethodLabels = {
   PIX: 'PIX',
 }
 
+const LEVEL_DEFAULT_CONTRACT_OPTION = '__LEVEL_DEFAULT_CONTRACT__'
+
 interface EditPaymentModalProps {
   studentId: string
   studentName: string
@@ -177,13 +180,13 @@ export function EnrollmentTabContent({
       ? 'SCHOLARSHIP'
       : 'NONE'
 
-  // Use enrollment's contractId, or fallback to level's contractId
-  const initialContractId = enrollment.contractId ?? (enrollment.level as any)?.contractId ?? ''
+  const levelContractId = (enrollment.level as any)?.contractId ?? ''
+  const initialContractSelection = enrollment.contractId ?? LEVEL_DEFAULT_CONTRACT_OPTION
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      contractId: initialContractId,
+      contractId: initialContractSelection,
       benefitMode: initialBenefitMode,
       scholarshipId: enrollment.scholarshipId ?? null,
       paymentMethod: enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO',
@@ -197,7 +200,11 @@ export function EnrollmentTabContent({
     },
   })
 
-  const contractId = form.watch('contractId') || initialContractId
+  const selectedContractValue = form.watch('contractId')
+  const contractId =
+    selectedContractValue === LEVEL_DEFAULT_CONTRACT_OPTION
+      ? levelContractId
+      : selectedContractValue || ''
   const benefitMode = form.watch('benefitMode')
   const scholarshipId = form.watch('scholarshipId')
   const individualDiscountType = form.watch('individualDiscountType')
@@ -217,6 +224,15 @@ export function EnrollmentTabContent({
   })
 
   const scholarships = scholarshipsData?.data ?? []
+
+  const { data: contractsData } = useQuery({
+    ...useContractsQueryOptions({
+      limit: 100,
+      isActive: true,
+    }),
+  })
+
+  const contracts = contractsData?.data ?? []
 
   // Get available payment days from contract
   const availablePaymentDays = useMemo(() => {
@@ -431,8 +447,11 @@ export function EnrollmentTabContent({
     try {
       const updateData: UpdateEnrollmentPayload = {}
 
-      if (data.contractId && data.contractId !== initialContractId) {
-        updateData.contractId = data.contractId
+      const desiredContractId =
+        data.contractId === LEVEL_DEFAULT_CONTRACT_OPTION ? null : data.contractId
+
+      if (desiredContractId !== (enrollment.contractId ?? null)) {
+        updateData.contractId = desiredContractId
       }
 
       const desiredScholarshipId = data.benefitMode === 'SCHOLARSHIP' ? data.scholarshipId : null
@@ -516,6 +535,38 @@ export function EnrollmentTabContent({
         noValidate
         className="space-y-4"
       >
+        <Card>
+          <CardContent className="pt-6">
+            <FormField
+              control={form.control}
+              name="contractId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contrato</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um contrato" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={LEVEL_DEFAULT_CONTRACT_OPTION}>
+                        Usar contrato da turma {levelContractId ? '(padrão)' : '(não configurado)'}
+                      </SelectItem>
+                      {contracts.map((contract: { id: string; name: string }) => (
+                        <SelectItem key={contract.id} value={contract.id}>
+                          {contract.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
         {/* Contract Info Card */}
         {isLoadingContract ? (
           <Card>

@@ -6,9 +6,11 @@ import Contract from '#models/contract'
 import ContractPaymentDay from '#models/contract_payment_day'
 import ContractEarlyDiscount from '#models/contract_early_discount'
 import AppException from '#exceptions/app_exception'
+import { dispatchEnrollmentPaymentUpdatesForContract } from '#services/payments/dispatch_enrollment_payment_updates_service'
 
 export default class UpdateContractController {
-  async handle({ params, request }: HttpContext) {
+  async handle(ctx: HttpContext) {
+    const { params, request, auth } = ctx
     const { id } = params
     const payload = await request.validateUsing(updateContractValidator)
 
@@ -71,6 +73,17 @@ export default class UpdateContractController {
     } catch (error) {
       await trx.rollback()
       throw error
+    }
+
+    const effectiveUser = ctx.effectiveUser ?? auth.user
+
+    try {
+      await dispatchEnrollmentPaymentUpdatesForContract({
+        contractId: contract.id,
+        triggeredBy: effectiveUser ? { id: effectiveUser.id, name: effectiveUser.name } : null,
+      })
+    } catch (error) {
+      console.error('[UPDATE_CONTRACT] Failed to dispatch payment update jobs:', error)
     }
 
     await contract.load('paymentDays')
