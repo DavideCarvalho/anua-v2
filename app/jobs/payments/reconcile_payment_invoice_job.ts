@@ -1,7 +1,7 @@
 import { Job } from '@boringnode/queue'
 import locks from '@adonisjs/lock/services/main'
 import StudentPayment from '#models/student_payment'
-import GenerateInvoices from '#start/jobs/generate_invoices'
+import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
 
 // Map technical source names to friendly labels
@@ -72,7 +72,7 @@ export default class ReconcilePaymentInvoiceJob extends Job<ReconcilePaymentInvo
           await payment.save()
         }
 
-        await GenerateInvoices.reconcilePayment(payment)
+        await BillingReconciliationService.reconcileByPaymentId(payment.id)
       })
 
       if (!executed) {

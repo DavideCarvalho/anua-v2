@@ -254,16 +254,16 @@ module "dispatch_invoices" {
   memory_limit = "512Mi"
 }
 
-module "dispatch_overdue" {
+module "dispatch_refresh_overdue" {
   source = "../../../modules/cloud-run-job"
 
   project_id = var.project_id
   region     = var.region
-  job_name   = "${var.environment}-${var.project_name}-dispatch-overdue"
+  job_name   = "${var.environment}-${var.project_name}-dispatch-refresh-overdue"
   image      = var.api_image
 
   command = ["node"]
-  args    = ["ace", "dispatch:mark-overdue-invoices"]
+  args    = ["ace", "dispatch:refresh-overdue-invoices"]
 
   env_vars = {
     NODE_ENV       = var.environment
@@ -344,46 +344,6 @@ module "dispatch_asaas_charges" {
 
   command = ["node"]
   args    = ["ace", "dispatch:create-invoice-asaas-charges"]
-
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
-  memory_limit = "512Mi"
-}
-
-module "dispatch_invoice_interest" {
-  source = "../../../modules/cloud-run-job"
-
-  project_id = var.project_id
-  region     = var.region
-  job_name   = "${var.environment}-${var.project_name}-dispatch-invoice-interest"
-  image      = var.api_image
-
-  command = ["node"]
-  args    = ["ace", "dispatch:apply-invoice-interest"]
 
   env_vars = {
     NODE_ENV       = var.environment
@@ -496,14 +456,14 @@ module "scheduler_invoices" {
   service_account_email = google_service_account.scheduler.email
 }
 
-module "scheduler_overdue" {
+module "scheduler_refresh_overdue" {
   source = "../../../modules/cloud-scheduler"
 
   project_id            = var.project_id
   region                = var.region
-  job_name              = "${var.environment}-${var.project_name}-dispatch-overdue"
+  job_name              = "${var.environment}-${var.project_name}-dispatch-refresh-overdue"
   schedule              = "0 5 * * *"
-  cloud_run_job_name    = module.dispatch_overdue.job_name
+  cloud_run_job_name    = module.dispatch_refresh_overdue.job_name
   service_account_email = google_service_account.scheduler.email
 }
 
@@ -515,17 +475,6 @@ module "scheduler_asaas_charges" {
   job_name              = "${var.environment}-${var.project_name}-dispatch-asaas-charges"
   schedule              = "0 6 * * *"
   cloud_run_job_name    = module.dispatch_asaas_charges.job_name
-  service_account_email = google_service_account.scheduler.email
-}
-
-module "scheduler_invoice_interest" {
-  source = "../../../modules/cloud-scheduler"
-
-  project_id            = var.project_id
-  region                = var.region
-  job_name              = "${var.environment}-${var.project_name}-dispatch-invoice-interest"
-  schedule              = "30 5 * * *"
-  cloud_run_job_name    = module.dispatch_invoice_interest.job_name
   service_account_email = google_service_account.scheduler.email
 }
 

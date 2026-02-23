@@ -5,6 +5,7 @@ import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
+import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 
 interface GenerateInvoicesOptions {
   schoolIds?: string[]
@@ -57,18 +58,19 @@ export default class GenerateInvoices {
     interestAmount?: number
     today?: DateTime
   }) {
-    const baseAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0)
+    const grossBaseAmount = payments.reduce((sum, p) => sum + Number(p.totalAmount || p.amount), 0)
+    const netBaseAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0)
     const discountPercentage = this.calculateEarlyDiscountPercentage(contract, dueDate, today)
-    const discountAmount = Math.round((baseAmount * discountPercentage) / 100)
-    const boundedDiscountAmount = Math.max(0, Math.min(baseAmount, discountAmount))
+    const discountAmount = Math.round((netBaseAmount * discountPercentage) / 100)
+    const boundedDiscountAmount = Math.max(0, Math.min(netBaseAmount, discountAmount))
 
     const totalAmount = Math.max(
       0,
-      baseAmount + Number(fineAmount || 0) + Number(interestAmount || 0) - boundedDiscountAmount
+      netBaseAmount + Number(fineAmount || 0) + Number(interestAmount || 0) - boundedDiscountAmount
     )
 
     return {
-      baseAmount,
+      baseAmount: grossBaseAmount,
       discountAmount: boundedDiscountAmount,
       totalAmount,
     }
@@ -98,155 +100,7 @@ export default class GenerateInvoices {
    * Chamado após criar/editar um pagamento para não depender do scheduler.
    */
   static async reconcilePayment(payment: StudentPayment) {
-    const contractCache = new Map<string, Contract | null>()
-
-    // Cancelled/renegotiated: only recalculate existing invoice total
-    if (['CANCELLED', 'RENEGOTIATED'].includes(payment.status)) {
-      if (payment.invoiceId) {
-        const invoice = await Invoice.query()
-          .where('id', payment.invoiceId)
-          .whereNotIn('status', ['PAID', 'CANCELLED'])
-          .first()
-
-        if (invoice) {
-          const linkedPayments = await StudentPayment.query()
-            .where('invoiceId', invoice.id)
-            .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-
-          const contract = await this.resolveContractWithDiscounts(
-            linkedPayments[0]?.contractId ?? null,
-            contractCache
-          )
-          const totals = this.calculateInvoiceTotals({
-            payments: linkedPayments,
-            dueDate: invoice.dueDate,
-            contract,
-            fineAmount: invoice.fineAmount,
-            interestAmount: invoice.interestAmount,
-          })
-
-          invoice.baseAmount = totals.baseAmount
-          invoice.discountAmount = totals.discountAmount
-          invoice.totalAmount = totals.totalAmount
-          invoice.contractId = invoice.contractId ?? linkedPayments[0]?.contractId ?? null
-          await invoice.save()
-        }
-      }
-      return
-    }
-
-    if (payment.type === 'AGREEMENT') {
-      return
-    }
-
-    // Already linked — just recalculate the invoice total
-    if (payment.invoiceId) {
-      const invoice = await Invoice.query()
-        .where('id', payment.invoiceId)
-        .whereNotIn('status', ['PAID', 'CANCELLED'])
-        .first()
-
-      if (invoice) {
-        const linkedPayments = await StudentPayment.query()
-          .where('invoiceId', invoice.id)
-          .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-
-        const contract = await this.resolveContractWithDiscounts(
-          linkedPayments[0]?.contractId ?? null,
-          contractCache
-        )
-        const totals = this.calculateInvoiceTotals({
-          payments: linkedPayments,
-          dueDate: invoice.dueDate,
-          contract,
-          fineAmount: invoice.fineAmount,
-          interestAmount: invoice.interestAmount,
-        })
-
-        invoice.baseAmount = totals.baseAmount
-        invoice.discountAmount = totals.discountAmount
-        invoice.totalAmount = totals.totalAmount
-        invoice.contractId = invoice.contractId ?? linkedPayments[0]?.contractId ?? null
-        await invoice.save()
-      }
-      return
-    }
-
-    // Critical section: find-or-create invoice (locked per student to prevent duplicates)
-    const lock = locks.createLock(`invoice-reconcile:${payment.studentId}`, '15s')
-    const [executed] = await lock.run(async () => {
-      // Re-read payment to get fresh data (another job may have linked it while we waited)
-      await payment.refresh()
-      if (payment.invoiceId) return
-
-      // Find invoice by student + month/year (not by contract)
-      let invoice = await Invoice.query()
-        .where('studentId', payment.studentId)
-        .where('month', payment.month)
-        .where('year', payment.year)
-        .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-        .first()
-
-      if (invoice) {
-        payment.invoiceId = invoice.id
-        await payment.save()
-
-        const linkedPayments = await StudentPayment.query()
-          .where('invoiceId', invoice.id)
-          .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-
-        const contract = await this.resolveContractWithDiscounts(
-          linkedPayments[0]?.contractId ?? null,
-          contractCache
-        )
-        const totals = this.calculateInvoiceTotals({
-          payments: linkedPayments,
-          dueDate: invoice.dueDate,
-          contract,
-          fineAmount: invoice.fineAmount,
-          interestAmount: invoice.interestAmount,
-        })
-
-        invoice.baseAmount = totals.baseAmount
-        invoice.discountAmount = totals.discountAmount
-        invoice.totalAmount = totals.totalAmount
-        invoice.contractId = invoice.contractId ?? linkedPayments[0]?.contractId ?? null
-        await invoice.save()
-      } else {
-        // Create invoice without contractId (aggregates all payment types)
-        const contract = await this.resolveContractWithDiscounts(payment.contractId, contractCache)
-        const totals = this.calculateInvoiceTotals({
-          payments: [payment],
-          dueDate: payment.dueDate,
-          contract,
-        })
-
-        invoice = await Invoice.create({
-          studentId: payment.studentId,
-          contractId: payment.contractId ?? null,
-          type: 'MONTHLY',
-          month: payment.month,
-          year: payment.year,
-          dueDate: payment.dueDate,
-          status: 'OPEN',
-          baseAmount: totals.baseAmount,
-          discountAmount: totals.discountAmount,
-          totalAmount: totals.totalAmount,
-        })
-        payment.invoiceId = invoice.id
-        await payment.save()
-
-        logger.info(`[INVOICES] Created invoice ${invoice.id} via reconcilePayment`, {
-          studentId: payment.studentId,
-          month: payment.month,
-          year: payment.year,
-        })
-      }
-    })
-
-    if (!executed) {
-      throw new Error(`Lock não adquirido para student ${payment.studentId}`)
-    }
+    await BillingReconciliationService.reconcileByPaymentId(payment.id)
   }
 
   static async handle(options: GenerateInvoicesOptions = {}) {

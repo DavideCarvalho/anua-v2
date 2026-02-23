@@ -7,9 +7,8 @@ import ContractPaymentDay from '#models/contract_payment_day'
 import Invoice from '#models/invoice'
 import { getQueueManager } from '#services/queue_service'
 import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
-import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
-import GenerateInvoices from '#start/jobs/generate_invoices'
+import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 
 const UNPAID_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE'] as const
 
@@ -69,7 +68,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
 
       await this.generatePaymentsIfMissing(enrollment, effectiveContractId)
       await this.updateFuturePayments(enrollment, effectiveContract)
-      await this.reconcileInvoices(enrollment, triggeredBy)
+      await this.reconcileInvoices(enrollment)
 
       console.log('========================================')
       console.log(`[UPDATE_ENROLLMENT_PAYMENTS] JOB COMPLETED for ${enrollmentId}`)
@@ -265,10 +264,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
     return paymentDay?.day ?? 5
   }
 
-  private async reconcileInvoices(
-    enrollment: StudentHasLevel,
-    triggeredBy?: { id: string; name: string } | null
-  ) {
+  private async reconcileInvoices(enrollment: StudentHasLevel) {
     const paymentsWithInvoice = await StudentPayment.query()
       .where((q) => {
         q.where('studentHasLevelId', enrollment.id).orWhere((sub) => {
@@ -300,7 +296,7 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
       }
 
       if (anchorPayment) {
-        await GenerateInvoices.reconcilePayment(anchorPayment)
+        await BillingReconciliationService.reconcileByInvoiceId(invoice.id)
         console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Reconciled invoice ${invoiceId}`)
       }
     }
@@ -324,18 +320,8 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
           .update({ studentHasLevelId: enrollment.id })
       }
 
-      try {
-        await getQueueManager()
-        for (const payment of unlinkedPayments) {
-          await ReconcilePaymentInvoiceJob.dispatch({
-            paymentId: payment.id,
-            triggeredBy,
-            source: 'update-enrollment-payments-job',
-          })
-        }
-      } catch (error) {
-        console.error('[UPDATE_ENROLLMENT_PAYMENTS] Failed to dispatch reconcile jobs:', error)
-        throw error
+      for (const payment of unlinkedPayments) {
+        await BillingReconciliationService.reconcileByPaymentId(payment.id)
       }
     }
   }

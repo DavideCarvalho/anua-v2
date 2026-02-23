@@ -1,28 +1,21 @@
 import logger from '@adonisjs/core/services/logger'
 import app from '@adonisjs/core/services/app'
-import locks from '@adonisjs/lock/services/main'
-import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
-import ContractInterestConfig from '#models/contract_interest_config'
 import AsaasService from '#services/asaas_service'
 import type School from '#models/school'
+import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 
 interface ApplyInvoiceInterestOptions {
   schoolId?: string
 }
 
 /**
- * Aplica multa e juros em Invoices OVERDUE com base no ContractInterestConfig.
+ * Recalcula invoices OVERDUE usando o reconciliador canônico de cobrança.
  *
- * Roda diariamente às 05:30 (após MarkOverdueInvoices às 05:00).
- *
- * - delayInterestPercentage = multa fixa % (aplicada uma vez sobre o baseAmount)
- * - delayInterestPerDayDelayed = juros diários em percentual
- *
- * Idempotente: usa lock por invoice e verifica valores antes de atualizar.
- * Se o valor mudar e a invoice tem charge no Asaas, cancela o charge antigo.
+ * Mantém a responsabilidade de cancelar cobranças antigas no Asaas quando o
+ * valor da invoice muda após o recálculo.
  */
 export default class ApplyInvoiceInterest {
   static async handle(options: ApplyInvoiceInterestOptions = {}) {
@@ -60,168 +53,61 @@ export default class ApplyInvoiceInterest {
 
       logger.info(`[INTEREST] Found ${invoices.length} overdue invoices to process`)
 
-      // Cache configs and schools by contractId
-      const interestConfigCache = new Map<string, ContractInterestConfig | null>()
       const schoolCache = new Map<string, School | null>()
 
       for (const invoice of invoices) {
-        const lock = locks.createLock(`invoice-interest:${invoice.id}`, '30s')
-        const [executed] = await lock.run(async () => {
-          try {
-            // Re-read fresh invoice inside lock
-            const freshInvoice = await Invoice.query()
-              .where('id', invoice.id)
-              .where('status', 'OVERDUE')
-              .preload('payments', (q) => q.whereNotIn('status', ['CANCELLED', 'RENEGOTIATED']))
-              .first()
+        try {
+          const result = await BillingReconciliationService.reconcileByInvoiceId(invoice.id)
 
-            if (!freshInvoice) {
-              skipped++
-              return
-            }
-
-            if (freshInvoice.payments.length === 0) {
-              skipped++
-              return
-            }
-
-            const effectiveContractId =
-              freshInvoice.contractId ?? freshInvoice.payments[0]?.contractId ?? null
-            if (!effectiveContractId) {
-              skipped++
-              return
-            }
-
-            // Resolve interest config
-            if (!interestConfigCache.has(effectiveContractId)) {
-              const config = await ContractInterestConfig.query()
-                .where('contractId', effectiveContractId)
-                .first()
-              interestConfigCache.set(effectiveContractId, config)
-            }
-
-            const interestConfig = interestConfigCache.get(effectiveContractId)
-            if (!interestConfig) {
-              skipped++
-              return
-            }
-
-            // Calculate days overdue
-            const dueDate = freshInvoice.dueDate.startOf('day')
-            const diasAtraso = Math.floor(today.diff(dueDate, 'days').days)
-
-            if (diasAtraso <= 0) {
-              skipped++
-              return
-            }
-
-            // baseAmount = sum of active payment amounts (snapshot, set once)
-            const baseAmount =
-              freshInvoice.baseAmount > 0
-                ? freshInvoice.baseAmount
-                : freshInvoice.payments.reduce((sum, p) => sum + Number(p.amount), 0)
-
-            // Fine: applied once as percentage of baseAmount
-            const fineAmount = Math.round(
-              (baseAmount * interestConfig.delayInterestPercentage) / 100
-            )
-
-            // Daily interest: (baseAmount * percentual ao dia) * dias overdue
-            const interestAmount = Math.round(
-              (baseAmount * interestConfig.delayInterestPerDayDelayed * diasAtraso) / 100
-            )
-
-            const newTotal = baseAmount + fineAmount + interestAmount
-
-            // Idempotency: skip if nothing changed
-            if (
-              freshInvoice.totalAmount === newTotal &&
-              freshInvoice.baseAmount === baseAmount &&
-              freshInvoice.fineAmount === fineAmount &&
-              freshInvoice.interestAmount === interestAmount
-            ) {
-              skipped++
-              return
-            }
-
-            const previousTotal = freshInvoice.totalAmount
-            const hadCharge = freshInvoice.paymentGatewayId
-            const valueChanged = previousTotal !== newTotal
-
-            // Transaction: update invoice + clear charge fields atomically
-            const trx = await db.transaction()
-            try {
-              freshInvoice.useTransaction(trx)
-              freshInvoice.baseAmount = baseAmount
-              freshInvoice.fineAmount = fineAmount
-              freshInvoice.interestAmount = interestAmount
-              freshInvoice.totalAmount = newTotal
-
-              // If charge exists and value changed, clear charge fields
-              if (hadCharge && valueChanged) {
-                freshInvoice.paymentGatewayId = null
-                freshInvoice.invoiceUrl = null
-                freshInvoice.paymentGateway = null
-                freshInvoice.paymentMethod = null
-              }
-
-              await freshInvoice.save()
-              await trx.commit()
-            } catch (trxError) {
-              await trx.rollback()
-              throw trxError
-            }
-
-            updated++
-            logger.info(
-              `[INTEREST] Updated invoice ${freshInvoice.id}: ${previousTotal} → ${newTotal} (base=${baseAmount}, fine=${fineAmount}, interest=${interestAmount}, days=${diasAtraso})`
-            )
-
-            // Cancel stale Asaas charge AFTER commit (best-effort, external API)
-            if (hadCharge && valueChanged) {
-              try {
-                const contractId = freshInvoice.payments[0].contractId
-                if (!schoolCache.has(contractId)) {
-                  const contract = await Contract.query()
-                    .where('id', contractId)
-                    .preload('school', (sq) => sq.preload('schoolChain'))
-                    .first()
-                  schoolCache.set(contractId, contract?.school ?? null)
-                }
-
-                const school = schoolCache.get(contractId)
-                if (school) {
-                  const asaasConfig = asaasService.resolveAsaasConfig(school)
-                  if (asaasConfig) {
-                    await asaasService.deleteAsaasPayment(asaasConfig.apiKey, hadCharge)
-                    chargesCancelled++
-                    logger.info(
-                      `[INTEREST] Cancelled stale Asaas charge ${hadCharge} for invoice ${freshInvoice.id}`
-                    )
-                  }
-                }
-              } catch (cancelError) {
-                // Log but don't fail — charge fields already cleared in DB
-                logger.warn(
-                  `[INTEREST] Failed to cancel Asaas charge ${hadCharge} for invoice ${freshInvoice.id}:`,
-                  {
-                    error: cancelError instanceof Error ? cancelError.message : String(cancelError),
-                  }
-                )
-              }
-            }
-          } catch (error) {
-            errors++
-            logger.error(`[INTEREST] Error processing invoice ${invoice.id}:`, {
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined,
-            })
+          if (!result.updated) {
+            skipped++
+            continue
           }
-        })
 
-        if (!executed) {
-          logger.warn(`[INTEREST] Could not acquire lock for invoice ${invoice.id} - skipping`)
-          skipped++
+          updated++
+
+          if (!result.staleChargeId || !result.contractId) {
+            continue
+          }
+
+          try {
+            if (!schoolCache.has(result.contractId)) {
+              const contract = await Contract.query()
+                .where('id', result.contractId)
+                .preload('school', (sq) => sq.preload('schoolChain'))
+                .first()
+              schoolCache.set(result.contractId, contract?.school ?? null)
+            }
+
+            const school = schoolCache.get(result.contractId)
+            if (!school) {
+              continue
+            }
+
+            const asaasConfig = asaasService.resolveAsaasConfig(school)
+            if (!asaasConfig) {
+              continue
+            }
+
+            await asaasService.deleteAsaasPayment(asaasConfig.apiKey, result.staleChargeId)
+            chargesCancelled++
+            logger.info(
+              `[INTEREST] Cancelled stale Asaas charge ${result.staleChargeId} for invoice ${invoice.id}`
+            )
+          } catch (cancelError) {
+            logger.warn(
+              `[INTEREST] Failed to cancel Asaas charge ${result.staleChargeId} for invoice ${invoice.id}:`,
+              {
+                error: cancelError instanceof Error ? cancelError.message : String(cancelError),
+              }
+            )
+          }
+        } catch (error) {
+          errors++
+          logger.error(`[INTEREST] Error processing invoice ${invoice.id}:`, {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          })
         }
       }
 

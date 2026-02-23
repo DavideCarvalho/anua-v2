@@ -28,7 +28,8 @@ export default class ReconcileStudentInvoicesCommand extends BaseCommand {
 
   async run() {
     const { default: StudentPayment } = await import('#models/student_payment')
-    const { default: GenerateInvoices } = await import('#start/jobs/generate_invoices')
+    const { default: BillingReconciliationService } =
+      await import('#services/payments/billing_reconciliation_service')
 
     // Verify student exists
     const { default: Student } = await import('#models/student')
@@ -69,7 +70,7 @@ export default class ReconcileStudentInvoicesCommand extends BaseCommand {
 
     for (const payment of payments) {
       try {
-        await GenerateInvoices.reconcilePayment(payment)
+        await BillingReconciliationService.reconcileByPaymentId(payment.id)
         reconciled++
         this.logger.info(
           `  ✓ Payment ${payment.id} (${payment.month}/${payment.year} - ${payment.type})`
