@@ -1,5 +1,4 @@
-import { Head } from '@inertiajs/react'
-import { usePage } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
