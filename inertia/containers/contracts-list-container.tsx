@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   useMutation,
   useQuery,
@@ -10,26 +10,18 @@ import { router } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useContractsQueryOptions, type ContractsResponse } from '../hooks/queries/use_contracts'
-import { deleteContractMutationOptions } from '../hooks/mutations/use_contract_mutations'
+import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
+import { updateContractMutationOptions } from '../hooks/mutations/use_contract_mutations'
+import { tuyau } from '../lib/api'
 import { toast } from 'sonner'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '../components/ui/alert-dialog'
+import { Badge } from '../components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
 import {
@@ -41,8 +33,17 @@ import {
   Plus,
   MoreHorizontal,
   Edit,
-  Trash2,
+  RefreshCw,
+  Filter,
+  X,
 } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 
 interface ContractItem {
   id: string
@@ -55,6 +56,20 @@ interface ContractItem {
   installments?: number
   flexibleInstallments?: boolean
   isActive?: boolean
+}
+
+interface CourseLevel {
+  id: string
+  levelId: string
+  name: string
+  classes: { id: string; name: string }[]
+}
+
+interface AcademicPeriodCourse {
+  id: string
+  courseId: string
+  name: string
+  levels: CourseLevel[]
 }
 
 type ContractsMeta = ContractsResponse extends { meta: infer T } ? T : null
@@ -181,42 +196,115 @@ function ContractsListContent() {
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
+    academicPeriodId: parseAsString,
+    courseId: parseAsString,
+    classId: parseAsString,
+    status: parseAsString,
     page: parseAsInteger.withDefault(1),
     limit: parseAsInteger.withDefault(20),
   })
 
-  const { search, page, limit } = filters
+  const { search, academicPeriodId, courseId, classId, status, page, limit } = filters
+  const [searchInput, setSearchInput] = useState(search || '')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters({ search: searchInput || null, page: 1 })
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchInput, setFilters])
+
+  useEffect(() => {
+    setSearchInput(search || '')
+  }, [search])
+
+  const statusFilter = status || 'active'
+
+  const hasActiveFilters =
+    !!search || !!academicPeriodId || !!courseId || !!classId || statusFilter !== 'active'
+
+  const clearFilters = () => {
+    setFilters({
+      search: null,
+      academicPeriodId: null,
+      courseId: null,
+      classId: null,
+      status: null,
+      page: 1,
+    })
+  }
+
+  const { data: academicPeriodsData } = useQuery({
+    ...useAcademicPeriodsQueryOptions({ limit: 100 }),
+  })
+  const academicPeriods = academicPeriodsData?.data ?? []
+
+  const { data: coursesData } = useQuery({
+    queryKey: ['academic-period-courses', academicPeriodId],
+    queryFn: async () => {
+      const response = await tuyau.api.v1['academic-periods']({
+        id: academicPeriodId!,
+      }).courses.$get()
+      if (response.error) throw new Error('Erro ao carregar cursos')
+      return response.data as AcademicPeriodCourse[]
+    },
+    enabled: !!academicPeriodId,
+  })
+  const courses = coursesData ?? []
+
+  const classes = useMemo(() => {
+    if (!courseId || !courses.length) return []
+
+    const selectedCourse = courses.find((course) => course.courseId === courseId)
+    if (!selectedCourse) return []
+
+    return selectedCourse.levels.flatMap((level) =>
+      level.classes.map((classItem) => ({
+        ...classItem,
+        levelName: level.name,
+      }))
+    )
+  }, [courseId, courses])
 
   const { data, isLoading, error, refetch } = useQuery(
-    useContractsQueryOptions({ page, limit, search: search || undefined })
+    useContractsQueryOptions({
+      page,
+      limit,
+      search: search || undefined,
+      academicPeriodId: academicPeriodId || undefined,
+      courseId: courseId || undefined,
+      classId: classId || undefined,
+      status: statusFilter,
+    })
   )
 
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [contractToDelete, setContractToDelete] = useState<ContractItem | null>(null)
+  const [contractActionPendingId, setContractActionPendingId] = useState<string | null>(null)
 
-  const deleteContract = useMutation(deleteContractMutationOptions())
+  const updateContract = useMutation(updateContractMutationOptions())
 
   const handleEdit = (contract: ContractItem) => {
     router.visit(`/escola/administrativo/contratos/${contract.id}/editar`)
   }
 
-  const handleDelete = (contract: ContractItem) => {
-    setContractToDelete(contract)
-    setIsDeleteModalOpen(true)
-  }
+  const handleToggleActive = async (contract: ContractItem) => {
+    if (typeof contract.isActive !== 'boolean') return
 
-  const confirmDelete = async () => {
-    if (!contractToDelete) return
     try {
-      await deleteContract.mutateAsync(contractToDelete.id)
+      setContractActionPendingId(contract.id)
+      await updateContract.mutateAsync({
+        id: contract.id,
+        isActive: !contract.isActive,
+      })
       await queryClient.invalidateQueries({ queryKey: ['contracts'] })
-      toast.success('Contrato removido com sucesso')
+      toast.success(
+        contract.isActive ? 'Contrato desativado com sucesso' : 'Contrato reativado com sucesso'
+      )
     } catch (error) {
-      console.error('Error deleting contract:', error)
-      toast.error('Erro ao remover contrato')
+      console.error('Error toggling contract status:', error)
+      toast.error('Erro ao atualizar status do contrato')
     } finally {
-      setIsDeleteModalOpen(false)
-      setContractToDelete(null)
+      setContractActionPendingId(null)
     }
   }
 
@@ -231,8 +319,8 @@ function ContractsListContent() {
           <Input
             placeholder="Buscar contratos..."
             className="pl-9"
-            value={search || ''}
-            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
         <Link route="web.escola.administrativo.contratos.novo">
@@ -242,6 +330,111 @@ function ContractsListContent() {
           </Button>
         </Link>
       </div>
+
+      <Card>
+        <CardContent className="py-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+
+            <Select
+              value={academicPeriodId || 'all'}
+              onValueChange={(value) =>
+                setFilters({
+                  academicPeriodId: value === 'all' ? null : value,
+                  courseId: null,
+                  classId: null,
+                  page: 1,
+                })
+              }
+            >
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Período Letivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os períodos</SelectItem>
+                {academicPeriods.map((period: any) => (
+                  <SelectItem key={period.id} value={period.id}>
+                    {period.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={courseId || 'all'}
+              onValueChange={(value) =>
+                setFilters({
+                  courseId: value === 'all' ? null : value,
+                  classId: null,
+                  page: 1,
+                })
+              }
+              disabled={!academicPeriodId}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Curso" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os cursos</SelectItem>
+                {courses.map((course) => (
+                  <SelectItem key={course.courseId} value={course.courseId}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={classId || 'all'}
+              onValueChange={(value) =>
+                setFilters({
+                  classId: value === 'all' ? null : value,
+                  page: 1,
+                })
+              }
+              disabled={!courseId}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Turma" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as turmas</SelectItem>
+                {classes.map((classItem) => (
+                  <SelectItem key={classItem.id} value={classItem.id}>
+                    {classItem.name} ({classItem.levelName})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={statusFilter}
+              onValueChange={(value) =>
+                setFilters({
+                  status: value === 'active' ? null : value,
+                  page: 1,
+                })
+              }
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Somente ativos</SelectItem>
+                <SelectItem value="inactive">Somente inativos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-1" />
+                Limpar filtros
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {isLoading && <ContractsListSkeleton />}
 
@@ -266,6 +459,7 @@ function ContractsListContent() {
                   <th className="text-left p-4 font-medium">Nome</th>
                   <th className="text-left p-4 font-medium">Matrícula</th>
                   <th className="text-left p-4 font-medium">Mensalidade</th>
+                  <th className="text-left p-4 font-medium">Status</th>
                   <th className="text-right p-4 font-medium">Ações</th>
                 </tr>
               </thead>
@@ -284,6 +478,18 @@ function ContractsListContent() {
                     </td>
                     <td className="p-4 text-muted-foreground">{getEnrollmentLabel(contract)}</td>
                     <td className="p-4 text-muted-foreground">{getTuitionLabel(contract)}</td>
+                    <td className="p-4">
+                      <Badge
+                        variant="outline"
+                        className={
+                          contract.isActive
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : 'border-slate-200 bg-slate-100 text-slate-700'
+                        }
+                      >
+                        {contract.isActive ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </td>
                     <td className="p-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -296,13 +502,12 @@ function ContractsListContent() {
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => handleDelete(contract)}
-                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleToggleActive(contract)}
+                            disabled={contractActionPendingId === contract.id}
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Excluir
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            {contract.isActive ? 'Desativar' : 'Reativar'}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -343,27 +548,6 @@ function ContractsListContent() {
           )}
         </div>
       )}
-
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir contrato</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o contrato "{contractToDelete?.name}"? Esta ação não
-              pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              {deleteContract.isPending ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

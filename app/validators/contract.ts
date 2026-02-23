@@ -138,6 +138,10 @@ export const listContractsValidator = vine.compile(
   vine.object({
     schoolId: vine.string().trim().optional(),
     academicPeriodId: vine.string().trim().optional(),
+    courseId: vine.string().trim().optional(),
+    classId: vine.string().trim().optional(),
+    search: vine.string().trim().optional(),
+    status: vine.enum(['active', 'inactive', 'all']).optional(),
     isActive: vine.boolean().optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
