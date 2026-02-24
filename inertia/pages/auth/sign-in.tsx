@@ -2,23 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { router } from '@inertiajs/react'
 import confetti from 'canvas-confetti'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Loader2,
-  Mail,
-  Sparkles,
-} from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Loader2, Mail, Sparkles } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 
 import { Button } from '~/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { tuyau } from '~/lib/api'
@@ -59,7 +47,7 @@ export default function SignIn() {
 
       // Redirect after success
       const redirectTimeout = setTimeout(() => {
-        router.visit('/escola')
+        router.visit('/dashboard')
       }, 2000)
 
       return () => clearTimeout(redirectTimeout)
