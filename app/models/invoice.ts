@@ -57,6 +57,12 @@ export default class Invoice extends compose(BaseModel, Auditable) {
   @column({ columnName: 'interestAmount' })
   declare interestAmount: number
 
+  @column({ columnName: 'platformFeeAmount' })
+  declare platformFeeAmount: number
+
+  @column({ columnName: 'chargedAmount' })
+  declare chargedAmount: number
+
   @column({ columnName: 'netAmountReceived' })
   declare netAmountReceived: number | null
 

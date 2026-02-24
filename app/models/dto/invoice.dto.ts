@@ -16,6 +16,8 @@ export default class InvoiceDto extends BaseModelDto {
   declare discountAmount: number
   declare fineAmount: number
   declare interestAmount: number
+  declare platformFeeAmount: number
+  declare chargedAmount: number
   declare totalAmount: number
   declare netAmountReceived: number | null
   declare paidAt: Date | null
@@ -56,6 +58,8 @@ export default class InvoiceDto extends BaseModelDto {
     this.discountAmount = invoice.discountAmount
     this.fineAmount = invoice.fineAmount
     this.interestAmount = invoice.interestAmount
+    this.platformFeeAmount = invoice.platformFeeAmount
+    this.chargedAmount = invoice.chargedAmount
     this.totalAmount = invoice.totalAmount
     this.netAmountReceived = invoice.netAmountReceived
     this.paidAt = invoice.paidAt ? invoice.paidAt.toJSDate() : null

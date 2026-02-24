@@ -5,6 +5,9 @@ import Invoice from '#models/invoice'
 import Contract from '#models/contract'
 import StudentHasLevel from '#models/student_has_level'
 import StudentHasResponsible from '#models/student_has_responsible'
+import PaymentSettings from '#models/payment_settings'
+import type School from '#models/school'
+import type SchoolChain from '#models/school_chain'
 import AppException from '#exceptions/app_exception'
 import type StudentPayment from '#models/student_payment'
 import AsaasService from '#services/asaas_service'
@@ -64,7 +67,13 @@ export default class CreateInvoiceAsaasChargeController {
     }
 
     const checkoutPricing = this.resolveCheckoutPricing(invoice, contract)
-    const expectedValue = checkoutPricing.totalAmount / 100
+    const paymentSettings = await this.resolvePaymentSettings(contract.school)
+    const platformFeeAmount = this.resolvePlatformFeeAmount(
+      checkoutPricing.totalAmount,
+      paymentSettings
+    )
+    const chargedAmount = checkoutPricing.totalAmount + platformFeeAmount
+    const expectedValue = chargedAmount / 100
 
     const discountSourcesByEnrollmentId = await this.resolveDiscountSourcesByEnrollmentId(invoice)
     const paymentDescriptions = invoice.payments
@@ -92,6 +101,8 @@ export default class CreateInvoiceAsaasChargeController {
         invoice.baseAmount = checkoutPricing.baseAmount
         invoice.discountAmount = checkoutPricing.discountAmount
         invoice.totalAmount = checkoutPricing.totalAmount
+        invoice.platformFeeAmount = platformFeeAmount
+        invoice.chargedAmount = chargedAmount
         invoice.invoiceUrl = existing.bankSlipUrl ?? existing.invoiceUrl ?? invoice.invoiceUrl
         await invoice.save()
         return response.ok({ invoiceUrl: invoice.invoiceUrl })
@@ -106,6 +117,8 @@ export default class CreateInvoiceAsaasChargeController {
       invoice.baseAmount = checkoutPricing.baseAmount
       invoice.discountAmount = checkoutPricing.discountAmount
       invoice.totalAmount = checkoutPricing.totalAmount
+      invoice.platformFeeAmount = platformFeeAmount
+      invoice.chargedAmount = chargedAmount
       await invoice.save()
     }
 
@@ -138,6 +151,8 @@ export default class CreateInvoiceAsaasChargeController {
     invoice.baseAmount = checkoutPricing.baseAmount
     invoice.discountAmount = checkoutPricing.discountAmount
     invoice.totalAmount = checkoutPricing.totalAmount
+    invoice.platformFeeAmount = platformFeeAmount
+    invoice.chargedAmount = chargedAmount
     invoice.paymentGateway = 'ASAAS'
     invoice.paymentGatewayId = charge.id
     invoice.invoiceUrl = charge.bankSlipUrl ?? charge.invoiceUrl ?? null
@@ -146,6 +161,49 @@ export default class CreateInvoiceAsaasChargeController {
     await invoice.save()
 
     return response.created({ invoiceUrl: invoice.invoiceUrl })
+  }
+
+  private async resolvePaymentSettings(
+    school: School & { schoolChain?: SchoolChain | null }
+  ): Promise<PaymentSettings | null> {
+    const chain = (school.$preloaded.schoolChain as SchoolChain | undefined) ?? school.schoolChain
+
+    const fetchSchoolSettings = () =>
+      PaymentSettings.query()
+        .where('schoolId', school.id)
+        .where('isActive', true)
+        .orderBy('createdAt', 'desc')
+        .first()
+
+    const fetchChainSettings = () =>
+      chain?.id
+        ? PaymentSettings.query()
+            .where('schoolChainId', chain.id)
+            .where('isActive', true)
+            .orderBy('createdAt', 'desc')
+            .first()
+        : Promise.resolve(null)
+
+    const schoolSettings = await fetchSchoolSettings()
+    if (schoolSettings) return schoolSettings
+
+    return fetchChainSettings()
+  }
+
+  private resolvePlatformFeeAmount(
+    totalAmount: number,
+    paymentSettings: PaymentSettings | null
+  ): number {
+    if (!paymentSettings || totalAmount <= 0) {
+      return 0
+    }
+
+    if (paymentSettings.platformFeeMode === 'FIXED') {
+      return Math.max(0, Math.round(Number(paymentSettings.platformFeeFixedAmount ?? 0)))
+    }
+
+    const percentage = Math.max(0, Number(paymentSettings.platformFeePercentage ?? 0))
+    return Math.max(0, Math.round((totalAmount * percentage) / 100))
   }
 
   private async resolveBillingType(invoice: Invoice): Promise<'BOLETO' | 'PIX' | 'CREDIT_CARD'> {

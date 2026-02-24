@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
+import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group'
 import { tuyau } from '../../lib/api'
 import { useSchoolChainsQueryOptions } from '../../hooks/queries/use_school_chains'
 import { usePlatformSettingsQueryOptions } from '../../hooks/queries/use_platform_settings'
@@ -59,7 +60,9 @@ function OnboardingFormError({
       <CardContent className="p-6">
         <div className="py-12 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold text-destructive">Erro ao carregar formulário</h3>
+          <h3 className="mt-4 text-lg font-semibold text-destructive">
+            Erro ao carregar formulário
+          </h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {error.message || 'Não foi possível carregar o formulário de onboarding.'}
           </p>
@@ -96,9 +99,14 @@ function OnboardingFormContent() {
       directorName: '',
       directorEmail: '',
       directorPhone: '',
+      directorDocumentNumber: '',
       trialDays: platformSettings?.defaultTrialDays ?? 30,
+      billingModel: 'PER_ACTIVE_STUDENT',
       pricePerStudent: platformSettings?.defaultPricePerStudent ?? 1290,
+      monthlyFixedPrice: undefined,
+      platformFeeMode: 'PERCENTAGE',
       platformFeePercentage: 5.0,
+      platformFeeFixedAmount: undefined,
       hasInsurance: false,
       insurancePercentage: undefined,
       insuranceCoveragePercentage: undefined,
@@ -108,11 +116,17 @@ function OnboardingFormContent() {
 
   const schoolChainId = form.watch('schoolChainId')
   const chainsList = schoolChains?.data ?? []
-  const selectedChain = chainsList.find((chain: { id: string; subscriptionLevel?: string }) => chain.id === schoolChainId)
+  const selectedChain = chainsList.find(
+    (chain: { id: string; subscriptionLevel?: string }) => chain.id === schoolChainId
+  )
   const hasNetworkSubscription = selectedChain?.subscriptionLevel === 'NETWORK'
 
   const { mutateAsync: createSchool, isPending } = useMutation({
     mutationFn: async (data: SchoolOnboardingFormData) => {
+      const pricePerStudent = data.billingModel === 'PER_ACTIVE_STUDENT' ? data.pricePerStudent : 0
+      const monthlyFixedPrice =
+        data.billingModel === 'FIXED_MONTHLY' ? data.monthlyFixedPrice : undefined
+
       const response = await tuyau.api.v1.admin.schools.onboarding.$post({
         name: data.schoolName,
         schoolChainId: data.schoolChainId,
@@ -128,15 +142,20 @@ function OnboardingFormContent() {
         directorName: data.directorName,
         directorEmail: data.directorEmail,
         directorPhone: data.directorPhone,
+        directorDocumentNumber: data.directorDocumentNumber,
         isNetwork: data.isNetwork,
         trialDays: data.trialDays,
-        pricePerStudent: data.pricePerStudent,
+        billingModel: data.billingModel,
+        pricePerStudent,
+        monthlyFixedPrice,
+        platformFeeMode: data.platformFeeMode,
         platformFeePercentage: data.platformFeePercentage,
+        platformFeeFixedAmount: data.platformFeeFixedAmount,
         hasInsurance: data.hasInsurance,
         insurancePercentage: data.insurancePercentage,
         insuranceCoveragePercentage: data.insuranceCoveragePercentage,
         insuranceClaimWaitingDays: data.insuranceClaimWaitingDays,
-      })
+      } as any)
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao criar escola')
       }
@@ -163,6 +182,19 @@ function OnboardingFormContent() {
   }
 
   const isNetwork = form.watch('isNetwork')
+  const selectedBillingModel = form.watch('billingModel')
+  const selectedPlatformFeeMode = form.watch('platformFeeMode')
+
+  useEffect(() => {
+    if (selectedBillingModel === 'PER_ACTIVE_STUDENT') {
+      form.setValue('monthlyFixedPrice', undefined)
+      return
+    }
+
+    if (form.getValues('monthlyFixedPrice') === undefined) {
+      form.setValue('monthlyFixedPrice', 0)
+    }
+  }, [form, selectedBillingModel])
 
   const handleZipCodeChange = async (zipCode: string) => {
     const cleanZipCode = zipCode.replace(/\D/g, '')
@@ -217,7 +249,9 @@ function OnboardingFormContent() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dados da Escola</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Dados da Escola
+                </h3>
 
                 <FormField
                   control={form.control}
@@ -237,16 +271,27 @@ function OnboardingFormContent() {
                   control={form.control}
                   name="isNetwork"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Esta escola faz parte de uma rede de ensino?</FormLabel>
-                        <FormDescription>
-                          Marque se a escola pertence a uma rede ou grupo educacional
-                        </FormDescription>
-                      </div>
+                    <FormItem className="rounded-md border p-0">
+                      <label
+                        htmlFor="is-network"
+                        className="flex cursor-pointer flex-row items-start space-x-3 p-4"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            id="is-network"
+                            checked={field.value}
+                            onCheckedChange={(checked) => field.onChange(checked === true)}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="cursor-pointer">
+                            Esta escola faz parte de uma rede de ensino?
+                          </FormLabel>
+                          <FormDescription>
+                            Marque se a escola pertence a uma rede ou grupo educacional
+                          </FormDescription>
+                        </div>
+                      </label>
                     </FormItem>
                   )}
                 />
@@ -299,7 +344,9 @@ function OnboardingFormContent() {
 
               {/* Address Section */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Endereço da Escola</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Endereço da Escola
+                </h3>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <FormField
@@ -339,7 +386,11 @@ function OnboardingFormContent() {
                       <FormItem className="md:col-span-2">
                         <FormLabel>Rua</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: Rua das Flores" {...field} disabled={isLoadingCep} />
+                          <Input
+                            placeholder="Ex: Rua das Flores"
+                            {...field}
+                            disabled={isLoadingCep}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -413,7 +464,12 @@ function OnboardingFormContent() {
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ex: SP" {...field} maxLength={2} disabled={isLoadingCep} />
+                          <Input
+                            placeholder="Ex: SP"
+                            {...field}
+                            maxLength={2}
+                            disabled={isLoadingCep}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -424,7 +480,9 @@ function OnboardingFormContent() {
 
               {!hasNetworkSubscription && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Configuração de Assinatura</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Configuração de Assinatura
+                  </h3>
 
                   <FormField
                     control={form.control}
@@ -441,8 +499,8 @@ function OnboardingFormContent() {
                           />
                         </FormControl>
                         <FormDescription>
-                          Número de dias de acesso gratuito (padrão: {platformSettings?.defaultTrialDays}{' '}
-                          dias)
+                          Número de dias de acesso gratuito (padrão:{' '}
+                          {platformSettings?.defaultTrialDays} dias)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -451,61 +509,246 @@ function OnboardingFormContent() {
 
                   <FormField
                     control={form.control}
-                    name="pricePerStudent"
+                    name="billingModel"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Preço por Aluno Ativo</FormLabel>
+                        <FormLabel>Modelo de Cobrança</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="R$ 0,00"
-                            value={
-                              field.value
-                                ? `R$ ${(field.value / 100).toFixed(2).replace('.', ',')}`
-                                : ''
-                            }
-                            onChange={(e) => {
-                              const rawValue = e.target.value.replace(/\D/g, '')
-                              const centavos = rawValue ? parseInt(rawValue, 10) : 0
-                              field.onChange(centavos)
-                            }}
-                          />
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="grid gap-3 md:grid-cols-2"
+                          >
+                            <FormItem
+                              className="flex cursor-pointer items-start space-x-3 space-y-0 rounded-md border p-4"
+                              onClick={() => field.onChange('PER_ACTIVE_STUDENT')}
+                            >
+                              <FormControl onClick={(e) => e.stopPropagation()}>
+                                <RadioGroupItem
+                                  id="billing-model-per-student"
+                                  value="PER_ACTIVE_STUDENT"
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel
+                                  htmlFor="billing-model-per-student"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Por aluno ativo
+                                </FormLabel>
+                                <FormDescription>
+                                  Cobra conforme quantidade de alunos ativos em períodos letivos
+                                  ativos.
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                            <FormItem
+                              className="flex cursor-pointer items-start space-x-3 space-y-0 rounded-md border p-4"
+                              onClick={() => field.onChange('FIXED_MONTHLY')}
+                            >
+                              <FormControl onClick={(e) => e.stopPropagation()}>
+                                <RadioGroupItem id="billing-model-fixed" value="FIXED_MONTHLY" />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel
+                                  htmlFor="billing-model-fixed"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Mensalidade fixa
+                                </FormLabel>
+                                <FormDescription>
+                                  Cobra um valor fixo mensal independente da quantidade de alunos.
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                          </RadioGroup>
                         </FormControl>
-                        <FormDescription>
-                          Valor cobrado por aluno ativo. Padrão: R${' '}
-                          {((platformSettings?.defaultPricePerStudent ?? 0) / 100)
-                            .toFixed(2)
-                            .replace('.', ',')}
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
+                  {selectedBillingModel === 'PER_ACTIVE_STUDENT' ? (
+                    <FormField
+                      control={form.control}
+                      name="pricePerStudent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Preço por Aluno Ativo</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="R$ 0,00"
+                              value={
+                                field.value
+                                  ? `R$ ${(field.value / 100).toFixed(2).replace('.', ',')}`
+                                  : ''
+                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(/\D/g, '')
+                                const centavos = rawValue ? parseInt(rawValue, 10) : 0
+                                field.onChange(centavos)
+                              }}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Valor cobrado por aluno ativo. Padrão: R${' '}
+                            {((platformSettings?.defaultPricePerStudent ?? 0) / 100)
+                              .toFixed(2)
+                              .replace('.', ',')}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="monthlyFixedPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Preço de Mensalidade</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="R$ 0,00"
+                              value={
+                                field.value !== undefined
+                                  ? `R$ ${(field.value / 100).toFixed(2).replace('.', ',')}`
+                                  : ''
+                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(/\D/g, '')
+                                const centavos = rawValue ? parseInt(rawValue, 10) : 0
+                                field.onChange(centavos)
+                              }}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Valor fixo cobrado todos os meses por escola.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
                   <FormField
                     control={form.control}
-                    name="platformFeePercentage"
+                    name="platformFeeMode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Taxa da Plataforma (%)</FormLabel>
+                        <FormLabel>Tipo de Taxa da Plataforma</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            min={0}
-                            max={100}
-                            placeholder="5.0"
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="grid gap-3 md:grid-cols-2"
+                          >
+                            <FormItem
+                              className="flex cursor-pointer items-start space-x-3 space-y-0 rounded-md border p-4"
+                              onClick={() => field.onChange('PERCENTAGE')}
+                            >
+                              <FormControl onClick={(e) => e.stopPropagation()}>
+                                <RadioGroupItem
+                                  id="platform-fee-mode-percentage"
+                                  value="PERCENTAGE"
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel
+                                  htmlFor="platform-fee-mode-percentage"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Percentual
+                                </FormLabel>
+                                <FormDescription>
+                                  Cobra uma porcentagem sobre o valor da fatura.
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                            <FormItem
+                              className="flex cursor-pointer items-start space-x-3 space-y-0 rounded-md border p-4"
+                              onClick={() => field.onChange('FIXED')}
+                            >
+                              <FormControl onClick={(e) => e.stopPropagation()}>
+                                <RadioGroupItem id="platform-fee-mode-fixed" value="FIXED" />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel
+                                  htmlFor="platform-fee-mode-fixed"
+                                  className="cursor-pointer font-medium"
+                                >
+                                  Valor fixo
+                                </FormLabel>
+                                <FormDescription>
+                                  Cobra um valor fixo por fatura gerada.
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                          </RadioGroup>
                         </FormControl>
-                        <FormDescription>
-                          Percentual cobrado sobre as mensalidades dos alunos (padrão: 5%)
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {selectedPlatformFeeMode === 'PERCENTAGE' ? (
+                    <FormField
+                      control={form.control}
+                      name="platformFeePercentage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa da Plataforma (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              min={0}
+                              max={100}
+                              placeholder="5.0"
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Percentual cobrado sobre as mensalidades dos alunos (padrão: 5%)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="platformFeeFixedAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa da Plataforma (R$)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="R$ 0,00"
+                              value={
+                                field.value !== undefined
+                                  ? `R$ ${(field.value / 100).toFixed(2).replace('.', ',')}`
+                                  : ''
+                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(/\D/g, '')
+                                const centavos = rawValue ? parseInt(rawValue, 10) : 0
+                                field.onChange(centavos)
+                              }}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Valor fixo adicional cobrado em cada fatura.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <div className="rounded-lg border bg-muted/50 p-4">
                     <p className="text-sm text-muted-foreground">
@@ -513,15 +756,19 @@ function OnboardingFormContent() {
                       {new Date(
                         Date.now() + form.watch('trialDays') * 24 * 60 * 60 * 1000
                       ).toLocaleDateString('pt-BR')}{' '}
-                      | R$ {(form.watch('pricePerStudent') / 100).toFixed(2).replace('.', ',')} por aluno
-                      ativo
+                      |{' '}
+                      {selectedBillingModel === 'PER_ACTIVE_STUDENT'
+                        ? `R$ ${(form.watch('pricePerStudent') / 100).toFixed(2).replace('.', ',')} por aluno ativo`
+                        : `R$ ${((form.watch('monthlyFixedPrice') ?? 0) / 100).toFixed(2).replace('.', ',')} por mês (fixo)`}
                     </p>
                   </div>
                 </div>
               )}
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dados do Diretor</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Dados do Diretor
+                </h3>
 
                 <FormField
                   control={form.control}
@@ -546,7 +793,9 @@ function OnboardingFormContent() {
                       <FormControl>
                         <Input type="email" placeholder="diretor@escola.com" {...field} />
                       </FormControl>
-                      <FormDescription>Este será o email de acesso do diretor ao sistema</FormDescription>
+                      <FormDescription>
+                        Este será o email de acesso do diretor ao sistema
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -565,119 +814,35 @@ function OnboardingFormContent() {
                     </FormItem>
                   )}
                 />
-              </div>
-
-              {/* Insurance Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Seguro de Inadimplência</h3>
-                <p className="text-sm text-muted-foreground">
-                  Configure o seguro contra inadimplência para proteger a escola de inadimplentes.
-                </p>
 
                 <FormField
                   control={form.control}
-                  name="hasInsurance"
+                  name="directorDocumentNumber"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem>
+                      <FormLabel>CPF/CNPJ do Diretor</FormLabel>
                       <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        <Input
+                          placeholder="Somente números"
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
+                        />
                       </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Habilitar seguro de inadimplência</FormLabel>
-                        <FormDescription>
-                          A escola pagará uma porcentagem mensal sobre as mensalidades para ter cobertura
-                          contra inadimplência.
-                        </FormDescription>
-                      </div>
+                      <FormDescription>
+                        Obrigatório para gerar cobranças automáticas no Asaas.
+                      </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {form.watch('hasInsurance') && (
-                  <div className="space-y-4 rounded-md border p-4">
-                    <FormField
-                      control={form.control}
-                      name="insurancePercentage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Porcentagem do Seguro (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={3}
-                              step="0.1"
-                              placeholder="3.0"
-                              value={field.value ?? ''}
-                              onChange={(e) =>
-                                field.onChange(e.target.value ? Number(e.target.value) : undefined)
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Porcentagem cobrada sobre as mensalidades (mínimo: 3%)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="insuranceCoveragePercentage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cobertura do Seguro (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              max={100}
-                              step="0.1"
-                              placeholder="100.0"
-                              value={field.value ?? ''}
-                              onChange={(e) =>
-                                field.onChange(e.target.value ? Number(e.target.value) : undefined)
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Porcentagem do valor inadimplente que será coberto (padrão: 100%)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="insuranceClaimWaitingDays"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Dias para Acionamento</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={1}
-                              placeholder="90"
-                              value={field.value ?? ''}
-                              onChange={(e) =>
-                                field.onChange(e.target.value ? Number(e.target.value) : undefined)
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Quantos dias de atraso antes de acionar o seguro (padrão: 90)
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
               </div>
 
               <div className="flex justify-end gap-4">
-                <Button type="button" variant="outline" onClick={() => router.visit('/admin/escolas')}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.visit('/admin/escolas')}
+                >
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={isPending}>
@@ -692,14 +857,6 @@ function OnboardingFormContent() {
       <CreateSchoolChainDialog
         open={isCreateChainDialogOpen}
         onOpenChange={setIsCreateChainDialogOpen}
-        defaultPlatformSettings={
-          platformSettings
-            ? {
-                defaultTrialDays: platformSettings.defaultTrialDays,
-                defaultPricePerStudent: platformSettings.defaultPricePerStudent,
-              }
-            : undefined
-        }
         onSuccess={(newChain) => {
           form.setValue('schoolChainId', newChain.id)
         }}

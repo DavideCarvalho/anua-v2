@@ -7,6 +7,7 @@ export const createSchoolOnboardingValidator = vine.compile(
     directorName: vine.string().minLength(1),
     directorEmail: vine.string().email(),
     directorPhone: vine.string().optional(),
+    directorDocumentNumber: vine.string().regex(/^(\d{11}|\d{14})$/),
     isNetwork: vine.boolean().optional(),
     // Address fields
     street: vine.string().minLength(1),
@@ -20,8 +21,12 @@ export const createSchoolOnboardingValidator = vine.compile(
     longitude: vine.number().optional(),
     // Subscription fields
     trialDays: vine.number().min(0).optional(),
+    billingModel: vine.enum(['PER_ACTIVE_STUDENT', 'FIXED_MONTHLY'] as const).optional(),
     pricePerStudent: vine.number().min(0).optional(),
+    monthlyFixedPrice: vine.number().min(0).optional(),
+    platformFeeMode: vine.enum(['PERCENTAGE', 'FIXED'] as const).optional(),
     platformFeePercentage: vine.number().min(0).max(100).optional(),
+    platformFeeFixedAmount: vine.number().min(0).optional(),
     // Insurance fields
     hasInsurance: vine.boolean().optional(),
     insurancePercentage: vine.number().min(0).max(100).optional(),

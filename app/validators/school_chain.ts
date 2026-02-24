@@ -13,6 +13,10 @@ export const listSchoolChainsValidator = vine.compile(
 export const createSchoolChainValidator = vine.compile(
   vine.object({
     name: vine.string().trim(),
+    directorName: vine.string().trim(),
+    directorEmail: vine.string().trim().email(),
+    directorPhone: vine.string().trim().optional(),
+    directorDocumentNumber: vine.string().regex(/^(\d{11}|\d{14})$/),
     slug: vine
       .string()
       .trim()

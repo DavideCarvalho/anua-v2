@@ -15,14 +15,12 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group'
 import { tuyau } from '../../lib/api'
 import { type CreateSchoolChainFormData, createSchoolChainSchema } from './schema'
 
@@ -30,17 +28,12 @@ interface CreateSchoolChainDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: (schoolChain: { id: string; name: string }) => void
-  defaultPlatformSettings?: {
-    defaultTrialDays: number
-    defaultPricePerStudent: number
-  }
 }
 
 export function CreateSchoolChainDialog({
   open,
   onOpenChange,
   onSuccess,
-  defaultPlatformSettings,
 }: CreateSchoolChainDialogProps) {
   const queryClient = useQueryClient()
 
@@ -48,19 +41,27 @@ export function CreateSchoolChainDialog({
     resolver: zodResolver(createSchoolChainSchema),
     defaultValues: {
       name: '',
-      subscriptionLevel: 'INDIVIDUAL',
-      trialDays: defaultPlatformSettings?.defaultTrialDays ?? 30,
-      pricePerStudent: defaultPlatformSettings?.defaultPricePerStudent ?? 1290,
+      directorName: '',
+      directorEmail: '',
+      directorPhone: '',
+      directorDocumentNumber: '',
     },
   })
 
   const { mutateAsync: createSchoolChain, isPending } = useMutation({
     mutationFn: async (data: CreateSchoolChainFormData) => {
-      const slug = data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      const slug = data.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
       const response = await tuyau.api.v1['school-chains'].$post({
         name: data.name,
         slug,
-        subscriptionLevel: data.subscriptionLevel,
+        subscriptionLevel: 'NETWORK',
+        directorName: data.directorName,
+        directorEmail: data.directorEmail,
+        directorPhone: data.directorPhone,
+        directorDocumentNumber: data.directorDocumentNumber,
       })
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao criar rede')
@@ -68,9 +69,6 @@ export function CreateSchoolChainDialog({
       return response.data
     },
   })
-
-  const subscriptionLevel = form.watch('subscriptionLevel')
-  const isNetworkSubscription = subscriptionLevel === 'NETWORK'
 
   const onSubmit = async (data: CreateSchoolChainFormData) => {
     try {
@@ -101,9 +99,7 @@ export function CreateSchoolChainDialog({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Criar Nova Rede de Ensino</DialogTitle>
-          <DialogDescription>
-            Configure uma nova rede de ensino e seu modelo de assinatura
-          </DialogDescription>
+          <DialogDescription>Cadastre uma nova rede de ensino</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -117,7 +113,6 @@ export function CreateSchoolChainDialog({
                   <FormControl>
                     <Input placeholder="Ex: Rede XYZ de Educação" {...field} />
                   </FormControl>
-                  <FormDescription>O identificador (slug) será gerado automaticamente</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -125,95 +120,63 @@ export function CreateSchoolChainDialog({
 
             <FormField
               control={form.control}
-              name="subscriptionLevel"
+              name="directorName"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Modelo de Assinatura</FormLabel>
+                <FormItem>
+                  <FormLabel>Responsável da Rede</FormLabel>
                   <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <RadioGroupItem value="INDIVIDUAL" />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="font-medium">Assinatura Individual por Escola</FormLabel>
-                          <FormDescription>
-                            Cada escola da rede terá sua própria assinatura, trial e cobrança separada
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                      <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <RadioGroupItem value="NETWORK" />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="font-medium">Assinatura Única para a Rede</FormLabel>
-                          <FormDescription>
-                            Todas as escolas da rede compartilham uma única assinatura e cobrança
-                            centralizada
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    </RadioGroup>
+                    <Input placeholder="Nome completo" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {isNetworkSubscription && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="trialDays"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dias de Trial</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription>Período de teste gratuito para a rede</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="directorEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email do Responsável</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="responsavel@rede.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="pricePerStudent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preço por Aluno Ativo</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="R$ 0,00"
-                          value={
-                            field.value ? `R$ ${(field.value / 100).toFixed(2).replace('.', ',')}` : ''
-                          }
-                          onChange={(e) => {
-                            const rawValue = e.target.value.replace(/\D/g, '')
-                            const centavos = rawValue ? parseInt(rawValue, 10) : 0
-                            field.onChange(centavos)
-                          }}
-                        />
-                      </FormControl>
-                      <FormDescription>Valor cobrado por aluno ativo na rede</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+            <FormField
+              control={form.control}
+              name="directorPhone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefone (Opcional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Somente números" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="directorDocumentNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CPF/CNPJ do Responsável</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Somente números"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

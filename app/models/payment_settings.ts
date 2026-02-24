@@ -5,6 +5,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import SchoolChain from './school_chain.js'
 
+export type PlatformFeeMode = 'PERCENTAGE' | 'FIXED'
+
 export default class PaymentSettings extends BaseModel {
   static table = 'PaymentSettings'
 
@@ -22,6 +24,12 @@ export default class PaymentSettings extends BaseModel {
   declare pricePerStudent: number
 
   @column()
+  declare billingModel: 'PER_ACTIVE_STUDENT' | 'FIXED_MONTHLY'
+
+  @column()
+  declare monthlyFixedPrice: number | null
+
+  @column()
   declare trialDays: number
 
   @column()
@@ -29,6 +37,12 @@ export default class PaymentSettings extends BaseModel {
 
   @column()
   declare platformFeePercentage: number
+
+  @column()
+  declare platformFeeMode: PlatformFeeMode
+
+  @column()
+  declare platformFeeFixedAmount: number
 
   @column()
   declare isActive: boolean

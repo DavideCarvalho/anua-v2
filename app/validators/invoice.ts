@@ -17,6 +17,7 @@ export const listInvoicesValidator = vine.compile(
         'reference',
         'baseAmount',
         'discountAmount',
+        'chargedAmount',
         'totalAmount',
         'status',
         'month',

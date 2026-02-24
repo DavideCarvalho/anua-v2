@@ -23,6 +23,9 @@ interface PlatformSettingsRow {
   defaultPricePerStudent: number
 }
 
+type SubscriptionBillingModel = 'PER_ACTIVE_STUDENT' | 'FIXED_MONTHLY'
+type PlatformFeeMode = 'PERCENTAGE' | 'FIXED'
+
 function generateSlug(name: string): string {
   return name
     .toLowerCase()
@@ -76,7 +79,20 @@ export default class CreateSchoolOnboardingController {
     // Valores finais
     const finalTrialDays = data.trialDays ?? platformSettings.defaultTrialDays
     const finalPricePerStudent = data.pricePerStudent ?? platformSettings.defaultPricePerStudent
+    const finalBillingModel: SubscriptionBillingModel = data.billingModel ?? 'PER_ACTIVE_STUDENT'
+    const finalMonthlyFixedPrice =
+      finalBillingModel === 'FIXED_MONTHLY' ? (data.monthlyFixedPrice ?? 0) : null
+    const finalPlatformFeeMode: PlatformFeeMode = data.platformFeeMode ?? 'PERCENTAGE'
     const finalPlatformFeePercentage = data.platformFeePercentage ?? 5.0
+    const finalPlatformFeeFixedAmount = data.platformFeeFixedAmount ?? 0
+
+    if (finalBillingModel === 'FIXED_MONTHLY' && data.monthlyFixedPrice === undefined) {
+      throw AppException.operationFailedWithProvidedData(422)
+    }
+
+    if (finalPlatformFeeMode === 'FIXED' && data.platformFeeFixedAmount === undefined) {
+      throw AppException.operationFailedWithProvidedData(422)
+    }
 
     // Gerar IDs
     const schoolId = uuidv7()
@@ -147,6 +163,22 @@ export default class CreateSchoolOnboardingController {
       directorId = existingUser.id
       directorName = existingUser.name
       directorEmail = existingUser.email
+
+      await db.rawQuery(
+        `
+          UPDATE "User"
+          SET
+            "documentType" = COALESCE("documentType", :documentType),
+            "documentNumber" = COALESCE("documentNumber", :documentNumber),
+            "updatedAt" = NOW()
+          WHERE id = :id
+        `,
+        {
+          id: directorId,
+          documentType: data.directorDocumentNumber.length === 14 ? 'CNPJ' : 'CPF',
+          documentNumber: data.directorDocumentNumber,
+        }
+      )
     } else {
       directorId = uuidv7()
       directorName = data.directorName
@@ -157,9 +189,9 @@ export default class CreateSchoolOnboardingController {
       await db.rawQuery(
         `
         INSERT INTO "User" (
-          id, name, slug, email, phone, "roleId", active, "whatsappContact", "grossSalary", "createdAt", "updatedAt"
+          id, name, slug, email, phone, "documentType", "documentNumber", "roleId", active, "whatsappContact", "grossSalary", "createdAt", "updatedAt"
         ) VALUES (
-          :id, :name, :slug, :email, :phone, :roleId, true, false, 0, NOW(), NOW()
+          :id, :name, :slug, :email, :phone, :documentType, :documentNumber, :roleId, true, false, 0, NOW(), NOW()
         )
         `,
         {
@@ -168,6 +200,8 @@ export default class CreateSchoolOnboardingController {
           slug: directorSlug,
           email: data.directorEmail,
           phone: data.directorPhone || null,
+          documentType: data.directorDocumentNumber.length === 14 ? 'CNPJ' : 'CPF',
+          documentNumber: data.directorDocumentNumber,
           roleId: directorRole.id,
         }
       )
@@ -200,17 +234,21 @@ export default class CreateSchoolOnboardingController {
     await db.rawQuery(
       `
       INSERT INTO "PaymentSettings" (
-        id, "schoolId", "pricePerStudent", "trialDays", discount, "platformFeePercentage", "isActive", "createdAt", "updatedAt"
+        id, "schoolId", "pricePerStudent", "billingModel", "monthlyFixedPrice", "trialDays", discount, "platformFeeMode", "platformFeePercentage", "platformFeeFixedAmount", "isActive", "createdAt", "updatedAt"
       ) VALUES (
-        :id, :schoolId, :pricePerStudent, :trialDays, 0, :platformFeePercentage, true, NOW(), NOW()
+        :id, :schoolId, :pricePerStudent, :billingModel, :monthlyFixedPrice, :trialDays, 0, :platformFeeMode, :platformFeePercentage, :platformFeeFixedAmount, true, NOW(), NOW()
       )
       `,
       {
         id: paymentSettingsId,
         schoolId: schoolId,
         pricePerStudent: finalPricePerStudent,
+        billingModel: finalBillingModel,
+        monthlyFixedPrice: finalMonthlyFixedPrice,
         trialDays: finalTrialDays,
+        platformFeeMode: finalPlatformFeeMode,
         platformFeePercentage: finalPlatformFeePercentage,
+        platformFeeFixedAmount: finalPlatformFeeFixedAmount,
       }
     )
 
@@ -224,10 +262,10 @@ export default class CreateSchoolOnboardingController {
       `
       INSERT INTO "Subscription" (
         id, "schoolId", status, "billingCycle", "currentPeriodStart", "currentPeriodEnd",
-        "trialEndsAt", "pricePerStudent", "activeStudents", "monthlyAmount", discount, "createdAt", "updatedAt"
+        "trialEndsAt", "billingModel", "pricePerStudent", "monthlyFixedPrice", "activeStudents", "monthlyAmount", discount, "createdAt", "updatedAt"
       ) VALUES (
         :id, :schoolId, 'TRIAL', 'MONTHLY', :currentPeriodStart, :currentPeriodEnd,
-        :trialEndsAt, :pricePerStudent, 0, 0, 0, NOW(), NOW()
+        :trialEndsAt, :billingModel, :pricePerStudent, :monthlyFixedPrice, 0, 0, 0, NOW(), NOW()
       )
       `,
       {
@@ -236,7 +274,9 @@ export default class CreateSchoolOnboardingController {
         currentPeriodStart: now.toISOString(),
         currentPeriodEnd: trialEndsAt.toISOString(),
         trialEndsAt: trialEndsAt.toISOString(),
+        billingModel: finalBillingModel,
         pricePerStudent: finalPricePerStudent,
+        monthlyFixedPrice: finalMonthlyFixedPrice,
       }
     )
 

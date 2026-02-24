@@ -156,6 +156,7 @@ export default class ListInvoicesController {
       'reference',
       'baseAmount',
       'discountAmount',
+      'chargedAmount',
       'totalAmount',
       'status',
       'month',

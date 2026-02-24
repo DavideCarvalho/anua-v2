@@ -361,6 +361,8 @@ type InvoiceRecord = Invoice & {
   discountAmount?: number | string | null
   fineAmount?: number | string | null
   interestAmount?: number | string | null
+  platformFeeAmount?: number | string | null
+  chargedAmount?: number | string | null
   nfseStatus?: string | null
   nfsePdfUrl?: string | null
   nfseXmlUrl?: string | null
@@ -492,6 +494,7 @@ type SortableColumn =
   | 'reference'
   | 'baseAmount'
   | 'discountAmount'
+  | 'chargedAmount'
   | 'totalAmount'
   | 'status'
   | 'month'
@@ -583,6 +586,7 @@ function InvoicesContent() {
     'reference',
     'baseAmount',
     'discountAmount',
+    'chargedAmount',
     'totalAmount',
     'status',
     'month',
@@ -955,10 +959,10 @@ function InvoicesContent() {
                       <button
                         type="button"
                         className="inline-flex items-center gap-1.5 hover:text-foreground cursor-pointer"
-                        onClick={() => toggleSort('totalAmount')}
+                        onClick={() => toggleSort('chargedAmount')}
                       >
-                        Valor Final
-                        {sortIcon('totalAmount')}
+                        Total Cobrado
+                        {sortIcon('chargedAmount')}
                       </button>
                     </th>
                     <th className="text-left p-4 font-medium">
@@ -983,6 +987,10 @@ function InvoicesContent() {
                     const discountAmount = Number(invoice.discountAmount || 0)
                     const fineAmount = Number(invoice.fineAmount || 0)
                     const interestAmount = Number(invoice.interestAmount || 0)
+                    const platformFeeAmount = Number(invoice.platformFeeAmount || 0)
+                    const chargedAmount =
+                      Number(invoice.chargedAmount || 0) ||
+                      Number(invoice.totalAmount || 0) + platformFeeAmount
                     const surchargeTotal = fineAmount + interestAmount
                     const daysOverdue = getDaysOverdue(invoice.dueDate)
                     const { paymentDiscountsByLabel, earlyDiscount, totalDiscount } =
@@ -1067,7 +1075,7 @@ function InvoicesContent() {
                           </td>
                           <td className="p-4 text-right font-semibold">
                             <div className="inline-flex flex-col items-end gap-0.5">
-                              <span>{formatCurrency(Number(invoice.totalAmount || 0))}</span>
+                              <span>{formatCurrency(chargedAmount)}</span>
                               <div className="md:hidden text-[11px] font-normal text-muted-foreground">
                                 <span>Base {formatCurrency(Number(invoice.baseAmount || 0))}</span>
                                 {discountAmount > 0 && (
@@ -1078,6 +1086,11 @@ function InvoicesContent() {
                                 {surchargeTotal > 0 && (
                                   <span className="ml-2 text-orange-600">
                                     + {formatCurrency(surchargeTotal)}
+                                  </span>
+                                )}
+                                {platformFeeAmount > 0 && (
+                                  <span className="ml-2 text-blue-600">
+                                    + taxa {formatCurrency(platformFeeAmount)}
                                   </span>
                                 )}
                               </div>
@@ -1216,7 +1229,7 @@ function InvoicesContent() {
                                       <p className="text-xs font-medium text-muted-foreground mb-2">
                                         Composição da fatura
                                       </p>
-                                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5 text-sm">
+                                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-6 text-sm">
                                         <div className="flex items-center justify-between gap-3 lg:block">
                                           <span className="text-muted-foreground">Valor base</span>
                                           <p className="font-medium text-foreground">
@@ -1262,9 +1275,29 @@ function InvoicesContent() {
                                           </p>
                                         </div>
                                         <div className="flex items-center justify-between gap-3 lg:block lg:border-l lg:pl-4">
-                                          <span className="text-muted-foreground">Total atual</span>
+                                          <span className="text-muted-foreground">
+                                            Total fatura
+                                          </span>
                                           <p className="font-semibold text-foreground">
                                             {formatCurrency(Number(invoice.totalAmount || 0))}
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 lg:block">
+                                          <span className="text-muted-foreground">
+                                            Taxa plataforma
+                                          </span>
+                                          <p className="font-medium text-blue-600">
+                                            {platformFeeAmount > 0
+                                              ? `+${formatCurrency(platformFeeAmount)}`
+                                              : '-'}
+                                          </p>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 lg:block lg:border-l lg:pl-4">
+                                          <span className="text-muted-foreground">
+                                            Total cobrado
+                                          </span>
+                                          <p className="font-semibold text-foreground">
+                                            {formatCurrency(chargedAmount)}
                                           </p>
                                         </div>
                                       </div>
