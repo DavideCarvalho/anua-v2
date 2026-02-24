@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.grades.classSubject')
@@ -15,7 +15,7 @@ interface UseSubjectGradesOptions {
 export function useSubjectGradesQueryOptions(options: UseSubjectGradesOptions) {
   const { classId, subjectId, courseId, academicPeriodId } = options
 
-  return {
+  return queryOptions({
     queryKey: ['subject-grades', { classId, subjectId, courseId, academicPeriodId }],
     queryFn: () => {
       return tuyau
@@ -24,5 +24,5 @@ export function useSubjectGradesQueryOptions(options: UseSubjectGradesOptions) {
         .unwrap()
     },
     enabled: !!classId && !!subjectId && !!courseId && !!academicPeriodId,
-  } satisfies QueryOptions
+  })
 }

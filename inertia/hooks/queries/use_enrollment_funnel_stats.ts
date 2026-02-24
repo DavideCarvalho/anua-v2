@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.analytics.enrollments.funnel')
@@ -10,10 +10,10 @@ export type EnrollmentFunnelStatsResponse = InferResponseType<
 type FunnelQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>['$get']>[0]>['query']
 
 export function useEnrollmentFunnelStatsQueryOptions(query: FunnelQuery = {}) {
-  return {
+  return queryOptions({
     queryKey: ['analytics', 'enrollments', 'funnel', query],
     queryFn: () => {
       return resolveRoute().$get({ query }).unwrap()
     },
-  } satisfies QueryOptions<EnrollmentFunnelStatsResponse>
+  })
 }

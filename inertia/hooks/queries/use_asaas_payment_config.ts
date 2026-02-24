@@ -1,4 +1,4 @@
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 
 export interface AsaasPaymentConfigResponse {
   paymentConfigStatus:
@@ -14,7 +14,7 @@ export interface AsaasPaymentConfigResponse {
 }
 
 export function useAsaasPaymentConfigQueryOptions() {
-  return {
+  return queryOptions({
     queryKey: ['asaas-payment-config'],
     queryFn: async (): Promise<AsaasPaymentConfigResponse> => {
       const response = await fetch('/api/v1/asaas/subaccounts/status')
@@ -30,5 +30,5 @@ export function useAsaasPaymentConfigQueryOptions() {
       }
       return false
     },
-  } satisfies QueryOptions<AsaasPaymentConfigResponse>
+  })
 }

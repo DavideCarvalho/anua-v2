@@ -9,7 +9,7 @@ export function useRespondConsentMutation() {
       const { id, approved, notes } = data
       return tuyau
         .$route('api.v1.consents.respond', { id })
-        .$post({ approved, notes } as any)
+        .$post({ approved, notes })
         .unwrap()
     },
     onSuccess: () => {

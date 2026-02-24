@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1['academic-periods']
@@ -12,8 +12,8 @@ export function useAcademicPeriodCoursesQueryOptions(
   academicPeriodId: string,
   query: AcademicPeriodCoursesQuery = {}
 ) {
-  return {
+  return queryOptions({
     queryKey: ['academic-period', academicPeriodId, 'courses', query],
     queryFn: () => resolveRoute()({ id: academicPeriodId }).courses.$get({ query }).unwrap(),
-  } satisfies QueryOptions<AcademicPeriodCoursesResponse>
+  })
 }

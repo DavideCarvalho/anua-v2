@@ -17,7 +17,7 @@ export function useUpdateSchoolInsuranceMutation() {
     mutationFn: (data: UpdateSchoolInsuranceData) => {
       const { schoolId, ...rest } = data
       return resolveRoute()
-        .$put({ params: { schoolId }, ...rest } as any)
+        .$put({ params: { schoolId }, ...rest })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

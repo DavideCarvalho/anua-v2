@@ -12,7 +12,7 @@ export function useImpersonationStatusQueryOptions() {
       const response = await resolveRoute()()
       if (response.error) {
         throw new Error(
-          (response.error as any).value?.message || 'Erro ao carregar status de personificação'
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar status de personificação'
         )
       }
       return response.data

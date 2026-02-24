@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.contractDocuments.index')
@@ -15,7 +15,7 @@ interface UseContractDocumentsOptions {
 export function useContractDocumentsQueryOptions(options: UseContractDocumentsOptions = {}) {
   const { contractId, page = 1, limit = 20 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['contract-documents', { contractId, page, limit }],
     queryFn: () => {
       return tuyau
@@ -23,7 +23,7 @@ export function useContractDocumentsQueryOptions(options: UseContractDocumentsOp
         .$get({ query: { contractId, page, limit } })
         .unwrap()
     },
-  } satisfies QueryOptions<ContractDocumentsResponse>
+  })
 }
 
 export function useContractDocuments(options: UseContractDocumentsOptions = {}) {

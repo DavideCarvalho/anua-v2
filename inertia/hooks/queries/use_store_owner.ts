@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // Own store
@@ -8,10 +8,10 @@ const resolveStoreRoute = () => tuyau.api.v1['store-owner'].store.$get
 export type OwnStoreResponse = InferResponseType<ReturnType<typeof resolveStoreRoute>>
 
 export function useOwnStoreQueryOptions() {
-  return {
+  return queryOptions({
     queryKey: ['storeOwner', 'store'],
     queryFn: () => resolveStoreRoute()().unwrap(),
-  } satisfies QueryOptions
+  })
 }
 
 // Own products
@@ -27,10 +27,10 @@ export function useOwnProductsQueryOptions(query: ProductsQuery = {}) {
     limit: 20,
     ...query,
   }
-  return {
+  return queryOptions({
     queryKey: ['storeOwner', 'products', mergedQuery],
     queryFn: () => resolveProductsRoute()({ query: mergedQuery }).unwrap(),
-  } satisfies QueryOptions
+  })
 }
 
 // Own orders
@@ -46,10 +46,10 @@ export function useOwnOrdersQueryOptions(query: OrdersQuery = {}) {
     limit: 10,
     ...query,
   }
-  return {
+  return queryOptions({
     queryKey: ['storeOwner', 'orders', mergedQuery],
     queryFn: () => resolveOrdersRoute()({ query: mergedQuery }).unwrap(),
-  } satisfies QueryOptions
+  })
 }
 
 // Financial settings
@@ -58,10 +58,10 @@ const resolveFinancialRoute = () => tuyau.api.v1['store-owner']['financial-setti
 export type OwnFinancialResponse = InferResponseType<ReturnType<typeof resolveFinancialRoute>>
 
 export function useOwnFinancialQueryOptions() {
-  return {
+  return queryOptions({
     queryKey: ['storeOwner', 'financial'],
     queryFn: () => resolveFinancialRoute()().unwrap(),
-  } satisfies QueryOptions
+  })
 }
 
 // Settlements
@@ -79,8 +79,8 @@ export function useOwnSettlementsQueryOptions(query: SettlementsQuery = {}) {
     limit: 20,
     ...query,
   }
-  return {
+  return queryOptions({
     queryKey: ['storeOwner', 'settlements', mergedQuery],
     queryFn: () => resolveSettlementsRoute()({ query: mergedQuery }).unwrap(),
-  } satisfies QueryOptions
+  })
 }

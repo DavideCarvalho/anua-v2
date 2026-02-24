@@ -17,7 +17,7 @@ export function useUpdateProfile() {
         .$put({ body: data })
 
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao atualizar perfil')
+        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao atualizar perfil')
       }
 
       return response.data

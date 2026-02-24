@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.invoices.$get
@@ -15,12 +15,12 @@ export function useInvoicesQueryOptions(query: InvoicesQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['invoices', mergedQuery],
     queryFn: () => {
       return resolveRoute()({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }
 
 export function useStudentPendingInvoicesQueryOptions(studentId: string | undefined) {

@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.purchaseRequests.index')
@@ -16,10 +16,10 @@ export function usePurchaseRequestsQueryOptions(query: PurchaseRequestsQuery = {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['purchase-requests', mergedQuery],
     queryFn: () => {
       return tuyau.$route('api.v1.purchaseRequests.index').$get({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions<PurchaseRequestsResponse>
+  })
 }

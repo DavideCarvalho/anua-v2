@@ -72,7 +72,7 @@ export function useGamificationRankingQueryOptions(options: UseGamificationRanki
     queryFn: () => {
       return tuyau
         .$route('api.v1.studentGamifications.ranking')
-        .$get({ query: { schoolId, period, limit } as any })
+        .$get({ query: { schoolId, period, limit } })
         .unwrap()
     },
   }
@@ -145,7 +145,10 @@ export function useResponsavelStudentGamificationQueryOptions(studentId: string)
         .$route('api.v1.responsavel.api.studentGamification', { studentId })
         .$get()
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar gamificacao')
+        throw new Error(
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message ||
+            'Erro ao carregar gamificacao'
+        )
       }
       return response.data as ResponsavelStudentGamificationResponse
     },

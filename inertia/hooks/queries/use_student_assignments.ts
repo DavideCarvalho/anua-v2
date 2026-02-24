@@ -20,7 +20,7 @@ export function useStudentAssignmentsQueryOptions(
           },
         })
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar atividades')
+        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar atividades')
       }
       return response.data
     },

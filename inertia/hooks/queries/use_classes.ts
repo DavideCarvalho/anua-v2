@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.classes.$get
@@ -15,10 +15,10 @@ export function useClassesQueryOptions(query: ClassesQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['classes', mergedQuery],
     queryFn: () => {
       return resolveRoute()({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions<ClassesResponse>
+  })
 }

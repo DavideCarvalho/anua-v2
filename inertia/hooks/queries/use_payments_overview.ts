@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.analytics.payments.overview')
@@ -10,10 +10,10 @@ type PaymentsOverviewQuery = NonNullable<
 >['query']
 
 export function usePaymentsOverviewQueryOptions(query: PaymentsOverviewQuery = {}) {
-  return {
+  return queryOptions({
     queryKey: ['analytics', 'payments', 'overview', query],
     queryFn: () => {
       return tuyau.$route('api.v1.analytics.payments.overview').$get({ query }).unwrap()
     },
-  } satisfies QueryOptions<PaymentsOverviewResponse>
+  })
 }

@@ -1,4 +1,4 @@
-import type { MutationOptions } from '@tanstack/react-query'
+import { mutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
 interface CreateAgreementPayload {
@@ -20,9 +20,9 @@ interface CreateAgreementPayload {
 }
 
 export function useCreateAgreementMutationOptions() {
-  return {
+  return mutationOptions({
     mutationFn: (data: CreateAgreementPayload) => {
       return tuyau.$route('api.v1.agreements.store').$post(data).unwrap()
     },
-  } satisfies MutationOptions
+  })
 }

@@ -13,7 +13,7 @@ export function useCreateWalletTopUp() {
     mutationFn: ({ studentId, ...data }: CreateWalletTopUpPayload) =>
       tuyau
         .$route('api.v1.responsavel.api.createWalletTopUp', { studentId })
-        .$post(data as any)
+        .$post(data)
         .unwrap(),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['responsavel', 'wallet-top-ups', variables.studentId] })

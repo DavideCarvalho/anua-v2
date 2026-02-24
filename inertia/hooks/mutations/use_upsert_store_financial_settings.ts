@@ -1,4 +1,4 @@
-import type { MutationOptions } from '@tanstack/react-query'
+import { mutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
@@ -10,9 +10,9 @@ export type UpsertStoreFinancialSettingsPayload = InferRequestType<
 }
 
 export function useUpsertStoreFinancialSettingsMutationOptions() {
-  return {
+  return mutationOptions({
     mutationFn: ({ storeId, ...data }: UpsertStoreFinancialSettingsPayload) => {
       return tuyau.$route('api.v1.stores.financialSettings.upsert', { storeId }).$put(data).unwrap()
     },
-  } satisfies MutationOptions
+  })
 }

@@ -21,7 +21,7 @@ export function useGamificationEventsQueryOptions(options: UseGamificationEvents
     queryFn: () => {
       return tuyau
         .$route('api.v1.gamificationEvents.index')
-        .$get({ query: { studentId, type, status, page, limit } as any })
+        .$get({ query: { studentId, type, status, page, limit } })
         .unwrap()
     },
   }

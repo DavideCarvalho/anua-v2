@@ -16,7 +16,7 @@ export function useReviewPrintRequestMutation() {
       const { id, ...body } = data
       return tuyau
         .$route('api.v1.printRequests.reviewPrintRequest', { id })
-        .$patch(body as any)
+        .$patch(body)
         .unwrap()
     },
     onSuccess: () => {

@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // Marketplace stores
@@ -8,13 +8,13 @@ const resolveStoresRoute = () => tuyau.api.v1.marketplace.stores.$get
 export type MarketplaceStoresResponse = InferResponseType<ReturnType<typeof resolveStoresRoute>>
 
 export function useMarketplaceStoresQueryOptions(studentId?: string) {
-  return {
+  return queryOptions({
     queryKey: ['marketplace', 'stores', { studentId }],
     queryFn: () => {
       const route = resolveStoresRoute()
       return route({ query: { studentId } }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }
 
 // Store items
@@ -33,14 +33,14 @@ export function useMarketplaceItemsQueryOptions(
     limit: 20,
     ...query,
   }
-  return {
+  return queryOptions({
     queryKey: ['marketplace', 'items', storeId, mergedQuery],
     queryFn: () =>
       tuyau
         .$route('api.v1.marketplace.stores.items', { storeId })
         .$get({ query: mergedQuery })
         .unwrap(),
-  } satisfies QueryOptions
+  })
 }
 
 // Installment options
@@ -51,14 +51,14 @@ export type InstallmentOptionsResponse = InferResponseType<
 >
 
 export function useInstallmentOptionsQueryOptions(storeId: string, amount: number) {
-  return {
+  return queryOptions({
     queryKey: ['marketplace', 'installmentOptions', storeId, amount],
     queryFn: () => {
       const route = resolveInstallmentOptionsRoute()
       return route({ query: { storeId, amount } }).unwrap()
     },
     enabled: !!storeId && amount > 0,
-  } satisfies QueryOptions
+  })
 }
 
 // My orders
@@ -73,8 +73,8 @@ export function useMyOrdersQueryOptions(query?: {
     limit: 10,
     ...query,
   }
-  return {
+  return queryOptions({
     queryKey: ['marketplace', 'orders', mergedQuery],
     queryFn: () => tuyau.api.v1.marketplace.orders.$get({ query: mergedQuery }).unwrap(),
-  } satisfies QueryOptions
+  })
 }

@@ -22,7 +22,7 @@ export function useStudentOccurrencesQueryOptions(
         })
       if (response.error) {
         throw new Error(
-          (response.error as any).value?.message || 'Erro ao carregar registros diarios'
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar registros diarios'
         )
       }
       return response.data

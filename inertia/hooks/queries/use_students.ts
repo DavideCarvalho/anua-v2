@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.students.$get
@@ -19,7 +19,7 @@ interface UseStudentsParams {
 export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
   const { page = 1, limit = 20, search, classId, academicPeriodId, courseId, active } = params
 
-  return {
+  return queryOptions({
     queryKey: ['students', { page, limit, search, classId, academicPeriodId, courseId, active }],
     queryFn: () => {
       return resolveRoute()({
@@ -34,5 +34,5 @@ export function useStudentsQueryOptions(params: UseStudentsParams = {}) {
         },
       }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }

@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.analytics.gamification.overview')
@@ -12,10 +12,10 @@ type GamificationOverviewQuery = NonNullable<
 >['query']
 
 export function useGamificationOverviewQueryOptions(query: GamificationOverviewQuery = {}) {
-  return {
+  return queryOptions({
     queryKey: ['analytics', 'gamification', 'overview', query],
     queryFn: () => {
       return tuyau.$route('api.v1.analytics.gamification.overview').$get({ query }).unwrap()
     },
-  } satisfies QueryOptions<GamificationOverviewResponse>
+  })
 }

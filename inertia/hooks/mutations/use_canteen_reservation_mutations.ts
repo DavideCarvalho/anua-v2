@@ -25,7 +25,7 @@ export function useUpdateCanteenMealReservationStatus() {
     mutationFn: ({ id, status }: { id: string; status: string }) => {
       return tuyau
         .$route('api.v1.canteenMealReservations.updateStatus', { id })
-        .$put({ status } as any)
+        .$put({ status })
         .unwrap()
     },
     onSuccess: () => {
@@ -73,7 +73,7 @@ export function useUpdateCanteenMonthlyTransferStatus() {
     mutationFn: ({ id, status }: { id: string; status: string }) => {
       return tuyau
         .$route('api.v1.canteenMonthlyTransfers.updateStatus', { id })
-        .$put({ status } as any)
+        .$put({ status })
         .unwrap()
     },
     onSuccess: () => {

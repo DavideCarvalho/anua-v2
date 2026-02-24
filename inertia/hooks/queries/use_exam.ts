@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 type SerializedResponse<T> = T extends { serialize: () => infer U }
@@ -16,7 +16,7 @@ export type ExamResponse = InferResponseType<ReturnType<typeof resolveRoute>>
 export type ExamData = SerializedResponse<ExamResponse>
 
 export function useExamQueryOptions(params: ExamParams) {
-  return {
+  return queryOptions({
     queryKey: ['exam', params],
     queryFn: () => {
       return tuyau.api.v1
@@ -35,5 +35,5 @@ export function useExamQueryOptions(params: ExamParams) {
           return response as ExamData
         })
     },
-  } satisfies QueryOptions<ExamData>
+  })
 }

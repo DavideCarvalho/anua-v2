@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1['student-gamifications'].ranking.$get
@@ -9,10 +9,10 @@ export type PointsRankingResponse = InferResponseType<ReturnType<typeof resolveR
 type PointsRankingQuery = NonNullable<Parameters<ReturnType<typeof resolveRoute>>[0]>['query']
 
 export function usePointsRankingQueryOptions(query: PointsRankingQuery) {
-  return {
+  return queryOptions({
     queryKey: ['student-gamifications', 'ranking', query],
     queryFn: () => {
       return resolveRoute()({ query }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }

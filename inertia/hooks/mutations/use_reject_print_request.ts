@@ -9,7 +9,7 @@ export function useRejectPrintRequestMutation() {
       const { id, ...body } = data
       return tuyau
         .$route('api.v1.printRequests.rejectPrintRequest', { id })
-        .$patch(body as any)
+        .$patch(body)
         .unwrap()
     },
     onSuccess: () => {

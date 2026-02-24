@@ -1,4 +1,4 @@
-import type { MutationOptions } from '@tanstack/react-query'
+import { mutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 
 interface MarkInvoicePaidPayload {
@@ -10,9 +10,9 @@ interface MarkInvoicePaidPayload {
 }
 
 export function useMarkInvoicePaidMutationOptions() {
-  return {
+  return mutationOptions({
     mutationFn: ({ id, ...data }: MarkInvoicePaidPayload) => {
       return tuyau.$route('api.v1.invoices.markPaid', { id }).$post(data).unwrap()
     },
-  } satisfies MutationOptions<unknown, Error, MarkInvoicePaidPayload, unknown>
+  })
 }

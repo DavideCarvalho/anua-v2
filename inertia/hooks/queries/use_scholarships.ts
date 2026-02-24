@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.scholarships.$get
@@ -15,10 +15,10 @@ export function useScholarshipsQueryOptions(query: ScholarshipsQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['scholarships', mergedQuery],
     queryFn: () => {
       return resolveRoute()({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions<ScholarshipsResponse>
+  })
 }

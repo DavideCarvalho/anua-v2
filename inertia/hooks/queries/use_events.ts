@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.events.index')
@@ -14,10 +14,10 @@ export function useEventsQueryOptions(query: EventsQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['events', mergedQuery],
     queryFn: () => {
       return tuyau.$route('api.v1.events.index').$get({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions<EventsResponse>
+  })
 }

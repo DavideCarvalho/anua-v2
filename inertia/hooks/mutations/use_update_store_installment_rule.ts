@@ -1,4 +1,4 @@
-import type { MutationOptions } from '@tanstack/react-query'
+import { mutationOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
@@ -10,9 +10,9 @@ export type UpdateStoreInstallmentRulePayload = InferRequestType<
 }
 
 export function useUpdateStoreInstallmentRuleMutationOptions() {
-  return {
+  return mutationOptions({
     mutationFn: ({ id, ...data }: UpdateStoreInstallmentRulePayload) => {
       return tuyau.$route('api.v1.storeInstallmentRules.update', { id }).$put(data).unwrap()
     },
-  } satisfies MutationOptions
+  })
 }

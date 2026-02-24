@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.analytics.incidents.overview')
@@ -10,10 +10,10 @@ type IncidentsOverviewQuery = NonNullable<
 >['query']
 
 export function useIncidentsOverviewQueryOptions(query: IncidentsOverviewQuery = {}) {
-  return {
+  return queryOptions({
     queryKey: ['analytics', 'incidents', 'overview', query],
     queryFn: () => {
       return tuyau.$route('api.v1.analytics.incidents.overview').$get({ query }).unwrap()
     },
-  } satisfies QueryOptions<IncidentsOverviewResponse>
+  })
 }

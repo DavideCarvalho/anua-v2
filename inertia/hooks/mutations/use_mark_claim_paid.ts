@@ -14,7 +14,7 @@ export function useMarkClaimPaidMutation() {
     mutationFn: (data: MarkClaimPaidData) => {
       const { claimId, notes } = data
       return resolveRoute()
-        .$post({ params: { claimId }, notes } as any)
+        .$post({ params: { claimId }, notes })
         .unwrap()
     },
     onSuccess: () => {

@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 type SerializedResponse<T> = T extends { serialize: () => infer U }
@@ -16,7 +16,7 @@ export type AssignmentResponse = InferResponseType<ReturnType<typeof resolveRout
 export type AssignmentData = SerializedResponse<AssignmentResponse>
 
 export function useAssignmentQueryOptions(params: AssignmentParams) {
-  return {
+  return queryOptions({
     queryKey: ['assignment', params],
     queryFn: () => {
       return tuyau.api.v1
@@ -35,5 +35,5 @@ export function useAssignmentQueryOptions(params: AssignmentParams) {
           return response as AssignmentData
         })
     },
-  } satisfies QueryOptions<AssignmentData>
+  })
 }

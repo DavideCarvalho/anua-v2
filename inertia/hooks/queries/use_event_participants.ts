@@ -20,7 +20,7 @@ export function useEventParticipantsQueryOptions(options: UseEventParticipantsOp
     queryFn: () => {
       return tuyau
         .$route('api.v1.events.participants.index', { eventId })
-        .$get({ query: { status, page, limit } as any })
+        .$get({ query: { status, page, limit } })
         .unwrap()
     },
     enabled: !!eventId,

@@ -1,4 +1,4 @@
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 
 export interface OccurrenceItem {
   id: string
@@ -96,7 +96,7 @@ export function useOccurrencesQueryOptions(params: UseOccurrencesParams = {}) {
   if (orderBy) queryParams.set('orderBy', orderBy)
   if (direction) queryParams.set('direction', direction)
 
-  return {
+  return queryOptions({
     queryKey: [
       'occurrences',
       {
@@ -121,7 +121,7 @@ export function useOccurrencesQueryOptions(params: UseOccurrencesParams = {}) {
       }
       return response.json()
     },
-  } satisfies QueryOptions<OccurrencesResponse>
+  })
 }
 
 export function useOccurrenceTeacherClassesQueryOptions(params?: { academicPeriodId?: string }) {
@@ -130,7 +130,7 @@ export function useOccurrenceTeacherClassesQueryOptions(params?: { academicPerio
     queryParams.set('academicPeriodId', params.academicPeriodId)
   }
 
-  return {
+  return queryOptions({
     queryKey: ['occurrence-teacher-classes', params?.academicPeriodId ?? null],
     queryFn: async (): Promise<OccurrenceTeacherClassesResponse> => {
       const response = await fetch(
@@ -141,7 +141,7 @@ export function useOccurrenceTeacherClassesQueryOptions(params?: { academicPerio
       }
       return response.json()
     },
-  } satisfies QueryOptions<OccurrenceTeacherClassesResponse>
+  })
 }
 
 export function useOccurrenceDetailQueryOptions(occurrenceId: string | null) {

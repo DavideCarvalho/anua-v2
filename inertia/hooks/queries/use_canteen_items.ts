@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1['canteen-items'].$get
@@ -15,10 +15,10 @@ export function useCanteenItemsQueryOptions(query: CanteenItemsQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['canteen-items', mergedQuery],
     queryFn: () => {
       return resolveRoute()({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions<CanteenItemsResponse>
+  })
 }

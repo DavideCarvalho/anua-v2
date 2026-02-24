@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.canteenMealReservations.index')
@@ -22,7 +22,7 @@ export function useCanteenMealReservationsQueryOptions(
 ) {
   const { canteenId, mealId, studentId, status, date, page = 1, limit = 20 } = options
 
-  return {
+  return queryOptions({
     queryKey: [
       'canteen-meal-reservations',
       { canteenId, mealId, studentId, status, date, page, limit },
@@ -30,8 +30,8 @@ export function useCanteenMealReservationsQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.canteenMealReservations.index')
-        .$get({ query: { canteenId, mealId, studentId, status, date, page, limit } as any })
+        .$get({ query: { canteenId, mealId, studentId, status, date, page, limit } })
         .unwrap()
     },
-  } satisfies QueryOptions<CanteenMealReservationsResponse>
+  })
 }

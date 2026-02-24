@@ -9,7 +9,7 @@ export function useMarkArrivedPurchaseRequestMutation() {
       const { id, ...body } = data
       return tuyau
         .$route('api.v1.purchaseRequests.markArrived', { id })
-        .$post(body as any)
+        .$post(body)
         .unwrap()
     },
     onSuccess: () => {

@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 // --- Stores list ---
@@ -9,13 +9,13 @@ export type StoresListResponse = InferResponseType<StoresListGet>
 
 export function useStoresQueryOptions(query?: NonNullable<Parameters<StoresListGet>[0]>['query']) {
   const mergedQuery = { page: 1, limit: 20, ...query }
-  return {
+  return queryOptions({
     queryKey: ['stores', mergedQuery],
     queryFn: () => {
       const route = resolveStoresListRoute()
       return route({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }
 
 // --- Store detail ---
@@ -24,11 +24,11 @@ type StoreShowGet = ReturnType<typeof resolveStoreShowRoute>['$get']
 export type StoreDetailResponse = InferResponseType<StoreShowGet>
 
 export function useStoreQueryOptions(id: string) {
-  return {
+  return queryOptions({
     queryKey: ['store', id],
     queryFn: () => tuyau.$route('api.v1.stores.show', { id }).$get().unwrap(),
     enabled: !!id,
-  } satisfies QueryOptions
+  })
 }
 
 // --- Store items ---
@@ -38,13 +38,13 @@ export type StoreItemsResponse = InferResponseType<StoreItemsListGet>
 type StoreItemsQuery = NonNullable<Parameters<StoreItemsListGet>[0]>['query']
 
 export function useStoreItemsQueryOptions(query: StoreItemsQuery) {
-  return {
+  return queryOptions({
     queryKey: ['storeItems', query],
     queryFn: () => {
       const route = resolveStoreItemsListRoute()
       return route({ query }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }
 
 // --- Store item detail (for type export) ---
@@ -59,13 +59,13 @@ export type StoreOrdersResponse = InferResponseType<StoreOrdersGet>
 type StoreOrdersQuery = NonNullable<Parameters<StoreOrdersGet>[0]>['query']
 
 export function useStoreOrdersQueryOptions(query: StoreOrdersQuery) {
-  return {
+  return queryOptions({
     queryKey: ['storeOrders', query],
     queryFn: () => {
       const route = resolveStoreOrdersRoute()
       return route({ query }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }
 
 // --- Store settlements ---
@@ -75,13 +75,13 @@ export type StoreSettlementsResponse = InferResponseType<StoreSettlementsGet>
 type StoreSettlementsQuery = NonNullable<Parameters<StoreSettlementsGet>[0]>['query']
 
 export function useStoreSettlementsQueryOptions(query: StoreSettlementsQuery) {
-  return {
+  return queryOptions({
     queryKey: ['storeSettlements', query],
     queryFn: () => {
       const route = resolveStoreSettlementsRoute()
       return route({ query }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }
 
 // --- Financial settings ---
@@ -90,12 +90,12 @@ type FinancialSettingsShowGet = ReturnType<typeof resolveFinancialSettingsShowRo
 export type StoreFinancialSettingsResponse = InferResponseType<FinancialSettingsShowGet>
 
 export function useStoreFinancialSettingsQueryOptions(storeId: string) {
-  return {
+  return queryOptions({
     queryKey: ['storeFinancialSettings', storeId],
     queryFn: () =>
       tuyau.$route('api.v1.stores.financialSettings.show', { storeId }).$get().unwrap(),
     enabled: !!storeId,
-  } satisfies QueryOptions
+  })
 }
 
 // --- Installment rules ---
@@ -105,11 +105,11 @@ export type StoreInstallmentRulesResponse = InferResponseType<InstallmentRulesGe
 type InstallmentRulesQuery = NonNullable<Parameters<InstallmentRulesGet>[0]>['query']
 
 export function useStoreInstallmentRulesQueryOptions(query: InstallmentRulesQuery) {
-  return {
+  return queryOptions({
     queryKey: ['storeInstallmentRules', query],
     queryFn: () => {
       const route = resolveInstallmentRulesRoute()
       return route({ query }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }

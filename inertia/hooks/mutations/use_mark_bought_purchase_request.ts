@@ -16,7 +16,7 @@ export function useMarkBoughtPurchaseRequestMutation() {
       const { id, ...body } = data
       return tuyau
         .$route('api.v1.purchaseRequests.markBought', { id })
-        .$post(body as any)
+        .$post(body)
         .unwrap()
     },
     onSuccess: () => {

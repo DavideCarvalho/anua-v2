@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.leaderboards.$get
@@ -15,10 +15,10 @@ export function useLeaderboardsQueryOptions(query: LeaderboardsQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['leaderboards', mergedQuery],
     queryFn: () => {
       return resolveRoute()({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions
+  })
 }

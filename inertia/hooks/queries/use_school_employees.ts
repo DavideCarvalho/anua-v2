@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.users['school-employees'].$get
@@ -17,7 +17,7 @@ interface UseSchoolEmployeesParams {
 export function useSchoolEmployeesQueryOptions(params: UseSchoolEmployeesParams = {}) {
   const { page = 1, limit = 20, search, roles, status } = params
 
-  return {
+  return queryOptions({
     queryKey: ['school-employees', { page, limit, search, roles, status }],
     queryFn: async () => {
       const response = await tuyau.api.v1.users['school-employees'].$get({
@@ -30,9 +30,9 @@ export function useSchoolEmployeesQueryOptions(params: UseSchoolEmployeesParams 
         },
       })
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar funcionários')
+        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar funcionários')
       }
       return response.data
     },
-  } satisfies QueryOptions
+  })
 }

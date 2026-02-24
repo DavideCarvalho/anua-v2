@@ -14,7 +14,7 @@ interface SidebarClassesQuery {
 export function useSidebarClassesQueryOptions(query: SidebarClassesQuery = { isActive: true }) {
   return {
     queryKey: ['sidebar-classes', query],
-    queryFn: () => resolveRoute()({ query } as any).unwrap(),
+    queryFn: () => resolveRoute()({ query }).unwrap(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   }
 }

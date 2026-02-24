@@ -22,7 +22,7 @@ export function useAssignTeacherToClassMutationOptions() {
     mutationFn: ({ teacherId, classId }: { teacherId: string; classId: string }) => {
       return tuyau
         .$route('api.v1.teachers.assignClass', { id: teacherId })
-        .$post({ classId } as any)
+        .$post({ classId })
         .unwrap()
     },
   }

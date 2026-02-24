@@ -12,7 +12,7 @@ export function useSchoolInsuranceStatsQueryOptions(schoolId: string) {
     queryFn: () => {
       return tuyau
         .$route('api.v1.insurance.school.stats', { schoolId })
-        .$get({} as any)
+        .$get({})
         .unwrap()
     },
     enabled: !!schoolId,

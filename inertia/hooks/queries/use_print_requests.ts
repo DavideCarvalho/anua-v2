@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.printRequests.listPrintRequests')
@@ -16,7 +16,7 @@ export function usePrintRequestsQueryOptions(query: PrintRequestsQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['print-requests', mergedQuery],
     queryFn: () => {
       return tuyau
@@ -24,5 +24,5 @@ export function usePrintRequestsQueryOptions(query: PrintRequestsQuery = {}) {
         .$get({ query: mergedQuery })
         .unwrap()
     },
-  } satisfies QueryOptions<PrintRequestsResponse>
+  })
 }

@@ -43,7 +43,7 @@ export function useUpdateParticipantStatus() {
     }) => {
       return tuyau
         .$route('api.v1.events.participants.updateStatus', { eventId, participantId })
-        .$put({ status } as any)
+        .$put({ status })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

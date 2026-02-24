@@ -22,7 +22,7 @@ export function useEscolaInsightsQueryOptions() {
     queryFn: async () => {
       const response = await resolveRoute()()
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar insights')
+        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar insights')
       }
       return response.data
     },

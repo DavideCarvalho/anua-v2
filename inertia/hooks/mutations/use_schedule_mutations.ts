@@ -13,7 +13,7 @@ export function useValidateScheduleConflict() {
     }) => {
       return tuyau
         .$route('api.v1.schedules.validateConflict')
-        .$post(data as any)
+        .$post(data)
         .unwrap()
     },
   })
@@ -38,7 +38,7 @@ export function useSaveClassSchedule() {
     }) => {
       return tuyau
         .$route('api.v1.schedules.saveClassSchedule', { classId })
-        .$post(data as any)
+        .$post(data)
         .unwrap()
     },
     onSuccess: () => {
@@ -67,7 +67,7 @@ export function useGenerateClassSchedule() {
     }) => {
       return tuyau
         .$route('api.v1.schedules.generateClassSchedule', { classId })
-        .$post(data as any)
+        .$post(data)
         .unwrap()
     },
     onSuccess: () => {

@@ -14,7 +14,7 @@ export function useRejectInsuranceClaimMutation() {
     mutationFn: (data: RejectClaimData) => {
       const { claimId, rejectionReason } = data
       return resolveRoute()
-        .$post({ params: { claimId }, rejectionReason } as any)
+        .$post({ params: { claimId }, rejectionReason })
         .unwrap()
     },
     onSuccess: () => {

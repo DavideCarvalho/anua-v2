@@ -1,4 +1,4 @@
-import type { MutationOptions } from '@tanstack/react-query'
+import { mutationOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 import { tuyau } from '../../lib/api'
 
@@ -11,9 +11,9 @@ export type BatchCreateAttendanceData = NonNullable<
 >
 
 export function useBatchCreateAttendanceMutationOptions() {
-  return {
+  return mutationOptions({
     mutationFn: (data: BatchCreateAttendanceData) => {
       return resolveRoute().$post(data).unwrap()
     },
-  } satisfies MutationOptions<BatchCreateAttendanceResponse, Error, BatchCreateAttendanceData>
+  })
 }

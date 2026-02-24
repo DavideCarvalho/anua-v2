@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.analytics.enrollments.trends')
@@ -13,10 +13,10 @@ export function useEnrollmentTrendsQueryOptions(query: TrendsQuery = {}) {
     ...query,
   }
 
-  return {
+  return queryOptions({
     queryKey: ['analytics', 'enrollments', 'trends', mergedQuery],
     queryFn: () => {
       return resolveRoute().$get({ query: mergedQuery }).unwrap()
     },
-  } satisfies QueryOptions<EnrollmentTrendsResponse>
+  })
 }

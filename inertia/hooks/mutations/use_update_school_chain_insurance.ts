@@ -17,7 +17,7 @@ export function useUpdateSchoolChainInsuranceMutation() {
     mutationFn: (data: UpdateSchoolChainInsuranceData) => {
       const { chainId, ...rest } = data
       return resolveRoute()
-        .$put({ params: { chainId }, ...rest } as any)
+        .$put({ params: { chainId }, ...rest })
         .unwrap()
     },
     onSuccess: () => {

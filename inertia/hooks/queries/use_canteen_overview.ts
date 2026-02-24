@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.analytics.canteen.overview')
@@ -10,10 +10,10 @@ type CanteenOverviewQuery = NonNullable<
 >['query']
 
 export function useCanteenOverviewQueryOptions(query: CanteenOverviewQuery = {}) {
-  return {
+  return queryOptions({
     queryKey: ['analytics', 'canteen', 'overview', query],
     queryFn: () => {
       return tuyau.$route('api.v1.analytics.canteen.overview').$get({ query }).unwrap()
     },
-  } satisfies QueryOptions<CanteenOverviewResponse>
+  })
 }

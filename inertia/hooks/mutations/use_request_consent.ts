@@ -9,7 +9,7 @@ export function useRequestConsentMutation() {
       const { eventId, studentId, responsibleId } = data
       return tuyau
         .$route('api.v1.events.consents.request', { eventId })
-        .$post({ studentId, responsibleId } as any)
+        .$post({ studentId, responsibleId })
         .unwrap()
     },
     onSuccess: (_, variables) => {

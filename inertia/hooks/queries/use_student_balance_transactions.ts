@@ -24,7 +24,7 @@ export function useStudentBalanceTransactionsQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.studentBalanceTransactions.index')
-        .$get({ query: { studentId, type, page, limit } as any })
+        .$get({ query: { studentId, type, page, limit } })
         .unwrap()
     },
   }

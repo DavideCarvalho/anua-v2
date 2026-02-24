@@ -12,7 +12,7 @@ export function useCheckExistingStudentMutation() {
   return useMutation({
     mutationFn: (data: CheckExistingBody) => {
       return resolveRoute()
-        .$post(data as any)
+        .$post(data)
         .unwrap()
     },
   })

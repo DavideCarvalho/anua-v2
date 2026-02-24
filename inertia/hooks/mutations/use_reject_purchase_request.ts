@@ -9,7 +9,7 @@ export function useRejectPurchaseRequestMutation() {
       const { id, ...body } = data
       return tuyau
         .$route('api.v1.purchaseRequests.reject', { id })
-        .$post(body as any)
+        .$post(body)
         .unwrap()
     },
     onSuccess: () => {

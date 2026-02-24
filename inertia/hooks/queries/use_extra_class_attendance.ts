@@ -1,4 +1,4 @@
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 
 interface StudentAttendanceRecord {
   id: string
@@ -59,7 +59,7 @@ export function useExtraClassAttendancesQueryOptions(
   params: { page?: number; limit?: number } = {}
 ) {
   const { page = 1, limit = 20 } = params
-  return {
+  return queryOptions({
     queryKey: ['extra-class-attendances', extraClassId, { page, limit }],
     queryFn: async (): Promise<ExtraClassAttendancesResponse> => {
       const res = await fetch(
@@ -68,16 +68,16 @@ export function useExtraClassAttendancesQueryOptions(
       if (!res.ok) throw new Error('Failed to fetch attendances')
       return res.json()
     },
-  } satisfies QueryOptions
+  })
 }
 
 export function useExtraClassAttendanceSummaryQueryOptions(extraClassId: string) {
-  return {
+  return queryOptions({
     queryKey: ['extra-class-attendance-summary', extraClassId],
     queryFn: async (): Promise<AttendanceSummaryResponse> => {
       const res = await fetch(`/api/v1/extra-classes/${extraClassId}/attendance/summary`)
       if (!res.ok) throw new Error('Failed to fetch attendance summary')
       return res.json()
     },
-  } satisfies QueryOptions
+  })
 }

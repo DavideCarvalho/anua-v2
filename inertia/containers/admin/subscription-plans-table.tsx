@@ -1,8 +1,9 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Package, Plus, MoreHorizontal, Users, GraduationCap, Building2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useSubscriptionPlansQueryOptions } from '../../hooks/queries/use_subscription_plans'
-import { useDeleteSubscriptionPlan } from '../../hooks/mutations/use_subscription_mutations'
+import { useDeleteSubscriptionPlanMutationOptions } from '../../hooks/mutations/use_subscription_mutations'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -36,8 +37,9 @@ const tierColors: Record<string, string> = {
 }
 
 export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableProps) {
+  const queryClient = useQueryClient()
   const { data } = useSuspenseQuery(useSubscriptionPlansQueryOptions({}))
-  const deleteMutation = useDeleteSubscriptionPlan()
+  const deleteMutation = useMutation(useDeleteSubscriptionPlanMutationOptions())
 
   const plans = data?.data ?? []
 
@@ -46,6 +48,16 @@ export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableP
       style: 'currency',
       currency: 'BRL',
     }).format(value)
+  }
+
+  async function handleDelete(planId: string) {
+    try {
+      await deleteMutation.mutateAsync(planId)
+      await queryClient.invalidateQueries({ queryKey: ['subscription-plans'] })
+      toast.success('Plano excluido com sucesso')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao excluir plano')
+    }
   }
 
   if (plans.length === 0) {
@@ -109,9 +121,7 @@ export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableP
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={tierColors[plan.tier] || tierColors.CUSTOM}>
-                    {plan.tier}
-                  </Badge>
+                  <Badge className={tierColors[plan.tier] || tierColors.CUSTOM}>{plan.tier}</Badge>
                 </TableCell>
                 <TableCell className="text-right font-medium">
                   {formatCurrency(plan.monthlyPrice)}
@@ -150,7 +160,7 @@ export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableP
                       <DropdownMenuItem>Ver Assinaturas</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => deleteMutation.mutate(plan.id)}
+                        onClick={() => handleDelete(plan.id)}
                       >
                         Excluir
                       </DropdownMenuItem>

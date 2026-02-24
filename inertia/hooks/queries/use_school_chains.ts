@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.schoolChains.listSchoolChains')
@@ -14,8 +14,8 @@ interface UseSchoolChainsOptions {
 export function useSchoolChainsQueryOptions(options: UseSchoolChainsOptions = {}) {
   const { search, page = 1, limit = 20 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['school-chains', { search, page, limit }],
     queryFn: () => resolveRoute().$get({ query: { search, page, limit } }).unwrap(),
-  } satisfies QueryOptions<SchoolChainsResponse>
+  })
 }

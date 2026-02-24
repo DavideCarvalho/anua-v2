@@ -9,7 +9,7 @@ export function useCreateCommentMutation() {
       const { postId, ...body } = data
       return tuyau
         .$route('api.v1.posts.comments.store', { postId })
-        .$post(body as any)
+        .$post(body)
         .unwrap()
     },
     onSuccess: (_, variables) => {

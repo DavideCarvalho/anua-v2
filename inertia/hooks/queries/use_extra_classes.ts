@@ -1,4 +1,4 @@
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 
 interface ExtraClassSchedule {
   id: string
@@ -68,25 +68,25 @@ export function useExtraClassesQueryOptions(params: UseExtraClassesParams = {}) 
   if (isActive !== undefined) queryParams.set('isActive', String(isActive))
   if (search) queryParams.set('search', search)
 
-  return {
+  return queryOptions({
     queryKey: ['extra-classes', { page, limit, schoolId, academicPeriodId, isActive, search }],
     queryFn: async (): Promise<ExtraClassesResponse> => {
       const res = await fetch(`/api/v1/extra-classes?${queryParams}`)
       if (!res.ok) throw new Error('Failed to fetch extra classes')
       return res.json()
     },
-  } satisfies QueryOptions
+  })
 }
 
 export function useExtraClassQueryOptions(id: string) {
-  return {
+  return queryOptions({
     queryKey: ['extra-class', id],
     queryFn: async (): Promise<ExtraClass> => {
       const res = await fetch(`/api/v1/extra-classes/${id}`)
       if (!res.ok) throw new Error('Failed to fetch extra class')
       return res.json()
     },
-  } satisfies QueryOptions
+  })
 }
 
 interface ExtraClassStudent {
@@ -114,7 +114,7 @@ export function useExtraClassStudentsQueryOptions(
   params: { page?: number; limit?: number } = {}
 ) {
   const { page = 1, limit = 20 } = params
-  return {
+  return queryOptions({
     queryKey: ['extra-class-students', extraClassId, { page, limit }],
     queryFn: async (): Promise<ExtraClassStudentsResponse> => {
       const res = await fetch(
@@ -123,5 +123,5 @@ export function useExtraClassStudentsQueryOptions(
       if (!res.ok) throw new Error('Failed to fetch extra class students')
       return res.json()
     },
-  } satisfies QueryOptions
+  })
 }

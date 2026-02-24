@@ -11,7 +11,7 @@ export function useSchoolInsuranceBillingsQueryOptions(schoolId: string, limit?:
     queryKey: ['insurance', 'school', schoolId, 'billings', limit],
     queryFn: () => {
       return resolveRoute()
-        .$get({ params: { schoolId }, query: { limit } } as any)
+        .$get({ params: { schoolId }, query: { limit } })
         .unwrap()
     },
     enabled: !!schoolId,

@@ -19,7 +19,7 @@ export function useSchoolEnrollmentInfoQueryOptions(
           schoolSlug,
           academicPeriodSlug,
           courseSlug,
-        } as any)
+        })
         .$get()
         .unwrap()
     },

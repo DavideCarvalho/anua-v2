@@ -1,5 +1,5 @@
 import { tuyau } from '../../lib/api'
-import type { QueryOptions } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.api.v1.users.$get
@@ -18,7 +18,7 @@ interface UseUsersParams {
 export function useUsersQueryOptions(params: UseUsersParams = {}) {
   const { page = 1, limit = 20, search, schoolId, roleId, active } = params
 
-  return {
+  return queryOptions({
     queryKey: ['users', { page, limit, search, schoolId, roleId, active }],
     queryFn: async () => {
       const response = await tuyau.api.v1.users.$get({
@@ -32,9 +32,9 @@ export function useUsersQueryOptions(params: UseUsersParams = {}) {
         },
       })
       if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar usuários')
+        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar usuários')
       }
       return response.data
     },
-  } satisfies QueryOptions
+  })
 }

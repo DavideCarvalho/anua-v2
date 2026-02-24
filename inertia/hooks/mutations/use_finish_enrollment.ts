@@ -90,7 +90,7 @@ export function useFinishEnrollmentMutation() {
   return useMutation({
     mutationFn: (data: FinishEnrollmentData) => {
       return resolveRoute()
-        .$post(data as any)
+        .$post(data)
         .unwrap()
     },
     onSuccess: () => {

@@ -19,7 +19,7 @@ export function usePostCommentsQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.posts.comments.index', { postId: params.postId })
-        .$get({ query: mergedQuery } as any)
+        .$get({ query: mergedQuery })
         .unwrap()
     },
     enabled: !!params.postId,

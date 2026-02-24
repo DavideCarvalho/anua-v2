@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import {
   CreditCard,
   Building2,
@@ -13,11 +13,14 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useSubscriptionsQueryOptions } from '../../hooks/queries/use_subscriptions'
 import {
-  useCancelSubscription,
-  usePauseSubscription,
-  useReactivateSubscription,
+  useSubscriptionsQueryOptions,
+  type SubscriptionsResponse,
+} from '../../hooks/queries/use_subscriptions'
+import {
+  useCancelSubscriptionMutationOptions,
+  usePauseSubscriptionMutationOptions,
+  useReactivateSubscriptionMutationOptions,
 } from '../../hooks/mutations/use_subscription_mutations'
 
 import { Button } from '../../components/ui/button'
@@ -40,16 +43,30 @@ import {
 } from '../../components/ui/dropdown-menu'
 
 interface SubscriptionsTableProps {
-  status?: string
+  status?: 'TRIAL' | 'ACTIVE' | 'PAST_DUE' | 'BLOCKED' | 'CANCELED' | 'PAUSED'
 }
+
+type SubscriptionItem = SubscriptionsResponse extends { data: infer T }
+  ? T extends Array<infer U>
+    ? U
+    : never
+  : never
 
 const statusConfig: Record<
   string,
-  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }
+  {
+    label: string
+    variant: 'default' | 'secondary' | 'destructive' | 'outline'
+    icon: React.ReactNode
+  }
 > = {
   TRIAL: { label: 'Trial', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
   ACTIVE: { label: 'Ativa', variant: 'default', icon: <CheckCircle className="h-3 w-3" /> },
-  PAST_DUE: { label: 'Atrasada', variant: 'destructive', icon: <AlertTriangle className="h-3 w-3" /> },
+  PAST_DUE: {
+    label: 'Atrasada',
+    variant: 'destructive',
+    icon: <AlertTriangle className="h-3 w-3" />,
+  },
   BLOCKED: { label: 'Bloqueada', variant: 'destructive', icon: <XCircle className="h-3 w-3" /> },
   CANCELED: { label: 'Cancelada', variant: 'outline', icon: <XCircle className="h-3 w-3" /> },
   PAUSED: { label: 'Pausada', variant: 'secondary', icon: <Pause className="h-3 w-3" /> },
@@ -64,17 +81,42 @@ const billingCycleLabels: Record<string, string> = {
 
 export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
   const { data } = useSuspenseQuery(useSubscriptionsQueryOptions({ status }))
-  const cancelMutation = useCancelSubscription()
-  const pauseMutation = usePauseSubscription()
-  const reactivateMutation = useReactivateSubscription()
+  const queryClient = useQueryClient()
+  const cancelMutation = useMutation(useCancelSubscriptionMutationOptions())
+  const pauseMutation = useMutation(usePauseSubscriptionMutationOptions())
+  const reactivateMutation = useMutation(useReactivateSubscriptionMutationOptions())
 
   const subscriptions = data?.data ?? []
+  const pastDueCount = subscriptions.filter(
+    (subscription) => subscription.status === 'PAST_DUE'
+  ).length
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value)
+  }
+
+  const handlePause = async (id: string) => {
+    try {
+      await pauseMutation.mutateAsync(id)
+      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+    } catch {}
+  }
+
+  const handleCancel = async (id: string) => {
+    try {
+      await cancelMutation.mutateAsync({ id })
+      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+    } catch {}
+  }
+
+  const handleReactivate = async (id: string) => {
+    try {
+      await reactivateMutation.mutateAsync(id)
+      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+    } catch {}
   }
 
   if (subscriptions.length === 0) {
@@ -96,6 +138,11 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
       <CardHeader>
         <CardTitle>Assinaturas</CardTitle>
         <CardDescription>{subscriptions.length} assinatura(s)</CardDescription>
+        {pastDueCount > 0 && (
+          <div className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {pastDueCount} assinatura(s) inadimplente(s) com falha de cobrança automática.
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <Table>
@@ -107,12 +154,13 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
               <TableHead className="text-right">Valor</TableHead>
               <TableHead className="text-center">Alunos</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Falha Cobrança</TableHead>
               <TableHead>Próx. Cobrança</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {subscriptions.map((subscription: any) => {
+            {subscriptions.map((subscription: SubscriptionItem) => {
               const config = statusConfig[subscription.status] || statusConfig.ACTIVE
 
               return (
@@ -121,9 +169,7 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">
-                        {subscription.school?.name ||
-                          subscription.schoolChain?.name ||
-                          '-'}
+                        {subscription.school?.name || subscription.schoolChain?.name || '-'}
                       </span>
                     </div>
                   </TableCell>
@@ -142,6 +188,18 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
                       {config.icon}
                       {config.label}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {subscription.invoices?.[0]?.lastChargeError ? (
+                      <span
+                        className="inline-flex max-w-[240px] cursor-help items-center truncate text-xs text-red-700"
+                        title={subscription.invoices[0].lastChargeError}
+                      >
+                        {subscription.invoices[0].lastChargeError}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {subscription.currentPeriodEnd
@@ -163,15 +221,13 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
                         <DropdownMenuSeparator />
                         {subscription.status === 'ACTIVE' && (
                           <>
-                            <DropdownMenuItem
-                              onClick={() => pauseMutation.mutate(subscription.id)}
-                            >
+                            <DropdownMenuItem onClick={() => handlePause(subscription.id)}>
                               <Pause className="h-4 w-4 mr-2" />
                               Pausar
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => cancelMutation.mutate(subscription.id)}
+                              onClick={() => handleCancel(subscription.id)}
                             >
                               <XCircle className="h-4 w-4 mr-2" />
                               Cancelar
@@ -180,9 +236,7 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
                         )}
                         {(subscription.status === 'PAUSED' ||
                           subscription.status === 'CANCELED') && (
-                          <DropdownMenuItem
-                            onClick={() => reactivateMutation.mutate(subscription.id)}
-                          >
+                          <DropdownMenuItem onClick={() => handleReactivate(subscription.id)}>
                             <Play className="h-4 w-4 mr-2" />
                             Reativar
                           </DropdownMenuItem>

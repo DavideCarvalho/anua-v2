@@ -27,8 +27,8 @@ export function useAddStudentPoints() {
   return useMutation({
     mutationFn: ({ id, points, reason }: { id: string; points: number; reason?: string }) => {
       return tuyau
-        .$route('api.v1.studentGamifications.addPoints', { id } as any)
-        .$post({ points, reason } as any)
+        .$route('api.v1.studentGamifications.addPoints', { id })
+        .$post({ points, reason })
         .unwrap()
     },
     onSuccess: (_data, variables) => {
