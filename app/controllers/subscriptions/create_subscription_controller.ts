@@ -19,11 +19,13 @@ export default class CreateSubscriptionController {
       ...data,
       status: 'TRIAL',
       billingCycle: data.billingCycle ?? 'MONTHLY',
+      billingModel: data.billingModel ?? 'PER_ACTIVE_STUDENT',
       currentPeriodStart: now,
       currentPeriodEnd: trialEndsAt,
       trialEndsAt: trialEndsAt,
       activeStudents: 0,
       monthlyAmount: 0,
+      monthlyFixedPrice: data.monthlyFixedPrice ?? null,
       discount: data.discount ?? 0,
     })
 

@@ -13,6 +13,7 @@ const subscriptionStatuses = [
   'PAUSED',
 ] as const
 const billingCycles = ['MONTHLY', 'QUARTERLY', 'SEMI_ANNUAL', 'ANNUAL'] as const
+const billingModels = ['PER_ACTIVE_STUDENT', 'FIXED_MONTHLY'] as const
 const invoiceStatuses = ['PENDING', 'PAID', 'OVERDUE', 'CANCELED', 'REFUNDED'] as const
 const paymentMethods = ['BOLETO', 'CREDIT_CARD', 'PIX'] as const
 
@@ -33,6 +34,8 @@ export const updatePlatformSettingsValidator = vine.compile(
 export const createPaymentSettingsValidator = vine.compile(
   vine.object({
     pricePerStudent: vine.number().min(0),
+    billingModel: vine.enum(billingModels).optional(),
+    monthlyFixedPrice: vine.number().min(0).optional(),
     trialDays: vine.number().min(0).optional(),
     discount: vine.number().min(0).max(100).optional(),
     platformFeePercentage: vine.number().min(0).max(100).optional(),
@@ -44,6 +47,8 @@ export const createPaymentSettingsValidator = vine.compile(
 export const updatePaymentSettingsValidator = vine.compile(
   vine.object({
     pricePerStudent: vine.number().min(0).optional(),
+    billingModel: vine.enum(billingModels).optional(),
+    monthlyFixedPrice: vine.number().min(0).optional(),
     trialDays: vine.number().min(0).optional(),
     discount: vine.number().min(0).max(100).optional(),
     platformFeePercentage: vine.number().min(0).max(100).optional(),
@@ -103,6 +108,8 @@ export const createSubscriptionValidator = vine.compile(
     schoolChainId: vine.string().trim().optional(),
     billingCycle: vine.enum(billingCycles).optional(),
     pricePerStudent: vine.number().min(0),
+    billingModel: vine.enum(billingModels).optional(),
+    monthlyFixedPrice: vine.number().min(0).optional(),
     discount: vine.number().min(0).max(100).optional(),
     paymentMethod: vine.enum(paymentMethods).optional(),
   })
@@ -113,6 +120,8 @@ export const updateSubscriptionValidator = vine.compile(
     planId: vine.string().trim().optional(),
     billingCycle: vine.enum(billingCycles).optional(),
     pricePerStudent: vine.number().min(0).optional(),
+    billingModel: vine.enum(billingModels).optional(),
+    monthlyFixedPrice: vine.number().min(0).optional(),
     discount: vine.number().min(0).max(100).optional(),
     paymentMethod: vine.enum(paymentMethods).optional(),
     creditCardToken: vine.string().trim().optional(),

@@ -20,5 +20,10 @@ output "dispatch_invoices_job_name" {
 
 output "dispatch_overdue_job_name" {
   description = "Name of the dispatch overdue Cloud Run Job"
-  value       = module.dispatch_overdue.job_name
+  value       = module.dispatch_refresh_overdue.job_name
+}
+
+output "dispatch_subscription_invoices_job_name" {
+  description = "Name of the dispatch subscription invoices Cloud Run Job"
+  value       = module.dispatch_subscription_invoices.job_name
 }

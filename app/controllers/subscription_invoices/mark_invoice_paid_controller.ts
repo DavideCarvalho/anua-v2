@@ -11,11 +11,24 @@ export default class MarkInvoicePaidController {
       throw AppException.notFound('Fatura de assinatura não encontrada')
     }
 
-    invoice.status = 'PAID'
-    invoice.paidAt = DateTime.now()
-    await invoice.save()
-
     await invoice.load('subscription')
+
+    const hasAutomaticCardBilling =
+      invoice.subscription?.paymentMethod === 'CREDIT_CARD' &&
+      !!invoice.subscription?.creditCardToken
+
+    if (hasAutomaticCardBilling) {
+      throw AppException.badRequest(
+        'Esta assinatura possui cobrança automática por cartão. A baixa manual está desabilitada.'
+      )
+    }
+
+    invoice.status = 'PAID'
+    invoice.collectionStatus = 'PAID'
+    invoice.paidAt = DateTime.now()
+    invoice.nextChargeRetryAt = null
+    invoice.lastChargeError = null
+    await invoice.save()
 
     return invoice
   }

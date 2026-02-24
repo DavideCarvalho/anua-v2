@@ -7,6 +7,8 @@ import CreateInvoiceAsaasChargesJob from '#jobs/payments/create_invoice_asaas_ch
 import SendInvoiceNotificationsJob from '#jobs/payments/send_invoice_notifications_job'
 import SendOccurrenceAckRemindersJob from '#jobs/occurrences/send_occurrence_ack_reminders_job'
 import SweepPendingAsaasDocumentsJob from '#jobs/asaas/sweep_pending_asaas_documents_job'
+import GenerateSubscriptionInvoicesJob from '#jobs/payments/generate_subscription_invoices_job'
+import RetrySubscriptionInvoiceChargesJob from '#jobs/payments/retry_subscription_invoice_charges_job'
 
 if (process.env.DISABLE_SCHEDULER) {
   console.log('[SCHEDULER] Scheduler disabled (DISABLE_SCHEDULER is set)')
@@ -72,6 +74,23 @@ if (process.env.DISABLE_SCHEDULER) {
     })
     .daily()
     .at('08:00')
+
+  // 04:00 (dia 1) - Gerar e cobrar assinaturas mensais de escolas/redes
+  scheduler
+    .call(async () => {
+      await getQueueManager()
+      await GenerateSubscriptionInvoicesJob.dispatch({})
+    })
+    .cron('0 4 1 * *')
+
+  // 04:30 - Retentar cobranças automáticas de assinaturas com falha
+  scheduler
+    .call(async () => {
+      await getQueueManager()
+      await RetrySubscriptionInvoiceChargesJob.dispatch({})
+    })
+    .daily()
+    .at('04:30')
 
   console.log('[SCHEDULER] Payment and invoice schedules configured')
 }

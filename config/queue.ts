@@ -21,10 +21,10 @@ const queueConfig = {
         database: env.get('DB_DATABASE'),
       },
       pool: {
-        min: 2,
-        max: 10, // Increased pool size for concurrency
+        min: 0,
+        max: 3,
       },
-      debug: false, // Disable debug to reduce noise
+      debug: false,
     }),
   },
 
@@ -32,8 +32,8 @@ const queueConfig = {
    * Worker configuration
    */
   worker: {
-    concurrency: 5,
-    idleDelay: '1s', // How long to wait between poll cycles when idle
+    concurrency: 2,
+    idleDelay: '1s',
   },
 
   /**

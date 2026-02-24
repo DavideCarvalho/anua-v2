@@ -14,7 +14,7 @@ const dbConfig = defineConfig({
         database: env.get('DB_DATABASE'),
       },
       pool: {
-        min: 1,
+        min: 0,
         max: env.get('DB_POOL_MAX', 3),
       },
       migrations: {

@@ -10,6 +10,7 @@ import SubscriptionStatusHistory from './subscription_status_history.js'
 
 export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'PAST_DUE' | 'BLOCKED' | 'CANCELED' | 'PAUSED'
 export type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'SEMI_ANNUAL' | 'ANNUAL'
+export type SubscriptionBillingModel = 'PER_ACTIVE_STUDENT' | 'FIXED_MONTHLY'
 
 export default class Subscription extends BaseModel {
   static table = 'Subscription'
@@ -59,6 +60,12 @@ export default class Subscription extends BaseModel {
 
   @column()
   declare pricePerStudent: number
+
+  @column()
+  declare billingModel: SubscriptionBillingModel
+
+  @column()
+  declare monthlyFixedPrice: number | null
 
   @column()
   declare activeStudents: number

@@ -42,6 +42,8 @@ interface AsaasPaymentPayload {
   description: string
   externalReference: string
   postalService?: boolean
+  creditCardToken?: string
+  remoteIp?: string
 }
 
 interface AsaasCustomerPayload {

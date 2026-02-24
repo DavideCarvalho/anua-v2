@@ -6,6 +6,7 @@ import Subscription from './subscription.js'
 import SubscriptionEmailNotification from './subscription_email_notification.js'
 
 export type SubscriptionInvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELED' | 'REFUNDED'
+export type SubscriptionCollectionStatus = 'PENDING' | 'RETRYING' | 'DELINQUENT' | 'PAID'
 
 export default class SubscriptionInvoice extends BaseModel {
   static table = 'SubscriptionInvoice'
@@ -67,6 +68,21 @@ export default class SubscriptionInvoice extends BaseModel {
 
   @column()
   declare metadata: Record<string, unknown> | null
+
+  @column()
+  declare chargeRetryCount: number
+
+  @column.dateTime()
+  declare nextChargeRetryAt: DateTime | null
+
+  @column.dateTime()
+  declare lastChargeAttemptAt: DateTime | null
+
+  @column()
+  declare lastChargeError: string | null
+
+  @column()
+  declare collectionStatus: SubscriptionCollectionStatus
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -1,9 +1,14 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Subscription from '#models/subscription'
-import type { SubscriptionStatus, BillingCycle } from '#models/subscription'
+import type {
+  SubscriptionStatus,
+  BillingCycle,
+  SubscriptionBillingModel,
+} from '#models/subscription'
 import SchoolDto from './school.dto.js'
 import SchoolChainDto from './school_chain.dto.js'
 import SubscriptionPlanDto from './subscription_plan.dto.js'
+import SubscriptionInvoiceDto from './subscription_invoice.dto.js'
 
 export default class SubscriptionDto extends BaseModelDto {
   declare id: string
@@ -12,6 +17,7 @@ export default class SubscriptionDto extends BaseModelDto {
   declare schoolChainId: string | null
   declare status: SubscriptionStatus
   declare billingCycle: BillingCycle
+  declare billingModel: SubscriptionBillingModel
   declare currentPeriodStart: Date
   declare currentPeriodEnd: Date
   declare trialEndsAt: Date | null
@@ -19,6 +25,7 @@ export default class SubscriptionDto extends BaseModelDto {
   declare pausedAt: Date | null
   declare blockedAt: Date | null
   declare pricePerStudent: number
+  declare monthlyFixedPrice: number | null
   declare activeStudents: number
   declare monthlyAmount: number
   declare discount: number
@@ -32,6 +39,7 @@ export default class SubscriptionDto extends BaseModelDto {
   declare school?: SchoolDto
   declare schoolChain?: SchoolChainDto
   declare plan?: SubscriptionPlanDto
+  declare invoices?: SubscriptionInvoiceDto[]
 
   constructor(subscription?: Subscription) {
     super()
@@ -44,6 +52,7 @@ export default class SubscriptionDto extends BaseModelDto {
     this.schoolChainId = subscription.schoolChainId
     this.status = subscription.status
     this.billingCycle = subscription.billingCycle
+    this.billingModel = subscription.billingModel
     this.currentPeriodStart = subscription.currentPeriodStart.toJSDate()
     this.currentPeriodEnd = subscription.currentPeriodEnd.toJSDate()
     this.trialEndsAt = subscription.trialEndsAt ? subscription.trialEndsAt.toJSDate() : null
@@ -51,6 +60,7 @@ export default class SubscriptionDto extends BaseModelDto {
     this.pausedAt = subscription.pausedAt ? subscription.pausedAt.toJSDate() : null
     this.blockedAt = subscription.blockedAt ? subscription.blockedAt.toJSDate() : null
     this.pricePerStudent = subscription.pricePerStudent
+    this.monthlyFixedPrice = subscription.monthlyFixedPrice
     this.activeStudents = subscription.activeStudents
     this.monthlyAmount = subscription.monthlyAmount
     this.discount = subscription.discount
@@ -66,5 +76,6 @@ export default class SubscriptionDto extends BaseModelDto {
       ? new SchoolChainDto(subscription.schoolChain)
       : undefined
     this.plan = subscription.plan ? new SubscriptionPlanDto(subscription.plan) : undefined
+    this.invoices = SubscriptionInvoiceDto.fromArray(subscription.invoices)
   }
 }

@@ -113,11 +113,11 @@ module "queue_worker" {
   image        = var.api_image # Uses the same image as API
 
   command = ["node"]
-  args    = ["ace", "queue:work"]
+  args    = ["ace", "queue:work", "--concurrency=2"]
 
   # Keep 1 instance always running to process jobs
   min_instances = 1
-  max_instances = 2
+  max_instances = 1
   cpu_limit     = "1"
   memory_limit  = "1Gi"
 
@@ -244,6 +244,50 @@ module "dispatch_invoices" {
     }
     DB_PASSWORD = {
       secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
+}
+
+module "dispatch_subscription_invoices" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-subscription-invoices"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:generate-subscription-invoices"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+    ASAAS_API_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_api_key_secret_id
       version   = "latest"
     }
   }
@@ -453,6 +497,17 @@ module "scheduler_invoices" {
   job_name              = "${var.environment}-${var.project_name}-dispatch-invoices"
   schedule              = "0 3 * * *"
   cloud_run_job_name    = module.dispatch_invoices.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_subscription_invoices" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-subscription-invoices"
+  schedule              = "0 4 1 * *"
+  cloud_run_job_name    = module.dispatch_subscription_invoices.job_name
   service_account_email = google_service_account.scheduler.email
 }
 

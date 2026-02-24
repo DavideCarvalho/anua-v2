@@ -13,6 +13,9 @@ export default class ListSubscriptionsController {
       .preload('school')
       .preload('schoolChain')
       .preload('plan')
+      .preload('invoices', (invoiceQuery) => {
+        invoiceQuery.whereNotNull('lastChargeError').orderBy('updatedAt', 'desc').limit(1)
+      })
       .orderBy('createdAt', 'desc')
 
     if (schoolId) {

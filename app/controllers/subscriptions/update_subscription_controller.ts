@@ -19,8 +19,13 @@ export default class UpdateSubscriptionController {
       subscription.merge({
         planId: data.planId !== undefined ? data.planId : subscription.planId,
         billingCycle: data.billingCycle ?? subscription.billingCycle,
+        billingModel: data.billingModel ?? subscription.billingModel,
         pricePerStudent:
           data.pricePerStudent !== undefined ? data.pricePerStudent : subscription.pricePerStudent,
+        monthlyFixedPrice:
+          data.monthlyFixedPrice !== undefined
+            ? data.monthlyFixedPrice
+            : subscription.monthlyFixedPrice,
         discount: data.discount !== undefined ? data.discount : subscription.discount,
         paymentMethod:
           data.paymentMethod !== undefined ? data.paymentMethod : subscription.paymentMethod,

@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type SubscriptionInvoice from '#models/subscription_invoice'
 import type { SubscriptionInvoiceStatus } from '#models/subscription_invoice'
+import type { SubscriptionCollectionStatus } from '#models/subscription_invoice'
 
 export default class SubscriptionInvoiceDto extends BaseModelDto {
   declare id: string
@@ -20,6 +21,11 @@ export default class SubscriptionInvoiceDto extends BaseModelDto {
   declare creditCardLastFourDigits: string | null
   declare creditCardBrand: string | null
   declare metadata: Record<string, unknown> | null
+  declare chargeRetryCount: number
+  declare nextChargeRetryAt: Date | null
+  declare lastChargeAttemptAt: Date | null
+  declare lastChargeError: string | null
+  declare collectionStatus: SubscriptionCollectionStatus
   declare createdAt: Date
   declare updatedAt: Date
 
@@ -45,6 +51,15 @@ export default class SubscriptionInvoiceDto extends BaseModelDto {
     this.creditCardLastFourDigits = subscriptionInvoice.creditCardLastFourDigits
     this.creditCardBrand = subscriptionInvoice.creditCardBrand
     this.metadata = subscriptionInvoice.metadata
+    this.chargeRetryCount = subscriptionInvoice.chargeRetryCount
+    this.nextChargeRetryAt = subscriptionInvoice.nextChargeRetryAt
+      ? subscriptionInvoice.nextChargeRetryAt.toJSDate()
+      : null
+    this.lastChargeAttemptAt = subscriptionInvoice.lastChargeAttemptAt
+      ? subscriptionInvoice.lastChargeAttemptAt.toJSDate()
+      : null
+    this.lastChargeError = subscriptionInvoice.lastChargeError
+    this.collectionStatus = subscriptionInvoice.collectionStatus
     this.createdAt = subscriptionInvoice.createdAt.toJSDate()
     this.updatedAt = subscriptionInvoice.updatedAt.toJSDate()
   }

@@ -12,8 +12,12 @@ import ProcessAsaasPaymentWebhookJob from '#jobs/asaas/process_asaas_payment_web
 import ProcessAsaasWalletTopUpWebhookJob from '#jobs/asaas/process_asaas_wallet_topup_webhook_job'
 import ProcessAsaasAccountStatusWebhookJob from '#jobs/asaas/process_asaas_account_status_webhook_job'
 import ProcessAsaasInvoiceWebhookJob from '#jobs/asaas/process_asaas_invoice_webhook_job'
+import ProcessAsaasSubscriptionInvoiceWebhookJob from '#jobs/asaas/process_asaas_subscription_invoice_webhook_job'
 import ProcessAsaasNfseWebhookJob from '#jobs/asaas/process_asaas_nfse_webhook_job'
 import Invoice from '#models/invoice'
+import SubscriptionInvoice from '#models/subscription_invoice'
+import Subscription from '#models/subscription'
+import SchoolChain from '#models/school_chain'
 import WebhookEventDto from '#models/dto/webhook_event.dto'
 
 type AsaasPaymentEvent =
@@ -164,6 +168,18 @@ export default class AsaasWebhookController {
     const invoice = await Invoice.find(payload.payment.externalReference)
     if (invoice) {
       return this.enqueueInvoicePayment(invoice, payload, webhookToken, eventId, response)
+    }
+
+    // Try SubscriptionInvoice
+    const subscriptionInvoice = await SubscriptionInvoice.find(payload.payment.externalReference)
+    if (subscriptionInvoice) {
+      return this.enqueueSubscriptionInvoicePayment(
+        subscriptionInvoice,
+        payload,
+        webhookToken,
+        eventId,
+        response
+      )
     }
 
     // Try WalletTopUp
@@ -329,6 +345,46 @@ export default class AsaasWebhookController {
     })
 
     await ProcessAsaasWalletTopUpWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
+
+    return response.ok(new WebhookEventDto(webhookEvent))
+  }
+
+  private async enqueueSubscriptionInvoicePayment(
+    subscriptionInvoice: SubscriptionInvoice,
+    payload: AsaasWebhookPayload,
+    webhookToken: string,
+    eventId: string,
+    response: HttpContext['response']
+  ) {
+    const subscription = await Subscription.query()
+      .where('id', subscriptionInvoice.subscriptionId)
+      .preload('school', (q) => q.preload('schoolChain'))
+      .first()
+
+    let expectedToken =
+      subscription?.school?.asaasWebhookToken ??
+      subscription?.school?.schoolChain?.asaasWebhookToken ??
+      null
+
+    if (!expectedToken && subscription?.schoolChainId) {
+      const chain = await SchoolChain.find(subscription.schoolChainId)
+      expectedToken = chain?.asaasWebhookToken ?? null
+    }
+
+    if (!this.isWebhookTokenValid(expectedToken, webhookToken)) {
+      throw AppException.invalidWebhookToken()
+    }
+
+    const webhookEvent = await WebhookEvent.create({
+      eventId,
+      provider: 'ASAAS',
+      eventType: payload.event,
+      payload: payload as unknown as Record<string, unknown>,
+      status: 'PENDING',
+      attempts: 0,
+    })
+
+    await ProcessAsaasSubscriptionInvoiceWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
     return response.ok(new WebhookEventDto(webhookEvent))
   }
