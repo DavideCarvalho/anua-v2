@@ -25,12 +25,7 @@ import {
 } from 'lucide-react'
 
 import { Button } from '~/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Label } from '~/components/ui/label'
@@ -72,15 +67,18 @@ const insights: InsightCardProps[] = [
 const faqs = [
   {
     question: 'O que é o Anuá?',
-    answer: 'Anuá é um sistema de gestão escolar completo que integra todas as áreas da sua escola em uma única plataforma, potencializado por inteligência artificial.',
+    answer:
+      'Anuá é um sistema de gestão escolar completo que integra todas as áreas da sua escola em uma única plataforma, potencializado por inteligência artificial.',
   },
   {
     question: 'O Anuá tem inteligência artificial?',
-    answer: 'Sim! Nossa IA analisa dados acadêmicos, financeiros e comportamentais para gerar insights automáticos, identificar alunos em risco e otimizar a gestão.',
+    answer:
+      'Sim! Nossa IA analisa dados acadêmicos, financeiros e comportamentais para gerar insights automáticos, identificar alunos em risco e otimizar a gestão.',
   },
   {
     question: 'Posso fazer matrículas online?',
-    answer: 'Sim, o Anuá oferece sistema completo de matrículas online com assinatura digital de contratos.',
+    answer:
+      'Sim, o Anuá oferece sistema completo de matrículas online com assinatura digital de contratos.',
   },
 ]
 
@@ -140,6 +138,9 @@ export default function Home() {
                   type="button"
                   className="inline-flex items-center rounded-full border border-purple-600 p-2.5 text-purple-600"
                   onClick={() => setExpanded(!expanded)}
+                  aria-expanded={expanded}
+                  aria-controls="mobile-menu"
+                  aria-label={expanded ? 'Fechar menu' : 'Abrir menu'}
                 >
                   {!expanded ? (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,10 +164,41 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            {expanded && (
+              <div id="mobile-menu" className="mt-4 border-t border-border pt-4 lg:hidden">
+                <nav className="flex flex-col gap-3">
+                  <a
+                    href="#funcionalidades"
+                    className="text-base font-medium text-muted-foreground transition-colors hover:text-purple-600"
+                    onClick={() => setExpanded(false)}
+                  >
+                    Funcionalidades
+                  </a>
+                  <a
+                    href="#fale-conosco"
+                    className="text-base font-medium text-muted-foreground transition-colors hover:text-purple-600"
+                    onClick={() => setExpanded(false)}
+                  >
+                    Fale conosco
+                  </a>
+                  <Link
+                    route="web.auth.signIn"
+                    className="mt-2 inline-flex w-full items-center justify-center rounded-full bg-purple-600 px-6 py-3 text-base font-medium text-white transition-all hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+                    onClick={() => setExpanded(false)}
+                  >
+                    Entrar
+                  </Link>
+                </nav>
+              </div>
+            )}
           </div>
         </header>
 
-        <section className="bg-gradient-to-b from-purple-50 to-background dark:from-purple-950/20 py-12 sm:py-16 lg:py-20" aria-labelledby="hero-heading">
+        <section
+          className="bg-gradient-to-b from-purple-50 to-background dark:from-purple-950/20 py-12 sm:py-16 lg:py-20"
+          aria-labelledby="hero-heading"
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-2 lg:gap-x-16">
               <div className="flex flex-col justify-center">
@@ -174,16 +206,19 @@ export default function Home() {
                   <Brain className="mr-2 h-4 w-4" aria-hidden="true" />
                   <span>Sistema de Gestão Escolar com Inteligência Artificial</span>
                 </div>
-                <h1 id="hero-heading" className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                <h1
+                  id="hero-heading"
+                  className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+                >
                   Software de Gestão Escolar Completo{' '}
                   <span className="text-purple-600">Potencializado por IA</span>
                 </h1>
                 <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
-                  O Anuá é o <strong>sistema de gestão escolar</strong> que integra todas as áreas da sua instituição:
-                  do administrativo ao pedagógico, do financeiro à gamificação. Nossa{' '}
-                  <strong className="text-purple-600">Inteligência Artificial</strong>{' '}
-                  gera insights automáticos, identifica alunos em risco e otimiza processos.
-                  Muito mais que uma agenda escolar - é <strong>gestão completa com IA</strong>.
+                  O Anuá é o <strong>sistema de gestão escolar</strong> que integra todas as áreas
+                  da sua instituição: do administrativo ao pedagógico, do financeiro à gamificação.
+                  Nossa <strong className="text-purple-600">Inteligência Artificial</strong> gera
+                  insights automáticos, identifica alunos em risco e otimiza processos. Muito mais
+                  que uma agenda escolar - é <strong>gestão completa com IA</strong>.
                 </p>
                 <div className="mt-8 flex flex-col sm:flex-row sm:space-x-4">
                   <form className="flex-1">
@@ -395,7 +430,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-background py-16" id="funcionalidades" aria-labelledby="features-heading">
+        <section
+          className="bg-background py-16"
+          id="funcionalidades"
+          aria-labelledby="features-heading"
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <header className="text-center">
               <h2 id="features-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
@@ -403,7 +442,8 @@ export default function Home() {
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
                 Todas as ferramentas que sua escola precisa em uma única plataforma integrada.
-                Gestão administrativa, pedagógica, financeira e experiência completa para alunos e responsáveis.
+                Gestão administrativa, pedagógica, financeira e experiência completa para alunos e
+                responsáveis.
               </p>
             </header>
 
@@ -414,7 +454,9 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-foreground">Gestão Administrativa</h3>
+                <h3 className="mt-6 text-xl font-semibold text-foreground">
+                  Gestão Administrativa
+                </h3>
                 <p className="mt-4 text-muted-foreground">
                   Matrículas online, gestão de alunos, professores e funcionários, folha de ponto,
                   controle de documentos e muito mais.
@@ -546,7 +588,9 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-600">
                   <Bell className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-foreground">Comunicação Integrada</h3>
+                <h3 className="mt-6 text-xl font-semibold text-foreground">
+                  Comunicação Integrada
+                </h3>
                 <p className="mt-4 text-muted-foreground">
                   Notificações por email, SMS, WhatsApp e push. Sistema de preferências para cada
                   tipo de notificação.
@@ -629,14 +673,19 @@ export default function Home() {
 
 function Contact() {
   return (
-    <section className="bg-purple-50 dark:bg-purple-950/20 py-16" id="fale-conosco" aria-labelledby="contact-heading">
+    <section
+      className="bg-purple-50 dark:bg-purple-950/20 py-16"
+      id="fale-conosco"
+      aria-labelledby="contact-heading"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="text-center">
           <h2 id="contact-heading" className="text-3xl font-bold text-foreground sm:text-4xl">
             Entre em contato conosco
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Nossa equipe especializada está pronta para mostrar como o sistema de gestão escolar com IA pode transformar sua instituição
+            Nossa equipe especializada está pronta para mostrar como o sistema de gestão escolar com
+            IA pode transformar sua instituição
           </p>
         </header>
 
@@ -685,15 +734,24 @@ function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between space-y-6 sm:flex-row sm:space-y-0">
           <nav aria-label="Links do rodapé" className="flex space-x-6">
-            <a href="#funcionalidades" className="text-muted-foreground hover:text-purple-600 transition-colors">
+            <a
+              href="#funcionalidades"
+              className="text-muted-foreground hover:text-purple-600 transition-colors"
+            >
               Funcionalidades
             </a>
-            <a href="#fale-conosco" className="text-muted-foreground hover:text-purple-600 transition-colors">
+            <a
+              href="#fale-conosco"
+              className="text-muted-foreground hover:text-purple-600 transition-colors"
+            >
               Fale Conosco
             </a>
           </nav>
           <div className="text-center text-muted-foreground">
-            <p>© {new Date().getFullYear()} Anuá - Sistema de Gestão Escolar. Todos os direitos reservados.</p>
+            <p>
+              © {new Date().getFullYear()} Anuá - Sistema de Gestão Escolar. Todos os direitos
+              reservados.
+            </p>
           </div>
         </div>
       </div>
