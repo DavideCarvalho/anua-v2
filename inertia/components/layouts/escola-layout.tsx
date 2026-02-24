@@ -325,6 +325,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
                 </div>
                 <Link
                   route="api.v1.auth.logout"
+                  method="post"
                   className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

@@ -38,11 +38,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '../ui/sidebar'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '../ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { api } from '../../../.adonisjs/api'
 import type { RouteName } from '@tuyau/client'
 
@@ -64,13 +60,37 @@ const navigation: NavItem[] = [
     href: '/admin/analytics',
     icon: BarChart3,
     children: [
-      { title: 'Acadêmico', route: 'web.admin.analytics.academico', href: '/admin/analytics/academico' },
-      { title: 'Presença', route: 'web.admin.analytics.presenca', href: '/admin/analytics/presenca' },
+      {
+        title: 'Acadêmico',
+        route: 'web.admin.analytics.academico',
+        href: '/admin/analytics/academico',
+      },
+      {
+        title: 'Presença',
+        route: 'web.admin.analytics.presenca',
+        href: '/admin/analytics/presenca',
+      },
       { title: 'Cantina', route: 'web.admin.analytics.cantina', href: '/admin/analytics/cantina' },
-      { title: 'Pagamentos', route: 'web.admin.analytics.pagamentos', href: '/admin/analytics/pagamentos' },
-      { title: 'Matrículas', route: 'web.admin.analytics.matriculas', href: '/admin/analytics/matriculas' },
-      { title: 'Ocorrências', route: 'web.admin.analytics.ocorrencias', href: '/admin/analytics/ocorrencias' },
-      { title: 'Gamificação', route: 'web.admin.analytics.gamificacao', href: '/admin/analytics/gamificacao' },
+      {
+        title: 'Pagamentos',
+        route: 'web.admin.analytics.pagamentos',
+        href: '/admin/analytics/pagamentos',
+      },
+      {
+        title: 'Matrículas',
+        route: 'web.admin.analytics.matriculas',
+        href: '/admin/analytics/matriculas',
+      },
+      {
+        title: 'Ocorrências',
+        route: 'web.admin.analytics.ocorrencias',
+        href: '/admin/analytics/ocorrencias',
+      },
+      {
+        title: 'Gamificação',
+        route: 'web.admin.analytics.gamificacao',
+        href: '/admin/analytics/gamificacao',
+      },
       { title: 'RH', route: 'web.admin.analytics.rh', href: '/admin/analytics/rh' },
     ],
   },
@@ -80,12 +100,25 @@ const navigation: NavItem[] = [
     href: '/admin/billing',
     icon: CreditCard,
     children: [
-      { title: 'Dashboard', route: 'web.admin.billing.dashboard', href: '/admin/billing/dashboard' },
-      { title: 'Assinaturas', route: 'web.admin.billing.subscriptions', href: '/admin/billing/subscriptions' },
+      {
+        title: 'Dashboard',
+        route: 'web.admin.billing.dashboard',
+        href: '/admin/billing/dashboard',
+      },
+      {
+        title: 'Assinaturas',
+        route: 'web.admin.billing.subscriptions',
+        href: '/admin/billing/subscriptions',
+      },
     ],
   },
   { title: 'Seguros', route: 'web.admin.seguros.index', href: '/admin/seguros', icon: Shield },
-  { title: 'Configurações', route: 'web.admin.configuracoes', href: '/admin/configuracoes', icon: Settings },
+  {
+    title: 'Configurações',
+    route: 'web.admin.configuracoes',
+    href: '/admin/configuracoes',
+    icon: Settings,
+  },
 ]
 
 function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: string }) {
@@ -105,7 +138,9 @@ function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: stri
             {item.children?.map((child) => (
               <SidebarMenuSubItem key={child.route}>
                 <SidebarMenuSubButton asChild isActive={pathname === child.href}>
-                  <Link route={child.route as any} params={undefined as any}>{child.title}</Link>
+                  <Link route={child.route as any} params={undefined as any}>
+                    {child.title}
+                  </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
@@ -186,7 +221,9 @@ function AppSidebar() {
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
                 <span className="font-medium truncate">{user?.name}</span>
-                <span className="text-xs text-muted-foreground truncate">{formatRoleName(user?.role?.name)}</span>
+                <span className="text-xs text-muted-foreground truncate">
+                  {formatRoleName(user?.role?.name)}
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -195,6 +232,7 @@ function AppSidebar() {
         {/* Logout */}
         <Link
           route="api.v1.auth.logout"
+          method="post"
           className="inline-flex w-full items-center justify-start gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <LogOut className="h-4 w-4" />
