@@ -22,25 +22,33 @@ terraform/
 Each stack has its own state file to reduce blast radius:
 
 ### foundation/
+
 Resources that rarely change:
+
 - GCP APIs enablement
 - Artifact Registry
 - Workload Identity Pool for GitHub Actions
 - GitHub Actions service account and IAM roles
 
 ### storage/
+
 Stateful resources:
+
 - GCS bucket for uploads
 - Secret Manager secrets
+- Observability secrets (PostHog)
 
 ### app/
+
 Application resources that change frequently:
+
 - Cloud Run API service
 - Cloud Run migration job
 
 ## Usage
 
 ### Prerequisites
+
 1. Install Terraform >= 1.0
 2. Authenticate with GCP: `gcloud auth application-default login`
 3. Create a `terraform.tfvars` file in each stack directory (see examples below)
@@ -48,25 +56,37 @@ Application resources that change frequently:
 ### terraform.tfvars examples
 
 **storage/terraform.tfvars:**
+
 ```hcl
 project_id    = "anua-480822"
 environment   = "production"
-app_key       = "your-app-key"
-db_password   = "your-db-password"
-smtp_password = "your-smtp-password"
 ```
 
 **app/terraform.tfvars:**
+
 ```hcl
 project_id  = "anua-480822"
 environment = "production"
-app_key     = "your-app-key"
-db_password = "your-db-password"
+```
+
+### Secret versions (required)
+
+This project creates Secret Manager **containers** with Terraform. You must create/update secret **versions** separately.
+
+Example for PostHog OTEL/evlog token:
+
+```bash
+gcloud secrets versions add production-anua-v2-posthog-project-token \
+  --project=anua-480822 \
+  --data-file=- <<'EOF'
+phc_your_project_token
+EOF
 ```
 
 ### Deploy Order
 
 Apply stacks in this order:
+
 1. `foundation/` - Base infrastructure
 2. `storage/` - Storage and secrets
 3. `app/` - Application services
@@ -108,6 +128,7 @@ If you need to migrate from the old single-state setup:
 3. Remove from old state
 
 Example:
+
 ```bash
 # In the new foundation/ directory
 terraform import google_artifact_registry_repository.docker_repo projects/anua-480822/locations/southamerica-east1/repositories/anua-v2-docker

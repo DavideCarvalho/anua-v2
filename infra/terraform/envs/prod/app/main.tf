@@ -19,6 +19,8 @@ module "api" {
     HOST           = "0.0.0.0"
     TZ             = "UTC"
     LOG_LEVEL      = "info"
+    APP_NAME       = "Anua"
+    APP_VERSION    = "0.0.0"
     SESSION_DRIVER = "cookie"
     # Database (existing from school-super-app)
     DB_HOST     = "34.39.158.54"
@@ -33,6 +35,13 @@ module "api" {
     # Storage
     DRIVE_DISK = "gcs"
     GCS_BUCKET = data.terraform_remote_state.storage.outputs.uploads_bucket_name
+    # Observability
+    OTEL_SERVICE_NAME          = "Anua"
+    OTEL_EXPORT_TARGET         = "posthog"
+    POSTHOG_OTEL_ENDPOINT_BASE = "https://us.i.posthog.com/i"
+    EVLOG_ENABLED              = "true"
+    EVLOG_DRAIN_TARGET         = "posthog"
+    EVLOG_POSTHOG_HOST         = "https://us.i.posthog.com"
   }
 
   secrets = {
@@ -58,6 +67,10 @@ module "api" {
     }
     ASAAS_WEBHOOK_TOKEN = {
       secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_token_secret_id
+      version   = "latest"
+    }
+    POSTHOG_PROJECT_TOKEN = {
+      secret_id = data.terraform_remote_state.storage.outputs.posthog_project_token_secret_id
       version   = "latest"
     }
   }

@@ -37,3 +37,8 @@ output "asaas_webhook_token_secret_id" {
   description = "Secret ID for ASAAS_WEBHOOK_TOKEN"
   value       = google_secret_manager_secret.asaas_webhook_token.secret_id
 }
+
+output "posthog_project_token_secret_id" {
+  description = "Secret ID for POSTHOG_PROJECT_TOKEN"
+  value       = google_secret_manager_secret.posthog_project_token.secret_id
+}

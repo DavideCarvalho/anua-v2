@@ -90,8 +90,8 @@ resource "google_cloud_run_v2_service" "service" {
       }
     }
 
-    service_account = var.service_account_email
-    timeout         = "${var.timeout_seconds}s"
+    service_account       = var.service_account_email
+    timeout               = "${var.timeout_seconds}s"
     execution_environment = "EXECUTION_ENVIRONMENT_GEN2"
   }
 
