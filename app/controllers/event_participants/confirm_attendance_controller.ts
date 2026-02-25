@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
+import EventParticipantDto from '#models/dto/event_participant.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ConfirmAttendanceController {
@@ -33,6 +34,6 @@ export default class ConfirmAttendanceController {
     await participant.save()
     await participant.load('user')
 
-    return response.ok(participant)
+    return response.ok(new EventParticipantDto(participant))
   }
 }
