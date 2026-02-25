@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenMonthlyTransferWithRelationsDto from '#models/dto/canteen_monthly_transfer_with_relations.dto'
+import CanteenMonthlyTransferDto from '#models/dto/canteen_monthly_transfer.dto'
 import { updateCanteenMonthlyTransferStatusValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
 
@@ -34,7 +34,7 @@ export default class UpdateCanteenMonthlyTransferStatusController {
       await transfer.load('canteen')
       await transfer.load('purchases')
 
-      return response.ok(new CanteenMonthlyTransferWithRelationsDto(transfer))
+      return response.ok(new CanteenMonthlyTransferDto(transfer))
     } catch (error) {
       await trx.rollback()
       throw error

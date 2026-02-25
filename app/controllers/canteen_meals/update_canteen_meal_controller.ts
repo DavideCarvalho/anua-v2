@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenMeal from '#models/canteen_meal'
-import CanteenMealWithRelationsDto from '#models/dto/canteen_meal_with_relations.dto'
+import CanteenMealDto from '#models/dto/canteen_meal.dto'
 import { updateCanteenMealValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
 
@@ -28,6 +28,6 @@ export default class UpdateCanteenMealController {
     await meal.save()
     await meal.load('canteen')
 
-    return response.ok(new CanteenMealWithRelationsDto(meal))
+    return response.ok(new CanteenMealDto(meal))
   }
 }
