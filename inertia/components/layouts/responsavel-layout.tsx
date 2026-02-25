@@ -17,10 +17,8 @@ import {
   Menu,
   X,
   ClipboardCheck,
-  Wallet,
   AlertTriangle,
   Clock,
-  ShoppingBag,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { SharedProps } from '../../lib/types'
@@ -111,13 +109,13 @@ const pedagogicalNavigation: NavItem[] = [
 ]
 
 const financialNavigation: NavItem[] = [
-  {
-    title: 'Crédito',
-    route: 'web.responsavel.credito',
-    href: '/responsavel/credito',
-    icon: Wallet,
-    requiresFinancial: true,
-  },
+  // {
+  //   title: 'Crédito',
+  //   route: 'web.responsavel.credito',
+  //   href: '/responsavel/credito',
+  //   icon: Wallet,
+  //   requiresFinancial: true,
+  // },
   {
     title: 'Mensalidades',
     route: 'web.responsavel.mensalidades',
@@ -140,12 +138,12 @@ const commonNavigation: NavItem[] = [
     href: '/responsavel/cantina',
     icon: UtensilsCrossed,
   },
-  {
-    title: 'Loja',
-    route: 'web.responsavel.loja' as any,
-    href: '/responsavel/loja',
-    icon: ShoppingBag,
-  },
+  // {
+  //   title: 'Loja',
+  //   route: 'web.responsavel.loja' as any,
+  //   href: '/responsavel/loja',
+  //   icon: ShoppingBag,
+  // },
   { title: 'Perfil', route: 'web.responsavel.perfil', href: '/responsavel/perfil', icon: User },
 ]
 
