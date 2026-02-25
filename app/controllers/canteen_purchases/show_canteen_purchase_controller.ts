@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenPurchase from '#models/canteen_purchase'
+import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowCanteenPurchaseController {
@@ -19,6 +20,6 @@ export default class ShowCanteenPurchaseController {
       throw AppException.notFound('Compra da cantina não encontrada')
     }
 
-    return response.ok(purchase)
+    return response.ok(new CanteenPurchaseDto(purchase))
   }
 }

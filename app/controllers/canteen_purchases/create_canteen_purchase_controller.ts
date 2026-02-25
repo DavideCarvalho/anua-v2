@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { getQueueManager } from '#services/queue_service'
 import CanteenPurchase, { type CanteenPurchaseStatus } from '#models/canteen_purchase'
+import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import CanteenItem from '#models/canteen_item'
 import CanteenItemPurchased from '#models/canteen_item_purchased'
 import Student from '#models/student'
@@ -235,6 +236,6 @@ export default class CreateCanteenPurchaseController {
       query.preload('item')
     })
 
-    return response.created(purchase)
+    return response.created(new CanteenPurchaseDto(purchase))
   }
 }
