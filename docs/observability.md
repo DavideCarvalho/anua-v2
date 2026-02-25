@@ -5,8 +5,14 @@
 - OTEL inicializado no boot do Adonis (`otel.ts` + `bin/server.ts`)
 - Provider e middleware do OTEL registrados (`adonisrc.ts` e `start/kernel.ts`)
 - Config basica em `config/otel.ts`
-- Exportacao nativa para PostHog via `destinations` do `@adonisjs/otel` (traces + logs)
+- Exportacao nativa para PostHog via `destinations` do `@adonisjs/otel` (traces)
 - evlog inicializado no boot (`start/evlog.ts`) com middleware de wide events (`app/middleware/evlog_middleware.ts`)
+
+Logs sao unificados no evlog:
+
+- logs do Adonis/Pino sao encaminhados para evlog via `instrumentation-pino` (`config/otel.ts`)
+- wide events de request continuam emitidos pelo middleware `evlog_middleware`
+- envio para PostHog Logs acontece via drain do evlog
 
 ## Alternar facil: local x prod
 
