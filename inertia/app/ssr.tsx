@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TuyauProvider } from '@tuyau/inertia/react'
 import { tuyau } from '../lib/api'
 import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
+import { AuthUserProvider } from '../components/auth-user-provider'
 
 export default function render(page: any) {
   return createInertiaApp({
@@ -19,7 +20,9 @@ export default function render(page: any) {
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-              <App {...props} />
+              <AuthUserProvider>
+                <App {...props} />
+              </AuthUserProvider>
             </NuqsAdapter>
           </QueryClientProvider>
         </TuyauProvider>

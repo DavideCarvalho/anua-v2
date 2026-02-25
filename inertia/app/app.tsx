@@ -11,10 +11,11 @@ import { Toaster } from 'sonner'
 import { tuyau } from '../lib/api'
 import { ThemeProvider } from '../components/theme-provider'
 import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
+import { AuthUserProvider } from '../components/auth-user-provider'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 createInertiaApp({
   progress: { color: '#5468FF' },
@@ -32,8 +33,10 @@ createInertiaApp({
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-              <App {...props} />
-              <Toaster richColors />
+              <AuthUserProvider>
+                <App {...props} />
+                <Toaster richColors />
+              </AuthUserProvider>
             </NuqsAdapter>
           </QueryClientProvider>
         </TuyauProvider>

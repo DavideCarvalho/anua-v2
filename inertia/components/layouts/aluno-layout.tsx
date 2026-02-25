@@ -7,6 +7,7 @@ import { ThemeToggle } from '../theme-toggle'
 import type { SharedProps } from '../../lib/types'
 import { formatRoleName } from '../../lib/formatters'
 import { CartProvider, useCart } from '../../contexts/cart-context'
+import { useAuthUser } from '../../stores/auth_store'
 import { Badge } from '../ui/badge'
 import {
   Sidebar,
@@ -61,8 +62,8 @@ function CartBadge() {
 }
 
 function AppSidebar() {
-  const { props, url } = usePage<SharedProps>()
-  const user = props.user
+  const { url } = usePage<SharedProps>()
+  const user = useAuthUser()
   const pathname = url.split('?')[0]
 
   return (
@@ -130,7 +131,6 @@ function AppSidebar() {
         {/* Logout */}
         <Link
           route="api.v1.auth.logout"
-          method="post"
           className="inline-flex w-full items-center justify-start gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <LogOut className="h-4 w-4" />

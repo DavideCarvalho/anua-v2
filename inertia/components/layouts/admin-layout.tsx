@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { PostHogProvider } from '../posthog-provider'
+import { useAuthUser } from '../../stores/auth_store'
 import {
   LayoutDashboard,
   Building2,
@@ -167,8 +168,8 @@ function NavItemSimple({ item, pathname }: { item: NavItem; pathname: string }) 
 }
 
 function AppSidebar() {
-  const { props, url } = usePage<SharedProps>()
-  const user = props.user
+  const { url } = usePage<SharedProps>()
+  const user = useAuthUser()
   const pathname = url.split('?')[0]
 
   return (
@@ -232,7 +233,6 @@ function AppSidebar() {
         {/* Logout */}
         <Link
           route="api.v1.auth.logout"
-          method="post"
           className="inline-flex w-full items-center justify-start gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <LogOut className="h-4 w-4" />

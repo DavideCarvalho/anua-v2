@@ -1,12 +1,11 @@
 import type { PropsWithChildren } from 'react'
 import { useEffect, useRef } from 'react'
-import { router, usePage } from '@inertiajs/react'
+import { router } from '@inertiajs/react'
 import { posthog, initPostHog } from '~/lib/posthog'
-import type { SharedProps } from '~/lib/types'
+import { useAuthUser } from '~/stores/auth_store'
 
 export function PostHogProvider({ children }: PropsWithChildren) {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
   const initialized = useRef(false)
 
   // Initialize PostHog once

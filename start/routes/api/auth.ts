@@ -27,6 +27,6 @@ export function registerAuthApiRoutes() {
       router.get('/me', [MeController]).as('auth.me')
     })
     .prefix('/auth')
-    .use(middleware.auth())
+    .use([middleware.auth(), middleware.impersonation()])
     .use(throttleApi)
 }

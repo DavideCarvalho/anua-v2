@@ -31,6 +31,7 @@ import { StudentSelectorWithData } from '../responsavel/student-selector'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useQuery } from '@tanstack/react-query'
 import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { useAuthUser } from '../../stores/auth_store'
 import { api } from '../../../.adonisjs/api'
 
 interface NavItem {
@@ -217,8 +218,7 @@ function NavigationContent() {
 }
 
 export function ResponsavelLayout({ children }: PropsWithChildren) {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -269,7 +269,6 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
               </div>
               <Link
                 route="api.v1.auth.logout"
-                method="post"
                 as="button"
                 className="mt-3 inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
               >

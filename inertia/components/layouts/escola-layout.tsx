@@ -27,6 +27,7 @@ import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
 import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
 import { NotificationBell } from '../notifications/notification-bell'
+import { useAuthUser } from '../../stores/auth_store'
 import { api } from '../../../.adonisjs/api'
 import type { RouteName } from '@tuyau/client'
 
@@ -209,6 +210,7 @@ function NavItemComponent({
               <Link
                 key={child.route}
                 route={child.route}
+                params={undefined}
                 className={cn(
                   'block rounded-lg px-3 py-2 text-sm transition-colors',
                   pathname === child.href
@@ -228,6 +230,7 @@ function NavItemComponent({
   return (
     <Link
       route={item.route}
+      params={undefined}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         pathname === item.href
@@ -242,8 +245,8 @@ function NavItemComponent({
 }
 
 export function EscolaLayout({ children }: PropsWithChildren) {
-  const { props, url } = usePage<SharedProps>()
-  const user = props.user
+  const { url } = usePage<SharedProps>()
+  const user = useAuthUser()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = url.split('?')[0]
   const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
@@ -325,7 +328,6 @@ export function EscolaLayout({ children }: PropsWithChildren) {
                 </div>
                 <Link
                   route="api.v1.auth.logout"
-                  method="post"
                   className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
