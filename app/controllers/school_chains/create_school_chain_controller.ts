@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { v7 as uuidv7 } from 'uuid'
 import db from '@adonisjs/lucid/services/db'
 import SchoolChain from '#models/school_chain'
+import SchoolChainDto from '#models/dto/school_chain.dto'
 import User from '#models/user'
 import Role from '#models/role'
 import { createSchoolChainValidator } from '#validators/school_chain'
@@ -89,6 +90,6 @@ export default class CreateSchoolChainController {
       return chain
     })
 
-    return response.created(schoolChain)
+    return response.created(new SchoolChainDto(schoolChain))
   }
 }
