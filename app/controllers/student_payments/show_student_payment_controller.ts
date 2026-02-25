@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentPayment from '#models/student_payment'
+import StudentPaymentDto from '#models/dto/student_payment.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowStudentPaymentController {
@@ -12,6 +13,6 @@ export default class ShowStudentPaymentController {
       throw AppException.notFound('Pagamento do aluno não encontrado')
     }
 
-    return response.ok(payment)
+    return response.ok(new StudentPaymentDto(payment))
   }
 }

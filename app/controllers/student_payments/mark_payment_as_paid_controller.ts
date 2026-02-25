@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
+import StudentPaymentDto from '#models/dto/student_payment.dto'
 import CanteenPurchase from '#models/canteen_purchase'
 import { markPaymentAsPaidValidator } from '#validators/student_payment'
 import AppException from '#exceptions/app_exception'
@@ -57,6 +58,6 @@ export default class MarkPaymentAsPaidController {
 
     await payment.load('student')
 
-    return response.ok(payment)
+    return response.ok(new StudentPaymentDto(payment))
   }
 }
