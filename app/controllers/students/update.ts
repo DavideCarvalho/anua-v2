@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Student from '#models/student'
+import StudentDto from '#models/dto/student.dto'
 import StudentHasLevel from '#models/student_has_level'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { updateStudentValidator } from '#validators/student'
@@ -135,7 +136,7 @@ export default class UpdateStudentController {
         .preload('user')
         .firstOrFail()
 
-      return response.ok(studentWithRelations)
+      return response.ok(new StudentDto(studentWithRelations))
     } catch (error) {
       await trx.rollback()
       throw error

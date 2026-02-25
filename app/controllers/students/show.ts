@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Student from '#models/student'
+import StudentDto from '#models/dto/student.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowStudentController {
@@ -37,6 +38,6 @@ export default class ShowStudentController {
       throw AppException.notFound('Aluno não encontrado')
     }
 
-    return response.ok(student)
+    return response.ok(new StudentDto(student))
   }
 }

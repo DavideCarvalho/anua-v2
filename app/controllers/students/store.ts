@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Student from '#models/student'
+import StudentDto from '#models/dto/student.dto'
 import { createStudentValidator } from '#validators/student'
 import string from '@adonisjs/core/helpers/string'
 import AppException from '#exceptions/app_exception'
@@ -64,7 +65,7 @@ export default class StoreStudentController {
         .preload('user')
         .firstOrFail()
 
-      return response.created(studentWithRelations)
+      return response.created(new StudentDto(studentWithRelations))
     } catch (error) {
       await trx.rollback()
       throw error
