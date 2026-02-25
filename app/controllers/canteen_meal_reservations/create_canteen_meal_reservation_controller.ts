@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenMeal from '#models/canteen_meal'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
+import CanteenMealReservationDto from '#models/dto/canteen_meal_reservation.dto'
 import Student from '#models/student'
 import { createCanteenMealReservationValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
@@ -50,6 +51,6 @@ export default class CreateCanteenMealReservationController {
     await reservation.load('meal')
     await reservation.load('student')
 
-    return response.created(reservation)
+    return response.created(new CanteenMealReservationDto(reservation))
   }
 }
