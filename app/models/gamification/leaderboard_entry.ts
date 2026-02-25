@@ -3,7 +3,7 @@ import { BaseModel, beforeCreate, column, belongsTo } from '@adonisjs/lucid/orm'
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Leaderboard from './leaderboard.js'
-import Student from '../student.js'
+import Student from '#models/student'
 
 export default class LeaderboardEntry extends BaseModel {
   static table = 'LeaderboardEntry'

@@ -3,7 +3,7 @@ import { BaseModel, beforeCreate, column, belongsTo } from '@adonisjs/lucid/orm'
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import StoreOrder from './store_order.js'
-import User from '../user.js'
+import User from '#models/user'
 
 export default class OrderStatusHistory extends BaseModel {
   static table = 'OrderStatusHistory'

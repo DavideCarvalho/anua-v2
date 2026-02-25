@@ -3,7 +3,7 @@ import { BaseModel, beforeCreate, column, belongsTo } from '@adonisjs/lucid/orm'
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Challenge from './challenge.js'
-import StudentGamification from '../student_gamification.js'
+import StudentGamification from '#models/student_gamification'
 
 export default class StudentChallenge extends BaseModel {
   static table = 'StudentChallenge'

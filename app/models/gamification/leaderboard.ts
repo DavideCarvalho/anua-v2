@@ -3,9 +3,9 @@ import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/l
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import LeaderboardEntry from './leaderboard_entry.js'
-import School from '../school.js'
-import Class from '../class.js'
-import Subject from '../subject.js'
+import School from '#models/school'
+import Class from '#models/class'
+import Subject from '#models/subject'
 
 export default class Leaderboard extends BaseModel {
   static table = 'Leaderboard'

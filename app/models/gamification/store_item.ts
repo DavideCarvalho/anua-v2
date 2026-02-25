@@ -3,8 +3,8 @@ import { BaseModel, beforeCreate, column, belongsTo, hasMany } from '@adonisjs/l
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import StoreOrderItem from './store_order_item.js'
-import CanteenItem from '../canteen_item.js'
-import School from '../school.js'
+import CanteenItem from '#models/canteen_item'
+import School from '#models/school'
 
 export default class StoreItem extends BaseModel {
   static table = 'StoreItem'
