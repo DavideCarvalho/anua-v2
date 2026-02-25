@@ -26,7 +26,11 @@ if (evlogDrainTarget === 'posthog' && posthogApiKey) {
     retry: { maxAttempts: 3, backoff: 'exponential', initialDelayMs: 1000 },
     maxBufferSize: 1000,
   })
-  const posthogDrain = createPostHogLogsDrain({ apiKey: posthogApiKey, host: posthogHost })
+  const posthogDrain = createPostHogLogsDrain({
+    apiKey: posthogApiKey,
+    host: posthogHost,
+    timeout: 15000,
+  })
   const drain = pipeline(async (batch: DrainContext[]) => {
     await posthogDrain(batch)
   })

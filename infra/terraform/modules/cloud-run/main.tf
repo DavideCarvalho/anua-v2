@@ -72,7 +72,7 @@ resource "google_cloud_run_v2_service" "service" {
           port = var.container_port
         }
         initial_delay_seconds = 10
-        timeout_seconds       = 3
+        timeout_seconds       = 10
         period_seconds        = 10
         failure_threshold     = 3
       }
