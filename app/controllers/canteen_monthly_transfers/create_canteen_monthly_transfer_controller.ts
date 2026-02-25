@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import Canteen from '#models/canteen'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
 import CanteenPurchase from '#models/canteen_purchase'
+import CanteenMonthlyTransferWithRelationsDto from '#models/dto/canteen_monthly_transfer_with_relations.dto'
 import { createCanteenMonthlyTransferValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
 
@@ -78,7 +79,7 @@ export default class CreateCanteenMonthlyTransferController {
       await transfer.load('canteen')
       await transfer.load('purchases')
 
-      return response.created(transfer)
+      return response.created(new CanteenMonthlyTransferWithRelationsDto(transfer))
     } catch (error) {
       await trx.rollback()
       throw error
