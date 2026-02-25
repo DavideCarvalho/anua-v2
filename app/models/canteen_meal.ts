@@ -17,40 +17,40 @@ export default class CanteenMeal extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'canteenId' })
   declare canteenId: string
 
-  @column.date()
+  @column.date({ columnName: 'date' })
   declare date: DateTime
 
-  @column()
+  @column({ columnName: 'mealType' })
   declare mealType: MealType
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'description' })
   declare description: string | null
 
-  @column()
+  @column({ columnName: 'price' })
   declare price: number
 
-  @column()
+  @column({ columnName: 'maxServings' })
   declare maxServings: number | null
 
-  @column()
+  @column({ columnName: 'availableServings' })
   declare availableServings: number | null
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Canteen, { foreignKey: 'canteenId' })

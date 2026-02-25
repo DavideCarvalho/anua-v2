@@ -117,7 +117,14 @@ const navigation: NavItem[] = [
       { title: 'PDV', route: 'web.escola.cantina.pdv', href: '/escola/cantina/pdv' },
       { title: 'Itens', route: 'web.escola.cantina.itens', href: '/escola/cantina/itens' },
       { title: 'Cardápio', route: 'web.escola.cantina.cardapio', href: '/escola/cantina/cardapio' },
+      { title: 'Pedidos', route: 'web.escola.cantina.pedidos', href: '/escola/cantina/pedidos' },
       { title: 'Vendas', route: 'web.escola.cantina.vendas', href: '/escola/cantina/vendas' },
+      { title: 'Reservas', route: 'web.escola.cantina.reservas', href: '/escola/cantina/reservas' },
+      {
+        title: 'Transferências',
+        route: 'web.escola.cantina.transferencias',
+        href: '/escola/cantina/transferencias',
+      },
     ],
   },
   {

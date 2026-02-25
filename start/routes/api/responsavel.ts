@@ -16,6 +16,8 @@ const GetResponsavelStudentInvoicesController = () =>
   import('#controllers/responsavel/get_student_invoices_controller')
 const GetResponsavelStudentBalanceController = () =>
   import('#controllers/responsavel/get_student_balance_controller')
+const GetResponsavelStudentCanteenPurchasesController = () =>
+  import('#controllers/responsavel/get_student_canteen_purchases_controller')
 const GetResponsavelStudentAssignmentsController = () =>
   import('#controllers/responsavel/get_student_assignments_controller')
 const GetResponsavelStudentScheduleController = () =>
@@ -66,6 +68,11 @@ export function registerResponsavelApiRoutes() {
       router
         .get('/students/:studentId/balance', [GetResponsavelStudentBalanceController])
         .as('studentBalance')
+      router
+        .get('/students/:studentId/canteen-purchases', [
+          GetResponsavelStudentCanteenPurchasesController,
+        ])
+        .as('studentCanteenPurchases')
       router
         .get('/students/:studentId/assignments', [GetResponsavelStudentAssignmentsController])
         .as('studentAssignments')

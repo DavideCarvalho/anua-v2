@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { ShoppingCart, BarChart3 } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
+import { CanteenContextBar } from '../../../components/cantina/canteen-context-bar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { CanteenPurchasesContainer } from '../../../containers/canteen-purchases-container'
@@ -10,7 +11,7 @@ import { CanteenReportsDashboard } from '../../../containers/cantina/canteen-rep
 import type { SharedProps } from '../../../lib/types'
 
 interface PageProps extends SharedProps {
-  canteenId?: string
+  canteenId?: string | null
 }
 
 function ReportsSkeleton() {
@@ -54,6 +55,8 @@ export default function VendasPage() {
           <p className="text-muted-foreground">Historico e relatorios de vendas da cantina</p>
         </div>
 
+        <CanteenContextBar />
+
         <Tabs defaultValue="historico" className="space-y-4">
           <TabsList>
             <TabsTrigger value="historico" className="gap-2">
@@ -67,7 +70,7 @@ export default function VendasPage() {
           </TabsList>
 
           <TabsContent value="historico">
-            <CanteenPurchasesContainer />
+            <CanteenPurchasesContainer canteenId={canteenId ?? undefined} />
           </TabsContent>
 
           <TabsContent value="relatorios">

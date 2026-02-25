@@ -24,6 +24,7 @@ const paymentMethodIcons: Record<string, typeof CreditCard> = {
   PIX: QrCode,
   CASH: Banknote,
   BALANCE: DollarSign,
+  ON_ACCOUNT: DollarSign,
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -32,6 +33,7 @@ const paymentMethodLabels: Record<string, string> = {
   PIX: 'PIX',
   CASH: 'Dinheiro',
   BALANCE: 'Saldo',
+  ON_ACCOUNT: 'Fiado',
 }
 
 interface CanteenReportsDashboardProps {

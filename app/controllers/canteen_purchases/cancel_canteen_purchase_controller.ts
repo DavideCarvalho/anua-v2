@@ -1,11 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { getQueueManager } from '#services/queue_service'
 import CanteenPurchase from '#models/canteen_purchase'
 import Student from '#models/student'
+import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
+import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 import AppException from '#exceptions/app_exception'
 
 export default class CancelCanteenPurchaseController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, auth }: HttpContext) {
     const { id } = params
 
     const purchase = await CanteenPurchase.find(id)
@@ -64,6 +68,38 @@ export default class CancelCanteenPurchaseController {
     purchase.status = 'CANCELLED'
     purchase.paidAt = null
     await purchase.save()
+
+    if (purchase.studentPaymentId) {
+      const linkedPayment = await StudentPayment.find(purchase.studentPaymentId)
+      if (linkedPayment && linkedPayment.status !== 'CANCELLED') {
+        linkedPayment.status = 'CANCELLED'
+        linkedPayment.paidAt = null
+        await linkedPayment.save()
+
+        try {
+          await BillingReconciliationService.reconcileByPaymentId(linkedPayment.id)
+        } catch (error) {
+          console.error(
+            '[CANTEEN_FIADO] Failed to reconcile invoice synchronously on cancel:',
+            error
+          )
+        }
+
+        try {
+          await getQueueManager()
+          await ReconcilePaymentInvoiceJob.dispatch({
+            paymentId: linkedPayment.id,
+            triggeredBy: auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null,
+            source: 'canteen-purchases.cancel',
+          })
+        } catch (error) {
+          console.error(
+            '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job on cancel:',
+            error
+          )
+        }
+      }
+    }
 
     await purchase.load('user')
     await purchase.load('canteen')

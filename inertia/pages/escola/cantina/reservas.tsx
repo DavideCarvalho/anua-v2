@@ -1,11 +1,16 @@
-import { Head } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { Calendar } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
+import { CanteenContextBar } from '../../../components/cantina/canteen-context-bar'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { MealReservationsTable } from '../../../containers/cantina/meal-reservations-table'
-import { useAuthUser } from '../../../stores/auth_store'
+import type { SharedProps } from '../../../lib/types'
+
+interface PageProps extends SharedProps {
+  canteenId?: string | null
+}
 
 function TableSkeleton() {
   return (
@@ -26,8 +31,8 @@ function TableSkeleton() {
 }
 
 export default function CantinaReservasPage() {
-  const user = useAuthUser()
-  const schoolId = user?.schoolId
+  const { props } = usePage<PageProps>()
+  const canteenId = props.canteenId
 
   return (
     <EscolaLayout>
@@ -42,14 +47,16 @@ export default function CantinaReservasPage() {
           <p className="text-muted-foreground">Gerencie as reservas de refeições dos alunos</p>
         </div>
 
-        {schoolId ? (
+        <CanteenContextBar />
+
+        {canteenId ? (
           <Suspense fallback={<TableSkeleton />}>
-            <MealReservationsTable />
+            <MealReservationsTable canteenId={canteenId} />
           </Suspense>
         ) : (
           <Card>
             <CardContent className="py-10 text-center text-muted-foreground">
-              Escola não encontrada no contexto do usuário.
+              Cantina não encontrada no contexto.
             </CardContent>
           </Card>
         )}

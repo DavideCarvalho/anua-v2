@@ -1,11 +1,14 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useEnrollmentTrendsQueryOptions } from '../../hooks/queries/use_enrollment_trends'
+import {
+  useEnrollmentTrendsQueryOptions,
+  type EnrollmentTrendsResponse,
+} from '../../hooks/queries/use_enrollment_trends'
 
 interface EnrollmentTrendsChartProps {
   schoolId?: string
@@ -18,22 +21,30 @@ export function EnrollmentTrendsChart({
   academicPeriodId,
   days = 30,
 }: EnrollmentTrendsChartProps) {
-  const { data } = useSuspenseQuery(
+  const { data, isLoading } = useQuery(
     useEnrollmentTrendsQueryOptions({ schoolId, academicPeriodId, days })
   )
 
-  const maxEnrollments = Math.max(...data.trends.map((t: any) => t.enrollments), 1)
+  if (isLoading || !data) {
+    return <EnrollmentTrendsChartSkeleton />
+  }
+
+  type EnrollmentTrend = EnrollmentTrendsResponse['trends'][number]
+
+  const maxEnrollments = Math.max(...data.trends.map((t: EnrollmentTrend) => t.enrollments), 1)
 
   // Calculate trend direction
   const recentTrends = data.trends.slice(-7)
   const olderTrends = data.trends.slice(-14, -7)
   const recentAvg =
     recentTrends.length > 0
-      ? recentTrends.reduce((sum: number, t: any) => sum + t.enrollments, 0) / recentTrends.length
+      ? recentTrends.reduce((sum: number, t: EnrollmentTrend) => sum + t.enrollments, 0) /
+        recentTrends.length
       : 0
   const olderAvg =
     olderTrends.length > 0
-      ? olderTrends.reduce((sum: number, t: any) => sum + t.enrollments, 0) / olderTrends.length
+      ? olderTrends.reduce((sum: number, t: EnrollmentTrend) => sum + t.enrollments, 0) /
+        olderTrends.length
       : 0
 
   const trendDirection = recentAvg > olderAvg ? 'up' : recentAvg < olderAvg ? 'down' : 'stable'
@@ -47,15 +58,9 @@ export function EnrollmentTrendsChart({
             <CardDescription>Últimos {days} dias</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            {trendDirection === 'up' && (
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            )}
-            {trendDirection === 'down' && (
-              <TrendingDown className="h-5 w-5 text-red-600" />
-            )}
-            {trendDirection === 'stable' && (
-              <Minus className="h-5 w-5 text-muted-foreground" />
-            )}
+            {trendDirection === 'up' && <TrendingUp className="h-5 w-5 text-green-600" />}
+            {trendDirection === 'down' && <TrendingDown className="h-5 w-5 text-red-600" />}
+            {trendDirection === 'stable' && <Minus className="h-5 w-5 text-muted-foreground" />}
             <span className="text-sm text-muted-foreground">
               Média: {data.average} matrículas/dia
             </span>
@@ -64,7 +69,7 @@ export function EnrollmentTrendsChart({
       </CardHeader>
       <CardContent>
         <div className="flex items-end gap-1 h-48">
-          {data.trends.map((trend: any, index: number) => (
+          {data.trends.map((trend: EnrollmentTrend, index: number) => (
             <div
               key={index}
               className="flex-1 flex flex-col items-center gap-1 group"

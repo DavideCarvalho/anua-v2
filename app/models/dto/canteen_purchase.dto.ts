@@ -13,6 +13,7 @@ export default class CanteenPurchaseDto extends BaseModelDto {
   declare paymentMethod: CanteenPaymentMethod
   declare status: CanteenPurchaseStatus
   declare paidAt: Date | null
+  declare studentPaymentId: string | null
   declare monthlyTransferId: string | null
   declare createdAt: Date
   declare updatedAt: Date
@@ -32,6 +33,7 @@ export default class CanteenPurchaseDto extends BaseModelDto {
     this.paymentMethod = canteenPurchase.paymentMethod
     this.status = canteenPurchase.status
     this.paidAt = canteenPurchase.paidAt ? canteenPurchase.paidAt.toJSDate() : null
+    this.studentPaymentId = canteenPurchase.studentPaymentId
     this.monthlyTransferId = canteenPurchase.monthlyTransferId
     this.createdAt = canteenPurchase.createdAt.toJSDate()
     this.updatedAt = canteenPurchase.updatedAt.toJSDate()

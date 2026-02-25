@@ -1,7 +1,10 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Users, Plus, MoreHorizontal } from 'lucide-react'
 
-import { useSchoolGroupsQueryOptions } from '../../hooks/queries/use_school_groups'
+import {
+  useSchoolGroupsQueryOptions,
+  type SchoolGroupsResponse,
+} from '../../hooks/queries/use_school_groups'
 import { useDeleteSchoolGroup } from '../../hooks/mutations/use_school_chain_mutations'
 
 import { Button } from '../../components/ui/button'
@@ -27,11 +30,26 @@ interface SchoolGroupsTableProps {
   onCreateGroup?: () => void
 }
 
+type SchoolGroupRow = SchoolGroupsResponse['data'][number] & {
+  description?: string | null
+  schools?: Array<unknown>
+}
+
 export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroupsTableProps) {
-  const { data } = useSuspenseQuery(useSchoolGroupsQueryOptions({ schoolChainId }))
+  const { data, isLoading } = useQuery(useSchoolGroupsQueryOptions({ schoolChainId }))
   const deleteMutation = useDeleteSchoolGroup()
 
   const groups = data?.data ?? []
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando grupos...
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (groups.length === 0) {
     return (
@@ -79,7 +97,7 @@ export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroups
             </TableRow>
           </TableHeader>
           <TableBody>
-            {groups.map((group: any) => (
+            {groups.map((group: SchoolGroupRow) => (
               <TableRow key={group.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">

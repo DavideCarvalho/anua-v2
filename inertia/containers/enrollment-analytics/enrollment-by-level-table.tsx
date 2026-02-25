@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { GraduationCap } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -13,17 +13,29 @@ import {
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 
-import { useEnrollmentByLevelQueryOptions } from '../../hooks/queries/use_enrollment_by_level'
+import {
+  useEnrollmentByLevelQueryOptions,
+  type EnrollmentByLevelResponse,
+} from '../../hooks/queries/use_enrollment_by_level'
 
 interface EnrollmentByLevelTableProps {
   schoolId?: string
   academicPeriodId?: string
 }
 
-export function EnrollmentByLevelTable({ schoolId, academicPeriodId }: EnrollmentByLevelTableProps) {
-  const { data } = useSuspenseQuery(
+export function EnrollmentByLevelTable({
+  schoolId,
+  academicPeriodId,
+}: EnrollmentByLevelTableProps) {
+  const { data, isLoading } = useQuery(
     useEnrollmentByLevelQueryOptions({ schoolId, academicPeriodId })
   )
+
+  if (isLoading || !data) {
+    return <EnrollmentByLevelTableSkeleton />
+  }
+
+  type EnrollmentByLevelItem = EnrollmentByLevelResponse['byLevel'][number]
 
   const levels = data.byLevel || []
 
@@ -62,7 +74,7 @@ export function EnrollmentByLevelTable({ schoolId, academicPeriodId }: Enrollmen
             </TableRow>
           </TableHeader>
           <TableBody>
-            {levels.map((level: any) => {
+            {levels.map((level: EnrollmentByLevelItem) => {
               const completionRate =
                 level.totalEnrollments > 0
                   ? Math.round((level.completed / level.totalEnrollments) * 100)

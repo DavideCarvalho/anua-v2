@@ -10,10 +10,18 @@ export default class ListCanteenItemsController {
     const page = data.page ?? 1
     const limit = data.limit ?? 20
 
-    const query = CanteenItem.query().preload('canteen').orderBy('name', 'asc')
+    const query = CanteenItem.query().orderBy('name', 'asc')
 
     if (data.canteenId) {
       query.where('canteenId', data.canteenId)
+    }
+
+    if (data.search) {
+      query.where((searchQuery) => {
+        searchQuery
+          .whereILike('name', `%${data.search}%`)
+          .orWhereILike('description', `%${data.search}%`)
+      })
     }
 
     if (data.category) {

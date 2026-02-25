@@ -3,7 +3,10 @@ import { Calendar, User, Check, X, Utensils } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useCanteenMealReservationsQueryOptions } from '../../hooks/queries/use_canteen_meal_reservations'
+import {
+  useCanteenMealReservationsQueryOptions,
+  type CanteenMealReservationsResponse,
+} from '../../hooks/queries/use_canteen_meal_reservations'
 import {
   useUpdateCanteenMealReservationStatus,
   useCancelCanteenMealReservation,
@@ -32,23 +35,39 @@ const statusConfig: Record<
 > = {
   PENDING: { label: 'Pendente', variant: 'secondary' },
   CONFIRMED: { label: 'Confirmada', variant: 'default' },
-  DELIVERED: { label: 'Entregue', variant: 'outline' },
+  SERVED: { label: 'Entregue', variant: 'outline' },
   CANCELLED: { label: 'Cancelada', variant: 'destructive' },
-  NO_SHOW: { label: 'Não Compareceu', variant: 'destructive' },
 }
 
+type MealReservation = CanteenMealReservationsResponse['data'][number]
+
 export function MealReservationsTable({ canteenId, date }: MealReservationsTableProps) {
-  const { data, isLoading } = useQuery(useCanteenMealReservationsQueryOptions({ canteenId, date }))
+  const { data, isLoading, isError, error } = useQuery(
+    useCanteenMealReservationsQueryOptions({ canteenId, date })
+  )
   const updateStatusMutation = useUpdateCanteenMealReservationStatus()
   const cancelMutation = useCancelCanteenMealReservation()
 
-  const reservations = (data as any)?.data ?? []
+  const reservations: MealReservation[] = data?.data ?? []
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
           Carregando reservas...
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <h3 className="text-lg font-semibold">Não foi possível carregar as reservas</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Tente novamente em instantes.'}
+          </p>
         </CardContent>
       </Card>
     )
@@ -86,7 +105,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
             </TableRow>
           </TableHeader>
           <TableBody>
-            {reservations.map((reservation: any) => {
+            {reservations.map((reservation) => {
               const config = statusConfig[reservation.status] || statusConfig.PENDING
 
               return (
@@ -94,7 +113,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{reservation.student?.name || '-'}</span>
+                      <span className="font-medium">{reservation.student?.user?.name || '-'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -104,8 +123,8 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                     </div>
                   </TableCell>
                   <TableCell>
-                    {reservation.date
-                      ? format(new Date(reservation.date), 'dd/MM/yyyy', { locale: ptBR })
+                    {reservation.meal?.date
+                      ? format(new Date(reservation.meal.date), 'dd/MM/yyyy', { locale: ptBR })
                       : '-'}
                   </TableCell>
                   <TableCell>
@@ -145,7 +164,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                           onClick={() =>
                             updateStatusMutation.mutate({
                               id: reservation.id,
-                              status: 'CONSUMED',
+                              status: 'SERVED',
                             })
                           }
                         >

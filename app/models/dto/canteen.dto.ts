@@ -3,6 +3,7 @@ import type Canteen from '#models/canteen'
 
 export default class CanteenDto extends BaseModelDto {
   declare id: string
+  declare name: string
   declare schoolId: string
   declare responsibleUserId: string
   declare createdAt: Date
@@ -14,6 +15,7 @@ export default class CanteenDto extends BaseModelDto {
     if (!canteen) return
 
     this.id = canteen.id
+    this.name = canteen.name
     this.schoolId = canteen.schoolId
     this.responsibleUserId = canteen.responsibleUserId
     this.createdAt = canteen.createdAt.toJSDate()

@@ -20,6 +20,7 @@ export default class UpdateCanteenController {
 
     const updatedCanteen = await db.transaction(async (trx) => {
       canteen.merge({
+        name: data.name !== undefined ? data.name : canteen.name,
         responsibleUserId:
           data.responsibleUserId !== undefined ? data.responsibleUserId : canteen.responsibleUserId,
       })

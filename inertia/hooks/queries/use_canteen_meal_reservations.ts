@@ -11,7 +11,7 @@ interface UseCanteenMealReservationsOptions {
   canteenId?: string
   mealId?: string
   studentId?: string
-  status?: 'PENDING' | 'CANCELLED' | 'CONFIRMED' | 'CONSUMED'
+  status?: 'PENDING' | 'CANCELLED' | 'CONFIRMED' | 'SERVED'
   date?: string
   page?: number
   limit?: number
@@ -30,7 +30,17 @@ export function useCanteenMealReservationsQueryOptions(
     queryFn: () => {
       return tuyau
         .$route('api.v1.canteenMealReservations.index')
-        .$get({ query: { canteenId, mealId, studentId, status, date, page, limit } })
+        .$get({
+          query: {
+            canteenId,
+            canteenMealId: mealId,
+            userId: studentId,
+            status,
+            date,
+            page,
+            limit,
+          },
+        })
         .unwrap()
     },
   })

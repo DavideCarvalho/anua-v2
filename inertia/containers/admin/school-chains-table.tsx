@@ -1,7 +1,10 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Building, Plus, MoreHorizontal, School } from 'lucide-react'
 
-import { useSchoolChainsQueryOptions } from '../../hooks/queries/use_school_chains'
+import {
+  useSchoolChainsQueryOptions,
+  type SchoolChainsResponse,
+} from '../../hooks/queries/use_school_chains'
 import { useDeleteSchoolChain } from '../../hooks/mutations/use_school_chain_mutations'
 
 import { Button } from '../../components/ui/button'
@@ -27,11 +30,28 @@ interface SchoolChainsTableProps {
   onViewSchools?: (chainId: string) => void
 }
 
+type SchoolChainRow = SchoolChainsResponse['data'][number] & {
+  legalName?: string | null
+  cnpj?: string | null
+  schools?: Array<unknown>
+  active?: boolean
+}
+
 export function SchoolChainsTable({ onCreateChain, onViewSchools }: SchoolChainsTableProps) {
-  const { data } = useSuspenseQuery(useSchoolChainsQueryOptions({}))
+  const { data, isLoading } = useQuery(useSchoolChainsQueryOptions({}))
   const deleteMutation = useDeleteSchoolChain()
 
   const chains = data?.data ?? []
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando redes...
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (chains.length === 0) {
     return (
@@ -79,7 +99,7 @@ export function SchoolChainsTable({ onCreateChain, onViewSchools }: SchoolChains
             </TableRow>
           </TableHeader>
           <TableBody>
-            {chains.map((chain: any) => (
+            {chains.map((chain: SchoolChainRow) => (
               <TableRow key={chain.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">

@@ -7,7 +7,7 @@ export default class ListCanteenPurchasesController {
   async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(listCanteenPurchasesValidator)
 
-    const { canteenId, userId, status, paymentMethod, page = 1, limit = 20 } = payload
+    const { canteenId, userId, search, status, paymentMethod, page = 1, limit = 20 } = payload
 
     const query = CanteenPurchase.query()
       .preload('user')
@@ -21,6 +21,14 @@ export default class ListCanteenPurchasesController {
 
     if (userId) {
       query.where('userId', userId)
+    }
+
+    if (search) {
+      query.where((searchQuery) => {
+        searchQuery.whereHas('user', (userQuery) => {
+          userQuery.whereILike('name', `%${search}%`)
+        })
+      })
     }
 
     if (status) {

@@ -14,17 +14,43 @@ export default class CreateCanteenMealController {
       throw AppException.notFound('Cantina não encontrada')
     }
 
+    const servedAt = DateTime.fromJSDate(payload.servedAt)
+    const servedAtDate = servedAt.toISODate()
+
+    if (!servedAtDate) {
+      throw AppException.badRequest('Data da refeição inválida')
+    }
+
+    const existingMeal = await CanteenMeal.query()
+      .where('canteenId', payload.canteenId)
+      .where('date', servedAtDate)
+      .where('mealType', 'LUNCH')
+      .first()
+
+    if (existingMeal) {
+      existingMeal.merge({
+        name: payload.name,
+        description: payload.description ?? null,
+        price: payload.price,
+        date: servedAt,
+        isActive: payload.isActive ?? true,
+        maxServings: payload.maxReservations ?? null,
+      })
+
+      await existingMeal.save()
+      await existingMeal.load('canteen')
+
+      return response.ok(existingMeal)
+    }
+
     const meal = await CanteenMeal.create({
       canteenId: payload.canteenId,
       name: payload.name,
       description: payload.description ?? null,
       price: payload.price,
-      // Validator provides servedAt, model expects date
-      date: DateTime.fromJSDate(payload.servedAt),
-      // Default meal type since validator doesn't provide it
+      date: servedAt,
       mealType: 'LUNCH',
       isActive: payload.isActive ?? true,
-      // Validator provides maxReservations, model expects maxServings
       maxServings: payload.maxReservations ?? null,
     })
 

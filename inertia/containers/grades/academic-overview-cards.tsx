@@ -1,12 +1,5 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  Users,
-  FileText,
-  CheckCircle,
-  TrendingUp,
-  AlertTriangle,
-  BookOpen,
-} from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Users, FileText, CheckCircle, TrendingUp, AlertTriangle, BookOpen } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 
@@ -17,7 +10,11 @@ interface AcademicOverviewCardsProps {
 }
 
 export function AcademicOverviewCards({ schoolId }: AcademicOverviewCardsProps) {
-  const { data } = useSuspenseQuery(useAcademicOverviewQueryOptions({ schoolId }))
+  const { data, isLoading } = useQuery(useAcademicOverviewQueryOptions({ schoolId }))
+
+  if (isLoading || !data) {
+    return <AcademicOverviewCardsSkeleton />
+  }
 
   const cards = [
     {

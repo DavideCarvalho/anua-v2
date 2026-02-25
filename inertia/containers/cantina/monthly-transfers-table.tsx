@@ -1,9 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { Wallet, Check, Clock, AlertTriangle, Building } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { formatCurrency } from '../../lib/utils'
 
-import { useCanteenMonthlyTransfersQueryOptions } from '../../hooks/queries/use_canteen_monthly_transfers'
+import {
+  useCanteenMonthlyTransfersQueryOptions,
+  type CanteenMonthlyTransfersResponse,
+} from '../../hooks/queries/use_canteen_monthly_transfers'
 import { useUpdateCanteenMonthlyTransferStatus } from '../../hooks/mutations/use_canteen_reservation_mutations'
 
 import { Button } from '../../components/ui/button'
@@ -27,33 +32,46 @@ const statusConfig: Record<
   {
     label: string
     variant: 'default' | 'secondary' | 'destructive' | 'outline'
-    icon: React.ReactNode
+    icon: LucideIcon
   }
 > = {
-  PENDING: { label: 'Pendente', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
-  PROCESSING: { label: 'Processando', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
-  COMPLETED: { label: 'Concluído', variant: 'default', icon: <Check className="h-3 w-3" /> },
-  FAILED: { label: 'Falhou', variant: 'destructive', icon: <AlertTriangle className="h-3 w-3" /> },
+  PENDING: { label: 'Pendente', variant: 'secondary', icon: Clock },
+  TRANSFERRED: { label: 'Concluído', variant: 'default', icon: Check },
+  CANCELLED: {
+    label: 'Cancelado',
+    variant: 'destructive',
+    icon: AlertTriangle,
+  },
 }
 
+type MonthlyTransfer = CanteenMonthlyTransfersResponse['data'][number]
+
 export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps) {
-  const { data, isLoading } = useQuery(useCanteenMonthlyTransfersQueryOptions({ canteenId }))
+  const { data, isLoading, isError, error } = useQuery(
+    useCanteenMonthlyTransfersQueryOptions({ canteenId })
+  )
   const updateStatusMutation = useUpdateCanteenMonthlyTransferStatus()
 
-  const transfers = (data as any)?.data ?? []
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value)
-  }
+  const transfers: MonthlyTransfer[] = data?.data ?? []
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="py-12 text-center text-muted-foreground">
           Carregando transferências...
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <h3 className="text-lg font-semibold">Não foi possível carregar as transferências</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : 'Tente novamente em instantes.'}
+          </p>
         </CardContent>
       </Card>
     )
@@ -93,8 +111,9 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transfers.map((transfer: any) => {
+            {transfers.map((transfer) => {
               const config = statusConfig[transfer.status] || statusConfig.PENDING
+              const StatusIcon = config.icon
 
               return (
                 <TableRow key={transfer.id}>
@@ -110,10 +129,10 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
                   <TableCell className="text-right font-medium">
                     {formatCurrency(transfer.totalAmount || 0)}
                   </TableCell>
-                  <TableCell className="text-center">{transfer.transactionCount || 0}</TableCell>
+                  <TableCell className="text-center">-</TableCell>
                   <TableCell>
                     <Badge variant={config.variant} className="gap-1">
-                      {config.icon}
+                      <StatusIcon className="h-3 w-3" />
                       {config.label}
                     </Badge>
                   </TableCell>

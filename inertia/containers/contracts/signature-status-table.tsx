@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { CheckCircle2, Clock, FileSignature, Users, XCircle } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
@@ -12,12 +12,19 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useContractSignatureStatsQueryOptions } from '../../hooks/queries/use_contract_signature_stats'
+import {
+  useContractSignatureStatsQueryOptions,
+  type ContractSignatureStatsResponse,
+} from '../../hooks/queries/use_contract_signature_stats'
 
 export function SignatureStatusTable({ contractId }: { contractId: string }) {
-  const { data } = useSuspenseQuery(useContractSignatureStatsQueryOptions(contractId))
+  const { data, isLoading } = useQuery(useContractSignatureStatsQueryOptions(contractId))
 
-  if (!data) return null
+  if (isLoading || !data) {
+    return null
+  }
+
+  type SignatureStudent = ContractSignatureStatsResponse['students'][number]
 
   const signatureRate = data.total > 0 ? Math.round((data.signed / data.total) * 100) : 0
 
@@ -94,7 +101,7 @@ export function SignatureStatusTable({ contractId }: { contractId: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.students.map((student: any) => (
+                {data.students.map((student: SignatureStudent) => (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.studentName}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">

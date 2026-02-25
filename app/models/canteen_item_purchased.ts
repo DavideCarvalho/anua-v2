@@ -15,28 +15,33 @@ export default class CanteenItemPurchased extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'canteenPurchaseId' })
   declare canteenPurchaseId: string
 
-  @column()
+  @column({ columnName: 'canteenItemId' })
   declare canteenItemId: string
 
-  @column()
+  @column({ columnName: 'quantity' })
   declare quantity: number
 
-  @column()
-  declare unitPrice: number // Preço unitário na hora da compra
+  @column({ columnName: 'price' })
+  declare price: number
 
-  @column()
-  declare totalPrice: number // quantity * unitPrice
+  get unitPrice(): number {
+    return this.price
+  }
 
-  @column.dateTime({ autoCreate: true })
+  get totalPrice(): number {
+    return this.price * this.quantity
+  }
+
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

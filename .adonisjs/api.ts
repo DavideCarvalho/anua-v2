@@ -567,6 +567,10 @@ type ApiV1ResponsavelStudentsIdBalanceGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_balance_controller.ts').default['handle'], false>
 }
+type ApiV1ResponsavelStudentsIdCanteenpurchasesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_canteen_purchases_controller.ts').default['handle'], false>
+}
 type ApiV1ResponsavelStudentsIdAssignmentsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/responsavel/get_student_assignments_controller.ts').default['handle'], false>
@@ -622,6 +626,10 @@ type ApiV1ResponsavelWallettopupsIdGetHead = {
 type ApiV1AdminStatsGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/dashboard/get_admin_stats_controller.ts').default['handle'], false>
+}
+type ApiV1AdminServerstatsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/get_server_stats_controller.ts').default['handle'], false>
 }
 type ApiV1AsaasWebhookPost = {
   request: unknown
@@ -694,10 +702,6 @@ type ApiV1UsersIdPut = {
 type ApiV1UsersIdDelete = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/users/destroy.ts').default['handle'], false>
-}
-type ApiV1UsersIdCanteenpurchasesGetHead = {
-  request: unknown
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_purchases/list_purchases_by_user_controller.ts').default['handle'], false>
 }
 type ApiV1UserschoolsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/user_school.ts')['listUserSchoolsValidator']>>
@@ -1660,16 +1664,16 @@ type ApiV1CanteenitemsGetHead = {
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/list_canteen_items_controller.ts').default['handle'], true>
 }
 type ApiV1CanteenitemsPost = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['createCanteenItemValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/create_canteen_item_controller.ts').default['handle'], true>
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/create_canteen_item_controller.ts').default['handle'], false>
 }
 type ApiV1CanteenitemsIdGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/show_canteen_item_controller.ts').default['handle'], false>
 }
 type ApiV1CanteenitemsIdPut = {
-  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/canteen.ts')['updateCanteenItemValidator']>>
-  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/update_canteen_item_controller.ts').default['handle'], true>
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/canteen_items/update_canteen_item_controller.ts').default['handle'], false>
 }
 type ApiV1CanteenitemsIdDelete = {
   request: unknown
@@ -2386,6 +2390,42 @@ type ApiV1AdminSchoolsOnboardingPost = {
 type ApiV1AdminJobsGeneratemissingpaymentsPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/trigger_missing_payments_controller.ts').default['handle'], false>
+}
+type AdminApiServerstatsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/get_server_stats_controller.ts').default['handle'], false>
+}
+type AdminApiDebugQueriesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['queries'], false>
+}
+type AdminApiDebugEventsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['events'], false>
+}
+type AdminApiDebugRoutesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['routes'], false>
+}
+type AdminApiDebugLogsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['logs'], false>
+}
+type AdminApiDebugEmailsGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['emails'], false>
+}
+type AdminApiDebugEmailsIdPreviewGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['emailPreview'], false>
+}
+type AdminApiDebugTracesGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['traces'], false>
+}
+type AdminApiDebugTracesIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/admin/debug_controller.ts').default['traceDetail'], false>
 }
 export interface ApiDefinition {
   ':schoolSlug': {
@@ -3129,6 +3169,66 @@ export interface ApiDefinition {
         '$head': AdminAnalyticsRhGetHead;
       };
     };
+    'api': {
+      'server-stats': {
+        '$url': {
+        };
+        '$get': AdminApiServerstatsGetHead;
+        '$head': AdminApiServerstatsGetHead;
+      };
+      'debug': {
+        'queries': {
+          '$url': {
+          };
+          '$get': AdminApiDebugQueriesGetHead;
+          '$head': AdminApiDebugQueriesGetHead;
+        };
+        'events': {
+          '$url': {
+          };
+          '$get': AdminApiDebugEventsGetHead;
+          '$head': AdminApiDebugEventsGetHead;
+        };
+        'routes': {
+          '$url': {
+          };
+          '$get': AdminApiDebugRoutesGetHead;
+          '$head': AdminApiDebugRoutesGetHead;
+        };
+        'logs': {
+          '$url': {
+          };
+          '$get': AdminApiDebugLogsGetHead;
+          '$head': AdminApiDebugLogsGetHead;
+        };
+        'emails': {
+          '$url': {
+          };
+          '$get': AdminApiDebugEmailsGetHead;
+          '$head': AdminApiDebugEmailsGetHead;
+          ':id': {
+            'preview': {
+              '$url': {
+              };
+              '$get': AdminApiDebugEmailsIdPreviewGetHead;
+              '$head': AdminApiDebugEmailsIdPreviewGetHead;
+            };
+          };
+        };
+        'traces': {
+          '$url': {
+          };
+          '$get': AdminApiDebugTracesGetHead;
+          '$head': AdminApiDebugTracesGetHead;
+          ':id': {
+            '$url': {
+            };
+            '$get': AdminApiDebugTracesIdGetHead;
+            '$head': AdminApiDebugTracesIdGetHead;
+          };
+        };
+      };
+    };
   };
   'loja': {
     '$url': {
@@ -3269,6 +3369,12 @@ export interface ApiDefinition {
               '$get': ApiV1ResponsavelStudentsIdBalanceGetHead;
               '$head': ApiV1ResponsavelStudentsIdBalanceGetHead;
             };
+            'canteen-purchases': {
+              '$url': {
+              };
+              '$get': ApiV1ResponsavelStudentsIdCanteenpurchasesGetHead;
+              '$head': ApiV1ResponsavelStudentsIdCanteenpurchasesGetHead;
+            };
             'assignments': {
               '$url': {
               };
@@ -3356,6 +3462,12 @@ export interface ApiDefinition {
           };
           '$get': ApiV1AdminStatsGetHead;
           '$head': ApiV1AdminStatsGetHead;
+        };
+        'server-stats': {
+          '$url': {
+          };
+          '$get': ApiV1AdminServerstatsGetHead;
+          '$head': ApiV1AdminServerstatsGetHead;
         };
         'impersonation': {
           '$url': {
@@ -3474,14 +3586,6 @@ export interface ApiDefinition {
           '$head': ApiV1UsersIdGetHead;
           '$put': ApiV1UsersIdPut;
           '$delete': ApiV1UsersIdDelete;
-        };
-        ':userId': {
-          'canteen-purchases': {
-            '$url': {
-            };
-            '$get': ApiV1UsersIdCanteenpurchasesGetHead;
-            '$head': ApiV1UsersIdCanteenpurchasesGetHead;
-          };
         };
       };
       'user-schools': {
@@ -6368,6 +6472,13 @@ const routes = [
   },
   {
     params: ["studentId"],
+    name: 'api.v1.responsavel.api.studentCanteenPurchases',
+    path: '/api/v1/responsavel/students/:studentId/canteen-purchases',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ResponsavelStudentsIdCanteenpurchasesGetHead,
+  },
+  {
+    params: ["studentId"],
     name: 'api.v1.responsavel.api.studentAssignments',
     path: '/api/v1/responsavel/students/:studentId/assignments',
     method: ["GET","HEAD"],
@@ -6463,6 +6574,13 @@ const routes = [
     path: '/api/v1/admin/stats',
     method: ["GET","HEAD"],
     types: {} as ApiV1AdminStatsGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.dashboard.serverStats',
+    path: '/api/v1/admin/server-stats',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1AdminServerstatsGetHead,
   },
   {
     params: [],
@@ -6589,13 +6707,6 @@ const routes = [
     path: '/api/v1/users/:id',
     method: ["DELETE"],
     types: {} as ApiV1UsersIdDelete,
-  },
-  {
-    params: ["userId"],
-    name: 'api.v1.users.canteenPurchases',
-    path: '/api/v1/users/:userId/canteen-purchases',
-    method: ["GET","HEAD"],
-    types: {} as ApiV1UsersIdCanteenpurchasesGetHead,
   },
   {
     params: [],

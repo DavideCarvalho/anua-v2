@@ -12,6 +12,7 @@ import { tuyau } from '../lib/api'
 import { ThemeProvider } from '../components/theme-provider'
 import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
 import { AuthUserProvider } from '../components/auth-user-provider'
+import type { SharedProps } from '../lib/types'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
@@ -33,7 +34,9 @@ createInertiaApp({
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-              <AuthUserProvider>
+              <AuthUserProvider
+                initialUser={(props.initialPage.props as unknown as SharedProps).user ?? null}
+              >
                 <App {...props} />
                 <Toaster richColors />
               </AuthUserProvider>

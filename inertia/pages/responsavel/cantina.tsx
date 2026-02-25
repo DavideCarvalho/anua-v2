@@ -1,24 +1,31 @@
 import { Head } from '@inertiajs/react'
+import { useEffect } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { UtensilsCrossed, XCircle } from 'lucide-react'
+import { UtensilsCrossed, XCircle, User } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
 
 import { useSelectedStudent } from '../../hooks/use_selected_student'
+import { StudentSelectorWithData } from '../../components/responsavel/student-selector'
 import {
   StudentBalanceContainer,
   StudentBalanceContainerSkeleton,
 } from '../../containers/responsavel/student-balance-container'
+import { StudentCanteenPurchasesContainer } from '../../containers/responsavel/student-canteen-purchases-container'
 
 function CantinaContent() {
-  const { student, isLoaded } = useSelectedStudent()
+  const { student, studentId, students, isLoaded, setDefaultStudent } = useSelectedStudent()
+
+  useEffect(() => {
+    setDefaultStudent()
+  }, [setDefaultStudent])
 
   if (!isLoaded) {
     return <StudentBalanceContainerSkeleton />
   }
 
-  if (!student) {
+  if (students.length === 0 || !student) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -32,7 +39,24 @@ function CantinaContent() {
     )
   }
 
-  return <StudentBalanceContainer studentId={student.id} studentName={student.name} />
+  return (
+    <div className="space-y-6">
+      {students.length > 1 && (
+        <Card>
+          <CardContent className="py-4">
+            <p className="mb-3 text-sm font-medium">Selecione um aluno:</p>
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <StudentSelectorWithData />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <StudentBalanceContainer studentId={student.id} studentName={student.name} />
+      {studentId && <StudentCanteenPurchasesContainer studentId={studentId} />}
+    </div>
+  )
 }
 
 export default function CantinaPage() {

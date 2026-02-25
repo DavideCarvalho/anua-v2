@@ -5,8 +5,11 @@ import { TuyauProvider } from '@tuyau/inertia/react'
 import { tuyau } from '../lib/api'
 import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
 import { AuthUserProvider } from '../components/auth-user-provider'
+import type { SharedProps } from '../lib/types'
 
-export default function render(page: any) {
+type SsrPage = Parameters<typeof createInertiaApp>[0]['page']
+
+export default function render(page: SsrPage) {
   return createInertiaApp({
     page,
     render: ReactDOMServer.renderToString,
@@ -20,7 +23,9 @@ export default function render(page: any) {
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-              <AuthUserProvider>
+              <AuthUserProvider
+                initialUser={(props.initialPage.props as unknown as SharedProps).user ?? null}
+              >
                 <App {...props} />
               </AuthUserProvider>
             </NuqsAdapter>

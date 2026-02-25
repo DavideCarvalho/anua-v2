@@ -10,6 +10,7 @@ export default class CanteenItemDto extends BaseModelDto {
   declare price: number
   declare category: string | null
   declare isActive: boolean
+  declare imageUrl: string | null
   declare createdAt: Date
   declare updatedAt: Date
   declare canteen?: CanteenDto
@@ -26,6 +27,7 @@ export default class CanteenItemDto extends BaseModelDto {
     this.price = canteenItem.price
     this.category = canteenItem.category
     this.isActive = canteenItem.isActive
+    this.imageUrl = canteenItem.image?.url ?? null
     this.createdAt = canteenItem.createdAt.toJSDate()
     this.updatedAt = canteenItem.updatedAt.toJSDate()
     if (canteenItem.canteen) this.canteen = new CanteenDto(canteenItem.canteen)

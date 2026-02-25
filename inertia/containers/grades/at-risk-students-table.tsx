@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, Users } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
@@ -13,14 +13,23 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import { useAtRiskStudentsQueryOptions } from '../../hooks/queries/use_at_risk_students'
+import {
+  useAtRiskStudentsQueryOptions,
+  type AtRiskStudentsResponse,
+} from '../../hooks/queries/use_at_risk_students'
 
 interface AtRiskStudentsTableProps {
   schoolId?: string
 }
 
 export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
-  const { data } = useSuspenseQuery(useAtRiskStudentsQueryOptions({ schoolId, limit: 20 }))
+  const { data, isLoading } = useQuery(useAtRiskStudentsQueryOptions({ schoolId, limit: 20 }))
+
+  if (isLoading || !data) {
+    return <AtRiskStudentsTableSkeleton />
+  }
+
+  type AtRiskStudent = AtRiskStudentsResponse['topStudents'][number]
 
   if (data.totalAtRisk === 0) {
     return (
@@ -30,9 +39,7 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
             <AlertTriangle className="h-5 w-5" />
             Alunos em Risco
           </CardTitle>
-          <CardDescription>
-            Alunos com media abaixo do minimo exigido
-          </CardDescription>
+          <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="py-12 text-center">
@@ -56,9 +63,7 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Alunos em Risco
             </CardTitle>
-            <CardDescription>
-              Alunos com media abaixo do minimo exigido
-            </CardDescription>
+            <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
           </div>
           <Badge variant="destructive" className="text-lg">
             {data.totalAtRisk} ({data.atRiskPercentage}%)
@@ -78,7 +83,7 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.topStudents.map((student: any) => (
+            {data.topStudents.map((student: AtRiskStudent) => (
               <TableRow key={student.studentId}>
                 <TableCell className="font-medium">{student.studentName}</TableCell>
                 <TableCell className="text-muted-foreground">{student.studentEmail}</TableCell>
@@ -97,9 +102,7 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
                 </TableCell>
                 <TableCell className="text-center">{student.minimumRequired}</TableCell>
                 <TableCell className="text-center">
-                  <span className="text-red-500 font-medium">
-                    -{student.deficit.toFixed(1)}
-                  </span>
+                  <span className="text-red-500 font-medium">-{student.deficit.toFixed(1)}</span>
                 </TableCell>
               </TableRow>
             ))}

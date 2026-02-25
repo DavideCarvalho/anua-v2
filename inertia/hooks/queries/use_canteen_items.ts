@@ -17,6 +17,7 @@ export function useCanteenItemsQueryOptions(query: CanteenItemsQuery = {}) {
 
   return queryOptions({
     queryKey: ['canteen-items', mergedQuery],
+    enabled: !!mergedQuery.canteenId,
     queryFn: () => {
       return resolveRoute()({ query: mergedQuery }).unwrap()
     },

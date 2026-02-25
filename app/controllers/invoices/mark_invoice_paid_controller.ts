@@ -42,6 +42,26 @@ export default class MarkInvoicePaidController {
           updatedAt: DateTime.now().toSQL(),
         })
 
+      const paymentRows = await trx
+        .from('StudentPayment')
+        .where('invoiceId', invoice.id)
+        .where('type', 'CANTEEN')
+        .select('id')
+
+      const canteenPaymentIds = paymentRows.map((row) => row.id)
+
+      if (canteenPaymentIds.length > 0) {
+        await trx
+          .from('CanteenPurchase')
+          .whereIn('studentPaymentId', canteenPaymentIds)
+          .whereNot('status', 'CANCELLED')
+          .update({
+            status: 'PAID',
+            paidAt: paidAt.toSQL(),
+            updatedAt: DateTime.now().toSQL(),
+          })
+      }
+
       await trx.commit()
 
       await invoice.load('payments')

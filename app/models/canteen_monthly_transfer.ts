@@ -17,31 +17,31 @@ export default class CanteenMonthlyTransfer extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'canteenId' })
   declare canteenId: string
 
-  @column()
+  @column({ columnName: 'month' })
   declare month: number
 
-  @column()
+  @column({ columnName: 'year' })
   declare year: number
 
-  @column()
+  @column({ columnName: 'totalAmount' })
   declare totalAmount: number
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: CanteenMonthlyTransferStatus
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'processedAt' })
   declare processedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Canteen, { foreignKey: 'canteenId' })

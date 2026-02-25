@@ -19,6 +19,7 @@ export default class CreateCanteenController {
       // Cria canteen explicitando campos permitidos (evita mass assignment)
       const newCanteen = await Canteen.create(
         {
+          name: data.name,
           schoolId: data.schoolId,
           responsibleUserId: data.responsibleUserId,
         },

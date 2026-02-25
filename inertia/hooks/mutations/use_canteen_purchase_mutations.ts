@@ -3,7 +3,9 @@ import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
 
 const resolveCreateRoute = () => tuyau.$route('api.v1.canteenPurchases.store')
-type CreateCanteenPurchasePayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
+export type CreateCanteenPurchasePayload = InferRequestType<
+  ReturnType<typeof resolveCreateRoute>['$post']
+>
 
 export function useCreateCanteenPurchase() {
   const queryClient = useQueryClient()

@@ -9,19 +9,20 @@ interface UseCanteenMealsOptions {
   canteenId?: string
   startDate?: string
   endDate?: string
+  isActive?: boolean
   page?: number
   limit?: number
 }
 
 export function useCanteenMealsQueryOptions(options: UseCanteenMealsOptions = {}) {
-  const { canteenId, startDate, endDate, page = 1, limit = 20 } = options
+  const { canteenId, startDate, endDate, isActive, page = 1, limit = 20 } = options
 
   return queryOptions({
     queryKey: ['canteen-meals', { canteenId, startDate, endDate, page, limit }],
     queryFn: () => {
       return tuyau
         .$route('api.v1.canteenMeals.index')
-        .$get({ query: { canteenId, startDate, endDate, page, limit } })
+        .$get({ query: { canteenId, startDate, endDate, isActive, page, limit } })
         .unwrap()
     },
   })

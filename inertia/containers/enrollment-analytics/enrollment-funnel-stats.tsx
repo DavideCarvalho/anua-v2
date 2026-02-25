@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Users, FileCheck, Clock, FileSignature, CheckCircle, XCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -12,9 +12,13 @@ interface EnrollmentFunnelStatsProps {
 }
 
 export function EnrollmentFunnelStats({ schoolId, academicPeriodId }: EnrollmentFunnelStatsProps) {
-  const { data } = useSuspenseQuery(
+  const { data, isLoading } = useQuery(
     useEnrollmentFunnelStatsQueryOptions({ schoolId, academicPeriodId })
   )
+
+  if (isLoading || !data) {
+    return <EnrollmentFunnelStatsSkeleton />
+  }
 
   const stats = [
     {

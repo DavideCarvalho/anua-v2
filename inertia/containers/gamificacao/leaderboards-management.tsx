@@ -1,7 +1,10 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Trophy, Plus, MoreHorizontal, Users, Target, Calendar } from 'lucide-react'
 
-import { useLeaderboardsQueryOptions } from '../../hooks/queries/use_leaderboards'
+import {
+  useLeaderboardsQueryOptions,
+  type LeaderboardsResponse,
+} from '../../hooks/queries/use_leaderboards'
 import { useDeleteLeaderboard } from '../../hooks/mutations/use_leaderboard_mutations'
 
 import { Button } from '../../components/ui/button'
@@ -39,15 +42,34 @@ const periodTypeLabels: Record<string, string> = {
   ALL_TIME: 'Geral',
 }
 
+type LeaderboardRow = LeaderboardsResponse['data'][number] & {
+  description?: string | null
+  metricType?: string
+  periodType?: string
+  entries?: Array<unknown>
+  class?: { name: string } | null
+  subject?: { name: string } | null
+}
+
 export function LeaderboardsManagement({
   schoolId,
   onCreateLeaderboard,
   onViewEntries,
 }: LeaderboardsManagementProps) {
-  const { data } = useSuspenseQuery(useLeaderboardsQueryOptions({ schoolId }))
+  const { data, isLoading } = useQuery(useLeaderboardsQueryOptions({ schoolId }))
   const deleteMutation = useDeleteLeaderboard()
 
   const leaderboards = data?.data ?? []
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando rankings...
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (leaderboards.length === 0) {
     return (
@@ -85,7 +107,7 @@ export function LeaderboardsManagement({
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {leaderboards.map((lb: any) => (
+          {leaderboards.map((lb: LeaderboardRow) => (
             <Card key={lb.id} className="relative">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
@@ -127,11 +149,11 @@ export function LeaderboardsManagement({
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="gap-1">
                     <Target className="h-3 w-3" />
-                    {metricTypeLabels[lb.metricType] || lb.metricType}
+                    {metricTypeLabels[lb.metricType ?? ''] || lb.metricType}
                   </Badge>
                   <Badge variant="outline" className="gap-1">
                     <Calendar className="h-3 w-3" />
-                    {periodTypeLabels[lb.periodType] || lb.periodType}
+                    {periodTypeLabels[lb.periodType ?? ''] || lb.periodType}
                   </Badge>
                 </div>
 
@@ -147,14 +169,10 @@ export function LeaderboardsManagement({
                 </div>
 
                 {lb.class && (
-                  <p className="text-xs text-muted-foreground">
-                    Turma: {lb.class.name}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Turma: {lb.class.name}</p>
                 )}
                 {lb.subject && (
-                  <p className="text-xs text-muted-foreground">
-                    Matéria: {lb.subject.name}
-                  </p>
+                  <p className="text-xs text-muted-foreground">Matéria: {lb.subject.name}</p>
                 )}
               </CardContent>
             </Card>

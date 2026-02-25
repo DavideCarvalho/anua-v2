@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
 import CanteenMealReservationDto from '#models/dto/canteen_meal_reservation.dto'
 import { listCanteenMealReservationsValidator } from '#validators/canteen'
@@ -27,6 +28,19 @@ export default class ListCanteenMealReservationsController {
 
     if (payload.status) {
       query.where('status', payload.status)
+    }
+
+    if (payload.canteenId) {
+      query.whereHas('meal', (mealQuery) => {
+        mealQuery.where('canteenId', payload.canteenId!)
+      })
+    }
+
+    if (payload.date) {
+      const filterDate = DateTime.fromJSDate(payload.date).toISODate()
+      query.whereHas('meal', (mealQuery) => {
+        mealQuery.where('date', filterDate!)
+      })
     }
 
     const reservations = await query.paginate(page, limit)

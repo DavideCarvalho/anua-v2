@@ -1,0 +1,55 @@
+{
+  "cookies": [
+    {
+      "name": "adonis-session",
+      "value": "s%3AeyJtZXNzYWdlIjoieXRuZHM3aGtnb3N4OHhraWQzZWh4NmIwIiwicHVycG9zZSI6ImFkb25pcy1zZXNzaW9uIn0.SekEvWby0OHU-px8icJwZlKCpOaWucmJ36FxDtHN1mI",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1774633594.153275,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ph_phc_qyioELyG5kCx7zfm25lSaZhAYXMPlcOUjO6UlrjHmtu_posthog",
+      "value": "%7B%22%24device_id%22%3A%22019c95e8-e06e-7ef7-88dc-5d655c776baf%22%2C%22distinct_id%22%3A%2268a0910c-3125-4878-9115-b44935e47130%22%2C%22%24sesid%22%3A%5B1772041593927%2C%22019c95e8-e29a-7ef9-99a0-687f97e1c3c2%22%2C1772041593498%5D%2C%22%24epp%22%3Atrue%7D",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1803577593,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "XSRF-TOKEN",
+      "value": "e%3A_s4VuQ9nsfRKf4ueKfV0b_714DKMHk2DSXzztHoRkYtJp7jtky9zox3V5_N1JB3Biz37JEh946C_yrKUSyxF79Eseeuofc9WDI2HD8pu92M.WDhZRHM3bzQ0cmpBSUhOcw.dN46KImj4huOYR3J84NfXvI5oeqcLkJK3MLRBnsES2w",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1772048794.153185,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ytnds7hkgosx8xkid3ehx6b0",
+      "value": "e%3ABme4Uv7rhwk1JT1H_UXa21ORvhNKrL6GQyrxFv4zNxqwUwtnSaARsvsWxy-WE3xACrEvNpPQztRsjP7jH1_IAfvHG6ngwzTpSV9abodUlcdi2BzonG9Jc3Wd7kKQmwO1OReocBoUsx5zaNCw3_Tz3kU2UisALLqT9Sfn7sWaQa8NIAqEVW14iG5orE1Ord9k.WnkzeVhtcVN2Y0FWeFRycQ.tGLxVZ3DqHKNO9UYfsBtFphVmNDjxP1ngrv9ZFtc6pI",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1774633594.1533,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:43195",
+      "localStorage": [
+        {
+          "name": "ph_phc_qyioELyG5kCx7zfm25lSaZhAYXMPlcOUjO6UlrjHmtu_posthog",
+          "value": "{\"$user_state\":\"identified\",\"$sesid\":[1772041593927,\"019c95e8-e29a-7ef9-99a0-687f97e1c3c2\",1772041593498],\"distinct_id\":\"68a0910c-3125-4878-9115-b44935e47130\",\"$device_id\":\"019c95e8-e06e-7ef7-88dc-5d655c776baf\",\"$last_posthog_reset\":\"2026-02-25T17:46:32.949Z\",\"$epp\":true,\"$user_id\":\"68a0910c-3125-4878-9115-b44935e47130\",\"$stored_person_properties\":{\"name\":\"Testerson\",\"email\":\"teste@teste.com\",\"role\":\"SCHOOL_DIRECTOR\",\"schoolId\":\"019be8e0-590f-70bf-894b-fb7ccc036bfc\",\"schoolName\":\"escola teste completo 3\",\"schoolChainId\":null},\"$stored_group_properties\":{\"school\":{\"name\":\"escola teste completo 3\"}},\"$groups\":{\"school\":\"019be8e0-590f-70bf-894b-fb7ccc036bfc\"},\"$session_recording_remote_config\":{\"cache_timestamp\":1772041593499,\"enabled\":true,\"consoleLogRecordingEnabled\":true,\"endpoint\":\"/s/\",\"eventTriggers\":[],\"linkedFlag\":null,\"masking\":null,\"minimumDurationMilliseconds\":null,\"networkPayloadCapture\":{\"capturePerformance\":{\"network_timing\":true,\"web_vitals\":true,\"web_vitals_allowed_metrics\":null}},\"recorderVersion\":\"v2\",\"sampleRate\":null,\"scriptConfig\":{\"script\":\"posthog-recorder\"},\"triggerMatchType\":null,\"urlBlocklist\":[],\"urlTriggers\":[],\"canvasRecording\":{}},\"$autocapture_disabled_server_side\":false,\"$heatmaps_enabled_server_side\":true,\"$product_tours_enabled_server_side\":false,\"$web_vitals_enabled_server_side\":true,\"$web_vitals_allowed_metrics\":null,\"$exception_capture_enabled_server_side\":true,\"$error_tracking_suppression_rules\":[],\"$dead_clicks_enabled_server_side\":false,\"$feature_flag_errors\":[],\"$active_feature_flags\":[],\"$enabled_feature_flags\":{},\"$feature_flag_payloads\":{},\"$feature_flag_details\":{},\"$feature_flag_request_id\":\"5a4186a9-9010-4a24-8147-77d00e708d26\",\"$feature_flag_evaluated_at\":1772041595176,\"$client_session_props\":{\"sessionId\":\"019c95e8-e29a-7ef9-99a0-687f97e1c3c2\",\"props\":{\"r\":\"$direct\",\"u\":\"http://localhost:43195/escola/cantina/cardapio\"}},\"$debug_first_full_snapshot_timestamp\":1772041593960}"
+        }
+      ]
+    }
+  ]
+}

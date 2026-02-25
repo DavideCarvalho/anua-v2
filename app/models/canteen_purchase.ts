@@ -8,7 +8,7 @@ import CanteenItemPurchased from './canteen_item_purchased.js'
 import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
 import StudentPayment from './student_payment.js'
 
-export type CanteenPaymentMethod = 'BALANCE' | 'CASH' | 'CARD' | 'PIX'
+export type CanteenPaymentMethod = 'BALANCE' | 'CASH' | 'CARD' | 'PIX' | 'ON_ACCOUNT'
 export type CanteenPurchaseStatus = 'PENDING' | 'PAID' | 'CANCELLED'
 
 export default class CanteenPurchase extends BaseModel {
@@ -21,40 +21,40 @@ export default class CanteenPurchase extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'userId' })
   declare userId: string
 
-  @column()
+  @column({ columnName: 'canteenId' })
   declare canteenId: string
 
-  @column()
+  @column({ columnName: 'totalAmount' })
   declare totalAmount: number // Em centavos
 
-  @column()
+  @column({ columnName: 'paymentMethod' })
   declare paymentMethod: CanteenPaymentMethod
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: CanteenPurchaseStatus
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'paidAt' })
   declare paidAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'studentPaymentId' })
   declare studentPaymentId: string | null
 
-  @column()
+  @column({ columnName: 'monthlyTransferId' })
   declare monthlyTransferId: string | null
 
   @belongsTo(() => CanteenMonthlyTransfer, { foreignKey: 'monthlyTransferId' })
   declare monthlyTransfer: BelongsTo<typeof CanteenMonthlyTransfer>
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

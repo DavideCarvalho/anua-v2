@@ -3,6 +3,7 @@ import vine from '@vinejs/vine'
 // Canteen validators
 export const createCanteenValidator = vine.compile(
   vine.object({
+    name: vine.string().trim().minLength(2).maxLength(120),
     schoolId: vine.string().trim(),
     responsibleUserId: vine.string().trim(),
   })
@@ -10,6 +11,7 @@ export const createCanteenValidator = vine.compile(
 
 export const updateCanteenValidator = vine.compile(
   vine.object({
+    name: vine.string().trim().minLength(2).maxLength(120).optional(),
     responsibleUserId: vine.string().trim().optional(),
   })
 )
@@ -31,8 +33,6 @@ export const createCanteenItemValidator = vine.compile(
     price: vine.number().min(0), // Em centavos
     category: vine.string().trim().maxLength(100).optional(),
     isActive: vine.boolean().optional(),
-    imageUrl: vine.string().trim().url().optional(),
-    stockQuantity: vine.number().min(0).optional(), // null = ilimitado
   })
 )
 
@@ -43,14 +43,14 @@ export const updateCanteenItemValidator = vine.compile(
     price: vine.number().min(0).optional(),
     category: vine.string().trim().maxLength(100).optional(),
     isActive: vine.boolean().optional(),
-    imageUrl: vine.string().trim().url().optional(),
-    stockQuantity: vine.number().min(0).optional(),
+    removeImage: vine.boolean().optional(),
   })
 )
 
 export const listCanteenItemsValidator = vine.compile(
   vine.object({
     canteenId: vine.string().trim().optional(),
+    search: vine.string().trim().optional(),
     category: vine.string().trim().optional(),
     isActive: vine.boolean().optional(),
     page: vine.number().min(1).optional(),
@@ -63,7 +63,8 @@ export const createCanteenPurchaseValidator = vine.compile(
   vine.object({
     userId: vine.string().trim(),
     canteenId: vine.string().trim(),
-    paymentMethod: vine.enum(['BALANCE', 'CASH', 'CARD', 'PIX']),
+    paymentMethod: vine.enum(['BALANCE', 'CASH', 'CARD', 'PIX', 'ON_ACCOUNT']),
+    studentHasLevelId: vine.string().trim().optional(),
     items: vine.array(
       vine.object({
         canteenItemId: vine.string().trim(),
@@ -76,9 +77,10 @@ export const createCanteenPurchaseValidator = vine.compile(
 export const listCanteenPurchasesValidator = vine.compile(
   vine.object({
     canteenId: vine.string().trim().optional(),
+    search: vine.string().trim().optional(),
     userId: vine.string().trim().optional(),
     status: vine.enum(['PENDING', 'PAID', 'CANCELLED']).optional(),
-    paymentMethod: vine.enum(['BALANCE', 'CASH', 'CARD', 'PIX']).optional(),
+    paymentMethod: vine.enum(['BALANCE', 'CASH', 'CARD', 'PIX', 'ON_ACCOUNT']).optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
   })
@@ -135,15 +137,17 @@ export const createCanteenMealReservationValidator = vine.compile(
 
 export const updateCanteenMealReservationStatusValidator = vine.compile(
   vine.object({
-    status: vine.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'CONSUMED']),
+    status: vine.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'SERVED']),
   })
 )
 
 export const listCanteenMealReservationsValidator = vine.compile(
   vine.object({
+    canteenId: vine.string().trim().optional(),
     canteenMealId: vine.string().trim().optional(),
     userId: vine.string().trim().optional(),
-    status: vine.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'CONSUMED']).optional(),
+    status: vine.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'SERVED']).optional(),
+    date: vine.date().optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
   })

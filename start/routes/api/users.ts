@@ -8,8 +8,6 @@ const ShowUserController = () => import('#controllers/users/show')
 const StoreUserController = () => import('#controllers/users/store')
 const UpdateUserController = () => import('#controllers/users/update')
 const DestroyUserController = () => import('#controllers/users/destroy')
-const ListPurchasesByUserController = () =>
-  import('#controllers/canteen_purchases/list_purchases_by_user_controller')
 
 // School Switcher
 const GetSchoolSwitcherDataController = () =>
@@ -28,11 +26,6 @@ export function registerUserApiRoutes() {
       router.get('/:id', [ShowUserController]).as('users.show')
       router.put('/:id', [UpdateUserController]).as('users.update')
       router.delete('/:id', [DestroyUserController]).as('users.destroy')
-
-      // User Canteen Purchases
-      router
-        .get('/:userId/canteen-purchases', [ListPurchasesByUserController])
-        .as('users.canteenPurchases')
     })
     .prefix('/users')
     .use([middleware.auth(), middleware.impersonation()])

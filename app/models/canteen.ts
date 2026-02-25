@@ -19,19 +19,22 @@ export default class Canteen extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
+  declare name: string
+
+  @column({ columnName: 'schoolId' })
   declare schoolId: string
 
-  @column()
+  @column({ columnName: 'responsibleUserId' })
   declare responsibleUserId: string
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

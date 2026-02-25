@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
+import CanteenPurchase from '#models/canteen_purchase'
 import { markPaymentAsPaidValidator } from '#validators/student_payment'
 import AppException from '#exceptions/app_exception'
 
@@ -40,6 +41,19 @@ export default class MarkPaymentAsPaidController {
     payment.metadata = metadata
 
     await payment.save()
+
+    if (payment.type === 'CANTEEN') {
+      const purchase = await CanteenPurchase.query()
+        .where('studentPaymentId', payment.id)
+        .whereNot('status', 'CANCELLED')
+        .first()
+
+      if (purchase) {
+        purchase.status = 'PAID'
+        purchase.paidAt = payment.paidAt ?? DateTime.now()
+        await purchase.save()
+      }
+    }
 
     await payment.load('student')
 

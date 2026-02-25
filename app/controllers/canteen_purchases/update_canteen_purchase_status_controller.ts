@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenPurchase from '#models/canteen_purchase'
 import Student from '#models/student'
+import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { updateCanteenPurchaseStatusValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
@@ -63,6 +64,15 @@ export default class UpdateCanteenPurchaseStatusController {
 
           student.balance = newBalance
           await student.save()
+        }
+      }
+
+      if (purchase.studentPaymentId) {
+        const linkedPayment = await StudentPayment.find(purchase.studentPaymentId)
+        if (linkedPayment && linkedPayment.status !== 'PAID') {
+          linkedPayment.status = 'PAID'
+          linkedPayment.paidAt = DateTime.now()
+          await linkedPayment.save()
         }
       }
     }

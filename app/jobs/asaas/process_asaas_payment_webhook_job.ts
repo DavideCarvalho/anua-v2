@@ -2,6 +2,7 @@ import { Job } from '@boringnode/queue'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import StudentPayment from '#models/student_payment'
+import CanteenPurchase from '#models/canteen_purchase'
 import WebhookEvent from '#models/webhook_event'
 import EmitNfseJob from '#jobs/invoices/emit_nfse_job'
 
@@ -97,6 +98,23 @@ export default class ProcessAsaasPaymentWebhookJob extends Job<ProcessAsaasPayme
         }
 
         await payment.save()
+
+        if (
+          payment.type === 'CANTEEN' &&
+          (payload.event === 'PAYMENT_CONFIRMED' || payload.event === 'PAYMENT_RECEIVED')
+        ) {
+          const purchase = await CanteenPurchase.query({ client: trx })
+            .where('studentPaymentId', payment.id)
+            .whereNot('status', 'CANCELLED')
+            .first()
+
+          if (purchase) {
+            purchase.useTransaction(trx)
+            purchase.status = 'PAID'
+            purchase.paidAt = payment.paidAt ?? DateTime.now()
+            await purchase.save()
+          }
+        }
 
         webhookEvent.useTransaction(trx)
         webhookEvent.status = 'COMPLETED'

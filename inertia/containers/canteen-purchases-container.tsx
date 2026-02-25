@@ -1,7 +1,10 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useCanteenPurchasesQueryOptions } from '../hooks/queries/use_canteen_purchases'
+import {
+  useCanteenPurchasesQueryOptions,
+  type CanteenPurchasesResponse,
+} from '../hooks/queries/use_canteen_purchases'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -16,6 +19,8 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { formatCurrency } from '../lib/utils'
 
 // Loading Skeleton
 function CanteenPurchasesSkeleton() {
@@ -60,33 +65,40 @@ function CanteenPurchasesErrorFallback({
   )
 }
 
-const statusConfig: Record<string, { label: string; className: string; icon: any }> = {
-  pending: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-700', icon: Clock },
-  preparing: { label: 'Preparando', className: 'bg-blue-100 text-blue-700', icon: Clock },
-  ready: { label: 'Pronto', className: 'bg-green-100 text-green-700', icon: CheckCircle },
-  delivered: { label: 'Entregue', className: 'bg-gray-100 text-gray-700', icon: CheckCircle },
-  cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-700', icon: XCircle },
+type CanteenPurchase = CanteenPurchasesResponse['data'][number]
+type CanteenPurchasesMeta = CanteenPurchasesResponse['meta']
+
+const statusConfig: Record<string, { label: string; className: string; icon: LucideIcon }> = {
+  PENDING: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-700', icon: Clock },
+  PAID: { label: 'Pago', className: 'bg-green-100 text-green-700', icon: CheckCircle },
+  CANCELLED: { label: 'Cancelado', className: 'bg-red-100 text-red-700', icon: XCircle },
 }
 
-// Container Export
-export function CanteenPurchasesContainer() {
+interface CanteenPurchasesContainerProps {
+  canteenId?: string
+}
+
+export function CanteenPurchasesContainer({ canteenId }: CanteenPurchasesContainerProps) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <CanteenPurchasesErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <CanteenPurchasesErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
-          <CanteenPurchasesContent />
+          <CanteenPurchasesContent canteenId={canteenId} />
         </ErrorBoundary>
       )}
     </QueryErrorResetBoundary>
   )
 }
 
-function CanteenPurchasesContent() {
+function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) {
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
@@ -97,11 +109,11 @@ function CanteenPurchasesContent() {
   const { search, page, limit } = filters
 
   const { data, isLoading, error, refetch } = useQuery(
-    useCanteenPurchasesQueryOptions({ page, limit, search: search || undefined })
+    useCanteenPurchasesQueryOptions({ page, limit, canteenId, search: search || undefined })
   )
 
-  const purchases = (data as any)?.data ?? []
-  const meta = (data as any)?.meta ?? null
+  const purchases: CanteenPurchase[] = data?.data ?? []
+  const meta: CanteenPurchasesMeta | null = data?.meta ?? null
 
   return (
     <div className="space-y-4">
@@ -128,7 +140,9 @@ function CanteenPurchasesContent() {
           <CardContent className="py-12 text-center">
             <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold">Nenhum pedido encontrado</h3>
-            <p className="text-sm text-muted-foreground mt-1">Os pedidos da cantina aparecerão aqui</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Os pedidos da cantina aparecerão aqui
+            </p>
           </CardContent>
         </Card>
       )}
@@ -148,8 +162,8 @@ function CanteenPurchasesContent() {
                 </tr>
               </thead>
               <tbody>
-                {purchases.map((purchase: any) => {
-                  const status = statusConfig[purchase.status] || statusConfig.pending
+                {purchases.map((purchase) => {
+                  const status = statusConfig[purchase.status] || statusConfig.PENDING
                   const StatusIcon = status.icon
 
                   return (
@@ -165,8 +179,12 @@ function CanteenPurchasesContent() {
                           <span className="font-medium">{purchase.user?.name || '-'}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-muted-foreground">{purchase.items?.length || 0} item(s)</td>
-                      <td className="p-4 font-semibold">R$ {Number(purchase.total || 0).toFixed(2)}</td>
+                      <td className="p-4 text-muted-foreground">
+                        {purchase.itemsPurchased?.length || 0} item(s)
+                      </td>
+                      <td className="p-4 font-semibold">
+                        {formatCurrency(Number(purchase.totalAmount || 0))}
+                      </td>
                       <td className="p-4">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.className}`}

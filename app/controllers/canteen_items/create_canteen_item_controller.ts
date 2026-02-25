@@ -1,16 +1,52 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { attachmentManager } from '@jrmc/adonis-attachment'
 import CanteenItem from '#models/canteen_item'
+import CanteenItemDto from '#models/dto/canteen_item.dto'
 import { createCanteenItemValidator } from '#validators/canteen'
 
 export default class CreateCanteenItemController {
   async handle({ request, response }: HttpContext) {
-    const data = await request.validateUsing(createCanteenItemValidator)
+    const image = request.file('image', {
+      size: '2mb',
+      extnames: ['jpg', 'jpeg', 'png', 'webp'],
+    })
+
+    if (image && !image.isValid) {
+      return response.badRequest({
+        message: image.errors[0]?.message || 'Imagem inválida',
+      })
+    }
+
+    const rawData = {
+      canteenId: String(request.input('canteenId') ?? '').trim(),
+      name: String(request.input('name') ?? '').trim(),
+      description:
+        request.input('description') !== undefined
+          ? String(request.input('description') ?? '').trim()
+          : undefined,
+      price: Number(request.input('price')),
+      category:
+        request.input('category') !== undefined
+          ? String(request.input('category') ?? '').trim()
+          : undefined,
+      isActive:
+        request.input('isActive') !== undefined
+          ? String(request.input('isActive')) === 'true'
+          : undefined,
+    }
+
+    const data = await createCanteenItemValidator.validate(rawData)
 
     const canteenItem = await CanteenItem.create({
       ...data,
       isActive: data.isActive ?? true,
     })
 
-    return response.created(canteenItem)
+    if (image) {
+      canteenItem.image = await attachmentManager.createFromFile(image)
+      await canteenItem.save()
+    }
+
+    return response.created(new CanteenItemDto(canteenItem))
   }
 }

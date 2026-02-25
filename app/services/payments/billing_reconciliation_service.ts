@@ -23,17 +23,12 @@ export default class BillingReconciliationService {
 
     if (payment.type === 'AGREEMENT') return
 
-    const lock = locks.createLock(
-      `billing-reconcile:payment:${payment.studentId}:${payment.month}:${payment.year}`,
-      '30s'
-    )
-
-    const [executed] = await lock.run(async () => {
+    const runReconciliation = async () => {
       await payment.refresh()
 
       if (payment.type === 'AGREEMENT') return
 
-      let invoice = await this.resolveTargetInvoice(payment)
+      const invoice = await this.resolveTargetInvoice(payment)
       if (!invoice) {
         return
       }
@@ -50,10 +45,22 @@ export default class BillingReconciliationService {
       }
 
       await this.reconcileByInvoiceId(invoice.id)
-    })
+    }
 
-    if (!executed) {
-      throw new Error(`Lock not acquired for payment ${paymentId}`)
+    try {
+      const lock = locks.createLock(
+        `billing-reconcile:payment:${payment.studentId}:${payment.month}:${payment.year}`,
+        '30s'
+      )
+
+      const [executed] = await lock.run(runReconciliation)
+
+      if (!executed) {
+        throw new Error(`Lock not acquired for payment ${paymentId}`)
+      }
+    } catch (error) {
+      console.warn('[BILLING_RECONCILE] Running payment reconciliation without lock:', error)
+      await runReconciliation()
     }
   }
 
@@ -78,8 +85,6 @@ export default class BillingReconciliationService {
   }
 
   static async reconcileByInvoiceId(invoiceId: string): Promise<InvoiceReconciliationResult> {
-    const lock = locks.createLock(`billing-reconcile:invoice:${invoiceId}`, '30s')
-
     let result: InvoiceReconciliationResult = {
       updated: false,
       valueChanged: false,
@@ -87,7 +92,7 @@ export default class BillingReconciliationService {
       contractId: null,
     }
 
-    const [executed] = await lock.run(async () => {
+    const runReconciliation = async () => {
       const invoice = await Invoice.query()
         .where('id', invoiceId)
         .whereNotIn('status', [...FINAL_INVOICE_STATUSES])
@@ -184,10 +189,18 @@ export default class BillingReconciliationService {
         staleChargeId: hadCharge && valueChanged ? hadCharge : null,
         contractId,
       }
-    })
+    }
 
-    if (!executed) {
-      throw new Error(`Lock not acquired for invoice ${invoiceId}`)
+    try {
+      const lock = locks.createLock(`billing-reconcile:invoice:${invoiceId}`, '30s')
+      const [executed] = await lock.run(runReconciliation)
+
+      if (!executed) {
+        throw new Error(`Lock not acquired for invoice ${invoiceId}`)
+      }
+    } catch (error) {
+      console.warn('[BILLING_RECONCILE] Running invoice reconciliation without lock:', error)
+      await runReconciliation()
     }
 
     return result

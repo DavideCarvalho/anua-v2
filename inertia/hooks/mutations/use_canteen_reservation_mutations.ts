@@ -27,7 +27,7 @@ export function useUpdateCanteenMealReservationStatus() {
       status,
     }: {
       id: string
-      status: 'PENDING' | 'CONFIRMED' | 'CONSUMED' | 'CANCELLED'
+      status: 'PENDING' | 'CONFIRMED' | 'SERVED' | 'CANCELLED'
     }) => {
       return tuyau
         .$route('api.v1.canteenMealReservations.updateStatus', { id })
