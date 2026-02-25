@@ -11,31 +11,38 @@ export default class AdminDebugController {
   }
 
   async queries(ctx: HttpContext) {
-    return (await this.getController()).queries(ctx)
+    const controller = await this.getController()
+    return controller.queries(ctx)
   }
 
   async events(ctx: HttpContext) {
-    return (await this.getController()).events(ctx)
+    const controller = await this.getController()
+    return controller.events(ctx)
   }
 
   async routes(ctx: HttpContext) {
-    return (await this.getController()).routes(ctx)
+    const controller = await this.getController()
+    return controller.routes(ctx)
   }
 
   async emails(ctx: HttpContext) {
-    return (await this.getController()).emails(ctx)
+    const controller = await this.getController()
+    return controller.emails(ctx)
   }
 
   async emailPreview(ctx: HttpContext) {
-    return (await this.getController()).emailPreview(ctx)
+    const controller = await this.getController()
+    return controller.emailPreview(ctx)
   }
 
   async traces(ctx: HttpContext) {
-    return (await this.getController()).traces(ctx)
+    const controller = await this.getController()
+    return controller.traces(ctx)
   }
 
   async traceDetail(ctx: HttpContext) {
-    return (await this.getController()).traceDetail(ctx)
+    const controller = await this.getController()
+    return controller.traceDetail(ctx)
   }
 
   async logs({ response }: HttpContext) {

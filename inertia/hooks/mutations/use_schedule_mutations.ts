@@ -11,10 +11,7 @@ export function useValidateScheduleConflict() {
       academicPeriodId: string
       classId: string
     }) => {
-      return tuyau
-        .$route('api.v1.schedules.validateConflict')
-        .$post(data)
-        .unwrap()
+      return tuyau.$route('api.v1.schedules.validateConflict').$post(data).unwrap()
     },
   })
 }
@@ -36,10 +33,7 @@ export function useSaveClassSchedule() {
         endTime: string
       }>
     }) => {
-      return tuyau
-        .$route('api.v1.schedules.saveClassSchedule', { classId })
-        .$post(data)
-        .unwrap()
+      return tuyau.$route('api.v1.schedules.saveClassSchedule', { classId }).$post(data).unwrap()
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['classSchedule'] })

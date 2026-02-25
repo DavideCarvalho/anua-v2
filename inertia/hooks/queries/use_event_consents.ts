@@ -8,10 +8,7 @@ export function useEventConsentsQueryOptions(eventId: string, query: Record<stri
   return {
     queryKey: ['events', eventId, 'consents', query],
     queryFn: () => {
-      return tuyau
-        .$route('api.v1.events.consents.index', { eventId })
-        .$get({ query })
-        .unwrap()
+      return tuyau.$route('api.v1.events.consents.index', { eventId }).$get({ query }).unwrap()
     },
     enabled: !!eventId,
   }

@@ -30,7 +30,10 @@ export function useSchoolEmployeesQueryOptions(params: UseSchoolEmployeesParams 
         },
       })
       if (response.error) {
-        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar funcionários')
+        throw new Error(
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message ||
+            'Erro ao carregar funcionários'
+        )
       }
       return response.data
     },

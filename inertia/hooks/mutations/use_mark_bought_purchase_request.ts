@@ -14,10 +14,7 @@ export function useMarkBoughtPurchaseRequestMutation() {
       receiptPath?: string
     }) => {
       const { id, ...body } = data
-      return tuyau
-        .$route('api.v1.purchaseRequests.markBought', { id })
-        .$post(body)
-        .unwrap()
+      return tuyau.$route('api.v1.purchaseRequests.markBought', { id }).$post(body).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })

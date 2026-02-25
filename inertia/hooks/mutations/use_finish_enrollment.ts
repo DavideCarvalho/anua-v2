@@ -89,9 +89,7 @@ export function useFinishEnrollmentMutation() {
 
   return useMutation({
     mutationFn: (data: FinishEnrollmentData) => {
-      return resolveRoute()
-        .$post(data)
-        .unwrap()
+      return resolveRoute().$post(data).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['analytics', 'enrollments'] })

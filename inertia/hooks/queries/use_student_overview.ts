@@ -12,7 +12,10 @@ export function useStudentOverviewQueryOptions(studentId: string) {
         .$route('api.v1.responsavel.api.studentOverview', { studentId })
         .$get()
       if (response.error) {
-        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar dados')
+        throw new Error(
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message ||
+            'Erro ao carregar dados'
+        )
       }
       return response.data
     },

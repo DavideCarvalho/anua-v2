@@ -30,7 +30,10 @@ export function useEscolaTeacherDashboardQueryOptions() {
     queryFn: async () => {
       const response = await resolveRoute()()
       if (response.error) {
-        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar dashboard')
+        throw new Error(
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message ||
+            'Erro ao carregar dashboard'
+        )
       }
       return response.data as TeacherDashboardResponse
     },

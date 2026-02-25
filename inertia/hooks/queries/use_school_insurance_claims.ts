@@ -14,9 +14,7 @@ export function useSchoolInsuranceClaimsQueryOptions(
   return {
     queryKey: ['insurance', 'school', schoolId, 'claims', status, limit],
     queryFn: () => {
-      return resolveRoute()
-        .$get({ params: { schoolId }, query: { status, limit } })
-        .unwrap()
+      return resolveRoute().$get({ params: { schoolId }, query: { status, limit } }).unwrap()
     },
     enabled: !!schoolId,
   }

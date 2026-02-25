@@ -14,10 +14,7 @@ export function useReviewPrintRequestMutation() {
       frontAndBack?: boolean
     }) => {
       const { id, ...body } = data
-      return tuyau
-        .$route('api.v1.printRequests.reviewPrintRequest', { id })
-        .$patch(body)
-        .unwrap()
+      return tuyau.$route('api.v1.printRequests.reviewPrintRequest', { id }).$patch(body).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['print-requests'] })

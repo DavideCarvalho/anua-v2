@@ -13,9 +13,7 @@ export function useMarkClaimPaidMutation() {
   return useMutation({
     mutationFn: (data: MarkClaimPaidData) => {
       const { claimId, notes } = data
-      return resolveRoute()
-        .$post({ params: { claimId }, notes })
-        .unwrap()
+      return resolveRoute().$post({ params: { claimId }, notes }).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })

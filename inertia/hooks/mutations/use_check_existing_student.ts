@@ -11,9 +11,7 @@ type CheckExistingBody = {
 export function useCheckExistingStudentMutation() {
   return useMutation({
     mutationFn: (data: CheckExistingBody) => {
-      return resolveRoute()
-        .$post(data)
-        .unwrap()
+      return resolveRoute().$post(data).unwrap()
     },
   })
 }

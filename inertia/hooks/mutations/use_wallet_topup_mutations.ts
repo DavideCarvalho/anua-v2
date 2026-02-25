@@ -11,10 +11,7 @@ export function useCreateWalletTopUp() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ studentId, ...data }: CreateWalletTopUpPayload) =>
-      tuyau
-        .$route('api.v1.responsavel.api.createWalletTopUp', { studentId })
-        .$post(data)
-        .unwrap(),
+      tuyau.$route('api.v1.responsavel.api.createWalletTopUp', { studentId }).$post(data).unwrap(),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['responsavel', 'wallet-top-ups', variables.studentId] })
       qc.invalidateQueries({ queryKey: ['responsavel', 'student', variables.studentId, 'balance'] })

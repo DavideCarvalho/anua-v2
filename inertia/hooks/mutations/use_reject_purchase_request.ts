@@ -7,10 +7,7 @@ export function useRejectPurchaseRequestMutation() {
   return useMutation({
     mutationFn: (data: { id: string; reason: string }) => {
       const { id, ...body } = data
-      return tuyau
-        .$route('api.v1.purchaseRequests.reject', { id })
-        .$post(body)
-        .unwrap()
+      return tuyau.$route('api.v1.purchaseRequests.reject', { id }).$post(body).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })

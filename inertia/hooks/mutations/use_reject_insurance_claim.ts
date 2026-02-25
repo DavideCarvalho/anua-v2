@@ -13,9 +13,7 @@ export function useRejectInsuranceClaimMutation() {
   return useMutation({
     mutationFn: (data: RejectClaimData) => {
       const { claimId, rejectionReason } = data
-      return resolveRoute()
-        .$post({ params: { claimId }, rejectionReason })
-        .unwrap()
+      return resolveRoute().$post({ params: { claimId }, rejectionReason }).unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })

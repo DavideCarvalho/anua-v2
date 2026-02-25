@@ -31,7 +31,10 @@ export function useTeachersQueryOptions(params: UseTeachersParams = {}) {
         },
       })
       if (response.error) {
-        throw new Error((response.error as { value?: { message?: string } } | undefined)?.value?.message || 'Erro ao carregar professores')
+        throw new Error(
+          (response.error as { value?: { message?: string } } | undefined)?.value?.message ||
+            'Erro ao carregar professores'
+        )
       }
       return response.data
     },
