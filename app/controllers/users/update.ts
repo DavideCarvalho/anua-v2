@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
+import UserDto from '#models/dto/user.dto'
 import { updateUserValidator } from '#validators/user'
 import AppException from '#exceptions/app_exception'
 
@@ -40,6 +41,6 @@ export default class UpdateUserController {
       .preload('schoolChain')
       .firstOrFail()
 
-    return response.ok(userWithRelations)
+    return response.ok(new UserDto(userWithRelations))
   }
 }

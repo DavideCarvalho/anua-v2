@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchool from '#models/user_has_school'
+import UserHasSchoolDto from '#models/dto/user_has_school.dto'
 import { updateUserSchoolValidator } from '#validators/user_school'
 import AppException from '#exceptions/app_exception'
 
@@ -36,6 +37,6 @@ export default class UpdateUserSchoolController {
     await assignment.load('school')
     await assignment.load('user')
 
-    return response.ok(assignment)
+    return response.ok(new UserHasSchoolDto(assignment))
   }
 }
