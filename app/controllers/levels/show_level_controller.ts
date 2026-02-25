@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
+import LevelDto from '#models/dto/level.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowLevelController {
@@ -14,6 +15,6 @@ export default class ShowLevelController {
       throw AppException.notFound('Nível não encontrado')
     }
 
-    return response.ok(level)
+    return response.ok(new LevelDto(level))
   }
 }

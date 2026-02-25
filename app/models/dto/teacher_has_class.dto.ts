@@ -1,5 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type TeacherHasClass from '#models/teacher_has_class'
+import TeacherDto from './teacher.dto.js'
+import SubjectDto from './subject.dto.js'
 
 export default class TeacherHasClassDto extends BaseModelDto {
   declare id: string
@@ -14,6 +16,8 @@ export default class TeacherHasClassDto extends BaseModelDto {
   declare isActive: boolean
   declare createdAt: Date
   declare updatedAt: Date
+  declare teacher?: TeacherDto
+  declare subject?: SubjectDto
 
   constructor(model?: TeacherHasClass) {
     super()
@@ -32,5 +36,7 @@ export default class TeacherHasClassDto extends BaseModelDto {
     this.isActive = model.isActive
     this.createdAt = model.createdAt.toJSDate()
     this.updatedAt = model.updatedAt.toJSDate()
+    this.teacher = model.teacher ? new TeacherDto(model.teacher) : undefined
+    this.subject = model.subject ? new SubjectDto(model.subject) : undefined
   }
 }

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Course from '#models/course'
+import CourseDto from '#models/dto/course.dto'
 import { createCourseValidator } from '#validators/course'
 
 export default class CreateCourseController {
@@ -11,6 +12,6 @@ export default class CreateCourseController {
       version: 1,
     })
 
-    return response.created(course)
+    return response.created(new CourseDto(course))
   }
 }
