@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
+import StoreOrderDto from '#models/dto/store_order.dto'
 import StudentHasResponsible from '#models/student_has_responsible'
 import AppException from '#exceptions/app_exception'
 
@@ -22,7 +23,7 @@ export default class ShowMyOrderController {
 
     // Verify access: student owns order or responsible is linked
     if (order.studentId === user.id) {
-      return response.ok(order)
+      return response.ok(new StoreOrderDto(order))
     }
 
     if (studentId) {
@@ -32,7 +33,7 @@ export default class ShowMyOrderController {
         .first()
 
       if (relation) {
-        return response.ok(order)
+        return response.ok(new StoreOrderDto(order))
       }
     }
 

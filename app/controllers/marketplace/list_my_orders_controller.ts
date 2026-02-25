@@ -1,10 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
+import StoreOrderDto from '#models/dto/store_order.dto'
 import StudentHasResponsible from '#models/student_has_responsible'
 import AppException from '#exceptions/app_exception'
 
 export default class ListMyOrdersController {
-  async handle({ request, response, effectiveUser }: HttpContext) {
+  async handle({ request, effectiveUser }: HttpContext) {
     const user = effectiveUser!
     const studentId = request.input('studentId')
     const page = request.input('page', 1)
@@ -37,6 +38,6 @@ export default class ListMyOrdersController {
     if (status) query.where('status', status)
 
     const orders = await query.paginate(page, limit)
-    return response.ok(orders.serialize())
+    return StoreOrderDto.fromPaginator(orders)
   }
 }

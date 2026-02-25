@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
+import StoreItemDto from '#models/dto/store_item.dto'
 import { createStoreItemValidator } from '#validators/gamification'
 import AppException from '#exceptions/app_exception'
 
@@ -28,6 +29,6 @@ export default class CreateProductController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(item)
+    return response.created(new StoreItemDto(item))
   }
 }

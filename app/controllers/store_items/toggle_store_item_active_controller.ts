@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreItem from '#models/store_item'
+import StoreItemDto from '#models/dto/store_item.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ToggleStoreItemActiveController {
@@ -13,6 +14,6 @@ export default class ToggleStoreItemActiveController {
     storeItem.isActive = !storeItem.isActive
     await storeItem.save()
 
-    return response.ok(storeItem)
+    return response.ok(new StoreItemDto(storeItem))
   }
 }

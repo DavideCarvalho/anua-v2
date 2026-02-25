@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
+import StoreDto from '#models/dto/store.dto'
 import Student from '#models/student'
 import User from '#models/user'
 import StudentHasLevel from '#models/student_has_level'
@@ -45,7 +46,7 @@ export default class ListMarketplaceStoresController {
     }
 
     if (!schoolIds.length) {
-      return response.ok({ data: [] })
+      return response.ok([])
     }
 
     const stores = await Store.query()
@@ -55,7 +56,7 @@ export default class ListMarketplaceStoresController {
       .preload('school')
       .orderBy('name', 'asc')
 
-    return response.ok({ data: stores })
+    return response.ok(StoreDto.fromArray(stores))
   }
 
   /**

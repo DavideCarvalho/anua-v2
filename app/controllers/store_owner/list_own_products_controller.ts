@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreItem from '#models/store_item'
+import StoreItemDto from '#models/dto/store_item.dto'
 import { listStoreItemsValidator } from '#validators/gamification'
 
 export default class ListOwnProductsController {
-  async handle({ storeOwnerStore, request, response }: HttpContext) {
+  async handle({ storeOwnerStore, request }: HttpContext) {
     const store = storeOwnerStore!
     const data = await request.validateUsing(listStoreItemsValidator)
     const page = data.page ?? 1
@@ -19,6 +20,6 @@ export default class ListOwnProductsController {
     if (data.isActive !== undefined) query.where('isActive', data.isActive)
 
     const items = await query.paginate(page, limit)
-    return response.ok(items.serialize())
+    return StoreItemDto.fromPaginator(items)
   }
 }

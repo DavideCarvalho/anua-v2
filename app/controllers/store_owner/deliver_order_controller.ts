@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
+import StoreOrderDto from '#models/dto/store_order.dto'
 import { deliverStoreOrderValidator } from '#validators/gamification'
 import AppException from '#exceptions/app_exception'
 
@@ -28,6 +29,6 @@ export default class DeliverOrderController {
     await order.load('student')
     await order.load('items', (q) => q.preload('storeItem'))
 
-    return response.ok(order)
+    return response.ok(new StoreOrderDto(order))
   }
 }
