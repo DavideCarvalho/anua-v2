@@ -1,0 +1,34 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+
+exporters:
+  debug:
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  otlphttp/posthog_traces:
+    endpoint: ${POSTHOG_OTEL_TRACES_ENDPOINT}
+    headers:
+      Authorization: Bearer ${POSTHOG_PROJECT_TOKEN}
+  otlphttp/posthog_logs:
+    endpoint: ${POSTHOG_OTEL_LOGS_ENDPOINT}
+    headers:
+      Authorization: Bearer ${POSTHOG_PROJECT_TOKEN}
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlp/jaeger, otlphttp/posthog_traces]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlphttp/posthog_logs]

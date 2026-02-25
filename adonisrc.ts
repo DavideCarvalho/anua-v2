@@ -81,6 +81,7 @@ export default defineConfig({
       file: () => import('adonisjs-server-stats/log-stream/provider'),
       environment: ['web'],
     },
+    () => import('@adonisjs/otel/otel_provider'),
   ],
 
   /*

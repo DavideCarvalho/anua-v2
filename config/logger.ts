@@ -1,6 +1,9 @@
 import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { defineConfig, targets } from '@adonisjs/core/logger'
+import { otelLoggingPreset } from '@adonisjs/otel/helpers'
+
+const isLocalDevelopment = env.get('NODE_ENV') === 'development'
 
 const loggerConfig = defineConfig({
   default: 'app',
@@ -16,9 +19,25 @@ const loggerConfig = defineConfig({
       level: env.get('LOG_LEVEL'),
       transport: {
         targets: targets()
-          .pushIf(!app.inProduction, targets.pretty())
           .pushIf(
             !app.inProduction,
+            targets.pretty(otelLoggingPreset({ keep: ['trace_id', 'span_id'] }))
+          )
+          .pushIf(isLocalDevelopment, {
+            target: 'pino-roll',
+            level: env.get('LOG_LEVEL'),
+            options: {
+              file: app.makePath('logs', 'adonisjs.log'),
+              frequency: 'daily',
+              size: '20m',
+              limit: {
+                count: 7,
+              },
+              mkdir: true,
+            },
+          })
+          .pushIf(
+            !app.inProduction && !isLocalDevelopment,
             targets.file({
               destination: app.makePath('logs', 'adonisjs.log'),
               mkdir: true,

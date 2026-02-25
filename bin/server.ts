@@ -9,6 +9,8 @@
 |
 */
 
+import '../otel.js'
+import '../start/evlog.js'
 import 'reflect-metadata'
 import { Ignitor, prettyPrintError } from '@adonisjs/core'
 

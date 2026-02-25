@@ -17,6 +17,15 @@ export default await Env.create(new URL('../', import.meta.url), {
   APP_KEY: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
+  APP_NAME: Env.schema.string.optional(),
+  APP_VERSION: Env.schema.string.optional(),
+  EVLOG_ENABLED: Env.schema.boolean.optional(),
+  EVLOG_DRAIN_TARGET: Env.schema.enum.optional(['none', 'posthog'] as const),
+  EVLOG_POSTHOG_HOST: Env.schema.string.optional(),
+  OTEL_EXPORT_TARGET: Env.schema.enum.optional(['collector', 'posthog', 'disabled'] as const),
+  OTEL_COLLECTOR_ENDPOINT: Env.schema.string.optional(),
+  POSTHOG_PROJECT_TOKEN: Env.schema.string.optional(),
+  POSTHOG_OTEL_ENDPOINT_BASE: Env.schema.string.optional(),
 
   /*
   |----------------------------------------------------------

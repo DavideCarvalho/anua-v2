@@ -68,5 +68,9 @@ export function registerAdminStatsApiRoutes() {
       router.get('/server-stats', [GetServerStatsController]).as('dashboard.serverStats')
     })
     .prefix('/admin')
-    .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
+    .use([
+      middleware.auth(),
+      middleware.impersonation(),
+      middleware.requireRole(['SUPER_ADMIN', 'ADMIN']),
+    ])
 }
