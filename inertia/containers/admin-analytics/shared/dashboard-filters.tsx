@@ -77,7 +77,7 @@ export function DashboardFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as escolas</SelectItem>
-              {schools.map((school: { id: string; name: string }) => (
+              {schools.map((school) => (
                 <SelectItem key={school.id} value={school.id}>
                   {school.name}
                 </SelectItem>

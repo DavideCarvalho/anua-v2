@@ -219,7 +219,9 @@ function ContractsListContent() {
     setSearchInput(search || '')
   }, [search])
 
-  const statusFilter = status || 'active'
+  let statusFilter: 'all' | 'active' | 'inactive' = 'active'
+  if (status === 'all') statusFilter = 'all'
+  if (status === 'inactive') statusFilter = 'inactive'
 
   const hasActiveFilters =
     !!search || !!academicPeriodId || !!courseId || !!classId || statusFilter !== 'active'

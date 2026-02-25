@@ -11,7 +11,7 @@ interface UseCanteenMealReservationsOptions {
   canteenId?: string
   mealId?: string
   studentId?: string
-  status?: string
+  status?: 'PENDING' | 'CANCELLED' | 'CONFIRMED' | 'CONSUMED'
   date?: string
   page?: number
   limit?: number

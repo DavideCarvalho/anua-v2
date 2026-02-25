@@ -14,34 +14,26 @@ type UpdateContractPayload = InferRequestType<
   id: string
 }
 
-export function createContractMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  CreateContractPayload
-> {
-  return {
-    mutationFn: (data) => {
+export function createContractMutationOptions() {
+  return mutationOptions({
+    mutationFn: (data: CreateContractPayload) => {
       return tuyau.$route('api.v1.contracts.store').$post(data).unwrap()
     },
-  }
+  })
 }
 
-export function updateContractMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  UpdateContractPayload
-> {
-  return {
-    mutationFn: ({ id, ...data }) => {
+export function updateContractMutationOptions() {
+  return mutationOptions({
+    mutationFn: ({ id, ...data }: UpdateContractPayload) => {
       return tuyau.$route('api.v1.contracts.update', { id }).$put(data).unwrap()
     },
-  }
+  })
 }
 
-export function deleteContractMutationOptions(): MutationOptions<unknown, Error, string> {
-  return {
-    mutationFn: (contractId) => {
+export function deleteContractMutationOptions() {
+  return mutationOptions({
+    mutationFn: (contractId: string) => {
       return tuyau.$route('api.v1.contracts.destroy', { id: contractId }).$delete().unwrap()
     },
-  }
+  })
 }

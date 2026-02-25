@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -16,7 +16,7 @@ interface UseClassStudentsOptions {
 export function useClassStudentsQueryOptions(options: UseClassStudentsOptions) {
   const { classId, courseId, academicPeriodId, page = 1, limit = 50 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['class-students', { classId, courseId, academicPeriodId, page, limit }],
     queryFn: () => {
       return tuyau
@@ -25,11 +25,7 @@ export function useClassStudentsQueryOptions(options: UseClassStudentsOptions) {
         .unwrap()
     },
     enabled: !!classId && !!courseId && !!academicPeriodId,
-  }
-}
-
-export function useClassStudents(options: UseClassStudentsOptions) {
-  return useSuspenseQuery(useClassStudentsQueryOptions(options))
+  })
 }
 
 // Students count
@@ -39,15 +35,11 @@ export type ClassStudentsCountResponse = InferResponseType<
 >
 
 export function useClassStudentsCountQueryOptions(classId: string) {
-  return {
+  return queryOptions({
     queryKey: ['class-students-count', classId],
     queryFn: () => {
       return tuyau.$route('api.v1.classes.studentsCount', { id: classId }).$get().unwrap()
     },
     enabled: !!classId,
-  }
-}
-
-export function useClassStudentsCount(classId: string) {
-  return useSuspenseQuery(useClassStudentsCountQueryOptions(classId))
+  })
 }

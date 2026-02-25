@@ -1,4 +1,4 @@
-import { Head, usePage, router } from '@inertiajs/react'
+import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
 import { User, Mail, Phone, MapPin, Shield, Pencil } from 'lucide-react'
 
@@ -18,11 +18,10 @@ import {
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { useUpdateProfile } from '../../hooks/mutations/use_update_profile'
-import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 
 export default function PerfilPage() {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
 
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [name, setName] = useState(user?.name || '')

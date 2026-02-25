@@ -1,7 +1,6 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.$route('api.v1.insurance.updateChain')
 type UpdateSchoolChainInsuranceData = {
   chainId: string
   hasInsuranceByDefault?: boolean
@@ -16,8 +15,9 @@ export function useUpdateSchoolChainInsuranceMutation() {
   return useMutation({
     mutationFn: (data: UpdateSchoolChainInsuranceData) => {
       const { chainId, ...rest } = data
-      return resolveRoute()
-        .$put({ params: { chainId }, ...rest })
+      return tuyau
+        .$route('api.v1.insurance.updateChain', { chainId })
+        .$put({ chainId, ...rest })
         .unwrap()
     },
     onSuccess: () => {

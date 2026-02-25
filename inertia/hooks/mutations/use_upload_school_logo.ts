@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { tuyau } from '../../lib/api'
 
 export function useUploadSchoolLogo(schoolId: string) {
   const queryClient = useQueryClient()
@@ -11,7 +10,7 @@ export function useUploadSchoolLogo(schoolId: string) {
 
       // tuyau request type is `unknown` for file uploads, so we use fetch
       // with the tuyau-generated URL for consistency
-      const url = tuyau.$route('api.v1.schools.uploadLogo', { id: schoolId }).$url().path
+      const url = `/api/v1/schools/${schoolId}/logo`
 
       const response = await fetch(url, {
         method: 'POST',

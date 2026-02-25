@@ -1,14 +1,26 @@
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { History, Loader2, ArrowLeft, FileText, CreditCard, GraduationCap, FileSignature, Handshake } from 'lucide-react'
+import {
+  History,
+  Loader2,
+  ArrowLeft,
+  FileText,
+  CreditCard,
+  GraduationCap,
+  FileSignature,
+  Handshake,
+} from 'lucide-react'
 import { Link } from '@inertiajs/react'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { AuditDiffCard } from '~/components/audit-diff-card'
-import { useStudentAuditHistory, type StudentAuditEntry } from '~/hooks/queries/use_audits'
+import {
+  useStudentAuditHistoryQueryOptions,
+  type StudentAuditEntry,
+} from '~/hooks/queries/use_audits'
 import { useStudentQueryOptions } from '~/hooks/queries/use_student'
 import { getEntityLabel } from '~/lib/audit_labels'
 
@@ -26,17 +38,20 @@ const ENTITY_ICONS: Record<string, typeof FileText> = {
 
 export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryContainerProps) {
   const { data: student } = useQuery(useStudentQueryOptions(studentId))
-  const { data: audits, isLoading, error } = useStudentAuditHistory(studentId)
+  const { data: audits, isLoading, error } = useQuery(useStudentAuditHistoryQueryOptions(studentId))
 
   // Group audits by date
-  const groupedAudits = audits?.reduce((groups, audit) => {
-    const date = format(new Date(audit.createdAt), 'yyyy-MM-dd')
-    if (!groups[date]) {
-      groups[date] = []
-    }
-    groups[date].push(audit)
-    return groups
-  }, {} as Record<string, StudentAuditEntry[]>)
+  const groupedAudits = audits?.reduce(
+    (groups, audit) => {
+      const date = format(new Date(audit.createdAt), 'yyyy-MM-dd')
+      if (!groups[date]) {
+        groups[date] = []
+      }
+      groups[date].push(audit)
+      return groups
+    },
+    {} as Record<string, StudentAuditEntry[]>
+  )
 
   return (
     <div className="container py-6 space-y-6">
@@ -52,9 +67,7 @@ export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryC
             <History className="h-6 w-6" />
             Historico Financeiro
           </h1>
-          {student && (
-            <p className="text-muted-foreground">{student.user?.name}</p>
-          )}
+          {student && <p className="text-muted-foreground">{student.user?.name}</p>}
         </div>
       </div>
 
@@ -68,9 +81,7 @@ export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryC
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : error ? (
-            <div className="text-center py-12 text-destructive">
-              Erro ao carregar historico
-            </div>
+            <div className="text-center py-12 text-destructive">Erro ao carregar historico</div>
           ) : !audits || audits.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -97,10 +108,7 @@ export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryC
                             <div className="text-xs text-muted-foreground mb-1">
                               {getEntityLabel(audit.entityType)}
                             </div>
-                            <AuditDiffCard
-                              audit={audit}
-                              entityType={audit.entityType}
-                            />
+                            <AuditDiffCard audit={audit} entityType={audit.entityType} />
                           </div>
                         )
                       })}

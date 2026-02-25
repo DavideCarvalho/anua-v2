@@ -22,10 +22,16 @@ export function useUpdateCanteenMealReservationStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => {
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string
+      status: 'PENDING' | 'CONFIRMED' | 'CONSUMED' | 'CANCELLED'
+    }) => {
       return tuyau
         .$route('api.v1.canteenMealReservations.updateStatus', { id })
-        .$put({ status })
+        .$post({ status })
         .unwrap()
     },
     onSuccess: () => {
@@ -70,10 +76,16 @@ export function useUpdateCanteenMonthlyTransferStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => {
+    mutationFn: ({
+      id,
+      status,
+    }: {
+      id: string
+      status: 'PENDING' | 'TRANSFERRED' | 'CANCELLED'
+    }) => {
       return tuyau
         .$route('api.v1.canteenMonthlyTransfers.updateStatus', { id })
-        .$put({ status })
+        .$post({ status })
         .unwrap()
     },
     onSuccess: () => {

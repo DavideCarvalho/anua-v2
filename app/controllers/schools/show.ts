@@ -9,6 +9,9 @@ export default class ShowSchoolController {
       .where('id', params.id)
       .preload('schoolChain')
       .preload('schoolGroups')
+      .preload('users', (query) => {
+        query.preload('role')
+      })
       .first()
 
     if (!school) {
@@ -37,9 +40,53 @@ export default class ShowSchoolController {
         }
       : null
 
+    const users = school.users.map((user) => {
+      const role = user.$preloaded.role
+      const roleName =
+        typeof role === 'object' && role !== null && !Array.isArray(role)
+          ? Reflect.get(role, 'name')
+          : null
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: typeof roleName === 'string' ? roleName : null,
+        roleName: typeof roleName === 'string' ? roleName : null,
+      }
+    })
+
     return response.ok({
-      ...school.serialize(),
+      id: school.id,
+      name: school.name,
+      slug: school.slug,
+      logoUrl: school.logoUrl,
+      zipCode: school.zipCode,
+      street: school.street,
+      number: school.number,
+      complement: school.complement,
+      neighborhood: school.neighborhood,
+      city: school.city,
+      state: school.state,
+      latitude: school.latitude,
+      longitude: school.longitude,
+      minimumGrade: school.minimumGrade,
+      minimumAttendancePercentage: school.minimumAttendancePercentage,
+      calculationAlgorithm: school.calculationAlgorithm,
+      hasInsurance: school.hasInsurance,
+      insurancePercentage: school.insurancePercentage,
+      insuranceCoveragePercentage: school.insuranceCoveragePercentage,
+      insuranceClaimWaitingDays: school.insuranceClaimWaitingDays,
+      schoolChain: school.schoolChain
+        ? {
+            id: school.schoolChain.id,
+            name: school.schoolChain.name,
+          }
+        : null,
+      users,
       director,
+      createdAt: school.createdAt.toISO(),
+      updatedAt: school.updatedAt?.toISO() ?? null,
     })
   }
 }

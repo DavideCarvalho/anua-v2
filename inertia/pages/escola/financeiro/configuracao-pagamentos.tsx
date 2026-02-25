@@ -28,6 +28,7 @@ import { AsaasOnboardingWizard } from '../../../containers/asaas/asaas-onboardin
 import { useSchoolQueryOptions } from '../../../hooks/queries/use_school'
 import { useUpdateSchool } from '../../../hooks/mutations/use_school_mutations'
 import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 type NfseFormData = {
   nfseEnabled: boolean
@@ -140,7 +141,8 @@ const badgeColors = {
 
 export default function ConfiguracaoPagamentosPage() {
   const { props } = usePage<SharedProps>()
-  const schoolId = props.selectedSchoolIds?.[0] ?? props.user?.schoolId ?? null
+  const user = useAuthUser()
+  const schoolId = props.selectedSchoolIds?.[0] ?? user?.schoolId ?? null
   const [wizardOpen, setWizardOpen] = useState(false)
   const [fiscalData, setFiscalData] = useState<NfseFormData>(EMPTY_NFSE_FORM)
   const { data, isLoading } = useQuery(useAsaasPaymentConfigQueryOptions())

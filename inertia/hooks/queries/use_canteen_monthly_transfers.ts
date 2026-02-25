@@ -11,7 +11,7 @@ interface UseCanteenMonthlyTransfersOptions {
   canteenId?: string
   month?: number
   year?: number
-  status?: string
+  status?: 'PENDING' | 'CANCELLED' | 'TRANSFERRED'
   page?: number
   limit?: number
 }

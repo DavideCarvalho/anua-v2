@@ -1,6 +1,4 @@
-import { Suspense } from 'react'
-import { useSuspenseQuery, useQueryClient, QueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import {
@@ -86,8 +84,16 @@ function DetailsError({
 
 function DetailsContent({ schoolId }: { schoolId: string }) {
   const queryClient = useQueryClient()
-  const { data: school } = useSuspenseQuery(useSchoolQueryOptions(schoolId))
+  const { data: school, isLoading, error } = useQuery(useSchoolQueryOptions(schoolId))
   const setImpersonationMutation = useSetImpersonation()
+
+  if (isLoading) {
+    return <DetailsSkeleton />
+  }
+
+  if (error) {
+    return <DetailsError error={error as Error} resetErrorBoundary={() => {}} />
+  }
 
   const handleImpersonate = async (userId: string, userName: string, userRole: string) => {
     try {
@@ -110,7 +116,9 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
       school?.number,
       school?.complement,
       school?.neighborhood,
-      school?.city && school?.state ? `${school.city}/${school.state}` : school?.city || school?.state,
+      school?.city && school?.state
+        ? `${school.city}/${school.state}`
+        : school?.city || school?.state,
     ].filter(Boolean)
 
     if (parts.length === 0) return null
@@ -165,9 +173,7 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
                 </div>
               )}
               <div>
-                <CardTitle className="text-2xl">
-                  {school?.name}
-                </CardTitle>
+                <CardTitle className="text-2xl">{school?.name}</CardTitle>
                 <CardDescription className="flex items-center gap-1 mt-1">
                   <Globe className="h-3 w-3" />
                   {school?.slug}
@@ -325,9 +331,7 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
             <Users className="h-5 w-5" />
             Usuários Vinculados
           </CardTitle>
-          <CardDescription>
-            {users.length} usuário(s) vinculado(s) a esta escola
-          </CardDescription>
+          <CardDescription>{users.length} usuário(s) vinculado(s) a esta escola</CardDescription>
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
@@ -347,28 +351,33 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {displayUsers.map((user: { id: string; name: string; email: string | null; role: string }) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {user.email || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{translateRole(user.role)}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleImpersonate(user.id, user.name, user.role)}
-                          disabled={setImpersonationMutation.isPending}
-                        >
-                          <UserCheck className="mr-2 h-4 w-4" />
-                          Personificar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {displayUsers.map(
+                    (user: {
+                      id: string
+                      name: string
+                      email: string | null
+                      role: string | null
+                    }) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{user.email || '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{translateRole(user.role ?? '-')}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleImpersonate(user.id, user.name, user.role ?? '')}
+                            disabled={setImpersonationMutation.isPending}
+                          >
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            Personificar
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
                 </TableBody>
               </Table>
               {hasMoreUsers && (
@@ -387,20 +396,5 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
 }
 
 export function SchoolDetails({ schoolId }: { schoolId: string }) {
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <DetailsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<DetailsSkeleton />}>
-            <DetailsContent schoolId={schoolId} />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
-  )
+  return <DetailsContent schoolId={schoolId} />
 }

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Wallet, Check, Clock, AlertTriangle, Building } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -24,7 +24,11 @@ interface MonthlyTransfersTableProps {
 
 const statusConfig: Record<
   string,
-  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }
+  {
+    label: string
+    variant: 'default' | 'secondary' | 'destructive' | 'outline'
+    icon: React.ReactNode
+  }
 > = {
   PENDING: { label: 'Pendente', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
   PROCESSING: { label: 'Processando', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
@@ -33,7 +37,7 @@ const statusConfig: Record<
 }
 
 export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps) {
-  const { data } = useSuspenseQuery(useCanteenMonthlyTransfersQueryOptions({ canteenId }))
+  const { data, isLoading } = useQuery(useCanteenMonthlyTransfersQueryOptions({ canteenId }))
   const updateStatusMutation = useUpdateCanteenMonthlyTransferStatus()
 
   const transfers = (data as any)?.data ?? []
@@ -43,6 +47,16 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
       style: 'currency',
       currency: 'BRL',
     }).format(value)
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando transferências...
+        </CardContent>
+      </Card>
+    )
   }
 
   if (transfers.length === 0) {
@@ -87,9 +101,7 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Building className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
-                        {transfer.canteen?.name || '-'}
-                      </span>
+                      <span className="font-medium">{transfer.canteen?.name || '-'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -98,9 +110,7 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
                   <TableCell className="text-right font-medium">
                     {formatCurrency(transfer.totalAmount || 0)}
                   </TableCell>
-                  <TableCell className="text-center">
-                    {transfer.transactionCount || 0}
-                  </TableCell>
+                  <TableCell className="text-center">{transfer.transactionCount || 0}</TableCell>
                   <TableCell>
                     <Badge variant={config.variant} className="gap-1">
                       {config.icon}
@@ -120,7 +130,7 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
                         onClick={() =>
                           updateStatusMutation.mutate({
                             id: transfer.id,
-                            status: 'COMPLETED',
+                            status: 'TRANSFERRED',
                           })
                         }
                       >

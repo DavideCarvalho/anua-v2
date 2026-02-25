@@ -17,8 +17,8 @@ export function useAssignResponsible() {
       isFinancial?: boolean
     }) => {
       return tuyau
-        .$route('api.v1.responsibles.assign', { studentId })
-        .$post({ responsibleId, isPedagogical, isFinancial })
+        .$route('api.v1.responsibles.assign')
+        .$post({ studentId, responsibleId, isPedagogical, isFinancial })
         .unwrap()
     },
     onSuccess: (_data, variables) => {
@@ -43,7 +43,7 @@ export function useUpdateResponsibleAssignment() {
     }) => {
       return tuyau
         .$route('api.v1.responsibles.updateAssignment', { id: responsibleId })
-        .$put({ isPedagogical, isFinancial })
+        .$patch({ isPedagogical, isFinancial })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

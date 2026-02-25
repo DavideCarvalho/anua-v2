@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaStatsContainer } from '../../containers/escola-stats-container'
@@ -7,13 +7,12 @@ import { EscolaTeacherDashboardContainer } from '../../containers/escola-teacher
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Users, DollarSign, Eye, EyeOff } from 'lucide-react'
 import { Button } from '../../components/ui/button'
-import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 
 const HIDE_FINANCIAL_INFO_STORAGE_KEY = 'escola:hide-financial-info'
 
 export default function EscolaDashboard() {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
   const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
   const [hideFinancialInfo, setHideFinancialInfo] = useState(false)
 

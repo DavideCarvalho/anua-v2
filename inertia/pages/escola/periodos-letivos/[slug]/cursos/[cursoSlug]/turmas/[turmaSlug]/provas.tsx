@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { usePage } from '@inertiajs/react'
 import { Plus } from 'lucide-react'
 
 import { EscolaLayout } from '../../../../../../../../components/layouts/escola-layout'
@@ -8,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Button } from '~/components/ui/button'
 import { ExamsList } from '../../../../../../../../containers/academico/exams-list'
 import { NewExamModal } from '../../../../../../../../containers/turma'
-import type { SharedProps } from '~/lib/types'
+import { useAuthUser } from '~/stores/auth_store'
 
 interface Props {
   academicPeriodSlug: string
@@ -31,8 +30,7 @@ export default function TurmaProvasPage({
   courseName,
   academicPeriodId,
 }: Props) {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
   const [modalOpen, setModalOpen] = useState(false)
 
   return (

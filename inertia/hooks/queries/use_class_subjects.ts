@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -14,7 +14,7 @@ interface UseClassSubjectsOptions {
 export function useClassSubjectsQueryOptions(options: UseClassSubjectsOptions) {
   const { classId, page = 1, limit = 50 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['class-subjects', { classId, page, limit }],
     queryFn: () => {
       return tuyau
@@ -23,9 +23,5 @@ export function useClassSubjectsQueryOptions(options: UseClassSubjectsOptions) {
         .unwrap()
     },
     enabled: !!classId,
-  }
-}
-
-export function useClassSubjects(options: UseClassSubjectsOptions) {
-  return useSuspenseQuery(useClassSubjectsQueryOptions(options))
+  })
 }

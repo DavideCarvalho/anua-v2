@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { usePage } from '@inertiajs/react'
 import { Building2, MapPin, GraduationCap, Save, Loader2 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -14,14 +13,15 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { ImageUpload } from '../../components/ui/image-upload'
-import { useSchool } from '../../hooks/queries/use_school'
+import { useQuery } from '@tanstack/react-query'
+import { useSchoolQueryOptions } from '../../hooks/queries/use_school'
 import { useUpdateSchool } from '../../hooks/mutations/use_school_mutations'
 import { useUploadSchoolLogo } from '../../hooks/mutations/use_upload_school_logo'
-import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 
 export function SchoolSettingsForm() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   if (!schoolId) {
     return (
@@ -37,12 +37,28 @@ export function SchoolSettingsForm() {
 }
 
 function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
-  const { data: schoolData } = useSchool(schoolId)
-  const school = schoolData as any
+  const { data: schoolData } = useQuery(useSchoolQueryOptions(schoolId))
+  const school = schoolData
   const updateSchool = useUpdateSchool()
   const uploadLogo = useUploadSchoolLogo(schoolId)
 
-  const [formData, setFormData] = useState({
+  type SchoolSettingsFormState = {
+    name: string
+    slug: string
+    street: string
+    number: string
+    complement: string
+    neighborhood: string
+    city: string
+    state: string
+    zipCode: string
+    logoUrl: string
+    minimumGrade: number
+    calculationAlgorithm: 'AVERAGE' | 'SUM'
+    minimumAttendancePercentage: number
+  }
+
+  const [formData, setFormData] = useState<SchoolSettingsFormState>({
     name: school?.name || '',
     slug: school?.slug || '',
     street: school?.street || '',
@@ -54,11 +70,14 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
     zipCode: school?.zipCode || '',
     logoUrl: school?.logoUrl || '',
     minimumGrade: school?.minimumGrade ?? 6,
-    calculationAlgorithm: school?.calculationAlgorithm || 'AVERAGE',
+    calculationAlgorithm: school?.calculationAlgorithm === 'SUM' ? 'SUM' : 'AVERAGE',
     minimumAttendancePercentage: school?.minimumAttendancePercentage ?? 75,
   })
 
-  const handleChange = (field: string, value: string | number) => {
+  const handleChange = <K extends keyof SchoolSettingsFormState>(
+    field: K,
+    value: SchoolSettingsFormState[K]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -222,7 +241,9 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
             <Label htmlFor="calculationAlgorithm">Cálculo de Média</Label>
             <Select
               value={formData.calculationAlgorithm}
-              onValueChange={(value) => handleChange('calculationAlgorithm', value)}
+              onValueChange={(value) =>
+                handleChange('calculationAlgorithm', value === 'SUM' ? 'SUM' : 'AVERAGE')
+              }
             >
               <SelectTrigger id="calculationAlgorithm">
                 <SelectValue />
@@ -241,7 +262,9 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
               min={0}
               max={100}
               value={formData.minimumAttendancePercentage}
-              onChange={(e) => handleChange('minimumAttendancePercentage', parseInt(e.target.value))}
+              onChange={(e) =>
+                handleChange('minimumAttendancePercentage', parseInt(e.target.value))
+              }
             />
           </div>
         </CardContent>

@@ -1,13 +1,9 @@
 import { History, Loader2 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { AuditDiffCard } from '~/components/audit-diff-card'
-import { useAudits } from '~/hooks/queries/use_audits'
+import { useQuery } from '@tanstack/react-query'
+import { useAuditsQueryOptions } from '~/hooks/queries/use_audits'
 import { getEntityLabel } from '~/lib/audit_labels'
 
 type EntityType = 'invoice' | 'student-payment' | 'student-has-level' | 'agreement' | 'contract'
@@ -22,11 +18,11 @@ interface AuditHistoryModalProps {
 
 // Map URL-friendly names to model names for display
 const ENTITY_TYPE_MAP: Record<EntityType, string> = {
-  invoice: 'Invoice',
+  'invoice': 'Invoice',
   'student-payment': 'StudentPayment',
   'student-has-level': 'StudentHasLevel',
-  agreement: 'Agreement',
-  contract: 'Contract',
+  'agreement': 'Agreement',
+  'contract': 'Contract',
 }
 
 export function AuditHistoryModal({
@@ -36,7 +32,7 @@ export function AuditHistoryModal({
   entityId,
   entityLabel,
 }: AuditHistoryModalProps) {
-  const { data: audits, isLoading, error } = useAudits(entityType, entityId)
+  const { data: audits, isLoading, error } = useQuery(useAuditsQueryOptions(entityType, entityId))
 
   const modelType = ENTITY_TYPE_MAP[entityType]
   const title = entityLabel
@@ -59,9 +55,7 @@ export function AuditHistoryModal({
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : error ? (
-            <div className="text-center py-8 text-destructive">
-              Erro ao carregar histórico
-            </div>
+            <div className="text-center py-8 text-destructive">Erro ao carregar histórico</div>
           ) : !audits || audits.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Nenhuma alteração registrada
@@ -69,11 +63,7 @@ export function AuditHistoryModal({
           ) : (
             <div className="space-y-3">
               {audits.map((audit) => (
-                <AuditDiffCard
-                  key={audit.id}
-                  audit={audit}
-                  entityType={modelType}
-                />
+                <AuditDiffCard key={audit.id} audit={audit} entityType={modelType} />
               ))}
             </div>
           )}

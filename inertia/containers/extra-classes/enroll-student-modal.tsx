@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
   Select,
@@ -25,6 +24,7 @@ import {
 import { useEnrollStudent } from '~/hooks/mutations/use_extra_class_mutations'
 import { useExtraClassQueryOptions } from '~/hooks/queries/use_extra_classes'
 import { useStudentsQueryOptions } from '~/hooks/queries/use_students'
+import { brazilianRealFormatter } from '~/lib/formatters'
 
 const schema = z.object({
   studentId: z.string().min(1, 'Selecione o aluno'),
@@ -35,7 +35,8 @@ const schema = z.object({
   scholarshipId: z.string().optional(),
 })
 
-type FormValues = z.infer<typeof schema>
+type FormInput = z.input<typeof schema>
+type FormOutput = z.output<typeof schema>
 
 interface EnrollStudentModalProps {
   extraClassId: string
@@ -43,12 +44,8 @@ interface EnrollStudentModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function EnrollStudentModal({
-  extraClassId,
-  open,
-  onOpenChange,
-}: EnrollStudentModalProps) {
-  const form = useForm<FormValues>({
+export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollStudentModalProps) {
+  const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
     defaultValues: {
       studentId: '',
@@ -79,7 +76,7 @@ export function EnrollStudentModal({
 
   const students = studentsData?.data ?? []
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: FormOutput) => {
     enrollMutation.mutate(
       {
         extraClassId,
@@ -103,9 +100,7 @@ export function EnrollStudentModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            Inscrever Aluno{extraClass ? ` - ${extraClass.name}` : ''}
-          </DialogTitle>
+          <DialogTitle>Inscrever Aluno{extraClass ? ` - ${extraClass.name}` : ''}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -118,7 +113,7 @@ export function EnrollStudentModal({
                 <SelectValue placeholder="Selecione o aluno" />
               </SelectTrigger>
               <SelectContent>
-                {students.map((s: any) => (
+                {students.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.user?.name ?? s.id}
                   </SelectItem>
@@ -126,9 +121,7 @@ export function EnrollStudentModal({
               </SelectContent>
             </Select>
             {form.formState.errors.studentId && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.studentId.message}
-              </p>
+              <p className="text-sm text-destructive">{form.formState.errors.studentId.message}</p>
             )}
           </div>
 
@@ -137,7 +130,9 @@ export function EnrollStudentModal({
               <Label>Forma de Pagamento</Label>
               <Select
                 value={form.watch('paymentMethod')}
-                onValueChange={(v) => form.setValue('paymentMethod', v as any)}
+                onValueChange={(v: FormOutput['paymentMethod']) =>
+                  form.setValue('paymentMethod', v)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -160,7 +155,7 @@ export function EnrollStudentModal({
                   <SelectValue placeholder="Selecione o dia" />
                 </SelectTrigger>
                 <SelectContent>
-                  {extraClass?.contract?.paymentDays?.map((pd: any) => (
+                  {extraClass?.contract?.paymentDays?.map((pd) => (
                     <SelectItem key={pd.day} value={pd.day.toString()}>
                       Dia {pd.day}
                     </SelectItem>
@@ -177,11 +172,12 @@ export function EnrollStudentModal({
 
           {extraClass?.contract && (
             <div className="rounded-lg border p-3 bg-muted/50">
-              <p className="text-sm text-muted-foreground">
-                Contrato: {extraClass.contract.name}
-              </p>
+              <p className="text-sm text-muted-foreground">Contrato: {extraClass.contract.name}</p>
               <p className="text-sm font-medium">
-                Valor: R$ {(extraClass.contract.amount / 100).toFixed(2)}
+                Valor:{' '}
+                {brazilianRealFormatter(
+                  (extraClass.contract.amount ?? extraClass.contract.ammount) / 100
+                )}
               </p>
             </div>
           )}
@@ -191,9 +187,7 @@ export function EnrollStudentModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={enrollMutation.isPending}>
-              {enrollMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {enrollMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Inscrever
             </Button>
           </DialogFooter>

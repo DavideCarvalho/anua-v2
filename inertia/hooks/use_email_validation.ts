@@ -86,8 +86,7 @@ export function useEmailValidation(options: UseEmailValidationOptions = {}) {
           if (response.exists) {
             setValidationResult({
               isValid: false,
-              error: `Email já cadastrado${response.userName ? ` para ${response.userName}` : ''}`,
-              existingUserName: response.userName,
+              error: 'Email já cadastrado',
             })
           } else {
             setValidationResult({ isValid: true })

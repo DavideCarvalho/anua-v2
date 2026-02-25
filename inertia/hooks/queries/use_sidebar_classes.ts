@@ -1,7 +1,7 @@
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 
 const resolveRoute = () => tuyau.api.v1.classes.sidebar.$get
 
@@ -12,11 +12,13 @@ interface SidebarClassesQuery {
 }
 
 export function useSidebarClassesQueryOptions(query: SidebarClassesQuery = { isActive: true }) {
-  return {
+  const requestQuery = { isActive: query.isActive }
+
+  return queryOptions({
     queryKey: ['sidebar-classes', query],
-    queryFn: () => resolveRoute()({ query }).unwrap(),
+    queryFn: () => resolveRoute()({ query: requestQuery }).unwrap(),
     staleTime: 1000 * 60 * 5, // 5 minutes
-  }
+  })
 }
 
 interface CourseInfo {

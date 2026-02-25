@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
@@ -24,8 +23,4 @@ export function useUserSchoolGroupsQueryOptions(options: UseUserSchoolGroupsOpti
         .unwrap()
     },
   })
-}
-
-export function useUserSchoolGroups(options: UseUserSchoolGroupsOptions = {}) {
-  return useSuspenseQuery(useUserSchoolGroupsQueryOptions(options))
 }

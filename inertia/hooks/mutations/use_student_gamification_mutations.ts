@@ -25,10 +25,19 @@ export function useAddStudentPoints() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, points, reason }: { id: string; points: number; reason?: string }) => {
+    mutationFn: ({
+      id,
+      points,
+      reason,
+    }: {
+      id: string
+      points: number
+      reason: string
+      type?: 'EARNED' | 'SPENT' | 'ADJUSTED' | 'PENALTY' | 'BONUS' | 'REFUND'
+    }) => {
       return tuyau
-        .$route('api.v1.studentGamifications.addPoints', { id })
-        .$post({ points, reason })
+        .$route('api.v1.studentGamifications.addPoints')
+        .$post({ studentGamificationId: id, points, reason, type: 'ADJUSTED' })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

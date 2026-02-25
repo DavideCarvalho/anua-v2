@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { usePage } from '@inertiajs/react'
 import { Plus, Minus, Loader2, AlertCircle } from 'lucide-react'
 
 import {
@@ -24,10 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import type { SharedProps } from '~/lib/types'
 import { useTeacherSubjectsQueryOptions } from '~/hooks/queries/use_teacher_subjects'
 import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
 import { useCreateClassWithTeachers } from '~/hooks/mutations/use_class_mutations'
+import { useAuthUser } from '~/stores/auth_store'
 
 const createClassSchema = z.object({
   name: z.string().min(1, 'Qual o nome da turma?'),
@@ -78,12 +77,14 @@ function SubjectTeacherRow({
   const teacherSubjects = useMemo(() => {
     const rawData = teacherSubjectsData ?? []
     // API returns TeacherHasSubject with nested subject, extract the subject info
-    return rawData.map((item: { subject?: { id: string; name: string }; id: string; name?: string }) => {
-      if (item.subject) {
-        return { id: item.subject.id, name: item.subject.name }
+    return rawData.map(
+      (item: { subject?: { id: string; name: string }; id: string; name?: string }) => {
+        if (item.subject) {
+          return { id: item.subject.id, name: item.subject.name }
+        }
+        return { id: item.id, name: item.name || '' }
       }
-      return { id: item.id, name: item.name || '' }
-    })
+    )
   }, [teacherSubjectsData])
 
   const hasNoSubjects = selectedTeacherId && !isLoadingSubjects && teacherSubjects.length === 0
@@ -91,9 +92,7 @@ function SubjectTeacherRow({
   // Clear subject when teacher changes
   useEffect(() => {
     if (selectedTeacherId && selectedSubjectId) {
-      const subjectExists = teacherSubjects.some(
-        (s: { id: string }) => s.id === selectedSubjectId
-      )
+      const subjectExists = teacherSubjects.some((s: { id: string }) => s.id === selectedSubjectId)
       if (!subjectExists && teacherSubjects.length > 0) {
         form.setValue(`subjectsWithTeachers.${index}.subjectId`, '')
       }
@@ -178,8 +177,8 @@ function SubjectTeacherRow({
 }
 
 export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassModalProps) {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   const form = useForm<CreateClassFormValues>({
     resolver: zodResolver(createClassSchema) as any,
@@ -258,9 +257,7 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
               className="mt-1"
             />
             {form.formState.errors.name && (
-              <p className="text-sm text-destructive mt-1">
-                {form.formState.errors.name.message}
-              </p>
+              <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
             )}
           </div>
 

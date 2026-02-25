@@ -1,12 +1,14 @@
 import { usePage } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
-import { useMarketplaceStoresQueryOptions, type MarketplaceStoresResponse } from '../hooks/queries/use_marketplace'
+import {
+  useMarketplaceStoresQueryOptions,
+  type MarketplaceStoresResponse,
+} from '../hooks/queries/use_marketplace'
 
 type MarketplaceStore = NonNullable<MarketplaceStoresResponse>['data'][number]
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { ShoppingBag } from 'lucide-react'
-import { formatCurrency } from '../lib/utils'
 import type { SharedProps } from '../lib/types'
 
 export function ResponsavelMarketplaceContainer() {
@@ -69,13 +71,11 @@ export function ResponsavelMarketplaceContainer() {
                   {store.type === 'INTERNAL' ? 'Interna' : 'Terceirizada'}
                 </Badge>
               </div>
-              {store.description && (
-                <CardDescription>{store.description}</CardDescription>
-              )}
+              {store.description && <CardDescription>{store.description}</CardDescription>}
             </CardHeader>
             <CardContent>
-              {store.schoolName && (
-                <p className="text-sm text-muted-foreground">{store.schoolName}</p>
+              {store.school?.name && (
+                <p className="text-sm text-muted-foreground">{store.school.name}</p>
               )}
             </CardContent>
           </Card>

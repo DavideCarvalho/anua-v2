@@ -19,6 +19,6 @@ export default class ListOwnProductsController {
     if (data.isActive !== undefined) query.where('isActive', data.isActive)
 
     const items = await query.paginate(page, limit)
-    return response.ok(items)
+    return response.ok(items.serialize())
   }
 }

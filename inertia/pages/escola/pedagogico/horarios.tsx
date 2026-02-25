@@ -3,13 +3,7 @@ import { Link } from '@tuyau/inertia/react'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
 import {
@@ -74,7 +68,9 @@ export default function HorariosPage() {
 
   const handleGenerate = () => {
     // Invalidate the schedule query to refetch with new data
-    queryClient.invalidateQueries({ queryKey: ['schedule', selectedClassId, selectedAcademicPeriodId] })
+    queryClient.invalidateQueries({
+      queryKey: ['schedule', selectedClassId, selectedAcademicPeriodId],
+    })
     setShowConfigForm(false)
   }
 
@@ -91,9 +87,7 @@ export default function HorariosPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Gerenciar Horários</h1>
-            <p className="text-muted-foreground">
-              Configure os horários das aulas para cada turma
-            </p>
+            <p className="text-muted-foreground">Configure os horários das aulas para cada turma</p>
           </div>
         </div>
 
@@ -162,7 +156,6 @@ export default function HorariosPage() {
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                         {c.level?.name && ` - ${c.level.name}`}
-                        {c.level?.course?.name && ` (${c.level.course.name})`}
                       </SelectItem>
                     ))}
                   </SelectContent>

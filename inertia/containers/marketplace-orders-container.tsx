@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select'
-import { useMyOrdersQueryOptions } from '../hooks/queries/use_marketplace'
+import { useMyOrdersQueryOptions, type MyOrdersResponse } from '../hooks/queries/use_marketplace'
 import { formatCurrency } from '../lib/utils'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -49,6 +49,7 @@ export function MarketplaceOrdersContainer() {
     useMyOrdersQueryOptions({ status: statusFilter || undefined })
   )
   const orders = data?.data ?? []
+  type Order = NonNullable<MyOrdersResponse>['data'][number]
 
   return (
     <div className="space-y-4">
@@ -95,15 +96,13 @@ export function MarketplaceOrdersContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {orders.map((order: Order) => (
                   <TableRow key={order.id}>
-                    <TableCell>
-                      {new Date(order.createdAt).toLocaleDateString('pt-BR')}
-                    </TableCell>
+                    <TableCell>{new Date(order.createdAt).toLocaleDateString('pt-BR')}</TableCell>
                     <TableCell>{order.store?.name ?? '—'}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {order.items?.map((item) => (
+                        {order.items?.map((item: Order['items'][number]) => (
                           <div key={item.id}>
                             {item.quantity}x {item.itemName ?? item.storeItem?.name ?? 'Item'}
                           </div>

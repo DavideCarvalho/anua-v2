@@ -22,8 +22,8 @@ export function useUpdateCanteenPurchaseStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => {
-      return tuyau.$route('api.v1.canteenPurchases.updateStatus', { id }).$put({ status }).unwrap()
+    mutationFn: ({ id, status }: { id: string; status: 'PENDING' | 'PAID' | 'CANCELLED' }) => {
+      return tuyau.$route('api.v1.canteenPurchases.updateStatus', { id }).$post({ status }).unwrap()
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['canteen-purchase', variables.id] })

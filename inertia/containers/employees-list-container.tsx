@@ -2,13 +2,12 @@ import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
-import { usePage } from '@inertiajs/react'
 import { useSchoolEmployeesQueryOptions } from '../hooks/queries/use_school_employees'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { NewEmployeeModal } from './employees/new-employee-modal'
-import type { SharedProps } from '../lib/types'
+import { useAuthUser } from '../stores/auth_store'
 import {
   Select,
   SelectContent,
@@ -16,11 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '../components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
 import { Checkbox } from '../components/ui/checkbox'
 import { formatRoleName } from '../lib/formatters'
 import {
@@ -216,8 +211,8 @@ function EmployeesListContent({
 
 // Container Export
 export function EmployeesListContainer() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
   const [isNewModalOpen, setIsNewModalOpen] = useState(false)
 
   const [filters, setFilters] = useQueryStates({

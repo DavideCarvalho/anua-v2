@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { usePage } from '@inertiajs/react'
 import { Trophy, Star, Plus, Pencil, Trash2, Award, Loader2 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -33,13 +32,14 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Switch } from '../../components/ui/switch'
-import { useAchievements } from '../../hooks/queries/use_achievements'
+import { useQuery } from '@tanstack/react-query'
+import { useAchievementsQueryOptions } from '../../hooks/queries/use_achievements'
 import {
   useCreateAchievement,
   useUpdateAchievement,
   useDeleteAchievement,
 } from '../../hooks/mutations/use_achievement_mutations'
-import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 
 const ACHIEVEMENT_TYPES = [
   { value: 'ACADEMIC_PERFORMANCE', label: 'Desempenho Acadêmico', color: 'bg-blue-500' },
@@ -84,10 +84,12 @@ const defaultFormData: AchievementFormData = {
 }
 
 export function AchievementsTable() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
-  const { data: achievements } = useAchievements({ schoolId: schoolId || undefined })
+  const { data: achievements } = useQuery(
+    useAchievementsQueryOptions({ schoolId: schoolId || undefined })
+  )
   const createAchievement = useCreateAchievement()
   const updateAchievement = useUpdateAchievement()
   const deleteAchievement = useDeleteAchievement()

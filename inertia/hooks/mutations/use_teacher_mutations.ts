@@ -19,10 +19,20 @@ export function useUpdateTeacherMutationOptions() {
 
 export function useAssignTeacherToClassMutationOptions() {
   return {
-    mutationFn: ({ teacherId, classId }: { teacherId: string; classId: string }) => {
+    mutationFn: ({
+      teacherId,
+      classId,
+      subjectId,
+      subjectQuantity,
+    }: {
+      teacherId: string
+      classId: string
+      subjectId: string
+      subjectQuantity?: number
+    }) => {
       return tuyau
         .$route('api.v1.teachers.assignClass', { id: teacherId })
-        .$post({ classId })
+        .$post({ classId, subjectId, subjectQuantity })
         .unwrap()
     },
   }

@@ -24,7 +24,10 @@ import {
   useOwnProductsQueryOptions,
   type OwnProductsResponse,
 } from '../hooks/queries/use_store_owner'
-import { useToggleProductActive, useDeleteProduct } from '../hooks/mutations/use_store_owner_mutations'
+import {
+  useToggleProductActive,
+  useDeleteProduct,
+} from '../hooks/mutations/use_store_owner_mutations'
 import { CreateProductModal } from './stores/create-product-modal'
 import { EditProductModal } from './store-owner/edit-product-modal'
 import { formatCurrency } from '../lib/utils'
@@ -73,9 +76,7 @@ export function StoreOwnerProductsContainer() {
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : !products.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum produto cadastrado
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado</div>
           ) : (
             <Table>
               <TableHeader>
@@ -89,7 +90,7 @@ export function StoreOwnerProductsContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {products.map((product: Product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="font-medium">{product.name}</div>

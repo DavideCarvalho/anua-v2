@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense, useState } from 'react'
 import { Gift, ShoppingCart, Package } from 'lucide-react'
 
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { StoreItemsTable } from '../../../containers/gamificacao/store-items-table'
 import { StoreOrdersTable } from '../../../containers/gamificacao/store-orders-table'
-import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 function TableSkeleton() {
   return (
@@ -28,8 +28,8 @@ function TableSkeleton() {
 }
 
 export default function RecompensasPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
   const [activeTab, setActiveTab] = useState('items')
 
   return (
@@ -42,9 +42,7 @@ export default function RecompensasPage() {
             <Gift className="h-6 w-6" />
             Loja de Recompensas
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie itens e pedidos da loja de pontos
-          </p>
+          <p className="text-muted-foreground">Gerencie itens e pedidos da loja de pontos</p>
         </div>
 
         {schoolId ? (

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -17,7 +17,7 @@ interface UseStudentGamificationsOptions {
 export function useStudentGamificationsQueryOptions(options: UseStudentGamificationsOptions = {}) {
   const { schoolId, page = 1, limit = 20 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['student-gamifications', { schoolId, page, limit }],
     queryFn: () => {
       return tuyau
@@ -25,11 +25,7 @@ export function useStudentGamificationsQueryOptions(options: UseStudentGamificat
         .$get({ query: { schoolId, page, limit } })
         .unwrap()
     },
-  }
-}
-
-export function useStudentGamifications(options: UseStudentGamificationsOptions = {}) {
-  return useSuspenseQuery(useStudentGamificationsQueryOptions(options))
+  })
 }
 
 // Get single student gamification
@@ -39,17 +35,13 @@ export type StudentGamificationResponse = InferResponseType<
 >
 
 export function useStudentGamificationQueryOptions(id: string) {
-  return {
+  return queryOptions({
     queryKey: ['student-gamification', id],
     queryFn: () => {
       return tuyau.$route('api.v1.studentGamifications.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  }
-}
-
-export function useStudentGamification(id: string) {
-  return useSuspenseQuery(useStudentGamificationQueryOptions(id))
+  })
 }
 
 // Get gamification ranking
@@ -59,15 +51,15 @@ export type GamificationRankingResponse = InferResponseType<
 >
 
 interface UseGamificationRankingOptions {
-  schoolId?: string
+  schoolId: string
   period?: 'week' | 'month' | 'year' | 'all'
   limit?: number
 }
 
-export function useGamificationRankingQueryOptions(options: UseGamificationRankingOptions = {}) {
+export function useGamificationRankingQueryOptions(options: UseGamificationRankingOptions) {
   const { schoolId, period = 'month', limit = 10 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['gamification-ranking', { schoolId, period, limit }],
     queryFn: () => {
       return tuyau
@@ -75,11 +67,7 @@ export function useGamificationRankingQueryOptions(options: UseGamificationRanki
         .$get({ query: { schoolId, period, limit } })
         .unwrap()
     },
-  }
-}
-
-export function useGamificationRanking(options: UseGamificationRankingOptions = {}) {
-  return useSuspenseQuery(useGamificationRankingQueryOptions(options))
+  })
 }
 
 // Get student gamification stats
@@ -89,17 +77,13 @@ export type StudentGamificationStatsResponse = InferResponseType<
 >
 
 export function useStudentGamificationStatsQueryOptions(studentId: string) {
-  return {
+  return queryOptions({
     queryKey: ['student-gamification-stats', studentId],
     queryFn: () => {
       return tuyau.$route('api.v1.students.gamificationStats', { studentId }).$get().unwrap()
     },
     enabled: !!studentId,
-  }
-}
-
-export function useStudentGamificationStats(studentId: string) {
-  return useSuspenseQuery(useStudentGamificationStatsQueryOptions(studentId))
+  })
 }
 
 // Responsavel: Get student gamification details
@@ -138,7 +122,7 @@ export type ResponsavelStudentGamificationResponse = {
 }
 
 export function useResponsavelStudentGamificationQueryOptions(studentId: string) {
-  return {
+  return queryOptions({
     queryKey: ['responsavel', 'students', studentId, 'gamification'],
     queryFn: async () => {
       const response = await tuyau
@@ -153,5 +137,5 @@ export function useResponsavelStudentGamificationQueryOptions(studentId: string)
       return response.data as ResponsavelStudentGamificationResponse
     },
     enabled: !!studentId,
-  }
+  })
 }

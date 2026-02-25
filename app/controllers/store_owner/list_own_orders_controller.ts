@@ -23,6 +23,6 @@ export default class ListOwnOrdersController {
     }
 
     const orders = await query.paginate(page, limit)
-    return response.ok(orders)
+    return response.ok(orders.serialize())
   }
 }

@@ -1,7 +1,11 @@
 import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useSuspenseQuery,
+  QueryErrorResetBoundary,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { usePage } from '@inertiajs/react'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { useTeachersQueryOptions } from '../hooks/queries/use_teachers'
 import { useUpdateTeacherMutationOptions } from '../hooks/mutations/use_teacher_mutations'
@@ -51,7 +55,7 @@ import { NewTeacherModal } from './teachers/new-teacher-modal'
 import { EditTeacherDataModal } from './teachers/edit-teacher-data-modal'
 import { EditTeacherRateModal } from './teachers/edit-teacher-rate-modal'
 import { EditTeacherSubjectsModal } from './teachers/edit-teacher-subjects-modal'
-import type { SharedProps } from '../lib/types'
+import { useAuthUser } from '../stores/auth_store'
 
 // Loading Skeleton
 function TeachersListSkeleton() {
@@ -195,7 +199,9 @@ function TeachersListContent({
                 <td className="p-4">
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      teacher.user?.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      teacher.user?.active
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {teacher.user?.active ? 'Ativo' : 'Inativo'}
@@ -224,7 +230,9 @@ function TeachersListContent({
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onToggleActive(teacher)}
-                        className={teacher.user?.active ? 'text-destructive focus:text-destructive' : ''}
+                        className={
+                          teacher.user?.active ? 'text-destructive focus:text-destructive' : ''
+                        }
                       >
                         {teacher.user?.active ? (
                           <>
@@ -281,8 +289,8 @@ function TeachersListContent({
 
 // Container Export
 export function TeachersListContainer() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
@@ -361,10 +369,7 @@ export function TeachersListContainer() {
           />
         </div>
 
-        <Select
-          value={status}
-          onValueChange={(value) => setFilters({ status: value, page: 1 })}
-        >
+        <Select value={status} onValueChange={(value) => setFilters({ status: value, page: 1 })}>
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -458,7 +463,9 @@ export function TeachersListContainer() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmToggleActive}
-              className={teacherToToggle?.user?.active ? 'bg-destructive hover:bg-destructive/90' : ''}
+              className={
+                teacherToToggle?.user?.active ? 'bg-destructive hover:bg-destructive/90' : ''
+              }
             >
               {updateTeacher.isPending
                 ? 'Processando...'

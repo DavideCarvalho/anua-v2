@@ -1,11 +1,11 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { Wallet } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { MonthlyTransfersTable } from '../../../containers/cantina/monthly-transfers-table'
-import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 function TableSkeleton() {
   return (
@@ -26,8 +26,8 @@ function TableSkeleton() {
 }
 
 export default function CantinaTransferenciasPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   return (
     <EscolaLayout>
@@ -39,9 +39,7 @@ export default function CantinaTransferenciasPage() {
             <Wallet className="h-6 w-6" />
             Transferências Mensais
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie as transferências mensais da cantina
-          </p>
+          <p className="text-muted-foreground">Gerencie as transferências mensais da cantina</p>
         </div>
 
         {schoolId ? (

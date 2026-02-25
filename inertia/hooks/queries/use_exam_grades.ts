@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -14,7 +14,7 @@ interface UseExamGradesOptions {
 export function useExamGradesQueryOptions(options: UseExamGradesOptions) {
   const { examId, page = 1, limit = 50 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['exam-grades', { examId, page, limit }],
     queryFn: () => {
       return tuyau
@@ -23,9 +23,5 @@ export function useExamGradesQueryOptions(options: UseExamGradesOptions) {
         .unwrap()
     },
     enabled: !!examId,
-  }
-}
-
-export function useExamGrades(options: UseExamGradesOptions) {
-  return useSuspenseQuery(useExamGradesQueryOptions(options))
+  })
 }

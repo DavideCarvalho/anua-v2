@@ -9,7 +9,7 @@ type StudentsGradesQuery = NonNullable<
   Parameters<ReturnType<typeof resolveRoute>['$get']>[0]
 >['query']
 
-export function useStudentsGradesQueryOptions(query: StudentsGradesQuery = {}) {
+export function useStudentsGradesQueryOptions(query: StudentsGradesQuery) {
   return queryOptions({
     queryKey: ['grades', 'students', query],
     queryFn: () => {

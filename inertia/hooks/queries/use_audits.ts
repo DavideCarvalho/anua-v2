@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
-import { tuyau } from '~/lib/api'
+import { queryOptions } from '@tanstack/react-query'
 
 export interface AuditEntry {
   id: string
@@ -23,32 +22,59 @@ export interface StudentAuditEntry extends AuditEntry {
 
 type EntityType = 'invoice' | 'student-payment' | 'student-has-level' | 'agreement' | 'contract'
 
-export function useAuditsQueryOptions(entityType: EntityType, entityId: string) {
+function toAuditEntry(item: Record<string, unknown>): AuditEntry {
+  const createdAt = item.createdAt
+  const event = item.event
+
   return {
-    queryKey: ['audits', entityType, entityId],
-    queryFn: async () => {
-      const response = await tuyau.api.v1.audits[entityType][entityId].$get()
-      return response.data as AuditEntry[]
-    },
-    enabled: !!entityType && !!entityId,
+    id: String(item.id),
+    event: event === 'created' || event === 'updated' || event === 'deleted' ? event : 'updated',
+    oldValues: (item.oldValues as Record<string, unknown> | null) ?? null,
+    newValues: (item.newValues as Record<string, unknown> | null) ?? null,
+    metadata: (item.metadata as AuditEntry['metadata']) ?? null,
+    createdAt: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt ?? ''),
   }
 }
 
-export function useAudits(entityType: EntityType, entityId: string) {
-  return useQuery(useAuditsQueryOptions(entityType, entityId))
+export function useAuditsQueryOptions(entityType: EntityType, entityId: string) {
+  return queryOptions({
+    queryKey: ['audits', entityType, entityId],
+    queryFn: async () => {
+      const response = await fetch(`/api/v1/audits/${entityType}/${entityId}`, {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar auditoria')
+      }
+
+      const payload = (await response.json()) as { data?: Array<Record<string, unknown>> }
+      return (payload.data ?? []).map(toAuditEntry)
+    },
+    enabled: !!entityType && !!entityId,
+  })
 }
 
 export function useStudentAuditHistoryQueryOptions(studentId: string) {
-  return {
+  return queryOptions({
     queryKey: ['student-audit-history', studentId],
     queryFn: async () => {
-      const response = await tuyau.api.v1.audits.students[studentId].history.$get()
-      return response.data as StudentAuditEntry[]
+      const response = await fetch(`/api/v1/audits/students/${studentId}/history`, {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar histórico de auditoria')
+      }
+
+      const payload = (await response.json()) as { data?: Array<Record<string, unknown>> }
+
+      return (payload.data ?? []).map((item) => ({
+        ...toAuditEntry(item),
+        entityType: String(item.entityType ?? ''),
+        entityId: String(item.entityId ?? ''),
+      })) as StudentAuditEntry[]
     },
     enabled: !!studentId,
-  }
-}
-
-export function useStudentAuditHistory(studentId: string) {
-  return useQuery(useStudentAuditHistoryQueryOptions(studentId))
+  })
 }

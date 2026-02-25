@@ -1,6 +1,5 @@
-import { Suspense, useState } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
   CalendarClock,
@@ -273,8 +272,16 @@ function InsightsError({
 
 // Content Component
 function InsightsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
-  const { data } = useSuspenseQuery(useEscolaInsightsQueryOptions())
+  const { data, isLoading, error } = useQuery(useEscolaInsightsQueryOptions())
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null)
+
+  if (isLoading || !data) {
+    return <InsightsSkeleton />
+  }
+
+  if (error) {
+    return <InsightsError error={error as Error} resetErrorBoundary={() => {}} />
+  }
 
   const insights = data.insights as Insight[]
   const displayedInsights = insights.slice(0, 5)
@@ -342,20 +349,5 @@ export function EscolaInsightsContainer({
 }: {
   hideFinancialValues?: boolean
 }) {
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <InsightsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<InsightsSkeleton />}>
-            <InsightsContent hideFinancialValues={hideFinancialValues} />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
-  )
+  return <InsightsContent hideFinancialValues={hideFinancialValues} />
 }

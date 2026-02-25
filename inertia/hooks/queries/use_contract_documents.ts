@@ -1,4 +1,3 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
@@ -24,8 +23,4 @@ export function useContractDocumentsQueryOptions(options: UseContractDocumentsOp
         .unwrap()
     },
   })
-}
-
-export function useContractDocuments(options: UseContractDocumentsOptions = {}) {
-  return useSuspenseQuery(useContractDocumentsQueryOptions(options))
 }

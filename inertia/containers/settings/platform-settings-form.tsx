@@ -4,13 +4,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '../../components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import {
   Form,
   FormControl,
@@ -21,8 +15,9 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
+import { useQuery } from '@tanstack/react-query'
 
-import { usePlatformSettings } from '../../hooks/queries/use_platform_settings'
+import { usePlatformSettingsQueryOptions } from '../../hooks/queries/use_platform_settings'
 import { useUpdatePlatformSettings } from '../../hooks/mutations/use_platform_settings_mutations'
 
 const platformSettingsSchema = z.object({
@@ -33,7 +28,7 @@ const platformSettingsSchema = z.object({
 type PlatformSettingsFormData = z.infer<typeof platformSettingsSchema>
 
 export function PlatformSettingsForm() {
-  const { data: platformSettings } = usePlatformSettings()
+  const { data: platformSettings } = useQuery(usePlatformSettingsQueryOptions())
   const { mutateAsync: updateSettings, isPending } = useUpdatePlatformSettings()
 
   const form = useForm<PlatformSettingsFormData>({
@@ -58,7 +53,10 @@ export function PlatformSettingsForm() {
   }
 
   const formatCurrency = (value: number) => {
-    return `R$ ${(value / 100).toFixed(2).replace('.', ',')}`
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value / 100)
   }
 
   return (

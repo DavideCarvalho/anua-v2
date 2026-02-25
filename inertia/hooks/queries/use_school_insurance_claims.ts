@@ -1,4 +1,5 @@
 import { tuyau } from '../../lib/api'
+import { queryOptions } from '@tanstack/react-query'
 import type { InferResponseType } from '@tuyau/client'
 
 const resolveRoute = () => tuyau.$route('api.v1.insurance.school.claims')
@@ -11,11 +12,14 @@ export function useSchoolInsuranceClaimsQueryOptions(
   status?: 'PENDING' | 'APPROVED' | 'PAID' | 'REJECTED',
   limit?: number
 ) {
-  return {
+  return queryOptions({
     queryKey: ['insurance', 'school', schoolId, 'claims', status, limit],
     queryFn: () => {
-      return resolveRoute().$get({ params: { schoolId }, query: { status, limit } }).unwrap()
+      return tuyau
+        .$route('api.v1.insurance.school.claims', { schoolId })
+        .$get({ query: { schoolId, status, limit } })
+        .unwrap()
     },
     enabled: !!schoolId,
-  }
+  })
 }

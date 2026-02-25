@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  Check,
-  X,
-  Truck,
-  Loader2,
-} from 'lucide-react'
+import { Check, X, Truck, Loader2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import {
@@ -35,10 +30,7 @@ import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
-import {
-  useOwnOrdersQueryOptions,
-  type OwnOrdersResponse,
-} from '../hooks/queries/use_store_owner'
+import { useOwnOrdersQueryOptions, type OwnOrdersResponse } from '../hooks/queries/use_store_owner'
 import {
   useApproveOrder,
   useRejectOrder,
@@ -145,13 +137,12 @@ function OrderActions({ order }: { order: Order }) {
     <>
       <div className="flex gap-1">
         {canApprove && (
-          <Button
-            size="sm"
-            variant="default"
-            onClick={handleApprove}
-            disabled={isPending}
-          >
-            {approveOrder.isPending ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Check className="h-3 w-3 mr-1" />}
+          <Button size="sm" variant="default" onClick={handleApprove} disabled={isPending}>
+            {approveOrder.isPending ? (
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+            ) : (
+              <Check className="h-3 w-3 mr-1" />
+            )}
             Aprovar
           </Button>
         )}
@@ -240,10 +231,7 @@ function OrderActions({ order }: { order: Order }) {
             <Button variant="outline" onClick={() => setDeliverDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              onClick={handleDeliver}
-              disabled={deliverOrder.isPending}
-            >
+            <Button onClick={handleDeliver} disabled={deliverOrder.isPending}>
               {deliverOrder.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Confirmar Entrega
             </Button>
@@ -284,7 +272,16 @@ function OrderActions({ order }: { order: Order }) {
 }
 
 export function StoreOwnerOrdersContainer() {
-  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<
+    | ''
+    | 'PENDING_APPROVAL'
+    | 'APPROVED'
+    | 'PREPARING'
+    | 'READY'
+    | 'DELIVERED'
+    | 'CANCELED'
+    | 'REJECTED'
+  >('')
   const [search, setSearch] = useState('')
 
   const { data, isLoading } = useQuery(
@@ -311,7 +308,23 @@ export function StoreOwnerOrdersContainer() {
             onChange={(e) => setSearch(e.target.value)}
             className="max-w-xs"
           />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              if (
+                value === '' ||
+                value === 'PENDING_APPROVAL' ||
+                value === 'APPROVED' ||
+                value === 'PREPARING' ||
+                value === 'READY' ||
+                value === 'DELIVERED' ||
+                value === 'CANCELED' ||
+                value === 'REJECTED'
+              ) {
+                setStatusFilter(value)
+              }
+            }}
+          >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Todos os status" />
             </SelectTrigger>
@@ -331,9 +344,7 @@ export function StoreOwnerOrdersContainer() {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !orders.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum pedido encontrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -349,17 +360,21 @@ export function StoreOwnerOrdersContainer() {
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">
-                    {order.orderNumber}
-                  </TableCell>
-                  <TableCell>{order.student?.name ?? '—'}</TableCell>
+                  <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
+                  <TableCell>{order.student?.user?.name ?? '—'}</TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {order.items?.map((item) => (
-                        <div key={item.id}>
-                          {item.quantity}x {item.storeItem?.name ?? 'Item'}
-                        </div>
-                      ))}
+                      {order.items?.map(
+                        (item: {
+                          id: string
+                          quantity: number
+                          storeItem?: { name?: string | null } | null
+                        }) => (
+                          <div key={item.id}>
+                            {item.quantity}x {item.storeItem?.name ?? 'Item'}
+                          </div>
+                        )
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>{formatCurrency(order.totalMoney)}</TableCell>

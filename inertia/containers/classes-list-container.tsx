@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { usePage } from '@inertiajs/react'
 import {
   useQuery,
   useQueryClient,
@@ -43,7 +42,7 @@ import {
 import { EditClassModal } from './classes/edit-class-modal'
 import { CreateClassModal } from './classes/create-class-modal'
 import { tuyau } from '../lib/api'
-import type { SharedProps } from '../lib/types'
+import { useAuthUser } from '../stores/auth_store'
 
 interface ClassItem {
   id: string
@@ -133,8 +132,8 @@ export function ClassesListContainer() {
 
 function ClassesListContent() {
   const queryClient = useQueryClient()
-  const { props } = usePage<SharedProps>()
-  const isSchoolTeacher = props.user?.role?.name === 'SCHOOL_TEACHER'
+  const user = useAuthUser()
+  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
 
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({

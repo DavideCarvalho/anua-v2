@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Package, Plus, MoreHorizontal, Users, GraduationCap, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -38,7 +38,7 @@ const tierColors: Record<string, string> = {
 
 export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableProps) {
   const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(useSubscriptionPlansQueryOptions({}))
+  const { data, isLoading } = useQuery(useSubscriptionPlansQueryOptions({}))
   const deleteMutation = useMutation(useDeleteSubscriptionPlanMutationOptions())
 
   const plans = data?.data ?? []
@@ -58,6 +58,16 @@ export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableP
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao excluir plano')
     }
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando planos...
+        </CardContent>
+      </Card>
+    )
   }
 
   if (plans.length === 0) {

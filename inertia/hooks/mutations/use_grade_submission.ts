@@ -4,18 +4,17 @@ import { tuyau } from '../../lib/api'
 interface GradeSubmissionData {
   assignmentId: string
   submissionId: string
-  score: number
-  feedback?: string
+  grade: number
 }
 
 export function useGradeSubmission() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ assignmentId, submissionId, score, feedback }: GradeSubmissionData) => {
+    mutationFn: ({ assignmentId, submissionId, grade }: GradeSubmissionData) => {
       return tuyau
         .$route('api.v1.assignments.submissions.grade', { id: assignmentId, submissionId })
-        .$post({ score, feedback })
+        .$post({ grade })
         .unwrap()
     },
     onSuccess: (_, variables) => {

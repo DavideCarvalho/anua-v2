@@ -1,11 +1,11 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { GraduationCap } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { CoursesLevelsTable } from '../../../containers/academic/courses-levels-table'
-import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 function TableSkeleton() {
   return (
@@ -26,8 +26,8 @@ function TableSkeleton() {
 }
 
 export default function CursosNiveisPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   return (
     <EscolaLayout>
@@ -39,9 +39,7 @@ export default function CursosNiveisPage() {
             <GraduationCap className="h-6 w-6" />
             Cursos e Níveis
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie a estrutura acadêmica da escola
-          </p>
+          <p className="text-muted-foreground">Gerencie a estrutura acadêmica da escola</p>
         </div>
 
         {schoolId ? (

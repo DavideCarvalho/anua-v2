@@ -1,25 +1,23 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { Shield } from 'lucide-react'
 
 import { EscolaLayout } from '../../components/layouts'
-import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 import {
   SchoolInsuranceOverview,
   SchoolInsuranceOverviewSkeleton,
 } from '../../containers/insurance/school-insurance-overview'
 
 export default function SegurosPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.school?.id
+  const user = useAuthUser()
+  const schoolId = user?.school?.id
 
   if (!schoolId) {
     return (
       <EscolaLayout>
         <Head title="Seguros" />
-        <div className="py-12 text-center text-muted-foreground">
-          Escola não encontrada.
-        </div>
+        <div className="py-12 text-center text-muted-foreground">Escola não encontrada.</div>
       </EscolaLayout>
     )
   }

@@ -15,7 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Badge } from '../../components/ui/badge'
-import { useCanteenReport } from '../../hooks/queries/use_canteen_reports'
+import { useQuery } from '@tanstack/react-query'
+import { useCanteenReportQueryOptions } from '../../hooks/queries/use_canteen_reports'
 
 const paymentMethodIcons: Record<string, typeof CreditCard> = {
   CREDIT_CARD: CreditCard,
@@ -41,12 +42,14 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
   const [startDate, setStartDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'))
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
 
-  const { data: report } = useCanteenReport({
-    canteenId,
-    startDate,
-    endDate,
-    topItemsLimit: 5,
-  })
+  const { data: report } = useQuery(
+    useCanteenReportQueryOptions({
+      canteenId,
+      startDate,
+      endDate,
+      topItemsLimit: 5,
+    })
+  )
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -97,10 +100,10 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(report?.totals.totalRevenue || 0)}</div>
-            <p className="text-xs text-muted-foreground">
-              No periodo selecionado
-            </p>
+            <div className="text-2xl font-bold">
+              {formatCurrency(report?.totals.totalRevenue || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">No periodo selecionado</p>
           </CardContent>
         </Card>
         <Card>
@@ -110,9 +113,7 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{report?.totals.totalOrders || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Pedidos finalizados
-            </p>
+            <p className="text-xs text-muted-foreground">Pedidos finalizados</p>
           </CardContent>
         </Card>
         <Card>
@@ -121,10 +122,10 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(report?.totals.averageTicket || 0)}</div>
-            <p className="text-xs text-muted-foreground">
-              Por pedido
-            </p>
+            <div className="text-2xl font-bold">
+              {formatCurrency(report?.totals.averageTicket || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">Por pedido</p>
           </CardContent>
         </Card>
       </div>
@@ -146,9 +147,10 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
                 {report.paymentsByMethod.map((method) => {
                   const Icon = paymentMethodIcons[method.paymentMethod] || DollarSign
                   const label = paymentMethodLabels[method.paymentMethod] || method.paymentMethod
-                  const percentage = report.totals.totalRevenue > 0
-                    ? ((method.totalRevenue / report.totals.totalRevenue) * 100).toFixed(1)
-                    : 0
+                  const percentage =
+                    report.totals.totalRevenue > 0
+                      ? ((method.totalRevenue / report.totals.totalRevenue) * 100).toFixed(1)
+                      : 0
 
                   return (
                     <div key={method.paymentMethod} className="flex items-center justify-between">
@@ -172,9 +174,7 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
                 })}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-4">
-                Nenhum dado disponivel
-              </p>
+              <p className="text-center text-muted-foreground py-4">Nenhum dado disponivel</p>
             )}
           </CardContent>
         </Card>
@@ -194,7 +194,10 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
                 {report.topItems.map((item, index) => (
                   <div key={item.itemId} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="h-6 w-6 flex items-center justify-center p-0">
+                      <Badge
+                        variant="outline"
+                        className="h-6 w-6 flex items-center justify-center p-0"
+                      >
                         {index + 1}
                       </Badge>
                       <div>
@@ -209,9 +212,7 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-4">
-                Nenhum dado disponivel
-              </p>
+              <p className="text-center text-muted-foreground py-4">Nenhum dado disponivel</p>
             )}
           </CardContent>
         </Card>

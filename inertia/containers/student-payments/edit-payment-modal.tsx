@@ -44,7 +44,7 @@ interface EditPaymentModalProps {
   payment: {
     id: string
     amount: number
-    dueDate: string
+    dueDate: string | Date
     discountPercentage: number
     discountType?: 'PERCENTAGE' | 'FLAT'
     discountValue?: number

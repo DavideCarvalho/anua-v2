@@ -3,13 +3,7 @@ import { Link } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, MoreHorizontal, Pencil } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import {
   Table,
   TableBody,
@@ -26,9 +20,9 @@ import {
 } from '../components/ui/dropdown-menu'
 import { Badge } from '../components/ui/badge'
 import { CreateStoreModal } from './stores/create-store-modal'
-import { useStoresQueryOptions, type StoresResponse } from '../hooks/queries/use_stores'
+import { useStoresQueryOptions, type StoresListResponse } from '../hooks/queries/use_stores'
 
-type Store = StoresResponse['data'][number]
+type Store = StoresListResponse['data'][number]
 
 export function StoreListContainer() {
   const [createModalOpen, setCreateModalOpen] = useState(false)
@@ -42,9 +36,7 @@ export function StoreListContainer() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Todas as Lojas</CardTitle>
-            <CardDescription>
-              Lojas internas e terceirizadas da instituicao
-            </CardDescription>
+            <CardDescription>Lojas internas e terceirizadas da instituicao</CardDescription>
           </div>
           <Button onClick={() => setCreateModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -55,9 +47,7 @@ export function StoreListContainer() {
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : !stores.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhuma loja cadastrada
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhuma loja cadastrada</div>
           ) : (
             <Table>
               <TableHeader>

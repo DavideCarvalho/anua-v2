@@ -8,6 +8,7 @@ import { Button } from '../../../../components/ui/button'
 import { ContractForm } from '../../../../containers/contracts/contract-form'
 import { useContractQueryOptions } from '../../../../hooks/queries/use_contract'
 import type { SharedProps } from '../../../../lib/types'
+import { useAuthUser } from '../../../../stores/auth_store'
 
 interface PageProps extends SharedProps {
   id: string
@@ -15,12 +16,11 @@ interface PageProps extends SharedProps {
 
 export default function EditarContratoPage() {
   const { props } = usePage<PageProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
   const contractId = props.id
 
-  const { data: contract, isLoading, error } = useQuery(
-    useContractQueryOptions(contractId)
-  )
+  const { data: contract, isLoading, error } = useQuery(useContractQueryOptions(contractId))
 
   return (
     <EscolaLayout>
@@ -44,15 +44,11 @@ export default function EditarContratoPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : error ? (
-          <div className="text-sm text-destructive">
-            Erro ao carregar contrato: {error.message}
-          </div>
+          <div className="text-sm text-destructive">Erro ao carregar contrato: {error.message}</div>
         ) : schoolId && contract ? (
           <ContractForm key={contract.id} schoolId={schoolId} initialData={contract} />
         ) : (
-          <div className="text-sm text-muted-foreground">
-            Contrato não encontrado.
-          </div>
+          <div className="text-sm text-muted-foreground">Contrato não encontrado.</div>
         )}
       </div>
     </EscolaLayout>

@@ -58,7 +58,8 @@ const schema = z.object({
     .min(1, 'Adicione ao menos um horario'),
 })
 
-type FormValues = z.infer<typeof schema>
+type FormInput = z.input<typeof schema>
+type FormOutput = z.output<typeof schema>
 
 interface EditExtraClassModalProps {
   extraClassId: string
@@ -76,7 +77,7 @@ export function EditExtraClassModal({
     enabled: open,
   })
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
@@ -120,7 +121,7 @@ export function EditExtraClassModal({
     }
   }, [extraClass, form])
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: FormOutput) => {
     updateMutation.mutate(
       {
         id: extraClassId,
@@ -161,9 +162,7 @@ export function EditExtraClassModal({
               <Label>Nome</Label>
               <Input {...form.register('name')} />
               {form.formState.errors.name && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.name.message}
-                </p>
+                <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
               )}
             </div>
 
@@ -183,7 +182,7 @@ export function EditExtraClassModal({
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teachers.map((t: any) => (
+                    {teachers.map((t) => (
                       <SelectItem key={t.id} value={t.id}>
                         {t.user?.name ?? t.id}
                       </SelectItem>
@@ -202,7 +201,7 @@ export function EditExtraClassModal({
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {contracts.map((c: any) => (
+                    {contracts.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
@@ -214,11 +213,7 @@ export function EditExtraClassModal({
 
             <div className="space-y-2">
               <Label>Limite de Vagas</Label>
-              <Input
-                type="number"
-                {...form.register('maxStudents')}
-                placeholder="Ilimitado"
-              />
+              <Input type="number" {...form.register('maxStudents')} placeholder="Ilimitado" />
             </div>
 
             <div className="space-y-2">
@@ -239,9 +234,17 @@ export function EditExtraClassModal({
                   <div key={field.id} className="flex items-center gap-2">
                     <Select
                       value={String(form.watch(`schedules.${index}.weekDay`))}
-                      onValueChange={(v) =>
-                        form.setValue(`schedules.${index}.weekDay`, Number(v) as any)
-                      }
+                      onValueChange={(v) => {
+                        const schedules = form.getValues('schedules')
+                        const nextSchedules = schedules.map((schedule, scheduleIndex) =>
+                          scheduleIndex === index ? { ...schedule, weekDay: Number(v) } : schedule
+                        )
+
+                        form.setValue('schedules', nextSchedules, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }}
                     >
                       <SelectTrigger className="w-28">
                         <SelectValue />
@@ -254,15 +257,9 @@ export function EditExtraClassModal({
                         ))}
                       </SelectContent>
                     </Select>
-                    <Input
-                      {...form.register(`schedules.${index}.startTime`)}
-                      className="w-20"
-                    />
+                    <Input {...form.register(`schedules.${index}.startTime`)} className="w-20" />
                     <span className="text-muted-foreground">-</span>
-                    <Input
-                      {...form.register(`schedules.${index}.endTime`)}
-                      className="w-20"
-                    />
+                    <Input {...form.register(`schedules.${index}.endTime`)} className="w-20" />
                     {fields.length > 1 && (
                       <Button
                         type="button"
@@ -283,9 +280,7 @@ export function EditExtraClassModal({
                 Cancelar
               </Button>
               <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar
               </Button>
             </DialogFooter>

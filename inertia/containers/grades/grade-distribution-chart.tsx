@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { BarChart3 } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
@@ -11,10 +11,14 @@ interface GradeDistributionChartProps {
 }
 
 export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps) {
-  const { data } = useSuspenseQuery(useGradeDistributionQueryOptions({ schoolId }))
+  const { data, isLoading } = useQuery(useGradeDistributionQueryOptions({ schoolId }))
+
+  if (isLoading) {
+    return <GradeDistributionChartSkeleton />
+  }
 
   // Create distribution buckets if data exists
-  const distribution = data.distribution || []
+  const distribution = data?.distribution || []
   const maxCount = Math.max(...distribution.map((d: any) => d.count), 1)
 
   const getBarColor = (range: string) => {

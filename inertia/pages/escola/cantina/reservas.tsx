@@ -1,11 +1,11 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { Calendar } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { MealReservationsTable } from '../../../containers/cantina/meal-reservations-table'
-import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 function TableSkeleton() {
   return (
@@ -26,8 +26,8 @@ function TableSkeleton() {
 }
 
 export default function CantinaReservasPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   return (
     <EscolaLayout>
@@ -39,9 +39,7 @@ export default function CantinaReservasPage() {
             <Calendar className="h-6 w-6" />
             Reservas de Refeições
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie as reservas de refeições dos alunos
-          </p>
+          <p className="text-muted-foreground">Gerencie as reservas de refeições dos alunos</p>
         </div>
 
         {schoolId ? (

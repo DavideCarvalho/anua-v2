@@ -21,6 +21,44 @@ interface ExtraClassScheduleData {
   schedules: Array<{ weekDay: number; startTime: string; endTime: string }>
 }
 
+function getMessage(value: unknown): string | null {
+  if (typeof value !== 'object' || value === null) return null
+  const message = Reflect.get(value, 'message')
+  return typeof message === 'string' ? message : null
+}
+
+function getExtraClassSchedules(value: unknown): ExtraClassScheduleData[] {
+  if (typeof value !== 'object' || value === null) return []
+  const extraClassSchedules = Reflect.get(value, 'extraClassSchedules')
+  if (!Array.isArray(extraClassSchedules)) return []
+
+  return extraClassSchedules.flatMap((entry) => {
+    if (typeof entry !== 'object' || entry === null) return []
+
+    const extraClassName = Reflect.get(entry, 'extraClassName')
+    const teacherName = Reflect.get(entry, 'teacherName')
+    const schedules = Reflect.get(entry, 'schedules')
+
+    if (typeof extraClassName !== 'string' || typeof teacherName !== 'string') return []
+    if (!Array.isArray(schedules)) return []
+
+    const normalizedSchedules = schedules.flatMap((schedule) => {
+      if (typeof schedule !== 'object' || schedule === null) return []
+
+      const weekDay = Reflect.get(schedule, 'weekDay')
+      const startTime = Reflect.get(schedule, 'startTime')
+      const endTime = Reflect.get(schedule, 'endTime')
+
+      if (typeof weekDay !== 'number') return []
+      if (typeof startTime !== 'string' || typeof endTime !== 'string') return []
+
+      return [{ weekDay, startTime, endTime }]
+    })
+
+    return [{ extraClassName, teacherName, schedules: normalizedSchedules }]
+  })
+}
+
 const EXTRA_CLASS_DAY_LABELS: Record<number, string> = {
   0: 'Dom',
   1: 'Seg',
@@ -95,14 +133,17 @@ export function StudentScheduleContainer({
     return null
   }
 
+  const message = getMessage(data)
+  const extraClassSchedules = getExtraClassSchedules(data)
+
   // Se a API retornou uma mensagem (ex: aluno sem turma, sem período letivo, etc.)
-  if (data.message) {
+  if (message) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
           <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Grade horaria indisponivel</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{data.message}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{message}</p>
         </CardContent>
       </Card>
     )
@@ -160,7 +201,7 @@ export function StudentScheduleContainer({
       )}
 
       {/* Extra Class Schedules */}
-      {(data as any).extraClassSchedules && (data as any).extraClassSchedules.length > 0 && (
+      {extraClassSchedules.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -168,12 +209,12 @@ export function StudentScheduleContainer({
               Aulas Avulsas
             </CardTitle>
             <CardDescription>
-              {(data as any).extraClassSchedules.length} aula(s) extracurricular(es)
+              {extraClassSchedules.length} aula(s) extracurricular(es)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2">
-              {((data as any).extraClassSchedules as ExtraClassScheduleData[]).map((ec) => (
+              {extraClassSchedules.map((ec) => (
                 <div
                   key={ec.extraClassName}
                   className="p-3 border rounded-lg border-purple-200 bg-purple-50"

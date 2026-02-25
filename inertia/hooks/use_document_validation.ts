@@ -94,8 +94,7 @@ export function useDocumentValidation(options: UseDocumentValidationOptions = {}
           if (response.exists) {
             setValidationResult({
               isValid: false,
-              error: `Documento já cadastrado${response.userName ? ` para ${response.userName}` : ''}`,
-              existingUserName: response.userName,
+              error: 'Documento já cadastrado',
             })
           } else {
             setValidationResult({

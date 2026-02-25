@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -14,7 +14,7 @@ interface UseSchoolUsageMetricsOptions {
 export function useSchoolUsageMetricsQueryOptions(options: UseSchoolUsageMetricsOptions) {
   const { schoolId, month, year } = options
 
-  return {
+  return queryOptions({
     queryKey: ['school-usage-metrics', { schoolId, month, year }],
     queryFn: () => {
       return tuyau
@@ -23,9 +23,5 @@ export function useSchoolUsageMetricsQueryOptions(options: UseSchoolUsageMetrics
         .unwrap()
     },
     enabled: !!schoolId,
-  }
-}
-
-export function useSchoolUsageMetrics(options: UseSchoolUsageMetricsOptions) {
-  return useSuspenseQuery(useSchoolUsageMetricsQueryOptions(options))
+  })
 }

@@ -1,7 +1,6 @@
 import { tuyau } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-const resolveRoute = () => tuyau.$route('api.v1.insurance.claims.markPaid')
 type MarkClaimPaidData = {
   claimId: string
   notes?: string
@@ -13,7 +12,10 @@ export function useMarkClaimPaidMutation() {
   return useMutation({
     mutationFn: (data: MarkClaimPaidData) => {
       const { claimId, notes } = data
-      return resolveRoute().$post({ params: { claimId }, notes }).unwrap()
+      return tuyau
+        .$route('api.v1.insurance.claims.markPaid', { claimId })
+        .$post({ claimId, notes })
+        .unwrap()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })

@@ -8,6 +8,7 @@ import { AlertCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
 import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 
 function ResponsavelContent() {
   const { url } = usePage<SharedProps>()
@@ -48,9 +49,10 @@ function ResponsavelContent() {
   // Pegar studentId dos query params ou usar primeiro filho
   let alunoId: string | null = null
   try {
-    const urlObj = typeof window !== 'undefined'
-      ? new URL(url, window.location.origin)
-      : new URL(`http://localhost${url}`)
+    const urlObj =
+      typeof window !== 'undefined'
+        ? new URL(url, window.location.origin)
+        : new URL(`http://localhost${url}`)
     alunoId = urlObj.searchParams.get('aluno')
   } catch {
     const match = url.match(/[?&]aluno=([^&]+)/)
@@ -90,8 +92,7 @@ function ResponsavelSkeleton() {
 }
 
 export default function ResponsavelDashboard() {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
 
   return (
     <ResponsavelLayout>
@@ -100,9 +101,7 @@ export default function ResponsavelDashboard() {
       <div className="space-y-6">
         {/* Welcome section */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Olá, {user?.name?.split(' ')[0]}!
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Olá, {user?.name?.split(' ')[0]}!</h1>
           <p className="text-muted-foreground">Acompanhe o desempenho dos seus filhos</p>
         </div>
 

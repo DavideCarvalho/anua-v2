@@ -42,17 +42,19 @@ export function useUpdateExamGrade() {
     mutationFn: ({
       examId,
       gradeId,
+      studentId,
       score,
       feedback,
     }: {
       examId: string
       gradeId: string
+      studentId: string
       score: number
       feedback?: string
     }) => {
       return tuyau
         .$route('api.v1.exams.updateGrade', { id: examId, gradeId })
-        .$put({ score, feedback })
+        .$put({ studentId, score, feedback })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

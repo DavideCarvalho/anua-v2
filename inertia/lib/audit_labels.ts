@@ -151,7 +151,7 @@ export function getEntityLabel(entityType: string): string {
 }
 
 // Format a value for display
-export function formatAuditValue(field: string, value: unknown, entityType: string): string {
+export function formatAuditValue(field: string, value: unknown, _entityType: string): string {
   if (value === null || value === undefined) {
     return '—'
   }

@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { Plus, AlertCircle, Users } from 'lucide-react'
-import { usePage } from '@inertiajs/react'
 import { Button } from '~/components/ui/button'
 import { Alert, AlertDescription } from '~/components/ui/alert'
-import type { SharedProps } from '~/lib/types'
 import type { EnrollmentFormData } from '../schema'
 import { GuardianCpfLookup } from '../components/guardian-cpf-lookup'
 import { GuardianCard } from '../components/guardian-card'
+import { useAuthUser } from '~/stores/auth_store'
 
 interface ResponsiblesStepProps {
   academicPeriodId?: string
@@ -19,8 +18,8 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps) {
     control: form.control,
     name: 'responsibles',
   })
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId ?? ''
+  const user = useAuthUser()
+  const schoolId = user?.schoolId ?? ''
 
   const [isAdding, setIsAdding] = useState(false)
 
@@ -30,7 +29,9 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps) {
   const hasFinancial = responsibles.some((r) => r.isFinancial)
 
   const existingDocuments = responsibles.map((r) => r.documentNumber?.replace(/\D/g, '') || '')
-  const existingEmails = responsibles.map((r) => r.email?.trim().toLowerCase()).filter(Boolean) as string[]
+  const existingEmails = responsibles
+    .map((r) => r.email?.trim().toLowerCase())
+    .filter(Boolean) as string[]
 
   return (
     <div className="space-y-4 py-4">
@@ -58,7 +59,9 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps) {
             const current = form.getValues(`responsibles.${index}`)
             update(index, { ...current, ...data })
           }}
-          existingEmails={existingEmails.filter((e) => e !== responsibles[index]?.email?.trim().toLowerCase())}
+          existingEmails={existingEmails.filter(
+            (e) => e !== responsibles[index]?.email?.trim().toLowerCase()
+          )}
           academicPeriodId={academicPeriodId}
         />
       ))}
@@ -80,7 +83,12 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps) {
 
       {/* Add button */}
       {!isAdding && (
-        <Button type="button" variant="outline" onClick={() => setIsAdding(true)} className="w-full">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setIsAdding(true)}
+          className="w-full"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Responsável
         </Button>

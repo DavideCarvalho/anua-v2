@@ -6,7 +6,7 @@ export function useUnlikePostMutation() {
 
   return useMutation({
     mutationFn: (id: string) => {
-      return tuyau.$route('api.v1.posts.unlike', { id }).$delete({}).unwrap()
+      return tuyau.$route('api.v1.posts.unlike', { id }).$post({}).unwrap()
     },
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] })

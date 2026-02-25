@@ -1,9 +1,9 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense, useState } from 'react'
 import { BarChart3, ClipboardList, GraduationCap } from 'lucide-react'
 
 import { EscolaLayout } from '../../components/layouts'
-import type { SharedProps } from '../../lib/types'
+import { useAuthUser } from '../../stores/auth_store'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Card, CardContent } from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
@@ -40,8 +40,8 @@ function EnrollmentsTableSkeleton() {
 }
 
 export default function MatriculasPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.school?.id
+  const user = useAuthUser()
+  const schoolId = user?.school?.id
   const [activeTab, setActiveTab] = useState('management')
 
   return (
@@ -54,9 +54,7 @@ export default function MatriculasPage() {
             <GraduationCap className="h-6 w-6" />
             Matrículas
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie matrículas e acompanhe analytics
-          </p>
+          <p className="text-muted-foreground">Gerencie matrículas e acompanhe analytics</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

@@ -24,12 +24,9 @@ import { toast } from 'sonner'
 import {
   useOwnFinancialQueryOptions,
   useOwnSettlementsQueryOptions,
-  type OwnSettlementsResponse,
 } from '../hooks/queries/use_store_owner'
 import { useUpdateFinancialSettings } from '../hooks/mutations/use_store_owner_mutations'
 import { formatCurrency } from '../lib/utils'
-
-type Settlement = NonNullable<OwnSettlementsResponse>['data'][number]
 
 const SETTLEMENT_STATUS_LABELS: Record<string, string> = {
   PENDING: 'Pendente',
@@ -40,7 +37,10 @@ const SETTLEMENT_STATUS_LABELS: Record<string, string> = {
   CANCELLED: 'Cancelado',
 }
 
-const SETTLEMENT_STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+const SETTLEMENT_STATUS_VARIANTS: Record<
+  string,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
   PENDING: 'outline',
   APPROVED: 'secondary',
   PROCESSING: 'secondary',
@@ -68,7 +68,7 @@ export function StoreOwnerFinancialContainer() {
   const updateSettings = useUpdateFinancialSettings()
 
   const [pixKey, setPixKey] = useState('')
-  const [pixKeyType, setPixKeyType] = useState('CPF')
+  const [pixKeyType, setPixKeyType] = useState<'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'>('CPF')
   const [bankName, setBankName] = useState('')
   const [accountHolder, setAccountHolder] = useState('')
 
@@ -116,7 +116,20 @@ export function StoreOwnerFinancialContainer() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="pixKeyType">Tipo da Chave PIX</Label>
-                  <Select value={pixKeyType} onValueChange={setPixKeyType}>
+                  <Select
+                    value={pixKeyType}
+                    onValueChange={(value) => {
+                      if (
+                        value === 'CPF' ||
+                        value === 'CNPJ' ||
+                        value === 'EMAIL' ||
+                        value === 'PHONE' ||
+                        value === 'RANDOM'
+                      ) {
+                        setPixKeyType(value)
+                      }
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -131,11 +144,7 @@ export function StoreOwnerFinancialContainer() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pixKey">Chave PIX</Label>
-                  <Input
-                    id="pixKey"
-                    value={pixKey}
-                    onChange={(e) => setPixKey(e.target.value)}
-                  />
+                  <Input id="pixKey" value={pixKey} onChange={(e) => setPixKey(e.target.value)} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -174,9 +183,7 @@ export function StoreOwnerFinancialContainer() {
           {settlementsLoading ? (
             <div className="text-center py-4 text-muted-foreground">Carregando...</div>
           ) : !settlements.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum repasse registrado
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhum repasse registrado</div>
           ) : (
             <Table>
               <TableHeader>

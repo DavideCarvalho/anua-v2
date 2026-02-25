@@ -24,7 +24,9 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
   const { data: settings, isLoading } = useQuery(useStoreFinancialSettingsQueryOptions(storeId))
 
   const [pixKey, setPixKey] = useState('')
-  const [pixKeyType, setPixKeyType] = useState('')
+  const [pixKeyType, setPixKeyType] = useState<'' | 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'>(
+    ''
+  )
   const [bankName, setBankName] = useState('')
   const [accountHolder, setAccountHolder] = useState('')
 
@@ -64,9 +66,7 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
     <Card>
       <CardHeader>
         <CardTitle>Configurações Financeiras</CardTitle>
-        <CardDescription>
-          Dados bancários para repasse.
-        </CardDescription>
+        <CardDescription>Dados bancários para repasse.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
@@ -82,7 +82,21 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
 
           <div className="space-y-2">
             <Label htmlFor="pixKeyType">Tipo da Chave</Label>
-            <Select value={pixKeyType} onValueChange={setPixKeyType}>
+            <Select
+              value={pixKeyType}
+              onValueChange={(value) => {
+                if (
+                  value === '' ||
+                  value === 'CPF' ||
+                  value === 'CNPJ' ||
+                  value === 'EMAIL' ||
+                  value === 'PHONE' ||
+                  value === 'RANDOM'
+                ) {
+                  setPixKeyType(value)
+                }
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>

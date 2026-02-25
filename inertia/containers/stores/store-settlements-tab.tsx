@@ -39,9 +39,7 @@ export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !settlementsList.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum repasse encontrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum repasse encontrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -55,17 +53,17 @@ export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {settlementsList.map((s) => (
+              {settlementsList.map((s: (typeof settlementsList)[number]) => (
                 <TableRow key={s.id}>
-                  <TableCell>{String(s.month).padStart(2, '0')}/{s.year}</TableCell>
+                  <TableCell>
+                    {String(s.month).padStart(2, '0')}/{s.year}
+                  </TableCell>
                   <TableCell>{formatCurrency(s.totalSalesAmount)}</TableCell>
                   <TableCell>{formatCurrency(s.commissionAmount)}</TableCell>
                   <TableCell>{formatCurrency(s.platformFeeAmount)}</TableCell>
                   <TableCell className="font-medium">{formatCurrency(s.transferAmount)}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {statusLabels[s.status] ?? s.status}
-                    </Badge>
+                    <Badge variant="outline">{statusLabels[s.status] ?? s.status}</Badge>
                   </TableCell>
                 </TableRow>
               ))}

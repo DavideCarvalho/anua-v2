@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
-import { useStoreItemsQueryOptions, type StoreItemResponse } from '../../hooks/queries/use_stores'
+import { useStoreItemsQueryOptions, type StoreItemsResponse } from '../../hooks/queries/use_stores'
 import { useDeleteStoreItemMutationOptions } from '../../hooks/mutations/use_delete_store_item'
 import { CreateProductModal } from './create-product-modal'
 import { EditProductModal } from './edit-product-modal'
@@ -43,7 +43,9 @@ interface StoreProductsTabProps {
 export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
   const queryClient = useQueryClient()
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<StoreItemResponse | null>(null)
+  const [editingProduct, setEditingProduct] = useState<StoreItemsResponse['data'][number] | null>(
+    null
+  )
 
   const { data: items, isLoading } = useQuery(useStoreItemsQueryOptions({ storeId }))
 
@@ -75,9 +77,7 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : !itemsList.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum produto cadastrado
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado</div>
           ) : (
             <Table>
               <TableHeader>
@@ -147,7 +147,6 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
       {editingProduct && (
         <EditProductModal
           product={editingProduct}
-          storeId={storeId}
           open={!!editingProduct}
           onOpenChange={(open) => {
             if (!open) setEditingProduct(null)

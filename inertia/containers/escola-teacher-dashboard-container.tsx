@@ -1,6 +1,4 @@
-import { Suspense } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,
   AlertTriangle,
@@ -66,7 +64,15 @@ function TeacherDashboardError({
 }
 
 function TeacherDashboardContent() {
-  const { data } = useSuspenseQuery(useEscolaTeacherDashboardQueryOptions())
+  const { data, isLoading, error } = useQuery(useEscolaTeacherDashboardQueryOptions())
+
+  if (isLoading || !data) {
+    return <TeacherDashboardSkeleton />
+  }
+
+  if (error) {
+    return <TeacherDashboardError error={error as Error} resetErrorBoundary={() => {}} />
+  }
 
   const statCards = [
     {
@@ -144,20 +150,5 @@ function TeacherDashboardContent() {
 }
 
 export function EscolaTeacherDashboardContainer() {
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <TeacherDashboardError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<TeacherDashboardSkeleton />}>
-            <TeacherDashboardContent />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
-  )
+  return <TeacherDashboardContent />
 }

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -7,7 +7,7 @@ export type EventParticipantsResponse = InferResponseType<ReturnType<typeof reso
 
 interface UseEventParticipantsOptions {
   eventId: string
-  status?: 'REGISTERED' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
+  status?: 'INVITED' | 'CONFIRMED' | 'DECLINED' | 'ATTENDED' | 'ABSENT'
   page?: number
   limit?: number
 }
@@ -15,7 +15,7 @@ interface UseEventParticipantsOptions {
 export function useEventParticipantsQueryOptions(options: UseEventParticipantsOptions) {
   const { eventId, status, page = 1, limit = 50 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['event-participants', { eventId, status, page, limit }],
     queryFn: () => {
       return tuyau
@@ -24,9 +24,5 @@ export function useEventParticipantsQueryOptions(options: UseEventParticipantsOp
         .unwrap()
     },
     enabled: !!eventId,
-  }
-}
-
-export function useEventParticipants(options: UseEventParticipantsOptions) {
-  return useSuspenseQuery(useEventParticipantsQueryOptions(options))
+  })
 }

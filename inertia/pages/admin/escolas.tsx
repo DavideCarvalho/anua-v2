@@ -1,15 +1,8 @@
 import { Head, router } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
-import { Suspense, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  Building2,
-  Search,
-  Plus,
-  MoreHorizontal,
-  Eye,
-  Pencil,
-} from 'lucide-react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Building2, Search, Plus, MoreHorizontal, Eye, Pencil } from 'lucide-react'
 
 import { AdminLayout } from '../../components/layouts'
 import { Button } from '../../components/ui/button'
@@ -41,10 +34,12 @@ interface School {
 }
 
 function EscolasContent({ search }: { search: string }) {
-  const { data } = useSuspenseQuery(
-    useSchoolsQueryOptions({ search: search || undefined })
-  )
-  const schools: School[] = (data?.data ?? []) as any
+  const { data, isLoading } = useQuery(useSchoolsQueryOptions({ search: search || undefined }))
+  const schools: School[] = (data?.data ?? []) as School[]
+
+  if (isLoading) {
+    return <EscolasSkeleton />
+  }
 
   if (schools.length === 0) {
     return (
@@ -102,7 +97,9 @@ function EscolasContent({ search }: { search: string }) {
                         <Eye className="mr-2 h-4 w-4" />
                         Ver Detalhes
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.visit(`/admin/escolas/${school.id}/editar`)}>
+                      <DropdownMenuItem
+                        onClick={() => router.visit(`/admin/escolas/${school.id}/editar`)}
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
@@ -177,9 +174,7 @@ export default function AdminEscolasPage() {
           </Button>
         </div>
 
-        <Suspense fallback={<EscolasSkeleton />}>
-          <EscolasContent search={search} />
-        </Suspense>
+        <EscolasContent search={search} />
       </div>
     </AdminLayout>
   )

@@ -30,7 +30,10 @@ import {
 } from '../../../components/ui/select'
 import { Button } from '../../../components/ui/button'
 import { Skeleton } from '../../../components/ui/skeleton'
-import { useSubscriptionInvoicesQueryOptions } from '../../../hooks/queries/use_subscription_invoices'
+import {
+  useSubscriptionInvoicesQueryOptions,
+  type SubscriptionInvoicesResponse,
+} from '../../../hooks/queries/use_subscription_invoices'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../../lib/formatters'
 
 const STATUS_OPTIONS = [
@@ -72,22 +75,29 @@ export default function BillingFaturasPage() {
   const [search, setSearch] = useQueryState('search', parseAsString)
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1))
 
+  const normalizedStatus =
+    status === 'PENDING' ||
+    status === 'PAID' ||
+    status === 'OVERDUE' ||
+    status === 'CANCELED' ||
+    status === 'REFUNDED'
+      ? status
+      : undefined
+
   const { data, isLoading, isError, error, refetch } = useQuery(
     useSubscriptionInvoicesQueryOptions({
-      status: status || undefined,
+      status: normalizedStatus,
       page,
       limit: 20,
     })
   )
 
-  const invoices = (data as any)?.data || []
-  const meta = (data as any)?.meta
+  const invoices = (data?.data ?? []) as SubscriptionInvoicesResponse['data']
+  const meta = data?.meta
 
   const filteredInvoices = search
-    ? invoices.filter((invoice: any) =>
-        invoice.subscription?.school?.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
+    ? invoices.filter((invoice) =>
+        invoice.subscription?.school?.name?.toLowerCase().includes(search.toLowerCase())
       )
     : invoices
 
@@ -198,7 +208,10 @@ export default function BillingFaturasPage() {
                           <TableCell>{brazilianRealFormatter(invoice.amount / 100)}</TableCell>
                           <TableCell>{brazilianDateFormatter(invoice.dueDate)}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={STATUS_COLORS[invoice.status] || ''}>
+                            <Badge
+                              variant="outline"
+                              className={STATUS_COLORS[invoice.status] || ''}
+                            >
                               {STATUS_LABELS[invoice.status] || invoice.status}
                             </Badge>
                           </TableCell>

@@ -21,11 +21,10 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useUpdateStoreItemMutationOptions } from '../../hooks/mutations/use_update_store_item'
-import type { StoreItemResponse } from '../../hooks/queries/use_stores'
+import type { StoreItemsResponse } from '../../hooks/queries/use_stores'
 
 interface Props {
-  product: StoreItemResponse
-  storeId: string
+  product: StoreItemsResponse['data'][number]
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -41,7 +40,7 @@ const CATEGORIES = [
   { value: 'OTHER', label: 'Outro' },
 ] as const
 
-export function EditProductModal({ product, storeId, open, onOpenChange }: Props) {
+export function EditProductModal({ product, open, onOpenChange }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
@@ -95,12 +94,7 @@ export function EditProductModal({ product, storeId, open, onOpenChange }: Props
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-name">Nome</Label>
-            <Input
-              id="edit-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-description">Descrição</Label>
@@ -113,11 +107,7 @@ export function EditProductModal({ product, storeId, open, onOpenChange }: Props
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-price">Preço</Label>
-              <CurrencyInput
-                id="edit-price"
-                value={price}
-                onChange={setPrice}
-              />
+              <CurrencyInput id="edit-price" value={price} onChange={setPrice} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-category">Categoria</Label>

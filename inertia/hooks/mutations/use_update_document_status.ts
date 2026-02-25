@@ -15,7 +15,7 @@ export function useUpdateDocumentStatusMutation() {
       const { id, status, rejectionReason } = data
       return tuyau
         .$route('api.v1.enrollments.documents.updateStatus', { id })
-        .$put({ status, rejectionReason })
+        .$patch({ status, rejectionReason })
         .unwrap()
     },
     onSuccess: () => {

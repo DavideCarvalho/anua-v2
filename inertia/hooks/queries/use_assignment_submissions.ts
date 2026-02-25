@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -16,7 +16,7 @@ interface UseAssignmentSubmissionsOptions {
 export function useAssignmentSubmissionsQueryOptions(options: UseAssignmentSubmissionsOptions) {
   const { assignmentId, page = 1, limit = 20 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['assignment-submissions', { assignmentId, page, limit }],
     queryFn: () => {
       return tuyau
@@ -25,9 +25,5 @@ export function useAssignmentSubmissionsQueryOptions(options: UseAssignmentSubmi
         .unwrap()
     },
     enabled: !!assignmentId,
-  }
-}
-
-export function useAssignmentSubmissions(options: UseAssignmentSubmissionsOptions) {
-  return useSuspenseQuery(useAssignmentSubmissionsQueryOptions(options))
+  })
 }

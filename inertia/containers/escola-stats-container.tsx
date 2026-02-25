@@ -1,10 +1,7 @@
-import { Suspense } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useQuery } from '@tanstack/react-query'
 import { useEscolaStatsQueryOptions } from '../hooks/queries/use_escola_stats'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { Users, GraduationCap, DollarSign, TrendingUp, AlertCircle, CircleHelp } from 'lucide-react'
+import { Users, GraduationCap, DollarSign, TrendingUp, CircleHelp } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip'
 
 // Loading Skeleton
@@ -27,35 +24,24 @@ function EscolaStatsSkeleton() {
   )
 }
 
-// Error Fallback
-function EscolaStatsError({
-  error,
-  resetErrorBoundary,
-}: {
-  error: Error
-  resetErrorBoundary: () => void
-}) {
-  return (
-    <Card className="border-destructive">
-      <CardContent className="flex items-center gap-4 py-6">
-        <AlertCircle className="h-8 w-8 text-destructive" />
-        <div className="flex-1">
-          <h3 className="font-semibold text-destructive">Erro ao carregar estatísticas</h3>
-          <p className="text-sm text-muted-foreground">
-            {error.message || 'Ocorreu um erro inesperado'}
-          </p>
-        </div>
-        <Button variant="outline" onClick={resetErrorBoundary}>
-          Tentar novamente
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
-
 // Content Component
 function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
-  const { data: stats } = useSuspenseQuery(useEscolaStatsQueryOptions())
+  const { data: stats, isLoading, error } = useQuery(useEscolaStatsQueryOptions())
+
+  if (isLoading || !stats) {
+    return <EscolaStatsSkeleton />
+  }
+
+  if (error) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="py-6 text-sm text-destructive">
+          Erro ao carregar estatísticas
+        </CardContent>
+      </Card>
+    )
+  }
+
   const monthlyRevenue = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -143,20 +129,5 @@ export function EscolaStatsContainer({
 }: {
   hideFinancialValues?: boolean
 }) {
-  return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <EscolaStatsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<EscolaStatsSkeleton />}>
-            <EscolaStatsContent hideFinancialValues={hideFinancialValues} />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
-  )
+  return <EscolaStatsContent hideFinancialValues={hideFinancialValues} />
 }

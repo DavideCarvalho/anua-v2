@@ -1,15 +1,15 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { ArrowLeft } from 'lucide-react'
 
-import type { SharedProps } from '~/lib/types'
 import { EscolaLayout } from '~/components/layouts'
 import { NewAcademicPeriodForm } from '~/containers/academic-periods/new-academic-period-form'
 import { Button } from '~/components/ui/button'
+import { useAuthUser } from '~/stores/auth_store'
 
 export default function NovoPeriodoLetivoPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   return (
     <EscolaLayout>
@@ -24,18 +24,14 @@ export default function NovoPeriodoLetivoPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Novo Período Letivo</h1>
-            <p className="text-muted-foreground">
-              Configure um novo período letivo para a escola
-            </p>
+            <p className="text-muted-foreground">Configure um novo período letivo para a escola</p>
           </div>
         </div>
 
         {schoolId ? (
           <NewAcademicPeriodForm schoolId={schoolId} />
         ) : (
-          <div className="text-sm text-muted-foreground">
-            Escola não encontrada no contexto.
-          </div>
+          <div className="text-sm text-muted-foreground">Escola não encontrada no contexto.</div>
         )}
       </div>
     </EscolaLayout>

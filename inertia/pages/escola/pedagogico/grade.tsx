@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import { EscolaLayout } from '../../../components/layouts'
 import {
@@ -12,11 +11,11 @@ import {
 import { buttonVariants } from '../../../components/ui/button'
 import { Calendar, Clock, BookOpen } from 'lucide-react'
 import { cn } from '../../../lib/utils'
-import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 export default function GradePage() {
-  const { props } = usePage<SharedProps>()
-  const isSchoolTeacher = props.user?.role?.name === 'SCHOOL_TEACHER'
+  const user = useAuthUser()
+  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
 
   return (
     <EscolaLayout>

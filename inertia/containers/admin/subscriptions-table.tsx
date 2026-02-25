@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   CreditCard,
   Building2,
@@ -80,7 +80,7 @@ const billingCycleLabels: Record<string, string> = {
 }
 
 export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
-  const { data } = useSuspenseQuery(useSubscriptionsQueryOptions({ status }))
+  const { data, isLoading } = useQuery(useSubscriptionsQueryOptions({ status }))
   const queryClient = useQueryClient()
   const cancelMutation = useMutation(useCancelSubscriptionMutationOptions())
   const pauseMutation = useMutation(usePauseSubscriptionMutationOptions())
@@ -117,6 +117,16 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
       await reactivateMutation.mutateAsync(id)
       await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
     } catch {}
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando assinaturas...
+        </CardContent>
+      </Card>
+    )
   }
 
   if (subscriptions.length === 0) {

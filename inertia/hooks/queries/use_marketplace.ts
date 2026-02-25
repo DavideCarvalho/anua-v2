@@ -62,6 +62,9 @@ export function useInstallmentOptionsQueryOptions(storeId: string, amount: numbe
 }
 
 // My orders
+const resolveMyOrdersRoute = () => tuyau.api.v1.marketplace.orders.$get
+export type MyOrdersResponse = InferResponseType<ReturnType<typeof resolveMyOrdersRoute>>
+
 export function useMyOrdersQueryOptions(query?: {
   studentId?: string
   status?: string
@@ -75,6 +78,6 @@ export function useMyOrdersQueryOptions(query?: {
   }
   return queryOptions({
     queryKey: ['marketplace', 'orders', mergedQuery],
-    queryFn: () => tuyau.api.v1.marketplace.orders.$get({ query: mergedQuery }).unwrap(),
+    queryFn: () => resolveMyOrdersRoute()({ query: mergedQuery }).unwrap(),
   })
 }

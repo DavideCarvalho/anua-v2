@@ -37,6 +37,6 @@ export default class ListMyOrdersController {
     if (status) query.where('status', status)
 
     const orders = await query.paginate(page, limit)
-    return response.ok(orders)
+    return response.ok(orders.serialize())
   }
 }

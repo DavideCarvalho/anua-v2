@@ -1,4 +1,4 @@
-import { QueryErrorResetBoundary } from '@tanstack/react-query'
+import { QueryErrorResetBoundary, useQuery } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { format } from 'date-fns'
@@ -35,16 +35,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { useGamificationEvents } from '../../hooks/queries/use_gamification_events'
+import { useGamificationEventsQueryOptions } from '../../hooks/queries/use_gamification_events'
 import { useRetryGamificationEvent } from '../../hooks/mutations/use_gamification_event_mutations'
 
 const EVENT_TYPES = [
-  { value: 'ATTENDANCE', label: 'Presenca' },
-  { value: 'GRADE', label: 'Nota' },
-  { value: 'ASSIGNMENT', label: 'Atividade' },
-  { value: 'BEHAVIOR', label: 'Comportamento' },
-  { value: 'ACHIEVEMENT', label: 'Conquista' },
-  { value: 'CUSTOM', label: 'Personalizado' },
+  { value: 'ATTENDANCE_PRESENT', label: 'Presenca' },
+  { value: 'GRADE_RECEIVED', label: 'Nota' },
+  { value: 'ASSIGNMENT_COMPLETED', label: 'Atividade' },
+  { value: 'BEHAVIOR_POSITIVE', label: 'Comportamento' },
+  { value: 'ACHIEVEMENT_UNLOCKED', label: 'Conquista' },
+  { value: 'STORE_PURCHASE', label: 'Loja' },
 ]
 
 const STATUS_CONFIG = {
@@ -85,7 +85,10 @@ export function GamificationEventsTable() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <GamificationEventsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <GamificationEventsErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <GamificationEventsTableContent />
@@ -96,6 +99,14 @@ export function GamificationEventsTable() {
 }
 
 function GamificationEventsTableContent() {
+  type GamificationEventType =
+    | 'ATTENDANCE_PRESENT'
+    | 'GRADE_RECEIVED'
+    | 'ASSIGNMENT_COMPLETED'
+    | 'BEHAVIOR_POSITIVE'
+    | 'ACHIEVEMENT_UNLOCKED'
+    | 'STORE_PURCHASE'
+
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     status: parseAsString.withDefault('all'),
@@ -106,17 +117,26 @@ function GamificationEventsTableContent() {
 
   const { status: statusFilter, type: typeFilter, page, limit } = filters
 
-  const { data: events } = useGamificationEvents({
-    status: statusFilter !== 'all' ? (statusFilter as 'PENDING' | 'PROCESSED' | 'FAILED') : undefined,
-    type: typeFilter !== 'all' ? typeFilter : undefined,
-    page,
-    limit,
-  })
+  const { data: events } = useQuery(
+    useGamificationEventsQueryOptions({
+      status:
+        statusFilter !== 'all' ? (statusFilter as 'PENDING' | 'PROCESSED' | 'FAILED') : undefined,
+      type: typeFilter !== 'all' ? (typeFilter as GamificationEventType) : undefined,
+      page,
+      limit,
+    })
+  )
 
   const retryEvent = useRetryGamificationEvent()
 
-  const eventsList = (events as any)?.data || []
-  const meta = (events as any)?.meta
+  const normalizedEvents = events as
+    | {
+        data?: Array<Record<string, unknown>>
+        meta?: { total: number; lastPage: number }
+      }
+    | undefined
+  const eventsList = normalizedEvents?.data ?? []
+  const meta = normalizedEvents?.meta
 
   const handleRetry = async (id: string) => {
     await retryEvent.mutateAsync(id)
@@ -131,9 +151,7 @@ function GamificationEventsTableContent() {
               <Zap className="h-5 w-5" />
               Eventos de Gamificacao
             </CardTitle>
-            <CardDescription>
-              Historico de eventos que geram pontos e conquistas
-            </CardDescription>
+            <CardDescription>Historico de eventos que geram pontos e conquistas</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -193,9 +211,12 @@ function GamificationEventsTableContent() {
               </TableHeader>
               <TableBody>
                 {eventsList.map((event: any) => {
-                  const status = STATUS_CONFIG[event.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.PENDING
+                  const status =
+                    STATUS_CONFIG[event.status as keyof typeof STATUS_CONFIG] ||
+                    STATUS_CONFIG.PENDING
                   const StatusIcon = status.icon
-                  const typeLabel = EVENT_TYPES.find((t) => t.value === event.eventType)?.label || event.eventType
+                  const typeLabel =
+                    EVENT_TYPES.find((t) => t.value === event.eventType)?.label || event.eventType
 
                   return (
                     <TableRow key={event.id}>
@@ -214,7 +235,9 @@ function GamificationEventsTableContent() {
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">
-                          {event.pointsAwarded > 0 ? `+${event.pointsAwarded}` : event.pointsAwarded || 0}
+                          {event.pointsAwarded > 0
+                            ? `+${event.pointsAwarded}`
+                            : event.pointsAwarded || 0}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -226,7 +249,7 @@ function GamificationEventsTableContent() {
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {format(new Date(event.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                        {format(new Date(event.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
                       </TableCell>
                       <TableCell>
                         {event.status === 'FAILED' && (

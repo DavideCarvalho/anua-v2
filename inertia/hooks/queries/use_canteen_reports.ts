@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -15,7 +15,7 @@ interface UseCanteenReportOptions {
 export function useCanteenReportQueryOptions(options: UseCanteenReportOptions) {
   const { canteenId, startDate, endDate, topItemsLimit = 5 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['canteen-report', { canteenId, startDate, endDate, topItemsLimit }],
     queryFn: () => {
       return tuyau
@@ -24,9 +24,5 @@ export function useCanteenReportQueryOptions(options: UseCanteenReportOptions) {
         .unwrap()
     },
     enabled: !!canteenId,
-  }
-}
-
-export function useCanteenReport(options: UseCanteenReportOptions) {
-  return useSuspenseQuery(useCanteenReportQueryOptions(options))
+  })
 }

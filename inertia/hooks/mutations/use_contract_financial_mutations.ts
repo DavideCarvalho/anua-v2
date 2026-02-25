@@ -6,34 +6,26 @@ interface AddPaymentDayPayload {
   day: number
 }
 
-export function addContractPaymentDayMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  AddPaymentDayPayload
-> {
-  return {
-    mutationFn: ({ contractId, day }) => {
+export function addContractPaymentDayMutationOptions() {
+  return mutationOptions({
+    mutationFn: ({ contractId, day }: AddPaymentDayPayload) => {
       return tuyau
         .$route('api.v1.contracts.paymentDays.store', { contractId })
         .$post({ contractId, day })
         .unwrap()
     },
-  }
+  })
 }
 
-export function removeContractPaymentDayMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  { contractId: string; id: string }
-> {
-  return {
-    mutationFn: ({ contractId, id }) => {
+export function removeContractPaymentDayMutationOptions() {
+  return mutationOptions({
+    mutationFn: ({ contractId, id }: { contractId: string; id: string }) => {
       return tuyau
         .$route('api.v1.contracts.paymentDays.destroy', { contractId, id })
         .$delete({})
         .unwrap()
     },
-  }
+  })
 }
 
 interface UpdateInterestPayload {
@@ -42,19 +34,15 @@ interface UpdateInterestPayload {
   delayInterestPerDayDelayed?: number
 }
 
-export function updateContractInterestConfigMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  UpdateInterestPayload
-> {
-  return {
-    mutationFn: ({ contractId, ...data }) => {
+export function updateContractInterestConfigMutationOptions() {
+  return mutationOptions({
+    mutationFn: ({ contractId, ...data }: UpdateInterestPayload) => {
       return tuyau
         .$route('api.v1.contracts.interestConfig.update', { contractId })
         .$put(data)
         .unwrap()
     },
-  }
+  })
 }
 
 interface AddDiscountPayload {
@@ -63,32 +51,24 @@ interface AddDiscountPayload {
   daysBeforeDeadline: number
 }
 
-export function addContractEarlyDiscountMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  AddDiscountPayload
-> {
-  return {
-    mutationFn: ({ contractId, percentage, daysBeforeDeadline }) => {
+export function addContractEarlyDiscountMutationOptions() {
+  return mutationOptions({
+    mutationFn: ({ contractId, percentage, daysBeforeDeadline }: AddDiscountPayload) => {
       return tuyau
         .$route('api.v1.contracts.earlyDiscounts.store', { contractId })
         .$post({ contractId, percentage, daysBeforeDeadline })
         .unwrap()
     },
-  }
+  })
 }
 
-export function removeContractEarlyDiscountMutationOptions(): MutationOptions<
-  unknown,
-  Error,
-  { contractId: string; id: string }
-> {
-  return {
-    mutationFn: ({ contractId, id }) => {
+export function removeContractEarlyDiscountMutationOptions() {
+  return mutationOptions({
+    mutationFn: ({ contractId, id }: { contractId: string; id: string }) => {
       return tuyau
         .$route('api.v1.contracts.earlyDiscounts.destroy', { contractId, id })
         .$delete({})
         .unwrap()
     },
-  }
+  })
 }

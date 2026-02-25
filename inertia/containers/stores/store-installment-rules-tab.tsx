@@ -40,7 +40,7 @@ interface StoreInstallmentRulesTabProps {
   storeId: string
 }
 
-type InstallmentRule = NonNullable<StoreInstallmentRulesResponse>['data'][number]
+type InstallmentRule = StoreInstallmentRulesResponse[number]
 
 export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabProps) {
   const [createOpen, setCreateOpen] = useState(false)
@@ -50,11 +50,9 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
 
   const queryClient = useQueryClient()
 
-  const { data: rulesData, isLoading } = useQuery(
-    useStoreInstallmentRulesQueryOptions({ storeId })
-  )
+  const { data: rulesData, isLoading } = useQuery(useStoreInstallmentRulesQueryOptions({ storeId }))
 
-  const rulesList = rulesData?.data ?? []
+  const rulesList = rulesData ?? []
 
   const createMutation = useMutation(useCreateStoreInstallmentRuleMutationOptions())
   const updateMutation = useMutation(useUpdateStoreInstallmentRuleMutationOptions())
@@ -145,7 +143,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rulesList.map((rule) => (
+                {rulesList.map((rule: InstallmentRule) => (
                   <TableRow key={rule.id}>
                     <TableCell>{formatCurrency(rule.minAmount)}</TableCell>
                     <TableCell>{rule.maxInstallments}x</TableCell>

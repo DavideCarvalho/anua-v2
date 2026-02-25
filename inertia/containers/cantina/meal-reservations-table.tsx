@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Calendar, User, Check, X, Utensils } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -38,13 +38,21 @@ const statusConfig: Record<
 }
 
 export function MealReservationsTable({ canteenId, date }: MealReservationsTableProps) {
-  const { data } = useSuspenseQuery(
-    useCanteenMealReservationsQueryOptions({ canteenId, date })
-  )
+  const { data, isLoading } = useQuery(useCanteenMealReservationsQueryOptions({ canteenId, date }))
   const updateStatusMutation = useUpdateCanteenMealReservationStatus()
   const cancelMutation = useCancelCanteenMealReservation()
 
   const reservations = (data as any)?.data ?? []
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando reservas...
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (reservations.length === 0) {
     return (
@@ -86,9 +94,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
-                        {reservation.student?.name || '-'}
-                      </span>
+                      <span className="font-medium">{reservation.student?.name || '-'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -139,7 +145,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                           onClick={() =>
                             updateStatusMutation.mutate({
                               id: reservation.id,
-                              status: 'DELIVERED',
+                              status: 'CONSUMED',
                             })
                           }
                         >

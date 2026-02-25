@@ -26,9 +26,11 @@ interface ExtraClass {
   contract?: {
     id: string
     name: string
+    amount?: number
     ammount: number
     paymentType: string
     installments: number
+    paymentDays?: Array<{ day: number }>
   }
   academicPeriod?: { id: string; name: string }
   enrollmentCount: number

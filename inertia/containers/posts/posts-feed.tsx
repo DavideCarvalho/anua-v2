@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Inbox } from 'lucide-react'
 
 import { Card, CardContent } from '../../components/ui/card'
@@ -13,9 +13,13 @@ interface PostsFeedProps {
 }
 
 export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) {
-  const { data } = useSuspenseQuery(usePostsQueryOptions({ schoolId, classId }))
+  const { data, isLoading } = useQuery(usePostsQueryOptions({ schoolId, classId }))
 
   const posts = (data as any)?.data ?? []
+
+  if (isLoading) {
+    return <PostsFeedSkeleton />
+  }
 
   if (posts.length === 0) {
     return (

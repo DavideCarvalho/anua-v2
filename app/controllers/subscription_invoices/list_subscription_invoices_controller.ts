@@ -32,6 +32,6 @@ export default class ListSubscriptionInvoicesController {
 
     const invoices = await query.paginate(page, limit)
 
-    return invoices
+    return invoices.serialize()
   }
 }

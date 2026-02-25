@@ -205,7 +205,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
         ) || [],
       contractDocuments:
         initialData?.contractDocuments?.map(
-          (doc: { id: string; name: string; description?: string; required: boolean }) => ({
+          (doc: { id: string; name: string; description: string | null; required: boolean }) => ({
             id: doc.id,
             name: doc.name,
             description: doc.description || '',

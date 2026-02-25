@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { ShoppingCart, Check, X, Truck, Clock, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -25,12 +25,35 @@ import {
 
 interface StoreOrdersTableProps {
   schoolId: string
-  status?: string
+  status?:
+    | 'PENDING_APPROVAL'
+    | 'REJECTED'
+    | 'APPROVED'
+    | 'PENDING_PAYMENT'
+    | 'PREPARING'
+    | 'READY'
+    | 'DELIVERED'
+    | 'CANCELED'
 }
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
-  PENDING_APPROVAL: { label: 'Aguardando', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
-  PENDING_PAYMENT: { label: 'Pend. Pagamento', variant: 'outline', icon: <AlertCircle className="h-3 w-3" /> },
+const statusConfig: Record<
+  string,
+  {
+    label: string
+    variant: 'default' | 'secondary' | 'destructive' | 'outline'
+    icon: React.ReactNode
+  }
+> = {
+  PENDING_APPROVAL: {
+    label: 'Aguardando',
+    variant: 'secondary',
+    icon: <Clock className="h-3 w-3" />,
+  },
+  PENDING_PAYMENT: {
+    label: 'Pend. Pagamento',
+    variant: 'outline',
+    icon: <AlertCircle className="h-3 w-3" />,
+  },
   APPROVED: { label: 'Aprovado', variant: 'default', icon: <Check className="h-3 w-3" /> },
   PREPARING: { label: 'Preparando', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
   READY: { label: 'Pronto', variant: 'default', icon: <Check className="h-3 w-3" /> },
@@ -40,7 +63,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 }
 
 export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
-  const { data } = useSuspenseQuery(useStoreOrdersQueryOptions({ schoolId, status }))
+  const { data, isLoading } = useQuery(useStoreOrdersQueryOptions({ schoolId, status }))
   const approveMutation = useApproveStoreOrder()
   const rejectMutation = useRejectStoreOrder()
   const deliverMutation = useDeliverStoreOrder()
@@ -72,6 +95,16 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
     } catch {
       toast.error('Erro ao entregar pedido')
     }
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando pedidos...
+        </CardContent>
+      </Card>
+    )
   }
 
   if (orders.length === 0) {
@@ -113,14 +146,10 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
 
               return (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.student?.name || '-'}</TableCell>
-                  <TableCell>
-                    {order.items?.map((item) => item.storeItem?.name).join(', ') ||
-                      order.storeItem?.name ||
-                      '-'}
-                  </TableCell>
-                  <TableCell className="text-center">{order.quantity}</TableCell>
-                  <TableCell className="text-center font-medium">{order.totalPointsCost} pts</TableCell>
+                  <TableCell className="font-medium">{order.student?.user?.name || '-'}</TableCell>
+                  <TableCell>{order.orderNumber}</TableCell>
+                  <TableCell className="text-center">-</TableCell>
+                  <TableCell className="text-center font-medium">{order.totalPoints} pts</TableCell>
                   <TableCell>
                     <Badge variant={config.variant} className="gap-1">
                       {config.icon}

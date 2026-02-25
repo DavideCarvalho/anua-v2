@@ -226,7 +226,10 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
 
   // Combine API teachers with teachers from classData to ensure they appear in the list
   const teachers = useMemo(() => {
-    const apiTeachers = teachersData?.data ?? []
+    const apiTeachers = (teachersData?.data ?? []).map((teacher) => ({
+      id: teacher.id,
+      user: teacher.user ? { name: teacher.user.name } : undefined,
+    }))
 
     if (!classData?.teacherClasses) return apiTeachers
 
@@ -278,7 +281,8 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
     mutationFn: (data: EditClassFormValues) => {
       if (!classData) throw new Error('Turma não encontrada')
 
-      return tuyau.$route('api.v1.classes.update', { id: classData.id } as any)
+      return tuyau
+        .$route('api.v1.classes.update', { id: classData.id } as any)
         .$put({
           name: data.name,
           subjectsWithTeachers: data.subjectsWithTeachers,
@@ -320,9 +324,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
               className="mt-1"
             />
             {form.formState.errors.name && (
-              <p className="text-sm text-destructive mt-1">
-                {form.formState.errors.name.message}
-              </p>
+              <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
             )}
           </div>
 

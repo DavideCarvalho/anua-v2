@@ -39,11 +39,11 @@ export function useUpdateParticipantStatus() {
     }: {
       eventId: string
       participantId: string
-      status: 'REGISTERED' | 'CONFIRMED' | 'CANCELLED' | 'ATTENDED'
+      status: 'INVITED' | 'CONFIRMED' | 'DECLINED' | 'ATTENDED' | 'ABSENT'
     }) => {
       return tuyau
         .$route('api.v1.events.participants.updateStatus', { eventId, participantId })
-        .$put({ status })
+        .$patch({ status })
         .unwrap()
     },
     onSuccess: (_data, variables) => {

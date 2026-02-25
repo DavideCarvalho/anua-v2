@@ -7,10 +7,7 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
-import {
-  useWalletTopUpsQueryOptions,
-  type WalletTopUpsResponse,
-} from '../../hooks/queries/use_wallet_topups'
+import { useWalletTopUpsQueryOptions } from '../../hooks/queries/use_wallet_topups'
 import { formatCurrency } from '../../lib/utils'
 
 const formatDate = (date: Date | string) => {
@@ -155,9 +152,7 @@ function TopUpHistoryContent({ studentId }: { studentId: string }) {
           <div className="py-12 text-center">
             <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Nenhuma recarga</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ainda não há recargas registradas.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Ainda não há recargas registradas.</p>
           </div>
         )}
       </CardContent>

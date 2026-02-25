@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
@@ -20,15 +20,15 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Label } from '~/components/ui/label'
-import type { SharedProps } from '~/lib/types'
+import { useAuthUser } from '~/stores/auth_store'
 
 interface Props {
   schoolId: string
 }
 
 export default function AulasAvulsasPage({ schoolId }: Props) {
-  const { props } = usePage<SharedProps>()
-  const isSchoolTeacher = props.user?.role?.name === 'SCHOOL_TEACHER'
+  const user = useAuthUser()
+  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
 
   const [createOpen, setCreateOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)

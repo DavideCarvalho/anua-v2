@@ -56,7 +56,8 @@ const schema = z.object({
     .min(1, 'Adicione ao menos um horario'),
 })
 
-type FormValues = z.infer<typeof schema>
+type FormInput = z.input<typeof schema>
+type FormOutput = z.output<typeof schema>
 
 interface CreateExtraClassModalProps {
   schoolId: string
@@ -69,7 +70,7 @@ export function CreateExtraClassModal({
   open,
   onOpenChange,
 }: CreateExtraClassModalProps) {
-  const form = useForm<FormValues>({
+  const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
@@ -93,7 +94,7 @@ export function CreateExtraClassModal({
   const teachers = teachersData?.data ?? []
   const contracts = contractsData?.data ?? []
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: FormOutput) => {
     createMutation.mutate(
       {
         ...values,
@@ -171,7 +172,7 @@ export function CreateExtraClassModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teachers.map((t: any) => (
+                  {teachers.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.user?.name ?? t.id}
                     </SelectItem>
@@ -197,7 +198,7 @@ export function CreateExtraClassModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {contracts.map((c: any) => (
+                  {contracts.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
                     </SelectItem>
@@ -238,9 +239,17 @@ export function CreateExtraClassModal({
                 <div key={field.id} className="flex items-center gap-2">
                   <Select
                     value={String(form.watch(`schedules.${index}.weekDay`))}
-                    onValueChange={(v) =>
-                      form.setValue(`schedules.${index}.weekDay`, Number(v) as any)
-                    }
+                    onValueChange={(v) => {
+                      const schedules = form.getValues('schedules')
+                      const nextSchedules = schedules.map((schedule, scheduleIndex) =>
+                        scheduleIndex === index ? { ...schedule, weekDay: Number(v) } : schedule
+                      )
+
+                      form.setValue('schedules', nextSchedules, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }}
                   >
                     <SelectTrigger className="w-28">
                       <SelectValue />

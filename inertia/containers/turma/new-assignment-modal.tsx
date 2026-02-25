@@ -63,7 +63,7 @@ const DIRECTOR_ROLES = ['SCHOOL_DIRECTOR', 'SCHOOL_COORDINATOR', 'ADMIN', 'SUPER
 
 export function NewAssignmentModal({
   classId,
-  academicPeriodId,
+  academicPeriodId: _academicPeriodId,
   open,
   onOpenChange,
   user,
@@ -158,11 +158,7 @@ export function NewAssignmentModal({
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nome da atividade *</Label>
-              <Input
-                id="name"
-                {...form.register('name')}
-                placeholder="Ex: Trabalho sobre..."
-              />
+              <Input id="name" {...form.register('name')} placeholder="Ex: Trabalho sobre..." />
               {form.formState.errors.name && (
                 <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
               )}

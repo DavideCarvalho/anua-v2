@@ -12,9 +12,7 @@ export function useUpdateProfile() {
 
   return useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      const response = await tuyau
-        .$route('api.v1.responsavel.api.updateProfile')
-        .$put({ body: data })
+      const response = await tuyau.$route('api.v1.responsavel.api.updateProfile').$put(data)
 
       if (response.error) {
         throw new Error(

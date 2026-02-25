@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import { usePage } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { Trophy, Medal, Zap } from 'lucide-react'
 
@@ -8,7 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { LeaderboardsManagement } from '../../../containers/gamificacao/leaderboards-management'
 import { GamificationEventsTable } from '../../../containers/gamificacao/gamification-events-table'
-import type { SharedProps } from '../../../lib/types'
+import { useAuthUser } from '../../../stores/auth_store'
 
 function LeaderboardsSkeleton() {
   return (
@@ -47,8 +46,8 @@ function EventsSkeleton() {
 }
 
 export default function GamificacaoPage() {
-  const { props } = usePage<SharedProps>()
-  const schoolId = props.user?.schoolId
+  const user = useAuthUser()
+  const schoolId = user?.schoolId
 
   return (
     <EscolaLayout>

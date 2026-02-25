@@ -40,12 +40,16 @@ const CATEGORIES = [
   { value: 'OTHER', label: 'Outro' },
 ] as const
 
+function isCategoryValue(value: string): value is (typeof CATEGORIES)[number]['value'] {
+  return CATEGORIES.some((item) => item.value === value)
+}
+
 export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [category, setCategory] = useState<string>('OTHER')
+  const [category, setCategory] = useState<(typeof CATEGORIES)[number]['value']>('OTHER')
   const [totalStock, setTotalStock] = useState('')
 
   const createMutation = useMutation(useCreateStoreItemMutationOptions())
@@ -107,15 +111,18 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="create-price">Preço</Label>
-              <CurrencyInput
-                id="create-price"
-                value={price}
-                onChange={setPrice}
-              />
+              <CurrencyInput id="create-price" value={price} onChange={setPrice} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-category">Categoria</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select
+                value={category}
+                onValueChange={(value) => {
+                  if (isCategoryValue(value)) {
+                    setCategory(value)
+                  }
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

@@ -32,6 +32,6 @@ export default class ListStoreSettlementsController {
 
     const settlements = await query.paginate(page, limit)
 
-    return response.ok(settlements)
+    return response.ok(settlements.serialize())
   }
 }

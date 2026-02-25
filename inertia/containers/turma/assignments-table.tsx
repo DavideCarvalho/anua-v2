@@ -15,12 +15,7 @@ import {
 } from '~/components/ui/table'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { LaunchGradesModal } from './launch-grades-modal'
 import { useAssignmentsQueryOptions } from '~/hooks/queries/use_assignments'
 import { useDeleteAssignment } from '~/hooks/mutations/use_assignment_mutations'
@@ -102,13 +97,13 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
   }
 
   if (isError || !response) {
-    return (
-      <div className="text-center text-destructive py-8">Erro ao carregar atividades</div>
-    )
+    return <div className="text-center text-destructive py-8">Erro ao carregar atividades</div>
   }
 
   const assignments = (response as any).data || []
-  const meta = (response as any).meta as { total: number; perPage: number; currentPage: number; lastPage: number } | undefined
+  const meta = (response as any).meta as
+    | { total: number; perPage: number; currentPage: number; lastPage: number }
+    | undefined
 
   if (assignments.length === 0) {
     return <AssignmentsTableEmpty />
@@ -139,7 +134,7 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assignments.map((assignment) => {
+          {assignments.map((assignment: Assignment) => {
             const status = getStatus(assignment.dueDate)
             const hasGrades = (assignment.$extras?.submissionsCount || 0) > 0
 

@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useStoreItemsQueryOptions, type StoreItemsResponse } from '../../hooks/queries/use_store_items'
+import { useStoreItemsQueryOptions } from '../../hooks/queries/use_store_items'
 import { useToggleStoreItemMutationOptions } from '../../hooks/mutations/use_toggle_store_item'
 import { useDeleteStoreItemMutationOptions } from '../../hooks/mutations/use_delete_store_item'
 
@@ -59,7 +59,7 @@ const paymentModeLabels: Record<string, string> = {
 
 export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps) {
   const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(useStoreItemsQueryOptions({ schoolId }))
+  const { data, isLoading } = useQuery(useStoreItemsQueryOptions({ schoolId }))
   const toggleMutation = useMutation(useToggleStoreItemMutationOptions())
   const deleteMutation = useMutation(useDeleteStoreItemMutationOptions())
 
@@ -70,6 +70,16 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
       style: 'currency',
       currency: 'BRL',
     }).format(value)
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Carregando itens...
+        </CardContent>
+      </Card>
+    )
   }
 
   if (items.length === 0) {

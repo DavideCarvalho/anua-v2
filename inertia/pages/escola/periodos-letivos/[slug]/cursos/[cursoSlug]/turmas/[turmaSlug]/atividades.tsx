@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { usePage } from '@inertiajs/react'
 import { Plus } from 'lucide-react'
 
 import { EscolaLayout } from '../../../../../../../../components/layouts/escola-layout'
@@ -7,7 +6,7 @@ import { TurmaLayout } from '../../../../../../../../components/layouts/turma-la
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { AssignmentsTable, NewAssignmentModal } from '../../../../../../../../containers/turma'
-import type { SharedProps } from '~/lib/types'
+import { useAuthUser } from '~/stores/auth_store'
 
 interface Props {
   academicPeriodSlug: string
@@ -31,8 +30,7 @@ export default function TurmaAtividadesPage({
   className,
   courseName,
 }: Props) {
-  const { props } = usePage<SharedProps>()
-  const user = props.user
+  const user = useAuthUser()
   const [modalOpen, setModalOpen] = useState(false)
 
   return (
@@ -58,7 +56,11 @@ export default function TurmaAtividadesPage({
             </div>
           </CardHeader>
           <CardContent>
-            <AssignmentsTable classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
+            <AssignmentsTable
+              classId={classId}
+              courseId={courseId}
+              academicPeriodId={academicPeriodId}
+            />
           </CardContent>
         </Card>
 

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferResponseType } from '@tuyau/client'
 
@@ -9,7 +9,7 @@ export type StudentBalanceTransactionsResponse = InferResponseType<
 
 interface UseStudentBalanceTransactionsOptions {
   studentId?: string
-  type?: 'CREDIT' | 'DEBIT'
+  type?: 'TOP_UP' | 'CANTEEN_PURCHASE' | 'STORE_PURCHASE' | 'REFUND' | 'ADJUSTMENT'
   page?: number
   limit?: number
 }
@@ -19,7 +19,7 @@ export function useStudentBalanceTransactionsQueryOptions(
 ) {
   const { studentId, type, page = 1, limit = 20 } = options
 
-  return {
+  return queryOptions({
     queryKey: ['student-balance-transactions', { studentId, type, page, limit }],
     queryFn: () => {
       return tuyau
@@ -27,11 +27,7 @@ export function useStudentBalanceTransactionsQueryOptions(
         .$get({ query: { studentId, type, page, limit } })
         .unwrap()
     },
-  }
-}
-
-export function useStudentBalanceTransactions(options: UseStudentBalanceTransactionsOptions = {}) {
-  return useSuspenseQuery(useStudentBalanceTransactionsQueryOptions(options))
+  })
 }
 
 // Get single transaction
@@ -41,15 +37,11 @@ export type StudentBalanceTransactionResponse = InferResponseType<
 >
 
 export function useStudentBalanceTransactionQueryOptions(id: string) {
-  return {
+  return queryOptions({
     queryKey: ['student-balance-transaction', id],
     queryFn: () => {
       return tuyau.$route('api.v1.studentBalanceTransactions.show', { id }).$get().unwrap()
     },
     enabled: !!id,
-  }
-}
-
-export function useStudentBalanceTransaction(id: string) {
-  return useSuspenseQuery(useStudentBalanceTransactionQueryOptions(id))
+  })
 }
