@@ -54,8 +54,12 @@ function EscolaStatsError({
 }
 
 // Content Component
-function EscolaStatsContent() {
+function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
   const { data: stats } = useSuspenseQuery(useEscolaStatsQueryOptions())
+  const monthlyRevenue = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(stats.monthlyRevenue / 100)
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -111,10 +115,7 @@ function EscolaStatsContent() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }).format(stats.monthlyRevenue / 100)}
+            {hideFinancialValues ? 'R$ ****' : monthlyRevenue}
           </div>
           <p className="text-xs text-muted-foreground">
             Baseado em {stats.activeStudents} alunos ativos
@@ -137,7 +138,11 @@ function EscolaStatsContent() {
 }
 
 // Container Export
-export function EscolaStatsContainer() {
+export function EscolaStatsContainer({
+  hideFinancialValues = false,
+}: {
+  hideFinancialValues?: boolean
+}) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
@@ -148,7 +153,7 @@ export function EscolaStatsContainer() {
           )}
         >
           <Suspense fallback={<EscolaStatsSkeleton />}>
-            <EscolaStatsContent />
+            <EscolaStatsContent hideFinancialValues={hideFinancialValues} />
           </Suspense>
         </ErrorBoundary>
       )}

@@ -1,16 +1,32 @@
 import { Head, usePage } from '@inertiajs/react'
+import { useEffect, useState } from 'react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaStatsContainer } from '../../containers/escola-stats-container'
 import { EscolaInsightsContainer } from '../../containers/escola-insights-container'
 import { EscolaTeacherDashboardContainer } from '../../containers/escola-teacher-dashboard-container'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Users, DollarSign } from 'lucide-react'
+import { Users, DollarSign, Eye, EyeOff } from 'lucide-react'
+import { Button } from '../../components/ui/button'
 import type { SharedProps } from '../../lib/types'
+
+const HIDE_FINANCIAL_INFO_STORAGE_KEY = 'escola:hide-financial-info'
 
 export default function EscolaDashboard() {
   const { props } = usePage<SharedProps>()
   const user = props.user
   const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
+  const [hideFinancialInfo, setHideFinancialInfo] = useState(false)
+
+  useEffect(() => {
+    const storedPreference = window.localStorage.getItem(HIDE_FINANCIAL_INFO_STORAGE_KEY)
+    setHideFinancialInfo(storedPreference === 'true')
+  }, [])
+
+  const toggleFinancialInfoVisibility = () => {
+    const nextState = !hideFinancialInfo
+    setHideFinancialInfo(nextState)
+    window.localStorage.setItem(HIDE_FINANCIAL_INFO_STORAGE_KEY, String(nextState))
+  }
 
   return (
     <EscolaLayout>
@@ -29,8 +45,21 @@ export default function EscolaDashboard() {
           <EscolaTeacherDashboardContainer />
         ) : (
           <>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={toggleFinancialInfoVisibility}
+                className="gap-2"
+              >
+                {hideFinancialInfo ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                {hideFinancialInfo ? 'Mostrar valores' : 'Ocultar valores'}
+              </Button>
+            </div>
+
             {/* Stats container with Suspense */}
-            <EscolaStatsContainer />
+            <EscolaStatsContainer hideFinancialValues={hideFinancialInfo} />
 
             {/* Quick actions */}
             <div className="grid gap-4 md:grid-cols-2">
@@ -67,7 +96,7 @@ export default function EscolaDashboard() {
                 </CardContent>
               </Card>
 
-              <EscolaInsightsContainer />
+              <EscolaInsightsContainer hideFinancialValues={hideFinancialInfo} />
             </div>
           </>
         )}

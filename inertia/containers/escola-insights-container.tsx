@@ -70,7 +70,11 @@ function getMetadataNumber(
   return value
 }
 
-function formatInsightDescription(insight: Insight): string {
+function formatInsightDescription(insight: Insight, hideFinancialValues = false): string {
+  if (hideFinancialValues && insight.type === 'financial') {
+    return 'Informacao financeira oculta'
+  }
+
   if (insight.id === 'overdue-payments') {
     const totalAmountInCents = getMetadataNumber(insight.metadata, 'totalAmount')
     const avgDaysOverdue = getMetadataNumber(insight.metadata, 'avgDaysOverdue')
@@ -91,10 +95,19 @@ function formatInsightDescription(insight: Insight): string {
 }
 
 // Individual Insight Item
-function InsightItem({ insight, onClick }: { insight: Insight; onClick: () => void }) {
+function InsightItem({
+  insight,
+  onClick,
+  hideFinancialValues = false,
+}: {
+  insight: Insight
+  onClick: () => void
+  hideFinancialValues?: boolean
+}) {
   const Icon = iconMap[insight.icon] || AlertCircle
   const config = priorityConfig[insight.priority]
-  const displayDescription = formatInsightDescription(insight)
+  const displayDescription = formatInsightDescription(insight, hideFinancialValues)
+  const displayValue = hideFinancialValues && insight.type === 'financial' ? '***' : insight.value
 
   return (
     <button
@@ -112,7 +125,7 @@ function InsightItem({ insight, onClick }: { insight: Insight; onClick: () => vo
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <span className="font-medium text-sm">{insight.title}</span>
-            <span className="text-lg font-bold">{insight.value}</span>
+            <span className="text-lg font-bold">{displayValue}</span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{displayDescription}</p>
         </div>
@@ -126,16 +139,19 @@ function InsightDetailModal({
   insight,
   open,
   onOpenChange,
+  hideFinancialValues = false,
 }: {
   insight: Insight | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  hideFinancialValues?: boolean
 }) {
   if (!insight) return null
 
   const Icon = iconMap[insight.icon] || AlertCircle
   const config = priorityConfig[insight.priority]
-  const displayDescription = formatInsightDescription(insight)
+  const displayDescription = formatInsightDescription(insight, hideFinancialValues)
+  const displayValue = hideFinancialValues && insight.type === 'financial' ? '***' : insight.value
 
   // Build action URL based on insight type
   const getActionUrl = () => {
@@ -175,7 +191,7 @@ function InsightDetailModal({
 
         <div className="py-4">
           <div className="text-center py-6">
-            <div className="text-4xl font-bold mb-2">{insight.value}</div>
+            <div className="text-4xl font-bold mb-2">{displayValue}</div>
             <p className="text-sm text-muted-foreground">
               {insight.id === 'pending-delivery-orders' && 'pedido(s)'}
               {insight.type === 'financial' &&
@@ -256,7 +272,7 @@ function InsightsError({
 }
 
 // Content Component
-function InsightsContent() {
+function InsightsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
   const { data } = useSuspenseQuery(useEscolaInsightsQueryOptions())
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null)
 
@@ -297,6 +313,7 @@ function InsightsContent() {
                   key={insight.id}
                   insight={insight}
                   onClick={() => setSelectedInsight(insight)}
+                  hideFinancialValues={hideFinancialValues}
                 />
               ))}
               {hasMore && (
@@ -313,13 +330,18 @@ function InsightsContent() {
         insight={selectedInsight}
         open={!!selectedInsight}
         onOpenChange={(open) => !open && setSelectedInsight(null)}
+        hideFinancialValues={hideFinancialValues}
       />
     </>
   )
 }
 
 // Container Export
-export function EscolaInsightsContainer() {
+export function EscolaInsightsContainer({
+  hideFinancialValues = false,
+}: {
+  hideFinancialValues?: boolean
+}) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
@@ -330,7 +352,7 @@ export function EscolaInsightsContainer() {
           )}
         >
           <Suspense fallback={<InsightsSkeleton />}>
-            <InsightsContent />
+            <InsightsContent hideFinancialValues={hideFinancialValues} />
           </Suspense>
         </ErrorBoundary>
       )}
