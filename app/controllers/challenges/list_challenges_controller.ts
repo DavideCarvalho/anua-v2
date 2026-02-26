@@ -15,7 +15,10 @@ export default class ListChallengesController {
     const query = Challenge.query().orderBy('name', 'asc')
 
     if (schoolId) {
-      query.where('schoolId', schoolId)
+      const sid = schoolId
+      query.where((q) => {
+        q.where('schoolId', sid).orWhereNull('schoolId')
+      })
     }
 
     if (payload.category) {

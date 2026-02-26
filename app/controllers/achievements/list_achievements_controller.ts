@@ -22,7 +22,10 @@ export default class ListAchievementsController {
     const query = Achievement.query().orderBy('name', 'asc')
 
     if (payload.schoolId) {
-      query.where('schoolId', payload.schoolId)
+      const schoolId = payload.schoolId
+      query.where((q) => {
+        q.where('schoolId', schoolId).orWhereNull('schoolId')
+      })
     }
 
     if (payload.category) {
