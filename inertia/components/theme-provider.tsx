@@ -28,14 +28,16 @@ export function ThemeProvider({
   storageKey = 'anua-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem(storageKey) as Theme) || defaultTheme
-    }
-    return defaultTheme
-  })
+  const [theme, setTheme] = useState<Theme>(defaultTheme)
 
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('light')
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null
+    if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system') {
+      setTheme(storedTheme)
+    }
+  }, [storageKey])
 
   useEffect(() => {
     const root = window.document.documentElement
