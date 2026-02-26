@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
+import GamificationEventDto from '#models/dto/gamification_event.dto'
 import { createGamificationEventValidator } from '#validators/gamification'
 import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
@@ -30,6 +31,6 @@ export default class CreateGamificationEventController {
       query.preload('user')
     })
 
-    return response.created(event)
+    return response.created(new GamificationEventDto(event))
   }
 }

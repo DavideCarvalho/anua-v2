@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Leaderboard, { type LeaderboardType, type LeaderboardPeriod } from '#models/leaderboard'
+import LeaderboardDto from '#models/dto/leaderboard.dto'
 import { createLeaderboardValidator } from '#validators/gamification'
 
 // Map validator enum values to model enum values
@@ -40,6 +41,6 @@ export default class CreateLeaderboardController {
 
     const leaderboard = await Leaderboard.create(leaderboardData)
 
-    return response.created(leaderboard)
+    return response.created(new LeaderboardDto(leaderboard))
   }
 }

@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
+import GamificationEventDto from '#models/dto/gamification_event.dto'
 import { listGamificationEventsValidator } from '#validators/gamification'
 
 export default class ListGamificationEventsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const payload = await request.validateUsing(listGamificationEventsValidator)
 
     const page = payload.page ?? 1
@@ -30,6 +31,6 @@ export default class ListGamificationEventsController {
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    return response.ok(events)
+    return GamificationEventDto.fromPaginator(events)
   }
 }

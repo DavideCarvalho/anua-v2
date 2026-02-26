@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
+import StudentGamificationDto from '#models/dto/student_gamification.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowStudentGamificationController {
@@ -17,6 +18,6 @@ export default class ShowStudentGamificationController {
       throw AppException.notFound('Gamificação do aluno não encontrada')
     }
 
-    return response.ok(gamification)
+    return response.ok(new StudentGamificationDto(gamification))
   }
 }
