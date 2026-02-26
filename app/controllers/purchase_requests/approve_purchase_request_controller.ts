@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
+import PurchaseRequestDto from '#models/dto/purchase_request.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ApprovePurchaseRequestController {
@@ -23,6 +24,6 @@ export default class ApprovePurchaseRequestController {
     await purchaseRequest.save()
     await purchaseRequest.load('requestingUser')
 
-    return response.ok(purchaseRequest)
+    return response.ok(new PurchaseRequestDto(purchaseRequest))
   }
 }

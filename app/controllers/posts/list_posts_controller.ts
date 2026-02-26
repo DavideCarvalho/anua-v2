@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
+import PostDto from '#models/dto/post.dto'
 import { listPostsValidator } from '#validators/post'
 
 export default class ListPostsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const data = await request.validateUsing(listPostsValidator)
     const page = data.page ?? 1
     const limit = data.limit ?? 20
@@ -33,6 +34,6 @@ export default class ListPostsController {
 
     const posts = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
-    return response.ok(posts)
+    return PostDto.fromPaginator(posts)
   }
 }

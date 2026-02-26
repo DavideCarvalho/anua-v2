@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceClaim from '#models/insurance_claim'
+import InsuranceClaimActionResponseDto from '#models/dto/insurance_claim_action_response.dto'
 import { DateTime } from 'luxon'
 import { markClaimPaidValidator } from '#validators/insurance'
 import AppException from '#exceptions/app_exception'
@@ -28,11 +29,6 @@ export default class MarkClaimPaidController {
 
     // TODO: Send email confirmation to school
 
-    return response.ok({
-      id: claim.id,
-      status: claim.status,
-      paidAt: claim.paidAt.toISO(),
-      coveredAmount: claim.coveredAmount,
-    })
+    return response.ok(new InsuranceClaimActionResponseDto(claim))
   }
 }

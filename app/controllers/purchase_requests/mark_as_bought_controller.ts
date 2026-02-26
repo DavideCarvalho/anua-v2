@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
+import PurchaseRequestDto from '#models/dto/purchase_request.dto'
 import { markAsBoughtValidator } from '#validators/purchase_request'
 import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
@@ -35,6 +36,6 @@ export default class MarkAsBoughtController {
     await purchaseRequest.save()
     await purchaseRequest.load('requestingUser')
 
-    return response.ok(purchaseRequest)
+    return response.ok(new PurchaseRequestDto(purchaseRequest))
   }
 }

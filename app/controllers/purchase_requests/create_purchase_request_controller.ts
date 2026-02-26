@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
+import PurchaseRequestDto from '#models/dto/purchase_request.dto'
 import { createPurchaseRequestValidator } from '#validators/purchase_request'
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
@@ -24,6 +25,6 @@ export default class CreatePurchaseRequestController {
 
     await purchaseRequest.load('requestingUser')
 
-    return response.created(purchaseRequest)
+    return response.created(new PurchaseRequestDto(purchaseRequest))
   }
 }

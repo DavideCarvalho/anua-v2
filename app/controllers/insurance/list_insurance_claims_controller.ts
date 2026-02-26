@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceClaim from '#models/insurance_claim'
+import InsuranceClaimDto from '#models/dto/insurance_claim.dto'
 import { listInsuranceClaimsValidator } from '#validators/insurance'
 
 export default class ListInsuranceClaimsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const {
       schoolId,
       status,
@@ -49,44 +50,6 @@ export default class ListInsuranceClaimsController {
 
     const claims = await query.paginate(page, limit)
 
-    const formattedClaims = claims.all().map((claim) => ({
-      id: claim.id,
-      claimDate: claim.claimDate.toISODate(),
-      overdueAmount: claim.overdueAmount,
-      coveragePercentage: claim.coveragePercentage,
-      coveredAmount: claim.coveredAmount,
-      status: claim.status,
-      approvedAt: claim.approvedAt?.toISO(),
-      approvedBy: claim.approvedByUser
-        ? { id: claim.approvedByUser.id, name: claim.approvedByUser.name }
-        : null,
-      paidAt: claim.paidAt?.toISO(),
-      rejectedAt: claim.rejectedAt?.toISO(),
-      rejectedBy: claim.rejectedByUser
-        ? { id: claim.rejectedByUser.id, name: claim.rejectedByUser.name }
-        : null,
-      rejectionReason: claim.rejectionReason,
-      notes: claim.notes,
-      studentPayment: {
-        id: claim.studentPayment.id,
-        amount: claim.studentPayment.amount,
-        dueDate: claim.studentPayment.dueDate.toISODate(),
-        student: {
-          id: claim.studentPayment.student.id,
-          name: claim.studentPayment.student.user.name,
-          email: claim.studentPayment.student.user.email,
-        },
-      },
-    }))
-
-    return response.ok({
-      data: formattedClaims,
-      meta: {
-        total: claims.total,
-        page: claims.currentPage,
-        lastPage: claims.lastPage,
-        perPage: claims.perPage,
-      },
-    })
+    return InsuranceClaimDto.fromPaginator(claims)
   }
 }

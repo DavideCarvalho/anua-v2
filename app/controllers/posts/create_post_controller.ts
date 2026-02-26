@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
+import PostDto from '#models/dto/post.dto'
 import { createPostValidator } from '#validators/post'
 import { randomUUID } from 'node:crypto'
 
@@ -17,6 +18,6 @@ export default class CreatePostController {
     await post.load('user')
     await post.load('school')
 
-    return response.created(post)
+    return response.created(new PostDto(post))
   }
 }

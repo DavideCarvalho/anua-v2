@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import SchoolChain from '#models/school_chain'
+import InsuranceConfigResponseDto from '#models/dto/insurance_config_response.dto'
 import { getInsuranceConfigValidator } from '#validators/insurance'
 import AppException from '#exceptions/app_exception'
 
@@ -18,34 +19,36 @@ export default class GetInsuranceConfigController {
     const chain = school.schoolChain
     const config = this.resolveConfig(school, chain)
 
-    return response.ok({
-      schoolId: school.id,
-      schoolName: school.name,
-      chainId: chain?.id || null,
-      chainName: chain?.name || null,
-      config,
-      source: {
-        hasInsurance: school.hasInsurance !== null ? 'school' : chain ? 'chain' : 'default',
-        insurancePercentage:
-          school.insurancePercentage !== null
-            ? 'school'
-            : chain?.insurancePercentage
-              ? 'chain'
-              : 'default',
-        insuranceCoveragePercentage:
-          school.insuranceCoveragePercentage !== null
-            ? 'school'
-            : chain?.insuranceCoveragePercentage
-              ? 'chain'
-              : 'default',
-        insuranceClaimWaitingDays:
-          school.insuranceClaimWaitingDays !== null
-            ? 'school'
-            : chain?.insuranceClaimWaitingDays
-              ? 'chain'
-              : 'default',
-      },
-    })
+    return response.ok(
+      new InsuranceConfigResponseDto({
+        schoolId: school.id,
+        schoolName: school.name,
+        chainId: chain?.id || null,
+        chainName: chain?.name || null,
+        config,
+        source: {
+          hasInsurance: school.hasInsurance !== null ? 'school' : chain ? 'chain' : 'default',
+          insurancePercentage:
+            school.insurancePercentage !== null
+              ? 'school'
+              : chain?.insurancePercentage
+                ? 'chain'
+                : 'default',
+          insuranceCoveragePercentage:
+            school.insuranceCoveragePercentage !== null
+              ? 'school'
+              : chain?.insuranceCoveragePercentage
+                ? 'chain'
+                : 'default',
+          insuranceClaimWaitingDays:
+            school.insuranceClaimWaitingDays !== null
+              ? 'school'
+              : chain?.insuranceClaimWaitingDays
+                ? 'chain'
+                : 'default',
+        },
+      })
+    )
   }
 
   private resolveConfig(school: School, chain: SchoolChain | null) {

@@ -3,6 +3,7 @@ import InsuranceClaim from '#models/insurance_claim'
 import InsuranceBilling from '#models/insurance_billing'
 import StudentPayment from '#models/student_payment'
 import db from '@adonisjs/lucid/services/db'
+import InsuranceSchoolStatsResponseDto from '#models/dto/insurance_school_stats_response.dto'
 import { getSchoolInsuranceStatsValidator } from '#validators/insurance'
 
 export default class GetSchoolInsuranceStatsController {
@@ -69,24 +70,26 @@ export default class GetSchoolInsuranceStatsController {
     const defaultRate =
       totalPayments > 0 ? Math.round((overduePayments / totalPayments) * 10000) / 100 : 0
 
-    return response.ok({
-      insuredStudents: totalInsuredStudents,
-      totalStudents: totalSchoolStudents,
-      insuredPercentage:
-        totalSchoolStudents > 0
-          ? Math.round((totalInsuredStudents / totalSchoolStudents) * 100)
-          : 0,
-      activeClaims: totalActiveClaims,
-      defaultRate,
-      latestBilling: latestBilling
-        ? {
-            id: latestBilling.id,
-            period: latestBilling.period.toISODate(),
-            totalAmount: latestBilling.totalAmount,
-            status: latestBilling.status,
-            dueDate: latestBilling.dueDate.toISODate(),
-          }
-        : null,
-    })
+    return response.ok(
+      new InsuranceSchoolStatsResponseDto({
+        insuredStudents: totalInsuredStudents,
+        totalStudents: totalSchoolStudents,
+        insuredPercentage:
+          totalSchoolStudents > 0
+            ? Math.round((totalInsuredStudents / totalSchoolStudents) * 100)
+            : 0,
+        activeClaims: totalActiveClaims,
+        defaultRate,
+        latestBilling: latestBilling
+          ? {
+              id: latestBilling.id,
+              period: latestBilling.period.toISODate()!,
+              totalAmount: latestBilling.totalAmount,
+              status: latestBilling.status,
+              dueDate: latestBilling.dueDate.toISODate()!,
+            }
+          : null,
+      })
+    )
   }
 }

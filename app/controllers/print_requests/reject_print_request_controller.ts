@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PrintRequest from '#models/print_request'
+import PrintRequestDto from '#models/dto/print_request.dto'
 import { rejectPrintRequestValidator } from '#validators/print_request'
 import AppException from '#exceptions/app_exception'
 
@@ -16,6 +17,6 @@ export default class RejectPrintRequestController {
     printRequest.rejectedFeedback = reason
     await printRequest.save()
 
-    return response.ok(printRequest)
+    return response.ok(new PrintRequestDto(printRequest))
   }
 }
