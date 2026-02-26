@@ -39,7 +39,7 @@ import { useGamificationEventsQueryOptions } from '../../hooks/queries/use_gamif
 import { useRetryGamificationEvent } from '../../hooks/mutations/use_gamification_event_mutations'
 
 const EVENT_TYPES = [
-  { value: 'ATTENDANCE_PRESENT', label: 'Presenca' },
+  { value: 'ATTENDANCE_PRESENT', label: 'Presença' },
   { value: 'GRADE_RECEIVED', label: 'Nota' },
   { value: 'ASSIGNMENT_COMPLETED', label: 'Atividade' },
   { value: 'BEHAVIOR_POSITIVE', label: 'Comportamento' },
@@ -149,9 +149,9 @@ function GamificationEventsTableContent() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5" />
-              Eventos de Gamificacao
+              Eventos de Gamificação
             </CardTitle>
-            <CardDescription>Historico de eventos que geram pontos e conquistas</CardDescription>
+            <CardDescription>Histórico de eventos que geram pontos e conquistas</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -206,7 +206,7 @@ function GamificationEventsTableContent() {
                   <TableHead className="text-center">Pontos</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Data</TableHead>
-                  <TableHead className="w-[80px]">Acoes</TableHead>
+                  <TableHead className="w-[80px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -216,7 +216,7 @@ function GamificationEventsTableContent() {
                     STATUS_CONFIG.PENDING
                   const StatusIcon = status.icon
                   const typeLabel =
-                    EVENT_TYPES.find((t) => t.value === event.eventType)?.label || event.eventType
+                    EVENT_TYPES.find((t) => t.value === event.type)?.label || event.type
 
                   return (
                     <TableRow key={event.id}>
@@ -288,7 +288,7 @@ function GamificationEventsTableContent() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm">
-                    Pagina {page} de {meta.lastPage}
+                    Página {page} de {meta.lastPage}
                   </span>
                   <Button
                     variant="outline"
