@@ -15,13 +15,14 @@ module "api" {
   container_port = 3333
 
   env_vars = {
-    NODE_ENV       = var.environment
-    HOST           = "0.0.0.0"
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    APP_NAME       = "Anua"
-    APP_VERSION    = "0.0.0"
-    SESSION_DRIVER = "cookie"
+    NODE_ENV          = var.environment
+    HOST              = "0.0.0.0"
+    TZ                = "UTC"
+    LOG_LEVEL         = "info"
+    APP_NAME          = "Anua"
+    APP_VERSION       = "0.0.0"
+    SESSION_DRIVER    = "cookie"
+    DISABLE_SCHEDULER = "1"
     # Database (existing from school-super-app)
     DB_HOST     = "34.39.158.54"
     DB_PORT     = "5432"
