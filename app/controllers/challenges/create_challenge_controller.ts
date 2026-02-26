@@ -5,10 +5,10 @@ import { createChallengeValidator } from '#validators/gamification'
 import ChallengeDto from '#models/dto/challenge.dto'
 
 export default class CreateChallengeController {
-  async handle({ request, auth }: HttpContext) {
+  async handle({ request, effectiveUser }: HttpContext) {
     const payload = await request.validateUsing(createChallengeValidator)
 
-    const schoolId = payload.schoolId ?? auth.user?.schoolId
+    const schoolId = payload.schoolId ?? effectiveUser?.schoolId
 
     const challenge = await Challenge.create({
       name: payload.name,
