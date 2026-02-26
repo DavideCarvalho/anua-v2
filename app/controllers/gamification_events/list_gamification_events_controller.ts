@@ -12,12 +12,16 @@ export default class ListGamificationEventsController {
 
     const query = GamificationEvent.query()
 
-    // Filter by school - only show events from students of the selected schools
+    // Filter by school - only show events from active students of the selected schools
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
       query.whereHas('student', (studentQuery) => {
-        studentQuery.whereHas('user', (userQuery) => {
-          userQuery.whereIn('schoolId', selectedSchoolIds)
-        })
+        studentQuery
+          .whereHas('user', (userQuery) => {
+            userQuery.whereIn('schoolId', selectedSchoolIds)
+          })
+          .whereHas('levels', (levelQuery) => {
+            levelQuery.whereNull('deletedAt')
+          })
       })
     }
 
