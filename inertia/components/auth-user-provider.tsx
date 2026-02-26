@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { PropsWithChildren } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAuthUserQueryOptions } from '../hooks/queries/use_auth_user'
 import type { SharedProps } from '../lib/types'
 import { useAuthStore } from '../stores/auth_store'
@@ -12,8 +12,10 @@ interface AuthUserProviderProps extends PropsWithChildren {
 
 export function AuthUserProvider({ children, initialUser }: AuthUserProviderProps) {
   const [sharedUser, setSharedUser] = useState<SharedProps['user']>(initialUser)
+  const queryClient = useQueryClient()
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clearUser)
+  const prevUserIdRef = useRef<string | null>(initialUser?.id ?? null)
 
   useEffect(() => {
     const removeNavigateListener = router.on('navigate', (event) => {
@@ -39,12 +41,24 @@ export function AuthUserProvider({ children, initialUser }: AuthUserProviderProp
 
   useEffect(() => {
     if (data) {
+      const currentUserId = data.id
+
+      if (prevUserIdRef.current !== currentUserId) {
+        prevUserIdRef.current = currentUserId
+        queryClient.invalidateQueries({ queryKey: ['achievements'] })
+        queryClient.invalidateQueries({ queryKey: ['challenges'] })
+        queryClient.invalidateQueries({ queryKey: ['store-items'] })
+        queryClient.invalidateQueries({ queryKey: ['store-orders'] })
+        queryClient.invalidateQueries({ queryKey: ['leaderboards'] })
+        queryClient.invalidateQueries({ queryKey: ['user'] })
+      }
+
       setUser(data)
       return
     }
 
     clearUser()
-  }, [data, setUser, clearUser])
+  }, [data, setUser, clearUser, queryClient])
 
   return <>{children}</>
 }
