@@ -4,6 +4,7 @@ import Attendance from '#models/attendance'
 import AttendanceDto from '#models/dto/attendance.dto'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
 import { createAttendanceValidator } from '#validators/attendance'
+import { gamificationEventService } from '#services/gamification/gamification_event_service'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
@@ -23,7 +24,7 @@ export default class CreateAttendanceController {
     })
 
     // Create student attendance record
-    await StudentHasAttendance.create({
+    const studentAttendance = await StudentHasAttendance.create({
       studentId: data.studentId,
       attendanceId: attendance.id,
       status: mapStatus(data.status),
@@ -31,6 +32,21 @@ export default class CreateAttendanceController {
     })
 
     await attendance.load('calendarSlot')
+
+    // Trigger gamification event (creates event + dispatches job)
+    const status = studentAttendance.status
+    if (status === 'PRESENT' || status === 'LATE') {
+      gamificationEventService
+        .emitAttendanceMarked({
+          attendanceId: attendance.id,
+          studentId: data.studentId,
+          status,
+          date: attendance.date.toISO() || new Date().toISOString(),
+        })
+        .catch((err) => {
+          console.error('[Gamification] Failed to emit attendance event:', err)
+        })
+    }
 
     return response.created(new AttendanceDto(attendance))
   }
