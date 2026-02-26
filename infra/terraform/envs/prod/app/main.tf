@@ -472,6 +472,90 @@ module "dispatch_invoice_notifications" {
 }
 
 # ==============================================================================
+# CLOUD RUN JOBS - GAMIFICATION
+# ==============================================================================
+
+module "dispatch_gamification_retry" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-gamification-retry"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:gamification-retry"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "500m"
+  memory_limit = "256Mi"
+}
+
+module "dispatch_gamification_streaks" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-gamification-streaks"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:gamification-streaks"]
+
+  env_vars = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    # Database
+    DB_HOST     = "34.39.158.54"
+    DB_PORT     = "5432"
+    DB_USER     = "app_user"
+    DB_DATABASE = "school_super_app"
+  }
+
+  secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+  }
+
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "500m"
+  memory_limit = "256Mi"
+}
+
+# ==============================================================================
 # SERVICE ACCOUNT - CLOUD SCHEDULER
 # ==============================================================================
 
@@ -565,5 +649,31 @@ module "scheduler_occurrence_ack_reminders" {
   job_name              = "${var.environment}-${var.project_name}-dispatch-occurrence-ack-reminders"
   schedule              = "0 9 * * 1-5"
   cloud_run_job_name    = module.dispatch_occurrence_ack_reminders.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+# ==============================================================================
+# CLOUD SCHEDULER - GAMIFICATION
+# ==============================================================================
+
+module "scheduler_gamification_retry" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-gamification-retry"
+  schedule              = "*/15 * * * *"
+  cloud_run_job_name    = module.dispatch_gamification_retry.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_gamification_streaks" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-gamification-streaks"
+  schedule              = "0 0 * * *"
+  cloud_run_job_name    = module.dispatch_gamification_streaks.job_name
   service_account_email = google_service_account.scheduler.email
 }
