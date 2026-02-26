@@ -5,7 +5,6 @@ import { FileText, Calendar, Edit, Trash2, Eye } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import {
   Table,
@@ -44,28 +43,7 @@ export function AssignmentsList({
 
   const rows: AssignmentRow[] = data?.data ?? []
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PUBLISHED':
-        return <Badge variant="default">Publicada</Badge>
-      case 'DRAFT':
-        return (
-          <Badge variant="outline" className="bg-muted/60 text-muted-foreground">
-            Rascunho
-          </Badge>
-        )
-      case 'ARCHIVED':
-        return (
-          <Badge variant="outline" className="bg-muted/60 text-muted-foreground">
-            Arquivada
-          </Badge>
-        )
-      default:
-        return <Badge variant="outline">{status}</Badge>
-    }
-  }
-
-  const isOverdue = (dueDate: string) => new Date(dueDate) < new Date()
+  const isOverdue = (dueDate: Date | string) => new Date(dueDate) < new Date()
 
   if (rows.length === 0) {
     return (
@@ -99,7 +77,6 @@ export function AssignmentsList({
               <TableHead>Materia</TableHead>
               <TableHead className="text-center">Pontuacao</TableHead>
               <TableHead>Prazo</TableHead>
-              <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-right">Acoes</TableHead>
             </TableRow>
           </TableHeader>
@@ -113,18 +90,11 @@ export function AssignmentsList({
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span
-                      className={cn(
-                        isOverdue(assignment.dueDate) && assignment.status === 'PUBLISHED'
-                          ? 'text-red-500'
-                          : ''
-                      )}
-                    >
+                    <span className={cn(isOverdue(assignment.dueDate) ? 'text-red-500' : '')}>
                       {format(new Date(assignment.dueDate), 'dd/MM/yyyy', { locale: ptBR })}
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="text-center">{getStatusBadge(assignment.status)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     {onView && (

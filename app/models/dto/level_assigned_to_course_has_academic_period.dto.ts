@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import LevelDto from './level.dto.js'
+import CourseHasAcademicPeriodDto from './course_has_academic_period.dto.js'
 
 export default class LevelAssignedToCourseHasAcademicPeriodDto extends BaseModelDto {
   declare id: string
@@ -8,6 +9,7 @@ export default class LevelAssignedToCourseHasAcademicPeriodDto extends BaseModel
   declare courseHasAcademicPeriodId: string
   declare isActive: boolean
   declare level?: LevelDto
+  declare courseHasAcademicPeriod?: CourseHasAcademicPeriodDto
 
   constructor(levelAssigned?: LevelAssignedToCourseHasAcademicPeriod) {
     super()
@@ -19,5 +21,8 @@ export default class LevelAssignedToCourseHasAcademicPeriodDto extends BaseModel
     this.courseHasAcademicPeriodId = levelAssigned.courseHasAcademicPeriodId
     this.isActive = levelAssigned.isActive
     this.level = levelAssigned.level ? new LevelDto(levelAssigned.level) : undefined
+    this.courseHasAcademicPeriod = levelAssigned.courseHasAcademicPeriod
+      ? new CourseHasAcademicPeriodDto(levelAssigned.courseHasAcademicPeriod)
+      : undefined
   }
 }

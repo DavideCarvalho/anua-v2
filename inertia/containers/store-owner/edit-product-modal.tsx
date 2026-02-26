@@ -86,12 +86,7 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-name">Nome</Label>
-            <Input
-              id="edit-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-description">Descricao</Label>
@@ -104,15 +99,11 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-price">Preço</Label>
-              <CurrencyInput
-                id="edit-price"
-                value={price}
-                onChange={setPrice}
-              />
+              <CurrencyInput id="edit-price" value={price} onChange={setPrice} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-category">Categoria</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={(v) => setCategory(v as typeof category)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

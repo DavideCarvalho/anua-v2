@@ -6,6 +6,7 @@ import { ContractDto } from './contract.dto.js'
 import ScholarshipDto from './scholarship.dto.js'
 import LevelDto from './level.dto.js'
 import ClassDto from './class.dto.js'
+import LevelAssignedToCourseHasAcademicPeriodDto from './level_assigned_to_course_has_academic_period.dto.js'
 
 export default class StudentHasLevelDto extends BaseModelDto {
   declare id: string
@@ -34,6 +35,7 @@ export default class StudentHasLevelDto extends BaseModelDto {
   declare scholarship?: ScholarshipDto
   declare level?: LevelDto
   declare class?: ClassDto
+  declare levelAssignedToCourseAcademicPeriod?: LevelAssignedToCourseHasAcademicPeriodDto
 
   constructor(model?: StudentHasLevel) {
     super()
@@ -68,5 +70,8 @@ export default class StudentHasLevelDto extends BaseModelDto {
     this.scholarship = model.scholarship ? new ScholarshipDto(model.scholarship) : undefined
     this.level = model.level ? new LevelDto(model.level) : undefined
     this.class = model.class ? new ClassDto(model.class) : undefined
+    this.levelAssignedToCourseAcademicPeriod = model.levelAssignedToCourseAcademicPeriod
+      ? new LevelAssignedToCourseHasAcademicPeriodDto(model.levelAssignedToCourseAcademicPeriod)
+      : undefined
   }
 }

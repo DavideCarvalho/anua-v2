@@ -75,7 +75,7 @@ function ComunicadosContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{notification.body}</p>
+            <p className="text-sm text-muted-foreground">{notification.message}</p>
           </CardContent>
         </Card>
       ))}

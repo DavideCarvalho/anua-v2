@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import CourseDto from './course.dto.js'
 import LevelAssignedToCourseHasAcademicPeriodDto from './level_assigned_to_course_has_academic_period.dto.js'
+import AcademicPeriodDto from './academic_period.dto.js'
 
 export default class CourseHasAcademicPeriodDto extends BaseModelDto {
   declare id: string
@@ -11,6 +12,7 @@ export default class CourseHasAcademicPeriodDto extends BaseModelDto {
   declare updatedAt: Date | null
   declare course?: CourseDto
   declare levelAssignments?: LevelAssignedToCourseHasAcademicPeriodDto[]
+  declare academicPeriod?: AcademicPeriodDto
 
   constructor(model?: CourseHasAcademicPeriod) {
     super()
@@ -25,6 +27,9 @@ export default class CourseHasAcademicPeriodDto extends BaseModelDto {
     this.course = model.course ? new CourseDto(model.course) : undefined
     this.levelAssignments = model.levelAssignments
       ? LevelAssignedToCourseHasAcademicPeriodDto.fromArray(model.levelAssignments)
+      : undefined
+    this.academicPeriod = model.academicPeriod
+      ? new AcademicPeriodDto(model.academicPeriod)
       : undefined
   }
 }

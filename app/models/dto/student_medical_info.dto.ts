@@ -1,5 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentMedicalInfo from '#models/student_medical_info'
+import StudentMedicationDto from './student_medication.dto.js'
 
 export default class StudentMedicalInfoDto extends BaseModelDto {
   declare id: string
@@ -8,6 +9,7 @@ export default class StudentMedicalInfoDto extends BaseModelDto {
   declare documents: Array<{ name: string; url: string }> | null
   declare createdAt: Date
   declare updatedAt: Date
+  declare medications?: StudentMedicationDto[]
 
   constructor(model?: StudentMedicalInfo) {
     super()
@@ -20,5 +22,8 @@ export default class StudentMedicalInfoDto extends BaseModelDto {
     this.documents = model.documents
     this.createdAt = model.createdAt.toJSDate()
     this.updatedAt = model.updatedAt.toJSDate()
+    this.medications = model.medications
+      ? StudentMedicationDto.fromArray(model.medications)
+      : undefined
   }
 }

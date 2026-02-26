@@ -89,7 +89,10 @@ export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTable
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <InsuranceBillingsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <InsuranceBillingsErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <InsuranceBillingsTableContent onViewDetails={onViewDetails} />
@@ -240,22 +243,22 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
           {meta && (
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Página {meta.page} de {meta.lastPage}
+                Página {meta.currentPage} de {meta.lastPage}
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.page <= 1}
-                  onClick={() => setFilters({ page: meta.page - 1 })}
+                  disabled={meta.currentPage <= 1}
+                  onClick={() => setFilters({ page: meta.currentPage - 1 })}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.page >= meta.lastPage}
-                  onClick={() => setFilters({ page: meta.page + 1 })}
+                  disabled={meta.currentPage >= meta.lastPage}
+                  onClick={() => setFilters({ page: meta.currentPage + 1 })}
                 >
                   Próxima
                 </Button>

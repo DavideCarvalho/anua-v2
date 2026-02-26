@@ -7,24 +7,17 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 
-import { useNotificationsQueryOptions } from '../../hooks/queries/use_notifications'
+import {
+  useNotificationsQueryOptions,
+  type NotificationsResponse,
+} from '../../hooks/queries/use_notifications'
 import { useMarkNotificationReadMutation } from '../../hooks/mutations/use_mark_notification_read'
 import { useMarkAllNotificationsReadMutation } from '../../hooks/mutations/use_mark_all_notifications_read'
 
-interface NotificationsListProps {
-  onNotificationClick?: (notification: Notification) => void
-}
+type NotificationItem = NonNullable<NotificationsResponse['data']>[number]
 
-interface Notification {
-  id: string
-  title: string
-  message: string
-  type: string
-  channel: string
-  status: string
-  readAt: string | null
-  actionUrl: string | null
-  createdAt: string
+interface NotificationsListProps {
+  onNotificationClick?: (notification: NotificationItem) => void
 }
 
 export function NotificationsList({ onNotificationClick }: NotificationsListProps) {
@@ -33,10 +26,10 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
   const markReadMutation = useMarkNotificationReadMutation()
   const markAllReadMutation = useMarkAllNotificationsReadMutation()
 
-  const notifications = (data?.data ?? []) as Notification[]
+  const notifications = data?.data ?? []
   const unreadCount = data?.unreadCount ?? 0
 
-  const handleNotificationClick = async (notification: Notification) => {
+  const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.readAt) {
       toast.promise(markReadMutation.mutateAsync(notification.id), {
         loading: 'Marcando como lida...',
@@ -116,17 +109,10 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
                   <div className="flex-1 space-y-2">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p
-                          className={cn(
-                            'text-sm',
-                            !notification.readAt && 'font-semibold'
-                          )}
-                        >
+                        <p className={cn('text-sm', !notification.readAt && 'font-semibold')}>
                           {notification.title}
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          {notification.message}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{notification.message}</p>
                       </div>
                       <Badge variant="outline" className="flex-shrink-0">
                         {getNotificationTypeLabel(notification.type)}

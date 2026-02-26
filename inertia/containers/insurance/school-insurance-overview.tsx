@@ -49,8 +49,8 @@ export function SchoolInsuranceOverview({ schoolId }: SchoolInsuranceOverviewPro
     useSchoolInsuranceClaimsQueryOptions(schoolId, undefined, 5)
   )
 
-  const billings = billingsData?.data || []
-  const claims = claimsData?.data || []
+  const billings = billingsData || []
+  const claims = claimsData || []
 
   const formatPeriod = (period: string) => {
     const date = new Date(period)
@@ -229,11 +229,11 @@ export function SchoolInsuranceOverview({ schoolId }: SchoolInsuranceOverviewPro
             <div>
               <h4 className="font-medium text-blue-900">Sobre o Seguro Educacional</h4>
               <p className="text-sm text-blue-800 mt-1">
-                O seguro educacional protege sua escola contra inadimplência. Quando um aluno
-                atinge o período de carência com pagamento em atraso, um sinistro é aberto
-                automaticamente e você pode receber até{' '}
-                <strong>{(stats?.latestBilling as any)?.insurancePercentage || 100}%</strong> do valor
-                em atraso após aprovação.
+                O seguro educacional protege sua escola contra inadimplência. Quando um aluno atinge
+                o período de carência com pagamento em atraso, um sinistro é aberto automaticamente
+                e você pode receber até{' '}
+                <strong>{(stats?.latestBilling as any)?.insurancePercentage || 100}%</strong> do
+                valor em atraso após aprovação.
               </p>
             </div>
           </div>

@@ -102,9 +102,9 @@ export function MarketplaceOrdersContainer() {
                     <TableCell>{order.store?.name ?? '—'}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {order.items?.map((item: Order['items'][number]) => (
+                        {order.items?.map((item: NonNullable<Order['items']>[number]) => (
                           <div key={item.id}>
-                            {item.quantity}x {item.itemName ?? item.storeItem?.name ?? 'Item'}
+                            {item.quantity}x {item.itemName ?? 'Item'}
                           </div>
                         ))}
                       </div>

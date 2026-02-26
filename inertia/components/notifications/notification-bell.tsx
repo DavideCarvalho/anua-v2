@@ -17,17 +17,6 @@ interface NotificationBellProps {
   allNotificationsRoute: 'web.escola.notificacoes' | 'web.responsavel.comunicados'
 }
 
-interface NotificationItem {
-  id: string
-  title: string
-  message?: string
-  body?: string
-  type: string
-  isRead?: boolean
-  readAt?: string | null
-  createdAt: string
-}
-
 export function NotificationBell({ allNotificationsRoute }: NotificationBellProps) {
   const { data, isLoading } = useQuery({
     ...useNotificationsQueryOptions({ page: 1, limit: 8 }),
@@ -37,13 +26,12 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
   const markReadMutation = useMarkNotificationReadMutation()
   const markAllReadMutation = useMarkAllNotificationsReadMutation()
 
-  const notifications = ((data?.data ?? []) as NotificationItem[]).map((notification) => {
+  const notifications = (data?.data ?? []).map((notification) => {
     const isRead = notification.isRead ?? Boolean(notification.readAt)
 
     return {
       ...notification,
       isRead,
-      message: notification.message ?? notification.body ?? '',
     }
   })
 
@@ -198,7 +186,7 @@ function getNotificationTypeLabel(type: string): string {
   return labels[type] || 'Sistema'
 }
 
-function formatRelativeDate(date: string): string {
+function formatRelativeDate(date: Date | string): string {
   const createdAt = new Date(date)
   return createdAt.toLocaleString('pt-BR', {
     day: '2-digit',
