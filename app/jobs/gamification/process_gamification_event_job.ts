@@ -72,7 +72,13 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
 
         const schoolId = student?.user?.schoolId
 
-        const achievementsQuery = Achievement.query({ client: trx }).where('isActive', true)
+        // OPTIMIZATION: Filter achievements by eventType at DB level
+        // This avoids fetching all achievements and filtering in memory
+        // Note: For best performance, add an index on criteria JSONB column:
+        // CREATE INDEX idx_achievement_criteria_event_type ON "Achievement" ((criteria->>'eventType'));
+        const achievementsQuery = Achievement.query({ client: trx })
+          .where('isActive', true)
+          .whereRaw(`criteria->>'eventType' = ?`, [event.type])
 
         if (schoolId) {
           achievementsQuery.where((builder) => {
@@ -83,21 +89,17 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
         }
 
         const achievements = await achievementsQuery
-        console.log('[WORKER] Found achievements:', { eventId, total: achievements.length })
+        console.log('[WORKER] Found achievements:', {
+          eventId,
+          eventType: event.type,
+          total: achievements.length,
+        })
 
         let achievementsUnlocked = 0
         let pointsAwarded = 0
 
         for (const achievement of achievements) {
-          const criteria = achievement.criteria as {
-            eventType?: string
-            conditions?: Record<string, unknown>
-          }
-
-          if (criteria.eventType && criteria.eventType !== event.type) {
-            continue
-          }
-
+          // Check if already unlocked (idempotency)
           const alreadyUnlocked = await trx
             .from('StudentAchievement')
             .where('studentGamificationId', studentGamification.id)
