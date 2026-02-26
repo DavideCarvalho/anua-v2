@@ -1,5 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type LeaderboardEntry from '#models/leaderboard_entry'
+import StudentDto from './student.dto.js'
 
 export default class LeaderboardEntryDto extends BaseModelDto {
   declare id: string
@@ -9,6 +10,7 @@ export default class LeaderboardEntryDto extends BaseModelDto {
   declare rank: number
   declare createdAt: Date
   declare updatedAt: Date
+  declare student?: StudentDto
 
   constructor(leaderboardEntry?: LeaderboardEntry) {
     super()
@@ -22,5 +24,6 @@ export default class LeaderboardEntryDto extends BaseModelDto {
     this.rank = leaderboardEntry.rank
     this.createdAt = leaderboardEntry.createdAt.toJSDate()
     this.updatedAt = leaderboardEntry.updatedAt.toJSDate()
+    this.student = leaderboardEntry.student ? new StudentDto(leaderboardEntry.student) : undefined
   }
 }

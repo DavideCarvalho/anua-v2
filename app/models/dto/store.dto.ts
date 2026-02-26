@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Store from '#models/store'
 import type { StoreType } from '#models/store'
+import SchoolDto from './school.dto.js'
 
 export default class StoreDto extends BaseModelDto {
   declare id: string
@@ -15,6 +16,7 @@ export default class StoreDto extends BaseModelDto {
   declare updatedAt: Date
   declare deletedAt: Date | null
   declare owner: { id: string; name: string } | null
+  declare school?: SchoolDto
 
   constructor(store?: Store) {
     super()
@@ -33,5 +35,6 @@ export default class StoreDto extends BaseModelDto {
     this.updatedAt = store.updatedAt.toJSDate()
     this.deletedAt = store.deletedAt ? store.deletedAt.toJSDate() : null
     this.owner = store.owner ? { id: store.owner.id, name: store.owner.name } : null
+    this.school = store.school ? new SchoolDto(store.school) : undefined
   }
 }
