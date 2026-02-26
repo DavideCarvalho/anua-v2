@@ -4,7 +4,7 @@ import GamificationEventDto from '#models/dto/gamification_event.dto'
 import { listGamificationEventsValidator } from '#validators/gamification'
 
 export default class ListGamificationEventsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, selectedSchoolIds }: HttpContext) {
     const payload = await request.validateUsing(listGamificationEventsValidator)
 
     const page = payload.page ?? 1
@@ -12,16 +12,31 @@ export default class ListGamificationEventsController {
 
     const query = GamificationEvent.query()
 
+    // Filter by school - only show events from students of the selected schools
+    if (selectedSchoolIds && selectedSchoolIds.length > 0) {
+      query.whereHas('student', (studentQuery) => {
+        studentQuery.whereHas('user', (userQuery) => {
+          userQuery.whereIn('schoolId', selectedSchoolIds)
+        })
+      })
+    }
+
     if (payload.studentId) {
       query.where('studentId', payload.studentId)
     }
 
     if (payload.type) {
-      query.where('eventType', payload.type)
+      query.where('type', payload.type)
     }
 
     if (payload.status) {
-      query.where('status', payload.status)
+      if (payload.status === 'PROCESSED') {
+        query.where('processed', true).whereNull('error')
+      } else if (payload.status === 'FAILED') {
+        query.whereNotNull('error')
+      } else if (payload.status === 'PENDING') {
+        query.where('processed', false).whereNull('error')
+      }
     }
 
     const events = await query
