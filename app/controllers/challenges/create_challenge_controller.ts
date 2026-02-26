@@ -5,8 +5,10 @@ import { createChallengeValidator } from '#validators/gamification'
 import ChallengeDto from '#models/dto/challenge.dto'
 
 export default class CreateChallengeController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, auth }: HttpContext) {
     const payload = await request.validateUsing(createChallengeValidator)
+
+    const schoolId = payload.schoolId ?? auth.user?.schoolId
 
     const challenge = await Challenge.create({
       name: payload.name,
@@ -19,7 +21,7 @@ export default class CreateChallengeController {
       recurrencePeriod: payload.recurrencePeriod ?? null,
       startDate: payload.startDate ? DateTime.fromJSDate(payload.startDate) : null,
       endDate: payload.endDate ? DateTime.fromJSDate(payload.endDate) : null,
-      schoolId: payload.schoolId ?? null,
+      schoolId: schoolId ?? null,
       isActive: payload.isActive ?? true,
     })
 

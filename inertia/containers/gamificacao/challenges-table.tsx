@@ -21,6 +21,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../../components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
@@ -101,6 +111,7 @@ export function ChallengesTable() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<ChallengeFormData>(defaultFormData)
 
   const handleChange = (field: keyof ChallengeFormData, value: string | number | boolean) => {
@@ -118,7 +129,6 @@ export function ChallengesTable() {
       isRecurring: formData.isRecurring,
       recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
       isActive: formData.isActive,
-      criteria: {},
     })
     setIsCreateOpen(false)
     setFormData(defaultFormData)
@@ -155,9 +165,10 @@ export function ChallengesTable() {
     setFormData(defaultFormData)
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este desafio?')) return
-    await deleteChallenge.mutateAsync(id)
+  const handleDelete = async () => {
+    if (!deletingId) return
+    await deleteChallenge.mutateAsync(deletingId)
+    setDeletingId(null)
   }
 
   const challengesList = challenges?.data || []
@@ -308,7 +319,7 @@ export function ChallengesTable() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(challenge.id)}
+                        onClick={() => setDeletingId(challenge.id)}
                         disabled={deleteChallenge.isPending}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -321,6 +332,28 @@ export function ChallengesTable() {
           </Table>
         )}
       </CardContent>
+
+      <AlertDialog open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir desafio</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este desafio? Esta acao nao pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteChallenge.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteChallenge.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteChallenge.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

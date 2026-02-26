@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { tuyau } from '../../lib/api'
 import type { InferRequestType } from '@tuyau/client'
+import { toast } from 'sonner'
 
 const resolveCreateRoute = () => tuyau.$route('api.v1.challenges.store')
 type CreateChallengePayload = InferRequestType<ReturnType<typeof resolveCreateRoute>['$post']>
@@ -19,6 +20,10 @@ export function useCreateChallenge() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      toast.success('Desafio criado com sucesso')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao criar desafio')
     },
   })
 }
@@ -33,6 +38,10 @@ export function useUpdateChallenge() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['challenge', variables.id] })
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      toast.success('Desafio atualizado com sucesso')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao atualizar desafio')
     },
   })
 }
@@ -46,6 +55,10 @@ export function useDeleteChallenge() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['challenges'] })
+      toast.success('Desafio excluído com sucesso')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao excluir desafio')
     },
   })
 }

@@ -4,16 +4,18 @@ import { listChallengesValidator } from '#validators/gamification'
 import ChallengeDto from '#models/dto/challenge.dto'
 
 export default class ListChallengesController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, auth }: HttpContext) {
     const payload = await request.validateUsing(listChallengesValidator)
 
     const page = payload.page || 1
     const limit = payload.limit || 20
 
+    const schoolId = payload.schoolId ?? auth.user?.schoolId
+
     const query = Challenge.query().orderBy('name', 'asc')
 
-    if (payload.schoolId) {
-      query.where('schoolId', payload.schoolId)
+    if (schoolId) {
+      query.where('schoolId', schoolId)
     }
 
     if (payload.category) {
