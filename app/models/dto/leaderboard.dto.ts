@@ -1,6 +1,8 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Leaderboard from '#models/leaderboard'
 import type { LeaderboardType, LeaderboardPeriod } from '#models/leaderboard'
+import SchoolDto from './school.dto.js'
+import LeaderboardEntryDto from './leaderboard_entry.dto.js'
 
 export default class LeaderboardDto extends BaseModelDto {
   declare id: string
@@ -14,6 +16,8 @@ export default class LeaderboardDto extends BaseModelDto {
   declare subjectId: string | null
   declare isActive: boolean
   declare createdAt: Date
+  declare school?: SchoolDto
+  declare entries?: LeaderboardEntryDto[]
 
   constructor(leaderboard?: Leaderboard) {
     super()
@@ -31,5 +35,9 @@ export default class LeaderboardDto extends BaseModelDto {
     this.subjectId = leaderboard.subjectId
     this.isActive = leaderboard.isActive
     this.createdAt = leaderboard.createdAt.toJSDate()
+    this.school = leaderboard.school ? new SchoolDto(leaderboard.school) : undefined
+    this.entries = leaderboard.entries
+      ? LeaderboardEntryDto.fromArray(leaderboard.entries)
+      : undefined
   }
 }

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import string from '@adonisjs/core/helpers/string'
 import ExtraClass from '#models/extra_class'
+import ExtraClassDto from '#models/dto/extra_class.dto'
 import ExtraClassSchedule from '#models/extra_class_schedule'
 import AcademicPeriod from '#models/academic_period'
 import { createExtraClassValidator } from '#validators/extra_class'
@@ -51,7 +52,7 @@ export default class CreateExtraClassController {
       await extraClass.load('contract')
       await extraClass.load('academicPeriod')
 
-      return response.created(extraClass)
+      return response.created(new ExtraClassDto(extraClass))
     } catch (error) {
       await trx.rollback()
       throw error

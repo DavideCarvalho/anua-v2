@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Leaderboard from '#models/leaderboard'
 import LeaderboardEntry from '#models/leaderboard_entry'
+import LeaderboardEntryDto from '#models/dto/leaderboard_entry.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ListLeaderboardEntriesController {
@@ -23,6 +24,6 @@ export default class ListLeaderboardEntriesController {
       .orderBy('rank', 'asc')
       .paginate(page, limit)
 
-    return response.ok(entries)
+    return response.ok(LeaderboardEntryDto.fromPaginator(entries))
   }
 }

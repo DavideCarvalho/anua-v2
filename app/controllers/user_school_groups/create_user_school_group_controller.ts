@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import SchoolGroup from '#models/school_group'
 import UserHasSchoolGroup from '#models/user_has_school_group'
+import UserHasSchoolGroupDto from '#models/dto/user_has_school_group.dto'
 import { createUserSchoolGroupValidator } from '#validators/user_school_group'
 import AppException from '#exceptions/app_exception'
 
@@ -36,6 +37,6 @@ export default class CreateUserSchoolGroupController {
     await assignment.load('schoolGroup')
     await assignment.load('user')
 
-    return response.created(assignment)
+    return response.created(new UserHasSchoolGroupDto(assignment))
   }
 }

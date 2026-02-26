@@ -8,7 +8,7 @@ import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice
 
 export default class CreateStudentPaymentController {
   async handle(ctx: HttpContext) {
-    const { request, response } = ctx
+    const { request, response, logger } = ctx
     const payload = await request.validateUsing(createStudentPaymentValidator)
     const user = ctx.auth?.user
 
@@ -39,7 +39,7 @@ export default class CreateStudentPaymentController {
         source: 'student-payments.create',
       })
     } catch (error) {
-      console.error('[CREATE_PAYMENT] Failed to dispatch reconcile job:', error)
+      logger.error({ error }, '[CREATE_PAYMENT] Failed to dispatch reconcile job')
     }
 
     await payment.load('student')

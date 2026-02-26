@@ -9,7 +9,7 @@ import AppException from '#exceptions/app_exception'
 
 export default class UpdateStudentPaymentController {
   async handle(ctx: HttpContext) {
-    const { params, request, response } = ctx
+    const { params, request, response, logger } = ctx
     const { id } = params
     const payload = await request.validateUsing(updateStudentPaymentValidator)
     const user = ctx.auth?.user
@@ -59,7 +59,7 @@ export default class UpdateStudentPaymentController {
         source: 'student-payments.update',
       })
     } catch (error) {
-      console.error('[UPDATE_PAYMENT] Failed to dispatch reconcile job:', error)
+      logger.error({ error }, '[UPDATE_PAYMENT] Failed to dispatch reconcile job')
     }
 
     await payment.load('student')

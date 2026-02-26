@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Course from '#models/course'
+import CourseDto from '#models/dto/course.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowCourseController {
@@ -10,6 +11,6 @@ export default class ShowCourseController {
       throw AppException.notFound('Curso não encontrado')
     }
 
-    return response.ok(course)
+    return response.ok(new CourseDto(course))
   }
 }

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
+import InsuranceDefaultRateBySchoolResponseDto from '#models/dto/insurance_default_rate_by_school_response.dto'
 import { getDefaultRateBySchoolValidator } from '#validators/insurance'
 
 export default class GetDefaultRateBySchoolController {
@@ -56,9 +57,8 @@ export default class GetDefaultRateBySchoolController {
     const platformDefaultRate =
       totalPayments > 0 ? Math.round((overduePayments / totalPayments) * 10000) / 100 : 0
 
-    return response.ok({
-      platformDefaultRate,
-      schools,
-    })
+    return response.ok(
+      new InsuranceDefaultRateBySchoolResponseDto({ platformDefaultRate, schools })
+    )
   }
 }

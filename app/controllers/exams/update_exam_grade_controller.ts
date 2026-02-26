@@ -3,6 +3,7 @@ import { saveExamGradeValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import AppException from '#exceptions/app_exception'
+import ExamGradeDto from '#models/dto/exam_grade.dto'
 
 export default class UpdateExamGradeController {
   async handle({ params, request, response }: HttpContext) {
@@ -34,6 +35,6 @@ export default class UpdateExamGradeController {
     await grade.load('student')
     await grade.load('exam')
 
-    return response.ok(grade)
+    return response.ok(new ExamGradeDto(grade))
   }
 }

@@ -6,7 +6,7 @@ import AchievementDto from '#models/dto/achievement.dto'
 
 // Map validator category to model category
 const categoryMap: Record<string, AchievementCategory> = {
-  ACADEMIC: 'ACADEMIC_PERFORMANCE',
+  ACADEMIC: 'ACADEMIC',
   ATTENDANCE: 'ATTENDANCE',
   BEHAVIOR: 'BEHAVIOR',
   SOCIAL: 'SOCIAL',

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
+import StudentHasAttendanceDto from '#models/dto/student_has_attendance.dto'
 import { updateAttendanceValidator } from '#validators/attendance'
 import AppException from '#exceptions/app_exception'
 
@@ -34,6 +35,6 @@ export default class UpdateAttendanceController {
 
     await studentAttendance.save()
 
-    return response.ok(studentAttendance)
+    return response.ok(new StudentHasAttendanceDto(studentAttendance))
   }
 }

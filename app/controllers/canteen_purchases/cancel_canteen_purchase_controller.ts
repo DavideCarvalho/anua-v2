@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { getQueueManager } from '#services/queue_service'
 import CanteenPurchase from '#models/canteen_purchase'
+import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
@@ -9,7 +10,7 @@ import BillingReconciliationService from '#services/payments/billing_reconciliat
 import AppException from '#exceptions/app_exception'
 
 export default class CancelCanteenPurchaseController {
-  async handle({ params, response, auth }: HttpContext) {
+  async handle({ params, response, auth, logger }: HttpContext) {
     const { id } = params
 
     const purchase = await CanteenPurchase.find(id)
@@ -79,9 +80,9 @@ export default class CancelCanteenPurchaseController {
         try {
           await BillingReconciliationService.reconcileByPaymentId(linkedPayment.id)
         } catch (error) {
-          console.error(
-            '[CANTEEN_FIADO] Failed to reconcile invoice synchronously on cancel:',
-            error
+          logger.error(
+            { error },
+            '[CANTEEN_FIADO] Failed to reconcile invoice synchronously on cancel'
           )
         }
 
@@ -93,9 +94,9 @@ export default class CancelCanteenPurchaseController {
             source: 'canteen-purchases.cancel',
           })
         } catch (error) {
-          console.error(
-            '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job on cancel:',
-            error
+          logger.error(
+            { error },
+            '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job on cancel'
           )
         }
       }
@@ -105,6 +106,6 @@ export default class CancelCanteenPurchaseController {
     await purchase.load('canteen')
     await purchase.load('itemsPurchased')
 
-    return response.ok(purchase)
+    return response.ok(new CanteenPurchaseDto(purchase))
   }
 }

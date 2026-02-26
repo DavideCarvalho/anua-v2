@@ -12,7 +12,7 @@ import AppException from '#exceptions/app_exception'
 
 export default class CreateAgreementController {
   async handle(ctx: HttpContext) {
-    const { request, response } = ctx
+    const { request, response, logger } = ctx
     const user = ctx.auth?.user
     const payload = await request.validateUsing(createAgreementValidator)
 
@@ -276,7 +276,7 @@ export default class CreateAgreementController {
             })
           }
         } catch (error) {
-          console.error('[CREATE_AGREEMENT] Failed to dispatch reconcile jobs:', error)
+          logger.error({ error }, '[CREATE_AGREEMENT] Failed to dispatch reconcile jobs')
         }
       }
 

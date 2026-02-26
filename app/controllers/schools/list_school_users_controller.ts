@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import UserHasSchool from '#models/user_has_school'
+import SchoolUserSummaryDto from '#models/dto/school_user_summary.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ListSchoolUsersController {
@@ -21,27 +22,9 @@ export default class ListSchoolUsersController {
 
     const users = userRelations
       .filter((rel) => rel.user) // Filtrar apenas relações com usuário ativo
-      .map((rel) => ({
-        id: rel.user.id,
-        name: rel.user.name,
-        email: rel.user.email,
-        role: rel.user.role?.name,
-        roleName: formatRoleName(rel.user.role?.name),
-      }))
+      .map((rel) => rel.user)
       .sort((a, b) => a.name.localeCompare(b.name))
 
-    return response.ok(users)
+    return response.ok(SchoolUserSummaryDto.fromArray(users))
   }
-}
-
-function formatRoleName(role: string | undefined): string {
-  const roleMap: Record<string, string> = {
-    SCHOOL_DIRECTOR: 'Diretor(a)',
-    SCHOOL_COORDINATOR: 'Coordenador(a)',
-    SCHOOL_ADMIN: 'Administrador',
-    SCHOOL_ADMINISTRATIVE: 'Administrativo',
-    SCHOOL_TEACHER: 'Professor(a)',
-    SCHOOL_CANTEEN: 'Cantina',
-  }
-  return roleMap[role || ''] || role || 'Sem cargo'
 }

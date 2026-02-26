@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import { updateExamValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import AppException from '#exceptions/app_exception'
+import ExamDto from '#models/dto/exam.dto'
 
 export default class UpdateExamController {
   async handle({ params, request, response }: HttpContext) {
@@ -28,6 +29,6 @@ export default class UpdateExamController {
     await exam.load('subject')
     await exam.load('teacher')
 
-    return response.ok(exam)
+    return response.ok(new ExamDto(exam))
   }
 }

@@ -17,7 +17,7 @@ import type { EmergencyContactRelationship } from '#models/student_emergency_con
 
 export default class FullUpdateStudentController {
   async handle(ctx: HttpContext) {
-    const { params, request, response } = ctx
+    const { params, request, response, logger } = ctx
 
     const student = await Student.query()
       .where('id', params.id)
@@ -321,7 +321,7 @@ export default class FullUpdateStudentController {
       })
     } catch (error) {
       await trx.rollback()
-      console.error('Error updating student:', error)
+      logger.error({ error }, 'Error updating student')
       throw error
     }
   }

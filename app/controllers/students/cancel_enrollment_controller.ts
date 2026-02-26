@@ -12,7 +12,7 @@ const CANCELLABLE_PAYMENT_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE'] as const
 
 export default class CancelEnrollmentController {
   async handle(ctx: HttpContext) {
-    const { params, response } = ctx
+    const { params, response, logger } = ctx
     const { id: studentId, enrollmentId } = params
     const user = ctx.auth?.user
 
@@ -93,7 +93,7 @@ export default class CancelEnrollmentController {
           })
         }
       } catch (error) {
-        console.error('[CANCEL_ENROLLMENT] Failed to dispatch reconcile jobs:', error)
+        logger.error({ error }, '[CANCEL_ENROLLMENT] Failed to dispatch reconcile jobs')
       }
     }
 

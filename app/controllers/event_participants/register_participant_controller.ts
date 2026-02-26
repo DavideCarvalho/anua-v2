@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
+import EventParticipantDto from '#models/dto/event_participant.dto'
 import { registerParticipantValidator } from '#validators/event'
 import { randomUUID } from 'node:crypto'
 import AppException from '#exceptions/app_exception'
@@ -49,6 +50,6 @@ export default class RegisterParticipantController {
     await participant.load('user')
     await participant.load('event')
 
-    return response.created(participant)
+    return response.created(new EventParticipantDto(participant))
   }
 }

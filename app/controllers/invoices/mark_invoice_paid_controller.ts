@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import Invoice from '#models/invoice'
 import { markInvoicePaidValidator } from '#validators/invoice'
 import AppException from '#exceptions/app_exception'
+import InvoiceDto from '#models/dto/invoice.dto'
 
 export default class MarkInvoicePaidController {
   async handle({ request, response, params }: HttpContext) {
@@ -66,7 +67,7 @@ export default class MarkInvoicePaidController {
 
       await invoice.load('payments')
 
-      return response.ok(invoice)
+      return response.ok(new InvoiceDto(invoice))
     } catch (error) {
       await trx.rollback()
       throw error

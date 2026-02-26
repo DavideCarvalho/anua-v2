@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
+import SchoolChainDto from '#models/dto/school_chain.dto'
 import { updateSchoolChainValidator } from '#validators/school_chain'
 import AppException from '#exceptions/app_exception'
 
@@ -73,6 +74,6 @@ export default class UpdateSchoolChainController {
 
     await schoolChain.save()
 
-    return response.ok(schoolChain)
+    return response.ok(new SchoolChainDto(schoolChain))
   }
 }

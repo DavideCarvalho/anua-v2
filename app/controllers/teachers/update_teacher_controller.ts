@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Teacher from '#models/teacher'
 import { updateTeacherValidator } from '#validators/teacher'
 import AppException from '#exceptions/app_exception'
+import TeacherDto from '#models/dto/teacher.dto'
 
 export default class UpdateTeacherController {
   async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
@@ -39,6 +40,6 @@ export default class UpdateTeacherController {
 
     await teacher.load('user')
 
-    return response.ok(teacher)
+    return response.ok(new TeacherDto(teacher))
   }
 }

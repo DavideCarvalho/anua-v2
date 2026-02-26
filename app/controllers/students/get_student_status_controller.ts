@@ -9,6 +9,7 @@ import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import { getStudents } from '#services/class_students_service'
 import AppException from '#exceptions/app_exception'
+import StudentStatusResultDto from '#models/dto/student_status_result.dto'
 
 type StudentStatus = 'APPROVED' | 'AT_RISK_GRADE' | 'AT_RISK_ATTENDANCE' | 'FAILED' | 'IN_PROGRESS'
 
@@ -268,6 +269,6 @@ export default class GetStudentStatusController {
       }
     })
 
-    return response.ok(results)
+    return response.ok(StudentStatusResultDto.fromArray(results))
   }
 }

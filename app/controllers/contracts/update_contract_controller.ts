@@ -10,7 +10,7 @@ import { dispatchEnrollmentPaymentUpdatesForContract } from '#services/payments/
 
 export default class UpdateContractController {
   async handle(ctx: HttpContext) {
-    const { params, request, auth } = ctx
+    const { params, request, auth, logger } = ctx
     const { id } = params
     const payload = await request.validateUsing(updateContractValidator)
 
@@ -83,7 +83,7 @@ export default class UpdateContractController {
         triggeredBy: effectiveUser ? { id: effectiveUser.id, name: effectiveUser.name } : null,
       })
     } catch (error) {
-      console.error('[UPDATE_CONTRACT] Failed to dispatch payment update jobs:', error)
+      logger.error({ error }, '[UPDATE_CONTRACT] Failed to dispatch payment update jobs')
     }
 
     await contract.load('paymentDays')

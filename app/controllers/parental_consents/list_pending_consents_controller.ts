@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import EventParentalConsent from '#models/event_parental_consent'
 import { DateTime } from 'luxon'
+import ParentalConsentDto from '#models/dto/parental_consent.dto'
 
 export default class ListPendingConsentsController {
   async handle({ auth, response }: HttpContext) {
@@ -47,6 +48,6 @@ export default class ListPendingConsentsController {
       },
     }))
 
-    return response.ok(formattedConsents)
+    return response.ok(ParentalConsentDto.fromArray(formattedConsents))
   }
 }

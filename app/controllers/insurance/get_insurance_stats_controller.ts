@@ -3,6 +3,7 @@ import InsuranceClaim from '#models/insurance_claim'
 import InsuranceBilling from '#models/insurance_billing'
 import StudentPayment from '#models/student_payment'
 import School from '#models/school'
+import InsurancePlatformStatsResponseDto from '#models/dto/insurance_platform_stats_response.dto'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 
@@ -77,19 +78,21 @@ export default class GetInsuranceStatsController {
 
     const totalOverduePayments = Number(overduePayments[0].$extras.count || 0)
 
-    return response.ok({
-      totalSchoolsWithInsurance,
-      totalInsuredStudents,
-      claims: {
-        pending: totalPendingClaims,
-        paidThisMonth: totalPaidClaimsThisMonth,
-        paidAmountThisMonth: totalPaidAmountThisMonth,
-      },
-      billings: {
-        pending: totalPendingBillings,
-        revenueThisMonth: totalMonthlyRevenue,
-      },
-      overduePaymentsWithInsurance: totalOverduePayments,
-    })
+    return response.ok(
+      new InsurancePlatformStatsResponseDto({
+        totalSchoolsWithInsurance,
+        totalInsuredStudents,
+        claims: {
+          pending: totalPendingClaims,
+          paidThisMonth: totalPaidClaimsThisMonth,
+          paidAmountThisMonth: totalPaidAmountThisMonth,
+        },
+        billings: {
+          pending: totalPendingBillings,
+          revenueThisMonth: totalMonthlyRevenue,
+        },
+        overduePaymentsWithInsurance: totalOverduePayments,
+      })
+    )
   }
 }

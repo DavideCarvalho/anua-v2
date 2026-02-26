@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
 import { createStoreValidator } from '#validators/store'
+import StoreDto from '#models/dto/store.dto'
 
 export default class CreateStoreController {
   async handle({ request, response }: HttpContext) {
@@ -16,6 +17,6 @@ export default class CreateStoreController {
       await store.load('owner')
     }
 
-    return response.created(store)
+    return response.created(new StoreDto(store))
   }
 }

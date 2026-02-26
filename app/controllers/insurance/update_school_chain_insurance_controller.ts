@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
+import InsuranceChainSettingsResponseDto from '#models/dto/insurance_chain_settings_response.dto'
 import { updateSchoolChainInsuranceValidator } from '#validators/insurance'
 import AppException from '#exceptions/app_exception'
 
@@ -34,12 +35,6 @@ export default class UpdateSchoolChainInsuranceController {
 
     await chain.save()
 
-    return response.ok({
-      id: chain.id,
-      hasInsuranceByDefault: chain.hasInsuranceByDefault,
-      insurancePercentage: chain.insurancePercentage,
-      insuranceCoveragePercentage: chain.insuranceCoveragePercentage,
-      insuranceClaimWaitingDays: chain.insuranceClaimWaitingDays,
-    })
+    return response.ok(new InsuranceChainSettingsResponseDto(chain))
   }
 }

@@ -8,6 +8,7 @@ import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import StudentHasLevel from '#models/student_has_level'
+import StoreOrderDto from '#models/dto/store_order.dto'
 import { createStoreOrderValidator } from '#validators/gamification'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import AppException from '#exceptions/app_exception'
@@ -164,7 +165,7 @@ export default class CreateStoreOrderController {
           await order.load('store')
         }
 
-        return response.created(order)
+        return response.created(new StoreOrderDto(order))
       }
 
       // PIX, CASH, CARD - direct payment
@@ -193,7 +194,7 @@ export default class CreateStoreOrderController {
         await order.load('store')
       }
 
-      return response.created(order)
+      return response.created(new StoreOrderDto(order))
     }
 
     // 6. DEFERRED payment - create StudentPayment(s)
@@ -270,7 +271,7 @@ export default class CreateStoreOrderController {
       await order.load('store')
     }
 
-    return response.created(order)
+    return response.created(new StoreOrderDto(order))
   }
 
   private async dispatchPostCheckoutJobs(

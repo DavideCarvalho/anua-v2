@@ -16,7 +16,7 @@ type CancelResult =
   | { type: 'ok'; event: Event }
 
 export default class CancelEventController {
-  async handle({ params, response, auth }: HttpContext) {
+  async handle({ params, response, auth, logger }: HttpContext) {
     const { id } = params
     const user = auth.user
 
@@ -97,7 +97,7 @@ export default class CancelEventController {
           })
         }
       } catch (error) {
-        console.error('[CANCEL_EVENT] Failed to dispatch reconcile payment job:', error)
+        logger.error({ error }, '[CANCEL_EVENT] Failed to dispatch reconcile payment job')
       }
     }
 

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreItem from '#models/store_item'
+import StoreItemDto from '#models/dto/store_item.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowStoreItemController {
@@ -15,6 +16,6 @@ export default class ShowStoreItemController {
       throw AppException.notFound('Item da loja não encontrado')
     }
 
-    return response.ok(storeItem)
+    return response.ok(new StoreItemDto(storeItem))
   }
 }

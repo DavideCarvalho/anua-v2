@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasExtraClassAttendance from '#models/student_has_extra_class_attendance'
+import StudentHasExtraClassAttendanceDto from '#models/dto/student_has_extra_class_attendance.dto'
 import { updateExtraClassAttendanceValidator } from '#validators/extra_class'
 import AppException from '#exceptions/app_exception'
 
@@ -24,6 +25,6 @@ export default class UpdateExtraClassAttendanceController {
     }
     await studentAttendance.save()
 
-    return response.ok(studentAttendance)
+    return response.ok(new StudentHasExtraClassAttendanceDto(studentAttendance))
   }
 }

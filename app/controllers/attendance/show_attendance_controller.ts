@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Attendance from '#models/attendance'
+import AttendanceDto from '#models/dto/attendance.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowAttendanceController {
@@ -13,6 +14,6 @@ export default class ShowAttendanceController {
       throw AppException.notFound('Chamada não encontrada')
     }
 
-    return response.ok(attendance)
+    return response.ok(new AttendanceDto(attendance))
   }
 }

@@ -1,11 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
 import Comment from '#models/comment'
+import CommentDto from '#models/dto/comment.dto'
 import { listCommentsValidator } from '#validators/post'
 import AppException from '#exceptions/app_exception'
 
 export default class ListPostCommentsController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request }: HttpContext) {
     const { postId } = params
     const { page = 1, limit = 20 } = await request.validateUsing(listCommentsValidator)
 
@@ -23,6 +24,6 @@ export default class ListPostCommentsController {
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    return response.ok(comments)
+    return CommentDto.fromPaginator(comments)
   }
 }

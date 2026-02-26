@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import PrintRequest from '#models/print_request'
+import PrintRequestDto from '#models/dto/print_request.dto'
 import { createPrintRequestValidator } from '#validators/print_request'
 import AppException from '#exceptions/app_exception'
 
@@ -25,6 +26,6 @@ export default class CreatePrintRequestController {
 
     await printRequest.load('user')
 
-    return response.created(printRequest)
+    return response.created(new PrintRequestDto(printRequest))
   }
 }

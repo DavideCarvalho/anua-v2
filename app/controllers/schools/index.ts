@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import SchoolDto from '#models/dto/school.dto'
+import SchoolWithUsersDto from '#models/dto/school_with_users.dto'
 
 export default class IndexSchoolsController {
   async handle({ request, response }: HttpContext) {
@@ -44,19 +45,9 @@ export default class IndexSchoolsController {
 
     const schools = await query.paginate(page, limit)
 
-    // Se includeUsers, mapear os usuários para formato simplificado
+    // Se includeUsers, retornar DTO específico com usuários resumidos
     if (includeUsers) {
-      const serialized = schools.serialize()
-      serialized.data = serialized.data.map((school: any) => ({
-        ...school,
-        users: school.users?.map((user: any) => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role?.name,
-        })),
-      }))
-      return response.ok(serialized)
+      return response.ok(SchoolWithUsersDto.fromPaginator(schools))
     }
 
     return SchoolDto.fromPaginator(schools)

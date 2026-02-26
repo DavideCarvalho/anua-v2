@@ -1,6 +1,8 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type CanteenMeal from '#models/canteen_meal'
 import type { MealType } from '#models/canteen_meal'
+import CanteenDto from './canteen.dto.js'
+import CanteenMealReservationDto from './canteen_meal_reservation.dto.js'
 
 export default class CanteenMealDto extends BaseModelDto {
   declare id: string
@@ -15,6 +17,8 @@ export default class CanteenMealDto extends BaseModelDto {
   declare isActive: boolean
   declare createdAt: Date
   declare updatedAt: Date
+  declare canteen?: CanteenDto
+  declare reservations?: CanteenMealReservationDto[]
 
   constructor(canteenMeal?: CanteenMeal) {
     super()
@@ -33,5 +37,9 @@ export default class CanteenMealDto extends BaseModelDto {
     this.isActive = canteenMeal.isActive
     this.createdAt = canteenMeal.createdAt.toJSDate()
     this.updatedAt = canteenMeal.updatedAt.toJSDate()
+
+    if (canteenMeal.canteen) this.canteen = new CanteenDto(canteenMeal.canteen)
+    if (canteenMeal.reservations)
+      this.reservations = CanteenMealReservationDto.fromArray(canteenMeal.reservations)
   }
 }

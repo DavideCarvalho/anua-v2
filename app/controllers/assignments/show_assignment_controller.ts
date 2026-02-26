@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
+import AssignmentDto from '#models/dto/assignment.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowAssignmentController {
@@ -22,6 +23,6 @@ export default class ShowAssignmentController {
       throw AppException.notFound('Atividade não encontrada')
     }
 
-    return response.ok(assignment)
+    return response.ok(new AssignmentDto(assignment))
   }
 }

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Leaderboard from '#models/leaderboard'
+import LeaderboardDto from '#models/dto/leaderboard.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowLeaderboardController {
@@ -18,6 +19,6 @@ export default class ShowLeaderboardController {
       throw AppException.notFound('Ranking não encontrado')
     }
 
-    return response.ok(leaderboard)
+    return response.ok(new LeaderboardDto(leaderboard))
   }
 }

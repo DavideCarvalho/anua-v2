@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
+import ClassDetailDto from '#models/dto/class_detail.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowClassBySlugController {
@@ -15,6 +16,6 @@ export default class ShowClassBySlugController {
       throw AppException.notFound('Turma não encontrada')
     }
 
-    return response.ok(classEntity)
+    return response.ok(new ClassDetailDto(classEntity))
   }
 }

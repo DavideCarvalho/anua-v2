@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreInstallmentRule from '#models/store_installment_rule'
 import { listStoreInstallmentRulesValidator } from '#validators/store'
+import StoreInstallmentRuleDto from '#models/dto/store_installment_rule.dto'
 
 export default class ListStoreInstallmentRulesController {
   async handle({ request, response }: HttpContext) {
@@ -10,6 +11,6 @@ export default class ListStoreInstallmentRulesController {
       .where('storeId', data.storeId)
       .orderBy('minAmount', 'asc')
 
-    return response.ok(rules)
+    return response.ok(StoreInstallmentRuleDto.fromArray(rules))
   }
 }

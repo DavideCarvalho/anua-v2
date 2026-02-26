@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Notification from '#models/notification'
 import { listNotificationsValidator } from '#validators/notification'
+import NotificationDto from '#models/dto/notification.dto'
 
 export default class ListNotificationsController {
   async handle({ request, response, auth, effectiveUser }: HttpContext) {
@@ -33,8 +34,10 @@ export default class ListNotificationsController {
       .where('isRead', false)
       .count('* as total')
 
+    const dto = NotificationDto.fromPaginator(notifications)
+
     return response.ok({
-      ...notifications.toJSON(),
+      ...dto,
       unreadCount: Number(unreadCount[0].$extras.total || 0),
     })
   }

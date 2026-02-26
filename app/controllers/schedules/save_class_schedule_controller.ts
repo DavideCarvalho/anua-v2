@@ -13,7 +13,7 @@ interface SlotInput {
 }
 
 export default class SaveClassScheduleController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, logger }: HttpContext) {
     const classId = params.classId
     const { academicPeriodId, slots } = request.body() as {
       academicPeriodId: string
@@ -76,7 +76,7 @@ export default class SaveClassScheduleController {
 
       return response.ok({ success: true })
     } catch (error) {
-      console.error('Error saving schedule:', error)
+      logger.error({ error }, 'Error saving schedule')
       throw AppException.internalServerError('Falha ao salvar grade de horários')
     }
   }

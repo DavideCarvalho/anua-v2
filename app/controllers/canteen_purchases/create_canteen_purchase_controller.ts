@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { getQueueManager } from '#services/queue_service'
 import CanteenPurchase, { type CanteenPurchaseStatus } from '#models/canteen_purchase'
+import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import CanteenItem from '#models/canteen_item'
 import CanteenItemPurchased from '#models/canteen_item_purchased'
 import Student from '#models/student'
@@ -75,7 +76,7 @@ export default class CreateCanteenPurchaseController {
   }
 
   async handle(ctx: HttpContext) {
-    const { request, response, auth } = ctx
+    const { request, response, auth, logger } = ctx
     const payload = await request.validateUsing(createCanteenPurchaseValidator)
 
     // Validate that all items exist and are active
@@ -213,7 +214,7 @@ export default class CreateCanteenPurchaseController {
       try {
         await BillingReconciliationService.reconcileByPaymentId(studentPaymentId)
       } catch (error) {
-        console.error('[CANTEEN_FIADO] Failed to reconcile invoice synchronously:', error)
+        logger.error({ error }, '[CANTEEN_FIADO] Failed to reconcile invoice synchronously')
       }
 
       try {
@@ -224,7 +225,7 @@ export default class CreateCanteenPurchaseController {
           source: 'canteen-purchases.create-fiado',
         })
       } catch (error) {
-        console.error('[CANTEEN_FIADO] Failed to dispatch invoice reconcile job:', error)
+        logger.error({ error }, '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job')
       }
     }
 
@@ -235,6 +236,6 @@ export default class CreateCanteenPurchaseController {
       query.preload('item')
     })
 
-    return response.created(purchase)
+    return response.created(new CanteenPurchaseDto(purchase))
   }
 }

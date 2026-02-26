@@ -1,6 +1,8 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type InsuranceBilling from '#models/insurance_billing'
 import type { InsuranceBillingStatus } from '#models/insurance_billing'
+import SchoolDto from './school.dto.js'
+import StudentPaymentDto from './student_payment.dto.js'
 
 export default class InsuranceBillingDto extends BaseModelDto {
   declare id: string
@@ -19,6 +21,8 @@ export default class InsuranceBillingDto extends BaseModelDto {
   declare notes: string | null
   declare createdAt: Date
   declare updatedAt: Date | null
+  declare school?: SchoolDto
+  declare studentPayments?: StudentPaymentDto[]
 
   constructor(insuranceBilling?: InsuranceBilling) {
     super()
@@ -43,5 +47,9 @@ export default class InsuranceBillingDto extends BaseModelDto {
     this.notes = insuranceBilling.notes
     this.createdAt = insuranceBilling.createdAt.toJSDate()
     this.updatedAt = insuranceBilling.updatedAt ? insuranceBilling.updatedAt.toJSDate() : null
+    this.school = insuranceBilling.school ? new SchoolDto(insuranceBilling.school) : undefined
+    this.studentPayments = insuranceBilling.studentPayments
+      ? StudentPaymentDto.fromArray(insuranceBilling.studentPayments)
+      : undefined
   }
 }

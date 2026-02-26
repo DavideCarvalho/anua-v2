@@ -11,7 +11,7 @@ import OtpCodeMail from '#mails/otp_code_mail'
 import { sendCodeValidator } from '#validators/auth'
 
 export default class SendCodeController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext) {
     try {
       const { email } = await request.validateUsing(sendCodeValidator)
       const normalizedEmail = email.toLowerCase().trim()
@@ -52,9 +52,9 @@ export default class SendCodeController {
 
       // Send email with code
       try {
-        console.log(`[OTP] Sending code to ${normalizedEmail}`)
+        logger.info({ email: normalizedEmail }, '[OTP] Sending code')
         await mail.send(new OtpCodeMail(normalizedEmail, code))
-        console.log(`[OTP] Email sent successfully to ${normalizedEmail}`)
+        logger.info({ email: normalizedEmail }, '[OTP] Email sent successfully')
       } catch (mailError) {
         await clearVerificationState(normalizedEmail)
         throw mailError
@@ -64,7 +64,7 @@ export default class SendCodeController {
         message: genericSuccessMessage,
       })
     } catch (error) {
-      console.error('[OTP] Error sending code:', error)
+      logger.error({ error }, '[OTP] Error sending code')
       throw error
     }
   }

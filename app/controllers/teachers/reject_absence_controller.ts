@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Absence from '#models/absence'
 import { rejectAbsenceValidator } from '#validators/teacher_timesheet'
 import AppException from '#exceptions/app_exception'
+import AbsenceDto from '#models/dto/absence.dto'
 
 export default class RejectAbsenceController {
   async handle({ request, response }: HttpContext) {
@@ -16,6 +17,6 @@ export default class RejectAbsenceController {
     absence.rejectionReason = rejectionReason
     await absence.save()
 
-    return response.ok(absence)
+    return response.ok(new AbsenceDto(absence))
   }
 }

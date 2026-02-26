@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceClaim from '#models/insurance_claim'
+import InsuranceClaimDto from '#models/dto/insurance_claim.dto'
 import { getSchoolInsuranceClaimsValidator } from '#validators/insurance'
 
 export default class GetSchoolInsuranceClaimsController {
@@ -32,25 +33,6 @@ export default class GetSchoolInsuranceClaimsController {
 
     const claims = await query
 
-    const formattedClaims = claims.map((claim) => ({
-      id: claim.id,
-      claimDate: claim.claimDate.toISODate(),
-      overdueAmount: claim.overdueAmount,
-      coveragePercentage: claim.coveragePercentage,
-      coveredAmount: claim.coveredAmount,
-      status: claim.status,
-      approvedAt: claim.approvedAt?.toISO(),
-      paidAt: claim.paidAt?.toISO(),
-      rejectedAt: claim.rejectedAt?.toISO(),
-      rejectionReason: claim.rejectionReason,
-      student: {
-        id: claim.studentPayment.student.id,
-        name: claim.studentPayment.student.user.name,
-      },
-    }))
-
-    return response.ok({
-      data: formattedClaims,
-    })
+    return response.ok(InsuranceClaimDto.fromArray(claims))
   }
 }

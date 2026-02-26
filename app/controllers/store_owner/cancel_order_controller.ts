@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
+import StoreOrderDto from '#models/dto/store_order.dto'
 import StoreItem from '#models/store_item'
 import StudentPayment from '#models/student_payment'
 import { cancelStoreOrderValidator } from '#validators/gamification'
@@ -77,6 +78,6 @@ export default class CancelOrderController {
     await order.load('student')
     await order.load('items', (q) => q.preload('storeItem'))
 
-    return response.ok(order)
+    return response.ok(new StoreOrderDto(order))
   }
 }

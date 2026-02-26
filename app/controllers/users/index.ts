@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
+import UserDto from '#models/dto/user.dto'
 
 export default class IndexUsersController {
   async handle({ request, response }: HttpContext) {
@@ -42,6 +43,6 @@ export default class IndexUsersController {
 
     const users = await query.paginate(page, limit)
 
-    return response.ok(users)
+    return response.ok(UserDto.fromPaginator(users))
   }
 }

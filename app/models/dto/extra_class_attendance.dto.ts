@@ -24,7 +24,7 @@ export default class ExtraClassAttendanceDto extends BaseModelDto {
     this.createdAt = model.createdAt.toJSDate()
     this.updatedAt = model.updatedAt.toJSDate()
     this.studentAttendances = model.studentAttendances
-      ? model.studentAttendances.map((sa) => new StudentHasExtraClassAttendanceDto(sa))
+      ? StudentHasExtraClassAttendanceDto.fromArray(model.studentAttendances)
       : undefined
   }
 }

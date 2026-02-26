@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Teacher from '#models/teacher'
 import TeacherHasClass from '#models/teacher_has_class'
 import AppException from '#exceptions/app_exception'
+import TeacherHasClassDto from '#models/dto/teacher_has_class.dto'
 
 export default class ListTeacherClassesController {
   async handle({ params, response }: HttpContext) {
@@ -16,6 +17,6 @@ export default class ListTeacherClassesController {
       .preload('class')
       .orderBy('createdAt', 'desc')
 
-    return response.ok(teacherClasses)
+    return response.ok(TeacherHasClassDto.fromArray(teacherClasses))
   }
 }

@@ -4,6 +4,7 @@ import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
 import Class_ from '#models/class'
 import AppException from '#exceptions/app_exception'
+import CourseActivityFeedItemDto from '#models/dto/course_activity_feed_item.dto'
 
 interface ActivityItem {
   id: string
@@ -123,6 +124,6 @@ export default class GetCourseActivityFeedController {
     activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     const limitedActivities = activities.slice(0, limit)
 
-    return response.ok(limitedActivities)
+    return response.ok(CourseActivityFeedItemDto.fromArray(limitedActivities))
   }
 }

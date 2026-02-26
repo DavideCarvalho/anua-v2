@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Comment from '#models/comment'
+import CommentDto from '#models/dto/comment.dto'
 import { updateCommentValidator } from '#validators/post'
 import AppException from '#exceptions/app_exception'
 
@@ -24,6 +25,6 @@ export default class UpdateCommentController {
 
     await comment.load('user')
 
-    return response.ok(comment)
+    return response.ok(new CommentDto(comment))
   }
 }

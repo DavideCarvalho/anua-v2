@@ -3,6 +3,7 @@ import Teacher from '#models/teacher'
 import TeacherHasClass from '#models/teacher_has_class'
 import { assignTeacherToClassValidator } from '#validators/teacher'
 import AppException from '#exceptions/app_exception'
+import TeacherHasClassDto from '#models/dto/teacher_has_class.dto'
 
 export default class AssignTeacherToClassController {
   async handle({ params, request, response }: HttpContext) {
@@ -24,6 +25,6 @@ export default class AssignTeacherToClassController {
 
     await teacherHasClass.load('class')
 
-    return response.created(teacherHasClass)
+    return response.created(new TeacherHasClassDto(teacherHasClass))
   }
 }

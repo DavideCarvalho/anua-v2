@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenMeal from '#models/canteen_meal'
+import CanteenMealDto from '#models/dto/canteen_meal.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowCanteenMealController {
@@ -14,6 +15,6 @@ export default class ShowCanteenMealController {
       throw AppException.notFound('Refeição não encontrada')
     }
 
-    return response.ok(meal)
+    return response.ok(new CanteenMealDto(meal))
   }
 }

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
+import AssignmentDto from '#models/dto/assignment.dto'
 import TeacherHasClass from '#models/teacher_has_class'
 import AcademicPeriod from '#models/academic_period'
 import Class_ from '#models/class'
@@ -60,6 +61,6 @@ export default class CreateAssignmentController {
       query.preload('teacher')
     })
 
-    return response.created(assignment)
+    return response.created(new AssignmentDto(assignment))
   }
 }

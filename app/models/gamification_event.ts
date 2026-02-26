@@ -14,34 +14,34 @@ export default class GamificationEvent extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'type' })
   declare type: string
 
-  @column()
+  @column({ columnName: 'entityType' })
   declare entityType: string
 
-  @column()
+  @column({ columnName: 'entityId' })
   declare entityId: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'metadata' })
   declare metadata: Record<string, unknown>
 
-  @column()
+  @column({ columnName: 'processed' })
   declare processed: boolean
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'processedAt' })
   declare processedAt: DateTime | null
 
-  @column()
+  @column({ columnName: 'error' })
   declare error: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

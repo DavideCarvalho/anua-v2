@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Teacher from '#models/teacher'
 import { getTeachersTimesheetValidator } from '#validators/teacher_timesheet'
+import TeacherTimesheetRowDto from '#models/dto/teacher_timesheet_row.dto'
 
 /**
  * Minimal implementation to support the Folha de Ponto UI.
@@ -23,7 +24,7 @@ export default class GetTeachersTimesheetController {
 
     const rows = teachers.map((teacher) => ({
       id: teacher.id,
-      User: {
+      user: {
         name: teacher.user?.name,
       },
       totalClasses: 0,
@@ -42,6 +43,6 @@ export default class GetTeachersTimesheetController {
       year,
     }))
 
-    return response.ok(rows)
+    return response.ok(TeacherTimesheetRowDto.fromArray(rows))
   }
 }

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Scholarship from '#models/scholarship'
 import { createScholarshipValidator } from '#validators/scholarship'
 import AppException from '#exceptions/app_exception'
+import ScholarshipDto from '#models/dto/scholarship.dto'
 
 export default class CreateScholarshipController {
   async handle({ request, response, auth }: HttpContext) {
@@ -32,6 +33,6 @@ export default class CreateScholarshipController {
 
     await scholarship.load('schoolPartner')
 
-    return response.created(scholarship)
+    return response.created(new ScholarshipDto(scholarship))
   }
 }

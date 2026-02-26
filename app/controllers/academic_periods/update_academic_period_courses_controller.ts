@@ -11,9 +11,10 @@ import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
 import AppException from '#exceptions/app_exception'
 import { dispatchEnrollmentPaymentUpdatesForLevelContracts } from '#services/payments/dispatch_enrollment_payment_updates_service'
+import AcademicPeriodCourseDto from '#models/dto/academic_period_course.dto'
 
 export default class UpdateAcademicPeriodCoursesController {
-  async handle({ params, request, response, auth }: HttpContext) {
+  async handle({ params, request, response, auth, logger }: HttpContext) {
     const academicPeriod = await AcademicPeriod.find(params.id)
 
     if (!academicPeriod) {
@@ -369,7 +370,7 @@ export default class UpdateAcademicPeriodCoursesController {
         triggeredBy: auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null,
       })
     } catch (error) {
-      console.error('[UPDATE_ACADEMIC_PERIOD_COURSES] Failed to dispatch payment updates:', error)
+      logger.error({ error }, '[UPDATE_ACADEMIC_PERIOD_COURSES] Failed to dispatch payment updates')
     }
 
     // Return updated data
@@ -440,6 +441,6 @@ export default class UpdateAcademicPeriodCoursesController {
         .sort((a, b) => a.order - b.order),
     }))
 
-    return response.ok(courses)
+    return response.ok(AcademicPeriodCourseDto.fromArray(courses))
   }
 }

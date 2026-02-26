@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PrintRequest from '#models/print_request'
+import PrintRequestDto from '#models/dto/print_request.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ApprovePrintRequestController {
@@ -12,6 +13,6 @@ export default class ApprovePrintRequestController {
     printRequest.status = 'APPROVED'
     await printRequest.save()
 
-    return response.ok(printRequest)
+    return response.ok(new PrintRequestDto(printRequest))
   }
 }

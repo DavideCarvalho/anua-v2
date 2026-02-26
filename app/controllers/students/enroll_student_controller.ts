@@ -26,7 +26,7 @@ import type { EmergencyContactRelationship } from '#models/student_emergency_con
 
 export default class EnrollStudentController {
   async handle(ctx: HttpContext) {
-    const { request, response, auth } = ctx
+    const { request, response, auth, logger } = ctx
 
     const data = await request.validateUsing(enrollStudentValidator)
 
@@ -420,12 +420,13 @@ export default class EnrollStudentController {
           await GenerateStudentPaymentsJob.dispatch({
             studentHasLevelId: createdStudentHasLevelId,
           })
-          console.log('[ENROLL] Dispatched payment generation job:', {
-            studentHasLevelId: createdStudentHasLevelId,
-          })
+          logger.info(
+            { studentHasLevelId: createdStudentHasLevelId },
+            '[ENROLL] Dispatched payment generation job'
+          )
         } catch (jobError) {
           // Log error but don't fail enrollment
-          console.error('[ENROLL] Failed to dispatch payment job:', jobError)
+          logger.error({ error: jobError }, '[ENROLL] Failed to dispatch payment job')
         }
       }
 
@@ -445,7 +446,7 @@ export default class EnrollStudentController {
       })
     } catch (error) {
       await trx.rollback()
-      console.error('Error enrolling student:', error)
+      logger.error({ error }, 'Error enrolling student')
       throw error
     }
   }

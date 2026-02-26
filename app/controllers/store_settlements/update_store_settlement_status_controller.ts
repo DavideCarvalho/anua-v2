@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreSettlement from '#models/store_settlement'
 import { updateStoreSettlementStatusValidator } from '#validators/store'
+import StoreSettlementDto from '#models/dto/store_settlement.dto'
 
 export default class UpdateStoreSettlementStatusController {
   async handle({ params, request, response, auth }: HttpContext) {
@@ -25,6 +26,6 @@ export default class UpdateStoreSettlementStatusController {
     await settlement.save()
     await settlement.load('store')
 
-    return response.ok(settlement)
+    return response.ok(new StoreSettlementDto(settlement))
   }
 }

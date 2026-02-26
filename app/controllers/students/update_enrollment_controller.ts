@@ -9,7 +9,7 @@ import IndividualDiscount from '#models/individual_discount'
 
 export default class UpdateEnrollmentController {
   async handle(ctx: HttpContext) {
-    const { params, request, response } = ctx
+    const { params, request, response, logger } = ctx
     const { id: studentId, enrollmentId } = params
     const payload = await request.validateUsing(updateEnrollmentValidator)
 
@@ -92,13 +92,13 @@ export default class UpdateEnrollmentController {
 
       // Explicitly call run() instead of relying on thenable
       const result = await dispatcher.run()
-      console.log(`[UPDATE_ENROLLMENT] Job dispatched with ID: ${result.jobId}`)
+      logger.info(`[UPDATE_ENROLLMENT] Job dispatched with ID: ${result.jobId}`)
 
       // Verify with direct DB query
       const jobs = await db.from('queue_jobs').select('id', 'status').where('queue', 'payments')
-      console.log(`[UPDATE_ENROLLMENT] Jobs in DB after dispatch: ${JSON.stringify(jobs)}`)
+      logger.info({ jobs }, '[UPDATE_ENROLLMENT] Jobs in DB after dispatch')
     } catch (error) {
-      console.error('[UPDATE_ENROLLMENT] Failed to dispatch job:', error)
+      logger.error({ error }, '[UPDATE_ENROLLMENT] Failed to dispatch job')
     }
 
     return response.ok(new StudentHasLevelDto(enrollment))

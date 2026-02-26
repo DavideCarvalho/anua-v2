@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
+import AssignmentDto from '#models/dto/assignment.dto'
 import { updateAssignmentValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
 
@@ -39,6 +40,6 @@ export default class UpdateAssignmentController {
       query.preload('teacher')
     })
 
-    return response.ok(assignment)
+    return response.ok(new AssignmentDto(assignment))
   }
 }

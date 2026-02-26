@@ -1,8 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
+import AssignmentDto from '#models/dto/assignment.dto'
 
 export default class ListAssignmentsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const classId = request.input('classId')
@@ -37,6 +38,6 @@ export default class ListAssignmentsController {
 
     const assignments = await query.paginate(page, limit)
 
-    return response.ok(assignments)
+    return AssignmentDto.fromPaginator(assignments)
   }
 }

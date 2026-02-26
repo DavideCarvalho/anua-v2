@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
+import EventDto from '#models/dto/event.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class CompleteEventController {
@@ -24,6 +25,6 @@ export default class CompleteEventController {
     await event.load('organizer')
     await event.load('school')
 
-    return response.ok(event)
+    return response.ok(new EventDto(event))
   }
 }

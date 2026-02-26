@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import ExtraClass from '#models/extra_class'
+import StudentHasExtraClassDto from '#models/dto/student_has_extra_class.dto'
 import StudentHasExtraClass from '#models/student_has_extra_class'
 import StudentPayment from '#models/student_payment'
 import AcademicPeriod from '#models/academic_period'
@@ -14,7 +15,7 @@ import AppException from '#exceptions/app_exception'
 
 export default class EnrollExtraClassController {
   async handle(ctx: HttpContext) {
-    const { params, request, response } = ctx
+    const { params, request, response, logger } = ctx
     const data = await request.validateUsing(enrollExtraClassValidator)
 
     const extraClass = await ExtraClass.find(params.id)
@@ -118,13 +119,13 @@ export default class EnrollExtraClassController {
           })
         }
       } catch (error) {
-        console.error('[ENROLL_EXTRA_CLASS] Failed to dispatch reconcile jobs:', error)
+        logger.error({ error }, '[ENROLL_EXTRA_CLASS] Failed to dispatch reconcile jobs')
       }
 
       await enrollment.load('student', (q) => q.preload('user'))
       await enrollment.load('extraClass')
 
-      return response.created(enrollment)
+      return response.created(new StudentHasExtraClassDto(enrollment))
     } catch (error) {
       await trx.rollback()
       throw error

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SchoolPartner from '#models/school_partner'
+import SchoolPartnerDto from '#models/dto/school_partner.dto'
 import { createSchoolPartnerValidator } from '#validators/school_partner'
 import AppException from '#exceptions/app_exception'
 
@@ -28,6 +29,6 @@ export default class CreateSchoolPartnerController {
       isActive: true,
     })
 
-    return response.created(partner)
+    return response.created(new SchoolPartnerDto(partner))
   }
 }

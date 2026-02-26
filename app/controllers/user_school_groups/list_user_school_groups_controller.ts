@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchoolGroup from '#models/user_has_school_group'
+import UserHasSchoolGroupDto from '#models/dto/user_has_school_group.dto'
 import { listUserSchoolGroupsValidator } from '#validators/user_school_group'
 
 export default class ListUserSchoolGroupsController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, auth }: HttpContext) {
     const payload = await request.validateUsing(listUserSchoolGroupsValidator)
 
     const page = payload.page ?? 1
@@ -26,6 +27,6 @@ export default class ListUserSchoolGroupsController {
 
     const assignments = await query.paginate(page, limit)
 
-    return response.ok(assignments)
+    return UserHasSchoolGroupDto.fromPaginator(assignments)
   }
 }

@@ -31,6 +31,6 @@ export default class LevelDto extends BaseModelDto {
     this.createdAt = level.createdAt.toJSDate()
     this.updatedAt = level.updatedAt ? level.updatedAt.toJSDate() : null
     this.school = level.school ? new SchoolDto(level.school) : undefined
-    this.classes = level.classes?.map((c) => new ClassDto(c))
+    this.classes = level.classes ? ClassDto.fromArray(level.classes) : undefined
   }
 }

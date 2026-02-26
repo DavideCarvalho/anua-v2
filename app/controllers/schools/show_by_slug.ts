@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
+import SchoolDto from '#models/dto/school.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowSchoolBySlugController {
@@ -14,6 +15,6 @@ export default class ShowSchoolBySlugController {
       throw AppException.notFound('Escola não encontrada')
     }
 
-    return response.ok(school)
+    return response.ok(new SchoolDto(school))
   }
 }

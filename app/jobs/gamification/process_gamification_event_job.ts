@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import GamificationEvent from '#models/gamification_event'
 import StudentGamification from '#models/student_gamification'
 import Achievement from '#models/achievement'
+import Student from '#models/student'
 import db from '@adonisjs/lucid/services/db'
 
 interface ProcessEventPayload {
@@ -29,142 +30,148 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
     })
 
     try {
-      // 1. Find the event
-      const event = await GamificationEvent.query()
-        .where('id', eventId)
-        .preload('student', (query) => {
-          query.preload('user')
+      const result = await db.transaction(async (trx) => {
+        const event = await GamificationEvent.query({ client: trx })
+          .where('id', eventId)
+          .forUpdate()
+          .first()
+
+        if (!event) {
+          console.warn(`[WORKER] Event ${eventId} not found - skipping`)
+          return { achievementsUnlocked: 0, pointsAwarded: 0 }
+        }
+
+        if (event.processed) {
+          console.log(`[WORKER] Event ${eventId} already processed, skipping`)
+          return { achievementsUnlocked: 0, pointsAwarded: 0 }
+        }
+
+        let studentGamification = await StudentGamification.query({ client: trx })
+          .where('studentId', event.studentId)
+          .forUpdate()
+          .first()
+
+        if (!studentGamification) {
+          studentGamification = await StudentGamification.create(
+            {
+              studentId: event.studentId,
+              totalPoints: 0,
+              currentLevel: 1,
+              levelProgress: 0,
+              streak: 0,
+              longestStreak: 0,
+            },
+            { client: trx }
+          )
+        }
+
+        const student = await Student.query({ client: trx })
+          .where('id', event.studentId)
+          .preload('user')
+          .first()
+
+        const schoolId = student?.user?.schoolId
+
+        // OPTIMIZATION: Filter achievements by eventType at DB level
+        // This avoids fetching all achievements and filtering in memory
+        // Note: For best performance, add an index on criteria JSONB column:
+        // CREATE INDEX idx_achievement_criteria_event_type ON "Achievement" ((criteria->>'eventType'));
+        const achievementsQuery = Achievement.query({ client: trx })
+          .where('isActive', true)
+          .whereRaw(`criteria->>'eventType' = ?`, [event.type])
+
+        if (schoolId) {
+          achievementsQuery.where((builder) => {
+            builder.whereNull('schoolId').orWhere('schoolId', schoolId)
+          })
+        } else {
+          achievementsQuery.whereNull('schoolId')
+        }
+
+        const achievements = await achievementsQuery
+        console.log('[WORKER] Found achievements:', {
+          eventId,
+          eventType: event.type,
+          total: achievements.length,
         })
-        .first()
 
-      if (!event) {
-        console.warn(`[WORKER] Event ${eventId} not found - skipping`)
-        return
-      }
+        let achievementsUnlocked = 0
+        let pointsAwarded = 0
 
-      // Check if already processed
-      if (event.processed) {
-        console.log(`[WORKER] Event ${eventId} already processed, skipping`)
-        return
-      }
+        for (const achievement of achievements) {
+          // Check if already unlocked (idempotency)
+          const alreadyUnlocked = await trx
+            .from('StudentAchievement')
+            .where('studentGamificationId', studentGamification.id)
+            .where('achievementId', achievement.id)
+            .first()
 
-      // 2. Get or create StudentGamification
-      let studentGamification = await StudentGamification.query()
-        .where('studentId', event.studentId)
-        .first()
-
-      if (!studentGamification) {
-        studentGamification = await StudentGamification.create({
-          studentId: event.studentId,
-          totalPoints: 0,
-          currentLevel: 1,
-        })
-      }
-
-      // 3. Get student's school ID
-      const studentWithClass = await db
-        .from('"Student"')
-        .join('"User"', '"Student".id', '"User".id')
-        .where('"Student".id', event.studentId)
-        .select('"User"."schoolId" as schoolId')
-        .first()
-
-      const schoolId = studentWithClass?.schoolId
-
-      // 4. Find active achievements
-      const achievementsQuery = Achievement.query().where('isActive', true)
-
-      if (schoolId) {
-        achievementsQuery.where((builder) => {
-          builder.whereNull('schoolId').orWhere('schoolId', schoolId)
-        })
-      } else {
-        achievementsQuery.whereNull('schoolId')
-      }
-
-      const achievements = await achievementsQuery
-
-      console.log('[WORKER] Found achievements:', {
-        eventId,
-        total: achievements.length,
-      })
-
-      let achievementsUnlocked = 0
-      let pointsAwarded = 0
-
-      // 5. Evaluate each achievement
-      for (const achievement of achievements) {
-        try {
-          const criteria = achievement.criteria as {
-            eventType?: string
-            conditions?: Record<string, unknown>
-          }
-
-          // Check if event type matches
-          if (criteria.eventType !== event.type) {
+          if (alreadyUnlocked) {
             continue
           }
 
-          // Check if already unlocked (for ONCE recurrence period)
-          if (achievement.recurrencePeriod === 'ONCE') {
-            const alreadyUnlocked = await db
-              .from('"StudentAchievement"')
-              .where('studentGamificationId', studentGamification.id)
+          if (achievement.maxUnlocks) {
+            const maxUnlocksReached = await trx
+              .from('StudentAchievement')
               .where('achievementId', achievement.id)
+              .count('* as total')
               .first()
 
-            if (alreadyUnlocked) {
+            if (Number(maxUnlocksReached?.total || 0) >= achievement.maxUnlocks) {
               continue
             }
           }
 
-          // 6. Unlock achievement
-          await db.table('"StudentAchievement"').insert({
+          await trx.table('StudentAchievement').insert({
             id: crypto.randomUUID(),
             studentGamificationId: studentGamification.id,
             achievementId: achievement.id,
             unlockedAt: DateTime.now().toSQL(),
-            createdAt: DateTime.now().toSQL(),
-            updatedAt: DateTime.now().toSQL(),
+            progress: 100,
           })
 
           achievementsUnlocked++
 
-          console.log('[WORKER] Achievement unlocked:', {
-            eventId,
-            achievementId: achievement.id,
-            achievementName: achievement.name,
-            points: achievement.points,
-          })
-
-          // 7. Award points
           if (achievement.points > 0) {
             const newTotalPoints = studentGamification.totalPoints + achievement.points
-            const { level: newLevel } = this.calculateLevel(newTotalPoints)
+            const { level: newLevel, progress: newProgress } = this.calculateLevel(newTotalPoints)
 
-            // Update StudentGamification
             studentGamification.totalPoints = newTotalPoints
             studentGamification.currentLevel = newLevel
+            studentGamification.levelProgress = newProgress
+            studentGamification.useTransaction(trx)
             await studentGamification.save()
+
+            await trx.table('PointTransaction').insert({
+              id: crypto.randomUUID(),
+              studentGamificationId: studentGamification.id,
+              points: achievement.points,
+              balanceAfter: newTotalPoints,
+              type: 'EARNED',
+              reason: `Achievement unlocked: ${achievement.name}`,
+              relatedEntityType: 'Achievement',
+              relatedEntityId: achievement.id,
+              createdAt: DateTime.now().toSQL(),
+            })
 
             pointsAwarded += achievement.points
           }
-        } catch (error) {
-          console.error(`[WORKER] Error processing achievement ${achievement.id}:`, error)
         }
-      }
 
-      // 8. Mark event as processed
-      event.processed = true
-      event.processedAt = DateTime.now()
-      await event.save()
+        event.processed = true
+        event.processedAt = DateTime.now()
+        event.error = null
+        event.useTransaction(trx)
+        await event.save()
+
+        return { achievementsUnlocked, pointsAwarded }
+      })
 
       const duration = Date.now() - startTime
-
       console.log('[WORKER] Processing completed:', {
         eventId,
-        achievementsUnlocked,
-        pointsAwarded,
+        achievementsUnlocked: result.achievementsUnlocked,
+        pointsAwarded: result.pointsAwarded,
         duration: `${duration}ms`,
       })
     } catch (error) {

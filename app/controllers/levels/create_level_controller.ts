@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
+import LevelDto from '#models/dto/level.dto'
 import { createLevelValidator } from '#validators/level'
 
 export default class CreateLevelController {
@@ -11,6 +12,6 @@ export default class CreateLevelController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(level)
+    return response.created(new LevelDto(level))
   }
 }

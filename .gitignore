@@ -20,6 +20,9 @@ yarn-error.log
 logs/*
 !logs/.gitkeep
 
+# Dogfood artifacts
+dogfood-output/
+
 # Server stats persisted debug cache
 .adonisjs/server-stats/
 
