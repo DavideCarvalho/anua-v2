@@ -1,18 +1,11 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, beforeCreate, beforeSave } from '@adonisjs/lucid/orm'
 import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import SchoolChain from './school_chain.js'
 
-export type AchievementCategory =
-  | 'ACADEMIC_PERFORMANCE'
-  | 'ATTENDANCE'
-  | 'BEHAVIOR'
-  | 'PARTICIPATION'
-  | 'STREAK'
-  | 'SOCIAL'
-  | 'SPECIAL'
+export type AchievementCategory = 'ACADEMIC' | 'ATTENDANCE' | 'BEHAVIOR' | 'SOCIAL' | 'SPECIAL'
 
 export type AchievementRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY'
 export type RecurrencePeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'ONCE'
@@ -51,7 +44,7 @@ export default class Achievement extends BaseModel {
   @column()
   declare criteria: Record<string, unknown>
 
-  @column()
+  @column({ columnName: 'isSecret' })
   declare isSecret: boolean
 
   @column()
@@ -60,26 +53,31 @@ export default class Achievement extends BaseModel {
   @column()
   declare maxUnlocks: number | null
 
-  @column()
+  @column({ columnName: 'recurrencePeriod' })
   declare recurrencePeriod: RecurrencePeriod | null
 
-  @column()
+  @column({ columnName: 'schoolId' })
   declare schoolId: string | null
 
-  @column()
+  @column({ columnName: 'schoolChainId' })
   declare schoolChainId: string | null
 
-  @column()
+  @column({ columnName: 'isActive' })
   declare isActive: boolean
 
-  @column.dateTime()
+  @column({ columnName: 'deletedAt' })
   declare deletedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column({ columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column({ columnName: 'updatedAt' })
   declare updatedAt: DateTime
+
+  @beforeSave()
+  static updateTimestamp(model: Achievement) {
+    model.updatedAt = DateTime.now()
+  }
 
   @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
