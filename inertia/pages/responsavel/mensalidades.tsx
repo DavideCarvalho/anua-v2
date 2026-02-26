@@ -21,25 +21,42 @@ function MensalidadesContent() {
   }, [setDefaultStudent])
 
   if (!isLoaded) {
-    return <MensalidadesSkeleton />
+    return (
+      <>
+        <div className="hidden" aria-hidden>
+          <StudentSelectorWithData />
+        </div>
+        <MensalidadesSkeleton />
+      </>
+    )
   }
 
   if (students.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <DollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Você não possui alunos vinculados à sua conta.
-          </p>
-        </CardContent>
-      </Card>
+      <>
+        <div className="hidden" aria-hidden>
+          <StudentSelectorWithData />
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <DollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Você não possui alunos vinculados à sua conta.
+            </p>
+          </CardContent>
+        </Card>
+      </>
     )
   }
 
   return (
     <div className="space-y-6">
+      {/* Data loader: populate responsavel store even with single student */}
+      <div className="hidden" aria-hidden>
+        <StudentSelectorWithData />
+      </div>
+
       {students.length > 1 && (
         <Card>
           <CardContent className="py-4">
