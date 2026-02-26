@@ -171,6 +171,23 @@ const navigation: NavItem[] = [
     route: 'web.escola.gamificacao.index',
     href: '/escola/gamificacao',
     icon: Trophy,
+    children: [
+      {
+        title: 'Rankings',
+        route: 'web.escola.gamificacao.rankings',
+        href: '/escola/gamificacao/rankings',
+      },
+      {
+        title: 'Conquistas',
+        route: 'web.escola.gamificacao.conquistas',
+        href: '/escola/gamificacao/conquistas',
+      },
+      {
+        title: 'Recompensas',
+        route: 'web.escola.gamificacao.recompensas',
+        href: '/escola/gamificacao/recompensas',
+      },
+    ],
   },
   {
     title: 'Configurações',
