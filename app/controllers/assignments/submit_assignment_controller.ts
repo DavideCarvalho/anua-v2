@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
+import StudentHasAssignmentDto from '#models/dto/student_has_assignment.dto'
 import { submitAssignmentValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
 
@@ -35,6 +36,6 @@ export default class SubmitAssignmentController {
     await submission.load('student')
     await submission.load('assignment')
 
-    return response.created(submission)
+    return response.created(new StudentHasAssignmentDto(submission))
   }
 }

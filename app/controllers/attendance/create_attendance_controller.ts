@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Attendance from '#models/attendance'
+import AttendanceDto from '#models/dto/attendance.dto'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
 import { createAttendanceValidator } from '#validators/attendance'
 
@@ -31,6 +32,6 @@ export default class CreateAttendanceController {
 
     await attendance.load('calendarSlot')
 
-    return response.created(attendance)
+    return response.created(new AttendanceDto(attendance))
   }
 }

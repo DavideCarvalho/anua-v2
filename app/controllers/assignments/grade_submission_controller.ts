@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
+import StudentHasAssignmentDto from '#models/dto/student_has_assignment.dto'
 import { gradeSubmissionValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
 
@@ -30,6 +31,6 @@ export default class GradeSubmissionController {
     await submission.load('student')
     await submission.load('assignment')
 
-    return response.ok(submission)
+    return response.ok(new StudentHasAssignmentDto(submission))
   }
 }

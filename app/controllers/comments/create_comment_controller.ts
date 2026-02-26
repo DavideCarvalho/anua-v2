@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
 import Comment from '#models/comment'
+import CommentDto from '#models/dto/comment.dto'
 import { createCommentValidator } from '#validators/post'
 import { randomUUID } from 'node:crypto'
 import AppException from '#exceptions/app_exception'
@@ -25,6 +26,6 @@ export default class CreateCommentController {
 
     await comment.load('user')
 
-    return response.created(comment)
+    return response.created(new CommentDto(comment))
   }
 }

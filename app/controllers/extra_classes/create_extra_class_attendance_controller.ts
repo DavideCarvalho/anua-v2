@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import ExtraClass from '#models/extra_class'
 import ExtraClassSchedule from '#models/extra_class_schedule'
 import ExtraClassAttendance from '#models/extra_class_attendance'
+import ExtraClassAttendanceDto from '#models/dto/extra_class_attendance.dto'
 import StudentHasExtraClassAttendance from '#models/student_has_extra_class_attendance'
 import { createExtraClassAttendanceValidator } from '#validators/extra_class'
 import AppException from '#exceptions/app_exception'
@@ -61,7 +62,7 @@ export default class CreateExtraClassAttendanceController {
         q.preload('student', (sq) => sq.preload('user'))
       })
 
-      return response.created(attendance)
+      return response.created(new ExtraClassAttendanceDto(attendance))
     } catch (error) {
       await trx.rollback()
       throw error

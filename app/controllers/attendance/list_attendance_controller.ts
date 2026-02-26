@@ -1,8 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance from '#models/student_has_attendance'
+import StudentHasAttendanceDto from '#models/dto/student_has_attendance.dto'
 
 export default class ListAttendanceController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 10)
     const calendarSlotId = request.input('calendarSlotId')
@@ -34,6 +35,6 @@ export default class ListAttendanceController {
 
     const attendances = await query.paginate(page, limit)
 
-    return response.ok(attendances)
+    return StudentHasAttendanceDto.fromPaginator(attendances)
   }
 }
