@@ -512,8 +512,8 @@ module "dispatch_gamification_retry" {
 
   timeout      = "300s"
   max_retries  = 0
-  cpu_limit    = "500m"
-  memory_limit = "256Mi"
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
 }
 
 module "dispatch_gamification_streaks" {
@@ -552,8 +552,8 @@ module "dispatch_gamification_streaks" {
 
   timeout      = "300s"
   max_retries  = 0
-  cpu_limit    = "500m"
-  memory_limit = "256Mi"
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
 }
 
 # ==============================================================================
