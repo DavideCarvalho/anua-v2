@@ -38,6 +38,16 @@ const CreateGamificationEventController = () =>
 const RetryGamificationEventController = () =>
   import('#controllers/gamification_events/retry_gamification_event_controller')
 
+// Challenges
+const ListChallengesController = () => import('#controllers/challenges/list_challenges_controller')
+const ShowChallengeController = () => import('#controllers/challenges/show_challenge_controller')
+const CreateChallengeController = () =>
+  import('#controllers/challenges/create_challenge_controller')
+const UpdateChallengeController = () =>
+  import('#controllers/challenges/update_challenge_controller')
+const DeleteChallengeController = () =>
+  import('#controllers/challenges/delete_challenge_controller')
+
 export function registerStudentGamificationApiRoutes() {
   router
     .group(() => {
@@ -84,5 +94,18 @@ export function registerGamificationEventApiRoutes() {
       router.post('/:id/retry', [RetryGamificationEventController]).as('gamificationEvents.retry')
     })
     .prefix('/gamification-events')
+    .use(middleware.auth())
+}
+
+export function registerChallengeApiRoutes() {
+  router
+    .group(() => {
+      router.get('/', [ListChallengesController]).as('challenges.index')
+      router.post('/', [CreateChallengeController]).as('challenges.store')
+      router.get('/:id', [ShowChallengeController]).as('challenges.show')
+      router.put('/:id', [UpdateChallengeController]).as('challenges.update')
+      router.delete('/:id', [DeleteChallengeController]).as('challenges.destroy')
+    })
+    .prefix('/challenges')
     .use(middleware.auth())
 }

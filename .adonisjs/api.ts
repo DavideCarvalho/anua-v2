@@ -307,6 +307,10 @@ type EscolaGamificacaoRecompensasGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_gamificacao_recompensas_page_controller.ts').default['handle'], false>
 }
+type EscolaGamificacaoDesafiosGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_gamificacao_desafios_page_controller.ts').default['handle'], false>
+}
 type EscolaConfiguracoesGetHead = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/pages/escola/show_configuracoes_page_controller.ts').default['handle'], false>
@@ -2035,6 +2039,26 @@ type ApiV1GamificationeventsIdRetryPost = {
   request: unknown
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/gamification_events/retry_gamification_event_controller.ts').default['handle'], false>
 }
+type ApiV1ChallengesGetHead = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['listChallengesValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/challenges/list_challenges_controller.ts').default['handle'], true>
+}
+type ApiV1ChallengesPost = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['createChallengeValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/challenges/create_challenge_controller.ts').default['handle'], true>
+}
+type ApiV1ChallengesIdGetHead = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/challenges/show_challenge_controller.ts').default['handle'], false>
+}
+type ApiV1ChallengesIdPut = {
+  request: MakeTuyauRequest<InferInput<typeof import('../app/validators/gamification.ts')['updateChallengeValidator']>>
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/challenges/update_challenge_controller.ts').default['handle'], true>
+}
+type ApiV1ChallengesIdDelete = {
+  request: unknown
+  response: MakeNonSerializedTuyauResponse<import('../app/controllers/challenges/delete_challenge_controller.ts').default['handle'], false>
+}
 type ApiV1ScholarshipsGetHead = {
   request: MakeTuyauRequest<InferInput<typeof import('../app/validators/scholarship.ts')['listScholarshipsValidator']>>
   response: MakeNonSerializedTuyauResponse<import('../app/controllers/scholarships/list_scholarships_controller.ts').default['handle'], true>
@@ -2907,6 +2931,12 @@ export interface ApiDefinition {
         };
         '$get': EscolaGamificacaoRecompensasGetHead;
         '$head': EscolaGamificacaoRecompensasGetHead;
+      };
+      'desafios': {
+        '$url': {
+        };
+        '$get': EscolaGamificacaoDesafiosGetHead;
+        '$head': EscolaGamificacaoDesafiosGetHead;
       };
     };
     'configuracoes': {
@@ -5109,6 +5139,21 @@ export interface ApiDefinition {
           };
         };
       };
+      'challenges': {
+        '$url': {
+        };
+        '$get': ApiV1ChallengesGetHead;
+        '$head': ApiV1ChallengesGetHead;
+        '$post': ApiV1ChallengesPost;
+        ':id': {
+          '$url': {
+          };
+          '$get': ApiV1ChallengesIdGetHead;
+          '$head': ApiV1ChallengesIdGetHead;
+          '$put': ApiV1ChallengesIdPut;
+          '$delete': ApiV1ChallengesIdDelete;
+        };
+      };
       'scholarships': {
         '$url': {
         };
@@ -6014,6 +6059,13 @@ const routes = [
     path: '/escola/gamificacao/recompensas',
     method: ["GET","HEAD"],
     types: {} as EscolaGamificacaoRecompensasGetHead,
+  },
+  {
+    params: [],
+    name: 'web.escola.gamificacao.desafios',
+    path: '/escola/gamificacao/desafios',
+    method: ["GET","HEAD"],
+    types: {} as EscolaGamificacaoDesafiosGetHead,
   },
   {
     params: [],
@@ -9038,6 +9090,41 @@ const routes = [
     path: '/api/v1/gamification-events/:id/retry',
     method: ["POST"],
     types: {} as ApiV1GamificationeventsIdRetryPost,
+  },
+  {
+    params: [],
+    name: 'api.v1.challenges.index',
+    path: '/api/v1/challenges',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ChallengesGetHead,
+  },
+  {
+    params: [],
+    name: 'api.v1.challenges.store',
+    path: '/api/v1/challenges',
+    method: ["POST"],
+    types: {} as ApiV1ChallengesPost,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.challenges.show',
+    path: '/api/v1/challenges/:id',
+    method: ["GET","HEAD"],
+    types: {} as ApiV1ChallengesIdGetHead,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.challenges.update',
+    path: '/api/v1/challenges/:id',
+    method: ["PUT"],
+    types: {} as ApiV1ChallengesIdPut,
+  },
+  {
+    params: ["id"],
+    name: 'api.v1.challenges.destroy',
+    path: '/api/v1/challenges/:id',
+    method: ["DELETE"],
+    types: {} as ApiV1ChallengesIdDelete,
   },
   {
     params: [],

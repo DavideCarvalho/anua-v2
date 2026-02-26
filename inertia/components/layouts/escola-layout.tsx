@@ -183,6 +183,11 @@ const navigation: NavItem[] = [
         href: '/escola/gamificacao/conquistas',
       },
       {
+        title: 'Desafios',
+        route: 'web.escola.gamificacao.desafios',
+        href: '/escola/gamificacao/desafios',
+      },
+      {
         title: 'Recompensas',
         route: 'web.escola.gamificacao.recompensas',
         href: '/escola/gamificacao/recompensas',

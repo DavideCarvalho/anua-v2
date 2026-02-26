@@ -381,3 +381,53 @@ export const getStudentStatsValidator = vine.compile(
     studentId: vine.string().trim(),
   })
 )
+
+// ==========================================
+// Challenge Validators
+// ==========================================
+export const createChallengeValidator = vine.compile(
+  vine.object({
+    name: vine.string().trim().minLength(1).maxLength(255),
+    description: vine.string().trim().minLength(1).maxLength(1000),
+    icon: vine.string().trim().optional(),
+    points: vine.number().min(0),
+    category: vine.enum(['ATTENDANCE', 'ACADEMIC', 'BEHAVIOR', 'EXTRACURRICULAR', 'SPECIAL']),
+    criteria: vine.any(),
+    isRecurring: vine.boolean().optional(),
+    recurrencePeriod: vine.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']).optional(),
+    startDate: vine.date().optional(),
+    endDate: vine.date().optional(),
+    schoolId: vine.string().trim().optional(),
+    isActive: vine.boolean().optional(),
+  })
+)
+
+export const updateChallengeValidator = vine.compile(
+  vine.object({
+    name: vine.string().trim().minLength(1).maxLength(255).optional(),
+    description: vine.string().trim().minLength(1).maxLength(1000).optional(),
+    icon: vine.string().trim().optional(),
+    points: vine.number().min(0).optional(),
+    category: vine
+      .enum(['ATTENDANCE', 'ACADEMIC', 'BEHAVIOR', 'EXTRACURRICULAR', 'SPECIAL'])
+      .optional(),
+    criteria: vine.any().optional(),
+    isRecurring: vine.boolean().optional(),
+    recurrencePeriod: vine.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']).optional(),
+    startDate: vine.date().optional(),
+    endDate: vine.date().optional(),
+    isActive: vine.boolean().optional(),
+  })
+)
+
+export const listChallengesValidator = vine.compile(
+  vine.object({
+    schoolId: vine.string().trim().optional(),
+    category: vine
+      .enum(['ATTENDANCE', 'ACADEMIC', 'BEHAVIOR', 'EXTRACURRICULAR', 'SPECIAL'])
+      .optional(),
+    isActive: vine.boolean().optional(),
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)

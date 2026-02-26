@@ -136,6 +136,8 @@ const ShowGamificacaoConquistasPageController = () =>
   import('#controllers/pages/escola/show_gamificacao_conquistas_page_controller')
 const ShowGamificacaoRecompensasPageController = () =>
   import('#controllers/pages/escola/show_gamificacao_recompensas_page_controller')
+const ShowGamificacaoDesafiosPageController = () =>
+  import('#controllers/pages/escola/show_gamificacao_desafios_page_controller')
 const ShowConfiguracaoPagamentosPageController = () =>
   import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller')
 const ShowConfiguracoesPageController = () =>
@@ -341,6 +343,9 @@ export function registerEscolaPageRoutes() {
       router
         .get('/gamificacao/recompensas', [ShowGamificacaoRecompensasPageController])
         .as('gamificacao.recompensas')
+      router
+        .get('/gamificacao/desafios', [ShowGamificacaoDesafiosPageController])
+        .as('gamificacao.desafios')
 
       // Configuracoes
       router.get('/configuracoes', [ShowConfiguracoesPageController]).as('configuracoes')

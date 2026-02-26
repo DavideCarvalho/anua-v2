@@ -71,6 +71,7 @@ import {
   registerStudentGamificationApiRoutes,
   registerLeaderboardApiRoutes,
   registerGamificationEventApiRoutes,
+  registerChallengeApiRoutes,
 } from './gamification.js'
 import {
   registerScholarshipApiRoutes,
@@ -162,6 +163,7 @@ export function registerApiRoutes() {
   registerStudentGamificationApiRoutes()
   registerLeaderboardApiRoutes()
   registerGamificationEventApiRoutes()
+  registerChallengeApiRoutes()
   registerScholarshipApiRoutes()
   registerSchoolPartnerApiRoutes()
   registerSchoolChainApiRoutes()
