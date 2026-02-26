@@ -1,12 +1,10 @@
 import { Head } from '@inertiajs/react'
 import { Suspense } from 'react'
-import { Trophy, Medal, Zap } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { LeaderboardsManagement } from '../../../containers/gamificacao/leaderboards-management'
-import { GamificationEventsTable } from '../../../containers/gamificacao/gamification-events-table'
 import { useAuthUser } from '../../../stores/auth_store'
 
 function LeaderboardsSkeleton() {
@@ -20,24 +18,6 @@ function LeaderboardsSkeleton() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-40 bg-muted animate-pulse rounded" />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function EventsSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="h-6 w-48 bg-muted animate-pulse rounded" />
-        <div className="h-4 w-64 bg-muted animate-pulse rounded" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-12 bg-muted animate-pulse rounded" />
           ))}
         </div>
       </CardContent>
@@ -63,30 +43,9 @@ export default function GamificacaoPage() {
         </div>
 
         {schoolId ? (
-          <Tabs defaultValue="rankings" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="rankings" className="gap-2">
-                <Medal className="h-4 w-4" />
-                Rankings
-              </TabsTrigger>
-              <TabsTrigger value="eventos" className="gap-2">
-                <Zap className="h-4 w-4" />
-                Eventos
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="rankings">
-              <Suspense fallback={<LeaderboardsSkeleton />}>
-                <LeaderboardsManagement schoolId={schoolId} />
-              </Suspense>
-            </TabsContent>
-
-            <TabsContent value="eventos">
-              <Suspense fallback={<EventsSkeleton />}>
-                <GamificationEventsTable />
-              </Suspense>
-            </TabsContent>
-          </Tabs>
+          <Suspense fallback={<LeaderboardsSkeleton />}>
+            <LeaderboardsManagement schoolId={schoolId} />
+          </Suspense>
         ) : (
           <Card>
             <CardContent className="py-10 text-center text-muted-foreground">
