@@ -8,7 +8,7 @@ import AppException from '#exceptions/app_exception'
 
 export default class CancelStudentPaymentController {
   async handle(ctx: HttpContext) {
-    const { params, request, response } = ctx
+    const { params, request, response, logger } = ctx
     const { id } = params
     const payload = await request.validateUsing(cancelStudentPaymentValidator)
     const user = ctx.auth?.user
@@ -35,7 +35,7 @@ export default class CancelStudentPaymentController {
         source: 'student-payments.cancel',
       })
     } catch (error) {
-      console.error('[CANCEL_PAYMENT] Failed to dispatch reconcile job:', error)
+      logger.error({ error }, '[CANCEL_PAYMENT] Failed to dispatch reconcile job')
     }
 
     await payment.load('student')

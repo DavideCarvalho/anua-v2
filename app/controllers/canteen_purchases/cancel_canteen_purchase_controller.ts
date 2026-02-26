@@ -10,7 +10,7 @@ import BillingReconciliationService from '#services/payments/billing_reconciliat
 import AppException from '#exceptions/app_exception'
 
 export default class CancelCanteenPurchaseController {
-  async handle({ params, response, auth }: HttpContext) {
+  async handle({ params, response, auth, logger }: HttpContext) {
     const { id } = params
 
     const purchase = await CanteenPurchase.find(id)
@@ -80,9 +80,9 @@ export default class CancelCanteenPurchaseController {
         try {
           await BillingReconciliationService.reconcileByPaymentId(linkedPayment.id)
         } catch (error) {
-          console.error(
-            '[CANTEEN_FIADO] Failed to reconcile invoice synchronously on cancel:',
-            error
+          logger.error(
+            { error },
+            '[CANTEEN_FIADO] Failed to reconcile invoice synchronously on cancel'
           )
         }
 
@@ -94,9 +94,9 @@ export default class CancelCanteenPurchaseController {
             source: 'canteen-purchases.cancel',
           })
         } catch (error) {
-          console.error(
-            '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job on cancel:',
-            error
+          logger.error(
+            { error },
+            '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job on cancel'
           )
         }
       }

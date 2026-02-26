@@ -3,6 +3,7 @@ import string from '@adonisjs/core/helpers/string'
 import Subject from '#models/subject'
 import { createSubjectValidator } from '#validators/subject'
 import AppException from '#exceptions/app_exception'
+import SubjectDto from '#models/dto/subject.dto'
 
 export default class CreateSubjectController {
   async handle({ request, response }: HttpContext) {
@@ -24,6 +25,6 @@ export default class CreateSubjectController {
       slug,
     })
 
-    return response.created(subject)
+    return response.created(new SubjectDto(subject))
   }
 }

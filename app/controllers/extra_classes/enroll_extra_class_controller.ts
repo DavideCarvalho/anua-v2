@@ -15,7 +15,7 @@ import AppException from '#exceptions/app_exception'
 
 export default class EnrollExtraClassController {
   async handle(ctx: HttpContext) {
-    const { params, request, response } = ctx
+    const { params, request, response, logger } = ctx
     const data = await request.validateUsing(enrollExtraClassValidator)
 
     const extraClass = await ExtraClass.find(params.id)
@@ -119,7 +119,7 @@ export default class EnrollExtraClassController {
           })
         }
       } catch (error) {
-        console.error('[ENROLL_EXTRA_CLASS] Failed to dispatch reconcile jobs:', error)
+        logger.error({ error }, '[ENROLL_EXTRA_CLASS] Failed to dispatch reconcile jobs')
       }
 
       await enrollment.load('student', (q) => q.preload('user'))

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Subject from '#models/subject'
 import TeacherHasClass from '#models/teacher_has_class'
 import TeacherHasSubject from '#models/teacher_has_subject'
+import SubjectDto from '#models/dto/subject.dto'
 
 export default class ListSubjectsForClassController {
   async handle({ params, response }: HttpContext) {
@@ -33,6 +34,6 @@ export default class ListSubjectsForClassController {
       .preload('school')
       .orderBy('name', 'asc')
 
-    return response.ok(subjects)
+    return response.ok(SubjectDto.fromArray(subjects))
   }
 }

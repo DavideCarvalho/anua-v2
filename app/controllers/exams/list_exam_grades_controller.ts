@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import AppException from '#exceptions/app_exception'
+import ExamGradeDto from '#models/dto/exam_grade.dto'
 
 export default class ListExamGradesController {
   async handle({ params, response }: HttpContext) {
@@ -18,6 +19,6 @@ export default class ListExamGradesController {
       .preload('student')
       .orderBy('createdAt', 'desc')
 
-    return response.ok(grades)
+    return response.ok(ExamGradeDto.fromArray(grades))
   }
 }

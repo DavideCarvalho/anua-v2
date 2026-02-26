@@ -22,7 +22,7 @@ function combineDateAndTime(isoDate: string, time: string) {
 }
 
 export default class CreateEventController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, logger }: HttpContext) {
     const data = await request.validateUsing(createEventValidator)
     const user = auth.user!
     const hasAdditionalCosts = data.hasAdditionalCosts ?? false
@@ -147,7 +147,7 @@ export default class CreateEventController {
         source: 'events.create',
       })
     } catch (error) {
-      console.error('[EVENT_CREATE] Failed to dispatch invitation job:', error)
+      logger.error({ error }, '[EVENT_CREATE] Failed to dispatch invitation job')
     }
 
     return response.created(new EventDto(event))

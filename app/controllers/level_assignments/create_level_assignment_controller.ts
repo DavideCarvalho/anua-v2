@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { createLevelAssignmentValidator } from '#validators/level_assignment'
+import LevelAssignedToCourseHasAcademicPeriodDto from '#models/dto/level_assigned_to_course_has_academic_period.dto'
 
 export default class CreateLevelAssignmentController {
   async handle({ request, response }: HttpContext) {
@@ -11,6 +12,6 @@ export default class CreateLevelAssignmentController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(levelAssignment)
+    return response.created(new LevelAssignedToCourseHasAcademicPeriodDto(levelAssignment))
   }
 }

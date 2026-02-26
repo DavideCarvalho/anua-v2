@@ -15,7 +15,7 @@ import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
 
 export default class FinishEnrollmentController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext) {
     const data = await request.validateUsing(finishEnrollmentValidator)
 
     const trx = await db.transaction()
@@ -250,7 +250,7 @@ export default class FinishEnrollmentController {
       })
     } catch (error) {
       await trx.rollback()
-      console.error('Enrollment error:', error)
+      logger.error({ error }, 'Enrollment error')
       throw AppException.internalServerError(
         'Erro ao processar matrícula. Por favor, tente novamente.'
       )

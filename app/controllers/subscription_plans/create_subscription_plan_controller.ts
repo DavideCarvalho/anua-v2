@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import SubscriptionPlan from '#models/subscription_plan'
 import { createSubscriptionPlanValidator } from '#validators/subscription'
+import SubscriptionPlanDto from '#models/dto/subscription_plan.dto'
 
 export default class CreateSubscriptionPlanController {
   async handle({ request, response }: HttpContext) {
@@ -29,6 +30,6 @@ export default class CreateSubscriptionPlanController {
       return newPlan
     })
 
-    return response.created(plan)
+    return response.created(new SubscriptionPlanDto(plan))
   }
 }

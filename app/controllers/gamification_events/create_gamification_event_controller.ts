@@ -6,7 +6,7 @@ import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
 
 export default class CreateGamificationEventController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext) {
     const payload = await request.validateUsing(createGamificationEventValidator)
 
     const event = await GamificationEvent.create({
@@ -23,8 +23,7 @@ export default class CreateGamificationEventController {
       await getQueueManager()
       await ProcessGamificationEventJob.dispatch({ eventId: event.id })
     } catch (error) {
-      console.error('Failed to enqueue gamification event:', error)
-      // Event is still created, will be retried later
+      logger.error({ error }, 'Failed to enqueue gamification event')
     }
 
     await event.load('student', (query) => {

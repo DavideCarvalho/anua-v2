@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { createStudentBalanceTransactionValidator } from '#validators/student_balance_transaction'
+import StudentBalanceTransactionDto from '#models/dto/student_balance_transaction.dto'
 
 export default class CreateStudentBalanceTransactionController {
   async handle({ request, response }: HttpContext) {
@@ -40,6 +41,6 @@ export default class CreateStudentBalanceTransactionController {
 
     await transaction.load('student')
 
-    return response.created(transaction)
+    return response.created(new StudentBalanceTransactionDto(transaction))
   }
 }

@@ -7,7 +7,7 @@ import AppException from '#exceptions/app_exception'
 
 // Map validator category to model category
 const categoryMap: Record<string, AchievementCategory> = {
-  ACADEMIC: 'ACADEMIC_PERFORMANCE',
+  ACADEMIC: 'ACADEMIC',
   ATTENDANCE: 'ATTENDANCE',
   BEHAVIOR: 'BEHAVIOR',
   SOCIAL: 'SOCIAL',

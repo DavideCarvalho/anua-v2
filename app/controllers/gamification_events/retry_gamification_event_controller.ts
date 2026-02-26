@@ -6,7 +6,7 @@ import ProcessGamificationEventJob from '#jobs/gamification/process_gamification
 import AppException from '#exceptions/app_exception'
 
 export default class RetryGamificationEventController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, logger }: HttpContext) {
     const event = await GamificationEvent.find(params.id)
 
     if (!event) {
@@ -30,7 +30,7 @@ export default class RetryGamificationEventController {
       await getQueueManager()
       await ProcessGamificationEventJob.dispatch({ eventId: event.id })
     } catch (error) {
-      console.error('Failed to enqueue gamification event retry:', error)
+      logger.error({ error }, 'Failed to enqueue gamification event retry')
     }
 
     await event.load('student', (query) => {

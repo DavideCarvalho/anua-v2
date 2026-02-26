@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreSettlement from '#models/store_settlement'
+import StoreSettlementDto from '#models/dto/store_settlement.dto'
 
 export default class ShowStoreSettlementController {
   async handle({ params, response }: HttpContext) {
@@ -10,6 +11,6 @@ export default class ShowStoreSettlementController {
       .preload('orders')
       .firstOrFail()
 
-    return response.ok(settlement)
+    return response.ok(new StoreSettlementDto(settlement))
   }
 }

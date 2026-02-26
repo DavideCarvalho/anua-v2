@@ -3,6 +3,7 @@ import Absence from '#models/absence'
 import Teacher from '#models/teacher'
 import { getTeacherAbsencesValidator } from '#validators/teacher_timesheet'
 import AppException from '#exceptions/app_exception'
+import AbsenceDto from '#models/dto/absence.dto'
 
 export default class GetTeacherAbsencesController {
   async handle({ request, response, auth }: HttpContext) {
@@ -27,6 +28,6 @@ export default class GetTeacherAbsencesController {
       .whereBetween('date', [start, end])
       .orderBy('date', 'desc')
 
-    return response.ok(absences)
+    return response.ok(AbsenceDto.fromArray(absences))
   }
 }

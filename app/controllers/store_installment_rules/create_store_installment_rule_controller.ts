@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
 import StoreInstallmentRule from '#models/store_installment_rule'
 import { createStoreInstallmentRuleValidator } from '#validators/store'
+import StoreInstallmentRuleDto from '#models/dto/store_installment_rule.dto'
 
 export default class CreateStoreInstallmentRuleController {
   async handle({ request, response }: HttpContext) {
@@ -14,6 +15,6 @@ export default class CreateStoreInstallmentRuleController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(rule)
+    return response.created(new StoreInstallmentRuleDto(rule))
   }
 }

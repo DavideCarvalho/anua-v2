@@ -76,7 +76,7 @@ export default class CreateCanteenPurchaseController {
   }
 
   async handle(ctx: HttpContext) {
-    const { request, response, auth } = ctx
+    const { request, response, auth, logger } = ctx
     const payload = await request.validateUsing(createCanteenPurchaseValidator)
 
     // Validate that all items exist and are active
@@ -214,7 +214,7 @@ export default class CreateCanteenPurchaseController {
       try {
         await BillingReconciliationService.reconcileByPaymentId(studentPaymentId)
       } catch (error) {
-        console.error('[CANTEEN_FIADO] Failed to reconcile invoice synchronously:', error)
+        logger.error({ error }, '[CANTEEN_FIADO] Failed to reconcile invoice synchronously')
       }
 
       try {
@@ -225,7 +225,7 @@ export default class CreateCanteenPurchaseController {
           source: 'canteen-purchases.create-fiado',
         })
       } catch (error) {
-        console.error('[CANTEEN_FIADO] Failed to dispatch invoice reconcile job:', error)
+        logger.error({ error }, '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job')
       }
     }
 

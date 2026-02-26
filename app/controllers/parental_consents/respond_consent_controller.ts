@@ -18,7 +18,7 @@ type RespondResult =
   | { type: 'expired' }
 
 export default class RespondConsentController {
-  async handle({ auth, params, request, response }: HttpContext) {
+  async handle({ auth, params, request, response, logger }: HttpContext) {
     const user = auth.user!
     const { id } = params
     const { approved, notes } = await request.validateUsing(respondConsentValidator)
@@ -95,7 +95,7 @@ export default class RespondConsentController {
           source,
         })
       } catch (error) {
-        console.error('[RESPOND_CONSENT] Failed to dispatch reconcile payment job:', error)
+        logger.error({ error }, '[RESPOND_CONSENT] Failed to dispatch reconcile payment job')
       }
     }
 

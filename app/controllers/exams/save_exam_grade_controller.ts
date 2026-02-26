@@ -3,6 +3,7 @@ import { saveExamGradeValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import AppException from '#exceptions/app_exception'
+import ExamGradeDto from '#models/dto/exam_grade.dto'
 
 export default class SaveExamGradeController {
   async handle({ params, request, response }: HttpContext) {
@@ -28,6 +29,6 @@ export default class SaveExamGradeController {
     await grade.load('student')
     await grade.load('exam')
 
-    return response.created(grade)
+    return response.created(new ExamGradeDto(grade))
   }
 }

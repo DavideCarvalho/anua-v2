@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
 import StoreFinancialSettings from '#models/store_financial_settings'
 import { upsertStoreFinancialSettingsValidator } from '#validators/store'
+import StoreFinancialSettingsDto from '#models/dto/store_financial_settings.dto'
 
 export default class UpsertStoreFinancialSettingsController {
   async handle({ params, request, response }: HttpContext) {
@@ -18,6 +19,6 @@ export default class UpsertStoreFinancialSettingsController {
       }
     )
 
-    return response.ok(settings)
+    return response.ok(new StoreFinancialSettingsDto(settings))
   }
 }

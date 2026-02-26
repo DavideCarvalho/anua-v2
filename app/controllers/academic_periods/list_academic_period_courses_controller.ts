@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import AppException from '#exceptions/app_exception'
+import AcademicPeriodCourseDto from '#models/dto/academic_period_course.dto'
 
 export default class ListAcademicPeriodCoursesController {
   async handle({ params, request, response }: HttpContext) {
@@ -85,6 +86,6 @@ export default class ListAcademicPeriodCoursesController {
         .sort((a, b) => a.order - b.order),
     }))
 
-    return response.ok(courses)
+    return response.ok(AcademicPeriodCourseDto.fromArray(courses))
   }
 }

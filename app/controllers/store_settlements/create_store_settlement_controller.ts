@@ -5,6 +5,7 @@ import StoreSettlement from '#models/store_settlement'
 import StoreFinancialSettings from '#models/store_financial_settings'
 import { createStoreSettlementValidator } from '#validators/store'
 import AppException from '#exceptions/app_exception'
+import StoreSettlementDto from '#models/dto/store_settlement.dto'
 
 export default class CreateStoreSettlementController {
   async handle({ request, response }: HttpContext) {
@@ -71,6 +72,6 @@ export default class CreateStoreSettlementController {
 
     await settlement.load('store')
 
-    return response.created(settlement)
+    return response.created(new StoreSettlementDto(settlement))
   }
 }

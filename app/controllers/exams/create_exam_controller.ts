@@ -5,6 +5,7 @@ import Exam from '#models/exam'
 import Class_ from '#models/class'
 import AcademicPeriod from '#models/academic_period'
 import AppException from '#exceptions/app_exception'
+import ExamDto from '#models/dto/exam.dto'
 
 export default class CreateExamController {
   async handle({ request, response }: HttpContext) {
@@ -55,6 +56,6 @@ export default class CreateExamController {
     await exam.load('subject')
     await exam.load('teacher')
 
-    return response.created(exam)
+    return response.created(new ExamDto(exam))
   }
 }

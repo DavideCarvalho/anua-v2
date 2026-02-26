@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { listStudentBalanceTransactionsValidator } from '#validators/student_balance_transaction'
+import StudentBalanceTransactionDto from '#models/dto/student_balance_transaction.dto'
 
 export default class ListStudentBalanceTransactionsController {
   async handle({ request, response }: HttpContext) {
@@ -25,6 +26,6 @@ export default class ListStudentBalanceTransactionsController {
 
     const transactions = await query.paginate(page, limit)
 
-    return response.ok(transactions)
+    return response.ok(StudentBalanceTransactionDto.fromPaginator(transactions))
   }
 }

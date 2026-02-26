@@ -29,7 +29,7 @@ function combineDateAndTime(isoDate: string, time: string) {
 }
 
 export default class UpdateEventController {
-  async handle({ params, request, response, selectedSchoolIds, auth }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, auth, logger }: HttpContext) {
     const { id } = params
     const data = await request.validateUsing(updateEventValidator)
     const user = auth.user
@@ -353,7 +353,7 @@ export default class UpdateEventController {
           source: 'events.update',
         })
       } catch (error) {
-        console.error('[UPDATE_EVENT] Failed to dispatch invitation job:', error)
+        logger.error({ error }, '[UPDATE_EVENT] Failed to dispatch invitation job')
       }
     }
 
@@ -367,7 +367,7 @@ export default class UpdateEventController {
           })
         }
       } catch (error) {
-        console.error('[UPDATE_EVENT] Failed to dispatch reconcile payment job:', error)
+        logger.error({ error }, '[UPDATE_EVENT] Failed to dispatch reconcile payment job')
       }
     }
 

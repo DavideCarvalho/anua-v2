@@ -6,7 +6,7 @@ import { verifyCodeValidator } from '#validators/auth'
 import AppException from '#exceptions/app_exception'
 
 export default class VerifyCodeController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, logger }: HttpContext) {
     try {
       const { email, code } = await request.validateUsing(verifyCodeValidator)
 
@@ -50,7 +50,7 @@ export default class VerifyCodeController {
         throw error
       }
 
-      console.error('[OTP] Error verifying code:', error)
+      logger.error({ error }, '[OTP] Error verifying code')
       throw error
     }
   }

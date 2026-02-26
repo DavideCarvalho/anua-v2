@@ -4,6 +4,7 @@ import Class_ from '#models/class'
 import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
 import AppException from '#exceptions/app_exception'
+import CourseClassExpandedDto from '#models/dto/course_class_expanded.dto'
 
 interface TeacherInfo {
   id: string
@@ -143,6 +144,6 @@ export default class GetCourseClassesController {
       })
     )
 
-    return response.ok(classesExpanded)
+    return response.ok(CourseClassExpandedDto.fromArray(classesExpanded))
   }
 }

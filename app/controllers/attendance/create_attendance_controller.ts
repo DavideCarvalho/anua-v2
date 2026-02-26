@@ -13,7 +13,7 @@ function mapStatus(validatorStatus: string): AttendanceStatus {
 }
 
 export default class CreateAttendanceController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, logger }: HttpContext) {
     const data = await request.validateUsing(createAttendanceValidator)
 
     // Create the attendance record for this calendar slot/date
@@ -44,7 +44,7 @@ export default class CreateAttendanceController {
           date: attendance.date.toISO() || new Date().toISOString(),
         })
         .catch((err) => {
-          console.error('[Gamification] Failed to emit attendance event:', err)
+          logger.error({ err }, '[Gamification] Failed to emit attendance event')
         })
     }
 
