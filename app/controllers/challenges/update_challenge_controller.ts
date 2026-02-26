@@ -3,14 +3,34 @@ import { DateTime } from 'luxon'
 import Challenge from '#models/challenge'
 import { updateChallengeValidator } from '#validators/gamification'
 import ChallengeDto from '#models/dto/challenge.dto'
+import AppException from '#exceptions/app_exception'
 
 export default class UpdateChallengeController {
-  async handle({ request, params, auth }: HttpContext) {
+  async handle({ request, params, effectiveUser, selectedSchoolIds }: HttpContext) {
     const challenge = await Challenge.findOrFail(params.id)
 
-    const userSchoolId = auth.user?.schoolId
-    if (userSchoolId && challenge.schoolId !== userSchoolId) {
-      throw new Error('Unauthorized: You can only update challenges from your school')
+    // Verificar ownership - desafios globais só podem ser modificados por admins
+    if (!challenge.schoolId) {
+      // Desafio global - carregar role e verificar se é admin
+      if (!effectiveUser?.role) {
+        await effectiveUser?.load('role')
+      }
+      if (
+        !effectiveUser?.role?.name ||
+        !['SUPER_ADMIN', 'ADMIN'].includes(effectiveUser.role.name)
+      ) {
+        throw AppException.forbidden(
+          'Desafios globais só podem ser modificados por administradores'
+        )
+      }
+    } else {
+      // Desafio da escola - verificar se a escola está no array de escolas do usuário
+      const userSchoolIds = selectedSchoolIds || []
+      if (userSchoolIds.length > 0 && !userSchoolIds.includes(challenge.schoolId)) {
+        throw AppException.forbidden(
+          'Você não tem permissão para modificar desafios de outras escolas'
+        )
+      }
     }
 
     const payload = await request.validateUsing(updateChallengeValidator)

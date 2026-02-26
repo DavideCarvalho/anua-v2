@@ -15,11 +15,35 @@ const categoryMap: Record<string, AchievementCategory> = {
 }
 
 export default class UpdateAchievementController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, effectiveUser, selectedSchoolIds }: HttpContext) {
     const achievement = await Achievement.find(params.id)
 
     if (!achievement) {
       throw AppException.notFound('Conquista não encontrada')
+    }
+
+    // Verificar ownership - conquistas globais só podem ser modificadas por admins
+    if (!achievement.schoolId) {
+      // Conquista global - carregar role e verificar se é admin
+      if (!effectiveUser?.role) {
+        await effectiveUser?.load('role')
+      }
+      if (
+        !effectiveUser?.role?.name ||
+        !['SUPER_ADMIN', 'ADMIN'].includes(effectiveUser.role.name)
+      ) {
+        throw AppException.forbidden(
+          'Conquistas globais só podem ser modificadas por administradores'
+        )
+      }
+    } else {
+      // Conquista da escola - verificar se a escola está no array de escolas do usuário
+      const userSchoolIds = selectedSchoolIds || []
+      if (userSchoolIds.length > 0 && !userSchoolIds.includes(achievement.schoolId)) {
+        throw AppException.forbidden(
+          'Você não tem permissão para modificar conquistas de outras escolas'
+        )
+      }
     }
 
     const payload = await request.validateUsing(updateAchievementValidator)
