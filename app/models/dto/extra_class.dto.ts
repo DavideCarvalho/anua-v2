@@ -37,9 +37,7 @@ export default class ExtraClassDto extends BaseModelDto {
     this.isActive = model.isActive
     this.createdAt = model.createdAt.toJSDate()
     this.updatedAt = model.updatedAt.toJSDate()
-    this.schedules = model.schedules
-      ? model.schedules.map((s) => new ExtraClassScheduleDto(s))
-      : undefined
+    this.schedules = model.schedules ? ExtraClassScheduleDto.fromArray(model.schedules) : undefined
     this.contract = model.contract ? new ContractDto(model.contract) : undefined
     this.teacherName = model.teacher?.user?.name
     this.enrollmentCount = (model.$extras as any)?.enrollments_count

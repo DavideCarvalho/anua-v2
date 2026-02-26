@@ -1,6 +1,8 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type InsuranceClaim from '#models/insurance_claim'
 import type { InsuranceClaimStatus } from '#models/insurance_claim'
+import StudentPaymentDto from './student_payment.dto.js'
+import UserDto from './user.dto.js'
 
 export default class InsuranceClaimDto extends BaseModelDto {
   declare id: string
@@ -19,6 +21,9 @@ export default class InsuranceClaimDto extends BaseModelDto {
   declare notes: string | null
   declare createdAt: Date
   declare updatedAt: Date | null
+  declare studentPayment?: StudentPaymentDto
+  declare approvedByUser?: UserDto
+  declare rejectedByUser?: UserDto
 
   constructor(insuranceClaim?: InsuranceClaim) {
     super()
@@ -41,5 +46,14 @@ export default class InsuranceClaimDto extends BaseModelDto {
     this.notes = insuranceClaim.notes
     this.createdAt = insuranceClaim.createdAt.toJSDate()
     this.updatedAt = insuranceClaim.updatedAt ? insuranceClaim.updatedAt.toJSDate() : null
+    this.studentPayment = insuranceClaim.studentPayment
+      ? new StudentPaymentDto(insuranceClaim.studentPayment)
+      : undefined
+    this.approvedByUser = insuranceClaim.approvedByUser
+      ? new UserDto(insuranceClaim.approvedByUser)
+      : undefined
+    this.rejectedByUser = insuranceClaim.rejectedByUser
+      ? new UserDto(insuranceClaim.rejectedByUser)
+      : undefined
   }
 }

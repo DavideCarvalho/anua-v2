@@ -1,5 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Comment from '#models/comment'
+import UserDto from './user.dto.js'
 
 export default class CommentDto extends BaseModelDto {
   declare id: number
@@ -9,6 +10,8 @@ export default class CommentDto extends BaseModelDto {
   declare userId: string
   declare createdAt: Date
   declare updatedAt: Date
+  declare user?: UserDto
+  declare likesCount?: number
 
   constructor(model?: Comment) {
     super()
@@ -22,5 +25,7 @@ export default class CommentDto extends BaseModelDto {
     this.userId = model.userId
     this.createdAt = model.createdAt.toJSDate()
     this.updatedAt = model.updatedAt.toJSDate()
+    this.user = model.user ? new UserDto(model.user) : undefined
+    this.likesCount = model.$extras.likes_count ? Number(model.$extras.likes_count) : undefined
   }
 }

@@ -5,7 +5,7 @@ import {
   type MarketplaceStoresResponse,
 } from '../hooks/queries/use_marketplace'
 
-type MarketplaceStore = NonNullable<MarketplaceStoresResponse>['data'][number]
+type MarketplaceStore = NonNullable<MarketplaceStoresResponse>[number]
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { ShoppingBag } from 'lucide-react'
@@ -27,7 +27,7 @@ export function ResponsavelMarketplaceContainer() {
   }
 
   const { data, isLoading } = useQuery(useMarketplaceStoresQueryOptions(selectedStudentId))
-  const stores: MarketplaceStore[] = data?.data ?? []
+  const stores: MarketplaceStore[] = data ?? []
 
   if (!selectedStudentId) {
     return (

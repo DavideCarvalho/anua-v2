@@ -7,12 +7,12 @@ import {
   type MarketplaceStoresResponse,
 } from '../hooks/queries/use_marketplace'
 
-type MarketplaceStore = NonNullable<MarketplaceStoresResponse>['data'][number]
+type MarketplaceStore = NonNullable<MarketplaceStoresResponse>[number]
 
 export function MarketplaceStoresContainer() {
   const { data, isLoading } = useQuery(useMarketplaceStoresQueryOptions())
 
-  const stores: MarketplaceStore[] = data?.data ?? []
+  const stores: MarketplaceStore[] = data ?? []
 
   if (isLoading) {
     return <div className="text-center py-12 text-muted-foreground">Carregando...</div>
