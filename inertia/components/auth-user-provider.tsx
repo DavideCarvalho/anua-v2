@@ -1,6 +1,8 @@
 import { router } from '@inertiajs/react'
+import { useQuery } from '@tanstack/react-query'
 import type { PropsWithChildren } from 'react'
 import { useEffect, useState } from 'react'
+import { useAuthUserQueryOptions } from '../hooks/queries/use_auth_user'
 import type { SharedProps } from '../lib/types'
 import { useAuthStore } from '../stores/auth_store'
 
@@ -32,6 +34,17 @@ export function AuthUserProvider({ children, initialUser }: AuthUserProviderProp
 
     clearUser()
   }, [sharedUser, setUser, clearUser])
+
+  const { data } = useQuery(useAuthUserQueryOptions(sharedUser ?? null))
+
+  useEffect(() => {
+    if (data) {
+      setUser(data)
+      return
+    }
+
+    clearUser()
+  }, [data, setUser, clearUser])
 
   return <>{children}</>
 }
