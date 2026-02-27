@@ -24,10 +24,16 @@ export default class AchievementDto extends BaseModelDto {
   declare updatedAt: Date
   declare school?: SchoolDto
 
-  constructor(achievement?: Achievement) {
+  constructor(achievement: Achievement) {
     super()
 
-    if (!achievement) return
+    const toDate = (date: unknown): Date | null => {
+      if (!date) return null
+      if (date instanceof Date) return date
+      if (typeof date === 'string') return new Date(date)
+      if (typeof (date as any)?.toJSDate === 'function') return (date as any).toJSDate()
+      return new Date(date as any)
+    }
 
     this.id = achievement.id
     this.slug = achievement.slug
@@ -44,9 +50,9 @@ export default class AchievementDto extends BaseModelDto {
     this.schoolId = achievement.schoolId
     this.schoolChainId = achievement.schoolChainId
     this.isActive = achievement.isActive
-    this.deletedAt = achievement.deletedAt ? achievement.deletedAt.toJSDate() : null
-    this.createdAt = achievement.createdAt.toJSDate()
-    this.updatedAt = achievement.updatedAt.toJSDate()
+    this.deletedAt = toDate(achievement.deletedAt)
+    this.createdAt = toDate(achievement.createdAt)!
+    this.updatedAt = toDate(achievement.updatedAt)!
     this.school = achievement.school ? new SchoolDto(achievement.school) : undefined
   }
 }

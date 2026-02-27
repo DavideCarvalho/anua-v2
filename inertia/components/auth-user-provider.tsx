@@ -45,12 +45,7 @@ export function AuthUserProvider({ children, initialUser }: AuthUserProviderProp
 
       if (prevUserIdRef.current !== currentUserId) {
         prevUserIdRef.current = currentUserId
-        queryClient.invalidateQueries({ queryKey: ['achievements'] })
-        queryClient.invalidateQueries({ queryKey: ['challenges'] })
-        queryClient.invalidateQueries({ queryKey: ['store-items'] })
-        queryClient.invalidateQueries({ queryKey: ['store-orders'] })
-        queryClient.invalidateQueries({ queryKey: ['leaderboards'] })
-        queryClient.invalidateQueries({ queryKey: ['user'] })
+        queryClient.invalidateQueries()
       }
 
       setUser(data)
