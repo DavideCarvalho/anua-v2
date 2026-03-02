@@ -15,6 +15,7 @@ export default class ShowAcademicPeriodBySlugController {
     if (includeCourses) {
       query.preload('courseAcademicPeriods', (courseQuery) => {
         courseQuery.preload('course')
+        courseQuery.preload('academicPeriod')
         courseQuery.preload('levelAssignments', (levelQuery) => {
           levelQuery.preload('level')
         })

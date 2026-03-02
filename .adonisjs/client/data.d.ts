@@ -70,6 +70,7 @@ import type TeacherTransformer from '#transformers/teacher_transformer'
 import type UserHasSchoolGroupTransformer from '#transformers/user_has_school_group_transformer'
 import type UserHasSchoolTransformer from '#transformers/user_has_school_transformer'
 import type UserTransformer from '#transformers/user_transformer'
+import type LevelAssignedToCourseHasAcademicPeriodTransformer from '#transformers/level_assigned_to_course_has_academic_period_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
 
 export namespace Data {
@@ -328,6 +329,10 @@ export namespace Data {
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
+  }
+  export type LevelAssignedToCourseHasAcademicPeriod = InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
+  export namespace LevelAssignedToCourseHasAcademicPeriod {
+    export type Variants = InferVariants<LevelAssignedToCourseHasAcademicPeriodTransformer>
   }
   export type SharedProps = InferSharedProps<InertiaMiddleware>
 }
