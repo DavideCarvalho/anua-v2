@@ -6,10 +6,10 @@ import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Button } from '../../components/ui/button'
 
-import {
-  useStudentScheduleQueryOptions,
-  type StudentScheduleResponse,
-} from '../../hooks/queries/use_student_schedule'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StudentScheduleResponse = Route.Response<'api.v1.responsavel.api.student_schedule'>
 
 type ScheduleDay = NonNullable<StudentScheduleResponse['scheduleByDay']>[string]
 type ScheduleSlot = ScheduleDay['slots'][number]
@@ -104,7 +104,9 @@ export function StudentScheduleContainer({
   studentId,
   studentName,
 }: StudentScheduleContainerProps) {
-  const { data, isLoading, error, refetch } = useQuery(useStudentScheduleQueryOptions(studentId))
+  const { data, isLoading, error, refetch } = useQuery(
+    api.api.v1.responsavel.api.studentSchedule.queryOptions({ params: { studentId } })
+  )
 
   if (isLoading) {
     return <StudentScheduleContainerSkeleton />

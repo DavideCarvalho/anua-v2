@@ -1,7 +1,7 @@
 import env from '#start/env'
 import { initLogger } from 'evlog'
 import type { DrainContext } from 'evlog'
-import { createPostHogLogsDrain } from 'evlog/posthog'
+import { createPostHogDrain } from 'evlog/posthog'
 import { createDrainPipeline } from 'evlog/pipeline'
 
 const isDev = env.get('NODE_ENV') === 'development'
@@ -26,7 +26,7 @@ if (evlogDrainTarget === 'posthog' && posthogApiKey) {
     retry: { maxAttempts: 3, backoff: 'exponential', initialDelayMs: 1000 },
     maxBufferSize: 1000,
   })
-  const posthogDrain = createPostHogLogsDrain({
+  const posthogDrain = createPostHogDrain({
     apiKey: posthogApiKey,
     host: posthogHost,
     timeout: 15000,

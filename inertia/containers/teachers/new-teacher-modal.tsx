@@ -25,7 +25,7 @@ import {
 import { Input } from '../../components/ui/input'
 import { Checkbox } from '../../components/ui/checkbox'
 import { tuyau } from '../../lib/api'
-import { useSubjectsQueryOptions } from '../../hooks/queries/use_subjects'
+import { api } from '~/lib/api'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -47,7 +47,9 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
   const [copied, setCopied] = useState(false)
 
   const { data: subjectsData } = useQuery(
-    useSubjectsQueryOptions({ page: 1, limit: 100, schoolId })
+    api.api.v1.subjects.index.queryOptions({
+      query: { page: 1, limit: 100, schoolId },
+    })
   )
 
   const subjects = subjectsData?.data ?? []
@@ -63,7 +65,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
 
   const { mutateAsync: createTeacher, isPending } = useMutation({
     mutationFn: async (values: FormValues) => {
-      const response = await tuyau.api.v1.teachers.$post({
+      const response = await tuyau.api.api.v1.teachers({
         name: values.name,
         email: values.email,
         schoolId,

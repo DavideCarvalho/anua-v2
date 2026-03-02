@@ -12,9 +12,7 @@ export default function AdminAnalyticsPagamentos() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard de Pagamentos</h1>
-            <p className="text-muted-foreground">
-              Mensalidades, inadimplência e recebimentos
-            </p>
+            <p className="text-muted-foreground">Mensalidades, inadimplência e recebimentos</p>
           </div>
         </div>
 

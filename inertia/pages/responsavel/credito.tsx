@@ -28,8 +28,8 @@ function NoFinancialPermissionCard() {
     <Alert variant="destructive">
       <AlertCircle className="h-4 w-4" />
       <AlertDescription>
-        Você não tem permissão financeira para gerenciar o saldo deste aluno. Entre em contato
-        com a secretaria da escola.
+        Você não tem permissão financeira para gerenciar o saldo deste aluno. Entre em contato com a
+        secretaria da escola.
       </AlertDescription>
     </Alert>
   )

@@ -6,14 +6,14 @@ Implementar histórico de alterações para entidades financeiras usando `@stoud
 
 ## Decisões
 
-| Aspecto | Decisão |
-|---------|---------|
-| Pacote | `@stouder-io/adonis-auditing` |
-| Entidades auditadas | Invoice, StudentPayment, StudentHasLevel, Agreement, Contract |
-| Visualização | Timeline com diff visual (antes → depois) |
-| Autor | Usuário + sistema + contexto (ex: "João Silva via Editar Matrícula") |
-| Acesso | Só admin/funcionários da escola |
-| Onde aparece | Listagem de faturas (modal) + página dedicada por aluno |
+| Aspecto             | Decisão                                                              |
+| ------------------- | -------------------------------------------------------------------- |
+| Pacote              | `@stouder-io/adonis-auditing`                                        |
+| Entidades auditadas | Invoice, StudentPayment, StudentHasLevel, Agreement, Contract        |
+| Visualização        | Timeline com diff visual (antes → depois)                            |
+| Autor               | Usuário + sistema + contexto (ex: "João Silva via Editar Matrícula") |
+| Acesso              | Só admin/funcionários da escola                                      |
+| Onde aparece        | Listagem de faturas (modal) + página dedicada por aluno              |
 
 ## Backend
 
@@ -72,6 +72,7 @@ export default class Invoice extends compose(BaseModel, Auditable) {
 ```
 
 Aplicar em:
+
 - `app/models/invoice.ts`
 - `app/models/student_payment.ts`
 - `app/models/student_has_level.ts`
@@ -89,11 +90,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { Audit } from '@stouder-io/adonis-auditing'
 
 const ENTITY_MAP = {
-  invoice: 'Invoice',
+  'invoice': 'Invoice',
   'student-payment': 'StudentPayment',
   'student-has-level': 'StudentHasLevel',
-  agreement: 'Agreement',
-  contract: 'Contract',
+  'agreement': 'Agreement',
+  'contract': 'Contract',
 }
 
 export default class ListAuditsController {
@@ -128,7 +129,13 @@ import vine from '@vinejs/vine'
 export const listAuditsValidator = vine.compile(
   vine.object({
     params: vine.object({
-      entityType: vine.enum(['invoice', 'student-payment', 'student-has-level', 'agreement', 'contract']),
+      entityType: vine.enum([
+        'invoice',
+        'student-payment',
+        'student-has-level',
+        'agreement',
+        'contract',
+      ]),
       entityId: vine.string().uuid(),
     }),
   })
@@ -146,6 +153,7 @@ Modal que recebe `entityType` e `entityId`, busca audits e renderiza timeline.
 **`inertia/components/audit-diff-card.tsx`**
 
 Card individual com:
+
 - Header: ícone do evento + data/hora + autor + contexto
 - Body: lista de campos alterados com valor antigo → novo
 
@@ -252,26 +260,26 @@ export function useStudentAuditHistory(studentId: string) {
 
 ### Criar
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `config/auditing.ts` | Configuração do pacote |
-| `app/controllers/audits/list_audits_controller.ts` | Endpoint de listagem |
-| `app/controllers/audits/list_student_audit_history_controller.ts` | Histórico por aluno |
-| `app/validators/audit.ts` | Validação |
-| `inertia/components/audit-history-modal.tsx` | Modal de histórico |
-| `inertia/components/audit-diff-card.tsx` | Card com diff |
-| `inertia/hooks/queries/use_audits.ts` | Query hooks |
-| `inertia/lib/audit-labels.ts` | Mapeamento de labels |
-| `inertia/pages/escola/administrativo/alunos/historico-financeiro.tsx` | Página de histórico |
+| Arquivo                                                               | Descrição              |
+| --------------------------------------------------------------------- | ---------------------- |
+| `config/auditing.ts`                                                  | Configuração do pacote |
+| `app/controllers/audits/list_audits_controller.ts`                    | Endpoint de listagem   |
+| `app/controllers/audits/list_student_audit_history_controller.ts`     | Histórico por aluno    |
+| `app/validators/audit.ts`                                             | Validação              |
+| `inertia/components/audit-history-modal.tsx`                          | Modal de histórico     |
+| `inertia/components/audit-diff-card.tsx`                              | Card com diff          |
+| `inertia/hooks/queries/use_audits.ts`                                 | Query hooks            |
+| `inertia/lib/audit-labels.ts`                                         | Mapeamento de labels   |
+| `inertia/pages/escola/administrativo/alunos/historico-financeiro.tsx` | Página de histórico    |
 
 ### Modificar
 
-| Arquivo | Mudança |
-|---------|---------|
-| `app/models/invoice.ts` | Adicionar mixin Auditable |
-| `app/models/student_payment.ts` | Adicionar mixin Auditable |
-| `app/models/student_has_level.ts` | Adicionar mixin Auditable |
-| `app/models/agreement.ts` | Adicionar mixin Auditable |
-| `app/models/contract.ts` | Adicionar mixin Auditable |
-| `start/routes.ts` | Adicionar rotas de audits |
-| `inertia/containers/invoices-container.tsx` | Botão de histórico |
+| Arquivo                                     | Mudança                   |
+| ------------------------------------------- | ------------------------- |
+| `app/models/invoice.ts`                     | Adicionar mixin Auditable |
+| `app/models/student_payment.ts`             | Adicionar mixin Auditable |
+| `app/models/student_has_level.ts`           | Adicionar mixin Auditable |
+| `app/models/agreement.ts`                   | Adicionar mixin Auditable |
+| `app/models/contract.ts`                    | Adicionar mixin Auditable |
+| `start/routes.ts`                           | Adicionar rotas de audits |
+| `inertia/containers/invoices-container.tsx` | Botão de histórico        |

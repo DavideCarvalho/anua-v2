@@ -97,7 +97,10 @@ export function StepAddress() {
 
           <div className="space-y-2">
             <Label htmlFor="address.state">Estado *</Label>
-            <Select value={watch('address.state')} onValueChange={(value) => setValue('address.state', value)}>
+            <Select
+              value={watch('address.state')}
+              onValueChange={(value) => setValue('address.state', value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o estado" />
               </SelectTrigger>

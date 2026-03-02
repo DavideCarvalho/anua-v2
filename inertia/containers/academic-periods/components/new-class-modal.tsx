@@ -33,13 +33,15 @@ import {
 
 const schema = z.object({
   name: z.string().min(1, 'Nome da turma é obrigatório'),
-  teachers: z.array(
-    z.object({
-      teacherId: z.string().min(1, 'Selecione um professor'),
-      subjectId: z.string().min(1, 'Selecione uma disciplina'),
-      subjectQuantity: z.number().min(1, 'Quantidade deve ser maior que 0'),
-    })
-  ).default([]),
+  teachers: z
+    .array(
+      z.object({
+        teacherId: z.string().min(1, 'Selecione um professor'),
+        subjectId: z.string().min(1, 'Selecione uma disciplina'),
+        subjectQuantity: z.number().min(1, 'Quantidade deve ser maior que 0'),
+      })
+    )
+    .default([]),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -143,9 +145,7 @@ export function NewClassModal({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      append({ teacherId: '', subjectId: '', subjectQuantity: 1 })
-                    }
+                    onClick={() => append({ teacherId: '', subjectId: '', subjectQuantity: 1 })}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Adicionar
@@ -155,7 +155,8 @@ export function NewClassModal({
                 <div className="space-y-4">
                   {fields.length === 0 && (
                     <p className="text-sm text-muted-foreground py-4 text-center">
-                      Nenhum professor vinculado. Clique em "Adicionar" para vincular professores e disciplinas.
+                      Nenhum professor vinculado. Clique em "Adicionar" para vincular professores e
+                      disciplinas.
                     </p>
                   )}
                   {fields.map((field, index) => (
@@ -256,7 +257,9 @@ export function NewClassModal({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="button" onClick={form.handleSubmit(onSubmit)}>Salvar</Button>
+              <Button type="button" onClick={form.handleSubmit(onSubmit)}>
+                Salvar
+              </Button>
             </DialogFooter>
           </form>
         </Form>

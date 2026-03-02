@@ -19,16 +19,16 @@ export function registerSchoolApiRoutes() {
     .group(() => {
       router.get('/', [IndexSchoolsController]).as('schools.index')
       router.post('/', [StoreSchoolController]).as('schools.store')
-      router.get('/slug/:slug', [ShowSchoolBySlugController]).as('schools.showBySlug')
+      router.get('/slug/:slug', [ShowSchoolBySlugController]).as('schools.show_by_slug')
       router.get('/:id', [ShowSchoolController]).as('schools.show')
       router
         .put('/:id', [UpdateSchoolController])
         .as('schools.update')
         .use([middleware.auth(), middleware.impersonation()])
       router.delete('/:id', [DestroySchoolController]).as('schools.destroy')
-      router.post('/:id/logo', [UploadSchoolLogoController]).as('schools.uploadLogo')
+      router.post('/:id/logo', [UploadSchoolLogoController]).as('schools.upload_logo')
       router.get('/:id/users', [ListSchoolUsersController]).as('schools.users')
-      router.put('/:id/director', [UpdateSchoolDirectorController]).as('schools.updateDirector')
+      router.put('/:id/director', [UpdateSchoolDirectorController]).as('schools.update_director')
     })
     .prefix('/schools')
 }

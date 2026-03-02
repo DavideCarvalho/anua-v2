@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { Head } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
@@ -17,19 +18,13 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { ResponsavelLayout } from '../../components/layouts'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useResponsavelStudentGamificationQueryOptions } from '../../hooks/queries/use_student_gamification'
+import { api } from '~/lib/api'
 
 interface GamificacaoDetailsPageProps {
   studentId: string
@@ -51,9 +46,12 @@ const TRANSACTION_TYPE_CONFIG: Record<string, { label: string; icon: typeof Tren
 }
 
 function GamificacaoDetailsContent({ studentId }: { studentId: string }) {
-  const { data, isLoading, isError, error } = useQuery(
-    useResponsavelStudentGamificationQueryOptions(studentId)
-  )
+  const { data, isLoading, isError, error } = useQuery({
+    ...api.api.v1.responsavel.api.studentGamification.queryOptions({
+      params: { studentId },
+    }),
+    enabled: !!studentId,
+  })
 
   if (isLoading) {
     return <GamificacaoDetailsSkeleton />
@@ -170,17 +168,13 @@ function GamificacaoDetailsContent({ studentId }: { studentId: string }) {
             <Trophy className="h-5 w-5" />
             Conquistas Desbloqueadas
           </CardTitle>
-          <CardDescription>
-            Conquistas obtidas pelo aluno
-          </CardDescription>
+          <CardDescription>Conquistas obtidas pelo aluno</CardDescription>
         </CardHeader>
         <CardContent>
           {achievements.length === 0 ? (
             <div className="text-center py-8">
               <Trophy className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <p className="mt-4 text-muted-foreground">
-                Nenhuma conquista desbloqueada ainda
-              </p>
+              <p className="mt-4 text-muted-foreground">Nenhuma conquista desbloqueada ainda</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -234,17 +228,13 @@ function GamificacaoDetailsContent({ studentId }: { studentId: string }) {
             <TrendingUp className="h-5 w-5" />
             Historico de Pontos
           </CardTitle>
-          <CardDescription>
-            Ultimas movimentacoes de pontos
-          </CardDescription>
+          <CardDescription>Ultimas movimentacoes de pontos</CardDescription>
         </CardHeader>
         <CardContent>
           {recentTransactions.length === 0 ? (
             <div className="text-center py-8">
               <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <p className="mt-4 text-muted-foreground">
-                Nenhuma movimentacao de pontos ainda
-              </p>
+              <p className="mt-4 text-muted-foreground">Nenhuma movimentacao de pontos ainda</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -263,20 +253,14 @@ function GamificacaoDetailsContent({ studentId }: { studentId: string }) {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`p-2 rounded-lg ${
-                          isPositive ? 'bg-green-100' : 'bg-red-100'
-                        }`}
+                        className={`p-2 rounded-lg ${isPositive ? 'bg-green-100' : 'bg-red-100'}`}
                       >
                         <Icon
-                          className={`h-4 w-4 ${
-                            isPositive ? 'text-green-600' : 'text-red-600'
-                          }`}
+                          className={`h-4 w-4 ${isPositive ? 'text-green-600' : 'text-red-600'}`}
                         />
                       </div>
                       <div>
-                        <p className="font-medium">
-                          {transaction.reason || config.label}
-                        </p>
+                        <p className="font-medium">{transaction.reason || config.label}</p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(transaction.createdAt), "dd/MM/yyyy 'as' HH:mm", {
                             locale: ptBR,
@@ -285,11 +269,7 @@ function GamificacaoDetailsContent({ studentId }: { studentId: string }) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p
-                        className={`font-bold ${
-                          isPositive ? 'text-green-600' : 'text-red-600'
-                        }`}
-                      >
+                      <p className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
                         {isPositive ? '+' : ''}
                         {transaction.points}
                       </p>
@@ -356,9 +336,7 @@ export default function GamificacaoDetailsPage({ studentId }: GamificacaoDetails
             <Trophy className="h-6 w-6" />
             Gamificacao
           </h1>
-          <p className="text-muted-foreground">
-            Detalhes de pontos e conquistas do aluno
-          </p>
+          <p className="text-muted-foreground">Detalhes de pontos e conquistas do aluno</p>
         </div>
 
         <ErrorBoundary

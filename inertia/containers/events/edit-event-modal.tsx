@@ -35,11 +35,8 @@ import { Switch } from '../../components/ui/switch'
 import { Textarea } from '../../components/ui/textarea'
 import { Checkbox } from '../../components/ui/checkbox'
 
-import { useEventQueryOptions } from '../../hooks/queries/use_event'
-import { useUpdateEventMutation } from '../../hooks/mutations/use_update_event'
-import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use_academic_periods'
-import { useLevelsQueryOptions } from '../../hooks/queries/use_levels'
-import { useClassesQueryOptions } from '../../hooks/queries/use_classes'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
@@ -130,14 +127,23 @@ interface EditEventModalProps {
 }
 
 export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalProps) {
-  const { data: event } = useSuspenseQuery(useEventQueryOptions({ id: eventId }))
-  const updateEventMutation = useUpdateEventMutation()
-  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
+  const { data: event } = useSuspenseQuery(
+    api.api.v1.events.show.queryOptions({ params: { id: eventId } })
+  )
+  const queryClient = useQueryClient()
+  const updateEventMutation = useMutation(api.api.v1.events.update.mutationOptions())
+  const { data: periodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
+  )
   const { data: levelsData } = useQuery(
-    useLevelsQueryOptions({ schoolId: event.schoolId, limit: 100 })
+    api.api.v1.levels.index.queryOptions({
+      query: { schoolId: event.schoolId, limit: 100 },
+    })
   )
   const { data: classesData } = useQuery(
-    useClassesQueryOptions({ schoolId: event.schoolId, limit: 200 })
+    api.api.v1.classes.index.queryOptions({
+      query: { schoolId: event.schoolId, limit: 200 },
+    })
   )
 
   const academicPeriods = periodsData?.data ?? []
@@ -206,25 +212,28 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
     toast.promise(
       updateEventMutation.mutateAsync({
         params: { id: eventId },
-        ...values,
-        startsAt: new Date(values.startsAt).toISOString(),
-        endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
-        onlineUrl: values.onlineUrl || undefined,
-        hasAdditionalCosts: values.hasAdditionalCosts,
-        additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : null,
-        additionalCostDescription: values.hasAdditionalCosts
-          ? values.additionalCostDescription
-          : null,
-        audienceWholeSchool: values.audienceWholeSchool,
-        audienceAcademicPeriodIds: values.audienceWholeSchool
-          ? []
-          : values.audienceAcademicPeriodIds,
-        audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
-        audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
-      } as any),
+        body: {
+          ...values,
+          startsAt: new Date(values.startsAt).toISOString(),
+          endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
+          onlineUrl: values.onlineUrl || undefined,
+          hasAdditionalCosts: values.hasAdditionalCosts,
+          additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : null,
+          additionalCostDescription: values.hasAdditionalCosts
+            ? values.additionalCostDescription
+            : null,
+          audienceWholeSchool: values.audienceWholeSchool,
+          audienceAcademicPeriodIds: values.audienceWholeSchool
+            ? []
+            : values.audienceAcademicPeriodIds,
+          audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
+          audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
+        },
+      }),
       {
         loading: 'Atualizando evento...',
         success: () => {
+          queryClient.invalidateQueries({ queryKey: ['events'] })
           onOpenChange(false)
           return 'Evento atualizado com sucesso!'
         },

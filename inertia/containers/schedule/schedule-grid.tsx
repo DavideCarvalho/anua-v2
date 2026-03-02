@@ -31,11 +31,8 @@ import {
 } from '~/components/ui/table'
 import { Save, RefreshCw, AlertCircle } from 'lucide-react'
 import { cn } from '~/lib/utils'
-import { useClassScheduleQueryOptions } from '~/hooks/queries/use_class_schedule'
-import {
-  useValidateScheduleConflict,
-  useSaveClassSchedule,
-} from '~/hooks/mutations/use_schedule_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface ScheduleGridProps {
   classId: string
@@ -101,18 +98,29 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
   const [localSlots, setLocalSlots] = useState<CalendarSlot[]>([])
   const [_isDirty, setIsDirty] = useState(false)
 
+  const queryClient = useQueryClient()
   const {
     data: scheduleData,
     isLoading,
     error,
     refetch,
   } = useQuery({
-    ...useClassScheduleQueryOptions(classId, { academicPeriodId }),
+    ...api.api.v1.schedules.getClassSchedule.queryOptions({
+      params: { classId },
+      query: { academicPeriodId },
+    }),
     enabled: !!classId && !!academicPeriodId,
-  }) as { data: ScheduleData | undefined; isLoading: boolean; error: Error | null; refetch: () => void }
+  }) as {
+    data: ScheduleData | undefined
+    isLoading: boolean
+    error: Error | null
+    refetch: () => void
+  }
 
-  const saveMutation = useSaveClassSchedule()
-  const validateConflictMutation = useValidateScheduleConflict()
+  const saveMutation = useMutation(api.api.v1.schedules.saveClassSchedule.mutationOptions())
+  const validateConflictMutation = useMutation(
+    api.api.v1.schedules.validateConflict.mutationOptions()
+  )
 
   // Initialize local slots when data changes
   useMemo(() => {
@@ -161,9 +169,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     }
 
     // Validar se há slots vazios (opcional - apenas aviso)
-    const emptySlots = localSlots.filter(
-      (s) => !s.isBreak && !s.teacherHasClassId
-    ).length
+    const emptySlots = localSlots.filter((s) => !s.isBreak && !s.teacherHasClassId).length
     if (emptySlots > 0) {
       toast.info(
         `Existem ${emptySlots} horário(s) vazio(s) na grade. Você pode preenchê-los depois.`,
@@ -175,17 +181,20 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
     saveMutation.mutate(
       {
-        classId,
-        academicPeriodId,
-        slots: localSlots.map((s) => ({
-          teacherHasClassId: s.teacherHasClassId,
-          classWeekDay: s.classWeekDay,
-          startTime: s.startTime,
-          endTime: s.endTime,
-        })),
+        params: { classId },
+        body: {
+          academicPeriodId,
+          slots: localSlots.map((s) => ({
+            teacherHasClassId: s.teacherHasClassId,
+            classWeekDay: s.classWeekDay,
+            startTime: s.startTime,
+            endTime: s.endTime,
+          })),
+        },
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['classSchedule'] })
           toast.success('Horários salvos com sucesso!')
           setIsDirty(false)
         },
@@ -222,10 +231,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
         // Find the target slot
         const slotIndex = localSlots.findIndex(
-          (s) =>
-            s.classWeekDay === dayNumber &&
-            s.startTime === startTime &&
-            s.endTime === endTime
+          (s) => s.classWeekDay === dayNumber && s.startTime === startTime && s.endTime === endTime
         )
 
         if (slotIndex === -1) return
@@ -244,14 +250,16 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
         // Validar conflito de professor
         try {
-          const validation = await validateConflictMutation.mutateAsync({
-            teacherHasClassId,
-            classWeekDay: dayNumber,
-            startTime,
-            endTime,
-            academicPeriodId,
-            classId,
-          }) as any
+          const validation = (await validateConflictMutation.mutateAsync({
+            body: {
+              teacherHasClassId,
+              classWeekDay: dayNumber,
+              startTime,
+              endTime,
+              academicPeriodId,
+              classId,
+            },
+          })) as any
           if (validation.hasConflict) {
             toast.error(validation.reason || 'Conflito de horário detectado')
             return
@@ -285,15 +293,10 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
       const activeSlotIndex = localSlots.findIndex(
         (s) =>
-          s.classWeekDay === activeDayNum &&
-          s.startTime === activeStart &&
-          s.endTime === activeEnd
+          s.classWeekDay === activeDayNum && s.startTime === activeStart && s.endTime === activeEnd
       )
       const overSlotIndex = localSlots.findIndex(
-        (s) =>
-          s.classWeekDay === overDayNum &&
-          s.startTime === overStart &&
-          s.endTime === overEnd
+        (s) => s.classWeekDay === overDayNum && s.startTime === overStart && s.endTime === overEnd
       )
 
       if (activeSlotIndex === -1 || overSlotIndex === -1) return
@@ -311,14 +314,16 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       // Validar se a aula do slot ativo pode ir para o slot de destino
       if (overSlot.teacherHasClassId) {
         try {
-          const validation = await validateConflictMutation.mutateAsync({
-            teacherHasClassId: overSlot.teacherHasClassId,
-            classWeekDay: activeDayNum,
-            startTime: activeStart,
-            endTime: activeEnd,
-            academicPeriodId,
-            classId,
-          }) as any
+          const validation = (await validateConflictMutation.mutateAsync({
+            body: {
+              teacherHasClassId: overSlot.teacherHasClassId,
+              classWeekDay: activeDayNum,
+              startTime: activeStart,
+              endTime: activeEnd,
+              academicPeriodId,
+              classId,
+            },
+          })) as any
           if (validation.hasConflict) {
             toast.error(
               `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`
@@ -334,14 +339,16 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       // Validar se a aula do slot de destino pode ir para o slot ativo
       if (activeSlot.teacherHasClassId) {
         try {
-          const validation = await validateConflictMutation.mutateAsync({
-            teacherHasClassId: activeSlot.teacherHasClassId,
-            classWeekDay: overDayNum,
-            startTime: overStart,
-            endTime: overEnd,
-            academicPeriodId,
-            classId,
-          }) as any
+          const validation = (await validateConflictMutation.mutateAsync({
+            body: {
+              teacherHasClassId: activeSlot.teacherHasClassId,
+              classWeekDay: overDayNum,
+              startTime: overStart,
+              endTime: overEnd,
+              academicPeriodId,
+              classId,
+            },
+          })) as any
           if (validation.hasConflict) {
             toast.error(
               `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`
@@ -402,9 +409,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     )
   }
 
-  const allSlotKeys = localSlots.map(
-    (s) => `${s.classWeekDay}_${s.startTime}-${s.endTime}`
-  )
+  const allSlotKeys = localSlots.map((s) => `${s.classWeekDay}_${s.startTime}-${s.endTime}`)
   const pendingKeys = pendingClasses.flatMap((pc) =>
     Array.from({ length: pc.missing }, (_, i) => `pending_${pc.id}_${i}`)
   )
@@ -461,7 +466,8 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
                 <div className="py-8 text-center text-muted-foreground">
                   <p>Nenhum horário configurado para esta turma.</p>
                   <p className="mt-2 text-sm">
-                    Configure os horários base primeiro para poder atribuir professores e disciplinas.
+                    Configure os horários base primeiro para poder atribuir professores e
+                    disciplinas.
                   </p>
                 </div>
               ) : (

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from '@inertiajs/react'
+import { api } from '../lib/api'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, MoreHorizontal, Pencil } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -20,15 +21,15 @@ import {
 } from '../components/ui/dropdown-menu'
 import { Badge } from '../components/ui/badge'
 import { CreateStoreModal } from './stores/create-store-modal'
-import { useStoresQueryOptions, type StoresListResponse } from '../hooks/queries/use_stores'
+import { Route } from '@tuyau/core/types'
 
-type Store = StoresListResponse['data'][number]
+type Store = NonNullable<Route.Response<'api.v1.stores.index'>['data']>[number]
 
 export function StoreListContainer() {
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const { data, isLoading, refetch } = useQuery(useStoresQueryOptions())
+  const { data: storesData, isLoading, refetch } = useQuery(api.api.v1.stores.index.queryOptions())
 
-  const stores: Store[] = data?.data ?? []
+  const stores: Store[] = storesData?.data ?? []
 
   return (
     <>

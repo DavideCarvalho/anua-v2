@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
-import StoreDto from '#models/dto/store.dto'
+import StoreTransformer from '#transformers/store_transformer'
 import Student from '#models/student'
 import User from '#models/user'
 import StudentHasLevel from '#models/student_has_level'
@@ -8,7 +8,7 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import AppException from '#exceptions/app_exception'
 
 export default class ListMarketplaceStoresController {
-  async handle({ auth, request, response, effectiveUser }: HttpContext) {
+  async handle({ auth, request, response, effectiveUser, serialize }: HttpContext) {
     const user = effectiveUser ?? auth.user
     if (!user) {
       throw AppException.invalidCredentials()
@@ -56,7 +56,7 @@ export default class ListMarketplaceStoresController {
       .preload('school')
       .orderBy('name', 'asc')
 
-    return response.ok(StoreDto.fromArray(stores))
+    return response.ok(serialize(StoreTransformer.transform(stores)))
   }
 
   /**

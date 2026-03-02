@@ -1,15 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
-import PurchaseRequestDto from '#models/dto/purchase_request.dto'
-import AppException from '#exceptions/app_exception'
+import PurchaseRequestTransformer from '#transformers/purchase_request_transformer'
+import { listPurchaseRequestsValidator } from '#validators/purchase_request'
 
 export default class ListPurchaseRequestsController {
-  async handle({ request }: HttpContext) {
-    const { schoolId, status, page = 1, limit = 20 } = request.qs()
-
-    if (!schoolId) {
-      throw AppException.badRequest('schoolId é obrigatório')
-    }
+  async handle({ request, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listPurchaseRequestsValidator)
+    const schoolId = filters.schoolId
+    const status = filters.status
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
 
     const query = PurchaseRequest.query()
       .where('schoolId', schoolId)
@@ -21,7 +21,9 @@ export default class ListPurchaseRequestsController {
     }
 
     const purchaseRequests = await query.paginate(page, limit)
+    const data = purchaseRequests.all()
+    const metadata = purchaseRequests.getMeta()
 
-    return PurchaseRequestDto.fromPaginator(purchaseRequests)
+    return serialize(PurchaseRequestTransformer.paginate(data, metadata))
   }
 }

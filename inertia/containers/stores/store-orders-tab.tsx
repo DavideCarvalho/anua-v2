@@ -35,21 +35,10 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '../../lib/utils'
-import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_stores'
-import {
-  useApproveStoreOrder,
-  useRejectStoreOrder,
-  useDeliverStoreOrder,
-  useCancelStoreOrder,
-} from '../../hooks/mutations/use_store_order_actions'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { Label } from '../../components/ui/label'
-import {
-  MoreHorizontal,
-  CheckCircle,
-  XCircle,
-  Truck,
-  Loader2,
-} from 'lucide-react'
+import { MoreHorizontal, CheckCircle, XCircle, Truck, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryStates, parseAsString } from 'nuqs'
 
@@ -121,10 +110,11 @@ function OrderActions({ order }: { order: Order }) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
 
-  const approveMutation = useApproveStoreOrder()
-  const rejectMutation = useRejectStoreOrder()
-  const deliverMutation = useDeliverStoreOrder()
-  const cancelMutation = useCancelStoreOrder()
+  const queryClient = useQueryClient()
+  const approveMutation = useMutation(api.api.v1.storeOrders.approve.mutationOptions())
+  const rejectMutation = useMutation(api.api.v1.storeOrders.reject.mutationOptions())
+  const deliverMutation = useMutation(api.api.v1.storeOrders.deliver.mutationOptions())
+  const cancelMutation = useMutation(api.api.v1.storeOrders.cancel.mutationOptions())
 
   const isPending =
     approveMutation.isPending ||
@@ -134,7 +124,8 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleApprove = async () => {
     try {
-      await approveMutation.mutateAsync(order.id)
+      await approveMutation.mutateAsync({ params: { id: order.id } })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido aprovado com sucesso!')
     } catch {
       toast.error('Erro ao aprovar pedido')
@@ -143,7 +134,11 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleReject = async () => {
     try {
-      await rejectMutation.mutateAsync({ id: order.id, reason: rejectReason })
+      await rejectMutation.mutateAsync({
+        params: { id: order.id },
+        body: { reason: rejectReason },
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido rejeitado')
       setRejectDialogOpen(false)
       setRejectReason('')
@@ -154,7 +149,11 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleDeliver = async () => {
     try {
-      await deliverMutation.mutateAsync({ id: order.id, deliveredAt })
+      await deliverMutation.mutateAsync({
+        params: { id: order.id },
+        body: { deliveredAt },
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido marcado como entregue!')
       setDeliverDialogOpen(false)
     } catch {
@@ -164,7 +163,11 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleCancel = async () => {
     try {
-      await cancelMutation.mutateAsync({ id: order.id, reason: cancelReason })
+      await cancelMutation.mutateAsync({
+        params: { id: order.id },
+        body: { reason: cancelReason },
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido cancelado')
       setCancelDialogOpen(false)
       setCancelReason('')
@@ -274,10 +277,7 @@ function OrderActions({ order }: { order: Order }) {
             <Button variant="outline" onClick={() => setDeliverDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              onClick={handleDeliver}
-              disabled={deliverMutation.isPending}
-            >
+            <Button onClick={handleDeliver} disabled={deliverMutation.isPending}>
               {deliverMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Confirmar Entrega
             </Button>
@@ -337,11 +337,13 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
   }, [debouncedSearch, setFilters])
 
   const { data: orders, isLoading } = useQuery(
-    useStoreOrdersQueryOptions({
-      storeId,
-      status: (status as StoreOrderStatus | null) || undefined,
-      paymentMode: (paymentMode as StoreOrderPaymentMode | null) || undefined,
-      search: search || undefined,
+    api.api.v1.storeOrders.index.queryOptions({
+      query: {
+        storeId,
+        status: (status as StoreOrderStatus | null) || undefined,
+        paymentMode: (paymentMode as StoreOrderPaymentMode | null) || undefined,
+        search: search || undefined,
+      },
     })
   )
 

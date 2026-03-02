@@ -6,6 +6,7 @@
 ## Contexto
 
 Quando o admin adiciona um aluno no último step, ao escolher o level:
+
 - Mostrar o contrato vinculado a esse level
 - Permitir aplicar uma scholarship para desconto
 - Exibir documentos exigidos pelo contrato
@@ -35,6 +36,7 @@ Mostra:   Oculta seções
 ### 1. Informações Acadêmicas (existente)
 
 Mantém como está:
+
 - Período Letivo (select)
 - Curso (select)
 - Level/Série (select)
@@ -45,6 +47,7 @@ Mantém como está:
 Aparece quando: `levelId` + `academicPeriodId` tem contrato associado.
 
 **Exibe:**
+
 - Nome do contrato
 - Taxa de Matrícula (R$)
 - Mensalidade (R$)
@@ -58,26 +61,29 @@ Aparece quando: `levelId` + `academicPeriodId` tem contrato associado.
 **Componente:** Dropdown com scholarships ativas da escola
 
 **Lista:** Todas `Scholarship` onde:
+
 - `schoolId` = escola atual
 - `isActive` = true
 
 **Exibição no dropdown:**
+
 ```
 Nome da Bolsa (30% mensalidade, 20% matrícula)
 ```
 
 **Ao selecionar, mostra comparativo:**
 
-| Item | Original | Desconto | Final |
-|------|----------|----------|-------|
-| Matrícula | R$ 500,00 | 20% | R$ 400,00 |
-| Mensalidade | R$ 1.200,00 | 30% | R$ 840,00 |
+| Item        | Original    | Desconto | Final     |
+| ----------- | ----------- | -------- | --------- |
+| Matrícula   | R$ 500,00   | 20%      | R$ 400,00 |
+| Mensalidade | R$ 1.200,00 | 30%      | R$ 840,00 |
 
 **Economia total:** Calcula (desconto matrícula) + (desconto mensalidade × parcelas)
 
 ### 4. Pagamento (atualizado)
 
 **Campos:**
+
 - Forma de Pagamento (Boleto, Cartão, PIX)
 - Dia de Vencimento (1-31)
 - Parcelas da Matrícula
@@ -103,6 +109,7 @@ if (contract.flexibleInstallments === false) {
 **Lista:** Todos `ContractDocument` vinculados ao contrato
 
 **Exibição:**
+
 ```
 ☐ Certidão de Nascimento     [Anexar arquivo]
 ☐ RG ou CPF do Aluno         [Anexar arquivo]
@@ -110,6 +117,7 @@ if (contract.flexibleInstallments === false) {
 ```
 
 **Comportamento:**
+
 - Upload é opcional durante matrícula
 - Documentos não anexados ficam com status `PENDING`
 - Responsável/aluno pode completar depois na área deles
@@ -135,9 +143,7 @@ const contract = await Contract.query()
 // Endpoint: GET /api/scholarships
 // Query: { active: true }
 
-const scholarships = await Scholarship.query()
-  .where('schoolId', schoolId)
-  .where('isActive', true)
+const scholarships = await Scholarship.query().where('schoolId', schoolId).where('isActive', true)
 ```
 
 ### Form data atualizado
@@ -154,14 +160,14 @@ billing: {
 
   // Atualizados (vêm do contrato)
   contractId: string | null
-  monthlyFee: number        // do contrato
-  enrollmentFee: number     // do contrato
-  installments: number      // do contrato ou calculado
+  monthlyFee: number // do contrato
+  enrollmentFee: number // do contrato
+  installments: number // do contrato ou calculado
   enrollmentInstallments: number
 
   // Novos
   scholarshipId: string | null
-  discountPercentage: number        // calculado da bolsa
+  discountPercentage: number // calculado da bolsa
   enrollmentDiscountPercentage: number
 
   // Documentos (opcional)
@@ -175,11 +181,13 @@ billing: {
 ## Componentes a Criar/Modificar
 
 ### Modificar
+
 - `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 - `inertia/containers/students/new-student-modal/schema.ts`
 - `app/controllers/students/enroll_student_controller.ts`
 
 ### Criar
+
 - `inertia/components/enrollment/contract-details-card.tsx`
 - `inertia/components/enrollment/scholarship-selector.tsx`
 - `inertia/components/enrollment/discount-comparison.tsx`
@@ -191,6 +199,7 @@ billing: {
 ## API Endpoints
 
 ### GET /api/contracts/by-level
+
 ```typescript
 // Query params
 { levelId: string, academicPeriodId: string }
@@ -214,6 +223,7 @@ billing: {
 ```
 
 ### GET /api/scholarships (já existe, verificar se retorna tudo necessário)
+
 ```typescript
 // Response
 Array<{
@@ -229,17 +239,21 @@ Array<{
 ## UI States
 
 ### Loading
+
 - Skeleton enquanto busca contrato após selecionar level
 
 ### Sem contrato
+
 - Oculta seções de pagamento
 - Mostra apenas seleção acadêmica
 - Admin pode prosseguir (matrícula sem contrato definido)
 
 ### Com contrato
+
 - Exibe todas as seções
 - Valores pré-preenchidos do contrato
 
 ### Com bolsa aplicada
+
 - Mostra comparativo de valores
 - Atualiza valores finais em tempo real

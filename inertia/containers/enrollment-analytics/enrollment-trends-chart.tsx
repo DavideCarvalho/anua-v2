@@ -5,10 +5,10 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-import {
-  useEnrollmentTrendsQueryOptions,
-  type EnrollmentTrendsResponse,
-} from '../../hooks/queries/use_enrollment_trends'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type EnrollmentTrendsResponse = Route.Response<'api.v1.analytics.enrollments.trends'>
 
 interface EnrollmentTrendsChartProps {
   schoolId?: string
@@ -22,7 +22,9 @@ export function EnrollmentTrendsChart({
   days = 30,
 }: EnrollmentTrendsChartProps) {
   const { data, isLoading } = useQuery(
-    useEnrollmentTrendsQueryOptions({ schoolId, academicPeriodId, days })
+    api.api.v1.analytics.enrollments.trends.queryOptions({
+      query: { schoolId, academicPeriodId, days },
+    })
   )
 
   if (isLoading || !data) {

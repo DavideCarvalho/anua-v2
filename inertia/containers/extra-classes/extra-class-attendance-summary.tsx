@@ -1,12 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, Users } from 'lucide-react'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Badge } from '~/components/ui/badge'
 import { Progress } from '~/components/ui/progress'
 import { Skeleton } from '~/components/ui/skeleton'
@@ -18,10 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
-import {
-  useExtraClassAttendanceSummaryQueryOptions,
-  type AttendanceSummaryStudent,
-} from '~/hooks/queries/use_extra_class_attendance'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type AttendanceSummaryStudent =
+  Route.Response<'api.v1.extra_classes.attendance.summary'>['data'][number]
 
 function getAttendanceBadgeVariant(percentage: number) {
   if (percentage >= 75) return 'default' as const
@@ -41,7 +37,9 @@ export function ExtraClassAttendanceSummary({
   onOpenChange,
 }: ExtraClassAttendanceSummaryProps) {
   const { data, isLoading } = useQuery({
-    ...useExtraClassAttendanceSummaryQueryOptions(extraClassId),
+    ...api.api.v1.extraClasses.attendance.summary.queryOptions({
+      params: { id: extraClassId },
+    }),
     enabled: open,
   })
 

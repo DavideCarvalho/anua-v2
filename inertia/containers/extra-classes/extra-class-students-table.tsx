@@ -25,11 +25,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog'
-import {
-  useExtraClassStudentsQueryOptions,
-  type ExtraClassStudent,
-} from '~/hooks/queries/use_extra_classes'
-import { useCancelEnrollment } from '~/hooks/mutations/use_extra_class_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type ExtraClassStudent = Route.Response<'api.v1.extra_classes.students'>['data'][number]
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   BOLETO: 'Boleto',
@@ -51,19 +51,26 @@ export function ExtraClassStudentsTable({
   const [page, setPage] = useState(1)
   const [cancelTarget, setCancelTarget] = useState<ExtraClassStudent | null>(null)
 
+  const queryClient = useQueryClient()
   const { data, isLoading } = useQuery({
-    ...useExtraClassStudentsQueryOptions(extraClassId, { page }),
+    ...api.api.v1.extraClasses.students.queryOptions({
+      params: { id: extraClassId },
+    }),
     enabled: open,
   })
 
-  const cancelMutation = useCancelEnrollment()
+  const cancelMutation = useMutation(api.api.v1.extraClasses.enroll.cancel.mutationOptions())
 
   const handleCancel = () => {
     if (!cancelTarget) return
     cancelMutation.mutate(
-      { extraClassId, enrollmentId: cancelTarget.id },
+      {
+        params: { id: extraClassId, enrollmentId: cancelTarget.id },
+      },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['extra-class-students', extraClassId] })
+          queryClient.invalidateQueries({ queryKey: ['extra-classes'] })
           toast.success('Inscricao cancelada')
           setCancelTarget(null)
         },

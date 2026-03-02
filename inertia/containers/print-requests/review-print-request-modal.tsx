@@ -24,8 +24,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { usePrintRequestQueryOptions } from '../../hooks/queries/use_print_request'
-import { useReviewPrintRequestMutation } from '../../hooks/mutations/use_review_print_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -46,10 +46,13 @@ export function ReviewPrintRequestModal({
   open: boolean
   onClose: () => void
 }) {
-  const review = useReviewPrintRequestMutation()
+  const queryClient = useQueryClient()
+  const review = useMutation(api.api.v1.printRequests.reviewPrintRequest.mutationOptions())
 
   const { data } = useQuery({
-    ...usePrintRequestQueryOptions({ id: printRequestId }),
+    ...api.api.v1.printRequests.showPrintRequest.queryOptions({
+      params: { id: printRequestId },
+    }),
     enabled: !!printRequestId,
   })
 

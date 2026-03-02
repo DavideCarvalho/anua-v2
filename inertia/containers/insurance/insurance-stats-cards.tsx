@@ -4,7 +4,7 @@ import { Shield, AlertCircle, CheckCircle2, DollarSign, Users, FileWarning } fro
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Button } from '../../components/ui/button'
-import { useInsuranceStatsQueryOptions } from '../../hooks/queries/use_insurance_stats'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 export function InsuranceStatsCardsSkeleton() {
@@ -27,7 +27,9 @@ export function InsuranceStatsCardsSkeleton() {
 }
 
 export function InsuranceStatsCards() {
-  const { data, isLoading, isError, error, refetch } = useQuery(useInsuranceStatsQueryOptions())
+  const { data, isLoading, isError, error, refetch } = useQuery(
+    api.api.v1.insurance.stats.queryOptions({})
+  )
 
   if (isLoading) {
     return <InsuranceStatsCardsSkeleton />
@@ -39,7 +41,9 @@ export function InsuranceStatsCards() {
         <CardContent className="flex items-center gap-4 py-6">
           <AlertCircle className="h-8 w-8 text-destructive" />
           <div className="flex-1">
-            <h3 className="font-semibold text-destructive">Erro ao carregar estatísticas de seguro</h3>
+            <h3 className="font-semibold text-destructive">
+              Erro ao carregar estatísticas de seguro
+            </h3>
             <p className="text-sm text-muted-foreground">
               {error?.message || 'Ocorreu um erro inesperado'}
             </p>
@@ -132,9 +136,7 @@ export function InsuranceStatsCards() {
           <AlertCircle className="h-4 w-4 text-red-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600">
-            {data.overduePaymentsWithInsurance}
-          </div>
+          <div className="text-2xl font-bold text-red-600">{data.overduePaymentsWithInsurance}</div>
           <p className="text-xs text-muted-foreground">pagamentos em atraso</p>
         </CardContent>
       </Card>

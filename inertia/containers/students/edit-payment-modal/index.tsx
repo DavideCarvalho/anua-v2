@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { differenceInMonths } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { CreditCard, Loader2, FileText } from 'lucide-react'
 import { z } from 'zod'
@@ -34,24 +34,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Skeleton } from '~/components/ui/skeleton'
-import {
-  useStudentEnrollmentsQueryOptions,
-  type StudentEnrollment,
-} from '~/hooks/queries/use_student_enrollments'
-import { useContractQueryOptions } from '~/hooks/queries/use_contract'
-import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
-import { useScholarshipsQueryOptions } from '~/hooks/queries/use_scholarships'
-import {
-  useUpdateEnrollment,
-  type UpdateEnrollmentPayload,
-} from '~/hooks/mutations/use_update_enrollment'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
 import {
   ContractDetailsCard,
   RequiredDocumentsList,
   ScholarshipSelector,
 } from '~/components/enrollment'
-import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
-import { useStudentPendingInvoicesQueryOptions } from '~/hooks/queries/use_invoices'
+
+type StudentEnrollment = Route.Response<'api.v1.students.enrollments.list'>[number]
+type UpdateEnrollmentPayload = Parameters<
+  ReturnType<typeof api.api.v1.students.enrollments.update.mutationOptions>['mutationFn']
+>[0]
 import { formatCurrency } from '~/lib/utils'
 
 const schema = z
@@ -148,7 +142,10 @@ export function EnrollmentTabContent({
   embedded?: boolean
 }) {
   const queryClient = useQueryClient()
-  const { mutateAsync: updateEnrollment, isPending } = useUpdateEnrollment()
+  const updateEnrollmentMutation = useMutation(
+    api.api.v1.students.enrollments.update.mutationOptions()
+  )
+  const { mutateAsync: updateEnrollment, isPending } = updateEnrollmentMutation
 
   const currentIndividualDiscount = useMemo(() => {
     const discounts = ((enrollment as any).individualDiscounts ?? []) as Array<{
@@ -214,21 +211,22 @@ export function EnrollmentTabContent({
 
   // Fetch contract details
   const { data: contractData, isLoading: isLoadingContract } = useQuery({
-    ...useContractQueryOptions(contractId),
+    ...api.api.v1.contracts.show.queryOptions({ params: { id: contractId } }),
     enabled: !!contractId,
   })
 
   // Fetch scholarships
   const { data: scholarshipsData } = useQuery({
-    ...useScholarshipsQueryOptions({ active: true, limit: 100 }),
+    ...api.api.v1.scholarships.listScholarships.queryOptions({
+      query: { active: true, limit: 100 },
+    }),
   })
 
   const scholarships = scholarshipsData?.data ?? []
 
   const { data: contractsData } = useQuery({
-    ...useContractsQueryOptions({
-      limit: 100,
-      isActive: true,
+    ...api.api.v1.contracts.index.queryOptions({
+      query: { limit: 100, isActive: true },
     }),
   })
 
@@ -265,7 +263,6 @@ export function EnrollmentTabContent({
         enrollment.scholarship.enrollmentDiscountPercentage
       )
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enrollment.id])
 
   // Set installments to 1 for MONTHLY payment type
@@ -273,18 +270,21 @@ export function EnrollmentTabContent({
     if (contractData?.paymentType === 'MONTHLY') {
       form.setValue('installments', 1)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractData?.paymentType])
 
   // Fetch pending payments for this enrollment
   const { data: pendingPaymentsData } = useQuery({
-    ...useStudentPendingPaymentsQueryOptions(studentId),
+    ...api.api.v1.studentPayments.index.queryOptions({
+      query: { studentId, limit: 100 },
+    }),
     enabled: !!studentId,
   })
 
   // Fetch pending invoices for this student
   const { data: invoicesData } = useQuery({
-    ...useStudentPendingInvoicesQueryOptions(studentId),
+    ...api.api.v1.invoices.index.queryOptions({
+      query: { studentId, limit: 100 },
+    }),
     enabled: !!studentId,
   })
 
@@ -500,9 +500,8 @@ export function EnrollmentTabContent({
       }
 
       await updateEnrollment({
-        studentId,
-        enrollmentId: enrollment.id,
-        data: updateData,
+        params: { id: studentId, enrollmentId: enrollment.id },
+        body: updateData,
       })
 
       queryClient.invalidateQueries({ queryKey: ['student-enrollments', studentId] })
@@ -960,7 +959,9 @@ export function EditPaymentSection({
   onSuccess,
 }: Omit<EditPaymentModalProps, 'open' | 'onOpenChange'>) {
   const { data: enrollments, isLoading } = useQuery({
-    ...useStudentEnrollmentsQueryOptions(studentId),
+    ...api.api.v1.students.enrollments.list.queryOptions({
+      params: { id: studentId },
+    }),
     enabled: !!studentId,
   })
 
@@ -1027,7 +1028,9 @@ export function EditPaymentModal({
   onSuccess,
 }: EditPaymentModalProps) {
   const { data: enrollments, isLoading } = useQuery({
-    ...useStudentEnrollmentsQueryOptions(studentId),
+    ...api.api.v1.students.enrollments.list.queryOptions({
+      params: { id: studentId },
+    }),
     enabled: open && !!studentId,
   })
 

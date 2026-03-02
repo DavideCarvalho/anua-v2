@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
 import { listContractsValidator } from '#validators/contract'
-import { ContractDto } from '#models/dto/contract.dto'
+import ContractTransformer from '#transformers/contract_transformer'
 import AppException from '#exceptions/app_exception'
 
 export default class ListContractsController {
-  async handle({ request, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({ request, auth, effectiveUser, selectedSchoolIds, serialize }: HttpContext) {
     const payload = await request.validateUsing(listContractsValidator)
 
     const user = effectiveUser ?? auth.user
@@ -129,7 +129,9 @@ export default class ListContractsController {
     }
 
     const contracts = await query.paginate(page, limit)
+    const data = contracts.all()
+    const metadata = contracts.getMeta()
 
-    return ContractDto.fromPaginator(contracts)
+    return serialize(ContractTransformer.paginate(data, metadata))
   }
 }

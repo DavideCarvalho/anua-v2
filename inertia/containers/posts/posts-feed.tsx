@@ -3,7 +3,7 @@ import { Inbox } from 'lucide-react'
 
 import { Card, CardContent } from '../../components/ui/card'
 
-import { usePostsQueryOptions } from '../../hooks/queries/use_posts'
+import { api } from '~/lib/api'
 import { PostCard } from './post-card'
 
 interface PostsFeedProps {
@@ -13,7 +13,9 @@ interface PostsFeedProps {
 }
 
 export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) {
-  const { data, isLoading } = useQuery(usePostsQueryOptions({ schoolId, classId }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.posts.index.queryOptions({ query: { schoolId, classId } })
+  )
 
   const posts = (data as any)?.data ?? []
 

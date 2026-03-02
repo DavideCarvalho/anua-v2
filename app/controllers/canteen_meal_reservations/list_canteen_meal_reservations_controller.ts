@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
-import CanteenMealReservationDto from '#models/dto/canteen_meal_reservation.dto'
+import CanteenMealReservationTransformer from '#transformers/canteen_meal_reservation_transformer'
 import { listCanteenMealReservationsValidator } from '#validators/canteen'
 
 export default class ListCanteenMealReservationsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listCanteenMealReservationsValidator)
 
     const page = payload.page ?? 1
@@ -45,6 +45,9 @@ export default class ListCanteenMealReservationsController {
 
     const reservations = await query.paginate(page, limit)
 
-    return CanteenMealReservationDto.fromPaginator(reservations)
+    const data = reservations.all()
+    const metadata = reservations.getMeta()
+
+    return serialize(CanteenMealReservationTransformer.paginate(data, metadata))
   }
 }

@@ -43,12 +43,8 @@ import {
 } from '../../components/ui/select'
 import { Switch } from '../../components/ui/switch'
 import { useQuery } from '@tanstack/react-query'
-import { useChallengesQueryOptions } from '../../hooks/queries/use_challenges'
-import {
-  useCreateChallenge,
-  useUpdateChallenge,
-  useDeleteChallenge,
-} from '../../hooks/mutations/use_challenge_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { useAuthUser } from '../../stores/auth_store'
 
 const CHALLENGE_CATEGORIES = [
@@ -102,12 +98,15 @@ export function ChallengesTable() {
   const user = useAuthUser()
   const schoolId = user?.schoolId
 
+  const queryClient = useQueryClient()
   const { data: challenges } = useQuery(
-    useChallengesQueryOptions({ schoolId: schoolId || undefined })
+    api.api.v1.challenges.index.queryOptions({
+      query: { schoolId: schoolId || undefined },
+    })
   )
-  const createChallenge = useCreateChallenge()
-  const updateChallenge = useUpdateChallenge()
-  const deleteChallenge = useDeleteChallenge()
+  const createChallenge = useMutation(api.api.v1.challenges.store.mutationOptions())
+  const updateChallenge = useMutation(api.api.v1.challenges.update.mutationOptions())
+  const deleteChallenge = useMutation(api.api.v1.challenges.destroy.mutationOptions())
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -120,16 +119,19 @@ export function ChallengesTable() {
 
   const handleCreate = async () => {
     await createChallenge.mutateAsync({
-      name: formData.name,
-      description: formData.description,
-      category: formData.category as any,
-      points: formData.points,
-      schoolId: schoolId || undefined,
-      icon: formData.icon || undefined,
-      isRecurring: formData.isRecurring,
-      recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
-      isActive: formData.isActive,
+      body: {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category as any,
+        points: formData.points,
+        schoolId: schoolId || undefined,
+        icon: formData.icon || undefined,
+        isRecurring: formData.isRecurring,
+        recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
+        isActive: formData.isActive,
+      },
     })
+    queryClient.invalidateQueries({ queryKey: ['challenges'] })
     setIsCreateOpen(false)
     setFormData(defaultFormData)
   }
@@ -151,23 +153,27 @@ export function ChallengesTable() {
   const handleUpdate = async () => {
     if (!editingId) return
     await updateChallenge.mutateAsync({
-      id: editingId,
-      name: formData.name,
-      description: formData.description,
-      category: formData.category as any,
-      points: formData.points,
-      icon: formData.icon || undefined,
-      isRecurring: formData.isRecurring,
-      recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
-      isActive: formData.isActive,
+      params: { id: editingId },
+      body: {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category as any,
+        points: formData.points,
+        icon: formData.icon || undefined,
+        isRecurring: formData.isRecurring,
+        recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
+        isActive: formData.isActive,
+      },
     })
+    queryClient.invalidateQueries({ queryKey: ['challenges'] })
     setEditingId(null)
     setFormData(defaultFormData)
   }
 
   const handleDelete = async () => {
     if (!deletingId) return
-    await deleteChallenge.mutateAsync(deletingId)
+    await deleteChallenge.mutateAsync({ params: { id: deletingId } })
+    queryClient.invalidateQueries({ queryKey: ['challenges'] })
     setDeletingId(null)
   }
 

@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
-import StudentHasAssignmentDto from '#models/dto/student_has_assignment.dto'
+import StudentHasAssignmentTransformer from '#transformers/student_has_assignment_transformer'
 import AppException from '#exceptions/app_exception'
 
 export default class ListAssignmentSubmissionsController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { id } = params
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
@@ -22,6 +22,9 @@ export default class ListAssignmentSubmissionsController {
       .orderBy('submittedAt', 'desc')
       .paginate(page, limit)
 
-    return StudentHasAssignmentDto.fromPaginator(submissions)
+    const data = submissions.all()
+    const metadata = submissions.getMeta()
+
+    return serialize(StudentHasAssignmentTransformer.paginate(data, metadata))
   }
 }

@@ -30,28 +30,28 @@ const GetExtraClassAttendanceSummaryController = () =>
 export function registerExtraClassApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListExtraClassesController]).as('extraClasses.index')
-      router.post('/', [CreateExtraClassController]).as('extraClasses.store')
-      router.get('/:id', [ShowExtraClassController]).as('extraClasses.show')
-      router.put('/:id', [UpdateExtraClassController]).as('extraClasses.update')
-      router.delete('/:id', [DeleteExtraClassController]).as('extraClasses.destroy')
-      router.post('/:id/enroll', [EnrollExtraClassController]).as('extraClasses.enroll')
+      router.get('/', [ListExtraClassesController]).as('extra_classes.index')
+      router.post('/', [CreateExtraClassController]).as('extra_classes.store')
+      router.get('/:id', [ShowExtraClassController]).as('extra_classes.show')
+      router.put('/:id', [UpdateExtraClassController]).as('extra_classes.update')
+      router.delete('/:id', [DeleteExtraClassController]).as('extra_classes.destroy')
+      router.post('/:id/enroll', [EnrollExtraClassController]).as('extra_classes.enroll')
       router
         .post('/:id/enroll/:enrollmentId', [CancelExtraClassEnrollmentController])
-        .as('extraClasses.enroll.cancel')
-      router.get('/:id/students', [ListExtraClassStudentsController]).as('extraClasses.students')
+        .as('extra_classes.enroll.cancel')
+      router.get('/:id/students', [ListExtraClassStudentsController]).as('extra_classes.students')
       router
         .post('/:id/attendance', [CreateExtraClassAttendanceController])
-        .as('extraClasses.attendance.store')
+        .as('extra_classes.attendance.store')
       router
         .get('/:id/attendance', [ListExtraClassAttendancesController])
-        .as('extraClasses.attendance.index')
+        .as('extra_classes.attendance.index')
       router
         .put('/:id/attendance/:attendanceId', [UpdateExtraClassAttendanceController])
-        .as('extraClasses.attendance.update')
+        .as('extra_classes.attendance.update')
       router
         .get('/:id/attendance/summary', [GetExtraClassAttendanceSummaryController])
-        .as('extraClasses.attendance.summary')
+        .as('extra_classes.attendance.summary')
     })
     .prefix('/extra-classes')
     .use([middleware.auth(), middleware.impersonation()])

@@ -1,7 +1,7 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useSchoolPartnersQueryOptions } from '../hooks/queries/use_school_partners'
+import { api } from '~/lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Skeleton } from '../components/ui/skeleton'
@@ -54,7 +54,10 @@ export function SchoolPartnersTableContainer({ onEdit }: { onEdit: (id: string) 
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <SchoolPartnersErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <SchoolPartnersErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <SchoolPartnersTableContent onEdit={onEdit} />
@@ -75,7 +78,9 @@ function SchoolPartnersTableContent({ onEdit }: { onEdit: (id: string) => void }
   const { search, page, limit } = filters
 
   const { data, isLoading } = useQuery(
-    useSchoolPartnersQueryOptions({ page, limit, search: search || undefined })
+    api.api.v1.schoolPartners.listSchoolPartners.queryOptions({
+      query: { page, limit, search: search || undefined },
+    })
   )
 
   if (isLoading) {

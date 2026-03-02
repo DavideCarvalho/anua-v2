@@ -1,15 +1,14 @@
 import { Head } from '@inertiajs/react'
-import {
-  DollarSign,
-  TrendingUp,
-  CreditCard,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-} from 'lucide-react'
+import { DollarSign, TrendingUp, CreditCard, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 
 import { AdminLayout } from '../../../components/layouts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Badge } from '../../../components/ui/badge'
 
 export default function BillingDashboardPage() {

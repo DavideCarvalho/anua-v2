@@ -13,6 +13,7 @@
 ## Task 1: Create Contract Query Hook
 
 **Files:**
+
 - Create: `inertia/hooks/queries/use_contract.ts`
 
 **Step 1: Create the hook file**
@@ -56,6 +57,7 @@ git commit -m "feat: add useContractQueryOptions hook"
 ## Task 2: Update Form Schema
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/schema.ts`
 
 **Step 1: Add new fields to billing schema**
@@ -107,6 +109,7 @@ git commit -m "feat: update billing schema with contract and scholarship fields"
 ## Task 3: Create Contract Details Card Component
 
 **Files:**
+
 - Create: `inertia/components/enrollment/contract-details-card.tsx`
 
 **Step 1: Create the component**
@@ -198,6 +201,7 @@ git commit -m "feat: add ContractDetailsCard component"
 ## Task 4: Create Scholarship Selector Component
 
 **Files:**
+
 - Create: `inertia/components/enrollment/scholarship-selector.tsx`
 
 **Step 1: Create the component**
@@ -296,6 +300,7 @@ git commit -m "feat: add ScholarshipSelector component"
 ## Task 5: Create Discount Comparison Component
 
 **Files:**
+
 - Create: `inertia/components/enrollment/discount-comparison.tsx`
 
 **Step 1: Create the component**
@@ -408,6 +413,7 @@ git commit -m "feat: add DiscountComparison component"
 ## Task 6: Create Required Documents List Component
 
 **Files:**
+
 - Create: `inertia/components/enrollment/required-documents-list.tsx`
 
 **Step 1: Create the component**
@@ -487,6 +493,7 @@ git commit -m "feat: add RequiredDocumentsList component"
 ## Task 7: Create Index Export for Enrollment Components
 
 **Files:**
+
 - Create: `inertia/components/enrollment/index.ts`
 
 **Step 1: Create the index file**
@@ -511,6 +518,7 @@ git commit -m "feat: add enrollment components index export"
 ## Task 8: Update BillingStep - Add Imports and State
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Add imports at top of file**
@@ -521,13 +529,7 @@ Replace current imports with:
 import { useEffect, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import {
   Select,
@@ -571,6 +573,7 @@ git commit -m "feat(billing-step): add imports for contract and scholarship"
 ## Task 9: Update BillingStep - Add Contract and Scholarship Queries
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Add contract and scholarship queries after existing queries (around line 50)**
@@ -578,32 +581,32 @@ git commit -m "feat(billing-step): add imports for contract and scholarship"
 After the `classesData` query, add:
 
 ```typescript
-  // Get contractId from selected level
-  const selectedLevel = levels.find((l) => l.levelId === levelId)
-  const contractId = selectedLevel?.contractId
+// Get contractId from selected level
+const selectedLevel = levels.find((l) => l.levelId === levelId)
+const contractId = selectedLevel?.contractId
 
-  // Fetch contract details
-  const { data: contractData, isLoading: isLoadingContract } = useQuery({
-    ...useContractQueryOptions(contractId),
-    enabled: !!contractId,
-  })
+// Fetch contract details
+const { data: contractData, isLoading: isLoadingContract } = useQuery({
+  ...useContractQueryOptions(contractId),
+  enabled: !!contractId,
+})
 
-  // Fetch scholarships
-  const { data: scholarshipsData, isLoading: isLoadingScholarships } = useQuery({
-    ...useScholarshipsQueryOptions({ active: true, limit: 100 }),
-  })
+// Fetch scholarships
+const { data: scholarshipsData, isLoading: isLoadingScholarships } = useQuery({
+  ...useScholarshipsQueryOptions({ active: true, limit: 100 }),
+})
 
-  const scholarships = scholarshipsData?.data ?? []
+const scholarships = scholarshipsData?.data ?? []
 
-  // Calculate months remaining until academic period ends
-  const maxInstallments = useMemo(() => {
-    if (!selectedPeriod?.endDate || !contractData) return 12
-    const endDate = new Date(selectedPeriod.endDate)
-    const now = new Date()
-    const monthsDiff = (endDate.getFullYear() - now.getFullYear()) * 12 +
-                       (endDate.getMonth() - now.getMonth())
-    return Math.min(Math.max(monthsDiff, 1), contractData.installments)
-  }, [selectedPeriod?.endDate, contractData])
+// Calculate months remaining until academic period ends
+const maxInstallments = useMemo(() => {
+  if (!selectedPeriod?.endDate || !contractData) return 12
+  const endDate = new Date(selectedPeriod.endDate)
+  const now = new Date()
+  const monthsDiff =
+    (endDate.getFullYear() - now.getFullYear()) * 12 + (endDate.getMonth() - now.getMonth())
+  return Math.min(Math.max(monthsDiff, 1), contractData.installments)
+}, [selectedPeriod?.endDate, contractData])
 ```
 
 **Step 2: Verify changes compile**
@@ -623,43 +626,48 @@ git commit -m "feat(billing-step): add contract and scholarship queries"
 ## Task 10: Update BillingStep - Auto-fill Contract Values
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Add useEffect to auto-fill form when contract loads (after queries)**
 
 ```typescript
-  // Auto-fill form when contract is loaded
-  useEffect(() => {
-    if (contractData) {
-      form.setValue('billing.contractId', contractData.id)
-      form.setValue('billing.monthlyFee', contractData.amount)
-      form.setValue('billing.enrollmentFee', contractData.enrollmentValue ?? 0)
-      form.setValue('billing.installments', contractData.flexibleInstallments
-        ? maxInstallments
-        : contractData.installments)
-      form.setValue('billing.enrollmentInstallments', contractData.enrollmentValueInstallments)
-      form.setValue('billing.flexibleInstallments', contractData.flexibleInstallments)
-    } else if (levelId && !contractId) {
-      // Level selected but no contract - clear contract fields
-      form.setValue('billing.contractId', null)
-      form.setValue('billing.monthlyFee', 0)
-      form.setValue('billing.enrollmentFee', 0)
-    }
-  }, [contractData, contractId, levelId, maxInstallments, form])
-
-  // Handle scholarship selection
-  const handleScholarshipChange = (
-    scholarshipId: string | null,
-    scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
-  ) => {
-    form.setValue('billing.scholarshipId', scholarshipId)
-    form.setValue('billing.discountPercentage', scholarship?.discountPercentage ?? 0)
-    form.setValue('billing.enrollmentDiscountPercentage', scholarship?.enrollmentDiscountPercentage ?? 0)
+// Auto-fill form when contract is loaded
+useEffect(() => {
+  if (contractData) {
+    form.setValue('billing.contractId', contractData.id)
+    form.setValue('billing.monthlyFee', contractData.amount)
+    form.setValue('billing.enrollmentFee', contractData.enrollmentValue ?? 0)
+    form.setValue(
+      'billing.installments',
+      contractData.flexibleInstallments ? maxInstallments : contractData.installments
+    )
+    form.setValue('billing.enrollmentInstallments', contractData.enrollmentValueInstallments)
+    form.setValue('billing.flexibleInstallments', contractData.flexibleInstallments)
+  } else if (levelId && !contractId) {
+    // Level selected but no contract - clear contract fields
+    form.setValue('billing.contractId', null)
+    form.setValue('billing.monthlyFee', 0)
+    form.setValue('billing.enrollmentFee', 0)
   }
+}, [contractData, contractId, levelId, maxInstallments, form])
 
-  const selectedScholarshipId = form.watch('billing.scholarshipId')
-  const discountPercentage = form.watch('billing.discountPercentage') ?? 0
-  const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
+// Handle scholarship selection
+const handleScholarshipChange = (
+  scholarshipId: string | null,
+  scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
+) => {
+  form.setValue('billing.scholarshipId', scholarshipId)
+  form.setValue('billing.discountPercentage', scholarship?.discountPercentage ?? 0)
+  form.setValue(
+    'billing.enrollmentDiscountPercentage',
+    scholarship?.enrollmentDiscountPercentage ?? 0
+  )
+}
+
+const selectedScholarshipId = form.watch('billing.scholarshipId')
+const discountPercentage = form.watch('billing.discountPercentage') ?? 0
+const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
 ```
 
 **Step 2: Verify changes compile**
@@ -679,6 +687,7 @@ git commit -m "feat(billing-step): auto-fill form with contract values"
 ## Task 11: Update BillingStep - Update JSX with Contract Card
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Add contract card section after academic info card**
@@ -733,6 +742,7 @@ git commit -m "feat(billing-step): add contract details card"
 ## Task 12: Update BillingStep - Add Scholarship Section
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Add scholarship selector and discount comparison after contract card**
@@ -780,6 +790,7 @@ git commit -m "feat(billing-step): add scholarship selector and discount compari
 ## Task 13: Update BillingStep - Conditional Payment Section
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Wrap payment section with contract condition**
@@ -900,6 +911,7 @@ git commit -m "feat(billing-step): conditional payment section based on contract
 ## Task 14: Update BillingStep - Add Required Documents Section
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/steps/billing-step.tsx`
 
 **Step 1: Add documents list after payment section**
@@ -928,6 +940,7 @@ git commit -m "feat(billing-step): add required documents list"
 ## Task 15: Update Default Values in Modal Index
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/index.tsx`
 
 **Step 1: Update billing default values (around line 70-84)**
@@ -970,6 +983,7 @@ git commit -m "feat(new-student-modal): update default billing values"
 ## Task 16: Update Validation in Modal Index
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/index.tsx`
 
 **Step 1: Update billing validation in validateCurrentStep (around line 144-153)**
@@ -1016,46 +1030,47 @@ git commit -m "feat(new-student-modal): update validation for optional contract"
 ## Task 17: Update handleSubmit in Modal Index
 
 **Files:**
+
 - Modify: `inertia/containers/students/new-student-modal/index.tsx`
 
 **Step 1: Update handleSubmit to include scholarship data (around line 207-228)**
 
 ```typescript
-  async function handleSubmit(data: NewStudentFormData) {
-    try {
-      await enrollStudent.mutateAsync({
-        basicInfo: {
-          ...data.basicInfo,
-          birthDate: data.basicInfo.birthDate.toISOString(),
-        },
-        responsibles: data.responsibles.map((r) => ({
-          ...r,
-          birthDate: r.birthDate.toISOString(),
-        })),
-        address: data.address,
-        medicalInfo: data.medicalInfo,
-        billing: {
-          academicPeriodId: data.billing.academicPeriodId,
-          classId: data.billing.classId || undefined,
-          contractId: data.billing.contractId || undefined,
-          monthlyFee: data.billing.monthlyFee,
-          enrollmentFee: data.billing.enrollmentFee,
-          discount: data.billing.discountPercentage,
-          enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
-          paymentDate: data.billing.paymentDate,
-          installments: data.billing.installments,
-          enrollmentInstallments: data.billing.enrollmentInstallments,
-          scholarshipId: data.billing.scholarshipId || undefined,
-        },
-      })
+async function handleSubmit(data: NewStudentFormData) {
+  try {
+    await enrollStudent.mutateAsync({
+      basicInfo: {
+        ...data.basicInfo,
+        birthDate: data.basicInfo.birthDate.toISOString(),
+      },
+      responsibles: data.responsibles.map((r) => ({
+        ...r,
+        birthDate: r.birthDate.toISOString(),
+      })),
+      address: data.address,
+      medicalInfo: data.medicalInfo,
+      billing: {
+        academicPeriodId: data.billing.academicPeriodId,
+        classId: data.billing.classId || undefined,
+        contractId: data.billing.contractId || undefined,
+        monthlyFee: data.billing.monthlyFee,
+        enrollmentFee: data.billing.enrollmentFee,
+        discount: data.billing.discountPercentage,
+        enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
+        paymentDate: data.billing.paymentDate,
+        installments: data.billing.installments,
+        enrollmentInstallments: data.billing.enrollmentInstallments,
+        scholarshipId: data.billing.scholarshipId || undefined,
+      },
+    })
 
-      toast.success('Aluno matriculado com sucesso!')
-      handleClose()
-    } catch (error: any) {
-      console.error('Error enrolling student:', error)
-      toast.error(error?.message || 'Erro ao matricular aluno')
-    }
+    toast.success('Aluno matriculado com sucesso!')
+    handleClose()
+  } catch (error: any) {
+    console.error('Error enrolling student:', error)
+    toast.error(error?.message || 'Erro ao matricular aluno')
   }
+}
 ```
 
 **Step 2: Verify changes compile**
@@ -1084,6 +1099,7 @@ Expected: No errors
 Run: `cd /home/dudousxd/personal/anua-v2 && pnpm dev`
 
 Test checklist:
+
 1. Go to `/escola/administrativo/alunos`
 2. Click "Novo Aluno"
 3. Fill steps 1-4

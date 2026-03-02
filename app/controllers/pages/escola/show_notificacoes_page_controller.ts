@@ -2,6 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ShowNotificacoesPageController {
   async handle({ inertia }: HttpContext) {
-    return inertia.render('escola/notificacoes')
+    return inertia.render('escola/notificacoes', {})
   }
 }

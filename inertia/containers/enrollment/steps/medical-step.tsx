@@ -1,12 +1,6 @@
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { Plus, Trash2, UserCheck } from 'lucide-react'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
@@ -192,7 +186,9 @@ export function MedicalInfoStep() {
           {/* Read-only emergency contacts from guardians marked as isEmergencyContact */}
           {emergencyGuardians.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Responsáveis marcados como contato de emergência:</p>
+              <p className="text-xs text-muted-foreground">
+                Responsáveis marcados como contato de emergência:
+              </p>
               {emergencyGuardians.map((resp, i) => (
                 <div key={i} className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
                   <UserCheck className="h-4 w-4 text-muted-foreground" />

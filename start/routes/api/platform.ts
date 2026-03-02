@@ -14,8 +14,8 @@ const GetSchoolUsageMetricsController = () =>
 export function registerPlatformSettingsApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ShowPlatformSettingsController]).as('platformSettings.show')
-      router.put('/', [UpdatePlatformSettingsController]).as('platformSettings.update')
+      router.get('/', [ShowPlatformSettingsController]).as('platform_settings.show')
+      router.put('/', [UpdatePlatformSettingsController]).as('platform_settings.update')
     })
     .prefix('/platform-settings')
     .use(middleware.auth())
@@ -24,7 +24,7 @@ export function registerPlatformSettingsApiRoutes() {
 export function registerSchoolUsageMetricsApiRoutes() {
   router
     .group(() => {
-      router.get('/', [GetSchoolUsageMetricsController]).as('schoolUsageMetrics.show')
+      router.get('/', [GetSchoolUsageMetricsController]).as('school_usage_metrics.show')
     })
     .prefix('/school-usage-metrics')
     .use(middleware.auth())

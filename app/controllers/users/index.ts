@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import UserDto from '#models/dto/user.dto'
+import UserTransformer from '#transformers/user_transformer'
 
 export default class IndexUsersController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
@@ -42,7 +42,9 @@ export default class IndexUsersController {
     }
 
     const users = await query.paginate(page, limit)
+    const data = users.all()
+    const metadata = users.getMeta()
 
-    return response.ok(UserDto.fromPaginator(users))
+    return serialize(UserTransformer.paginate(data, metadata))
   }
 }

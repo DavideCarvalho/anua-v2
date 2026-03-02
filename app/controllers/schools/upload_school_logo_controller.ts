@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { cuid } from '@adonisjs/core/helpers'
+import { v4 as uuidV4 } from 'uuid'
 import drive from '@adonisjs/drive/services/main'
 import School from '#models/school'
 import {
@@ -77,7 +77,7 @@ export default class UploadSchoolLogoController {
     }
 
     // Gera nome único e seguro
-    const filename = `schools/${school.id}/logo-${cuid()}.${sanitizedExt}`
+    const filename = `schools/${school.id}/logo-${uuidV4()}.${sanitizedExt}`
 
     // Upload para o drive
     await logo.moveToDisk(filename)

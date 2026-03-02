@@ -1,10 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractDocument from '#models/contract_document'
-import { ContractDocumentDto } from '#models/dto/contract_document.dto'
+import ContractDocumentTransformer from '#transformers/contract_document_transformer'
+import { listContractDocumentsValidator } from '#validators/contract'
 
 export default class ListContractDocumentsController {
-  async handle({ request }: HttpContext) {
-    const { contractId, schoolId } = request.qs()
+  async handle({ request, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listContractDocumentsValidator)
+    const contractId = filters.contractId
+    const schoolId = filters.schoolId
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
 
     const query = ContractDocument.query().preload('school').orderBy('createdAt', 'desc')
 
@@ -16,8 +21,10 @@ export default class ListContractDocumentsController {
       query.where('schoolId', schoolId)
     }
 
-    const contractDocuments = await query
+    const contractDocuments = await query.paginate(page, limit)
+    const data = contractDocuments.all()
+    const metadata = contractDocuments.getMeta()
 
-    return ContractDocumentDto.fromArray(contractDocuments)
+    return serialize(ContractDocumentTransformer.paginate(data, metadata))
   }
 }

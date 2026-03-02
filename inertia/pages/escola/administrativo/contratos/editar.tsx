@@ -1,12 +1,12 @@
 import { Head, usePage } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 
 import { EscolaLayout } from '../../../../components/layouts'
 import { Button } from '../../../../components/ui/button'
 import { ContractForm } from '../../../../containers/contracts/contract-form'
-import { useContractQueryOptions } from '../../../../hooks/queries/use_contract'
+import { api } from '~/lib/api'
 import type { SharedProps } from '../../../../lib/types'
 import { useAuthUser } from '../../../../stores/auth_store'
 
@@ -20,7 +20,14 @@ export default function EditarContratoPage() {
   const schoolId = user?.schoolId
   const contractId = props.id
 
-  const { data: contract, isLoading, error } = useQuery(useContractQueryOptions(contractId))
+  const {
+    data: contract,
+    isLoading,
+    error,
+  } = useQuery({
+    ...api.api.v1.contracts.show.queryOptions({ params: { id: contractId } }),
+    enabled: !!contractId,
+  })
 
   return (
     <EscolaLayout>

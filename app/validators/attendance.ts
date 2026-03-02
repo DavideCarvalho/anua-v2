@@ -1,5 +1,16 @@
 import vine from '@vinejs/vine'
 
+export const listAttendanceValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    calendarSlotId: vine.string().trim().optional(),
+    studentId: vine.string().trim().optional(),
+    date: vine.string().trim().optional(),
+    status: vine.enum(['PRESENT', 'ABSENT', 'LATE', 'JUSTIFIED']).optional(),
+  })
+)
+
 export const createAttendanceValidator = vine.compile(
   vine.object({
     status: vine.enum(['PRESENT', 'ABSENT', 'LATE', 'JUSTIFIED']),

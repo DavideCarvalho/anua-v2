@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { cn } from '~/lib/utils'
 
-export interface CurrencyInputProps
-  extends Omit<React.ComponentProps<'input'>, 'onChange' | 'value'> {
+export interface CurrencyInputProps extends Omit<
+  React.ComponentProps<'input'>,
+  'onChange' | 'value'
+> {
   value: string | number
   onChange: (value: string) => void
 }

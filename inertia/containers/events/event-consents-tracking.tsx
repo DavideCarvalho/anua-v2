@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 
-import { useEventConsentsQueryOptions } from '../../hooks/queries/use_event_consents'
+import { api } from '~/lib/api'
 
 interface EventConsentsTrackingProps {
   eventId: string
@@ -63,7 +63,10 @@ type Stats = {
 export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
   const [statusFilter, setStatusFilter] = useState<ConsentStatus | 'ALL'>('ALL')
   const { data } = useSuspenseQuery(
-    useEventConsentsQueryOptions(eventId, statusFilter !== 'ALL' ? { status: statusFilter } : {})
+    api.api.v1.events.consents.index.queryOptions({
+      params: { eventId },
+      query: statusFilter !== 'ALL' ? { status: statusFilter } : {},
+    })
   )
 
   const event = data.event

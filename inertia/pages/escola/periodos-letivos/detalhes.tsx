@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 
 import { EscolaLayout } from '~/components/layouts'
 import { Card, CardContent } from '~/components/ui/card'
-import { useAcademicPeriodBySlugQueryOptions } from '~/hooks/queries/use_academic_period_by_slug'
+import { api } from '~/lib/api'
 import { PeriodoLetivoHeader } from '~/containers/academic-periods/periodo-letivo-header'
 import { PeriodoLetivoInfoCard } from '~/containers/academic-periods/periodo-letivo-info-card'
 import { CursosDoPeríodoList } from '~/containers/academic-periods/cursos-do-periodo-list'
@@ -15,9 +15,9 @@ interface Props {
 
 export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props) {
   const { data, isLoading, error } = useQuery(
-    useAcademicPeriodBySlugQueryOptions({
-      slug: academicPeriodSlug,
-      include: 'courses',
+    api.api.v1.academicPeriods.showBySlug.queryOptions({
+      params: { slug: academicPeriodSlug },
+      query: { include: 'courses' },
     })
   )
 
@@ -56,7 +56,9 @@ export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props)
             <PeriodoLetivoInfoCard
               startDate={String(data.startDate)}
               endDate={String(data.endDate)}
-              enrollmentStartDate={data.enrollmentStartDate ? String(data.enrollmentStartDate) : null}
+              enrollmentStartDate={
+                data.enrollmentStartDate ? String(data.enrollmentStartDate) : null
+              }
               enrollmentEndDate={data.enrollmentEndDate ? String(data.enrollmentEndDate) : null}
               segment={data.segment}
             />

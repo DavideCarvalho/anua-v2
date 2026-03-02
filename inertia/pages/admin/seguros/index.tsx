@@ -1,10 +1,16 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { Suspense } from 'react'
 import { Shield, AlertCircle, FileText, BarChart3, Settings } from 'lucide-react'
 
 import { AdminLayout } from '../../../components/layouts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import {
   InsuranceStatsCards,
   InsuranceStatsCardsSkeleton,
@@ -26,9 +32,7 @@ export default function AdminSegurosPage() {
               <Shield className="h-6 w-6" />
               Seguros
             </h1>
-            <p className="text-muted-foreground">
-              Gerencie o seguro educacional da plataforma
-            </p>
+            <p className="text-muted-foreground">Gerencie o seguro educacional da plataforma</p>
           </div>
         </div>
 
@@ -41,9 +45,7 @@ export default function AdminSegurosPage() {
               </CardHeader>
               <CardContent>
                 <CardTitle className="text-sm">Sinistros</CardTitle>
-                <CardDescription className="text-xs">
-                  Gerenciar sinistros pendentes
-                </CardDescription>
+                <CardDescription className="text-xs">Gerenciar sinistros pendentes</CardDescription>
               </CardContent>
             </Card>
           </Link>
@@ -55,9 +57,7 @@ export default function AdminSegurosPage() {
               </CardHeader>
               <CardContent>
                 <CardTitle className="text-sm">Faturamento</CardTitle>
-                <CardDescription className="text-xs">
-                  Boletos e pagamentos
-                </CardDescription>
+                <CardDescription className="text-xs">Boletos e pagamentos</CardDescription>
               </CardContent>
             </Card>
           </Link>
@@ -69,9 +69,7 @@ export default function AdminSegurosPage() {
               </CardHeader>
               <CardContent>
                 <CardTitle className="text-sm">Analytics</CardTitle>
-                <CardDescription className="text-xs">
-                  Relatórios e métricas
-                </CardDescription>
+                <CardDescription className="text-xs">Relatórios e métricas</CardDescription>
               </CardContent>
             </Card>
           </Link>
@@ -83,9 +81,7 @@ export default function AdminSegurosPage() {
               </CardHeader>
               <CardContent>
                 <CardTitle className="text-sm">Configuração</CardTitle>
-                <CardDescription className="text-xs">
-                  Configurar escolas e redes
-                </CardDescription>
+                <CardDescription className="text-xs">Configurar escolas e redes</CardDescription>
               </CardContent>
             </Card>
           </Link>

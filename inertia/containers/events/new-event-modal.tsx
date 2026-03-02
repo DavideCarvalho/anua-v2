@@ -35,10 +35,8 @@ import { Switch } from '../../components/ui/switch'
 import { Textarea } from '../../components/ui/textarea'
 import { Checkbox } from '../../components/ui/checkbox'
 
-import { useCreateEventMutation } from '../../hooks/mutations/use_create_event'
-import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use_academic_periods'
-import { useLevelsQueryOptions } from '../../hooks/queries/use_levels'
-import { useClassesQueryOptions } from '../../hooks/queries/use_classes'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
@@ -142,10 +140,17 @@ interface NewEventModalProps {
 }
 
 export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalProps) {
-  const createEventMutation = useCreateEventMutation()
-  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
-  const { data: levelsData } = useQuery(useLevelsQueryOptions({ schoolId, limit: 100 }))
-  const { data: classesData } = useQuery(useClassesQueryOptions({ schoolId, limit: 200 }))
+  const queryClient = useQueryClient()
+  const createEventMutation = useMutation(api.api.v1.events.store.mutationOptions())
+  const { data: periodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
+  )
+  const { data: levelsData } = useQuery(
+    api.api.v1.levels.index.queryOptions({ query: { schoolId, limit: 100 } })
+  )
+  const { data: classesData } = useQuery(
+    api.api.v1.classes.index.queryOptions({ query: { schoolId, limit: 200 } })
+  )
 
   const academicPeriods = periodsData?.data ?? []
   const levels = levelsData?.data ?? []
@@ -192,30 +197,33 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
   const onSubmit = async (values: FormValues) => {
     toast.promise(
       createEventMutation.mutateAsync({
-        title: values.title,
-        description: values.description,
-        type: values.type as any,
-        visibility: values.visibility as any,
-        location: values.location,
-        requiresParentalConsent: values.requiresParentalConsent,
-        hasAdditionalCosts: values.hasAdditionalCosts,
-        additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : undefined,
-        additionalCostDescription: values.hasAdditionalCosts
-          ? values.additionalCostDescription
-          : undefined,
-        audienceWholeSchool: values.audienceWholeSchool,
-        audienceAcademicPeriodIds: values.audienceWholeSchool
-          ? []
-          : values.audienceAcademicPeriodIds,
-        audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
-        audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
-        schoolId,
-        startsAt: new Date(values.startsAt).toISOString(),
-        endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
+        body: {
+          title: values.title,
+          description: values.description,
+          type: values.type as any,
+          visibility: values.visibility as any,
+          location: values.location,
+          requiresParentalConsent: values.requiresParentalConsent,
+          hasAdditionalCosts: values.hasAdditionalCosts,
+          additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : undefined,
+          additionalCostDescription: values.hasAdditionalCosts
+            ? values.additionalCostDescription
+            : undefined,
+          audienceWholeSchool: values.audienceWholeSchool,
+          audienceAcademicPeriodIds: values.audienceWholeSchool
+            ? []
+            : values.audienceAcademicPeriodIds,
+          audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
+          audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
+          schoolId,
+          startsAt: new Date(values.startsAt).toISOString(),
+          endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
+        },
       }),
       {
         loading: 'Criando evento...',
         success: () => {
+          queryClient.invalidateQueries({ queryKey: ['events'] })
           form.reset()
           onOpenChange(false)
           return 'Evento criado com sucesso!'

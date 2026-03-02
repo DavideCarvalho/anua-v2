@@ -54,7 +54,7 @@ export function CreateSchoolChainDialog({
         .toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '')
-      const response = await tuyau.api.v1['school-chains'].$post({
+      const response = await tuyau.api.api.v1.schoolChains({
         name: data.name,
         slug,
         subscriptionLevel: 'NETWORK',

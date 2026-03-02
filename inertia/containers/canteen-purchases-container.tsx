@@ -1,10 +1,8 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { api } from '../lib/api'
 import { ErrorBoundary } from 'react-error-boundary'
+import { api } from '../lib/api'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import {
-  useCanteenPurchasesQueryOptions,
-  type CanteenPurchasesResponse,
-} from '../hooks/queries/use_canteen_purchases'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -20,6 +18,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { api } from '../lib/api'
 import { formatCurrency } from '../lib/utils'
 
 // Loading Skeleton
@@ -109,7 +108,9 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
   const { search, page, limit } = filters
 
   const { data, isLoading, error, refetch } = useQuery(
-    useCanteenPurchasesQueryOptions({ page, limit, canteenId, search: search || undefined })
+    api.canteen_purchases.index.queryOptions({
+      query: { page, limit, canteenId, search: search || undefined },
+    })
   )
 
   const purchases: CanteenPurchase[] = data?.data ?? []

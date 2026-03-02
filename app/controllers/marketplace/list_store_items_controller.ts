@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
-import StoreItemDto from '#models/dto/store_item.dto'
+import StoreItemTransformer from '#transformers/store_item_transformer'
 import Store from '#models/store'
 import School from '#models/school'
 import AppException from '#exceptions/app_exception'
 
 export default class ListStoreItemsController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { storeId } = params
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
@@ -42,7 +42,9 @@ export default class ListStoreItemsController {
     if (category) query.where('category', category)
 
     const items = await query.paginate(page, limit)
-    const paginated = StoreItemDto.fromPaginator(items)
+    const list = items.all()
+    const metadata = items.getMeta()
+    const paginated = serialize(StoreItemTransformer.paginate(list, metadata))
 
     return { ...paginated, hasOnlinePayment }
   }

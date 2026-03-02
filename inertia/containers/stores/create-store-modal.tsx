@@ -21,7 +21,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePage } from '@inertiajs/react'
 import { toast } from 'sonner'
-import { useCreateStoreMutationOptions } from '../../hooks/mutations/use_create_store'
+import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
 
 interface CreateStoreModalProps {
@@ -33,7 +33,7 @@ interface CreateStoreModalProps {
 export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreModalProps) {
   const { props } = usePage<SharedProps>()
   const queryClient = useQueryClient()
-  const createStore = useMutation(useCreateStoreMutationOptions())
+  const createStore = useMutation(api.api.v1.stores.store.mutationOptions())
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -48,14 +48,16 @@ export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreM
 
     try {
       await createStore.mutateAsync({
-        schoolId,
-        name,
-        type,
-        description: description || undefined,
-        commissionPercentage:
-          type === 'THIRD_PARTY' && commissionPercentage
-            ? Number(commissionPercentage)
-            : undefined,
+        body: {
+          schoolId,
+          name,
+          type,
+          description: description || undefined,
+          commissionPercentage:
+            type === 'THIRD_PARTY' && commissionPercentage
+              ? Number(commissionPercentage)
+              : undefined,
+        },
       })
 
       queryClient.invalidateQueries({ queryKey: ['stores'] })
@@ -103,10 +105,7 @@ export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreM
 
             <div className="space-y-2">
               <Label htmlFor="type">Tipo</Label>
-              <Select
-                value={type}
-                onValueChange={(v) => setType(v as 'INTERNAL' | 'THIRD_PARTY')}
-              >
+              <Select value={type} onValueChange={(v) => setType(v as 'INTERNAL' | 'THIRD_PARTY')}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

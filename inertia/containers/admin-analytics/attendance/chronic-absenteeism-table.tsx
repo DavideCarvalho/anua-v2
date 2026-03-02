@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useChronicAbsenteeismQueryOptions } from '../../../hooks/queries/use_chronic_absenteeism'
+import { api } from '~/lib/api'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,
@@ -16,9 +16,11 @@ import { Badge } from '../../../components/ui/badge'
 export function ChronicAbsenteeismTable() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useChronicAbsenteeismQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.attendance.chronic.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

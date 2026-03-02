@@ -32,13 +32,8 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Switch } from '../../components/ui/switch'
-import { useQuery } from '@tanstack/react-query'
-import { useAchievementsQueryOptions } from '../../hooks/queries/use_achievements'
-import {
-  useCreateAchievement,
-  useUpdateAchievement,
-  useDeleteAchievement,
-} from '../../hooks/mutations/use_achievement_mutations'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { useAuthUser } from '../../stores/auth_store'
 
 const ACHIEVEMENT_TYPES = [
@@ -87,12 +82,13 @@ export function AchievementsTable() {
   const user = useAuthUser()
   const schoolId = user?.schoolId
 
-  const { data: achievements } = useQuery(
-    useAchievementsQueryOptions({ schoolId: schoolId || undefined })
+  const queryClient = useQueryClient()
+  const { data: achievements, isLoading } = useQuery(
+    api.api.v1.achievements.index.queryOptions({ query: { schoolId: schoolId || undefined } })
   )
-  const createAchievement = useCreateAchievement()
-  const updateAchievement = useUpdateAchievement()
-  const deleteAchievement = useDeleteAchievement()
+  const createAchievement = useMutation(api.api.v1.achievements.store.mutationOptions())
+  const updateAchievement = useMutation(api.api.v1.achievements.update.mutationOptions())
+  const deleteAchievement = useMutation(api.api.v1.achievements.destroy.mutationOptions())
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -104,15 +100,18 @@ export function AchievementsTable() {
 
   const handleCreate = async () => {
     await createAchievement.mutateAsync({
-      name: formData.name,
-      description: formData.description,
-      category: formData.type as any,
-      points: formData.pointsReward,
-      schoolId: schoolId || undefined,
-      icon: formData.iconUrl || undefined,
-      isActive: formData.isActive,
-      criteria: {},
+      body: {
+        name: formData.name,
+        description: formData.description,
+        category: formData.type as any,
+        points: formData.pointsReward,
+        schoolId: schoolId || undefined,
+        icon: formData.iconUrl || undefined,
+        isActive: formData.isActive,
+        criteria: {},
+      },
     })
+    queryClient.invalidateQueries({ queryKey: ['achievements'] })
     setIsCreateOpen(false)
     setFormData(defaultFormData)
   }
@@ -134,21 +133,25 @@ export function AchievementsTable() {
   const handleUpdate = async () => {
     if (!editingId) return
     await updateAchievement.mutateAsync({
-      id: editingId,
-      name: formData.name,
-      description: formData.description,
-      category: formData.type as any,
-      points: formData.pointsReward,
-      icon: formData.iconUrl || undefined,
-      isActive: formData.isActive,
+      params: { id: editingId },
+      body: {
+        name: formData.name,
+        description: formData.description,
+        category: formData.type as any,
+        points: formData.pointsReward,
+        icon: formData.iconUrl || undefined,
+        isActive: formData.isActive,
+      },
     })
+    queryClient.invalidateQueries({ queryKey: ['achievements'] })
     setEditingId(null)
     setFormData(defaultFormData)
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta conquista?')) return
-    await deleteAchievement.mutateAsync(id)
+    await deleteAchievement.mutateAsync({ params: { id } })
+    queryClient.invalidateQueries({ queryKey: ['achievements'] })
   }
 
   const achievementsList = achievements?.data || []
@@ -189,7 +192,12 @@ export function AchievementsTable() {
         </Dialog>
       </CardHeader>
       <CardContent>
-        {achievementsList.length === 0 ? (
+        {isLoading ? (
+          <div className="py-10 text-center text-muted-foreground">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+            <p className="mt-2">Carregando conquistas...</p>
+          </div>
+        ) : achievementsList.length === 0 ? (
           <div className="py-10 text-center text-muted-foreground">
             <Award className="mx-auto h-12 w-12 opacity-50" />
             <p className="mt-2">Nenhuma conquista cadastrada</p>

@@ -9,7 +9,8 @@ import { NewPrintRequestModal } from '../../../containers/print-requests/new-pri
 import { CheckPrintRequestModal } from '../../../containers/print-requests/check-print-request-modal'
 import { RejectPrintRequestModal } from '../../../containers/print-requests/reject-print-request-modal'
 import { ReviewPrintRequestModal } from '../../../containers/print-requests/review-print-request-modal'
-import { useMarkPrintRequestPrintedMutation } from '../../../hooks/mutations/use_mark_print_request_printed'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { toast } from 'sonner'
 
 export default function ImpressaoPage() {
@@ -18,7 +19,10 @@ export default function ImpressaoPage() {
   const [reviewModalId, setReviewModalId] = useState<string | null>(null)
   const [rejectModalId, setRejectModalId] = useState<string | null>(null)
 
-  const markPrinted = useMarkPrintRequestPrintedMutation()
+  const queryClient = useQueryClient()
+  const markPrinted = useMutation(
+    api.api.v1.printRequests.markPrintRequestPrinted.mutationOptions()
+  )
 
   return (
     <EscolaLayout>
@@ -34,11 +38,16 @@ export default function ImpressaoPage() {
           onView={(id) => setCheckModalId(id)}
           onReview={(id) => setReviewModalId(id)}
           onMarkPrinted={(id) => {
-            toast.promise(markPrinted.mutateAsync({ id } as any), {
-              loading: 'Atualizando status...',
-              error: 'Erro ao marcar como impresso',
-              success: 'Solicitação marcada como impressa!',
-            })
+            toast.promise(
+              markPrinted.mutateAsync({ params: { id } }).then(() => {
+                queryClient.invalidateQueries({ queryKey: ['print-requests'] })
+              }),
+              {
+                loading: 'Atualizando status...',
+                error: 'Erro ao marcar como impresso',
+                success: 'Solicitação marcada como impressa!',
+              }
+            )
           }}
         />
 

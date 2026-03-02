@@ -55,8 +55,11 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 
-import { useEnrollmentsQueryOptions, type EnrollmentsResponse } from '../../hooks/queries/use_enrollments'
-import { useUpdateDocumentStatusMutation } from '../../hooks/mutations/use_update_document_status'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type EnrollmentsResponse = Route.Response<'api.v1.enrollments.index'>
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 type Enrollment = EnrollmentsResponse['data'][number]
@@ -120,18 +123,17 @@ interface EnrollmentsTableProps {
   levelId?: string
 }
 
-export function EnrollmentsTable({
-  schoolId,
-  academicPeriodId,
-  levelId,
-}: EnrollmentsTableProps) {
+export function EnrollmentsTable({ schoolId, academicPeriodId, levelId }: EnrollmentsTableProps) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <EnrollmentsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <EnrollmentsErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <EnrollmentsTableContent
@@ -145,11 +147,7 @@ export function EnrollmentsTable({
   )
 }
 
-function EnrollmentsTableContent({
-  schoolId,
-  academicPeriodId,
-  levelId,
-}: EnrollmentsTableProps) {
+function EnrollmentsTableContent({ schoolId, academicPeriodId, levelId }: EnrollmentsTableProps) {
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
     status: parseAsString,
@@ -168,18 +166,23 @@ function EnrollmentsTableContent({
   } | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
+  const queryClient = useQueryClient()
   const { data } = useQuery(
-    useEnrollmentsQueryOptions({
-      schoolId,
-      academicPeriodId,
-      levelId,
-      status: statusFilter as any,
-      page,
-      limit,
+    api.api.v1.enrollments.index.queryOptions({
+      query: {
+        schoolId,
+        academicPeriodId,
+        levelId,
+        status: statusFilter as any,
+        page,
+        limit,
+      },
     })
   )
 
-  const updateDocumentMutation = useUpdateDocumentStatusMutation()
+  const updateDocumentMutation = useMutation(
+    api.api.v1.enrollments.documents.updateStatus.mutationOptions()
+  )
 
   const rows = data?.data || []
   const meta = data?.meta
@@ -198,10 +201,15 @@ function EnrollmentsTableContent({
 
   const handleApproveDocument = (docId: string, fileName: string) => {
     toast.promise(
-      updateDocumentMutation.mutateAsync({
-        id: docId,
-        status: 'APPROVED',
-      }),
+      updateDocumentMutation
+        .mutateAsync({
+          params: { id: docId },
+          body: { status: 'APPROVED' },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+          queryClient.invalidateQueries({ queryKey: ['students'] })
+        }),
       {
         loading: 'Aprovando documento...',
         success: `Documento "${fileName}" aprovado com sucesso!`,
@@ -220,11 +228,18 @@ function EnrollmentsTableContent({
     if (!selectedDocument || !rejectionReason.trim()) return
 
     toast.promise(
-      updateDocumentMutation.mutateAsync({
-        id: selectedDocument.id,
-        status: 'REJECTED',
-        rejectionReason: rejectionReason.trim(),
-      }),
+      updateDocumentMutation
+        .mutateAsync({
+          params: { id: selectedDocument.id },
+          body: {
+            status: 'REJECTED',
+            rejectionReason: rejectionReason.trim(),
+          },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+          queryClient.invalidateQueries({ queryKey: ['students'] })
+        }),
       {
         loading: 'Rejeitando documento...',
         success: `Documento "${selectedDocument.fileName}" rejeitado.`,
@@ -298,225 +313,214 @@ function EnrollmentsTableContent({
               {rows.map((enrollment: Enrollment) => (
                 <Collapsible key={enrollment.id} asChild>
                   <TableBody>
-                      <TableRow className="cursor-pointer hover:bg-muted/50">
-                        <TableCell>
-                          <CollapsibleTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleRow(enrollment.id)}
-                            >
-                              {expandedRows.has(enrollment.id) ? (
-                                <ChevronUp className="h-4 w-4" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </CollapsibleTrigger>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {enrollment.student?.name}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {enrollment.student?.email}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {enrollment.level?.name || '-'}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {enrollment.academicPeriod?.name || '-'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {enrollment.student?.documents?.length > 0 ? (
-                              <>
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <Badge
-                                        variant="outline"
-                                        className="gap-1 border-green-200 bg-green-50 text-green-700"
-                                      >
-                                        <CheckCircle2 className="h-3 w-3" />
-                                        {getApprovedDocsCount(enrollment.student.documents)}
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Aprovados</TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <Badge
-                                        variant="outline"
-                                        className="gap-1 border-yellow-200 bg-yellow-50 text-yellow-700"
-                                      >
-                                        <Clock className="h-3 w-3" />
-                                        {getPendingDocsCount(enrollment.student.documents)}
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Pendentes</TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-
-                                {getRejectedDocsCount(enrollment.student.documents) > 0 && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <Badge
-                                          variant="outline"
-                                          className="gap-1 border-red-200 bg-red-50 text-red-700"
-                                        >
-                                          <XCircle className="h-3 w-3" />
-                                          {getRejectedDocsCount(enrollment.student.documents)}
-                                        </Badge>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Rejeitados</TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
-                              </>
+                    <TableRow className="cursor-pointer hover:bg-muted/50">
+                      <TableCell>
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleRow(enrollment.id)}
+                          >
+                            {expandedRows.has(enrollment.id) ? (
+                              <ChevronUp className="h-4 w-4" />
                             ) : (
-                              <span className="text-sm text-muted-foreground">
-                                Sem documentos
-                              </span>
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                      </TableCell>
+                      <TableCell className="font-medium">{enrollment.student?.name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {enrollment.student?.email}
+                      </TableCell>
+                      <TableCell className="text-sm">{enrollment.level?.name || '-'}</TableCell>
+                      <TableCell className="text-sm">
+                        {enrollment.academicPeriod?.name || '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {enrollment.student?.documents?.length > 0 ? (
+                            <>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge
+                                      variant="outline"
+                                      className="gap-1 border-green-200 bg-green-50 text-green-700"
+                                    >
+                                      <CheckCircle2 className="h-3 w-3" />
+                                      {getApprovedDocsCount(enrollment.student.documents)}
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Aprovados</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Badge
+                                      variant="outline"
+                                      className="gap-1 border-yellow-200 bg-yellow-50 text-yellow-700"
+                                    >
+                                      <Clock className="h-3 w-3" />
+                                      {getPendingDocsCount(enrollment.student.documents)}
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Pendentes</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              {getRejectedDocsCount(enrollment.student.documents) > 0 && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge
+                                        variant="outline"
+                                        className="gap-1 border-red-200 bg-red-50 text-red-700"
+                                      >
+                                        <XCircle className="h-3 w-3" />
+                                        {getRejectedDocsCount(enrollment.student.documents)}
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Rejeitados</TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Sem documentos</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            ENROLLMENT_STATUS_COLORS[enrollment.student?.enrollmentStatus] || ''
+                          }
+                        >
+                          {ENROLLMENT_STATUS_LABELS[enrollment.student?.enrollmentStatus] ||
+                            enrollment.student?.enrollmentStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {enrollment.createdAt
+                          ? brazilianDateFormatter(String(enrollment.createdAt))
+                          : '-'}
+                      </TableCell>
+                    </TableRow>
+
+                    <CollapsibleContent asChild>
+                      <TableRow>
+                        <TableCell colSpan={8} className="bg-muted/30 p-0">
+                          <div className="p-4">
+                            <h4 className="mb-3 text-sm font-semibold">Documentos da Matrícula</h4>
+                            {enrollment.student?.documents?.length > 0 ? (
+                              <div className="space-y-2">
+                                {enrollment.student.documents.map((doc: StudentDocument) => (
+                                  <div
+                                    key={doc.id}
+                                    className="flex items-center justify-between rounded-lg border bg-background p-3"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div>
+                                        <p className="text-sm font-medium">
+                                          {doc.contractDocument?.name || doc.fileName}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {doc.fileName}
+                                        </p>
+                                        {doc.rejectionReason && (
+                                          <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                                            <AlertCircle className="h-3 w-3" />
+                                            {doc.rejectionReason}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge
+                                        variant="outline"
+                                        className={DOC_STATUS_COLORS[doc.status] || ''}
+                                      >
+                                        {DOC_STATUS_LABELS[doc.status] || doc.status}
+                                      </Badge>
+
+                                      {doc.status === 'PENDING' && (
+                                        <>
+                                          <TooltipProvider>
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="text-green-600 hover:text-green-700"
+                                                  onClick={() =>
+                                                    handleApproveDocument(doc.id, doc.fileName)
+                                                  }
+                                                  disabled={updateDocumentMutation.isPending}
+                                                >
+                                                  <FileCheck className="h-4 w-4" />
+                                                </Button>
+                                              </TooltipTrigger>
+                                              <TooltipContent>Aprovar</TooltipContent>
+                                            </Tooltip>
+                                          </TooltipProvider>
+
+                                          <TooltipProvider>
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="text-red-600 hover:text-red-700"
+                                                  onClick={() =>
+                                                    handleOpenRejectDialog(doc.id, doc.fileName)
+                                                  }
+                                                  disabled={updateDocumentMutation.isPending}
+                                                >
+                                                  <FileX className="h-4 w-4" />
+                                                </Button>
+                                              </TooltipTrigger>
+                                              <TooltipContent>Rejeitar</TooltipContent>
+                                            </Tooltip>
+                                          </TooltipProvider>
+                                        </>
+                                      )}
+
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button variant="ghost" size="sm" asChild>
+                                              <a
+                                                href={`/api/v1/documents/${doc.id}/download`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                              >
+                                                <Eye className="h-4 w-4" />
+                                              </a>
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>Visualizar</TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                Nenhum documento enviado ainda.
+                              </p>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={
-                              ENROLLMENT_STATUS_COLORS[enrollment.student?.enrollmentStatus] ||
-                              ''
-                            }
-                          >
-                            {ENROLLMENT_STATUS_LABELS[enrollment.student?.enrollmentStatus] ||
-                              enrollment.student?.enrollmentStatus}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {enrollment.createdAt ? brazilianDateFormatter(String(enrollment.createdAt)) : '-'}
-                        </TableCell>
                       </TableRow>
-
-                      <CollapsibleContent asChild>
-                        <TableRow>
-                          <TableCell colSpan={8} className="bg-muted/30 p-0">
-                            <div className="p-4">
-                              <h4 className="mb-3 text-sm font-semibold">
-                                Documentos da Matrícula
-                              </h4>
-                              {enrollment.student?.documents?.length > 0 ? (
-                                <div className="space-y-2">
-                                  {enrollment.student.documents.map((doc: StudentDocument) => (
-                                    <div
-                                      key={doc.id}
-                                      className="flex items-center justify-between rounded-lg border bg-background p-3"
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <div>
-                                          <p className="text-sm font-medium">
-                                            {doc.contractDocument?.name || doc.fileName}
-                                          </p>
-                                          <p className="text-xs text-muted-foreground">
-                                            {doc.fileName}
-                                          </p>
-                                          {doc.rejectionReason && (
-                                            <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                                              <AlertCircle className="h-3 w-3" />
-                                              {doc.rejectionReason}
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Badge
-                                          variant="outline"
-                                          className={DOC_STATUS_COLORS[doc.status] || ''}
-                                        >
-                                          {DOC_STATUS_LABELS[doc.status] || doc.status}
-                                        </Badge>
-
-                                        {doc.status === 'PENDING' && (
-                                          <>
-                                            <TooltipProvider>
-                                              <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-green-600 hover:text-green-700"
-                                                    onClick={() =>
-                                                      handleApproveDocument(doc.id, doc.fileName)
-                                                    }
-                                                    disabled={updateDocumentMutation.isPending}
-                                                  >
-                                                    <FileCheck className="h-4 w-4" />
-                                                  </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Aprovar</TooltipContent>
-                                              </Tooltip>
-                                            </TooltipProvider>
-
-                                            <TooltipProvider>
-                                              <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-red-600 hover:text-red-700"
-                                                    onClick={() =>
-                                                      handleOpenRejectDialog(doc.id, doc.fileName)
-                                                    }
-                                                    disabled={updateDocumentMutation.isPending}
-                                                  >
-                                                    <FileX className="h-4 w-4" />
-                                                  </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Rejeitar</TooltipContent>
-                                              </Tooltip>
-                                            </TooltipProvider>
-                                          </>
-                                        )}
-
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                asChild
-                                              >
-                                                <a
-                                                  href={`/api/v1/documents/${doc.id}/download`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                >
-                                                  <Eye className="h-4 w-4" />
-                                                </a>
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Visualizar</TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-muted-foreground">
-                                  Nenhum documento enviado ainda.
-                                </p>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      </CollapsibleContent>
-                    </TableBody>
-                  </Collapsible>
-                ))}
+                    </CollapsibleContent>
+                  </TableBody>
+                </Collapsible>
+              ))}
             </Table>
           )}
 
@@ -553,8 +557,8 @@ function EnrollmentsTableContent({
           <DialogHeader>
             <DialogTitle>Rejeitar Documento</DialogTitle>
             <DialogDescription>
-              Informe o motivo da rejeição do documento "{selectedDocument?.fileName}".
-              O responsável será notificado e poderá enviar um novo documento.
+              Informe o motivo da rejeição do documento "{selectedDocument?.fileName}". O
+              responsável será notificado e poderá enviar um novo documento.
             </DialogDescription>
           </DialogHeader>
 

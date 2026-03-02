@@ -1,11 +1,11 @@
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, X, AlertTriangle, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 import { Button } from '../ui/button'
-import { useClearImpersonation } from '../../hooks/mutations/use_impersonation_mutations'
-import { useImpersonationStatusQueryOptions } from '../../hooks/queries/use_impersonation_status'
+import { useMutation } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 function getRouteForRole(role: string): 'web.responsavel.dashboard' | 'web.escola.dashboard' {
   // Responsáveis vão para /responsavel
@@ -40,12 +40,12 @@ function translateRole(roleName: string): string {
 export function ImpersonationBanner() {
   const queryClient = useQueryClient()
 
-  const { data: status } = useQuery(useImpersonationStatusQueryOptions())
-  const clearImpersonationMutation = useClearImpersonation()
+  const { data: status } = useQuery(api.api.v1.impersonation.status.queryOptions({}))
+  const clearImpersonationMutation = useMutation(api.api.v1.impersonation.clear.mutationOptions())
 
   const handleExit = async () => {
     try {
-      await clearImpersonationMutation.mutateAsync()
+      await clearImpersonationMutation.mutateAsync({})
 
       toast.success('Personificação desativada - Você voltou ao modo admin')
 

@@ -1,12 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import {
   Select,
@@ -32,9 +26,7 @@ export function CalendarForm() {
       <Card>
         <CardHeader>
           <CardTitle>Informações Básicas</CardTitle>
-          <CardDescription>
-            Configure o nome e segmento do período letivo
-          </CardDescription>
+          <CardDescription>Configure o nome e segmento do período letivo</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <FormField
@@ -81,9 +73,7 @@ export function CalendarForm() {
       <Card>
         <CardHeader>
           <CardTitle>Datas do Período</CardTitle>
-          <CardDescription>
-            Defina as datas de início e término do período letivo
-          </CardDescription>
+          <CardDescription>Defina as datas de início e término do período letivo</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <FormField

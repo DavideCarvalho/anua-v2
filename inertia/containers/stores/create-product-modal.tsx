@@ -20,7 +20,7 @@ import {
 } from '../../components/ui/select'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useCreateStoreItemMutationOptions } from '../../hooks/mutations/use_create_store_item'
+import { api } from '~/lib/api'
 
 interface Props {
   storeId: string
@@ -52,7 +52,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]['value']>('OTHER')
   const [totalStock, setTotalStock] = useState('')
 
-  const createMutation = useMutation(useCreateStoreItemMutationOptions())
+  const createMutation = useMutation(api.api.v1.storeItems.store.mutationOptions())
 
   function resetForm() {
     setName('')
@@ -66,13 +66,15 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
     e.preventDefault()
     try {
       await createMutation.mutateAsync({
-        storeId,
-        name,
-        description: description || undefined,
-        price: Math.round(Number(price) * 100),
-        category,
-        paymentMode: 'MONEY_ONLY',
-        totalStock: totalStock ? Number(totalStock) : undefined,
+        body: {
+          storeId,
+          name,
+          description: description || undefined,
+          price: Math.round(Number(price) * 100),
+          category,
+          paymentMode: 'MONEY_ONLY',
+          totalStock: totalStock ? Number(totalStock) : undefined,
+        },
       })
       queryClient.invalidateQueries({ queryKey: ['storeItems'] })
       toast.success('Produto criado com sucesso!')

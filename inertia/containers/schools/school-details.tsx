@@ -28,8 +28,8 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
-import { useSchoolQueryOptions } from '../../hooks/queries/use_schools'
-import { useSetImpersonation } from '../../hooks/mutations/use_impersonation_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const ROLE_TRANSLATIONS: Record<string, string> = {
   SCHOOL_DIRECTOR: 'Diretor(a)',
@@ -84,8 +84,12 @@ function DetailsError({
 
 function DetailsContent({ schoolId }: { schoolId: string }) {
   const queryClient = useQueryClient()
-  const { data: school, isLoading, error } = useQuery(useSchoolQueryOptions(schoolId))
-  const setImpersonationMutation = useSetImpersonation()
+  const {
+    data: school,
+    isLoading,
+    error,
+  } = useQuery(api.api.v1.schools.show.queryOptions({ params: { id: schoolId } }))
+  const setImpersonationMutation = useMutation(api.api.v1.impersonation.set.mutationOptions())
 
   if (isLoading) {
     return <DetailsSkeleton />
@@ -97,7 +101,9 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
 
   const handleImpersonate = async (userId: string, userName: string, userRole: string) => {
     try {
-      const data = await setImpersonationMutation.mutateAsync({ userId })
+      const data = await setImpersonationMutation.mutateAsync({
+        body: { userId },
+      })
 
       if (data?.success) {
         toast.success(`Personificando: ${userName} (${translateRole(userRole)})`)

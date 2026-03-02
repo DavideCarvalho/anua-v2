@@ -26,8 +26,8 @@ import {
 } from '../../components/ui/form'
 import { Checkbox } from '../../components/ui/checkbox'
 
-import { useScholarshipQueryOptions } from '../../hooks/queries/use_scholarship'
-import { useUpdateScholarshipMutation } from '../../hooks/mutations/use_update_scholarship'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -63,11 +63,14 @@ export function EditScholarshipModal({
   open: boolean
   onCancel: () => void
 }) {
-  const updateScholarship = useUpdateScholarshipMutation()
+  const queryClient = useQueryClient()
+  const updateScholarship = useMutation(api.api.v1.scholarships.updateScholarship.mutationOptions())
   const [autoGenerateCode, setAutoGenerateCode] = useState(false)
 
   const { data: scholarship } = useQuery({
-    ...useScholarshipQueryOptions({ id: scholarshipId }),
+    ...api.api.v1.scholarships.showScholarship.queryOptions({
+      params: { id: scholarshipId },
+    }),
     enabled: !!scholarshipId,
   })
 
@@ -131,6 +134,7 @@ export function EditScholarshipModal({
         body: payload,
       })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['scholarships'] })
         toast.success('Bolsa editada com sucesso!')
         onCancel()
       })

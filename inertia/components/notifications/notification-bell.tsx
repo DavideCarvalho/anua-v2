@@ -1,17 +1,15 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { Bell, Check, CheckCheck } from 'lucide-react'
 import type { MouseEvent } from 'react'
 
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 
 import { cn } from '../../lib/utils'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { ScrollArea } from '../ui/scroll-area'
-import { useNotificationsQueryOptions } from '../../hooks/queries/use_notifications'
-import { useMarkNotificationReadMutation } from '../../hooks/mutations/use_mark_notification_read'
-import { useMarkAllNotificationsReadMutation } from '../../hooks/mutations/use_mark_all_notifications_read'
+import { api } from '~/lib/api'
 
 interface NotificationBellProps {
   allNotificationsRoute: 'web.escola.notificacoes' | 'web.responsavel.comunicados'
@@ -19,12 +17,12 @@ interface NotificationBellProps {
 
 export function NotificationBell({ allNotificationsRoute }: NotificationBellProps) {
   const { data, isLoading } = useQuery({
-    ...useNotificationsQueryOptions({ page: 1, limit: 8 }),
+    ...api.api.v1.notifications.index.queryOptions({ query: { page: 1, limit: 8 } }),
     refetchInterval: 60_000,
   })
 
-  const markReadMutation = useMarkNotificationReadMutation()
-  const markAllReadMutation = useMarkAllNotificationsReadMutation()
+  const markReadMutation = useMutation(api.api.v1.notifications.markRead.mutationOptions())
+  const markAllReadMutation = useMutation(api.api.v1.notifications.markAllRead.mutationOptions())
 
   const notifications = (data?.data ?? []).map((notification) => {
     const isRead = notification.isRead ?? Boolean(notification.readAt)
@@ -40,11 +38,11 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
   const handleMarkRead = async (notificationId: string, event?: MouseEvent<HTMLElement>) => {
     event?.stopPropagation()
 
-    await markReadMutation.mutateAsync(notificationId)
+    await markReadMutation.mutateAsync({ params: { id: notificationId } })
   }
 
   const handleMarkAllRead = async () => {
-    await markAllReadMutation.mutateAsync()
+    await markAllReadMutation.mutateAsync({})
   }
 
   return (

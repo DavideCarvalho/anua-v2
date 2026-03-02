@@ -1,12 +1,17 @@
-import { createTuyau } from '@tuyau/client'
+import { registry } from '~/generated/registry'
+import { createTuyau } from '@tuyau/core/client'
+import { createTuyauReactQueryClient } from '@tuyau/react-query'
 import { superjson } from '@tuyau/superjson/plugin'
-import { api } from '../../.adonisjs/api'
+import { QueryClient } from '@tanstack/react-query'
 
-export const tuyau = createTuyau<typeof api>({
-  baseUrl: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3333',
+const apiUrl = import.meta.env.VITE_API_URL
+
+export const queryClient = new QueryClient()
+
+export const tuyau = createTuyau({
+  baseUrl: apiUrl,
+  registry,
   plugins: [superjson()],
-  api,
-  headers: {
-    Accept: 'application/json',
-  },
 })
+
+export const api = createTuyauReactQueryClient({ client: tuyau })

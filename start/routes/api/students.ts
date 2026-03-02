@@ -53,14 +53,14 @@ export function registerStudentApiRoutes() {
       router.get('/', [IndexStudentsController]).as('students.index')
       router.post('/', [StoreStudentController]).as('students.store')
       router.post('/enroll', [EnrollStudentController]).as('students.enroll')
-      router.get('/check-document', [CheckDocumentController]).as('students.checkDocument')
-      router.get('/check-email', [CheckEmailController]).as('students.checkEmail')
+      router.get('/check-document', [CheckDocumentController]).as('students.check_document')
+      router.get('/check-email', [CheckEmailController]).as('students.check_email')
       router
         .get('/lookup-responsible', [LookupResponsibleController])
-        .as('students.lookupResponsible')
+        .as('students.lookup_responsible')
       router.get('/:id', [ShowStudentController]).as('students.show')
       router.put('/:id', [UpdateStudentController]).as('students.update')
-      router.put('/:id/full', [FullUpdateStudentController]).as('students.fullUpdate')
+      router.put('/:id/full', [FullUpdateStudentController]).as('students.full_update')
       router.delete('/:id', [DestroyStudentController]).as('students.destroy')
       router
         .get('/:id/enrollments', [ListStudentEnrollmentsController])
@@ -84,7 +84,7 @@ export function registerStudentApiRoutes() {
       router.get('/:studentId/balance', [GetStudentBalanceController]).as('students.balance')
       router
         .get('/:studentId/balance-transactions', [ListStudentBalanceByStudentController])
-        .as('students.balanceTransactions')
+        .as('students.balance_transactions')
     })
     .prefix('/students')
     .use([middleware.auth(), middleware.impersonation()])
@@ -95,11 +95,11 @@ export function registerResponsibleApiRoutes() {
     .group(() => {
       router
         .get('/students/:studentId/responsibles', [ListStudentResponsiblesController])
-        .as('responsibles.listByStudent')
+        .as('responsibles.list_by_student')
       router.post('/', [AssignResponsibleController]).as('responsibles.assign')
       router
         .patch('/:id', [UpdateResponsibleAssignmentController])
-        .as('responsibles.updateAssignment')
+        .as('responsibles.update_assignment')
       router.delete('/:id', [RemoveResponsibleController]).as('responsibles.remove')
     })
     .prefix('/responsibles')
@@ -111,8 +111,8 @@ export function registerResponsibleAddressApiRoutes() {
     .group(() => {
       router
         .get('/:responsibleId', [ShowResponsibleAddressController])
-        .as('responsibleAddresses.show')
-      router.post('/', [CreateResponsibleAddressController]).as('responsibleAddresses.create')
+        .as('responsible_addresses.show')
+      router.post('/', [CreateResponsibleAddressController]).as('responsible_addresses.create')
     })
     .prefix('/responsible-addresses')
     .use([middleware.auth(), middleware.impersonation()])

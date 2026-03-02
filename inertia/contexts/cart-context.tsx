@@ -53,9 +53,7 @@ export function CartProvider({ children }: PropsWithChildren) {
       removeItem(storeItemId)
       return
     }
-    setItems((prev) =>
-      prev.map((i) => (i.storeItemId === storeItemId ? { ...i, quantity } : i))
-    )
+    setItems((prev) => prev.map((i) => (i.storeItemId === storeItemId ? { ...i, quantity } : i)))
   }
 
   function clearCart() {

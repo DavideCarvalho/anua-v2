@@ -71,6 +71,15 @@ export const updateContractValidator = vine.compile(
   })
 )
 
+export const listContractDocumentsValidator = vine.compile(
+  vine.object({
+    contractId: vine.string().trim().optional(),
+    schoolId: vine.string().uuid().optional(),
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)
+
 export const createContractDocumentValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2),

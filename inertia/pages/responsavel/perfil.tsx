@@ -17,7 +17,8 @@ import {
 } from '../../components/ui/dialog'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { useUpdateProfile } from '../../hooks/mutations/use_update_profile'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { useAuthUser } from '../../stores/auth_store'
 
 export default function PerfilPage() {
@@ -27,22 +28,24 @@ export default function PerfilPage() {
   const [name, setName] = useState(user?.name || '')
   const [phone, setPhone] = useState(user?.phone || '')
 
-  const updateProfile = useUpdateProfile()
+  const queryClient = useQueryClient()
+  const updateProfile = useMutation(api.api.v1.responsavel.api.updateProfile.mutationOptions())
 
   const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name.trim()) return
 
-    updateProfile.mutate(
-      { name: name.trim(), phone: phone.trim() || undefined },
-      {
-        onSuccess: () => {
-          setEditDialogOpen(false)
-          router.reload()
-        },
-      }
-    )
+    try {
+      await updateProfile.mutateAsync({
+        body: { name: name.trim(), phone: phone.trim() || undefined },
+      })
+      queryClient.invalidateQueries({ queryKey: ['user'] })
+      setEditDialogOpen(false)
+      router.reload({ only: ['user'] })
+    } catch {
+      // Error handled by mutation
+    }
   }
 
   const handleOpenEditDialog = () => {

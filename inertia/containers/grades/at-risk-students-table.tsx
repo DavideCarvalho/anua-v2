@@ -13,17 +13,19 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import {
-  useAtRiskStudentsQueryOptions,
-  type AtRiskStudentsResponse,
-} from '../../hooks/queries/use_at_risk_students'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type AtRiskStudentsResponse = Route.Response<'api.v1.grades.atRisk'>
 
 interface AtRiskStudentsTableProps {
   schoolId?: string
 }
 
 export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
-  const { data, isLoading } = useQuery(useAtRiskStudentsQueryOptions({ schoolId, limit: 20 }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.grades.atRisk.queryOptions({ query: { schoolId, limit: 20 } })
+  )
 
   if (isLoading || !data) {
     return <AtRiskStudentsTableSkeleton />

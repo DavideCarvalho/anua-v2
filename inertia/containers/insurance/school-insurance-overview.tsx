@@ -13,9 +13,7 @@ import {
 } from '../../components/ui/table'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useSchoolInsuranceStatsQueryOptions } from '../../hooks/queries/use_school_insurance_stats'
-import { useSchoolInsuranceBillingsQueryOptions } from '../../hooks/queries/use_school_insurance_billings'
-import { useSchoolInsuranceClaimsQueryOptions } from '../../hooks/queries/use_school_insurance_claims'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -41,12 +39,23 @@ interface SchoolInsuranceOverviewProps {
 }
 
 export function SchoolInsuranceOverview({ schoolId }: SchoolInsuranceOverviewProps) {
-  const { data: stats } = useSuspenseQuery(useSchoolInsuranceStatsQueryOptions(schoolId))
+  const { data: stats } = useSuspenseQuery(
+    api.api.v1.insurance.school.stats.queryOptions({
+      params: { schoolId },
+      query: { schoolId },
+    })
+  )
   const { data: billingsData } = useSuspenseQuery(
-    useSchoolInsuranceBillingsQueryOptions(schoolId, 3)
+    api.api.v1.insurance.school.billings.queryOptions({
+      params: { schoolId },
+      query: { schoolId, limit: 3 },
+    })
   )
   const { data: claimsData } = useSuspenseQuery(
-    useSchoolInsuranceClaimsQueryOptions(schoolId, undefined, 5)
+    api.api.v1.insurance.school.claims.queryOptions({
+      params: { schoolId },
+      query: { schoolId, limit: 5 },
+    })
   )
 
   const billings = billingsData || []

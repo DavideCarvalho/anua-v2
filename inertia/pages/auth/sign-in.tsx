@@ -79,8 +79,8 @@ export default function SignIn() {
       setFlowState('loading')
       setErrorMessage('')
 
-      const response = await tuyau.api.v1.auth['send-code'].$post({
-        email: emailAddress,
+      const response = await tuyau.api.api.v1.auth.sendCode({
+        body: { email: emailAddress },
       })
 
       if (response.error) {
@@ -135,9 +135,8 @@ export default function SignIn() {
       setFlowState('loading')
       setErrorMessage('')
 
-      const response = await tuyau.api.v1.auth['verify-code'].$post({
-        email,
-        code: codeInput,
+      const response = await tuyau.api.api.v1.auth.verifyCode({
+        body: { email, code: codeInput },
       })
 
       if (response.error) {

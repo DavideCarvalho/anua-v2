@@ -1,18 +1,20 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Student from '#models/student'
-import StudentDto from '#models/dto/student.dto'
+import StudentTransformer from '#transformers/student_transformer'
 import AppException from '#exceptions/app_exception'
+import { listStudentsValidator } from '#validators/student'
 
 export default class IndexStudentsController {
-  async handle({ request, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const search = request.input('search', '')
-    const classId = request.input('classId')
-    const academicPeriodId = request.input('academicPeriodId')
-    const courseId = request.input('courseId')
-    const enrollmentStatus = request.input('enrollmentStatus')
+  async handle({ request, auth, effectiveUser, selectedSchoolIds, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listStudentsValidator)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
+    const search = filters.search ?? ''
+    const classId = filters.classId
+    const academicPeriodId = filters.academicPeriodId
+    const courseId = filters.courseId
+    const enrollmentStatus = filters.enrollmentStatus
 
     const user = effectiveUser ?? auth.user
     if (!user) {
@@ -24,8 +26,8 @@ export default class IndexStudentsController {
 
     // Admins podem passar schoolId param, outros usam selectedSchoolIds do middleware
     const schoolIds = isAdmin
-      ? request.input('schoolId')
-        ? [request.input('schoolId')]
+      ? filters.schoolId
+        ? [filters.schoolId]
         : selectedSchoolIds
       : selectedSchoolIds
 
@@ -103,7 +105,9 @@ export default class IndexStudentsController {
     }
 
     const students = await query.paginate(page, limit)
+    const data = students.all()
+    const metadata = students.getMeta()
 
-    return StudentDto.fromPaginator(students)
+    return serialize(StudentTransformer.paginate(data, metadata))
   }
 }

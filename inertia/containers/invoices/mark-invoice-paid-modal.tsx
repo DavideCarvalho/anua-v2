@@ -29,8 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { api } from '~/lib/api'
 import { formatCurrency } from '~/lib/utils'
-import { useMarkInvoicePaidMutationOptions } from '~/hooks/mutations/use_invoice_mutations'
 
 const markPaidSchema = z.object({
   paymentMethod: z.enum(['PIX', 'BOLETO', 'CREDIT_CARD', 'CASH', 'OTHER'], {
@@ -65,7 +65,7 @@ interface MarkInvoicePaidModalProps {
 
 export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoicePaidModalProps) {
   const queryClient = useQueryClient()
-  const markPaid = useMutation(useMarkInvoicePaidMutationOptions())
+  const markPaid = useMutation(api.api.v1.invoices.markPaid.mutationOptions())
 
   const form = useForm<MarkPaidFormData>({
     resolver: zodResolver(markPaidSchema) as any,
@@ -80,11 +80,13 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
   async function onSubmit(data: MarkPaidFormData) {
     try {
       await markPaid.mutateAsync({
-        id: invoice.id,
-        paymentMethod: data.paymentMethod,
-        netAmountReceived: Math.round(data.netAmountReceivedReais * 100),
-        paidAt: data.paidAt,
-        observation: data.observation || undefined,
+        params: { id: invoice.id },
+        body: {
+          paymentMethod: data.paymentMethod,
+          netAmountReceived: Math.round(data.netAmountReceivedReais * 100),
+          paidAt: data.paidAt,
+          observation: data.observation || undefined,
+        },
       })
       await queryClient.invalidateQueries({ queryKey: ['invoices'] })
       await queryClient.invalidateQueries({ queryKey: ['student-pending-invoices'] })

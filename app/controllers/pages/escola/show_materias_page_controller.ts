@@ -2,6 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ShowMateriasPageController {
   async handle({ inertia }: HttpContext) {
-    return inertia.render('escola/administrativo/materias')
+    return inertia.render('escola/administrativo/materias', {})
   }
 }

@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreSettlement from '#models/store_settlement'
-import StoreSettlementDto from '#models/dto/store_settlement.dto'
+import StoreSettlementTransformer from '#transformers/store_settlement_transformer'
 
 export default class ListSettlementsController {
-  async handle({ storeOwnerStore, request }: HttpContext) {
+  async handle({ storeOwnerStore, request, serialize }: HttpContext) {
     const store = storeOwnerStore!
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
@@ -17,6 +17,9 @@ export default class ListSettlementsController {
     if (status) query.where('status', status)
 
     const settlements = await query.paginate(page, limit)
-    return StoreSettlementDto.fromPaginator(settlements)
+    const data = settlements.all()
+    const metadata = settlements.getMeta()
+
+    return serialize(StoreSettlementTransformer.paginate(data, metadata))
   }
 }

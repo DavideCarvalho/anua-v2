@@ -33,7 +33,13 @@ function formatDateForInput(date: Date | undefined | null): string {
   return d.toISOString().split('T')[0]
 }
 
-export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = [], academicPeriodId }: GuardianCardProps) {
+export function GuardianCard({
+  guardian,
+  onRemove,
+  onUpdate,
+  existingEmails = [],
+  academicPeriodId,
+}: GuardianCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [name, setName] = useState(guardian.name)
   const [email, setEmail] = useState(guardian.email)
@@ -44,7 +50,8 @@ export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = []
   const [isEmergencyContact, setIsEmergencyContact] = useState(guardian.isEmergencyContact)
   const [isEmailValid, setIsEmailValid] = useState<boolean | null>(null)
 
-  const isEmailDuplicate = email.trim().toLowerCase() !== '' && existingEmails.includes(email.trim().toLowerCase())
+  const isEmailDuplicate =
+    email.trim().toLowerCase() !== '' && existingEmails.includes(email.trim().toLowerCase())
 
   const formattedDocument =
     guardian.documentType === 'CPF' ? formatCpf(guardian.documentNumber) : guardian.documentNumber
@@ -89,7 +96,9 @@ export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = []
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor={`edit-birthdate-${guardian.documentNumber}`}>Data de Nascimento *</Label>
+              <Label htmlFor={`edit-birthdate-${guardian.documentNumber}`}>
+                Data de Nascimento *
+              </Label>
               <Input
                 id={`edit-birthdate-${guardian.documentNumber}`}
                 type="date"
@@ -108,7 +117,9 @@ export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = []
                 onValidationChange={setIsEmailValid}
               />
               {isEmailDuplicate && (
-                <p className="text-sm text-destructive">Este email já está sendo usado por outro responsável</p>
+                <p className="text-sm text-destructive">
+                  Este email já está sendo usado por outro responsável
+                </p>
               )}
             </div>
 
@@ -124,7 +135,10 @@ export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = []
 
             <div className="space-y-2">
               <Label>Documento</Label>
-              <Input value={`${DocumentTypeLabels[guardian.documentType as DocumentType] ?? guardian.documentType}: ${formattedDocument}`} disabled />
+              <Input
+                value={`${DocumentTypeLabels[guardian.documentType as DocumentType] ?? guardian.documentType}: ${formattedDocument}`}
+                disabled
+              />
             </div>
           </div>
 
@@ -159,7 +173,18 @@ export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = []
             <Button type="button" variant="outline" onClick={handleCancel}>
               Cancelar
             </Button>
-            <Button type="button" onClick={handleSave} disabled={!name.trim() || !email || !phone || !birthDate || isEmailDuplicate || isEmailValid === false}>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={
+                !name.trim() ||
+                !email ||
+                !phone ||
+                !birthDate ||
+                isEmailDuplicate ||
+                isEmailValid === false
+              }
+            >
               Salvar
             </Button>
           </div>
@@ -174,7 +199,8 @@ export function GuardianCard({ guardian, onRemove, onUpdate, existingEmails = []
         <div className="space-y-1">
           <p className="text-sm font-medium">{guardian.name}</p>
           <p className="text-xs text-muted-foreground">
-            {DocumentTypeLabels[guardian.documentType as DocumentType] ?? guardian.documentType}: {formattedDocument}
+            {DocumentTypeLabels[guardian.documentType as DocumentType] ?? guardian.documentType}:{' '}
+            {formattedDocument}
           </p>
           <div className="flex gap-1.5 flex-wrap">
             {guardian.isPedagogical && (

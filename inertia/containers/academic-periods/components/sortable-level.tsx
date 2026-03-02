@@ -27,8 +27,7 @@ import {
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
 import { FormControl, FormField, FormItem } from '~/components/ui/form'
-import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
-import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
+import { api } from '~/lib/api'
 
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 import { NewClassModal } from './new-class-modal'
@@ -58,8 +57,12 @@ export function SortableLevel({
   const [showNewClassModal, setShowNewClassModal] = useState(false)
   const [editingClassIndex, setEditingClassIndex] = useState<number | null>(null)
 
-  const { data: teachersData } = useQuery(useTeachersQueryOptions({ limit: 100 }))
-  const { data: subjectsData } = useQuery(useSubjectsQueryOptions({ limit: 100 }))
+  const { data: teachersData } = useQuery(
+    api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } })
+  )
+  const { data: subjectsData } = useQuery(
+    api.api.v1.subjects.index.queryOptions({ query: { limit: 100 } })
+  )
 
   const teachers = teachersData?.data ?? []
   const subjects = subjectsData?.data ?? []

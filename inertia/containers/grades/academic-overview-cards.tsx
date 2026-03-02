@@ -3,14 +3,16 @@ import { Users, FileText, CheckCircle, TrendingUp, AlertTriangle, BookOpen } fro
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useAcademicOverviewQueryOptions } from '../../hooks/queries/use_academic_overview'
+import { api } from '~/lib/api'
 
 interface AcademicOverviewCardsProps {
   schoolId?: string
 }
 
 export function AcademicOverviewCards({ schoolId }: AcademicOverviewCardsProps) {
-  const { data, isLoading } = useQuery(useAcademicOverviewQueryOptions({ schoolId }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.grades.academicOverview.queryOptions({ query: { schoolId } })
+  )
 
   if (isLoading || !data) {
     return <AcademicOverviewCardsSkeleton />

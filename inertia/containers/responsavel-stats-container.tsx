@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useResponsavelStatsQueryOptions } from '../hooks/queries/use_responsavel_stats'
+import { api } from '~/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { BookOpen, Calendar, DollarSign, Trophy, AlertCircle, Bell } from 'lucide-react'
@@ -64,7 +64,7 @@ function ResponsavelStatsError({
 
 // Content Component
 function ResponsavelStatsContent() {
-  const { data } = useSuspenseQuery(useResponsavelStatsQueryOptions())
+  const { data } = useSuspenseQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
 
   return (
     <div className="space-y-4">
@@ -74,9 +74,7 @@ function ResponsavelStatsContent() {
           <CardContent className="flex items-center gap-4 py-4">
             <Bell className="h-5 w-5 text-primary" />
             <div>
-              <p className="font-medium">
-                Você tem {data.notifications} nova(s) notificação(ões)
-              </p>
+              <p className="font-medium">Você tem {data.notifications} nova(s) notificação(ões)</p>
               <a href="/responsavel/comunicados" className="text-sm text-primary hover:underline">
                 Ver comunicados
               </a>

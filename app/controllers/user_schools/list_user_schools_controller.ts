@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchool from '#models/user_has_school'
-import UserHasSchoolDto from '#models/dto/user_has_school.dto'
+import UserHasSchoolTransformer from '#transformers/user_has_school_transformer'
 import { listUserSchoolsValidator } from '#validators/user_school'
 
 export default class ListUserSchoolsController {
-  async handle({ request, auth }: HttpContext) {
+  async handle({ request, auth, serialize }: HttpContext) {
     const payload = await request.validateUsing(listUserSchoolsValidator)
 
     const page = payload.page ?? 1
@@ -26,7 +26,9 @@ export default class ListUserSchoolsController {
     }
 
     const assignments = await query.paginate(page, limit)
+    const data = assignments.all()
+    const metadata = assignments.getMeta()
 
-    return UserHasSchoolDto.fromPaginator(assignments)
+    return serialize(UserHasSchoolTransformer.paginate(data, metadata))
   }
 }

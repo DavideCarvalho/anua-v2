@@ -12,7 +12,8 @@ import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group'
 import { Card, CardContent } from '../../components/ui/card'
 import { CurrencyInput } from '../../components/ui/currency-input'
 import { formatCurrency } from '../../lib/utils'
-import { useCreateWalletTopUp } from '../../hooks/mutations/use_wallet_topup_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { Loader2, QrCode, Copy, Check, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -35,7 +36,8 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null)
   const [copied, setCopied] = useState(false)
 
-  const createTopUp = useCreateWalletTopUp()
+  const queryClient = useQueryClient()
+  const createTopUp = useMutation(api.api.v1.responsavel.api.createWalletTopUp.mutationOptions())
 
   const amountInCents = Math.round(parseFloat(amount) * 100)
   const isValidAmount = amountInCents >= 100
@@ -62,10 +64,10 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
 
     try {
       const result = await createTopUp.mutateAsync({
-        studentId,
-        amount: amountInCents,
-        paymentMethod,
+        params: { studentId },
+        body: { amount: amountInCents, paymentMethod },
       })
+      queryClient.invalidateQueries({ queryKey: ['responsavel', 'wallet-top-ups'] })
       const response = result as { paymentDetails: PaymentResult }
       setPaymentResult(response.paymentDetails)
     } catch {
@@ -89,20 +91,14 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {paymentResult ? 'Pagamento gerado' : 'Recarregar saldo'}
-          </DialogTitle>
+          <DialogTitle>{paymentResult ? 'Pagamento gerado' : 'Recarregar saldo'}</DialogTitle>
         </DialogHeader>
 
         {!paymentResult ? (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Valor da recarga</Label>
-              <CurrencyInput
-                value={amount}
-                onChange={setAmount}
-                placeholder="0,00"
-              />
+              <CurrencyInput value={amount} onChange={setAmount} placeholder="0,00" />
               {parseFloat(amount) > 0 && !isValidAmount && (
                 <p className="text-xs text-destructive">Valor mínimo: R$ 1,00</p>
               )}
@@ -147,11 +143,7 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
             )}
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancelar
               </Button>
               <Button

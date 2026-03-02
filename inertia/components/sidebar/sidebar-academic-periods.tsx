@@ -1,8 +1,30 @@
-import { useState } from 'react'
-import { Link, usePage } from '@inertiajs/react'
+import { useMemo, useState } from 'react'
+import { Link } from '@adonisjs/inertia/react'
+import { usePage } from '@inertiajs/react'
 import { ChevronDown, GraduationCap, Eye, Users } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import { useSidebarClasses } from '../../hooks/queries/use_sidebar_classes'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type SidebarData = Record<
+  string,
+  {
+    period: { id: string; name: string; slug: string; isActive: boolean }
+    courses: Record<
+      string,
+      {
+        course: { id: string; name: string; slug: string }
+        levels: Record<
+          string,
+          {
+            level: { id: string; name: string; slug: string; order: number | null }
+            classes: Array<{ id: string; name: string; slug: string }>
+          }
+        >
+      }
+    >
+  }
+>
 import type { SharedProps } from '../../lib/types'
 
 interface SidebarCourseProps {
@@ -176,7 +198,37 @@ function SidebarPeriod({ period, courses, pathname }: SidebarPeriodProps) {
 export function SidebarAcademicPeriods() {
   const { url } = usePage<SharedProps>()
   const pathname = url.split('?')[0]
-  const { groupedData, isLoading, isError } = useSidebarClasses()
+  const {
+    data: classesData,
+    isLoading,
+    isError,
+  } = useQuery(api.api.v1.classes.sidebar.queryOptions({ query: { isActive: true } }))
+  const groupedData = useMemo<SidebarData>(() => {
+    if (!classesData?.data) return {}
+    return classesData.data.reduce<SidebarData>((acc, item) => {
+      const periodSlug = item.academicPeriod.slug
+      const courseSlug = item.course.slug
+      if (!acc[periodSlug]) {
+        acc[periodSlug] = { period: item.academicPeriod, courses: {} }
+      }
+      if (!acc[periodSlug].courses[courseSlug]) {
+        acc[periodSlug].courses[courseSlug] = { course: item.course, levels: {} }
+      }
+      const levelId = item.level.id
+      if (!acc[periodSlug].courses[courseSlug].levels[levelId]) {
+        acc[periodSlug].courses[courseSlug].levels[levelId] = {
+          level: item.level,
+          classes: [],
+        }
+      }
+      acc[periodSlug].courses[courseSlug].levels[levelId].classes.push({
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+      })
+      return acc
+    }, {})
+  }, [classesData])
 
   if (isLoading) {
     return (

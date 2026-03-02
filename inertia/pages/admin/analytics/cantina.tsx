@@ -16,9 +16,7 @@ export default function AdminAnalyticsCantina() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard da Cantina</h1>
-            <p className="text-muted-foreground">
-              Vendas, receita e métricas de consumo
-            </p>
+            <p className="text-muted-foreground">Vendas, receita e métricas de consumo</p>
           </div>
         </div>
 

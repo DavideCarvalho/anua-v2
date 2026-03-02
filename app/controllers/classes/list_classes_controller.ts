@@ -1,18 +1,20 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import ListClassesResponseDto from './dtos/list_classes_response.dto.js'
+import { listClassesValidator } from '#validators/class'
 
 export default class ListClassesController {
   async handle(ctx: HttpContext) {
     const { auth, request, selectedSchoolIds } = ctx
     const user = ctx.effectiveUser ?? auth.user!
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const search = request.input('search', '')
-    const levelId = request.input('levelId')
-    const schoolId = request.input('schoolId')
-    const status = request.input('status')
-    const academicPeriodId = request.input('academicPeriodId')
+    const filters = await request.validateUsing(listClassesValidator)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
+    const search = filters.search ?? ''
+    const levelId = filters.levelId
+    const schoolId = filters.schoolId
+    const status = filters.status
+    const academicPeriodId = filters.academicPeriodId
 
     // Use schoolId from request (for admins) or selectedSchoolIds from middleware
     const schoolIds = schoolId ? [schoolId] : selectedSchoolIds

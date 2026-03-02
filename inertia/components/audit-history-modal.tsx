@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/u
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { AuditDiffCard } from '~/components/audit-diff-card'
 import { useQuery } from '@tanstack/react-query'
-import { useAuditsQueryOptions } from '~/hooks/queries/use_audits'
+import { api } from '~/lib/api'
 import { getEntityLabel } from '~/lib/audit_labels'
 
 type EntityType = 'invoice' | 'student-payment' | 'student-has-level' | 'agreement' | 'contract'
@@ -32,7 +32,16 @@ export function AuditHistoryModal({
   entityId,
   entityLabel,
 }: AuditHistoryModalProps) {
-  const { data: audits, isLoading, error } = useQuery(useAuditsQueryOptions(entityType, entityId))
+  const {
+    data: audits,
+    isLoading,
+    error,
+  } = useQuery(
+    api.api.v1.audits.index.queryOptions(
+      { params: { entityType, entityId } },
+      { enabled: !!entityType && !!entityId && open }
+    )
+  )
 
   const modelType = ENTITY_TYPE_MAP[entityType]
   const title = entityLabel

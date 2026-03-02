@@ -14,6 +14,6 @@ export default class ShowAdminDashboardPageController {
       return response.redirect('/dashboard')
     }
 
-    return inertia.render('admin/index')
+    return inertia.render('admin/index', {})
   }
 }

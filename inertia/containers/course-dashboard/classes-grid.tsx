@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
 import {
   GraduationCap,
   Users,
@@ -82,9 +82,7 @@ function ClassesGridError() {
         <div className="py-12 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
           <h3 className="mt-4 text-lg font-semibold text-destructive">Erro ao carregar turmas</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Não foi possível carregar as turmas.
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Não foi possível carregar as turmas.</p>
         </div>
       </CardContent>
     </Card>

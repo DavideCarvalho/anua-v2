@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
 import { listAcademicPeriodsValidator } from '#validators/academic_period'
-import AcademicPeriodDto from '#models/dto/academic_period.dto'
+import AcademicPeriodTransformer from '#transformers/academic_period_transformer'
 
 export default class ListAcademicPeriodsController {
   async handle(ctx: HttpContext) {
-    const { request, selectedSchoolIds } = ctx
+    const { request, selectedSchoolIds, serialize } = ctx
     const payload = await request.validateUsing(listAcademicPeriodsValidator)
 
     const page = payload.page ?? 1
@@ -22,6 +22,9 @@ export default class ListAcademicPeriodsController {
 
     const periods = await query.paginate(page, limit)
 
-    return AcademicPeriodDto.fromPaginator(periods)
+    const data = periods.all()
+    const metadata = periods.getMeta()
+
+    return serialize(AcademicPeriodTransformer.paginate(data, metadata))
   }
 }

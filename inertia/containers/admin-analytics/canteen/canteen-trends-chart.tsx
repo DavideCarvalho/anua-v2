@@ -1,23 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useCanteenTrendsQueryOptions } from '../../../hooks/queries/use_canteen_trends'
+import { api } from '~/lib/api'
 import { ChartContainer } from '../shared/chart-container'
 
 export function CanteenTrendsChart() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useCanteenTrendsQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.canteen.trends.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
   const formatCurrency = (value: number) =>
     value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-  const maxRevenue = data?.trends
-    ? Math.max(...data.trends.map((t: any) => t.revenue), 1)
-    : 1
+  const maxRevenue = data?.trends ? Math.max(...data.trends.map((t: any) => t.revenue), 1) : 1
 
   return (
     <ChartContainer

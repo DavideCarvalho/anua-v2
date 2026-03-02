@@ -4,7 +4,7 @@ import { Users, FileCheck, Clock, FileSignature, CheckCircle, XCircle } from 'lu
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Progress } from '../../components/ui/progress'
 
-import { useEnrollmentFunnelStatsQueryOptions } from '../../hooks/queries/use_enrollment_funnel_stats'
+import { api } from '~/lib/api'
 
 interface EnrollmentFunnelStatsProps {
   schoolId?: string
@@ -13,7 +13,9 @@ interface EnrollmentFunnelStatsProps {
 
 export function EnrollmentFunnelStats({ schoolId, academicPeriodId }: EnrollmentFunnelStatsProps) {
   const { data, isLoading } = useQuery(
-    useEnrollmentFunnelStatsQueryOptions({ schoolId, academicPeriodId })
+    api.api.v1.analytics.enrollments.funnel.queryOptions({
+      query: { schoolId, academicPeriodId },
+    })
   )
 
   if (isLoading || !data) {

@@ -70,7 +70,10 @@ export function SeoHead({
       {noIndex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta
+          name="robots"
+          content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+        />
       )}
 
       {/* Open Graph / Facebook */}
@@ -105,16 +108,16 @@ export function getOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Anuá',
-    url: 'https://anuaapp.com.br',
-    logo: 'https://anuaapp.com.br/logo.png',
-    description: 'Sistema de gestão escolar completo com inteligência artificial',
-    contactPoint: {
+    'name': 'Anuá',
+    'url': 'https://anuaapp.com.br',
+    'logo': 'https://anuaapp.com.br/logo.png',
+    'description': 'Sistema de gestão escolar completo com inteligência artificial',
+    'contactPoint': {
       '@type': 'ContactPoint',
-      contactType: 'customer service',
-      availableLanguage: 'Portuguese',
+      'contactType': 'customer service',
+      'availableLanguage': 'Portuguese',
     },
-    sameAs: [],
+    'sameAs': [],
   }
 }
 
@@ -122,27 +125,28 @@ export function getSoftwareApplicationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Anuá',
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web',
-    description: 'Sistema de gestão escolar completo com IA integrada. Matrículas, pedagógico, financeiro, gamificação e muito mais.',
-    offers: {
+    'name': 'Anuá',
+    'applicationCategory': 'BusinessApplication',
+    'operatingSystem': 'Web',
+    'description':
+      'Sistema de gestão escolar completo com IA integrada. Matrículas, pedagógico, financeiro, gamificação e muito mais.',
+    'offers': {
       '@type': 'Offer',
-      price: '18.90',
-      priceCurrency: 'BRL',
-      priceSpecification: {
+      'price': '18.90',
+      'priceCurrency': 'BRL',
+      'priceSpecification': {
         '@type': 'UnitPriceSpecification',
-        price: '18.90',
-        priceCurrency: 'BRL',
-        unitText: 'aluno/mês',
+        'price': '18.90',
+        'priceCurrency': 'BRL',
+        'unitText': 'aluno/mês',
       },
     },
-    aggregateRating: {
+    'aggregateRating': {
       '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '150',
+      'ratingValue': '4.8',
+      'ratingCount': '150',
     },
-    featureList: [
+    'featureList': [
       'Gestão de matrículas online',
       'Controle pedagógico completo',
       'Financeiro integrado',
@@ -158,12 +162,12 @@ export function getFAQSchema(faqs: Array<{ question: string; answer: string }>) 
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
+    'mainEntity': faqs.map((faq) => ({
       '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
+      'name': faq.question,
+      'acceptedAnswer': {
         '@type': 'Answer',
-        text: faq.answer,
+        'text': faq.answer,
       },
     })),
   }
@@ -173,11 +177,11 @@ export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>)
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index) => ({
+    'itemListElement': items.map((item, index) => ({
       '@type': 'ListItem',
-      position: index + 1,
-      name: item.name,
-      item: `https://anuaapp.com.br${item.url}`,
+      'position': index + 1,
+      'name': item.name,
+      'item': `https://anuaapp.com.br${item.url}`,
     })),
   }
 }

@@ -21,7 +21,7 @@ export function registerUserApiRoutes() {
   router
     .group(() => {
       router.get('/', [IndexUsersController]).as('users.index')
-      router.get('/school-employees', [SchoolEmployeesController]).as('users.schoolEmployees')
+      router.get('/school-employees', [SchoolEmployeesController]).as('users.school_employees')
       router.post('/', [StoreUserController]).as('users.store')
       router.get('/:id', [ShowUserController]).as('users.show')
       router.put('/:id', [UpdateUserController]).as('users.update')
@@ -43,10 +43,10 @@ export function registerUserSchoolApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListUserSchoolsController]).as('userSchools.listUserSchools')
-      router.post('/', [CreateUserSchoolController]).as('userSchools.createUserSchool')
-      router.put('/:id', [UpdateUserSchoolController]).as('userSchools.updateUserSchool')
-      router.delete('/:id', [DeleteUserSchoolController]).as('userSchools.deleteUserSchool')
+      router.get('/', [ListUserSchoolsController]).as('user_schools.list_user_schools')
+      router.post('/', [CreateUserSchoolController]).as('user_schools.create_user_school')
+      router.put('/:id', [UpdateUserSchoolController]).as('user_schools.update_user_school')
+      router.delete('/:id', [DeleteUserSchoolController]).as('user_schools.delete_user_school')
     })
     .prefix('/user-schools')
     .use(middleware.auth())
@@ -62,13 +62,15 @@ export function registerUserSchoolGroupApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListUserSchoolGroupsController]).as('userSchoolGroups.listUserSchoolGroups')
+      router
+        .get('/', [ListUserSchoolGroupsController])
+        .as('user_school_groups.list_user_school_groups')
       router
         .post('/', [CreateUserSchoolGroupController])
-        .as('userSchoolGroups.createUserSchoolGroup')
+        .as('user_school_groups.create_user_school_group')
       router
         .delete('/:id', [DeleteUserSchoolGroupController])
-        .as('userSchoolGroups.deleteUserSchoolGroup')
+        .as('user_school_groups.delete_user_school_group')
     })
     .prefix('/user-school-groups')
     .use(middleware.auth())
@@ -77,13 +79,13 @@ export function registerUserSchoolGroupApiRoutes() {
 export function registerSchoolSwitcherApiRoutes() {
   router
     .group(() => {
-      router.get('/', [GetSchoolSwitcherDataController]).as('schoolSwitcher.getData')
+      router.get('/', [GetSchoolSwitcherDataController]).as('school_switcher.get_data')
       router
         .post('/toggle-school', [ToggleSchoolSelectionController])
-        .as('schoolSwitcher.toggleSchool')
+        .as('school_switcher.toggle_school')
       router
         .post('/toggle-group', [ToggleSchoolGroupSelectionController])
-        .as('schoolSwitcher.toggleGroup')
+        .as('school_switcher.toggle_group')
     })
     .prefix('/school-switcher')
     .use([middleware.auth(), middleware.impersonation()])

@@ -56,13 +56,13 @@ export function registerEventApiRoutes() {
         .as('events.participants.register')
       router
         .patch('/:eventId/participants/:participantId', [UpdateParticipantStatusController])
-        .as('events.participants.updateStatus')
+        .as('events.participants.update_status')
       router
         .delete('/:eventId/participants/:participantId', [CancelRegistrationController])
         .as('events.participants.cancel')
       router
         .post('/:eventId/participants/:participantId/confirm', [ConfirmAttendanceController])
-        .as('events.participants.confirmAttendance')
+        .as('events.participants.confirm_attendance')
     })
     .prefix('/events')
     .use([middleware.auth(), middleware.impersonation()])

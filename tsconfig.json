@@ -30,13 +30,10 @@
     "resolvePackageJsonExports": true,
     "resolvePackageJsonImports": true,
     "preserveConstEnums": true,
-    "paths": {
-      "#audit_resolvers/*": ["./app/audit_resolvers/*.js"],
-      "#lib/*": ["./app/lib/*.js"]
-    }
+    "paths": { "#audit_resolvers/*": ["./app/audit_resolvers/*.js"], "#lib/*": ["./app/lib/*.js"] },
+    "rewriteRelativeImportExtensions": true
   },
-  "ts-node": {
-    "swc": true
-  },
-  "exclude": ["./inertia/**/*", "node_modules", "build", "tests", "bin/test.ts", "./build"]
+  "ts-node": { "swc": true },
+  "exclude": ["./inertia/**/*", "node_modules", "build", "tests", "bin/test.ts", "./build"],
+  "references": [{ "path": "./tsconfig.inertia.json" }]
 }

@@ -1,18 +1,11 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import {
-  User,
-  Calendar,
-  CreditCard,
-  ShoppingCart,
-  CheckCircle,
-  Clock,
-} from 'lucide-react'
+import { User, Calendar, CreditCard, ShoppingCart, CheckCircle, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { useStudentOverviewQueryOptions } from '../../hooks/queries/use_student_overview'
+import { api } from '~/lib/api'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
@@ -33,7 +26,12 @@ function DashboardOverviewSkeleton() {
 }
 
 function DashboardOverviewContent({ studentId }: { studentId: string }) {
-  const { data: overview, isLoading, isError, error } = useQuery(useStudentOverviewQueryOptions(studentId))
+  const {
+    data: overview,
+    isLoading,
+    isError,
+    error,
+  } = useQuery(api.api.v1.responsavel.api.studentOverview.queryOptions({ params: { studentId } }))
 
   if (isLoading) {
     return <DashboardOverviewSkeleton />
@@ -107,10 +105,7 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
               <div className="text-2xl font-bold">
                 {overview.pedagogical.attendance.percentage}%
               </div>
-              <Progress
-                value={overview.pedagogical.attendance.percentage}
-                className="mt-2"
-              />
+              <Progress value={overview.pedagogical.attendance.percentage} className="mt-2" />
               <p className="mt-1 text-xs text-muted-foreground">
                 {overview.pedagogical.attendance.presentDays} de{' '}
                 {overview.pedagogical.attendance.totalDays} dias
@@ -158,9 +153,11 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
                 {formatCurrency(overview.financial.totalPending)}
               </div>
               <p className="text-xs text-muted-foreground">
-                {overview.financial.recentPayments.filter(
-                  (p) => p.status === 'PENDING' || p.status === 'OVERDUE'
-                ).length}{' '}
+                {
+                  overview.financial.recentPayments.filter(
+                    (p) => p.status === 'PENDING' || p.status === 'OVERDUE'
+                  ).length
+                }{' '}
                 mensalidade(s)
               </p>
             </CardContent>
@@ -174,9 +171,7 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(overview.canteen.balance)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(overview.canteen.balance)}</div>
             <p className="text-xs text-muted-foreground">Saldo disponível</p>
           </CardContent>
         </Card>
@@ -206,30 +201,38 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
               <CardContent>
                 {overview.pedagogical.recentGrades.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.pedagogical.recentGrades.map((grade: { subject: string; assignmentTitle: string; grade: number; maxGrade: number }, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="flex-1">
-                          <p className="font-medium">{grade.subject}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {grade.assignmentTitle}
-                          </p>
-                        </div>
-                        <Badge
-                          variant={
-                            grade.grade && grade.maxGrade
-                              ? (grade.grade ?? 0) >= (grade.maxGrade ?? 0) * 0.7
-                                ? 'default'
-                                : 'destructive'
-                              : 'secondary'
-                          }
+                    {overview.pedagogical.recentGrades.map(
+                      (
+                        grade: {
+                          subject: string
+                          assignmentTitle: string
+                          grade: number
+                          maxGrade: number
+                        },
+                        index: number
+                      ) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between rounded-lg border p-3"
                         >
-                          {grade.grade?.toFixed(1) || '-'} / {grade.maxGrade || '-'}
-                        </Badge>
-                      </div>
-                    ))}
+                          <div className="flex-1">
+                            <p className="font-medium">{grade.subject}</p>
+                            <p className="text-xs text-muted-foreground">{grade.assignmentTitle}</p>
+                          </div>
+                          <Badge
+                            variant={
+                              grade.grade && grade.maxGrade
+                                ? (grade.grade ?? 0) >= (grade.maxGrade ?? 0) * 0.7
+                                  ? 'default'
+                                  : 'destructive'
+                                : 'secondary'
+                            }
+                          >
+                            {grade.grade?.toFixed(1) || '-'} / {grade.maxGrade || '-'}
+                          </Badge>
+                        </div>
+                      )
+                    )}
                   </div>
                 ) : (
                   <p className="text-center text-sm text-muted-foreground">
@@ -251,28 +254,33 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
               <CardContent>
                 {overview.pedagogical.upcomingAssignments.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.pedagogical.upcomingAssignments.map((assignment: { id: string; title: string; subject: string; dueDate: string }) => (
-                      <div
-                        key={assignment.id}
-                        className="flex items-center gap-3 rounded-lg border p-3"
-                      >
-                        <Clock className="h-5 w-5 text-orange-500" />
-                        <div className="flex-1">
-                          <p className="font-medium">{assignment.title}</p>
-                          <p className="text-xs text-muted-foreground">{assignment.subject}</p>
+                    {overview.pedagogical.upcomingAssignments.map(
+                      (assignment: {
+                        id: string
+                        title: string
+                        subject: string
+                        dueDate: string
+                      }) => (
+                        <div
+                          key={assignment.id}
+                          className="flex items-center gap-3 rounded-lg border p-3"
+                        >
+                          <Clock className="h-5 w-5 text-orange-500" />
+                          <div className="flex-1">
+                            <p className="font-medium">{assignment.title}</p>
+                            <p className="text-xs text-muted-foreground">{assignment.subject}</p>
+                          </div>
+                          <div className="text-right text-xs text-muted-foreground">
+                            {formatDate(assignment.dueDate)}
+                          </div>
                         </div>
-                        <div className="text-right text-xs text-muted-foreground">
-                          {formatDate(assignment.dueDate)}
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 ) : (
                   <div className="py-12 text-center">
                     <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Nenhuma tarefa pendente!
-                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">Nenhuma tarefa pendente!</p>
                   </div>
                 )}
               </CardContent>

@@ -25,8 +25,9 @@ export default defineConfig({
   devToolbar: {
     enabled: true,
     tracing: true,
+    dashboard: true,
     slowQueryThresholdMs: 100,
     persistDebugData: true,
   },
-  shouldShow: (ctx) => !app.inProduction && Boolean(ctx.auth?.user),
+  shouldShow: (_ctx) => !app.inProduction,
 })

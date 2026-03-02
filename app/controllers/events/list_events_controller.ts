@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
+import EventTransformer from '#transformers/event_transformer'
 import { listEventsValidator } from '#validators/event'
 import { DateTime } from 'luxon'
-import EventDto from '#models/dto/event.dto'
 
 export default class ListEventsController {
   async handle(ctx: HttpContext) {
-    const { request, response, selectedSchoolIds } = ctx
+    const { request, response, selectedSchoolIds, serialize } = ctx
     const {
       schoolId,
       type,
@@ -59,6 +59,9 @@ export default class ListEventsController {
 
     const events = await query.orderBy('Event.startDate', 'desc').paginate(page, limit)
 
-    return response.ok(EventDto.fromPaginator(events))
+    const data = events.all()
+    const metadata = events.getMeta()
+
+    return response.ok(serialize(EventTransformer.paginate(data, metadata)))
   }
 }

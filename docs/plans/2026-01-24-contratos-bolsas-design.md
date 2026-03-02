@@ -10,6 +10,7 @@ Implementar as telas de Contratos e Bolsas com todas as funcionalidades do siste
 ## Escopo
 
 ### Incluído
+
 - Juros/multa por atraso
 - Descontos por antecipação
 - Seguro de inadimplência
@@ -19,6 +20,7 @@ Implementar as telas de Contratos e Bolsas com todas as funcionalidades do siste
 - Campo código nas bolsas
 
 ### Excluído
+
 - Integração DocuSeal (assinatura digital)
 
 ---
@@ -41,6 +43,7 @@ Implementar as telas de Contratos e Bolsas com todas as funcionalidades do siste
 ```
 
 ### Colunas
+
 - **Nome** - Nome do contrato
 - **Período Letivo** - Ex: "Ano Letivo 2025"
 - **Matrícula** - Valor da matrícula formatado (R$)
@@ -50,6 +53,7 @@ Implementar as telas de Contratos e Bolsas com todas as funcionalidades do siste
 - **Ações** - Menu com Editar, Excluir
 
 ### Comportamento
+
 - Clicar no contrato abre página de edição
 - Filtro por período letivo
 - Busca por nome
@@ -59,44 +63,50 @@ Implementar as telas de Contratos e Bolsas com todas as funcionalidades do siste
 ## 2. Página Criar/Editar Contrato
 
 ### Estrutura
+
 Página dedicada com 3 abas:
 
 ### Aba 1: Informações Básicas
-| Campo | Tipo | Obrigatório |
-|-------|------|-------------|
-| Nome | text | Sim |
-| Período Letivo | select | Sim |
-| Descrição | textarea | Não |
-| Data de Término | date | Não |
-| Seguro de Inadimplência | checkbox | Não |
+
+| Campo                   | Tipo     | Obrigatório |
+| ----------------------- | -------- | ----------- |
+| Nome                    | text     | Sim         |
+| Período Letivo          | select   | Sim         |
+| Descrição               | textarea | Não         |
+| Data de Término         | date     | Não         |
+| Seguro de Inadimplência | checkbox | Não         |
 
 ### Aba 2: Pagamento
-| Campo | Tipo | Obrigatório |
-|-------|------|-------------|
-| Valor da Matrícula | currency | Não |
-| Parcelas da Matrícula | number (1-12) | Não |
-| Valor do Curso | currency | Sim |
-| Tipo de Pagamento | radio (Mensal/À Vista) | Sim |
-| Parcelas do Curso | number | Sim |
-| Parcelas Flexíveis | checkbox | Não |
-| Dias de Vencimento | multi-select (1-31) | Sim |
+
+| Campo                 | Tipo                   | Obrigatório |
+| --------------------- | ---------------------- | ----------- |
+| Valor da Matrícula    | currency               | Não         |
+| Parcelas da Matrícula | number (1-12)          | Não         |
+| Valor do Curso        | currency               | Sim         |
+| Tipo de Pagamento     | radio (Mensal/À Vista) | Sim         |
+| Parcelas do Curso     | number                 | Sim         |
+| Parcelas Flexíveis    | checkbox               | Não         |
+| Dias de Vencimento    | multi-select (1-31)    | Sim         |
 
 ### Aba 3: Juros e Descontos
-| Campo | Tipo | Obrigatório |
-|-------|------|-------------|
-| Multa por atraso (%) | number | Não |
-| Juros ao dia (%) | number | Não |
-| Descontos por antecipação | lista dinâmica (dias + %) | Não |
+
+| Campo                     | Tipo                      | Obrigatório |
+| ------------------------- | ------------------------- | ----------- |
+| Multa por atraso (%)      | number                    | Não         |
+| Juros ao dia (%)          | number                    | Não         |
+| Descontos por antecipação | lista dinâmica (dias + %) | Não         |
 
 ---
 
 ## 3. Tela de Bolsas (Melhorias)
 
 ### Novas Colunas na Tabela
+
 - **Desc. Matrícula** - Percentual de desconto na matrícula
 - **Código** - Código para matrícula online
 
 ### Novo Campo no Modal
+
 - **Código** (opcional) - Usado na matrícula online para aplicar a bolsa automaticamente
 
 ---
@@ -104,6 +114,7 @@ Página dedicada com 3 abas:
 ## 4. Arquivos
 
 ### Criar
+
 ```
 inertia/pages/escola/administrativo/contratos/
 ├── index.tsx                    # Listagem
@@ -118,6 +129,7 @@ inertia/containers/contracts/
 ```
 
 ### Modificar
+
 ```
 inertia/containers/scholarships-table-container.tsx
 inertia/containers/scholarships/new-scholarship-modal.tsx
@@ -126,6 +138,7 @@ inertia/components/layouts/escola-layout.tsx (descomentar Bolsas)
 ```
 
 ### Rotas
+
 ```
 GET  /escola/administrativo/contratos           # Listagem
 GET  /escola/administrativo/contratos/novo      # Criar

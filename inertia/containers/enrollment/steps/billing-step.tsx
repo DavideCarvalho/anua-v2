@@ -11,11 +11,7 @@ import {
 } from '~/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
-import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
-import { useContractQueryOptions } from '~/hooks/queries/use_contract'
-import { useScholarshipsQueryOptions } from '~/hooks/queries/use_scholarships'
+import { api } from '~/lib/api'
 import { getCourseLabel, getLevelLabel } from '~/lib/formatters'
 import {
   ContractDetailsCard,
@@ -40,15 +36,21 @@ export function BillingStep() {
   const courseId = form.watch('billing.courseId')
   const levelId = form.watch('billing.levelId')
 
-  const { data: academicPeriodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 50 }))
+  const { data: academicPeriodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 50 } })
+  )
 
   const { data: coursesData, isLoading: isLoadingCourses } = useQuery({
-    ...useAcademicPeriodCoursesQueryOptions(academicPeriodId),
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: academicPeriodId! },
+    }),
     enabled: !!academicPeriodId,
   })
 
   const { data: classesData, isLoading: isLoadingClasses } = useQuery({
-    ...useClassesQueryOptions({ levelId, academicPeriodId, limit: 50 }),
+    ...api.api.v1.classes.index.queryOptions({
+      query: { levelId, academicPeriodId, limit: 50 },
+    }),
     enabled: !!levelId && !!academicPeriodId,
   })
 
@@ -69,13 +71,15 @@ export function BillingStep() {
 
   // Fetch contract details
   const { data: contractData, isLoading: isLoadingContract } = useQuery({
-    ...useContractQueryOptions(contractId),
+    ...api.api.v1.contracts.show.queryOptions({ params: { id: contractId! } }),
     enabled: !!contractId,
   })
 
   // Fetch scholarships
   const { data: scholarshipsData, isLoading: isLoadingScholarships } = useQuery({
-    ...useScholarshipsQueryOptions({ active: true, limit: 100 }),
+    ...api.api.v1.scholarships.listScholarships.queryOptions({
+      query: { active: true, limit: 100 },
+    }),
   })
 
   const scholarships = useMemo(() => scholarshipsData?.data ?? [], [scholarshipsData?.data])
@@ -96,7 +100,6 @@ export function BillingStep() {
     if (hasOnlyOneCourse && !courseId) {
       form.setValue('billing.courseId', courses[0].courseId)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasOnlyOneCourse, courseId, courses])
 
   // Auto-fill form when contract is loaded
@@ -117,7 +120,6 @@ export function BillingStep() {
       form.setValue('billing.monthlyFee', 0)
       form.setValue('billing.enrollmentFee', 0)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractData?.id, contractId, levelId])
 
   // Handle scholarship selection

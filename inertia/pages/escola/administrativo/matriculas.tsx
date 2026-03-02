@@ -1,6 +1,12 @@
 import { Head } from '@inertiajs/react'
 import { EscolaLayout } from '../../../components/layouts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
 import { FileText, UserPlus, ClipboardList } from 'lucide-react'
 
@@ -12,9 +18,7 @@ export default function MatriculasPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Matrículas</h1>
-          <p className="text-muted-foreground">
-            Gerencie o processo de matrícula de novos alunos
-          </p>
+          <p className="text-muted-foreground">Gerencie o processo de matrícula de novos alunos</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -22,9 +26,7 @@ export default function MatriculasPage() {
             <CardHeader>
               <UserPlus className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Nova Matrícula</CardTitle>
-              <CardDescription>
-                Iniciar processo de matrícula para um novo aluno
-              </CardDescription>
+              <CardDescription>Iniciar processo de matrícula para um novo aluno</CardDescription>
             </CardHeader>
             <CardContent>
               <Button className="w-full">Iniciar Matrícula</Button>
@@ -35,12 +37,12 @@ export default function MatriculasPage() {
             <CardHeader>
               <ClipboardList className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Matrículas Pendentes</CardTitle>
-              <CardDescription>
-                Visualizar matrículas aguardando aprovação
-              </CardDescription>
+              <CardDescription>Visualizar matrículas aguardando aprovação</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Ver Pendentes</Button>
+              <Button variant="outline" className="w-full">
+                Ver Pendentes
+              </Button>
             </CardContent>
           </Card>
 
@@ -48,12 +50,12 @@ export default function MatriculasPage() {
             <CardHeader>
               <FileText className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Rematrículas</CardTitle>
-              <CardDescription>
-                Gerenciar processo de rematrícula dos alunos
-              </CardDescription>
+              <CardDescription>Gerenciar processo de rematrícula dos alunos</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Gerenciar</Button>
+              <Button variant="outline" className="w-full">
+                Gerenciar
+              </Button>
             </CardContent>
           </Card>
         </div>

@@ -15,13 +15,13 @@ export function registerScholarshipApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListScholarshipsController]).as('scholarships.listScholarships')
-      router.post('/', [CreateScholarshipController]).as('scholarships.createScholarship')
-      router.get('/:id', [ShowScholarshipController]).as('scholarships.showScholarship')
-      router.put('/:id', [UpdateScholarshipController]).as('scholarships.updateScholarship')
+      router.get('/', [ListScholarshipsController]).as('scholarships.list_scholarships')
+      router.post('/', [CreateScholarshipController]).as('scholarships.create_scholarship')
+      router.get('/:id', [ShowScholarshipController]).as('scholarships.show_scholarship')
+      router.put('/:id', [UpdateScholarshipController]).as('scholarships.update_scholarship')
       router
         .patch('/:id/toggle-active', [ToggleScholarshipActiveController])
-        .as('scholarships.toggleScholarshipActive')
+        .as('scholarships.toggle_scholarship_active')
     })
     .prefix('/scholarships')
     .use(middleware.auth())
@@ -41,13 +41,15 @@ export function registerSchoolPartnerApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListSchoolPartnersController]).as('schoolPartners.listSchoolPartners')
-      router.post('/', [CreateSchoolPartnerController]).as('schoolPartners.createSchoolPartner')
-      router.get('/:id', [ShowSchoolPartnerController]).as('schoolPartners.showSchoolPartner')
-      router.put('/:id', [UpdateSchoolPartnerController]).as('schoolPartners.updateSchoolPartner')
+      router.get('/', [ListSchoolPartnersController]).as('school_partners.list_school_partners')
+      router.post('/', [CreateSchoolPartnerController]).as('school_partners.create_school_partner')
+      router.get('/:id', [ShowSchoolPartnerController]).as('school_partners.show_school_partner')
+      router
+        .put('/:id', [UpdateSchoolPartnerController])
+        .as('school_partners.update_school_partner')
       router
         .patch('/:id/toggle-active', [ToggleSchoolPartnerActiveController])
-        .as('schoolPartners.toggleSchoolPartnerActive')
+        .as('school_partners.toggle_school_partner_active')
     })
     .prefix('/school-partners')
     .use(middleware.auth())
@@ -67,11 +69,11 @@ export function registerSchoolChainApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListSchoolChainsController]).as('schoolChains.listSchoolChains')
-      router.post('/', [CreateSchoolChainController]).as('schoolChains.createSchoolChain')
-      router.get('/:id', [ShowSchoolChainController]).as('schoolChains.showSchoolChain')
-      router.put('/:id', [UpdateSchoolChainController]).as('schoolChains.updateSchoolChain')
-      router.delete('/:id', [DeleteSchoolChainController]).as('schoolChains.deleteSchoolChain')
+      router.get('/', [ListSchoolChainsController]).as('school_chains.list_school_chains')
+      router.post('/', [CreateSchoolChainController]).as('school_chains.create_school_chain')
+      router.get('/:id', [ShowSchoolChainController]).as('school_chains.show_school_chain')
+      router.put('/:id', [UpdateSchoolChainController]).as('school_chains.update_school_chain')
+      router.delete('/:id', [DeleteSchoolChainController]).as('school_chains.delete_school_chain')
     })
     .prefix('/school-chains')
     .use(middleware.auth())
@@ -91,11 +93,11 @@ export function registerSchoolGroupApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListSchoolGroupsController]).as('schoolGroups.listSchoolGroups')
-      router.post('/', [CreateSchoolGroupController]).as('schoolGroups.createSchoolGroup')
-      router.get('/:id', [ShowSchoolGroupController]).as('schoolGroups.showSchoolGroup')
-      router.put('/:id', [UpdateSchoolGroupController]).as('schoolGroups.updateSchoolGroup')
-      router.delete('/:id', [DeleteSchoolGroupController]).as('schoolGroups.deleteSchoolGroup')
+      router.get('/', [ListSchoolGroupsController]).as('school_groups.list_school_groups')
+      router.post('/', [CreateSchoolGroupController]).as('school_groups.create_school_group')
+      router.get('/:id', [ShowSchoolGroupController]).as('school_groups.show_school_group')
+      router.put('/:id', [UpdateSchoolGroupController]).as('school_groups.update_school_group')
+      router.delete('/:id', [DeleteSchoolGroupController]).as('school_groups.delete_school_group')
     })
     .prefix('/school-groups')
     .use(middleware.auth())

@@ -15,9 +15,8 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
 
-import { useLikePostMutation } from '../../hooks/mutations/use_like_post'
-import { useUnlikePostMutation } from '../../hooks/mutations/use_unlike_post'
-import { useDeletePostMutation } from '../../hooks/mutations/use_delete_post'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface Post {
   id: string
@@ -47,9 +46,10 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
   const [isLiked, setIsLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(post.$extras?.likes_count ?? 0)
 
-  const likeMutation = useLikePostMutation()
-  const unlikeMutation = useUnlikePostMutation()
-  const deleteMutation = useDeletePostMutation()
+  const queryClient = useQueryClient()
+  const likeMutation = useMutation(api.api.v1.posts.like.mutationOptions())
+  const unlikeMutation = useMutation(api.api.v1.posts.unlike.mutationOptions())
+  const deleteMutation = useMutation(api.api.v1.posts.destroy.mutationOptions())
 
   const isAuthor = currentUserId === post.author.id
 
@@ -58,7 +58,8 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
       setIsLiked(false)
       setLikeCount((c) => c - 1)
       try {
-        await unlikeMutation.mutateAsync(post.id)
+        await unlikeMutation.mutateAsync({ params: { id: post.id } })
+        queryClient.invalidateQueries({ queryKey: ['posts'] })
       } catch {
         setIsLiked(true)
         setLikeCount((c) => c + 1)
@@ -68,7 +69,8 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
       setIsLiked(true)
       setLikeCount((c) => c + 1)
       try {
-        await likeMutation.mutateAsync(post.id)
+        await likeMutation.mutateAsync({ params: { id: post.id } })
+        queryClient.invalidateQueries({ queryKey: ['posts'] })
       } catch {
         setIsLiked(false)
         setLikeCount((c) => c - 1)
@@ -78,11 +80,16 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
   }
 
   const handleDelete = () => {
-    toast.promise(deleteMutation.mutateAsync(post.id), {
-      loading: 'Excluindo post...',
-      success: 'Post excluido!',
-      error: 'Erro ao excluir post',
-    })
+    toast.promise(
+      deleteMutation.mutateAsync({ params: { id: post.id } }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['posts'] })
+      }),
+      {
+        loading: 'Excluindo post...',
+        success: 'Post excluido!',
+        error: 'Erro ao excluir post',
+      }
+    )
   }
 
   const getTypeLabel = (type: string) => {
@@ -199,9 +206,7 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
             onClick={() => onCommentClick?.(post.id)}
           >
             <MessageCircle className="h-4 w-4" />
-            {(post.$extras?.comments_count ?? 0) > 0 && (
-              <span>{post.$extras.comments_count}</span>
-            )}
+            {(post.$extras?.comments_count ?? 0) > 0 && <span>{post.$extras.comments_count}</span>}
           </Button>
         </div>
       </CardFooter>

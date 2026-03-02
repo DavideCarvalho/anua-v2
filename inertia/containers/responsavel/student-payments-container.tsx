@@ -2,7 +2,8 @@ import { CheckCircle, Clock, AlertTriangle, XCircle, ExternalLink, Loader2 } fro
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useQuery } from '@tanstack/react-query'
-import { useCreateInvoiceCheckout } from '../../hooks/mutations/use_create_invoice_checkout'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -14,8 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
-
-import { useResponsavelStudentInvoicesQueryOptions } from '../../hooks/queries/use_responsavel_student_invoices'
 
 function getPaymentDescription(payment: any): string {
   const contractName = payment.contract?.name
@@ -53,10 +52,11 @@ interface StudentPaymentsContainerProps {
 }
 
 export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainerProps) {
+  const queryClient = useQueryClient()
   const { data, isLoading, isError, error } = useQuery(
-    useResponsavelStudentInvoicesQueryOptions({ studentId })
+    api.api.v1.responsavel.api.studentInvoices.queryOptions({ params: { studentId } })
   )
-  const checkoutMutation = useCreateInvoiceCheckout()
+  const checkoutMutation = useMutation(api.api.v1.responsavel.api.invoiceCheckout.mutationOptions())
 
   if (isLoading) {
     return <StudentPaymentsContainerSkeleton />
@@ -104,13 +104,17 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
   }
 
   const handleCreateCheckout = (invoiceId: string) => {
-    checkoutMutation.mutate(invoiceId, {
-      onSuccess: (result) => {
-        if (result.invoiceUrl) {
-          window.open(result.invoiceUrl, '_blank')
-        }
-      },
-    })
+    checkoutMutation.mutate(
+      { params: { id: invoiceId } },
+      {
+        onSuccess: (result) => {
+          queryClient.invalidateQueries({ queryKey: ['responsavel', 'student-invoices'] })
+          if (result?.invoiceUrl) {
+            window.open(result.invoiceUrl, '_blank')
+          }
+        },
+      }
+    )
   }
 
   const renderPayInvoiceAction = (invoice: any) => {

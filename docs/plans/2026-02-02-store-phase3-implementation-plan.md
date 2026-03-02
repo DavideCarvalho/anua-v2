@@ -13,6 +13,7 @@
 ## Context for all tasks
 
 **Key data relationships:**
+
 - `Student.id === User.id` (1:1 via `foreignKey: 'id'`)
 - `StudentHasResponsible` links `responsibleId` (parent User.id) → `studentId`
 - `StudentHasLevel` links student → Level/Class/School (has `contractId` for payments)
@@ -21,6 +22,7 @@
 - RESPONSIBLE role user → can buy for their children via `StudentHasResponsible`
 
 **Existing code to reuse:**
+
 - `CreateStoreOrderController`: `app/controllers/store_orders/create_store_order_controller.ts` — full order creation logic with IMMEDIATE (balance/cash/card/pix) and DEFERRED (installments) payment flows. The marketplace checkout will follow the same logic but with auth-based student resolution.
 - `StoreInstallmentRule` model: queried by `storeId` + `isActive`, ordered by `minAmount` to determine max installments for a given total.
 - `createStoreOrderValidator`: `app/validators/gamification.ts` — accepts `studentId`, `schoolId`, `items[]`, `paymentMode`, `paymentMethod`, `installments`, `notes`.
@@ -33,6 +35,7 @@
 ## Task 1: Marketplace API controllers — list stores and items
 
 **Files:**
+
 - Create: `app/controllers/marketplace/list_marketplace_stores_controller.ts`
 - Create: `app/controllers/marketplace/list_store_items_controller.ts`
 
@@ -104,10 +107,7 @@ export default class ListMarketplaceStoresController {
     }
 
     // Fallback: check student's direct schoolId via user
-    const student = await Student.query()
-      .where('id', studentId)
-      .preload('user')
-      .first()
+    const student = await Student.query().where('id', studentId).preload('user').first()
 
     if (student?.user?.schoolId) {
       schoolIds.add(student.user.schoolId)
@@ -119,6 +119,7 @@ export default class ListMarketplaceStoresController {
 ```
 
 **IMPORTANT:** Before writing this controller, read the existing models to understand how `StudentHasLevel` → `Level` → `Course` → `School` chain works. The chain may differ — adapt the `getStudentSchoolIds` method to match the actual model relationships. Check:
+
 - `app/models/student_has_level.ts` for the `level` relationship
 - `app/models/level.ts` for the `course` or `school` relationship
 - If `Level` has a direct `schoolId`, use that instead of the chain
@@ -182,6 +183,7 @@ feat: add marketplace API controllers for stores and items listing
 ## Task 2: Marketplace API controllers — installment options and checkout
 
 **Files:**
+
 - Create: `app/controllers/marketplace/get_installment_options_controller.ts`
 - Create: `app/controllers/marketplace/marketplace_checkout_controller.ts`
 
@@ -226,6 +228,7 @@ export default class GetInstallmentOptionsController {
 Handles order creation for both students and parents. Auto-resolves student from auth, validates enrollment, processes payment.
 
 Follow the EXACT same logic as the existing `CreateStoreOrderController` at `app/controllers/store_orders/create_store_order_controller.ts`, but with these differences:
+
 1. If auth user is STUDENT role → set `studentId = auth.user.id`
 2. If auth user is RESPONSIBLE role → require `studentId` in body, verify via `StudentHasResponsible`
 3. Auto-derive `schoolId` from store
@@ -325,9 +328,7 @@ export default class MarketplaceCheckoutController {
 
     // 4. Validate items
     const storeItemIds = payload.items.map((i) => i.storeItemId)
-    const storeItems = await StoreItem.query()
-      .whereIn('id', storeItemIds)
-      .whereNull('deletedAt')
+    const storeItems = await StoreItem.query().whereIn('id', storeItemIds).whereNull('deletedAt')
 
     const storeItemMap = new Map(storeItems.map((item) => [item.id, item]))
 
@@ -592,6 +593,7 @@ feat: add marketplace checkout and installment options controllers
 ## Task 3: Marketplace API controllers — order history
 
 **Files:**
+
 - Create: `app/controllers/marketplace/list_my_orders_controller.ts`
 - Create: `app/controllers/marketplace/show_my_order_controller.ts`
 
@@ -699,6 +701,7 @@ feat: add marketplace order history controllers
 ## Task 4: Register marketplace routes + page controllers
 
 **Files:**
+
 - Create: `app/controllers/pages/aluno/show_aluno_loja_page_controller.ts`
 - Create: `app/controllers/pages/aluno/show_aluno_loja_store_page_controller.ts`
 - Create: `app/controllers/pages/aluno/show_aluno_carrinho_page_controller.ts`
@@ -759,11 +762,13 @@ router
 ```
 
 Add responsavel loja route to the existing responsavel group:
+
 ```typescript
 router.get('/loja', [ShowResponsavelLojaPageController]).as('loja')
 ```
 
 **IMPORTANT:** The `/aluno/loja/carrinho` route MUST be defined BEFORE `/aluno/loja/:id` to avoid the dynamic `:id` param matching "carrinho". Same for `/aluno/loja/pedidos`. Order:
+
 1. `/loja` (index)
 2. `/loja/carrinho` (static)
 3. `/loja/pedidos` (static)
@@ -780,12 +785,14 @@ feat: register marketplace API and web routes
 ## Task 5: Create AlunoLayout and Cart context
 
 **Files:**
+
 - Create: `inertia/components/layouts/aluno-layout.tsx`
 - Create: `inertia/contexts/cart-context.tsx`
 
 ### AlunoLayout
 
 Follow `AdminLayout` sidebar pattern. Navigation items:
+
 - Loja (`/aluno/loja`, icon: `ShoppingBag`)
 - Carrinho (`/aluno/loja/carrinho`, icon: `ShoppingCart`) — show item count badge
 - Meus Pedidos (`/aluno/loja/pedidos`, icon: `ClipboardList`)
@@ -859,9 +866,7 @@ export function CartProvider({ children }: PropsWithChildren) {
       removeItem(storeItemId)
       return
     }
-    setItems((prev) =>
-      prev.map((i) => (i.storeItemId === storeItemId ? { ...i, quantity } : i))
-    )
+    setItems((prev) => prev.map((i) => (i.storeItemId === storeItemId ? { ...i, quantity } : i)))
   }
 
   function clearCart() {
@@ -874,7 +879,16 @@ export function CartProvider({ children }: PropsWithChildren) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice, storeId }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        totalPrice,
+        storeId,
+      }}
     >
       {children}
     </CartContext.Provider>
@@ -899,6 +913,7 @@ feat: add AlunoLayout and client-side Cart context
 ## Task 6: Marketplace frontend hooks
 
 **Files:**
+
 - Create: `inertia/hooks/queries/use_marketplace.ts`
 - Create: `inertia/hooks/mutations/use_marketplace_mutations.ts`
 
@@ -922,12 +937,18 @@ export function useMarketplaceStoresQueryOptions(studentId?: string) {
 
 // Store items
 // Use path params for storeId
-export function useMarketplaceItemsQueryOptions(storeId: string, query: { page?: number; limit?: number; category?: string } = {}) {
+export function useMarketplaceItemsQueryOptions(
+  storeId: string,
+  query: { page?: number; limit?: number; category?: string } = {}
+) {
   const mergedQuery = { page: 1, limit: 20, ...query }
   return {
     queryKey: ['marketplace', 'items', storeId, mergedQuery],
     queryFn: () =>
-      tuyau.api.v1.marketplace.stores({ storeId }).items.$get({ query: mergedQuery as any }).unwrap(),
+      tuyau.api.v1.marketplace
+        .stores({ storeId })
+        .items.$get({ query: mergedQuery as any })
+        .unwrap(),
     enabled: !!storeId,
   } satisfies QueryOptions
 }
@@ -945,12 +966,13 @@ export function useInstallmentOptionsQueryOptions(storeId: string, amount: numbe
 }
 
 // My orders
-export function useMyOrdersQueryOptions(query: { studentId?: string; status?: string; page?: number; limit?: number } = {}) {
+export function useMyOrdersQueryOptions(
+  query: { studentId?: string; status?: string; page?: number; limit?: number } = {}
+) {
   const mergedQuery = { page: 1, limit: 10, ...query }
   return {
     queryKey: ['marketplace', 'orders', mergedQuery],
-    queryFn: () =>
-      tuyau.api.v1.marketplace.orders.$get({ query: mergedQuery as any }).unwrap(),
+    queryFn: () => tuyau.api.v1.marketplace.orders.$get({ query: mergedQuery as any }).unwrap(),
   } satisfies QueryOptions
 }
 ```
@@ -977,7 +999,10 @@ export function useMarketplaceCheckout() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: CheckoutPayload) =>
-      tuyau.$route('api.v1.marketplace.checkout').$post(data as any).unwrap(),
+      tuyau
+        .$route('api.v1.marketplace.checkout')
+        .$post(data as any)
+        .unwrap(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['marketplace', 'orders'] })
     },
@@ -996,6 +1021,7 @@ feat: add marketplace query and mutation hooks
 ## Task 7: Marketplace stores listing page
 
 **Files:**
+
 - Create: `inertia/pages/aluno/loja/index.tsx`
 - Create: `inertia/containers/marketplace-stores-container.tsx`
 
@@ -1045,6 +1071,7 @@ feat: add marketplace stores listing page
 ## Task 8: Store detail page with product listing
 
 **Files:**
+
 - Create: `inertia/pages/aluno/loja/store.tsx`
 - Create: `inertia/containers/marketplace-store-detail-container.tsx`
 
@@ -1076,12 +1103,14 @@ feat: add marketplace store detail page with add-to-cart
 ## Task 9: Cart and checkout page
 
 **Files:**
+
 - Create: `inertia/pages/aluno/loja/carrinho.tsx`
 - Create: `inertia/containers/marketplace-cart-container.tsx`
 
 ### Container
 
 Two sections:
+
 1. **Cart items list** — table/list of items with quantity controls, remove button, subtotal per item, grand total
 2. **Checkout form** — payment mode selection (IMMEDIATE/DEFERRED), payment method selection (BALANCE/PIX for immediate), installment options (for deferred — queries installment rules), submit button
 
@@ -1114,6 +1143,7 @@ feat: add marketplace cart and checkout page
 ## Task 10: Order history page
 
 **Files:**
+
 - Create: `inertia/pages/aluno/loja/pedidos.tsx`
 - Create: `inertia/containers/marketplace-orders-container.tsx`
 
@@ -1141,6 +1171,7 @@ feat: add marketplace order history page
 ## Task 11: Responsável marketplace page + nav update
 
 **Files:**
+
 - Create: `inertia/pages/responsavel/loja.tsx`
 - Create: `inertia/containers/responsavel-marketplace-container.tsx`
 - Modify: `inertia/components/layouts/responsavel-layout.tsx` — add "Loja" to `commonNavigation`
@@ -1179,22 +1210,23 @@ feat: add responsável marketplace page and nav link
 
 ## Summary
 
-| Task | Description | Files |
-|------|-------------|-------|
-| 1 | Marketplace stores + items API | 2 new |
-| 2 | Installment options + checkout API | 2 new |
-| 3 | Order history API | 2 new |
-| 4 | Routes + page controllers | 5 new + 1 modified |
-| 5 | AlunoLayout + Cart context | 2 new |
-| 6 | Marketplace hooks | 2 new |
-| 7 | Stores listing page | 2 new |
-| 8 | Store detail + add to cart | 2 new |
-| 9 | Cart + checkout page | 2 new |
-| 10 | Order history page | 2 new |
-| 11 | Responsável marketplace + nav | 2 new + 1 modified |
-| **Total** | | **25 new files, 2 modified** |
+| Task      | Description                        | Files                        |
+| --------- | ---------------------------------- | ---------------------------- |
+| 1         | Marketplace stores + items API     | 2 new                        |
+| 2         | Installment options + checkout API | 2 new                        |
+| 3         | Order history API                  | 2 new                        |
+| 4         | Routes + page controllers          | 5 new + 1 modified           |
+| 5         | AlunoLayout + Cart context         | 2 new                        |
+| 6         | Marketplace hooks                  | 2 new                        |
+| 7         | Stores listing page                | 2 new                        |
+| 8         | Store detail + add to cart         | 2 new                        |
+| 9         | Cart + checkout page               | 2 new                        |
+| 10        | Order history page                 | 2 new                        |
+| 11        | Responsável marketplace + nav      | 2 new + 1 modified           |
+| **Total** |                                    | **25 new files, 2 modified** |
 
 **Dependencies:**
+
 - Tasks 1-3 can run in parallel (different controller files)
 - Task 4 depends on Tasks 1-3 (imports controllers in routes)
 - Task 5 is independent (layout + context, no API dependency)

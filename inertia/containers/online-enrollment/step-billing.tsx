@@ -17,7 +17,8 @@ import {
 import { Alert, AlertDescription } from '../../components/ui/alert'
 
 import type { EnrollmentFormData } from './enrollment-form'
-import { useFindScholarshipMutation } from '../../hooks/mutations/use_find_scholarship'
+import { useMutation } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface StepBillingProps {
   schoolId: string
@@ -31,10 +32,7 @@ interface StepBillingProps {
 }
 
 export function StepBilling({ schoolId, contract }: StepBillingProps) {
-  const {
-    setValue,
-    watch,
-  } = useFormContext<EnrollmentFormData>()
+  const { setValue, watch } = useFormContext<EnrollmentFormData>()
 
   const [scholarshipCode, setScholarshipCode] = useState('')
   const [appliedScholarship, setAppliedScholarship] = useState<{
@@ -43,7 +41,9 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
     enrollmentDiscountPercentage: number
   } | null>(null)
 
-  const findScholarshipMutation = useFindScholarshipMutation()
+  const findScholarshipMutation = useMutation(
+    api.api.v1.enrollment.findScholarship.mutationOptions()
+  )
 
   const paymentMethod = watch('billing.paymentMethod')
 
@@ -52,8 +52,7 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
 
     try {
       const result = await findScholarshipMutation.mutateAsync({
-        code: scholarshipCode,
-        schoolId,
+        body: { code: scholarshipCode, schoolId },
       })
 
       setAppliedScholarship({
@@ -209,9 +208,7 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
               <RadioGroupItem value="PIX" id="pix" />
               <Label htmlFor="pix" className="flex-1 cursor-pointer">
                 <span className="font-medium">PIX</span>
-                <p className="text-sm text-muted-foreground">
-                  Pagamento instantâneo via PIX
-                </p>
+                <p className="text-sm text-muted-foreground">Pagamento instantâneo via PIX</p>
               </Label>
             </div>
 

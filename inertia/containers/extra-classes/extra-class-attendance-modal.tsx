@@ -29,8 +29,8 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
-import { useCreateExtraClassAttendance } from '~/hooks/mutations/use_extra_class_attendance_mutations'
-import { useExtraClassStudentsQueryOptions } from '~/hooks/queries/use_extra_classes'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
 
@@ -63,12 +63,15 @@ export function ExtraClassAttendanceModal({
   const [entries, setEntries] = useState<StudentAttendanceEntry[]>([])
   const [initialized, setInitialized] = useState(false)
 
+  const queryClient = useQueryClient()
   const { data: studentsData, isLoading } = useQuery({
-    ...useExtraClassStudentsQueryOptions(extraClassId, { limit: 100 }),
+    ...api.api.v1.extraClasses.students.queryOptions({
+      params: { id: extraClassId },
+    }),
     enabled: open,
   })
 
-  const createMutation = useCreateExtraClassAttendance()
+  const createMutation = useMutation(api.api.v1.extraClasses.attendance.store.mutationOptions())
 
   const students = studentsData?.data ?? []
 
@@ -104,16 +107,19 @@ export function ExtraClassAttendanceModal({
 
     createMutation.mutate(
       {
-        extraClassId,
-        date,
-        attendances: entries.map((e) => ({
-          studentId: e.studentId,
-          status: e.status,
-          justification: e.justification || undefined,
-        })),
+        params: { id: extraClassId },
+        body: {
+          date,
+          attendances: entries.map((e) => ({
+            studentId: e.studentId,
+            status: e.status,
+            justification: e.justification || undefined,
+          })),
+        },
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['extra-class-attendance'] })
           toast.success('Frequencia registrada')
           setInitialized(false)
           onOpenChange(false)

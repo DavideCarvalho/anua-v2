@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
-import { Link } from '@inertiajs/react'
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '../contexts/cart-context'
-import { useInstallmentOptionsQueryOptions } from '../hooks/queries/use_marketplace'
-import { useMarketplaceCheckout } from '../hooks/mutations/use_marketplace_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group'
@@ -15,16 +15,25 @@ import { Textarea } from '../components/ui/textarea'
 import { Separator } from '../components/ui/separator'
 import { formatCurrency } from '../lib/utils'
 
-export function MarketplaceCartContainer({ backHref = '/aluno/loja', hasOnlinePayment = false }: { backHref?: string; hasOnlinePayment?: boolean }) {
+export function MarketplaceCartContainer({
+  backHref = '/aluno/loja',
+  hasOnlinePayment = false,
+}: {
+  backHref?: string
+  hasOnlinePayment?: boolean
+}) {
   const cart = useCart()
   const [paymentOption, setPaymentOption] = useState<'IMMEDIATE' | 'BILL' | 'INSTALLMENTS'>('BILL')
   const [paymentMethod, setPaymentMethod] = useState<'BALANCE' | 'PIX'>('BALANCE')
   const [installments, setInstallments] = useState(2)
   const [notes, setNotes] = useState('')
-  const checkout = useMarketplaceCheckout()
+  const queryClient = useQueryClient()
+  const checkout = useMutation(api.api.v1.marketplace.checkout.mutationOptions())
 
   const { data: installmentData } = useQuery({
-    ...useInstallmentOptionsQueryOptions(cart.storeId ?? '', cart.totalPrice),
+    ...api.api.v1.marketplace.installmentOptions.queryOptions({
+      query: { storeId: cart.storeId ?? '', amount: cart.totalPrice },
+    }),
     enabled: paymentOption === 'INSTALLMENTS' && !!cart.storeId && cart.totalPrice > 0,
   })
   const installmentOptions = installmentData?.options ?? []
@@ -34,14 +43,17 @@ export function MarketplaceCartContainer({ backHref = '/aluno/loja', hasOnlinePa
     const isDeferred = paymentOption === 'BILL' || paymentOption === 'INSTALLMENTS'
     try {
       await checkout.mutateAsync({
-        storeId: cart.storeId,
-        items: cart.items.map((i) => ({ storeItemId: i.storeItemId, quantity: i.quantity })),
-        paymentMode: isDeferred ? 'DEFERRED' : 'IMMEDIATE',
-        paymentMethod: paymentOption === 'IMMEDIATE' ? paymentMethod : undefined,
-        installments: paymentOption === 'INSTALLMENTS' ? installments : undefined,
-        spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
-        notes: notes || undefined,
+        body: {
+          storeId: cart.storeId,
+          items: cart.items.map((i) => ({ storeItemId: i.storeItemId, quantity: i.quantity })),
+          paymentMode: isDeferred ? 'DEFERRED' : 'IMMEDIATE',
+          paymentMethod: paymentOption === 'IMMEDIATE' ? paymentMethod : undefined,
+          installments: paymentOption === 'INSTALLMENTS' ? installments : undefined,
+          spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
+          notes: notes || undefined,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'orders'] })
       cart.clearCart()
       toast.success('Pedido realizado com sucesso!')
       router.visit(backHref)
@@ -233,11 +245,7 @@ export function MarketplaceCartContainer({ backHref = '/aluno/loja', hasOnlinePa
             </div>
 
             {/* Submit */}
-            <Button
-              className="w-full"
-              onClick={handleCheckout}
-              disabled={checkout.isPending}
-            >
+            <Button className="w-full" onClick={handleCheckout} disabled={checkout.isPending}>
               {checkout.isPending ? 'Finalizando...' : 'Finalizar Compra'}
             </Button>
           </CardContent>

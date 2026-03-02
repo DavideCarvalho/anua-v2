@@ -28,13 +28,10 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
-import {
-  useStoreInstallmentRulesQueryOptions,
-  type StoreInstallmentRulesResponse,
-} from '../../hooks/queries/use_stores'
-import { useCreateStoreInstallmentRuleMutationOptions } from '../../hooks/mutations/use_create_store_installment_rule'
-import { useUpdateStoreInstallmentRuleMutationOptions } from '../../hooks/mutations/use_update_store_installment_rule'
-import { useDeleteStoreInstallmentRuleMutationOptions } from '../../hooks/mutations/use_delete_store_installment_rule'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StoreInstallmentRulesResponse = Route.Response<'api.v1.storeInstallmentRules.index'>
 
 interface StoreInstallmentRulesTabProps {
   storeId: string
@@ -50,21 +47,25 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
 
   const queryClient = useQueryClient()
 
-  const { data: rulesData, isLoading } = useQuery(useStoreInstallmentRulesQueryOptions({ storeId }))
+  const { data: rulesData, isLoading } = useQuery(
+    api.api.v1.storeInstallmentRules.index.queryOptions({ query: { storeId } })
+  )
 
   const rulesList = rulesData ?? []
 
-  const createMutation = useMutation(useCreateStoreInstallmentRuleMutationOptions())
-  const updateMutation = useMutation(useUpdateStoreInstallmentRuleMutationOptions())
-  const deleteMutation = useMutation(useDeleteStoreInstallmentRuleMutationOptions())
+  const createMutation = useMutation(api.api.v1.storeInstallmentRules.store.mutationOptions())
+  const updateMutation = useMutation(api.api.v1.storeInstallmentRules.update.mutationOptions())
+  const deleteMutation = useMutation(api.api.v1.storeInstallmentRules.destroy.mutationOptions())
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     try {
       await createMutation.mutateAsync({
-        storeId,
-        minAmount: Math.round(Number(minAmount) * 100),
-        maxInstallments: Number(maxInstallments),
+        body: {
+          storeId,
+          minAmount: Math.round(Number(minAmount) * 100),
+          maxInstallments: Number(maxInstallments),
+        },
       })
       queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
       toast.success('Regra criada com sucesso!')
@@ -87,9 +88,11 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
     if (!editingRule) return
     try {
       await updateMutation.mutateAsync({
-        id: editingRule.id,
-        minAmount: Math.round(Number(minAmount) * 100),
-        maxInstallments: Number(maxInstallments),
+        params: { id: editingRule.id },
+        body: {
+          minAmount: Math.round(Number(minAmount) * 100),
+          maxInstallments: Number(maxInstallments),
+        },
       })
       queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
       toast.success('Regra atualizada com sucesso!')
@@ -103,7 +106,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
 
   async function handleDelete(id: string) {
     try {
-      await deleteMutation.mutateAsync(id)
+      await deleteMutation.mutateAsync({ params: { id } })
       queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
       toast.success('Regra excluída com sucesso!')
     } catch {

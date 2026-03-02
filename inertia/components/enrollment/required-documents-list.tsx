@@ -27,10 +27,7 @@ export function RequiredDocumentsList({ documents }: RequiredDocumentsListProps)
       </CardHeader>
       <CardContent className="space-y-2">
         {documents.map((doc) => (
-          <div
-            key={doc.id}
-            className="flex items-start gap-2 text-sm py-1 border-b last:border-0"
-          >
+          <div key={doc.id} className="flex items-start gap-2 text-sm py-1 border-b last:border-0">
             <div className="flex-1">
               <p className="font-medium">
                 {doc.name}
@@ -44,9 +41,7 @@ export function RequiredDocumentsList({ documents }: RequiredDocumentsListProps)
         ))}
         <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
           <AlertCircle className="h-3 w-3" />
-          <span>
-            Documentos pendentes ficarão disponíveis para o responsável completar depois.
-          </span>
+          <span>Documentos pendentes ficarão disponíveis para o responsável completar depois.</span>
         </div>
       </CardContent>
     </Card>

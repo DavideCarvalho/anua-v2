@@ -1,4 +1,4 @@
-import { ApplicationService } from '@adonisjs/core/types'
+import { type ApplicationService } from '@adonisjs/core/types'
 import { QueueManager as QM } from '@boringnode/queue'
 import queueConfig from '#config/queue'
 

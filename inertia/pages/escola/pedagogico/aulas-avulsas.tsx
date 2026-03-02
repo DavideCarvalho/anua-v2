@@ -11,7 +11,7 @@ import { EnrollStudentModal } from '~/containers/extra-classes/enroll-student-mo
 import { ExtraClassAttendanceModal } from '~/containers/extra-classes/extra-class-attendance-modal'
 import { ExtraClassAttendanceSummary } from '~/containers/extra-classes/extra-class-attendance-summary'
 import { ExtraClassStudentsTable } from '~/containers/extra-classes/extra-class-students-table'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { api } from '~/lib/api'
 import {
   Select,
   SelectContent,
@@ -38,7 +38,9 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
   const [studentsExtraClassId, setStudentsExtraClassId] = useState<string | null>(null)
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
 
-  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
+  const { data: periodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
+  )
   const academicPeriods = periodsData?.data ?? []
 
   return (

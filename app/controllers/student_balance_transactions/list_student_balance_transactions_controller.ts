@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { listStudentBalanceTransactionsValidator } from '#validators/student_balance_transaction'
-import StudentBalanceTransactionDto from '#models/dto/student_balance_transaction.dto'
+import StudentBalanceTransactionTransformer from '#transformers/student_balance_transaction_transformer'
 
 export default class ListStudentBalanceTransactionsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listStudentBalanceTransactionsValidator)
 
     const page = payload.page || 1
@@ -25,7 +25,9 @@ export default class ListStudentBalanceTransactionsController {
     }
 
     const transactions = await query.paginate(page, limit)
+    const data = transactions.all()
+    const metadata = transactions.getMeta()
 
-    return response.ok(StudentBalanceTransactionDto.fromPaginator(transactions))
+    return serialize(StudentBalanceTransactionTransformer.paginate(data, metadata))
   }
 }

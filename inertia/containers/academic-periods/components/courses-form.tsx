@@ -25,7 +25,7 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Card, CardContent, CardHeader } from '~/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
-import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
+import { api } from '~/lib/api'
 
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 import { SortableLevel } from './sortable-level'
@@ -110,7 +110,9 @@ export function CoursesForm() {
     levelIndex: number
   } | null>(null)
 
-  const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
+  const { data: contractsData } = useQuery(
+    api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
+  )
   const contracts = contractsData?.data ?? []
 
   const {

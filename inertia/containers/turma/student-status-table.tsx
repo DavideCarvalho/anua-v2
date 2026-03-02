@@ -14,7 +14,12 @@ import { Label } from '~/components/ui/label'
 import { Switch } from '~/components/ui/switch'
 import { Badge } from '~/components/ui/badge'
 
-import { useStudentStatus, type StudentStatusData, type StudentStatus } from '~/hooks/queries/use_student_status'
+import type { Route } from '@tuyau/core/types'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type StudentStatusData = Route.Response<'api.v1.classes.student_status'>[number]
+type StudentStatus = StudentStatusData['status']
 
 interface StudentStatusTableProps {
   classId: string
@@ -82,7 +87,9 @@ function NoAtRiskStudents() {
     <div className="py-12 text-center">
       <Users className="mx-auto h-12 w-12 text-muted-foreground" />
       <h3 className="mt-4 text-lg font-semibold">Nenhum aluno em risco</h3>
-      <p className="mt-2 text-sm text-muted-foreground">Todos os alunos estão com bom desempenho!</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Todos os alunos estão com bom desempenho!
+      </p>
     </div>
   )
 }
@@ -117,7 +124,9 @@ function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
         <TableCell className="text-center">
           <Badge
             variant={config.variant}
-            className={student.status === 'IN_PROGRESS' ? 'bg-blue-50' : ''}
+            className={
+              student.status === 'IN_PROGRESS' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''
+            }
           >
             {config.label}
           </Badge>
@@ -137,7 +146,9 @@ function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
         </TableCell>
         <TableCell className="text-center">
           {student.pointsUntilPass !== null && student.pointsUntilPass > 0 ? (
-            <span className="font-medium text-yellow-600">{student.pointsUntilPass.toFixed(1)} pts</span>
+            <span className="font-medium text-yellow-600">
+              {student.pointsUntilPass.toFixed(1)} pts
+            </span>
           ) : (
             <span className="text-xs text-muted-foreground">-</span>
           )}
@@ -156,11 +167,11 @@ function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
         </TableCell>
         <TableCell className="text-center">
           {student.missedAssignments.length === 0 ? (
-            <Badge variant="outline" className="bg-green-50">
+            <Badge variant="outline" className="border-green-200 bg-green-100 text-green-800">
               Tudo em dia
             </Badge>
           ) : (
-            <Badge variant="secondary">
+            <Badge variant="outline" className="border-amber-200 bg-amber-100 text-amber-900">
               {student.missedAssignments.length} pendente
               {student.missedAssignments.length !== 1 ? 's' : ''}
             </Badge>
@@ -192,16 +203,25 @@ function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
   )
 }
 
-export function StudentStatusTable({ classId, courseId, academicPeriodId, subjectId }: StudentStatusTableProps) {
+export function StudentStatusTable({
+  classId,
+  courseId,
+  academicPeriodId,
+  subjectId,
+}: StudentStatusTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [showOnlyAtRisk, setShowOnlyAtRisk] = useState(false)
 
-  const { data: students, isLoading, isError } = useStudentStatus({
-    classId,
-    courseId,
-    academicPeriodId,
-    subjectId,
-    enabled: !!subjectId,
+  const {
+    data: students,
+    isLoading,
+    isError,
+  } = useQuery({
+    ...api.api.v1.classes.studentStatus.queryOptions({
+      params: { id: classId },
+      query: { subjectId: subjectId!, courseId, academicPeriodId },
+    }),
+    enabled: !!subjectId && !!classId && !!courseId && !!academicPeriodId,
   })
 
   if (!subjectId) {

@@ -1,7 +1,7 @@
 import { Head, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { Plus, FileText, Filter } from 'lucide-react'
-import { useRouter } from '@tuyau/inertia/react'
+import { useRouter } from '@adonisjs/inertia/react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { Button } from '../../../components/ui/button'

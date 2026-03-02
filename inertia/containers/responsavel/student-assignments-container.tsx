@@ -30,10 +30,10 @@ import {
   AccordionTrigger,
 } from '../../components/ui/accordion'
 
-import {
-  useStudentAssignmentsQueryOptions,
-  type StudentAssignmentsResponse,
-} from '../../hooks/queries/use_student_assignments'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StudentAssignmentsResponse = Route.Response<'api.v1.responsavel.api.student_assignments'>
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 type Subject = StudentAssignmentsResponse['subjects'][number]
@@ -59,9 +59,12 @@ export function StudentAssignmentsContainer({
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
 
   const { data, isLoading, isError, error } = useQuery(
-    useStudentAssignmentsQueryOptions(studentId, {
-      status: statusFilter === 'all' ? undefined : statusFilter,
-      subjectId: subjectFilter === 'all' ? undefined : subjectFilter,
+    api.api.v1.responsavel.api.studentAssignments.queryOptions({
+      params: { studentId },
+      query: {
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        subjectId: subjectFilter === 'all' ? undefined : subjectFilter,
+      },
     })
   )
 

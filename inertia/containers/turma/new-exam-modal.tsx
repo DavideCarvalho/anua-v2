@@ -26,8 +26,8 @@ import {
 } from '~/components/ui/select'
 import { DatePicker } from '~/components/ui/date-picker'
 import type { UserDto } from '~/lib/types'
-import { useClassQueryOptions } from '~/hooks/queries/use_class'
-import { useCreateExam } from '~/hooks/mutations/use_create_exam'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const examTypes = [
   { value: 'WRITTEN', label: 'Escrita' },
@@ -91,8 +91,9 @@ export function NewExamModal({
     },
   })
 
+  const queryClient = useQueryClient()
   const { data: classData, isLoading: isLoadingSubjects } = useQuery({
-    ...useClassQueryOptions(classId),
+    ...api.api.v1.classes.show.queryOptions({ params: { id: classId } }),
     enabled: open && !!classId,
   })
 
@@ -133,7 +134,7 @@ export function NewExamModal({
     }
   }, [open, form, subjects])
 
-  const createMutation = useCreateExam()
+  const createMutation = useMutation(api.api.v1.exams.store.mutationOptions())
 
   const onSubmit = form.handleSubmit(async (data) => {
     const selectedSubject = subjects?.find((s) => s.id === data.subjectId)
@@ -144,15 +145,18 @@ export function NewExamModal({
 
     try {
       await createMutation.mutateAsync({
-        title: data.title,
-        description: data.description,
-        maxScore: data.maxScore,
-        type: data.type,
-        scheduledDate: data.scheduledDate.toISOString(),
-        classId,
-        subjectId: data.subjectId,
-        teacherId: selectedSubject.teacherId,
+        body: {
+          title: data.title,
+          description: data.description,
+          maxScore: data.maxScore,
+          type: data.type,
+          scheduledDate: data.scheduledDate.toISOString(),
+          classId,
+          subjectId: data.subjectId,
+          teacherId: selectedSubject.teacherId,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['exams'] })
       toast.success('Prova criada com sucesso!')
       onOpenChange(false)
       form.reset()

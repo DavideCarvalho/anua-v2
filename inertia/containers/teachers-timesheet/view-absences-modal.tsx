@@ -8,9 +8,8 @@ import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use_teacher_absences'
-import { useApproveAbsenceMutation } from '../../hooks/mutations/use_approve_absence'
-import { useRejectAbsenceMutation } from '../../hooks/mutations/use_reject_absence'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const ABSENCE_REASON_LABELS: Record<string, string> = {
   SICKNESS: 'Doença',
@@ -44,11 +43,14 @@ export function ViewAbsencesModal({
   const [rejectionReason, setRejectionReason] = useState('')
   const [absenceToReject, setAbsenceToReject] = useState<string | null>(null)
 
-  const approve = useApproveAbsenceMutation()
-  const reject = useRejectAbsenceMutation()
+  const queryClient = useQueryClient()
+  const approve = useMutation(api.api.v1.teachers.approveAbsence.mutationOptions())
+  const reject = useMutation(api.api.v1.teachers.rejectAbsence.mutationOptions())
 
   const { data, isLoading } = useQuery({
-    ...useTeacherAbsencesQueryOptions({ teacherId: teacherId ?? '', month, year } as any),
+    ...api.api.v1.teachers.getTeacherAbsences.queryOptions({
+      query: { teacherId: teacherId ?? '', month, year },
+    }),
     enabled: !!teacherId && open,
   })
 
@@ -126,11 +128,18 @@ export function ViewAbsencesModal({
                           size="sm"
                           variant="default"
                           onClick={() => {
-                            toast.promise(approve.mutateAsync({ absenceId: absence.id } as any), {
-                              loading: 'Aprovando falta...',
-                              error: 'Erro ao aprovar falta',
-                              success: 'Falta aprovada com sucesso!',
-                            })
+                            toast.promise(
+                              approve.mutateAsync({ body: { absenceId: absence.id } }).then(() =>
+                                queryClient.invalidateQueries({
+                                  queryKey: ['teacher-absences'],
+                                })
+                              ),
+                              {
+                                loading: 'Aprovando falta...',
+                                error: 'Erro ao aprovar falta',
+                                success: 'Falta aprovada com sucesso!',
+                              }
+                            )
                           }}
                         >
                           Aprovar
@@ -154,10 +163,18 @@ export function ViewAbsencesModal({
                                   }
 
                                   toast.promise(
-                                    reject.mutateAsync({
-                                      absenceId: absence.id,
-                                      rejectionReason,
-                                    } as any),
+                                    reject
+                                      .mutateAsync({
+                                        body: {
+                                          absenceId: absence.id,
+                                          rejectionReason,
+                                        },
+                                      })
+                                      .then(() =>
+                                        queryClient.invalidateQueries({
+                                          queryKey: ['teacher-absences'],
+                                        })
+                                      ),
                                     {
                                       loading: 'Rejeitando falta...',
                                       error: 'Erro ao rejeitar falta',

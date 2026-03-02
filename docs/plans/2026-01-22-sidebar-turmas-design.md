@@ -25,6 +25,7 @@ Migrar a funcionalidade de sidebar dinâmica do projeto `school-super-app` para 
 **Controller:** `app/controllers/classes/get_classes_for_sidebar_controller.ts`
 
 **Query:**
+
 - Busca turmas dos períodos ativos do usuário
 - Filtros:
   - `AcademicPeriod.isActive = true`
@@ -32,6 +33,7 @@ Migrar a funcionalidade de sidebar dinâmica do projeto `school-super-app` para 
   - Escola do usuário (via `UserHasSchool`)
 
 **Retorno por turma:**
+
 ```typescript
 {
   id: string
@@ -97,6 +99,7 @@ interface SidebarData {
 **Arquivo:** `inertia/components/sidebar/sidebar-academic-periods.tsx`
 
 Estrutura visual:
+
 ```
 ▼ Período Letivo 2025
   ▼ Ensino Fundamental
@@ -138,18 +141,22 @@ O componente `SidebarAcademicPeriods` será adicionado no sidebar existente (`in
 
 ```typescript
 // start/routes.ts
-router.group(() => {
-  router.get('visao-geral', [CourseOverviewController])
-  router.get('turmas', [CourseClassesController])
+router
+  .group(() => {
+    router.get('visao-geral', [CourseOverviewController])
+    router.get('turmas', [CourseClassesController])
 
-  router.group(() => {
-    router.get('atividades', [ClassActivitiesController])
-    router.get('provas', [ClassExamsController])
-    router.get('presencas', [ClassAttendanceController])
-    router.get('notas', [ClassGradesController])
-    router.get('situacao', [ClassStatusController])
-  }).prefix(':turmaSlug')
-}).prefix('escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas')
+    router
+      .group(() => {
+        router.get('atividades', [ClassActivitiesController])
+        router.get('provas', [ClassExamsController])
+        router.get('presencas', [ClassAttendanceController])
+        router.get('notas', [ClassGradesController])
+        router.get('situacao', [ClassStatusController])
+      })
+      .prefix(':turmaSlug')
+  })
+  .prefix('escola/periodos-letivos/:slug/cursos/:cursoSlug/turmas')
 ```
 
 ---
@@ -158,15 +165,15 @@ router.group(() => {
 
 ### Arquivos a Criar
 
-| Página | Arquivo |
-|--------|---------|
-| Visão Geral do Curso | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral.tsx` |
-| Lista de Turmas | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index.tsx` |
-| Turma - Atividades | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/atividades.tsx` |
-| Turma - Provas | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/provas.tsx` |
-| Turma - Presenças | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/presencas.tsx` |
-| Turma - Notas | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/notas.tsx` |
-| Turma - Situação | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao.tsx` |
+| Página               | Arquivo                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| Visão Geral do Curso | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral.tsx`                   |
+| Lista de Turmas      | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index.tsx`                  |
+| Turma - Atividades   | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/atividades.tsx` |
+| Turma - Provas       | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/provas.tsx`     |
+| Turma - Presenças    | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/presencas.tsx`  |
+| Turma - Notas        | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/notas.tsx`      |
+| Turma - Situação     | `inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao.tsx`   |
 
 ### Layout da Turma
 
@@ -187,6 +194,7 @@ As páginas de turma individual usarão um layout compartilhado `TurmaLayout` co
 ## Referência
 
 Baseado na implementação do `school-super-app`:
+
 - Hook: `apps/anua/src/app/escola/hooks/useSideBarRoutes.tsx` (linhas 494-576)
 - Endpoint: `packages/api/src/router/class/endpoints/get-classes-for-sidebar.ts`
 

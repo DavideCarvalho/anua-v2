@@ -15,8 +15,10 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import type { AssignmentsData } from '../../hooks/queries/use_assignments'
-import { useAssignmentsQueryOptions } from '../../hooks/queries/use_assignments'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type AssignmentsData = Route.Response<'api.v1.assignments.index'>
 
 interface AssignmentsListProps {
   classId?: string
@@ -33,7 +35,11 @@ export function AssignmentsList({
   onEdit,
   onDelete,
 }: AssignmentsListProps) {
-  const { data, isLoading } = useQuery(useAssignmentsQueryOptions({ classId, subjectId }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.assignments.index.queryOptions({
+      query: { classId, subjectId },
+    })
+  )
 
   if (isLoading) {
     return <AssignmentsListSkeleton />

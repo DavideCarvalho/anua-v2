@@ -2,8 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Package, Plus, MoreHorizontal, Users, GraduationCap, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useSubscriptionPlansQueryOptions } from '../../hooks/queries/use_subscription_plans'
-import { useDeleteSubscriptionPlanMutationOptions } from '../../hooks/mutations/use_subscription_mutations'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -38,8 +37,8 @@ const tierColors: Record<string, string> = {
 
 export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableProps) {
   const queryClient = useQueryClient()
-  const { data, isLoading } = useQuery(useSubscriptionPlansQueryOptions({}))
-  const deleteMutation = useMutation(useDeleteSubscriptionPlanMutationOptions())
+  const { data, isLoading } = useQuery(api.api.v1.subscriptionPlans.index.queryOptions({}))
+  const deleteMutation = useMutation(api.api.v1.subscriptionPlans.destroy.mutationOptions())
 
   const plans = data?.data ?? []
 
@@ -52,7 +51,7 @@ export function SubscriptionPlansTable({ onCreatePlan }: SubscriptionPlansTableP
 
   async function handleDelete(planId: string) {
     try {
-      await deleteMutation.mutateAsync(planId)
+      await deleteMutation.mutateAsync({ params: { id: planId } })
       await queryClient.invalidateQueries({ queryKey: ['subscription-plans'] })
       toast.success('Plano excluido com sucesso')
     } catch (error) {

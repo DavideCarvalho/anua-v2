@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Stepper, type Step } from '../students/new-student-modal/components/stepper'
-import { useCreateAsaasSubaccount } from '../../hooks/mutations/use_create_asaas_subaccount'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const formSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres').max(255),
@@ -66,7 +67,8 @@ export function AsaasOnboardingWizard({
     STEPS_CONFIG.map(() => 'pending')
   )
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const createMutation = useCreateAsaasSubaccount()
+  const queryClient = useQueryClient()
+  const createMutation = useMutation(api.api.v1.asaas.subaccounts.create.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -189,19 +191,21 @@ export function AsaasOnboardingWizard({
 
     toast.promise(
       createMutation.mutateAsync({
-        name: values.name,
-        email: values.email,
-        cpfCnpj: digitsOnly(values.cpfCnpj),
-        companyType: values.companyType,
-        birthDate: values.birthDate ? values.birthDate.split('/').reverse().join('-') : undefined,
-        phone: values.phone ? digitsOnly(values.phone) : undefined,
-        mobilePhone: values.mobilePhone ? digitsOnly(values.mobilePhone) : undefined,
-        address: values.address,
-        addressNumber: values.addressNumber,
-        complement: values.complement || undefined,
-        province: values.province,
-        postalCode: digitsOnly(values.postalCode),
-        incomeValue: values.incomeValue,
+        body: {
+          name: values.name,
+          email: values.email,
+          cpfCnpj: digitsOnly(values.cpfCnpj),
+          companyType: values.companyType,
+          birthDate: values.birthDate ? values.birthDate.split('/').reverse().join('-') : undefined,
+          phone: values.phone ? digitsOnly(values.phone) : undefined,
+          mobilePhone: values.mobilePhone ? digitsOnly(values.mobilePhone) : undefined,
+          address: values.address,
+          addressNumber: values.addressNumber,
+          complement: values.complement || undefined,
+          province: values.province,
+          postalCode: digitsOnly(values.postalCode),
+          incomeValue: values.incomeValue,
+        },
       }),
       {
         loading: loadingMessage,

@@ -1,8 +1,8 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useScholarshipsQueryOptions } from '../hooks/queries/use_scholarships'
-import { useToggleScholarshipActiveMutation } from '../hooks/mutations/use_toggle_scholarship_active'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -91,7 +91,10 @@ export function ScholarshipsTableContainer({
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <ScholarshipsListErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <ScholarshipsListErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <ScholarshipsTableContent onEdit={onEdit} onNew={onNew} />
@@ -117,11 +120,16 @@ function ScholarshipsTableContent({
 
   const { search, page, limit } = filters
 
+  const queryClient = useQueryClient()
   const { data, isLoading, error, refetch } = useQuery(
-    useScholarshipsQueryOptions({ page, limit, search: search || undefined })
+    api.api.v1.scholarships.listScholarships.queryOptions({
+      query: { page, limit, search: search || undefined },
+    })
   )
 
-  const toggleActive = useToggleScholarshipActiveMutation()
+  const toggleActive = useMutation(
+    api.api.v1.scholarships.toggleScholarshipActive.mutationOptions()
+  )
 
   const rows = data?.data ?? []
   const meta = data?.meta ?? null
@@ -195,7 +203,15 @@ function ScholarshipsTableContent({
                       <Switch
                         checked={!!row.isActive}
                         onCheckedChange={() => {
-                          toggleActive.mutate({ id: row.id })
+                          toggleActive.mutate(
+                            { params: { id: row.id } },
+                            {
+                              onSuccess: () =>
+                                queryClient.invalidateQueries({
+                                  queryKey: ['scholarships'],
+                                }),
+                            }
+                          )
                         }}
                       />
                     </td>

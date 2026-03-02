@@ -28,12 +28,8 @@ import {
   DialogTitle,
 } from '../../../components/ui/dialog'
 import { formatCurrency } from '../../../lib/utils'
-import { useCanteenMealsQueryOptions } from '../../../hooks/queries/use_canteen_meals'
-import {
-  useCreateCanteenMeal,
-  useDeleteCanteenMeal,
-  useUpdateCanteenMeal,
-} from '../../../hooks/mutations/use_canteen_meal_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import type { SharedProps } from '../../../lib/types'
 
 interface PageProps extends SharedProps {
@@ -106,18 +102,22 @@ export default function CardapioPage() {
   const [createForm, setCreateForm] = useState<MealFormValues>(emptyMealForm)
   const [editForm, setEditForm] = useState<MealFormValues>(emptyMealForm)
 
-  const createMeal = useCreateCanteenMeal()
-  const updateMeal = useUpdateCanteenMeal()
-  const deleteMeal = useDeleteCanteenMeal()
+  const queryClient = useQueryClient()
+  const createMeal = useMutation(api.api.v1.canteenMeals.store.mutationOptions())
+  const updateMeal = useMutation(api.api.v1.canteenMeals.update.mutationOptions())
+  const deleteMeal = useMutation(api.api.v1.canteenMeals.destroy.mutationOptions())
 
-  const { data, isLoading } = useQuery(
-    useCanteenMealsQueryOptions({
-      canteenId: canteenId ?? undefined,
-      page: 1,
-      limit: 100,
-      isActive: true,
-    })
-  )
+  const { data, isLoading } = useQuery({
+    ...api.api.v1.canteenMeals.index.queryOptions({
+      query: {
+        canteenId: canteenId ?? undefined,
+        page: 1,
+        limit: 100,
+        isActive: true,
+      },
+    }),
+    enabled: !!canteenId,
+  })
 
   const meals = (data as PaginatorLike<CanteenMeal> | undefined)?.data ?? []
 
@@ -168,22 +168,26 @@ export default function CardapioPage() {
 
     await toast.promise(
       createMeal.mutateAsync({
-        canteenId,
-        name: createForm.name.trim(),
-        description: createForm.description.trim() || undefined,
-        price,
-        servedAt: createForm.date,
-        maxReservations,
+        body: {
+          canteenId,
+          name: createForm.name.trim(),
+          description: createForm.description.trim() || undefined,
+          price,
+          servedAt: createForm.date,
+          maxReservations,
+        },
       }),
       {
         loading: 'Criando refeição...',
-        success: 'Refeição criada com sucesso',
+        success: () => {
+          queryClient.invalidateQueries({ queryKey: ['canteen-meals'] })
+          setCreateOpen(false)
+          setCreateForm(emptyMealForm)
+          return 'Refeição criada com sucesso'
+        },
         error: (err) => (err instanceof Error ? err.message : 'Erro ao criar refeição'),
       }
     )
-
-    setCreateOpen(false)
-    setCreateForm(emptyMealForm)
   }
 
   const handleEdit = async () => {
@@ -203,21 +207,25 @@ export default function CardapioPage() {
 
     await toast.promise(
       updateMeal.mutateAsync({
-        id: editingMeal.id,
-        name: editForm.name.trim(),
-        description: editForm.description.trim() || undefined,
-        price,
-        servedAt: editForm.date,
-        maxReservations,
+        params: { id: editingMeal.id },
+        body: {
+          name: editForm.name.trim(),
+          description: editForm.description.trim() || undefined,
+          price,
+          servedAt: editForm.date,
+          maxReservations,
+        },
       }),
       {
         loading: 'Atualizando refeição...',
-        success: 'Refeição atualizada',
+        success: () => {
+          queryClient.invalidateQueries({ queryKey: ['canteen-meals'] })
+          setEditingMeal(null)
+          return 'Refeição atualizada'
+        },
         error: (err) => (err instanceof Error ? err.message : 'Erro ao atualizar refeição'),
       }
     )
-
-    setEditingMeal(null)
   }
 
   const handleDelete = async (meal: CanteenMeal) => {
@@ -225,9 +233,12 @@ export default function CardapioPage() {
       return
     }
 
-    await toast.promise(deleteMeal.mutateAsync(meal.id), {
+    await toast.promise(deleteMeal.mutateAsync({ params: { id: meal.id } }), {
       loading: 'Excluindo refeição...',
-      success: 'Refeição excluída',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: ['canteen-meals'] })
+        return 'Refeição excluída'
+      },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao excluir refeição'),
     })
   }

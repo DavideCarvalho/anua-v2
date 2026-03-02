@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
+import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 import { listCanteenPurchasesValidator } from '#validators/canteen'
 
 export default class ListCanteenPurchasesController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listCanteenPurchasesValidator)
 
     const { canteenId, userId, search, status, paymentMethod, page = 1, limit = 20 } = payload
@@ -41,6 +41,9 @@ export default class ListCanteenPurchasesController {
 
     const purchases = await query.paginate(page, limit)
 
-    return CanteenPurchaseDto.fromPaginator(purchases)
+    const data = purchases.all()
+    const metadata = purchases.getMeta()
+
+    return serialize(CanteenPurchaseTransformer.paginate(data, metadata))
   }
 }

@@ -13,6 +13,7 @@
 ## Task 1: Migration — Add Columns to User Table
 
 **Files:**
+
 - Create: `database/migrations/1768500144000_add_email_verified_and_last_logged_in_to_users.ts`
 
 **Step 1:** Create the migration file:
@@ -52,6 +53,7 @@ Expected: Migration runs successfully, two new nullable columns on `User`.
 ## Task 2: User Model — Add Column Declarations
 
 **Files:**
+
 - Modify: `app/models/user.ts:82-87` (after `schoolChainId` column, before `createdAt`)
 
 **Step 1:** Add the two new column declarations right before the `createdAt` column (line 83):
@@ -71,6 +73,7 @@ Insert these after line 81 (`declare schoolChainId: string | null`) and before l
 ## Task 3: VerifyCodeController — Set emailVerifiedAt on First OTP Login
 
 **Files:**
+
 - Modify: `app/controllers/auth/verify_code.ts:29-30`
 
 **Step 1:** Add `DateTime` import at the top (line 2):
@@ -82,13 +85,13 @@ import { DateTime } from 'luxon'
 **Step 2:** After `await auth.use('web').login(user)` (line 29), add:
 
 ```typescript
-      await auth.use('web').login(user)
+await auth.use('web').login(user)
 
-      // Set emailVerifiedAt on first OTP verification (proves email ownership)
-      if (!user.emailVerifiedAt) {
-        user.emailVerifiedAt = DateTime.now()
-        await user.save()
-      }
+// Set emailVerifiedAt on first OTP verification (proves email ownership)
+if (!user.emailVerifiedAt) {
+  user.emailVerifiedAt = DateTime.now()
+  await user.save()
+}
 ```
 
 The rest of the controller (return response with preloaded user) stays unchanged.
@@ -98,6 +101,7 @@ The rest of the controller (return response with preloaded user) stays unchanged
 ## Task 4: TrackActivityMiddleware — Update lastLoggedInAt
 
 **Files:**
+
 - Create: `app/middleware/track_activity_middleware.ts`
 - Modify: `start/kernel.ts:41-42`
 
@@ -139,11 +143,13 @@ This ensures the middleware runs after auth is initialized (so `ctx.auth.isAuthe
 ## Task 5: Email Guard — Enroll Student Controller
 
 **Files:**
+
 - Modify: `app/controllers/students/enroll_student_controller.ts:190-191`
 
 **Step 1:** In the responsible linking block (~line 190), when an existing responsible is found, add the email guard and allow updating unverified emails:
 
 Change from:
+
 ```typescript
           if (existingResponsible) {
             responsibleUser = existingResponsible
@@ -151,6 +157,7 @@ Change from:
 ```
 
 To:
+
 ```typescript
           if (existingResponsible) {
             responsibleUser = existingResponsible
@@ -167,11 +174,13 @@ To:
 ## Task 6: Email Guard — Full Update Student Controller
 
 **Files:**
+
 - Modify: `app/controllers/students/full_update_student_controller.ts:138-148`
 
 **Step 1:** In the responsible update block (~line 138-148), guard the email field when merging:
 
 Change from:
+
 ```typescript
           if (existingResponsible) {
             responsibleUser = existingResponsible
@@ -187,6 +196,7 @@ Change from:
 ```
 
 To:
+
 ```typescript
           if (existingResponsible) {
             responsibleUser = existingResponsible
@@ -207,15 +217,15 @@ To:
 
 ## Files Summary
 
-| Action | File |
-|--------|------|
+| Action | File                                                                                  |
+| ------ | ------------------------------------------------------------------------------------- |
 | Create | `database/migrations/1768500144000_add_email_verified_and_last_logged_in_to_users.ts` |
-| Create | `app/middleware/track_activity_middleware.ts` |
-| Modify | `app/models/user.ts` (add 2 column declarations) |
-| Modify | `app/controllers/auth/verify_code.ts` (set emailVerifiedAt on OTP verify) |
-| Modify | `start/kernel.ts` (register TrackActivityMiddleware) |
-| Modify | `app/controllers/students/enroll_student_controller.ts` (email guard on link) |
-| Modify | `app/controllers/students/full_update_student_controller.ts` (email guard on merge) |
+| Create | `app/middleware/track_activity_middleware.ts`                                         |
+| Modify | `app/models/user.ts` (add 2 column declarations)                                      |
+| Modify | `app/controllers/auth/verify_code.ts` (set emailVerifiedAt on OTP verify)             |
+| Modify | `start/kernel.ts` (register TrackActivityMiddleware)                                  |
+| Modify | `app/controllers/students/enroll_student_controller.ts` (email guard on link)         |
+| Modify | `app/controllers/students/full_update_student_controller.ts` (email guard on merge)   |
 
 ## Verification
 

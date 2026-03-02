@@ -61,7 +61,7 @@ export default function TurmaSituacaoPage({
 
   // Auto-select first subject
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
-    filteredSubjects.length > 0 ? filteredSubjects[0]?.id ?? null : null
+    filteredSubjects.length > 0 ? (filteredSubjects[0]?.id ?? null) : null
   )
 
   return (
@@ -104,7 +104,12 @@ export default function TurmaSituacaoPage({
             </div>
           </CardHeader>
           <CardContent>
-            <StudentStatusTable classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} subjectId={selectedSubjectId} />
+            <StudentStatusTable
+              classId={classId}
+              courseId={courseId}
+              academicPeriodId={academicPeriodId}
+              subjectId={selectedSubjectId}
+            />
           </CardContent>
         </Card>
       </TurmaLayout>

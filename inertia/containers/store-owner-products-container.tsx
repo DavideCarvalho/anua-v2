@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { api } from '../lib/api'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -19,18 +20,11 @@ import {
 } from '../components/ui/dropdown-menu'
 import { Badge } from '../components/ui/badge'
 import { Switch } from '../components/ui/switch'
-import {
-  useOwnStoreQueryOptions,
-  useOwnProductsQueryOptions,
-  type OwnProductsResponse,
-} from '../hooks/queries/use_store_owner'
-import {
-  useToggleProductActive,
-  useDeleteProduct,
-} from '../hooks/mutations/use_store_owner_mutations'
+import { useMutation } from '@tanstack/react-query'
 import { CreateProductModal } from './stores/create-product-modal'
 import { EditProductModal } from './store-owner/edit-product-modal'
 import { formatCurrency } from '../lib/utils'
+import { Route } from '@tuyau/core/types'
 
 const CATEGORY_LABELS: Record<string, string> = {
   CANTEEN_FOOD: 'Alimento',
@@ -45,19 +39,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Outro',
 }
 
-type Product = NonNullable<OwnProductsResponse>['data'][number]
+type Product = NonNullable<Route.Response<'api.v1.store_owner.products.index'>['data']>[number]
 
 export function StoreOwnerProductsContainer() {
   const queryClient = useQueryClient()
   const [createOpen, setCreateOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
-  const { data: storeData } = useQuery(useOwnStoreQueryOptions())
-  const { data, isLoading } = useQuery(useOwnProductsQueryOptions())
-  const toggleActive = useToggleProductActive()
-  const deleteProduct = useDeleteProduct()
+  const { data: storeData } = useQuery(api.api.v1.storeOwner.store.show.queryOptions())
+  const { data: productsData, isLoading } = useQuery(
+    api.api.v1.storeOwner.products.index.queryOptions()
+  )
+  const toggleActive = useMutation(api.api.v1.storeOwner.products.toggleActive.mutationOptions())
+  const deleteProduct = useMutation(api.api.v1.storeOwner.products.destroy.mutationOptions())
 
-  const products = data?.data ?? []
+  const products = productsData?.data ?? []
 
   return (
     <>
@@ -90,7 +86,7 @@ export function StoreOwnerProductsContainer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product: Product) => (
+                {products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="font-medium">{product.name}</div>
@@ -116,7 +112,17 @@ export function StoreOwnerProductsContainer() {
                     <TableCell>
                       <Switch
                         checked={product.isActive}
-                        onCheckedChange={() => toggleActive.mutate(product.id)}
+                        onCheckedChange={() =>
+                          toggleActive.mutate(
+                            { params: { id: product.id } },
+                            {
+                              onSuccess: () =>
+                                queryClient.invalidateQueries({
+                                  queryKey: ['storeOwner', 'products'],
+                                }),
+                            }
+                          )
+                        }
                       />
                     </TableCell>
                     <TableCell>
@@ -135,7 +141,15 @@ export function StoreOwnerProductsContainer() {
                             className="text-destructive"
                             onClick={() => {
                               if (confirm('Tem certeza que deseja excluir este produto?')) {
-                                deleteProduct.mutate(product.id)
+                                deleteProduct.mutate(
+                                  { params: { id: product.id } },
+                                  {
+                                    onSuccess: () =>
+                                      queryClient.invalidateQueries({
+                                        queryKey: ['storeOwner', 'products'],
+                                      }),
+                                  }
+                                )
                               }
                             }}
                           >

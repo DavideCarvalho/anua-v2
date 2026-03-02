@@ -17,19 +17,19 @@ import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
 import { formatCurrency } from '../../../lib/utils'
-import { useStudentsQueryOptions, type StudentsResponse } from '../../../hooks/queries/use_students'
-import {
-  useCanteenItemsQueryOptions,
-  type CanteenItemsResponse,
-} from '../../../hooks/queries/use_canteen_items'
-import {
-  useStudentEnrollmentsQueryOptions,
-  type StudentEnrollment,
-} from '../../../hooks/queries/use_student_enrollments'
-import {
-  useCreateCanteenPurchase,
-  type CreateCanteenPurchasePayload,
-} from '../../../hooks/mutations/use_canteen_purchase_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type StudentsResponse = Route.Response<'api.v1.students.index'>
+type CanteenItemsResponse = Route.Response<'api.v1.canteenItems.index'>
+interface CreateCanteenPurchasePayload {
+  userId: string
+  canteenId: string
+  paymentMethod: string
+  studentHasLevelId?: string
+  items: Array<{ canteenItemId: string; quantity: number }>
+}
 import type { SharedProps } from '../../../lib/types'
 
 interface PageProps extends SharedProps {
@@ -52,28 +52,32 @@ export default function PDVPage() {
     Array<{ id: string; name: string; price: number; quantity: number }>
   >([])
 
-  const createPurchaseMutation = useCreateCanteenPurchase()
+  const queryClient = useQueryClient()
+  const createPurchaseMutation = useMutation(api.api.v1.canteenPurchases.store.mutationOptions())
 
   const { data: studentsData, isLoading: loadingStudents } = useQuery(
-    useStudentsQueryOptions({ page: 1, limit: 8, search: studentSearch || undefined })
+    api.api.v1.students.index.queryOptions({
+      query: { page: 1, limit: 8, search: studentSearch || undefined },
+    })
   )
   const students = studentsData?.data ?? []
   const selectedStudent =
     students.find((student: StudentListItem) => student.id === selectedStudentId) ?? null
 
-  const { data: enrollmentsData } = useQuery(
-    useStudentEnrollmentsQueryOptions(selectedStudentId || null)
-  )
+  const { data: enrollmentsData } = useQuery({
+    ...api.api.v1.students.enrollments.list.queryOptions({
+      params: { id: selectedStudentId! },
+    }),
+    enabled: !!selectedStudentId,
+  })
   const enrollments = enrollmentsData ?? []
 
-  const { data: itemsData, isLoading: loadingItems } = useQuery(
-    useCanteenItemsQueryOptions({
-      page: 1,
-      limit: 40,
-      canteenId,
-      isActive: true,
-    })
-  )
+  const { data: itemsData, isLoading: loadingItems } = useQuery({
+    ...api.api.v1.canteenItems.index.queryOptions({
+      query: { page: 1, limit: 40, canteenId: canteenId ?? undefined, isActive: true },
+    }),
+    enabled: !!canteenId,
+  })
   const items = itemsData?.data ?? []
 
   useEffect(() => {
@@ -159,13 +163,16 @@ export default function PDVPage() {
       })),
     }
 
-    await toast.promise(createPurchaseMutation.mutateAsync(payload), {
+    await toast.promise(createPurchaseMutation.mutateAsync({ body: payload }), {
       loading: 'Registrando venda...',
-      success: 'Venda registrada com sucesso',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+        queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+        setCart([])
+        return 'Venda registrada com sucesso'
+      },
       error: (error) => (error instanceof Error ? error.message : 'Erro ao registrar venda'),
     })
-
-    setCart([])
   }
 
   return (

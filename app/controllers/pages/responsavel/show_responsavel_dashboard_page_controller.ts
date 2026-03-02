@@ -7,6 +7,6 @@ export default class ShowResponsavelDashboardPageController {
       return response.redirect('/sign-in')
     }
 
-    return inertia.render('responsavel/index')
+    return inertia.render('responsavel/index', {})
   }
 }

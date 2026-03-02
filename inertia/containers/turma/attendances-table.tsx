@@ -14,7 +14,7 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Progress } from '~/components/ui/progress'
 import { ErrorBoundary } from '~/components/error-boundary'
-import { useAttendanceClassStudentsQueryOptions } from '~/hooks/queries/use_attendance_class_students'
+import { api } from '~/lib/api'
 
 interface AttendancesTableProps {
   classId: string
@@ -48,9 +48,7 @@ function AttendancesTableEmpty() {
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <Users className="h-12 w-12 text-muted-foreground" />
       <h3 className="mt-4 text-lg font-semibold">Nenhum aluno</h3>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Não há alunos matriculados nesta turma.
-      </p>
+      <p className="mt-2 text-sm text-muted-foreground">Não há alunos matriculados nesta turma.</p>
     </div>
   )
 }
@@ -68,16 +66,19 @@ function AttendancesTableContent({ classId, academicPeriodId, courseId }: Attend
     data: response,
     isLoading,
     isError,
-  } = useQuery(useAttendanceClassStudentsQueryOptions({ classId, courseId, academicPeriodId, page }))
+  } = useQuery(
+    api.api.v1.attendance.classStudents.queryOptions({
+      params: { classId },
+      query: { page, limit: 20, courseId, academicPeriodId },
+    })
+  )
 
   if (isLoading) {
     return <AttendancesTableSkeleton />
   }
 
   if (isError || !response) {
-    return (
-      <div className="text-center text-destructive py-8">Erro ao carregar presenças</div>
-    )
+    return <div className="text-center text-destructive py-8">Erro ao carregar presenças</div>
   }
 
   const attendances: StudentAttendance[] = response?.data ?? []
@@ -110,26 +111,17 @@ function AttendancesTableContent({ classId, academicPeriodId, courseId }: Attend
                 </Badge>
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="destructive">
-                  {attendance.absentCount}
-                </Badge>
+                <Badge variant="destructive">{attendance.absentCount}</Badge>
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="secondary">
-                  {attendance.lateCount}
-                </Badge>
+                <Badge variant="secondary">{attendance.lateCount}</Badge>
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="outline">
-                  {attendance.justifiedCount}
-                </Badge>
+                <Badge variant="outline">{attendance.justifiedCount}</Badge>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2 justify-center">
-                  <Progress
-                    value={attendance.attendancePercentage}
-                    className="w-16 h-2"
-                  />
+                  <Progress value={attendance.attendancePercentage} className="w-16 h-2" />
                   <Badge variant={getAttendanceBadgeVariant(attendance.attendancePercentage)}>
                     {attendance.attendancePercentage}%
                   </Badge>

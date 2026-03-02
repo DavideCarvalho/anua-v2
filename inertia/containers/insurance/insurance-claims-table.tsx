@@ -41,10 +41,8 @@ import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useInsuranceClaimsQueryOptions } from '../../hooks/queries/use_insurance_claims'
-import { useApproveInsuranceClaimMutation } from '../../hooks/mutations/use_approve_insurance_claim'
-import { useRejectInsuranceClaimMutation } from '../../hooks/mutations/use_reject_insurance_claim'
-import { useMarkClaimPaidMutation } from '../../hooks/mutations/use_mark_claim_paid'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_OPTIONS = [
@@ -127,27 +125,35 @@ function InsuranceClaimsTableContent() {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
+  const queryClient = useQueryClient()
   const { data } = useQuery(
-    useInsuranceClaimsQueryOptions({
-      status: statusFilter as any,
-      page,
-      limit,
+    api.api.v1.insurance.claims.index.queryOptions({
+      query: {
+        status: statusFilter as any,
+        page,
+        limit,
+      },
     })
   )
 
-  const approveMutation = useApproveInsuranceClaimMutation()
-  const rejectMutation = useRejectInsuranceClaimMutation()
-  const markPaidMutation = useMarkClaimPaidMutation()
+  const approveMutation = useMutation(api.api.v1.insurance.claims.approve.mutationOptions())
+  const rejectMutation = useMutation(api.api.v1.insurance.claims.reject.mutationOptions())
+  const markPaidMutation = useMutation(api.api.v1.insurance.claims.markPaid.mutationOptions())
 
   const claims = data?.data || []
   const meta = data?.meta
 
   const handleApprove = (claimId: string) => {
-    toast.promise(approveMutation.mutateAsync({ claimId }), {
-      loading: 'Aprovando sinistro...',
-      success: 'Sinistro aprovado com sucesso!',
-      error: 'Erro ao aprovar sinistro',
-    })
+    toast.promise(
+      approveMutation.mutateAsync({ params: { claimId } }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
+      }),
+      {
+        loading: 'Aprovando sinistro...',
+        success: 'Sinistro aprovado com sucesso!',
+        error: 'Erro ao aprovar sinistro',
+      }
+    )
   }
 
   const handleOpenRejectDialog = (claimId: string) => {
@@ -160,10 +166,14 @@ function InsuranceClaimsTableContent() {
     if (!selectedClaimId || !rejectionReason.trim()) return
 
     toast.promise(
-      rejectMutation.mutateAsync({
-        claimId: selectedClaimId,
-        rejectionReason: rejectionReason.trim(),
-      }),
+      rejectMutation
+        .mutateAsync({
+          params: { claimId: selectedClaimId },
+          body: { rejectionReason: rejectionReason.trim() },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
+        }),
       {
         loading: 'Rejeitando sinistro...',
         success: 'Sinistro rejeitado.',
@@ -177,11 +187,16 @@ function InsuranceClaimsTableContent() {
   }
 
   const handleMarkPaid = (claimId: string) => {
-    toast.promise(markPaidMutation.mutateAsync({ claimId }), {
-      loading: 'Marcando como pago...',
-      success: 'Sinistro marcado como pago!',
-      error: 'Erro ao marcar como pago',
-    })
+    toast.promise(
+      markPaidMutation.mutateAsync({ params: { claimId } }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
+      }),
+      {
+        loading: 'Marcando como pago...',
+        success: 'Sinistro marcado como pago!',
+        error: 'Erro ao marcar como pago',
+      }
+    )
   }
 
   return (

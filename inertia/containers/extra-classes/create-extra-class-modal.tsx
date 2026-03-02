@@ -23,10 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { useCreateExtraClass } from '~/hooks/mutations/use_extra_class_mutations'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
-import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const DAY_OPTIONS = [
   { value: '0', label: 'Domingo' },
@@ -84,11 +82,20 @@ export function CreateExtraClassModal({
   })
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'schedules' })
-  const createMutation = useCreateExtraClass()
+  const queryClient = useQueryClient()
+  const createMutation = useMutation(api.api.v1.extraClasses.store.mutationOptions())
 
-  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
-  const { data: teachersData } = useQuery(useTeachersQueryOptions({ limit: 100 }))
-  const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
+  const { data: periodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { limit: 100 },
+    })
+  )
+  const { data: teachersData } = useQuery(
+    api.api.v1.teachers.index.queryOptions({ query: { limit: 100 } })
+  )
+  const { data: contractsData } = useQuery(
+    api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
+  )
 
   const academicPeriods = periodsData?.data ?? []
   const teachers = teachersData?.data ?? []
@@ -97,17 +104,20 @@ export function CreateExtraClassModal({
   const onSubmit = (values: FormOutput) => {
     createMutation.mutate(
       {
-        ...values,
-        schoolId,
-        maxStudents: values.maxStudents ? Number(values.maxStudents) : undefined,
-        schedules: values.schedules.map((s) => ({
-          weekDay: Number(s.weekDay),
-          startTime: s.startTime,
-          endTime: s.endTime,
-        })),
+        body: {
+          ...values,
+          schoolId,
+          maxStudents: values.maxStudents ? Number(values.maxStudents) : undefined,
+          schedules: values.schedules.map((s) => ({
+            weekDay: Number(s.weekDay),
+            startTime: s.startTime,
+            endTime: s.endTime,
+          })),
+        },
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['extra-classes'] })
           toast.success('Aula avulsa criada com sucesso')
           form.reset()
           onOpenChange(false)

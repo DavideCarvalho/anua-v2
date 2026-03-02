@@ -1,11 +1,11 @@
-import { Link } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useState } from 'react'
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { useQuery } from '@tanstack/react-query'
-import { useStoreQueryOptions } from '../hooks/queries/use_stores'
+import { api } from '~/lib/api'
 import { StoreProductsTab } from './stores/store-products-tab'
 import { StoreOrdersTab } from './stores/store-orders-tab'
 import { StoreInstallmentRulesTab } from './stores/store-installment-rules-tab'
@@ -19,7 +19,9 @@ interface StoreDetailContainerProps {
 
 export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
   const [createSaleOpen, setCreateSaleOpen] = useState(false)
-  const { data: store, isLoading } = useQuery(useStoreQueryOptions(storeId))
+  const { data: store, isLoading } = useQuery(
+    api.api.v1.stores.show.queryOptions({ params: { id: storeId } })
+  )
 
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Carregando...</div>

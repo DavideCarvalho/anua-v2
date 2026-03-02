@@ -21,7 +21,8 @@ import {
 } from '../../components/ui/form'
 import { Textarea } from '../../components/ui/textarea'
 
-import { useRejectPurchaseRequestMutation } from '../../hooks/mutations/use_reject_purchase_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   reason: z.string().min(1, 'Informe o motivo da rejeição'),
@@ -40,7 +41,8 @@ export function RejectPurchaseRequestModal({
   open,
   onClose,
 }: RejectPurchaseRequestModalProps) {
-  const rejectMutation = useRejectPurchaseRequestMutation()
+  const queryClient = useQueryClient()
+  const rejectMutation = useMutation(api.api.v1.purchaseRequests.reject.mutationOptions())
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -51,10 +53,14 @@ export function RejectPurchaseRequestModal({
 
   async function handleSubmit(data: FormData) {
     toast.promise(
-      rejectMutation.mutateAsync({
-        params: { id: purchaseRequestId },
-        reason: data.reason,
-      } as any),
+      rejectMutation
+        .mutateAsync({
+          params: { id: purchaseRequestId },
+          body: { reason: data.reason },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+        }),
       {
         loading: 'Rejeitando solicitação...',
         success: () => {

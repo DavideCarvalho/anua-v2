@@ -5,10 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 import { Skeleton } from '../../components/ui/skeleton'
-import { useInsuranceDefaultRateQueryOptions } from '../../hooks/queries/use_insurance_default_rate'
+import { api } from '~/lib/api'
 
 export function DefaultRateBySchool() {
-  const { data } = useSuspenseQuery(useInsuranceDefaultRateQueryOptions(10))
+  const { data } = useSuspenseQuery(
+    api.api.v1.insurance.analytics.defaultRate.queryOptions({
+      query: { limit: 10 },
+    })
+  )
 
   if (!data) return null
 
@@ -38,11 +42,17 @@ export function DefaultRateBySchool() {
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{school.name}</span>
                     {school.hasInsurance ? (
-                      <Badge variant="outline" className="text-xs border-green-200 bg-green-50 text-green-700">
+                      <Badge
+                        variant="outline"
+                        className="text-xs border-green-200 bg-green-50 text-green-700"
+                      >
                         Segurada
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-xs border-gray-200 bg-gray-50 text-gray-700">
+                      <Badge
+                        variant="outline"
+                        className="text-xs border-gray-200 bg-gray-50 text-gray-700"
+                      >
                         <ShieldOff className="h-3 w-3 mr-1" />
                         Sem seguro
                       </Badge>

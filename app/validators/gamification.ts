@@ -85,6 +85,12 @@ export const listAchievementsValidator = vine.compile(
   })
 )
 
+export const updateSchoolAchievementConfigValidator = vine.compile(
+  vine.object({
+    isActive: vine.boolean(),
+  })
+)
+
 // ==========================================
 // Store Item Validators
 // ==========================================

@@ -30,13 +30,11 @@ import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
-import { useOwnOrdersQueryOptions, type OwnOrdersResponse } from '../hooks/queries/use_store_owner'
-import {
-  useApproveOrder,
-  useRejectOrder,
-  useDeliverOrder,
-  useCancelOrder,
-} from '../hooks/mutations/use_store_owner_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type OwnOrdersResponse = Route.Response<'api.v1.store_owner.orders'>
 import { formatCurrency } from '../lib/utils'
 import { toast } from 'sonner'
 
@@ -72,10 +70,11 @@ function OrderActions({ order }: { order: Order }) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
 
-  const approveOrder = useApproveOrder()
-  const rejectOrder = useRejectOrder()
-  const deliverOrder = useDeliverOrder()
-  const cancelOrder = useCancelOrder()
+  const queryClient = useQueryClient()
+  const approveOrder = useMutation(api.api.v1.storeOwner.orders.approve.mutationOptions())
+  const rejectOrder = useMutation(api.api.v1.storeOwner.orders.reject.mutationOptions())
+  const deliverOrder = useMutation(api.api.v1.storeOwner.orders.deliver.mutationOptions())
+  const cancelOrder = useMutation(api.api.v1.storeOwner.orders.cancel.mutationOptions())
 
   const isPending =
     approveOrder.isPending ||
@@ -85,7 +84,8 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleApprove = async () => {
     try {
-      await approveOrder.mutateAsync(order.id)
+      await approveOrder.mutateAsync({ params: { id: order.id } })
+      queryClient.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
       toast.success('Pedido aprovado com sucesso!')
     } catch {
       toast.error('Erro ao aprovar pedido')
@@ -94,7 +94,11 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleReject = async () => {
     try {
-      await rejectOrder.mutateAsync({ id: order.id, reason: rejectReason })
+      await rejectOrder.mutateAsync({
+        params: { id: order.id },
+        body: { reason: rejectReason },
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
       toast.success('Pedido rejeitado')
       setRejectDialogOpen(false)
       setRejectReason('')
@@ -105,7 +109,11 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleDeliver = async () => {
     try {
-      await deliverOrder.mutateAsync({ id: order.id, deliveredAt })
+      await deliverOrder.mutateAsync({
+        params: { id: order.id },
+        body: { deliveredAt },
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
       toast.success('Pedido marcado como entregue!')
       setDeliverDialogOpen(false)
     } catch {
@@ -115,7 +123,11 @@ function OrderActions({ order }: { order: Order }) {
 
   const handleCancel = async () => {
     try {
-      await cancelOrder.mutateAsync({ id: order.id, reason: cancelReason })
+      await cancelOrder.mutateAsync({
+        params: { id: order.id },
+        body: { reason: cancelReason },
+      })
+      queryClient.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
       toast.success('Pedido cancelado')
       setCancelDialogOpen(false)
       setCancelReason('')
@@ -285,9 +297,11 @@ export function StoreOwnerOrdersContainer() {
   const [search, setSearch] = useState('')
 
   const { data, isLoading } = useQuery(
-    useOwnOrdersQueryOptions({
-      status: statusFilter || undefined,
-      search: search || undefined,
+    api.api.v1.storeOwner.orders.index.queryOptions({
+      query: {
+        status: statusFilter || undefined,
+        search: search || undefined,
+      },
     })
   )
 

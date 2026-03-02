@@ -37,12 +37,14 @@ export default function TurmaNotasPage({
         <Card>
           <CardHeader>
             <CardTitle>Notas por Matéria</CardTitle>
-            <CardDescription>
-              Visualize as notas dos alunos agrupadas por matéria
-            </CardDescription>
+            <CardDescription>Visualize as notas dos alunos agrupadas por matéria</CardDescription>
           </CardHeader>
           <CardContent>
-            <GradesAccordion classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
+            <GradesAccordion
+              classId={classId}
+              courseId={courseId}
+              academicPeriodId={academicPeriodId}
+            />
           </CardContent>
         </Card>
       </TurmaLayout>

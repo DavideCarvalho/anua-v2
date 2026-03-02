@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import logger from '@adonisjs/core/services/logger'
 import app from '@adonisjs/core/services/app'
 import SubscriptionInvoice from '#models/subscription_invoice'
-import Subscription from '#models/subscription'
+import type Subscription from '#models/subscription'
 import AsaasService from '#services/asaas_service'
 import GenerateSubscriptionInvoices from '#start/jobs/generate_subscription_invoices'
 

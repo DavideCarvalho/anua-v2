@@ -1,4 +1,5 @@
-import { Link, usePage } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { usePage } from '@inertiajs/react'
 import type { PropsWithChildren } from 'react'
 import { cn } from '../../lib/utils'
 import type { SharedProps } from '../../lib/types'

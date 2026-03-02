@@ -30,8 +30,7 @@ import {
 } from '../../components/ui/select'
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group'
 import { tuyau } from '../../lib/api'
-import { useSchoolChainsQueryOptions } from '../../hooks/queries/use_school_chains'
-import { usePlatformSettingsQueryOptions } from '../../hooks/queries/use_platform_settings'
+import { api } from '~/lib/api'
 import { CreateSchoolChainDialog } from './create-school-chain-dialog'
 import { type SchoolOnboardingFormData, schoolOnboardingSchema } from './schema'
 
@@ -79,8 +78,12 @@ function OnboardingFormContent() {
   const [isCreateChainDialogOpen, setIsCreateChainDialogOpen] = useState(false)
   const [isLoadingCep, setIsLoadingCep] = useState(false)
 
-  const { data: schoolChains } = useSuspenseQuery(useSchoolChainsQueryOptions())
-  const { data: platformSettings } = useSuspenseQuery(usePlatformSettingsQueryOptions())
+  const { data: schoolChains } = useSuspenseQuery(
+    api.api.v1.schoolChains.listSchoolChains.queryOptions({ query: {} })
+  )
+  const { data: platformSettings } = useSuspenseQuery(
+    api.api.v1.platformSettings.show.queryOptions({})
+  )
 
   const form = useForm<SchoolOnboardingFormData>({
     resolver: zodResolver(schoolOnboardingSchema) as any,
@@ -127,7 +130,7 @@ function OnboardingFormContent() {
       const monthlyFixedPrice =
         data.billingModel === 'FIXED_MONTHLY' ? data.monthlyFixedPrice : undefined
 
-      const response = await tuyau.api.v1.admin.schools.onboarding.$post({
+      const response = await tuyau.api.api.v1.admin.schools.onboarding({
         name: data.schoolName,
         schoolChainId: data.schoolChainId,
         street: data.street,

@@ -1,5 +1,19 @@
 import vine from '@vinejs/vine'
 
+export const listStudentsValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    search: vine.string().trim().optional(),
+    classId: vine.string().trim().optional(),
+    academicPeriodId: vine.string().uuid().optional(),
+    courseId: vine.string().uuid().optional(),
+    enrollmentStatus: vine.enum(['PENDING_DOCUMENT_REVIEW', 'REGISTERED']).optional(),
+    active: vine.boolean().optional(),
+    schoolId: vine.string().uuid().optional(),
+  })
+)
+
 export const createStudentValidator = vine.compile(
   vine.object({
     // User fields (will create a user too)

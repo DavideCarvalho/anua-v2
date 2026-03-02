@@ -15,6 +15,7 @@
 ### Task 1: Create InvoiceStatus and InvoiceType enums
 
 **Files:**
+
 - Create: `database/migrations/1768500126000_create_invoice_enums.ts`
 
 **Step 1: Write the migration**
@@ -64,6 +65,7 @@ feat: add InvoiceStatus and InvoiceType enums
 ### Task 2: Create Invoice table migration
 
 **Files:**
+
 - Create: `database/migrations/1768500127000_create_invoice_table.ts`
 
 **Step 1: Write the migration**
@@ -139,6 +141,7 @@ feat: create Invoice table migration
 ### Task 3: Add invoiceId to StudentPayment
 
 **Files:**
+
 - Create: `database/migrations/1768500128000_add_invoice_id_to_student_payment.ts`
 
 **Step 1: Write the migration**
@@ -185,6 +188,7 @@ feat: add invoiceId column to StudentPayment
 ### Task 4: Add studentPaymentId to CanteenPurchase and StoreOrder
 
 **Files:**
+
 - Create: `database/migrations/1768500129000_add_student_payment_id_to_canteen_and_store.ts`
 
 **Step 1: Write the migration**
@@ -243,6 +247,7 @@ feat: add studentPaymentId to CanteenPurchase and StoreOrder
 ### Task 5: Create Invoice model
 
 **Files:**
+
 - Create: `app/models/invoice.ts`
 
 **Step 1: Write the model**
@@ -340,22 +345,26 @@ feat: create Invoice model
 ### Task 6: Update StudentPayment model with invoiceId
 
 **Files:**
+
 - Modify: `app/models/student_payment.ts`
 
 **Step 1: Add Invoice import and relationship**
 
 Add import at the top (after Contract import):
+
 ```typescript
 import Invoice from './invoice.js'
 ```
 
 Add column after `agreementId`:
+
 ```typescript
   @column({ columnName: 'invoiceId' })
   declare invoiceId: string | null
 ```
 
 Add relationship after the `contract` relationship:
+
 ```typescript
   @belongsTo(() => Invoice, { foreignKey: 'invoiceId' })
   declare invoice: BelongsTo<typeof Invoice>
@@ -372,22 +381,26 @@ feat: add invoiceId relationship to StudentPayment model
 ### Task 7: Update CanteenPurchase model with studentPaymentId
 
 **Files:**
+
 - Modify: `app/models/canteen_purchase.ts`
 
 **Step 1: Add import and relationship**
 
 Add import:
+
 ```typescript
 import StudentPayment from './student_payment.js'
 ```
 
 Add column:
+
 ```typescript
   @column()
   declare studentPaymentId: string | null
 ```
 
 Add relationship:
+
 ```typescript
   @belongsTo(() => StudentPayment, { foreignKey: 'studentPaymentId' })
   declare studentPayment: BelongsTo<typeof StudentPayment>
@@ -406,22 +419,26 @@ feat: add studentPaymentId to CanteenPurchase model
 ### Task 8: Update StoreOrder model with studentPaymentId
 
 **Files:**
+
 - Modify: `app/models/store_order.ts`
 
 **Step 1: Add import and relationship**
 
 Add import:
+
 ```typescript
 import StudentPayment from './student_payment.js'
 ```
 
 Add column:
+
 ```typescript
   @column({ columnName: 'studentPaymentId' })
   declare studentPaymentId: string | null
 ```
 
 Add relationship:
+
 ```typescript
   @belongsTo(() => StudentPayment, { foreignKey: 'studentPaymentId' })
   declare studentPayment: BelongsTo<typeof StudentPayment>
@@ -440,6 +457,7 @@ feat: add studentPaymentId to StoreOrder model
 ### Task 9: Create Invoice validator
 
 **Files:**
+
 - Create: `app/validators/invoice.ts`
 
 **Step 1: Write the validator**
@@ -451,9 +469,7 @@ export const listInvoicesValidator = vine.compile(
   vine.object({
     studentId: vine.string().trim().optional(),
     contractId: vine.string().trim().optional(),
-    status: vine
-      .enum(['OPEN', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED'])
-      .optional(),
+    status: vine.enum(['OPEN', 'PENDING', 'PAID', 'OVERDUE', 'CANCELLED']).optional(),
     type: vine.enum(['MONTHLY', 'UPFRONT']).optional(),
     month: vine.number().min(1).max(12).optional(),
     year: vine.number().min(2020).max(2100).optional(),
@@ -482,6 +498,7 @@ feat: create Invoice validators
 ### Task 10: Create ListInvoicesController
 
 **Files:**
+
 - Create: `app/controllers/invoices/list_invoices_controller.ts`
 
 **Step 1: Write the controller**
@@ -496,16 +513,7 @@ export default class ListInvoicesController {
     const { request, response, selectedSchoolIds } = ctx
     const payload = await request.validateUsing(listInvoicesValidator)
 
-    const {
-      studentId,
-      contractId,
-      status,
-      type,
-      month,
-      year,
-      page = 1,
-      limit = 20,
-    } = payload
+    const { studentId, contractId, status, type, month, year, page = 1, limit = 20 } = payload
 
     const query = Invoice.query()
       .preload('student', (q) => q.preload('user'))
@@ -560,6 +568,7 @@ feat: create ListInvoicesController
 ### Task 11: Create MarkInvoicePaidController
 
 **Files:**
+
 - Create: `app/controllers/invoices/mark_invoice_paid_controller.ts`
 
 **Step 1: Write the controller**
@@ -630,21 +639,22 @@ feat: create MarkInvoicePaidController
 ### Task 12: Register Invoice routes
 
 **Files:**
+
 - Modify: `start/routes.ts`
 
 **Step 1: Add controller imports**
 
 Near the other controller imports (around line 386), add:
+
 ```typescript
-const ListInvoicesController = () =>
-  import('#controllers/invoices/list_invoices_controller')
-const MarkInvoicePaidController = () =>
-  import('#controllers/invoices/mark_invoice_paid_controller')
+const ListInvoicesController = () => import('#controllers/invoices/list_invoices_controller')
+const MarkInvoicePaidController = () => import('#controllers/invoices/mark_invoice_paid_controller')
 ```
 
 **Step 2: Add route registration function**
 
 After `registerAgreementApiRoutes()` (around line 1450), add:
+
 ```typescript
 function registerInvoiceApiRoutes() {
   router
@@ -660,8 +670,9 @@ function registerInvoiceApiRoutes() {
 **Step 3: Call the function**
 
 Find where `registerStudentPaymentApiRoutes()` and `registerAgreementApiRoutes()` are called (around line 2740) and add:
+
 ```typescript
-    registerInvoiceApiRoutes()
+registerInvoiceApiRoutes()
 ```
 
 **Step 4: Commit**

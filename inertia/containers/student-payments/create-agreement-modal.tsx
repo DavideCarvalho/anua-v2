@@ -34,8 +34,7 @@ import {
 } from '~/components/ui/select'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { formatCurrency } from '~/lib/utils'
-import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
-import { useCreateAgreementMutationOptions } from '~/hooks/mutations/use_agreement_mutations'
+import { api } from '~/lib/api'
 
 const ACTIONABLE_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE']
 
@@ -106,11 +105,13 @@ interface CreateAgreementModalProps {
 
 export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgreementModalProps) {
   const queryClient = useQueryClient()
-  const createAgreement = useMutation(useCreateAgreementMutationOptions())
+  const createAgreement = useMutation(api.api.v1.agreements.store.mutationOptions())
   const [discountsOpen, setDiscountsOpen] = useState(false)
 
   const { data: paymentsData, isLoading } = useQuery({
-    ...useStudentPendingPaymentsQueryOptions(payment.studentId),
+    ...api.api.v1.studentPayments.index.queryOptions({
+      query: { studentId: payment.studentId, limit: 100 },
+    }),
     enabled: open,
   })
 
@@ -222,35 +223,37 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   async function onSubmit(data: AgreementFormData) {
     try {
       await createAgreement.mutateAsync({
-        invoiceIds: data.selectedPaymentIds,
-        installments: data.installments,
-        startDate: `${data.startMonth}-01`,
-        paymentDay: data.paymentDay,
-        paymentMethod: data.paymentMethod,
-        renegotiationDiscountType: data.renegotiationDiscountType,
-        renegotiationDiscountValue:
-          data.renegotiationDiscountType === 'FLAT'
-            ? Math.round(Number(data.renegotiationDiscountValue ?? 0) * 100)
-            : data.renegotiationDiscountValue,
-        finePercentage: data.finePercentage,
-        dailyInterestPercentage: data.dailyInterestPercentage,
-        earlyDiscounts:
-          data.earlyDiscounts.length > 0
-            ? data.earlyDiscounts.map((discount) => ({
-                discountType: discount.discountType,
-                percentage:
-                  discount.discountType === 'PERCENTAGE'
-                    ? Number(discount.percentage ?? 0)
-                    : undefined,
-                flatAmount:
-                  discount.discountType === 'FLAT'
-                    ? Math.round(Number(discount.flatAmount ?? 0) * 100)
-                    : undefined,
-                daysBeforeDeadline: discount.daysBeforeDeadline,
-              }))
-            : undefined,
+        body: {
+          invoiceIds: data.selectedPaymentIds,
+          installments: data.installments,
+          startDate: `${data.startMonth}-01`,
+          paymentDay: data.paymentDay,
+          paymentMethod: data.paymentMethod,
+          renegotiationDiscountType: data.renegotiationDiscountType,
+          renegotiationDiscountValue:
+            data.renegotiationDiscountType === 'FLAT'
+              ? Math.round(Number(data.renegotiationDiscountValue ?? 0) * 100)
+              : data.renegotiationDiscountValue,
+          finePercentage: data.finePercentage,
+          dailyInterestPercentage: data.dailyInterestPercentage,
+          earlyDiscounts:
+            data.earlyDiscounts.length > 0
+              ? data.earlyDiscounts.map((discount) => ({
+                  discountType: discount.discountType,
+                  percentage:
+                    discount.discountType === 'PERCENTAGE'
+                      ? Number(discount.percentage ?? 0)
+                      : undefined,
+                  flatAmount:
+                    discount.discountType === 'FLAT'
+                      ? Math.round(Number(discount.flatAmount ?? 0) * 100)
+                      : undefined,
+                  daysBeforeDeadline: discount.daysBeforeDeadline,
+                }))
+              : undefined,
+        },
       })
-      await queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      queryClient.invalidateQueries({ queryKey: ['invoices'] })
       await queryClient.invalidateQueries({ queryKey: ['student-pending-invoices'] })
       await queryClient.invalidateQueries({ queryKey: ['student-payments'] })
       toast.success('Acordo criado com sucesso')

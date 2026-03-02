@@ -1,39 +1,42 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenItem from '#models/canteen_item'
-import CanteenItemDto from '#models/dto/canteen_item.dto'
+import CanteenItemTransformer from '#transformers/canteen_item_transformer'
 import { listCanteenItemsValidator } from '#validators/canteen'
 
 export default class ListCanteenItemsController {
-  async handle({ request }: HttpContext) {
-    const data = await request.validateUsing(listCanteenItemsValidator)
+  async handle({ request, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listCanteenItemsValidator)
 
-    const page = data.page ?? 1
-    const limit = data.limit ?? 20
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
 
     const query = CanteenItem.query().orderBy('name', 'asc')
 
-    if (data.canteenId) {
-      query.where('canteenId', data.canteenId)
+    if (filters.canteenId) {
+      query.where('canteenId', filters.canteenId)
     }
 
-    if (data.search) {
+    if (filters.search) {
       query.where((searchQuery) => {
         searchQuery
-          .whereILike('name', `%${data.search}%`)
-          .orWhereILike('description', `%${data.search}%`)
+          .whereILike('name', `%${filters.search}%`)
+          .orWhereILike('description', `%${filters.search}%`)
       })
     }
 
-    if (data.category) {
-      query.where('category', data.category)
+    if (filters.category) {
+      query.where('category', filters.category)
     }
 
-    if (data.isActive !== undefined) {
-      query.where('isActive', data.isActive)
+    if (filters.isActive !== undefined) {
+      query.where('isActive', filters.isActive)
     }
 
     const canteenItems = await query.paginate(page, limit)
 
-    return CanteenItemDto.fromPaginator(canteenItems)
+    const items = canteenItems.all()
+    const metadata = canteenItems.getMeta()
+
+    return serialize(CanteenItemTransformer.paginate(items, metadata))
   }
 }

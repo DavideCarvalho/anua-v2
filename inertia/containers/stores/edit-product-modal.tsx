@@ -20,8 +20,10 @@ import {
 } from '../../components/ui/select'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useUpdateStoreItemMutationOptions } from '../../hooks/mutations/use_update_store_item'
-import type { StoreItemsResponse } from '../../hooks/queries/use_stores'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StoreItemsResponse = Route.Response<'api.v1.storeItems.index'>
 
 interface Props {
   product: StoreItemsResponse['data'][number]
@@ -64,18 +66,20 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
     )
   }, [product])
 
-  const updateMutation = useMutation(useUpdateStoreItemMutationOptions())
+  const updateMutation = useMutation(api.api.v1.storeItems.update.mutationOptions())
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     try {
       await updateMutation.mutateAsync({
-        id: product.id,
-        name,
-        description: description || undefined,
-        price: Math.round(Number(price) * 100),
-        category,
-        totalStock: totalStock ? Number(totalStock) : undefined,
+        params: { id: product.id },
+        body: {
+          name,
+          description: description || undefined,
+          price: Math.round(Number(price) * 100),
+          category,
+          totalStock: totalStock ? Number(totalStock) : undefined,
+        },
       })
       queryClient.invalidateQueries({ queryKey: ['storeItems'] })
       toast.success('Produto atualizado com sucesso!')

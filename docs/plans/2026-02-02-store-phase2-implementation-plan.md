@@ -13,6 +13,7 @@
 ## Context for all tasks
 
 **Existing code you'll need:**
+
 - Store model: `app/models/store.ts` — has `ownerUserId`, `items`, `orders`, `financialSettings`, `settlements`, `installmentRules` relationships
 - StoreItem model: `app/models/store_item.ts` — soft-delete pattern (`deletedAt`)
 - StoreOrder model: `app/models/store_order.ts` — status machine with timestamp columns
@@ -29,6 +30,7 @@
 - Frontend types: `inertia/lib/types.ts` — `RoleName` union type, helper functions
 
 **Naming conventions:**
+
 - Controllers: `snake_case` file names in folders, one class per file
 - Models: PascalCase class, `snake_case` file
 - Validators: exported const with camelCase
@@ -41,6 +43,7 @@
 ## Task 1: Add STORE_OWNER role type and create storeOwner middleware
 
 **Files:**
+
 - Modify: `inertia/lib/types.ts`
 - Create: `app/middleware/store_owner_middleware.ts`
 - Modify: `start/kernel.ts`
@@ -155,6 +158,7 @@ feat: add STORE_OWNER role type and storeOwner middleware
 ## Task 2: Create store owner API controllers — store and products
 
 **Files:**
+
 - Create: `app/controllers/store_owner/show_own_store_controller.ts`
 - Create: `app/controllers/store_owner/list_own_products_controller.ts`
 - Create: `app/controllers/store_owner/create_product_controller.ts`
@@ -349,6 +353,7 @@ feat: add store owner API controllers for store and products
 ## Task 3: Create store owner API controllers — orders
 
 **Files:**
+
 - Create: `app/controllers/store_owner/list_own_orders_controller.ts`
 - Create: `app/controllers/store_owner/show_order_controller.ts`
 - Create: `app/controllers/store_owner/approve_order_controller.ts`
@@ -427,10 +432,7 @@ import StoreOrder from '#models/store_order'
 export default class ApproveOrderController {
   async handle({ storeOwnerStore, params, auth, response }: HttpContext) {
     const store = storeOwnerStore!
-    const order = await StoreOrder.query()
-      .where('id', params.id)
-      .where('storeId', store.id)
-      .first()
+    const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
       return response.notFound({ message: 'Pedido não encontrado' })
@@ -465,10 +467,7 @@ import StoreOrder from '#models/store_order'
 export default class RejectOrderController {
   async handle({ storeOwnerStore, params, request, auth, response }: HttpContext) {
     const store = storeOwnerStore!
-    const order = await StoreOrder.query()
-      .where('id', params.id)
-      .where('storeId', store.id)
-      .first()
+    const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
       return response.notFound({ message: 'Pedido não encontrado' })
@@ -505,10 +504,7 @@ import StoreOrder from '#models/store_order'
 export default class MarkPreparingController {
   async handle({ storeOwnerStore, params, auth, response }: HttpContext) {
     const store = storeOwnerStore!
-    const order = await StoreOrder.query()
-      .where('id', params.id)
-      .where('storeId', store.id)
-      .first()
+    const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
       return response.notFound({ message: 'Pedido não encontrado' })
@@ -543,10 +539,7 @@ import StoreOrder from '#models/store_order'
 export default class MarkReadyController {
   async handle({ storeOwnerStore, params, response }: HttpContext) {
     const store = storeOwnerStore!
-    const order = await StoreOrder.query()
-      .where('id', params.id)
-      .where('storeId', store.id)
-      .first()
+    const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
       return response.notFound({ message: 'Pedido não encontrado' })
@@ -580,10 +573,7 @@ import StoreOrder from '#models/store_order'
 export default class DeliverOrderController {
   async handle({ storeOwnerStore, params, auth, response }: HttpContext) {
     const store = storeOwnerStore!
-    const order = await StoreOrder.query()
-      .where('id', params.id)
-      .where('storeId', store.id)
-      .first()
+    const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
     if (!order) {
       return response.notFound({ message: 'Pedido não encontrado' })
@@ -620,6 +610,7 @@ feat: add store owner order management controllers
 ## Task 4: Create store owner API controllers — financial
 
 **Files:**
+
 - Create: `app/controllers/store_owner/show_financial_settings_controller.ts`
 - Create: `app/controllers/store_owner/update_financial_settings_controller.ts`
 - Create: `app/controllers/store_owner/list_settlements_controller.ts`
@@ -633,9 +624,7 @@ import StoreFinancialSettings from '#models/store_financial_settings'
 export default class ShowFinancialSettingsController {
   async handle({ storeOwnerStore, response }: HttpContext) {
     const store = storeOwnerStore!
-    const settings = await StoreFinancialSettings.query()
-      .where('storeId', store.id)
-      .first()
+    const settings = await StoreFinancialSettings.query().where('storeId', store.id).first()
 
     return response.ok(settings)
   }
@@ -665,10 +654,7 @@ export default class UpdateFinancialSettingsController {
     const store = storeOwnerStore!
     const data = await request.validateUsing(updateOwnFinancialSettingsValidator)
 
-    const settings = await StoreFinancialSettings.updateOrCreate(
-      { storeId: store.id },
-      data
-    )
+    const settings = await StoreFinancialSettings.updateOrCreate({ storeId: store.id }, data)
 
     return response.ok(settings)
   }
@@ -712,6 +698,7 @@ feat: add store owner financial settings and settlements controllers
 ## Task 5: Register store owner routes (API + web) and page controllers
 
 **Files:**
+
 - Create: `app/controllers/pages/loja/show_loja_dashboard_page_controller.ts`
 - Create: `app/controllers/pages/loja/show_loja_produtos_page_controller.ts`
 - Create: `app/controllers/pages/loja/show_loja_pedidos_page_controller.ts`
@@ -723,6 +710,7 @@ feat: add store owner financial settings and settlements controllers
 All page controllers follow the same simple pattern — render an Inertia page.
 
 **show_loja_dashboard_page_controller.ts:**
+
 ```typescript
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -734,6 +722,7 @@ export default class ShowLojaDashboardPageController {
 ```
 
 **show_loja_produtos_page_controller.ts:**
+
 ```typescript
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -745,6 +734,7 @@ export default class ShowLojaProdutosPageController {
 ```
 
 **show_loja_pedidos_page_controller.ts:**
+
 ```typescript
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -756,6 +746,7 @@ export default class ShowLojaPedidosPageController {
 ```
 
 **show_loja_financeiro_page_controller.ts:**
+
 ```typescript
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -774,32 +765,21 @@ Add a `registerStoreOwnerApiRoutes()` function in `start/routes.ts`. Place it ne
 
 ```typescript
 // Store Owner Controllers
-const ShowOwnStoreController = () =>
-  import('#controllers/store_owner/show_own_store_controller')
+const ShowOwnStoreController = () => import('#controllers/store_owner/show_own_store_controller')
 const ListOwnProductsController = () =>
   import('#controllers/store_owner/list_own_products_controller')
-const SOCreateProductController = () =>
-  import('#controllers/store_owner/create_product_controller')
-const SOUpdateProductController = () =>
-  import('#controllers/store_owner/update_product_controller')
-const SODeleteProductController = () =>
-  import('#controllers/store_owner/delete_product_controller')
+const SOCreateProductController = () => import('#controllers/store_owner/create_product_controller')
+const SOUpdateProductController = () => import('#controllers/store_owner/update_product_controller')
+const SODeleteProductController = () => import('#controllers/store_owner/delete_product_controller')
 const SOToggleProductActiveController = () =>
   import('#controllers/store_owner/toggle_product_active_controller')
-const ListOwnOrdersController = () =>
-  import('#controllers/store_owner/list_own_orders_controller')
-const SOShowOrderController = () =>
-  import('#controllers/store_owner/show_order_controller')
-const SOApproveOrderController = () =>
-  import('#controllers/store_owner/approve_order_controller')
-const SORejectOrderController = () =>
-  import('#controllers/store_owner/reject_order_controller')
-const SOMarkPreparingController = () =>
-  import('#controllers/store_owner/mark_preparing_controller')
-const SOMarkReadyController = () =>
-  import('#controllers/store_owner/mark_ready_controller')
-const SODeliverOrderController = () =>
-  import('#controllers/store_owner/deliver_order_controller')
+const ListOwnOrdersController = () => import('#controllers/store_owner/list_own_orders_controller')
+const SOShowOrderController = () => import('#controllers/store_owner/show_order_controller')
+const SOApproveOrderController = () => import('#controllers/store_owner/approve_order_controller')
+const SORejectOrderController = () => import('#controllers/store_owner/reject_order_controller')
+const SOMarkPreparingController = () => import('#controllers/store_owner/mark_preparing_controller')
+const SOMarkReadyController = () => import('#controllers/store_owner/mark_ready_controller')
+const SODeliverOrderController = () => import('#controllers/store_owner/deliver_order_controller')
 const SOShowFinancialSettingsController = () =>
   import('#controllers/store_owner/show_financial_settings_controller')
 const SOUpdateFinancialSettingsController = () =>
@@ -900,6 +880,7 @@ feat: register store owner API and web routes with page controllers
 ## Task 6: Create LojaLayout and frontend hooks
 
 **Files:**
+
 - Create: `inertia/components/layouts/loja-layout.tsx`
 - Create: `inertia/hooks/queries/use_store_owner.ts`
 - Create: `inertia/hooks/mutations/use_store_owner_mutations.ts`
@@ -909,6 +890,7 @@ feat: register store owner API and web routes with page controllers
 Follow the `admin-layout.tsx` pattern exactly — sidebar with `SidebarProvider`, header with `SidebarTrigger` + `ThemeToggle`, main content area.
 
 Navigation items:
+
 - Dashboard (`/loja`, icon: `LayoutDashboard`)
 - Produtos (`/loja/produtos`, icon: `Package`)
 - Pedidos (`/loja/pedidos`, icon: `ShoppingCart`)
@@ -918,14 +900,7 @@ Navigation items:
 import { usePage } from '@inertiajs/react'
 import { Link } from '@tuyau/inertia/react'
 import type { PropsWithChildren } from 'react'
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Wallet,
-  LogOut,
-  Store,
-} from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Wallet, LogOut, Store } from 'lucide-react'
 
 import { ThemeToggle } from '../theme-toggle'
 import type { SharedProps } from '../../lib/types'
@@ -1290,6 +1265,7 @@ feat: add LojaLayout and store owner query/mutation hooks
 ## Task 7: Create store owner dashboard page
 
 **Files:**
+
 - Create: `inertia/pages/loja/index.tsx`
 - Create: `inertia/containers/store-owner-dashboard-container.tsx`
 
@@ -1373,9 +1349,7 @@ export function StoreOwnerDashboardContainer() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {(productsData as any)?.meta?.total ?? 0}
-            </div>
+            <div className="text-2xl font-bold">{(productsData as any)?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">produtos cadastrados</p>
           </CardContent>
         </Card>
@@ -1386,9 +1360,7 @@ export function StoreOwnerDashboardContainer() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {(pendingOrdersData as any)?.meta?.total ?? 0}
-            </div>
+            <div className="text-2xl font-bold">{(pendingOrdersData as any)?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">aguardando aprovação</p>
           </CardContent>
         </Card>
@@ -1399,9 +1371,7 @@ export function StoreOwnerDashboardContainer() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {(allOrdersData as any)?.meta?.total ?? 0}
-            </div>
+            <div className="text-2xl font-bold">{(allOrdersData as any)?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">pedidos realizados</p>
           </CardContent>
         </Card>
@@ -1422,6 +1392,7 @@ feat: add store owner dashboard page with metrics
 ## Task 8: Create store owner products page
 
 **Files:**
+
 - Create: `inertia/pages/loja/produtos.tsx`
 - Create: `inertia/containers/store-owner-products-container.tsx`
 - Create: `inertia/containers/store-owner/create-product-modal.tsx`
@@ -1477,7 +1448,10 @@ import {
 import { Badge } from '../components/ui/badge'
 import { Switch } from '../components/ui/switch'
 import { useOwnProductsQueryOptions } from '../hooks/queries/use_store_owner'
-import { useToggleProductActive, useDeleteProduct } from '../hooks/mutations/use_store_owner_mutations'
+import {
+  useToggleProductActive,
+  useDeleteProduct,
+} from '../hooks/mutations/use_store_owner_mutations'
 import { CreateProductModal } from './store-owner/create-product-modal'
 import { EditProductModal } from './store-owner/edit-product-modal'
 import { formatCurrency } from '../lib/utils'
@@ -1522,9 +1496,7 @@ export function StoreOwnerProductsContainer() {
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : !products.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum produto cadastrado
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado</div>
           ) : (
             <Table>
               <TableHeader>
@@ -1558,9 +1530,7 @@ export function StoreOwnerProductsContainer() {
                         ? `${product.price} pts`
                         : formatCurrency(product.price)}
                     </TableCell>
-                    <TableCell>
-                      {product.totalStock !== null ? product.totalStock : '∞'}
-                    </TableCell>
+                    <TableCell>{product.totalStock !== null ? product.totalStock : '∞'}</TableCell>
                     <TableCell>
                       <Switch
                         checked={product.isActive}
@@ -1704,12 +1674,7 @@ export function CreateProductModal({ open, onOpenChange, onSuccess }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
@@ -1858,12 +1823,7 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-name">Nome</Label>
-            <Input
-              id="edit-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-description">Descrição</Label>
@@ -1937,6 +1897,7 @@ feat: add store owner products page with CRUD modals
 ## Task 9: Create store owner orders page
 
 **Files:**
+
 - Create: `inertia/pages/loja/pedidos.tsx`
 - Create: `inertia/containers/store-owner-orders-container.tsx`
 
@@ -1970,13 +1931,7 @@ Table of orders with status badges and action buttons for the order lifecycle.
 ```tsx
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  Check,
-  X,
-  ChefHat,
-  PackageCheck,
-  Truck,
-} from 'lucide-react'
+import { Check, X, ChefHat, PackageCheck, Truck } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import {
@@ -2087,9 +2042,7 @@ export function StoreOwnerOrdersContainer() {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !orders.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum pedido encontrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -2105,9 +2058,7 @@ export function StoreOwnerOrdersContainer() {
             <TableBody>
               {orders.map((order: any) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">
-                    {order.orderNumber}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
                   <TableCell>{order.student?.name ?? '—'}</TableCell>
                   <TableCell>
                     <div className="text-sm">
@@ -2203,6 +2154,7 @@ feat: add store owner orders page with action buttons
 ## Task 10: Create store owner financial page
 
 **Files:**
+
 - Create: `inertia/pages/loja/financeiro.tsx`
 - Create: `inertia/containers/store-owner-financial-container.tsx`
 
@@ -2272,7 +2224,10 @@ const SETTLEMENT_STATUS_LABELS: Record<string, string> = {
   CANCELLED: 'Cancelado',
 }
 
-const SETTLEMENT_STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+const SETTLEMENT_STATUS_VARIANTS: Record<
+  string,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
   PENDING: 'outline',
   APPROVED: 'secondary',
   PROCESSING: 'secondary',
@@ -2359,11 +2314,7 @@ export function StoreOwnerFinancialContainer() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pixKey">Chave PIX</Label>
-                  <Input
-                    id="pixKey"
-                    value={pixKey}
-                    onChange={(e) => setPixKey(e.target.value)}
-                  />
+                  <Input id="pixKey" value={pixKey} onChange={(e) => setPixKey(e.target.value)} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -2402,9 +2353,7 @@ export function StoreOwnerFinancialContainer() {
           {settlementsLoading ? (
             <div className="text-center py-4 text-muted-foreground">Carregando...</div>
           ) : !settlements.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum repasse registrado
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhum repasse registrado</div>
           ) : (
             <Table>
               <TableHeader>
@@ -2456,21 +2405,22 @@ feat: add store owner financial page with settings and settlements
 
 ## Summary
 
-| Task | Description | Files |
-|------|-------------|-------|
-| 1 | STORE_OWNER role type + storeOwner middleware | 3 (1 new, 2 modified) |
-| 2 | Store/product API controllers | 6 new |
-| 3 | Order API controllers | 7 new |
-| 4 | Financial API controllers | 3 new |
-| 5 | Routes + page controllers | 4 new + 1 modified |
-| 6 | LojaLayout + hooks | 3 new |
-| 7 | Dashboard page + container | 2 new |
-| 8 | Products page + container + modals | 4 new |
-| 9 | Orders page + container | 2 new |
-| 10 | Financial page + container | 2 new |
-| **Total** | | **36 new files, 3 modified** |
+| Task      | Description                                   | Files                        |
+| --------- | --------------------------------------------- | ---------------------------- |
+| 1         | STORE_OWNER role type + storeOwner middleware | 3 (1 new, 2 modified)        |
+| 2         | Store/product API controllers                 | 6 new                        |
+| 3         | Order API controllers                         | 7 new                        |
+| 4         | Financial API controllers                     | 3 new                        |
+| 5         | Routes + page controllers                     | 4 new + 1 modified           |
+| 6         | LojaLayout + hooks                            | 3 new                        |
+| 7         | Dashboard page + container                    | 2 new                        |
+| 8         | Products page + container + modals            | 4 new                        |
+| 9         | Orders page + container                       | 2 new                        |
+| 10        | Financial page + container                    | 2 new                        |
+| **Total** |                                               | **36 new files, 3 modified** |
 
 **Dependencies:**
+
 - Task 1 must complete first (middleware types needed by all controllers)
 - Tasks 2-4 can run in parallel after Task 1
 - Task 5 depends on Tasks 2-4 (imports controller references)

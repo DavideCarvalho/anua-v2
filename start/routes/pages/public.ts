@@ -15,7 +15,7 @@ const ShowDashboardPageController = () =>
 
 export function registerPublicPageRoutes() {
   // Public home
-  router.on('/').renderInertia('home').as('home')
+  router.on('/').renderInertia('home', {}).as('home')
 
   // Public enrollment page
   router

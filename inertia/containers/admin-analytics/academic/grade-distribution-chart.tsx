@@ -1,14 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useGradeDistributionQueryOptions } from '../../../hooks/queries/use_grade_distribution'
+import { api } from '~/lib/api'
 import { ChartContainer } from '../shared/chart-container'
 
 export function GradeDistributionChart() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useGradeDistributionQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.grades.distribution.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

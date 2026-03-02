@@ -80,16 +80,13 @@ export function useDocumentValidation(options: UseDocumentValidationOptions = {}
         try {
           abortControllerRef.current = new AbortController()
 
-          const response = await tuyau
-            .$route('api.v1.students.checkDocument')
-            .$get({
-              query: {
-                documentNumber: cleanNumber,
-                academicPeriodId,
-                ...(excludeUserId && { excludeUserId }),
-              },
-            })
-            .unwrap()
+          const response = await tuyau.$route('api.v1.students.checkDocument')({
+            query: {
+              documentNumber: cleanNumber,
+              academicPeriodId,
+              ...(excludeUserId && { excludeUserId }),
+            },
+          })
 
           if (response.exists) {
             setValidationResult({

@@ -2,6 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ShowSchoolOnboardingPageController {
   async handle({ inertia }: HttpContext) {
-    return inertia.render('admin/onboarding')
+    return inertia.render('admin/onboarding', {})
   }
 }

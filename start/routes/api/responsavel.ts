@@ -49,69 +49,69 @@ export function registerResponsavelApiRoutes() {
   router
     .get('/responsavel/stats', [GetResponsavelStatsController])
     .use([middleware.auth(), middleware.impersonation()])
-    .as('dashboard.responsavelStats')
+    .as('dashboard.responsavel_stats')
 
   router
     .group(() => {
       router
         .get('/students/:studentId/grades', [GetResponsavelStudentGradesController])
-        .as('studentGrades')
+        .as('student_grades')
       router
         .get('/students/:studentId/attendance', [GetResponsavelStudentAttendanceController])
-        .as('studentAttendance')
+        .as('student_attendance')
       router
         .get('/students/:studentId/payments', [GetResponsavelStudentPaymentsController])
-        .as('studentPayments')
+        .as('student_payments')
       router
         .get('/students/:studentId/invoices', [GetResponsavelStudentInvoicesController])
-        .as('studentInvoices')
+        .as('student_invoices')
       router
         .get('/students/:studentId/balance', [GetResponsavelStudentBalanceController])
-        .as('studentBalance')
+        .as('student_balance')
       router
         .get('/students/:studentId/canteen-purchases', [
           GetResponsavelStudentCanteenPurchasesController,
         ])
-        .as('studentCanteenPurchases')
+        .as('student_canteen_purchases')
       router
         .get('/students/:studentId/assignments', [GetResponsavelStudentAssignmentsController])
-        .as('studentAssignments')
+        .as('student_assignments')
       router
         .get('/students/:studentId/schedule', [GetResponsavelStudentScheduleController])
-        .as('studentSchedule')
+        .as('student_schedule')
       router
         .get('/students/:studentId/documents', [GetResponsavelStudentDocumentsController])
-        .as('studentDocuments')
+        .as('student_documents')
       router
         .get('/students/:studentId/occurrences', [GetResponsavelStudentOccurrencesController])
-        .as('studentOccurrences')
+        .as('student_occurrences')
       router
         .post('/students/:studentId/occurrences/:occurrenceId/acknowledge', [
           AcknowledgeOccurrenceController,
         ])
-        .as('acknowledgeOccurrence')
+        .as('acknowledge_occurrence')
       router
         .get('/students/:studentId/overview', [GetStudentOverviewController])
-        .as('studentOverview')
+        .as('student_overview')
       router
         .get('/students/:studentId/gamification', [GetResponsavelStudentGamificationController])
-        .as('studentGamification')
+        .as('student_gamification')
       router.get('/notifications', [GetResponsavelNotificationsController]).as('notifications')
-      router.put('/profile', [UpdateResponsavelProfileController]).as('updateProfile')
+      router.put('/profile', [UpdateResponsavelProfileController]).as('update_profile')
 
       // Invoice checkout (Asaas on-demand charge)
       router
         .post('/invoices/:id/checkout', [CreateInvoiceAsaasChargeController])
-        .as('invoiceCheckout')
+        .as('invoice_checkout')
 
       // Wallet top-ups
       router
         .post('/students/:studentId/wallet-top-ups', [CreateWalletTopUpController])
-        .as('createWalletTopUp')
+        .as('create_wallet_top_up')
       router
         .get('/students/:studentId/wallet-top-ups', [ListWalletTopUpsController])
-        .as('listWalletTopUps')
-      router.get('/wallet-top-ups/:id', [ShowWalletTopUpController]).as('showWalletTopUp')
+        .as('list_wallet_top_ups')
+      router.get('/wallet-top-ups/:id', [ShowWalletTopUpController]).as('show_wallet_top_up')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])

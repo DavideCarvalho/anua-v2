@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Users, Plus, MoreHorizontal } from 'lucide-react'
 
-import {
-  useSchoolGroupsQueryOptions,
-  type SchoolGroupsResponse,
-} from '../../hooks/queries/use_school_groups'
-import { useDeleteSchoolGroup } from '../../hooks/mutations/use_school_chain_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type SchoolGroupsResponse = Route.Response<'api.v1.school_groups.index'>
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -36,8 +36,13 @@ type SchoolGroupRow = SchoolGroupsResponse['data'][number] & {
 }
 
 export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroupsTableProps) {
-  const { data, isLoading } = useQuery(useSchoolGroupsQueryOptions({ schoolChainId }))
-  const deleteMutation = useDeleteSchoolGroup()
+  const queryClient = useQueryClient()
+  const { data, isLoading } = useQuery(
+    api.api.v1.schoolGroups.index.queryOptions({
+      query: { schoolChainId },
+    })
+  )
+  const deleteMutation = useMutation(api.api.v1.schoolGroups.destroy.mutationOptions())
 
   const groups = data?.data ?? []
 
@@ -124,7 +129,17 @@ export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroups
                       <DropdownMenuItem>Ver Escolas</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => deleteMutation.mutate(group.id)}
+                        onClick={() =>
+                          deleteMutation.mutate(
+                            { params: { id: group.id } },
+                            {
+                              onSuccess: () =>
+                                queryClient.invalidateQueries({
+                                  queryKey: ['school-groups'],
+                                }),
+                            }
+                          )
+                        }
                       >
                         Excluir
                       </DropdownMenuItem>

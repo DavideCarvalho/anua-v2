@@ -2,7 +2,13 @@ import { Head } from '@inertiajs/react'
 import { Settings } from 'lucide-react'
 
 import { AdminLayout } from '../../../components/layouts'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert'
 import { InfoIcon } from 'lucide-react'
 
@@ -26,8 +32,8 @@ export default function AdminConfiguracaoPage() {
           <InfoIcon className="h-4 w-4" />
           <AlertTitle>Hierarquia de Configuração</AlertTitle>
           <AlertDescription>
-            As configurações de seguro seguem uma hierarquia: Rede → Escola → Contrato.
-            Cada nível pode herdar ou sobrescrever as configurações do nível superior.
+            As configurações de seguro seguem uma hierarquia: Rede → Escola → Contrato. Cada nível
+            pode herdar ou sobrescrever as configurações do nível superior.
           </AlertDescription>
         </Alert>
 
@@ -84,8 +90,8 @@ export default function AdminConfiguracaoPage() {
             <div>
               <h4 className="font-medium">Dias de Carência</h4>
               <p className="text-sm text-muted-foreground">
-                Número de dias que um pagamento deve estar em atraso antes de gerar um sinistro.
-                O padrão é 90 dias.
+                Número de dias que um pagamento deve estar em atraso antes de gerar um sinistro. O
+                padrão é 90 dias.
               </p>
             </div>
           </CardContent>

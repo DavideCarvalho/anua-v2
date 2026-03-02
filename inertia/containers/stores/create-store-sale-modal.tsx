@@ -23,12 +23,7 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
 import { formatCurrency } from '../../lib/utils'
-import { useStudentsQueryOptions } from '../../hooks/queries/use_students'
-import { useStoreItemsQueryOptions } from '../../hooks/queries/use_stores'
-import {
-  useCreateStoreOrderMutationOptions,
-  type CreateStoreOrderPayload,
-} from '../../hooks/mutations/use_create_store_order'
+import { api } from '~/lib/api'
 
 interface CreateStoreSaleModalProps {
   open: boolean
@@ -49,7 +44,7 @@ export function CreateStoreSaleModal({
   schoolId,
 }: CreateStoreSaleModalProps) {
   const queryClient = useQueryClient()
-  const createOrder = useMutation(useCreateStoreOrderMutationOptions())
+  const createOrder = useMutation(api.api.v1.storeOrders.store.mutationOptions())
 
   const [studentSearch, setStudentSearch] = useState('')
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null)
@@ -60,12 +55,16 @@ export function CreateStoreSaleModal({
   const [notes, setNotes] = useState('')
 
   const { data: studentsData, isLoading: isLoadingStudents } = useQuery({
-    ...useStudentsQueryOptions({ search: studentSearch || undefined, limit: 15 }),
+    ...api.api.v1.students.index.queryOptions({
+      query: { search: studentSearch || undefined, limit: 15 },
+    }),
     enabled: open,
   })
 
   const { data: storeItemsData, isLoading: isLoadingItems } = useQuery({
-    ...useStoreItemsQueryOptions({ storeId, isActive: true, limit: 100 }),
+    ...api.api.v1.storeItems.index.queryOptions({
+      query: { storeId, isActive: true, limit: 100 },
+    }),
     enabled: open,
   })
 
@@ -123,7 +122,7 @@ export function CreateStoreSaleModal({
       return
     }
 
-    const payload: CreateStoreOrderPayload = {
+    const payload = {
       studentId: selectedStudent.id,
       schoolId,
       storeId,
@@ -138,7 +137,7 @@ export function CreateStoreSaleModal({
     }
 
     try {
-      await createOrder.mutateAsync(payload)
+      await createOrder.mutateAsync({ body: payload })
       toast.success('Venda registrada com sucesso!')
 
       await Promise.all([

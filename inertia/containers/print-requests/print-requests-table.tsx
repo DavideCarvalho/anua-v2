@@ -12,13 +12,8 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { usePrintRequestsQueryOptions } from '../../hooks/queries/use_print_requests'
-import {
-  useApprovePrintRequest,
-  useRejectPrintRequest,
-  useMarkPrintRequestPrinted,
-  useReviewPrintRequest,
-} from '../../hooks/mutations/use_print_request_actions'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -44,7 +39,11 @@ interface PrintRequestsTableProps {
 
 const statusConfig: Record<
   string,
-  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }
+  {
+    label: string
+    variant: 'default' | 'secondary' | 'destructive' | 'outline'
+    icon: React.ReactNode
+  }
 > = {
   REQUESTED: { label: 'Solicitado', variant: 'secondary', icon: <Clock className="h-3 w-3" /> },
   APPROVED: { label: 'Aprovado', variant: 'default', icon: <Check className="h-3 w-3" /> },
@@ -54,11 +53,18 @@ const statusConfig: Record<
 }
 
 export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
-  const { data } = useSuspenseQuery(usePrintRequestsQueryOptions({ statuses } as any))
-  const approveMutation = useApprovePrintRequest()
-  const rejectMutation = useRejectPrintRequest()
-  const printedMutation = useMarkPrintRequestPrinted()
-  const reviewMutation = useReviewPrintRequest()
+  const queryClient = useQueryClient()
+  const { data } = useSuspenseQuery(
+    api.api.v1.printRequests.listPrintRequests.queryOptions({ query: { statuses } })
+  )
+  const approveMutation = useMutation(
+    api.api.v1.printRequests.approvePrintRequest.mutationOptions()
+  )
+  const rejectMutation = useMutation(api.api.v1.printRequests.rejectPrintRequest.mutationOptions())
+  const printedMutation = useMutation(
+    api.api.v1.printRequests.markPrintRequestPrinted.mutationOptions()
+  )
+  const reviewMutation = useMutation(api.api.v1.printRequests.reviewPrintRequest.mutationOptions())
 
   const requests = (data as any)?.data ?? []
 
@@ -139,7 +145,17 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => approveMutation.mutate(request.id)}
+                            onClick={() =>
+                              approveMutation.mutate(
+                                { params: { id: request.id } },
+                                {
+                                  onSuccess: () =>
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['print-requests'],
+                                    }),
+                                }
+                              )
+                            }
                             disabled={approveMutation.isPending}
                             title="Aprovar"
                           >
@@ -148,7 +164,17 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => rejectMutation.mutate({ id: request.id })}
+                            onClick={() =>
+                              rejectMutation.mutate(
+                                { params: { id: request.id }, body: { reason: 'Rejeitado' } },
+                                {
+                                  onSuccess: () =>
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['print-requests'],
+                                    }),
+                                }
+                              )
+                            }
                             disabled={rejectMutation.isPending}
                             title="Rejeitar"
                           >
@@ -157,7 +183,17 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => reviewMutation.mutate(request.id)}
+                            onClick={() =>
+                              reviewMutation.mutate(
+                                { params: { id: request.id } },
+                                {
+                                  onSuccess: () =>
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['print-requests'],
+                                    }),
+                                }
+                              )
+                            }
                             disabled={reviewMutation.isPending}
                             title="Solicitar Revisão"
                           >
@@ -169,7 +205,17 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => printedMutation.mutate(request.id)}
+                          onClick={() =>
+                            printedMutation.mutate(
+                              { params: { id: request.id } },
+                              {
+                                onSuccess: () =>
+                                  queryClient.invalidateQueries({
+                                    queryKey: ['print-requests'],
+                                  }),
+                              }
+                            )
+                          }
                           disabled={printedMutation.isPending}
                         >
                           <Printer className="h-4 w-4 mr-1" />

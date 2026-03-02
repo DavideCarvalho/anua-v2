@@ -48,11 +48,11 @@ const MarkInvoicePaidController = () =>
 export function registerSubscriptionPlanApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionPlansController]).as('subscriptionPlans.index')
-      router.post('/', [CreateSubscriptionPlanController]).as('subscriptionPlans.store')
-      router.get('/:id', [ShowSubscriptionPlanController]).as('subscriptionPlans.show')
-      router.put('/:id', [UpdateSubscriptionPlanController]).as('subscriptionPlans.update')
-      router.delete('/:id', [DeleteSubscriptionPlanController]).as('subscriptionPlans.destroy')
+      router.get('/', [ListSubscriptionPlansController]).as('subscription_plans.index')
+      router.post('/', [CreateSubscriptionPlanController]).as('subscription_plans.store')
+      router.get('/:id', [ShowSubscriptionPlanController]).as('subscription_plans.show')
+      router.put('/:id', [UpdateSubscriptionPlanController]).as('subscription_plans.update')
+      router.delete('/:id', [DeleteSubscriptionPlanController]).as('subscription_plans.destroy')
     })
     .prefix('/subscription-plans')
     .use(middleware.auth())
@@ -89,7 +89,7 @@ export function registerSubscriptionApiRoutes() {
     .group(() => {
       router
         .get('/:schoolChainId/subscription', [GetChainSubscriptionController])
-        .as('schoolChains.subscription')
+        .as('school_chains.subscription')
     })
     .prefix('/school-chains')
     .use(middleware.auth())
@@ -98,11 +98,13 @@ export function registerSubscriptionApiRoutes() {
 export function registerSubscriptionInvoiceApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionInvoicesController]).as('subscriptionInvoices.index')
-      router.post('/', [CreateSubscriptionInvoiceController]).as('subscriptionInvoices.store')
-      router.get('/:id', [ShowSubscriptionInvoiceController]).as('subscriptionInvoices.show')
-      router.put('/:id', [UpdateSubscriptionInvoiceController]).as('subscriptionInvoices.update')
-      router.post('/:id/mark-paid', [MarkInvoicePaidController]).as('subscriptionInvoices.markPaid')
+      router.get('/', [ListSubscriptionInvoicesController]).as('subscription_invoices.index')
+      router.post('/', [CreateSubscriptionInvoiceController]).as('subscription_invoices.store')
+      router.get('/:id', [ShowSubscriptionInvoiceController]).as('subscription_invoices.show')
+      router.put('/:id', [UpdateSubscriptionInvoiceController]).as('subscription_invoices.update')
+      router
+        .post('/:id/mark-paid', [MarkInvoicePaidController])
+        .as('subscription_invoices.mark_paid')
     })
     .prefix('/subscription-invoices')
     .use(middleware.auth())

@@ -31,12 +31,7 @@ const RELATIONSHIPS = [
 ]
 
 export function StepMedicalInfo() {
-  const {
-    register,
-    control,
-    setValue,
-    watch,
-  } = useFormContext<EnrollmentFormData>()
+  const { register, control, setValue, watch } = useFormContext<EnrollmentFormData>()
 
   const {
     fields: medicationFields,

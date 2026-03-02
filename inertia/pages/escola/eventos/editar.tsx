@@ -1,4 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { Head, router } from '@inertiajs/react'
 import { type KeyboardEvent, useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -31,11 +32,8 @@ import { Textarea } from '../../../components/ui/textarea'
 import { Switch } from '../../../components/ui/switch'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
-import { useEventQueryOptions } from '../../../hooks/queries/use_event'
-import { useUpdateEventMutation } from '../../../hooks/mutations/use_update_event'
-import { useAcademicPeriodsQueryOptions } from '../../../hooks/queries/use_academic_periods'
-import { useLevelsQueryOptions } from '../../../hooks/queries/use_levels'
-import { useClassesQueryOptions } from '../../../hooks/queries/use_classes'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { getEducationType, type AcademicPeriodSegment } from '../../../lib/formatters'
 
 const EventType = {
@@ -146,8 +144,11 @@ interface Props {
 
 export default function EditarEventoPage({ eventId }: Props) {
   const [currentStep, setCurrentStep] = useState(0)
-  const updateEventMutation = useUpdateEventMutation()
-  const { data: event, isLoading: isLoadingEvent } = useQuery(useEventQueryOptions({ id: eventId }))
+  const queryClient = useQueryClient()
+  const updateEventMutation = useMutation(api.api.v1.events.update.mutationOptions())
+  const { data: event, isLoading: isLoadingEvent } = useQuery(
+    api.api.v1.events.show.queryOptions({ params: { id: eventId } })
+  )
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -208,20 +209,26 @@ export default function EditarEventoPage({ eventId }: Props) {
   const levelIds = form.watch('audienceLevelIds')
   const singleAcademicPeriodId = periodIds.length === 1 ? periodIds[0] : undefined
 
-  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
+  const { data: periodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
+  )
   const { data: levelsData, isFetched: hasFetchedLevels } = useQuery({
-    ...useLevelsQueryOptions({
-      schoolId: event?.schoolId ?? '',
-      limit: 300,
-      academicPeriodId: singleAcademicPeriodId,
+    ...api.api.v1.levels.index.queryOptions({
+      query: {
+        schoolId: event?.schoolId ?? '',
+        limit: 300,
+        academicPeriodId: singleAcademicPeriodId,
+      },
     }),
     enabled: Boolean(event?.schoolId) && !values.audienceWholeSchool && periodIds.length > 0,
   })
   const { data: classesData, isFetched: hasFetchedClasses } = useQuery({
-    ...useClassesQueryOptions({
-      schoolId: event?.schoolId ?? '',
-      limit: 300,
-      academicPeriodId: singleAcademicPeriodId,
+    ...api.api.v1.classes.index.queryOptions({
+      query: {
+        schoolId: event?.schoolId ?? '',
+        limit: 300,
+        academicPeriodId: singleAcademicPeriodId,
+      },
     }),
     enabled:
       Boolean(event?.schoolId) &&
@@ -350,38 +357,41 @@ export default function EditarEventoPage({ eventId }: Props) {
 
     toast.promise(
       updateEventMutation.mutateAsync({
-        id: eventId,
-        title: formValues.title,
-        description: formValues.description,
-        type: formValues.type,
-        location: formValues.location,
-        isAllDay: formValues.isAllDay,
-        startTime: formValues.isAllDay ? null : formValues.startTime || null,
-        endTime: formValues.isAllDay ? null : formValues.endTime || null,
-        isExternal: formValues.isExternal,
-        requiresParentalConsent: formValues.requiresParentalConsent,
-        hasAdditionalCosts: formValues.hasAdditionalCosts,
-        additionalCostAmount: formValues.hasAdditionalCosts
-          ? formValues.additionalCostAmount
-          : undefined,
-        additionalCostInstallments: formValues.hasAdditionalCosts
-          ? formValues.additionalCostInstallments
-          : undefined,
-        additionalCostDescription: formValues.hasAdditionalCosts
-          ? formValues.additionalCostDescription
-          : undefined,
-        audienceWholeSchool: formValues.audienceWholeSchool,
-        audienceAcademicPeriodIds: formValues.audienceWholeSchool
-          ? []
-          : formValues.audienceAcademicPeriodIds,
-        audienceLevelIds: formValues.audienceWholeSchool ? [] : formValues.audienceLevelIds,
-        audienceClassIds: formValues.audienceWholeSchool ? [] : formValues.audienceClassIds,
-        startsAt: startsAtIso,
-        endsAt: endsAtIso,
+        params: { id: eventId },
+        body: {
+          title: formValues.title,
+          description: formValues.description,
+          type: formValues.type,
+          location: formValues.location,
+          isAllDay: formValues.isAllDay,
+          startTime: formValues.isAllDay ? null : formValues.startTime || null,
+          endTime: formValues.isAllDay ? null : formValues.endTime || null,
+          isExternal: formValues.isExternal,
+          requiresParentalConsent: formValues.requiresParentalConsent,
+          hasAdditionalCosts: formValues.hasAdditionalCosts,
+          additionalCostAmount: formValues.hasAdditionalCosts
+            ? formValues.additionalCostAmount
+            : undefined,
+          additionalCostInstallments: formValues.hasAdditionalCosts
+            ? formValues.additionalCostInstallments
+            : undefined,
+          additionalCostDescription: formValues.hasAdditionalCosts
+            ? formValues.additionalCostDescription
+            : undefined,
+          audienceWholeSchool: formValues.audienceWholeSchool,
+          audienceAcademicPeriodIds: formValues.audienceWholeSchool
+            ? []
+            : formValues.audienceAcademicPeriodIds,
+          audienceLevelIds: formValues.audienceWholeSchool ? [] : formValues.audienceLevelIds,
+          audienceClassIds: formValues.audienceWholeSchool ? [] : formValues.audienceClassIds,
+          startsAt: startsAtIso,
+          endsAt: endsAtIso,
+        },
       }),
       {
         loading: 'Salvando evento...',
         success: () => {
+          queryClient.invalidateQueries({ queryKey: ['events'] })
           router.visit('/escola/eventos')
           return 'Evento atualizado com sucesso!'
         },

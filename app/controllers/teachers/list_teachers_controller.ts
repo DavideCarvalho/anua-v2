@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { TeacherListDto } from '#dtos/teacher_dto'
+import { listTeachersValidator } from '#validators/teacher'
 
 interface UserSchoolRow {
   schoolId: string
@@ -29,10 +30,11 @@ export default class ListTeachersController {
   async handle(ctx: HttpContext) {
     const { request, auth } = ctx
     const user = ctx.effectiveUser ?? auth.user!
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const search = request.input('search', '')
-    const active = request.input('active')
+    const filters = await request.validateUsing(listTeachersValidator)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
+    const search = filters.search ?? ''
+    const active = filters.active
 
     // Get schools the user has access to
     const userSchoolsResult = await db.rawQuery<{ rows: UserSchoolRow[] }>(
@@ -65,9 +67,9 @@ export default class ListTeachersController {
     }
 
     let activeFilter = ''
-    if (active !== undefined && active !== null && active !== '') {
+    if (active !== undefined && active !== null) {
       activeFilter = 'AND u.active = :active'
-      params.active = active === 'true' || active === true
+      params.active = active
     }
 
     // Count total

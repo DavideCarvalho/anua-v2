@@ -25,10 +25,8 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Skeleton } from '~/components/ui/skeleton'
-import { useUpdateExtraClass } from '~/hooks/mutations/use_extra_class_mutations'
-import { useExtraClassQueryOptions } from '~/hooks/queries/use_extra_classes'
-import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
-import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const DAY_OPTIONS = [
   { value: '0', label: 'Domingo' },
@@ -73,7 +71,7 @@ export function EditExtraClassModal({
   onOpenChange,
 }: EditExtraClassModalProps) {
   const { data: extraClass, isLoading } = useQuery({
-    ...useExtraClassQueryOptions(extraClassId),
+    ...api.api.v1.extraClasses.show.queryOptions({ params: { id: extraClassId } }),
     enabled: open,
   })
 
@@ -93,10 +91,15 @@ export function EditExtraClassModal({
     control: form.control,
     name: 'schedules',
   })
-  const updateMutation = useUpdateExtraClass()
+  const queryClient = useQueryClient()
+  const updateMutation = useMutation(api.api.v1.extraClasses.update.mutationOptions())
 
-  const { data: teachersData } = useQuery(useTeachersQueryOptions({ limit: 100 }))
-  const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
+  const { data: teachersData } = useQuery(
+    api.api.v1.teachers.index.queryOptions({ query: { limit: 100 } })
+  )
+  const { data: contractsData } = useQuery(
+    api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
+  )
 
   const teachers = teachersData?.data ?? []
   const contracts = contractsData?.data ?? []
@@ -124,18 +127,21 @@ export function EditExtraClassModal({
   const onSubmit = (values: FormOutput) => {
     updateMutation.mutate(
       {
-        id: extraClassId,
-        ...values,
-        maxStudents: values.maxStudents ? Number(values.maxStudents) : null,
-        description: values.description || null,
-        schedules: values.schedules.map((s) => ({
-          weekDay: Number(s.weekDay),
-          startTime: s.startTime,
-          endTime: s.endTime,
-        })),
+        params: { id: extraClassId },
+        body: {
+          ...values,
+          maxStudents: values.maxStudents ? Number(values.maxStudents) : null,
+          description: values.description || null,
+          schedules: values.schedules.map((s) => ({
+            weekDay: Number(s.weekDay),
+            startTime: s.startTime,
+            endTime: s.endTime,
+          })),
+        },
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['extra-classes'] })
           toast.success('Aula avulsa atualizada')
           onOpenChange(false)
         },

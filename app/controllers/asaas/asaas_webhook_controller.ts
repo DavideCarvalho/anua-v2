@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import type { Request } from '@adonisjs/core/http'
+import type { HttpRequest } from '@adonisjs/core/http'
 import { timingSafeEqual } from 'node:crypto'
 import Contract from '#models/contract'
 import School from '#models/school'
@@ -455,7 +455,7 @@ export default class AsaasWebhookController {
     return response.ok(new WebhookEventDto(webhookEvent))
   }
 
-  private getWebhookToken(request: Request): string | null {
+  private getWebhookToken(request: HttpRequest): string | null {
     const token = request.header('x-asaas-webhook-token')
     return token?.trim() || null
   }

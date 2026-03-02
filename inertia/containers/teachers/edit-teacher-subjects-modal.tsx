@@ -13,8 +13,7 @@ import {
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
-import { tuyau } from '~/lib/api'
-import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
+import { api } from '~/lib/api'
 
 interface TeacherData {
   id: string
@@ -41,7 +40,7 @@ export function EditTeacherSubjectsModal({
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([])
 
   const { data: subjectsData } = useQuery(
-    useSubjectsQueryOptions({ page: 1, limit: 100, schoolId })
+    api.api.v1.subjects.index.queryOptions({ query: { page: 1, limit: 100, schoolId } })
   )
 
   const subjects = subjectsData?.data ?? []
@@ -55,22 +54,25 @@ export function EditTeacherSubjectsModal({
     }
   }, [teacher])
 
-  const updateMutation = useMutation({
-    mutationFn: () => {
-      if (!teacher) throw new Error('Professor não encontrado')
-      return tuyau.api.v1.teachers({ id: teacher.id }).subjects
-        .$put({ subjectIds: selectedSubjectIds })
-        .unwrap()
-    },
-    onSuccess: () => {
+  const updateMutation = useMutation(api.api.v1.teachers.updateTeacherSubjects.mutationOptions())
+
+  const handleSave = async () => {
+    if (!teacher) {
+      toast.error('Professor não encontrado')
+      return
+    }
+    try {
+      await updateMutation.mutateAsync({
+        params: { id: teacher.id },
+        body: { subjectIds: selectedSubjectIds },
+      })
       toast.success('Disciplinas atualizadas com sucesso')
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
       onOpenChange(false)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao atualizar disciplinas')
-    },
-  })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar disciplinas')
+    }
+  }
 
   const handleToggleSubject = (subjectId: string, checked: boolean) => {
     if (checked) {
@@ -82,7 +84,7 @@ export function EditTeacherSubjectsModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    updateMutation.mutate()
+    handleSave()
   }
 
   return (
@@ -107,14 +109,9 @@ export function EditTeacherSubjectsModal({
                   <Checkbox
                     id={`subject-${subject.id}`}
                     checked={selectedSubjectIds.includes(subject.id)}
-                    onCheckedChange={(checked) =>
-                      handleToggleSubject(subject.id, checked === true)
-                    }
+                    onCheckedChange={(checked) => handleToggleSubject(subject.id, checked === true)}
                   />
-                  <Label
-                    htmlFor={`subject-${subject.id}`}
-                    className="font-normal cursor-pointer"
-                  >
+                  <Label htmlFor={`subject-${subject.id}`} className="font-normal cursor-pointer">
                     {subject.name}
                   </Label>
                 </div>

@@ -7,12 +7,12 @@ import {
 } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { router } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useContractsQueryOptions, type ContractsResponse } from '../hooks/queries/use_contracts'
-import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
-import { updateContractMutationOptions } from '../hooks/mutations/use_contract_mutations'
-import { tuyau } from '../lib/api'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type ContractsResponse = Route.Response<'api.v1.contracts.index'>
 import { toast } from 'sonner'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -51,7 +51,7 @@ interface ContractItem {
   description?: string
   enrollmentValue?: number
   enrollmentValueInstallments?: number
-  amount?: number
+  ammount?: number
   paymentType?: 'MONTHLY' | 'UPFRONT'
   installments?: number
   flexibleInstallments?: boolean
@@ -141,7 +141,7 @@ function getInstallmentsLabel(contract: ContractItem): string {
 }
 
 function getTuitionLabel(contract: ContractItem): string {
-  const valueLabel = formatCurrency(contract.amount)
+  const valueLabel = formatCurrency(contract.ammount)
   const installmentsLabel = getInstallmentsLabel(contract)
 
   if (installmentsLabel === '-' || installmentsLabel === 'Mensal') {
@@ -238,22 +238,19 @@ function ContractsListContent() {
   }
 
   const { data: academicPeriodsData } = useQuery({
-    ...useAcademicPeriodsQueryOptions({ limit: 100 }),
+    ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { limit: 100 },
+    }),
   })
   const academicPeriods = academicPeriodsData?.data ?? []
 
   const { data: coursesData } = useQuery({
-    queryKey: ['academic-period-courses', academicPeriodId],
-    queryFn: async () => {
-      const response = await tuyau.api.v1['academic-periods']({
-        id: academicPeriodId!,
-      }).courses.$get()
-      if (response.error) throw new Error('Erro ao carregar cursos')
-      return response.data as AcademicPeriodCourse[]
-    },
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: academicPeriodId! },
+    }),
     enabled: !!academicPeriodId,
   })
-  const courses = coursesData ?? []
+  const courses = (coursesData ?? []) as AcademicPeriodCourse[]
 
   const classes = useMemo(() => {
     if (!courseId || !courses.length) return []
@@ -270,20 +267,22 @@ function ContractsListContent() {
   }, [courseId, courses])
 
   const { data, isLoading, error, refetch } = useQuery(
-    useContractsQueryOptions({
-      page,
-      limit,
-      search: search || undefined,
-      academicPeriodId: academicPeriodId || undefined,
-      courseId: courseId || undefined,
-      classId: classId || undefined,
-      status: statusFilter,
+    api.api.v1.contracts.index.queryOptions({
+      query: {
+        page,
+        limit,
+        search: search || undefined,
+        academicPeriodId: academicPeriodId || undefined,
+        courseId: courseId || undefined,
+        classId: classId || undefined,
+        status: statusFilter,
+      },
     })
   )
 
   const [contractActionPendingId, setContractActionPendingId] = useState<string | null>(null)
 
-  const updateContract = useMutation(updateContractMutationOptions())
+  const updateContract = useMutation(api.api.v1.contracts.update.mutationOptions())
 
   const handleEdit = (contract: ContractItem) => {
     router.visit(`/escola/administrativo/contratos/${contract.id}/editar`)
@@ -295,8 +294,8 @@ function ContractsListContent() {
     try {
       setContractActionPendingId(contract.id)
       await updateContract.mutateAsync({
-        id: contract.id,
-        isActive: !contract.isActive,
+        params: { id: contract.id },
+        body: { isActive: !contract.isActive },
       })
       await queryClient.invalidateQueries({ queryKey: ['contracts'] })
       toast.success(

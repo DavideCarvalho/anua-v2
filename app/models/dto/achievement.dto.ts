@@ -2,6 +2,7 @@ import { BaseModelDto } from '@adocasts.com/dto/base'
 import type Achievement from '#models/achievement'
 import type { AchievementCategory, AchievementRarity, RecurrencePeriod } from '#models/achievement'
 import SchoolDto from './school.dto.js'
+import type SchoolAchievementConfigDto from './school_achievement_config.dto.js'
 
 export default class AchievementDto extends BaseModelDto {
   declare id: string
@@ -23,6 +24,7 @@ export default class AchievementDto extends BaseModelDto {
   declare createdAt: Date
   declare updatedAt: Date
   declare school?: SchoolDto
+  declare schoolAchievementConfig?: SchoolAchievementConfigDto
 
   constructor(achievement: Achievement) {
     super()

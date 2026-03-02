@@ -49,19 +49,29 @@ export function DatePicker({
           selected={date}
           onSelect={onChange}
           locale={ptBR}
-          disabled={
-            fromDate || toDate
-              ? { before: fromDate, after: toDate } as any
-              : undefined
-          }
+          disabled={fromDate || toDate ? ({ before: fromDate, after: toDate } as any) : undefined}
           components={{
             PreviousMonthButton: (props) => (
-              <button type="button" {...props} className={cn(props.className, 'absolute left-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input')}>
+              <button
+                type="button"
+                {...props}
+                className={cn(
+                  props.className,
+                  'absolute left-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input'
+                )}
+              >
                 <ChevronLeft className="h-4 w-4" />
               </button>
             ),
             NextMonthButton: (props) => (
-              <button type="button" {...props} className={cn(props.className, 'absolute right-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input')}>
+              <button
+                type="button"
+                {...props}
+                className={cn(
+                  props.className,
+                  'absolute right-1 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input'
+                )}
+              >
                 <ChevronRight className="h-4 w-4" />
               </button>
             ),

@@ -19,10 +19,11 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { toast } from 'sonner'
-import { useUpdateProduct } from '../../hooks/mutations/use_store_owner_mutations'
-import type { OwnProductsResponse } from '../../hooks/queries/use_store_owner'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
-type Product = NonNullable<OwnProductsResponse>['data'][number]
+type Product = NonNullable<Route.Response<'api.v1.store_owner.products'>>['data'][number]
 
 interface Props {
   product: Product
@@ -49,7 +50,8 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
     product.totalStock !== null ? String(product.totalStock) : ''
   )
 
-  const updateProduct = useUpdateProduct()
+  const queryClient = useQueryClient()
+  const updateProduct = useMutation(api.api.v1.storeOwner.products.update.mutationOptions())
 
   useEffect(() => {
     setName(product.name)
@@ -63,13 +65,16 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
     e.preventDefault()
     try {
       await updateProduct.mutateAsync({
-        id: product.id,
-        name,
-        description: description || undefined,
-        price: Math.round(Number(price) * 100),
-        category,
-        totalStock: totalStock ? Number(totalStock) : undefined,
+        params: { id: product.id },
+        body: {
+          name,
+          description: description || undefined,
+          price: Math.round(Number(price) * 100),
+          category,
+          totalStock: totalStock ? Number(totalStock) : undefined,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['storeOwner', 'products'] })
       toast.success('Produto atualizado com sucesso!')
       onSuccess()
     } catch {

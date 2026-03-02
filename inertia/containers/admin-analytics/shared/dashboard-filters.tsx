@@ -7,8 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../components/ui/select'
-import { useSchoolsQueryOptions } from '../../../hooks/queries/use_schools'
-import { useSchoolChainsQueryOptions } from '../../../hooks/queries/use_school_chains'
+import { api } from '~/lib/api'
 import { useSearchParams } from '../../../hooks/use_search_params'
 
 interface DashboardFiltersProps {
@@ -24,8 +23,8 @@ export function DashboardFilters({
   const schoolId = params.schoolId ?? ''
   const schoolChainId = params.schoolChainId ?? ''
 
-  const { data: schoolsRaw } = useQuery(useSchoolsQueryOptions())
-  const { data: chainsRaw } = useQuery(useSchoolChainsQueryOptions())
+  const { data: schoolsRaw } = useQuery(api.api.v1.schools.index.queryOptions({}))
+  const { data: chainsRaw } = useQuery(api.api.v1.schoolChains.listSchoolChains.queryOptions({}))
   const schools = schoolsRaw?.data ?? []
   const chains = chainsRaw?.data ?? []
 

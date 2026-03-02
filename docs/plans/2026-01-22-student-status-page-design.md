@@ -16,15 +16,15 @@ Mostrar o status acadêmico de cada aluno da turma em uma matéria específica, 
 
 ## Dados por Aluno
 
-| Campo | Descrição |
-|-------|-----------|
-| Nome | Nome do estudante |
-| Status | APPROVED, AT_RISK_GRADE, AT_RISK_ATTENDANCE, FAILED, IN_PROGRESS |
-| Nota Final | Nota atual / máximo possível |
-| Pontos p/ Passar | Diferença até a média mínima |
-| Presença | Percentual de frequência |
-| Aulas até Reprovar | Margem de faltas restante |
-| Atividades Pendentes | Contador + lista expansível |
+| Campo                | Descrição                                                        |
+| -------------------- | ---------------------------------------------------------------- |
+| Nome                 | Nome do estudante                                                |
+| Status               | APPROVED, AT_RISK_GRADE, AT_RISK_ATTENDANCE, FAILED, IN_PROGRESS |
+| Nota Final           | Nota atual / máximo possível                                     |
+| Pontos p/ Passar     | Diferença até a média mínima                                     |
+| Presença             | Percentual de frequência                                         |
+| Aulas até Reprovar   | Margem de faltas restante                                        |
+| Atividades Pendentes | Contador + lista expansível                                      |
 
 ## Arquitetura
 
@@ -88,5 +88,6 @@ inertia/
 ## Permissões
 
 Seletor de matérias filtrado por papel:
+
 - SCHOOL_DIRECTOR, SCHOOL_COORDINATOR, ADMIN, SUPER_ADMIN: vê todas as matérias
 - SCHOOL_TEACHER: vê apenas matérias que leciona

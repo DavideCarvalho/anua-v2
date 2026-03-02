@@ -14,7 +14,10 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import { useEscolaInsightsQueryOptions, type Insight } from '../hooks/queries/use_escola_insights'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type Insight = Route.Response<'api.v1.dashboard.escola_insights'>['insights'][number]
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
@@ -272,7 +275,7 @@ function InsightsError({
 
 // Content Component
 function InsightsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
-  const { data, isLoading, error } = useQuery(useEscolaInsightsQueryOptions())
+  const { data, isLoading, error } = useQuery(api.api.v1.dashboard.escolaInsights.queryOptions({}))
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null)
 
   if (isLoading || !data) {

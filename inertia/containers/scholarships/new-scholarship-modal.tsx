@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import type { SchoolPartnersForSelectResponse } from '../../hooks/queries/use_school_partners_for_select'
 import { toast } from 'sonner'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
@@ -26,8 +25,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreateScholarshipMutation } from '../../hooks/mutations/use_create_scholarship'
-import { useSchoolPartnersForSelectQueryOptions } from '../../hooks/queries/use_school_partners_for_select'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -55,10 +54,9 @@ export function NewScholarshipModal({
   onCancel: () => void
   onSubmit: () => void
 }) {
-  const createScholarship = useCreateScholarshipMutation()
-  const { data: partnersData } = useQuery<SchoolPartnersForSelectResponse>(
-    useSchoolPartnersForSelectQueryOptions() as any
-  )
+  const queryClient = useQueryClient()
+  const createScholarship = useMutation(api.api.v1.scholarships.createScholarship.mutationOptions())
+  const { data: partnersData } = useQuery(api.api.v1.schoolPartners.index.queryOptions({}))
 
   const partners = useMemo(() => {
     return (partnersData as any)?.data ?? []
@@ -98,7 +96,8 @@ export function NewScholarshipModal({
       payload.enrollmentDiscountValue = values.enrollmentDiscountValue ?? 0
     }
 
-    const promise = createScholarship.mutateAsync(payload).then(() => {
+    const promise = createScholarship.mutateAsync({ body: payload }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['scholarships'] })
       form.reset()
       onSubmit()
       toast.success('Bolsa criada com sucesso!')

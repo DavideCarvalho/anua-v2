@@ -5,12 +5,13 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { useRouter } from '@tuyau/inertia/react'
+import { useRouter } from '@adonisjs/inertia/react'
 
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Stepper } from '~/components/ui/stepper'
-import { useCreateAcademicPeriodMutation } from '~/hooks/mutations/use_create_academic_period'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 import { CalendarForm } from './components/calendar-form'
 import { CoursesForm } from './components/courses-form'
@@ -53,13 +54,16 @@ const schema = z.object({
               z.object({
                 id: z.string().optional(),
                 name: z.string(),
-                teachers: z.array(
-                  z.object({
-                    teacherId: z.string(),
-                    subjectId: z.string(),
-                    subjectQuantity: z.number(),
-                  })
-                ).optional().default([]),
+                teachers: z
+                  .array(
+                    z.object({
+                      teacherId: z.string(),
+                      subjectId: z.string(),
+                      subjectQuantity: z.number(),
+                    })
+                  )
+                  .optional()
+                  .default([]),
               })
             )
             .optional()
@@ -91,7 +95,8 @@ interface NewAcademicPeriodFormProps {
 export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriodFormProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
-  const createMutation = useCreateAcademicPeriodMutation()
+  const queryClient = useQueryClient()
+  const createMutation = useMutation(api.api.v1.academicPeriods.store.mutationOptions())
 
   const form = useForm<AcademicPeriodFormValues>({
     resolver: zodResolver(schema) as any,
@@ -114,7 +119,12 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
 
   const handleNext = async () => {
     if (currentStep === 0) {
-      const isValid = await form.trigger(['calendar.name', 'calendar.startDate', 'calendar.endDate', 'calendar.segment'])
+      const isValid = await form.trigger([
+        'calendar.name',
+        'calendar.startDate',
+        'calendar.endDate',
+        'calendar.segment',
+      ])
       if (!isValid) {
         toast.error('Preencha todos os campos obrigatórios')
         return
@@ -130,29 +140,31 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
   const handleSubmit = async (values: AcademicPeriodFormValues) => {
     try {
       await createMutation.mutateAsync({
-        schoolId: values.schoolId,
-        name: values.calendar.name,
-        startDate: values.calendar.startDate.toISOString(),
-        endDate: values.calendar.endDate.toISOString(),
-        segment: values.calendar.segment,
-        enrollmentStartDate: values.calendar.enrollmentStartDate?.toISOString(),
-        enrollmentEndDate: values.calendar.enrollmentEndDate?.toISOString(),
-        courses: values.courses.map((course) => ({
-          courseId: course.id,
-          name: course.name,
-          levels: course.levels.map((level) => ({
-            levelId: level.id,
-            name: level.name,
-            order: level.order,
-            contractId: level.contractId,
-            classes: level.classes.map((cls) => ({
-              name: cls.name,
-              teachers: cls.teachers,
+        body: {
+          schoolId: values.schoolId,
+          name: values.calendar.name,
+          startDate: values.calendar.startDate.toISOString(),
+          endDate: values.calendar.endDate.toISOString(),
+          segment: values.calendar.segment,
+          enrollmentStartDate: values.calendar.enrollmentStartDate?.toISOString(),
+          enrollmentEndDate: values.calendar.enrollmentEndDate?.toISOString(),
+          courses: values.courses.map((course) => ({
+            courseId: course.id,
+            name: course.name,
+            levels: course.levels.map((level) => ({
+              levelId: level.id,
+              name: level.name,
+              order: level.order,
+              contractId: level.contractId,
+              classes: level.classes.map((cls) => ({
+                name: cls.name,
+                teachers: cls.teachers,
+              })),
             })),
           })),
-        })),
+        },
       })
-
+      queryClient.invalidateQueries({ queryKey: ['academic-periods'] })
       toast.success('Período letivo criado com sucesso!')
       onSuccess?.()
       router.visit({ route: 'web.escola.periodosLetivos' })

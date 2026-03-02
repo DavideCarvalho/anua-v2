@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Challenge from '#models/challenge'
+import ChallengeTransformer from '#transformers/challenge_transformer'
 import { listChallengesValidator } from '#validators/gamification'
-import ChallengeDto from '#models/dto/challenge.dto'
 
 export default class ListChallengesController {
-  async handle({ request, auth }: HttpContext) {
+  async handle({ request, auth, serialize }: HttpContext) {
     const payload = await request.validateUsing(listChallengesValidator)
 
     const page = payload.page || 1
@@ -31,6 +31,9 @@ export default class ListChallengesController {
 
     const challenges = await query.paginate(page, limit)
 
-    return ChallengeDto.fromPaginator(challenges)
+    const data = challenges.all()
+    const metadata = challenges.getMeta()
+
+    return serialize(ChallengeTransformer.paginate(data, metadata))
   }
 }

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Trophy, Star, Award, ShoppingBag, Users } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useGamificationOverviewQueryOptions } from '../../../hooks/queries/use_gamification_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 import { ChartContainer } from '../shared/chart-container'
@@ -18,9 +18,11 @@ import { Badge } from '../../../components/ui/badge'
 export function GamificationOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useGamificationOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.gamification.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -72,9 +74,11 @@ export function GamificationOverviewCards() {
 export function TopStudentsTable() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useGamificationOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.gamification.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

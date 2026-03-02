@@ -237,31 +237,31 @@ DB_DATABASE=anua_v2
 
 ## Status Geral
 
-| Fase | Descrição                | Status         |
-| ---- | ------------------------ | -------------- |
-| 0    | Setup Inicial            | Concluído      |
-| 1    | Módulo Escolas           | Concluído      |
-| 2    | Auth/Usuários            | Concluído      |
-| 3    | Alunos                   | Concluído      |
-| 4    | Responsáveis             | Concluído      |
-| 5    | Matrícula Online         | Concluído      |
-| 6    | Pedagógico               | Concluído      |
-| 7    | Financeiro               | Concluído      |
-| 8    | Cantina                  | Parcial        |
-| 9    | Gamificação              | Concluído      |
-| 10   | Admin/Platform           | Concluído      |
-| 11   | Frontend Pages           | Parcial        |
-| 12   | Backend Incompleto       | **Em Análise** |
+| Fase | Descrição          | Status         |
+| ---- | ------------------ | -------------- |
+| 0    | Setup Inicial      | Concluído      |
+| 1    | Módulo Escolas     | Concluído      |
+| 2    | Auth/Usuários      | Concluído      |
+| 3    | Alunos             | Concluído      |
+| 4    | Responsáveis       | Concluído      |
+| 5    | Matrícula Online   | Concluído      |
+| 6    | Pedagógico         | Concluído      |
+| 7    | Financeiro         | Concluído      |
+| 8    | Cantina            | Parcial        |
+| 9    | Gamificação        | Concluído      |
+| 10   | Admin/Platform     | Concluído      |
+| 11   | Frontend Pages     | Parcial        |
+| 12   | Backend Incompleto | **Em Análise** |
 
 ### Detalhamento Fase 12 (Módulos com Backend Incompleto)
 
-| Módulo             | Models | Migrations | Controllers | Rotas | Status     |
-| ------------------ | ------ | ---------- | ----------- | ----- | ---------- |
-| Events             | OK     | OK         | OK          | OK    | Concluído  |
-| Notifications      | OK     | OK         | OK          | OK    | Concluído  |
-| Posts/Feed         | OK     | OK         | OK          | OK    | Concluído  |
-| Grades (Analytics) | OK     | OK         | OK          | OK    | Concluído  |
-| Purchase Requests  | OK     | OK         | OK          | OK    | Concluído  |
+| Módulo             | Models | Migrations | Controllers | Rotas | Status    |
+| ------------------ | ------ | ---------- | ----------- | ----- | --------- |
+| Events             | OK     | OK         | OK          | OK    | Concluído |
+| Notifications      | OK     | OK         | OK          | OK    | Concluído |
+| Posts/Feed         | OK     | OK         | OK          | OK    | Concluído |
+| Grades (Analytics) | OK     | OK         | OK          | OK    | Concluído |
+| Purchase Requests  | OK     | OK         | OK          | OK    | Concluído |
 
 ---
 
@@ -2103,19 +2103,23 @@ Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Co
 **Status:** Concluído
 
 **Models existentes:**
+
 - [x] `Event` - Eventos escolares (reuniões, festas, passeios)
 - [x] `EventParticipant` - Participantes do evento
 
 **Migrations existentes:**
+
 - [x] `create_events_table`
 - [x] `create_event_participants_table`
 - [x] `create_event_comments_table`
 - [x] `create_event_parental_consents_table`
 
 **Validators criados:**
+
 - [x] `app/validators/event.ts` - createEventValidator, updateEventValidator, listEventsValidator, registerParticipantValidator, etc.
 
 **Controllers criados:**
+
 - [x] `events/list_events_controller.ts`
 - [x] `events/show_event_controller.ts`
 - [x] `events/create_event_controller.ts`
@@ -2154,17 +2158,21 @@ Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Co
 **Status:** Concluído
 
 **Models existentes:**
+
 - [x] `Notification` - Notificações do sistema
 - [x] `NotificationPreference` - Preferências de notificação por usuário
 
 **Migrations existentes:**
+
 - [x] `create_notifications_table`
 - [x] `create_notification_preferences_table`
 
 **Validators criados:**
+
 - [x] `app/validators/notification.ts` - listNotificationsValidator, createNotificationValidator, updateNotificationPreferencesValidator
 
 **Controllers criados:**
+
 - [x] `notifications/list_notifications_controller.ts`
 - [x] `notifications/show_notification_controller.ts`
 - [x] `notifications/mark_notification_read_controller.ts`
@@ -2191,16 +2199,19 @@ Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Co
 **Status:** Concluído
 
 **Models existentes:**
+
 - [x] `Post` - Posts do feed/mural
 - [x] `Comment` - Comentários em posts
 - [x] `CommentLike` - Likes em comentários
 - [x] `UserLikedPost` - Likes em posts
 
 **Migrations existentes:**
+
 - [x] `create_posts_table`
 - [x] `create_user_liked_posts_table`
 
 **Controllers criados:**
+
 - [x] `posts/list_posts_controller.ts`
 - [x] `posts/show_post_controller.ts`
 - [x] `posts/create_post_controller.ts`
@@ -2215,6 +2226,7 @@ Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Co
 - [x] `comments/like_comment_controller.ts`
 
 **Validators criados:**
+
 - [x] `validators/post.ts` - createPostValidator, updatePostValidator, createCommentValidator, updateCommentValidator
 
 **Endpoints implementados:**
@@ -2240,15 +2252,19 @@ Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Co
 **Status:** Concluído
 
 **Model criado:**
+
 - [x] `purchase_request.ts` - Solicitações de compra de materiais
 
 **Migration criada:**
+
 - [x] `1769100000000_create_purchase_requests_table.ts`
 
 **Validators criados:**
+
 - [x] `validators/purchase_request.ts` - createPurchaseRequestValidator, updatePurchaseRequestValidator, rejectPurchaseRequestValidator, markAsBoughtValidator, markAsArrivedValidator
 
 **Controllers criados:**
+
 - [x] `purchase_requests/list_purchase_requests_controller.ts`
 - [x] `purchase_requests/show_purchase_request_controller.ts`
 - [x] `purchase_requests/create_purchase_request_controller.ts`
@@ -2273,21 +2289,25 @@ Estes módulos já possuem **Models** e **Migrations**, mas ainda faltam os **Co
 | POST | `/api/v1/purchase-requests/:id/mark-arrived` | mark_as_arrived_controller | Concluído |
 
 **Fluxo de status:**
+
 ```
 REQUESTED → APPROVED → BOUGHT → ARRIVED
          ↘ REJECTED
 ```
 
 **Frontend implementado:**
+
 - [x] Página: `inertia/pages/escola/administrativo/solicitacoes-de-compra.tsx`
 - [x] Rota: `/escola/:schoolSlug/administrativo/solicitacoes-de-compra`
 
 **Componentes UI criados:**
+
 - [x] `inertia/components/ui/popover.tsx`
 - [x] `inertia/components/ui/hover-card.tsx`
 - [x] `inertia/components/ui/date-picker.tsx`
 
 **Hooks criados:**
+
 - [x] `hooks/queries/use-purchase-requests.ts`
 - [x] `hooks/queries/use-purchase-request.ts`
 - [x] `hooks/mutations/use-create-purchase-request.ts`
@@ -2299,6 +2319,7 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 - [x] `hooks/mutations/use-mark-arrived-purchase-request.ts`
 
 **Containers criados:**
+
 - [x] `containers/purchase-requests/purchase-requests-table.tsx`
 - [x] `containers/purchase-requests/new-purchase-request-modal.tsx`
 - [x] `containers/purchase-requests/approve-purchase-request-modal.tsx`
@@ -2307,6 +2328,7 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 - [x] `containers/purchase-requests/arrived-purchase-request-modal.tsx`
 
 **Dependências adicionadas:**
+
 - `react-day-picker` - DatePicker
 - `@radix-ui/react-popover` - Popover para DatePicker
 - `@radix-ui/react-hover-card` - HoverCard para detalhes na tabela
@@ -2318,17 +2340,21 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 **Status:** Concluído
 
 **Páginas criadas:**
+
 - [x] `inertia/pages/escola/notificacoes.tsx`
 - [x] `inertia/pages/escola/notificacoes/preferencias.tsx`
 
 **Rotas:**
+
 - [x] `/escola/:schoolSlug/notificacoes`
 - [x] `/escola/:schoolSlug/notificacoes/preferencias`
 
 **Componentes UI criados:**
+
 - [x] `inertia/components/ui/separator.tsx`
 
 **Hooks criados:**
+
 - [x] `hooks/queries/use-notifications.ts`
 - [x] `hooks/queries/use-notification-preferences.ts`
 - [x] `hooks/mutations/use-mark-notification-read.ts`
@@ -2337,14 +2363,17 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 - [x] `hooks/mutations/use-update-notification-preferences.ts`
 
 **Containers criados:**
+
 - [x] `containers/notifications/notifications-list.tsx`
 - [x] `containers/notifications/notification-preferences.tsx`
 
 **Controllers de página criados:**
+
 - [x] `controllers/pages/escola/show_notificacoes_page_controller.ts`
 - [x] `controllers/pages/escola/show_notificacoes_preferencias_page_controller.ts`
 
 **Dependências adicionadas:**
+
 - `@radix-ui/react-separator` - Separator para divisão de seções
 
 ---
@@ -2354,12 +2383,15 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 **Status:** Concluído
 
 **Página criada:**
+
 - [x] `inertia/pages/escola/eventos.tsx`
 
 **Rota:**
+
 - [x] `/escola/:schoolSlug/eventos`
 
 **Hooks criados:**
+
 - [x] `hooks/queries/use-events.ts`
 - [x] `hooks/queries/use-event.ts`
 - [x] `hooks/mutations/use-create-event.ts`
@@ -2370,15 +2402,18 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 - [x] `hooks/mutations/use-complete-event.ts`
 
 **Containers criados:**
+
 - [x] `containers/events/events-calendar.tsx`
 - [x] `containers/events/new-event-modal.tsx`
 - [x] `containers/events/edit-event-modal.tsx`
 - [x] `containers/events/calendar.css`
 
 **Controller de página criado:**
+
 - [x] `controllers/pages/escola/show_eventos_page_controller.ts`
 
 **Dependências adicionadas:**
+
 - `react-big-calendar` - Calendário de eventos
 - `@types/react-big-calendar` - Tipos do calendário
 
@@ -2389,16 +2424,20 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 **Status:** Concluído
 
 **Página criada:**
+
 - [x] `inertia/pages/escola/mural.tsx`
 
 **Rota:**
+
 - [x] `/escola/:schoolSlug/mural`
 
 **Componentes UI criados:**
+
 - [x] `inertia/components/ui/avatar.tsx`
 - [x] `inertia/components/ui/dropdown-menu.tsx`
 
 **Hooks criados:**
+
 - [x] `hooks/queries/use-posts.ts`
 - [x] `hooks/queries/use-post.ts`
 - [x] `hooks/queries/use-post-comments.ts`
@@ -2410,14 +2449,17 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 - [x] `hooks/mutations/use-create-comment.ts`
 
 **Containers criados:**
+
 - [x] `containers/posts/posts-feed.tsx`
 - [x] `containers/posts/post-card.tsx`
 - [x] `containers/posts/new-post-modal.tsx`
 
 **Controller de página criado:**
+
 - [x] `controllers/pages/escola/show_mural_page_controller.ts`
 
 **Dependências adicionadas:**
+
 - `@radix-ui/react-avatar` - Avatar component
 - `@radix-ui/react-dropdown-menu` - DropdownMenu component
 - `@radix-ui/react-icons` - Radix icons
@@ -2429,6 +2471,7 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 **Status:** Concluído (Analytics Principais)
 
 **Já implementado:**
+
 - [x] CRUD de Exams (provas)
 - [x] CRUD de ExamGrades (notas de provas)
 - [x] CRUD de Assignments (atividades)
@@ -2440,6 +2483,7 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 - [x] `grades/get_at_risk_students_controller.ts`
 
 **Controllers opcionais (baixa prioridade):**
+
 - [ ] `grades/get_subject_difficulty_controller.ts`
 - [ ] `grades/get_assignment_completion_rates_controller.ts`
 
@@ -2460,23 +2504,28 @@ REQUESTED → APPROVED → BOUGHT → ARRIVED
 **Status:** Concluido
 
 **Pagina criada:**
+
 - [x] `inertia/pages/escola/desempenho.tsx`
 
 **Rota:**
+
 - [x] `/escola/:schoolSlug/desempenho`
 
 **Hooks criados:**
+
 - [x] `hooks/queries/use-academic-overview.ts`
 - [x] `hooks/queries/use-students-grades.ts`
 - [x] `hooks/queries/use-grade-distribution.ts`
 - [x] `hooks/queries/use-at-risk-students.ts`
 
 **Containers criados:**
+
 - [x] `containers/grades/academic-overview-cards.tsx` - 6 cards com visao geral
 - [x] `containers/grades/grade-distribution-chart.tsx` - Grafico de distribuicao de notas
 - [x] `containers/grades/at-risk-students-table.tsx` - Tabela de alunos em risco
 
 **Controller de pagina criado:**
+
 - [x] `controllers/pages/escola/show_desempenho_page_controller.ts`
 
 ---

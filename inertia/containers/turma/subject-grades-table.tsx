@@ -14,7 +14,7 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { LaunchGradesModal } from './launch-grades-modal'
-import { useSubjectGradesQueryOptions } from '~/hooks/queries/use_subject_grades'
+import { api } from '~/lib/api'
 
 interface SubjectGradesTableProps {
   classId: string
@@ -73,12 +73,24 @@ interface SelectedAssignment {
   maxGrade: number
 }
 
-function SubjectGradesTableContent({ classId, subjectId, courseId, academicPeriodId }: SubjectGradesTableProps) {
+function SubjectGradesTableContent({
+  classId,
+  subjectId,
+  courseId,
+  academicPeriodId,
+}: SubjectGradesTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedAssignment, setSelectedAssignment] = useState<SelectedAssignment | null>(null)
 
-  const { data: response, isLoading, isError } = useQuery(
-    useSubjectGradesQueryOptions({ classId, subjectId, courseId, academicPeriodId })
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useQuery(
+    api.api.v1.grades.classSubject.queryOptions({
+      params: { classId, subjectId },
+      query: { courseId, academicPeriodId },
+    })
   )
 
   const toggleRow = (studentId: string) => {
@@ -107,9 +119,7 @@ function SubjectGradesTableContent({ classId, subjectId, courseId, academicPerio
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">
-        {students.length} aluno(s)
-      </p>
+      <p className="text-sm text-muted-foreground">{students.length} aluno(s)</p>
 
       <div className="rounded-md border">
         <Table>
@@ -188,18 +198,14 @@ function SubjectGradesTableContent({ classId, subjectId, courseId, academicPerio
                                 className="flex items-center justify-between rounded-md border bg-background p-2"
                               >
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium">
-                                    {gradeItem.assignment.name}
-                                  </p>
+                                  <p className="text-sm font-medium">{gradeItem.assignment.name}</p>
                                   <p className="text-xs text-muted-foreground">
                                     Máx: {gradeItem.assignment.maxGrade}
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <p className="text-sm font-semibold">
-                                    {gradeItem.grade !== null
-                                      ? gradeItem.grade.toFixed(1)
-                                      : '-'}
+                                    {gradeItem.grade !== null ? gradeItem.grade.toFixed(1) : '-'}
                                   </p>
                                   <Button
                                     variant="outline"

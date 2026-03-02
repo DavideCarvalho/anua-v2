@@ -1,7 +1,7 @@
 import ReactDOMServer from 'react-dom/server'
 import { createInertiaApp } from '@inertiajs/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TuyauProvider } from '@tuyau/inertia/react'
+import { TuyauProvider } from '@adonisjs/inertia/react'
 import { tuyau } from '../lib/api'
 import { NuqsAdapter } from '../lib/nuqs_inertia_adapter'
 import { AuthUserProvider } from '../components/auth-user-provider'

@@ -14,7 +14,8 @@ import {
   DialogTitle,
 } from '../ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { useCreateCanteen } from '../../hooks/mutations/use_canteen_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
 
 interface CanteenSummary {
@@ -32,7 +33,8 @@ interface PageProps extends SharedProps {
 
 export function CanteenContextBar() {
   const { props, url } = usePage<PageProps>()
-  const createCanteen = useCreateCanteen()
+  const queryClient = useQueryClient()
+  const createCanteen = useMutation(api.api.v1.canteens.store.mutationOptions())
   const [isCreating, setIsCreating] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newCanteenName, setNewCanteenName] = useState('')
@@ -69,11 +71,9 @@ export function CanteenContextBar() {
     setIsCreating(true)
     try {
       const canteen = await createCanteen.mutateAsync({
-        name,
-        schoolId,
-        responsibleUserId,
+        body: { name, schoolId, responsibleUserId },
       })
-
+      queryClient.invalidateQueries({ queryKey: ['canteens'] })
       toast.success('Cantina criada com sucesso')
       setIsDialogOpen(false)
       setNewCanteenName('')

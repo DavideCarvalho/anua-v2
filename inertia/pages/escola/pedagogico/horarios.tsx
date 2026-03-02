@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
@@ -16,8 +16,7 @@ import {
 import { ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { ScheduleGrid } from '~/containers/schedule/schedule-grid'
 import { ScheduleConfigForm } from '~/containers/schedule/schedule-config-form'
-import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { api } from '~/lib/api'
 
 interface ScheduleData {
   calendar: { id: string; name: string; isActive: boolean } | null
@@ -45,11 +44,13 @@ export default function HorariosPage() {
   const [showConfigForm, setShowConfigForm] = useState(false)
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 100 })
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
   )
 
   const { data: classesData, isLoading: loadingClasses } = useQuery({
-    ...useClassesQueryOptions({ limit: 100, academicPeriodId: selectedAcademicPeriodId }),
+    ...api.api.v1.classes.index.queryOptions({
+      query: { limit: 100, academicPeriodId: selectedAcademicPeriodId },
+    }),
     enabled: !!selectedAcademicPeriodId,
   })
 

@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles } from 'lucide-react'
+import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useStoreItemsQueryOptions } from '../../hooks/queries/use_store_items'
-import { useToggleStoreItemMutationOptions } from '../../hooks/mutations/use_toggle_store_item'
-import { useDeleteStoreItemMutationOptions } from '../../hooks/mutations/use_delete_store_item'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -59,9 +57,13 @@ const paymentModeLabels: Record<string, string> = {
 
 export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps) {
   const queryClient = useQueryClient()
-  const { data, isLoading } = useQuery(useStoreItemsQueryOptions({ schoolId }))
-  const toggleMutation = useMutation(useToggleStoreItemMutationOptions())
-  const deleteMutation = useMutation(useDeleteStoreItemMutationOptions())
+  const { data, isLoading, error } = useQuery(
+    api.api.v1.storeItems.index.queryOptions({ query: { schoolId } })
+  )
+  const toggleMutation = useMutation(api.api.v1.storeItems.toggleActive.mutationOptions())
+  const deleteMutation = useMutation(api.api.v1.storeItems.destroy.mutationOptions())
+
+  console.log(error)
 
   const items = data?.data ?? []
 
@@ -75,8 +77,9 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          Carregando itens...
+        <CardContent className="py-10 text-center text-muted-foreground">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+          <p className="mt-2">Carregando itens...</p>
         </CardContent>
       </Card>
     )
@@ -181,8 +184,8 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
                     checked={item.isActive}
                     onCheckedChange={async () => {
                       try {
-                        await toggleMutation.mutateAsync(item.id)
-                        queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+                        await toggleMutation.mutateAsync({ params: { id: item.id } })
+                        queryClient.invalidateQueries({ queryKey: ['store-items'] })
                       } catch {
                         toast.error('Erro ao alterar status do item.')
                       }
@@ -204,8 +207,8 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
                         className="text-destructive"
                         onClick={async () => {
                           try {
-                            await deleteMutation.mutateAsync(item.id)
-                            queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+                            await deleteMutation.mutateAsync({ params: { id: item.id } })
+                            queryClient.invalidateQueries({ queryKey: ['store-items'] })
                             toast.success('Item excluído com sucesso!')
                           } catch {
                             toast.error('Erro ao excluir item.')

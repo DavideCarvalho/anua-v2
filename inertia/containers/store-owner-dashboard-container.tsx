@@ -2,19 +2,23 @@ import { useQuery } from '@tanstack/react-query'
 import { Package, ShoppingCart, DollarSign, Store } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import {
-  useOwnStoreQueryOptions,
-  useOwnProductsQueryOptions,
-  useOwnOrdersQueryOptions,
-} from '../hooks/queries/use_store_owner'
+import { api } from '~/lib/api'
 
 export function StoreOwnerDashboardContainer() {
-  const { data: storeData, isLoading: storeLoading } = useQuery(useOwnStoreQueryOptions())
-  const { data: productsData } = useQuery(useOwnProductsQueryOptions({ limit: 1 }))
-  const { data: pendingOrdersData } = useQuery(
-    useOwnOrdersQueryOptions({ status: 'PENDING_APPROVAL', limit: 1 })
+  const { data: storeData, isLoading: storeLoading } = useQuery(
+    api.api.v1.storeOwner.store.show.queryOptions({})
   )
-  const { data: allOrdersData } = useQuery(useOwnOrdersQueryOptions({ limit: 1 }))
+  const { data: productsData } = useQuery(
+    api.api.v1.storeOwner.products.index.queryOptions({ query: { limit: 1 } })
+  )
+  const { data: pendingOrdersData } = useQuery(
+    api.api.v1.storeOwner.orders.index.queryOptions({
+      query: { status: 'PENDING_APPROVAL', limit: 1 },
+    })
+  )
+  const { data: allOrdersData } = useQuery(
+    api.api.v1.storeOwner.orders.index.queryOptions({ query: { limit: 1 } })
+  )
 
   if (storeLoading) {
     return <div className="text-center py-8 text-muted-foreground">Carregando...</div>
@@ -48,9 +52,7 @@ export function StoreOwnerDashboardContainer() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {productsData?.meta?.total ?? 0}
-            </div>
+            <div className="text-2xl font-bold">{productsData?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">produtos cadastrados</p>
           </CardContent>
         </Card>
@@ -61,9 +63,7 @@ export function StoreOwnerDashboardContainer() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {pendingOrdersData?.meta?.total ?? 0}
-            </div>
+            <div className="text-2xl font-bold">{pendingOrdersData?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">aguardando aprovação</p>
           </CardContent>
         </Card>
@@ -74,9 +74,7 @@ export function StoreOwnerDashboardContainer() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {allOrdersData?.meta?.total ?? 0}
-            </div>
+            <div className="text-2xl font-bold">{allOrdersData?.meta?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">pedidos realizados</p>
           </CardContent>
         </Card>

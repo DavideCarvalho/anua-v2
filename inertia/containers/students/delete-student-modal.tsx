@@ -10,7 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog'
-import { useDeleteStudent } from '~/hooks/mutations/use_student_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface DeleteStudentModalProps {
   studentId: string
@@ -27,11 +28,15 @@ export function DeleteStudentModal({
   onOpenChange,
   onSuccess,
 }: DeleteStudentModalProps) {
-  const { mutateAsync: deleteStudent, isPending } = useDeleteStudent()
+  const queryClient = useQueryClient()
+  const { mutateAsync: deleteStudent, isPending } = useMutation(
+    api.api.v1.students.destroy.mutationOptions()
+  )
 
   async function handleDelete() {
     try {
-      await deleteStudent(studentId)
+      await deleteStudent({ params: { id: studentId } })
+      queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('Aluno excluído com sucesso!')
       onOpenChange(false)
       onSuccess?.()

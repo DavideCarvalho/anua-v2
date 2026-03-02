@@ -6,13 +6,15 @@ import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
 import { useAuthUser } from '../../stores/auth_store'
 
 function ResponsavelContent() {
   const { url } = usePage<SharedProps>()
-  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.dashboard.responsavelStats.queryOptions({})
+  )
 
   if (isLoading) {
     return <ResponsavelSkeleton />

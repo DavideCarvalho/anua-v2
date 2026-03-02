@@ -20,8 +20,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
-import { useStoreItemsQueryOptions, type StoreItemsResponse } from '../../hooks/queries/use_stores'
-import { useDeleteStoreItemMutationOptions } from '../../hooks/mutations/use_delete_store_item'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StoreItemsResponse = Route.Response<'api.v1.storeItems.index'>
 import { CreateProductModal } from './create-product-modal'
 import { EditProductModal } from './edit-product-modal'
 
@@ -47,13 +49,15 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
     null
   )
 
-  const { data: items, isLoading } = useQuery(useStoreItemsQueryOptions({ storeId }))
+  const { data: items, isLoading } = useQuery(
+    api.api.v1.storeItems.index.queryOptions({ query: { storeId } })
+  )
 
-  const deleteMutation = useMutation(useDeleteStoreItemMutationOptions())
+  const deleteMutation = useMutation(api.api.v1.storeItems.destroy.mutationOptions())
 
   async function handleDelete(id: string) {
     try {
-      await deleteMutation.mutateAsync(id)
+      await deleteMutation.mutateAsync({ params: { id } })
       queryClient.invalidateQueries({ queryKey: ['storeItems'] })
       toast.success('Produto excluído com sucesso!')
     } catch {

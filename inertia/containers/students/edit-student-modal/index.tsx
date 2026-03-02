@@ -4,12 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Stepper, type Step } from '../new-student-modal/components/stepper'
 import { StudentInfoStep } from '../new-student-modal/steps/student-info-step'
@@ -18,8 +13,11 @@ import { AddressStep } from '../new-student-modal/steps/address-step'
 import { MedicalInfoStep } from '../new-student-modal/steps/medical-info-step'
 import { editStudentSchema, type EditStudentFormData } from './schema'
 import { EmergencyContactRelationship } from '../new-student-modal/schema'
-import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
-import { useFullUpdateStudent } from '~/hooks/mutations/use_student_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
+
+type StudentResponse = Route.Response<'api.v1.students.show'>
 
 const STEPS_CONFIG = [
   { title: 'Aluno', description: 'Dados do aluno' },
@@ -49,12 +47,13 @@ export function EditStudentModal({
   )
   const [isInitialized, setIsInitialized] = useState(false)
 
+  const queryClient = useQueryClient()
   const { data: student, isLoading } = useQuery({
-    ...useStudentQueryOptions(studentId),
+    ...api.api.v1.students.show.queryOptions({ params: { id: studentId } }),
     enabled: open && !!studentId,
   })
 
-  const fullUpdateStudent = useFullUpdateStudent()
+  const fullUpdateStudent = useMutation(api.api.v1.students.fullUpdate.mutationOptions())
 
   // Get academicPeriodId from student's levels if not passed as prop
   const effectiveAcademicPeriodId = useMemo(() => {
@@ -62,7 +61,8 @@ export function EditStudentModal({
     // StudentResponse includes levels with nested academicPeriod
     const levels = (student as StudentResponse | undefined)?.levels
     const firstLevel = levels?.[0]
-    const academicPeriod = firstLevel?.levelAssignedToCourseAcademicPeriod?.courseHasAcademicPeriod?.academicPeriod
+    const academicPeriod =
+      firstLevel?.levelAssignedToCourseAcademicPeriod?.courseHasAcademicPeriod?.academicPeriod
     return academicPeriod?.id || null
   }, [academicPeriodId, student])
 
@@ -130,9 +130,7 @@ export function EditStudentModal({
       // Also match by name+phone for legacy data where userId may be missing
       studentData.emergencyContacts?.forEach((c) => {
         if (!c.userId) {
-          const idx = mappedResponsibles.findIndex(
-            (r) => r.name === c.name && r.phone === c.phone
-          )
+          const idx = mappedResponsibles.findIndex((r) => r.name === c.name && r.phone === c.phone)
           if (idx >= 0) {
             mappedResponsibles[idx].isEmergencyContact = true
           }
@@ -177,9 +175,8 @@ export function EditStudentModal({
               // Match by userId first, then fallback to name+phone for legacy data
               let respIndex = -1
               if (c.userId) {
-                respIndex = studentData.responsibles?.findIndex(
-                  (r) => r.responsibleId === c.userId
-                ) ?? -1
+                respIndex =
+                  studentData.responsibles?.findIndex((r) => r.responsibleId === c.userId) ?? -1
               }
               if (respIndex < 0) {
                 respIndex = mappedResponsibles.findIndex(
@@ -190,7 +187,8 @@ export function EditStudentModal({
                 id: c.id,
                 name: c.name || '',
                 phone: c.phone || '',
-                relationship: (c.relationship as typeof EmergencyContactRelationship[number]) || 'OTHER',
+                relationship:
+                  (c.relationship as (typeof EmergencyContactRelationship)[number]) || 'OTHER',
                 order: c.order ?? index,
                 responsibleIndex: respIndex >= 0 ? respIndex : undefined,
               }
@@ -307,19 +305,23 @@ export function EditStudentModal({
   async function handleSubmit(data: EditStudentFormData) {
     try {
       await fullUpdateStudent.mutateAsync({
-        id: studentId,
-        basicInfo: {
-          ...data.basicInfo,
-          birthDate: data.basicInfo.birthDate.toISOString(),
+        params: { id: studentId },
+        body: {
+          basicInfo: {
+            ...data.basicInfo,
+            birthDate: data.basicInfo.birthDate.toISOString(),
+          },
+          responsibles: data.responsibles.map((r) => ({
+            ...r,
+            birthDate: r.birthDate.toISOString(),
+          })),
+          address: data.address,
+          medicalInfo: data.medicalInfo,
         },
-        responsibles: data.responsibles.map((r) => ({
-          ...r,
-          birthDate: r.birthDate.toISOString(),
-        })),
-        address: data.address,
-        medicalInfo: data.medicalInfo,
       })
 
+      queryClient.invalidateQueries({ queryKey: ['students'] })
+      queryClient.invalidateQueries({ queryKey: ['student', studentId] })
       toast.success('Aluno atualizado com sucesso!')
       handleClose()
       onSuccess?.()
@@ -340,7 +342,12 @@ export function EditStudentModal({
   function renderStep() {
     switch (currentStep) {
       case 0:
-        return <StudentInfoStep excludeUserId={studentId} academicPeriodId={effectiveAcademicPeriodId || undefined} />
+        return (
+          <StudentInfoStep
+            excludeUserId={studentId}
+            academicPeriodId={effectiveAcademicPeriodId || undefined}
+          />
+        )
       case 1:
         return <ResponsiblesStep academicPeriodId={effectiveAcademicPeriodId || undefined} />
       case 2:

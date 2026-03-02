@@ -38,7 +38,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Label } from '../../components/ui/label'
 import { tuyau } from '../../lib/api'
-import { useSchoolQueryOptions } from '../../hooks/queries/use_schools'
+import { api } from '~/lib/api'
 import { schoolEditSchema, type SchoolEditFormData } from './school_edit_schema'
 
 const newDirectorSchema = z.object({
@@ -100,12 +100,14 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
   const [newDirectorData, setNewDirectorData] = useState({ name: '', email: '', phone: '' })
   const queryClient = useQueryClient()
 
-  const { data: school } = useSuspenseQuery(useSchoolQueryOptions(schoolId))
+  const { data: school } = useSuspenseQuery(
+    api.api.v1.schools.show.queryOptions({ params: { id: schoolId } })
+  )
 
   // Buscar usuários da escola para o select
   const { data: schoolUsers, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['school-users', schoolId],
-    queryFn: () => (tuyau.api.v1.schools as any)({ id: schoolId }).users.$get().unwrap(),
+    queryFn: () => (tuyau.api.api.v1.schools as any)({ id: schoolId }).users,
     enabled: directorMode === 'select',
   })
 
@@ -135,7 +137,10 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
 
   const { mutateAsync: updateSchool, isPending } = useMutation({
     mutationFn: async (data: SchoolEditFormData) => {
-      const response = await (tuyau.api.v1.schools as any)({ id: schoolId }).$put(data)
+      const response = await tuyau.api.api.v1.schools.update({
+        params: { id: schoolId },
+        body: data,
+      })
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao atualizar escola')
       }
@@ -148,8 +153,14 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
   })
 
   const { mutateAsync: updateDirector, isPending: isUpdatingDirector } = useMutation({
-    mutationFn: async (data: { existingUserId?: string; newDirector?: { name: string; email: string; phone?: string } }) => {
-      return (tuyau.api.v1.schools as any)({ id: schoolId }).director.$put(data).unwrap()
+    mutationFn: async (data: {
+      existingUserId?: string
+      newDirector?: { name: string; email: string; phone?: string }
+    }) => {
+      return tuyau.api.api.v1.schools.updateDirector({
+        params: { id: schoolId },
+        body: data,
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school', schoolId] })
@@ -477,7 +488,9 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
-                      <FormDescription>Porcentagem mínima de presença para aprovação</FormDescription>
+                      <FormDescription>
+                        Porcentagem mínima de presença para aprovação
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -517,10 +530,7 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value || false}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value || false} onCheckedChange={field.onChange} />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Habilitar seguro de inadimplência</FormLabel>
@@ -626,16 +636,26 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
 
                   {directorMode === 'view' && (
                     <div className="rounded-lg border p-4 space-y-4">
-                      {(school as { director?: { id: string; name: string; email: string; phone?: string } })?.director ? (
+                      {(
+                        school as {
+                          director?: { id: string; name: string; email: string; phone?: string }
+                        }
+                      )?.director ? (
                         <div className="flex items-center gap-4">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                             <User className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium">{(school as { director?: { name: string } }).director?.name}</p>
-                            <p className="text-sm text-muted-foreground">{(school as { director?: { email: string } }).director?.email}</p>
+                            <p className="font-medium">
+                              {(school as { director?: { name: string } }).director?.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {(school as { director?: { email: string } }).director?.email}
+                            </p>
                             {(school as { director?: { phone?: string } }).director?.phone && (
-                              <p className="text-sm text-muted-foreground">{(school as { director?: { phone?: string } }).director?.phone}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {(school as { director?: { phone?: string } }).director?.phone}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -648,11 +668,21 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                         </div>
                       )}
                       <div className="flex gap-2 pt-2">
-                        <Button type="button" variant="outline" size="sm" onClick={() => setDirectorMode('select')}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDirectorMode('select')}
+                        >
                           <Users className="h-4 w-4 mr-2" />
                           Escolher da escola
                         </Button>
-                        <Button type="button" variant="outline" size="sm" onClick={() => setDirectorMode('create')}>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDirectorMode('create')}
+                        >
                           <UserPlus className="h-4 w-4 mr-2" />
                           Criar novo diretor
                         </Button>
@@ -674,7 +704,7 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                             <SelectValue placeholder="Selecione um usuário" />
                           </SelectTrigger>
                           <SelectContent>
-                            {(schoolUsers as SchoolUser[] || [])
+                            {((schoolUsers as SchoolUser[]) || [])
                               .filter((u) => u.role !== 'SCHOOL_DIRECTOR')
                               .map((user) => (
                                 <SelectItem key={user.id} value={user.id}>
@@ -694,7 +724,12 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                           {isUpdatingDirector && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                           Confirmar
                         </Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setDirectorMode('view')}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDirectorMode('view')}
+                        >
                           Cancelar
                         </Button>
                       </div>
@@ -711,7 +746,9 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                             id="directorName"
                             placeholder="Nome completo"
                             value={newDirectorData.name}
-                            onChange={(e) => setNewDirectorData({ ...newDirectorData, name: e.target.value })}
+                            onChange={(e) =>
+                              setNewDirectorData({ ...newDirectorData, name: e.target.value })
+                            }
                           />
                         </div>
                         <div>
@@ -721,7 +758,9 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                             type="email"
                             placeholder="email@exemplo.com"
                             value={newDirectorData.email}
-                            onChange={(e) => setNewDirectorData({ ...newDirectorData, email: e.target.value })}
+                            onChange={(e) =>
+                              setNewDirectorData({ ...newDirectorData, email: e.target.value })
+                            }
                           />
                         </div>
                         <div>
@@ -730,7 +769,9 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                             id="directorPhone"
                             placeholder="(11) 99999-9999"
                             value={newDirectorData.phone}
-                            onChange={(e) => setNewDirectorData({ ...newDirectorData, phone: e.target.value })}
+                            onChange={(e) =>
+                              setNewDirectorData({ ...newDirectorData, phone: e.target.value })
+                            }
                           />
                         </div>
                       </div>
@@ -739,12 +780,19 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                           type="button"
                           size="sm"
                           onClick={handleUpdateDirector}
-                          disabled={!newDirectorData.name || !newDirectorData.email || isUpdatingDirector}
+                          disabled={
+                            !newDirectorData.name || !newDirectorData.email || isUpdatingDirector
+                          }
                         >
                           {isUpdatingDirector && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                           Criar e definir como diretor
                         </Button>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setDirectorMode('view')}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDirectorMode('view')}
+                        >
                           Cancelar
                         </Button>
                       </div>
@@ -755,7 +803,11 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
             </Tabs>
 
             <div className="flex justify-end gap-4 border-t pt-4">
-              <Button type="button" variant="outline" onClick={() => router.visit('/admin/escolas')}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.visit('/admin/escolas')}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending}>

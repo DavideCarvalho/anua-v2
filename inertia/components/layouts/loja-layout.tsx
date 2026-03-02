@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { LayoutDashboard, Package, ShoppingCart, Wallet, LogOut, Store } from 'lucide-react'
 
@@ -23,12 +23,11 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '../ui/sidebar'
-import { api } from '../../../.adonisjs/api'
-import type { RouteName } from '@tuyau/client'
+import { registry } from '~/generated/registry'
 
 interface NavItem {
   title: string
-  route: RouteName<typeof api.routes>
+  route: keyof typeof registry.routes
   href: string
   icon: React.ElementType
 }

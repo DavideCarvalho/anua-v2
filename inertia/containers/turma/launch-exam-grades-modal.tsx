@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, Save, Users } from 'lucide-react'
-import { tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -20,8 +20,6 @@ import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { Checkbox } from '~/components/ui/checkbox'
 import { ErrorBoundary } from '~/components/error-boundary'
-import { useClassStudentsQueryOptions } from '~/hooks/queries/use_class_students'
-import { useExamGradesQueryOptions } from '~/hooks/queries/use_exam_grades'
 
 interface LaunchExamGradesModalProps {
   examId: string
@@ -68,19 +66,6 @@ interface SaveGradePayload {
   absent: boolean
 }
 
-async function batchSaveExamGrades(examId: string, grades: SaveGradePayload[]): Promise<void> {
-  await tuyau
-    .$route('api.v1.exams.batchSaveGrades', { id: examId })
-    .$post({
-      grades: grades.map((g) => ({
-        studentId: g.studentId,
-        score: g.score,
-        absent: g.absent,
-      })),
-    })
-    .unwrap()
-}
-
 function LaunchExamGradesModalSkeleton() {
   return (
     <div className="py-12 text-center">
@@ -116,18 +101,18 @@ function LaunchExamGradesModalContent({
     },
   })
 
-  const studentsQueryOptions = useClassStudentsQueryOptions({
-    classId,
-    courseId,
-    academicPeriodId,
-    limit: 1000,
-  })
-
-  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(studentsQueryOptions)
+  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(
+    api.api.v1.classes.students.queryOptions({
+      params: { id: classId },
+      query: { courseId, academicPeriodId, limit: 1000 },
+    })
+  )
   const students = studentsResponse?.data || []
 
   const { data: examGradesResponse, isLoading: isLoadingGrades } = useQuery(
-    useExamGradesQueryOptions({ examId, limit: 1000 })
+    api.api.v1.exams.grades.queryOptions({
+      params: { id: examId },
+    })
   )
 
   const existingGrades = (() => {
@@ -159,21 +144,7 @@ function LaunchExamGradesModalContent({
     form.setValue('grades', formGrades)
   }, [students, existingGrades, form])
 
-  const saveMutation = useMutation({
-    mutationFn: async (grades: SaveGradePayload[]) => {
-      // Save all grades in a single batch request
-      await batchSaveExamGrades(examId, grades)
-    },
-    onSuccess: () => {
-      toast.success('Notas salvas com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['exams'] })
-      queryClient.invalidateQueries({ queryKey: ['exam-grades', examId] })
-      onOpenChange(false)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao salvar notas')
-    },
-  })
+  const saveMutation = useMutation(api.api.v1.exams.batchSaveGrades.mutationOptions())
 
   const grades = form.watch('grades')
   const isLoading = isLoadingStudents || isLoadingGrades
@@ -201,7 +172,29 @@ function LaunchExamGradesModalContent({
       return
     }
 
-    saveMutation.mutate(gradesToSave)
+    saveMutation.mutate(
+      {
+        params: { id: examId },
+        body: {
+          grades: gradesToSave.map((g) => ({
+            studentId: g.studentId,
+            score: g.score,
+            absent: g.absent,
+          })),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['exams'] })
+          queryClient.invalidateQueries({ queryKey: ['exam-grades', examId] })
+          toast.success('Notas salvas com sucesso!')
+          onOpenChange(false)
+        },
+        onError: (error: Error) => {
+          toast.error(error.message || 'Erro ao salvar notas')
+        },
+      }
+    )
   }
 
   return (

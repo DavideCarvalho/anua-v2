@@ -14,6 +14,6 @@ export default class ShowAdminConfiguracoesPageController {
       return response.redirect('/dashboard')
     }
 
-    return inertia.render('admin/configuracoes')
+    return inertia.render('admin/configuracoes', {})
   }
 }

@@ -1,15 +1,17 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance from '#models/student_has_attendance'
-import StudentHasAttendanceDto from '#models/dto/student_has_attendance.dto'
+import StudentHasAttendanceTransformer from '#transformers/student_has_attendance_transformer'
+import { listAttendanceValidator } from '#validators/attendance'
 
 export default class ListAttendanceController {
-  async handle({ request }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 10)
-    const calendarSlotId = request.input('calendarSlotId')
-    const studentId = request.input('studentId')
-    const date = request.input('date')
-    const status = request.input('status')
+  async handle({ request, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listAttendanceValidator)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 10
+    const calendarSlotId = filters.calendarSlotId
+    const studentId = filters.studentId
+    const date = filters.date
+    const status = filters.status
 
     const query = StudentHasAttendance.query()
       .preload('student')
@@ -34,7 +36,9 @@ export default class ListAttendanceController {
     }
 
     const attendances = await query.paginate(page, limit)
+    const data = attendances.all()
+    const metadata = attendances.getMeta()
 
-    return StudentHasAttendanceDto.fromPaginator(attendances)
+    return serialize(StudentHasAttendanceTransformer.paginate(data, metadata))
   }
 }

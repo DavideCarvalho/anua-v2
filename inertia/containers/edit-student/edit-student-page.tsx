@@ -3,7 +3,8 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Link, router } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { router } from '@inertiajs/react'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import {
@@ -19,8 +20,11 @@ import { ReviewStep } from './steps/review-step'
 import { EditPaymentSection } from '../students/edit-payment-modal'
 import { editStudentSchema, type EditStudentFormData } from '../students/edit-student-modal/schema'
 import { EmergencyContactRelationship } from '../enrollment/schema'
-import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
-import { useFullUpdateStudent } from '~/hooks/mutations/use_student_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
+
+type StudentResponse = Route.Response<'api.v1.students.show'>
 
 const STEPS_CONFIG = [
   { title: 'Aluno', description: 'Dados do aluno' },
@@ -42,10 +46,13 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
   const [stepsStatus, setStepsStatus] = useState<StepStatus[]>(STEPS_CONFIG.map(() => 'pending'))
   const [isInitialized, setIsInitialized] = useState(false)
 
-  const fullUpdateStudent = useFullUpdateStudent()
+  const queryClient = useQueryClient()
+  const fullUpdateStudent = useMutation(api.api.v1.students.fullUpdate.mutationOptions())
 
   // ── Data loading ────────────────────────────────────────────────────
-  const { data: student, isLoading } = useQuery(useStudentQueryOptions(studentId))
+  const { data: student, isLoading } = useQuery(
+    api.api.v1.students.show.queryOptions({ params: { id: studentId } })
+  )
 
   // Derive academicPeriodId from student data
   const academicPeriodId = useMemo(() => {
@@ -431,22 +438,26 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
 
     try {
       await fullUpdateStudent.mutateAsync({
-        id: studentId,
-        basicInfo: {
-          ...data.basicInfo,
-          birthDate: data.basicInfo.birthDate.toISOString(),
-        },
-        responsibles: data.responsibles.map((r) => ({
-          ...r,
-          birthDate: r.birthDate.toISOString(),
-        })),
-        address: data.address,
-        medicalInfo: {
-          ...data.medicalInfo,
-          emergencyContacts: [...guardianContacts, ...manualContacts],
+        params: { id: studentId },
+        body: {
+          basicInfo: {
+            ...data.basicInfo,
+            birthDate: data.basicInfo.birthDate.toISOString(),
+          },
+          responsibles: data.responsibles.map((r) => ({
+            ...r,
+            birthDate: r.birthDate.toISOString(),
+          })),
+          address: data.address,
+          medicalInfo: {
+            ...data.medicalInfo,
+            emergencyContacts: [...guardianContacts, ...manualContacts],
+          },
         },
       })
 
+      queryClient.invalidateQueries({ queryKey: ['students'] })
+      queryClient.invalidateQueries({ queryKey: ['student', studentId] })
       toast.success('Aluno atualizado com sucesso!')
       router.visit('/escola/administrativo/alunos')
     } catch (error: any) {

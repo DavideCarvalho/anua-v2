@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Subject from '#models/subject'
 import TeacherHasClass from '#models/teacher_has_class'
 import TeacherHasSubject from '#models/teacher_has_subject'
-import SubjectDto from '#models/dto/subject.dto'
+import SubjectTransformer from '#transformers/subject_transformer'
 
 export default class ListSubjectsForClassController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const classId = params.classId
 
     const teacherAssignments = await TeacherHasClass.query()
@@ -34,6 +34,6 @@ export default class ListSubjectsForClassController {
       .preload('school')
       .orderBy('name', 'asc')
 
-    return response.ok(SubjectDto.fromArray(subjects))
+    return response.ok(serialize(SubjectTransformer.transform(subjects)))
   }
 }

@@ -1,15 +1,6 @@
 import { useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  Check,
-  X,
-  Pencil,
-  Trash2,
-  ShoppingCart,
-  MapPin,
-  ArrowUp,
-  ArrowDown,
-} from 'lucide-react'
+import { Check, X, Pencil, Trash2, ShoppingCart, MapPin, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '../../components/ui/button'
@@ -38,8 +29,8 @@ import {
 } from '../../components/ui/tooltip'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../components/ui/hover-card'
 
-import { usePurchaseRequestsQueryOptions } from '../../hooks/queries/use_purchase_requests'
-import { useDeletePurchaseRequestMutation } from '../../hooks/mutations/use_delete_purchase_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_OPTIONS = [
@@ -86,26 +77,34 @@ export function PurchaseRequestsTable({
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
 
+  const queryClient = useQueryClient()
   const { data } = useSuspenseQuery(
-    usePurchaseRequestsQueryOptions({
-      schoolId,
-      page,
-      limit: 10,
-      status: statusFilter,
-    } as any)
+    api.api.v1.purchaseRequests.index.queryOptions({
+      query: {
+        schoolId,
+        page,
+        limit: 10,
+        status: statusFilter,
+      },
+    })
   )
 
-  const deleteMutation = useDeletePurchaseRequestMutation()
+  const deleteMutation = useMutation(api.api.v1.purchaseRequests.destroy.mutationOptions())
 
   const rows = data?.data ?? []
   const meta = data?.meta ?? null
 
   const handleDelete = async (id: string) => {
-    toast.promise(deleteMutation.mutateAsync(id), {
-      loading: 'Removendo solicitação...',
-      success: 'Solicitação removida com sucesso!',
-      error: 'Erro ao remover solicitação',
-    })
+    toast.promise(
+      deleteMutation.mutateAsync({ params: { id } }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+      }),
+      {
+        loading: 'Removendo solicitação...',
+        success: 'Solicitação removida com sucesso!',
+        error: 'Erro ao remover solicitação',
+      }
+    )
   }
 
   return (
@@ -162,9 +161,7 @@ export function PurchaseRequestsTable({
                             )}
                             <span
                               className={
-                                row.finalQuantity > row.quantity
-                                  ? 'text-green-500'
-                                  : 'text-red-500'
+                                row.finalQuantity > row.quantity ? 'text-green-500' : 'text-red-500'
                               }
                             >
                               {row.finalQuantity}*
@@ -205,7 +202,9 @@ export function PurchaseRequestsTable({
                         </HoverCardTrigger>
                         <HoverCardContent>
                           <p>Valor unitário pedido: {brazilianRealFormatter(row.unitValue)}</p>
-                          <p>Valor unitário comprado: {brazilianRealFormatter(row.finalUnitValue)}</p>
+                          <p>
+                            Valor unitário comprado: {brazilianRealFormatter(row.finalUnitValue)}
+                          </p>
                           <p>Valor total comprado: {brazilianRealFormatter(row.finalValue)}</p>
                         </HoverCardContent>
                       </HoverCard>
@@ -233,11 +232,7 @@ export function PurchaseRequestsTable({
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => onEdit(row.id)}
-                                >
+                                <Button variant="ghost" size="sm" onClick={() => onEdit(row.id)}>
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                               </TooltipTrigger>

@@ -6,10 +6,12 @@ import { Trophy, Star, Medal, Target, XCircle } from 'lucide-react'
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { api } from '~/lib/api'
 
 function GamificacaoContent() {
-  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.dashboard.responsavelStats.queryOptions({})
+  )
 
   if (isLoading) {
     return <GamificacaoSkeleton />

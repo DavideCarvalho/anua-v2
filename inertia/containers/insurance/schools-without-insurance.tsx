@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 import { Skeleton } from '../../components/ui/skeleton'
-import { useSchoolsWithoutInsuranceQueryOptions } from '../../hooks/queries/use_schools_without_insurance'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const RISK_COLORS: Record<string, string> = {
@@ -28,7 +28,11 @@ const RISK_LABELS: Record<string, string> = {
 }
 
 export function SchoolsWithoutInsurance() {
-  const { data } = useSuspenseQuery(useSchoolsWithoutInsuranceQueryOptions(15))
+  const { data } = useSuspenseQuery(
+    api.api.v1.insurance.analytics.schoolsWithout.queryOptions({
+      query: { limit: 15 },
+    })
+  )
 
   if (!data) return null
 
@@ -82,9 +86,7 @@ export function SchoolsWithoutInsurance() {
                       variant="outline"
                       className={`gap-1 ${RISK_COLORS[school.riskLevel] || ''}`}
                     >
-                      {school.riskLevel === 'HIGH' && (
-                        <AlertTriangle className="h-3 w-3" />
-                      )}
+                      {school.riskLevel === 'HIGH' && <AlertTriangle className="h-3 w-3" />}
                       {RISK_LABELS[school.riskLevel] || school.riskLevel}
                     </Badge>
                   </TableCell>

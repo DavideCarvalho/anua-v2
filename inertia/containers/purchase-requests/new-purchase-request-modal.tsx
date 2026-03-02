@@ -25,7 +25,8 @@ import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { useCreatePurchaseRequestMutation } from '../../hooks/mutations/use_create_purchase_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const schema = z.object({
@@ -52,7 +53,8 @@ export function NewPurchaseRequestModal({
   onCancel,
   onSubmit,
 }: NewPurchaseRequestModalProps) {
-  const createMutation = useCreatePurchaseRequestMutation()
+  const queryClient = useQueryClient()
+  const createMutation = useMutation(api.api.v1.purchaseRequests.store.mutationOptions())
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema) as any,
@@ -72,16 +74,22 @@ export function NewPurchaseRequestModal({
 
   async function handleSubmit(data: FormData) {
     toast.promise(
-      createMutation.mutateAsync({
-        productName: data.productName,
-        quantity: data.quantity,
-        unitValue: data.unitValue,
-        value: data.unitValue * data.quantity,
-        dueDate: data.dueDate,
-        productUrl: data.productUrl || undefined,
-        description: data.description || undefined,
-        schoolId,
-      } as any),
+      createMutation
+        .mutateAsync({
+          body: {
+            productName: data.productName,
+            quantity: data.quantity,
+            unitValue: data.unitValue,
+            value: data.unitValue * data.quantity,
+            dueDate: data.dueDate,
+            productUrl: data.productUrl || undefined,
+            description: data.description || undefined,
+            schoolId,
+          },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+        }),
       {
         loading: 'Criando solicitação...',
         success: () => {

@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Building2, Search, Plus, MoreHorizontal, Eye, Pencil } from 'lucide-react'
@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
 
-import { useSchoolsQueryOptions } from '../../hooks/queries/use_schools'
+import { api } from '~/lib/api'
 
 interface School {
   id: string
@@ -34,7 +34,9 @@ interface School {
 }
 
 function EscolasContent({ search }: { search: string }) {
-  const { data, isLoading } = useQuery(useSchoolsQueryOptions({ search: search || undefined }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.schools.index.queryOptions({ query: { search: search || undefined } })
+  )
   const schools: School[] = (data?.data ?? []) as School[]
 
   if (isLoading) {

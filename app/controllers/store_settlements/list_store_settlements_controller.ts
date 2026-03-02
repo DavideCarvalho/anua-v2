@@ -1,37 +1,41 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreSettlement from '#models/store_settlement'
+import StoreSettlementTransformer from '#transformers/store_settlement_transformer'
 import { listStoreSettlementsValidator } from '#validators/store'
 
 export default class ListStoreSettlementsController {
-  async handle({ request, response }: HttpContext) {
-    const data = await request.validateUsing(listStoreSettlementsValidator)
+  async handle({ request, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listStoreSettlementsValidator)
 
-    const page = data.page ?? 1
-    const limit = data.limit ?? 20
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
 
     const query = StoreSettlement.query()
       .preload('store')
       .orderBy('year', 'desc')
       .orderBy('month', 'desc')
 
-    if (data.storeId) {
-      query.where('storeId', data.storeId)
+    if (filters.storeId) {
+      query.where('storeId', filters.storeId)
     }
 
-    if (data.status) {
-      query.where('status', data.status)
+    if (filters.status) {
+      query.where('status', filters.status)
     }
 
-    if (data.month) {
-      query.where('month', data.month)
+    if (filters.month) {
+      query.where('month', filters.month)
     }
 
-    if (data.year) {
-      query.where('year', data.year)
+    if (filters.year) {
+      query.where('year', filters.year)
     }
 
     const settlements = await query.paginate(page, limit)
 
-    return response.ok(settlements.serialize())
+    const items = settlements.all()
+    const metadata = settlements.getMeta()
+
+    return serialize(StoreSettlementTransformer.paginate(items, metadata))
   }
 }

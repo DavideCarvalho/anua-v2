@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 
-import { useConsentHistoryQueryOptions } from '../../hooks/queries/use_consent_history'
+import { api } from '~/lib/api'
 
 type ConsentHistoryItem = {
   id: string
@@ -40,11 +40,10 @@ interface ConsentHistoryContainerProps {
   onPageChange?: (page: number) => void
 }
 
-export function ConsentHistoryContainer({
-  page = 1,
-  onPageChange,
-}: ConsentHistoryContainerProps) {
-  const { data } = useSuspenseQuery(useConsentHistoryQueryOptions({ page, limit: 10 }))
+export function ConsentHistoryContainer({ page = 1, onPageChange }: ConsentHistoryContainerProps) {
+  const { data } = useSuspenseQuery(
+    api.api.v1.consents.history.queryOptions({ query: { page, limit: 10 } })
+  )
 
   const consents = data.data as unknown as ConsentHistoryItem[]
   const meta = data.meta
@@ -144,9 +143,7 @@ export function ConsentHistoryContainer({
                   </span>
                 </div>
               )}
-              {consent.notes && (
-                <p className="mt-2 text-sm italic">"{consent.notes}"</p>
-              )}
+              {consent.notes && <p className="mt-2 text-sm italic">"{consent.notes}"</p>}
             </div>
           </CardContent>
         </Card>

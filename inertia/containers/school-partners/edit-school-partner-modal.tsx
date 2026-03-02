@@ -18,8 +18,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useSchoolPartnerQueryOptions } from '../../hooks/queries/use_school_partner'
-import { useUpdateSchoolPartnerMutation } from '../../hooks/mutations/use_update_school_partner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -44,10 +44,11 @@ export function EditSchoolPartnerModal({
   open: boolean
   onCancel: () => void
 }) {
-  const updatePartner = useUpdateSchoolPartnerMutation()
+  const queryClient = useQueryClient()
+  const updatePartner = useMutation(api.api.v1.schoolPartners.update.mutationOptions())
 
   const { data: partner, isLoading } = useQuery({
-    ...useSchoolPartnerQueryOptions({ id: partnerId }),
+    ...api.api.v1.schoolPartners.show.queryOptions({ params: { id: partnerId } }),
     enabled: !!partnerId,
   })
 
@@ -102,6 +103,7 @@ export function EditSchoolPartnerModal({
         } as any,
       })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['school-partners'] })
         toast.success('Parceiro atualizado com sucesso!')
         onCancel()
       })

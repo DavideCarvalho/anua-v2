@@ -22,7 +22,7 @@ export function registerMarketplaceApiRoutes() {
         .as('marketplace.stores.items')
       router
         .get('/installment-options', [GetInstallmentOptionsController])
-        .as('marketplace.installmentOptions')
+        .as('marketplace.installment_options')
       router.post('/checkout', [MarketplaceCheckoutController]).as('marketplace.checkout')
       router.get('/orders', [ListMyOrdersController]).as('marketplace.orders.index')
       router.get('/orders/:id', [ShowMyOrderController]).as('marketplace.orders.show')

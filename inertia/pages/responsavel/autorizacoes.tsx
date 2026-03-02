@@ -7,16 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { Badge } from '../../components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 
-import {
-  PendingConsentsContainer,
-} from '../../containers/parental-consents/pending-consents-container'
-import {
-  ConsentHistoryContainer,
-} from '../../containers/parental-consents/consent-history-container'
-import { usePendingConsentsQueryOptions } from '../../hooks/queries/use_pending_consents'
+import { PendingConsentsContainer } from '../../containers/parental-consents/pending-consents-container'
+import { ConsentHistoryContainer } from '../../containers/parental-consents/consent-history-container'
+import { api } from '~/lib/api'
 
 function PendingCountBadge() {
-  const { data } = useQuery(usePendingConsentsQueryOptions())
+  const { data } = useQuery(api.api.v1.consents.pending.queryOptions({}))
   const count = data?.length ?? 0
 
   if (count === 0) return null

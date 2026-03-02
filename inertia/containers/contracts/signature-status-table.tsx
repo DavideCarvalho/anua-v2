@@ -12,13 +12,17 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import {
-  useContractSignatureStatsQueryOptions,
-  type ContractSignatureStatsResponse,
-} from '../../hooks/queries/use_contract_signature_stats'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type ContractSignatureStatsResponse = Route.Response<'api.v1.contracts.getSignatureStats'>
 
 export function SignatureStatusTable({ contractId }: { contractId: string }) {
-  const { data, isLoading } = useQuery(useContractSignatureStatsQueryOptions(contractId))
+  const { data, isLoading } = useQuery(
+    api.api.v1.contracts.getSignatureStats.queryOptions({
+      params: { contractId },
+    })
+  )
 
   if (isLoading || !data) {
     return null

@@ -23,8 +23,10 @@ export function EmailInput({
   className,
   onValidationChange,
 }: EmailInputProps) {
-  const { isValidating, validationResult, validateEmail } =
-    useEmailValidation({ excludeUserId, academicPeriodId })
+  const { isValidating, validationResult, validateEmail } = useEmailValidation({
+    excludeUserId,
+    academicPeriodId,
+  })
   const [hasBlurred, setHasBlurred] = useState(false)
 
   useEffect(() => {

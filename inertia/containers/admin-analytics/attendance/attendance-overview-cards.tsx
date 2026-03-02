@@ -1,16 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { Users, CheckCircle, XCircle, Clock, FileCheck } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useAttendanceOverviewQueryOptions } from '../../../hooks/queries/use_attendance_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 
 export function AttendanceOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useAttendanceOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.attendance.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -33,11 +35,7 @@ export function AttendanceOverviewCards() {
         value={data.totalStudents.toLocaleString('pt-BR')}
         icon={Users}
       />
-      <StatCard
-        title="Taxa de Presença"
-        value={`${data.attendanceRate}%`}
-        icon={CheckCircle}
-      />
+      <StatCard title="Taxa de Presença" value={`${data.attendanceRate}%`} icon={CheckCircle} />
       <StatCard
         title="Total de Faltas"
         value={data.absentCount.toLocaleString('pt-BR')}

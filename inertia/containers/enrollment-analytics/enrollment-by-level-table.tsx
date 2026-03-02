@@ -13,10 +13,10 @@ import {
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
 
-import {
-  useEnrollmentByLevelQueryOptions,
-  type EnrollmentByLevelResponse,
-} from '../../hooks/queries/use_enrollment_by_level'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type EnrollmentByLevelResponse = Route.Response<'api.v1.analytics.enrollments.by_level'>
 
 interface EnrollmentByLevelTableProps {
   schoolId?: string
@@ -28,7 +28,9 @@ export function EnrollmentByLevelTable({
   academicPeriodId,
 }: EnrollmentByLevelTableProps) {
   const { data, isLoading } = useQuery(
-    useEnrollmentByLevelQueryOptions({ schoolId, academicPeriodId })
+    api.api.v1.analytics.enrollments.byLevel.queryOptions({
+      query: { schoolId, academicPeriodId },
+    })
   )
 
   if (isLoading || !data) {

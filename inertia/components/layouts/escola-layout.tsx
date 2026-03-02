@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { PostHogProvider } from '../posthog-provider'
 import {
@@ -28,15 +28,14 @@ import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
 import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useAuthUser } from '../../stores/auth_store'
-import { api } from '../../../.adonisjs/api'
-import type { RouteName } from '@tuyau/client'
+import { registry } from '~/generated/registry'
 
 interface NavItem {
   title: string
-  route: RouteName<typeof api.routes>
+  route: keyof typeof registry.routes
   href: string
   icon: React.ElementType
-  children?: { title: string; route: RouteName<typeof api.routes>; href: string }[]
+  children?: { title: string; route: keyof typeof registry.routes; href: string }[]
 }
 
 const navigation: NavItem[] = [

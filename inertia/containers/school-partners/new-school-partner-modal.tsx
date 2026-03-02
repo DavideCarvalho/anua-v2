@@ -15,7 +15,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreateSchoolPartnerMutation } from '../../hooks/mutations/use_create_school_partner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -39,7 +40,8 @@ export function NewSchoolPartnerModal({
   onCancel: () => void
   onSubmit: () => void
 }) {
-  const createPartner = useCreateSchoolPartnerMutation()
+  const queryClient = useQueryClient()
+  const createPartner = useMutation(api.api.v1.schoolPartners.store.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -52,18 +54,21 @@ export function NewSchoolPartnerModal({
   async function handleSubmit(values: FormValues) {
     const promise = createPartner
       .mutateAsync({
-        name: values.name,
-        cnpj: values.cnpj,
-        email: values.email || undefined,
-        phone: values.phone || undefined,
-        contactName: values.contactName || undefined,
-        discountPercentage: values.discountPercentage,
-        partnershipStartDate: new Date(values.partnershipStartDate),
-        partnershipEndDate: values.partnershipEndDate
-          ? new Date(values.partnershipEndDate)
-          : undefined,
-      } as any)
+        body: {
+          name: values.name,
+          cnpj: values.cnpj,
+          email: values.email || undefined,
+          phone: values.phone || undefined,
+          contactName: values.contactName || undefined,
+          discountPercentage: values.discountPercentage,
+          partnershipStartDate: new Date(values.partnershipStartDate),
+          partnershipEndDate: values.partnershipEndDate
+            ? new Date(values.partnershipEndDate)
+            : undefined,
+        } as any,
+      })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['school-partners'] })
         toast.success('Parceiro criado com sucesso!')
         form.reset()
         onSubmit()

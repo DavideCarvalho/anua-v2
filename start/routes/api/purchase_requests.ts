@@ -25,17 +25,21 @@ export function registerPurchaseRequestApiRoutes() {
   router
     .group(() => {
       // CRUD
-      router.get('/', [ListPurchaseRequestsController]).as('purchaseRequests.index')
-      router.post('/', [CreatePurchaseRequestController]).as('purchaseRequests.store')
-      router.get('/:id', [ShowPurchaseRequestController]).as('purchaseRequests.show')
-      router.put('/:id', [UpdatePurchaseRequestController]).as('purchaseRequests.update')
-      router.delete('/:id', [DeletePurchaseRequestController]).as('purchaseRequests.destroy')
+      router.get('/', [ListPurchaseRequestsController]).as('purchase_requests.index')
+      router.post('/', [CreatePurchaseRequestController]).as('purchase_requests.store')
+      router.get('/:id', [ShowPurchaseRequestController]).as('purchase_requests.show')
+      router.put('/:id', [UpdatePurchaseRequestController]).as('purchase_requests.update')
+      router.delete('/:id', [DeletePurchaseRequestController]).as('purchase_requests.destroy')
 
       // Status actions
-      router.post('/:id/approve', [ApprovePurchaseRequestController]).as('purchaseRequests.approve')
-      router.post('/:id/reject', [RejectPurchaseRequestController]).as('purchaseRequests.reject')
-      router.post('/:id/mark-bought', [MarkAsBoughtController]).as('purchaseRequests.markBought')
-      router.post('/:id/mark-arrived', [MarkAsArrivedController]).as('purchaseRequests.markArrived')
+      router
+        .post('/:id/approve', [ApprovePurchaseRequestController])
+        .as('purchase_requests.approve')
+      router.post('/:id/reject', [RejectPurchaseRequestController]).as('purchase_requests.reject')
+      router.post('/:id/mark-bought', [MarkAsBoughtController]).as('purchase_requests.mark_bought')
+      router
+        .post('/:id/mark-arrived', [MarkAsArrivedController])
+        .as('purchase_requests.mark_arrived')
     })
     .prefix('/purchase-requests')
     .use(middleware.auth())

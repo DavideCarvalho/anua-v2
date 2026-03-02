@@ -13,6 +13,7 @@
 ### Task 1: Backend - List Student Enrollments Endpoint
 
 **Files:**
+
 - Create: `app/controllers/students/list_enrollments_controller.ts`
 - Modify: `start/routes.ts`
 
@@ -66,6 +67,7 @@ EOF
 ### Task 2: Backend - Update Student Enrollment Endpoint
 
 **Files:**
+
 - Create: `app/controllers/students/update_enrollment_controller.ts`
 - Create: `app/validators/student_enrollment.ts`
 - Modify: `start/routes.ts`
@@ -125,7 +127,9 @@ export default class UpdateEnrollmentController {
 Add to `start/routes.ts` inside the students group:
 
 ```typescript
-router.patch('/students/:id/enrollments/:enrollmentId', [UpdateEnrollmentController]).as('students.enrollments.update')
+router
+  .patch('/students/:id/enrollments/:enrollmentId', [UpdateEnrollmentController])
+  .as('students.enrollments.update')
 ```
 
 **Step 4: Commit**
@@ -145,6 +149,7 @@ EOF
 ### Task 3: Frontend - Create useStudentEnrollments hook
 
 **Files:**
+
 - Create: `inertia/hooks/queries/use_student_enrollments.ts`
 
 **Step 1: Create the hook**
@@ -190,6 +195,7 @@ EOF
 ### Task 4: Frontend - Create useUpdateEnrollment mutation hook
 
 **Files:**
+
 - Create: `inertia/hooks/mutations/use_update_enrollment.ts`
 
 **Step 1: Create the mutation hook**
@@ -252,6 +258,7 @@ EOF
 ### Task 5: Frontend - Create EditPaymentModal component
 
 **Files:**
+
 - Create: `inertia/containers/students/edit-payment-modal/index.tsx`
 
 **Step 1: Create the modal component**
@@ -692,16 +699,19 @@ EOF
 ### Task 6: Frontend - Add "Editar Pagamento" action to students list
 
 **Files:**
+
 - Modify: `inertia/containers/students-list-container.tsx`
 
 **Step 1: Import the new modal and add state**
 
 At the top imports, add:
+
 ```typescript
 import { EditPaymentModal } from './students/edit-payment-modal'
 ```
 
 Add state alongside other modal states:
+
 ```typescript
 const [editPaymentStudent, setEditPaymentStudent] = useState<StudentAction | null>(null)
 ```
@@ -709,6 +719,7 @@ const [editPaymentStudent, setEditPaymentStudent] = useState<StudentAction | nul
 **Step 2: Add callback to StudentsListContent props**
 
 Add to the props type and destructuring:
+
 ```typescript
 onEditPayment: (student: StudentAction) => void
 ```
@@ -716,6 +727,7 @@ onEditPayment: (student: StudentAction) => void
 **Step 3: Add dropdown menu item**
 
 After "Mudar curso" menu item, add:
+
 ```typescript
 <DropdownMenuItem
   onClick={() =>
@@ -731,6 +743,7 @@ After "Mudar curso" menu item, add:
 ```
 
 Import CreditCard icon at top:
+
 ```typescript
 import { CreditCard } from 'lucide-react'
 ```
@@ -738,6 +751,7 @@ import { CreditCard } from 'lucide-react'
 **Step 4: Add modal component**
 
 After ChangeStudentCourseModal, add:
+
 ```typescript
 {editPaymentStudent && (
   <EditPaymentModal
@@ -755,8 +769,9 @@ After ChangeStudentCourseModal, add:
 **Step 5: Pass callback to StudentsListContent**
 
 Add prop:
+
 ```typescript
-onEditPayment={setEditPaymentStudent}
+onEditPayment = { setEditPaymentStudent }
 ```
 
 **Step 6: Commit**

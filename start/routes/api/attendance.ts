@@ -23,12 +23,12 @@ export function registerAttendanceApiRoutes() {
       router.post('/batch', [BatchCreateAttendanceController]).as('attendance.batch')
       router
         .get('/available-dates', [GetAttendanceAvailableDatesController])
-        .as('attendance.availableDates')
+        .as('attendance.available_dates')
       router.get('/:id', [ShowAttendanceController]).as('attendance.show')
       router.put('/:id', [UpdateAttendanceController]).as('attendance.update')
       router
         .get('/class/:classId/students', [GetClassStudentsAttendanceController])
-        .as('attendance.classStudents')
+        .as('attendance.class_students')
     })
     .prefix('/attendance')
     .use([middleware.auth(), middleware.impersonation()])

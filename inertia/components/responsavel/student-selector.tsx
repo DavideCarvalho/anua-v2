@@ -1,20 +1,14 @@
 import { useEffect } from 'react'
 import { useQueryState } from 'nuqs'
 import { Users } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { api } from '~/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import { useResponsavelStore, type Student } from '../../stores/responsavel_store'
 
 // Componente que carrega os dados e popula o store
 export function StudentSelectorWithData() {
-  const { data, isLoading } = useQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading } = useQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
   const { setStudents, students, isLoaded } = useResponsavelStore()
   const [alunoSlug, setAlunoSlug] = useQueryState('aluno')
 

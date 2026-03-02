@@ -15,9 +15,7 @@ export default function AdminAnalyticsGamificacao() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard de Gamificação</h1>
-            <p className="text-muted-foreground">
-              Pontos, conquistas e rankings dos alunos
-            </p>
+            <p className="text-muted-foreground">Pontos, conquistas e rankings dos alunos</p>
           </div>
         </div>
 

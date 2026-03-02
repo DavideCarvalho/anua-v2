@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
-import StudentGamificationDto from '#models/dto/student_gamification.dto'
+import StudentGamificationTransformer from '#transformers/student_gamification_transformer'
 import { listStudentGamificationsValidator } from '#validators/gamification'
 
 export default class ListStudentGamificationsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listStudentGamificationsValidator)
 
     const page = payload.page || 1
@@ -29,7 +29,9 @@ export default class ListStudentGamificationsController {
     }
 
     const gamifications = await query.paginate(page, limit)
+    const data = gamifications.all()
+    const metadata = gamifications.getMeta()
 
-    return StudentGamificationDto.fromPaginator(gamifications)
+    return serialize(StudentGamificationTransformer.paginate(data, metadata))
   }
 }

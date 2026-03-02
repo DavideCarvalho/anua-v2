@@ -14,9 +14,7 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import {
-  useStudentAttendanceQueryOptions,
-} from '../../hooks/queries/use_student_attendance'
+import { api } from '~/lib/api'
 
 interface StudentAttendanceContainerProps {
   studentId: string
@@ -27,7 +25,9 @@ export function StudentAttendanceContainer({
   studentId,
   studentName,
 }: StudentAttendanceContainerProps) {
-  const { data, isLoading, error, isError } = useQuery(useStudentAttendanceQueryOptions({ studentId }))
+  const { data, isLoading, error, isError } = useQuery(
+    api.api.v1.responsavel.api.studentAttendance.queryOptions({ params: { studentId } })
+  )
 
   if (isLoading) {
     return <StudentAttendanceContainerSkeleton />
@@ -100,7 +100,12 @@ export function StudentAttendanceContainer({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-5">
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className={cn('text-3xl font-bold', getAttendanceColor(data.summary.attendanceRate))}>
+              <p
+                className={cn(
+                  'text-3xl font-bold',
+                  getAttendanceColor(data.summary.attendanceRate)
+                )}
+              >
                 {data.summary.attendanceRate}%
               </p>
               <p className="text-sm text-muted-foreground">Frequencia</p>

@@ -1,5 +1,17 @@
 import vine from '@vinejs/vine'
 
+export const listClassesValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    search: vine.string().trim().optional(),
+    levelId: vine.string().uuid().optional(),
+    schoolId: vine.string().uuid().optional(),
+    status: vine.enum(['ACTIVE', 'INACTIVE', 'ARCHIVED']).optional(),
+    academicPeriodId: vine.string().uuid().optional(),
+  })
+)
+
 export const createClassValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(255),

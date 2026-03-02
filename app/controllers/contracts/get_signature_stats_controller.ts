@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
-import StudentHasLevel from '#models/student_has_level'
+import type StudentHasLevel from '#models/student_has_level'
 
 const STATUS_ORDER: Record<string, number> = {
   PENDING: 0,

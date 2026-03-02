@@ -27,10 +27,10 @@ export function registerOnlineEnrollmentApiRoutes() {
         .as('enrollment.info')
       router
         .post('/check-existing', [CheckExistingStudentController])
-        .as('enrollment.checkExisting')
+        .as('enrollment.check_existing')
       router
         .post('/find-scholarship', [FindScholarshipByCodeController])
-        .as('enrollment.findScholarship')
+        .as('enrollment.find_scholarship')
       router.post('/finish', [FinishEnrollmentController]).as('enrollment.finish')
     })
     .prefix('/online-enrollment')
@@ -42,7 +42,7 @@ export function registerEnrollmentManagementApiRoutes() {
       router.get('/', [ListEnrollmentsController]).as('enrollments.index')
       router
         .patch('/documents/:id/status', [UpdateDocumentStatusController])
-        .as('enrollments.documents.updateStatus')
+        .as('enrollments.documents.update_status')
     })
     .prefix('/enrollments')
     .use([middleware.auth(), middleware.impersonation()])

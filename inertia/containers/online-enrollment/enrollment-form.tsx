@@ -13,8 +13,8 @@ import { StepAddress } from './step-address'
 import { StepMedicalInfo } from './step-medical-info'
 import { StepBilling } from './step-billing'
 
-import { useSchoolEnrollmentInfoQueryOptions } from '../../hooks/queries/use_school_enrollment_info'
-import { useFinishEnrollmentMutation } from '../../hooks/mutations/use_finish_enrollment'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 export interface EnrollmentFormData {
   student: {
@@ -101,11 +101,14 @@ export function EnrollmentForm({
   const [currentStep, setCurrentStep] = useState(1)
   const [isCompleted, setIsCompleted] = useState(false)
 
+  const queryClient = useQueryClient()
   const { data: enrollmentInfo } = useSuspenseQuery(
-    useSchoolEnrollmentInfoQueryOptions(schoolSlug, academicPeriodSlug, courseSlug)
+    api.api.v1.enrollment.info.queryOptions({
+      params: { schoolSlug, academicPeriodSlug, courseSlug },
+    })
   )
 
-  const finishEnrollmentMutation = useFinishEnrollmentMutation()
+  const finishEnrollmentMutation = useMutation(api.api.v1.enrollment.finish.mutationOptions())
 
   const methods = useForm<EnrollmentFormData>({
     defaultValues: {
@@ -212,19 +215,21 @@ export function EnrollmentForm({
   const onSubmit = async (data: EnrollmentFormData) => {
     try {
       await finishEnrollmentMutation.mutateAsync({
-        student: data.student,
-        responsibles: data.student.isSelfResponsible ? [] : data.responsibles,
-        address: data.address,
-        medicalInfo: data.medicalInfo,
-        emergencyContacts: data.emergencyContacts,
-        billing: data.billing,
-        schoolId: enrollmentInfo.school.id,
-        academicPeriodId: enrollmentInfo.academicPeriod.id,
-        courseId: enrollmentInfo.course.id,
-        levelId: enrollmentInfo.level.id,
-        contractId: enrollmentInfo.contract?.id,
+        body: {
+          student: data.student,
+          responsibles: data.student.isSelfResponsible ? [] : data.responsibles,
+          address: data.address,
+          medicalInfo: data.medicalInfo,
+          emergencyContacts: data.emergencyContacts,
+          billing: data.billing,
+          schoolId: enrollmentInfo.school.id,
+          academicPeriodId: enrollmentInfo.academicPeriod.id,
+          courseId: enrollmentInfo.course.id,
+          levelId: enrollmentInfo.level.id,
+          contractId: enrollmentInfo.contract?.id,
+        },
       })
-
+      queryClient.invalidateQueries({ queryKey: ['enrollment'] })
       setIsCompleted(true)
     } catch (error) {
       console.error('Error submitting enrollment:', error)
@@ -276,18 +281,16 @@ export function EnrollmentForm({
           {currentStep === 3 && <StepAddress />}
           {currentStep === 4 && <StepMedicalInfo />}
           {currentStep === 5 && (
-            <StepBilling schoolId={enrollmentInfo.school.id} contract={enrollmentInfo.contract as any} />
+            <StepBilling
+              schoolId={enrollmentInfo.school.id}
+              contract={enrollmentInfo.contract as any}
+            />
           )}
         </div>
 
         {/* Navigation Buttons */}
         <div className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-          >
+          <Button type="button" variant="outline" onClick={handleBack} disabled={currentStep === 1}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>

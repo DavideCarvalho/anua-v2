@@ -1,5 +1,15 @@
 import vine from '@vinejs/vine'
 
+export const listSchoolsValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    search: vine.string().trim().optional(),
+    schoolChainId: vine.string().uuid().optional(),
+    includeUsers: vine.boolean().optional(),
+  })
+)
+
 export const createSchoolValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(255),

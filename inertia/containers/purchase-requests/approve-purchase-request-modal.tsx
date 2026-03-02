@@ -11,8 +11,8 @@ import {
 } from '../../components/ui/dialog'
 import { Label } from '../../components/ui/label'
 
-import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use_purchase_request'
-import { useApprovePurchaseRequestMutation } from '../../hooks/mutations/use_approve_purchase_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 interface ApprovePurchaseRequestModalProps {
@@ -26,21 +26,27 @@ export function ApprovePurchaseRequestModal({
   open,
   onClose,
 }: ApprovePurchaseRequestModalProps) {
+  const queryClient = useQueryClient()
   const { data: purchaseRequest } = useSuspenseQuery(
-    usePurchaseRequestQueryOptions({ id: purchaseRequestId })
+    api.api.v1.purchaseRequests.show.queryOptions({ params: { id: purchaseRequestId } })
   )
 
-  const approveMutation = useApprovePurchaseRequestMutation()
+  const approveMutation = useMutation(api.api.v1.purchaseRequests.approve.mutationOptions())
 
   async function handleApprove() {
-    toast.promise(approveMutation.mutateAsync(purchaseRequestId), {
-      loading: 'Aprovando solicitação...',
-      success: () => {
-        onClose()
-        return 'Solicitação aprovada com sucesso!'
-      },
-      error: 'Erro ao aprovar solicitação',
-    })
+    toast.promise(
+      approveMutation.mutateAsync({ params: { id: purchaseRequestId } }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+      }),
+      {
+        loading: 'Aprovando solicitação...',
+        success: () => {
+          onClose()
+          return 'Solicitação aprovada com sucesso!'
+        },
+        error: 'Erro ao aprovar solicitação',
+      }
+    )
   }
 
   return (
@@ -73,7 +79,11 @@ export function ApprovePurchaseRequestModal({
 
           <div className="space-y-1">
             <Label>Para quando?</Label>
-            <p>{purchaseRequest?.dueDate ? brazilianDateFormatter(String(purchaseRequest.dueDate)) : '-'}</p>
+            <p>
+              {purchaseRequest?.dueDate
+                ? brazilianDateFormatter(String(purchaseRequest.dueDate))
+                : '-'}
+            </p>
           </div>
 
           {purchaseRequest?.productUrl && (

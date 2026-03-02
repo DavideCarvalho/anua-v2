@@ -13,16 +13,51 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import {
-  useCanteenItemsQueryOptions,
-  type CanteenItemsResponse,
-} from '../hooks/queries/use_canteen_items'
-import {
-  useCreateCanteenItem,
-  useDeleteCanteenItem,
-  useToggleCanteenItemActive,
-  useUpdateCanteenItem,
-} from '../hooks/mutations/use_canteen_item_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api, tuyau } from '~/lib/api'
+
+type CanteenItemsResponse = Route.Response<'api.v1.canteenItems.index'>
+
+function buildCreateFormData(data: {
+  canteenId: string
+  name: string
+  description?: string
+  price: number
+  category?: string
+  isActive?: boolean
+  image?: File | null
+}): FormData {
+  const formData = new FormData()
+  formData.append('canteenId', data.canteenId)
+  formData.append('name', data.name)
+  if (data.description) formData.append('description', data.description)
+  formData.append('price', String(data.price))
+  if (data.category) formData.append('category', data.category)
+  formData.append('isActive', String(data.isActive))
+  if (data.image) formData.append('image', data.image)
+  return formData
+}
+
+function buildUpdateFormData(data: {
+  name?: string
+  description?: string
+  price?: number
+  category?: string
+  isActive?: boolean
+  removeImage?: boolean
+  image?: File | null
+}): FormData {
+  const formData = new FormData()
+  if (data.name !== undefined) formData.append('name', data.name)
+  if (data.description !== undefined) formData.append('description', data.description)
+  if (data.price !== undefined) formData.append('price', String(data.price))
+  if (data.category !== undefined) formData.append('category', data.category)
+  if (data.isActive !== undefined) formData.append('isActive', String(data.isActive))
+  if (data.removeImage !== undefined) formData.append('removeImage', String(data.removeImage))
+  if (data.image) formData.append('image', data.image)
+  return formData
+}
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
@@ -135,24 +170,52 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
   const [createForm, setCreateForm] = useState<ItemFormValues>(defaultItemForm)
   const [editForm, setEditForm] = useState<ItemFormValues>(defaultItemForm)
 
-  const createItem = useCreateCanteenItem()
-  const updateItem = useUpdateCanteenItem()
-  const deleteItem = useDeleteCanteenItem()
-  const toggleItem = useToggleCanteenItemActive()
+  const queryClient = useQueryClient()
+  const createItem = useMutation({
+    ...api.api.v1.canteenItems.store.mutationOptions(),
+    mutationFn: async (data: Parameters<typeof buildCreateFormData>[0]) => {
+      const formData = buildCreateFormData(data)
+      return tuyau.api.api.v1.canteenItems.store({ body: formData as any })
+    },
+  })
+  const updateItem = useMutation({
+    ...api.api.v1.canteenItems.update.mutationOptions(),
+    mutationFn: async ({
+      id,
+      ...data
+    }: {
+      id: string
+      name?: string
+      description?: string
+      price?: number
+      category?: string
+      isActive?: boolean
+      removeImage?: boolean
+      image?: File | null
+    }) => {
+      const formData = buildUpdateFormData(data)
+      return tuyau.api.api.v1.canteenItems.update({ params: { id }, body: formData as any })
+    },
+  })
+  const deleteItem = useMutation(api.api.v1.canteenItems.destroy.mutationOptions())
+  const toggleItem = useMutation(api.api.v1.canteenItems.toggleActive.mutationOptions())
 
   const { search, page, limit } = filters
 
-  const { data, isLoading, error, refetch } = useQuery(
-    useCanteenItemsQueryOptions({
-      canteenId,
-      search: search || undefined,
-      page,
-      limit,
-    })
-  )
+  const { data, isLoading, error, refetch } = useQuery({
+    ...api.api.v1.canteenItems.index.queryOptions({
+      query: {
+        canteenId: canteenId!,
+        search: search || undefined,
+        page,
+        limit,
+      },
+    }),
+    enabled: !!canteenId,
+  })
 
   const items = data?.data ?? []
-  const meta = data?.meta
+  const meta = data?.metadata ?? null
 
   const openEditDialog = (item: CanteenItem) => {
     setEditingItem(item)
@@ -204,16 +267,18 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       }),
       {
         loading: 'Criando item...',
-        success: 'Item criado com sucesso',
+        success: () => {
+          queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+          setCreateOpen(false)
+          setCreateForm(defaultItemForm)
+          return 'Item criado com sucesso'
+        },
         error: (err) => (err instanceof Error ? err.message : 'Erro ao criar item'),
       }
     )
-
-    setCreateOpen(false)
-    setCreateForm(defaultItemForm)
   }
 
-  const handleEdit = async () => {
+  async function handleEdit() {
     if (!editingItem) {
       return
     }
@@ -224,7 +289,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       return
     }
 
-    await toast.promise(
+    toast.promise(
       updateItem.mutateAsync({
         id: editingItem.id,
         name: editForm.name.trim(),
@@ -237,12 +302,14 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       }),
       {
         loading: 'Salvando item...',
-        success: 'Item atualizado com sucesso',
+        success: () => {
+          queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+          setEditingItem(null)
+          return 'Item atualizado com sucesso'
+        },
         error: (err) => (err instanceof Error ? err.message : 'Erro ao salvar item'),
       }
     )
-
-    setEditingItem(null)
   }
 
   const handleDelete = async (item: CanteenItem) => {
@@ -250,17 +317,23 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       return
     }
 
-    await toast.promise(deleteItem.mutateAsync(item.id), {
+    await toast.promise(deleteItem.mutateAsync({ params: { id: item.id } }), {
       loading: 'Excluindo item...',
-      success: 'Item excluído com sucesso',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+        return 'Item excluído com sucesso'
+      },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao excluir item'),
     })
   }
 
   const handleToggle = async (item: CanteenItem) => {
-    await toast.promise(toggleItem.mutateAsync(item.id), {
+    await toast.promise(toggleItem.mutateAsync({ params: { id: item.id } }), {
       loading: item.isActive ? 'Desativando item...' : 'Ativando item...',
-      success: 'Status atualizado',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+        return 'Status atualizado'
+      },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao atualizar status'),
     })
   }

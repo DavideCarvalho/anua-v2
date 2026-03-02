@@ -4,14 +4,16 @@ import { BarChart3 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 
-import { useGradeDistributionQueryOptions } from '../../hooks/queries/use_grade_distribution'
+import { api } from '~/lib/api'
 
 interface GradeDistributionChartProps {
   schoolId?: string
 }
 
 export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps) {
-  const { data, isLoading } = useQuery(useGradeDistributionQueryOptions({ schoolId }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.grades.distribution.queryOptions({ query: { schoolId } })
+  )
 
   if (isLoading) {
     return <GradeDistributionChartSkeleton />

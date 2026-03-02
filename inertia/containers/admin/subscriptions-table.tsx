@@ -13,15 +13,10 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import {
-  useSubscriptionsQueryOptions,
-  type SubscriptionsResponse,
-} from '../../hooks/queries/use_subscriptions'
-import {
-  useCancelSubscriptionMutationOptions,
-  usePauseSubscriptionMutationOptions,
-  useReactivateSubscriptionMutationOptions,
-} from '../../hooks/mutations/use_subscription_mutations'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type SubscriptionsResponse = Route.Response<'api.v1.subscriptions.index'>
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -80,11 +75,13 @@ const billingCycleLabels: Record<string, string> = {
 }
 
 export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
-  const { data, isLoading } = useQuery(useSubscriptionsQueryOptions({ status }))
   const queryClient = useQueryClient()
-  const cancelMutation = useMutation(useCancelSubscriptionMutationOptions())
-  const pauseMutation = useMutation(usePauseSubscriptionMutationOptions())
-  const reactivateMutation = useMutation(useReactivateSubscriptionMutationOptions())
+  const { data, isLoading } = useQuery(
+    api.api.v1.subscriptions.index.queryOptions({ query: { status } })
+  )
+  const cancelMutation = useMutation(api.api.v1.subscriptions.cancel.mutationOptions())
+  const pauseMutation = useMutation(api.api.v1.subscriptions.pause.mutationOptions())
+  const reactivateMutation = useMutation(api.api.v1.subscriptions.reactivate.mutationOptions())
 
   const subscriptions = data?.data ?? []
   const pastDueCount = subscriptions.filter(
@@ -100,22 +97,22 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
 
   const handlePause = async (id: string) => {
     try {
-      await pauseMutation.mutateAsync(id)
-      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+      await pauseMutation.mutateAsync({ params: { id } })
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
     } catch {}
   }
 
   const handleCancel = async (id: string) => {
     try {
-      await cancelMutation.mutateAsync({ id })
-      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+      await cancelMutation.mutateAsync({ params: { id } })
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
     } catch {}
   }
 
   const handleReactivate = async (id: string) => {
     try {
-      await reactivateMutation.mutateAsync(id)
-      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+      await reactivateMutation.mutateAsync({ params: { id } })
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
     } catch {}
   }
 

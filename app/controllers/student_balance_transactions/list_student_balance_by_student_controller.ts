@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
-import StudentBalanceTransactionDto from '#models/dto/student_balance_transaction.dto'
+import StudentBalanceTransactionTransformer from '#transformers/student_balance_transaction_transformer'
 
 export default class ListStudentBalanceByStudentController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { studentId } = params
     const page = request.input('page', 1)
     const limit = request.input('limit', 10)
@@ -13,6 +13,9 @@ export default class ListStudentBalanceByStudentController {
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    return response.ok(StudentBalanceTransactionDto.fromPaginator(transactions))
+    const data = transactions.all()
+    const metadata = transactions.getMeta()
+
+    return serialize(StudentBalanceTransactionTransformer.paginate(data, metadata))
   }
 }

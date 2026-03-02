@@ -29,7 +29,7 @@ import {
 } from '../../components/ui/tooltip'
 import { Skeleton } from '../../components/ui/skeleton'
 
-import { useInsuranceBillingsQueryOptions } from '../../hooks/queries/use_insurance_billings'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const STATUS_OPTIONS = [
@@ -113,10 +113,12 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
   const { status: statusFilter, page, limit } = filters
 
   const { data } = useQuery(
-    useInsuranceBillingsQueryOptions({
-      status: statusFilter as any,
-      page,
-      limit,
+    api.api.v1.insurance.billings.index.queryOptions({
+      query: {
+        status: statusFilter as any,
+        page,
+        limit,
+      },
     })
   )
 

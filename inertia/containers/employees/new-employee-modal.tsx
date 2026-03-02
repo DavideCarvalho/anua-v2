@@ -71,7 +71,7 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
 
   const { mutateAsync: createEmployee, isPending } = useMutation({
     mutationFn: async (values: FormValues) => {
-      const response = await tuyau.api.v1.users.$post({
+      const response = await tuyau.api.api.v1.users({
         name: values.name,
         email: values.email,
         password: Math.random().toString(36).slice(-8) + 'A1!',

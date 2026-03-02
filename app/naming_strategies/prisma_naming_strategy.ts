@@ -6,7 +6,7 @@
  * - Colunas em camelCase (createdAt, schoolId, etc)
  */
 
-import { BaseModel, SnakeCaseNamingStrategy } from '@adonisjs/lucid/orm'
+import { type BaseModel, SnakeCaseNamingStrategy } from '@adonisjs/lucid/orm'
 
 export class PrismaNamingStrategy extends SnakeCaseNamingStrategy {
   /**

@@ -9,10 +9,12 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 
-import { useNotificationsQueryOptions } from '../../hooks/queries/use_notifications'
+import { api } from '~/lib/api'
 
 function ComunicadosContent() {
-  const { data, isLoading, isError, error } = useQuery(useNotificationsQueryOptions({ limit: 20 }))
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.notifications.index.queryOptions({ query: { limit: 20 } })
+  )
 
   if (isLoading) {
     return <ComunicadosSkeleton />

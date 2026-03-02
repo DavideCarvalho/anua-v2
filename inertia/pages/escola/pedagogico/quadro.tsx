@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useState } from 'react'
 import { EscolaLayout } from '~/components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -22,8 +22,7 @@ import {
 } from '~/components/ui/table'
 import { ArrowLeft, Calendar, Printer } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { api } from '~/lib/api'
 
 interface CalendarSlot {
   id: string
@@ -65,11 +64,13 @@ export default function QuadroPage() {
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 100 })
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
   )
 
   const { data: classesData, isLoading: loadingClasses } = useQuery({
-    ...useClassesQueryOptions({ limit: 100, academicPeriodId: selectedAcademicPeriodId }),
+    ...api.api.v1.classes.index.queryOptions({
+      query: { limit: 100, academicPeriodId: selectedAcademicPeriodId },
+    }),
     enabled: !!selectedAcademicPeriodId,
   })
 

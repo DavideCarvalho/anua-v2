@@ -8,7 +8,6 @@ import {
 import { ErrorBoundary } from 'react-error-boundary'
 import { toast } from 'sonner'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useClassesQueryOptions } from '../hooks/queries/use_classes'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -41,7 +40,7 @@ import {
 } from '../components/ui/alert-dialog'
 import { EditClassModal } from './classes/edit-class-modal'
 import { CreateClassModal } from './classes/create-class-modal'
-import { tuyau } from '../lib/api'
+import { api, tuyau } from '~/lib/api'
 import { useAuthUser } from '../stores/auth_store'
 
 interface ClassItem {
@@ -145,7 +144,7 @@ function ClassesListContent() {
   const { search, page, limit } = filters
 
   const { data, isLoading, error, refetch } = useQuery(
-    useClassesQueryOptions({ page, limit, search: search || undefined })
+    api.api.v1.classes.index.queryOptions({ query: { page, limit, search: search || undefined } })
   )
 
   const [editModalOpen, setEditModalOpen] = useState(false)
@@ -155,20 +154,13 @@ function ClassesListContent() {
   const [classToDelete, setClassToDelete] = useState<ClassItem | null>(null)
   const [_isLoadingClassDetails, setIsLoadingClassDetails] = useState(false)
 
-  const { mutateAsync: deleteClass, isPending: isDeleting } = useMutation({
-    mutationFn: async (classId: string) => {
-      const response = await (tuyau.api.v1.classes as any)({ id: classId }).$delete()
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao excluir turma')
-      }
-      return response
-    },
-  })
+  const deleteClassMutation = useMutation(api.api.v1.classes.destroy.mutationOptions())
+  const { mutateAsync: deleteClass, isPending: isDeleting } = deleteClassMutation
 
   const handleEditClass = async (classItem: ClassItem) => {
     setIsLoadingClassDetails(true)
     try {
-      const classData = await (tuyau.api.v1.classes as any)({ id: classItem.id }).$get().unwrap()
+      const classData = await tuyau.api.api.v1.classes.show({ params: { id: classItem.id } })
       setSelectedClass({
         ...classItem,
         ...classData,
@@ -191,7 +183,7 @@ function ClassesListContent() {
   const confirmDelete = async () => {
     if (!classToDelete) return
     try {
-      await deleteClass(classToDelete.id)
+      await deleteClass({ params: { id: classToDelete.id } })
       toast.success('Turma excluída com sucesso')
       queryClient.invalidateQueries({ queryKey: ['classes'] })
       setDeleteDialogOpen(false)

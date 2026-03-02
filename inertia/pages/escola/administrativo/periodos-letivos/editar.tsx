@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 
@@ -7,17 +7,23 @@ import { EscolaLayout } from '~/components/layouts'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { EditAcademicPeriodForm } from '~/containers/academic-periods/edit-academic-period-form'
-import { useAcademicPeriodQueryOptions } from '~/hooks/queries/use_academic_period'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
+import { api } from '~/lib/api'
 
 interface Props {
   academicPeriodId: string
 }
 
 export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
-  const periodQuery = useQuery(useAcademicPeriodQueryOptions(academicPeriodId))
+  const periodQuery = useQuery(
+    api.api.v1.academicPeriods.showAcademicPeriod.queryOptions({
+      params: { id: academicPeriodId },
+    })
+  )
   const coursesQuery = useQuery(
-    useAcademicPeriodCoursesQueryOptions(academicPeriodId, { isActive: true })
+    api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: academicPeriodId },
+      query: { isActive: true },
+    })
   )
 
   const isLoading = periodQuery.isLoading || coursesQuery.isLoading

@@ -173,7 +173,12 @@ export function EditClassModal({
                         <span className="text-sm font-medium text-muted-foreground">
                           Aula {index + 1}
                         </span>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => remove(index)}
+                        >
                           <Minus className="h-4 w-4" />
                         </Button>
                       </div>

@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 import { BarChart3, Loader2 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 
 interface ChartContainerProps {
   title: string

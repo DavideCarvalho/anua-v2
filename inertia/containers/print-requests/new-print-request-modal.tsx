@@ -22,7 +22,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreatePrintRequestMutation } from '../../hooks/mutations/use_create_print_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -43,7 +44,8 @@ export function NewPrintRequestModal({
   onCancel: () => void
   onSubmit: () => void
 }) {
-  const createRequest = useCreatePrintRequestMutation()
+  const queryClient = useQueryClient()
+  const createRequest = useMutation(api.api.v1.printRequests.createPrintRequest.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -56,13 +58,16 @@ export function NewPrintRequestModal({
   async function handleSubmit(values: FormValues) {
     const promise = createRequest
       .mutateAsync({
-        name: values.name,
-        fileUrl: values.fileUrl,
-        quantity: values.quantity,
-        dueDate: new Date(values.dueDate),
-        frontAndBack: values.frontAndBack,
-      } as any)
+        body: {
+          name: values.name,
+          fileUrl: values.fileUrl,
+          quantity: values.quantity,
+          dueDate: new Date(values.dueDate),
+          frontAndBack: values.frontAndBack,
+        },
+      })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['print-requests'] })
         toast.success('Solicitação criada com sucesso!')
         form.reset()
         onSubmit()

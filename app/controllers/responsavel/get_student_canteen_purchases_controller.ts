@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasResponsible from '#models/student_has_responsible'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
+import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 import AppException from '#exceptions/app_exception'
 
 export default class GetStudentCanteenPurchasesController {
-  async handle({ params, request, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser, serialize }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
@@ -32,6 +32,9 @@ export default class GetStudentCanteenPurchasesController {
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    return CanteenPurchaseDto.fromPaginator(purchases)
+    const data = purchases.all()
+    const metadata = purchases.getMeta()
+
+    return serialize(CanteenPurchaseTransformer.paginate(data, metadata))
   }
 }

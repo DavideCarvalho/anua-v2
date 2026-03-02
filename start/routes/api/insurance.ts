@@ -41,13 +41,13 @@ export function registerInsuranceApiRoutes() {
       router.get('/config', [GetInsuranceConfigController]).as('insurance.config')
       router
         .put('/school/:schoolId', [UpdateSchoolInsuranceController])
-        .as('insurance.updateSchool')
+        .as('insurance.update_school')
       router
         .put('/chain/:chainId', [UpdateSchoolChainInsuranceController])
-        .as('insurance.updateChain')
+        .as('insurance.update_chain')
       router
         .post('/school/:schoolId/reset', [ResetSchoolInsuranceController])
-        .as('insurance.resetSchool')
+        .as('insurance.reset_school')
 
       // Claims
       router.get('/claims', [ListInsuranceClaimsController]).as('insurance.claims.index')
@@ -59,7 +59,7 @@ export function registerInsuranceApiRoutes() {
         .as('insurance.claims.reject')
       router
         .post('/claims/:claimId/mark-paid', [MarkClaimPaidController])
-        .as('insurance.claims.markPaid')
+        .as('insurance.claims.mark_paid')
 
       // Billings
       router.get('/billings', [ListInsuranceBillingsController]).as('insurance.billings.index')
@@ -71,10 +71,10 @@ export function registerInsuranceApiRoutes() {
       router.get('/stats', [GetInsuranceStatsController]).as('insurance.stats')
       router
         .get('/analytics/default-rate', [GetDefaultRateBySchoolController])
-        .as('insurance.analytics.defaultRate')
+        .as('insurance.analytics.default_rate')
       router
         .get('/analytics/schools-without', [GetSchoolsWithoutInsuranceController])
-        .as('insurance.analytics.schoolsWithout')
+        .as('insurance.analytics.schools_without')
 
       // School-specific
       router

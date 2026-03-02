@@ -75,14 +75,14 @@ export function SchoolGroupSwitcher() {
   const { data, isLoading } = useQuery({
     queryKey: ['schoolSwitcher'],
     queryFn: async () => {
-      const response = await tuyau.$route('api.v1.schoolSwitcher.getData').$get().unwrap()
+      const response = await tuyau.api.api.v1.schoolSwitcher.getData()
       return response as SchoolSwitcherData
     },
   })
 
   const toggleSchoolMutation = useMutation({
     mutationFn: async (schoolId: string) => {
-      return tuyau.$route('api.v1.schoolSwitcher.toggleSchool').$post({ schoolId }).unwrap()
+      return tuyau.api.api.v1.schoolSwitcher.toggleSchool({ body: { schoolId } })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schoolSwitcher'] })
@@ -91,7 +91,7 @@ export function SchoolGroupSwitcher() {
 
   const toggleGroupMutation = useMutation({
     mutationFn: async (schoolGroupId: string) => {
-      return tuyau.$route('api.v1.schoolSwitcher.toggleGroup').$post({ schoolGroupId }).unwrap()
+      return tuyau.api.api.v1.schoolSwitcher.toggleGroup({ body: { schoolGroupId } })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schoolSwitcher'] })
@@ -177,10 +177,7 @@ export function SchoolGroupSwitcher() {
                     )}
                   >
                     <div className="relative">
-                      <Checkbox
-                        checked={selected}
-                        className="pointer-events-none"
-                      />
+                      <Checkbox checked={selected} className="pointer-events-none" />
                       {partial && !selected && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <Minus className="h-3 w-3 text-primary" />

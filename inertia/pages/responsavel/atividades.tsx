@@ -36,12 +36,7 @@ function AtividadesContent() {
     return <NoStudentCard />
   }
 
-  return (
-    <StudentAssignmentsContainer
-      studentId={student.id}
-      studentName={student.name}
-    />
-  )
+  return <StudentAssignmentsContainer studentId={student.id} studentName={student.name} />
 }
 
 function AtividadesSkeleton() {
@@ -73,9 +68,7 @@ export default function AtividadesPage() {
             <BookOpen className="h-6 w-6" />
             Atividades
           </h1>
-          <p className="text-muted-foreground">
-            Acompanhe as tarefas e atividades dos seus filhos
-          </p>
+          <p className="text-muted-foreground">Acompanhe as tarefas e atividades dos seus filhos</p>
         </div>
 
         <ErrorBoundary

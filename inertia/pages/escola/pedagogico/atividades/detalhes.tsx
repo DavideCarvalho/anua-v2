@@ -12,15 +12,19 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../../components/ui/card'
-import type { AssignmentData } from '../../../../hooks/queries/use_assignment'
-import { useAssignmentQueryOptions } from '../../../../hooks/queries/use_assignment'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type AssignmentData = Route.Response<'api.v1.assignments.show'>
 
 interface Props {
   assignmentId: string
 }
 
 export default function AtividadeDetalhesPage({ assignmentId }: Props) {
-  const { data, isLoading } = useQuery(useAssignmentQueryOptions({ id: assignmentId }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.assignments.show.queryOptions({ params: { id: assignmentId } })
+  )
 
   const assignment = data as AssignmentData | undefined
 

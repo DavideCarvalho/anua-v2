@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Users, UserPlus, UserMinus, Clock, TrendingUp } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useEnrollmentsOverviewQueryOptions } from '../../../hooks/queries/use_enrollments_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 import { ChartContainer } from '../shared/chart-container'
@@ -9,9 +9,11 @@ import { ChartContainer } from '../shared/chart-container'
 export function EnrollmentsOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useEnrollmentsOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.enrollments.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -62,9 +64,11 @@ export function EnrollmentsOverviewCards() {
 export function EnrollmentsByLevelChart() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useEnrollmentsOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.enrollments.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

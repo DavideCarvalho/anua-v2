@@ -1,4 +1,5 @@
-import { Head, Link, usePage } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { Head, usePage } from '@inertiajs/react'
 import { Suspense } from 'react'
 import { Plus } from 'lucide-react'
 

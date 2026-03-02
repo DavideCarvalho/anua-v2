@@ -14,9 +14,8 @@ import {
 } from '../../components/ui/select'
 import { ImageUpload } from '../../components/ui/image-upload'
 import { useQuery } from '@tanstack/react-query'
-import { useSchoolQueryOptions } from '../../hooks/queries/use_school'
-import { useUpdateSchool } from '../../hooks/mutations/use_school_mutations'
-import { useUploadSchoolLogo } from '../../hooks/mutations/use_upload_school_logo'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { useAuthUser } from '../../stores/auth_store'
 
 export function SchoolSettingsForm() {
@@ -37,10 +36,32 @@ export function SchoolSettingsForm() {
 }
 
 function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
-  const { data: schoolData } = useQuery(useSchoolQueryOptions(schoolId))
+  const queryClient = useQueryClient()
+  const { data: schoolData } = useQuery(
+    api.api.v1.schools.show.queryOptions({ params: { id: schoolId } })
+  )
   const school = schoolData
-  const updateSchool = useUpdateSchool()
-  const uploadLogo = useUploadSchoolLogo(schoolId)
+  const updateSchool = useMutation(api.api.v1.schools.update.mutationOptions())
+  const uploadLogo = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData()
+      formData.append('logo', file)
+      const response = await fetch(`/api/v1/schools/${schoolId}/logo`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.message || 'Erro ao fazer upload')
+      }
+      const data = await response.json()
+      return data.url as string
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['school', schoolId] })
+    },
+  })
 
   type SchoolSettingsFormState = {
     name: string
@@ -84,17 +105,20 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await updateSchool.mutateAsync({
-      id: schoolId,
-      ...formData,
-      street: formData.street || null,
-      number: formData.number || null,
-      complement: formData.complement || null,
-      neighborhood: formData.neighborhood || null,
-      city: formData.city || null,
-      state: formData.state || null,
-      zipCode: formData.zipCode || null,
-      logoUrl: formData.logoUrl || null,
+      params: { id: schoolId },
+      body: {
+        ...formData,
+        street: formData.street || null,
+        number: formData.number || null,
+        complement: formData.complement || null,
+        neighborhood: formData.neighborhood || null,
+        city: formData.city || null,
+        state: formData.state || null,
+        zipCode: formData.zipCode || null,
+        logoUrl: formData.logoUrl || null,
+      },
     })
+    queryClient.invalidateQueries({ queryKey: ['school', schoolId] })
   }
 
   return (

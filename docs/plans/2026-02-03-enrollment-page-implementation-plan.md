@@ -17,6 +17,7 @@
 Create the backend route and page controller for the new enrollment page.
 
 **Files:**
+
 - Create: `app/controllers/pages/escola/show_nova_matricula_page_controller.ts`
 - Modify: `start/routes.ts`
 
@@ -39,12 +40,14 @@ export default class ShowNovaMatriculaPageController {
 In `start/routes.ts`:
 
 1. Add lazy import near line ~2417 (after `ShowMatriculasPageController`):
+
 ```typescript
 const ShowNovaMatriculaPageController = () =>
   import('#controllers/pages/escola/show_nova_matricula_page_controller')
 ```
 
 2. Add route inside the escola group, after the existing matriculas route (~line 2700, after `administrativo.matriculas`):
+
 ```typescript
 router
   .get('/administrativo/matriculas/nova', [ShowNovaMatriculaPageController])
@@ -67,6 +70,7 @@ git commit -m "feat: add route and controller for enrollment page"
 Extend the Zod schema to support the new emergency contact checkbox on guardians.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/schema.ts`
 
 **Step 1: Create the new schema**
@@ -83,8 +87,17 @@ export const DocumentType = ['CPF', 'RG', 'PASSPORT'] as const
 export type DocumentType = (typeof DocumentType)[number]
 
 export const EmergencyContactRelationship = [
-  'MOTHER', 'FATHER', 'GRANDMOTHER', 'GRANDFATHER',
-  'AUNT', 'UNCLE', 'COUSIN', 'NEPHEW', 'NIECE', 'GUARDIAN', 'OTHER',
+  'MOTHER',
+  'FATHER',
+  'GRANDMOTHER',
+  'GRANDFATHER',
+  'AUNT',
+  'UNCLE',
+  'COUSIN',
+  'NEPHEW',
+  'NIECE',
+  'GUARDIAN',
+  'OTHER',
 ] as const
 export type EmergencyContactRelationship = (typeof EmergencyContactRelationship)[number]
 
@@ -142,7 +155,10 @@ export const enrollmentSchema = z.object({
         if (isAdult && (!data.documentNumber || data.documentNumber.length === 0)) return false
         return true
       },
-      { message: 'O número do documento é obrigatório para maiores de 18 anos', path: ['documentNumber'] }
+      {
+        message: 'O número do documento é obrigatório para maiores de 18 anos',
+        path: ['documentNumber'],
+      }
     ),
   responsibles: z.array(
     z.object({
@@ -233,6 +249,7 @@ git commit -m "feat: create enrollment schema with emergency contact flag"
 Create the vertical sidebar stepper component for the enrollment page.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/enrollment-sidebar.tsx`
 
 **Step 1: Create the sidebar stepper**
@@ -342,6 +359,7 @@ git commit -m "feat: create vertical enrollment sidebar stepper"
 Create the CPF-first lookup component for the responsibles step.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/components/guardian-cpf-lookup.tsx`
 
 **Step 1: Create the component**
@@ -421,6 +439,7 @@ const LookupResponsibleController = () =>
 ```
 
 And the route:
+
 ```typescript
 router.get('/lookup-responsible', [LookupResponsibleController])
 ```
@@ -497,8 +516,7 @@ export function GuardianCpfLookup({
     const digits = value.replace(/\D/g, '').slice(0, 11)
     if (digits.length <= 3) return digits
     if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
-    if (digits.length <= 9)
-      return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
   }
 
@@ -591,9 +609,7 @@ export function GuardianCpfLookup({
             </Button>
           </div>
           {isDuplicate && (
-            <p className="text-sm text-destructive">
-              Este CPF já foi adicionado como responsável
-            </p>
+            <p className="text-sm text-destructive">Este CPF já foi adicionado como responsável</p>
           )}
         </div>
 
@@ -651,18 +667,30 @@ export function GuardianCpfLookup({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Nome*</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nome completo"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Data de Nascimento*</Label>
-                <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+                <Input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Email*</Label>
-                <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" />
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@exemplo.com"
+                />
               </div>
               <div className="space-y-2">
                 <Label>Telefone*</Label>
@@ -718,7 +746,11 @@ export function GuardianCpfLookup({
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancelar
               </Button>
-              <Button type="button" onClick={handleConfirmNew} disabled={!name || !email || !phone || !birthDate}>
+              <Button
+                type="button"
+                onClick={handleConfirmNew}
+                disabled={!name || !email || !phone || !birthDate}
+              >
                 Confirmar
               </Button>
             </div>
@@ -753,6 +785,7 @@ git commit -m "feat: add guardian CPF lookup component and API endpoint"
 Create the read-only card that displays an added guardian in the list.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/components/guardian-card.tsx`
 
 **Step 1: Create the component**
@@ -825,6 +858,7 @@ git commit -m "feat: add guardian card component"
 Port existing steps from the modal to the new enrollment directory. Steps 1, 3, 4, 5 are mostly unchanged. Step 2 is redesigned.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/steps/student-step.tsx` (port from `new-student-modal/steps/student-info-step.tsx`)
 - Create: `inertia/containers/enrollment/steps/responsibles-step.tsx` (redesigned)
 - Create: `inertia/containers/enrollment/steps/address-step.tsx` (port from `new-student-modal/steps/address-step.tsx`)
@@ -911,7 +945,12 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps) {
 
       {/* Add button */}
       {!isAdding && (
-        <Button type="button" variant="outline" onClick={() => setIsAdding(true)} className="w-full">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setIsAdding(true)}
+          className="w-full"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Responsável
         </Button>
@@ -939,6 +978,7 @@ Copy `inertia/containers/students/new-student-modal/steps/address-step.tsx` to `
 **Step 4: Create medical-step.tsx with read-only emergency contacts from guardians**
 
 Port from `inertia/containers/students/new-student-modal/steps/medical-info-step.tsx` with these changes:
+
 - Responsibles marked as `isEmergencyContact` appear as read-only cards at the top of the emergency contacts section
 - The existing manual add flow remains for additional contacts
 - Update type imports to `EnrollmentFormData`
@@ -961,6 +1001,7 @@ git commit -m "feat: create enrollment step components with redesigned responsib
 Create the review step that shows a summary of all form data.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/steps/review-step.tsx`
 
 **Step 1: Create the review step**
@@ -981,7 +1022,13 @@ interface ReviewStepProps {
   contractName?: string
 }
 
-export function ReviewStep({ onGoToStep, courseName, levelName, className, contractName }: ReviewStepProps) {
+export function ReviewStep({
+  onGoToStep,
+  courseName,
+  levelName,
+  className,
+  contractName,
+}: ReviewStepProps) {
   const form = useFormContext<EnrollmentFormData>()
   const data = form.getValues()
 
@@ -1020,16 +1067,28 @@ export function ReviewStep({ onGoToStep, courseName, levelName, className, contr
           <EditLink step={0} />
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
-          <p><span className="text-muted-foreground">Nome:</span> {data.basicInfo.name}</p>
-          <p><span className="text-muted-foreground">Nascimento:</span> {formatDate(data.basicInfo.birthDate)}</p>
+          <p>
+            <span className="text-muted-foreground">Nome:</span> {data.basicInfo.name}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Nascimento:</span>{' '}
+            {formatDate(data.basicInfo.birthDate)}
+          </p>
           {data.basicInfo.documentNumber && (
-            <p><span className="text-muted-foreground">Documento:</span> {data.basicInfo.documentType} — {formatCpf(data.basicInfo.documentNumber)}</p>
+            <p>
+              <span className="text-muted-foreground">Documento:</span>{' '}
+              {data.basicInfo.documentType} — {formatCpf(data.basicInfo.documentNumber)}
+            </p>
           )}
           {data.basicInfo.email && (
-            <p><span className="text-muted-foreground">Email:</span> {data.basicInfo.email}</p>
+            <p>
+              <span className="text-muted-foreground">Email:</span> {data.basicInfo.email}
+            </p>
           )}
           {data.basicInfo.phone && (
-            <p><span className="text-muted-foreground">Telefone:</span> {data.basicInfo.phone}</p>
+            <p>
+              <span className="text-muted-foreground">Telefone:</span> {data.basicInfo.phone}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -1045,11 +1104,25 @@ export function ReviewStep({ onGoToStep, courseName, levelName, className, contr
             {data.responsibles.map((resp, i) => (
               <div key={i} className="space-y-1">
                 <p className="text-sm font-medium">{resp.name}</p>
-                <p className="text-xs text-muted-foreground">{resp.documentType}: {formatCpf(resp.documentNumber)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {resp.documentType}: {formatCpf(resp.documentNumber)}
+                </p>
                 <div className="flex gap-1.5 flex-wrap">
-                  {resp.isPedagogical && <Badge variant="secondary" className="text-xs">Pedagógico</Badge>}
-                  {resp.isFinancial && <Badge variant="secondary" className="text-xs">Financeiro</Badge>}
-                  {resp.isEmergencyContact && <Badge variant="outline" className="text-xs">Emergência</Badge>}
+                  {resp.isPedagogical && (
+                    <Badge variant="secondary" className="text-xs">
+                      Pedagógico
+                    </Badge>
+                  )}
+                  {resp.isFinancial && (
+                    <Badge variant="secondary" className="text-xs">
+                      Financeiro
+                    </Badge>
+                  )}
+                  {resp.isEmergencyContact && (
+                    <Badge variant="outline" className="text-xs">
+                      Emergência
+                    </Badge>
+                  )}
                 </div>
               </div>
             ))}
@@ -1069,7 +1142,8 @@ export function ReviewStep({ onGoToStep, courseName, levelName, className, contr
             {data.address.complement ? ` — ${data.address.complement}` : ''}
           </p>
           <p className="text-muted-foreground">
-            {data.address.neighborhood} — {data.address.city}/{data.address.state} — CEP {data.address.zipCode}
+            {data.address.neighborhood} — {data.address.city}/{data.address.state} — CEP{' '}
+            {data.address.zipCode}
           </p>
         </CardContent>
       </Card>
@@ -1082,12 +1156,18 @@ export function ReviewStep({ onGoToStep, courseName, levelName, className, contr
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
           {data.medicalInfo.conditions ? (
-            <p><span className="text-muted-foreground">Condições:</span> {data.medicalInfo.conditions}</p>
+            <p>
+              <span className="text-muted-foreground">Condições:</span>{' '}
+              {data.medicalInfo.conditions}
+            </p>
           ) : (
             <p className="text-muted-foreground">Sem condições registradas</p>
           )}
           {data.medicalInfo.medications && data.medicalInfo.medications.length > 0 && (
-            <p><span className="text-muted-foreground">Medicamentos:</span> {data.medicalInfo.medications.length}</p>
+            <p>
+              <span className="text-muted-foreground">Medicamentos:</span>{' '}
+              {data.medicalInfo.medications.length}
+            </p>
           )}
           <p>
             <span className="text-muted-foreground">Contatos de emergência:</span>{' '}
@@ -1103,12 +1183,34 @@ export function ReviewStep({ onGoToStep, courseName, levelName, className, contr
           <EditLink step={4} />
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
-          {courseName && <p><span className="text-muted-foreground">Curso:</span> {courseName}</p>}
-          {levelName && <p><span className="text-muted-foreground">Nível:</span> {levelName}</p>}
-          {className && <p><span className="text-muted-foreground">Turma:</span> {className}</p>}
-          {contractName && <p><span className="text-muted-foreground">Contrato:</span> {contractName}</p>}
-          <p><span className="text-muted-foreground">Pagamento:</span> {PaymentMethodLabels[data.billing.paymentMethod] || data.billing.paymentMethod} — dia {data.billing.paymentDate}</p>
-          <p><span className="text-muted-foreground">Parcelas:</span> {data.billing.installments}x</p>
+          {courseName && (
+            <p>
+              <span className="text-muted-foreground">Curso:</span> {courseName}
+            </p>
+          )}
+          {levelName && (
+            <p>
+              <span className="text-muted-foreground">Nível:</span> {levelName}
+            </p>
+          )}
+          {className && (
+            <p>
+              <span className="text-muted-foreground">Turma:</span> {className}
+            </p>
+          )}
+          {contractName && (
+            <p>
+              <span className="text-muted-foreground">Contrato:</span> {contractName}
+            </p>
+          )}
+          <p>
+            <span className="text-muted-foreground">Pagamento:</span>{' '}
+            {PaymentMethodLabels[data.billing.paymentMethod] || data.billing.paymentMethod} — dia{' '}
+            {data.billing.paymentDate}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Parcelas:</span> {data.billing.installments}x
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -1130,11 +1232,13 @@ git commit -m "feat: add enrollment review step"
 Create the main container that orchestrates form state, step navigation, and the sidebar.
 
 **Files:**
+
 - Create: `inertia/containers/enrollment/enrollment-page.tsx`
 
 **Step 1: Create the main container**
 
 This is the biggest file. It ports the logic from `new-student-modal/index.tsx` but:
+
 - Uses the new sidebar stepper layout
 - Has 6 steps (with review)
 - Adds validation for `isPedagogical` and `isFinancial` in step 1
@@ -1142,6 +1246,7 @@ This is the biggest file. It ports the logic from `new-student-modal/index.tsx` 
 - On submit, redirects to `/escola/administrativo/matriculas` with Inertia
 
 The core form logic (validation, submission, step navigation) stays the same as the modal. Key changes:
+
 - `STEPS_CONFIG` has 6 items
 - Validation for step 1 (responsibles) checks `hasPedagogical && hasFinancial`
 - When moving from address to medical (step 2→3), auto-populate emergency contacts from guardians marked as `isEmergencyContact`
@@ -1149,6 +1254,7 @@ The core form logic (validation, submission, step navigation) stays the same as 
 - Submit on step 5 (review) instead of step 4
 
 Port the full logic from `new-student-modal/index.tsx` adapting:
+
 - Dialog → div with sidebar layout
 - `handleClose` → Inertia visit back to list
 - Academic period selector moves into the page top area
@@ -1168,6 +1274,7 @@ git commit -m "feat: create enrollment page container with sidebar stepper"
 Create the actual page file and wire it to the layout.
 
 **Files:**
+
 - Create: `inertia/pages/escola/administrativo/matriculas/nova.tsx`
 
 **Step 1: Create the page**
@@ -1201,6 +1308,7 @@ git commit -m "feat: create nova matricula inertia page"
 Update the existing enrollment list to link to the new page instead of opening the modal.
 
 **Files:**
+
 - Modify: `inertia/containers/students-list-container.tsx` — replace modal button with Inertia Link
 - Modify: `inertia/containers/enrollment-management/enrollments-table.tsx` — add "Nova Matrícula" link if not present
 

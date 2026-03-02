@@ -3,7 +3,8 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Link, router } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { router } from '@inertiajs/react'
 import { AlertCircle, ArrowLeft } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
@@ -23,11 +24,8 @@ import { MedicalInfoStep } from './steps/medical-step'
 import { BillingStep } from './steps/billing-step'
 import { ReviewStep } from './steps/review-step'
 import { enrollmentSchema, type EnrollmentFormData } from './schema'
-import { useEnrollStudent } from '~/hooks/mutations/use_student_mutations'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
-import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
-import { useContractQueryOptions } from '~/hooks/queries/use_contract'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const STEPS_CONFIG = [
   { title: 'Aluno', description: 'Dados do aluno' },
@@ -42,13 +40,12 @@ export function EnrollmentPage() {
   // ── State ─────────────────────────────────────────────────────────────
   const [currentStep, setCurrentStep] = useState(0)
   const [maxVisitedStep, setMaxVisitedStep] = useState(0)
-  const [stepsStatus, setStepsStatus] = useState<StepStatus[]>(
-    STEPS_CONFIG.map(() => 'pending')
-  )
+  const [stepsStatus, setStepsStatus] = useState<StepStatus[]>(STEPS_CONFIG.map(() => 'pending'))
   const [selectorShake, setSelectorShake] = useState(false)
   const selectorRef = useRef<HTMLDivElement>(null)
 
-  const enrollStudent = useEnrollStudent()
+  const queryClient = useQueryClient()
+  const enrollStudent = useMutation(api.api.v1.students.enroll.mutationOptions())
 
   // ── Form setup ────────────────────────────────────────────────────────
   const form = useForm<EnrollmentFormData>({
@@ -108,18 +105,22 @@ export function EnrollmentPage() {
 
   // ── Queries for academic data ─────────────────────────────────────────
   const { data: academicPeriodsData } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 50 })
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 50 } })
   )
   const academicPeriods = academicPeriodsData?.data ?? []
 
   const { data: coursesData } = useQuery({
-    ...useAcademicPeriodCoursesQueryOptions(academicPeriodId),
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: academicPeriodId! },
+    }),
     enabled: !!academicPeriodId,
   })
   const courses = coursesData ?? []
 
   const { data: classesData } = useQuery({
-    ...useClassesQueryOptions({ levelId, academicPeriodId, limit: 50 }),
+    ...api.api.v1.classes.index.queryOptions({
+      query: { levelId, academicPeriodId, limit: 50 },
+    }),
     enabled: !!levelId && !!academicPeriodId,
   })
   const classes = classesData?.data ?? []
@@ -131,7 +132,7 @@ export function EnrollmentPage() {
   const contractId = selectedLevel?.contractId
 
   const { data: contractData } = useQuery({
-    ...useContractQueryOptions(contractId),
+    ...api.api.v1.contracts.show.queryOptions({ params: { id: contractId! } }),
     enabled: !!contractId,
   })
 
@@ -267,9 +268,7 @@ export function EnrollmentPage() {
               // Check for document conflicts
               const studentDoc =
                 form.getValues('basicInfo.documentNumber')?.replace(/\D/g, '') || ''
-              const respDocs = responsibles.map(
-                (r) => r.documentNumber?.replace(/\D/g, '') || ''
-              )
+              const respDocs = responsibles.map((r) => r.documentNumber?.replace(/\D/g, '') || '')
 
               // Check student vs responsibles
               const hasStudentConflict = respDocs.some((doc) => doc && doc === studentDoc)
@@ -307,7 +306,9 @@ export function EnrollmentPage() {
         break
       case 3: {
         const emergencyContacts = form.getValues('medicalInfo.emergencyContacts')
-        const hasEmergencyGuardians = form.getValues('responsibles').some((r) => r.isEmergencyContact)
+        const hasEmergencyGuardians = form
+          .getValues('responsibles')
+          .some((r) => r.isEmergencyContact)
         if (emergencyContacts.length === 0 && !hasEmergencyGuardians && !isSelfResponsible) {
           form.setError('root', {
             message: 'Adicione pelo menos um contato de emergência',
@@ -425,35 +426,38 @@ export function EnrollmentPage() {
 
     try {
       await enrollStudent.mutateAsync({
-        basicInfo: {
-          ...data.basicInfo,
-          birthDate: data.basicInfo.birthDate.toISOString(),
-        },
-        responsibles: data.responsibles.map((r) => ({
-          ...r,
-          birthDate: r.birthDate.toISOString(),
-        })),
-        address: data.address,
-        medicalInfo: {
-          ...data.medicalInfo,
-          emergencyContacts: [...guardianContacts, ...manualContacts],
-        },
-        billing: {
-          academicPeriodId: data.billing.academicPeriodId,
-          monthlyFee: data.billing.monthlyFee,
-          enrollmentFee: data.billing.enrollmentFee,
-          discount: data.billing.discountPercentage,
-          enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
-          paymentDate: data.billing.paymentDate,
-          paymentMethod: data.billing.paymentMethod,
-          installments: data.billing.installments,
-          enrollmentInstallments: data.billing.enrollmentInstallments,
-          ...(data.billing.classId && { classId: data.billing.classId }),
-          ...(data.billing.contractId && { contractId: data.billing.contractId }),
-          ...(data.billing.scholarshipId && { scholarshipId: data.billing.scholarshipId }),
+        body: {
+          basicInfo: {
+            ...data.basicInfo,
+            birthDate: data.basicInfo.birthDate.toISOString(),
+          },
+          responsibles: data.responsibles.map((r) => ({
+            ...r,
+            birthDate: r.birthDate.toISOString(),
+          })),
+          address: data.address,
+          medicalInfo: {
+            ...data.medicalInfo,
+            emergencyContacts: [...guardianContacts, ...manualContacts],
+          },
+          billing: {
+            academicPeriodId: data.billing.academicPeriodId,
+            monthlyFee: data.billing.monthlyFee,
+            enrollmentFee: data.billing.enrollmentFee,
+            discount: data.billing.discountPercentage,
+            enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
+            paymentDate: data.billing.paymentDate,
+            paymentMethod: data.billing.paymentMethod,
+            installments: data.billing.installments,
+            enrollmentInstallments: data.billing.enrollmentInstallments,
+            ...(data.billing.classId && { classId: data.billing.classId }),
+            ...(data.billing.contractId && { contractId: data.billing.contractId }),
+            ...(data.billing.scholarshipId && { scholarshipId: data.billing.scholarshipId }),
+          },
         },
       })
 
+      queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('Aluno matriculado com sucesso!')
       router.visit('/escola/administrativo/matriculas')
     } catch (error: any) {
@@ -567,10 +571,7 @@ export function EnrollmentPage() {
       </div>
 
       <FormProvider {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="flex flex-1 flex-col min-h-0"
-        >
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-1 flex-col min-h-0">
           {/* Sidebar + Content */}
           <div className="flex flex-1 min-h-0 relative">
             {/* Overlay when no academic period selected */}
@@ -578,9 +579,7 @@ export function EnrollmentPage() {
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
                 <div className="text-center p-6">
                   <AlertCircle className="h-12 w-12 text-amber-500 dark:text-amber-400 mx-auto mb-3" />
-                  <p className="text-lg font-medium text-foreground">
-                    Selecione o período letivo
-                  </p>
+                  <p className="text-lg font-medium text-foreground">Selecione o período letivo</p>
                   <p className="text-sm text-muted-foreground mt-1">
                     Use o seletor acima para escolher o período letivo antes de continuar
                   </p>

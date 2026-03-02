@@ -21,7 +21,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useCreateSubjectMutation } from '../../hooks/mutations/use_create_subject'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Qual o nome da matéria?'),
@@ -40,7 +41,8 @@ export function NewSubjectModal({
   onSubmit: () => void
   schoolId: string
 }) {
-  const createSubject = useCreateSubjectMutation()
+  const queryClient = useQueryClient()
+  const createSubject = useMutation(api.api.v1.subjects.store.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -50,10 +52,10 @@ export function NewSubjectModal({
   async function handleSubmit(values: FormValues) {
     const promise = createSubject
       .mutateAsync({
-        name: values.name,
-        schoolId,
-      } as any)
+        body: { name: values.name, schoolId },
+      })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['subjects'] })
         toast.success('Matéria criada com sucesso!')
         form.reset()
         onSubmit()

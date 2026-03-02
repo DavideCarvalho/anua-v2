@@ -31,8 +31,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu'
-import { useExtraClassesQueryOptions, type ExtraClass } from '~/hooks/queries/use_extra_classes'
-import { useDeleteExtraClass } from '~/hooks/mutations/use_extra_class_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type ExtraClass = Route.Response<'api.v1.extra_classes.index'>['data'][number]
 import { toast } from 'sonner'
 
 const DAY_LABELS: Record<number, string> = {
@@ -74,23 +77,32 @@ export function ExtraClassesTable({
 
   const { search, page, limit } = filters
 
+  const queryClient = useQueryClient()
   const { data, isLoading } = useQuery(
-    useExtraClassesQueryOptions({
-      page,
-      limit,
-      schoolId,
-      academicPeriodId,
-      search: search || undefined,
+    api.api.v1.extraClasses.index.queryOptions({
+      query: {
+        page,
+        limit,
+        schoolId,
+        academicPeriodId,
+        search: search || undefined,
+      },
     })
   )
 
-  const deleteMutation = useDeleteExtraClass()
+  const deleteMutation = useMutation(api.api.v1.extraClasses.destroy.mutationOptions())
 
   const handleDeactivate = (id: string) => {
-    deleteMutation.mutate(id, {
-      onSuccess: () => toast.success('Aula avulsa desativada'),
-      onError: () => toast.error('Erro ao desativar'),
-    })
+    deleteMutation.mutate(
+      { params: { id } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['extra-classes'] })
+          toast.success('Aula avulsa desativada')
+        },
+        onError: () => toast.error('Erro ao desativar'),
+      }
+    )
   }
 
   if (isLoading) {

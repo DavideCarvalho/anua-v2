@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentPayment from '#models/student_payment'
 import { listStudentPaymentsValidator } from '#validators/student_payment'
-import StudentPaymentDto from '#models/dto/student_payment.dto'
+import StudentPaymentTransformer from '#transformers/student_payment_transformer'
 
 export default class ListStudentPaymentsController {
   async handle(ctx: HttpContext) {
-    const { request, selectedSchoolIds } = ctx
+    const { request, selectedSchoolIds, serialize } = ctx
     const payload = await request.validateUsing(listStudentPaymentsValidator)
 
     const {
@@ -71,6 +71,11 @@ export default class ListStudentPaymentsController {
 
     const payments = await query.paginate(page, limit)
 
-    return StudentPaymentDto.fromPaginator(payments)
+    const data = payments.all()
+    const metadata = payments.getMeta()
+
+    console.log(data, metadata)
+
+    return serialize(StudentPaymentTransformer.paginate(data, metadata))
   }
 }

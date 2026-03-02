@@ -2,7 +2,6 @@ import { useEffect, useMemo } from 'react'
 import { useForm, useFieldArray, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Plus, Minus, Loader2, AlertCircle } from 'lucide-react'
 
@@ -23,9 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { useTeacherSubjectsQueryOptions } from '~/hooks/queries/use_teacher_subjects'
-import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
-import { useCreateClassWithTeachers } from '~/hooks/mutations/use_class_mutations'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { useAuthUser } from '~/stores/auth_store'
 
 const createClassSchema = z.object({
@@ -70,8 +68,10 @@ function SubjectTeacherRow({
 
   // Get subjects for selected teacher
   const { data: teacherSubjectsData, isLoading: isLoadingSubjects } = useQuery({
-    ...useTeacherSubjectsQueryOptions(selectedTeacherId || ''),
-    enabled: !!selectedTeacherId,
+    ...api.api.v1.teachers.listTeacherSubjects.queryOptions(
+      { params: { id: selectedTeacherId || '' } },
+      { enabled: !!selectedTeacherId }
+    ),
   })
 
   const teacherSubjects = useMemo(() => {
@@ -97,7 +97,7 @@ function SubjectTeacherRow({
         form.setValue(`subjectsWithTeachers.${index}.subjectId`, '')
       }
     }
-  }, [selectedTeacherId, teacherSubjects]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedTeacherId, teacherSubjects])
 
   return (
     <div className="flex items-end gap-2">
@@ -193,9 +193,9 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
     name: 'subjectsWithTeachers',
   })
 
+  const queryClient = useQueryClient()
   const { data: teachersData, isLoading: isLoadingTeachers } = useQuery({
-    ...useTeachersQueryOptions({ limit: 100 }),
-    enabled: open,
+    ...api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } }, { enabled: open }),
   })
 
   const teachers = useMemo(() => {
@@ -212,7 +212,13 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
     }
   }, [open, form])
 
-  const createMutation = useCreateClassWithTeachers()
+  const createMutation = useMutation(
+    api.api.v1.classes.storeWithTeachers.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: api.api.v1.classes.index.pathKey() })
+      },
+    })
+  )
 
   const onSubmit = form.handleSubmit((data) => {
     if (!schoolId) {
@@ -221,15 +227,17 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
     }
     createMutation.mutate(
       {
-        name: data.name,
-        schoolId: schoolId || '',
-        subjectsWithTeachers: data.subjectsWithTeachers,
-      } as any,
+        body: {
+          name: data.name,
+          schoolId: schoolId || '',
+          subjectsWithTeachers: data.subjectsWithTeachers,
+        },
+      },
       {
         onSuccess: (result: any) => {
           toast.success('Turma criada com sucesso')
           onOpenChange(false)
-          if (onCreated && result.id) {
+          if (onCreated && result?.id) {
             onCreated(result.id)
           }
         },

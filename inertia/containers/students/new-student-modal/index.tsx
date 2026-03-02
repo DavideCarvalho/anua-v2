@@ -5,12 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { AlertCircle } from 'lucide-react'
 import { cn } from '~/lib/utils'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import {
   Select,
@@ -27,8 +22,8 @@ import { AddressStep } from './steps/address-step'
 import { MedicalInfoStep } from './steps/medical-info-step'
 import { BillingStep } from './steps/billing-step'
 import { newStudentSchema, type NewStudentFormData } from './schema'
-import { useEnrollStudent } from '~/hooks/mutations/use_student_mutations'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const STEPS_CONFIG = [
   { title: 'Aluno', description: 'Dados do aluno' },
@@ -52,11 +47,14 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
   const [selectorShake, setSelectorShake] = useState(false)
   const selectorRef = useRef<HTMLDivElement>(null)
 
-  const enrollStudent = useEnrollStudent()
+  const queryClient = useQueryClient()
+  const enrollStudent = useMutation(api.api.v1.students.enroll.mutationOptions())
 
   // Load academic periods for the selector
   const { data: academicPeriodsData } = useQuery({
-    ...useAcademicPeriodsQueryOptions({ limit: 50 }),
+    ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { limit: 50 },
+    }),
     enabled: open,
   })
   const academicPeriods = academicPeriodsData?.data ?? []
@@ -213,7 +211,8 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
 
             if (isValid) {
               // Check for document conflicts
-              const studentDoc = form.getValues('basicInfo.documentNumber')?.replace(/\D/g, '') || ''
+              const studentDoc =
+                form.getValues('basicInfo.documentNumber')?.replace(/\D/g, '') || ''
               const respDocs = responsibles.map((r) => r.documentNumber?.replace(/\D/g, '') || '')
 
               // Check student vs responsibles
@@ -363,32 +362,34 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
 
     try {
       await enrollStudent.mutateAsync({
-        basicInfo: {
-          ...data.basicInfo,
-          birthDate: data.basicInfo.birthDate.toISOString(),
-        },
-        responsibles: data.responsibles.map((r) => ({
-          ...r,
-          birthDate: r.birthDate.toISOString(),
-        })),
-        address: data.address,
-        medicalInfo: data.medicalInfo,
-        billing: {
-          academicPeriodId: data.billing.academicPeriodId,
-          monthlyFee: data.billing.monthlyFee,
-          enrollmentFee: data.billing.enrollmentFee,
-          discount: data.billing.discountPercentage,
-          enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
-          paymentDate: data.billing.paymentDate,
-          paymentMethod: data.billing.paymentMethod,
-          installments: data.billing.installments,
-          enrollmentInstallments: data.billing.enrollmentInstallments,
-          ...(data.billing.classId && { classId: data.billing.classId }),
-          ...(data.billing.contractId && { contractId: data.billing.contractId }),
-          ...(data.billing.scholarshipId && { scholarshipId: data.billing.scholarshipId }),
+        body: {
+          basicInfo: {
+            ...data.basicInfo,
+            birthDate: data.basicInfo.birthDate.toISOString(),
+          },
+          responsibles: data.responsibles.map((r) => ({
+            ...r,
+            birthDate: r.birthDate.toISOString(),
+          })),
+          address: data.address,
+          medicalInfo: data.medicalInfo,
+          billing: {
+            academicPeriodId: data.billing.academicPeriodId,
+            monthlyFee: data.billing.monthlyFee,
+            enrollmentFee: data.billing.enrollmentFee,
+            discount: data.billing.discountPercentage,
+            enrollmentDiscount: data.billing.enrollmentDiscountPercentage,
+            paymentDate: data.billing.paymentDate,
+            paymentMethod: data.billing.paymentMethod,
+            installments: data.billing.installments,
+            enrollmentInstallments: data.billing.enrollmentInstallments,
+            ...(data.billing.classId && { classId: data.billing.classId }),
+            ...(data.billing.contractId && { contractId: data.billing.contractId }),
+            ...(data.billing.scholarshipId && { scholarshipId: data.billing.scholarshipId }),
+          },
         },
       })
-
+      queryClient.invalidateQueries({ queryKey: ['students'] })
       toast.success('Aluno matriculado com sucesso!')
       handleClose()
     } catch (error: any) {
@@ -457,13 +458,21 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
             ref={selectorRef}
             className={cn(
               'mt-4 p-3 rounded-lg transition-all',
-              !academicPeriodId && 'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700',
+              !academicPeriodId &&
+                'bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-700',
               selectorShake && 'animate-shake'
             )}
           >
             <div className="flex items-center gap-2">
-              {!academicPeriodId && <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />}
-              <Label className={cn('text-sm font-medium', !academicPeriodId && 'text-amber-700 dark:text-amber-400')}>
+              {!academicPeriodId && (
+                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              )}
+              <Label
+                className={cn(
+                  'text-sm font-medium',
+                  !academicPeriodId && 'text-amber-700 dark:text-amber-400'
+                )}
+              >
                 Período Letivo *
               </Label>
             </div>
@@ -481,7 +490,8 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
               <SelectTrigger
                 className={cn(
                   'mt-1',
-                  !academicPeriodId && 'border-amber-500 dark:border-amber-400 focus:ring-amber-500 dark:focus:ring-amber-400'
+                  !academicPeriodId &&
+                    'border-amber-500 dark:border-amber-400 focus:ring-amber-500 dark:focus:ring-amber-400'
                 )}
               >
                 <SelectValue placeholder="Selecione o período letivo" />
@@ -521,11 +531,7 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
                 </div>
               )}
 
-              <Stepper
-                currentStep={currentStep}
-                steps={steps}
-                onStepClick={handleStepClick}
-              />
+              <Stepper currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
 
               {/* Step 0: Dados do Aluno */}
               {currentStep === 0 && <StudentInfoStep academicPeriodId={academicPeriodId} />}

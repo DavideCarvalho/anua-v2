@@ -4,10 +4,10 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
 import { DateTime } from 'luxon'
 import type { LucideIcon } from 'lucide-react'
-import { useInvoicesQueryOptions, type InvoicesResponse } from '../hooks/queries/use_invoices'
-import { useStudentsQueryOptions } from '../hooks/queries/use_students'
-import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
-import { tuyau } from '../lib/api'
+import type { Route } from '@tuyau/core/types'
+import { api, tuyau } from '~/lib/api'
+
+type InvoicesResponse = Route.Response<'api.v1.invoices.index'>
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -87,12 +87,14 @@ function StudentMultiSelect({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const { data: studentsData, isLoading } = useQuery({
-    ...useStudentsQueryOptions({
-      search: debouncedSearch || undefined,
-      academicPeriodId: academicPeriodId || undefined,
-      courseId: courseId || undefined,
-      classId: classId || undefined,
-      limit: 15,
+    ...api.api.v1.students.index.queryOptions({
+      query: {
+        search: debouncedSearch || undefined,
+        academicPeriodId: academicPeriodId || undefined,
+        courseId: courseId || undefined,
+        classId: classId || undefined,
+        limit: 15,
+      },
     }),
     enabled: open,
   })
@@ -553,23 +555,20 @@ function InvoicesContent() {
   } = filters
 
   const { data: academicPeriodsData } = useQuery({
-    ...useAcademicPeriodsQueryOptions({ limit: 100 }),
+    ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { limit: 100 },
+    }),
   })
   const academicPeriods: AcademicPeriodOption[] = (academicPeriodsData?.data ??
     []) as AcademicPeriodOption[]
 
   const { data: coursesData } = useQuery({
-    queryKey: ['invoice-academic-period-courses', filterAcademicPeriodId],
-    queryFn: async () => {
-      const response = await tuyau.api.v1['academic-periods']({
-        id: filterAcademicPeriodId!,
-      }).courses.$get()
-      if (response.error) throw new Error('Erro ao carregar cursos')
-      return response.data as AcademicPeriodCourse[]
-    },
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: filterAcademicPeriodId! },
+    }),
     enabled: !!filterAcademicPeriodId,
   })
-  const courses = coursesData ?? []
+  const courses = (coursesData ?? []) as AcademicPeriodCourse[]
 
   const classes = useMemo(() => {
     if (!filterCourseId || courses.length === 0) return []
@@ -600,19 +599,21 @@ function InvoicesContent() {
     activeSortBy === null ? null : filterSortDirection === 'desc' ? 'desc' : 'asc'
 
   const { data, isLoading, error, refetch } = useQuery(
-    useInvoicesQueryOptions({
-      page,
-      limit,
-      studentIds:
-        filterStudentIds && filterStudentIds.length > 0 ? filterStudentIds.join(',') : undefined,
-      status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
-      academicPeriodId: filterAcademicPeriodId || undefined,
-      courseId: filterCourseId || undefined,
-      classId: filterClassId || undefined,
-      sortBy: activeSortBy || undefined,
-      sortDirection: activeSortDirection || undefined,
-      month: filterMonth || undefined,
-      year: filterYear || undefined,
+    api.api.v1.invoices.index.queryOptions({
+      query: {
+        page,
+        limit,
+        studentIds:
+          filterStudentIds && filterStudentIds.length > 0 ? filterStudentIds.join(',') : undefined,
+        status: filterStatuses.length > 0 ? filterStatuses.join(',') : undefined,
+        academicPeriodId: filterAcademicPeriodId || undefined,
+        courseId: filterCourseId || undefined,
+        classId: filterClassId || undefined,
+        sortBy: activeSortBy || undefined,
+        sortDirection: activeSortDirection || undefined,
+        month: filterMonth || undefined,
+        year: filterYear || undefined,
+      },
     })
   )
 

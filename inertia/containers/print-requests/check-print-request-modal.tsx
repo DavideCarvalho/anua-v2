@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
-import { usePrintRequestQueryOptions } from '../../hooks/queries/use_print_request'
-import { useApprovePrintRequestMutation } from '../../hooks/mutations/use_approve_print_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 export function CheckPrintRequestModal({
   printRequestId,
@@ -23,12 +23,18 @@ export function CheckPrintRequestModal({
   onClose: () => void
   onReject: () => void
 }) {
-  const approve = useApprovePrintRequestMutation()
+  const queryClient = useQueryClient()
+  const approve = useMutation(api.api.v1.printRequests.approvePrintRequest.mutationOptions())
 
-  const { data } = useSuspenseQuery(usePrintRequestQueryOptions({ id: printRequestId }))
+  const { data } = useSuspenseQuery(
+    api.api.v1.printRequests.showPrintRequest.queryOptions({
+      params: { id: printRequestId },
+    })
+  )
 
   async function handleApprove() {
-    const promise = approve.mutateAsync(printRequestId).then(() => {
+    const promise = approve.mutateAsync({ params: { id: printRequestId } }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['print-requests'] })
       toast.success('Solicitação aprovada com sucesso!')
       onClose()
     })

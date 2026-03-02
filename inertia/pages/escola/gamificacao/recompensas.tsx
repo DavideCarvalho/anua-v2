@@ -1,27 +1,35 @@
 import { Head } from '@inertiajs/react'
-import { Suspense, useState } from 'react'
-import { Gift, ShoppingCart, Package } from 'lucide-react'
+import { useState } from 'react'
+import { Gift, ShoppingCart, Package, AlertCircle } from 'lucide-react'
+import { ErrorBoundary } from 'react-error-boundary'
 
 import { EscolaLayout } from '../../../components/layouts'
-import { Card, CardContent, CardHeader } from '../../../components/ui/card'
+import { Card, CardContent } from '../../../components/ui/card'
+import { Button } from '../../../components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { StoreItemsTable } from '../../../containers/gamificacao/store-items-table'
 import { StoreOrdersTable } from '../../../containers/gamificacao/store-orders-table'
 import { useAuthUser } from '../../../stores/auth_store'
 
-function TableSkeleton() {
+function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: unknown
+  resetErrorBoundary: () => void
+}) {
+  const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro inesperado'
   return (
-    <Card>
-      <CardHeader>
-        <div className="h-6 w-48 bg-muted animate-pulse rounded" />
-        <div className="h-4 w-32 bg-muted animate-pulse rounded" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-12 bg-muted animate-pulse rounded" />
-          ))}
+    <Card className="border-destructive">
+      <CardContent className="flex flex-col items-center gap-4 py-10">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <div className="text-center">
+          <h3 className="font-semibold text-destructive">Erro ao carregar recompensas</h3>
+          <p className="text-sm text-muted-foreground mt-1">{errorMessage}</p>
         </div>
+        <Button variant="outline" onClick={resetErrorBoundary}>
+          Tentar novamente
+        </Button>
       </CardContent>
     </Card>
   )
@@ -59,15 +67,15 @@ export default function RecompensasPage() {
             </TabsList>
 
             <TabsContent value="items" className="mt-6">
-              <Suspense fallback={<TableSkeleton />}>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
                 <StoreItemsTable schoolId={schoolId} />
-              </Suspense>
+              </ErrorBoundary>
             </TabsContent>
 
             <TabsContent value="orders" className="mt-6">
-              <Suspense fallback={<TableSkeleton />}>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
                 <StoreOrdersTable schoolId={schoolId} />
-              </Suspense>
+              </ErrorBoundary>
             </TabsContent>
           </Tabs>
         ) : (

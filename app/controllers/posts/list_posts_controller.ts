@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
-import PostDto from '#models/dto/post.dto'
+import PostTransformer from '#transformers/post_transformer'
 import { listPostsValidator } from '#validators/post'
 
 export default class ListPostsController {
-  async handle({ request }: HttpContext) {
-    const data = await request.validateUsing(listPostsValidator)
-    const page = data.page ?? 1
-    const limit = data.limit ?? 20
+  async handle({ request, serialize }: HttpContext) {
+    const filters = await request.validateUsing(listPostsValidator)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
 
     const query = Post.query()
       .preload('user')
@@ -15,25 +15,28 @@ export default class ListPostsController {
       .withCount('likes')
       .withCount('comments')
 
-    if (data.schoolId) {
-      query.where('schoolId', data.schoolId)
+    if (filters.schoolId) {
+      query.where('schoolId', filters.schoolId)
     }
 
     // Validator provides authorId, model uses userId
-    if (data.authorId) {
-      query.where('userId', data.authorId)
+    if (filters.authorId) {
+      query.where('userId', filters.authorId)
     }
 
-    if (data.type) {
-      query.where('type', data.type)
+    if (filters.type) {
+      query.where('type', filters.type)
     }
 
-    if (data.visibility) {
-      query.where('visibility', data.visibility)
+    if (filters.visibility) {
+      query.where('visibility', filters.visibility)
     }
 
     const posts = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
-    return PostDto.fromPaginator(posts)
+    const items = posts.all()
+    const metadata = posts.getMeta()
+
+    return serialize(PostTransformer.paginate(items, metadata))
   }
 }

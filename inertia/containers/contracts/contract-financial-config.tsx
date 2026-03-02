@@ -2,13 +2,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 import { toast } from 'sonner'
 import { Calendar, Percent, DollarSign, Plus, Trash2, AlertCircle } from 'lucide-react'
 
-import { useContractPaymentDaysQueryOptions } from '../../hooks/queries/use_contract_payment_days'
-import { useContractInterestConfigQueryOptions } from '../../hooks/queries/use_contract_interest_config'
-import { useContractEarlyDiscountsQueryOptions } from '../../hooks/queries/use_contract_early_discounts'
-import {
-  removeContractPaymentDayMutationOptions,
-  removeContractEarlyDiscountMutationOptions,
-} from '../../hooks/mutations/use_contract_financial_mutations'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -21,14 +15,24 @@ interface ContractFinancialConfigProps {
 
 export function ContractFinancialConfig({ contractId }: ContractFinancialConfigProps) {
   const queryClient = useQueryClient()
-  const { data: paymentDaysData } = useSuspenseQuery(useContractPaymentDaysQueryOptions(contractId))
-  const { data: interestData } = useSuspenseQuery(useContractInterestConfigQueryOptions(contractId))
+  const { data: paymentDaysData } = useSuspenseQuery(
+    api.api.v1.contracts.paymentDays.index.queryOptions({
+      params: { contractId },
+    })
+  )
+  const { data: interestData } = useSuspenseQuery(
+    api.api.v1.contracts.interestConfig.show.queryOptions({
+      params: { contractId },
+    })
+  )
   const { data: discountsData } = useSuspenseQuery(
-    useContractEarlyDiscountsQueryOptions(contractId)
+    api.api.v1.contracts.earlyDiscounts.index.queryOptions({
+      params: { contractId },
+    })
   )
 
-  const removePaymentDay = useMutation(removeContractPaymentDayMutationOptions())
-  const removeDiscount = useMutation(removeContractEarlyDiscountMutationOptions())
+  const removePaymentDay = useMutation(api.api.v1.contracts.paymentDays.destroy.mutationOptions())
+  const removeDiscount = useMutation(api.api.v1.contracts.earlyDiscounts.destroy.mutationOptions())
 
   const paymentDays = paymentDaysData ?? []
   const interestConfig = interestData && typeof interestData === 'object' ? interestData : null
@@ -36,7 +40,9 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
 
   const handleRemovePaymentDay = async (id: string) => {
     try {
-      await removePaymentDay.mutateAsync({ contractId, id })
+      await removePaymentDay.mutateAsync({
+        params: { contractId, id },
+      })
       await queryClient.invalidateQueries({ queryKey: ['contract-payment-days', contractId] })
       await queryClient.invalidateQueries({ queryKey: ['contract', contractId] })
     } catch {
@@ -46,7 +52,9 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
 
   const handleRemoveDiscount = async (id: string) => {
     try {
-      await removeDiscount.mutateAsync({ contractId, id })
+      await removeDiscount.mutateAsync({
+        params: { contractId, id },
+      })
       await queryClient.invalidateQueries({ queryKey: ['contract-early-discounts', contractId] })
       await queryClient.invalidateQueries({ queryKey: ['contract', contractId] })
     } catch {

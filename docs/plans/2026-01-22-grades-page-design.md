@@ -9,6 +9,7 @@ Migração da página de notas do school-super-app para anua-v2, com notas agrup
 ### Backend
 
 **Controller:** `app/controllers/grades/get_class_grades_by_subject_controller.ts`
+
 - Recebe `classId` e `subjectId` como parâmetros
 - Busca o algoritmo de cálculo da escola (AVERAGE ou SUM)
 - Retorna lista de alunos com:

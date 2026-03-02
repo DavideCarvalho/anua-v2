@@ -18,13 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 

@@ -4,16 +4,18 @@ import { middleware } from '#start/kernel'
 // Achievements
 const ListAchievementsController = () =>
   import('#controllers/achievements/list_achievements_controller')
-const ShowAchievementController = () =>
-  import('#controllers/achievements/show_achievement_controller')
 const CreateAchievementController = () =>
   import('#controllers/achievements/create_achievement_controller')
+const ShowAchievementController = () =>
+  import('#controllers/achievements/show_achievement_controller')
 const UpdateAchievementController = () =>
   import('#controllers/achievements/update_achievement_controller')
 const DeleteAchievementController = () =>
   import('#controllers/achievements/delete_achievement_controller')
 const UnlockAchievementController = () =>
   import('#controllers/achievements/unlock_achievement_controller')
+const UpdateSchoolAchievementConfigController = () =>
+  import('#controllers/achievements/update_school_achievement_config_controller')
 
 // Stores
 const ListStoresController = () => import('#controllers/stores/list_stores_controller')
@@ -110,6 +112,9 @@ export function registerAchievementApiRoutes() {
       router.put('/:id', [UpdateAchievementController]).as('achievements.update')
       router.delete('/:id', [DeleteAchievementController]).as('achievements.destroy')
       router.post('/:id/unlock', [UnlockAchievementController]).as('achievements.unlock')
+      router
+        .put('/:achievementId/schools/:schoolId/config', [UpdateSchoolAchievementConfigController])
+        .as('achievements.config.update')
     })
     .prefix('/achievements')
     .use(middleware.auth())
@@ -125,10 +130,10 @@ export function registerStoreApiRoutes() {
       router.delete('/:id', [DeleteStoreController]).as('stores.destroy')
       router
         .get('/:storeId/financial-settings', [ShowStoreFinancialSettingsController])
-        .as('stores.financialSettings.show')
+        .as('stores.financial_settings.show')
       router
         .put('/:storeId/financial-settings', [UpsertStoreFinancialSettingsController])
-        .as('stores.financialSettings.upsert')
+        .as('stores.financial_settings.upsert')
     })
     .prefix('/stores')
     .use(middleware.auth())
@@ -137,12 +142,12 @@ export function registerStoreApiRoutes() {
 export function registerStoreSettlementApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStoreSettlementsController]).as('storeSettlements.index')
-      router.post('/', [CreateStoreSettlementController]).as('storeSettlements.store')
-      router.get('/:id', [ShowStoreSettlementController]).as('storeSettlements.show')
+      router.get('/', [ListStoreSettlementsController]).as('store_settlements.index')
+      router.post('/', [CreateStoreSettlementController]).as('store_settlements.store')
+      router.get('/:id', [ShowStoreSettlementController]).as('store_settlements.show')
       router
-        .put('/:id/status', [UpdateStoreSettlementStatusController])
-        .as('storeSettlements.updateStatus')
+        .patch('/:id/update-status', [UpdateStoreSettlementStatusController])
+        .as('store_settlements.update_status')
     })
     .prefix('/store-settlements')
     .use(middleware.auth())
@@ -151,14 +156,14 @@ export function registerStoreSettlementApiRoutes() {
 export function registerStoreItemApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStoreItemsController]).as('storeItems.index')
-      router.post('/', [CreateStoreItemController]).as('storeItems.store')
-      router.get('/:id', [ShowStoreItemController]).as('storeItems.show')
-      router.put('/:id', [UpdateStoreItemController]).as('storeItems.update')
-      router.delete('/:id', [DeleteStoreItemController]).as('storeItems.destroy')
+      router.get('/', [ListStoreItemsController]).as('store_items.index')
+      router.post('/', [CreateStoreItemController]).as('store_items.store')
+      router.get('/:id', [ShowStoreItemController]).as('store_items.show')
+      router.put('/:id', [UpdateStoreItemController]).as('store_items.update')
+      router.delete('/:id', [DeleteStoreItemController]).as('store_items.destroy')
       router
         .patch('/:id/toggle-active', [ToggleStoreItemActiveController])
-        .as('storeItems.toggleActive')
+        .as('store_items.toggle_active')
     })
     .prefix('/store-items')
     .use(middleware.auth())
@@ -167,13 +172,13 @@ export function registerStoreItemApiRoutes() {
 export function registerStoreOrderApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStoreOrdersController]).as('storeOrders.index')
-      router.post('/', [CreateStoreOrderController]).as('storeOrders.store')
-      router.get('/:id', [ShowStoreOrderController]).as('storeOrders.show')
-      router.post('/:id/approve', [ApproveStoreOrderController]).as('storeOrders.approve')
-      router.post('/:id/reject', [RejectStoreOrderController]).as('storeOrders.reject')
-      router.post('/:id/deliver', [DeliverStoreOrderController]).as('storeOrders.deliver')
-      router.post('/:id/cancel', [CancelStoreOrderController]).as('storeOrders.cancel')
+      router.get('/', [ListStoreOrdersController]).as('store_orders.index')
+      router.post('/', [CreateStoreOrderController]).as('store_orders.store')
+      router.get('/:id', [ShowStoreOrderController]).as('store_orders.show')
+      router.post('/:id/approve', [ApproveStoreOrderController]).as('store_orders.approve')
+      router.post('/:id/reject', [RejectStoreOrderController]).as('store_orders.reject')
+      router.post('/:id/deliver', [DeliverStoreOrderController]).as('store_orders.deliver')
+      router.post('/:id/cancel', [CancelStoreOrderController]).as('store_orders.cancel')
     })
     .prefix('/store-orders')
     .use(middleware.auth())
@@ -182,12 +187,14 @@ export function registerStoreOrderApiRoutes() {
 export function registerStoreInstallmentRuleApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStoreInstallmentRulesController]).as('storeInstallmentRules.index')
-      router.post('/', [CreateStoreInstallmentRuleController]).as('storeInstallmentRules.store')
-      router.put('/:id', [UpdateStoreInstallmentRuleController]).as('storeInstallmentRules.update')
+      router.get('/', [ListStoreInstallmentRulesController]).as('store_installment_rules.index')
+      router.post('/', [CreateStoreInstallmentRuleController]).as('store_installment_rules.store')
+      router
+        .put('/:id', [UpdateStoreInstallmentRuleController])
+        .as('store_installment_rules.update')
       router
         .delete('/:id', [DeleteStoreInstallmentRuleController])
-        .as('storeInstallmentRules.destroy')
+        .as('store_installment_rules.destroy')
     })
     .prefix('/store-installment-rules')
     .use(middleware.auth())
@@ -197,37 +204,41 @@ export function registerStoreOwnerApiRoutes() {
   router
     .group(() => {
       // Store info
-      router.get('/store', [ShowOwnStoreController]).as('storeOwner.store.show')
+      router.get('/store', [ShowOwnStoreController]).as('store_owner.store.show')
 
       // Products
-      router.get('/products', [ListOwnProductsController]).as('storeOwner.products.index')
-      router.post('/products', [SOCreateProductController]).as('storeOwner.products.store')
-      router.put('/products/:id', [SOUpdateProductController]).as('storeOwner.products.update')
-      router.delete('/products/:id', [SODeleteProductController]).as('storeOwner.products.destroy')
+      router.get('/products', [ListOwnProductsController]).as('store_owner.products.index')
+      router.post('/products', [SOCreateProductController]).as('store_owner.products.store')
+      router.put('/products/:id', [SOUpdateProductController]).as('store_owner.products.update')
+      router.delete('/products/:id', [SODeleteProductController]).as('store_owner.products.destroy')
       router
         .patch('/products/:id/toggle-active', [SOToggleProductActiveController])
-        .as('storeOwner.products.toggleActive')
+        .as('store_owner.products.toggle_active')
 
       // Orders
-      router.get('/orders', [ListOwnOrdersController]).as('storeOwner.orders.index')
-      router.get('/orders/:id', [SOShowOrderController]).as('storeOwner.orders.show')
-      router.post('/orders/:id/approve', [SOApproveOrderController]).as('storeOwner.orders.approve')
-      router.post('/orders/:id/reject', [SORejectOrderController]).as('storeOwner.orders.reject')
+      router.get('/orders', [ListOwnOrdersController]).as('store_owner.orders.index')
+      router.get('/orders/:id', [SOShowOrderController]).as('store_owner.orders.show')
+      router
+        .post('/orders/:id/approve', [SOApproveOrderController])
+        .as('store_owner.orders.approve')
+      router.post('/orders/:id/reject', [SORejectOrderController]).as('store_owner.orders.reject')
       router
         .post('/orders/:id/preparing', [SOMarkPreparingController])
-        .as('storeOwner.orders.preparing')
-      router.post('/orders/:id/ready', [SOMarkReadyController]).as('storeOwner.orders.ready')
-      router.post('/orders/:id/deliver', [SODeliverOrderController]).as('storeOwner.orders.deliver')
-      router.post('/orders/:id/cancel', [SOCancelOrderController]).as('storeOwner.orders.cancel')
+        .as('store_owner.orders.preparing')
+      router.post('/orders/:id/ready', [SOMarkReadyController]).as('store_owner.orders.ready')
+      router
+        .post('/orders/:id/deliver', [SODeliverOrderController])
+        .as('store_owner.orders.deliver')
+      router.post('/orders/:id/cancel', [SOCancelOrderController]).as('store_owner.orders.cancel')
 
       // Financial
       router
         .get('/financial-settings', [SOShowFinancialSettingsController])
-        .as('storeOwner.financial.show')
+        .as('store_owner.financial.show')
       router
         .put('/financial-settings', [SOUpdateFinancialSettingsController])
-        .as('storeOwner.financial.update')
-      router.get('/settlements', [SOListSettlementsController]).as('storeOwner.settlements.index')
+        .as('store_owner.financial.update')
+      router.get('/settlements', [SOListSettlementsController]).as('store_owner.settlements.index')
     })
     .prefix('/store-owner')
     .use([middleware.auth(), middleware.storeOwner()])

@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { Suspense } from 'react'
 import { Settings, Bell } from 'lucide-react'
 
@@ -15,9 +15,7 @@ function NotificationsListSkeleton() {
       <CardContent className="p-6">
         <div className="py-12 text-center">
           <Bell className="mx-auto h-12 w-12 animate-pulse text-muted-foreground" />
-          <p className="mt-4 text-sm text-muted-foreground">
-            Carregando notificações...
-          </p>
+          <p className="mt-4 text-sm text-muted-foreground">Carregando notificações...</p>
         </div>
       </CardContent>
     </Card>

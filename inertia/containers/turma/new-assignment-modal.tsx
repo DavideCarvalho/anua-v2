@@ -26,8 +26,8 @@ import {
 } from '~/components/ui/select'
 import { DatePicker } from '~/components/ui/date-picker'
 import type { UserDto } from '~/lib/types'
-import { useClassQueryOptions } from '~/hooks/queries/use_class'
-import { useCreateAssignment } from '~/hooks/mutations/use_create_assignment'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Qual o nome da atividade?'),
@@ -79,8 +79,9 @@ export function NewAssignmentModal({
     },
   })
 
+  const queryClient = useQueryClient()
   const { data: classData, isLoading: isLoadingSubjects } = useQuery({
-    ...useClassQueryOptions(classId),
+    ...api.api.v1.classes.show.queryOptions({ params: { id: classId } }),
     enabled: open && !!classId,
   })
 
@@ -120,7 +121,7 @@ export function NewAssignmentModal({
     }
   }, [open, form, subjects])
 
-  const createMutation = useCreateAssignment()
+  const createMutation = useMutation(api.api.v1.assignments.store.mutationOptions())
 
   const onSubmit = form.handleSubmit(async (data) => {
     const selectedSubject = subjects?.find((s) => s.id === data.subjectId)
@@ -131,14 +132,17 @@ export function NewAssignmentModal({
 
     try {
       await createMutation.mutateAsync({
-        title: data.name,
-        description: data.description,
-        maxScore: data.grade,
-        dueDate: data.dueDate.toISOString(),
-        classId,
-        subjectId: data.subjectId,
-        teacherId: selectedSubject.teacherId,
+        body: {
+          title: data.name,
+          description: data.description,
+          maxScore: data.grade,
+          dueDate: data.dueDate.toISOString(),
+          classId,
+          subjectId: data.subjectId,
+          teacherId: selectedSubject.teacherId,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['assignments'] })
       toast.success('Atividade criada com sucesso!')
       onOpenChange(false)
       form.reset()

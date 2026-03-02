@@ -4,15 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import {
-  Calendar,
-  CheckCircle,
-  Loader2,
-  Search,
-  Users,
-  X,
-  XCircle,
-} from 'lucide-react'
+import { Calendar, CheckCircle, Loader2, Search, Users, X, XCircle } from 'lucide-react'
 
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -37,10 +29,7 @@ import {
 import { cn } from '~/lib/utils'
 import { ErrorBoundary } from '~/components/error-boundary'
 
-import { useClassStudentsQueryOptions } from '../../hooks/queries/use_class_students'
-import { useClassQueryOptions } from '../../hooks/queries/use_class'
-import { useAttendanceAvailableDatesQueryOptions } from '../../hooks/queries/use_attendance_available_dates'
-import { useBatchCreateAttendanceMutationOptions } from '../../hooks/mutations/use_batch_create_attendance'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   dates: z.array(z.string()).min(1, 'Selecione pelo menos uma data'),
@@ -135,13 +124,16 @@ function NewAttendanceModalContent({
   })
 
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery({
-    ...useClassStudentsQueryOptions({ classId, courseId, academicPeriodId, limit: 1000 }),
+    ...api.api.v1.classes.students.queryOptions({
+      params: { id: classId },
+      query: { courseId, academicPeriodId, limit: 1000 },
+    }),
     enabled: open,
   })
   const students = useMemo(() => studentsResponse?.data ?? [], [studentsResponse?.data])
 
   const { data: classData, isLoading: isLoadingSubjects } = useQuery({
-    ...useClassQueryOptions(classId),
+    ...api.api.v1.classes.show.queryOptions({ params: { id: classId } }),
     enabled: open,
   })
 
@@ -165,10 +157,8 @@ function NewAttendanceModalContent({
 
   const subjectId = form.watch('subjectId')
   const { data: availableDatesResponse, isLoading: isLoadingDates } = useQuery({
-    ...useAttendanceAvailableDatesQueryOptions({
-      classId,
-      academicPeriodId,
-      subjectId,
+    ...api.api.v1.attendance.availableDates.queryOptions({
+      query: { classId, academicPeriodId, subjectId },
     }),
     enabled: open && !!subjectId,
   })
@@ -179,7 +169,6 @@ function NewAttendanceModalContent({
     if (subjects && subjects.length === 1 && subjects[0]) {
       form.setValue('subjectId', subjects[0].id)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjects])
 
   // When subject changes, clear date selection
@@ -187,7 +176,6 @@ function NewAttendanceModalContent({
     if (subjectId) {
       form.setValue('dates', [])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId])
 
   // Track if we've initialized for current modal open
@@ -215,24 +203,9 @@ function NewAttendanceModalContent({
     form.setValue('dates', [])
     setSearchQuery('')
     setHasInitialized(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, students, hasInitialized])
 
-  const createMutation = useMutation({
-    ...useBatchCreateAttendanceMutationOptions(),
-    onSuccess: () => {
-      toast.success('Presença registrada com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['class-students-attendance', classId] })
-      queryClient.invalidateQueries({
-        queryKey: ['attendance-available-dates'],
-      })
-      onOpenChange(false)
-      form.reset()
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao registrar presença')
-    },
-  })
+  const createMutation = useMutation(api.api.v1.attendance.batchCreate.mutationOptions())
 
   const studentsAttendances = form.watch('attendances')
 
@@ -267,7 +240,10 @@ function NewAttendanceModalContent({
   function toggleDate(date: string) {
     const current = form.getValues('dates')
     if (current.includes(date)) {
-      form.setValue('dates', current.filter((d) => d !== date))
+      form.setValue(
+        'dates',
+        current.filter((d) => d !== date)
+      )
     } else {
       form.setValue('dates', [...current, date])
     }
@@ -275,7 +251,10 @@ function NewAttendanceModalContent({
 
   // Select/deselect all dates
   function selectAllDates() {
-    form.setValue('dates', availableDates.map((d) => d.date))
+    form.setValue(
+      'dates',
+      availableDates.map((d) => d.date)
+    )
   }
 
   function deselectAllDates() {
@@ -308,16 +287,27 @@ function NewAttendanceModalContent({
   async function onSubmit(data: FormValues) {
     const attendances = data.attendances.map((a) => ({
       studentId: a.student.id,
-      status: (a.status === 'EXCUSED' ? 'JUSTIFIED' : a.status) as 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED',
+      status: (a.status === 'EXCUSED' ? 'JUSTIFIED' : a.status) as
+        | 'PRESENT'
+        | 'ABSENT'
+        | 'LATE'
+        | 'JUSTIFIED',
     }))
 
     await createMutation.mutateAsync({
-      classId,
-      academicPeriodId,
-      subjectId: data.subjectId,
-      dates: data.dates.map((d) => new Date(d).toISOString()),
-      attendances,
+      body: {
+        classId,
+        academicPeriodId,
+        subjectId: data.subjectId,
+        dates: data.dates.map((d) => new Date(d).toISOString()),
+        attendances,
+      },
     })
+    queryClient.invalidateQueries({ queryKey: ['class-students-attendance', classId] })
+    queryClient.invalidateQueries({ queryKey: ['attendance-available-dates'] })
+    toast.success('Presença registrada com sucesso!')
+    onOpenChange(false)
+    form.reset()
   }
 
   // Attendance statistics component
@@ -406,26 +396,16 @@ function NewAttendanceModalContent({
                 </div>
               ) : availableDates.length === 0 ? (
                 <p className="text-sm text-destructive">
-                  Nenhum dia de aula para esta matéria. Verifique o quadro de horários
-                  e o período letivo.
+                  Nenhum dia de aula para esta matéria. Verifique o quadro de horários e o período
+                  letivo.
                 </p>
               ) : (
                 <div className="space-y-2">
                   <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={selectAllDates}
-                    >
+                    <Button type="button" variant="outline" size="sm" onClick={selectAllDates}>
                       Selecionar Todas
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={deselectAllDates}
-                    >
+                    <Button type="button" variant="outline" size="sm" onClick={deselectAllDates}>
                       Limpar
                     </Button>
                   </div>
@@ -450,9 +430,7 @@ function NewAttendanceModalContent({
                 </div>
               )}
               {form.formState.errors.dates && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.dates.message}
-                </p>
+                <p className="text-sm text-destructive">{form.formState.errors.dates.message}</p>
               )}
             </div>
 
@@ -552,7 +530,9 @@ function NewAttendanceModalContent({
                           {isPresent ? (
                             <Badge className="bg-green-500 text-xs">Presente</Badge>
                           ) : (
-                            <Badge variant="destructive" className="text-xs">Ausente</Badge>
+                            <Badge variant="destructive" className="text-xs">
+                              Ausente
+                            </Badge>
                           )}
                           <input
                             type="checkbox"
@@ -585,11 +565,7 @@ function NewAttendanceModalContent({
             <Button
               type="submit"
               onClick={form.handleSubmit(onSubmit)}
-              disabled={
-                createMutation.isPending ||
-                !subjectId ||
-                selectedDates.length === 0
-              }
+              disabled={createMutation.isPending || !subjectId || selectedDates.length === 0}
               className="flex-1 sm:flex-none"
             >
               {createMutation.isPending ? (

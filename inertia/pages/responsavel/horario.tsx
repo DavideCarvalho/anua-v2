@@ -8,7 +8,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { api } from '~/lib/api'
 import {
   StudentScheduleContainer,
   StudentScheduleContainerSkeleton,
@@ -42,7 +42,9 @@ function StudentSelector({
 }
 
 function HorarioContent() {
-  const { data, isLoading, isError, error } = useQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.dashboard.responsavelStats.queryOptions({})
+  )
   const students = data?.students ?? []
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
 

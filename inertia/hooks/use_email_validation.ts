@@ -72,16 +72,13 @@ export function useEmailValidation(options: UseEmailValidationOptions = {}) {
         try {
           abortControllerRef.current = new AbortController()
 
-          const response = await tuyau
-            .$route('api.v1.students.checkEmail')
-            .$get({
-              query: {
-                email: trimmed,
-                academicPeriodId,
-                ...(excludeUserId && { excludeUserId }),
-              },
-            })
-            .unwrap()
+          const response = await tuyau.$route('api.v1.students.checkEmail')({
+            query: {
+              email: trimmed,
+              academicPeriodId,
+              ...(excludeUserId && { excludeUserId }),
+            },
+          })
 
           if (response.exists) {
             setValidationResult({

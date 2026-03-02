@@ -11,13 +11,7 @@ interface ImageUploadProps {
   className?: string
 }
 
-export function ImageUpload({
-  value,
-  onChange,
-  onUpload,
-  disabled,
-  className,
-}: ImageUploadProps) {
+export function ImageUpload({ value, onChange, onUpload, disabled, className }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)

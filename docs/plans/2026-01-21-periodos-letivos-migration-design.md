@@ -17,18 +17,18 @@ Migrar as páginas de detalhes e edição de períodos letivos do app Next.js an
 
 ### Novos endpoints a criar
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/v1/academic-periods/by-slug/:slug` | Busca período pelo slug, suporta `?include=courses` |
-| GET | `/api/v1/academic-periods/:id/courses` | Lista cursos e níveis do período |
-| PUT | `/api/v1/academic-periods/:id/courses` | Atualiza cursos e níveis do período |
+| Método | Rota                                     | Descrição                                           |
+| ------ | ---------------------------------------- | --------------------------------------------------- |
+| GET    | `/api/v1/academic-periods/by-slug/:slug` | Busca período pelo slug, suporta `?include=courses` |
+| GET    | `/api/v1/academic-periods/:id/courses`   | Lista cursos e níveis do período                    |
+| PUT    | `/api/v1/academic-periods/:id/courses`   | Atualiza cursos e níveis do período                 |
 
 ### Endpoints existentes
 
-| Método | Rota | Alteração |
-|--------|------|-----------|
-| GET | `/api/v1/academic-periods/:id` | Adicionar suporte a `?include=courses` |
-| PUT | `/api/v1/academic-periods/:id` | Já existe, sem alterações |
+| Método | Rota                           | Alteração                              |
+| ------ | ------------------------------ | -------------------------------------- |
+| GET    | `/api/v1/academic-periods/:id` | Adicionar suporte a `?include=courses` |
+| PUT    | `/api/v1/academic-periods/:id` | Já existe, sem alterações              |
 
 ## Estrutura de Arquivos
 
@@ -105,30 +105,42 @@ interface AcademicPeriodWithCourses {
 const editAcademicPeriodSchema = z.object({
   calendar: z.object({
     name: z.string().min(1),
-    segment: z.enum(['KINDERGARTEN', 'ELEMENTARY', 'HIGHSCHOOL', 'TECHNICAL', 'UNIVERSITY', 'OTHER']),
+    segment: z.enum([
+      'KINDERGARTEN',
+      'ELEMENTARY',
+      'HIGHSCHOOL',
+      'TECHNICAL',
+      'UNIVERSITY',
+      'OTHER',
+    ]),
     startDate: z.date(),
     endDate: z.date(),
     enrollmentStartDate: z.date().nullable().optional(),
     enrollmentEndDate: z.date().nullable().optional(),
   }),
-  courses: z.array(z.object({
-    id: z.string().optional(),
-    courseId: z.string(),
-    name: z.string(),
-    levels: z.array(z.object({
+  courses: z.array(
+    z.object({
       id: z.string().optional(),
-      levelId: z.string(),
+      courseId: z.string(),
       name: z.string(),
-      order: z.number(),
-      contractId: z.string().nullable().optional(),
-    })),
-  })),
+      levels: z.array(
+        z.object({
+          id: z.string().optional(),
+          levelId: z.string(),
+          name: z.string(),
+          order: z.number(),
+          contractId: z.string().nullable().optional(),
+        })
+      ),
+    })
+  ),
 })
 ```
 
 ## Dependências
 
 ### Já existentes
+
 - React Hook Form
 - Zod
 - React Query (@tanstack/react-query)
@@ -136,6 +148,7 @@ const editAcademicPeriodSchema = z.object({
 - date-fns
 
 ### A instalar
+
 - @dnd-kit/core
 - @dnd-kit/sortable
 

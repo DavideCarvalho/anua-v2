@@ -1,10 +1,8 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { useSuspenseQuery, useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useStudentsQueryOptions } from '../hooks/queries/use_students'
-import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
-import { tuyau } from '../lib/api'
+import { api } from '../lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -35,7 +33,8 @@ import {
   Filter,
   X,
 } from 'lucide-react'
-import { Link, router } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { router } from '@inertiajs/react'
 import { DeleteStudentModal } from './students/delete-student-modal'
 import { ChangeStudentCourseModal } from './students/change-course-modal'
 import { EditPaymentModal } from './students/edit-payment-modal'
@@ -128,19 +127,21 @@ function StudentsListContent({
   onEditPayment: (student: StudentAction) => void
   onDeleteStudent: (student: StudentAction) => void
 }) {
-  const { data } = useSuspenseQuery(
-    useStudentsQueryOptions({
-      page,
-      limit,
-      search: search || undefined,
-      academicPeriodId: academicPeriodId || undefined,
-      courseId: courseId || undefined,
-      classId: classId || undefined,
+  const { data } = useQuery(
+    api.api.v1.students.index.queryOptions({
+      query: {
+        page,
+        limit,
+        search: search || undefined,
+        academicPeriodId: academicPeriodId || undefined,
+        courseId: courseId || undefined,
+        classId: classId || undefined,
+      },
     })
   )
 
   const students = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   if (students.length === 0) {
     return (
@@ -266,7 +267,7 @@ function StudentsListContent({
             <Button
               variant="outline"
               size="sm"
-              disabled={page >= meta.lastPage}
+              disabled={page >= Number(meta.lastPage)}
               onClick={() => onPageChange(page + 1)}
             >
               <ChevronRight className="h-4 w-4" />
@@ -327,19 +328,13 @@ export function StudentsListContainer() {
 
   // Fetch academic periods
   const { data: academicPeriodsData } = useQuery({
-    ...useAcademicPeriodsQueryOptions({ limit: 100 }),
+    ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } }),
   })
   const academicPeriods = academicPeriodsData?.data ?? []
 
   // Fetch courses for selected academic period
   const { data: coursesData } = useQuery({
-    queryKey: ['academic-period-courses', academicPeriodId],
-    queryFn: async () => {
-      const response = await tuyau.api.v1['academic-periods']({ id: academicPeriodId! }).courses.$get()
-      if (response.error) throw new Error('Erro ao carregar cursos')
-      return response.data as AcademicPeriodCourse[]
-    },
-    enabled: !!academicPeriodId,
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({ params: { id: academicPeriodId! } }),
   })
   const courses = coursesData ?? []
 

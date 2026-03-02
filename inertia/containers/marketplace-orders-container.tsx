@@ -18,7 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select'
-import { useMyOrdersQueryOptions, type MyOrdersResponse } from '../hooks/queries/use_marketplace'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type MyOrdersResponse = Route.Response<'api.v1.marketplace.orders.index'>
 import { formatCurrency } from '../lib/utils'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -46,7 +49,9 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 
 export function MarketplaceOrdersContainer() {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const { data, isLoading } = useQuery(
-    useMyOrdersQueryOptions({ status: statusFilter || undefined })
+    api.api.v1.marketplace.orders.index.queryOptions({
+      query: { status: statusFilter || undefined },
+    })
   )
   const orders = data?.data ?? []
   type Order = NonNullable<MyOrdersResponse>['data'][number]

@@ -1,11 +1,9 @@
 import { usePage } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  useMarketplaceStoresQueryOptions,
-  type MarketplaceStoresResponse,
-} from '../hooks/queries/use_marketplace'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
 
-type MarketplaceStore = NonNullable<MarketplaceStoresResponse>[number]
+type MarketplaceStore = NonNullable<Route.Response<'api.v1.marketplace.stores.index'>>[number]
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { ShoppingBag } from 'lucide-react'
@@ -26,7 +24,11 @@ export function ResponsavelMarketplaceContainer() {
     selectedStudentId = match ? match[1] : undefined
   }
 
-  const { data, isLoading } = useQuery(useMarketplaceStoresQueryOptions(selectedStudentId))
+  const { data, isLoading } = useQuery(
+    api.api.v1.marketplace.stores.index.queryOptions({
+      query: { studentId: selectedStudentId },
+    })
+  )
   const stores: MarketplaceStore[] = data ?? []
 
   if (!selectedStudentId) {

@@ -13,6 +13,7 @@
 ### Task 1: Extend backend validators for cancel and mark-paid
 
 **Files:**
+
 - Modify: `app/validators/student_payment.ts`
 
 **Step 1: Update `markPaymentAsPaidValidator`**
@@ -142,6 +143,7 @@ git commit -m "feat: extend mark-paid and cancel validators with metadata"
 ### Task 2: Create agreement backend (validator, controller, route)
 
 **Files:**
+
 - Create: `app/validators/agreement.ts`
 - Create: `app/controllers/agreements/create_agreement_controller.ts`
 - Modify: `start/routes.ts`
@@ -347,6 +349,7 @@ git commit -m "feat: add agreement creation endpoint"
 ### Task 3: Add pending payments query for agreement modal
 
 **Files:**
+
 - Modify: `start/routes.ts` (add route for listing pending payments by student)
 - Create: `inertia/hooks/queries/use_student_pending_payments.ts`
 
@@ -392,6 +395,7 @@ git commit -m "feat: add student pending payments query hook"
 ### Task 4: Create agreement mutation hook
 
 **Files:**
+
 - Create: `inertia/hooks/mutations/use_agreement_mutations.ts`
 
 **Step 1: Create mutation hook**
@@ -437,6 +441,7 @@ git commit -m "feat: add agreement creation mutation hook"
 ### Task 5: Create edit payment modal
 
 **Files:**
+
 - Create: `inertia/containers/student-payments/edit-payment-modal.tsx`
 
 **Step 1: Create the component**
@@ -520,8 +525,7 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
     }
   }
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -531,8 +535,15 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
         </DialogHeader>
 
         <div className="text-sm text-muted-foreground space-y-1">
-          <p>Aluno: <span className="font-medium text-foreground">{studentName}</span></p>
-          <p>Referência: <span className="font-medium text-foreground">{payment.month}/{payment.year}</span></p>
+          <p>
+            Aluno: <span className="font-medium text-foreground">{studentName}</span>
+          </p>
+          <p>
+            Referência:{' '}
+            <span className="font-medium text-foreground">
+              {payment.month}/{payment.year}
+            </span>
+          </p>
         </div>
 
         <Form {...form}>
@@ -576,7 +587,10 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
                       <Input type="number" min="0" max="100" className="w-24" {...field} />
                     </FormControl>
                     <span className="text-sm text-muted-foreground">
-                      Valor final: <span className="font-medium text-foreground">R$ {finalAmount.toFixed(2)}</span>
+                      Valor final:{' '}
+                      <span className="font-medium text-foreground">
+                        R$ {finalAmount.toFixed(2)}
+                      </span>
                     </span>
                   </div>
                   <FormMessage />
@@ -612,6 +626,7 @@ git commit -m "feat: add edit payment modal"
 ### Task 6: Create mark-as-paid modal
 
 **Files:**
+
 - Create: `inertia/containers/student-payments/mark-paid-modal.tsx`
 - Modify: `inertia/hooks/mutations/use_student_payment_mutations.ts`
 
@@ -751,8 +766,7 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
     }
   }
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -762,9 +776,19 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
         </DialogHeader>
 
         <div className="text-sm text-muted-foreground space-y-1">
-          <p>Aluno: <span className="font-medium text-foreground">{studentName}</span></p>
-          <p>Referência: <span className="font-medium text-foreground">{payment.month}/{payment.year}</span></p>
-          <p>Valor: <span className="font-medium text-foreground">R$ {originalAmount.toFixed(2)}</span></p>
+          <p>
+            Aluno: <span className="font-medium text-foreground">{studentName}</span>
+          </p>
+          <p>
+            Referência:{' '}
+            <span className="font-medium text-foreground">
+              {payment.month}/{payment.year}
+            </span>
+          </p>
+          <p>
+            Valor:{' '}
+            <span className="font-medium text-foreground">R$ {originalAmount.toFixed(2)}</span>
+          </p>
         </div>
 
         <Form {...form}>
@@ -874,6 +898,7 @@ git commit -m "feat: add mark-as-paid modal with payment method and observation"
 ### Task 7: Create cancel payment dialog
 
 **Files:**
+
 - Create: `inertia/containers/student-payments/cancel-payment-dialog.tsx`
 - Modify: `inertia/hooks/mutations/use_student_payment_mutations.ts`
 
@@ -932,8 +957,7 @@ export function CancelPaymentDialog({ payment, open, onOpenChange }: CancelPayme
   const [reason, setReason] = useState('')
   const cancelPayment = useCancelStudentPayment()
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   async function handleCancel() {
     try {
@@ -951,15 +975,22 @@ export function CancelPaymentDialog({ payment, open, onOpenChange }: CancelPayme
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Cancelar Pagamento</AlertDialogTitle>
-          <AlertDialogDescription>
-            Essa ação não pode ser desfeita.
-          </AlertDialogDescription>
+          <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="text-sm space-y-1">
-          <p>Aluno: <span className="font-medium">{studentName}</span></p>
-          <p>Referência: <span className="font-medium">{payment.month}/{payment.year}</span></p>
-          <p>Valor: <span className="font-medium">R$ {Number(payment.amount).toFixed(2)}</span></p>
+          <p>
+            Aluno: <span className="font-medium">{studentName}</span>
+          </p>
+          <p>
+            Referência:{' '}
+            <span className="font-medium">
+              {payment.month}/{payment.year}
+            </span>
+          </p>
+          <p>
+            Valor: <span className="font-medium">R$ {Number(payment.amount).toFixed(2)}</span>
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -1006,6 +1037,7 @@ git commit -m "feat: add cancel payment dialog with reason"
 ### Task 8: Create agreement modal
 
 **Files:**
+
 - Create: `inertia/containers/student-payments/create-agreement-modal.tsx`
 
 **Step 1: Create the component**
@@ -1040,11 +1072,7 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Badge } from '~/components/ui/badge'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '~/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { useStudentPendingPaymentsQueryOptions } from '~/hooks/queries/use_student_pending_payments'
 import { useCreateAgreement } from '~/hooks/mutations/use_agreement_mutations'
 
@@ -1104,9 +1132,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   const allPayments = useMemo(() => {
     const result = paymentsData as any
     const list = Array.isArray(result) ? result : result?.data || []
-    return list.filter(
-      (p: any) => ACTIONABLE_STATUSES.includes(p.status) && p.type !== 'AGREEMENT'
-    )
+    return list.filter((p: any) => ACTIONABLE_STATUSES.includes(p.status) && p.type !== 'AGREEMENT')
   }, [paymentsData])
 
   const form = useForm<AgreementFormData>({
@@ -1190,8 +1216,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
     }
   }
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1233,7 +1258,9 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                       />
                       <div className="flex-1 flex items-center justify-between">
                         <div className="text-sm">
-                          <span className="font-medium">{p.month}/{p.year}</span>
+                          <span className="font-medium">
+                            {p.month}/{p.year}
+                          </span>
                           <span className="text-muted-foreground ml-2">
                             Venc: {formatDate(p.dueDate)}
                           </span>
@@ -1242,10 +1269,7 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                           <span className="text-sm font-medium">
                             R$ {Number(p.amount).toFixed(2)}
                           </span>
-                          <Badge
-                            variant="secondary"
-                            className={statusClasses[p.status] || ''}
-                          >
+                          <Badge variant="secondary" className={statusClasses[p.status] || ''}>
                             {statusLabels[p.status] || p.status}
                           </Badge>
                         </div>
@@ -1405,7 +1429,10 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
                       Total: <span className="font-medium">R$ {totalAmount.toFixed(2)}</span>
                     </p>
                     <p>
-                      Parcelas: <span className="font-medium">{installments}x de R$ {installmentAmount.toFixed(2)}</span>
+                      Parcelas:{' '}
+                      <span className="font-medium">
+                        {installments}x de R$ {installmentAmount.toFixed(2)}
+                      </span>
                     </p>
                     {startDateStr && (
                       <p>
@@ -1449,6 +1476,7 @@ git commit -m "feat: add create agreement modal with payment selection and disco
 ### Task 9: Wire up actions menu and modals in container
 
 **Files:**
+
 - Modify: `inertia/containers/student-payments-container.tsx`
 
 **Step 1: Add imports and state**
@@ -1477,7 +1505,9 @@ Add state at the top of the `StudentPaymentsContent` function:
 
 ```typescript
 const [selectedPayment, setSelectedPayment] = useState<any>(null)
-const [activeModal, setActiveModal] = useState<'edit' | 'mark-paid' | 'cancel' | 'agreement' | null>(null)
+const [activeModal, setActiveModal] = useState<
+  'edit' | 'mark-paid' | 'cancel' | 'agreement' | null
+>(null)
 
 function openModal(payment: any, modal: typeof activeModal) {
   setSelectedPayment(payment)
@@ -1539,34 +1569,38 @@ Replace the `<td className="p-4 text-right">` block in the table with the dropdo
 Add right before the final `</div>` of `StudentPaymentsContent`:
 
 ```tsx
-{selectedPayment && activeModal === 'edit' && (
-  <EditPaymentModal
-    payment={selectedPayment}
-    open
-    onOpenChange={(open) => !open && closeModal()}
-  />
-)}
-{selectedPayment && activeModal === 'mark-paid' && (
-  <MarkPaidModal
-    payment={selectedPayment}
-    open
-    onOpenChange={(open) => !open && closeModal()}
-  />
-)}
-{selectedPayment && activeModal === 'cancel' && (
-  <CancelPaymentDialog
-    payment={selectedPayment}
-    open
-    onOpenChange={(open) => !open && closeModal()}
-  />
-)}
-{selectedPayment && activeModal === 'agreement' && (
-  <CreateAgreementModal
-    payment={selectedPayment}
-    open
-    onOpenChange={(open) => !open && closeModal()}
-  />
-)}
+{
+  selectedPayment && activeModal === 'edit' && (
+    <EditPaymentModal
+      payment={selectedPayment}
+      open
+      onOpenChange={(open) => !open && closeModal()}
+    />
+  )
+}
+{
+  selectedPayment && activeModal === 'mark-paid' && (
+    <MarkPaidModal payment={selectedPayment} open onOpenChange={(open) => !open && closeModal()} />
+  )
+}
+{
+  selectedPayment && activeModal === 'cancel' && (
+    <CancelPaymentDialog
+      payment={selectedPayment}
+      open
+      onOpenChange={(open) => !open && closeModal()}
+    />
+  )
+}
+{
+  selectedPayment && activeModal === 'agreement' && (
+    <CreateAgreementModal
+      payment={selectedPayment}
+      open
+      onOpenChange={(open) => !open && closeModal()}
+    />
+  )
+}
 ```
 
 **Step 5: Run TypeScript check**

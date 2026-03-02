@@ -6,7 +6,7 @@ import { ptBR } from 'date-fns/locale'
 import { Calendar, ShieldAlert } from 'lucide-react'
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'
 
-import { useEventsQueryOptions } from '../../hooks/queries/use_events'
+import { api } from '~/lib/api'
 import { EventDetailsModal } from './event-details-modal'
 
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -117,10 +117,12 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
   }, [currentDate, view])
 
   const { data } = useSuspenseQuery(
-    useEventsQueryOptions({
-      schoolId,
-      startDate: dateRange.start.toISOString(),
-      endDate: dateRange.end.toISOString(),
+    api.api.v1.events.index.queryOptions({
+      query: {
+        schoolId,
+        startDate: dateRange.start.toISOString(),
+        endDate: dateRange.end.toISOString(),
+      },
     })
   )
 

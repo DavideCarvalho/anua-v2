@@ -7,8 +7,7 @@ import {
 } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
-import { useTeachersQueryOptions } from '../hooks/queries/use_teachers'
-import { useUpdateTeacherMutationOptions } from '../hooks/mutations/use_teacher_mutations'
+import { api } from '~/lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -144,7 +143,9 @@ function TeachersListContent({
   const active = status === 'all' ? undefined : status === 'inactive' ? false : true
 
   const { data } = useSuspenseQuery(
-    useTeachersQueryOptions({ page, limit, search: search || undefined, active })
+    api.api.v1.teachers.listTeachers.queryOptions({
+      query: { page, limit, search: search || undefined, active },
+    })
   )
 
   const teachers = data?.data ?? []
@@ -333,7 +334,7 @@ export function TeachersListContainer() {
   }
 
   const queryClient = useQueryClient()
-  const updateTeacher = useMutation(useUpdateTeacherMutationOptions())
+  const updateTeacher = useMutation(api.api.v1.teachers.updateTeacher.mutationOptions())
 
   const handleToggleActive = (teacher: TeacherItem) => {
     setTeacherToToggle(teacher)
@@ -344,8 +345,8 @@ export function TeachersListContainer() {
     if (!teacherToToggle) return
     try {
       await updateTeacher.mutateAsync({
-        id: teacherToToggle.id,
-        active: !teacherToToggle.user?.active,
+        params: { id: teacherToToggle.id },
+        body: { active: !teacherToToggle.user?.active },
       })
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
     } catch (error) {

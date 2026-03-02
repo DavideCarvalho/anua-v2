@@ -1,5 +1,5 @@
 import { Head, usePage } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { Suspense } from 'react'
 import { ArrowLeft, Shield } from 'lucide-react'
 

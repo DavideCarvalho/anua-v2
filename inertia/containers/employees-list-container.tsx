@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'nuqs'
-import { useSchoolEmployeesQueryOptions } from '../hooks/queries/use_school_employees'
+import { api } from '~/lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -99,12 +99,14 @@ function EmployeesListContent({
   onPageChange: (page: number) => void
 }) {
   const { data, isLoading } = useQuery(
-    useSchoolEmployeesQueryOptions({
-      page,
-      limit: 20,
-      search: search || undefined,
-      roles: roles && roles.length > 0 ? roles : undefined,
-      status: status || undefined,
+    api.api.v1.users.schoolEmployees.queryOptions({
+      query: {
+        page,
+        limit: 20,
+        search: search || undefined,
+        roles: roles && roles.length > 0 ? roles : undefined,
+        status: status || undefined,
+      },
     })
   )
 

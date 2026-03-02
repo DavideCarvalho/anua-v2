@@ -27,6 +27,7 @@ O formulário de matrícula atual vive dentro de um modal (`new-student-modal/`)
 ### Step 1 — Aluno
 
 Sem mudanças funcionais. Mesmos campos:
+
 - Nome, data de nascimento, email (opcional), telefone (opcional), tipo de documento, número do documento
 - Checkbox "Maior de idade e próprio responsável" (pula step 2 se marcado + adulto)
 
@@ -35,6 +36,7 @@ Com mais espaço horizontal, campos podem usar grid de 2 colunas onde faz sentid
 ### Step 2 — Responsáveis (redesenhado)
 
 **Estado inicial:**
+
 - Mensagem vazia: "Nenhum responsável adicionado"
 - Botão: "+ Adicionar responsável"
 - Hint de validação: "É necessário pelo menos um responsável financeiro e um pedagógico"
@@ -54,10 +56,12 @@ Com mais espaço horizontal, campos podem usar grid de 2 colunas onde faz sentid
    - Botões: "Confirmar" / "Cancelar"
 
 **Após adicionar:**
+
 - Responsável aparece como card na lista: nome, documento, badges de papel (pedagógico/financeiro/emergência), botão remover (X)
 - Pode adicionar mais clicando "+ Adicionar responsável"
 
 **Validação:**
+
 - Pelo menos um responsável deve ser `isFinancial`
 - Pelo menos um responsável deve ser `isPedagogical`
 - O mesmo responsável pode ter ambos os papéis
@@ -72,6 +76,7 @@ Sem mudanças funcionais. CEP lookup com ViaCEP, auto-preenchimento. Campos: CEP
 Sem mudanças funcionais nos campos médicos (condições, medicamentos).
 
 **Contatos de emergência — mudança:**
+
 - Responsáveis marcados como "contato de emergência" no step 2 aparecem automaticamente como cards read-only
 - Usuário pode adicionar contatos de emergência adicionais manualmente
 - Pelo menos um contato de emergência obrigatório
@@ -108,6 +113,7 @@ Botão no final: "Confirmar Matrícula". Ao clicar, submete para `EnrollStudentC
 ## Componentes a criar/modificar
 
 ### Novos
+
 - `inertia/pages/escola/matriculas/nova.tsx` — página Inertia
 - `inertia/containers/enrollment/enrollment-page.tsx` — container principal com estado do form
 - `inertia/containers/enrollment/enrollment-sidebar.tsx` — stepper lateral
@@ -123,8 +129,10 @@ Botão no final: "Confirmar Matrícula". Ao clicar, submete para `EnrollStudentC
 - `app/controllers/pages/escola/show_nova_matricula_page_controller.ts`
 
 ### Modificar
+
 - `start/routes.ts` — adicionar nova rota
 - `inertia/pages/escola/matriculas.tsx` — trocar botão de abrir modal por link para `/escola/matriculas/nova`
 
 ### Remover (após migração completa)
+
 - `inertia/containers/students/new-student-modal/` — modal antigo e todos os sub-componentes

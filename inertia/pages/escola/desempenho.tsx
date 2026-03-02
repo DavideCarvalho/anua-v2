@@ -3,9 +3,18 @@ import { Suspense } from 'react'
 
 import { EscolaLayout } from '../../components/layouts'
 
-import { AcademicOverviewCards, AcademicOverviewCardsSkeleton } from '../../containers/grades/academic-overview-cards'
-import { GradeDistributionChart, GradeDistributionChartSkeleton } from '../../containers/grades/grade-distribution-chart'
-import { AtRiskStudentsTable, AtRiskStudentsTableSkeleton } from '../../containers/grades/at-risk-students-table'
+import {
+  AcademicOverviewCards,
+  AcademicOverviewCardsSkeleton,
+} from '../../containers/grades/academic-overview-cards'
+import {
+  GradeDistributionChart,
+  GradeDistributionChartSkeleton,
+} from '../../containers/grades/grade-distribution-chart'
+import {
+  AtRiskStudentsTable,
+  AtRiskStudentsTableSkeleton,
+} from '../../containers/grades/at-risk-students-table'
 
 interface PageProps {
   schoolId: string

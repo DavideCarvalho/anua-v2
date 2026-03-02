@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { useAdminStatsQueryOptions } from '../hooks/queries/use_admin_stats'
+import { api } from '~/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Building2, Users, DollarSign, TrendingUp, AlertCircle, AlertTriangle } from 'lucide-react'
@@ -61,7 +61,7 @@ function AdminStatsError({
 
 // Content Component
 function AdminStatsContent() {
-  const { data: stats } = useSuspenseQuery(useAdminStatsQueryOptions())
+  const { data: stats } = useSuspenseQuery(api.api.v1.dashboard.adminStats.queryOptions({}))
 
   return (
     <div className="space-y-4">

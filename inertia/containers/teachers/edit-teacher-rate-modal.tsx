@@ -37,11 +37,7 @@ interface EditTeacherRateModalProps {
   teacher: TeacherData | null
 }
 
-export function EditTeacherRateModal({
-  open,
-  onOpenChange,
-  teacher,
-}: EditTeacherRateModalProps) {
+export function EditTeacherRateModal({ open, onOpenChange, teacher }: EditTeacherRateModalProps) {
   const queryClient = useQueryClient()
 
   const form = useForm<FormValues>({
@@ -54,9 +50,9 @@ export function EditTeacherRateModal({
   const updateMutation = useMutation({
     mutationFn: (data: FormValues) => {
       if (!teacher) throw new Error('Professor não encontrado')
-      return tuyau.api.v1.teachers({ id: teacher.id })
-        .$put({ hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : undefined })
-        .unwrap()
+      return tuyau.api.api.v1.teachers({ id: teacher.id })({
+        hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : undefined,
+      })
     },
     onSuccess: () => {
       toast.success('Valor hora/aula atualizado com sucesso')

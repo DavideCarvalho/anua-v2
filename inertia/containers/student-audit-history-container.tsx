@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
@@ -11,18 +12,14 @@ import {
   FileSignature,
   Handshake,
 } from 'lucide-react'
-import { Link } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { AuditDiffCard } from '~/components/audit-diff-card'
-import {
-  useStudentAuditHistoryQueryOptions,
-  type StudentAuditEntry,
-} from '~/hooks/queries/use_audits'
-import { useStudentQueryOptions } from '~/hooks/queries/use_student'
 import { getEntityLabel } from '~/lib/audit_labels'
+import { Audit } from '~/generated/registry'
 
 interface StudentAuditHistoryContainerProps {
   studentId: string
@@ -37,8 +34,14 @@ const ENTITY_ICONS: Record<string, typeof FileText> = {
 }
 
 export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryContainerProps) {
-  const { data: student } = useQuery(useStudentQueryOptions(studentId))
-  const { data: audits, isLoading, error } = useQuery(useStudentAuditHistoryQueryOptions(studentId))
+  const { data: student } = useQuery(
+    api.api.v1.students.show.queryOptions({ params: { id: studentId } })
+  )
+  const {
+    data: audits,
+    isLoading,
+    error,
+  } = useQuery(api.api.v1.audits.studentHistory.queryOptions({ params: { studentId } }))
 
   // Group audits by date
   const groupedAudits = audits?.reduce(
@@ -50,7 +53,7 @@ export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryC
       groups[date].push(audit)
       return groups
     },
-    {} as Record<string, StudentAuditEntry[]>
+    {} as Record<string, Audit[]>
   )
 
   return (

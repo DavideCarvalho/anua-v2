@@ -19,21 +19,21 @@ export function registerPrintRequestApiRoutes() {
 
   router
     .group(() => {
-      router.get('/', [ListPrintRequestsController]).as('printRequests.listPrintRequests')
-      router.post('/', [CreatePrintRequestController]).as('printRequests.createPrintRequest')
-      router.get('/:id', [ShowPrintRequestController]).as('printRequests.showPrintRequest')
+      router.get('/', [ListPrintRequestsController]).as('print_requests.list_print_requests')
+      router.post('/', [CreatePrintRequestController]).as('print_requests.create_print_request')
+      router.get('/:id', [ShowPrintRequestController]).as('print_requests.show_print_request')
       router
         .patch('/:id/approve', [ApprovePrintRequestController])
-        .as('printRequests.approvePrintRequest')
+        .as('print_requests.approve_print_request')
       router
         .patch('/:id/reject', [RejectPrintRequestController])
-        .as('printRequests.rejectPrintRequest')
+        .as('print_requests.reject_print_request')
       router
         .patch('/:id/review', [ReviewPrintRequestController])
-        .as('printRequests.reviewPrintRequest')
+        .as('print_requests.review_print_request')
       router
         .patch('/:id/printed', [MarkPrintRequestPrintedController])
-        .as('printRequests.markPrintRequestPrinted')
+        .as('print_requests.mark_print_request_printed')
     })
     .prefix('/print-requests')
     .use(middleware.auth())

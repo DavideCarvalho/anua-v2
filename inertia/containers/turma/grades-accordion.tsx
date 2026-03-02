@@ -10,7 +10,7 @@ import {
 } from '~/components/ui/accordion'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { SubjectGradesTable } from './subject-grades-table'
-import { useClassQueryOptions } from '~/hooks/queries/use_class'
+import { api } from '~/lib/api'
 
 interface GradesAccordionProps {
   classId: string
@@ -44,7 +44,11 @@ function GradesAccordionEmpty() {
 }
 
 function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesAccordionProps) {
-  const { data: classData, isLoading, isError } = useQuery(useClassQueryOptions(classId))
+  const {
+    data: classData,
+    isLoading,
+    isError,
+  } = useQuery(api.api.v1.classes.show.queryOptions({ params: { id: classId } }))
 
   const subjects = useMemo(() => {
     if (!classData) return []
@@ -64,11 +68,7 @@ function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesA
   }
 
   if (isError || !subjects) {
-    return (
-      <div className="text-center text-destructive py-8">
-        Erro ao carregar matérias
-      </div>
-    )
+    return <div className="text-center text-destructive py-8">Erro ao carregar matérias</div>
   }
 
   if (subjects.length === 0) {
@@ -86,7 +86,12 @@ function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesA
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <SubjectGradesTable classId={classId} subjectId={subject.id} courseId={courseId} academicPeriodId={academicPeriodId} />
+            <SubjectGradesTable
+              classId={classId}
+              subjectId={subject.id}
+              courseId={courseId}
+              academicPeriodId={academicPeriodId}
+            />
           </AccordionContent>
         </AccordionItem>
       ))}

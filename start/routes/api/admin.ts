@@ -55,7 +55,7 @@ export function registerAdminJobsApiRoutes() {
     .group(() => {
       router
         .post('/generate-missing-payments', [TriggerMissingPaymentsController])
-        .as('admin.jobs.generateMissingPayments')
+        .as('admin.jobs.generate_missing_payments')
     })
     .prefix('/admin/jobs')
     .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
@@ -64,8 +64,8 @@ export function registerAdminJobsApiRoutes() {
 export function registerAdminStatsApiRoutes() {
   router
     .group(() => {
-      router.get('/stats', [GetAdminStatsController]).as('dashboard.adminStats')
-      router.get('/server-stats', [GetServerStatsController]).as('dashboard.serverStats')
+      router.get('/stats', [GetAdminStatsController]).as('dashboard.admin_stats')
+      router.get('/server-stats', [GetServerStatsController]).as('dashboard.server_stats')
     })
     .prefix('/admin')
     .use([

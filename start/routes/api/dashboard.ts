@@ -12,13 +12,13 @@ export function registerDashboardApiRoutes() {
   router
     .get('/escola/stats', [GetEscolaStatsController])
     .use([middleware.auth(), middleware.impersonation()])
-    .as('dashboard.escolaStats')
+    .as('dashboard.escola_stats')
   router
     .get('/escola/insights', [GetEscolaInsightsController])
     .use([middleware.auth(), middleware.impersonation()])
-    .as('dashboard.escolaInsights')
+    .as('dashboard.escola_insights')
   router
     .get('/escola/teacher-dashboard', [GetEscolaTeacherDashboardController])
     .use([middleware.auth(), middleware.impersonation()])
-    .as('dashboard.escolaTeacherDashboard')
+    .as('dashboard.escola_teacher_dashboard')
 }

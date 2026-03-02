@@ -17,8 +17,8 @@ import {
 import { Input } from '../../components/ui/input'
 import { useQuery } from '@tanstack/react-query'
 
-import { usePlatformSettingsQueryOptions } from '../../hooks/queries/use_platform_settings'
-import { useUpdatePlatformSettings } from '../../hooks/mutations/use_platform_settings_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const platformSettingsSchema = z.object({
   defaultTrialDays: z.number().int().min(0, 'Dias de trial devem ser positivos'),
@@ -28,8 +28,10 @@ const platformSettingsSchema = z.object({
 type PlatformSettingsFormData = z.infer<typeof platformSettingsSchema>
 
 export function PlatformSettingsForm() {
-  const { data: platformSettings } = useQuery(usePlatformSettingsQueryOptions())
-  const { mutateAsync: updateSettings, isPending } = useUpdatePlatformSettings()
+  const queryClient = useQueryClient()
+  const { data: platformSettings } = useQuery(api.api.v1.platformSettings.show.queryOptions())
+  const updateMutation = useMutation(api.api.v1.platformSettings.update.mutationOptions())
+  const { mutateAsync: updateSettings, isPending } = updateMutation
 
   const form = useForm<PlatformSettingsFormData>({
     resolver: zodResolver(platformSettingsSchema),
@@ -42,10 +44,12 @@ export function PlatformSettingsForm() {
   const onSubmit = async (data: PlatformSettingsFormData) => {
     try {
       await updateSettings({
-        defaultTrialDays: data.defaultTrialDays,
-        defaultPricePerStudent: data.defaultPricePerStudent,
+        body: {
+          defaultTrialDays: data.defaultTrialDays,
+          defaultPricePerStudent: data.defaultPricePerStudent,
+        },
       })
-
+      queryClient.invalidateQueries({ queryKey: ['platform-settings'] })
       toast.success('Configurações atualizadas com sucesso!')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao atualizar configurações')

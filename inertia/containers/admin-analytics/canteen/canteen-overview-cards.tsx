@@ -1,16 +1,25 @@
 import { useQuery } from '@tanstack/react-query'
-import { DollarSign, ShoppingCart, Package, TrendingUp, CreditCard, ArrowDownCircle } from 'lucide-react'
+import {
+  DollarSign,
+  ShoppingCart,
+  Package,
+  TrendingUp,
+  CreditCard,
+  ArrowDownCircle,
+} from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useCanteenOverviewQueryOptions } from '../../../hooks/queries/use_canteen_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 
 export function CanteenOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useCanteenOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.canteen.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -31,22 +40,14 @@ export function CanteenOverviewCards() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      <StatCard
-        title="Receita Total"
-        value={formatCurrency(data.totalRevenue)}
-        icon={DollarSign}
-      />
+      <StatCard title="Receita Total" value={formatCurrency(data.totalRevenue)} icon={DollarSign} />
       <StatCard
         title="Vendas Hoje"
         value={data.todaySales.toLocaleString('pt-BR')}
         description={formatCurrency(data.todayRevenue)}
         icon={ShoppingCart}
       />
-      <StatCard
-        title="Ticket Médio"
-        value={formatCurrency(data.averageTicket)}
-        icon={TrendingUp}
-      />
+      <StatCard title="Ticket Médio" value={formatCurrency(data.averageTicket)} icon={TrendingUp} />
       <StatCard
         title="Itens Disponíveis"
         value={`${data.availableItems}/${data.totalItems}`}

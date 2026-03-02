@@ -1,15 +1,9 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { EscolaLayout } from '~/components/layouts'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import {
   DropdownMenu,
@@ -32,8 +26,7 @@ import { Calendar, Plus, Settings, Loader2, MoreVertical, Trash2 } from 'lucide-
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatSegmentName } from '~/lib/formatters'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useDeleteAcademicPeriodMutationOptions } from '~/hooks/mutations/use_academic_period_mutations'
+import { api } from '~/lib/api'
 
 function formatDate(dateString: string): string {
   return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR })
@@ -42,13 +35,17 @@ function formatDate(dateString: string): string {
 export default function PeriodosLetivosPage() {
   const queryClient = useQueryClient()
 
-  const { data, isLoading, error } = useQuery(useAcademicPeriodsQueryOptions({ limit: 50 }))
+  const { data, isLoading, error } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 50 } })
+  )
 
-  const deleteMutation = useMutation(useDeleteAcademicPeriodMutationOptions())
+  const deleteMutation = useMutation(
+    api.api.v1.academicPeriods.deleteAcademicPeriod.mutationOptions()
+  )
 
   async function handleDelete(id: string) {
     try {
-      await deleteMutation.mutateAsync(id)
+      await deleteMutation.mutateAsync({ params: { id } })
       toast.success('Período letivo excluído com sucesso')
       queryClient.invalidateQueries({ queryKey: ['academic-periods'] })
     } catch (err) {
@@ -152,7 +149,8 @@ export default function PeriodosLetivosPage() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Excluir período letivo</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tem certeza que deseja excluir "{period.name}"? O período será desativado e não aparecerá mais na listagem.
+                              Tem certeza que deseja excluir "{period.name}"? O período será
+                              desativado e não aparecerá mais na listagem.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -194,10 +192,7 @@ export default function PeriodosLetivosPage() {
                     )}
                   </div>
                   <Link route="web.escola.periodosLetivos.show" params={{ slug: period.slug }}>
-                    <Button
-                      variant={period.isActive ? 'outline' : 'ghost'}
-                      className="w-full mt-4"
-                    >
+                    <Button variant={period.isActive ? 'outline' : 'ghost'} className="w-full mt-4">
                       <Settings className="h-4 w-4 mr-2" />
                       Ver Detalhes
                     </Button>

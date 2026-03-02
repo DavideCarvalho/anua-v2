@@ -21,7 +21,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useRejectPrintRequestMutation } from '../../hooks/mutations/use_reject_print_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   reason: z.string().min(1, 'Motivo é obrigatório'),
@@ -38,7 +39,8 @@ export function RejectPrintRequestModal({
   open: boolean
   onClose: () => void
 }) {
-  const reject = useRejectPrintRequestMutation()
+  const queryClient = useQueryClient()
+  const reject = useMutation(api.api.v1.printRequests.rejectPrintRequest.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -50,8 +52,9 @@ export function RejectPrintRequestModal({
       .mutateAsync({
         params: { id: printRequestId },
         body: { reason: values.reason },
-      } as any)
+      })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['print-requests'] })
         toast.success('Solicitação rejeitada com sucesso!')
         form.reset()
         onClose()

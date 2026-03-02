@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasLevel from '#models/student_has_level'
-import StudentHasLevelDto from '#models/dto/student_has_level.dto'
+import StudentHasLevelTransformer from '#transformers/student_has_level_transformer'
 
 export default class ListEnrollmentsController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const { id: studentId } = params
 
     const enrollments = await StudentHasLevel.query()
@@ -26,6 +26,6 @@ export default class ListEnrollmentsController {
       .preload('class')
       .orderBy('createdAt', 'desc')
 
-    return StudentHasLevelDto.fromArray(enrollments)
+    return serialize(StudentHasLevelTransformer.transform(enrollments))
   }
 }

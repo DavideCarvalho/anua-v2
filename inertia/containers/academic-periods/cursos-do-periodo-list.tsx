@@ -115,8 +115,7 @@ export function CursosDoPeríodoList({ courses, segment }: CursosDoPeríodoListP
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Layers className="h-4 w-4" />
                   <span>
-                    {course.levels.length}{' '}
-                    {course.levels.length === 1 ? 'semestre' : 'semestres'}
+                    {course.levels.length} {course.levels.length === 1 ? 'semestre' : 'semestres'}
                   </span>
                 </div>
                 {course.levels.length > 0 && (

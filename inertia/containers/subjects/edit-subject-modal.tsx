@@ -23,8 +23,8 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useSubjectQueryOptions } from '../../hooks/queries/use_subject'
-import { useUpdateSubjectMutation } from '../../hooks/mutations/use_update_subject'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -41,10 +41,11 @@ export function EditSubjectModal({
   open: boolean
   onCancel: () => void
 }) {
-  const updateSubject = useUpdateSubjectMutation()
+  const queryClient = useQueryClient()
+  const updateSubject = useMutation(api.api.v1.subjects.update.mutationOptions())
 
   const { data: subject, isLoading } = useQuery({
-    ...useSubjectQueryOptions({ id: subjectId }),
+    ...api.api.v1.subjects.show.queryOptions({ params: { id: subjectId } }),
     enabled: !!subjectId,
   })
 
@@ -67,6 +68,7 @@ export function EditSubjectModal({
         body: { name: values.name } as any,
       })
       .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['subjects'] })
         toast.success('Matéria alterada com sucesso!')
         onCancel()
       })

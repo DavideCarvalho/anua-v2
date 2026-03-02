@@ -1,15 +1,17 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Course from '#models/course'
-import CourseDto from '#models/dto/course.dto'
+import CourseTransformer from '#transformers/course_transformer'
+import { listCoursesValidator } from '#validators/course'
 
 export default class ListCoursesController {
   async handle(ctx: HttpContext) {
-    const { request, selectedSchoolIds } = ctx
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const search = request.input('search', '')
-    const schoolId = request.input('schoolId')
-    const academicPeriodId = request.input('academicPeriodId')
+    const { request, serialize, selectedSchoolIds } = ctx
+    const filters = await request.validateUsing(listCoursesValidator)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
+    const search = filters.search ?? ''
+    const schoolId = filters.schoolId
+    const academicPeriodId = filters.academicPeriodId
 
     // Use schoolId from request (for admins) or selectedSchoolIds from middleware
     const schoolIds = schoolId ? [schoolId] : selectedSchoolIds
@@ -31,7 +33,9 @@ export default class ListCoursesController {
     }
 
     const courses = await query.paginate(page, limit)
+    const data = courses.all()
+    const metadata = courses.getMeta()
 
-    return CourseDto.fromPaginator(courses)
+    return serialize(CourseTransformer.paginate(data, metadata))
   }
 }

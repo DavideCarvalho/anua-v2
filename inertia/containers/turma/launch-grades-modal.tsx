@@ -18,9 +18,8 @@ import {
 import { Input } from '~/components/ui/input'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { ErrorBoundary } from '~/components/error-boundary'
-import { useClassStudentsQueryOptions } from '~/hooks/queries/use_class_students'
-import { useAssignmentSubmissionsQueryOptions } from '~/hooks/queries/use_assignment_submissions'
-import { useBatchSaveGrades } from '~/hooks/mutations/use_batch_save_grades'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface LaunchGradesModalProps {
   assignmentId: string
@@ -60,7 +59,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-
 function LaunchGradesModalSkeleton() {
   return (
     <div className="py-12 text-center">
@@ -96,18 +94,20 @@ function LaunchGradesModalContent({
     },
   })
 
-  const studentsQueryOptions = useClassStudentsQueryOptions({
-    classId,
-    courseId,
-    academicPeriodId,
-    limit: 1000,
-  })
-
-  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(studentsQueryOptions)
+  const queryClient = useQueryClient()
+  const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(
+    api.api.v1.classes.students.queryOptions({
+      params: { id: classId },
+      query: { courseId, academicPeriodId, limit: 1000 },
+    })
+  )
   const students = studentsResponse?.data || []
 
   const { data: submissionsResponse, isLoading: isLoadingGrades } = useQuery(
-    useAssignmentSubmissionsQueryOptions({ assignmentId, limit: 1000 })
+    api.api.v1.assignments.submissions.index.queryOptions({
+      params: { id: assignmentId },
+      query: { limit: 1000 },
+    })
   )
 
   const existingGrades = (() => {
@@ -124,9 +124,7 @@ function LaunchGradesModalContent({
   useEffect(() => {
     if (!students || students.length === 0) return
 
-    const gradesMap = new Map(
-      (existingGrades || []).map((g) => [g.studentId, g])
-    )
+    const gradesMap = new Map((existingGrades || []).map((g) => [g.studentId, g]))
 
     const formGrades: StudentGrade[] = students.map((student: Student) => {
       const existing = gradesMap.get(student.id)
@@ -141,7 +139,7 @@ function LaunchGradesModalContent({
     form.setValue('grades', formGrades)
   }, [students, existingGrades, form, today])
 
-  const saveMutation = useBatchSaveGrades()
+  const saveMutation = useMutation(api.api.v1.grades.batchSave.mutationOptions())
 
   const grades = form.watch('grades')
   const isLoading = isLoadingStudents || isLoadingGrades
@@ -164,13 +162,18 @@ function LaunchGradesModalContent({
 
     try {
       await saveMutation.mutateAsync({
-        assignmentId,
-        grades: gradesWithValues.map((g) => ({
-          studentId: g.studentId,
-          grade: g.grade,
-          submittedAt: g.submittedAt,
-        })),
+        body: {
+          assignmentId,
+          grades: gradesWithValues.map((g) => ({
+            studentId: g.studentId,
+            grade: g.grade,
+            submittedAt: g.submittedAt,
+          })),
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['subject-grades'] })
+      queryClient.invalidateQueries({ queryKey: ['assignments'] })
+      queryClient.invalidateQueries({ queryKey: ['assignment-grades', assignmentId] })
       toast.success('Notas salvas com sucesso!')
       onOpenChange(false)
     } catch (error: any) {

@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { ArrowLeft } from 'lucide-react'
 
 import { EscolaLayout } from '~/components/layouts'

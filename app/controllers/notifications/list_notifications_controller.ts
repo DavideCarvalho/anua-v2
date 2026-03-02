@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Notification from '#models/notification'
+import NotificationTransformer from '#transformers/notification_transformer'
 import { listNotificationsValidator } from '#validators/notification'
-import NotificationDto from '#models/dto/notification.dto'
 
 export default class ListNotificationsController {
-  async handle({ request, response, auth, effectiveUser }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser, serialize }: HttpContext) {
     const {
       type,
       unreadOnly,
@@ -34,10 +34,12 @@ export default class ListNotificationsController {
       .where('isRead', false)
       .count('* as total')
 
-    const dto = NotificationDto.fromPaginator(notifications)
+    const data = notifications.all()
+    const metadata = notifications.getMeta()
+    const paginated = serialize(NotificationTransformer.paginate(data, metadata))
 
     return response.ok({
-      ...dto,
+      ...paginated,
       unreadCount: Number(unreadCount[0].$extras.total || 0),
     })
   }

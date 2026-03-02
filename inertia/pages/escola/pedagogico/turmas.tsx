@@ -10,9 +10,7 @@ export default function TurmasPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Turmas</h1>
-          <p className="text-muted-foreground">
-            Gerencie as turmas e suas configurações
-          </p>
+          <p className="text-muted-foreground">Gerencie as turmas e suas configurações</p>
         </div>
 
         <ClassesListContainer />

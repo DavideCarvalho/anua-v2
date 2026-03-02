@@ -1,4 +1,4 @@
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import { ArrowLeft, Edit, Calendar } from 'lucide-react'
 import { differenceInDays, isBefore } from 'date-fns'
 
@@ -55,9 +55,7 @@ export function PeriodoLetivoHeader({
               <Badge variant={status.variant}>{status.label}</Badge>
             </div>
             {!isClosed && !isBeforeStart && daysUntilEnd > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {daysUntilEnd} dias restantes
-              </p>
+              <p className="text-sm text-muted-foreground">{daysUntilEnd} dias restantes</p>
             )}
           </div>
         </div>

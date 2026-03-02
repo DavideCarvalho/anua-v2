@@ -23,8 +23,7 @@ export function DiscountComparison({
   monthlyDiscountPercentage,
   installments,
 }: DiscountComparisonProps) {
-  const discountedEnrollmentFee =
-    originalEnrollmentFee * (1 - enrollmentDiscountPercentage / 100)
+  const discountedEnrollmentFee = originalEnrollmentFee * (1 - enrollmentDiscountPercentage / 100)
   const discountedMonthlyFee = originalMonthlyFee * (1 - monthlyDiscountPercentage / 100)
 
   const enrollmentSavings = originalEnrollmentFee - discountedEnrollmentFee

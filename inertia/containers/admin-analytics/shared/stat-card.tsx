@@ -14,7 +14,14 @@ interface StatCardProps {
   className?: string
 }
 
-export function StatCard({ title, value, description, icon: Icon, trend, className }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  trend,
+  className,
+}: StatCardProps) {
   return (
     <Card className={className}>
       <CardContent className="p-6">

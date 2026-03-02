@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance from '#models/student_has_attendance'
-import StudentHasAttendanceDto from '#models/dto/student_has_attendance.dto'
+import StudentHasAttendanceTransformer from '#transformers/student_has_attendance_transformer'
 
 export default class GetStudentAttendanceController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 10)
 
@@ -16,6 +16,9 @@ export default class GetStudentAttendanceController {
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    return StudentHasAttendanceDto.fromPaginator(attendances)
+    const data = attendances.all()
+    const metadata = attendances.getMeta()
+
+    return serialize(StudentHasAttendanceTransformer.paginate(data, metadata))
   }
 }

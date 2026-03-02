@@ -16,7 +16,7 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Badge } from '../../components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
-import { useCanteenReportQueryOptions } from '../../hooks/queries/use_canteen_reports'
+import { api } from '~/lib/api'
 
 const paymentMethodIcons: Record<string, typeof CreditCard> = {
   CREDIT_CARD: CreditCard,
@@ -45,11 +45,13 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
   const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
 
   const { data: report } = useQuery(
-    useCanteenReportQueryOptions({
-      canteenId,
-      startDate,
-      endDate,
-      topItemsLimit: 5,
+    api.api.v1.canteenReports.summary.queryOptions({
+      query: {
+        canteenId,
+        startDate,
+        endDate,
+        topItemsLimit: 5,
+      },
     })
   )
 

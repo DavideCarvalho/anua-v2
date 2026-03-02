@@ -39,11 +39,7 @@ interface EditTeacherDataModalProps {
   teacher: TeacherData | null
 }
 
-export function EditTeacherDataModal({
-  open,
-  onOpenChange,
-  teacher,
-}: EditTeacherDataModalProps) {
+export function EditTeacherDataModal({ open, onOpenChange, teacher }: EditTeacherDataModalProps) {
   const queryClient = useQueryClient()
 
   const form = useForm<FormValues>({
@@ -57,9 +53,7 @@ export function EditTeacherDataModal({
   const updateMutation = useMutation({
     mutationFn: (data: FormValues) => {
       if (!teacher) throw new Error('Professor não encontrado')
-      return tuyau.api.v1.teachers({ id: teacher.id })
-        .$put({ name: data.name, email: data.email })
-        .unwrap()
+      return tuyau.api.api.v1.teachers({ id: teacher.id })({ name: data.name, email: data.email })
     },
     onSuccess: () => {
       toast.success('Dados atualizados com sucesso')
@@ -92,9 +86,7 @@ export function EditTeacherDataModal({
               className="mt-1"
             />
             {form.formState.errors.name && (
-              <p className="text-sm text-destructive mt-1">
-                {form.formState.errors.name.message}
-              </p>
+              <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
             )}
           </div>
 
@@ -108,9 +100,7 @@ export function EditTeacherDataModal({
               className="mt-1"
             />
             {form.formState.errors.email && (
-              <p className="text-sm text-destructive mt-1">
-                {form.formState.errors.email.message}
-              </p>
+              <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>
             )}
           </div>
 

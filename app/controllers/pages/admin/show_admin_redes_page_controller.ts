@@ -2,6 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ShowAdminRedesPageController {
   async handle({ inertia }: HttpContext) {
-    return inertia.render('admin/redes')
+    return inertia.render('admin/redes', {})
   }
 }

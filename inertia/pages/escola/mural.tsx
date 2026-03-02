@@ -40,11 +40,7 @@ export default function MuralPage() {
           <PostsFeed schoolId={schoolId} currentUserId={currentUserId} />
         </Suspense>
 
-        <NewPostModal
-          schoolId={schoolId}
-          open={newModalOpen}
-          onOpenChange={setNewModalOpen}
-        />
+        <NewPostModal schoolId={schoolId} open={newModalOpen} onOpenChange={setNewModalOpen} />
       </div>
     </EscolaLayout>
   )

@@ -1,12 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 import { useCallback, useEffect, useMemo } from 'react'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Checkbox } from '~/components/ui/checkbox'
 import {
@@ -151,9 +145,7 @@ export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfo
                 disabled={!isAdult(birthDate)}
               />
             </FormControl>
-            <FormLabel className="font-normal">
-              Maior de idade e próprio responsável
-            </FormLabel>
+            <FormLabel className="font-normal">Maior de idade e próprio responsável</FormLabel>
           </FormItem>
         )}
       />
@@ -253,9 +245,7 @@ export function StudentInfoStep({ excludeUserId, academicPeriodId }: StudentInfo
           name="basicInfo.documentNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Número do Documento{isDocumentRequired ? '*' : ' (opcional)'}
-              </FormLabel>
+              <FormLabel>Número do Documento{isDocumentRequired ? '*' : ' (opcional)'}</FormLabel>
               <FormControl>
                 <DocumentInput
                   value={field.value ?? ''}

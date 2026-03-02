@@ -6,12 +6,7 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../../components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -68,7 +63,7 @@ export function NewContractModal({ schoolId, open, onOpenChange }: NewContractMo
 
   const { mutateAsync: createContract, isPending } = useMutation({
     mutationFn: async (values: FormValues) => {
-      const response = await tuyau.api.v1.contracts.$post({
+      const response = await tuyau.api.api.v1.contracts({
         schoolId,
         name: values.name,
         description: values.description || undefined,

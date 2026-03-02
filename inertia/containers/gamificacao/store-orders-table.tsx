@@ -1,15 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
-import { ShoppingCart, Check, X, Truck, Clock, AlertCircle } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ShoppingCart, Check, X, Truck, Clock, AlertCircle, Loader2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { toast } from 'sonner'
 
-import { useStoreOrdersQueryOptions } from '../../hooks/queries/use_store_orders'
-import {
-  useApproveStoreOrder,
-  useRejectStoreOrder,
-  useDeliverStoreOrder,
-} from '../../hooks/mutations/use_store_order_actions'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -63,16 +58,20 @@ const statusConfig: Record<
 }
 
 export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
-  const { data, isLoading } = useQuery(useStoreOrdersQueryOptions({ schoolId, status }))
-  const approveMutation = useApproveStoreOrder()
-  const rejectMutation = useRejectStoreOrder()
-  const deliverMutation = useDeliverStoreOrder()
+  const queryClient = useQueryClient()
+  const { data, isLoading } = useQuery(
+    api.api.v1.storeOrders.index.queryOptions({ query: { schoolId, status } })
+  )
+  const approveMutation = useMutation(api.api.v1.storeOrders.approve.mutationOptions())
+  const rejectMutation = useMutation(api.api.v1.storeOrders.reject.mutationOptions())
+  const deliverMutation = useMutation(api.api.v1.storeOrders.deliver.mutationOptions())
 
   const orders = data?.data ?? []
 
   const handleApprove = async (id: string) => {
     try {
-      await approveMutation.mutateAsync(id)
+      await approveMutation.mutateAsync({ params: { id } })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido aprovado!')
     } catch {
       toast.error('Erro ao aprovar pedido')
@@ -81,7 +80,8 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
 
   const handleReject = async (id: string) => {
     try {
-      await rejectMutation.mutateAsync({ id, reason: 'Rejeitado' })
+      await rejectMutation.mutateAsync({ params: { id }, body: { reason: 'Rejeitado' } })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido rejeitado')
     } catch {
       toast.error('Erro ao rejeitar pedido')
@@ -90,7 +90,8 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
 
   const handleDeliver = async (id: string) => {
     try {
-      await deliverMutation.mutateAsync({ id })
+      await deliverMutation.mutateAsync({ params: { id } })
+      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
       toast.success('Pedido marcado como entregue!')
     } catch {
       toast.error('Erro ao entregar pedido')
@@ -100,8 +101,9 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          Carregando pedidos...
+        <CardContent className="py-10 text-center text-muted-foreground">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+          <p className="mt-2">Carregando pedidos...</p>
         </CardContent>
       </Card>
     )

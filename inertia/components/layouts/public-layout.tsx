@@ -1,4 +1,4 @@
-import { Link } from '@tuyau/inertia/react'
+import { Link } from '@adonisjs/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { Button } from '../ui/button'
 import { PostHogProvider } from '../posthog-provider'

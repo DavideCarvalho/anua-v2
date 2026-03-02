@@ -2,13 +2,13 @@ import { Head } from '@inertiajs/react'
 import { useQuery } from '@tanstack/react-query'
 import { AdminLayout } from '../../components/layouts'
 import { AdminStatsContainer } from '../../containers/admin-stats-container'
-import { useSchoolsQueryOptions } from '../../hooks/queries/use_schools'
+import { api } from '~/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Building2, DollarSign, Loader2 } from 'lucide-react'
 
 export default function AdminDashboard() {
   const { data: schoolsData, isLoading: isLoadingSchools } = useQuery(
-    useSchoolsQueryOptions({ page: 1, limit: 5 })
+    api.api.v1.schools.index.queryOptions({ query: { page: 1, limit: 5 } })
   )
   const recentSchools = (schoolsData as any)?.data ?? []
 

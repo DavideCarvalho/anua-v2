@@ -18,10 +18,10 @@ import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert'
 
-import {
-  useStudentDocumentsQueryOptions,
-  type StudentDocumentsResponse,
-} from '../../hooks/queries/use_student_documents'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StudentDocumentsResponse = Route.Response<'api.v1.responsavel.api.student_documents'>
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 type MissingDocument = StudentDocumentsResponse['missingDocuments'][number]
@@ -66,7 +66,16 @@ export function StudentDocumentsContainer({
   studentId,
   studentName,
 }: StudentDocumentsContainerProps) {
-  const { data, isLoading, isError, error } = useQuery(useStudentDocumentsQueryOptions(studentId))
+  const {
+    data: rawData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    ...api.api.v1.responsavel.api.studentDocuments.queryOptions({ params: { studentId } }),
+    enabled: !!studentId,
+  })
+  const data = (rawData as any)?.data ?? rawData
 
   if (isLoading) {
     return <StudentDocumentsContainerSkeleton />

@@ -1,5 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, XCircle } from 'lucide-react'
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  XCircle,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -15,10 +22,10 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import {
-  useStudentBalanceQueryOptions,
-  type StudentBalanceResponse,
-} from '../../hooks/queries/use_student_balance'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StudentBalanceResponse = Route.Response<'api.v1.responsavel.api.student_balance'>
 
 type BalanceTransaction = StudentBalanceResponse['data'][number]
 
@@ -27,12 +34,9 @@ interface StudentBalanceContainerProps {
   studentName: string
 }
 
-export function StudentBalanceContainer({
-  studentId,
-  studentName,
-}: StudentBalanceContainerProps) {
+export function StudentBalanceContainer({ studentId, studentName }: StudentBalanceContainerProps) {
   const { data, isLoading, isError, error } = useQuery(
-    useStudentBalanceQueryOptions({ studentId })
+    api.api.v1.responsavel.api.studentBalance.queryOptions({ params: { studentId } })
   )
 
   if (isLoading) {
@@ -150,14 +154,17 @@ export function StudentBalanceContainer({
                 {data.data.map((transaction: BalanceTransaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>
-                      {format(new Date(String(transaction.createdAt)), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      {format(new Date(String(transaction.createdAt)), 'dd/MM/yyyy HH:mm', {
+                        locale: ptBR,
+                      })}
                     </TableCell>
-                    <TableCell className="font-medium">
-                      {transaction.description || '-'}
-                    </TableCell>
+                    <TableCell className="font-medium">{transaction.description || '-'}</TableCell>
                     <TableCell className="text-center">
                       {transaction.type === 'CREDIT' ? (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200"
+                        >
                           <ArrowUpRight className="mr-1 h-3 w-3" />
                           Credito
                         </Badge>
@@ -178,9 +185,7 @@ export function StudentBalanceContainer({
                       {formatCurrency(transaction.amount)}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge
-                        variant={transaction.status === 'COMPLETED' ? 'default' : 'secondary'}
-                      >
+                      <Badge variant={transaction.status === 'COMPLETED' ? 'default' : 'secondary'}>
                         {transaction.status === 'COMPLETED' ? 'Concluido' : 'Pendente'}
                       </Badge>
                     </TableCell>

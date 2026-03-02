@@ -154,6 +154,7 @@ O professor da aula avulsa:
 ### Cálculo de frequência
 
 Mesmo cálculo das aulas regulares:
+
 - `frequência% = (PRESENT + LATE + EXCUSED) / total * 100`
 
 ---
@@ -179,10 +180,10 @@ const extraClasses = await StudentHasExtraClass.query()
 // Retornar no response como campo separado:
 return response.ok({
   ...scheduleData,
-  extraClassSchedules: extraClasses.map(shec => ({
+  extraClassSchedules: extraClasses.map((shec) => ({
     extraClassName: shec.extraClass.name,
     teacherName: shec.extraClass.teacher.name,
-    schedules: shec.extraClass.schedules.map(s => ({
+    schedules: shec.extraClass.schedules.map((s) => ({
       weekDay: s.weekDay,
       startTime: s.startTime,
       endTime: s.endTime,
@@ -353,12 +354,14 @@ GET    /escola/pedagogico/aulas-avulsas          ShowExtraClassesPageController
 ### Página de Gestão (`inertia/pages/escola/pedagogico/aulas-avulsas.tsx`)
 
 Tabela listando as aulas avulsas da escola com:
+
 - Nome, professor, horários, vagas (ocupadas/total), período, status
 - Ações: editar, ver alunos inscritos, lançar frequência, desativar
 
 ### Modal de Criar/Editar Aula Avulsa
 
 Campos:
+
 - Nome
 - Professor (select dos teachers da escola)
 - Período letivo (select dos academic periods ativos)
@@ -397,6 +400,7 @@ Campos:
 ### Horário do Aluno
 
 No `student-schedule-container.tsx`, os slots de aula avulsa aparecem com:
+
 - Cor diferenciada (ex: roxo/lilás vs azul das aulas regulares)
 - Badge "Avulsa" ou nome da atividade
 - Mesmo layout de slot (horário, professor)
@@ -420,7 +424,7 @@ enrollmentCount: number  // count de inscritos ativos
 ### `ExtraClassScheduleDto`
 
 ```typescript
-id, extraClassId, weekDay, startTime, endTime
+;(id, extraClassId, weekDay, startTime, endTime)
 ```
 
 ### `StudentHasExtraClassDto`
@@ -475,7 +479,7 @@ schedules: vine.array(
 
 ```typescript
 studentId: vine.string().uuid()
-contractId: vine.string().uuid().optional()  // herda do extra_class se não informado
+contractId: vine.string().uuid().optional() // herda do extra_class se não informado
 scholarshipId: vine.string().uuid().optional()
 paymentMethod: vine.enum(['BOLETO', 'CREDIT_CARD', 'PIX'])
 paymentDay: vine.number().range([1, 31])
@@ -517,6 +521,7 @@ justification: vine.string().trim().maxLength(500).optional()
 ## Arquivos a Criar
 
 ### Backend
+
 - `app/models/extra_class.ts`
 - `app/models/extra_class_schedule.ts`
 - `app/models/student_has_extra_class.ts`
@@ -544,12 +549,14 @@ justification: vine.string().trim().maxLength(500).optional()
 - 6 migrations
 
 ### Backend (modificar)
+
 - `app/models/student_payment.ts` — adicionar `EXTRA_CLASS` ao type, FK `studentHasExtraClassId`
 - `app/models/dto/student_payment.dto.ts` — adicionar `studentHasExtraClassId`
 - `app/controllers/responsavel/get_student_schedule_controller.ts` — incluir extra classes no response
 - `start/routes.ts` — registrar rotas de extra classes
 
 ### Frontend
+
 - `inertia/pages/escola/pedagogico/aulas-avulsas.tsx`
 - `inertia/containers/extra-classes/extra-classes-table.tsx`
 - `inertia/containers/extra-classes/create-extra-class-modal.tsx`
@@ -564,4 +571,5 @@ justification: vine.string().trim().maxLength(500).optional()
 - `inertia/hooks/mutations/use_extra_class_attendance_mutations.ts`
 
 ### Frontend (modificar)
+
 - `inertia/containers/responsavel/student-schedule-container.tsx` — renderizar slots de aula avulsa

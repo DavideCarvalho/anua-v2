@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useAtRiskStudentsQueryOptions } from '../../../hooks/queries/use_at_risk_students'
+import { api } from '~/lib/api'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,
@@ -16,9 +16,11 @@ import { Badge } from '../../../components/ui/badge'
 export function AtRiskStudentsTable() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useAtRiskStudentsQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.grades.atRisk.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

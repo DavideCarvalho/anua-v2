@@ -7,46 +7,56 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 
-import {
-  useNotificationsQueryOptions,
-  type NotificationsResponse,
-} from '../../hooks/queries/use_notifications'
-import { useMarkNotificationReadMutation } from '../../hooks/mutations/use_mark_notification_read'
-import { useMarkAllNotificationsReadMutation } from '../../hooks/mutations/use_mark_all_notifications_read'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
-type NotificationItem = NonNullable<NotificationsResponse['data']>[number]
+type NotificationItem = NonNullable<Route.Response<'api.v1.notifications.index'>['data']>[number]
 
 interface NotificationsListProps {
   onNotificationClick?: (notification: NotificationItem) => void
 }
 
 export function NotificationsList({ onNotificationClick }: NotificationsListProps) {
-  const { data } = useSuspenseQuery(useNotificationsQueryOptions({ page: 1, limit: 20 }))
+  const queryClient = useQueryClient()
+  const { data } = useSuspenseQuery(
+    api.api.v1.notifications.index.queryOptions({ query: { page: 1, limit: 20 } })
+  )
 
-  const markReadMutation = useMarkNotificationReadMutation()
-  const markAllReadMutation = useMarkAllNotificationsReadMutation()
+  const markReadMutation = useMutation(api.api.v1.notifications.markRead.mutationOptions())
+  const markAllReadMutation = useMutation(api.api.v1.notifications.markAllRead.mutationOptions())
 
   const notifications = data?.data ?? []
   const unreadCount = data?.unreadCount ?? 0
 
   const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.readAt) {
-      toast.promise(markReadMutation.mutateAsync(notification.id), {
-        loading: 'Marcando como lida...',
-        success: 'Notificação marcada como lida',
-        error: 'Erro ao marcar como lida',
-      })
+      toast.promise(
+        markReadMutation
+          .mutateAsync({ params: { id: notification.id } })
+          .then(() => queryClient.invalidateQueries({ queryKey: ['notifications'] })),
+        {
+          loading: 'Marcando como lida...',
+          success: 'Notificação marcada como lida',
+          error: 'Erro ao marcar como lida',
+        }
+      )
     }
 
     onNotificationClick?.(notification)
   }
 
   const handleMarkAllAsRead = () => {
-    toast.promise(markAllReadMutation.mutateAsync(), {
-      loading: 'Marcando todas como lidas...',
-      success: 'Todas as notificações foram marcadas como lidas!',
-      error: 'Erro ao marcar notificações como lidas',
-    })
+    toast.promise(
+      markAllReadMutation
+        .mutateAsync({})
+        .then(() => queryClient.invalidateQueries({ queryKey: ['notifications'] })),
+      {
+        loading: 'Marcando todas como lidas...',
+        success: 'Todas as notificações foram marcadas como lidas!',
+        error: 'Erro ao marcar notificações como lidas',
+      }
+    )
   }
 
   if (notifications.length === 0) {

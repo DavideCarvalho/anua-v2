@@ -15,6 +15,7 @@
 ### Task 1: Create WalletTopUpStatus enum migration
 
 **Files:**
+
 - Create: `database/migrations/1768500138000_create_wallet_top_up_status_enum.ts`
 
 **Step 1: Write the migration**
@@ -50,6 +51,7 @@ feat: add WalletTopUpStatus enum migration
 ### Task 2: Create WalletTopUp table migration
 
 **Files:**
+
 - Create: `database/migrations/1768500139000_create_wallet_top_up_table.ts`
 
 **Step 1: Write the migration**
@@ -114,6 +116,7 @@ feat: create WalletTopUp table migration
 ### Task 3: Create StoreInstallmentRule table migration
 
 **Files:**
+
 - Create: `database/migrations/1768500140000_create_store_installment_rule_table.ts`
 
 **Step 1: Write the migration**
@@ -164,6 +167,7 @@ feat: create StoreInstallmentRule table migration
 ### Task 4: Add defaultStorePlatformFeePercentage to PlatformSettings
 
 **Files:**
+
 - Create: `database/migrations/1768500141000_add_default_store_fee_to_platform_settings.ts`
 
 **Step 1: Write the migration**
@@ -199,6 +203,7 @@ feat: add defaultStorePlatformFeePercentage to PlatformSettings
 ### Task 5: Make StoreFinancialSettings.platformFeePercentage nullable
 
 **Files:**
+
 - Create: `database/migrations/1768500142000_make_store_fee_percentage_nullable.ts`
 
 **Step 1: Write the migration**
@@ -245,6 +250,7 @@ Expected: All 5 new migrations run successfully (1768500138000 through 176850014
 ### Task 7: Create WalletTopUp model
 
 **Files:**
+
 - Create: `app/models/wallet_top_up.ts`
 
 **Step 1: Write the model**
@@ -322,6 +328,7 @@ feat: create WalletTopUp model
 ### Task 8: Create WalletTopUp DTO
 
 **Files:**
+
 - Create: `app/models/dto/wallet_top_up.dto.ts`
 
 **Step 1: Write the DTO**
@@ -376,6 +383,7 @@ feat: create WalletTopUp DTO
 ### Task 9: Create StoreInstallmentRule model
 
 **Files:**
+
 - Create: `app/models/store_installment_rule.ts`
 
 **Step 1: Write the model**
@@ -435,6 +443,7 @@ feat: create StoreInstallmentRule model
 ### Task 10: Create StoreInstallmentRule DTO
 
 **Files:**
+
 - Create: `app/models/dto/store_installment_rule.dto.ts`
 
 **Step 1: Write the DTO**
@@ -480,6 +489,7 @@ feat: create StoreInstallmentRule DTO
 ### Task 11: Update PlatformSettings model
 
 **Files:**
+
 - Modify: `app/models/platform_settings.ts`
 
 **Step 1: Add new column**
@@ -502,6 +512,7 @@ feat: add defaultStorePlatformFeePercentage to PlatformSettings model
 ### Task 12: Update PlatformSettings DTO
 
 **Files:**
+
 - Modify: `app/models/dto/platform_settings.dto.ts`
 
 **Step 1: Add new field**
@@ -509,13 +520,14 @@ feat: add defaultStorePlatformFeePercentage to PlatformSettings model
 Add to the class declarations (after `defaultPricePerStudent`):
 
 ```typescript
-  declare defaultStorePlatformFeePercentage: number
+declare
+defaultStorePlatformFeePercentage: number
 ```
 
 Add to the constructor (after `this.defaultPricePerStudent = ...`):
 
 ```typescript
-    this.defaultStorePlatformFeePercentage = model.defaultStorePlatformFeePercentage
+this.defaultStorePlatformFeePercentage = model.defaultStorePlatformFeePercentage
 ```
 
 **Step 2: Commit**
@@ -529,6 +541,7 @@ feat: add defaultStorePlatformFeePercentage to PlatformSettings DTO
 ### Task 13: Update PlatformSettings validator
 
 **Files:**
+
 - Modify: `app/validators/subscription.ts`
 
 **Step 1: Add field to updatePlatformSettingsValidator**
@@ -550,17 +563,20 @@ feat: add defaultStorePlatformFeePercentage to platform settings validator
 ### Task 14: Update StoreFinancialSettings model (nullable fee)
 
 **Files:**
+
 - Modify: `app/models/store_financial_settings.ts`
 
 **Step 1: Change type**
 
 Change:
+
 ```typescript
   @column()
   declare platformFeePercentage: number
 ```
 
 To:
+
 ```typescript
   @column()
   declare platformFeePercentage: number | null
@@ -577,18 +593,23 @@ feat: make StoreFinancialSettings.platformFeePercentage nullable
 ### Task 15: Update StoreFinancialSettings DTO (nullable fee)
 
 **Files:**
+
 - Modify: `app/models/dto/store_financial_settings.dto.ts`
 
 **Step 1: Change type**
 
 Change:
+
 ```typescript
-  declare platformFeePercentage: number
+declare
+platformFeePercentage: number
 ```
 
 To:
+
 ```typescript
-  declare platformFeePercentage: number | null
+declare
+platformFeePercentage: number | null
 ```
 
 **Step 2: Commit**
@@ -602,6 +623,7 @@ feat: make StoreFinancialSettings DTO platformFeePercentage nullable
 ### Task 16: Update Store financial settings validator (nullable fee)
 
 **Files:**
+
 - Modify: `app/validators/store.ts`
 
 **Step 1: Make platformFeePercentage optional**
@@ -629,11 +651,13 @@ feat: make platformFeePercentage optional in store financial settings validator
 ### Task 17: Add installmentRules relationship to Store model
 
 **Files:**
+
 - Modify: `app/models/store.ts`
 
 **Step 1: Add import**
 
 Add import at the top:
+
 ```typescript
 import StoreInstallmentRule from './store_installment_rule.js'
 ```
@@ -658,6 +682,7 @@ feat: add installmentRules relationship to Store model
 ### Task 18: Create StoreInstallmentRule validators
 
 **Files:**
+
 - Modify: `app/validators/store.ts`
 
 **Step 1: Add validators at the end of the file**
@@ -701,6 +726,7 @@ feat: add StoreInstallmentRule validators
 ### Task 19: Create StoreInstallmentRule CRUD controllers
 
 **Files:**
+
 - Create: `app/controllers/store_installment_rules/list_store_installment_rules_controller.ts`
 - Create: `app/controllers/store_installment_rules/create_store_installment_rule_controller.ts`
 - Create: `app/controllers/store_installment_rules/update_store_installment_rule_controller.ts`
@@ -797,6 +823,7 @@ feat: create StoreInstallmentRule CRUD controllers
 ### Task 20: Register StoreInstallmentRule routes
 
 **Files:**
+
 - Modify: `start/routes.ts`
 
 **Step 1: Add controller imports**
@@ -824,9 +851,7 @@ function registerStoreInstallmentRuleApiRoutes() {
     .group(() => {
       router.get('/', [ListStoreInstallmentRulesController]).as('storeInstallmentRules.index')
       router.post('/', [CreateStoreInstallmentRuleController]).as('storeInstallmentRules.store')
-      router
-        .put('/:id', [UpdateStoreInstallmentRuleController])
-        .as('storeInstallmentRules.update')
+      router.put('/:id', [UpdateStoreInstallmentRuleController]).as('storeInstallmentRules.update')
       router
         .delete('/:id', [DeleteStoreInstallmentRuleController])
         .as('storeInstallmentRules.destroy')
@@ -841,7 +866,7 @@ function registerStoreInstallmentRuleApiRoutes() {
 After `registerStoreOrderApiRoutes()` call (around line 2827), add:
 
 ```typescript
-    registerStoreInstallmentRuleApiRoutes()
+registerStoreInstallmentRuleApiRoutes()
 ```
 
 **Step 4: Commit**
@@ -855,6 +880,7 @@ feat: register StoreInstallmentRule API routes
 ### Task 21: Add Lojas nav item to EscolaLayout
 
 **Files:**
+
 - Modify: `inertia/components/layouts/escola-layout.tsx`
 
 **Step 1: Add Store icon import**
@@ -891,6 +917,7 @@ feat: add Lojas nav item to escola layout sidebar
 ### Task 22: Create store list page controller (Inertia)
 
 **Files:**
+
 - Create: `app/controllers/pages/escola/show_lojas_page_controller.ts`
 
 **Step 1: Write the controller**
@@ -916,6 +943,7 @@ feat: create show lojas page controller
 ### Task 23: Create store detail page controller (Inertia)
 
 **Files:**
+
 - Create: `app/controllers/pages/escola/show_loja_detail_page_controller.ts`
 
 **Step 1: Write the controller**
@@ -941,6 +969,7 @@ feat: create show loja detail page controller
 ### Task 24: Register page routes for lojas
 
 **Files:**
+
 - Modify: `start/routes.ts`
 
 **Step 1: Add page controller imports**
@@ -948,8 +977,7 @@ feat: create show loja detail page controller
 Near the other page controller imports, add:
 
 ```typescript
-const ShowLojasPageController = () =>
-  import('#controllers/pages/escola/show_lojas_page_controller')
+const ShowLojasPageController = () => import('#controllers/pages/escola/show_lojas_page_controller')
 const ShowLojaDetailPageController = () =>
   import('#controllers/pages/escola/show_loja_detail_page_controller')
 ```
@@ -959,8 +987,8 @@ const ShowLojaDetailPageController = () =>
 Inside the `registerPageRoutes()` function, find where other `/escola/*` page routes are registered and add:
 
 ```typescript
-      router.get('/escola/lojas', [ShowLojasPageController]).as('web.escola.lojas.index')
-      router.get('/escola/lojas/:id', [ShowLojaDetailPageController]).as('web.escola.lojas.show')
+router.get('/escola/lojas', [ShowLojasPageController]).as('web.escola.lojas.index')
+router.get('/escola/lojas/:id', [ShowLojaDetailPageController]).as('web.escola.lojas.show')
 ```
 
 **Step 3: Commit**
@@ -974,6 +1002,7 @@ feat: register escola lojas page routes
 ### Task 25: Create store list frontend page
 
 **Files:**
+
 - Create: `inertia/pages/escola/lojas/index.tsx`
 
 **Step 1: Write the page**
@@ -992,9 +1021,7 @@ export default function LojasPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Lojas</h1>
-          <p className="text-muted-foreground">
-            Gerencie as lojas da instituição
-          </p>
+          <p className="text-muted-foreground">Gerencie as lojas da instituição</p>
         </div>
         <StoreListContainer />
       </div>
@@ -1014,6 +1041,7 @@ feat: create lojas list page
 ### Task 26: Create store list container
 
 **Files:**
+
 - Create: `inertia/containers/store-list-container.tsx`
 
 **Step 1: Write the container**
@@ -1025,13 +1053,7 @@ import { useEffect, useState } from 'react'
 import { Link } from '@inertiajs/react'
 import { Plus, Store as StoreIcon, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import {
   Table,
   TableBody,
@@ -1060,9 +1082,7 @@ export function StoreListContainer() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Todas as Lojas</CardTitle>
-            <CardDescription>
-              Lojas internas e terceirizadas da instituição
-            </CardDescription>
+            <CardDescription>Lojas internas e terceirizadas da instituição</CardDescription>
           </div>
           <Button onClick={() => setCreateModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -1073,9 +1093,7 @@ export function StoreListContainer() {
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : !stores?.data?.length ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhuma loja cadastrada
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhuma loja cadastrada</div>
           ) : (
             <Table>
               <TableHeader>
@@ -1165,6 +1183,7 @@ feat: create store list container
 ### Task 27: Create useStores query hook
 
 **Files:**
+
 - Create: `inertia/hooks/queries/use_stores.ts`
 
 **Step 1: Write the hook**
@@ -1210,6 +1229,7 @@ feat: create useStores query hook
 ### Task 28: Create store mutations hook
 
 **Files:**
+
 - Create: `inertia/hooks/mutations/use_store_mutations.ts`
 
 **Step 1: Write the hook**
@@ -1305,6 +1325,7 @@ feat: create store mutation hooks
 ### Task 29: Create CreateStoreModal
 
 **Files:**
+
 - Create: `inertia/containers/stores/create-store-modal.tsx`
 
 **Step 1: Write the modal**
@@ -1362,9 +1383,8 @@ export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreM
       name,
       type,
       description: description || undefined,
-      commissionPercentage: type === 'THIRD_PARTY' && commissionPercentage
-        ? Number(commissionPercentage)
-        : undefined,
+      commissionPercentage:
+        type === 'THIRD_PARTY' && commissionPercentage ? Number(commissionPercentage) : undefined,
     })
 
     setName('')
@@ -1380,9 +1400,7 @@ export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreM
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Nova Loja</DialogTitle>
-            <DialogDescription>
-              Crie uma nova loja para a instituição
-            </DialogDescription>
+            <DialogDescription>Crie uma nova loja para a instituição</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -1463,6 +1481,7 @@ feat: create CreateStoreModal component
 ### Task 30: Create store detail page
 
 **Files:**
+
 - Create: `inertia/pages/escola/lojas/show.tsx`
 
 **Step 1: Write the page**
@@ -1499,6 +1518,7 @@ feat: create loja detail page
 ### Task 31: Create store detail container
 
 **Files:**
+
 - Create: `inertia/containers/store-detail-container.tsx`
 
 **Step 1: Write the container**
@@ -1563,9 +1583,7 @@ export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
                 {store.isActive ? 'Ativa' : 'Inativa'}
               </Badge>
             </div>
-            {store.description && (
-              <p className="text-muted-foreground">{store.description}</p>
-            )}
+            {store.description && <p className="text-muted-foreground">{store.description}</p>}
           </div>
         </div>
       </div>
@@ -1577,9 +1595,7 @@ export function StoreDetailContainer({ storeId }: StoreDetailContainerProps) {
           <TabsTrigger value="orders">Pedidos</TabsTrigger>
           <TabsTrigger value="installment-rules">Parcelamento</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
-          {store.type === 'THIRD_PARTY' && (
-            <TabsTrigger value="settlements">Repasses</TabsTrigger>
-          )}
+          {store.type === 'THIRD_PARTY' && <TabsTrigger value="settlements">Repasses</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="products">
@@ -1620,6 +1636,7 @@ feat: create store detail container with tabs
 ### Task 32: Create StoreProductsTab
 
 **Files:**
+
 - Create: `inertia/containers/stores/store-products-tab.tsx`
 
 **Step 1: Write the tab**
@@ -1686,9 +1703,7 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !items?.data?.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum produto cadastrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -1738,6 +1753,7 @@ feat: create StoreProductsTab component
 ### Task 33: Create StoreOrdersTab
 
 **Files:**
+
 - Create: `inertia/containers/stores/store-orders-tab.tsx`
 
 **Step 1: Write the tab**
@@ -1807,9 +1823,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !orders?.data?.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum pedido encontrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -1824,9 +1838,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
             <TableBody>
               {orders.data.map((order: any) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">
-                    {order.orderNumber}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
                   <TableCell>{order.student?.user?.name ?? '—'}</TableCell>
                   <TableCell>{formatCurrency(order.totalMoney)}</TableCell>
                   <TableCell>
@@ -1861,6 +1873,7 @@ feat: create StoreOrdersTab component
 ### Task 34: Create StoreInstallmentRulesTab
 
 **Files:**
+
 - Create: `inertia/containers/stores/store-installment-rules-tab.tsx`
 
 **Step 1: Write the tab**
@@ -1947,7 +1960,8 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
 
   const deleteMutation = useMutation({
     mutationFn: deleteRule,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules', storeId] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules', storeId] }),
   })
 
   const handleCreate = (e: React.FormEvent) => {
@@ -2078,6 +2092,7 @@ feat: create StoreInstallmentRulesTab component
 ### Task 35: Create StoreFinancialSettingsTab
 
 **Files:**
+
 - Create: `inertia/containers/stores/store-financial-settings-tab.tsx`
 
 **Step 1: Write the tab**
@@ -2172,8 +2187,8 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
       <CardHeader>
         <CardTitle>Configuracoes Financeiras</CardTitle>
         <CardDescription>
-          Taxa da plataforma e dados bancarios para repasse.
-          Se a taxa ficar vazia, usa o padrao da plataforma.
+          Taxa da plataforma e dados bancarios para repasse. Se a taxa ficar vazia, usa o padrao da
+          plataforma.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -2242,9 +2257,7 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
             {mutation.isPending ? 'Salvando...' : 'Salvar'}
           </Button>
 
-          {mutation.isSuccess && (
-            <p className="text-sm text-green-600">Salvo com sucesso</p>
-          )}
+          {mutation.isSuccess && <p className="text-sm text-green-600">Salvo com sucesso</p>}
         </form>
       </CardContent>
     </Card>
@@ -2263,6 +2276,7 @@ feat: create StoreFinancialSettingsTab component
 ### Task 36: Create StoreSettlementsTab
 
 **Files:**
+
 - Create: `inertia/containers/stores/store-settlements-tab.tsx`
 
 **Step 1: Write the tab**
@@ -2319,9 +2333,7 @@ export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Carregando...</div>
         ) : !settlements?.data?.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum repasse encontrado
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Nenhum repasse encontrado</div>
         ) : (
           <Table>
             <TableHeader>
@@ -2337,15 +2349,15 @@ export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
             <TableBody>
               {settlements.data.map((s: any) => (
                 <TableRow key={s.id}>
-                  <TableCell>{String(s.month).padStart(2, '0')}/{s.year}</TableCell>
+                  <TableCell>
+                    {String(s.month).padStart(2, '0')}/{s.year}
+                  </TableCell>
                   <TableCell>{formatCurrency(s.totalSalesAmount)}</TableCell>
                   <TableCell>{formatCurrency(s.commissionAmount)}</TableCell>
                   <TableCell>{formatCurrency(s.platformFeeAmount)}</TableCell>
                   <TableCell className="font-medium">{formatCurrency(s.transferAmount)}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {statusLabels[s.status] ?? s.status}
-                    </Badge>
+                    <Badge variant="outline">{statusLabels[s.status] ?? s.status}</Badge>
                   </TableCell>
                 </TableRow>
               ))}

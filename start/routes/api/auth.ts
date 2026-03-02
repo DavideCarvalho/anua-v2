@@ -14,8 +14,8 @@ export function registerAuthApiRoutes() {
   router
     .group(() => {
       router.post('/login', [LoginController]).as('auth.login')
-      router.post('/send-code', [SendCodeController]).as('auth.sendCode')
-      router.post('/verify-code', [VerifyCodeController]).as('auth.verifyCode')
+      router.post('/send-code', [SendCodeController]).as('auth.send_code')
+      router.post('/verify-code', [VerifyCodeController]).as('auth.verify_code')
     })
     .prefix('/auth')
     .use(throttleAuth)

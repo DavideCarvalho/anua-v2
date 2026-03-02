@@ -3,11 +3,11 @@ import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import type { LucideIcon } from 'lucide-react'
-import {
-  useStudentPaymentsQueryOptions,
-  type StudentPaymentsResponse,
-} from '../hooks/queries/use_student_payments'
-import { useClassesQueryOptions, type ClassesResponse } from '../hooks/queries/use_classes'
+import { api } from '../lib/api'
+import type { Route } from '@tuyau/core/types'
+
+type StudentPaymentsResponse = Route.Response<'api.v1.student_payments.index'>
+type ClassesResponse = Route.Response<'api.v1.classes.index'>
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -96,12 +96,10 @@ function StudentPaymentsErrorFallback({
 }
 
 type PaymentStatus = NonNullable<
-  NonNullable<Parameters<typeof useStudentPaymentsQueryOptions>[0]>['status']
+  NonNullable<Route.Query<'api.v1.student_payments.index'>>['status']
 >
 
-type PaymentType = NonNullable<
-  NonNullable<Parameters<typeof useStudentPaymentsQueryOptions>[0]>['type']
->
+type PaymentType = NonNullable<NonNullable<Route.Query<'api.v1.student_payments.index'>>['type']>
 
 type StatusConfig = { label: string; className: string; icon: LucideIcon }
 
@@ -125,8 +123,18 @@ const typeLabels: Record<string, string> = {
 }
 
 const monthLabels = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ]
 
 type Payment = StudentPaymentsResponse['data'][number]
@@ -155,7 +163,10 @@ export function StudentPaymentsContainer({
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <StudentPaymentsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <StudentPaymentsErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <StudentPaymentsContent status={status} showSearch={showSearch} />
@@ -201,11 +212,22 @@ function StudentPaymentsContent({
     limit: parseAsInteger.withDefault(20),
   })
 
-  const { search, page, limit, status: filterStatus, type: filterType, month: filterMonth, year: filterYear, classId } = filters
+  const {
+    search,
+    page,
+    limit,
+    status: filterStatus,
+    type: filterType,
+    month: filterMonth,
+    year: filterYear,
+    classId,
+  } = filters
 
   const activeStatus = status || (filterStatus as PaymentStatus) || undefined
 
-  const { data: classesData } = useQuery(useClassesQueryOptions({ limit: 100 }))
+  const { data: classesData } = useQuery(
+    api.api.v1.classes.index.queryOptions({ query: { limit: 100 } })
+  )
   const classes: ClassItem[] = classesData?.data ?? []
 
   const hasActiveFilters = !!(filterStatus || filterType || filterMonth || filterYear || classId)
@@ -215,15 +237,17 @@ function StudentPaymentsContent({
   }
 
   const { data, isLoading, error, refetch } = useQuery(
-    useStudentPaymentsQueryOptions({
-      page,
-      limit,
-      status: activeStatus,
-      search: search || undefined,
-      type: (filterType as PaymentType) || undefined,
-      month: filterMonth || undefined,
-      year: filterYear || undefined,
-      classId: classId || undefined,
+    api.api.v1.studentPayments.index.queryOptions({
+      query: {
+        page,
+        limit,
+        status: activeStatus,
+        search: search || undefined,
+        type: (filterType as PaymentType) || undefined,
+        month: filterMonth || undefined,
+        year: filterYear || undefined,
+        classId: classId || undefined,
+      },
     })
   )
 
@@ -332,7 +356,12 @@ function StudentPaymentsContent({
           </Select>
 
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="text-muted-foreground"
+            >
               <FilterX className="h-4 w-4 mr-1" />
               Limpar
             </Button>
@@ -342,9 +371,7 @@ function StudentPaymentsContent({
 
       {isLoading && <StudentPaymentsSkeleton />}
 
-      {error && (
-        <StudentPaymentsErrorFallback error={error} resetErrorBoundary={() => refetch()} />
-      )}
+      {error && <StudentPaymentsErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
 
       {!isLoading && !error && payments.length === 0 && (
         <Card>
@@ -384,16 +411,16 @@ function StudentPaymentsContent({
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
                             {payment.student?.user?.name?.charAt(0) || 'A'}
                           </div>
-                          <span className="font-medium">
-                            {payment.student?.user?.name || '-'}
-                          </span>
+                          <span className="font-medium">{payment.student?.user?.name || '-'}</span>
                         </div>
                       </td>
                       <td className="p-4 text-muted-foreground">
                         {payment.month}/{payment.year}
                       </td>
                       <td className="p-4 text-muted-foreground">{formatDate(payment.dueDate)}</td>
-                      <td className="p-4 font-semibold">{formatCurrency(Number(payment.amount || 0))}</td>
+                      <td className="p-4 font-semibold">
+                        {formatCurrency(Number(payment.amount || 0))}
+                      </td>
                       <td className="p-4">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.className}`}

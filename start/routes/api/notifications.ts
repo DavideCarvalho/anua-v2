@@ -23,8 +23,8 @@ export function registerNotificationApiRoutes() {
     .group(() => {
       router.get('/', [ListNotificationsController]).as('notifications.index')
       router.get('/:id', [ShowNotificationController]).as('notifications.show')
-      router.post('/:id/read', [MarkNotificationReadController]).as('notifications.markRead')
-      router.post('/read-all', [MarkAllReadController]).as('notifications.markAllRead')
+      router.post('/:id/read', [MarkNotificationReadController]).as('notifications.mark_read')
+      router.post('/read-all', [MarkAllReadController]).as('notifications.mark_all_read')
       router.delete('/:id', [DeleteNotificationController]).as('notifications.destroy')
     })
     .prefix('/notifications')
@@ -34,10 +34,10 @@ export function registerNotificationApiRoutes() {
 export function registerNotificationPreferenceApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ShowNotificationPreferencesController]).as('notificationPreferences.show')
+      router.get('/', [ShowNotificationPreferencesController]).as('notification_preferences.show')
       router
         .put('/', [UpdateNotificationPreferencesController])
-        .as('notificationPreferences.update')
+        .as('notification_preferences.update')
     })
     .prefix('/notification-preferences')
     .use([middleware.auth(), middleware.impersonation()])

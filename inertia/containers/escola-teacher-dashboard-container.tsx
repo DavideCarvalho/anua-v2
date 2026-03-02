@@ -7,7 +7,7 @@ import {
   Users,
   CheckSquare,
 } from 'lucide-react'
-import { useEscolaTeacherDashboardQueryOptions } from '../hooks/queries/use_escola_teacher_dashboard'
+import { api } from '~/lib/api'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 
@@ -64,7 +64,9 @@ function TeacherDashboardError({
 }
 
 function TeacherDashboardContent() {
-  const { data, isLoading, error } = useQuery(useEscolaTeacherDashboardQueryOptions())
+  const { data, isLoading, error } = useQuery(
+    api.api.v1.dashboard.escolaTeacherDashboard.queryOptions({})
+  )
 
   if (isLoading || !data) {
     return <TeacherDashboardSkeleton />

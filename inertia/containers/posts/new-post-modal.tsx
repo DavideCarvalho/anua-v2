@@ -29,7 +29,8 @@ import {
 } from '../../components/ui/select'
 import { Textarea } from '../../components/ui/textarea'
 
-import { useCreatePostMutation } from '../../hooks/mutations/use_create_post'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const PostType = {
   TEXT: 'TEXT',
@@ -48,19 +49,17 @@ const PostVisibility = {
 
 const formSchema = z.object({
   content: z.string().min(1, 'Conteudo e obrigatorio'),
-  type: z.enum([
-    PostType.TEXT,
-    PostType.IMAGE,
-    PostType.VIDEO,
-    PostType.LINK,
-    PostType.ANNOUNCEMENT,
-  ]).default(PostType.TEXT),
-  visibility: z.enum([
-    PostVisibility.PUBLIC,
-    PostVisibility.SCHOOL_ONLY,
-    PostVisibility.CLASS_ONLY,
-    PostVisibility.PRIVATE,
-  ]).default(PostVisibility.SCHOOL_ONLY),
+  type: z
+    .enum([PostType.TEXT, PostType.IMAGE, PostType.VIDEO, PostType.LINK, PostType.ANNOUNCEMENT])
+    .default(PostType.TEXT),
+  visibility: z
+    .enum([
+      PostVisibility.PUBLIC,
+      PostVisibility.SCHOOL_ONLY,
+      PostVisibility.CLASS_ONLY,
+      PostVisibility.PRIVATE,
+    ])
+    .default(PostVisibility.SCHOOL_ONLY),
   attachmentUrl: z.string().url('URL invalida').optional().or(z.literal('')),
 })
 
@@ -74,7 +73,8 @@ interface NewPostModalProps {
 }
 
 export function NewPostModal({ open, onOpenChange, schoolId, classId }: NewPostModalProps) {
-  const createPostMutation = useCreatePostMutation()
+  const queryClient = useQueryClient()
+  const createPostMutation = useMutation(api.api.v1.posts.store.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -89,14 +89,17 @@ export function NewPostModal({ open, onOpenChange, schoolId, classId }: NewPostM
   const onSubmit = async (values: FormValues) => {
     toast.promise(
       createPostMutation.mutateAsync({
-        ...values,
-        schoolId,
-        classId,
-        attachmentUrl: values.attachmentUrl || undefined,
+        body: {
+          ...values,
+          schoolId,
+          classId,
+          attachmentUrl: values.attachmentUrl || undefined,
+        },
       }),
       {
         loading: 'Publicando...',
         success: () => {
+          queryClient.invalidateQueries({ queryKey: ['posts'] })
           form.reset()
           onOpenChange(false)
           return 'Publicacao criada!'
@@ -122,11 +125,7 @@ export function NewPostModal({ open, onOpenChange, schoolId, classId }: NewPostM
                 <FormItem>
                   <FormLabel>Conteudo *</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="O que voce quer compartilhar?"
-                      rows={4}
-                      {...field}
-                    />
+                    <Textarea placeholder="O que voce quer compartilhar?" rows={4} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

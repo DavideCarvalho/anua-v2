@@ -5,16 +5,21 @@ import { Trash2, Plus, Minus } from 'lucide-react'
 import { toast } from 'sonner'
 import { differenceInMonths } from 'date-fns'
 import { useCart } from '../contexts/cart-context'
-import { useInstallmentOptionsQueryOptions } from '../hooks/queries/use_marketplace'
-import { useAcademicPeriodsQueryOptions } from '../hooks/queries/use_academic_periods'
-import { useMarketplaceCheckout } from '../hooks/mutations/use_marketplace_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { Button } from '../components/ui/button'
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group'
 import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { Separator } from '../components/ui/separator'
 import { SheetClose } from '../components/ui/sheet'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
 import { formatCurrency } from '../lib/utils'
 
 interface CartSheetContentProps {
@@ -23,24 +28,33 @@ interface CartSheetContentProps {
   studentId?: string
 }
 
-export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = false, studentId }: CartSheetContentProps) {
+export function CartSheetContent({
+  backHref = '/aluno/loja',
+  hasOnlinePayment = false,
+  studentId,
+}: CartSheetContentProps) {
   const cart = useCart()
   const [paymentOption, setPaymentOption] = useState<'IMMEDIATE' | 'BILL' | 'INSTALLMENTS'>('BILL')
   const [paymentMethod, setPaymentMethod] = useState<'BALANCE' | 'PIX'>('BALANCE')
   const [installments, setInstallments] = useState(2)
   const [billInstallments, setBillInstallments] = useState(1)
   const [notes, setNotes] = useState('')
-  const checkout = useMarketplaceCheckout()
+  const queryClient = useQueryClient()
+  const checkout = useMutation(api.api.v1.marketplace.checkout.mutationOptions())
 
   const { data: installmentData } = useQuery({
-    ...useInstallmentOptionsQueryOptions(cart.storeId ?? '', cart.totalPrice),
+    ...api.api.v1.marketplace.installmentOptions.queryOptions({
+      query: { storeId: cart.storeId ?? '', amount: cart.totalPrice },
+    }),
     enabled: paymentOption === 'INSTALLMENTS' && !!cart.storeId && cart.totalPrice > 0,
   })
   const installmentOptions = installmentData?.options ?? []
 
   // Fetch active academic period to calculate max installments for BILL
   const { data: academicPeriodsData } = useQuery({
-    ...useAcademicPeriodsQueryOptions({ isActive: true, limit: 1 }),
+    ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { isActive: true, limit: 1 },
+    }),
     enabled: paymentOption === 'BILL',
   })
 
@@ -65,15 +79,23 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
     const isDeferred = paymentOption === 'BILL' || paymentOption === 'INSTALLMENTS'
     try {
       await checkout.mutateAsync({
-        storeId: cart.storeId,
-        items: cart.items.map((i) => ({ storeItemId: i.storeItemId, quantity: i.quantity })),
-        paymentMode: isDeferred ? 'DEFERRED' : 'IMMEDIATE',
-        paymentMethod: paymentOption === 'IMMEDIATE' ? paymentMethod : undefined,
-        installments: paymentOption === 'INSTALLMENTS' ? installments : (paymentOption === 'BILL' ? billInstallments : undefined),
-        spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
-        notes: notes || undefined,
-        studentId,
+        body: {
+          storeId: cart.storeId,
+          items: cart.items.map((i) => ({ storeItemId: i.storeItemId, quantity: i.quantity })),
+          paymentMode: isDeferred ? 'DEFERRED' : 'IMMEDIATE',
+          paymentMethod: paymentOption === 'IMMEDIATE' ? paymentMethod : undefined,
+          installments:
+            paymentOption === 'INSTALLMENTS'
+              ? installments
+              : paymentOption === 'BILL'
+                ? billInstallments
+                : undefined,
+          spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
+          notes: notes || undefined,
+          studentId,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'orders'] })
       cart.clearCart()
       toast.success('Pedido realizado com sucesso!')
       router.visit(backHref)
@@ -93,9 +115,7 @@ export function CartSheetContent({ backHref = '/aluno/loja', hasOnlinePayment = 
               <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatCurrency(item.price)} cada
-                  </p>
+                  <p className="text-xs text-muted-foreground">{formatCurrency(item.price)} cada</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Button

@@ -106,3 +106,18 @@ export function isStudent(user: UserDto | null): boolean {
 export function isStoreOwner(user: UserDto | null): boolean {
   return hasRole(user, ['STORE_OWNER'])
 }
+
+export interface AuditEntry {
+  id: string
+  event: 'created' | 'updated' | 'deleted'
+  oldValues: Record<string, unknown> | null
+  newValues: Record<string, unknown> | null
+  metadata: {
+    ip_address?: string
+    user_agent?: string
+    url?: string
+    source?: string
+    user_name?: string
+  } | null
+  createdAt: string
+}

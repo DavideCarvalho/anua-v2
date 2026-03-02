@@ -22,11 +22,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '../../../components/ui/accordion'
-import { useAsaasPaymentConfigQueryOptions } from '../../../hooks/queries/use_asaas_payment_config'
-import type { AsaasPaymentConfigResponse } from '../../../hooks/queries/use_asaas_payment_config'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { AsaasOnboardingWizard } from '../../../containers/asaas/asaas-onboarding-wizard'
-import { useSchoolQueryOptions } from '../../../hooks/queries/use_school'
-import { useUpdateSchool } from '../../../hooks/mutations/use_school_mutations'
+
+type AsaasPaymentConfigResponse = Route.Response<'api.v1.asaas.subaccounts.status'>
 import type { SharedProps } from '../../../lib/types'
 import { useAuthUser } from '../../../stores/auth_store'
 
@@ -145,12 +146,20 @@ export default function ConfiguracaoPagamentosPage() {
   const schoolId = props.selectedSchoolIds?.[0] ?? user?.schoolId ?? null
   const [wizardOpen, setWizardOpen] = useState(false)
   const [fiscalData, setFiscalData] = useState<NfseFormData>(EMPTY_NFSE_FORM)
-  const { data, isLoading } = useQuery(useAsaasPaymentConfigQueryOptions())
+  const queryClient = useQueryClient()
+  const { data, isLoading } = useQuery({
+    ...api.api.v1.asaas.subaccounts.status.queryOptions({}),
+    refetchInterval: (query: { state: { data?: AsaasPaymentConfigResponse } }) => {
+      const status = query.state.data?.paymentConfigStatus
+      if (status === 'PENDING_DOCUMENTS') return 5000
+      return false
+    },
+  })
   const { data: schoolData, isLoading: isLoadingSchool } = useQuery({
-    ...useSchoolQueryOptions(schoolId ?? ''),
+    ...api.api.v1.schools.show.queryOptions({ params: { id: schoolId ?? '' } }),
     enabled: !!schoolId,
   })
-  const updateSchool = useUpdateSchool()
+  const updateSchool = useMutation(api.api.v1.schools.update.mutationOptions())
   const hasAsaasAccount = Boolean(data?.hasAsaasAccount)
   const accountActionLabel = hasAsaasAccount ? 'Atualizar dados da conta' : 'Configurar Conta'
   const accountActionVariant = hasAsaasAccount ? 'outline' : 'default'
@@ -216,19 +225,22 @@ export default function ConfiguracaoPagamentosPage() {
     }
 
     await updateSchool.mutateAsync({
-      id: schoolId,
-      nfseEnabled: fiscalData.nfseEnabled,
-      nfseMunicipalServiceCode: fiscalData.nfseMunicipalServiceCode.trim() || null,
-      nfseMunicipalServiceName: fiscalData.nfseMunicipalServiceName.trim() || null,
-      nfseIssPercentage: numberOrNull(fiscalData.nfseIssPercentage),
-      nfseCofinsPercentage: numberOrNull(fiscalData.nfseCofinsPercentage),
-      nfsePisPercentage: numberOrNull(fiscalData.nfsePisPercentage),
-      nfseCsllPercentage: numberOrNull(fiscalData.nfseCsllPercentage),
-      nfseInssPercentage: numberOrNull(fiscalData.nfseInssPercentage),
-      nfseIrPercentage: numberOrNull(fiscalData.nfseIrPercentage),
-      nfseDeductions: numberOrNull(fiscalData.nfseDeductions),
+      params: { id: schoolId },
+      body: {
+        nfseEnabled: fiscalData.nfseEnabled,
+        nfseMunicipalServiceCode: fiscalData.nfseMunicipalServiceCode.trim() || null,
+        nfseMunicipalServiceName: fiscalData.nfseMunicipalServiceName.trim() || null,
+        nfseIssPercentage: numberOrNull(fiscalData.nfseIssPercentage),
+        nfseCofinsPercentage: numberOrNull(fiscalData.nfseCofinsPercentage),
+        nfsePisPercentage: numberOrNull(fiscalData.nfsePisPercentage),
+        nfseCsllPercentage: numberOrNull(fiscalData.nfseCsllPercentage),
+        nfseInssPercentage: numberOrNull(fiscalData.nfseInssPercentage),
+        nfseIrPercentage: numberOrNull(fiscalData.nfseIrPercentage),
+        nfseDeductions: numberOrNull(fiscalData.nfseDeductions),
+      },
     })
-
+    queryClient.invalidateQueries({ queryKey: ['school', schoolId] })
+    queryClient.invalidateQueries({ queryKey: ['schools'] })
     toast.success('Configuração fiscal salva com sucesso')
   }
 

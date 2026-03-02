@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
-import StoreOrderDto from '#models/dto/store_order.dto'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 import { listStoreOrdersValidator } from '#validators/gamification'
 
 export default class ListStoreOrdersController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listStoreOrdersValidator)
 
     const page = payload.page || 1
@@ -47,6 +47,9 @@ export default class ListStoreOrdersController {
 
     const orders = await query.paginate(page, limit)
 
-    return StoreOrderDto.fromPaginator(orders)
+    const data = orders.all()
+    const metadata = orders.getMeta()
+
+    return serialize(StoreOrderTransformer.paginate(data, metadata))
   }
 }

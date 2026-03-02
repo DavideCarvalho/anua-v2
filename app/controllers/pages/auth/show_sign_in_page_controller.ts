@@ -8,6 +8,6 @@ export default class ShowSignInPageController {
       return response.redirect('/dashboard')
     }
 
-    return inertia.render('auth/sign-in')
+    return inertia.render('auth/sign-in', {})
   }
 }

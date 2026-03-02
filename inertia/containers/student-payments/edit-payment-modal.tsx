@@ -28,7 +28,8 @@ import {
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
 import { formatCurrency } from '~/lib/utils'
-import { useUpdateStudentPayment } from '~/hooks/mutations/use_student_payment_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const editPaymentSchema = z.object({
   amountReais: z.coerce.number().positive('Valor deve ser maior que zero'),
@@ -57,7 +58,8 @@ interface EditPaymentModalProps {
 }
 
 export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentModalProps) {
-  const updatePayment = useUpdateStudentPayment()
+  const queryClient = useQueryClient()
+  const updatePayment = useMutation(api.api.v1.studentPayments.update.mutationOptions())
 
   const form = useForm<EditPaymentFormData>({
     resolver: zodResolver(editPaymentSchema) as any,
@@ -83,13 +85,17 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
   async function onSubmit(data: EditPaymentFormData) {
     try {
       await updatePayment.mutateAsync({
-        id: payment.id,
-        amount: Math.round(data.amountReais * 100),
-        dueDate: data.dueDate,
-        discountType: data.discountType,
-        discountPercentage: data.discountType === 'PERCENTAGE' ? data.discountPercentage : 0,
-        discountValue: data.discountType === 'FLAT' ? Math.round(data.discountValueReais * 100) : 0,
+        params: { id: payment.id },
+        body: {
+          amount: Math.round(data.amountReais * 100),
+          dueDate: data.dueDate,
+          discountType: data.discountType,
+          discountPercentage: data.discountType === 'PERCENTAGE' ? data.discountPercentage : 0,
+          discountValue:
+            data.discountType === 'FLAT' ? Math.round(data.discountValueReais * 100) : 0,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['student-payments'] })
       toast.success('Mensalidade atualizada com sucesso')
       onOpenChange(false)
     } catch {

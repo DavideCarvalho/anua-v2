@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
-import EventParticipantDto from '#models/dto/event_participant.dto'
+import EventParticipantTransformer from '#transformers/event_participant_transformer'
 import { listParticipantsValidator } from '#validators/event'
 import AppException from '#exceptions/app_exception'
 
 export default class ListEventParticipantsController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { eventId } = params
     const { status, page = 1, limit = 50 } = await request.validateUsing(listParticipantsValidator)
 
@@ -24,6 +24,9 @@ export default class ListEventParticipantsController {
 
     const participants = await query.orderBy('createdAt', 'desc').paginate(page, limit)
 
-    return EventParticipantDto.fromPaginator(participants)
+    const data = participants.all()
+    const metadata = participants.getMeta()
+
+    return serialize(EventParticipantTransformer.paginate(data, metadata))
   }
 }

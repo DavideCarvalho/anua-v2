@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AcademicPeriod from '#models/academic_period'
-import AcademicPeriodDto from '#models/dto/academic_period.dto'
+import AcademicPeriodTransformer from '#transformers/academic_period_transformer'
 
 export default class GetCurrentActiveAcademicPeriodsController {
-  async handle({ auth, response }: HttpContext) {
+  async handle({ auth, response, serialize }: HttpContext) {
     const schoolId = auth.user?.schoolId
 
     if (!schoolId) {
@@ -16,6 +16,6 @@ export default class GetCurrentActiveAcademicPeriodsController {
       .whereNull('deletedAt')
       .orderBy('startDate', 'desc')
 
-    return AcademicPeriodDto.fromArray(periods)
+    return response.ok(serialize(AcademicPeriodTransformer.transform(periods)))
   }
 }

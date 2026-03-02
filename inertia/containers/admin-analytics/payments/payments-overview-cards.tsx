@@ -1,16 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { DollarSign, CheckCircle, Clock, AlertTriangle, Users, Calendar } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { usePaymentsOverviewQueryOptions } from '../../../hooks/queries/use_payments_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 
 export function PaymentsOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    usePaymentsOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.payments.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -49,11 +51,7 @@ export function PaymentsOverviewCards() {
         description={`${data.overdueCount} pagamentos`}
         icon={AlertTriangle}
       />
-      <StatCard
-        title="Taxa de Pagamento"
-        value={`${data.paymentRate}%`}
-        icon={DollarSign}
-      />
+      <StatCard title="Taxa de Pagamento" value={`${data.paymentRate}%`} icon={DollarSign} />
       <StatCard
         title="Alunos Inadimplentes"
         value={data.studentsWithOverdue.toLocaleString('pt-BR')}

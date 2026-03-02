@@ -10,9 +10,7 @@ export default function ContratosPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contratos</h1>
-          <p className="text-muted-foreground">
-            Gerencie os modelos de contrato da escola
-          </p>
+          <p className="text-muted-foreground">Gerencie os modelos de contrato da escola</p>
         </div>
 
         <ContractsListContainer />

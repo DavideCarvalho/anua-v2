@@ -49,9 +49,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
-import { useContractsQueryOptions } from '~/hooks/queries/use_contracts'
-import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
-import { useSubjectsQueryOptions } from '~/hooks/queries/use_subjects'
+import { api } from '~/lib/api'
 import type {
   EditAcademicPeriodFormValues,
   LevelFormValues,
@@ -345,9 +343,15 @@ export function CourseLevels({ courseIndex }: CourseLevelsProps) {
   const segment = form.watch('calendar.segment')
   const levelLabel = getLevelLabel(segment)
 
-  const { data: contractsData } = useQuery(useContractsQueryOptions({ limit: 100 }))
-  const { data: teachersData } = useQuery(useTeachersQueryOptions({ limit: 100 }))
-  const { data: subjectsData } = useQuery(useSubjectsQueryOptions({ limit: 100 }))
+  const { data: contractsData } = useQuery(
+    api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
+  )
+  const { data: teachersData } = useQuery(
+    api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } })
+  )
+  const { data: subjectsData } = useQuery(
+    api.api.v1.subjects.index.queryOptions({ query: { limit: 100 } })
+  )
 
   const contracts = contractsData?.data ?? []
   const teachers = teachersData?.data ?? []

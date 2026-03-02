@@ -12,7 +12,8 @@ import { Button } from '~/components/ui/button'
 import { Textarea } from '~/components/ui/textarea'
 import { Label } from '~/components/ui/label'
 import { formatCurrency } from '~/lib/utils'
-import { useCancelStudentPayment } from '~/hooks/mutations/use_student_payment_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface CancelPaymentDialogProps {
   payment: {
@@ -28,14 +29,18 @@ interface CancelPaymentDialogProps {
 
 export function CancelPaymentDialog({ payment, open, onOpenChange }: CancelPaymentDialogProps) {
   const [reason, setReason] = useState('')
-  const cancelPayment = useCancelStudentPayment()
+  const queryClient = useQueryClient()
+  const cancelPayment = useMutation(api.api.v1.studentPayments.cancel.mutationOptions())
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   async function handleCancel() {
     try {
-      await cancelPayment.mutateAsync({ id: payment.id, reason })
+      await cancelPayment.mutateAsync({
+        params: { id: payment.id },
+        body: { reason },
+      })
+      queryClient.invalidateQueries({ queryKey: ['student-payments'] })
       toast.success('Pagamento cancelado')
       setReason('')
       onOpenChange(false)
@@ -49,15 +54,22 @@ export function CancelPaymentDialog({ payment, open, onOpenChange }: CancelPayme
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Cancelar Pagamento</AlertDialogTitle>
-          <AlertDialogDescription>
-            Essa ação não pode ser desfeita.
-          </AlertDialogDescription>
+          <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="text-sm space-y-1">
-          <p>Aluno: <span className="font-medium">{studentName}</span></p>
-          <p>Referência: <span className="font-medium">{payment.month}/{payment.year}</span></p>
-          <p>Valor: <span className="font-medium">{formatCurrency(Number(payment.amount))}</span></p>
+          <p>
+            Aluno: <span className="font-medium">{studentName}</span>
+          </p>
+          <p>
+            Referência:{' '}
+            <span className="font-medium">
+              {payment.month}/{payment.year}
+            </span>
+          </p>
+          <p>
+            Valor: <span className="font-medium">{formatCurrency(Number(payment.amount))}</span>
+          </p>
         </div>
 
         <div className="space-y-2">

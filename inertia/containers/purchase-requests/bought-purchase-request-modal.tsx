@@ -25,8 +25,8 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use_purchase_request'
-import { useMarkBoughtPurchaseRequestMutation } from '../../hooks/mutations/use_mark_bought_purchase_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const schema = z.object({
@@ -48,11 +48,12 @@ export function BoughtPurchaseRequestModal({
   open,
   onClose,
 }: BoughtPurchaseRequestModalProps) {
+  const queryClient = useQueryClient()
   const { data: purchaseRequest } = useSuspenseQuery(
-    usePurchaseRequestQueryOptions({ id: purchaseRequestId })
+    api.api.v1.purchaseRequests.show.queryOptions({ params: { id: purchaseRequestId } })
   )
 
-  const markBoughtMutation = useMarkBoughtPurchaseRequestMutation()
+  const markBoughtMutation = useMutation(api.api.v1.purchaseRequests.markBought.mutationOptions())
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema) as any,
@@ -69,13 +70,19 @@ export function BoughtPurchaseRequestModal({
 
   async function handleSubmit(data: FormData) {
     toast.promise(
-      markBoughtMutation.mutateAsync({
-        params: { id: purchaseRequestId },
-        finalQuantity: data.finalQuantity,
-        finalUnitValue: data.finalUnitValue,
-        finalValue: data.finalQuantity * data.finalUnitValue,
-        estimatedArrivalDate: data.estimatedArrivalDate,
-      } as any),
+      markBoughtMutation
+        .mutateAsync({
+          params: { id: purchaseRequestId },
+          body: {
+            finalQuantity: data.finalQuantity,
+            finalUnitValue: data.finalUnitValue,
+            finalValue: data.finalQuantity * data.finalUnitValue,
+            estimatedArrivalDate: data.estimatedArrivalDate,
+          },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+        }),
       {
         loading: 'Marcando como comprado...',
         success: () => {

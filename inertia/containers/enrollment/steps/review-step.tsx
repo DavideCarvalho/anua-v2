@@ -74,7 +74,9 @@ export function ReviewStep({
           {data.basicInfo.documentNumber && (
             <p>
               <span className="text-muted-foreground">Documento:</span>{' '}
-              {DocumentTypeLabels[data.basicInfo.documentType as DocumentType] ?? data.basicInfo.documentType} — {formatCpf(data.basicInfo.documentNumber)}
+              {DocumentTypeLabels[data.basicInfo.documentType as DocumentType] ??
+                data.basicInfo.documentType}{' '}
+              — {formatCpf(data.basicInfo.documentNumber)}
             </p>
           )}
           {data.basicInfo.email && (
@@ -102,7 +104,8 @@ export function ReviewStep({
               <div key={i} className="space-y-1">
                 <p className="text-sm font-medium">{resp.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {DocumentTypeLabels[resp.documentType as DocumentType] ?? resp.documentType}: {formatCpf(resp.documentNumber)}
+                  {DocumentTypeLabels[resp.documentType as DocumentType] ?? resp.documentType}:{' '}
+                  {formatCpf(resp.documentNumber)}
                 </p>
                 <div className="flex gap-1.5 flex-wrap">
                   {resp.isPedagogical && (

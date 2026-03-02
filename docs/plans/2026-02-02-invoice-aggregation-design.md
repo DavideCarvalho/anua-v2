@@ -44,6 +44,7 @@ Invoice
 **UPFRONT cartão de crédito:** Uma única Invoice com o valor total. Escola recebe tudo de uma vez (menos taxa), responsável parcela com o banco.
 
 **Relacionamentos:**
+
 - Invoice hasMany StudentPayment (via `invoiceId`)
 - Invoice belongsTo Student
 - Invoice belongsTo Contract
@@ -51,15 +52,18 @@ Invoice
 ## Mudanças em tabelas existentes
 
 ### StudentPayment
+
 - Novo campo: `invoiceId` (nullable FK → Invoice)
 - Null = ainda não faturado (entra na próxima Invoice)
 
 ### CanteenPurchase
+
 - Novo campo: `studentPaymentId` (nullable FK → StudentPayment)
 - Preenchido quando compra é fiado (sem crédito suficiente)
 - Null = pago com crédito, dinheiro ou cartão na hora
 
 ### StoreOrder
+
 - Novo campo: `studentPaymentId` (nullable FK → StudentPayment)
 - Preenchido quando parte em dinheiro é fiado
 - Null = pago só com pontos ou pago na hora

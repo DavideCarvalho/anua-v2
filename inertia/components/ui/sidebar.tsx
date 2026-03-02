@@ -12,12 +12,7 @@ import { Input } from './input'
 import { Separator } from './separator'
 import { Sheet, SheetContent, SheetTitle } from './sheet'
 import { Skeleton } from './skeleton'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from './tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -529,7 +524,15 @@ const SidebarMenuButton = React.forwardRef<
   } & VariantProps<typeof sidebarMenuButtonVariants>
 >(
   (
-    { asChild = false, isActive = false, variant = 'default', size = 'default', tooltip, className, ...props },
+    {
+      asChild = false,
+      isActive = false,
+      variant = 'default',
+      size = 'default',
+      tooltip,
+      className,
+      ...props
+    },
     ref
   ) => {
     const Comp = asChild ? Slot : 'button'

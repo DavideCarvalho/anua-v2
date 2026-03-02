@@ -1,5 +1,5 @@
-import { HttpContext } from '@adonisjs/core/http'
-import { UserResolver } from '@stouder-io/adonis-auditing'
+import { type HttpContext } from '@adonisjs/core/http'
+import { type UserResolver } from '@stouder-io/adonis-auditing'
 import { getAuditContext } from '#services/audit_context_service'
 
 export default class implements UserResolver {

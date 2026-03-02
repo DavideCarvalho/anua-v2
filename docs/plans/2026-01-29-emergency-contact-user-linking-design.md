@@ -34,12 +34,14 @@ In each, set `userId: contact.responsibleUserId ?? null` when creating `StudentE
 ### Schema (`inertia/containers/students/new-student-modal/schema.ts`)
 
 Add optional fields to emergency contact zod schema:
+
 - `responsibleUserId: z.string().uuid().optional()`
 - `responsibleIndex: z.number().optional()`
 
 ### Medical Info Step (`inertia/containers/students/new-student-modal/steps/medical-info-step.tsx`)
 
 Per emergency contact card:
+
 - Add a Select at the top: "Selecionar responsavel" with the registered responsibles as options.
 - On select: fill name/phone/relationship from the responsible, disable those fields, store `responsibleUserId` and `responsibleIndex`.
 - On clear: re-enable fields, clear values, remove `responsibleUserId`.

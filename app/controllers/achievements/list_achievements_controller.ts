@@ -1,9 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
+import SchoolAchievementConfig from '#models/school_achievement_config'
+import AchievementTransformer from '#transformers/achievement_transformer'
+import SchoolAchievementConfigTransformer from '#transformers/school_achievement_config_transformer'
 import { listAchievementsValidator } from '#validators/gamification'
-import AchievementDto from '#models/dto/achievement.dto'
 
-// Map validator category to model type
 const categoryToTypeMap: Record<string, string> = {
   ACADEMIC: 'ACADEMIC_PERFORMANCE',
   ATTENDANCE: 'ATTENDANCE',
@@ -13,24 +14,26 @@ const categoryToTypeMap: Record<string, string> = {
 }
 
 export default class ListAchievementsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listAchievementsValidator)
 
     const page = payload.page || 1
     const limit = payload.limit || 20
 
-    const query = Achievement.query().orderBy('name', 'asc')
+    const query = Achievement.query().orderBy('name', 'asc').preload('school')
 
     if (payload.schoolId) {
       const schoolId = payload.schoolId
       query.where((q) => {
-        q.where('schoolId', schoolId).orWhereNull('schoolId')
+        q.where('schoolId', schoolId).orWhereNull('schoolId').orWhereNotNull('schoolChainId')
       })
+    } else {
+      query.whereNull('schoolId').whereNull('schoolChainId')
     }
 
     if (payload.category) {
       const type = categoryToTypeMap[payload.category] || payload.category
-      query.where('type', type)
+      query.where('category', type)
     }
 
     if (payload.isActive !== undefined) {
@@ -38,7 +41,37 @@ export default class ListAchievementsController {
     }
 
     const achievements = await query.paginate(page, limit)
+    const data = achievements.all()
+    const metadata = achievements.getMeta()
 
-    return AchievementDto.fromPaginator(achievements)
+    let configByAchievementId: Map<string, SchoolAchievementConfig> = new Map()
+    if (payload.schoolId && data.some((a) => a.schoolChainId)) {
+      const achievementIds = data.filter((a) => a.schoolChainId).map((a) => a.id)
+      const configs = await SchoolAchievementConfig.query()
+        .whereIn('achievementId', achievementIds)
+        .where('schoolId', payload.schoolId)
+      for (const config of configs) {
+        configByAchievementId.set(config.achievementId, config)
+      }
+    }
+
+    const paginated = serialize(AchievementTransformer.paginate(data, metadata)) as unknown as {
+      data: Record<string, unknown>[]
+      meta: unknown
+    }
+
+    if (configByAchievementId.size > 0) {
+      paginated.data = paginated.data.map((item) => {
+        const config = configByAchievementId.get(item.id as string)
+        return {
+          ...item,
+          schoolAchievementConfig: config
+            ? SchoolAchievementConfigTransformer.transform(config)
+            : undefined,
+        }
+      })
+    }
+
+    return paginated
   }
 }

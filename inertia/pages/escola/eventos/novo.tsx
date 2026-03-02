@@ -1,4 +1,5 @@
-import { Head, Link, router, usePage } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
+import { Head, router, usePage } from '@inertiajs/react'
 import { type KeyboardEvent, useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -32,10 +33,8 @@ import { Switch } from '~/components/ui/switch'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Label } from '~/components/ui/label'
-import { useCreateEventMutation } from '~/hooks/mutations/use_create_event'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useClassesQueryOptions } from '~/hooks/queries/use_classes'
-import { useLevelsQueryOptions } from '~/hooks/queries/use_levels'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { getEducationType, type AcademicPeriodSegment } from '~/lib/formatters'
 import type { SharedProps } from '~/lib/types'
 
@@ -150,7 +149,8 @@ export default function NovoEventoPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [maxVisitedStep, setMaxVisitedStep] = useState(0)
 
-  const createEventMutation = useCreateEventMutation()
+  const queryClient = useQueryClient()
+  const createEventMutation = useMutation(api.api.v1.events.store.mutationOptions())
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
@@ -185,7 +185,9 @@ export default function NovoEventoPage() {
   const singleAcademicPeriodId =
     formAudiencePeriodIds.length === 1 ? formAudiencePeriodIds[0] : undefined
 
-  const { data: periodsData } = useQuery(useAcademicPeriodsQueryOptions({ limit: 100 }))
+  const { data: periodsData } = useQuery(
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
+  )
   const shouldLoadLevels = !values.audienceWholeSchool && formAudiencePeriodIds.length > 0
   const shouldLoadClasses =
     !values.audienceWholeSchool &&
@@ -193,18 +195,22 @@ export default function NovoEventoPage() {
     formAudienceLevelIds.length > 0
 
   const { data: levelsData } = useQuery({
-    ...useLevelsQueryOptions({
-      schoolId: eventSchoolId,
-      limit: 300,
-      academicPeriodId: singleAcademicPeriodId,
+    ...api.api.v1.levels.index.queryOptions({
+      query: {
+        schoolId: eventSchoolId!,
+        limit: 300,
+        academicPeriodId: singleAcademicPeriodId,
+      },
     }),
     enabled: shouldLoadLevels && hasSchoolId,
   })
   const { data: classesData } = useQuery({
-    ...useClassesQueryOptions({
-      schoolId: eventSchoolId,
-      limit: 300,
-      academicPeriodId: singleAcademicPeriodId,
+    ...api.api.v1.classes.index.queryOptions({
+      query: {
+        schoolId: eventSchoolId!,
+        limit: 300,
+        academicPeriodId: singleAcademicPeriodId,
+      },
     }),
     enabled: shouldLoadClasses && hasSchoolId,
   })
@@ -372,47 +378,46 @@ export default function NovoEventoPage() {
       ? buildIsoDateTime(endsAtBaseDate, formValues.isAllDay ? undefined : formValues.endTime)
       : undefined
 
-    toast.promise(
-      createEventMutation.mutateAsync({
-        title: formValues.title,
-        description: formValues.description,
-        type: formValues.type as any,
-        visibility: EventVisibility.INTERNAL,
-        location: formValues.location,
-        isAllDay: formValues.isAllDay,
-        startTime: formValues.isAllDay ? null : formValues.startTime || null,
-        endTime: formValues.isAllDay ? null : formValues.endTime || null,
-        isExternal: formValues.isExternal,
-        requiresParentalConsent: formValues.requiresParentalConsent,
-        hasAdditionalCosts: formValues.hasAdditionalCosts,
-        additionalCostAmount: formValues.hasAdditionalCosts
-          ? formValues.additionalCostAmount
-          : undefined,
-        additionalCostInstallments: formValues.hasAdditionalCosts
-          ? formValues.additionalCostInstallments
-          : undefined,
-        additionalCostDescription: formValues.hasAdditionalCosts
-          ? formValues.additionalCostDescription
-          : undefined,
-        audienceWholeSchool: formValues.audienceWholeSchool,
-        audienceAcademicPeriodIds: formValues.audienceWholeSchool
-          ? []
-          : formValues.audienceAcademicPeriodIds,
-        audienceLevelIds: formValues.audienceWholeSchool ? [] : formValues.audienceLevelIds,
-        audienceClassIds: formValues.audienceWholeSchool ? [] : formValues.audienceClassIds,
-        schoolId: eventSchoolId,
-        startsAt: startsAtIso,
-        endsAt: endsAtIso,
-      }),
-      {
-        loading: 'Criando evento...',
-        success: () => {
-          router.visit('/escola/eventos')
-          return 'Evento criado com sucesso!'
-        },
-        error: 'Erro ao criar evento',
-      }
-    )
+    const eventPayload = {
+      title: formValues.title,
+      description: formValues.description,
+      type: formValues.type as any,
+      visibility: EventVisibility.INTERNAL,
+      location: formValues.location,
+      isAllDay: formValues.isAllDay,
+      startTime: formValues.isAllDay ? null : formValues.startTime || null,
+      endTime: formValues.isAllDay ? null : formValues.endTime || null,
+      isExternal: formValues.isExternal,
+      requiresParentalConsent: formValues.requiresParentalConsent,
+      hasAdditionalCosts: formValues.hasAdditionalCosts,
+      additionalCostAmount: formValues.hasAdditionalCosts
+        ? formValues.additionalCostAmount
+        : undefined,
+      additionalCostInstallments: formValues.hasAdditionalCosts
+        ? formValues.additionalCostInstallments
+        : undefined,
+      additionalCostDescription: formValues.hasAdditionalCosts
+        ? formValues.additionalCostDescription
+        : undefined,
+      audienceWholeSchool: formValues.audienceWholeSchool,
+      audienceAcademicPeriodIds: formValues.audienceWholeSchool
+        ? []
+        : formValues.audienceAcademicPeriodIds,
+      audienceLevelIds: formValues.audienceWholeSchool ? [] : formValues.audienceLevelIds,
+      audienceClassIds: formValues.audienceWholeSchool ? [] : formValues.audienceClassIds,
+      schoolId: eventSchoolId,
+      startsAt: startsAtIso,
+      endsAt: endsAtIso,
+    }
+    toast.promise(createEventMutation.mutateAsync({ body: eventPayload }), {
+      loading: 'Criando evento...',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: ['events'] })
+        router.visit('/escola/eventos')
+        return 'Evento criado com sucesso!'
+      },
+      error: 'Erro ao criar evento',
+    })
   }
 
   return (

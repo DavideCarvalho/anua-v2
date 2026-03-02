@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { format, isAfter, isBefore, isToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ClipboardList, Trash2, Loader2, FileText } from 'lucide-react'
@@ -17,8 +16,8 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { LaunchGradesModal } from './launch-grades-modal'
-import { useAssignmentsQueryOptions } from '~/hooks/queries/use_assignments'
-import { useDeleteAssignment } from '~/hooks/mutations/use_assignment_mutations'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface AssignmentsTableProps {
   classId: string
@@ -76,16 +75,27 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
     data: response,
     isLoading,
     isError,
-  } = useQuery(useAssignmentsQueryOptions({ classId, academicPeriodId, page, limit: 10 }))
+  } = useQuery(
+    api.api.v1.assignments.index.queryOptions({
+      query: { classId, academicPeriodId, page, limit: 10 },
+    })
+  )
 
-  const deleteMutation = useDeleteAssignment()
+  const queryClient = useQueryClient()
+  const deleteMutation = useMutation(
+    api.api.v1.assignments.destroy.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
+      },
+    })
+  )
 
   const handleDelete = async (assignmentId: string) => {
     if (!confirm('Tem certeza que deseja excluir esta atividade?')) {
       return
     }
     try {
-      await deleteMutation.mutateAsync(assignmentId)
+      await deleteMutation.mutateAsync({ params: { id: assignmentId }, body: {} })
       toast.success('Atividade excluida com sucesso!')
     } catch {
       toast.error('Erro ao excluir atividade')

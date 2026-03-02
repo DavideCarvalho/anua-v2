@@ -13,8 +13,7 @@ import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { ErrorBoundary } from '../../components/error-boundary'
 
-import { useTeachersTimesheetQueryOptions } from '../../hooks/queries/use_teachers_timesheet'
-import { useAcademicPeriodsQueryOptions } from '../../hooks/queries/use_academic_periods'
+import { api } from '~/lib/api'
 
 function TeacherTimesheetTableContent({
   onViewAbsences,
@@ -27,7 +26,9 @@ function TeacherTimesheetTableContent({
   const [selectedAcademicPeriodIds, setSelectedAcademicPeriodIds] = useState<string[]>([])
 
   const { data: activeAcademicPeriods, isLoading: isLoadingPeriods } = useQuery(
-    useAcademicPeriodsQueryOptions({ page: 1, limit: 50 })
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { page: 1, limit: 50 },
+    })
   )
 
   const periods = useMemo(() => {
@@ -35,13 +36,15 @@ function TeacherTimesheetTableContent({
   }, [activeAcademicPeriods])
 
   const { data: timesheet, isLoading: isLoadingTimesheet } = useQuery(
-    useTeachersTimesheetQueryOptions({
-      month: selectedMonth,
-      year: selectedYear,
-      academicPeriodIds: selectedAcademicPeriodIds.length
-        ? selectedAcademicPeriodIds
-        : [periods[0]?.id].filter(Boolean),
-    } as any)
+    api.api.v1.teachers.getTeachersTimesheet.queryOptions({
+      query: {
+        month: selectedMonth,
+        year: selectedYear,
+        academicPeriodIds: selectedAcademicPeriodIds.length
+          ? selectedAcademicPeriodIds
+          : [periods[0]?.id].filter(Boolean),
+      },
+    })
   )
 
   const rows = useMemo(() => {

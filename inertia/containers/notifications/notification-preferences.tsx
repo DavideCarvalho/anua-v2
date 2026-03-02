@@ -7,8 +7,8 @@ import { Switch } from '../../components/ui/switch'
 import { Label } from '../../components/ui/label'
 import { Separator } from '../../components/ui/separator'
 
-import { useNotificationPreferencesQueryOptions } from '../../hooks/queries/use_notification_preferences'
-import { useUpdateNotificationPreferencesMutation } from '../../hooks/mutations/use_update_notification_preferences'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface NotificationPreference {
   id: string
@@ -18,17 +18,24 @@ interface NotificationPreference {
 }
 
 export function NotificationPreferences() {
-  const { data } = useSuspenseQuery(useNotificationPreferencesQueryOptions())
-  const updateMutation = useUpdateNotificationPreferencesMutation()
+  const queryClient = useQueryClient()
+  const { data } = useSuspenseQuery(api.api.v1.notificationPreferences.index.queryOptions({}))
+  const updateMutation = useMutation(api.api.v1.notificationPreferences.update.mutationOptions())
 
   const preferences = (data?.preferences ?? []) as unknown as NotificationPreference[]
-  const grouped = data?.grouped as Record<string, Record<string, boolean>> ?? {}
+  const grouped = (data?.grouped as Record<string, Record<string, boolean>>) ?? {}
 
   const handleToggle = (type: string, channel: string, currentValue: boolean) => {
     toast.promise(
-      updateMutation.mutateAsync({
-        preferences: [{ type, channel, enabled: !currentValue }] as any,
-      }),
+      updateMutation
+        .mutateAsync({
+          body: {
+            preferences: [{ type, channel, enabled: !currentValue }] as any,
+          },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
+        }),
       {
         loading: 'Atualizando preferência...',
         success: 'Preferência atualizada!',
@@ -42,18 +49,29 @@ export function NotificationPreferences() {
 
   // Group types by category
   const gamificationTypes = types.filter((t) =>
-    ['ORDER_APPROVED', 'ORDER_READY', 'ORDER_REJECTED', 'ORDER_PREPARING',
-     'ACHIEVEMENT_UNLOCKED', 'CHALLENGE_COMPLETED', 'POINTS_RECEIVED', 'LEVEL_UP'].includes(t)
+    [
+      'ORDER_APPROVED',
+      'ORDER_READY',
+      'ORDER_REJECTED',
+      'ORDER_PREPARING',
+      'ACHIEVEMENT_UNLOCKED',
+      'CHALLENGE_COMPLETED',
+      'POINTS_RECEIVED',
+      'LEVEL_UP',
+    ].includes(t)
   )
 
   const academicTypes = types.filter((t) =>
-    ['ASSIGNMENT_CREATED', 'ASSIGNMENT_GRADED', 'ASSIGNMENT_DUE_SOON',
-     'GRADE_PUBLISHED', 'ATTENDANCE_MARKED'].includes(t)
+    [
+      'ASSIGNMENT_CREATED',
+      'ASSIGNMENT_GRADED',
+      'ASSIGNMENT_DUE_SOON',
+      'GRADE_PUBLISHED',
+      'ATTENDANCE_MARKED',
+    ].includes(t)
   )
 
-  const administrativeTypes = types.filter((t) =>
-    ['PAYMENT_DUE', 'PAYMENT_RECEIVED'].includes(t)
-  )
+  const administrativeTypes = types.filter((t) => ['PAYMENT_DUE', 'PAYMENT_RECEIVED'].includes(t))
 
   const systemTypes = types.filter((t) =>
     ['SYSTEM_ANNOUNCEMENT', 'MAINTENANCE_SCHEDULED'].includes(t)
@@ -65,8 +83,8 @@ export function NotificationPreferences() {
         <CardHeader>
           <CardTitle>Como funciona?</CardTitle>
           <CardDescription>
-            Configure através de quais canais você deseja receber cada tipo de
-            notificação. Por padrão, todas são enviadas pelo app.
+            Configure através de quais canais você deseja receber cada tipo de notificação. Por
+            padrão, todas são enviadas pelo app.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -161,9 +179,7 @@ function PreferenceSection({
             {index > 0 && <Separator className="my-4" />}
             <div className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium">
-                  {getNotificationTypeLabel(type)}
-                </h4>
+                <h4 className="text-sm font-medium">{getNotificationTypeLabel(type)}</h4>
                 <p className="text-sm text-muted-foreground">
                   {getNotificationTypeDescription(type)}
                 </p>

@@ -1,13 +1,7 @@
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { useEffect, useMemo } from 'react'
 import { Plus, Trash2, GripVertical, UserCheck } from 'lucide-react'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
@@ -62,10 +56,7 @@ export function MedicalInfoStep() {
   // If a responsible is removed, clear emergency contacts linked to it
   useEffect(() => {
     watchedEmergencyContacts?.forEach((contact, contactIndex) => {
-      if (
-        contact.responsibleIndex != null &&
-        contact.responsibleIndex >= responsibles.length
-      ) {
+      if (contact.responsibleIndex != null && contact.responsibleIndex >= responsibles.length) {
         form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.responsibleIndex`, undefined)
         form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.name`, '')
         form.setValue(`medicalInfo.emergencyContacts.${contactIndex}.phone`, '')
@@ -93,9 +84,7 @@ export function MedicalInfoStep() {
   }
 
   // Sync responsible data changes to linked emergency contacts
-  const responsibleDataKey = responsibles
-    .map((r) => `${r.name}|${r.phone}`)
-    .join('\0')
+  const responsibleDataKey = responsibles.map((r) => `${r.name}|${r.phone}`).join('\0')
 
   useEffect(() => {
     watchedEmergencyContacts?.forEach((contact, contactIndex) => {
@@ -327,11 +316,7 @@ export function MedicalInfoStep() {
                         <FormItem>
                           <FormLabel>Nome*</FormLabel>
                           <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Nome do contato"
-                              disabled={isLinked}
-                            />
+                            <Input {...field} placeholder="Nome do contato" disabled={isLinked} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -21,11 +21,8 @@ import {
   SelectValue,
 } from '../components/ui/select'
 import { toast } from 'sonner'
-import {
-  useOwnFinancialQueryOptions,
-  useOwnSettlementsQueryOptions,
-} from '../hooks/queries/use_store_owner'
-import { useUpdateFinancialSettings } from '../hooks/mutations/use_store_owner_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { formatCurrency } from '../lib/utils'
 
 const SETTLEMENT_STATUS_LABELS: Record<string, string> = {
@@ -58,14 +55,15 @@ const PIX_KEY_TYPES = [
 ]
 
 export function StoreOwnerFinancialContainer() {
+  const queryClient = useQueryClient()
   const { data: financialData, isLoading: financialLoading } = useQuery(
-    useOwnFinancialQueryOptions()
+    api.api.v1.storeOwner.financial.show.queryOptions({})
   )
   const { data: settlementsData, isLoading: settlementsLoading } = useQuery(
-    useOwnSettlementsQueryOptions()
+    api.api.v1.storeOwner.settlements.index.queryOptions({})
   )
 
-  const updateSettings = useUpdateFinancialSettings()
+  const updateSettings = useMutation(api.api.v1.storeOwner.financial.update.mutationOptions())
 
   const [pixKey, setPixKey] = useState('')
   const [pixKeyType, setPixKeyType] = useState<'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'>('CPF')
@@ -85,11 +83,14 @@ export function StoreOwnerFinancialContainer() {
     e.preventDefault()
     try {
       await updateSettings.mutateAsync({
-        pixKey: pixKey || undefined,
-        pixKeyType: pixKeyType || undefined,
-        bankName: bankName || undefined,
-        accountHolder: accountHolder || undefined,
+        body: {
+          pixKey: pixKey || undefined,
+          pixKeyType: pixKeyType || undefined,
+          bankName: bankName || undefined,
+          accountHolder: accountHolder || undefined,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['storeOwner', 'financial'] })
       toast.success('Dados salvos com sucesso!')
     } catch {
       toast.error('Erro ao salvar dados.')

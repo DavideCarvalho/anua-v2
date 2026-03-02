@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
-import SchoolChain from '#models/school_chain'
+import type SchoolChain from '#models/school_chain'
 import InsuranceConfigResponseDto from '#models/dto/insurance_config_response.dto'
 import { getInsuranceConfigValidator } from '#validators/insurance'
 import AppException from '#exceptions/app_exception'

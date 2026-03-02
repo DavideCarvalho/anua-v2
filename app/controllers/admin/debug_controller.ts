@@ -7,7 +7,8 @@ import DebugController from 'adonisjs-server-stats/debug/controller'
 export default class AdminDebugController {
   private async getController() {
     const store = (await app.container.make('debug.store')) as DebugStore
-    return new DebugController(store)
+    const logPath = app.makePath('logs', 'adonisjs.log')
+    return new DebugController(store, logPath)
   }
 
   async queries(ctx: HttpContext) {

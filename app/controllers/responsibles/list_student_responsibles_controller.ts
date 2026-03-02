@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasResponsible from '#models/student_has_responsible'
-import { StudentHasResponsibleDto } from '#models/dto/student_has_responsible.dto'
+import StudentHasResponsibleTransformer from '#transformers/student_has_responsible_transformer'
 
 export default class ListStudentResponsiblesController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const { studentId } = params
 
     const responsibles = await StudentHasResponsible.query()
@@ -14,6 +14,6 @@ export default class ListStudentResponsiblesController {
       })
       .orderBy('createdAt', 'desc')
 
-    return StudentHasResponsibleDto.fromArray(responsibles)
+    return serialize(StudentHasResponsibleTransformer.transform(responsibles))
   }
 }

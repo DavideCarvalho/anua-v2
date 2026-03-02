@@ -23,8 +23,8 @@ import {
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { usePurchaseRequestQueryOptions } from '../../hooks/queries/use_purchase_request'
-import { useMarkArrivedPurchaseRequestMutation } from '../../hooks/mutations/use_mark_arrived_purchase_request'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
 const schema = z.object({
@@ -44,11 +44,12 @@ export function ArrivedPurchaseRequestModal({
   open,
   onClose,
 }: ArrivedPurchaseRequestModalProps) {
+  const queryClient = useQueryClient()
   const { data: purchaseRequest } = useSuspenseQuery(
-    usePurchaseRequestQueryOptions({ id: purchaseRequestId })
+    api.api.v1.purchaseRequests.show.queryOptions({ params: { id: purchaseRequestId } })
   )
 
-  const markArrivedMutation = useMarkArrivedPurchaseRequestMutation()
+  const markArrivedMutation = useMutation(api.api.v1.purchaseRequests.markArrived.mutationOptions())
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -59,10 +60,14 @@ export function ArrivedPurchaseRequestModal({
 
   async function handleSubmit(data: FormData) {
     toast.promise(
-      markArrivedMutation.mutateAsync({
-        params: { id: purchaseRequestId },
-        arrivalDate: data.arrivalDate,
-      } as any),
+      markArrivedMutation
+        .mutateAsync({
+          params: { id: purchaseRequestId },
+          body: { arrivalDate: data.arrivalDate },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+        }),
       {
         loading: 'Marcando como chegou...',
         success: () => {
@@ -97,7 +102,11 @@ export function ArrivedPurchaseRequestModal({
                 </div>
                 <div className="space-y-1">
                   <Label>Valor total</Label>
-                  <p>{brazilianRealFormatter(purchaseRequest?.finalValue ?? purchaseRequest?.value ?? 0)}</p>
+                  <p>
+                    {brazilianRealFormatter(
+                      purchaseRequest?.finalValue ?? purchaseRequest?.value ?? 0
+                    )}
+                  </p>
                 </div>
               </div>
 

@@ -1,7 +1,7 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger } from 'nuqs'
-import { useLeaderboardsQueryOptions } from '../hooks/queries/use_leaderboards'
+import { api } from '~/lib/api'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { ChevronLeft, ChevronRight, AlertCircle, Trophy } from 'lucide-react'
@@ -59,7 +59,10 @@ export function LeaderboardsListContainer() {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <LeaderboardsErrorFallback error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <LeaderboardsErrorFallback
+              error={error as Error}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <LeaderboardsListContent />
@@ -78,7 +81,9 @@ function LeaderboardsListContent() {
 
   const { page, limit } = filters
 
-  const { data, isLoading, error, refetch } = useQuery(useLeaderboardsQueryOptions({ page, limit }))
+  const { data, isLoading, error, refetch } = useQuery(
+    api.api.v1.leaderboards.index.queryOptions({ query: { page, limit } })
+  )
 
   const leaderboards = data?.data ?? []
   const meta = data?.meta ?? null

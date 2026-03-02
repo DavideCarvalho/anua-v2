@@ -5,11 +5,11 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatCurrency } from '../../lib/utils'
 
-import {
-  useCanteenMonthlyTransfersQueryOptions,
-  type CanteenMonthlyTransfersResponse,
-} from '../../hooks/queries/use_canteen_monthly_transfers'
-import { useUpdateCanteenMonthlyTransferStatus } from '../../hooks/mutations/use_canteen_reservation_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type CanteenMonthlyTransfersResponse = Route.Response<'api.v1.canteen_monthly_transfers.index'>
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -47,10 +47,15 @@ const statusConfig: Record<
 type MonthlyTransfer = CanteenMonthlyTransfersResponse['data'][number]
 
 export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps) {
+  const queryClient = useQueryClient()
   const { data, isLoading, isError, error } = useQuery(
-    useCanteenMonthlyTransfersQueryOptions({ canteenId })
+    api.api.v1.canteenMonthlyTransfers.index.queryOptions({
+      query: { canteenId },
+    })
   )
-  const updateStatusMutation = useUpdateCanteenMonthlyTransferStatus()
+  const updateStatusMutation = useMutation(
+    api.api.v1.canteenMonthlyTransfers.updateStatus.mutationOptions()
+  )
 
   const transfers: MonthlyTransfer[] = data?.data ?? []
 
@@ -147,10 +152,18 @@ export function MonthlyTransfersTable({ canteenId }: MonthlyTransfersTableProps)
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          updateStatusMutation.mutate({
-                            id: transfer.id,
-                            status: 'TRANSFERRED',
-                          })
+                          updateStatusMutation.mutate(
+                            {
+                              params: { id: transfer.id },
+                              body: { status: 'TRANSFERRED' },
+                            },
+                            {
+                              onSuccess: () =>
+                                queryClient.invalidateQueries({
+                                  queryKey: ['canteen-monthly-transfers'],
+                                }),
+                            }
+                          )
                         }
                       >
                         Marcar Concluído

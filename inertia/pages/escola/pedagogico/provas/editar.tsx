@@ -9,15 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../../components/ui/card'
-import type { ExamData } from '../../../../hooks/queries/use_exam'
-import { useExamQueryOptions } from '../../../../hooks/queries/use_exam'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type ExamData = Route.Response<'api.v1.exams.show'>
 
 interface Props {
   examId: string
 }
 
 export default function EditarProvaPage({ examId }: Props) {
-  const { data, isLoading } = useQuery(useExamQueryOptions({ id: examId }))
+  const { data, isLoading } = useQuery(
+    api.api.v1.exams.show.queryOptions({ params: { id: examId } })
+  )
 
   const exam = data as ExamData | undefined
 

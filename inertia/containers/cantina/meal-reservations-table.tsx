@@ -3,14 +3,11 @@ import { Calendar, User, Check, X, Utensils } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import {
-  useCanteenMealReservationsQueryOptions,
-  type CanteenMealReservationsResponse,
-} from '../../hooks/queries/use_canteen_meal_reservations'
-import {
-  useUpdateCanteenMealReservationStatus,
-  useCancelCanteenMealReservation,
-} from '../../hooks/mutations/use_canteen_reservation_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type CanteenMealReservationsResponse = Route.Response<'api.v1.canteen_meal_reservations.index'>
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -42,11 +39,16 @@ const statusConfig: Record<
 type MealReservation = CanteenMealReservationsResponse['data'][number]
 
 export function MealReservationsTable({ canteenId, date }: MealReservationsTableProps) {
+  const queryClient = useQueryClient()
   const { data, isLoading, isError, error } = useQuery(
-    useCanteenMealReservationsQueryOptions({ canteenId, date })
+    api.api.v1.canteenMealReservations.index.queryOptions({
+      query: { canteenId, date },
+    })
   )
-  const updateStatusMutation = useUpdateCanteenMealReservationStatus()
-  const cancelMutation = useCancelCanteenMealReservation()
+  const updateStatusMutation = useMutation(
+    api.api.v1.canteenMealReservations.updateStatus.mutationOptions()
+  )
+  const cancelMutation = useMutation(api.api.v1.canteenMealReservations.cancel.mutationOptions())
 
   const reservations: MealReservation[] = data?.data ?? []
 
@@ -138,10 +140,18 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                             size="sm"
                             variant="ghost"
                             onClick={() =>
-                              updateStatusMutation.mutate({
-                                id: reservation.id,
-                                status: 'CONFIRMED',
-                              })
+                              updateStatusMutation.mutate(
+                                {
+                                  params: { id: reservation.id },
+                                  body: { status: 'CONFIRMED' },
+                                },
+                                {
+                                  onSuccess: () =>
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['canteen-meal-reservations'],
+                                    }),
+                                }
+                              )
                             }
                             title="Confirmar"
                           >
@@ -150,7 +160,17 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => cancelMutation.mutate(reservation.id)}
+                            onClick={() =>
+                              cancelMutation.mutate(
+                                { params: { id: reservation.id } },
+                                {
+                                  onSuccess: () =>
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['canteen-meal-reservations'],
+                                    }),
+                                }
+                              )
+                            }
                             title="Cancelar"
                           >
                             <X className="h-4 w-4 text-red-600" />
@@ -162,10 +182,18 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                           size="sm"
                           variant="outline"
                           onClick={() =>
-                            updateStatusMutation.mutate({
-                              id: reservation.id,
-                              status: 'SERVED',
-                            })
+                            updateStatusMutation.mutate(
+                              {
+                                params: { id: reservation.id },
+                                body: { status: 'SERVED' },
+                              },
+                              {
+                                onSuccess: () =>
+                                  queryClient.invalidateQueries({
+                                    queryKey: ['canteen-meal-reservations'],
+                                  }),
+                              }
+                            )
                           }
                         >
                           Entregar

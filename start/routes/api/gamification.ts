@@ -51,11 +51,11 @@ const DeleteChallengeController = () =>
 export function registerStudentGamificationApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStudentGamificationsController]).as('studentGamifications.index')
-      router.post('/', [CreateStudentGamificationController]).as('studentGamifications.store')
-      router.get('/:id', [ShowStudentGamificationController]).as('studentGamifications.show')
-      router.post('/add-points', [AddPointsController]).as('studentGamifications.addPoints')
-      router.get('/ranking', [GetPointsRankingController]).as('studentGamifications.ranking')
+      router.get('/', [ListStudentGamificationsController]).as('student_gamifications.index')
+      router.post('/', [CreateStudentGamificationController]).as('student_gamifications.store')
+      router.get('/:id', [ShowStudentGamificationController]).as('student_gamifications.show')
+      router.post('/add-points', [AddPointsController]).as('student_gamifications.add_points')
+      router.get('/ranking', [GetPointsRankingController]).as('student_gamifications.ranking')
     })
     .prefix('/student-gamifications')
     .use(middleware.auth())
@@ -65,7 +65,7 @@ export function registerStudentGamificationApiRoutes() {
     .group(() => {
       router
         .get('/:studentId/gamification/stats', [GetStudentStatsController])
-        .as('students.gamificationStats')
+        .as('students.gamification_stats')
     })
     .prefix('/students')
     .use(middleware.auth())
@@ -88,10 +88,10 @@ export function registerLeaderboardApiRoutes() {
 export function registerGamificationEventApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListGamificationEventsController]).as('gamificationEvents.index')
-      router.post('/', [CreateGamificationEventController]).as('gamificationEvents.store')
-      router.get('/:id', [ShowGamificationEventController]).as('gamificationEvents.show')
-      router.post('/:id/retry', [RetryGamificationEventController]).as('gamificationEvents.retry')
+      router.get('/', [ListGamificationEventsController]).as('gamification_events.index')
+      router.post('/', [CreateGamificationEventController]).as('gamification_events.store')
+      router.get('/:id', [ShowGamificationEventController]).as('gamification_events.show')
+      router.post('/:id/retry', [RetryGamificationEventController]).as('gamification_events.retry')
     })
     .prefix('/gamification-events')
     .use(middleware.auth())

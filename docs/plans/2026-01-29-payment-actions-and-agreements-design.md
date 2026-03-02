@@ -8,19 +8,22 @@ Adicionar menu de ações na tabela de mensalidades da escola com 4 funcionalida
 
 O botão `MoreHorizontal` existente vira um `DropdownMenu` com:
 
-| Ação | Ícone | Visível quando |
-|---|---|---|
-| Editar | `Pencil` | NOT_PAID, PENDING, OVERDUE |
-| Marcar como pago | `CheckCircle` | NOT_PAID, PENDING, OVERDUE |
-| Criar acordo | `Handshake` | NOT_PAID, PENDING, OVERDUE (exceto type AGREEMENT) |
-| Cancelar | `XCircle` | NOT_PAID, PENDING, OVERDUE (exceto type AGREEMENT) |
+| Ação             | Ícone         | Visível quando                                     |
+| ---------------- | ------------- | -------------------------------------------------- |
+| Editar           | `Pencil`      | NOT_PAID, PENDING, OVERDUE                         |
+| Marcar como pago | `CheckCircle` | NOT_PAID, PENDING, OVERDUE                         |
+| Criar acordo     | `Handshake`   | NOT_PAID, PENDING, OVERDUE (exceto type AGREEMENT) |
+| Cancelar         | `XCircle`     | NOT_PAID, PENDING, OVERDUE (exceto type AGREEMENT) |
 
 Pagamentos PAID, CANCELLED ou FAILED não mostram ações. Pagamentos type AGREEMENT podem ter Editar e Marcar como pago, mas não Criar acordo nem Cancelar.
 
 Estado no container:
+
 ```ts
 const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
-const [activeModal, setActiveModal] = useState<'edit' | 'mark-paid' | 'cancel' | 'agreement' | null>(null)
+const [activeModal, setActiveModal] = useState<
+  'edit' | 'mark-paid' | 'cancel' | 'agreement' | null
+>(null)
 ```
 
 ## Modal: Editar Mensalidade

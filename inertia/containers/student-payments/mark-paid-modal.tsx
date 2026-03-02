@@ -31,7 +31,8 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { formatCurrency } from '~/lib/utils'
-import { useMarkPaymentAsPaid } from '~/hooks/mutations/use_student_payment_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const markPaidSchema = z.object({
   paidAt: z.string().min(1, 'Data do pagamento é obrigatória'),
@@ -65,7 +66,8 @@ interface MarkPaidModalProps {
 }
 
 export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProps) {
-  const markPaid = useMarkPaymentAsPaid()
+  const queryClient = useQueryClient()
+  const markPaid = useMutation(api.api.v1.studentPayments.markPaid.mutationOptions())
 
   const form = useForm<MarkPaidFormData>({
     resolver: zodResolver(markPaidSchema) as any,
@@ -84,12 +86,15 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
   async function onSubmit(data: MarkPaidFormData) {
     try {
       await markPaid.mutateAsync({
-        id: payment.id,
-        paidAt: data.paidAt,
-        paymentMethod: data.paymentMethod,
-        amountPaid: Math.round(data.amountPaidReais * 100),
-        observation: data.observation || undefined,
+        params: { id: payment.id },
+        body: {
+          paidAt: data.paidAt,
+          paymentMethod: data.paymentMethod,
+          amountPaid: Math.round(data.amountPaidReais * 100),
+          observation: data.observation || undefined,
+        },
       })
+      queryClient.invalidateQueries({ queryKey: ['student-payments'] })
       toast.success('Pagamento registrado com sucesso')
       onOpenChange(false)
     } catch {
@@ -97,8 +102,7 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
     }
   }
 
-  const studentName =
-    payment.student?.user?.name || payment.student?.name || 'Aluno'
+  const studentName = payment.student?.user?.name || payment.student?.name || 'Aluno'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,9 +112,21 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
         </DialogHeader>
 
         <div className="text-sm text-muted-foreground space-y-1">
-          <p>Aluno: <span className="font-medium text-foreground">{studentName}</span></p>
-          <p>Referência: <span className="font-medium text-foreground">{payment.month}/{payment.year}</span></p>
-          <p>Valor: <span className="font-medium text-foreground">{formatCurrency(Number(payment.amount))}</span></p>
+          <p>
+            Aluno: <span className="font-medium text-foreground">{studentName}</span>
+          </p>
+          <p>
+            Referência:{' '}
+            <span className="font-medium text-foreground">
+              {payment.month}/{payment.year}
+            </span>
+          </p>
+          <p>
+            Valor:{' '}
+            <span className="font-medium text-foreground">
+              {formatCurrency(Number(payment.amount))}
+            </span>
+          </p>
         </div>
 
         <Form {...form}>

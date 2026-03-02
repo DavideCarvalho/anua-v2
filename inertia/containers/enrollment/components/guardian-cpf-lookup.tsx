@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/select'
 import { cn } from '~/lib/utils'
 import { tuyau } from '~/lib/api'
-import type { InferResponseType } from '@tuyau/client'
+import type { Route } from '@tuyau/core/types'
 import { EmailInput } from '~/components/forms/email-input'
 import type { EnrollmentFormData } from '../schema'
 import { DocumentType, DocumentTypeLabels } from '../schema'
@@ -29,8 +29,7 @@ interface GuardianCpfLookupProps {
   academicPeriodId?: string
 }
 
-const _lookupRoute = tuyau.api.v1.students['lookup-responsible']
-type LookupResult = InferResponseType<typeof _lookupRoute.$get>
+type LookupResult = Route.Response<'api.v1.students.lookupResponsible'>
 
 function formatCpf(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 11)
@@ -42,9 +41,12 @@ function formatCpf(value: string) {
 
 function getDocPlaceholder(type: (typeof DocumentType)[number]) {
   switch (type) {
-    case 'CPF': return '000.000.000-00'
-    case 'RG': return 'Número do RG'
-    case 'PASSPORT': return 'Número do passaporte'
+    case 'CPF':
+      return '000.000.000-00'
+    case 'RG':
+      return 'Número do RG'
+    case 'PASSPORT':
+      return 'Número do passaporte'
   }
 }
 
@@ -88,9 +90,9 @@ export function GuardianCpfLookup({
   const cleanedDoc = cleanDocument(documentInput, documentType)
   const isDuplicate = existingDocuments.includes(cleanedDoc)
   const canSearch =
-    !isDuplicate &&
-    (documentType === 'CPF' ? cleanedDoc.length === 11 : cleanedDoc.length >= 1)
-  const isEmailDuplicate = email.trim().toLowerCase() !== '' && existingEmails.includes(email.trim().toLowerCase())
+    !isDuplicate && (documentType === 'CPF' ? cleanedDoc.length === 11 : cleanedDoc.length >= 1)
+  const isEmailDuplicate =
+    email.trim().toLowerCase() !== '' && existingEmails.includes(email.trim().toLowerCase())
 
   function handleDocumentTypeChange(val: string) {
     setDocumentType(val as (typeof DocumentType)[number])
@@ -113,7 +115,10 @@ export function GuardianCpfLookup({
     if (!canSearch) return
     setIsSearching(true)
     try {
-      const data = await tuyau.api.v1.students['lookup-responsible'].$get({ query: { documentNumber: cleanedDoc, schoolId } }).unwrap()
+      const data = await tuyau.api.api.v1.students['lookup-responsible']({
+        query: { documentNumber: cleanedDoc, schoolId },
+      })
+
       setFoundResponsible(data)
       setSearched(true)
     } catch {
@@ -131,7 +136,8 @@ export function GuardianCpfLookup({
       name: foundResponsible.name,
       email: foundResponsible.email ?? '',
       phone: foundResponsible.phone ?? '',
-      documentType: (foundResponsible.documentType ?? documentType) as (typeof DocumentType)[number],
+      documentType: (foundResponsible.documentType ??
+        documentType) as (typeof DocumentType)[number],
       documentNumber: foundResponsible.documentNumber ?? cleanedDoc,
       birthDate: foundResponsible.birthDate ? new Date(foundResponsible.birthDate) : new Date(),
       isPedagogical,
@@ -229,14 +235,10 @@ export function GuardianCpfLookup({
                 </Badge>
               </div>
               {foundResponsible.email && (
-                <p className="text-xs text-muted-foreground">
-                  Email: {foundResponsible.email}
-                </p>
+                <p className="text-xs text-muted-foreground">Email: {foundResponsible.email}</p>
               )}
               {foundResponsible.phone && (
-                <p className="text-xs text-muted-foreground">
-                  Telefone: {foundResponsible.phone}
-                </p>
+                <p className="text-xs text-muted-foreground">Telefone: {foundResponsible.phone}</p>
               )}
             </div>
 
@@ -298,7 +300,9 @@ export function GuardianCpfLookup({
                   onValidationChange={setIsEmailValid}
                 />
                 {isEmailDuplicate && (
-                  <p className="text-sm text-destructive">Este email já está sendo usado por outro responsável</p>
+                  <p className="text-sm text-destructive">
+                    Este email já está sendo usado por outro responsável
+                  </p>
                 )}
               </div>
 
@@ -314,7 +318,10 @@ export function GuardianCpfLookup({
 
               <div className="space-y-2">
                 <Label>Documento</Label>
-                <Input value={`${DocumentTypeLabels[documentType]}: ${formatDocument(cleanedDoc, documentType)}`} disabled />
+                <Input
+                  value={`${DocumentTypeLabels[documentType]}: ${formatDocument(cleanedDoc, documentType)}`}
+                  disabled
+                />
               </div>
             </div>
 
@@ -331,7 +338,18 @@ export function GuardianCpfLookup({
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancelar
               </Button>
-              <Button type="button" onClick={handleConfirmNew} disabled={!name.trim() || !email || !phone || !birthDate || isEmailDuplicate || isEmailValid === false}>
+              <Button
+                type="button"
+                onClick={handleConfirmNew}
+                disabled={
+                  !name.trim() ||
+                  !email ||
+                  !phone ||
+                  !birthDate ||
+                  isEmailDuplicate ||
+                  isEmailValid === false
+                }
+              >
                 Confirmar
               </Button>
             </div>

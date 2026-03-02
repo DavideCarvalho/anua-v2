@@ -8,13 +8,11 @@ import { Badge } from '../../components/ui/badge'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { tuyau } from '../../lib/api'
 
-const $route = tuyau.api.v1.responsavel.notifications.$get
-
 function useNotificationsQueryOptions() {
   return {
     queryKey: ['responsavel', 'notifications'],
     queryFn: async () => {
-      const response = await $route()
+      const response = await tuyau.api.api.v1.responsavel.api.notifications()
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar notificações')
       }

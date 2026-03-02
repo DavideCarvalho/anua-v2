@@ -34,11 +34,11 @@ import {
   AccordionTrigger,
 } from '../../components/ui/accordion'
 
-import {
-  useStudentOccurrencesQueryOptions,
-  type StudentOccurrencesResponse,
-} from '../../hooks/queries/use_student_occurrences'
-import { useAcknowledgeOccurrence } from '../../hooks/mutations/use_acknowledge_occurrence'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type StudentOccurrencesResponse = Route.Response<'api.v1.responsavel.api.student_occurrences'>
 import { brazilianDateFormatter } from '../../lib/formatters'
 
 type Occurrence = StudentOccurrencesResponse['occurrences'][number]
@@ -72,15 +72,20 @@ export function StudentOccurrencesContainer({
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [severityFilter, setSeverityFilter] = useState<string>('all')
 
+  const queryClient = useQueryClient()
+  const acknowledgeMutation = useMutation(
+    api.api.v1.responsavel.api.acknowledgeOccurrence.mutationOptions()
+  )
   const { data, isLoading, isError, error } = useQuery(
-    useStudentOccurrencesQueryOptions(studentId, {
-      type: typeFilter === 'all' ? undefined : typeFilter,
-      status: statusFilter === 'all' ? undefined : statusFilter,
-      severity: severityFilter === 'all' ? undefined : severityFilter,
+    api.api.v1.responsavel.api.studentOccurrences.queryOptions({
+      params: { studentId },
+      query: {
+        type: typeFilter === 'all' ? undefined : typeFilter,
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        severity: severityFilter === 'all' ? undefined : severityFilter,
+      },
     })
   )
-
-  const acknowledgeMutation = useAcknowledgeOccurrence()
 
   if (isLoading) {
     return <StudentOccurrencesContainerSkeleton />
@@ -108,7 +113,16 @@ export function StudentOccurrencesContainer({
   const hasOccurrences = data.occurrences.length > 0
 
   const handleAcknowledge = (occurrenceId: string) => {
-    acknowledgeMutation.mutate({ studentId, occurrenceId })
+    acknowledgeMutation.mutate(
+      { params: { studentId, occurrenceId } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ['responsavel', 'students', studentId, 'occurrences'],
+          })
+        },
+      }
+    )
   }
 
   return (

@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Trophy, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
-import { usePointsRankingQueryOptions } from '../hooks/queries/use_points_ranking'
+import { api } from '~/lib/api'
 
 function PointsRankingSkeleton() {
   return (
@@ -44,7 +44,11 @@ function PointsRankingError({
 }
 
 function PointsRankingContent({ schoolId }: { schoolId: string }) {
-  const { data } = useSuspenseQuery(usePointsRankingQueryOptions({ schoolId, limit: 10 }))
+  const { data } = useSuspenseQuery(
+    api.api.v1.studentGamifications.ranking.queryOptions({
+      query: { schoolId, limit: 10 },
+    })
+  )
 
   const ranking = (data as any)?.ranking ?? []
 

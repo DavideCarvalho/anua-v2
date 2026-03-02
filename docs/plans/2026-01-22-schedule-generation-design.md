@@ -26,20 +26,22 @@ Implementar a funcionalidade de geração automática de grade de horários para
 **Controller:** `app/controllers/schedules/generate_class_schedule_controller.ts`
 
 **Input:**
+
 ```typescript
 {
   academicPeriodId: string
   config: {
-    startTime: string        // "07:30"
-    classesPerDay: number    // 6
-    classDuration: number    // 50 (minutos)
-    breakAfterClass: number  // 3 (intervalo após 3ª aula)
-    breakDuration: number    // 20 (minutos)
+    startTime: string // "07:30"
+    classesPerDay: number // 6
+    classDuration: number // 50 (minutos)
+    breakAfterClass: number // 3 (intervalo após 3ª aula)
+    breakDuration: number // 20 (minutos)
   }
 }
 ```
 
 **Algoritmo de geração (baseado no school-super-app):**
+
 1. Criar slots vazios para cada dia (Seg-Sex) baseado no config
 2. Buscar todos os `TeacherHasClass` da turma com `subjectQuantity`
 3. Ordenar professores por carga horária (mais aulas primeiro)
@@ -53,6 +55,7 @@ Implementar a funcionalidade de geração automática de grade de horários para
 6. Retornar tentativa com menos erros
 
 **Output:**
+
 ```typescript
 {
   calendar: { id: string, name: string, isActive: boolean }
@@ -77,6 +80,7 @@ Implementar a funcionalidade de geração automática de grade de horários para
 **Arquivo:** `inertia/containers/schedule/schedule-config-form.tsx`
 
 **Props:**
+
 ```typescript
 {
   classId: string
@@ -87,6 +91,7 @@ Implementar a funcionalidade de geração automática de grade de horários para
 ```
 
 **Campos:**
+
 - Hora de início (time input)
 - Aulas por dia (number input, 1-10)
 - Duração da aula em minutos (number input, 30-60)
@@ -96,11 +101,13 @@ Implementar a funcionalidade de geração automática de grade de horários para
 ### Integração na página `/escola/pedagogico/horarios`
 
 **Lógica de exibição:**
+
 - Se não tem grade configurada → Mostra `ScheduleConfigForm`
 - Se já tem grade → Mostra `ScheduleGrid` + botão "Reconfigurar"
 - Ao clicar "Reconfigurar" → Mostra modal com `ScheduleConfigForm`
 
 **Fluxo após geração:**
+
 1. Chama endpoint de geração
 2. Atualiza estado local com slots retornados
 3. Aulas em `unscheduled` aparecem em "Aulas Pendentes"
@@ -130,6 +137,7 @@ Implementar a funcionalidade de geração automática de grade de horários para
 ## Referência
 
 Baseado na implementação do `school-super-app`:
+
 - Algoritmo: `packages/api/src/router/school/utils/schedule-generation.ts`
 - Endpoint: `packages/api/src/router/school/endpoints/generate-school-calendar.ts`
 - UI: `apps/anua/src/components/school-calendar-grid/`

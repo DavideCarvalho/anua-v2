@@ -2,18 +2,13 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Settings, Wand2 } from 'lucide-react'
-import { useGenerateClassSchedule } from '~/hooks/mutations/use_schedule_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 interface ScheduleConfig {
   startTime: string
@@ -70,7 +65,8 @@ export function ScheduleConfigForm({
     breakDuration: 20,
   })
 
-  const generateMutation = useGenerateClassSchedule()
+  const queryClient = useQueryClient()
+  const generateMutation = useMutation(api.api.v1.schedules.generateClassSchedule.mutationOptions())
 
   const handleChange = (field: keyof ScheduleConfig, value: string | number) => {
     setConfig((prev) => ({ ...prev, [field]: value }))
@@ -84,8 +80,8 @@ export function ScheduleConfigForm({
           Configuração da Grade
         </CardTitle>
         <CardDescription>
-          Configure o template de horários e clique em "Gerar Grade" para distribuir
-          automaticamente as aulas
+          Configure o template de horários e clique em "Gerar Grade" para distribuir automaticamente
+          as aulas
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -156,9 +152,13 @@ export function ScheduleConfigForm({
             <Button
               onClick={() =>
                 generateMutation.mutate(
-                  { classId, academicPeriodId, config },
+                  {
+                    params: { classId },
+                    body: { academicPeriodId, config },
+                  },
                   {
                     onSuccess: (result: any) => {
+                      queryClient.invalidateQueries({ queryKey: ['classSchedule'] })
                       if (result.unscheduled?.length > 0) {
                         toast.warning(
                           `Grade gerada com ${result.unscheduled.length} aula(s) não alocada(s). Arraste-as para os horários disponíveis.`

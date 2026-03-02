@@ -35,8 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { useGamificationEventsQueryOptions } from '../../hooks/queries/use_gamification_events'
-import { useRetryGamificationEvent } from '../../hooks/mutations/use_gamification_event_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 const EVENT_TYPES = [
   { value: 'ATTENDANCE_PRESENT', label: 'Presença' },
@@ -117,17 +117,20 @@ function GamificationEventsTableContent() {
 
   const { status: statusFilter, type: typeFilter, page, limit } = filters
 
+  const queryClient = useQueryClient()
   const { data: events } = useQuery(
-    useGamificationEventsQueryOptions({
-      status:
-        statusFilter !== 'all' ? (statusFilter as 'PENDING' | 'PROCESSED' | 'FAILED') : undefined,
-      type: typeFilter !== 'all' ? (typeFilter as GamificationEventType) : undefined,
-      page,
-      limit,
+    api.api.v1.gamificationEvents.index.queryOptions({
+      query: {
+        status:
+          statusFilter !== 'all' ? (statusFilter as 'PENDING' | 'PROCESSED' | 'FAILED') : undefined,
+        type: typeFilter !== 'all' ? (typeFilter as GamificationEventType) : undefined,
+        page,
+        limit,
+      },
     })
   )
 
-  const retryEvent = useRetryGamificationEvent()
+  const retryEvent = useMutation(api.api.v1.gamificationEvents.retry.mutationOptions())
 
   const normalizedEvents = events as
     | {
@@ -139,7 +142,8 @@ function GamificationEventsTableContent() {
   const meta = normalizedEvents?.meta
 
   const handleRetry = async (id: string) => {
-    await retryEvent.mutateAsync(id)
+    await retryEvent.mutateAsync({ params: { id } })
+    queryClient.invalidateQueries({ queryKey: ['gamification-events'] })
   }
 
   return (

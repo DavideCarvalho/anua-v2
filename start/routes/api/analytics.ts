@@ -48,7 +48,7 @@ export function registerAnalyticsApiRoutes() {
       router.get('/canteen/trends', [GetCanteenTrendsController]).as('analytics.canteen.trends')
       router
         .get('/canteen/top-items', [GetCanteenTopItemsController])
-        .as('analytics.canteen.topItems')
+        .as('analytics.canteen.top_items')
       router
         .get('/payments/overview', [GetPaymentsOverviewController])
         .as('analytics.payments.overview')
@@ -63,7 +63,7 @@ export function registerAnalyticsApiRoutes() {
         .as('analytics.enrollments.trends')
       router
         .get('/enrollments/by-level', [GetEnrollmentByLevelController])
-        .as('analytics.enrollments.byLevel')
+        .as('analytics.enrollments.by_level')
       router
         .get('/incidents/overview', [GetIncidentsOverviewController])
         .as('analytics.incidents.overview')

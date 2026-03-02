@@ -14,9 +14,8 @@ function useBalanceQueryOptions(studentId: string) {
   return {
     queryKey: ['responsavel', 'student', studentId, 'balance'],
     queryFn: async () => {
-      const response = await tuyau
-        .$route('api.v1.responsavel.api.studentBalance', { studentId })
-        .$get()
+      const response = await tuyau.$route('api.v1.responsavel.api.studentBalance', { studentId })
+
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar saldo')
       }
@@ -76,9 +75,7 @@ function BalanceOverviewContent({ studentId }: { studentId: string }) {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(data.summary.currentBalance)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(data.summary.currentBalance)}</div>
             <p className="text-xs text-muted-foreground">Disponível para uso</p>
             <Button size="sm" className="mt-2" onClick={() => setTopUpOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />

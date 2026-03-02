@@ -2,15 +2,13 @@ import { useQuery } from '@tanstack/react-query'
 import { ShoppingBag, Store as StoreIcon } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import {
-  useMarketplaceStoresQueryOptions,
-  type MarketplaceStoresResponse,
-} from '../hooks/queries/use_marketplace'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
 
-type MarketplaceStore = NonNullable<MarketplaceStoresResponse>[number]
+type MarketplaceStore = NonNullable<Route.Response<'api.v1.marketplace.stores.index'>>[number]
 
 export function MarketplaceStoresContainer() {
-  const { data, isLoading } = useQuery(useMarketplaceStoresQueryOptions())
+  const { data, isLoading } = useQuery(api.api.v1.marketplace.stores.index.queryOptions({}))
 
   const stores: MarketplaceStore[] = data ?? []
 

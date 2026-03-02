@@ -39,9 +39,7 @@ export default function ProfessoresPage() {
             <GraduationCap className="h-6 w-6" />
             Professores
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie o corpo docente da escola
-          </p>
+          <p className="text-muted-foreground">Gerencie o corpo docente da escola</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

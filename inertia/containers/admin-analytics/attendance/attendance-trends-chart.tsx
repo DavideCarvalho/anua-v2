@@ -1,14 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useAttendanceTrendsQueryOptions } from '../../../hooks/queries/use_attendance_trends'
+import { api } from '~/lib/api'
 import { ChartContainer } from '../shared/chart-container'
 
 export function AttendanceTrendsChart() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useAttendanceTrendsQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.attendance.trends.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

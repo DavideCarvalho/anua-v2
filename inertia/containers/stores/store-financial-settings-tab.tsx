@@ -12,8 +12,7 @@ import {
 } from '../../components/ui/select'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useStoreFinancialSettingsQueryOptions } from '../../hooks/queries/use_stores'
-import { useUpsertStoreFinancialSettingsMutationOptions } from '../../hooks/mutations/use_upsert_store_financial_settings'
+import { api } from '~/lib/api'
 
 interface StoreFinancialSettingsTabProps {
   storeId: string
@@ -21,7 +20,9 @@ interface StoreFinancialSettingsTabProps {
 
 export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTabProps) {
   const queryClient = useQueryClient()
-  const { data: settings, isLoading } = useQuery(useStoreFinancialSettingsQueryOptions(storeId))
+  const { data: settings, isLoading } = useQuery(
+    api.api.v1.stores.financialSettings.show.queryOptions({ params: { storeId } })
+  )
 
   const [pixKey, setPixKey] = useState('')
   const [pixKeyType, setPixKeyType] = useState<'' | 'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM'>(
@@ -39,17 +40,19 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
     }
   }, [settings])
 
-  const mutation = useMutation(useUpsertStoreFinancialSettingsMutationOptions())
+  const mutation = useMutation(api.api.v1.stores.financialSettings.upsert.mutationOptions())
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     try {
       await mutation.mutateAsync({
-        storeId,
-        pixKey: pixKey || undefined,
-        pixKeyType: pixKeyType || undefined,
-        bankName: bankName || undefined,
-        accountHolder: accountHolder || undefined,
+        params: { storeId },
+        body: {
+          pixKey: pixKey || undefined,
+          pixKeyType: pixKeyType || undefined,
+          bankName: bankName || undefined,
+          accountHolder: accountHolder || undefined,
+        },
       })
       queryClient.invalidateQueries({ queryKey: ['storeFinancialSettings', storeId] })
       toast.success('Configurações salvas com sucesso!')

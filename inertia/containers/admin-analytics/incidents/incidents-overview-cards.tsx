@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, AlertCircle, Clock, Calendar, Building2, UserX } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useIncidentsOverviewQueryOptions } from '../../../hooks/queries/use_incidents_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 import { ChartContainer } from '../shared/chart-container'
@@ -10,9 +10,11 @@ import { Badge } from '../../../components/ui/badge'
 export function IncidentsOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useIncidentsOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.incidents.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -40,16 +42,8 @@ export function IncidentsOverviewCards() {
         value={data.behaviorCount.toLocaleString('pt-BR')}
         icon={AlertCircle}
       />
-      <StatCard
-        title="Faltas"
-        value={data.absenceCount.toLocaleString('pt-BR')}
-        icon={UserX}
-      />
-      <StatCard
-        title="Atrasos"
-        value={data.lateCount.toLocaleString('pt-BR')}
-        icon={Clock}
-      />
+      <StatCard title="Faltas" value={data.absenceCount.toLocaleString('pt-BR')} icon={UserX} />
+      <StatCard title="Atrasos" value={data.lateCount.toLocaleString('pt-BR')} icon={Clock} />
       <StatCard
         title="Últimos 30 dias"
         value={data.recentIncidents.toLocaleString('pt-BR')}
@@ -62,9 +56,11 @@ export function IncidentsOverviewCards() {
 export function IncidentsByTypeChart() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useIncidentsOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.incidents.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -95,9 +91,11 @@ export function IncidentsByTypeChart() {
 export function IncidentsBySchoolTable() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useIncidentsOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.incidents.overview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 

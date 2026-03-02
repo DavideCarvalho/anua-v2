@@ -54,7 +54,11 @@ export default function TurmaPresencasPage({
             </div>
           </CardHeader>
           <CardContent>
-            <AttendancesTable classId={classId} academicPeriodId={academicPeriodId} courseId={courseId} />
+            <AttendancesTable
+              classId={classId}
+              academicPeriodId={academicPeriodId}
+              courseId={courseId}
+            />
           </CardContent>
         </Card>
 

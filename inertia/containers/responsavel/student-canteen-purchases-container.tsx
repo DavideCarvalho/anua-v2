@@ -9,10 +9,11 @@ import { Button } from '../../components/ui/button'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
-import {
-  useResponsavelStudentCanteenPurchasesQueryOptions,
-  type ResponsavelStudentCanteenPurchasesResponse,
-} from '../../hooks/queries/use_responsavel_student_canteen_purchases'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type ResponsavelStudentCanteenPurchasesResponse =
+  Route.Response<'api.v1.responsavel.api.student_canteen_purchases'>
 
 type ResponsavelCanteenPurchase = ResponsavelStudentCanteenPurchasesResponse['data'][number]
 
@@ -58,7 +59,10 @@ function StudentCanteenPurchasesSkeleton() {
 function StudentCanteenPurchasesContent({ studentId }: { studentId: string }) {
   const [page, setPage] = useState(1)
   const { data, isLoading, isError, error } = useQuery(
-    useResponsavelStudentCanteenPurchasesQueryOptions({ studentId, page, limit: 10 })
+    api.api.v1.responsavel.api.studentCanteenPurchases.queryOptions({
+      params: { studentId },
+      query: { page, limit: 10 },
+    })
   )
 
   if (isLoading) {

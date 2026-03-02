@@ -1,4 +1,7 @@
 import { defineConfig } from '@adonisjs/core/app'
+import { indexEntities } from '@adonisjs/core'
+import { indexPages } from '@adonisjs/inertia'
+import { generateRegistry } from '@tuyau/core/hooks'
 
 export default defineConfig({
   /*
@@ -28,7 +31,6 @@ export default defineConfig({
   commands: [
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
-    () => import('@tuyau/core/commands'),
     () => import('@adocasts.com/dto/commands'),
     () => import('@adonisjs/mail/commands'),
     () => import('adonisjs-scheduler/commands'),
@@ -46,6 +48,7 @@ export default defineConfig({
   providers: [
     () => import('@adonisjs/core/providers/app_provider'),
     () => import('@adonisjs/core/providers/hash_provider'),
+    () => import('#providers/transform_provider'),
     {
       file: () => import('@adonisjs/core/providers/repl_provider'),
       environment: ['repl', 'test'],
@@ -60,7 +63,6 @@ export default defineConfig({
     () => import('@adonisjs/lucid/database_provider'),
     () => import('@adonisjs/auth/auth_provider'),
     () => import('@adonisjs/inertia/inertia_provider'),
-    () => import('@tuyau/core/tuyau_provider'),
     () => import('@adonisjs/mail/mail_provider'),
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/lock/lock_provider'),
@@ -114,12 +116,12 @@ export default defineConfig({
   tests: {
     suites: [
       {
-        files: ['tests/unit/**/*.spec(.ts|.js)'],
+        files: ['tests/unit/**/*.spec.{ts,js}'],
         name: 'unit',
         timeout: 2000,
       },
       {
-        files: ['tests/functional/**/*.spec(.ts|.js)'],
+        files: ['tests/functional/**/*.spec.{ts,js}'],
         name: 'functional',
         timeout: 30000,
       },
@@ -147,9 +149,15 @@ export default defineConfig({
     },
   ],
 
-  assetsBundler: false,
   hooks: {
-    onBuildStarting: [() => import('@adonisjs/vite/build_hook')],
+    init: [
+      indexEntities({
+        transformers: { enabled: true, withSharedProps: true },
+      }),
+      indexPages({ framework: 'react' }),
+      generateRegistry(),
+    ],
+    buildStarting: [() => import('@adonisjs/vite/build_hook')],
   },
   directories: {
     audit_resolvers: 'app/audit_resolvers',

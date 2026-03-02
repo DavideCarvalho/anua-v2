@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { Trophy, Plus, MoreHorizontal, Users, Target, Calendar } from 'lucide-react'
 
-import {
-  useLeaderboardsQueryOptions,
-  type LeaderboardsResponse,
-} from '../../hooks/queries/use_leaderboards'
-import { useDeleteLeaderboard } from '../../hooks/mutations/use_leaderboard_mutations'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type LeaderboardsResponse = Route.Response<'api.v1.leaderboards.index'>
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -56,8 +56,11 @@ export function LeaderboardsManagement({
   onCreateLeaderboard,
   onViewEntries,
 }: LeaderboardsManagementProps) {
-  const { data, isLoading } = useQuery(useLeaderboardsQueryOptions({ schoolId }))
-  const deleteMutation = useDeleteLeaderboard()
+  const queryClient = useQueryClient()
+  const { data, isLoading } = useQuery(
+    api.api.v1.leaderboards.index.queryOptions({ query: { schoolId } })
+  )
+  const deleteMutation = useMutation(api.api.v1.leaderboards.destroy.mutationOptions())
 
   const leaderboards = data?.data ?? []
 
@@ -137,7 +140,17 @@ export function LeaderboardsManagement({
                       <DropdownMenuItem>Editar</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => deleteMutation.mutate(lb.id)}
+                        onClick={() =>
+                          deleteMutation.mutate(
+                            { params: { id: lb.id } },
+                            {
+                              onSuccess: () =>
+                                queryClient.invalidateQueries({
+                                  queryKey: ['leaderboards'],
+                                }),
+                            }
+                          )
+                        }
                       >
                         Excluir
                       </DropdownMenuItem>

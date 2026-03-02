@@ -21,9 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { useEnrollStudent } from '~/hooks/mutations/use_extra_class_mutations'
-import { useExtraClassQueryOptions } from '~/hooks/queries/use_extra_classes'
-import { useStudentsQueryOptions } from '~/hooks/queries/use_students'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '~/lib/formatters'
 
 const schema = z.object({
@@ -55,10 +54,11 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
     },
   })
 
-  const enrollMutation = useEnrollStudent()
+  const queryClient = useQueryClient()
+  const enrollMutation = useMutation(api.api.v1.extraClasses.enroll.mutationOptions())
 
   const { data: extraClass } = useQuery({
-    ...useExtraClassQueryOptions(extraClassId),
+    ...api.api.v1.extraClasses.show.queryOptions({ params: { id: extraClassId } }),
     enabled: open,
   })
 
@@ -70,7 +70,7 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
   }
 
   const { data: studentsData } = useQuery({
-    ...useStudentsQueryOptions({ limit: 100 }),
+    ...api.api.v1.students.index.queryOptions({ query: { limit: 100 } }),
     enabled: open,
   })
 
@@ -79,14 +79,18 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
   const onSubmit = (values: FormOutput) => {
     enrollMutation.mutate(
       {
-        extraClassId,
-        studentId: values.studentId,
-        paymentMethod: values.paymentMethod,
-        paymentDay: values.paymentDay,
-        scholarshipId: values.scholarshipId || undefined,
+        params: { id: extraClassId },
+        body: {
+          studentId: values.studentId,
+          paymentMethod: values.paymentMethod,
+          paymentDay: values.paymentDay,
+          scholarshipId: values.scholarshipId || undefined,
+        },
       },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['extra-class-students', extraClassId] })
+          queryClient.invalidateQueries({ queryKey: ['extra-classes'] })
           toast.success('Aluno inscrito com sucesso')
           form.reset()
           onOpenChange(false)

@@ -19,9 +19,7 @@ export default function AdminSinistrosPage() {
             <AlertCircle className="h-6 w-6" />
             Sinistros
           </h1>
-          <p className="text-muted-foreground">
-            Gerencie sinistros de inadimplência das escolas
-          </p>
+          <p className="text-muted-foreground">Gerencie sinistros de inadimplência das escolas</p>
         </div>
 
         <Suspense fallback={<InsuranceClaimsTableSkeleton />}>

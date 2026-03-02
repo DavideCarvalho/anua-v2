@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEscolaStatsQueryOptions } from '../hooks/queries/use_escola_stats'
+import { api } from '~/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Users, GraduationCap, DollarSign, TrendingUp, CircleHelp } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip'
@@ -26,7 +26,11 @@ function EscolaStatsSkeleton() {
 
 // Content Component
 function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
-  const { data: stats, isLoading, error } = useQuery(useEscolaStatsQueryOptions())
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useQuery(api.api.v1.dashboard.escolaStats.queryOptions({}))
 
   if (isLoading || !stats) {
     return <EscolaStatsSkeleton />

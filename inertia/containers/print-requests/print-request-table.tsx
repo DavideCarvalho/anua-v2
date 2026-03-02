@@ -20,7 +20,7 @@ import {
 } from '../../components/ui/select'
 import { Badge } from '../../components/ui/badge'
 
-import { usePrintRequestsQueryOptions } from '../../hooks/queries/use_print_requests'
+import { api } from '~/lib/api'
 
 const STATUS_OPTIONS = [
   { label: 'Pedido', value: 'REQUESTED' },
@@ -51,11 +51,13 @@ export function PrintRequestTable({
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
 
   const { data } = useSuspenseQuery(
-    usePrintRequestsQueryOptions({
-      page,
-      limit: 10,
-      statuses: statusFilter ? [statusFilter as any] : undefined,
-    } as any)
+    api.api.v1.printRequests.listPrintRequests.queryOptions({
+      query: {
+        page,
+        limit: 10,
+        statuses: statusFilter ? [statusFilter as any] : undefined,
+      },
+    })
   )
 
   const rows = data?.data ?? []
@@ -116,7 +118,13 @@ export function PrintRequestTable({
                   <TableCell>{row.quantity}</TableCell>
                   <TableCell>{String(row.dueDate).slice(0, 10)}</TableCell>
                   <TableCell>
-                    <Badge variant={(statusBadge as Record<string, string>)[row.status] === 'default' ? 'default' : 'outline'}>
+                    <Badge
+                      variant={
+                        (statusBadge as Record<string, string>)[row.status] === 'default'
+                          ? 'default'
+                          : 'outline'
+                      }
+                    >
                       {STATUS_LABELS[row.status as string] ?? row.status}
                     </Badge>
                   </TableCell>

@@ -1,6 +1,5 @@
 import { usePage } from '@inertiajs/react'
-import { Link } from '@tuyau/inertia/react'
-import type { RouteName } from '@tuyau/client'
+import { Link } from '@adonisjs/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { PostHogProvider } from '../posthog-provider'
 import {
@@ -28,13 +27,13 @@ import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { StudentSelectorWithData } from '../responsavel/student-selector'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useQuery } from '@tanstack/react-query'
-import { useResponsavelStatsQueryOptions } from '../../hooks/queries/use_responsavel_stats'
+import { api } from '~/lib/api'
+import { registry } from '~/generated/registry'
 import { useAuthUser } from '../../stores/auth_store'
-import { api } from '../../../.adonisjs/api'
 
 interface NavItem {
   title: string
-  route: RouteName<typeof api.routes>
+  route: keyof typeof registry.routes
   href: string
   icon: React.ElementType
   requiresPedagogical?: boolean
@@ -149,7 +148,7 @@ const commonNavigation: NavItem[] = [
 
 function NavigationContent() {
   const { url } = usePage<SharedProps>()
-  const { data, isLoading } = useQuery(useResponsavelStatsQueryOptions())
+  const { data, isLoading } = useQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
   const pathname = url.split('?')[0]
 
   if (isLoading || !data) {
@@ -198,7 +197,6 @@ function NavigationContent() {
           <Link
             key={item.route}
             route={item.route}
-            params={undefined}
             className={cn(
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isActive

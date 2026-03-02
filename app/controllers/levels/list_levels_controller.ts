@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
-import LevelDto from '#models/dto/level.dto'
+import LevelTransformer from '#transformers/level_transformer'
 
 export default class ListLevelsController {
   async handle(ctx: HttpContext) {
-    const { request, selectedSchoolIds } = ctx
+    const { request, selectedSchoolIds, serialize } = ctx
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const search = request.input('search', '')
@@ -39,7 +39,9 @@ export default class ListLevelsController {
     }
 
     const levels = await query.paginate(page, limit)
+    const data = levels.all()
+    const metadata = levels.getMeta()
 
-    return LevelDto.fromPaginator(levels)
+    return serialize(LevelTransformer.paginate(data, metadata))
   }
 }

@@ -1,5 +1,14 @@
 import vine from '@vinejs/vine'
 
+export const listPurchaseRequestsValidator = vine.compile(
+  vine.object({
+    schoolId: vine.string().trim(),
+    status: vine.string().trim().optional(),
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)
+
 export const createPurchaseRequestValidator = vine.compile(
   vine.object({
     productName: vine.string().trim().minLength(1).maxLength(255),

@@ -12,9 +12,7 @@ export default function AdminAnalyticsRh() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard de RH</h1>
-            <p className="text-muted-foreground">
-              Funcionários, professores e registros de ponto
-            </p>
+            <p className="text-muted-foreground">Funcionários, professores e registros de ponto</p>
           </div>
         </div>
 

@@ -3,11 +3,7 @@ import { Calendar, Check, X, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-import { useTeacherAbsencesQueryOptions } from '../../hooks/queries/use_teacher_absences'
-import {
-  useApproveTeacherAbsenceMutationOptions,
-  useRejectTeacherAbsenceMutationOptions,
-} from '../../hooks/mutations/use_teacher_mutations'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -36,15 +32,17 @@ const statusConfig: Record<
 
 export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
   const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(useTeacherAbsencesQueryOptions({ status } as any))
-  const approveMutation = useMutation(useApproveTeacherAbsenceMutationOptions())
-  const rejectMutation = useMutation(useRejectTeacherAbsenceMutationOptions())
+  const { data } = useSuspenseQuery(
+    api.api.v1.teachers.getTeacherAbsences.queryOptions({ query: { status } })
+  )
+  const approveMutation = useMutation(api.api.v1.teachers.approveAbsence.mutationOptions())
+  const rejectMutation = useMutation(api.api.v1.teachers.rejectAbsence.mutationOptions())
 
   const absences = data ?? []
 
   const handleApprove = async (absenceId: string) => {
     try {
-      await approveMutation.mutateAsync(absenceId)
+      await approveMutation.mutateAsync({ body: { absenceId } })
       queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
     } catch (error) {
       console.error('Error approving absence:', error)
@@ -53,7 +51,9 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
 
   const handleReject = async (absenceId: string) => {
     try {
-      await rejectMutation.mutateAsync({ absenceId, rejectionReason: '' })
+      await rejectMutation.mutateAsync({
+        body: { absenceId, rejectionReason: '' },
+      })
       queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
     } catch (error) {
       console.error('Error rejecting absence:', error)
@@ -110,9 +110,7 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
                       ? format(new Date(absence.date), 'dd/MM/yyyy', { locale: ptBR })
                       : '-'}
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate">
-                    {absence.reason || '-'}
-                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate">{absence.reason || '-'}</TableCell>
                   <TableCell>
                     <Badge variant={config.variant}>{config.label}</Badge>
                   </TableCell>

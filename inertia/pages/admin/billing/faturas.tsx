@@ -30,10 +30,10 @@ import {
 } from '../../../components/ui/select'
 import { Button } from '../../../components/ui/button'
 import { Skeleton } from '../../../components/ui/skeleton'
-import {
-  useSubscriptionInvoicesQueryOptions,
-  type SubscriptionInvoicesResponse,
-} from '../../../hooks/queries/use_subscription_invoices'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type SubscriptionInvoicesResponse = Route.Response<'api.v1.subscriptionInvoices.index'>
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../../lib/formatters'
 
 const STATUS_OPTIONS = [
@@ -85,10 +85,12 @@ export default function BillingFaturasPage() {
       : undefined
 
   const { data, isLoading, isError, error, refetch } = useQuery(
-    useSubscriptionInvoicesQueryOptions({
-      status: normalizedStatus,
-      page,
-      limit: 20,
+    api.api.v1.subscriptionInvoices.index.queryOptions({
+      query: {
+        status: normalizedStatus,
+        page,
+        limit: 20,
+      },
     })
   )
 

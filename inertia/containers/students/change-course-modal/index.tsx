@@ -31,11 +31,11 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { Badge } from '~/components/ui/badge'
-import { useStudentQueryOptions, type StudentResponse } from '~/hooks/queries/use_student'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
-import { useUpdateStudent } from '~/hooks/mutations/use_student_mutations'
-import { useCancelEnrollment } from '~/hooks/mutations/use_update_enrollment'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type StudentResponse = Route.Response<'api.v1.students.show'>
 import { getCourseLabels, getLevelLabels, type AcademicPeriodSegment } from '~/lib/formatters'
 
 const schema = z.object({
@@ -130,14 +130,15 @@ export function ChangeStudentCourseModal({
     classSet: false,
   })
 
+  const queryClient = useQueryClient()
   const { data: student, isLoading: isLoadingStudent } = useQuery({
-    ...useStudentQueryOptions(studentId),
+    ...api.api.v1.students.show.queryOptions({ params: { id: studentId } }),
     enabled: open && !!studentId,
     staleTime: 0, // Always refetch when modal opens
   })
 
-  const updateStudent = useUpdateStudent()
-  const cancelEnrollment = useCancelEnrollment()
+  const updateStudent = useMutation(api.api.v1.students.update.mutationOptions())
+  const cancelEnrollment = useMutation(api.api.v1.students.enrollments.cancel.mutationOptions())
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -154,11 +155,15 @@ export function ChangeStudentCourseModal({
   const levelId = form.watch('levelId')
 
   const { data: academicPeriodsData, isLoading: isLoadingPeriods } = useQuery(
-    useAcademicPeriodsQueryOptions({ limit: 50, isActive: true })
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { limit: 50, isActive: true },
+    })
   )
 
   const { data: coursesData, isLoading: isLoadingCourses } = useQuery({
-    ...useAcademicPeriodCoursesQueryOptions(academicPeriodId),
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: academicPeriodId },
+    }),
     enabled: !!academicPeriodId,
   })
 
@@ -351,13 +356,15 @@ export function ChangeStudentCourseModal({
   async function handleSubmit(data: FormData) {
     try {
       await updateStudent.mutateAsync({
-        id: studentId,
-        classId: data.classId,
-        academicPeriodId: data.academicPeriodId,
-        courseId: data.courseId,
-        levelId: data.levelId,
+        params: { id: studentId },
+        body: {
+          classId: data.classId,
+          academicPeriodId: data.academicPeriodId,
+          courseId: data.courseId,
+          levelId: data.levelId,
+        },
       })
-
+      queryClient.invalidateQueries({ queryKey: ['student', studentId] })
       toast.success('Turma alterada com sucesso!')
       onOpenChange(false)
       onSuccess?.()
@@ -405,9 +412,9 @@ export function ChangeStudentCourseModal({
 
     try {
       await cancelEnrollment.mutateAsync({
-        studentId,
-        enrollmentId: selectedEnrollment.id,
+        params: { id: studentId, enrollmentId: selectedEnrollment.id },
       })
+      queryClient.invalidateQueries({ queryKey: ['student-enrollments', studentId] })
       toast.success('Matrícula cancelada com sucesso!')
       onOpenChange(false)
       onSuccess?.()

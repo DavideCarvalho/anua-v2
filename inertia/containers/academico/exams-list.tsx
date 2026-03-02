@@ -31,8 +31,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog'
-import { useExamsQueryOptions } from '../../hooks/queries/use_exams'
-import { useDeleteExam } from '../../hooks/mutations/use_exam_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { LaunchExamGradesModal } from '../turma/launch-exam-grades-modal'
 
 interface Exam {
@@ -78,21 +78,28 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
 
-  const { data, isLoading, isError } = useQuery(useExamsQueryOptions({ classId, subjectId }))
+  const queryClient = useQueryClient()
+  const { data, isLoading, isError } = useQuery(
+    api.api.v1.exams.index.queryOptions({ query: { classId, subjectId } })
+  )
 
-  const deleteMutation = useDeleteExam()
+  const deleteMutation = useMutation(api.api.v1.exams.destroy.mutationOptions())
 
   const handleDelete = () => {
     if (!examToDelete) return
-    deleteMutation.mutate(examToDelete.id, {
-      onSuccess: () => {
-        toast.success('Prova excluida com sucesso!')
-        setExamToDelete(null)
-      },
-      onError: (error: Error) => {
-        toast.error(error.message || 'Erro ao excluir prova')
-      },
-    })
+    deleteMutation.mutate(
+      { params: { id: examToDelete.id } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['exams'] })
+          toast.success('Prova excluida com sucesso!')
+          setExamToDelete(null)
+        },
+        onError: (error: Error) => {
+          toast.error(error.message || 'Erro ao excluir prova')
+        },
+      }
+    )
   }
 
   if (isLoading) {

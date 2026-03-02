@@ -3,13 +3,8 @@ import { ptBR } from 'date-fns/locale'
 import { FileEdit, Plus, Trash2, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
-import {
-  getFieldLabel,
-  getSourceLabel,
-  getEventLabel,
-  formatAuditValue,
-} from '~/lib/audit_labels'
-import type { AuditEntry } from '~/hooks/queries/use_audits'
+import { getFieldLabel, getSourceLabel, getEventLabel, formatAuditValue } from '~/lib/audit_labels'
+import type { AuditEntry } from '~/lib/types'
 
 interface AuditDiffCardProps {
   audit: AuditEntry
@@ -56,9 +51,7 @@ export function AuditDiffCard({ audit, entityType }: AuditDiffCardProps) {
         </div>
         <p className="text-sm text-muted-foreground">
           Por: <span className="font-medium text-foreground">{userName}</span>
-          {source !== 'Sistema' && (
-            <span className="text-muted-foreground"> via {source}</span>
-          )}
+          {source !== 'Sistema' && <span className="text-muted-foreground"> via {source}</span>}
         </p>
       </CardHeader>
 

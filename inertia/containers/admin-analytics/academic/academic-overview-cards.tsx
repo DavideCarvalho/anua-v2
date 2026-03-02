@@ -1,16 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { GraduationCap, BookOpen, CheckCircle, AlertTriangle, Users, FileText } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useAcademicOverviewQueryOptions } from '../../../hooks/queries/use_academic_overview'
+import { api } from '~/lib/api'
 import { StatCard } from '../shared/stat-card'
 import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 
 export function AcademicOverviewCards() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useAcademicOverviewQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.grades.academicOverview.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -43,16 +45,8 @@ export function AcademicOverviewCards() {
         value={data.gradedAssignments.toLocaleString('pt-BR')}
         icon={CheckCircle}
       />
-      <StatCard
-        title="Média Geral"
-        value={`${data.averageGrade}%`}
-        icon={GraduationCap}
-      />
-      <StatCard
-        title="Taxa de Conclusão"
-        value={`${data.completionRate}%`}
-        icon={BookOpen}
-      />
+      <StatCard title="Média Geral" value={`${data.averageGrade}%`} icon={GraduationCap} />
+      <StatCard title="Taxa de Conclusão" value={`${data.completionRate}%`} icon={BookOpen} />
       <StatCard
         title="Alunos em Risco"
         value={data.atRiskStudents.toLocaleString('pt-BR')}

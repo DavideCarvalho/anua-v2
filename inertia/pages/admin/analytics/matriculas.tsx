@@ -15,9 +15,7 @@ export default function AdminAnalyticsMatriculas() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard de Matrículas</h1>
-            <p className="text-muted-foreground">
-              Alunos por período, curso e status de matrícula
-            </p>
+            <p className="text-muted-foreground">Alunos por período, curso e status de matrícula</p>
           </div>
         </div>
 

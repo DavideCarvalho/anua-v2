@@ -1,15 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractEarlyDiscount from '#models/contract_early_discount'
-import { ContractEarlyDiscountDto } from '#models/dto/contract_early_discount.dto'
+import ContractEarlyDiscountTransformer from '#transformers/contract_early_discount_transformer'
 
 export default class ListContractEarlyDiscountsController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const { contractId } = params
 
     const earlyDiscounts = await ContractEarlyDiscount.query()
       .where('contractId', contractId)
       .orderBy('daysBeforeDeadline', 'desc')
 
-    return ContractEarlyDiscountDto.fromArray(earlyDiscounts)
+    return serialize(ContractEarlyDiscountTransformer.transform(earlyDiscounts))
   }
 }

@@ -50,19 +50,21 @@ const GetStudentBalanceController = () =>
 export function registerStudentPaymentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListStudentPaymentsController]).as('studentPayments.index')
-      router.post('/', [CreateStudentPaymentController]).as('studentPayments.store')
-      router.get('/:id', [ShowStudentPaymentController]).as('studentPayments.show')
-      router.put('/:id', [UpdateStudentPaymentController]).as('studentPayments.update')
-      router.post('/:id/cancel', [CancelStudentPaymentController]).as('studentPayments.cancel')
-      router.post('/:id/mark-paid', [MarkPaymentAsPaidController]).as('studentPayments.markPaid')
+      router.get('/', [ListStudentPaymentsController]).as('student_payments.index')
+      router.post('/', [CreateStudentPaymentController]).as('student_payments.store')
+      router.get('/:id', [ShowStudentPaymentController]).as('student_payments.show')
+      router.put('/:id', [UpdateStudentPaymentController]).as('student_payments.update')
+      router.post('/:id/cancel', [CancelStudentPaymentController]).as('student_payments.cancel')
+      router.post('/:id/mark-paid', [MarkPaymentAsPaidController]).as('student_payments.mark_paid')
       router
         .post('/:id/asaas-charge', [CreateStudentPaymentAsaasChargeController])
-        .as('studentPayments.asaasCharge')
+        .as('student_payments.asaas_charge')
       router
         .post('/:id/send-boleto', [SendStudentPaymentBoletoEmailController])
-        .as('studentPayments.sendBoleto')
-      router.get('/:id/boleto', [GetStudentPaymentBoletoController]).as('studentPayments.getBoleto')
+        .as('student_payments.send_boleto')
+      router
+        .get('/:id/boleto', [GetStudentPaymentBoletoController])
+        .as('student_payments.get_boleto')
     })
     .prefix('/student-payments')
     .use([middleware.auth(), middleware.impersonation()])
@@ -81,7 +83,7 @@ export function registerInvoiceApiRoutes() {
   router
     .group(() => {
       router.get('/', [ListInvoicesController]).as('invoices.index')
-      router.post('/:id/mark-paid', [MarkStudentInvoicePaidController]).as('invoices.markPaid')
+      router.post('/:id/mark-paid', [MarkStudentInvoicePaidController]).as('invoices.mark_paid')
     })
     .prefix('/invoices')
     .use([middleware.auth(), middleware.impersonation()])
@@ -93,7 +95,7 @@ export function registerAuditApiRoutes() {
       router.get('/:entityType/:entityId', [ListAuditsController]).as('audits.index')
       router
         .get('/students/:studentId/history', [ListStudentAuditHistoryController])
-        .as('audits.studentHistory')
+        .as('audits.student_history')
     })
     .prefix('/audits')
     .use([middleware.auth(), middleware.impersonation()])
@@ -104,19 +106,19 @@ export function registerStudentBalanceTransactionApiRoutes() {
     .group(() => {
       router
         .get('/', [ListStudentBalanceTransactionsController])
-        .as('studentBalanceTransactions.index')
+        .as('student_balance_transactions.index')
       router
         .post('/', [CreateStudentBalanceTransactionController])
-        .as('studentBalanceTransactions.store')
+        .as('student_balance_transactions.store')
       router
         .get('/:id', [ShowStudentBalanceTransactionController])
-        .as('studentBalanceTransactions.show')
+        .as('student_balance_transactions.show')
       router
         .get('/:studentId/balance-transactions', [ListStudentBalanceByStudentController])
-        .as('studentBalanceTransactions.byStudent')
+        .as('student_balance_transactions.by_student')
       router
         .get('/:studentId/balance', [GetStudentBalanceController])
-        .as('studentBalanceTransactions.balance')
+        .as('student_balance_transactions.balance')
     })
     .prefix('/student-balance-transactions')
     .use([middleware.auth(), middleware.impersonation()])

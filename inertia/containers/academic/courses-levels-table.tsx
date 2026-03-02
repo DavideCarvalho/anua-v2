@@ -2,10 +2,8 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { GraduationCap, Layers, Plus, MoreHorizontal, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
-import { useCoursesQueryOptions } from '../../hooks/queries/use_courses'
-import { useLevelsQueryOptions } from '../../hooks/queries/use_levels'
-import { useDeleteCourse } from '../../hooks/mutations/use_course_mutations'
-import { useDeleteLevel } from '../../hooks/mutations/use_level_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -45,10 +43,15 @@ export function CoursesLevelsTable({
   onEditCourse,
   onEditLevel,
 }: CoursesLevelsTableProps) {
-  const { data: coursesData } = useSuspenseQuery(useCoursesQueryOptions({ schoolId }))
-  const { data: levelsData } = useSuspenseQuery(useLevelsQueryOptions({ schoolId }))
-  const deleteCourseMutation = useDeleteCourse()
-  const deleteLevelMutation = useDeleteLevel()
+  const queryClient = useQueryClient()
+  const { data: coursesData } = useSuspenseQuery(
+    api.api.v1.courses.index.queryOptions({ query: { schoolId } })
+  )
+  const { data: levelsData } = useSuspenseQuery(
+    api.api.v1.levels.index.queryOptions({ query: { schoolId } })
+  )
+  const deleteCourseMutation = useMutation(api.api.v1.courses.destroy.mutationOptions())
+  const deleteLevelMutation = useMutation(api.api.v1.levels.destroy.mutationOptions())
 
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set())
 
@@ -114,7 +117,11 @@ export function CoursesLevelsTable({
             const isExpanded = expandedCourses.has(course.id)
 
             return (
-              <Collapsible key={course.id} open={isExpanded} onOpenChange={() => toggleCourse(course.id)}>
+              <Collapsible
+                key={course.id}
+                open={isExpanded}
+                onOpenChange={() => toggleCourse(course.id)}
+              >
                 <div className="rounded-lg border">
                   <div className="flex items-center justify-between p-4">
                     <CollapsibleTrigger className="flex items-center gap-3 flex-1 text-left">
@@ -159,7 +166,21 @@ export function CoursesLevelsTable({
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => deleteCourseMutation.mutate(course.id)}
+                            onClick={() =>
+                              deleteCourseMutation.mutate(
+                                { params: { id: course.id } },
+                                {
+                                  onSuccess: () => {
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['courses'],
+                                    })
+                                    queryClient.invalidateQueries({
+                                      queryKey: ['levels'],
+                                    })
+                                  },
+                                }
+                              )
+                            }
                           >
                             Excluir Curso
                           </DropdownMenuItem>
@@ -214,7 +235,21 @@ export function CoursesLevelsTable({
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           className="text-destructive"
-                                          onClick={() => deleteLevelMutation.mutate(level.id)}
+                                          onClick={() =>
+                                            deleteLevelMutation.mutate(
+                                              { params: { id: level.id } },
+                                              {
+                                                onSuccess: () => {
+                                                  queryClient.invalidateQueries({
+                                                    queryKey: ['levels'],
+                                                  })
+                                                  queryClient.invalidateQueries({
+                                                    queryKey: ['courses'],
+                                                  })
+                                                },
+                                              }
+                                            )
+                                          }
                                         >
                                           Excluir
                                         </DropdownMenuItem>

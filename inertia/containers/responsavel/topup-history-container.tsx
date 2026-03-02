@@ -7,7 +7,7 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
-import { useWalletTopUpsQueryOptions } from '../../hooks/queries/use_wallet_topups'
+import { api } from '~/lib/api'
 import { formatCurrency } from '../../lib/utils'
 
 const formatDate = (date: Date | string) => {
@@ -65,7 +65,10 @@ function TopUpHistorySkeleton() {
 function TopUpHistoryContent({ studentId }: { studentId: string }) {
   const [page, setPage] = useState(1)
   const { data, isLoading, isError, error } = useQuery(
-    useWalletTopUpsQueryOptions({ studentId, page, limit: 10 })
+    api.api.v1.responsavel.api.listWalletTopUps.queryOptions({
+      params: { studentId },
+      query: { page, limit: 10 },
+    })
   )
 
   if (isLoading) {

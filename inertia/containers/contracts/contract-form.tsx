@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tuyau/inertia/react'
+import { useRouter } from '@adonisjs/inertia/react'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
@@ -30,12 +30,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import {
-  createContractMutationOptions,
-  updateContractMutationOptions,
-} from '../../hooks/mutations/use_contract_mutations'
-import { updateContractInterestConfigMutationOptions } from '../../hooks/mutations/use_contract_financial_mutations'
-import type { ContractResponse } from '../../hooks/queries/use_contract'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type ContractResponse = Route.Response<'api.v1.contracts.show'>
 
 function toNumber(value: unknown) {
   if (value === '' || value === undefined || value === null) return undefined
@@ -160,9 +158,11 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const isEditing = !!initialData
 
-  const createContract = useMutation(createContractMutationOptions())
-  const updateContract = useMutation(updateContractMutationOptions())
-  const updateInterestConfig = useMutation(updateContractInterestConfigMutationOptions())
+  const createContract = useMutation(api.api.v1.contracts.store.mutationOptions())
+  const updateContract = useMutation(api.api.v1.contracts.update.mutationOptions())
+  const updateInterestConfig = useMutation(
+    api.api.v1.contracts.interestConfig.update.mutationOptions()
+  )
 
   const isSubmitting =
     createContract.isPending || updateContract.isPending || updateInterestConfig.isPending
@@ -310,18 +310,22 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
 
       if (isEditing && initialData) {
         await updateContract.mutateAsync({
-          id: initialData.id,
-          ...basePayload,
-          paymentDays: values.paymentDays,
-          earlyDiscounts: values.earlyDiscounts,
+          params: { id: initialData.id },
+          body: {
+            ...basePayload,
+            paymentDays: values.paymentDays,
+            earlyDiscounts: values.earlyDiscounts,
+          },
         })
 
         // Update interest config if provided
         if (values.interestPercentage || values.interestPerDay) {
           await updateInterestConfig.mutateAsync({
-            contractId: initialData.id,
-            delayInterestPercentage: values.interestPercentage || 0,
-            delayInterestPerDayDelayed: values.interestPerDay || 0,
+            params: { contractId: initialData.id },
+            body: {
+              delayInterestPercentage: values.interestPercentage || 0,
+              delayInterestPerDayDelayed: values.interestPerDay || 0,
+            },
           })
         }
 
@@ -350,7 +354,7 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
           earlyDiscounts: values.earlyDiscounts.length > 0 ? values.earlyDiscounts : undefined,
         }
 
-        await createContract.mutateAsync(payload)
+        await createContract.mutateAsync({ body: payload })
         await queryClient.invalidateQueries({ queryKey: ['contracts'] })
         toast.success('Contrato criado com sucesso!')
       }

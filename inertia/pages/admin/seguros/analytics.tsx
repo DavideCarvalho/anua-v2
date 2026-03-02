@@ -27,9 +27,7 @@ export default function AdminAnalyticsPage() {
             <BarChart3 className="h-6 w-6" />
             Analytics de Seguros
           </h1>
-          <p className="text-muted-foreground">
-            Métricas e análises do seguro educacional
-          </p>
+          <p className="text-muted-foreground">Métricas e análises do seguro educacional</p>
         </div>
 
         <Suspense fallback={<InsuranceStatsCardsSkeleton />}>

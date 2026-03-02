@@ -1,13 +1,7 @@
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { useCallback, useMemo } from 'react'
 import { Plus, Trash2, AlertCircle } from 'lucide-react'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
@@ -113,9 +107,7 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
   }, [studentEmail, responsibleEmailsKey])
 
   const getDocumentConflictError = (index: number): string | null => {
-    const conflict = documentConflicts.find(
-      (c) => c.index === index || c.otherIndex === index
-    )
+    const conflict = documentConflicts.find((c) => c.index === index || c.otherIndex === index)
     if (!conflict) return null
     if (conflict.type === 'student') {
       return 'Documento igual ao do aluno'
@@ -124,9 +116,7 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
   }
 
   const getEmailConflictError = (index: number): string | null => {
-    const conflict = emailConflicts.find(
-      (c) => c.index === index || c.otherIndex === index
-    )
+    const conflict = emailConflicts.find((c) => c.index === index || c.otherIndex === index)
     if (!conflict) return null
     if (conflict.type === 'student') {
       return 'Email igual ao do aluno'
@@ -164,8 +154,10 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
               if (hasUnderageResponsibles) issues.push('responsáveis menores de idade')
 
               if (issues.length === 1) {
-                if (documentConflicts.length > 0) return 'Existem documentos duplicados. Cada pessoa deve ter um documento único.'
-                if (emailConflicts.length > 0) return 'Existem emails duplicados. Cada pessoa deve ter um email único.'
+                if (documentConflicts.length > 0)
+                  return 'Existem documentos duplicados. Cada pessoa deve ter um documento único.'
+                if (emailConflicts.length > 0)
+                  return 'Existem emails duplicados. Cada pessoa deve ter um email único.'
                 return 'Todos os responsáveis devem ser maiores de idade.'
               }
               return `Existem ${issues.join(' e ')}. Corrija antes de continuar.`
@@ -185,12 +177,7 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Responsável {index + 1}</CardTitle>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => remove(index)}
-              >
+              <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
@@ -228,9 +215,7 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
                           academicPeriodId={effectiveAcademicPeriodId}
                         />
                       </FormControl>
-                      {emailError && (
-                        <p className="text-sm text-destructive">{emailError}</p>
-                      )}
+                      {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                     </FormItem>
                   )
                 }}
@@ -281,7 +266,9 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
                       />
                     </FormControl>
                     {showAgeError && (
-                      <p className="text-sm text-destructive">Responsável deve ser maior de idade</p>
+                      <p className="text-sm text-destructive">
+                        Responsável deve ser maior de idade
+                      </p>
                     )}
                     <FormMessage />
                   </FormItem>
@@ -333,9 +320,7 @@ export function ResponsiblesStep({ academicPeriodId }: ResponsiblesStepProps = {
                           placeholder="Número"
                         />
                       </FormControl>
-                      {conflictError && (
-                        <p className="text-sm text-destructive">{conflictError}</p>
-                      )}
+                      {conflictError && <p className="text-sm text-destructive">{conflictError}</p>}
                       <FormMessage />
                     </FormItem>
                   )

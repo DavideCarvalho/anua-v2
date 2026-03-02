@@ -19,14 +19,18 @@ import {
 import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 
-import { usePendingConsentsQueryOptions, type PendingConsentsResponse } from '../../hooks/queries/use_pending_consents'
-import { useRespondConsentMutation } from '../../hooks/mutations/use_respond_consent'
+import type { Route } from '@tuyau/core/types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
+
+type PendingConsentsResponse = Route.Response<'api.v1.consents.pending'>
 
 type PendingConsent = PendingConsentsResponse[number]
 
 function PendingConsentsContent() {
-  const { data, isLoading, isError, error } = useQuery(usePendingConsentsQueryOptions())
-  const respondMutation = useRespondConsentMutation()
+  const queryClient = useQueryClient()
+  const { data, isLoading, isError, error } = useQuery(api.api.v1.consents.pending.queryOptions({}))
+  const respondMutation = useMutation(api.api.v1.consents.respond.mutationOptions())
 
   const [selectedConsent, setSelectedConsent] = useState<PendingConsent | null>(null)
   const [respondType, setRespondType] = useState<'approve' | 'deny' | null>(null)
@@ -56,11 +60,10 @@ function PendingConsentsContent() {
     if (!selectedConsent || !respondType) return
 
     await respondMutation.mutateAsync({
-      id: selectedConsent.id,
-      approved: respondType === 'approve',
-      notes: notes || undefined,
+      params: { id: selectedConsent.id },
+      body: { approved: respondType === 'approve', notes: notes || undefined },
     })
-
+    queryClient.invalidateQueries({ queryKey: ['consents'] })
     setSelectedConsent(null)
     setRespondType(null)
     setNotes('')

@@ -42,12 +42,10 @@ export function PeriodoLetivoInfoCard({
         <CardContent>
           <div className="space-y-1">
             <p className="text-sm">
-              <span className="text-muted-foreground">Início:</span>{' '}
-              {formatDate(startDate)}
+              <span className="text-muted-foreground">Início:</span> {formatDate(startDate)}
             </p>
             <p className="text-sm">
-              <span className="text-muted-foreground">Término:</span>{' '}
-              {formatDate(endDate)}
+              <span className="text-muted-foreground">Término:</span> {formatDate(endDate)}
             </p>
           </div>
         </CardContent>
@@ -82,9 +80,7 @@ export function PeriodoLetivoInfoCard({
           <GraduationCap className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <p className="text-lg font-semibold">
-            {SEGMENT_LABELS[segment] ?? segment}
-          </p>
+          <p className="text-lg font-semibold">{SEGMENT_LABELS[segment] ?? segment}</p>
         </CardContent>
       </Card>
     </div>

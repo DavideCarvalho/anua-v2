@@ -13,9 +13,9 @@ function useBalanceQueryOptions(studentId: string, page: number = 1) {
   return {
     queryKey: ['responsavel', 'student', studentId, 'transactions', page],
     queryFn: async () => {
-      const response = await tuyau
-        .$route('api.v1.responsavel.api.studentBalance', { studentId })
-        .$get({ query: { page, limit: 20 } })
+      const response = await tuyau.$route('api.v1.responsavel.api.studentBalance', { studentId })({
+        query: { page, limit: 20 },
+      })
       if (response.error) {
         throw new Error((response.error as any).value?.message || 'Erro ao carregar transacoes')
       }
@@ -55,7 +55,8 @@ function TransactionsHistoryContent({ studentId }: { studentId: string }) {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Erro ao carregar transações: {error instanceof Error ? error.message : 'Erro desconhecido'}
+          Erro ao carregar transações:{' '}
+          {error instanceof Error ? error.message : 'Erro desconhecido'}
         </AlertDescription>
       </Alert>
     )

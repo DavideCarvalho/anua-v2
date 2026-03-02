@@ -16,7 +16,7 @@ export function registerOccurrenceApiRoutes() {
       router.post('/', [CreateOccurrenceController]).as('occurrences.store')
       router
         .get('/teacher-classes', [ListOccurrenceTeacherClassesController])
-        .as('occurrences.teacherClasses')
+        .as('occurrences.teacher_classes')
       router.get('/:id', [ShowOccurrenceController]).as('occurrences.show')
     })
     .prefix('/occurrences')

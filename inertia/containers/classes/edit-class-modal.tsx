@@ -3,6 +3,7 @@ import { useForm, useFieldArray, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import { toast } from 'sonner'
 import { Plus, Trash2, Loader2, AlertCircle } from 'lucide-react'
 
@@ -23,9 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import { tuyau } from '~/lib/api'
-import { useTeachersQueryOptions } from '~/hooks/queries/use_teachers'
-import { useTeacherSubjectsQueryOptions } from '~/hooks/queries/use_teacher_subjects'
 
 const editClassSchema = z.object({
   name: z.string().min(1, 'Nome da turma é obrigatório'),
@@ -79,7 +77,9 @@ function SubjectTeacherRow({
 
   // Get subjects for selected teacher
   const { data: teacherSubjectsData, isLoading: isLoadingSubjects } = useQuery({
-    ...useTeacherSubjectsQueryOptions(selectedTeacherId || ''),
+    ...api.api.v1.teachers.listTeacherSubjects.queryOptions({
+      params: { id: selectedTeacherId || '' },
+    }),
     enabled: !!selectedTeacherId,
   })
 
@@ -221,7 +221,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
 
   // Fetch teachers
   const { data: teachersData, isLoading: isLoadingTeachers } = useQuery(
-    useTeachersQueryOptions({ limit: 100 })
+    api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } })
   )
 
   // Combine API teachers with teachers from classData to ensure they appear in the list
@@ -274,33 +274,31 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
           })) || [],
       })
     }
-  }, [classData, open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [classData, open])
 
-  // Mutation to update class
-  const updateMutation = useMutation({
-    mutationFn: (data: EditClassFormValues) => {
-      if (!classData) throw new Error('Turma não encontrada')
-
-      return tuyau
-        .$route('api.v1.classes.update', { id: classData.id } as any)
-        .$put({
-          name: data.name,
-          subjectsWithTeachers: data.subjectsWithTeachers,
-        } as any)
-        .unwrap()
-    },
-    onSuccess: () => {
-      toast.success('Turma atualizada com sucesso')
-      queryClient.invalidateQueries({ queryKey: ['classes'] })
-      onOpenChange(false)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    },
-  })
+  const updateMutation = useMutation(api.api.v1.classes.update.mutationOptions())
 
   const onSubmit = form.handleSubmit((data) => {
-    updateMutation.mutate(data)
+    if (!classData) return
+    updateMutation.mutate(
+      {
+        params: { id: classData.id },
+        body: {
+          name: data.name,
+          subjectsWithTeachers: data.subjectsWithTeachers,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['classes'] })
+          toast.success('Turma atualizada com sucesso')
+          onOpenChange(false)
+        },
+        onError: (error: Error) => {
+          toast.error(error.message)
+        },
+      }
+    )
   })
 
   const addSubject = () => {

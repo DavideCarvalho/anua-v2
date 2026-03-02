@@ -40,15 +40,8 @@ import {
 } from '~/components/ui/table'
 import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
-import {
-  useOccurrencesQueryOptions,
-  useOccurrenceTeacherClassesQueryOptions,
-  useOccurrenceDetailQueryOptions,
-} from '~/hooks/queries/use_occurrences'
-import { useAcademicPeriodsQueryOptions } from '~/hooks/queries/use_academic_periods'
-import { useAcademicPeriodCoursesQueryOptions } from '~/hooks/queries/use_academic_period_courses'
-import { useStudentsQueryOptions } from '~/hooks/queries/use_students'
-import { useCreateOccurrence } from '~/hooks/mutations/use_occurrence_mutations'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '~/lib/api'
 import {
   brazilianDateFormatter,
   formatSegmentName,
@@ -91,7 +84,8 @@ function NewOccurrenceModal({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const createMutation = useCreateOccurrence()
+  const queryClient = useQueryClient()
+  const createMutation = useMutation(api.api.v1.occurrences.store.mutationOptions())
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState('')
   const [selectedCourseId, setSelectedCourseId] = useState('')
   const [selectedLevelId, setSelectedLevelId] = useState('')
@@ -109,27 +103,32 @@ function NewOccurrenceModal({
   })
 
   const { data: studentsData } = useQuery({
-    ...useStudentsQueryOptions({ page: 1, limit: 200 }),
+    ...api.api.v1.students.index.queryOptions({ query: { page: 1, limit: 200 } }),
     enabled: open,
   })
   const { data: academicPeriodsData } = useQuery({
-    ...useAcademicPeriodsQueryOptions({ page: 1, limit: 100, isActive: true }),
+    ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
+      query: { page: 1, limit: 100, isActive: true },
+    }),
     enabled: open,
   })
   const { data: periodCoursesData } = useQuery({
-    ...useAcademicPeriodCoursesQueryOptions(selectedAcademicPeriodId, { isActive: true }),
-    enabled: open && Boolean(selectedAcademicPeriodId),
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: selectedAcademicPeriodId },
+      query: { isActive: true },
+    }),
+    enabled: open && !!selectedAcademicPeriodId,
   })
   const { data: teacherClassesData } = useQuery({
-    ...useOccurrenceTeacherClassesQueryOptions({
-      academicPeriodId: selectedAcademicPeriodId || undefined,
+    ...api.api.v1.occurrences.teacherClasses.queryOptions({
+      query: { academicPeriodId: selectedAcademicPeriodId || undefined },
     }),
     enabled: open,
   })
 
   const students = studentsData?.data ?? []
   const academicPeriods = academicPeriodsData?.data ?? []
-  const courses = periodCoursesData ?? []
+  const courses = (periodCoursesData?.data ?? periodCoursesData ?? []) as any[]
   const teacherClasses = teacherClassesData?.data ?? []
 
   const selectedPeriod = academicPeriods.find(
@@ -232,26 +231,31 @@ function NewOccurrenceModal({
       return
     }
 
-    createMutation.mutate(values, {
-      onSuccess: () => {
-        toast.success('Registro diario criado com sucesso')
-        form.reset({
-          studentId: '',
-          teacherHasClassId: '',
-          type: 'BEHAVIOR',
-          date: new Date().toISOString().split('T')[0],
-          text: '',
-        })
-        setSelectedAcademicPeriodId('')
-        setSelectedCourseId('')
-        setSelectedLevelId('')
-        setSelectedClassId('')
-        onOpenChange(false)
-      },
-      onError: (error: any) => {
-        toast.error(error?.message || 'Erro ao criar registro diario')
-      },
-    })
+    createMutation.mutate(
+      { body: values },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['occurrences'] })
+          queryClient.invalidateQueries({ queryKey: ['notifications'] })
+          toast.success('Registro diario criado com sucesso')
+          form.reset({
+            studentId: '',
+            teacherHasClassId: '',
+            type: 'BEHAVIOR',
+            date: new Date().toISOString().split('T')[0],
+            text: '',
+          })
+          setSelectedAcademicPeriodId('')
+          setSelectedCourseId('')
+          setSelectedLevelId('')
+          setSelectedClassId('')
+          onOpenChange(false)
+        },
+        onError: (error: any) => {
+          toast.error(error?.message || 'Erro ao criar registro diario')
+        },
+      }
+    )
   }
 
   return (
@@ -579,15 +583,19 @@ export default function OcorrenciasPage() {
   }, [debouncedSearch, setFilters])
 
   const { data: teacherClassesData } = useQuery(
-    useOccurrenceTeacherClassesQueryOptions({
-      academicPeriodId:
-        academicPeriodId && academicPeriodId !== 'all' ? academicPeriodId : undefined,
+    api.api.v1.occurrences.teacherClasses.queryOptions({
+      query: {
+        academicPeriodId:
+          academicPeriodId && academicPeriodId !== 'all' ? academicPeriodId : undefined,
+      },
     })
   )
   const { data: academicPeriodsData } = useQuery(
-    useAcademicPeriodsQueryOptions({ page: 1, limit: 100 })
+    api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { page: 1, limit: 100 } })
   )
-  const { data: studentsData } = useQuery(useStudentsQueryOptions({ page: 1, limit: 500 }))
+  const { data: studentsData } = useQuery(
+    api.api.v1.students.index.queryOptions({ query: { page: 1, limit: 500 } })
+  )
 
   const academicPeriodOptions = academicPeriodsData?.data ?? []
 
@@ -608,25 +616,30 @@ export default function OcorrenciasPage() {
   }, [studentsData?.data, classId])
 
   const { data, isLoading } = useQuery(
-    useOccurrencesQueryOptions({
-      page,
-      limit,
-      search: debouncedSearch || undefined,
-      type: type && type !== 'all' ? (type as any) : undefined,
-      academicPeriodId:
-        academicPeriodId && academicPeriodId !== 'all' ? academicPeriodId : undefined,
-      classId: classId && classId !== 'all' ? classId : undefined,
-      studentId: studentId && studentId !== 'all' ? studentId : undefined,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-      orderBy,
-      direction,
+    api.api.v1.occurrences.index.queryOptions({
+      query: {
+        page,
+        limit,
+        search: debouncedSearch || undefined,
+        type: type && type !== 'all' ? (type as any) : undefined,
+        academicPeriodId:
+          academicPeriodId && academicPeriodId !== 'all' ? academicPeriodId : undefined,
+        classId: classId && classId !== 'all' ? classId : undefined,
+        studentId: studentId && studentId !== 'all' ? studentId : undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        orderBy,
+        direction,
+      },
     })
   )
 
-  const { data: occurrenceDetail, isLoading: isOccurrenceDetailLoading } = useQuery(
-    useOccurrenceDetailQueryOptions(selectedOccurrenceId)
-  )
+  const { data: occurrenceDetail, isLoading: isOccurrenceDetailLoading } = useQuery({
+    ...api.api.v1.occurrences.show.queryOptions({
+      params: { id: selectedOccurrenceId! },
+    }),
+    enabled: !!selectedOccurrenceId,
+  })
 
   const rows = data?.data ?? []
 

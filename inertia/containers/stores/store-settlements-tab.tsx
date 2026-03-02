@@ -10,7 +10,7 @@ import {
 import { Badge } from '../../components/ui/badge'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '../../lib/utils'
-import { useStoreSettlementsQueryOptions } from '../../hooks/queries/use_stores'
+import { api } from '~/lib/api'
 
 interface StoreSettlementsTabProps {
   storeId: string
@@ -26,7 +26,9 @@ const statusLabels: Record<string, string> = {
 }
 
 export function StoreSettlementsTab({ storeId }: StoreSettlementsTabProps) {
-  const { data: settlements, isLoading } = useQuery(useStoreSettlementsQueryOptions({ storeId }))
+  const { data: settlements, isLoading } = useQuery(
+    api.api.v1.storeSettlements.index.queryOptions({ query: { storeId } })
+  )
 
   const settlementsList = settlements?.data ?? []
 

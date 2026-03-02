@@ -10,26 +10,28 @@ School decision-makers (directors, administrators) who are experiencing pain fro
 
 ## Narrative Structure: Problem → Solution
 
-| Timestamp | Section | Duration | Content |
-|-----------|---------|----------|---------|
-| 0:00-0:05 | Hook | 5s | Anuá logo reveal + "Gestão escolar nunca foi tão simples" |
-| 0:05-0:20 | Problem | 15s | Abstract visuals of chaos: spreadsheets, paper, overwhelm |
-| 0:20-0:25 | Transition | 5s | "Conheça o Anuá" - brand moment |
-| 0:25-0:50 | Dashboard | 25s | Floating UI showing metrics animating in |
-| 0:50-1:05 | AI Insights | 15s | AI panel with predictions, risk alerts |
-| 1:05-1:15 | CTA | 10s | "Agende uma demonstração" + website + logo |
+| Timestamp | Section     | Duration | Content                                                   |
+| --------- | ----------- | -------- | --------------------------------------------------------- |
+| 0:00-0:05 | Hook        | 5s       | Anuá logo reveal + "Gestão escolar nunca foi tão simples" |
+| 0:05-0:20 | Problem     | 15s      | Abstract visuals of chaos: spreadsheets, paper, overwhelm |
+| 0:20-0:25 | Transition  | 5s       | "Conheça o Anuá" - brand moment                           |
+| 0:25-0:50 | Dashboard   | 25s      | Floating UI showing metrics animating in                  |
+| 0:50-1:05 | AI Insights | 15s      | AI panel with predictions, risk alerts                    |
+| 1:05-1:15 | CTA         | 10s      | "Agende uma demonstração" + website + logo                |
 
 **Total: ~75 seconds**
 
 ## Visual Style
 
 ### Color Palette
+
 - **Background**: Deep purple gradient (#1a0a2e → #2d1b4e)
 - **UI elements**: White/light cards with purple accents (#9333EA)
 - **Text overlays**: White, bold, clean sans-serif
 - **AI accents**: Soft gold (#d4a855) for sparkles/emphasis
 
 ### Animation Principles
+
 - Smooth easing (ease-out for entries)
 - UI cards slide/fade in from bottom or sides
 - Numbers animate counting up
@@ -37,6 +39,7 @@ School decision-makers (directors, administrators) who are experiencing pain fro
 - Text appears with gentle fade + slight upward motion
 
 ### Problem Section
+
 - Abstract/minimalist illustrations of chaos
 - Muted, desaturated colors
 - Quick 2-3 second cuts
@@ -44,11 +47,13 @@ School decision-makers (directors, administrators) who are experiencing pain fro
 ## UI Elements to Recreate
 
 ### Dashboard Screen (25 seconds)
+
 - **Metric Cards**: Total Alunos, Receita Mensal, Taxa de Inadimplência, Matrículas Ativas
 - **Chart**: Line/bar chart showing trends
 - **Animation**: Cards populate one by one, numbers count up, chart draws itself
 
 ### AI Insights Panel (15 seconds)
+
 - Risk alerts with student indicators
 - Prediction cards
 - Animated sparkle/glow effects for AI emphasis

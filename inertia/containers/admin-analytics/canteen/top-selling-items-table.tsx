@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from '../../../hooks/use_search_params'
-import { useCanteenTopItemsQueryOptions } from '../../../hooks/queries/use_canteen_top_items'
+import { api } from '~/lib/api'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,
@@ -15,9 +15,11 @@ import { Badge } from '../../../components/ui/badge'
 export function TopSellingItemsTable() {
   const { params } = useSearchParams()
   const { data, isLoading, error } = useQuery(
-    useCanteenTopItemsQueryOptions({
-      schoolId: params.schoolId,
-      schoolChainId: params.schoolChainId,
+    api.api.v1.analytics.canteen.topItems.queryOptions({
+      query: {
+        schoolId: params.schoolId,
+        schoolChainId: params.schoolChainId,
+      },
     })
   )
 
@@ -47,9 +49,7 @@ export function TopSellingItemsTable() {
               <TableRow key={item.id}>
                 <TableCell className="font-medium">
                   {index < 3 && (
-                    <span className="mr-2">
-                      {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                    </span>
+                    <span className="mr-2">{index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
                   )}
                   {item.name}
                 </TableCell>

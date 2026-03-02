@@ -13,10 +13,10 @@ import {
   TableRow,
 } from '../../components/ui/table'
 
-import {
-  useStudentGradesQueryOptions,
-  type StudentGradesResponse,
-} from '../../hooks/queries/use_student_grades'
+import type { Route } from '@tuyau/core/types'
+import { api } from '~/lib/api'
+
+type StudentGradesResponse = Route.Response<'api.v1.responsavel.api.student_grades'>
 
 type SubjectGrade = StudentGradesResponse['bySubject'][number]
 type RecentAssignment = StudentGradesResponse['recentAssignments'][number]
@@ -27,7 +27,9 @@ interface StudentGradesContainerProps {
 }
 
 export function StudentGradesContainer({ studentId, studentName }: StudentGradesContainerProps) {
-  const { data, isLoading, isError, error } = useQuery(useStudentGradesQueryOptions(studentId))
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.responsavel.api.studentGrades.queryOptions({ params: { studentId } })
+  )
 
   if (isLoading) {
     return <StudentGradesContainerSkeleton />
@@ -153,9 +155,7 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
         </CardHeader>
         <CardContent>
           {data.recentAssignments.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              Nenhuma atividade recente
-            </div>
+            <div className="py-8 text-center text-muted-foreground">Nenhuma atividade recente</div>
           ) : (
             <Table>
               <TableHeader>
@@ -173,14 +173,18 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
                     <TableCell>{assignment.subjectName}</TableCell>
                     <TableCell className="text-center">
                       {assignment.score !== null ? (
-                        <span className={getGradeColor((assignment.score / assignment.maxScore) * 10)}>
+                        <span
+                          className={getGradeColor((assignment.score / assignment.maxScore) * 10)}
+                        >
                           {assignment.score}/{assignment.maxScore}
                         </span>
                       ) : (
                         '-'
                       )}
                     </TableCell>
-                    <TableCell className="text-center">{getStatusBadge(assignment.status)}</TableCell>
+                    <TableCell className="text-center">
+                      {getStatusBadge(assignment.status)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

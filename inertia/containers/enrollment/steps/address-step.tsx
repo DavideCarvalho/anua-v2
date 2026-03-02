@@ -1,13 +1,7 @@
 import { useFormContext } from 'react-hook-form'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import type { EnrollmentFormData } from '../schema'

@@ -16,9 +16,7 @@ export default function AdminAnalyticsAcademico() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard Acadêmico</h1>
-            <p className="text-muted-foreground">
-              Visão geral de desempenho acadêmico e analytics
-            </p>
+            <p className="text-muted-foreground">Visão geral de desempenho acadêmico e analytics</p>
           </div>
         </div>
 

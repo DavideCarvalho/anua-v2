@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Input } from '../../components/ui/input'
 import { Search, AlertCircle } from 'lucide-react'
-import { useSubjectsQueryOptions } from '../../hooks/queries/use_subjects'
+import { api } from '~/lib/api'
 
 function SubjectsTableSkeleton() {
   return (
@@ -88,7 +88,9 @@ function SubjectsTableContent({
   const { search, page, limit } = filters
 
   const { data, isLoading } = useQuery(
-    useSubjectsQueryOptions({ page, limit, schoolId, search: search || undefined })
+    api.api.v1.subjects.index.queryOptions({
+      query: { page, limit, schoolId, search: search || undefined },
+    })
   )
 
   if (isLoading) {
