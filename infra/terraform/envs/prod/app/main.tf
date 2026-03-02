@@ -1,4 +1,53 @@
 # ==============================================================================
+# LOCALS - Common config for dispatch jobs (AdonisJS validates all env at startup)
+# ==============================================================================
+
+locals {
+  dispatch_job_env = {
+    NODE_ENV       = var.environment
+    TZ             = "UTC"
+    LOG_LEVEL      = "info"
+    SESSION_DRIVER = "cookie"
+    DB_HOST        = "34.39.158.54"
+    DB_PORT        = "5432"
+    DB_USER        = "app_user"
+    DB_DATABASE    = "school_super_app"
+    SMTP_HOST      = "smtp.resend.com"
+    SMTP_PORT      = "465"
+    SMTP_USER      = "resend"
+    SMTP_FROM_EMAIL = "Anuá <dont-reply@transactional.anuaapp.com.br>"
+    DRIVE_DISK     = "gcs"
+    GCS_BUCKET     = data.terraform_remote_state.storage.outputs.uploads_bucket_name
+  }
+  dispatch_job_secrets = {
+    APP_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
+      version   = "latest"
+    }
+    DB_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
+      version   = "latest"
+    }
+    SMTP_PASSWORD = {
+      secret_id = data.terraform_remote_state.storage.outputs.smtp_password_secret_id
+      version   = "latest"
+    }
+    ASAAS_API_KEY = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_api_key_secret_id
+      version   = "latest"
+    }
+    ASAAS_WEBHOOK_URL = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_url_secret_id
+      version   = "latest"
+    }
+    ASAAS_WEBHOOK_TOKEN = {
+      secret_id = data.terraform_remote_state.storage.outputs.asaas_webhook_token_secret_id
+      version   = "latest"
+    }
+  }
+}
+
+# ==============================================================================
 # CLOUD RUN - API
 # ==============================================================================
 
@@ -199,32 +248,11 @@ module "dispatch_missing_payments" {
   command = ["node"]
   args    = ["ace", "dispatch:generate-missing-payments"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars   = local.dispatch_job_env
+  secrets    = local.dispatch_job_secrets
+  timeout    = "300s"
+  max_retries = 0
+  cpu_limit  = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -239,32 +267,11 @@ module "dispatch_invoices" {
   command = ["node"]
   args    = ["ace", "dispatch:generate-invoices"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -279,36 +286,11 @@ module "dispatch_subscription_invoices" {
   command = ["node"]
   args    = ["ace", "dispatch:generate-subscription-invoices"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-    ASAAS_API_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.asaas_api_key_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -323,32 +305,11 @@ module "dispatch_refresh_overdue" {
   command = ["node"]
   args    = ["ace", "dispatch:refresh-overdue-invoices"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -363,32 +324,11 @@ module "dispatch_occurrence_ack_reminders" {
   command = ["node"]
   args    = ["ace", "dispatch:send-occurrence-ack-reminders"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -403,32 +343,11 @@ module "dispatch_asaas_charges" {
   command = ["node"]
   args    = ["ace", "dispatch:create-invoice-asaas-charges"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -443,32 +362,11 @@ module "dispatch_invoice_notifications" {
   command = ["node"]
   args    = ["ace", "dispatch:send-invoice-notifications"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -487,32 +385,11 @@ module "dispatch_gamification_retry" {
   command = ["node"]
   args    = ["ace", "dispatch:gamification-retry"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
@@ -527,32 +404,11 @@ module "dispatch_gamification_streaks" {
   command = ["node"]
   args    = ["ace", "dispatch:gamification-streaks"]
 
-  env_vars = {
-    NODE_ENV       = var.environment
-    TZ             = "UTC"
-    LOG_LEVEL      = "info"
-    SESSION_DRIVER = "cookie"
-    # Database
-    DB_HOST     = "34.39.158.54"
-    DB_PORT     = "5432"
-    DB_USER     = "app_user"
-    DB_DATABASE = "school_super_app"
-  }
-
-  secrets = {
-    APP_KEY = {
-      secret_id = data.terraform_remote_state.storage.outputs.app_key_secret_id
-      version   = "latest"
-    }
-    DB_PASSWORD = {
-      secret_id = data.terraform_remote_state.storage.outputs.db_password_secret_id
-      version   = "latest"
-    }
-  }
-
-  timeout      = "300s"
-  max_retries  = 0
-  cpu_limit    = "1000m"
+  env_vars    = local.dispatch_job_env
+  secrets     = local.dispatch_job_secrets
+  timeout     = "300s"
+  max_retries = 0
+  cpu_limit   = "1000m"
   memory_limit = "512Mi"
 }
 
