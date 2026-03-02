@@ -9,6 +9,20 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
   async share(ctx: HttpContext) {
     const { session, auth } = ctx
 
+    // auth pode ser undefined quando o erro ocorre antes do auth middleware (ex: ao renderizar página de erro 500)
+    if (!auth) {
+      return {
+        errors: this.getValidationErrors(ctx),
+        flash: {
+          error: session?.flashMessages?.get('error'),
+          success: session?.flashMessages?.get('success'),
+        },
+        user: null,
+        userSchools: [],
+        selectedSchoolIds: [],
+      } as PageProps
+    }
+
     await auth.check()
     const user =
       (ctx as HttpContext & { effectiveUser?: typeof auth.user }).effectiveUser ?? auth.user
