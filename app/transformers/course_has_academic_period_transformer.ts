@@ -14,7 +14,7 @@ export default class CourseHasAcademicPeriodTransformer extends BaseTransformer<
       ),
       levelAssignments: LevelAssignedToCourseHasAcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.levelAssignments)
-      )?.depth(2),
+      )?.depth(6),
     }
   }
 }
