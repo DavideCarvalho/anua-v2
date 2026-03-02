@@ -330,7 +330,8 @@ export namespace Data {
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
   }
-  export type LevelAssignedToCourseHasAcademicPeriod = InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
+  export type LevelAssignedToCourseHasAcademicPeriod =
+    InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
   export namespace LevelAssignedToCourseHasAcademicPeriod {
     export type Variants = InferVariants<LevelAssignedToCourseHasAcademicPeriodTransformer>
   }
