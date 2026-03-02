@@ -120,3 +120,9 @@ export const updateCoursesValidator = vine.compile(
     ),
   })
 )
+
+export const showAcademicPeriodBySlugQueryValidator = vine.compile(
+  vine.object({
+    include: vine.string().trim().optional(),
+  })
+)

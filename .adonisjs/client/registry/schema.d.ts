@@ -6306,7 +6306,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { slug: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/academic_period').showAcademicPeriodBySlugQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_periods/show_academic_period_by_slug_controller').default['handle']>>>
     }
   }

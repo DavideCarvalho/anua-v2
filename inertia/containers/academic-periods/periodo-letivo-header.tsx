@@ -60,7 +60,7 @@ export function PeriodoLetivoHeader({
           </div>
         </div>
       </div>
-      <Link route="web.escola.administrativo.periodosLetivos.editar" params={{ id }}>
+      <Link route="web.escola.administrativo.periodosLetivos.editar" routeParams={{ id }}>
         <Button>
           <Edit className="mr-2 h-4 w-4" />
           Editar
