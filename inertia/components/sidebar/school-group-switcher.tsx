@@ -1,6 +1,6 @@
 import { Building, FolderTree, MapPin, Map, Star, ChevronDown, Minus } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 import { cn } from '~/lib/utils'
 import {
   DropdownMenu,
@@ -73,41 +73,23 @@ export function SchoolGroupSwitcher() {
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['schoolSwitcher'],
-    queryFn: async () => {
-      const response = await tuyau.api.api.v1.schoolSwitcher.getData()
-      return response as SchoolSwitcherData
-    },
+    ...api.api.v1.schoolSwitcher.getData.queryOptions(),
   })
 
-  const toggleSchoolMutation = useMutation({
-    mutationFn: async (schoolId: string) => {
-      return tuyau.api.api.v1.schoolSwitcher.toggleSchool({ body: { schoolId } })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schoolSwitcher'] })
-    },
-  })
+  const toggleSchoolMutation = useMutation(api.api.v1.schoolSwitcher.toggleSchool.mutationOptions())
 
-  const toggleGroupMutation = useMutation({
-    mutationFn: async (schoolGroupId: string) => {
-      return tuyau.api.api.v1.schoolSwitcher.toggleGroup({ body: { schoolGroupId } })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schoolSwitcher'] })
-    },
-  })
+  const toggleGroupMutation = useMutation(api.api.v1.schoolSwitcher.toggleGroup.mutationOptions())
 
   const schools = data?.schools || []
   const groups = data?.groups || []
   const selectedSchools = data?.selectedSchools || []
   const selectedGroups = data?.selectedGroups || []
 
-  const isGroupSelected = (group: SchoolGroup) => {
+  function isGroupSelected(group: SchoolGroup) {
     return selectedGroups.some((sg) => sg.id === group.id)
   }
 
-  const isGroupPartial = (group: SchoolGroup) => {
+  function isGroupPartial(group: SchoolGroup) {
     if (isGroupSelected(group)) return false
 
     const selectedSchoolIds = selectedSchools.map((s) => s.id)
@@ -118,16 +100,18 @@ export function SchoolGroupSwitcher() {
     return selectedCount > 0 && selectedCount < groupSchoolIds.length
   }
 
-  const isSchoolSelected = (school: School) => {
+  function isSchoolSelected(school: School) {
     return selectedSchools.some((s) => s.id === school.id)
   }
 
-  const handleSelectSchool = (school: School) => {
-    toggleSchoolMutation.mutate(school.id)
+  function handleSelectSchool(school: School) {
+    toggleSchoolMutation.mutateAsync({ body: { schoolId: school.id } })
+    queryClient.invalidateQueries({ queryKey: ['schoolSwitcher'] })
   }
 
-  const handleSelectGroup = (group: SchoolGroup) => {
-    toggleGroupMutation.mutate(group.id)
+  function handleSelectGroup(group: SchoolGroup) {
+    toggleGroupMutation.mutateAsync({ body: { schoolGroupId: group.id } })
+    queryClient.invalidateQueries({ queryKey: ['schoolSwitcher'] })
   }
 
   const headerText = getHeaderText(selectedSchools, selectedGroups)
