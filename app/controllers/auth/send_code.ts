@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import mail from '@adonisjs/mail/services/main'
 import locks from '@adonisjs/lock/services/main'
+import { DateTime } from 'luxon'
 import User from '#models/user'
 import {
   clearVerificationState,
@@ -26,6 +27,16 @@ export default class SendCodeController {
         return response.ok({
           message: genericSuccessMessage,
         })
+      }
+
+      if (user.birthDate instanceof DateTime && user.birthDate.isValid) {
+        const age = Math.floor(DateTime.now().diff(user.birthDate, 'years').years)
+
+        if (age <= 14) {
+          return response.ok({
+            message: genericSuccessMessage,
+          })
+        }
       }
 
       const lock = locks.createLock(`otp-send:${normalizedEmail}`, '10s')
