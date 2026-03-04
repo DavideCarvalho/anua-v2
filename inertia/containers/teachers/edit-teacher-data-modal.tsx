@@ -64,7 +64,9 @@ export function EditTeacherDataModal({ open, onOpenChange, teacher }: EditTeache
         body: { name: data.name, email: data.email },
       })
       toast.success('Dados atualizados com sucesso')
-      queryClient.invalidateQueries({ queryKey: ['teachers'] })
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryHash.includes('api.v1.teachers.list_teachers'),
+      })
       onOpenChange(false)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao atualizar dados')
