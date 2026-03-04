@@ -25,6 +25,9 @@ export type StoreItemCategory =
   | 'MERCHANDISE'
   | 'DIGITAL'
   | 'OTHER'
+  | 'AVATAR_HAIR'
+  | 'AVATAR_OUTFIT'
+  | 'AVATAR_ACCESSORY'
 
 export type StoreItemPaymentMode = 'POINTS_ONLY' | 'MONEY_ONLY' | 'HYBRID'
 

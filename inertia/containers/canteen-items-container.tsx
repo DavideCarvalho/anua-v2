@@ -15,49 +15,9 @@ import { toast } from 'sonner'
 
 import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api, tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 
-type CanteenItemsResponse = Route.Response<'api.v1.canteenItems.index'>
-
-function buildCreateFormData(data: {
-  canteenId: string
-  name: string
-  description?: string
-  price: number
-  category?: string
-  isActive?: boolean
-  image?: File | null
-}): FormData {
-  const formData = new FormData()
-  formData.append('canteenId', data.canteenId)
-  formData.append('name', data.name)
-  if (data.description) formData.append('description', data.description)
-  formData.append('price', String(data.price))
-  if (data.category) formData.append('category', data.category)
-  formData.append('isActive', String(data.isActive))
-  if (data.image) formData.append('image', data.image)
-  return formData
-}
-
-function buildUpdateFormData(data: {
-  name?: string
-  description?: string
-  price?: number
-  category?: string
-  isActive?: boolean
-  removeImage?: boolean
-  image?: File | null
-}): FormData {
-  const formData = new FormData()
-  if (data.name !== undefined) formData.append('name', data.name)
-  if (data.description !== undefined) formData.append('description', data.description)
-  if (data.price !== undefined) formData.append('price', String(data.price))
-  if (data.category !== undefined) formData.append('category', data.category)
-  if (data.isActive !== undefined) formData.append('isActive', String(data.isActive))
-  if (data.removeImage !== undefined) formData.append('removeImage', String(data.removeImage))
-  if (data.image) formData.append('image', data.image)
-  return formData
-}
+type CanteenItemsResponseData = Route.Response<'api.v1.canteen_items.index'>['data']
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
@@ -80,7 +40,7 @@ import {
 import { Switch } from '../components/ui/switch'
 import { formatCurrency } from '../lib/utils'
 
-type CanteenItem = CanteenItemsResponse['data'][number]
+type CanteenItem = CanteenItemsResponseData[number]
 
 interface CanteenItemsContainerProps {
   canteenId?: string
@@ -92,7 +52,6 @@ interface ItemFormValues {
   category: string
   priceReais: string
   isActive: boolean
-  imageFile: File | null
   imagePreviewUrl: string | null
   removeImage: boolean
 }
@@ -103,7 +62,6 @@ const defaultItemForm: ItemFormValues = {
   category: '',
   priceReais: '',
   isActive: true,
-  imageFile: null,
   imagePreviewUrl: null,
   removeImage: false,
 }
@@ -114,6 +72,26 @@ function parsePriceToCents(priceReais: string) {
     return null
   }
   return Math.round(normalized * 100)
+}
+
+function getItemImageUrl(image: CanteenItem['image']): string | null {
+  if (!image) return null
+
+  if (typeof image === 'object' && image !== null && 'url' in image) {
+    const url = image.url
+    if (typeof url === 'string' && url.length > 0) {
+      return url
+    }
+  }
+
+  if (typeof image.getUrl === 'function') {
+    const url = image.getUrl()
+    if (typeof url === 'string' && url.length > 0) {
+      return url
+    }
+  }
+
+  return null
 }
 
 function CanteenItemsErrorFallback({
@@ -147,7 +125,7 @@ export function CanteenItemsContainer({ canteenId }: CanteenItemsContainerProps)
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
             <CanteenItemsErrorFallback
-              error={error as Error}
+              error={error instanceof Error ? error : new Error('Erro inesperado')}
               resetErrorBoundary={resetErrorBoundary}
             />
           )}
@@ -171,32 +149,8 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
   const [editForm, setEditForm] = useState<ItemFormValues>(defaultItemForm)
 
   const queryClient = useQueryClient()
-  const createItem = useMutation({
-    ...api.api.v1.canteenItems.store.mutationOptions(),
-    mutationFn: async (data: Parameters<typeof buildCreateFormData>[0]) => {
-      const formData = buildCreateFormData(data)
-      return tuyau.api.api.v1.canteenItems.store({ body: formData as any })
-    },
-  })
-  const updateItem = useMutation({
-    ...api.api.v1.canteenItems.update.mutationOptions(),
-    mutationFn: async ({
-      id,
-      ...data
-    }: {
-      id: string
-      name?: string
-      description?: string
-      price?: number
-      category?: string
-      isActive?: boolean
-      removeImage?: boolean
-      image?: File | null
-    }) => {
-      const formData = buildUpdateFormData(data)
-      return tuyau.api.api.v1.canteenItems.update({ params: { id }, body: formData as any })
-    },
-  })
+  const createItem = useMutation(api.api.v1.canteenItems.store.mutationOptions())
+  const updateItem = useMutation(api.api.v1.canteenItems.update.mutationOptions())
   const deleteItem = useMutation(api.api.v1.canteenItems.destroy.mutationOptions())
   const toggleItem = useMutation(api.api.v1.canteenItems.toggleActive.mutationOptions())
 
@@ -225,8 +179,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       category: item.category ?? '',
       priceReais: (item.price / 100).toFixed(2),
       isActive: item.isActive,
-      imageFile: null,
-      imagePreviewUrl: item.imageUrl ?? null,
+      imagePreviewUrl: getItemImageUrl(item.image),
       removeImage: false,
     })
   }
@@ -243,7 +196,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
     )
   }, [editForm.name, editForm.priceReais, editingItem])
 
-  const handleCreate = async () => {
+  async function handleCreate() {
     if (!canteenId) {
       toast.error('Cantina não encontrada no contexto atual')
       return
@@ -257,18 +210,23 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
 
     await toast.promise(
       createItem.mutateAsync({
-        canteenId,
-        name: createForm.name.trim(),
-        description: createForm.description.trim() || undefined,
-        category: createForm.category.trim() || undefined,
-        price,
-        isActive: createForm.isActive,
-        image: createForm.imageFile,
+        body: {
+          canteenId,
+          name: createForm.name.trim(),
+          description: createForm.description.trim() || undefined,
+          category: createForm.category.trim() || undefined,
+          price,
+          isActive: createForm.isActive,
+        },
       }),
       {
         loading: 'Criando item...',
         success: () => {
-          queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+          queryClient.invalidateQueries({
+            predicate: (query) =>
+              query.queryHash.includes('api.v1.canteenItems.index') ||
+              query.queryHash.includes('api.v1.canteen_items.index'),
+          })
           setCreateOpen(false)
           setCreateForm(defaultItemForm)
           return 'Item criado com sucesso'
@@ -291,19 +249,24 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
 
     toast.promise(
       updateItem.mutateAsync({
-        id: editingItem.id,
-        name: editForm.name.trim(),
-        description: editForm.description.trim() || undefined,
-        category: editForm.category.trim() || undefined,
-        price,
-        isActive: editForm.isActive,
-        image: editForm.imageFile,
-        removeImage: editForm.removeImage,
+        params: { id: editingItem.id },
+        body: {
+          name: editForm.name.trim(),
+          description: editForm.description.trim() || undefined,
+          category: editForm.category.trim() || undefined,
+          price,
+          isActive: editForm.isActive,
+          removeImage: editForm.removeImage,
+        },
       }),
       {
         loading: 'Salvando item...',
         success: () => {
-          queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+          queryClient.invalidateQueries({
+            predicate: (query) =>
+              query.queryHash.includes('api.v1.canteenItems.index') ||
+              query.queryHash.includes('api.v1.canteen_items.index'),
+          })
           setEditingItem(null)
           return 'Item atualizado com sucesso'
         },
@@ -312,7 +275,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
     )
   }
 
-  const handleDelete = async (item: CanteenItem) => {
+  async function handleDelete(item: CanteenItem) {
     if (!confirm(`Excluir o item "${item.name}"?`)) {
       return
     }
@@ -320,23 +283,33 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
     await toast.promise(deleteItem.mutateAsync({ params: { id: item.id } }), {
       loading: 'Excluindo item...',
       success: () => {
-        queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            query.queryHash.includes('api.v1.canteenItems.index') ||
+            query.queryHash.includes('api.v1.canteen_items.index'),
+        })
         return 'Item excluído com sucesso'
       },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao excluir item'),
     })
   }
 
-  const handleToggle = async (item: CanteenItem) => {
+  async function handleToggle(item: CanteenItem) {
     await toast.promise(toggleItem.mutateAsync({ params: { id: item.id } }), {
       loading: item.isActive ? 'Desativando item...' : 'Ativando item...',
       success: () => {
-        queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            query.queryHash.includes('api.v1.canteenItems.index') ||
+            query.queryHash.includes('api.v1.canteen_items.index'),
+        })
         return 'Status atualizado'
       },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao atualizar status'),
     })
   }
+
+  const queryError = error instanceof Error ? error : error ? new Error('Erro inesperado') : null
 
   return (
     <>
@@ -365,9 +338,11 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
           </Card>
         )}
 
-        {error && <CanteenItemsErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
+        {queryError ? (
+          <CanteenItemsErrorFallback error={queryError} resetErrorBoundary={() => refetch()} />
+        ) : null}
 
-        {!isLoading && !error && items.length === 0 && (
+        {!isLoading && !queryError && items.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <UtensilsCrossed className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -379,92 +354,96 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
           </Card>
         )}
 
-        {!isLoading && !error && items.length > 0 && (
+        {!isLoading && !queryError && items.length > 0 && (
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {items.map((item) => (
-                <Card key={item.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="mb-2">
-                          {item.imageUrl ? (
-                            <img
-                              src={item.imageUrl}
-                              alt={item.name}
-                              className="h-24 w-full rounded-md object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="flex h-24 w-full items-center justify-center rounded-md bg-muted">
-                              <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                            </div>
+              {items.map((item) => {
+                const imageUrl = getItemImageUrl(item.image)
+
+                return (
+                  <Card key={item.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="mb-2">
+                            {imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={item.name}
+                                className="h-24 w-full rounded-md object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-24 w-full items-center justify-center rounded-md bg-muted">
+                                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="font-semibold">{item.name}</h3>
+                          <p className="text-lg font-bold text-primary">
+                            {formatCurrency(item.price)}
+                          </p>
+                          {item.category && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Categoria: {item.category}
+                            </p>
                           )}
                         </div>
-                        <h3 className="font-semibold">{item.name}</h3>
-                        <p className="text-lg font-bold text-primary">
-                          {formatCurrency(item.price)}
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEditDialog(item)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleDelete(item)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {item.description && (
+                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                          {item.description}
                         </p>
-                        {item.category && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Categoria: {item.category}
-                          </p>
-                        )}
+                      )}
+
+                      <div className="mt-3 flex items-center justify-between">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            item.isActive
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {item.isActive ? 'Disponível' : 'Indisponível'}
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Ativo</span>
+                          <Switch
+                            checked={item.isActive}
+                            onCheckedChange={() => handleToggle(item)}
+                          />
+                        </div>
                       </div>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(item)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDelete(item)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    {item.description && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {item.description}
-                      </p>
-                    )}
-
-                    <div className="mt-3 flex items-center justify-between">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          item.isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {item.isActive ? 'Disponível' : 'Indisponível'}
-                      </span>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Ativo</span>
-                        <Switch
-                          checked={item.isActive}
-                          onCheckedChange={() => handleToggle(item)}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
 
-            {meta && meta.lastPage > 1 && (
+            {meta && Number(meta.lastPage) > 1 && (
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
                   Mostrando {items.length} de {meta.total} itens
@@ -479,12 +458,12 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
                     Anterior
                   </Button>
                   <span className="text-sm">
-                    Página {page} de {meta.lastPage}
+                    Página {page} de {Number(meta.lastPage)}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={page >= meta.lastPage}
+                    disabled={page >= Number(meta.lastPage)}
                     onClick={() => setFilters({ page: page + 1 })}
                   >
                     Próxima
@@ -552,26 +531,9 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
 
             <div className="space-y-1">
               <Label htmlFor="create-item-image">Imagem (opcional)</Label>
-              <Input
-                id="create-item-image"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => {
-                  const file = event.target.files?.[0] ?? null
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    imageFile: file,
-                    imagePreviewUrl: file ? URL.createObjectURL(file) : null,
-                  }))
-                }}
-              />
-              {createForm.imagePreviewUrl ? (
-                <img
-                  src={createForm.imagePreviewUrl}
-                  alt="Pré-visualização da imagem"
-                  className="h-28 w-full rounded-md object-cover"
-                />
-              ) : null}
+              <p className="text-xs text-muted-foreground">
+                Upload de imagem sera habilitado quando o contrato tipado da API incluir arquivo.
+              </p>
             </div>
           </div>
 
@@ -639,20 +601,9 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
 
             <div className="space-y-2">
               <Label htmlFor="edit-item-image">Imagem</Label>
-              <Input
-                id="edit-item-image"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => {
-                  const file = event.target.files?.[0] ?? null
-                  setEditForm((prev) => ({
-                    ...prev,
-                    imageFile: file,
-                    imagePreviewUrl: file ? URL.createObjectURL(file) : prev.imagePreviewUrl,
-                    removeImage: false,
-                  }))
-                }}
-              />
+              <p className="text-xs text-muted-foreground">
+                Upload de imagem sera habilitado quando o contrato tipado da API incluir arquivo.
+              </p>
               {editForm.imagePreviewUrl ? (
                 <img
                   src={editForm.imagePreviewUrl}
@@ -660,7 +611,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
                   className="h-28 w-full rounded-md object-cover"
                 />
               ) : null}
-              {editingItem?.imageUrl ? (
+              {editingItem && getItemImageUrl(editingItem.image) ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -668,7 +619,6 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
                   onClick={() =>
                     setEditForm((prev) => ({
                       ...prev,
-                      imageFile: null,
                       imagePreviewUrl: null,
                       removeImage: true,
                     }))

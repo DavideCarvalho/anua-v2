@@ -96,7 +96,8 @@ export const updateSchoolAchievementConfigValidator = vine.compile(
 // ==========================================
 export const createStoreItemValidator = vine.compile(
   vine.object({
-    storeId: vine.string().trim(),
+    storeId: vine.string().trim().optional(),
+    schoolId: vine.string().trim().optional(),
     name: vine.string().trim().minLength(1).maxLength(255),
     description: vine.string().trim().maxLength(1000).optional(),
     price: vine.number().min(1), // Em pontos
@@ -115,6 +116,9 @@ export const createStoreItemValidator = vine.compile(
       'MERCHANDISE',
       'DIGITAL',
       'OTHER',
+      'AVATAR_HAIR',
+      'AVATAR_OUTFIT',
+      'AVATAR_ACCESSORY',
     ]),
     imageUrl: vine.string().trim().url().optional(),
     totalStock: vine.number().min(0).optional(), // null = unlimited
@@ -151,6 +155,9 @@ export const updateStoreItemValidator = vine.compile(
         'MERCHANDISE',
         'DIGITAL',
         'OTHER',
+        'AVATAR_HAIR',
+        'AVATAR_OUTFIT',
+        'AVATAR_ACCESSORY',
       ])
       .optional(),
     imageUrl: vine.string().trim().url().optional(),
@@ -182,6 +189,9 @@ export const listStoreItemsValidator = vine.compile(
         'MERCHANDISE',
         'DIGITAL',
         'OTHER',
+        'AVATAR_HAIR',
+        'AVATAR_OUTFIT',
+        'AVATAR_ACCESSORY',
       ])
       .optional(),
     paymentMode: vine.enum(['POINTS_ONLY', 'MONEY_ONLY', 'HYBRID']).optional(),

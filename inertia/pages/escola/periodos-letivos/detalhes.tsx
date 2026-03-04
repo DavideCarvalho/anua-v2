@@ -16,7 +16,7 @@ interface Props {
   academicPeriodSlug: string
 }
 
-type AcademicPeriodResponse = Route.Response<'api.v1.academic_periods.show_by_slug'>
+type AcademicPeriodResponse = Route.Response<'api.v1.academic_periods.show_dashboard_by_slug'>
 
 type AcademicPeriodView = {
   id: string
@@ -27,17 +27,39 @@ type AcademicPeriodView = {
   enrollmentEndDate: string | Date | null
   isActive: boolean
   isClosed: boolean
+  metrics?: {
+    coursesCount: number
+    levelsCount: number
+    studentsCount: number
+    classesCount: number
+  }
   segment: 'KINDERGARTEN' | 'ELEMENTARY' | 'HIGHSCHOOL' | 'TECHNICAL' | 'UNIVERSITY' | 'OTHER'
   courseAcademicPeriods?: Array<{
     id: string
     courseId: string
-    course?: { name?: string | null } | null
+    metrics?: {
+      levelsCount: number
+      activeLevelsCount: number
+      inactiveLevelsCount: number
+      studentsCount: number
+      classesCount: number
+    }
+    course?: {
+      name?: string | null
+      slug?: string | null
+      enrollmentMinimumAge?: number | null
+      enrollmentMaximumAge?: number | null
+      maxStudentsPerClass?: number | null
+    } | null
     levelAssignments?: Array<{
       id: string
       levelId: string
       isActive: boolean
+      studentsCount?: number
+      classesCount?: number
       level?: {
         name?: string | null
+        slug?: string | null
         order?: number | null
         contractId?: string | null
       } | null
@@ -97,9 +119,8 @@ function PeriodoLetivoDetalhesSkeleton() {
 
 export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props) {
   const { data, isLoading, error, refetch, isRefetching } = useQuery(
-    api.api.v1.academicPeriods.showBySlug.queryOptions({
+    api.api.v1.academicPeriods.showDashboardBySlug.queryOptions({
       params: { slug: academicPeriodSlug },
-      query: { include: 'courses' },
     })
   )
 
@@ -119,13 +140,21 @@ export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props)
     id: item.id,
     courseId: item.courseId,
     name: item.course?.name ?? 'Curso',
+    slug: item.course?.slug ?? null,
+    enrollmentMinimumAge: item.course?.enrollmentMinimumAge ?? null,
+    enrollmentMaximumAge: item.course?.enrollmentMaximumAge ?? null,
+    maxStudentsPerClass: item.course?.maxStudentsPerClass ?? null,
+    metrics: item.metrics,
     levels: (item.levelAssignments ?? []).map((assignment) => ({
       id: assignment.id,
       levelId: assignment.levelId,
       name: assignment.level?.name ?? 'Nível',
+      slug: assignment.level?.slug ?? null,
       order: assignment.level?.order ?? 0,
       contractId: assignment.level?.contractId ?? null,
       isActive: assignment.isActive,
+      studentsCount: assignment.studentsCount ?? 0,
+      classesCount: assignment.classesCount ?? 0,
     })),
   }))
 
@@ -175,6 +204,39 @@ export default function PeriodoLetivoDetalhesPage({ academicPeriodSlug }: Props)
             }
             segment={resolvedAcademicPeriod.segment}
           />
+
+          {resolvedAcademicPeriod.metrics && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cursos</p>
+                    <p className="text-2xl font-semibold">
+                      {resolvedAcademicPeriod.metrics.coursesCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Series/Niveis</p>
+                    <p className="text-2xl font-semibold">
+                      {resolvedAcademicPeriod.metrics.levelsCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Alunos</p>
+                    <p className="text-2xl font-semibold">
+                      {resolvedAcademicPeriod.metrics.studentsCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Turmas</p>
+                    <p className="text-2xl font-semibold">
+                      {resolvedAcademicPeriod.metrics.classesCount}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <CursosDoPeríodoList courses={courses} segment={resolvedAcademicPeriod.segment} />
         </div>

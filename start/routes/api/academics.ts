@@ -124,6 +124,8 @@ const ShowAcademicPeriodController = () =>
   import('#controllers/academic_periods/show_academic_period_controller')
 const ShowAcademicPeriodBySlugController = () =>
   import('#controllers/academic_periods/show_academic_period_by_slug_controller')
+const ShowAcademicPeriodDashboardBySlugController = () =>
+  import('#controllers/academic_periods/show_academic_period_dashboard_by_slug_controller')
 const UpdateAcademicPeriodController = () =>
   import('#controllers/academic_periods/update_academic_period_controller')
 const DeleteAcademicPeriodController = () =>
@@ -353,6 +355,9 @@ export function registerAcademicPeriodApiRoutes() {
       router
         .get('/by-slug/:slug', [ShowAcademicPeriodBySlugController])
         .as('academic_periods.show_by_slug')
+      router
+        .get('/by-slug/:slug/dashboard', [ShowAcademicPeriodDashboardBySlugController])
+        .as('academic_periods.show_dashboard_by_slug')
       router
         .post('/', [CreateAcademicPeriodController])
         .as('academic_periods.create_academic_period')

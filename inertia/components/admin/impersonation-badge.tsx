@@ -100,9 +100,12 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
         if (role === 'RESPONSIBLE' || role === 'STUDENT_RESPONSIBLE') {
           redirectPath = '/responsavel'
         }
-        // Todos os outros (STUDENT, TEACHER, SCHOOL_*, SCHOOL_CHAIN_*) vão para /escola
+        // Alunos vão para /aluno
+        else if (role === 'STUDENT') {
+          redirectPath = '/aluno'
+        }
+        // Professores e escola vão para /escola
         else if (
-          role === 'STUDENT' ||
           role === 'TEACHER' ||
           role.startsWith('SCHOOL_') ||
           role.startsWith('SCHOOL_CHAIN_')

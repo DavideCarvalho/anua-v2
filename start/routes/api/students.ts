@@ -47,6 +47,14 @@ const GetStudentBalanceController = () =>
 const GetStudentAttendanceController = () =>
   import('#controllers/attendance/get_student_attendance_controller')
 
+// Student Avatar (must be before /:id to match 'me')
+const ShowStudentAvatarController = () =>
+  import('#controllers/student_avatars/show_student_avatar_controller')
+const UpdateStudentAvatarController = () =>
+  import('#controllers/student_avatars/update_student_avatar_controller')
+const PurchaseAvatarItemController = () =>
+  import('#controllers/student_avatars/purchase_avatar_item_controller')
+
 export function registerStudentApiRoutes() {
   router
     .group(() => {
@@ -58,6 +66,12 @@ export function registerStudentApiRoutes() {
       router
         .get('/lookup-responsible', [LookupResponsibleController])
         .as('students.lookup_responsible')
+      // Student avatar (me = current student)
+      router.get('/me/avatar', [ShowStudentAvatarController]).as('students.me.avatar.show')
+      router.put('/me/avatar', [UpdateStudentAvatarController]).as('students.me.avatar.update')
+      router
+        .post('/me/avatar/purchase', [PurchaseAvatarItemController])
+        .as('students.me.avatar.purchase')
       router.get('/:id', [ShowStudentController]).as('students.show')
       router.put('/:id', [UpdateStudentController]).as('students.update')
       router.put('/:id/full', [FullUpdateStudentController]).as('students.full_update')

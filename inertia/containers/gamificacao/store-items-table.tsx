@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, Plus, Gift, Package, Coffee, Star, Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '~/lib/api'
+import { CreateRecompensaItemModal } from './create-recompensa-item-modal'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -25,7 +27,6 @@ import { Switch } from '../../components/ui/switch'
 
 interface StoreItemsTableProps {
   schoolId: string
-  onCreateItem?: () => void
 }
 
 const categoryLabels: Record<string, string> = {
@@ -39,6 +40,9 @@ const categoryLabels: Record<string, string> = {
   MERCHANDISE: 'Mercadoria',
   DIGITAL: 'Digital',
   OTHER: 'Outro',
+  AVATAR_HAIR: 'Cabelo (Avatar)',
+  AVATAR_OUTFIT: 'Roupa (Avatar)',
+  AVATAR_ACCESSORY: 'Acessório (Avatar)',
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -46,6 +50,9 @@ const categoryIcons: Record<string, React.ReactNode> = {
   CANTEEN_DRINK: <Coffee className="h-4 w-4" />,
   PRIVILEGE: <Star className="h-4 w-4" />,
   HOMEWORK_PASS: <Sparkles className="h-4 w-4" />,
+  AVATAR_HAIR: <Sparkles className="h-4 w-4" />,
+  AVATAR_OUTFIT: <Sparkles className="h-4 w-4" />,
+  AVATAR_ACCESSORY: <Sparkles className="h-4 w-4" />,
   DEFAULT: <Package className="h-4 w-4" />,
 }
 
@@ -55,15 +62,14 @@ const paymentModeLabels: Record<string, string> = {
   HYBRID: 'Híbrido',
 }
 
-export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps) {
+export function StoreItemsTable({ schoolId }: StoreItemsTableProps) {
   const queryClient = useQueryClient()
-  const { data, isLoading, error } = useQuery(
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const { data, isLoading } = useQuery(
     api.api.v1.storeItems.index.queryOptions({ query: { schoolId } })
   )
   const toggleMutation = useMutation(api.api.v1.storeItems.toggleActive.mutationOptions())
   const deleteMutation = useMutation(api.api.v1.storeItems.destroy.mutationOptions())
-
-  console.log(error)
 
   const items = data?.data ?? []
 
@@ -87,38 +93,43 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
 
   if (items.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Gift className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">Nenhum item cadastrado</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Cadastre itens para que os alunos possam trocar seus pontos
-          </p>
-          {onCreateItem && (
-            <Button className="mt-4" onClick={onCreateItem}>
+      <>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Gift className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">Nenhum item cadastrado</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Cadastre itens para que os alunos possam trocar seus pontos
+            </p>
+            <Button className="mt-4" onClick={() => setShowCreateModal(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Adicionar Item
             </Button>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        <CreateRecompensaItemModal
+          schoolId={schoolId}
+          open={showCreateModal}
+          onOpenChange={setShowCreateModal}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['store-items'] })}
+        />
+      </>
     )
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Itens da Loja</CardTitle>
-          <CardDescription>{items.length} item(ns) cadastrado(s)</CardDescription>
-        </div>
-        {onCreateItem && (
-          <Button onClick={onCreateItem}>
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Itens da Loja</CardTitle>
+            <CardDescription>{items.length} item(ns) cadastrado(s)</CardDescription>
+          </div>
+          <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Novo Item
           </Button>
-        )}
-      </CardHeader>
+        </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
@@ -226,5 +237,12 @@ export function StoreItemsTable({ schoolId, onCreateItem }: StoreItemsTableProps
         </Table>
       </CardContent>
     </Card>
+      <CreateRecompensaItemModal
+        schoolId={schoolId}
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['store-items'] })}
+      />
+    </>
   )
 }

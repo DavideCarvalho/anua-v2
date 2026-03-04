@@ -24,7 +24,7 @@ export default class ShowDashboardPageController {
     } else if (roleName === 'RESPONSIBLE' || roleName === 'STUDENT_RESPONSIBLE') {
       redirectTo = '/responsavel'
     } else if (roleName === 'STUDENT') {
-      redirectTo = '/escola' // Students see the escola dashboard for now
+      redirectTo = '/aluno'
     }
 
     return inertia.render('dashboard', { redirectTo })

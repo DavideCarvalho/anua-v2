@@ -30,6 +30,7 @@ import {
   Pencil,
   RefreshCw,
   Trash2,
+  UserX,
   Filter,
   X,
 } from 'lucide-react'
@@ -112,6 +113,7 @@ function StudentsListContent({
   onPageChange,
   onEditStudent,
   onChangeCourse,
+  onCancelEnrollment,
   onEditPayment,
   onDeleteStudent,
 }: {
@@ -124,6 +126,7 @@ function StudentsListContent({
   onPageChange: (page: number) => void
   onEditStudent: (student: StudentAction) => void
   onChangeCourse: (student: StudentAction) => void
+  onCancelEnrollment: (student: StudentAction) => void
   onEditPayment: (student: StudentAction) => void
   onDeleteStudent: (student: StudentAction) => void
 }) {
@@ -212,7 +215,7 @@ function StudentsListContent({
                         }
                       >
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Mudar curso
+                        Gerenciar matrícula
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
@@ -224,6 +227,18 @@ function StudentsListContent({
                       >
                         <CreditCard className="h-4 w-4 mr-2" />
                         Editar pagamento
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          onCancelEnrollment({
+                            id: student.id,
+                            name: student.user?.name || student.name,
+                          })
+                        }
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <UserX className="h-4 w-4 mr-2" />
+                        Cancelar matrícula
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
@@ -277,21 +292,6 @@ function StudentsListContent({
       )}
     </div>
   )
-}
-
-// Types for cascading filter data
-interface CourseLevel {
-  id: string
-  levelId: string
-  name: string
-  classes: { id: string; name: string }[]
-}
-
-interface AcademicPeriodCourse {
-  id: string
-  courseId: string
-  name: string
-  levels: CourseLevel[]
 }
 
 // Container Export
@@ -524,6 +524,7 @@ export function StudentsListContainer() {
                   router.visit(`/escola/administrativo/alunos/${student.id}/editar`)
                 }
                 onChangeCourse={setChangeCourseStudent}
+                onCancelEnrollment={setChangeCourseStudent}
                 onEditPayment={setEditPaymentStudent}
                 onDeleteStudent={setDeleteStudent}
               />

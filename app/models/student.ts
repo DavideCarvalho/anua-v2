@@ -13,6 +13,7 @@ import StudentAddress from './student_address.js'
 import StudentMedicalInfo from './student_medical_info.js'
 import StudentEmergencyContact from './student_emergency_contact.js'
 import Occurrence from './occurrence.js'
+import StudentAvatar from './student_avatar.js'
 
 export type EnrollmentStatus = 'PENDING_DOCUMENT_REVIEW' | 'REGISTERED'
 
@@ -93,4 +94,7 @@ export default class Student extends BaseModel {
 
   @hasMany(() => Occurrence, { foreignKey: 'studentId' })
   declare occurrences: HasMany<typeof Occurrence>
+
+  @hasOne(() => StudentAvatar, { foreignKey: 'studentId' })
+  declare avatar: HasOne<typeof StudentAvatar>
 }

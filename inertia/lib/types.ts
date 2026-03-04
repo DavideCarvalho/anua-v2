@@ -56,6 +56,18 @@ export interface SharedProps {
   userSchools: UserSchool[]
   /** IDs das escolas atualmente selecionadas */
   selectedSchoolIds: string[]
+  /** Whether the student is in gamified mode (age <= 14) */
+  gamified?: boolean
+  /** Gamification stats shared by middleware */
+  gamificationData?: { totalPoints: number; currentLevel: number } | null
+  /** Avatar data shared by middleware */
+  avatarData?: {
+    skinTone: string
+    hairStyle: string
+    hairColor: string
+    outfit: string
+    accessories: string[]
+  } | null
 }
 
 // Role names from the system
