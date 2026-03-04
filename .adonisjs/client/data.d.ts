@@ -6,6 +6,7 @@
 /// <reference path="./manifest.d.ts" />
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
 import type { InferSharedProps } from '@adonisjs/inertia/types'
+import type AcademicPeriodDashboardTransformer from '#transformers/academic_period_dashboard_transformer'
 import type AcademicPeriodTransformer from '#transformers/academic_period_transformer'
 import type AchievementTransformer from '#transformers/achievement_transformer'
 import type AssignmentTransformer from '#transformers/assignment_transformer'
@@ -33,6 +34,7 @@ import type ExamGradeTransformer from '#transformers/exam_grade_transformer'
 import type ExamTransformer from '#transformers/exam_transformer'
 import type GamificationEventTransformer from '#transformers/gamification_event_transformer'
 import type InsuranceBillingTransformer from '#transformers/insurance_billing_transformer'
+import type LevelAssignedToCourseHasAcademicPeriodTransformer from '#transformers/level_assigned_to_course_has_academic_period_transformer'
 import type LevelTransformer from '#transformers/level_transformer'
 import type NotificationTransformer from '#transformers/notification_transformer'
 import type OccurrenceTransformer from '#transformers/occurrence_transformer'
@@ -70,10 +72,13 @@ import type TeacherTransformer from '#transformers/teacher_transformer'
 import type UserHasSchoolGroupTransformer from '#transformers/user_has_school_group_transformer'
 import type UserHasSchoolTransformer from '#transformers/user_has_school_transformer'
 import type UserTransformer from '#transformers/user_transformer'
-import type LevelAssignedToCourseHasAcademicPeriodTransformer from '#transformers/level_assigned_to_course_has_academic_period_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
 
 export namespace Data {
+  export type AcademicPeriodDashboard = InferData<AcademicPeriodDashboardTransformer>
+  export namespace AcademicPeriodDashboard {
+    export type Variants = InferVariants<AcademicPeriodDashboardTransformer>
+  }
   export type AcademicPeriod = InferData<AcademicPeriodTransformer>
   export namespace AcademicPeriod {
     export type Variants = InferVariants<AcademicPeriodTransformer>
@@ -181,6 +186,10 @@ export namespace Data {
   export type InsuranceBilling = InferData<InsuranceBillingTransformer>
   export namespace InsuranceBilling {
     export type Variants = InferVariants<InsuranceBillingTransformer>
+  }
+  export type LevelAssignedToCourseHasAcademicPeriod = InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
+  export namespace LevelAssignedToCourseHasAcademicPeriod {
+    export type Variants = InferVariants<LevelAssignedToCourseHasAcademicPeriodTransformer>
   }
   export type Level = InferData<LevelTransformer>
   export namespace Level {
@@ -329,11 +338,6 @@ export namespace Data {
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
-  }
-  export type LevelAssignedToCourseHasAcademicPeriod =
-    InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
-  export namespace LevelAssignedToCourseHasAcademicPeriod {
-    export type Variants = InferVariants<LevelAssignedToCourseHasAcademicPeriodTransformer>
   }
   export type SharedProps = InferSharedProps<InertiaMiddleware>
 }

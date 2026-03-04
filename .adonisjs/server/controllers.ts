@@ -5,24 +5,16 @@
 
 export const controllers = {
   academicPeriods: {
-    CreateAcademicPeriod: () =>
-      import('#controllers/academic_periods/create_academic_period_controller'),
-    DeleteAcademicPeriod: () =>
-      import('#controllers/academic_periods/delete_academic_period_controller'),
-    GetCurrentActiveAcademicPeriods: () =>
-      import('#controllers/academic_periods/get_current_active_academic_periods_controller'),
-    ListAcademicPeriodCourses: () =>
-      import('#controllers/academic_periods/list_academic_period_courses_controller'),
-    ListAcademicPeriods: () =>
-      import('#controllers/academic_periods/list_academic_periods_controller'),
-    ShowAcademicPeriodBySlug: () =>
-      import('#controllers/academic_periods/show_academic_period_by_slug_controller'),
-    ShowAcademicPeriod: () =>
-      import('#controllers/academic_periods/show_academic_period_controller'),
-    UpdateAcademicPeriod: () =>
-      import('#controllers/academic_periods/update_academic_period_controller'),
-    UpdateAcademicPeriodCourses: () =>
-      import('#controllers/academic_periods/update_academic_period_courses_controller'),
+    CreateAcademicPeriod: () => import('#controllers/academic_periods/create_academic_period_controller'),
+    DeleteAcademicPeriod: () => import('#controllers/academic_periods/delete_academic_period_controller'),
+    GetCurrentActiveAcademicPeriods: () => import('#controllers/academic_periods/get_current_active_academic_periods_controller'),
+    ListAcademicPeriodCourses: () => import('#controllers/academic_periods/list_academic_period_courses_controller'),
+    ListAcademicPeriods: () => import('#controllers/academic_periods/list_academic_periods_controller'),
+    ShowAcademicPeriodBySlug: () => import('#controllers/academic_periods/show_academic_period_by_slug_controller'),
+    ShowAcademicPeriod: () => import('#controllers/academic_periods/show_academic_period_controller'),
+    ShowAcademicPeriodDashboardBySlug: () => import('#controllers/academic_periods/show_academic_period_dashboard_by_slug_controller'),
+    UpdateAcademicPeriod: () => import('#controllers/academic_periods/update_academic_period_controller'),
+    UpdateAcademicPeriodCourses: () => import('#controllers/academic_periods/update_academic_period_courses_controller'),
   },
   achievements: {
     CreateAchievement: () => import('#controllers/achievements/create_achievement_controller'),
@@ -31,8 +23,7 @@ export const controllers = {
     ShowAchievement: () => import('#controllers/achievements/show_achievement_controller'),
     UnlockAchievement: () => import('#controllers/achievements/unlock_achievement_controller'),
     UpdateAchievement: () => import('#controllers/achievements/update_achievement_controller'),
-    UpdateSchoolAchievementConfig: () =>
-      import('#controllers/achievements/update_school_achievement_config_controller'),
+    UpdateSchoolAchievementConfig: () => import('#controllers/achievements/update_school_achievement_config_controller'),
   },
   admin: {
     ClearImpersonation: () => import('#controllers/admin/clear_impersonation_controller'),
@@ -48,22 +39,17 @@ export const controllers = {
     CreateAgreement: () => import('#controllers/agreements/create_agreement_controller'),
   },
   analytics: {
-    GetAttendanceOverview: () =>
-      import('#controllers/analytics/get_attendance_overview_controller'),
+    GetAttendanceOverview: () => import('#controllers/analytics/get_attendance_overview_controller'),
     GetAttendanceTrends: () => import('#controllers/analytics/get_attendance_trends_controller'),
     GetCanteenOverview: () => import('#controllers/analytics/get_canteen_overview_controller'),
     GetCanteenTopItems: () => import('#controllers/analytics/get_canteen_top_items_controller'),
     GetCanteenTrends: () => import('#controllers/analytics/get_canteen_trends_controller'),
-    GetChronicAbsenteeism: () =>
-      import('#controllers/analytics/get_chronic_absenteeism_controller'),
+    GetChronicAbsenteeism: () => import('#controllers/analytics/get_chronic_absenteeism_controller'),
     GetEnrollmentByLevel: () => import('#controllers/analytics/get_enrollment_by_level_controller'),
-    GetEnrollmentFunnelStats: () =>
-      import('#controllers/analytics/get_enrollment_funnel_stats_controller'),
+    GetEnrollmentFunnelStats: () => import('#controllers/analytics/get_enrollment_funnel_stats_controller'),
     GetEnrollmentTrends: () => import('#controllers/analytics/get_enrollment_trends_controller'),
-    GetEnrollmentsOverview: () =>
-      import('#controllers/analytics/get_enrollments_overview_controller'),
-    GetGamificationOverview: () =>
-      import('#controllers/analytics/get_gamification_overview_controller'),
+    GetEnrollmentsOverview: () => import('#controllers/analytics/get_enrollments_overview_controller'),
+    GetGamificationOverview: () => import('#controllers/analytics/get_gamification_overview_controller'),
     GetHrOverview: () => import('#controllers/analytics/get_hr_overview_controller'),
     GetIncidentsOverview: () => import('#controllers/analytics/get_incidents_overview_controller'),
     GetPaymentsOverview: () => import('#controllers/analytics/get_payments_overview_controller'),
@@ -77,25 +63,20 @@ export const controllers = {
     CreateAssignment: () => import('#controllers/assignments/create_assignment_controller'),
     DeleteAssignment: () => import('#controllers/assignments/delete_assignment_controller'),
     GradeSubmission: () => import('#controllers/assignments/grade_submission_controller'),
-    ListAssignmentSubmissions: () =>
-      import('#controllers/assignments/list_assignment_submissions_controller'),
+    ListAssignmentSubmissions: () => import('#controllers/assignments/list_assignment_submissions_controller'),
     ListAssignments: () => import('#controllers/assignments/list_assignments_controller'),
     ShowAssignment: () => import('#controllers/assignments/show_assignment_controller'),
     SubmitAssignment: () => import('#controllers/assignments/submit_assignment_controller'),
     UpdateAssignment: () => import('#controllers/assignments/update_assignment_controller'),
   },
   attendance: {
-    BatchCreateAttendance: () =>
-      import('#controllers/attendance/batch_create_attendance_controller'),
+    BatchCreateAttendance: () => import('#controllers/attendance/batch_create_attendance_controller'),
     CreateAttendance: () => import('#controllers/attendance/create_attendance_controller'),
     dtos: {
-      GetClassStudentsAttendanceResponseDto: () =>
-        import('#controllers/attendance/dtos/get_class_students_attendance_response.dto'),
+      GetClassStudentsAttendanceResponseDto: () => import('#controllers/attendance/dtos/get_class_students_attendance_response.dto'),
     },
-    GetAttendanceAvailableDates: () =>
-      import('#controllers/attendance/get_attendance_available_dates_controller'),
-    GetClassStudentsAttendance: () =>
-      import('#controllers/attendance/get_class_students_attendance_controller'),
+    GetAttendanceAvailableDates: () => import('#controllers/attendance/get_attendance_available_dates_controller'),
+    GetClassStudentsAttendance: () => import('#controllers/attendance/get_class_students_attendance_controller'),
     GetStudentAttendance: () => import('#controllers/attendance/get_student_attendance_controller'),
     ListAttendance: () => import('#controllers/attendance/list_attendance_controller'),
     ShowAttendance: () => import('#controllers/attendance/show_attendance_controller'),
@@ -103,8 +84,7 @@ export const controllers = {
   },
   audits: {
     ListAudits: () => import('#controllers/audits/list_audits_controller'),
-    ListStudentAuditHistory: () =>
-      import('#controllers/audits/list_student_audit_history_controller'),
+    ListStudentAuditHistory: () => import('#controllers/audits/list_student_audit_history_controller'),
   },
   auth: {
     Login: () => import('#controllers/auth/login'),
@@ -119,21 +99,15 @@ export const controllers = {
     ListCanteenItems: () => import('#controllers/canteen_items/list_canteen_items_controller'),
     ListItemsByCanteen: () => import('#controllers/canteen_items/list_items_by_canteen_controller'),
     ShowCanteenItem: () => import('#controllers/canteen_items/show_canteen_item_controller'),
-    ToggleCanteenItemActive: () =>
-      import('#controllers/canteen_items/toggle_canteen_item_active_controller'),
+    ToggleCanteenItemActive: () => import('#controllers/canteen_items/toggle_canteen_item_active_controller'),
     UpdateCanteenItem: () => import('#controllers/canteen_items/update_canteen_item_controller'),
   },
   canteenMealReservations: {
-    CreateCanteenMealReservation: () =>
-      import('#controllers/canteen_meal_reservations/create_canteen_meal_reservation_controller'),
-    DeleteCanteenMealReservation: () =>
-      import('#controllers/canteen_meal_reservations/delete_canteen_meal_reservation_controller'),
-    ListCanteenMealReservations: () =>
-      import('#controllers/canteen_meal_reservations/list_canteen_meal_reservations_controller'),
-    ShowCanteenMealReservation: () =>
-      import('#controllers/canteen_meal_reservations/show_canteen_meal_reservation_controller'),
-    UpdateCanteenMealReservationStatus: () =>
-      import('#controllers/canteen_meal_reservations/update_canteen_meal_reservation_status_controller'),
+    CreateCanteenMealReservation: () => import('#controllers/canteen_meal_reservations/create_canteen_meal_reservation_controller'),
+    DeleteCanteenMealReservation: () => import('#controllers/canteen_meal_reservations/delete_canteen_meal_reservation_controller'),
+    ListCanteenMealReservations: () => import('#controllers/canteen_meal_reservations/list_canteen_meal_reservations_controller'),
+    ShowCanteenMealReservation: () => import('#controllers/canteen_meal_reservations/show_canteen_meal_reservation_controller'),
+    UpdateCanteenMealReservationStatus: () => import('#controllers/canteen_meal_reservations/update_canteen_meal_reservation_status_controller'),
   },
   canteenMeals: {
     CreateCanteenMeal: () => import('#controllers/canteen_meals/create_canteen_meal_controller'),
@@ -143,26 +117,17 @@ export const controllers = {
     UpdateCanteenMeal: () => import('#controllers/canteen_meals/update_canteen_meal_controller'),
   },
   canteenMonthlyTransfers: {
-    CreateCanteenMonthlyTransfer: () =>
-      import('#controllers/canteen_monthly_transfers/create_canteen_monthly_transfer_controller'),
-    ListCanteenMonthlyTransfers: () =>
-      import('#controllers/canteen_monthly_transfers/list_canteen_monthly_transfers_controller'),
-    ShowCanteenMonthlyTransfer: () =>
-      import('#controllers/canteen_monthly_transfers/show_canteen_monthly_transfer_controller'),
-    UpdateCanteenMonthlyTransferStatus: () =>
-      import('#controllers/canteen_monthly_transfers/update_canteen_monthly_transfer_status_controller'),
+    CreateCanteenMonthlyTransfer: () => import('#controllers/canteen_monthly_transfers/create_canteen_monthly_transfer_controller'),
+    ListCanteenMonthlyTransfers: () => import('#controllers/canteen_monthly_transfers/list_canteen_monthly_transfers_controller'),
+    ShowCanteenMonthlyTransfer: () => import('#controllers/canteen_monthly_transfers/show_canteen_monthly_transfer_controller'),
+    UpdateCanteenMonthlyTransferStatus: () => import('#controllers/canteen_monthly_transfers/update_canteen_monthly_transfer_status_controller'),
   },
   canteenPurchases: {
-    CancelCanteenPurchase: () =>
-      import('#controllers/canteen_purchases/cancel_canteen_purchase_controller'),
-    CreateCanteenPurchase: () =>
-      import('#controllers/canteen_purchases/create_canteen_purchase_controller'),
-    ListCanteenPurchases: () =>
-      import('#controllers/canteen_purchases/list_canteen_purchases_controller'),
-    ShowCanteenPurchase: () =>
-      import('#controllers/canteen_purchases/show_canteen_purchase_controller'),
-    UpdateCanteenPurchaseStatus: () =>
-      import('#controllers/canteen_purchases/update_canteen_purchase_status_controller'),
+    CancelCanteenPurchase: () => import('#controllers/canteen_purchases/cancel_canteen_purchase_controller'),
+    CreateCanteenPurchase: () => import('#controllers/canteen_purchases/create_canteen_purchase_controller'),
+    ListCanteenPurchases: () => import('#controllers/canteen_purchases/list_canteen_purchases_controller'),
+    ShowCanteenPurchase: () => import('#controllers/canteen_purchases/show_canteen_purchase_controller'),
+    UpdateCanteenPurchaseStatus: () => import('#controllers/canteen_purchases/update_canteen_purchase_status_controller'),
   },
   canteenReports: {
     GetCanteenReport: () => import('#controllers/canteen_reports/get_canteen_report_controller'),
@@ -184,8 +149,7 @@ export const controllers = {
   classes: {
     CountClassStudents: () => import('#controllers/classes/count_class_students_controller'),
     CreateClass: () => import('#controllers/classes/create_class_controller'),
-    CreateClassWithTeachers: () =>
-      import('#controllers/classes/create_class_with_teachers_controller'),
+    CreateClassWithTeachers: () => import('#controllers/classes/create_class_with_teachers_controller'),
     DeleteClass: () => import('#controllers/classes/delete_class_controller'),
     dtos: {
       ListClassesResponseDto: () => import('#controllers/classes/dtos/list_classes_response.dto'),
@@ -196,8 +160,7 @@ export const controllers = {
     ShowClassBySlug: () => import('#controllers/classes/show_class_by_slug_controller'),
     ShowClass: () => import('#controllers/classes/show_class_controller'),
     UpdateClass: () => import('#controllers/classes/update_class_controller'),
-    UpdateClassWithTeachers: () =>
-      import('#controllers/classes/update_class_with_teachers_controller'),
+    UpdateClassWithTeachers: () => import('#controllers/classes/update_class_with_teachers_controller'),
   },
   comments: {
     CreateComment: () => import('#controllers/comments/create_comment_controller'),
@@ -207,45 +170,31 @@ export const controllers = {
     UpdateComment: () => import('#controllers/comments/update_comment_controller'),
   },
   contractDocuments: {
-    CreateContractDocument: () =>
-      import('#controllers/contract-documents/create_contract_document_controller'),
-    ListContractDocuments: () =>
-      import('#controllers/contract-documents/list_contract_documents_controller'),
+    CreateContractDocument: () => import('#controllers/contract-documents/create_contract_document_controller'),
+    ListContractDocuments: () => import('#controllers/contract-documents/list_contract_documents_controller'),
   },
   contracts: {
-    AddContractEarlyDiscount: () =>
-      import('#controllers/contracts/add_contract_early_discount_controller'),
-    AddContractPaymentDay: () =>
-      import('#controllers/contracts/add_contract_payment_day_controller'),
+    AddContractEarlyDiscount: () => import('#controllers/contracts/add_contract_early_discount_controller'),
+    AddContractPaymentDay: () => import('#controllers/contracts/add_contract_payment_day_controller'),
     CreateContract: () => import('#controllers/contracts/create_contract_controller'),
     DeleteContract: () => import('#controllers/contracts/delete_contract_controller'),
-    DeleteDocusealTemplate: () =>
-      import('#controllers/contracts/delete_docuseal_template_controller'),
+    DeleteDocusealTemplate: () => import('#controllers/contracts/delete_docuseal_template_controller'),
     GetDocusealTemplate: () => import('#controllers/contracts/get_docuseal_template_controller'),
     GetSignatureStats: () => import('#controllers/contracts/get_signature_stats_controller'),
-    ListContractEarlyDiscounts: () =>
-      import('#controllers/contracts/list_contract_early_discounts_controller'),
-    ListContractPaymentDays: () =>
-      import('#controllers/contracts/list_contract_payment_days_controller'),
+    ListContractEarlyDiscounts: () => import('#controllers/contracts/list_contract_early_discounts_controller'),
+    ListContractPaymentDays: () => import('#controllers/contracts/list_contract_payment_days_controller'),
     ListContracts: () => import('#controllers/contracts/list_contracts_controller'),
-    RemoveContractEarlyDiscount: () =>
-      import('#controllers/contracts/remove_contract_early_discount_controller'),
-    RemoveContractPaymentDay: () =>
-      import('#controllers/contracts/remove_contract_payment_day_controller'),
+    RemoveContractEarlyDiscount: () => import('#controllers/contracts/remove_contract_early_discount_controller'),
+    RemoveContractPaymentDay: () => import('#controllers/contracts/remove_contract_payment_day_controller'),
     ShowContract: () => import('#controllers/contracts/show_contract_controller'),
-    ShowContractInterestConfig: () =>
-      import('#controllers/contracts/show_contract_interest_config_controller'),
+    ShowContractInterestConfig: () => import('#controllers/contracts/show_contract_interest_config_controller'),
     UpdateContract: () => import('#controllers/contracts/update_contract_controller'),
-    UpdateContractEarlyDiscount: () =>
-      import('#controllers/contracts/update_contract_early_discount_controller'),
-    UpdateContractInterestConfig: () =>
-      import('#controllers/contracts/update_contract_interest_config_controller'),
-    UploadDocusealTemplate: () =>
-      import('#controllers/contracts/upload_docuseal_template_controller'),
+    UpdateContractEarlyDiscount: () => import('#controllers/contracts/update_contract_early_discount_controller'),
+    UpdateContractInterestConfig: () => import('#controllers/contracts/update_contract_interest_config_controller'),
+    UploadDocusealTemplate: () => import('#controllers/contracts/upload_docuseal_template_controller'),
   },
   courseHasAcademicPeriods: {
-    CreateCourseHasAcademicPeriod: () =>
-      import('#controllers/course_has_academic_periods/create_course_has_academic_period_controller'),
+    CreateCourseHasAcademicPeriod: () => import('#controllers/course_has_academic_periods/create_course_has_academic_period_controller'),
   },
   courses: {
     CreateCourse: () => import('#controllers/courses/create_course_controller'),
@@ -253,8 +202,7 @@ export const controllers = {
     GetCourseActivityFeed: () => import('#controllers/courses/get_course_activity_feed_controller'),
     GetCourseAlerts: () => import('#controllers/courses/get_course_alerts_controller'),
     GetCourseClasses: () => import('#controllers/courses/get_course_classes_controller'),
-    GetCourseDashboardMetrics: () =>
-      import('#controllers/courses/get_course_dashboard_metrics_controller'),
+    GetCourseDashboardMetrics: () => import('#controllers/courses/get_course_dashboard_metrics_controller'),
     ListCourses: () => import('#controllers/courses/list_courses_controller'),
     ShowCourse: () => import('#controllers/courses/show_course_controller'),
     UpdateCourse: () => import('#controllers/courses/update_course_controller'),
@@ -263,26 +211,19 @@ export const controllers = {
     GetAdminStats: () => import('#controllers/dashboard/get_admin_stats_controller'),
     GetEscolaInsights: () => import('#controllers/dashboard/get_escola_insights_controller'),
     GetEscolaStats: () => import('#controllers/dashboard/get_escola_stats_controller'),
-    GetEscolaTeacherDashboard: () =>
-      import('#controllers/dashboard/get_escola_teacher_dashboard_controller'),
+    GetEscolaTeacherDashboard: () => import('#controllers/dashboard/get_escola_teacher_dashboard_controller'),
     GetResponsavelStats: () => import('#controllers/dashboard/get_responsavel_stats_controller'),
   },
   enrollments: {
     ListEnrollments: () => import('#controllers/enrollments/list_enrollments_controller'),
-    UpdateDocumentStatus: () =>
-      import('#controllers/enrollments/update_document_status_controller'),
+    UpdateDocumentStatus: () => import('#controllers/enrollments/update_document_status_controller'),
   },
   eventParticipants: {
-    CancelRegistration: () =>
-      import('#controllers/event_participants/cancel_registration_controller'),
-    ConfirmAttendance: () =>
-      import('#controllers/event_participants/confirm_attendance_controller'),
-    ListEventParticipants: () =>
-      import('#controllers/event_participants/list_event_participants_controller'),
-    RegisterParticipant: () =>
-      import('#controllers/event_participants/register_participant_controller'),
-    UpdateParticipantStatus: () =>
-      import('#controllers/event_participants/update_participant_status_controller'),
+    CancelRegistration: () => import('#controllers/event_participants/cancel_registration_controller'),
+    ConfirmAttendance: () => import('#controllers/event_participants/confirm_attendance_controller'),
+    ListEventParticipants: () => import('#controllers/event_participants/list_event_participants_controller'),
+    RegisterParticipant: () => import('#controllers/event_participants/register_participant_controller'),
+    UpdateParticipantStatus: () => import('#controllers/event_participants/update_participant_status_controller'),
   },
   events: {
     CancelEvent: () => import('#controllers/events/cancel_event_controller'),
@@ -306,89 +247,66 @@ export const controllers = {
     UpdateExamGrade: () => import('#controllers/exams/update_exam_grade_controller'),
   },
   extraClasses: {
-    CancelExtraClassEnrollment: () =>
-      import('#controllers/extra_classes/cancel_extra_class_enrollment_controller'),
-    CreateExtraClassAttendance: () =>
-      import('#controllers/extra_classes/create_extra_class_attendance_controller'),
+    CancelExtraClassEnrollment: () => import('#controllers/extra_classes/cancel_extra_class_enrollment_controller'),
+    CreateExtraClassAttendance: () => import('#controllers/extra_classes/create_extra_class_attendance_controller'),
     CreateExtraClass: () => import('#controllers/extra_classes/create_extra_class_controller'),
     DeleteExtraClass: () => import('#controllers/extra_classes/delete_extra_class_controller'),
     EnrollExtraClass: () => import('#controllers/extra_classes/enroll_extra_class_controller'),
-    GetExtraClassAttendanceSummary: () =>
-      import('#controllers/extra_classes/get_extra_class_attendance_summary_controller'),
-    ListExtraClassAttendances: () =>
-      import('#controllers/extra_classes/list_extra_class_attendances_controller'),
-    ListExtraClassStudents: () =>
-      import('#controllers/extra_classes/list_extra_class_students_controller'),
+    GetExtraClassAttendanceSummary: () => import('#controllers/extra_classes/get_extra_class_attendance_summary_controller'),
+    ListExtraClassAttendances: () => import('#controllers/extra_classes/list_extra_class_attendances_controller'),
+    ListExtraClassStudents: () => import('#controllers/extra_classes/list_extra_class_students_controller'),
     ListExtraClasses: () => import('#controllers/extra_classes/list_extra_classes_controller'),
     ShowExtraClass: () => import('#controllers/extra_classes/show_extra_class_controller'),
-    UpdateExtraClassAttendance: () =>
-      import('#controllers/extra_classes/update_extra_class_attendance_controller'),
+    UpdateExtraClassAttendance: () => import('#controllers/extra_classes/update_extra_class_attendance_controller'),
     UpdateExtraClass: () => import('#controllers/extra_classes/update_extra_class_controller'),
   },
   gamificationEvents: {
-    CreateGamificationEvent: () =>
-      import('#controllers/gamification_events/create_gamification_event_controller'),
-    ListGamificationEvents: () =>
-      import('#controllers/gamification_events/list_gamification_events_controller'),
-    RetryGamificationEvent: () =>
-      import('#controllers/gamification_events/retry_gamification_event_controller'),
-    ShowGamificationEvent: () =>
-      import('#controllers/gamification_events/show_gamification_event_controller'),
+    CreateGamificationEvent: () => import('#controllers/gamification_events/create_gamification_event_controller'),
+    ListGamificationEvents: () => import('#controllers/gamification_events/list_gamification_events_controller'),
+    RetryGamificationEvent: () => import('#controllers/gamification_events/retry_gamification_event_controller'),
+    ShowGamificationEvent: () => import('#controllers/gamification_events/show_gamification_event_controller'),
   },
   grades: {
     BatchSaveGrades: () => import('#controllers/grades/batch_save_grades_controller'),
     GetAcademicOverview: () => import('#controllers/grades/get_academic_overview_controller'),
     GetAtRiskStudents: () => import('#controllers/grades/get_at_risk_students_controller'),
-    GetClassGradesBySubject: () =>
-      import('#controllers/grades/get_class_grades_by_subject_controller'),
+    GetClassGradesBySubject: () => import('#controllers/grades/get_class_grades_by_subject_controller'),
     GetGradeDistribution: () => import('#controllers/grades/get_grade_distribution_controller'),
     GetStudentsGrades: () => import('#controllers/grades/get_students_grades_controller'),
   },
   insurance: {
-    ApproveInsuranceClaim: () =>
-      import('#controllers/insurance/approve_insurance_claim_controller'),
+    ApproveInsuranceClaim: () => import('#controllers/insurance/approve_insurance_claim_controller'),
     GetBillingDetails: () => import('#controllers/insurance/get_billing_details_controller'),
-    GetDefaultRateBySchool: () =>
-      import('#controllers/insurance/get_default_rate_by_school_controller'),
+    GetDefaultRateBySchool: () => import('#controllers/insurance/get_default_rate_by_school_controller'),
     GetInsuranceConfig: () => import('#controllers/insurance/get_insurance_config_controller'),
     GetInsuranceStats: () => import('#controllers/insurance/get_insurance_stats_controller'),
-    GetSchoolInsuranceBillings: () =>
-      import('#controllers/insurance/get_school_insurance_billings_controller'),
-    GetSchoolInsuranceClaims: () =>
-      import('#controllers/insurance/get_school_insurance_claims_controller'),
-    GetSchoolInsuranceStats: () =>
-      import('#controllers/insurance/get_school_insurance_stats_controller'),
-    GetSchoolsWithoutInsurance: () =>
-      import('#controllers/insurance/get_schools_without_insurance_controller'),
-    ListInsuranceBillings: () =>
-      import('#controllers/insurance/list_insurance_billings_controller'),
+    GetSchoolInsuranceBillings: () => import('#controllers/insurance/get_school_insurance_billings_controller'),
+    GetSchoolInsuranceClaims: () => import('#controllers/insurance/get_school_insurance_claims_controller'),
+    GetSchoolInsuranceStats: () => import('#controllers/insurance/get_school_insurance_stats_controller'),
+    GetSchoolsWithoutInsurance: () => import('#controllers/insurance/get_schools_without_insurance_controller'),
+    ListInsuranceBillings: () => import('#controllers/insurance/list_insurance_billings_controller'),
     ListInsuranceClaims: () => import('#controllers/insurance/list_insurance_claims_controller'),
     MarkClaimPaid: () => import('#controllers/insurance/mark_claim_paid_controller'),
     RejectInsuranceClaim: () => import('#controllers/insurance/reject_insurance_claim_controller'),
     ResetSchoolInsurance: () => import('#controllers/insurance/reset_school_insurance_controller'),
-    UpdateSchoolChainInsurance: () =>
-      import('#controllers/insurance/update_school_chain_insurance_controller'),
-    UpdateSchoolInsurance: () =>
-      import('#controllers/insurance/update_school_insurance_controller'),
+    UpdateSchoolChainInsurance: () => import('#controllers/insurance/update_school_chain_insurance_controller'),
+    UpdateSchoolInsurance: () => import('#controllers/insurance/update_school_insurance_controller'),
   },
   invoices: {
-    CreateInvoiceAsaasCharge: () =>
-      import('#controllers/invoices/create_invoice_asaas_charge_controller'),
+    CreateInvoiceAsaasCharge: () => import('#controllers/invoices/create_invoice_asaas_charge_controller'),
     ListInvoices: () => import('#controllers/invoices/list_invoices_controller'),
     MarkInvoicePaid: () => import('#controllers/invoices/mark_invoice_paid_controller'),
   },
   leaderboards: {
     CreateLeaderboard: () => import('#controllers/leaderboards/create_leaderboard_controller'),
     DeleteLeaderboard: () => import('#controllers/leaderboards/delete_leaderboard_controller'),
-    ListLeaderboardEntries: () =>
-      import('#controllers/leaderboards/list_leaderboard_entries_controller'),
+    ListLeaderboardEntries: () => import('#controllers/leaderboards/list_leaderboard_entries_controller'),
     ListLeaderboards: () => import('#controllers/leaderboards/list_leaderboards_controller'),
     ShowLeaderboard: () => import('#controllers/leaderboards/show_leaderboard_controller'),
     UpdateLeaderboard: () => import('#controllers/leaderboards/update_leaderboard_controller'),
   },
   levelAssignments: {
-    CreateLevelAssignment: () =>
-      import('#controllers/level_assignments/create_level_assignment_controller'),
+    CreateLevelAssignment: () => import('#controllers/level_assignments/create_level_assignment_controller'),
   },
   levels: {
     CreateLevel: () => import('#controllers/levels/create_level_controller'),
@@ -398,78 +316,59 @@ export const controllers = {
     UpdateLevel: () => import('#controllers/levels/update_level_controller'),
   },
   marketplace: {
-    GetInstallmentOptions: () =>
-      import('#controllers/marketplace/get_installment_options_controller'),
-    ListMarketplaceStores: () =>
-      import('#controllers/marketplace/list_marketplace_stores_controller'),
+    GetInstallmentOptions: () => import('#controllers/marketplace/get_installment_options_controller'),
+    ListMarketplaceStores: () => import('#controllers/marketplace/list_marketplace_stores_controller'),
     ListMyOrders: () => import('#controllers/marketplace/list_my_orders_controller'),
     ListStoreItems: () => import('#controllers/marketplace/list_store_items_controller'),
     MarketplaceCheckout: () => import('#controllers/marketplace/marketplace_checkout_controller'),
     ShowMyOrder: () => import('#controllers/marketplace/show_my_order_controller'),
   },
   notificationPreferences: {
-    ShowNotificationPreferences: () =>
-      import('#controllers/notification_preferences/show_notification_preferences_controller'),
-    UpdateNotificationPreferences: () =>
-      import('#controllers/notification_preferences/update_notification_preferences_controller'),
+    ShowNotificationPreferences: () => import('#controllers/notification_preferences/show_notification_preferences_controller'),
+    UpdateNotificationPreferences: () => import('#controllers/notification_preferences/update_notification_preferences_controller'),
   },
   notifications: {
     DeleteNotification: () => import('#controllers/notifications/delete_notification_controller'),
     ListNotifications: () => import('#controllers/notifications/list_notifications_controller'),
     MarkAllRead: () => import('#controllers/notifications/mark_all_read_controller'),
-    MarkNotificationRead: () =>
-      import('#controllers/notifications/mark_notification_read_controller'),
+    MarkNotificationRead: () => import('#controllers/notifications/mark_notification_read_controller'),
     ShowNotification: () => import('#controllers/notifications/show_notification_controller'),
   },
   occurrences: {
     CreateOccurrence: () => import('#controllers/occurrences/create_occurrence_controller'),
-    ListOccurrenceTeacherClasses: () =>
-      import('#controllers/occurrences/list_occurrence_teacher_classes_controller'),
+    ListOccurrenceTeacherClasses: () => import('#controllers/occurrences/list_occurrence_teacher_classes_controller'),
     ListOccurrences: () => import('#controllers/occurrences/list_occurrences_controller'),
     ShowOccurrence: () => import('#controllers/occurrences/show_occurrence_controller'),
   },
   onlineEnrollment: {
-    CheckExistingStudent: () =>
-      import('#controllers/online-enrollment/check_existing_student_controller'),
-    FindScholarshipByCode: () =>
-      import('#controllers/online-enrollment/find_scholarship_by_code_controller'),
+    CheckExistingStudent: () => import('#controllers/online-enrollment/check_existing_student_controller'),
+    FindScholarshipByCode: () => import('#controllers/online-enrollment/find_scholarship_by_code_controller'),
     FinishEnrollment: () => import('#controllers/online-enrollment/finish_enrollment_controller'),
-    GetSchoolEnrollmentInfo: () =>
-      import('#controllers/online-enrollment/get_school_enrollment_info_controller'),
+    GetSchoolEnrollmentInfo: () => import('#controllers/online-enrollment/get_school_enrollment_info_controller'),
   },
   pages: {
     admin: {
-      ShowAdminAnalyticsPage: () =>
-        import('#controllers/pages/admin/show_admin_analytics_page_controller'),
-      ShowAdminBillingDashboardPage: () =>
-        import('#controllers/pages/admin/show_admin_billing_dashboard_page_controller'),
-      ShowAdminBillingFaturasPage: () =>
-        import('#controllers/pages/admin/show_admin_billing_faturas_page_controller'),
-      ShowAdminConfiguracoesPage: () =>
-        import('#controllers/pages/admin/show_admin_configuracoes_page_controller'),
-      ShowAdminDashboardPage: () =>
-        import('#controllers/pages/admin/show_admin_dashboard_page_controller'),
-      ShowAdminEscolasPage: () =>
-        import('#controllers/pages/admin/show_admin_escolas_page_controller'),
+      ShowAdminAnalyticsPage: () => import('#controllers/pages/admin/show_admin_analytics_page_controller'),
+      ShowAdminBillingDashboardPage: () => import('#controllers/pages/admin/show_admin_billing_dashboard_page_controller'),
+      ShowAdminBillingFaturasPage: () => import('#controllers/pages/admin/show_admin_billing_faturas_page_controller'),
+      ShowAdminConfiguracoesPage: () => import('#controllers/pages/admin/show_admin_configuracoes_page_controller'),
+      ShowAdminDashboardPage: () => import('#controllers/pages/admin/show_admin_dashboard_page_controller'),
+      ShowAdminEscolasPage: () => import('#controllers/pages/admin/show_admin_escolas_page_controller'),
       ShowAdminRedesPage: () => import('#controllers/pages/admin/show_admin_redes_page_controller'),
-      ShowAdminSegurosPage: () =>
-        import('#controllers/pages/admin/show_admin_seguros_page_controller'),
-      ShowAdminSubscriptionsPage: () =>
-        import('#controllers/pages/admin/show_admin_subscriptions_page_controller'),
+      ShowAdminSegurosPage: () => import('#controllers/pages/admin/show_admin_seguros_page_controller'),
+      ShowAdminSubscriptionsPage: () => import('#controllers/pages/admin/show_admin_subscriptions_page_controller'),
       ShowEditSchoolPage: () => import('#controllers/pages/admin/show_edit_school_page_controller'),
-      ShowSchoolDetailsPage: () =>
-        import('#controllers/pages/admin/show_school_details_page_controller'),
-      ShowSchoolOnboardingPage: () =>
-        import('#controllers/pages/admin/show_school_onboarding_page_controller'),
+      ShowSchoolDetailsPage: () => import('#controllers/pages/admin/show_school_details_page_controller'),
+      ShowSchoolOnboardingPage: () => import('#controllers/pages/admin/show_school_onboarding_page_controller'),
     },
     aluno: {
-      ShowAlunoCarrinhoPage: () =>
-        import('#controllers/pages/aluno/show_aluno_carrinho_page_controller'),
+      ShowAlunoCarrinhoPage: () => import('#controllers/pages/aluno/show_aluno_carrinho_page_controller'),
+      ShowAlunoDashboardPage: () => import('#controllers/pages/aluno/show_aluno_dashboard_page_controller'),
+      ShowAlunoIdlePage: () => import('#controllers/pages/aluno/show_aluno_idle_page_controller'),
       ShowAlunoLojaPage: () => import('#controllers/pages/aluno/show_aluno_loja_page_controller'),
-      ShowAlunoLojaStorePage: () =>
-        import('#controllers/pages/aluno/show_aluno_loja_store_page_controller'),
-      ShowAlunoPedidosPage: () =>
-        import('#controllers/pages/aluno/show_aluno_pedidos_page_controller'),
+      ShowAlunoLojaPontosPage: () => import('#controllers/pages/aluno/show_aluno_loja_pontos_page_controller'),
+      ShowAlunoLojaStorePage: () => import('#controllers/pages/aluno/show_aluno_loja_store_page_controller'),
+      ShowAlunoPedidosPage: () => import('#controllers/pages/aluno/show_aluno_pedidos_page_controller'),
     },
     auth: {
       ShowSignInPage: () => import('#controllers/pages/auth/show_sign_in_page_controller'),
@@ -479,192 +378,115 @@ export const controllers = {
       ShowAlunosPage: () => import('#controllers/pages/escola/show_alunos_page_controller'),
       ShowAtividadePage: () => import('#controllers/pages/escola/show_atividade_page_controller'),
       ShowAtividadesPage: () => import('#controllers/pages/escola/show_atividades_page_controller'),
-      ShowAulasAvulsasPage: () =>
-        import('#controllers/pages/escola/show_aulas_avulsas_page_controller'),
+      ShowAulasAvulsasPage: () => import('#controllers/pages/escola/show_aulas_avulsas_page_controller'),
       ShowBolsasPage: () => import('#controllers/pages/escola/show_bolsas_page_controller'),
-      ShowCantinaCardapioPage: () =>
-        import('#controllers/pages/escola/show_cantina_cardapio_page_controller'),
-      ShowCantinaItensPage: () =>
-        import('#controllers/pages/escola/show_cantina_itens_page_controller'),
-      ShowCantinaPdvPage: () =>
-        import('#controllers/pages/escola/show_cantina_pdv_page_controller'),
-      ShowCantinaPedidosPage: () =>
-        import('#controllers/pages/escola/show_cantina_pedidos_page_controller'),
-      ShowCantinaReservasPage: () =>
-        import('#controllers/pages/escola/show_cantina_reservas_page_controller'),
-      ShowCantinaTransferenciasPage: () =>
-        import('#controllers/pages/escola/show_cantina_transferencias_page_controller'),
-      ShowCantinaVendasPage: () =>
-        import('#controllers/pages/escola/show_cantina_vendas_page_controller'),
-      ShowConfiguracaoPagamentosPage: () =>
-        import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller'),
-      ShowConfiguracoesPage: () =>
-        import('#controllers/pages/escola/show_configuracoes_page_controller'),
-      ShowContratoAssinaturasPage: () =>
-        import('#controllers/pages/escola/show_contrato_assinaturas_page_controller'),
-      ShowContratoDocusealPage: () =>
-        import('#controllers/pages/escola/show_contrato_docuseal_page_controller'),
-      ShowContratoFinanceiroPage: () =>
-        import('#controllers/pages/escola/show_contrato_financeiro_page_controller'),
+      ShowCantinaCardapioPage: () => import('#controllers/pages/escola/show_cantina_cardapio_page_controller'),
+      ShowCantinaItensPage: () => import('#controllers/pages/escola/show_cantina_itens_page_controller'),
+      ShowCantinaPdvPage: () => import('#controllers/pages/escola/show_cantina_pdv_page_controller'),
+      ShowCantinaPedidosPage: () => import('#controllers/pages/escola/show_cantina_pedidos_page_controller'),
+      ShowCantinaReservasPage: () => import('#controllers/pages/escola/show_cantina_reservas_page_controller'),
+      ShowCantinaTransferenciasPage: () => import('#controllers/pages/escola/show_cantina_transferencias_page_controller'),
+      ShowCantinaVendasPage: () => import('#controllers/pages/escola/show_cantina_vendas_page_controller'),
+      ShowConfiguracaoPagamentosPage: () => import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller'),
+      ShowConfiguracoesPage: () => import('#controllers/pages/escola/show_configuracoes_page_controller'),
+      ShowContratoAssinaturasPage: () => import('#controllers/pages/escola/show_contrato_assinaturas_page_controller'),
+      ShowContratoDocusealPage: () => import('#controllers/pages/escola/show_contrato_docuseal_page_controller'),
+      ShowContratoFinanceiroPage: () => import('#controllers/pages/escola/show_contrato_financeiro_page_controller'),
       ShowContratosPage: () => import('#controllers/pages/escola/show_contratos_page_controller'),
-      ShowCursoTurmasPage: () =>
-        import('#controllers/pages/escola/show_curso_turmas_page_controller'),
-      ShowCursoVisaoGeralPage: () =>
-        import('#controllers/pages/escola/show_curso_visao_geral_page_controller'),
-      ShowCursosNiveisPage: () =>
-        import('#controllers/pages/escola/show_cursos_niveis_page_controller'),
+      ShowCursoTurmasPage: () => import('#controllers/pages/escola/show_curso_turmas_page_controller'),
+      ShowCursoVisaoGeralPage: () => import('#controllers/pages/escola/show_curso_visao_geral_page_controller'),
+      ShowCursosNiveisPage: () => import('#controllers/pages/escola/show_cursos_niveis_page_controller'),
       ShowDesempenhoPage: () => import('#controllers/pages/escola/show_desempenho_page_controller'),
-      ShowEditAtividadePage: () =>
-        import('#controllers/pages/escola/show_edit_atividade_page_controller'),
+      ShowEditAtividadePage: () => import('#controllers/pages/escola/show_edit_atividade_page_controller'),
       ShowEditProvaPage: () => import('#controllers/pages/escola/show_edit_prova_page_controller'),
-      ShowEditarAlunoPage: () =>
-        import('#controllers/pages/escola/show_editar_aluno_page_controller'),
-      ShowEditarContratoPage: () =>
-        import('#controllers/pages/escola/show_editar_contrato_page_controller'),
-      ShowEditarEventoPage: () =>
-        import('#controllers/pages/escola/show_editar_evento_page_controller'),
-      ShowEditarPeriodoLetivoPage: () =>
-        import('#controllers/pages/escola/show_editar_periodo_letivo_page_controller'),
-      ShowEscolaDashboardPage: () =>
-        import('#controllers/pages/escola/show_escola_dashboard_page_controller'),
-      ShowEventoAutorizacoesPage: () =>
-        import('#controllers/pages/escola/show_evento_autorizacoes_page_controller'),
+      ShowEditarAlunoPage: () => import('#controllers/pages/escola/show_editar_aluno_page_controller'),
+      ShowEditarContratoPage: () => import('#controllers/pages/escola/show_editar_contrato_page_controller'),
+      ShowEditarEventoPage: () => import('#controllers/pages/escola/show_editar_evento_page_controller'),
+      ShowEditarPeriodoLetivoPage: () => import('#controllers/pages/escola/show_editar_periodo_letivo_page_controller'),
+      ShowEscolaDashboardPage: () => import('#controllers/pages/escola/show_escola_dashboard_page_controller'),
+      ShowEventoAutorizacoesPage: () => import('#controllers/pages/escola/show_evento_autorizacoes_page_controller'),
       ShowEventosPage: () => import('#controllers/pages/escola/show_eventos_page_controller'),
       ShowFaturasPage: () => import('#controllers/pages/escola/show_faturas_page_controller'),
-      ShowFolhaDePontoPage: () =>
-        import('#controllers/pages/escola/show_folha_de_ponto_page_controller'),
-      ShowFuncionariosPage: () =>
-        import('#controllers/pages/escola/show_funcionarios_page_controller'),
-      ShowGamificacaoConquistasPage: () =>
-        import('#controllers/pages/escola/show_gamificacao_conquistas_page_controller'),
-      ShowGamificacaoDesafiosPage: () =>
-        import('#controllers/pages/escola/show_gamificacao_desafios_page_controller'),
-      ShowGamificacaoPage: () =>
-        import('#controllers/pages/escola/show_gamificacao_page_controller'),
-      ShowGamificacaoRankingsPage: () =>
-        import('#controllers/pages/escola/show_gamificacao_rankings_page_controller'),
-      ShowGamificacaoRecompensasPage: () =>
-        import('#controllers/pages/escola/show_gamificacao_recompensas_page_controller'),
+      ShowFolhaDePontoPage: () => import('#controllers/pages/escola/show_folha_de_ponto_page_controller'),
+      ShowFuncionariosPage: () => import('#controllers/pages/escola/show_funcionarios_page_controller'),
+      ShowGamificacaoConquistasPage: () => import('#controllers/pages/escola/show_gamificacao_conquistas_page_controller'),
+      ShowGamificacaoDesafiosPage: () => import('#controllers/pages/escola/show_gamificacao_desafios_page_controller'),
+      ShowGamificacaoPage: () => import('#controllers/pages/escola/show_gamificacao_page_controller'),
+      ShowGamificacaoRankingsPage: () => import('#controllers/pages/escola/show_gamificacao_rankings_page_controller'),
+      ShowGamificacaoRecompensasPage: () => import('#controllers/pages/escola/show_gamificacao_recompensas_page_controller'),
       ShowGradePage: () => import('#controllers/pages/escola/show_grade_page_controller'),
-      ShowHistoricoFinanceiroPage: () =>
-        import('#controllers/pages/escola/show_historico_financeiro_page_controller'),
+      ShowHistoricoFinanceiroPage: () => import('#controllers/pages/escola/show_historico_financeiro_page_controller'),
       ShowHorariosPage: () => import('#controllers/pages/escola/show_horarios_page_controller'),
       ShowImpressaoPage: () => import('#controllers/pages/escola/show_impressao_page_controller'),
-      ShowInadimplenciaPage: () =>
-        import('#controllers/pages/escola/show_inadimplencia_page_controller'),
-      ShowLojaDetailPage: () =>
-        import('#controllers/pages/escola/show_loja_detail_page_controller'),
+      ShowInadimplenciaPage: () => import('#controllers/pages/escola/show_inadimplencia_page_controller'),
+      ShowLojaDetailPage: () => import('#controllers/pages/escola/show_loja_detail_page_controller'),
       ShowLojasPage: () => import('#controllers/pages/escola/show_lojas_page_controller'),
       ShowMateriasPage: () => import('#controllers/pages/escola/show_materias_page_controller'),
       ShowMatriculasPage: () => import('#controllers/pages/escola/show_matriculas_page_controller'),
       ShowMuralPage: () => import('#controllers/pages/escola/show_mural_page_controller'),
-      ShowNotificacoesPage: () =>
-        import('#controllers/pages/escola/show_notificacoes_page_controller'),
-      ShowNotificacoesPreferenciasPage: () =>
-        import('#controllers/pages/escola/show_notificacoes_preferencias_page_controller'),
-      ShowNovaMatriculaPage: () =>
-        import('#controllers/pages/escola/show_nova_matricula_page_controller'),
-      ShowNovoContratoPage: () =>
-        import('#controllers/pages/escola/show_novo_contrato_page_controller'),
-      ShowNovoEventoPage: () =>
-        import('#controllers/pages/escola/show_novo_evento_page_controller'),
-      ShowNovoPeriodoLetivoPage: () =>
-        import('#controllers/pages/escola/show_novo_periodo_letivo_page_controller'),
-      ShowOcorrenciasPage: () =>
-        import('#controllers/pages/escola/show_ocorrencias_page_controller'),
+      ShowNotificacoesPage: () => import('#controllers/pages/escola/show_notificacoes_page_controller'),
+      ShowNotificacoesPreferenciasPage: () => import('#controllers/pages/escola/show_notificacoes_preferencias_page_controller'),
+      ShowNovaMatriculaPage: () => import('#controllers/pages/escola/show_nova_matricula_page_controller'),
+      ShowNovoContratoPage: () => import('#controllers/pages/escola/show_novo_contrato_page_controller'),
+      ShowNovoEventoPage: () => import('#controllers/pages/escola/show_novo_evento_page_controller'),
+      ShowNovoPeriodoLetivoPage: () => import('#controllers/pages/escola/show_novo_periodo_letivo_page_controller'),
+      ShowOcorrenciasPage: () => import('#controllers/pages/escola/show_ocorrencias_page_controller'),
       ShowParceirosPage: () => import('#controllers/pages/escola/show_parceiros_page_controller'),
-      ShowPeriodoLetivoPage: () =>
-        import('#controllers/pages/escola/show_periodo_letivo_page_controller'),
-      ShowPeriodosLetivosPage: () =>
-        import('#controllers/pages/escola/show_periodos_letivos_page_controller'),
+      ShowPeriodoLetivoPage: () => import('#controllers/pages/escola/show_periodo_letivo_page_controller'),
+      ShowPeriodosLetivosPage: () => import('#controllers/pages/escola/show_periodos_letivos_page_controller'),
       ShowPresencaPage: () => import('#controllers/pages/escola/show_presenca_page_controller'),
-      ShowProfessoresPage: () =>
-        import('#controllers/pages/escola/show_professores_page_controller'),
+      ShowProfessoresPage: () => import('#controllers/pages/escola/show_professores_page_controller'),
       ShowProvaPage: () => import('#controllers/pages/escola/show_prova_page_controller'),
       ShowProvasPage: () => import('#controllers/pages/escola/show_provas_page_controller'),
       ShowQuadroPage: () => import('#controllers/pages/escola/show_quadro_page_controller'),
       ShowSegurosPage: () => import('#controllers/pages/escola/show_seguros_page_controller'),
-      ShowSolicitacoesDeCompraPage: () =>
-        import('#controllers/pages/escola/show_solicitacoes_de_compra_page_controller'),
-      ShowTurmaAtividadesPage: () =>
-        import('#controllers/pages/escola/show_turma_atividades_page_controller'),
-      ShowTurmaNotasPage: () =>
-        import('#controllers/pages/escola/show_turma_notas_page_controller'),
-      ShowTurmaPresencasPage: () =>
-        import('#controllers/pages/escola/show_turma_presencas_page_controller'),
-      ShowTurmaProvasPage: () =>
-        import('#controllers/pages/escola/show_turma_provas_page_controller'),
-      ShowTurmaSituacaoPage: () =>
-        import('#controllers/pages/escola/show_turma_situacao_page_controller'),
+      ShowSolicitacoesDeCompraPage: () => import('#controllers/pages/escola/show_solicitacoes_de_compra_page_controller'),
+      ShowTurmaAtividadesPage: () => import('#controllers/pages/escola/show_turma_atividades_page_controller'),
+      ShowTurmaNotasPage: () => import('#controllers/pages/escola/show_turma_notas_page_controller'),
+      ShowTurmaPresencasPage: () => import('#controllers/pages/escola/show_turma_presencas_page_controller'),
+      ShowTurmaProvasPage: () => import('#controllers/pages/escola/show_turma_provas_page_controller'),
+      ShowTurmaSituacaoPage: () => import('#controllers/pages/escola/show_turma_situacao_page_controller'),
       ShowTurmasPage: () => import('#controllers/pages/escola/show_turmas_page_controller'),
     },
     loja: {
-      ShowLojaDashboardPage: () =>
-        import('#controllers/pages/loja/show_loja_dashboard_page_controller'),
-      ShowLojaFinanceiroPage: () =>
-        import('#controllers/pages/loja/show_loja_financeiro_page_controller'),
-      ShowLojaPedidosPage: () =>
-        import('#controllers/pages/loja/show_loja_pedidos_page_controller'),
-      ShowLojaProdutosPage: () =>
-        import('#controllers/pages/loja/show_loja_produtos_page_controller'),
+      ShowLojaDashboardPage: () => import('#controllers/pages/loja/show_loja_dashboard_page_controller'),
+      ShowLojaFinanceiroPage: () => import('#controllers/pages/loja/show_loja_financeiro_page_controller'),
+      ShowLojaPedidosPage: () => import('#controllers/pages/loja/show_loja_pedidos_page_controller'),
+      ShowLojaProdutosPage: () => import('#controllers/pages/loja/show_loja_produtos_page_controller'),
     },
     responsavel: {
-      ShowResponsavelAtividadesPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_atividades_page_controller'),
-      ShowResponsavelAutorizacoesPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_autorizacoes_page_controller'),
-      ShowResponsavelCantinaPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_cantina_page_controller'),
-      ShowResponsavelComunicadosPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_comunicados_page_controller'),
-      ShowResponsavelDashboardPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_dashboard_page_controller'),
-      ShowResponsavelDocumentosPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_documentos_page_controller'),
-      ShowResponsavelFrequenciaPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_frequencia_page_controller'),
-      ShowResponsavelGamificacaoDetailsPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_gamificacao_details_page_controller'),
-      ShowResponsavelGamificacaoPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_gamificacao_page_controller'),
-      ShowResponsavelHorarioPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_horario_page_controller'),
-      ShowResponsavelLojaPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_loja_page_controller'),
-      ShowResponsavelLojaStorePage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller'),
-      ShowResponsavelMensalidadesPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_mensalidades_page_controller'),
-      ShowResponsavelNotasPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_notas_page_controller'),
-      ShowResponsavelOcorrenciasPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller'),
-      ShowResponsavelPerfilPage: () =>
-        import('#controllers/pages/responsavel/show_responsavel_perfil_page_controller'),
+      ShowResponsavelAtividadesPage: () => import('#controllers/pages/responsavel/show_responsavel_atividades_page_controller'),
+      ShowResponsavelAutorizacoesPage: () => import('#controllers/pages/responsavel/show_responsavel_autorizacoes_page_controller'),
+      ShowResponsavelCantinaPage: () => import('#controllers/pages/responsavel/show_responsavel_cantina_page_controller'),
+      ShowResponsavelComunicadosPage: () => import('#controllers/pages/responsavel/show_responsavel_comunicados_page_controller'),
+      ShowResponsavelDashboardPage: () => import('#controllers/pages/responsavel/show_responsavel_dashboard_page_controller'),
+      ShowResponsavelDocumentosPage: () => import('#controllers/pages/responsavel/show_responsavel_documentos_page_controller'),
+      ShowResponsavelFrequenciaPage: () => import('#controllers/pages/responsavel/show_responsavel_frequencia_page_controller'),
+      ShowResponsavelGamificacaoDetailsPage: () => import('#controllers/pages/responsavel/show_responsavel_gamificacao_details_page_controller'),
+      ShowResponsavelGamificacaoPage: () => import('#controllers/pages/responsavel/show_responsavel_gamificacao_page_controller'),
+      ShowResponsavelHorarioPage: () => import('#controllers/pages/responsavel/show_responsavel_horario_page_controller'),
+      ShowResponsavelLojaPage: () => import('#controllers/pages/responsavel/show_responsavel_loja_page_controller'),
+      ShowResponsavelLojaStorePage: () => import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller'),
+      ShowResponsavelMensalidadesPage: () => import('#controllers/pages/responsavel/show_responsavel_mensalidades_page_controller'),
+      ShowResponsavelNotasPage: () => import('#controllers/pages/responsavel/show_responsavel_notas_page_controller'),
+      ShowResponsavelOcorrenciasPage: () => import('#controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller'),
+      ShowResponsavelPerfilPage: () => import('#controllers/pages/responsavel/show_responsavel_perfil_page_controller'),
     },
     ShowDashboardPage: () => import('#controllers/pages/show_dashboard_page_controller'),
-    ShowMatriculaOnlinePage: () =>
-      import('#controllers/pages/show_matricula_online_page_controller'),
-    ShowResponsavelCreditoPage: () =>
-      import('#controllers/pages/show_responsavel_credito_page_controller'),
-    ShowResponsavelNotificacoesPage: () =>
-      import('#controllers/pages/show_responsavel_notificacoes_page_controller'),
+    ShowMatriculaOnlinePage: () => import('#controllers/pages/show_matricula_online_page_controller'),
+    ShowResponsavelCreditoPage: () => import('#controllers/pages/show_responsavel_credito_page_controller'),
+    ShowResponsavelNotificacoesPage: () => import('#controllers/pages/show_responsavel_notificacoes_page_controller'),
   },
   parentalConsents: {
-    ListConsentHistory: () =>
-      import('#controllers/parental_consents/list_consent_history_controller'),
-    ListEventConsents: () =>
-      import('#controllers/parental_consents/list_event_consents_controller'),
-    ListPendingConsents: () =>
-      import('#controllers/parental_consents/list_pending_consents_controller'),
+    ListConsentHistory: () => import('#controllers/parental_consents/list_consent_history_controller'),
+    ListEventConsents: () => import('#controllers/parental_consents/list_event_consents_controller'),
+    ListPendingConsents: () => import('#controllers/parental_consents/list_pending_consents_controller'),
     RequestConsent: () => import('#controllers/parental_consents/request_consent_controller'),
     RespondConsent: () => import('#controllers/parental_consents/respond_consent_controller'),
   },
   platformSettings: {
-    ShowPlatformSettings: () =>
-      import('#controllers/platform_settings/show_platform_settings_controller'),
-    UpdatePlatformSettings: () =>
-      import('#controllers/platform_settings/update_platform_settings_controller'),
+    ShowPlatformSettings: () => import('#controllers/platform_settings/show_platform_settings_controller'),
+    UpdatePlatformSettings: () => import('#controllers/platform_settings/update_platform_settings_controller'),
   },
   posts: {
     CreatePost: () => import('#controllers/posts/create_post_controller'),
@@ -676,85 +498,63 @@ export const controllers = {
     UpdatePost: () => import('#controllers/posts/update_post_controller'),
   },
   printRequests: {
-    ApprovePrintRequest: () =>
-      import('#controllers/print_requests/approve_print_request_controller'),
+    ApprovePrintRequest: () => import('#controllers/print_requests/approve_print_request_controller'),
     CreatePrintRequest: () => import('#controllers/print_requests/create_print_request_controller'),
     ListPrintRequests: () => import('#controllers/print_requests/list_print_requests_controller'),
-    MarkPrintRequestPrinted: () =>
-      import('#controllers/print_requests/mark_print_request_printed_controller'),
+    MarkPrintRequestPrinted: () => import('#controllers/print_requests/mark_print_request_printed_controller'),
     RejectPrintRequest: () => import('#controllers/print_requests/reject_print_request_controller'),
     ReviewPrintRequest: () => import('#controllers/print_requests/review_print_request_controller'),
     ShowPrintRequest: () => import('#controllers/print_requests/show_print_request_controller'),
   },
   purchaseRequests: {
-    ApprovePurchaseRequest: () =>
-      import('#controllers/purchase_requests/approve_purchase_request_controller'),
-    CreatePurchaseRequest: () =>
-      import('#controllers/purchase_requests/create_purchase_request_controller'),
-    DeletePurchaseRequest: () =>
-      import('#controllers/purchase_requests/delete_purchase_request_controller'),
-    ListPurchaseRequests: () =>
-      import('#controllers/purchase_requests/list_purchase_requests_controller'),
+    ApprovePurchaseRequest: () => import('#controllers/purchase_requests/approve_purchase_request_controller'),
+    CreatePurchaseRequest: () => import('#controllers/purchase_requests/create_purchase_request_controller'),
+    DeletePurchaseRequest: () => import('#controllers/purchase_requests/delete_purchase_request_controller'),
+    ListPurchaseRequests: () => import('#controllers/purchase_requests/list_purchase_requests_controller'),
     MarkAsArrived: () => import('#controllers/purchase_requests/mark_as_arrived_controller'),
     MarkAsBought: () => import('#controllers/purchase_requests/mark_as_bought_controller'),
-    RejectPurchaseRequest: () =>
-      import('#controllers/purchase_requests/reject_purchase_request_controller'),
-    ShowPurchaseRequest: () =>
-      import('#controllers/purchase_requests/show_purchase_request_controller'),
-    UpdatePurchaseRequest: () =>
-      import('#controllers/purchase_requests/update_purchase_request_controller'),
+    RejectPurchaseRequest: () => import('#controllers/purchase_requests/reject_purchase_request_controller'),
+    ShowPurchaseRequest: () => import('#controllers/purchase_requests/show_purchase_request_controller'),
+    UpdatePurchaseRequest: () => import('#controllers/purchase_requests/update_purchase_request_controller'),
   },
   responsavel: {
-    AcknowledgeOccurrence: () =>
-      import('#controllers/responsavel/acknowledge_occurrence_controller'),
+    AcknowledgeOccurrence: () => import('#controllers/responsavel/acknowledge_occurrence_controller'),
     GetNotifications: () => import('#controllers/responsavel/get_notifications_controller'),
-    GetStudentAssignments: () =>
-      import('#controllers/responsavel/get_student_assignments_controller'),
-    GetStudentAttendance: () =>
-      import('#controllers/responsavel/get_student_attendance_controller'),
+    GetStudentAssignments: () => import('#controllers/responsavel/get_student_assignments_controller'),
+    GetStudentAttendance: () => import('#controllers/responsavel/get_student_attendance_controller'),
     GetStudentBalance: () => import('#controllers/responsavel/get_student_balance_controller'),
-    GetStudentCanteenPurchases: () =>
-      import('#controllers/responsavel/get_student_canteen_purchases_controller'),
+    GetStudentCanteenPurchases: () => import('#controllers/responsavel/get_student_canteen_purchases_controller'),
     GetStudentDocuments: () => import('#controllers/responsavel/get_student_documents_controller'),
-    GetStudentGamification: () =>
-      import('#controllers/responsavel/get_student_gamification_controller'),
+    GetStudentGamification: () => import('#controllers/responsavel/get_student_gamification_controller'),
     GetStudentGrades: () => import('#controllers/responsavel/get_student_grades_controller'),
     GetStudentInvoices: () => import('#controllers/responsavel/get_student_invoices_controller'),
-    GetStudentOccurrences: () =>
-      import('#controllers/responsavel/get_student_occurrences_controller'),
+    GetStudentOccurrences: () => import('#controllers/responsavel/get_student_occurrences_controller'),
     GetStudentOverview: () => import('#controllers/responsavel/get_student_overview_controller'),
     GetStudentPayments: () => import('#controllers/responsavel/get_student_payments_controller'),
     GetStudentSchedule: () => import('#controllers/responsavel/get_student_schedule_controller'),
     UpdateProfile: () => import('#controllers/responsavel/update_profile_controller'),
   },
   responsibleAddresses: {
-    CreateResponsibleAddress: () =>
-      import('#controllers/responsible-addresses/create_responsible_address_controller'),
-    ShowResponsibleAddress: () =>
-      import('#controllers/responsible-addresses/show_responsible_address_controller'),
+    CreateResponsibleAddress: () => import('#controllers/responsible-addresses/create_responsible_address_controller'),
+    ShowResponsibleAddress: () => import('#controllers/responsible-addresses/show_responsible_address_controller'),
   },
   responsibles: {
     AssignResponsible: () => import('#controllers/responsibles/assign_responsible_controller'),
-    ListStudentResponsibles: () =>
-      import('#controllers/responsibles/list_student_responsibles_controller'),
+    ListStudentResponsibles: () => import('#controllers/responsibles/list_student_responsibles_controller'),
     RemoveResponsible: () => import('#controllers/responsibles/remove_responsible_controller'),
-    UpdateResponsibleAssignment: () =>
-      import('#controllers/responsibles/update_responsible_assignment_controller'),
+    UpdateResponsibleAssignment: () => import('#controllers/responsibles/update_responsible_assignment_controller'),
   },
   schedules: {
-    GenerateClassSchedule: () =>
-      import('#controllers/schedules/generate_class_schedule_controller'),
+    GenerateClassSchedule: () => import('#controllers/schedules/generate_class_schedule_controller'),
     GetClassSchedule: () => import('#controllers/schedules/get_class_schedule_controller'),
     SaveClassSchedule: () => import('#controllers/schedules/save_class_schedule_controller'),
-    ValidateTeacherScheduleConflict: () =>
-      import('#controllers/schedules/validate_teacher_schedule_conflict_controller'),
+    ValidateTeacherScheduleConflict: () => import('#controllers/schedules/validate_teacher_schedule_conflict_controller'),
   },
   scholarships: {
     CreateScholarship: () => import('#controllers/scholarships/create_scholarship_controller'),
     ListScholarships: () => import('#controllers/scholarships/list_scholarships_controller'),
     ShowScholarship: () => import('#controllers/scholarships/show_scholarship_controller'),
-    ToggleScholarshipActive: () =>
-      import('#controllers/scholarships/toggle_scholarship_active_controller'),
+    ToggleScholarshipActive: () => import('#controllers/scholarships/toggle_scholarship_active_controller'),
     UpdateScholarship: () => import('#controllers/scholarships/update_scholarship_controller'),
   },
   schoolChains: {
@@ -772,27 +572,19 @@ export const controllers = {
     UpdateSchoolGroup: () => import('#controllers/school_groups/update_school_group_controller'),
   },
   schoolPartners: {
-    CreateSchoolPartner: () =>
-      import('#controllers/school_partners/create_school_partner_controller'),
-    ListSchoolPartners: () =>
-      import('#controllers/school_partners/list_school_partners_controller'),
+    CreateSchoolPartner: () => import('#controllers/school_partners/create_school_partner_controller'),
+    ListSchoolPartners: () => import('#controllers/school_partners/list_school_partners_controller'),
     ShowSchoolPartner: () => import('#controllers/school_partners/show_school_partner_controller'),
-    ToggleSchoolPartnerActive: () =>
-      import('#controllers/school_partners/toggle_school_partner_active_controller'),
-    UpdateSchoolPartner: () =>
-      import('#controllers/school_partners/update_school_partner_controller'),
+    ToggleSchoolPartnerActive: () => import('#controllers/school_partners/toggle_school_partner_active_controller'),
+    UpdateSchoolPartner: () => import('#controllers/school_partners/update_school_partner_controller'),
   },
   schoolSwitcher: {
-    GetSchoolSwitcherData: () =>
-      import('#controllers/school_switcher/get_school_switcher_data_controller'),
-    ToggleSchoolGroupSelection: () =>
-      import('#controllers/school_switcher/toggle_school_group_selection_controller'),
-    ToggleSchoolSelection: () =>
-      import('#controllers/school_switcher/toggle_school_selection_controller'),
+    GetSchoolSwitcherData: () => import('#controllers/school_switcher/get_school_switcher_data_controller'),
+    ToggleSchoolGroupSelection: () => import('#controllers/school_switcher/toggle_school_group_selection_controller'),
+    ToggleSchoolSelection: () => import('#controllers/school_switcher/toggle_school_selection_controller'),
   },
   schoolUsageMetrics: {
-    GetSchoolUsageMetrics: () =>
-      import('#controllers/school_usage_metrics/get_school_usage_metrics_controller'),
+    GetSchoolUsageMetrics: () => import('#controllers/school_usage_metrics/get_school_usage_metrics_controller'),
   },
   schools: {
     Destroy: () => import('#controllers/schools/destroy'),
@@ -806,28 +598,21 @@ export const controllers = {
     UploadSchoolLogo: () => import('#controllers/schools/upload_school_logo_controller'),
   },
   storeFinancialSettings: {
-    ShowStoreFinancialSettings: () =>
-      import('#controllers/store_financial_settings/show_store_financial_settings_controller'),
-    UpsertStoreFinancialSettings: () =>
-      import('#controllers/store_financial_settings/upsert_store_financial_settings_controller'),
+    ShowStoreFinancialSettings: () => import('#controllers/store_financial_settings/show_store_financial_settings_controller'),
+    UpsertStoreFinancialSettings: () => import('#controllers/store_financial_settings/upsert_store_financial_settings_controller'),
   },
   storeInstallmentRules: {
-    CreateStoreInstallmentRule: () =>
-      import('#controllers/store_installment_rules/create_store_installment_rule_controller'),
-    DeleteStoreInstallmentRule: () =>
-      import('#controllers/store_installment_rules/delete_store_installment_rule_controller'),
-    ListStoreInstallmentRules: () =>
-      import('#controllers/store_installment_rules/list_store_installment_rules_controller'),
-    UpdateStoreInstallmentRule: () =>
-      import('#controllers/store_installment_rules/update_store_installment_rule_controller'),
+    CreateStoreInstallmentRule: () => import('#controllers/store_installment_rules/create_store_installment_rule_controller'),
+    DeleteStoreInstallmentRule: () => import('#controllers/store_installment_rules/delete_store_installment_rule_controller'),
+    ListStoreInstallmentRules: () => import('#controllers/store_installment_rules/list_store_installment_rules_controller'),
+    UpdateStoreInstallmentRule: () => import('#controllers/store_installment_rules/update_store_installment_rule_controller'),
   },
   storeItems: {
     CreateStoreItem: () => import('#controllers/store_items/create_store_item_controller'),
     DeleteStoreItem: () => import('#controllers/store_items/delete_store_item_controller'),
     ListStoreItems: () => import('#controllers/store_items/list_store_items_controller'),
     ShowStoreItem: () => import('#controllers/store_items/show_store_item_controller'),
-    ToggleStoreItemActive: () =>
-      import('#controllers/store_items/toggle_store_item_active_controller'),
+    ToggleStoreItemActive: () => import('#controllers/store_items/toggle_store_item_active_controller'),
     UpdateStoreItem: () => import('#controllers/store_items/update_store_item_controller'),
   },
   storeOrders: {
@@ -851,24 +636,18 @@ export const controllers = {
     MarkPreparing: () => import('#controllers/store_owner/mark_preparing_controller'),
     MarkReady: () => import('#controllers/store_owner/mark_ready_controller'),
     RejectOrder: () => import('#controllers/store_owner/reject_order_controller'),
-    ShowFinancialSettings: () =>
-      import('#controllers/store_owner/show_financial_settings_controller'),
+    ShowFinancialSettings: () => import('#controllers/store_owner/show_financial_settings_controller'),
     ShowOrder: () => import('#controllers/store_owner/show_order_controller'),
     ShowOwnStore: () => import('#controllers/store_owner/show_own_store_controller'),
     ToggleProductActive: () => import('#controllers/store_owner/toggle_product_active_controller'),
-    UpdateFinancialSettings: () =>
-      import('#controllers/store_owner/update_financial_settings_controller'),
+    UpdateFinancialSettings: () => import('#controllers/store_owner/update_financial_settings_controller'),
     UpdateProduct: () => import('#controllers/store_owner/update_product_controller'),
   },
   storeSettlements: {
-    CreateStoreSettlement: () =>
-      import('#controllers/store_settlements/create_store_settlement_controller'),
-    ListStoreSettlements: () =>
-      import('#controllers/store_settlements/list_store_settlements_controller'),
-    ShowStoreSettlement: () =>
-      import('#controllers/store_settlements/show_store_settlement_controller'),
-    UpdateStoreSettlementStatus: () =>
-      import('#controllers/store_settlements/update_store_settlement_status_controller'),
+    CreateStoreSettlement: () => import('#controllers/store_settlements/create_store_settlement_controller'),
+    ListStoreSettlements: () => import('#controllers/store_settlements/list_store_settlements_controller'),
+    ShowStoreSettlement: () => import('#controllers/store_settlements/show_store_settlement_controller'),
+    UpdateStoreSettlementStatus: () => import('#controllers/store_settlements/update_store_settlement_status_controller'),
   },
   stores: {
     CreateStore: () => import('#controllers/stores/create_store_controller'),
@@ -877,52 +656,37 @@ export const controllers = {
     ShowStore: () => import('#controllers/stores/show_store_controller'),
     UpdateStore: () => import('#controllers/stores/update_store_controller'),
   },
+  studentAvatars: {
+    PurchaseAvatarItem: () => import('#controllers/student_avatars/purchase_avatar_item_controller'),
+    ShowStudentAvatar: () => import('#controllers/student_avatars/show_student_avatar_controller'),
+    UpdateStudentAvatar: () => import('#controllers/student_avatars/update_student_avatar_controller'),
+  },
   studentBalanceTransactions: {
-    CreateStudentBalanceTransaction: () =>
-      import('#controllers/student_balance_transactions/create_student_balance_transaction_controller'),
-    GetStudentBalance: () =>
-      import('#controllers/student_balance_transactions/get_student_balance_controller'),
-    ListStudentBalanceByStudent: () =>
-      import('#controllers/student_balance_transactions/list_student_balance_by_student_controller'),
-    ListStudentBalanceTransactions: () =>
-      import('#controllers/student_balance_transactions/list_student_balance_transactions_controller'),
-    ShowStudentBalanceTransaction: () =>
-      import('#controllers/student_balance_transactions/show_student_balance_transaction_controller'),
+    CreateStudentBalanceTransaction: () => import('#controllers/student_balance_transactions/create_student_balance_transaction_controller'),
+    GetStudentBalance: () => import('#controllers/student_balance_transactions/get_student_balance_controller'),
+    ListStudentBalanceByStudent: () => import('#controllers/student_balance_transactions/list_student_balance_by_student_controller'),
+    ListStudentBalanceTransactions: () => import('#controllers/student_balance_transactions/list_student_balance_transactions_controller'),
+    ShowStudentBalanceTransaction: () => import('#controllers/student_balance_transactions/show_student_balance_transaction_controller'),
   },
   studentGamifications: {
     AddPoints: () => import('#controllers/student_gamifications/add_points_controller'),
-    CreateStudentGamification: () =>
-      import('#controllers/student_gamifications/create_student_gamification_controller'),
-    GetPointsRanking: () =>
-      import('#controllers/student_gamifications/get_points_ranking_controller'),
-    GetStudentStats: () =>
-      import('#controllers/student_gamifications/get_student_stats_controller'),
-    ListStudentGamifications: () =>
-      import('#controllers/student_gamifications/list_student_gamifications_controller'),
-    ShowStudentGamification: () =>
-      import('#controllers/student_gamifications/show_student_gamification_controller'),
+    CreateStudentGamification: () => import('#controllers/student_gamifications/create_student_gamification_controller'),
+    GetPointsRanking: () => import('#controllers/student_gamifications/get_points_ranking_controller'),
+    GetStudentStats: () => import('#controllers/student_gamifications/get_student_stats_controller'),
+    ListStudentGamifications: () => import('#controllers/student_gamifications/list_student_gamifications_controller'),
+    ShowStudentGamification: () => import('#controllers/student_gamifications/show_student_gamification_controller'),
   },
   studentPayments: {
-    CancelStudentPayment: () =>
-      import('#controllers/student_payments/cancel_student_payment_controller'),
-    CreateStudentPaymentAsaasCharge: () =>
-      import('#controllers/student_payments/create_student_payment_asaas_charge_controller'),
-    CreateStudentPayment: () =>
-      import('#controllers/student_payments/create_student_payment_controller'),
-    GetStudentPaymentBoleto: () =>
-      import('#controllers/student_payments/get_student_payment_boleto_controller'),
-    ListStudentPaymentsByStudent: () =>
-      import('#controllers/student_payments/list_student_payments_by_student_controller'),
-    ListStudentPayments: () =>
-      import('#controllers/student_payments/list_student_payments_controller'),
-    MarkPaymentAsPaid: () =>
-      import('#controllers/student_payments/mark_payment_as_paid_controller'),
-    SendStudentPaymentBoletoEmail: () =>
-      import('#controllers/student_payments/send_student_payment_boleto_email_controller'),
-    ShowStudentPayment: () =>
-      import('#controllers/student_payments/show_student_payment_controller'),
-    UpdateStudentPayment: () =>
-      import('#controllers/student_payments/update_student_payment_controller'),
+    CancelStudentPayment: () => import('#controllers/student_payments/cancel_student_payment_controller'),
+    CreateStudentPaymentAsaasCharge: () => import('#controllers/student_payments/create_student_payment_asaas_charge_controller'),
+    CreateStudentPayment: () => import('#controllers/student_payments/create_student_payment_controller'),
+    GetStudentPaymentBoleto: () => import('#controllers/student_payments/get_student_payment_boleto_controller'),
+    ListStudentPaymentsByStudent: () => import('#controllers/student_payments/list_student_payments_by_student_controller'),
+    ListStudentPayments: () => import('#controllers/student_payments/list_student_payments_controller'),
+    MarkPaymentAsPaid: () => import('#controllers/student_payments/mark_payment_as_paid_controller'),
+    SendStudentPaymentBoletoEmail: () => import('#controllers/student_payments/send_student_payment_boleto_email_controller'),
+    ShowStudentPayment: () => import('#controllers/student_payments/show_student_payment_controller'),
+    UpdateStudentPayment: () => import('#controllers/student_payments/update_student_payment_controller'),
   },
   students: {
     CancelEnrollment: () => import('#controllers/students/cancel_enrollment_controller'),
@@ -950,40 +714,27 @@ export const controllers = {
     UpdateSubject: () => import('#controllers/subjects/update_subject_controller'),
   },
   subscriptionInvoices: {
-    CreateSubscriptionInvoice: () =>
-      import('#controllers/subscription_invoices/create_subscription_invoice_controller'),
-    ListSubscriptionInvoices: () =>
-      import('#controllers/subscription_invoices/list_subscription_invoices_controller'),
-    MarkInvoicePaid: () =>
-      import('#controllers/subscription_invoices/mark_invoice_paid_controller'),
-    ShowSubscriptionInvoice: () =>
-      import('#controllers/subscription_invoices/show_subscription_invoice_controller'),
-    UpdateSubscriptionInvoice: () =>
-      import('#controllers/subscription_invoices/update_subscription_invoice_controller'),
+    CreateSubscriptionInvoice: () => import('#controllers/subscription_invoices/create_subscription_invoice_controller'),
+    ListSubscriptionInvoices: () => import('#controllers/subscription_invoices/list_subscription_invoices_controller'),
+    MarkInvoicePaid: () => import('#controllers/subscription_invoices/mark_invoice_paid_controller'),
+    ShowSubscriptionInvoice: () => import('#controllers/subscription_invoices/show_subscription_invoice_controller'),
+    UpdateSubscriptionInvoice: () => import('#controllers/subscription_invoices/update_subscription_invoice_controller'),
   },
   subscriptionPlans: {
-    CreateSubscriptionPlan: () =>
-      import('#controllers/subscription_plans/create_subscription_plan_controller'),
-    DeleteSubscriptionPlan: () =>
-      import('#controllers/subscription_plans/delete_subscription_plan_controller'),
-    ListSubscriptionPlans: () =>
-      import('#controllers/subscription_plans/list_subscription_plans_controller'),
-    ShowSubscriptionPlan: () =>
-      import('#controllers/subscription_plans/show_subscription_plan_controller'),
-    UpdateSubscriptionPlan: () =>
-      import('#controllers/subscription_plans/update_subscription_plan_controller'),
+    CreateSubscriptionPlan: () => import('#controllers/subscription_plans/create_subscription_plan_controller'),
+    DeleteSubscriptionPlan: () => import('#controllers/subscription_plans/delete_subscription_plan_controller'),
+    ListSubscriptionPlans: () => import('#controllers/subscription_plans/list_subscription_plans_controller'),
+    ShowSubscriptionPlan: () => import('#controllers/subscription_plans/show_subscription_plan_controller'),
+    UpdateSubscriptionPlan: () => import('#controllers/subscription_plans/update_subscription_plan_controller'),
   },
   subscriptions: {
     CancelSubscription: () => import('#controllers/subscriptions/cancel_subscription_controller'),
     CreateSubscription: () => import('#controllers/subscriptions/create_subscription_controller'),
-    GetChainSubscription: () =>
-      import('#controllers/subscriptions/get_chain_subscription_controller'),
-    GetSchoolSubscription: () =>
-      import('#controllers/subscriptions/get_school_subscription_controller'),
+    GetChainSubscription: () => import('#controllers/subscriptions/get_chain_subscription_controller'),
+    GetSchoolSubscription: () => import('#controllers/subscriptions/get_school_subscription_controller'),
     ListSubscriptions: () => import('#controllers/subscriptions/list_subscriptions_controller'),
     PauseSubscription: () => import('#controllers/subscriptions/pause_subscription_controller'),
-    ReactivateSubscription: () =>
-      import('#controllers/subscriptions/reactivate_subscription_controller'),
+    ReactivateSubscription: () => import('#controllers/subscriptions/reactivate_subscription_controller'),
     ShowSubscription: () => import('#controllers/subscriptions/show_subscription_controller'),
     UpdateSubscription: () => import('#controllers/subscriptions/update_subscription_controller'),
   },
@@ -998,19 +749,15 @@ export const controllers = {
     ListTeacherSubjects: () => import('#controllers/teachers/list_teacher_subjects_controller'),
     ListTeachers: () => import('#controllers/teachers/list_teachers_controller'),
     RejectAbsence: () => import('#controllers/teachers/reject_absence_controller'),
-    RemoveTeacherFromClass: () =>
-      import('#controllers/teachers/remove_teacher_from_class_controller'),
+    RemoveTeacherFromClass: () => import('#controllers/teachers/remove_teacher_from_class_controller'),
     ShowTeacher: () => import('#controllers/teachers/show_teacher_controller'),
     UpdateTeacher: () => import('#controllers/teachers/update_teacher_controller'),
     UpdateTeacherSubjects: () => import('#controllers/teachers/update_teacher_subjects_controller'),
   },
   userSchoolGroups: {
-    CreateUserSchoolGroup: () =>
-      import('#controllers/user_school_groups/create_user_school_group_controller'),
-    DeleteUserSchoolGroup: () =>
-      import('#controllers/user_school_groups/delete_user_school_group_controller'),
-    ListUserSchoolGroups: () =>
-      import('#controllers/user_school_groups/list_user_school_groups_controller'),
+    CreateUserSchoolGroup: () => import('#controllers/user_school_groups/create_user_school_group_controller'),
+    DeleteUserSchoolGroup: () => import('#controllers/user_school_groups/delete_user_school_group_controller'),
+    ListUserSchoolGroups: () => import('#controllers/user_school_groups/list_user_school_groups_controller'),
   },
   userSchools: {
     CreateUserSchool: () => import('#controllers/user_schools/create_user_school_controller'),

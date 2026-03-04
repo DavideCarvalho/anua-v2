@@ -12,386 +12,141 @@ type ExtractProps<T> =
 
 declare module '@adonisjs/inertia/types' {
   export interface InertiaPages {
-    'admin/analytics/academico': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/academico.tsx'))['default']
-    >
-    'admin/analytics/cantina': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/cantina.tsx'))['default']
-    >
-    'admin/analytics/gamificacao': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/gamificacao.tsx'))['default']
-    >
-    'admin/analytics/index': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/index.tsx'))['default']
-    >
-    'admin/analytics/matriculas': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/matriculas.tsx'))['default']
-    >
-    'admin/analytics/ocorrencias': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/ocorrencias.tsx'))['default']
-    >
-    'admin/analytics/pagamentos': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/pagamentos.tsx'))['default']
-    >
-    'admin/analytics/presenca': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/presenca.tsx'))['default']
-    >
-    'admin/analytics/rh': ExtractProps<
-      (typeof import('../../inertia/pages/admin/analytics/rh.tsx'))['default']
-    >
-    'admin/billing/dashboard': ExtractProps<
-      (typeof import('../../inertia/pages/admin/billing/dashboard.tsx'))['default']
-    >
-    'admin/billing/faturas': ExtractProps<
-      (typeof import('../../inertia/pages/admin/billing/faturas.tsx'))['default']
-    >
-    'admin/billing/subscriptions': ExtractProps<
-      (typeof import('../../inertia/pages/admin/billing/subscriptions.tsx'))['default']
-    >
-    'admin/configuracoes': ExtractProps<
-      (typeof import('../../inertia/pages/admin/configuracoes.tsx'))['default']
-    >
-    'admin/escolas': ExtractProps<
-      (typeof import('../../inertia/pages/admin/escolas.tsx'))['default']
-    >
-    'admin/escolas/detalhes': ExtractProps<
-      (typeof import('../../inertia/pages/admin/escolas/detalhes.tsx'))['default']
-    >
-    'admin/escolas/editar': ExtractProps<
-      (typeof import('../../inertia/pages/admin/escolas/editar.tsx'))['default']
-    >
+    'admin/analytics/academico': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/academico.tsx'))['default']>
+    'admin/analytics/cantina': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/cantina.tsx'))['default']>
+    'admin/analytics/gamificacao': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/gamificacao.tsx'))['default']>
+    'admin/analytics/index': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/index.tsx'))['default']>
+    'admin/analytics/matriculas': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/matriculas.tsx'))['default']>
+    'admin/analytics/ocorrencias': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/ocorrencias.tsx'))['default']>
+    'admin/analytics/pagamentos': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/pagamentos.tsx'))['default']>
+    'admin/analytics/presenca': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/presenca.tsx'))['default']>
+    'admin/analytics/rh': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/rh.tsx'))['default']>
+    'admin/billing/dashboard': ExtractProps<(typeof import('../../inertia/pages/admin/billing/dashboard.tsx'))['default']>
+    'admin/billing/faturas': ExtractProps<(typeof import('../../inertia/pages/admin/billing/faturas.tsx'))['default']>
+    'admin/billing/subscriptions': ExtractProps<(typeof import('../../inertia/pages/admin/billing/subscriptions.tsx'))['default']>
+    'admin/configuracoes': ExtractProps<(typeof import('../../inertia/pages/admin/configuracoes.tsx'))['default']>
+    'admin/escolas': ExtractProps<(typeof import('../../inertia/pages/admin/escolas.tsx'))['default']>
+    'admin/escolas/detalhes': ExtractProps<(typeof import('../../inertia/pages/admin/escolas/detalhes.tsx'))['default']>
+    'admin/escolas/editar': ExtractProps<(typeof import('../../inertia/pages/admin/escolas/editar.tsx'))['default']>
     'admin/index': ExtractProps<(typeof import('../../inertia/pages/admin/index.tsx'))['default']>
-    'admin/onboarding': ExtractProps<
-      (typeof import('../../inertia/pages/admin/onboarding.tsx'))['default']
-    >
+    'admin/onboarding': ExtractProps<(typeof import('../../inertia/pages/admin/onboarding.tsx'))['default']>
     'admin/redes': ExtractProps<(typeof import('../../inertia/pages/admin/redes.tsx'))['default']>
-    'admin/seguros/analytics': ExtractProps<
-      (typeof import('../../inertia/pages/admin/seguros/analytics.tsx'))['default']
-    >
-    'admin/seguros/configuracao': ExtractProps<
-      (typeof import('../../inertia/pages/admin/seguros/configuracao.tsx'))['default']
-    >
-    'admin/seguros/faturamento': ExtractProps<
-      (typeof import('../../inertia/pages/admin/seguros/faturamento.tsx'))['default']
-    >
-    'admin/seguros/index': ExtractProps<
-      (typeof import('../../inertia/pages/admin/seguros/index.tsx'))['default']
-    >
-    'admin/seguros/sinistros': ExtractProps<
-      (typeof import('../../inertia/pages/admin/seguros/sinistros.tsx'))['default']
-    >
-    'aluno/loja/carrinho': ExtractProps<
-      (typeof import('../../inertia/pages/aluno/loja/carrinho.tsx'))['default']
-    >
-    'aluno/loja/index': ExtractProps<
-      (typeof import('../../inertia/pages/aluno/loja/index.tsx'))['default']
-    >
-    'aluno/loja/pedidos': ExtractProps<
-      (typeof import('../../inertia/pages/aluno/loja/pedidos.tsx'))['default']
-    >
-    'aluno/loja/store': ExtractProps<
-      (typeof import('../../inertia/pages/aluno/loja/store.tsx'))['default']
-    >
+    'admin/seguros/analytics': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/analytics.tsx'))['default']>
+    'admin/seguros/configuracao': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/configuracao.tsx'))['default']>
+    'admin/seguros/faturamento': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/faturamento.tsx'))['default']>
+    'admin/seguros/index': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/index.tsx'))['default']>
+    'admin/seguros/sinistros': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/sinistros.tsx'))['default']>
+    'aluno/dashboard': ExtractProps<(typeof import('../../inertia/pages/aluno/dashboard.tsx'))['default']>
+    'aluno/idle': ExtractProps<(typeof import('../../inertia/pages/aluno/idle.tsx'))['default']>
+    'aluno/loja/carrinho': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/carrinho.tsx'))['default']>
+    'aluno/loja/index': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/index.tsx'))['default']>
+    'aluno/loja/pedidos': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/pedidos.tsx'))['default']>
+    'aluno/loja/pontos': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/pontos.tsx'))['default']>
+    'aluno/loja/store': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/store.tsx'))['default']>
     'auth/sign-in': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in.tsx'))['default']>
-    'auth/sign-in/components/decorative/floating-orbs': ExtractProps<
-      (typeof import('../../inertia/pages/auth/sign-in/components/decorative/floating-orbs.tsx'))['default']
-    >
-    'auth/sign-in/components/decorative/grid-pattern': ExtractProps<
-      (typeof import('../../inertia/pages/auth/sign-in/components/decorative/grid-pattern.tsx'))['default']
-    >
-    'auth/sign-in/components/illustrations/hero-illustration': ExtractProps<
-      (typeof import('../../inertia/pages/auth/sign-in/components/illustrations/hero-illustration.tsx'))['default']
-    >
-    'auth/sign-in/components/illustrations/success-illustration': ExtractProps<
-      (typeof import('../../inertia/pages/auth/sign-in/components/illustrations/success-illustration.tsx'))['default']
-    >
+    'auth/sign-in/components/decorative/floating-orbs': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in/components/decorative/floating-orbs.tsx'))['default']>
+    'auth/sign-in/components/decorative/grid-pattern': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in/components/decorative/grid-pattern.tsx'))['default']>
+    'auth/sign-in/components/illustrations/hero-illustration': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in/components/illustrations/hero-illustration.tsx'))['default']>
+    'auth/sign-in/components/illustrations/success-illustration': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in/components/illustrations/success-illustration.tsx'))['default']>
     'dashboard': ExtractProps<(typeof import('../../inertia/pages/dashboard.tsx'))['default']>
-    'errors/not_found': ExtractProps<
-      (typeof import('../../inertia/pages/errors/not_found.tsx'))['default']
-    >
-    'errors/server_error': ExtractProps<
-      (typeof import('../../inertia/pages/errors/server_error.tsx'))['default']
-    >
-    'escola/administrativo/alunos': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/alunos.tsx'))['default']
-    >
-    'escola/administrativo/alunos/editar': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/alunos/editar.tsx'))['default']
-    >
-    'escola/administrativo/alunos/historico-financeiro': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/alunos/historico-financeiro.tsx'))['default']
-    >
-    'escola/administrativo/bolsas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/bolsas.tsx'))['default']
-    >
-    'escola/administrativo/contratos': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/contratos.tsx'))['default']
-    >
-    'escola/administrativo/contratos/assinaturas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/contratos/assinaturas.tsx'))['default']
-    >
-    'escola/administrativo/contratos/docuseal': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/contratos/docuseal.tsx'))['default']
-    >
-    'escola/administrativo/contratos/editar': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/contratos/editar.tsx'))['default']
-    >
-    'escola/administrativo/contratos/financeiro': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/contratos/financeiro.tsx'))['default']
-    >
-    'escola/administrativo/contratos/novo': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/contratos/novo.tsx'))['default']
-    >
-    'escola/administrativo/folha-de-ponto': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/folha-de-ponto.tsx'))['default']
-    >
-    'escola/administrativo/funcionarios': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/funcionarios.tsx'))['default']
-    >
-    'escola/administrativo/impressao': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/impressao.tsx'))['default']
-    >
-    'escola/administrativo/materias': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/materias.tsx'))['default']
-    >
-    'escola/administrativo/matriculas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/matriculas.tsx'))['default']
-    >
-    'escola/administrativo/matriculas/nova': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/matriculas/nova.tsx'))['default']
-    >
-    'escola/administrativo/parceiros': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/parceiros.tsx'))['default']
-    >
-    'escola/administrativo/periodos-letivos/editar': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/periodos-letivos/editar.tsx'))['default']
-    >
-    'escola/administrativo/periodos-letivos/novo-periodo-letivo': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/periodos-letivos/novo-periodo-letivo.tsx'))['default']
-    >
-    'escola/administrativo/professores': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/professores.tsx'))['default']
-    >
-    'escola/administrativo/solicitacoes-de-compra': ExtractProps<
-      (typeof import('../../inertia/pages/escola/administrativo/solicitacoes-de-compra.tsx'))['default']
-    >
-    'escola/cantina/cardapio': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/cardapio.tsx'))['default']
-    >
-    'escola/cantina/itens': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/itens.tsx'))['default']
-    >
-    'escola/cantina/pdv': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/pdv.tsx'))['default']
-    >
-    'escola/cantina/pedidos': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/pedidos.tsx'))['default']
-    >
-    'escola/cantina/reservas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/reservas.tsx'))['default']
-    >
-    'escola/cantina/transferencias': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/transferencias.tsx'))['default']
-    >
-    'escola/cantina/vendas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/cantina/vendas.tsx'))['default']
-    >
-    'escola/configuracoes/index': ExtractProps<
-      (typeof import('../../inertia/pages/escola/configuracoes/index.tsx'))['default']
-    >
-    'escola/desempenho': ExtractProps<
-      (typeof import('../../inertia/pages/escola/desempenho.tsx'))['default']
-    >
-    'escola/eventos': ExtractProps<
-      (typeof import('../../inertia/pages/escola/eventos.tsx'))['default']
-    >
-    'escola/eventos/autorizacoes': ExtractProps<
-      (typeof import('../../inertia/pages/escola/eventos/autorizacoes.tsx'))['default']
-    >
-    'escola/eventos/editar': ExtractProps<
-      (typeof import('../../inertia/pages/escola/eventos/editar.tsx'))['default']
-    >
-    'escola/eventos/novo': ExtractProps<
-      (typeof import('../../inertia/pages/escola/eventos/novo.tsx'))['default']
-    >
-    'escola/financeiro/configuracao-pagamentos': ExtractProps<
-      (typeof import('../../inertia/pages/escola/financeiro/configuracao-pagamentos.tsx'))['default']
-    >
-    'escola/financeiro/faturas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/financeiro/faturas.tsx'))['default']
-    >
-    'escola/financeiro/inadimplencia': ExtractProps<
-      (typeof import('../../inertia/pages/escola/financeiro/inadimplencia.tsx'))['default']
-    >
-    'escola/gamificacao/conquistas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/gamificacao/conquistas.tsx'))['default']
-    >
-    'escola/gamificacao/desafios': ExtractProps<
-      (typeof import('../../inertia/pages/escola/gamificacao/desafios.tsx'))['default']
-    >
-    'escola/gamificacao/index': ExtractProps<
-      (typeof import('../../inertia/pages/escola/gamificacao/index.tsx'))['default']
-    >
-    'escola/gamificacao/rankings': ExtractProps<
-      (typeof import('../../inertia/pages/escola/gamificacao/rankings.tsx'))['default']
-    >
-    'escola/gamificacao/recompensas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/gamificacao/recompensas.tsx'))['default']
-    >
+    'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.tsx'))['default']>
+    'errors/server_error': ExtractProps<(typeof import('../../inertia/pages/errors/server_error.tsx'))['default']>
+    'escola/administrativo/alunos': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/alunos.tsx'))['default']>
+    'escola/administrativo/alunos/editar': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/alunos/editar.tsx'))['default']>
+    'escola/administrativo/alunos/historico-financeiro': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/alunos/historico-financeiro.tsx'))['default']>
+    'escola/administrativo/bolsas': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/bolsas.tsx'))['default']>
+    'escola/administrativo/contratos': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos.tsx'))['default']>
+    'escola/administrativo/contratos/assinaturas': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/assinaturas.tsx'))['default']>
+    'escola/administrativo/contratos/docuseal': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/docuseal.tsx'))['default']>
+    'escola/administrativo/contratos/editar': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/editar.tsx'))['default']>
+    'escola/administrativo/contratos/financeiro': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/financeiro.tsx'))['default']>
+    'escola/administrativo/contratos/novo': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/novo.tsx'))['default']>
+    'escola/administrativo/folha-de-ponto': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/folha-de-ponto.tsx'))['default']>
+    'escola/administrativo/funcionarios': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/funcionarios.tsx'))['default']>
+    'escola/administrativo/impressao': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/impressao.tsx'))['default']>
+    'escola/administrativo/materias': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/materias.tsx'))['default']>
+    'escola/administrativo/matriculas': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/matriculas.tsx'))['default']>
+    'escola/administrativo/matriculas/nova': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/matriculas/nova.tsx'))['default']>
+    'escola/administrativo/parceiros': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/parceiros.tsx'))['default']>
+    'escola/administrativo/periodos-letivos/editar': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/periodos-letivos/editar.tsx'))['default']>
+    'escola/administrativo/periodos-letivos/novo-periodo-letivo': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/periodos-letivos/novo-periodo-letivo.tsx'))['default']>
+    'escola/administrativo/professores': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/professores.tsx'))['default']>
+    'escola/administrativo/solicitacoes-de-compra': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/solicitacoes-de-compra.tsx'))['default']>
+    'escola/cantina/cardapio': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/cardapio.tsx'))['default']>
+    'escola/cantina/itens': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/itens.tsx'))['default']>
+    'escola/cantina/pdv': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/pdv.tsx'))['default']>
+    'escola/cantina/pedidos': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/pedidos.tsx'))['default']>
+    'escola/cantina/reservas': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/reservas.tsx'))['default']>
+    'escola/cantina/transferencias': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/transferencias.tsx'))['default']>
+    'escola/cantina/vendas': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/vendas.tsx'))['default']>
+    'escola/configuracoes/index': ExtractProps<(typeof import('../../inertia/pages/escola/configuracoes/index.tsx'))['default']>
+    'escola/desempenho': ExtractProps<(typeof import('../../inertia/pages/escola/desempenho.tsx'))['default']>
+    'escola/eventos': ExtractProps<(typeof import('../../inertia/pages/escola/eventos.tsx'))['default']>
+    'escola/eventos/autorizacoes': ExtractProps<(typeof import('../../inertia/pages/escola/eventos/autorizacoes.tsx'))['default']>
+    'escola/eventos/editar': ExtractProps<(typeof import('../../inertia/pages/escola/eventos/editar.tsx'))['default']>
+    'escola/eventos/novo': ExtractProps<(typeof import('../../inertia/pages/escola/eventos/novo.tsx'))['default']>
+    'escola/financeiro/configuracao-pagamentos': ExtractProps<(typeof import('../../inertia/pages/escola/financeiro/configuracao-pagamentos.tsx'))['default']>
+    'escola/financeiro/faturas': ExtractProps<(typeof import('../../inertia/pages/escola/financeiro/faturas.tsx'))['default']>
+    'escola/financeiro/inadimplencia': ExtractProps<(typeof import('../../inertia/pages/escola/financeiro/inadimplencia.tsx'))['default']>
+    'escola/gamificacao/conquistas': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/conquistas.tsx'))['default']>
+    'escola/gamificacao/desafios': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/desafios.tsx'))['default']>
+    'escola/gamificacao/index': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/index.tsx'))['default']>
+    'escola/gamificacao/rankings': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/rankings.tsx'))['default']>
+    'escola/gamificacao/recompensas': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/recompensas.tsx'))['default']>
     'escola/index': ExtractProps<(typeof import('../../inertia/pages/escola/index.tsx'))['default']>
-    'escola/lojas/index': ExtractProps<
-      (typeof import('../../inertia/pages/escola/lojas/index.tsx'))['default']
-    >
-    'escola/lojas/show': ExtractProps<
-      (typeof import('../../inertia/pages/escola/lojas/show.tsx'))['default']
-    >
-    'escola/matriculas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/matriculas.tsx'))['default']
-    >
+    'escola/lojas/index': ExtractProps<(typeof import('../../inertia/pages/escola/lojas/index.tsx'))['default']>
+    'escola/lojas/show': ExtractProps<(typeof import('../../inertia/pages/escola/lojas/show.tsx'))['default']>
+    'escola/matriculas': ExtractProps<(typeof import('../../inertia/pages/escola/matriculas.tsx'))['default']>
     'escola/mural': ExtractProps<(typeof import('../../inertia/pages/escola/mural.tsx'))['default']>
-    'escola/notificacoes': ExtractProps<
-      (typeof import('../../inertia/pages/escola/notificacoes.tsx'))['default']
-    >
-    'escola/notificacoes/preferencias': ExtractProps<
-      (typeof import('../../inertia/pages/escola/notificacoes/preferencias.tsx'))['default']
-    >
-    'escola/pedagogico/atividades': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/atividades.tsx'))['default']
-    >
-    'escola/pedagogico/atividades/detalhes': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/atividades/detalhes.tsx'))['default']
-    >
-    'escola/pedagogico/atividades/editar': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/atividades/editar.tsx'))['default']
-    >
-    'escola/pedagogico/aulas-avulsas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/aulas-avulsas.tsx'))['default']
-    >
-    'escola/pedagogico/cursos-niveis': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/cursos-niveis.tsx'))['default']
-    >
-    'escola/pedagogico/grade': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/grade.tsx'))['default']
-    >
-    'escola/pedagogico/horarios': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/horarios.tsx'))['default']
-    >
-    'escola/pedagogico/ocorrencias': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/ocorrencias.tsx'))['default']
-    >
-    'escola/pedagogico/presenca': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/presenca.tsx'))['default']
-    >
-    'escola/pedagogico/provas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/provas.tsx'))['default']
-    >
-    'escola/pedagogico/provas/detalhes': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/provas/detalhes.tsx'))['default']
-    >
-    'escola/pedagogico/provas/editar': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/provas/editar.tsx'))['default']
-    >
-    'escola/pedagogico/quadro': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/quadro.tsx'))['default']
-    >
-    'escola/pedagogico/turmas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/pedagogico/turmas.tsx'))['default']
-    >
-    'escola/periodos-letivos': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/atividades': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/atividades.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/notas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/notas.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/presencas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/presencas.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/provas': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/provas.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index.tsx'))['default']
-    >
-    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral.tsx'))['default']
-    >
-    'escola/periodos-letivos/detalhes': ExtractProps<
-      (typeof import('../../inertia/pages/escola/periodos-letivos/detalhes.tsx'))['default']
-    >
-    'escola/seguros': ExtractProps<
-      (typeof import('../../inertia/pages/escola/seguros.tsx'))['default']
-    >
+    'escola/notificacoes': ExtractProps<(typeof import('../../inertia/pages/escola/notificacoes.tsx'))['default']>
+    'escola/notificacoes/preferencias': ExtractProps<(typeof import('../../inertia/pages/escola/notificacoes/preferencias.tsx'))['default']>
+    'escola/pedagogico/atividades': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/atividades.tsx'))['default']>
+    'escola/pedagogico/atividades/detalhes': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/atividades/detalhes.tsx'))['default']>
+    'escola/pedagogico/atividades/editar': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/atividades/editar.tsx'))['default']>
+    'escola/pedagogico/aulas-avulsas': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/aulas-avulsas.tsx'))['default']>
+    'escola/pedagogico/cursos-niveis': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/cursos-niveis.tsx'))['default']>
+    'escola/pedagogico/grade': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/grade.tsx'))['default']>
+    'escola/pedagogico/horarios': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/horarios.tsx'))['default']>
+    'escola/pedagogico/ocorrencias': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/ocorrencias.tsx'))['default']>
+    'escola/pedagogico/presenca': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/presenca.tsx'))['default']>
+    'escola/pedagogico/provas': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/provas.tsx'))['default']>
+    'escola/pedagogico/provas/detalhes': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/provas/detalhes.tsx'))['default']>
+    'escola/pedagogico/provas/editar': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/provas/editar.tsx'))['default']>
+    'escola/pedagogico/quadro': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/quadro.tsx'))['default']>
+    'escola/pedagogico/turmas': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/turmas.tsx'))['default']>
+    'escola/periodos-letivos': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/atividades': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/atividades.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/notas': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/notas.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/presencas': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/presencas.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/provas': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/provas.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index.tsx'))['default']>
+    'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral.tsx'))['default']>
+    'escola/periodos-letivos/detalhes': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/detalhes.tsx'))['default']>
+    'escola/seguros': ExtractProps<(typeof import('../../inertia/pages/escola/seguros.tsx'))['default']>
     'home': ExtractProps<(typeof import('../../inertia/pages/home.tsx'))['default']>
-    'loja/financeiro': ExtractProps<
-      (typeof import('../../inertia/pages/loja/financeiro.tsx'))['default']
-    >
+    'loja/financeiro': ExtractProps<(typeof import('../../inertia/pages/loja/financeiro.tsx'))['default']>
     'loja/index': ExtractProps<(typeof import('../../inertia/pages/loja/index.tsx'))['default']>
     'loja/pedidos': ExtractProps<(typeof import('../../inertia/pages/loja/pedidos.tsx'))['default']>
-    'loja/produtos': ExtractProps<
-      (typeof import('../../inertia/pages/loja/produtos.tsx'))['default']
-    >
-    'matricula-online/index': ExtractProps<
-      (typeof import('../../inertia/pages/matricula-online/index.tsx'))['default']
-    >
-    'responsavel/atividades': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/atividades.tsx'))['default']
-    >
-    'responsavel/autorizacoes': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/autorizacoes.tsx'))['default']
-    >
-    'responsavel/cantina': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/cantina.tsx'))['default']
-    >
-    'responsavel/comunicados': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/comunicados.tsx'))['default']
-    >
-    'responsavel/credito': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/credito.tsx'))['default']
-    >
-    'responsavel/documentos': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/documentos.tsx'))['default']
-    >
-    'responsavel/frequencia': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/frequencia.tsx'))['default']
-    >
-    'responsavel/gamificacao-details': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/gamificacao-details.tsx'))['default']
-    >
-    'responsavel/gamificacao': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/gamificacao.tsx'))['default']
-    >
-    'responsavel/horario': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/horario.tsx'))['default']
-    >
-    'responsavel/index': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/index.tsx'))['default']
-    >
-    'responsavel/loja/index': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/loja/index.tsx'))['default']
-    >
-    'responsavel/loja/store': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/loja/store.tsx'))['default']
-    >
-    'responsavel/mensalidades': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/mensalidades.tsx'))['default']
-    >
-    'responsavel/notas': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/notas.tsx'))['default']
-    >
-    'responsavel/notificacoes': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/notificacoes.tsx'))['default']
-    >
-    'responsavel/ocorrencias': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/ocorrencias.tsx'))['default']
-    >
-    'responsavel/perfil': ExtractProps<
-      (typeof import('../../inertia/pages/responsavel/perfil.tsx'))['default']
-    >
+    'loja/produtos': ExtractProps<(typeof import('../../inertia/pages/loja/produtos.tsx'))['default']>
+    'matricula-online/index': ExtractProps<(typeof import('../../inertia/pages/matricula-online/index.tsx'))['default']>
+    'responsavel/atividades': ExtractProps<(typeof import('../../inertia/pages/responsavel/atividades.tsx'))['default']>
+    'responsavel/autorizacoes': ExtractProps<(typeof import('../../inertia/pages/responsavel/autorizacoes.tsx'))['default']>
+    'responsavel/cantina': ExtractProps<(typeof import('../../inertia/pages/responsavel/cantina.tsx'))['default']>
+    'responsavel/comunicados': ExtractProps<(typeof import('../../inertia/pages/responsavel/comunicados.tsx'))['default']>
+    'responsavel/credito': ExtractProps<(typeof import('../../inertia/pages/responsavel/credito.tsx'))['default']>
+    'responsavel/documentos': ExtractProps<(typeof import('../../inertia/pages/responsavel/documentos.tsx'))['default']>
+    'responsavel/frequencia': ExtractProps<(typeof import('../../inertia/pages/responsavel/frequencia.tsx'))['default']>
+    'responsavel/gamificacao-details': ExtractProps<(typeof import('../../inertia/pages/responsavel/gamificacao-details.tsx'))['default']>
+    'responsavel/gamificacao': ExtractProps<(typeof import('../../inertia/pages/responsavel/gamificacao.tsx'))['default']>
+    'responsavel/horario': ExtractProps<(typeof import('../../inertia/pages/responsavel/horario.tsx'))['default']>
+    'responsavel/index': ExtractProps<(typeof import('../../inertia/pages/responsavel/index.tsx'))['default']>
+    'responsavel/loja/index': ExtractProps<(typeof import('../../inertia/pages/responsavel/loja/index.tsx'))['default']>
+    'responsavel/loja/store': ExtractProps<(typeof import('../../inertia/pages/responsavel/loja/store.tsx'))['default']>
+    'responsavel/mensalidades': ExtractProps<(typeof import('../../inertia/pages/responsavel/mensalidades.tsx'))['default']>
+    'responsavel/notas': ExtractProps<(typeof import('../../inertia/pages/responsavel/notas.tsx'))['default']>
+    'responsavel/notificacoes': ExtractProps<(typeof import('../../inertia/pages/responsavel/notificacoes.tsx'))['default']>
+    'responsavel/ocorrencias': ExtractProps<(typeof import('../../inertia/pages/responsavel/ocorrencias.tsx'))['default']>
+    'responsavel/perfil': ExtractProps<(typeof import('../../inertia/pages/responsavel/perfil.tsx'))['default']>
   }
 }
