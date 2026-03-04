@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Calendar, Check, X, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -10,6 +11,13 @@ import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select'
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,10 +25,33 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
+import type { Route } from '@tuyau/core/types'
 
 interface TeacherAbsencesTableProps {
   status?: string
 }
+
+interface TeacherOption {
+  id: string
+  user?: {
+    name?: string | null
+  } | null
+}
+
+interface AbsenceItem {
+  id: string
+  status: string
+  date?: Date | string | null
+  reason?: string | null
+  teacher?: {
+    user?: {
+      name?: string | null
+    } | null
+    name?: string | null
+  } | null
+}
+
+type TeacherAbsencesResponseData = Route.Response<'api.v1.teachers.list_teachers'>['data']
 
 const statusConfig: Record<
   string,
@@ -32,36 +63,98 @@ const statusConfig: Record<
 }
 
 export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
-  const queryClient = useQueryClient()
-  const absencesQueryOptions = api.api.v1.teachers.getTeacherAbsences.queryOptions({
-    query: { status },
+  const [selectedTeacherId, setSelectedTeacherId] = useState('')
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const year = now.getFullYear()
+
+  const {
+    data: teachersResponse,
+    isLoading: isTeachersLoading,
+    isError: isTeachersError,
+  } = useQuery(api.api.v1.teachers.listTeachers.queryOptions({ query: { page: 1, limit: 100 } }))
+
+  const teachers = (teachersResponse?.data ?? []) as TeacherAbsencesResponseData
+
+  useEffect(() => {
+    if (!selectedTeacherId && teachers.length > 0) {
+      setSelectedTeacherId(teachers[0].id)
+    }
+  }, [selectedTeacherId, teachers])
+
+  const absencesQuery = useQuery({
+    ...api.api.v1.teachers.getTeacherAbsences.queryOptions({
+      query: { teacherId: selectedTeacherId, month, year },
+    }),
+    enabled: !!selectedTeacherId,
   })
-  const { data } = useSuspenseQuery(absencesQueryOptions)
+
   const approveMutation = useMutation(api.api.v1.teachers.approveAbsence.mutationOptions())
   const rejectMutation = useMutation(api.api.v1.teachers.rejectAbsence.mutationOptions())
 
-  const absences = data ?? []
+  const isAbsencesLoading = absencesQuery.isLoading
+  const hasError = isTeachersError || absencesQuery.isError
 
-  const handleApprove = async (absenceId: string) => {
+  const absences = useMemo(() => {
+    const data = (absencesQuery.data ?? []) as AbsenceItem[]
+    if (!status) return data
+    return data.filter((absence) => absence.status === status)
+  }, [absencesQuery.data, status])
+
+  async function handleApprove(absenceId: string) {
     try {
       await approveMutation.mutateAsync({ body: { absenceId } })
-      queryClient.invalidateQueries({ queryKey: absencesQueryOptions.queryKey })
+      await absencesQuery.refetch()
       toast.success('Falta aprovada com sucesso')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao aprovar falta')
     }
   }
 
-  const handleReject = async (absenceId: string) => {
+  async function handleReject(absenceId: string) {
     try {
       await rejectMutation.mutateAsync({
         body: { absenceId, rejectionReason: '' },
       })
-      queryClient.invalidateQueries({ queryKey: absencesQueryOptions.queryKey })
+      await absencesQuery.refetch()
       toast.success('Falta rejeitada com sucesso')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao rejeitar falta')
     }
+  }
+
+  if (isTeachersLoading || isAbsencesLoading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
+          <p className="mt-2 text-sm text-muted-foreground">Carregando ausencias...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (hasError) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar ausencias</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Tente novamente em alguns instantes.</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (teachers.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-semibold">Nenhum professor encontrado</h3>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (absences.length === 0) {
@@ -83,6 +176,20 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
       <CardHeader>
         <CardTitle>Ausências de Professores</CardTitle>
         <CardDescription>{absences.length} registro(s)</CardDescription>
+        <div className="pt-2">
+          <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+            <SelectTrigger className="w-full max-w-sm">
+              <SelectValue placeholder="Selecione um professor" />
+            </SelectTrigger>
+            <SelectContent>
+              {teachers.map((teacher) => (
+                <SelectItem key={teacher.id} value={teacher.id}>
+                  {teacher.user?.name || 'Professor sem nome'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -96,7 +203,7 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {absences.map((absence: any) => {
+            {absences.map((absence) => {
               const config = statusConfig[absence.status] || statusConfig.PENDING
 
               return (
