@@ -23,6 +23,7 @@ import { getQueueManager } from '#services/queue_service'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
 import AppException from '#exceptions/app_exception'
 import type { EmergencyContactRelationship } from '#models/student_emergency_contact'
+import { normalizeDocumentNumber } from '#lib/normalize_document_number'
 
 export default class EnrollStudentController {
   async handle(ctx: HttpContext) {
@@ -60,13 +61,15 @@ export default class EnrollStudentController {
     }
 
     // Check for duplicate documents
-    const studentDoc = data.basicInfo.documentNumber?.replace(/\D/g, '') || ''
-    const responsibleDocs = data.responsibles.map((r) => r.documentNumber.replace(/\D/g, ''))
+    const studentDoc = normalizeDocumentNumber(data.basicInfo.documentNumber || '', 'CPF')
+    const responsibleDocs = data.responsibles.map((r) =>
+      normalizeDocumentNumber(r.documentNumber, r.documentType)
+    )
 
     // Check if student document matches any responsible
     if (studentDoc) {
       const conflictWithResponsible = data.responsibles.find(
-        (r) => r.documentNumber.replace(/\D/g, '') === studentDoc
+        (r) => normalizeDocumentNumber(r.documentNumber, r.documentType) === studentDoc
       )
       if (conflictWithResponsible) {
         throw AppException.badRequest(
@@ -121,7 +124,10 @@ export default class EnrollStudentController {
         .first()
 
       if (existingUser) {
-        const respDoc = responsible.documentNumber?.replace(/\D/g, '') || ''
+        const respDoc = normalizeDocumentNumber(
+          responsible.documentNumber || '',
+          responsible.documentType
+        )
         const existingDoc = existingUser.documentNumber?.replace(/\D/g, '') || ''
         if (!respDoc || !existingDoc || respDoc !== existingDoc) {
           throw AppException.operationFailedWithProvidedData(409)
@@ -206,8 +212,13 @@ export default class EnrollStudentController {
           let responsibleUser: User
 
           // Check if responsible already exists
+          const normalizedResponsibleDocument = normalizeDocumentNumber(
+            respData.documentNumber,
+            respData.documentType
+          )
+
           const existingResponsible = await User.query({ client: trx })
-            .where('documentNumber', respData.documentNumber)
+            .where('documentNumber', normalizedResponsibleDocument)
             .first()
 
           if (existingResponsible) {
@@ -231,7 +242,7 @@ export default class EnrollStudentController {
                 phone: respData.phone,
                 birthDate: DateTime.fromISO(respData.birthDate),
                 documentType: respData.documentType,
-                documentNumber: respData.documentNumber,
+                documentNumber: normalizedResponsibleDocument,
                 schoolId: schoolId,
                 roleId: responsibleRole!.id,
                 active: true,

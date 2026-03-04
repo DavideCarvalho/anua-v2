@@ -14,6 +14,7 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import { fullUpdateStudentValidator } from '#validators/student'
 import AppException from '#exceptions/app_exception'
 import type { EmergencyContactRelationship } from '#models/student_emergency_contact'
+import { normalizeDocumentNumber } from '#lib/normalize_document_number'
 
 export default class FullUpdateStudentController {
   async handle(ctx: HttpContext) {
@@ -64,13 +65,15 @@ export default class FullUpdateStudentController {
     }
 
     // Check for duplicate documents
-    const studentDoc = data.basicInfo.documentNumber?.replace(/\D/g, '') || ''
-    const responsibleDocs = data.responsibles.map((r) => r.documentNumber.replace(/\D/g, ''))
+    const studentDoc = normalizeDocumentNumber(data.basicInfo.documentNumber || '', 'CPF')
+    const responsibleDocs = data.responsibles.map((r) =>
+      normalizeDocumentNumber(r.documentNumber, r.documentType)
+    )
 
     // Check if student document matches any responsible
     if (studentDoc) {
       const conflictWithResponsible = data.responsibles.find(
-        (r) => r.documentNumber.replace(/\D/g, '') === studentDoc
+        (r) => normalizeDocumentNumber(r.documentNumber, r.documentType) === studentDoc
       )
       if (conflictWithResponsible) {
         throw AppException.badRequest(
@@ -123,9 +126,21 @@ export default class FullUpdateStudentController {
           let responsibleUser: User
 
           // Check if responsible already exists by document
-          const existingResponsible = await User.query({ client: trx })
-            .where('documentNumber', respData.documentNumber)
-            .first()
+          const normalizedResponsibleDocument = normalizeDocumentNumber(
+            respData.documentNumber,
+            respData.documentType
+          )
+
+          const existingResponsibleQuery = User.query({ client: trx }).where(
+            'documentNumber',
+            normalizedResponsibleDocument
+          )
+
+          if (student.user.schoolId) {
+            existingResponsibleQuery.where('schoolId', student.user.schoolId)
+          }
+
+          const existingResponsible = await existingResponsibleQuery.first()
 
           if (existingResponsible) {
             responsibleUser = existingResponsible
@@ -138,6 +153,7 @@ export default class FullUpdateStudentController {
               phone: respData.phone,
               birthDate: DateTime.fromISO(respData.birthDate),
               documentType: respData.documentType,
+              documentNumber: normalizedResponsibleDocument,
             })
             await responsibleUser.useTransaction(trx).save()
           } else {
@@ -154,7 +170,7 @@ export default class FullUpdateStudentController {
                 phone: respData.phone,
                 birthDate: DateTime.fromISO(respData.birthDate),
                 documentType: respData.documentType,
-                documentNumber: respData.documentNumber,
+                documentNumber: normalizedResponsibleDocument,
                 schoolId: student.user.schoolId,
                 roleId: responsibleRole!.id,
                 active: true,
