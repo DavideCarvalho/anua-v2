@@ -24,7 +24,6 @@ import {
 } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
 import { Checkbox } from '../../components/ui/checkbox'
-import { tuyau } from '../../lib/api'
 import { api } from '~/lib/api'
 
 const formSchema = z.object({
@@ -63,27 +62,20 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
     },
   })
 
-  const { mutateAsync: createTeacher, isPending } = useMutation({
-    mutationFn: async (values: FormValues) => {
-      const response = await tuyau.api.api.v1.teachers({
-        name: values.name,
-        email: values.email,
-        schoolId,
-        subjectIds: values.subjectIds.length > 0 ? values.subjectIds : undefined,
-      })
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao criar professor')
-      }
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teachers'] })
-    },
-  })
+  const createTeacher = useMutation(api.api.v1.teachers.createTeacher.mutationOptions())
 
   async function onSubmit(values: FormValues) {
     try {
-      const result = await createTeacher(values)
+      const result = await createTeacher.mutateAsync({
+        body: {
+          name: values.name,
+          email: values.email,
+          schoolId,
+          subjectIds: values.subjectIds.length > 0 ? values.subjectIds : undefined,
+        },
+      })
+      queryClient.invalidateQueries({ queryKey: ['teachers'] })
+
       if ((result as any)?.generatedPassword) {
         setGeneratedPassword((result as any).generatedPassword)
       } else {
@@ -232,8 +224,8 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
+              <Button type="submit" disabled={createTeacher.isPending}>
+                {createTeacher.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Criando...

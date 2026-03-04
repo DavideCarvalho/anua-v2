@@ -15,7 +15,7 @@ import {
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -50,23 +50,25 @@ export function EditTeacherDataModal({ open, onOpenChange, teacher }: EditTeache
     },
   })
 
-  const updateMutation = useMutation({
-    mutationFn: (data: FormValues) => {
-      if (!teacher) throw new Error('Professor não encontrado')
-      return tuyau.api.api.v1.teachers({ id: teacher.id })({ name: data.name, email: data.email })
-    },
-    onSuccess: () => {
+  const updateMutation = useMutation(api.api.v1.teachers.updateTeacher.mutationOptions())
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    if (!teacher) {
+      toast.error('Professor nao encontrado')
+      return
+    }
+
+    try {
+      await updateMutation.mutateAsync({
+        params: { id: teacher.id },
+        body: { name: data.name, email: data.email },
+      })
       toast.success('Dados atualizados com sucesso')
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
       onOpenChange(false)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao atualizar dados')
-    },
-  })
-
-  const onSubmit = form.handleSubmit((data) => {
-    updateMutation.mutate(data)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar dados')
+    }
   })
 
   return (

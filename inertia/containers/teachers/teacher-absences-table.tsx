@@ -2,6 +2,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 import { Calendar, Check, X, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toast } from 'sonner'
 
 import { api } from '~/lib/api'
 
@@ -32,9 +33,10 @@ const statusConfig: Record<
 
 export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
   const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(
-    api.api.v1.teachers.getTeacherAbsences.queryOptions({ query: { status } })
-  )
+  const absencesQueryOptions = api.api.v1.teachers.getTeacherAbsences.queryOptions({
+    query: { status },
+  })
+  const { data } = useSuspenseQuery(absencesQueryOptions)
   const approveMutation = useMutation(api.api.v1.teachers.approveAbsence.mutationOptions())
   const rejectMutation = useMutation(api.api.v1.teachers.rejectAbsence.mutationOptions())
 
@@ -43,9 +45,10 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
   const handleApprove = async (absenceId: string) => {
     try {
       await approveMutation.mutateAsync({ body: { absenceId } })
-      queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
+      queryClient.invalidateQueries({ queryKey: absencesQueryOptions.queryKey })
+      toast.success('Falta aprovada com sucesso')
     } catch (error) {
-      console.error('Error approving absence:', error)
+      toast.error(error instanceof Error ? error.message : 'Erro ao aprovar falta')
     }
   }
 
@@ -54,9 +57,10 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
       await rejectMutation.mutateAsync({
         body: { absenceId, rejectionReason: '' },
       })
-      queryClient.invalidateQueries({ queryKey: ['teacher-absences'] })
+      queryClient.invalidateQueries({ queryKey: absencesQueryOptions.queryKey })
+      toast.success('Falta rejeitada com sucesso')
     } catch (error) {
-      console.error('Error rejecting absence:', error)
+      toast.error(error instanceof Error ? error.message : 'Erro ao rejeitar falta')
     }
   }
 
