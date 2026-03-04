@@ -10,12 +10,22 @@ export default class CreateStoreItemController {
   async handle({ request, response }: HttpContext) {
     const data = await request.validateUsing(createStoreItemValidator)
 
-    // Resolver schoolId a partir da loja
-    const store = await Store.find(data.storeId)
-    if (!store) {
-      throw AppException.notFound('Loja não encontrada')
+    let schoolId: string
+    let storeId: string | null = null
+
+    if (data.schoolId) {
+      schoolId = data.schoolId
+      storeId = null
+    } else if (data.storeId) {
+      const store = await Store.find(data.storeId)
+      if (!store) {
+        throw AppException.notFound('Loja não encontrada')
+      }
+      schoolId = store.schoolId
+      storeId = data.storeId
+    } else {
+      throw AppException.badRequest('Informe storeId ou schoolId')
     }
-    const schoolId = store.schoolId
 
     // Validate HYBRID mode percentages
     if (data.paymentMode === 'HYBRID') {
@@ -29,8 +39,12 @@ export default class CreateStoreItemController {
       }
     }
 
+    const { storeId: omittedStoreId, schoolId: omittedSchoolId, ...rest } = data
+    void omittedStoreId
+    void omittedSchoolId
     const storeItem = await StoreItem.create({
-      ...data,
+      ...rest,
+      storeId,
       schoolId,
       description: data.description ?? '',
       availableFrom: data.availableFrom ? DateTime.fromJSDate(data.availableFrom) : null,
