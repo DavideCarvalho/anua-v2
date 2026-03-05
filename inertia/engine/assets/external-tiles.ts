@@ -151,7 +151,7 @@ export function getExternalObjectTexture(zoneId: string): Texture | null {
   const url = `${OBJECTS_BASE}/${zoneId}.png`
   if (textureCache[url]) return textureCache[url]
 
-  const texture = Texture.from(url, { scaleMode: 'nearest' })
+  const texture = Texture.from(url)
   textureCache[url] = texture
   return texture
 }
@@ -168,7 +168,7 @@ export function getExternalObjectTileTexture(zoneId: string): Texture | null {
   const url = `${DUNGEON_BASE}/${frame}.png`
   if (textureCache[url]) return textureCache[url]
 
-  const texture = Texture.from(url, { scaleMode: 'nearest' })
+  const texture = Texture.from(url)
   textureCache[url] = texture
   return texture
 }

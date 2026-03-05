@@ -44,7 +44,6 @@ export class IndoorScene extends BaseScene {
   private position!: Position
   private interactionManager!: InteractionManager
   private doorZones: InteractionZoneDef[]
-  private currentPromptType: PromptType = null
   private onVisibilityChange!: () => void
   private onCanvasClick!: (e: MouseEvent) => void
   private decorationsContainer!: Container
@@ -131,13 +130,10 @@ export class IndoorScene extends BaseScene {
     const allZones: InteractionZoneDef[] = [...mapData.interactionZones, ...this.doorZones]
     this.interactionManager = new InteractionManager(allZones, (zone: NearbyZone) => {
       if (zone === null) {
-        this.currentPromptType = null
         this.callbacks.onNearbyZoneChange(null, null)
       } else if (zone.id.startsWith('door-')) {
-        this.currentPromptType = 'exit'
         this.callbacks.onNearbyZoneChange(zone, 'exit')
       } else {
-        this.currentPromptType = 'interact'
         this.callbacks.onNearbyZoneChange(zone, 'interact')
       }
     })

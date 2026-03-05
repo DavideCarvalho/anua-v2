@@ -22,13 +22,6 @@ const W0 = PALETTE.wood[0]
 const W1 = PALETTE.wood[1]
 const W2 = PALETTE.wood[2]
 const W3 = PALETTE.wood[3]
-const GR0 = PALETTE.grass[0]
-const GR1 = PALETTE.grass[1]
-const GR2 = PALETTE.grass[2]
-const GR3 = PALETTE.grass[3]
-const ST0 = PALETTE.stone[0]
-const ST1 = PALETTE.stone[1]
-const ST2 = PALETTE.stone[2]
 const BL = PALETTE.blue
 const WH = PALETTE.white
 const RD = PALETTE.red
@@ -220,7 +213,7 @@ export function generateObjectTexture(zoneId: string): Texture | null {
 
   const canvas = generateObjectCanvas(zoneId)
   if (!canvas) return null
-  return Texture.from(canvas, { scaleMode: 'nearest' })
+  return Texture.from(canvas)
 }
 
 export { SIZE as OBJECT_SPRITE_SIZE }

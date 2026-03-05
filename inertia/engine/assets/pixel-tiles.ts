@@ -30,7 +30,6 @@ const W3 = PALETTE.wood[3]
 const S0 = PALETTE.stone[0]
 const S1 = PALETTE.stone[1]
 const S2 = PALETTE.stone[2]
-const S3 = PALETTE.stone[3]
 const G0 = PALETTE.gold[0]
 const G1 = PALETTE.gold[1]
 const RD = PALETTE.red
@@ -38,7 +37,6 @@ const BL = PALETTE.blue
 const GR0 = PALETTE.grass[0]
 const GR1 = PALETTE.grass[1]
 const GR2 = PALETTE.grass[2]
-const GR3 = PALETTE.grass[3]
 const WT0 = PALETTE.water[0]
 const WT1 = PALETTE.water[1]
 const WT2 = PALETTE.water[2]
@@ -289,7 +287,7 @@ export function getTileTexture(tileId: number): Texture | null {
   if (!pixels) return null
 
   const canvas = renderPixelData(pixels, TILE_SIZE, TILE_SIZE)
-  const texture = Texture.from(canvas, { scaleMode: 'nearest' })
+  const texture = Texture.from(canvas)
   tileTextureCache[tileId] = texture
   return texture
 }

@@ -46,7 +46,7 @@ export function generatePlayerTextures(
     canvasCache = { key, canvas: generatePlayerSpritesheetCanvas(avatar) }
   }
   const canvas = canvasCache.canvas
-  const baseTexture = Texture.from(canvas, { scaleMode: 'nearest' })
+  const baseTexture = Texture.from(canvas)
 
   const directions: Direction[] = ['down', 'left', 'right', 'up']
   const result = {} as Record<Direction, Texture[]>

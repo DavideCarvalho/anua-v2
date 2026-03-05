@@ -59,8 +59,8 @@ function drawTreasureDecorations(
 
 function drawMarketDecorations(
   tileSize: number,
-  width: number,
-  height: number,
+  _width: number,
+  _height: number,
   isDark: boolean
 ): Container {
   const container = new Container()

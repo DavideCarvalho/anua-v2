@@ -137,7 +137,6 @@ const BUSHES = generateBushes(8)
 export function drawOverworldDecorations(theme: Theme): Container {
   const container = new Container()
   const isDark = theme === 'dark'
-  const dimFactor = isDark ? 0.6 : 1
 
   // --- Dirt paths (drawn first, underneath everything else) ---
   const paths = new Graphics()

@@ -11,7 +11,7 @@
  * Walk cycle: stand, right step, stand, left step (subtle bob).
  */
 
-import { _ } from './pixel-palette'
+import { transparentPixel as _ } from './pixel-palette'
 import { getAvatarPalette } from './avatar-palette'
 import type { AvatarData } from '../types'
 
