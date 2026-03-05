@@ -74,5 +74,8 @@ jobs:
       - name: Run queue tests
         run: npm run test:queue
 
+      - name: Restore generated schema snapshot
+        run: git checkout -- database/schema.ts
+
       - name: Typecheck
         run: npm run typecheck
