@@ -3,6 +3,7 @@ import { CheckCircle2, XCircle, Clock, AlertCircle, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
+import type { Route } from '@tuyau/core/types'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -29,36 +30,9 @@ interface EventConsentsTrackingProps {
 }
 
 type ConsentStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'EXPIRED'
-
-type Consent = {
-  id: string
-  studentId: string
-  responsibleId: string
-  status: ConsentStatus
-  notes: string | null
-  requestedAt: string
-  approvedAt: string | null
-  deniedAt: string | null
-  expiresAt: string | null
-  student: {
-    id: string
-    name: string
-    email: string
-  }
-  responsible: {
-    id: string
-    name: string
-    email: string
-  }
-}
-
-type Stats = {
-  total: number
-  pending: number
-  approved: number
-  denied: number
-  expired: number
-}
+type ConsentsResponse = Route.Response<'api.v1.events.consents.index'>
+type Consent = ConsentsResponse['consents'][number]
+type Stats = ConsentsResponse['stats']
 
 export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
   const [statusFilter, setStatusFilter] = useState<ConsentStatus | 'ALL'>('ALL')
@@ -70,8 +44,8 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
   )
 
   const event = data.event
-  const stats = data.stats as Stats
-  const consents = data.consents as unknown as Consent[]
+  const stats: Stats = data.stats
+  const consents: Consent[] = data.consents
 
   const getStatusBadge = (status: ConsentStatus) => {
     switch (status) {
@@ -225,14 +199,14 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
                     </TableCell>
                     <TableCell>{getStatusBadge(consent.status)}</TableCell>
                     <TableCell>
-                      {consent.approvedAt && (
+                      {consent.status === 'APPROVED' && consent.respondedAt && (
                         <span className="text-sm">
-                          {format(new Date(consent.approvedAt), 'dd/MM/yyyy HH:mm')}
+                          {format(new Date(consent.respondedAt), 'dd/MM/yyyy HH:mm')}
                         </span>
                       )}
-                      {consent.deniedAt && (
+                      {consent.status === 'DENIED' && consent.respondedAt && (
                         <span className="text-sm">
-                          {format(new Date(consent.deniedAt), 'dd/MM/yyyy HH:mm')}
+                          {format(new Date(consent.respondedAt), 'dd/MM/yyyy HH:mm')}
                         </span>
                       )}
                       {consent.status === 'PENDING' && (
@@ -243,8 +217,10 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      {consent.notes ? (
-                        <span className="text-sm italic">"{consent.notes}"</span>
+                      {consent.approvalNotes || consent.denialReason ? (
+                        <span className="text-sm italic">
+                          "{consent.approvalNotes ?? consent.denialReason}"
+                        </span>
                       ) : (
                         <span className="text-sm text-muted-foreground">-</span>
                       )}

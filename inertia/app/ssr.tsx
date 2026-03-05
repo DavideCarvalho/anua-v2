@@ -9,6 +9,12 @@ import type { SharedProps } from '../lib/types'
 
 type SsrPage = Parameters<typeof createInertiaApp>[0]['page']
 
+function getInitialUser(pageProps: unknown): SharedProps['user'] | null {
+  if (!pageProps || typeof pageProps !== 'object') return null
+  const maybeUser = (pageProps as { user?: SharedProps['user'] }).user
+  return maybeUser ?? null
+}
+
 export default function render(page: SsrPage) {
   return createInertiaApp({
     page,
@@ -23,9 +29,7 @@ export default function render(page: SsrPage) {
         <TuyauProvider client={tuyau}>
           <QueryClientProvider client={queryClient}>
             <NuqsAdapter>
-              <AuthUserProvider
-                initialUser={(props.initialPage.props as unknown as SharedProps).user ?? null}
-              >
+              <AuthUserProvider initialUser={getInitialUser(props.initialPage.props)}>
                 <App {...props} />
               </AuthUserProvider>
             </NuqsAdapter>

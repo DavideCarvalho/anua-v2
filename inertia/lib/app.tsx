@@ -17,6 +17,12 @@ const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 
 const queryClient = new QueryClient()
 
+function getInitialUser(pageProps: unknown): SharedProps['user'] | null {
+  if (!pageProps || typeof pageProps !== 'object') return null
+  const maybeUser = (pageProps as { user?: SharedProps['user'] }).user
+  return maybeUser ?? null
+}
+
 function ClientOnlyToaster() {
   const [mounted, setMounted] = useState(false)
 
@@ -46,9 +52,7 @@ createInertiaApp({
       <ThemeProvider defaultTheme="system" storageKey="anua-theme">
         <QueryClientProvider client={queryClient}>
           <NuqsAdapter>
-            <AuthUserProvider
-              initialUser={(props.initialPage.props as unknown as SharedProps).user ?? null}
-            >
+            <AuthUserProvider initialUser={getInitialUser(props.initialPage.props)}>
               <App {...props} />
               <ClientOnlyToaster />
             </AuthUserProvider>

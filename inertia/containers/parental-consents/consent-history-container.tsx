@@ -2,6 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { CheckCircle2, XCircle, Clock, Calendar, History } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import type { Route } from '@tuyau/core/types'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
@@ -9,31 +10,8 @@ import { Button } from '../../components/ui/button'
 
 import { api } from '~/lib/api'
 
-type ConsentHistoryItem = {
-  id: string
-  eventId: string
-  studentId: string
-  status: 'PENDING' | 'APPROVED' | 'DENIED' | 'EXPIRED'
-  notes: string | null
-  requestedAt: string
-  approvedAt: string | null
-  deniedAt: string | null
-  expiresAt: string | null
-  event: {
-    id: string
-    title: string
-    type: string
-    startsAt: string
-    school: {
-      id: string
-      name: string
-    }
-  }
-  student: {
-    id: string
-    name: string
-  }
-}
+type ConsentsHistoryResponse = Route.Response<'api.v1.consents.history'>
+type ConsentHistoryItem = ConsentsHistoryResponse['data'][number]
 
 interface ConsentHistoryContainerProps {
   page?: number
@@ -45,7 +23,7 @@ export function ConsentHistoryContainer({ page = 1, onPageChange }: ConsentHisto
     api.api.v1.consents.history.queryOptions({ query: { page, limit: 10 } })
   )
 
-  const consents = data.data as unknown as ConsentHistoryItem[]
+  const consents: ConsentsHistoryResponse['data'] = data.data
   const meta = data.meta
 
   const getStatusBadge = (status: ConsentHistoryItem['status']) => {
@@ -116,34 +94,41 @@ export function ConsentHistoryContainer({ page = 1, onPageChange }: ConsentHisto
                 <Calendar className="h-4 w-4" />
                 <span>
                   Evento:{' '}
-                  {format(new Date(consent.event.startsAt), "dd/MM/yyyy 'às' HH:mm", {
-                    locale: ptBR,
-                  })}
+                  {consent.event.startDate
+                    ? format(new Date(consent.event.startDate), "dd/MM/yyyy 'às' HH:mm", {
+                        locale: ptBR,
+                      })
+                    : 'Data não informada'}
                 </span>
               </div>
-              {consent.approvedAt && (
+              {consent.status === 'APPROVED' && consent.respondedAt && (
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <span>
                     Autorizado em:{' '}
-                    {format(new Date(consent.approvedAt), "dd/MM/yyyy 'às' HH:mm", {
+                    {format(new Date(consent.respondedAt), "dd/MM/yyyy 'às' HH:mm", {
                       locale: ptBR,
                     })}
                   </span>
                 </div>
               )}
-              {consent.deniedAt && (
+              {consent.status === 'DENIED' && consent.respondedAt && (
                 <div className="flex items-center gap-2">
                   <XCircle className="h-4 w-4 text-destructive" />
                   <span>
                     Negado em:{' '}
-                    {format(new Date(consent.deniedAt), "dd/MM/yyyy 'às' HH:mm", {
+                    {format(new Date(consent.respondedAt), "dd/MM/yyyy 'às' HH:mm", {
                       locale: ptBR,
                     })}
                   </span>
                 </div>
               )}
-              {consent.notes && <p className="mt-2 text-sm italic">"{consent.notes}"</p>}
+              {consent.approvalNotes && (
+                <p className="mt-2 text-sm italic">"{consent.approvalNotes}"</p>
+              )}
+              {consent.denialReason && (
+                <p className="mt-2 text-sm italic">"{consent.denialReason}"</p>
+              )}
             </div>
           </CardContent>
         </Card>

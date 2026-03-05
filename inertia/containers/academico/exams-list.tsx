@@ -32,54 +32,11 @@ import {
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 import { LaunchExamGradesModal } from '../turma/launch-exam-grades-modal'
 
-interface Exam {
-  id: string
-  title: string
-  description: string | null
-  scheduledDate: string
-  maxScore: number
-  type: string
-  status: string
-  classId: string
-  academicPeriodId: string
-  courseId: string | null
-  class: { id: string; name: string } | null
-  subject: { id: string; name: string } | null
-  gradesCount: number
-}
-
-function toExam(record: Record<string, unknown>): Exam {
-  return {
-    id: String(record.id ?? ''),
-    title: String(record.title ?? ''),
-    description: typeof record.description === 'string' ? record.description : null,
-    scheduledDate: String(record.scheduledDate ?? ''),
-    maxScore: Number(record.maxScore ?? 0),
-    type: String(record.type ?? ''),
-    status: String(record.status ?? ''),
-    classId: String(record.classId ?? ''),
-    academicPeriodId: String(record.academicPeriodId ?? ''),
-    courseId: typeof record.courseId === 'string' ? record.courseId : null,
-    class:
-      record.class && typeof record.class === 'object'
-        ? {
-            id: String((record.class as Record<string, unknown>).id ?? ''),
-            name: String((record.class as Record<string, unknown>).name ?? ''),
-          }
-        : null,
-    subject:
-      record.subject && typeof record.subject === 'object'
-        ? {
-            id: String((record.subject as Record<string, unknown>).id ?? ''),
-            name: String((record.subject as Record<string, unknown>).name ?? ''),
-          }
-        : null,
-    gradesCount: Number(record.gradesCount ?? 0),
-  }
-}
+type Exam = Route.Response<'api.v1.exams.index'>['data'][number]
 
 interface ExamsListProps {
   classId?: string
@@ -109,19 +66,9 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
 
   const queryClient = useQueryClient()
-  const { data, isLoading, isError } = useQuery({
-    ...api.api.v1.exams.index.queryOptions({ query: { classId, subjectId } }),
-    select: (response) => {
-      const rawData =
-        response && typeof response === 'object' && 'data' in response
-          ? ((response as { data?: Record<string, unknown>[] }).data ?? [])
-          : []
-
-      return {
-        data: rawData.map((item) => toExam(item)),
-      }
-    },
-  })
+  const { data, isLoading, isError } = useQuery(
+    api.api.v1.exams.index.queryOptions({ query: { classId, subjectId } })
+  )
 
   const deleteMutation = useMutation(api.api.v1.exams.destroy.mutationOptions())
 
@@ -225,7 +172,9 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    {format(new Date(exam.scheduledDate), 'dd/MM/yyyy', { locale: ptBR })}
+                    {exam.examDate
+                      ? format(new Date(exam.examDate), 'dd/MM/yyyy', { locale: ptBR })
+                      : '-'}
                   </div>
                 </TableCell>
                 <TableCell className="text-center">{getStatusBadge(exam.status)}</TableCell>

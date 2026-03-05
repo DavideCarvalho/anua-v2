@@ -14,6 +14,12 @@ import { getThemeManager, darkenColor, type Theme } from '../utils/theme'
 import type { Direction } from '../assets/placeholder-sprites'
 import type { AvatarData } from '../types'
 
+type TileDebugWindow = Window & {
+  __ANUA_OVERWORLD_TILE_DEBUG__?: () => unknown
+  __ANUA_OVERWORLD_TILE_DEBUG_JSON__?: () => string
+  __ANUA_PRINT_OVERWORLD_TILE_DEBUG__?: () => string
+}
+
 /** Viewport dimensions (visible area, Pokemon-style). */
 const VIEWPORT_WIDTH = 400
 const VIEWPORT_HEIGHT = 300
@@ -161,7 +167,7 @@ export class OverworldScene extends BaseScene {
       ground: OVERWORLD_TILEMAP.layers.ground,
     })
 
-    const w = window as unknown as Record<string, unknown>
+    const w = window as TileDebugWindow
     w.__ANUA_OVERWORLD_TILE_DEBUG__ = () => snapshot
     w.__ANUA_OVERWORLD_TILE_DEBUG_JSON__ = () => JSON.stringify(snapshot)
     w.__ANUA_PRINT_OVERWORLD_TILE_DEBUG__ = () => {

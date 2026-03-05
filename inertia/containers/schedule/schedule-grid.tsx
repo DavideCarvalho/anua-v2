@@ -91,26 +91,6 @@ interface ScheduleData {
   teacherClasses: TeacherHasClass[]
 }
 
-interface ConflictValidationResult {
-  hasConflict: boolean
-  reason?: string
-  teacherName?: string
-}
-
-function parseConflictValidation(value: unknown): ConflictValidationResult {
-  if (!value || typeof value !== 'object') {
-    return { hasConflict: false }
-  }
-
-  const result = value as Record<string, unknown>
-
-  return {
-    hasConflict: result.hasConflict === true,
-    reason: typeof result.reason === 'string' ? result.reason : undefined,
-    teacherName: typeof result.teacherName === 'string' ? result.teacherName : undefined,
-  }
-}
-
 type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY'
 
 const DAYS_OF_WEEK: { key: DayOfWeek; label: string; number: number }[] = [
@@ -296,18 +276,16 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
 
         // Validar conflito de professor
         try {
-          const validation = parseConflictValidation(
-            await validateConflictMutation.mutateAsync({
-              body: {
-                teacherHasClassId,
-                classWeekDay: dayNumber,
-                startTime,
-                endTime,
-                academicPeriodId,
-                classId,
-              },
-            })
-          )
+          const validation = await validateConflictMutation.mutateAsync({
+            body: {
+              teacherHasClassId,
+              classWeekDay: dayNumber,
+              startTime,
+              endTime,
+              academicPeriodId,
+              classId,
+            },
+          })
           if (validation.hasConflict) {
             toast.error(validation.reason || 'Conflito de horário detectado')
             return
@@ -363,18 +341,16 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       // Validar se a aula do slot ativo pode ir para o slot de destino
       if (overSlot.teacherHasClassId) {
         try {
-          const validation = parseConflictValidation(
-            await validateConflictMutation.mutateAsync({
-              body: {
-                teacherHasClassId: overSlot.teacherHasClassId,
-                classWeekDay: activeDayNum,
-                startTime: activeStart,
-                endTime: activeEnd,
-                academicPeriodId,
-                classId,
-              },
-            })
-          )
+          const validation = await validateConflictMutation.mutateAsync({
+            body: {
+              teacherHasClassId: overSlot.teacherHasClassId,
+              classWeekDay: activeDayNum,
+              startTime: activeStart,
+              endTime: activeEnd,
+              academicPeriodId,
+              classId,
+            },
+          })
           if (validation.hasConflict) {
             toast.error(
               `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`
@@ -390,18 +366,16 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
       // Validar se a aula do slot de destino pode ir para o slot ativo
       if (activeSlot.teacherHasClassId) {
         try {
-          const validation = parseConflictValidation(
-            await validateConflictMutation.mutateAsync({
-              body: {
-                teacherHasClassId: activeSlot.teacherHasClassId,
-                classWeekDay: overDayNum,
-                startTime: overStart,
-                endTime: overEnd,
-                academicPeriodId,
-                classId,
-              },
-            })
-          )
+          const validation = await validateConflictMutation.mutateAsync({
+            body: {
+              teacherHasClassId: activeSlot.teacherHasClassId,
+              classWeekDay: overDayNum,
+              startTime: overStart,
+              endTime: overEnd,
+              academicPeriodId,
+              classId,
+            },
+          })
           if (validation.hasConflict) {
             toast.error(
               `${validation.teacherName || 'Professor'}: ${validation.reason || 'Conflito de horário detectado'}`

@@ -108,8 +108,8 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
       previousPeriodId: null,
       calendar: {
         name: '',
-        startDate: undefined as unknown as Date,
-        endDate: undefined as unknown as Date,
+        startDate: undefined,
+        endDate: undefined,
         segment: 'ELEMENTARY',
         holidays: [],
         weekendDaysWithClasses: [],
