@@ -4,6 +4,13 @@ export default class extends BaseSchema {
   protected tableName = 'exams'
 
   async up() {
+    await this.db.rawQuery(
+      `DO $$ BEGIN CREATE TYPE "ExamType" AS ENUM ('WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;`
+    )
+    await this.db.rawQuery(
+      `DO $$ BEGIN CREATE TYPE "ExamStatus" AS ENUM ('DRAFT', 'SCHEDULED', 'COMPLETED', 'CANCELLED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;`
+    )
+
     this.schema.createTable(this.tableName, (table) => {
       table.text('id').primary()
       table.text('title').notNullable()
@@ -59,5 +66,7 @@ export default class extends BaseSchema {
 
   async down() {
     this.schema.dropTable(this.tableName)
+    await this.db.rawQuery('DROP TYPE IF EXISTS "ExamStatus";')
+    await this.db.rawQuery('DROP TYPE IF EXISTS "ExamType";')
   }
 }

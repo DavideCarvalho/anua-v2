@@ -48,7 +48,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: postgis/postgis:16-3.4
         env:
           POSTGRES_DB: anua_test
           POSTGRES_USER: postgres
@@ -73,7 +73,7 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_DATABASE: anua_test
-      DB_POOL_MAX: 1
+      DB_POOL_MAX: 5
       SMTP_HOST: localhost
       SMTP_PORT: 1025
       SMTP_USER: test
@@ -103,11 +103,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Reset and run migrations
-        run: node ace migration:fresh --force
-
-      - name: Show migration status
-        run: node ace migration:status
-
-      - name: Run tests
-        run: npm run test
+      - name: Migrate, verify schema, and run tests
+        run: |
+          node ace migration:fresh --force
+          node ace migration:status
+          psql "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}" -c "SELECT to_regclass('\"Role\"') AS role_table, to_regclass('rate_limits') AS rate_limits_table;"
+          npm run test
