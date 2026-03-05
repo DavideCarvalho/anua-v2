@@ -103,8 +103,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run migrations
-        run: node ace migration:run --force
+      - name: Reset and run migrations
+        run: node ace migration:fresh --force
+
+      - name: Show migration status
+        run: node ace migration:status
 
       - name: Run tests
         run: npm run test
