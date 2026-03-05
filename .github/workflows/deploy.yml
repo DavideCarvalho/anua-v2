@@ -1,9 +1,10 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['CI']
+    types:
+      - completed
   workflow_dispatch:
 
 env:
@@ -19,6 +20,13 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
     environment: production
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
 
     permissions:
       contents: read
@@ -27,6 +35,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -42,22 +52,26 @@ jobs:
 
       - name: Build Docker image
         run: |
+          IMAGE_TAG=${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           docker build \
             --build-arg VITE_API_URL="/" \
-            -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest \
             .
 
       - name: Push image to Artifact Registry
         run: |
-          docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          IMAGE_TAG=${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
           docker push ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy services and update jobs (parallel)
         run: |
+          IMAGE_TAG=${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
           # Deploy API
           gcloud run services update ${{ env.SERVICE_NAME }} \
-            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --startup-probe="initialDelaySeconds=10,timeoutSeconds=10,periodSeconds=10,failureThreshold=3,httpGet.path=/,httpGet.port=3333" \
@@ -67,24 +81,24 @@ jobs:
 
           # Deploy Queue Worker
           gcloud run services update production-anua-v2-queue-worker \
-            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --quiet &
 
           # Update Cloud Run Jobs with new image
           gcloud run jobs update production-anua-v2-dispatch-missing-payments \
-            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             --region=${{ env.REGION }} \
             --quiet &
 
           gcloud run jobs update production-anua-v2-dispatch-invoices \
-            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             --region=${{ env.REGION }} \
             --quiet &
 
           gcloud run jobs update production-anua-v2-dispatch-overdue \
-            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --image=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG} \
             --region=${{ env.REGION }} \
             --quiet &
 
