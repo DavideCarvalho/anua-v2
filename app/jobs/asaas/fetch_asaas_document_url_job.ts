@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import app from '@adonisjs/core/services/app'
 import School from '#models/school'
 import AppException from '#exceptions/app_exception'

@@ -2,7 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
 import GamificationEventDto from '#models/dto/gamification_event.dto'
 import { createGamificationEventValidator } from '#validators/gamification'
-import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
 
 export default class CreateGamificationEventController {
@@ -20,7 +19,6 @@ export default class CreateGamificationEventController {
 
     // Enqueue job for processing
     try {
-      await getQueueManager()
       await ProcessGamificationEventJob.dispatch({ eventId: event.id })
     } catch (error) {
       logger.error({ error }, 'Failed to enqueue gamification event')

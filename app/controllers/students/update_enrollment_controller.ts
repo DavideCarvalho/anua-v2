@@ -2,7 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasLevel from '#models/student_has_level'
 import StudentHasLevelDto from '#models/dto/student_has_level.dto'
 import { updateEnrollmentValidator } from '#validators/student_enrollment'
-import { getQueueManager } from '#services/queue_service'
 import UpdateEnrollmentPaymentsJob from '#jobs/payments/update_enrollment_payments_job'
 import db from '@adonisjs/lucid/services/db'
 import IndividualDiscount from '#models/individual_discount'
@@ -82,7 +81,6 @@ export default class UpdateEnrollmentController {
     // Dispara job para atualizar pagamentos
     const user = ctx.auth?.user
     try {
-      await getQueueManager()
       console.log(`[UPDATE_ENROLLMENT] QueueManager ready, dispatching...`)
 
       const dispatcher = UpdateEnrollmentPaymentsJob.dispatch({

@@ -1,6 +1,5 @@
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
-import { getQueueManager } from '#services/queue_service'
 import GenerateMissingPaymentsJob from '#jobs/payments/generate_missing_payments_job'
 
 export default class DispatchGenerateMissingPayments extends BaseCommand {
@@ -13,8 +12,6 @@ export default class DispatchGenerateMissingPayments extends BaseCommand {
 
   async run() {
     this.logger.info('Initializing queue manager...')
-    await getQueueManager()
-
     this.logger.info('Dispatching GenerateMissingPaymentsJob...')
     await GenerateMissingPaymentsJob.dispatch({})
 

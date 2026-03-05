@@ -1,6 +1,5 @@
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
-import { getQueueManager } from '#services/queue_service'
 import UpdateStreaksJob from '#jobs/gamification/update_streaks_job'
 
 export default class DispatchGamificationStreaks extends BaseCommand {
@@ -13,8 +12,6 @@ export default class DispatchGamificationStreaks extends BaseCommand {
 
   async run() {
     this.logger.info('Initializing queue manager...')
-    await getQueueManager()
-
     this.logger.info('Dispatching UpdateStreaksJob...')
     await UpdateStreaksJob.dispatch({} as never)
 

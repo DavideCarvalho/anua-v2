@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
-import { getQueueManager } from '#services/queue_service'
 import CanteenPurchase, { type CanteenPurchaseStatus } from '#models/canteen_purchase'
 import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import CanteenItem from '#models/canteen_item'
@@ -218,7 +217,6 @@ export default class CreateCanteenPurchaseController {
       }
 
       try {
-        await getQueueManager()
         await ReconcilePaymentInvoiceJob.dispatch({
           paymentId: studentPaymentId,
           triggeredBy: auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null,

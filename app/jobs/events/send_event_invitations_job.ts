@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import db from '@adonisjs/lucid/services/db'
 import Event from '#models/event'
 import type EventModel from '#models/event'

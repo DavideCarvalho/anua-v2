@@ -1,11 +1,10 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import { DateTime } from 'luxon'
 import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import Contract from '#models/contract'
 import ContractPaymentDay from '#models/contract_payment_day'
 import Invoice from '#models/invoice'
-import { getQueueManager } from '#services/queue_service'
 import { setAuditContext, clearAuditContext } from '#services/audit_context_service'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
 import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
@@ -113,7 +112,6 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
       `[UPDATE_ENROLLMENT_PAYMENTS] No payments found for enrollment ${enrollment.id}, dispatching generation job`
     )
     try {
-      await getQueueManager()
       await GenerateStudentPaymentsJob.dispatch({ studentHasLevelId: enrollment.id })
     } catch (error) {
       console.error(

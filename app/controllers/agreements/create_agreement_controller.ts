@@ -6,7 +6,6 @@ import AgreementEarlyDiscount from '#models/agreement_early_discount'
 import Invoice from '#models/invoice'
 import StudentPayment from '#models/student_payment'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
-import { getQueueManager } from '#services/queue_service'
 import { createAgreementValidator } from '#validators/agreement'
 import AppException from '#exceptions/app_exception'
 
@@ -266,8 +265,6 @@ export default class CreateAgreementController {
 
       if (affectedPaymentIds.size > 0) {
         try {
-          await getQueueManager()
-
           for (const paymentId of affectedPaymentIds) {
             await ReconcilePaymentInvoiceJob.dispatch({
               paymentId,

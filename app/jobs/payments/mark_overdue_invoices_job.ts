@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import MarkOverdueInvoices from '#start/jobs/mark_overdue_invoices'
 
 interface MarkOverdueInvoicesPayload {}

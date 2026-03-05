@@ -1,5 +1,4 @@
 import StudentHasLevel from '#models/student_has_level'
-import { getQueueManager } from '#services/queue_service'
 import UpdateEnrollmentPaymentsJob from '#jobs/payments/update_enrollment_payments_job'
 
 interface TriggeredByPayload {
@@ -58,9 +57,6 @@ export async function dispatchEnrollmentPaymentUpdatesForLevelContracts({
   if (enrollmentIdsToUpdate.length === 0) {
     return
   }
-
-  await getQueueManager()
-
   for (const enrollmentId of enrollmentIdsToUpdate) {
     await UpdateEnrollmentPaymentsJob.dispatch({
       enrollmentId,
@@ -86,9 +82,6 @@ export async function dispatchEnrollmentPaymentUpdatesForContract({
   if (enrollments.length === 0) {
     return
   }
-
-  await getQueueManager()
-
   for (const enrollment of enrollments) {
     await UpdateEnrollmentPaymentsJob.dispatch({
       enrollmentId: enrollment.id,

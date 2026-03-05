@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import { DateTime } from 'luxon'
 import GamificationEvent from '#models/gamification_event'
 import StudentGamification from '#models/student_gamification'

@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import EmitNfse from '#start/jobs/emit_nfse'
 
 interface EmitNfsePayload {

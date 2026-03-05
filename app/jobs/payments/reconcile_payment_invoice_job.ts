@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import locks from '@adonisjs/lock/services/main'
 import StudentPayment from '#models/student_payment'
 import BillingReconciliationService from '#services/payments/billing_reconciliation_service'

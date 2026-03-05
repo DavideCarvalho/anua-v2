@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import locks from '@adonisjs/lock/services/main'

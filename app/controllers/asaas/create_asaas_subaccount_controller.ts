@@ -7,7 +7,6 @@ import AsaasService, { AsaasApiError } from '#services/asaas_service'
 import { buildAsaasSubaccountWebhooks } from '#services/asaas_webhook_config'
 import { createAsaasSubaccountValidator } from '#validators/asaas_subaccount'
 import FetchAsaasDocumentUrlJob from '#jobs/asaas/fetch_asaas_document_url_job'
-import { getQueueManager } from '#services/queue_service'
 
 @inject()
 export default class CreateAsaasSubaccountController {
@@ -96,7 +95,6 @@ export default class CreateAsaasSubaccountController {
 
     if (school.paymentConfigStatus === 'PENDING_DOCUMENTS') {
       // Dispatch job to fetch document URL (with ~15s delay for Asaas processing)
-      await getQueueManager()
       await FetchAsaasDocumentUrlJob.dispatch({ schoolId: school.id })
     }
 

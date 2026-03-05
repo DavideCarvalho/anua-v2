@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 
 export default class UpdateStreaksJob extends Job<void> {
   static readonly jobName = 'UpdateStreaksJob'

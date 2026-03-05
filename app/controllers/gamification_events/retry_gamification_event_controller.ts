@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
 import GamificationEventDto from '#models/dto/gamification_event.dto'
-import { getQueueManager } from '#services/queue_service'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
 import AppException from '#exceptions/app_exception'
 
@@ -27,7 +26,6 @@ export default class RetryGamificationEventController {
 
     // Re-enqueue job for processing
     try {
-      await getQueueManager()
       await ProcessGamificationEventJob.dispatch({ eventId: event.id })
     } catch (error) {
       logger.error({ error }, 'Failed to enqueue gamification event retry')

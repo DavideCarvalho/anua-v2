@@ -1,6 +1,5 @@
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
-import { getQueueManager } from '#services/queue_service'
 import ApplyInvoiceInterestJob from '#jobs/payments/apply_invoice_interest_job'
 
 export default class DispatchApplyInvoiceInterest extends BaseCommand {
@@ -13,8 +12,6 @@ export default class DispatchApplyInvoiceInterest extends BaseCommand {
 
   async run() {
     this.logger.info('Initializing queue manager...')
-    await getQueueManager()
-
     this.logger.info('Dispatching ApplyInvoiceInterestJob...')
     await ApplyInvoiceInterestJob.dispatch({})
 

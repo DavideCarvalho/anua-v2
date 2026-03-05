@@ -19,7 +19,6 @@ import Class_ from '#models/class'
 import Level from '#models/level'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { enrollStudentValidator } from '#validators/student'
-import { getQueueManager } from '#services/queue_service'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
 import AppException from '#exceptions/app_exception'
 import type { EmergencyContactRelationship } from '#models/student_emergency_contact'
@@ -427,7 +426,6 @@ export default class EnrollStudentController {
       // Job will check for contract (own or from level) and skip if none
       if (createdStudentHasLevelId) {
         try {
-          await getQueueManager()
           await GenerateStudentPaymentsJob.dispatch({
             studentHasLevelId: createdStudentHasLevelId,
           })

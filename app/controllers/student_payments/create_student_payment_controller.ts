@@ -3,7 +3,6 @@ import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
 import StudentPaymentDto from '#models/dto/student_payment.dto'
 import { createStudentPaymentValidator } from '#validators/student_payment'
-import { getQueueManager } from '#services/queue_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 
 export default class CreateStudentPaymentController {
@@ -32,7 +31,6 @@ export default class CreateStudentPaymentController {
     })
 
     try {
-      await getQueueManager()
       await ReconcilePaymentInvoiceJob.dispatch({
         paymentId: payment.id,
         triggeredBy: user ? { id: user.id, name: user.name ?? 'Unknown' } : null,

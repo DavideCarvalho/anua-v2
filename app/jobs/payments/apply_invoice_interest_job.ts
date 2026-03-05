@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import ApplyInvoiceInterest from '#start/jobs/apply_invoice_interest'
 
 interface ApplyInvoiceInterestPayload {

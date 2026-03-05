@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import School from '#models/school'

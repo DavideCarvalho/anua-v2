@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import SendInvoiceNotifications from '#start/jobs/send_invoice_notifications'
 
 interface SendInvoiceNotificationsPayload {

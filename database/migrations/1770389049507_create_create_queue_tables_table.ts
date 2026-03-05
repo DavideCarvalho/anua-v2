@@ -1,5 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { QueueSchemaService } from '@boringnode/queue'
+import { QueueSchemaService } from '@adonisjs/queue'
 import db from '@adonisjs/lucid/services/db'
 
 export default class extends BaseSchema {

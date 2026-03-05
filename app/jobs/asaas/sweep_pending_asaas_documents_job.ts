@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import School from '#models/school'
 import FetchAsaasDocumentUrlJob from './fetch_asaas_document_url_job.js'
 

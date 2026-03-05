@@ -1,5 +1,4 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { getQueueManager } from '#services/queue_service'
 import CanteenPurchase from '#models/canteen_purchase'
 import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import Student from '#models/student'
@@ -87,7 +86,6 @@ export default class CancelCanteenPurchaseController {
         }
 
         try {
-          await getQueueManager()
           await ReconcilePaymentInvoiceJob.dispatch({
             paymentId: linkedPayment.id,
             triggeredBy: auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null,

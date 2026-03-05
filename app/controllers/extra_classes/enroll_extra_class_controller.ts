@@ -9,7 +9,6 @@ import AcademicPeriod from '#models/academic_period'
 import Contract from '#models/contract'
 import Scholarship from '#models/scholarship'
 import { enrollExtraClassValidator } from '#validators/extra_class'
-import { getQueueManager } from '#services/queue_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import AppException from '#exceptions/app_exception'
 
@@ -109,7 +108,6 @@ export default class EnrollExtraClassController {
 
       // Reconcile invoices
       try {
-        await getQueueManager()
         const user = ctx.auth?.user
         for (const payment of payments) {
           await ReconcilePaymentInvoiceJob.dispatch({

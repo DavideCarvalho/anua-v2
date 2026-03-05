@@ -1,45 +1,20 @@
 import env from '#start/env'
-import { knex } from '@boringnode/queue/drivers/knex_adapter'
+import { defineConfig, drivers } from '@adonisjs/queue'
 
-const queueConfig = {
-  /**
-   * The default adapter to use for the queue.
-   */
-  default: 'knex',
+export default defineConfig({
+  default: env.get('QUEUE_DRIVER', env.get('NODE_ENV') === 'development' ? 'sync' : 'database'),
 
-  /**
-   * Configure your queue adapters here.
-   */
   adapters: {
-    knex: knex({
-      client: 'pg',
-      connection: {
-        host: env.get('DB_HOST'),
-        port: env.get('DB_PORT'),
-        user: env.get('DB_USER'),
-        password: env.get('DB_PASSWORD'),
-        database: env.get('DB_DATABASE'),
-      },
-      pool: {
-        min: 0,
-        max: 3,
-      },
-      debug: false,
+    database: drivers.database({
+      connectionName: 'postgres',
     }),
+    sync: drivers.sync(),
   },
 
-  /**
-   * Worker configuration
-   */
   worker: {
     concurrency: 2,
     idleDelay: '1s',
   },
 
-  /**
-   * Job locations for auto-discovery
-   */
-  locations: ['./app/jobs/**/*.{js,ts}'],
-}
-
-export default queueConfig
+  locations: ['./app/jobs/**/*.ts'],
+})

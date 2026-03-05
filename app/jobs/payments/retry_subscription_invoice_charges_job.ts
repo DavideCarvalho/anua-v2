@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import RetrySubscriptionInvoiceCharges from '#start/jobs/retry_subscription_invoice_charges'
 
 export default class RetrySubscriptionInvoiceChargesJob extends Job<Record<string, never>> {

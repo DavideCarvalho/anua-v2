@@ -33,6 +33,7 @@ export default defineConfig({
     () => import('@adonisjs/lucid/commands'),
     () => import('@adocasts.com/dto/commands'),
     () => import('@adonisjs/mail/commands'),
+    () => import('@adonisjs/queue/commands'),
     () => import('adonisjs-scheduler/commands'),
   ],
 
@@ -67,13 +68,13 @@ export default defineConfig({
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/lock/lock_provider'),
     () => import('@adonisjs/drive/drive_provider'),
+    () => import('@adonisjs/queue/queue_provider'),
     () => import('@jrmc/adonis-attachment/attachment_provider'),
     {
       file: () => import('adonisjs-scheduler/scheduler_provider'),
       environment: ['console'],
     },
     () => import('@stouder-io/adonis-auditing/auditing_provider'),
-    () => import('#providers/queue_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),
     {
       file: () => import('adonisjs-server-stats/provider'),

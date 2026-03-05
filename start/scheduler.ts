@@ -1,5 +1,4 @@
 import scheduler from 'adonisjs-scheduler/services/main'
-import { getQueueManager } from '#services/queue_service'
 import GenerateMissingPaymentsJob from '#jobs/payments/generate_missing_payments_job'
 import GenerateInvoicesJob from '#jobs/payments/generate_invoices_job'
 import RefreshOverdueInvoicesJob from '#jobs/payments/refresh_overdue_invoices_job'
@@ -18,7 +17,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 02:00 - Gerar pagamentos faltantes
   scheduler
     .call(async () => {
-      await getQueueManager()
       await GenerateMissingPaymentsJob.dispatch({})
     })
     .daily()
@@ -27,7 +25,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 03:00 - Gerar invoices (faturas)
   scheduler
     .call(async () => {
-      await getQueueManager()
       await GenerateInvoicesJob.dispatch({})
     })
     .daily()
@@ -36,7 +33,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 05:00 - Marcar invoices vencidas + recalcular encargos de atraso
   scheduler
     .call(async () => {
-      await getQueueManager()
       await RefreshOverdueInvoicesJob.dispatch({})
     })
     .daily()
@@ -45,7 +41,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 06:00 - Criar cobranças Asaas para invoices OPEN/OVERDUE sem charge
   scheduler
     .call(async () => {
-      await getQueueManager()
       await CreateInvoiceAsaasChargesJob.dispatch({})
     })
     .daily()
@@ -54,7 +49,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 06:30 - Enviar notificações consolidadas de invoices para responsáveis financeiros
   scheduler
     .call(async () => {
-      await getQueueManager()
       await SendInvoiceNotificationsJob.dispatch({})
     })
     .daily()
@@ -63,7 +57,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 09:00 (dias úteis) - Lembretes de reconhecimento de ocorrências
   scheduler
     .call(async () => {
-      await getQueueManager()
       await SendOccurrenceAckRemindersJob.dispatch({})
     })
     .cron('0 9 * * 1-5')
@@ -71,7 +64,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 08:00 - Varredura diária de document URLs pendentes no Asaas
   scheduler
     .call(async () => {
-      await getQueueManager()
       await SweepPendingAsaasDocumentsJob.dispatch({})
     })
     .daily()
@@ -80,7 +72,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 04:00 (dia 1) - Gerar e cobrar assinaturas mensais de escolas/redes
   scheduler
     .call(async () => {
-      await getQueueManager()
       await GenerateSubscriptionInvoicesJob.dispatch({})
     })
     .cron('0 4 1 * *')
@@ -88,7 +79,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // 04:30 - Retentar cobranças automáticas de assinaturas com falha
   scheduler
     .call(async () => {
-      await getQueueManager()
       await RetrySubscriptionInvoiceChargesJob.dispatch({})
     })
     .daily()
@@ -101,7 +91,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // A cada 15 minutos - Retry de eventos de gamificação que falharam
   scheduler
     .call(async () => {
-      await getQueueManager()
       await RetryPendingEventsJob.dispatch({} as never)
     })
     .everyFifteenMinutes()
@@ -109,7 +98,6 @@ if (process.env.DISABLE_SCHEDULER) {
   // Daily 00:00 - Atualizar sequências (streaks) de alunos
   scheduler
     .call(async () => {
-      await getQueueManager()
       await UpdateStreaksJob.dispatch({} as never)
     })
     .daily()
@@ -120,7 +108,6 @@ if (process.env.DISABLE_SCHEDULER) {
 // 02:00 - Gerar pagamentos faltantes
 scheduler
   .call(async () => {
-    await getQueueManager()
     await GenerateMissingPaymentsJob.dispatch({})
   })
   .daily()
@@ -129,7 +116,6 @@ scheduler
 // 03:00 - Gerar invoices (faturas)
 scheduler
   .call(async () => {
-    await getQueueManager()
     await GenerateInvoicesJob.dispatch({})
   })
   .daily()
@@ -138,7 +124,6 @@ scheduler
 // 05:00 - Marcar invoices vencidas + recalcular encargos de atraso
 scheduler
   .call(async () => {
-    await getQueueManager()
     await RefreshOverdueInvoicesJob.dispatch({})
   })
   .daily()
@@ -147,7 +132,6 @@ scheduler
 // 06:00 - Criar cobranças Asaas para invoices OPEN/OVERDUE sem charge
 scheduler
   .call(async () => {
-    await getQueueManager()
     await CreateInvoiceAsaasChargesJob.dispatch({})
   })
   .daily()
@@ -156,7 +140,6 @@ scheduler
 // 06:30 - Enviar notificações consolidadas de invoices para responsáveis financeiros
 scheduler
   .call(async () => {
-    await getQueueManager()
     await SendInvoiceNotificationsJob.dispatch({})
   })
   .daily()
@@ -165,7 +148,6 @@ scheduler
 // 09:00 (dias úteis) - Lembretes de reconhecimento de ocorrências
 scheduler
   .call(async () => {
-    await getQueueManager()
     await SendOccurrenceAckRemindersJob.dispatch({})
   })
   .cron('0 9 * * 1-5')
@@ -173,7 +155,6 @@ scheduler
 // 08:00 - Varredura diária de document URLs pendentes no Asaas
 scheduler
   .call(async () => {
-    await getQueueManager()
     await SweepPendingAsaasDocumentsJob.dispatch({})
   })
   .daily()
@@ -182,7 +163,6 @@ scheduler
 // 04:00 (dia 1) - Gerar e cobrar assinaturas mensais de escolas/redes
 scheduler
   .call(async () => {
-    await getQueueManager()
     await GenerateSubscriptionInvoicesJob.dispatch({})
   })
   .cron('0 4 1 * *')
@@ -190,7 +170,6 @@ scheduler
 // 04:30 - Retentar cobranças automáticas de assinaturas com falha
 scheduler
   .call(async () => {
-    await getQueueManager()
     await RetrySubscriptionInvoiceChargesJob.dispatch({})
   })
   .daily()

@@ -5,7 +5,6 @@ import Student from '#models/student'
 import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import AppException from '#exceptions/app_exception'
-import { getQueueManager } from '#services/queue_service'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 
 const CANCELLABLE_PAYMENT_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE'] as const
@@ -84,7 +83,6 @@ export default class CancelEnrollmentController {
 
     if (paymentIdsToReconcile.length > 0) {
       try {
-        await getQueueManager()
         for (const paymentId of paymentIdsToReconcile) {
           await ReconcilePaymentInvoiceJob.dispatch({
             paymentId,

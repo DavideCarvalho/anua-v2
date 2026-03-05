@@ -1,4 +1,4 @@
-import { Job } from '@boringnode/queue'
+import { Job } from '@adonisjs/queue'
 import { DateTime } from 'luxon'
 import mail from '@adonisjs/mail/services/main'
 import Invoice from '#models/invoice'
