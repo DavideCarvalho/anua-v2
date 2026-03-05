@@ -5,7 +5,7 @@ import { useQueryStates, parseAsInteger, parseAsString, parseAsArrayOf } from 'n
 import { DateTime } from 'luxon'
 import type { LucideIcon } from 'lucide-react'
 import type { Route } from '@tuyau/core/types'
-import { api, tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 
 type InvoicesResponse = Route.Response<'api.v1.invoices.index'>
 import { Card, CardContent } from '../components/ui/card'
@@ -892,7 +892,9 @@ function InvoicesContent() {
 
       {isLoading && <InvoicesSkeleton />}
 
-      {error && <InvoicesErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
+      {error instanceof Error && (
+        <InvoicesErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+      )}
 
       {!isLoading && !error && invoices.length === 0 && (
         <Card>

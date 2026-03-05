@@ -16,6 +16,8 @@ import {
 
 import type { EnrollmentFormData } from './enrollment-form'
 
+type Relationship = EnrollmentFormData['emergencyContacts'][number]['relationship']
+
 const RELATIONSHIPS = [
   { value: 'MOTHER', label: 'Mãe' },
   { value: 'FATHER', label: 'Pai' },
@@ -28,7 +30,11 @@ const RELATIONSHIPS = [
   { value: 'NIECE', label: 'Sobrinha' },
   { value: 'GUARDIAN', label: 'Responsável Legal' },
   { value: 'OTHER', label: 'Outro' },
-]
+] as const satisfies ReadonlyArray<{ value: Relationship; label: string }>
+
+function isRelationship(value: string): value is Relationship {
+  return RELATIONSHIPS.some((relationship) => relationship.value === value)
+}
 
 export function StepMedicalInfo() {
   const { register, control, setValue, watch } = useFormContext<EnrollmentFormData>()
@@ -182,9 +188,11 @@ export function StepMedicalInfo() {
                   <Label className="text-xs">Parentesco *</Label>
                   <Select
                     value={watch(`emergencyContacts.${index}.relationship`)}
-                    onValueChange={(value) =>
-                      setValue(`emergencyContacts.${index}.relationship`, value as any)
-                    }
+                    onValueChange={(value) => {
+                      if (isRelationship(value)) {
+                        setValue(`emergencyContacts.${index}.relationship`, value)
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />

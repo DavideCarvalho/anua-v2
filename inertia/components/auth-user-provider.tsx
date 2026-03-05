@@ -1,8 +1,6 @@
 import { router } from '@inertiajs/react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { PropsWithChildren } from 'react'
-import { useEffect, useState, useRef } from 'react'
-import { api } from '~/lib/api'
+import { useEffect, useState } from 'react'
 import type { SharedProps } from '../lib/types'
 import { useAuthStore } from '../stores/auth_store'
 
@@ -12,10 +10,8 @@ interface AuthUserProviderProps extends PropsWithChildren {
 
 export function AuthUserProvider({ children, initialUser }: AuthUserProviderProps) {
   const [sharedUser, setSharedUser] = useState<SharedProps['user']>(initialUser)
-  const queryClient = useQueryClient()
   const setUser = useAuthStore((state) => state.setUser)
   const clearUser = useAuthStore((state) => state.clearUser)
-  const prevUserIdRef = useRef<string | null>(initialUser?.id ?? null)
 
   useEffect(() => {
     const removeNavigateListener = router.on('navigate', (event) => {
@@ -36,31 +32,6 @@ export function AuthUserProvider({ children, initialUser }: AuthUserProviderProp
 
     clearUser()
   }, [sharedUser, setUser, clearUser])
-
-  const { data } = useQuery({
-    ...api.api.v1.auth.me.queryOptions({}),
-    queryKey: ['user'],
-    initialData: sharedUser ?? undefined,
-    enabled: sharedUser !== null,
-    staleTime: 1000 * 60,
-    retry: false,
-  })
-
-  useEffect(() => {
-    if (data) {
-      const currentUserId = data.id
-
-      if (prevUserIdRef.current !== currentUserId) {
-        prevUserIdRef.current = currentUserId
-        queryClient.invalidateQueries()
-      }
-
-      setUser(data)
-      return
-    }
-
-    clearUser()
-  }, [data, setUser, clearUser, queryClient])
 
   return <>{children}</>
 }

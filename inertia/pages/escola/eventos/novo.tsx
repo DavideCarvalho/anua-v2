@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -37,6 +38,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import { getEducationType, type AcademicPeriodSegment } from '~/lib/formatters'
 import type { SharedProps } from '~/lib/types'
+import type { Route } from '@tuyau/core/types'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
@@ -137,6 +139,7 @@ const formSchema = z
   })
 
 type FormValues = z.infer<typeof formSchema>
+type CreateEventBody = Route.Body<'api.v1.events.store'>
 
 export default function NovoEventoPage() {
   const { props } = usePage<SharedProps>()
@@ -153,7 +156,7 @@ export default function NovoEventoPage() {
   const createEventMutation = useMutation(api.api.v1.events.store.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       title: '',
       description: '',
@@ -378,10 +381,10 @@ export default function NovoEventoPage() {
       ? buildIsoDateTime(endsAtBaseDate, formValues.isAllDay ? undefined : formValues.endTime)
       : undefined
 
-    const eventPayload = {
+    const eventPayload: CreateEventBody = {
       title: formValues.title,
       description: formValues.description,
-      type: formValues.type as any,
+      type: formValues.type,
       visibility: EventVisibility.INTERNAL,
       location: formValues.location,
       isAllDay: formValues.isAllDay,

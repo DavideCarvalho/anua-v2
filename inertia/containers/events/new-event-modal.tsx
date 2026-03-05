@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -37,6 +38,7 @@ import { Checkbox } from '../../components/ui/checkbox'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
@@ -132,6 +134,7 @@ const formSchema = z
   })
 
 type FormValues = z.infer<typeof formSchema>
+type CreateEventBody = Route.Body<'api.v1.events.store'>
 
 interface NewEventModalProps {
   open: boolean
@@ -157,7 +160,7 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
   const classes = classesData?.data ?? []
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       title: '',
       description: '',
@@ -195,30 +198,35 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
   }, [form])
 
   const onSubmit = async (values: FormValues) => {
+    const normalizedType: CreateEventBody['type'] =
+      values.type === EventType.HOLIDAY ? EventType.OTHER : values.type
+    const normalizedVisibility: CreateEventBody['visibility'] =
+      values.visibility === EventVisibility.SCHOOL_ONLY ? 'INTERNAL' : values.visibility
+
+    const body: CreateEventBody = {
+      title: values.title,
+      description: values.description,
+      type: normalizedType,
+      visibility: normalizedVisibility,
+      location: values.location,
+      requiresParentalConsent: values.requiresParentalConsent,
+      hasAdditionalCosts: values.hasAdditionalCosts,
+      additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : undefined,
+      additionalCostDescription: values.hasAdditionalCosts
+        ? values.additionalCostDescription
+        : undefined,
+      audienceWholeSchool: values.audienceWholeSchool,
+      audienceAcademicPeriodIds: values.audienceWholeSchool ? [] : values.audienceAcademicPeriodIds,
+      audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
+      audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
+      schoolId,
+      startsAt: new Date(values.startsAt).toISOString(),
+      endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
+    }
+
     toast.promise(
       createEventMutation.mutateAsync({
-        body: {
-          title: values.title,
-          description: values.description,
-          type: values.type as any,
-          visibility: values.visibility as any,
-          location: values.location,
-          requiresParentalConsent: values.requiresParentalConsent,
-          hasAdditionalCosts: values.hasAdditionalCosts,
-          additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : undefined,
-          additionalCostDescription: values.hasAdditionalCosts
-            ? values.additionalCostDescription
-            : undefined,
-          audienceWholeSchool: values.audienceWholeSchool,
-          audienceAcademicPeriodIds: values.audienceWholeSchool
-            ? []
-            : values.audienceAcademicPeriodIds,
-          audienceLevelIds: values.audienceWholeSchool ? [] : values.audienceLevelIds,
-          audienceClassIds: values.audienceWholeSchool ? [] : values.audienceClassIds,
-          schoolId,
-          startsAt: new Date(values.startsAt).toISOString(),
-          endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
-        },
+        body,
       }),
       {
         loading: 'Criando evento...',

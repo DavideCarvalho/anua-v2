@@ -281,10 +281,7 @@ export function EnrollmentForm({
           {currentStep === 3 && <StepAddress />}
           {currentStep === 4 && <StepMedicalInfo />}
           {currentStep === 5 && (
-            <StepBilling
-              schoolId={enrollmentInfo.school.id}
-              contract={enrollmentInfo.contract as any}
-            />
+            <StepBilling schoolId={enrollmentInfo.school.id} contract={enrollmentInfo.contract} />
           )}
         </div>
 

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -27,7 +28,7 @@ const schema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   contactName: z.string().optional().or(z.literal('')),
-  discountPercentage: z.preprocess((v) => Number(v), z.number().min(0).max(100)),
+  discountPercentage: z.coerce.number().min(0).max(100),
   partnershipStartDate: z.string().min(1, 'Data de início é obrigatória'),
   partnershipEndDate: z.string().optional().or(z.literal('')),
   isActive: z.boolean(),
@@ -45,26 +46,29 @@ export function EditSchoolPartnerModal({
   onCancel: () => void
 }) {
   const queryClient = useQueryClient()
-  const updatePartner = useMutation(api.api.v1.schoolPartners.update.mutationOptions())
+  const updatePartner = useMutation(api.api.v1.schoolPartners.updateSchoolPartner.mutationOptions())
 
   const { data: partner, isLoading } = useQuery({
-    ...api.api.v1.schoolPartners.show.queryOptions({ params: { id: partnerId } }),
+    ...api.api.v1.schoolPartners.showSchoolPartner.queryOptions({ params: { id: partnerId } }),
     enabled: !!partnerId,
   })
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: {
       partnershipStartDate: new Date().toISOString().slice(0, 10),
       isActive: true,
     },
   })
 
-  function toDateInput(value: any) {
+  function toDateInput(value: unknown) {
     if (!value) return ''
     if (typeof value === 'string') return value.slice(0, 10)
     if (value instanceof Date) return value.toISOString().slice(0, 10)
-    if (typeof value.toISO === 'function') return (value.toISO() ?? '').slice(0, 10)
+    if (typeof value === 'object' && 'toISO' in value && typeof value.toISO === 'function') {
+      const iso = value.toISO()
+      return typeof iso === 'string' ? iso.slice(0, 10) : ''
+    }
     return ''
   }
 
@@ -95,12 +99,10 @@ export function EditSchoolPartnerModal({
           phone: values.phone || undefined,
           contactName: values.contactName || undefined,
           discountPercentage: values.discountPercentage,
-          partnershipStartDate: new Date(values.partnershipStartDate),
-          partnershipEndDate: values.partnershipEndDate
-            ? new Date(values.partnershipEndDate)
-            : null,
+          partnershipStartDate: values.partnershipStartDate,
+          partnershipEndDate: values.partnershipEndDate || undefined,
           isActive: values.isActive,
-        } as any,
+        },
       })
       .then(() => {
         queryClient.invalidateQueries({ queryKey: ['school-partners'] })

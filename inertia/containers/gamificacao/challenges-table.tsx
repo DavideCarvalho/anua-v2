@@ -45,6 +45,7 @@ import { Switch } from '../../components/ui/switch'
 import { useQuery } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 import { useAuthUser } from '../../stores/auth_store'
 
 const CHALLENGE_CATEGORIES = [
@@ -83,6 +84,10 @@ interface ChallengeFormData {
   isActive: boolean
 }
 
+type ChallengeCategory = Route.Body<'api.v1.challenges.store'>['category']
+type RecurrencePeriod = NonNullable<Route.Body<'api.v1.challenges.store'>['recurrencePeriod']>
+type ChallengeItem = Route.Response<'api.v1.challenges.index'>['data'][number]
+
 const defaultFormData: ChallengeFormData = {
   name: '',
   description: '',
@@ -118,16 +123,21 @@ export function ChallengesTable() {
   }
 
   const handleCreate = async () => {
+    const category = formData.category as ChallengeCategory
+    const recurrencePeriod = formData.isRecurring
+      ? (formData.recurrencePeriod as RecurrencePeriod)
+      : undefined
+
     await createChallenge.mutateAsync({
       body: {
         name: formData.name,
         description: formData.description,
-        category: formData.category as any,
+        category,
         points: formData.points,
         schoolId: schoolId || undefined,
         icon: formData.icon || undefined,
         isRecurring: formData.isRecurring,
-        recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
+        recurrencePeriod,
         isActive: formData.isActive,
       },
     })
@@ -136,7 +146,7 @@ export function ChallengesTable() {
     setFormData(defaultFormData)
   }
 
-  const handleEdit = (challenge: any) => {
+  const handleEdit = (challenge: ChallengeItem) => {
     setEditingId(challenge.id)
     setFormData({
       name: challenge.name,
@@ -152,16 +162,21 @@ export function ChallengesTable() {
 
   const handleUpdate = async () => {
     if (!editingId) return
+    const category = formData.category as ChallengeCategory
+    const recurrencePeriod = formData.isRecurring
+      ? (formData.recurrencePeriod as RecurrencePeriod)
+      : undefined
+
     await updateChallenge.mutateAsync({
       params: { id: editingId },
       body: {
         name: formData.name,
         description: formData.description,
-        category: formData.category as any,
+        category,
         points: formData.points,
         icon: formData.icon || undefined,
         isRecurring: formData.isRecurring,
-        recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as any) : undefined,
+        recurrencePeriod,
         isActive: formData.isActive,
       },
     })
@@ -234,7 +249,7 @@ export function ChallengesTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {challengesList.map((challenge: any) => (
+              {challengesList.map((challenge: ChallengeItem) => (
                 <TableRow key={challenge.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">

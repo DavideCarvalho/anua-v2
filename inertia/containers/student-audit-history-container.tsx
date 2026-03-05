@@ -19,11 +19,13 @@ import { Badge } from '~/components/ui/badge'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { AuditDiffCard } from '~/components/audit-diff-card'
 import { getEntityLabel } from '~/lib/audit_labels'
-import { Audit } from '~/generated/registry'
+import type { Route } from '@tuyau/core/types'
 
 interface StudentAuditHistoryContainerProps {
   studentId: string
 }
+
+type Audit = Route.Response<'api.v1.audits.student_history'>[number]
 
 const ENTITY_ICONS: Record<string, typeof FileText> = {
   Invoice: FileText,

@@ -60,6 +60,13 @@ export function SchoolInsuranceOverview({ schoolId }: SchoolInsuranceOverviewPro
 
   const billings = billingsData || []
   const claims = claimsData || []
+  const insurancePercentage =
+    stats?.latestBilling &&
+    typeof stats.latestBilling === 'object' &&
+    'insurancePercentage' in stats.latestBilling &&
+    typeof stats.latestBilling.insurancePercentage === 'number'
+      ? stats.latestBilling.insurancePercentage
+      : 100
 
   const formatPeriod = (period: string) => {
     const date = new Date(period)
@@ -240,9 +247,8 @@ export function SchoolInsuranceOverview({ schoolId }: SchoolInsuranceOverviewPro
               <p className="text-sm text-blue-800 mt-1">
                 O seguro educacional protege sua escola contra inadimplência. Quando um aluno atinge
                 o período de carência com pagamento em atraso, um sinistro é aberto automaticamente
-                e você pode receber até{' '}
-                <strong>{(stats?.latestBilling as any)?.insurancePercentage || 100}%</strong> do
-                valor em atraso após aprovação.
+                e você pode receber até <strong>{insurancePercentage}%</strong> do valor em atraso
+                após aprovação.
               </p>
             </div>
           </div>

@@ -11,7 +11,8 @@ import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
-type NotificationItem = NonNullable<Route.Response<'api.v1.notifications.index'>['data']>[number]
+type NotificationsResponse = Awaited<Route.Response<'api.v1.notifications.index'>>
+type NotificationItem = NotificationsResponse['data'][number]
 
 interface NotificationsListProps {
   onNotificationClick?: (notification: NotificationItem) => void
@@ -26,8 +27,9 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
   const markReadMutation = useMutation(api.api.v1.notifications.markRead.mutationOptions())
   const markAllReadMutation = useMutation(api.api.v1.notifications.markAllRead.mutationOptions())
 
-  const notifications = data?.data ?? []
-  const unreadCount = data?.unreadCount ?? 0
+  const notificationsResponse = data as NotificationsResponse | undefined
+  const notifications = notificationsResponse?.data ?? []
+  const unreadCount = notificationsResponse?.unreadCount ?? 0
 
   const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.readAt) {
@@ -97,7 +99,7 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
       <Card>
         <CardContent className="p-0">
           <div className="divide-y">
-            {notifications.map((notification) => (
+            {notifications.map((notification: NotificationItem) => (
               <button
                 key={notification.id}
                 className={cn(
@@ -176,7 +178,8 @@ function getNotificationTypeLabel(type: string): string {
   return labels[type] || 'Sistema'
 }
 
-function formatDate(date: Date | string): string {
+function formatDate(date: Date | string | null): string {
+  if (!date) return '-'
   const d = typeof date === 'string' ? new Date(date) : date
   const now = new Date()
   const diffMs = now.getTime() - d.getTime()

@@ -58,12 +58,17 @@ export function LeaderboardsListContainer() {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <LeaderboardsErrorFallback
-              error={error as Error}
-              resetErrorBoundary={resetErrorBoundary}
-            />
-          )}
+          fallbackRender={({ error, resetErrorBoundary }) => {
+            const boundaryError =
+              error instanceof Error ? error : new Error('Erro ao carregar rankings')
+
+            return (
+              <LeaderboardsErrorFallback
+                error={boundaryError}
+                resetErrorBoundary={resetErrorBoundary}
+              />
+            )
+          }}
         >
           <LeaderboardsListContent />
         </ErrorBoundary>
@@ -93,7 +98,8 @@ function LeaderboardsListContent() {
   }
 
   if (error) {
-    return <LeaderboardsErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+    const queryError = error instanceof Error ? error : new Error('Erro ao carregar rankings')
+    return <LeaderboardsErrorFallback error={queryError} resetErrorBoundary={() => refetch()} />
   }
 
   if (leaderboards.length === 0) {

@@ -107,7 +107,7 @@ function NoStudentsEmpty() {
 function NewAttendanceModalContent({
   classId,
   academicPeriodId,
-  courseId,
+  courseId: _courseId,
   open,
   onOpenChange,
 }: NewAttendanceModalProps) {
@@ -126,7 +126,6 @@ function NewAttendanceModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery({
     ...api.api.v1.classes.students.queryOptions({
       params: { id: classId },
-      query: { courseId, academicPeriodId, limit: 1000 },
     }),
     enabled: open,
   })
@@ -157,9 +156,7 @@ function NewAttendanceModalContent({
 
   const subjectId = form.watch('subjectId')
   const { data: availableDatesResponse, isLoading: isLoadingDates } = useQuery({
-    ...api.api.v1.attendance.availableDates.queryOptions({
-      query: { classId, academicPeriodId, subjectId },
-    }),
+    ...api.api.v1.attendance.availableDates.queryOptions({}),
     enabled: open && !!subjectId,
   })
   const availableDates = availableDatesResponse?.dates ?? []
@@ -205,7 +202,7 @@ function NewAttendanceModalContent({
     setHasInitialized(true)
   }, [open, students, hasInitialized])
 
-  const createMutation = useMutation(api.api.v1.attendance.batchCreate.mutationOptions())
+  const createMutation = useMutation(api.api.v1.attendance.batch.mutationOptions())
 
   const studentsAttendances = form.watch('attendances')
 

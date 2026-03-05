@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
@@ -62,7 +63,7 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
   const updatePayment = useMutation(api.api.v1.studentPayments.update.mutationOptions())
 
   const form = useForm<EditPaymentFormData>({
-    resolver: zodResolver(editPaymentSchema) as any,
+    resolver: zodResolver(editPaymentSchema) as Resolver<EditPaymentFormData>,
     defaultValues: {
       amountReais: Number(payment.amount) / 100,
       dueDate: new Date(payment.dueDate).toISOString().split('T')[0],

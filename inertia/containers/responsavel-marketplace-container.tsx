@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-type MarketplaceStore = NonNullable<Route.Response<'api.v1.marketplace.stores.index'>>[number]
+type MarketplaceStoresResponse = Awaited<Route.Response<'api.v1.marketplace.stores.index'>>
+type MarketplaceStore = MarketplaceStoresResponse[number]
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { ShoppingBag } from 'lucide-react'
@@ -29,7 +30,7 @@ export function ResponsavelMarketplaceContainer() {
       query: { studentId: selectedStudentId },
     })
   )
-  const stores: MarketplaceStore[] = data ?? []
+  const stores: MarketplaceStore[] = (data as MarketplaceStoresResponse | undefined) ?? []
 
   if (!selectedStudentId) {
     return (

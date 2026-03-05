@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import type React from 'react'
 
 import { EscolaLayout } from '~/components/layouts/escola-layout'
 import { TurmaLayout } from '~/components/layouts/turma-layout'
@@ -36,7 +37,7 @@ interface Props {
   currentUserRole: string
 }
 
-export default function TurmaSituacaoPage({
+const TurmaSituacaoPage: React.FC<Props> = ({
   academicPeriodSlug,
   courseSlug,
   classSlug,
@@ -48,7 +49,7 @@ export default function TurmaSituacaoPage({
   subjects,
   currentUserId,
   currentUserRole,
-}: Props) {
+}) => {
   // Filter subjects based on user role
   const filteredSubjects = useMemo(() => {
     const isDirectorOrAdmin = DIRECTOR_ROLES.includes(currentUserRole)
@@ -116,3 +117,5 @@ export default function TurmaSituacaoPage({
     </EscolaLayout>
   )
 }
+
+export default TurmaSituacaoPage

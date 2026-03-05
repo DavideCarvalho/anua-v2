@@ -80,7 +80,7 @@ export function HrBySchoolChart() {
       title="Equipe por Escola"
       description="Distribuição de funcionários e professores"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.bySchool && data.bySchool.length > 0 ? (
         <div className="space-y-4">

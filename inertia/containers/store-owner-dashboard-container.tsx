@@ -52,7 +52,7 @@ export function StoreOwnerDashboardContainer() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productsData?.meta?.total ?? 0}</div>
+            <div className="text-2xl font-bold">{productsData?.metadata?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">produtos cadastrados</p>
           </CardContent>
         </Card>
@@ -63,7 +63,7 @@ export function StoreOwnerDashboardContainer() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingOrdersData?.meta?.total ?? 0}</div>
+            <div className="text-2xl font-bold">{pendingOrdersData?.metadata?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">aguardando aprovação</p>
           </CardContent>
         </Card>
@@ -74,7 +74,7 @@ export function StoreOwnerDashboardContainer() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{allOrdersData?.meta?.total ?? 0}</div>
+            <div className="text-2xl font-bold">{allOrdersData?.metadata?.total ?? 0}</div>
             <p className="text-xs text-muted-foreground">pedidos realizados</p>
           </CardContent>
         </Card>

@@ -49,7 +49,8 @@ export function AssignmentsList({
 
   const rows: AssignmentRow[] = data?.data ?? []
 
-  const isOverdue = (dueDate: Date | string) => new Date(dueDate) < new Date()
+  const isOverdue = (dueDate: Date | string | null) =>
+    dueDate ? new Date(dueDate) < new Date() : false
 
   if (rows.length === 0) {
     return (
@@ -89,16 +90,20 @@ export function AssignmentsList({
           <TableBody>
             {rows.map((assignment: AssignmentRow) => (
               <TableRow key={assignment.id}>
-                <TableCell className="font-medium">{assignment.title}</TableCell>
-                <TableCell>{assignment.class?.name || '-'}</TableCell>
-                <TableCell>{assignment.subject?.name || '-'}</TableCell>
-                <TableCell className="text-center">{assignment.maxScore} pts</TableCell>
+                <TableCell className="font-medium">{assignment.name}</TableCell>
+                <TableCell>{assignment.teacherHasClass?.classId || '-'}</TableCell>
+                <TableCell>{assignment.teacherHasClass?.subjectId || '-'}</TableCell>
+                <TableCell className="text-center">{assignment.grade} pts</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className={cn(isOverdue(assignment.dueDate) ? 'text-red-500' : '')}>
-                      {format(new Date(assignment.dueDate), 'dd/MM/yyyy', { locale: ptBR })}
-                    </span>
+                    {assignment.dueDate ? (
+                      <span className={cn(isOverdue(assignment.dueDate) ? 'text-red-500' : '')}>
+                        {format(new Date(assignment.dueDate), 'dd/MM/yyyy', { locale: ptBR })}
+                      </span>
+                    ) : (
+                      <span>-</span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

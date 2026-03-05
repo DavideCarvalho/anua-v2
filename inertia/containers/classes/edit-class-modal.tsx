@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useForm, useFieldArray, UseFormReturn } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -210,7 +211,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
   }, [classData])
 
   const form = useForm<EditClassFormValues>({
-    resolver: zodResolver(editClassSchema) as any,
+    resolver: zodResolver(editClassSchema) as Resolver<EditClassFormValues>,
     defaultValues: initialValues,
   })
 

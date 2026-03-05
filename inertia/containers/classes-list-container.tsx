@@ -157,7 +157,7 @@ function ClassesListContent() {
   const deleteClassMutation = useMutation(api.api.v1.classes.destroy.mutationOptions())
   const { mutateAsync: deleteClass, isPending: isDeleting } = deleteClassMutation
 
-  const handleEditClass = async (classItem: ClassItem) => {
+  async function handleEditClass(classItem: ClassItem) {
     setIsLoadingClassDetails(true)
     try {
       const classData = await tuyau.api.api.v1.classes.show({ params: { id: classItem.id } })
@@ -175,12 +175,12 @@ function ClassesListContent() {
     }
   }
 
-  const handleDeleteClass = (classItem: ClassItem) => {
+  function handleDeleteClass(classItem: ClassItem) {
     setClassToDelete(classItem)
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = async () => {
+  async function confirmDelete() {
     if (!classToDelete) return
     try {
       await deleteClass({ params: { id: classToDelete.id } })
@@ -193,7 +193,7 @@ function ClassesListContent() {
     }
   }
 
-  const classes: ClassItem[] = (data?.data || []) as any
+  const classes = (data?.data ?? []) as ClassItem[]
   const meta = data?.meta ?? null
 
   return (
@@ -218,7 +218,9 @@ function ClassesListContent() {
 
       {isLoading && <ClassesListSkeleton />}
 
-      {error && <ClassesListErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
+      {error instanceof Error && (
+        <ClassesListErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+      )}
 
       {!isLoading && !error && classes.length === 0 && (
         <Card>

@@ -34,7 +34,7 @@ import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
-type OwnOrdersResponse = Route.Response<'api.v1.store_owner.orders'>
+type OwnOrdersResponse = Route.Response<'api.v1.store_owner.orders.index'>
 import { formatCurrency } from '../lib/utils'
 import { toast } from 'sonner'
 
@@ -96,7 +96,6 @@ function OrderActions({ order }: { order: Order }) {
     try {
       await rejectOrder.mutateAsync({
         params: { id: order.id },
-        body: { reason: rejectReason },
       })
       queryClient.invalidateQueries({ queryKey: ['storeOwner', 'orders'] })
       toast.success('Pedido rejeitado')
@@ -375,17 +374,13 @@ export function StoreOwnerOrdersContainer() {
               {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
-                  <TableCell>{order.student?.user?.name ?? '—'}</TableCell>
+                  <TableCell>{order.student?.id ?? '—'}</TableCell>
                   <TableCell>
                     <div className="text-sm">
                       {order.items?.map(
-                        (item: {
-                          id: string
-                          quantity: number
-                          storeItem?: { name?: string | null } | null
-                        }) => (
+                        (item: { id: string; quantity: number; itemName?: string | null }) => (
                           <div key={item.id}>
-                            {item.quantity}x {item.storeItem?.name ?? 'Item'}
+                            {item.quantity}x {item.itemName ?? 'Item'}
                           </div>
                         )
                       )}

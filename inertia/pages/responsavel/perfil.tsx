@@ -95,10 +95,10 @@ export default function PerfilPage() {
                   <span>{user.phone}</span>
                 </div>
               )}
-              {(user as any)?.address && (
+              {user && 'address' in user && typeof user.address === 'string' && user.address && (
                 <div className="flex items-center gap-3">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{(user as any).address}</span>
+                  <span>{user.address}</span>
                 </div>
               )}
             </CardContent>

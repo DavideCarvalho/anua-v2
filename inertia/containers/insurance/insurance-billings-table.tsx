@@ -30,7 +30,12 @@ import {
 import { Skeleton } from '../../components/ui/skeleton'
 
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
+
+type InsuranceBillingsQuery = Route.Query<'api.v1.insurance.billings.index'>
+type InsuranceBillingsResponse = Route.Response<'api.v1.insurance.billings.index'>
+type InsuranceBilling = InsuranceBillingsResponse['data'][number]
 
 const STATUS_OPTIONS = [
   { label: 'Pendente', value: 'PENDING' },
@@ -88,12 +93,17 @@ export function InsuranceBillingsTable({ onViewDetails }: InsuranceBillingsTable
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <InsuranceBillingsErrorFallback
-              error={error as Error}
-              resetErrorBoundary={resetErrorBoundary}
-            />
-          )}
+          fallbackRender={({ error, resetErrorBoundary }) => {
+            const safeError =
+              error instanceof Error ? error : new Error('Erro ao carregar faturamentos')
+
+            return (
+              <InsuranceBillingsErrorFallback
+                error={safeError}
+                resetErrorBoundary={resetErrorBoundary}
+              />
+            )
+          }}
         >
           <InsuranceBillingsTableContent onViewDetails={onViewDetails} />
         </ErrorBoundary>
@@ -112,10 +122,14 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
 
   const { status: statusFilter, page, limit } = filters
 
+  const status = STATUS_OPTIONS.some((option) => option.value === statusFilter)
+    ? (statusFilter as InsuranceBillingsQuery['status'])
+    : undefined
+
   const { data } = useQuery(
     api.api.v1.insurance.billings.index.queryOptions({
       query: {
-        status: statusFilter as any,
+        status,
         page,
         limit,
       },
@@ -123,7 +137,7 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
   )
 
   const billings = data?.data || []
-  const meta = data?.meta
+  const meta = data?.metadata
 
   const formatPeriod = (period: string) => {
     const date = new Date(period)
@@ -180,18 +194,20 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {billings.map((billing: any) => (
+                {billings.map((billing: InsuranceBilling) => (
                   <TableRow key={billing.id}>
                     <TableCell className="font-medium capitalize">
-                      {formatPeriod(billing.period)}
+                      {billing.period ? formatPeriod(billing.period) : '-'}
                     </TableCell>
-                    <TableCell>{billing.school.name}</TableCell>
+                    <TableCell>{billing.school?.name ?? '-'}</TableCell>
                     <TableCell>{billing.insuredStudentsCount}</TableCell>
                     <TableCell>{billing.insurancePercentage}%</TableCell>
                     <TableCell className="font-medium">
                       {brazilianRealFormatter(billing.totalAmount / 100)}
                     </TableCell>
-                    <TableCell>{brazilianDateFormatter(billing.dueDate)}</TableCell>
+                    <TableCell>
+                      {billing.dueDate ? brazilianDateFormatter(billing.dueDate) : '-'}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={STATUS_COLORS[billing.status] || ''}>
                         {STATUS_LABELS[billing.status] || billing.status}
@@ -251,16 +267,16 @@ function InsuranceBillingsTableContent({ onViewDetails }: InsuranceBillingsTable
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage <= 1}
-                  onClick={() => setFilters({ page: meta.currentPage - 1 })}
+                  disabled={Number(meta.currentPage) <= 1}
+                  onClick={() => setFilters({ page: Number(meta.currentPage) - 1 })}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage >= meta.lastPage}
-                  onClick={() => setFilters({ page: meta.currentPage + 1 })}
+                  disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                  onClick={() => setFilters({ page: Number(meta.currentPage) + 1 })}
                 >
                   Próxima
                 </Button>

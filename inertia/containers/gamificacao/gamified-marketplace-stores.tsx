@@ -4,24 +4,23 @@ import { ShoppingBag, Store as StoreIcon } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
 import { api } from '~/lib/api'
 import { staggerContainer, fadeUp } from '../../lib/gamified-animations'
+import type { Route } from '@tuyau/core/types'
+
+type StoresResponse = Awaited<Route.Response<'api.v1.marketplace.stores.index'>>
 
 export function GamifiedMarketplaceStores() {
   const { data, isLoading } = useQuery(api.api.v1.marketplace.stores.index.queryOptions({}))
-  const stores = data?.data ?? []
+  const stores: StoresResponse = (data as StoresResponse | undefined) ?? []
 
   if (isLoading) {
-    return (
-      <div className="py-12 text-center font-body text-muted-foreground">Carregando...</div>
-    )
+    return <div className="py-12 text-center font-body text-muted-foreground">Carregando...</div>
   }
 
   if (stores.length === 0) {
     return (
       <div className="flex flex-col items-center rounded-2xl border-2 border-dashed border-gf-secondary/40 py-16 text-center">
         <ShoppingBag className="size-12 text-gf-secondary/50" />
-        <h3 className="mt-4 font-display text-lg font-semibold">
-          Nenhuma barraquinha aberta!
-        </h3>
+        <h3 className="mt-4 font-display text-lg font-semibold">Nenhuma barraquinha aberta!</h3>
         <p className="mt-2 font-body text-sm text-muted-foreground">
           O mercadinho está fechado no momento. Volte depois!
         </p>
@@ -36,12 +35,8 @@ export function GamifiedMarketplaceStores() {
       animate="show"
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
-      {stores.map((store) => (
-        <motion.a
-          key={store.id}
-          href={`/aluno/loja/${store.id}`}
-          variants={fadeUp}
-        >
+      {stores.map((store: StoresResponse[number]) => (
+        <motion.a key={store.id} href={`/aluno/loja/${store.id}`} variants={fadeUp}>
           <motion.div
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
@@ -70,9 +65,7 @@ export function GamifiedMarketplaceStores() {
                   {store.description}
                 </p>
               )}
-              <p className="mt-3 font-body text-xs text-muted-foreground">
-                {store.school?.name}
-              </p>
+              <p className="mt-3 font-body text-xs text-muted-foreground">{store.school?.name}</p>
             </div>
           </motion.div>
         </motion.a>

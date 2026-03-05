@@ -91,10 +91,10 @@ export function CreateExtraClassModal({
     })
   )
   const { data: teachersData } = useQuery(
-    api.api.v1.teachers.index.queryOptions({ query: { limit: 100 } })
+    api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } })
   )
   const { data: contractsData } = useQuery(
-    api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
+    api.api.v1.contracts.index.queryOptions({ query: { limit: 100, schoolId } })
   )
 
   const academicPeriods = periodsData?.data ?? []
@@ -106,7 +106,6 @@ export function CreateExtraClassModal({
       {
         body: {
           ...values,
-          schoolId,
           maxStudents: values.maxStudents ? Number(values.maxStudents) : undefined,
           schedules: values.schedules.map((s) => ({
             weekDay: Number(s.weekDay),
@@ -182,7 +181,7 @@ export function CreateExtraClassModal({
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teachers.map((t) => (
+                  {teachers.map((t: { id: string; user?: { name?: string | null } }) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.user?.name ?? t.id}
                     </SelectItem>

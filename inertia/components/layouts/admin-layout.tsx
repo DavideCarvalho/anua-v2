@@ -138,9 +138,7 @@ function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: stri
             {item.children?.map((child) => (
               <SidebarMenuSubItem key={child.route}>
                 <SidebarMenuSubButton asChild isActive={pathname === child.href}>
-                  <Link route={child.route as any} params={undefined as any}>
-                    {child.title}
-                  </Link>
+                  <Link href={child.href}>{child.title}</Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
@@ -157,7 +155,7 @@ function NavItemSimple({ item, pathname }: { item: NavItem; pathname: string }) 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-        <Link route={item.route as any} params={undefined as any}>
+        <Link href={item.href}>
           <item.icon className="h-4 w-4" />
           <span>{item.title}</span>
         </Link>

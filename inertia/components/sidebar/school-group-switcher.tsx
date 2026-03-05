@@ -26,13 +26,6 @@ interface SchoolGroup {
   schoolCount: number
 }
 
-interface SchoolSwitcherData {
-  schools: School[]
-  groups: SchoolGroup[]
-  selectedSchools: School[]
-  selectedGroups: SchoolGroup[]
-}
-
 function getGroupIcon(type: SchoolGroup['type']) {
   switch (type) {
     case 'CITY':

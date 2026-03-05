@@ -43,7 +43,7 @@ export function RejectPrintRequestModal({
   const reject = useMutation(api.api.v1.printRequests.rejectPrintRequest.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema),
     defaultValues: { reason: '' },
   })
 

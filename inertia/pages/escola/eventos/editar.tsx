@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -138,6 +139,17 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>
 
+type EventExtras = Partial<{
+  hasAdditionalCosts: boolean
+  additionalCostAmount: number | null
+  additionalCostInstallments: number
+  additionalCostDescription: string | null
+  audienceWholeSchool: boolean
+  audienceAcademicPeriodIds: string[]
+  audienceLevelIds: string[]
+  audienceClassIds: string[]
+}>
+
 interface Props {
   eventId: string
 }
@@ -151,7 +163,7 @@ export default function EditarEventoPage({ eventId }: Props) {
   )
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       title: '',
       description: '',
@@ -177,6 +189,7 @@ export default function EditarEventoPage({ eventId }: Props) {
 
   useEffect(() => {
     if (!event) return
+    const eventExtras = event as EventExtras
 
     const startTime = event.isAllDay ? '' : toTimeInputValue(event.startTime)
     const endTime = event.isAllDay ? '' : toTimeInputValue(event.endTime)
@@ -193,14 +206,14 @@ export default function EditarEventoPage({ eventId }: Props) {
       location: event.location || '',
       isExternal: event.isExternal,
       requiresParentalConsent: event.requiresParentalConsent,
-      hasAdditionalCosts: Boolean((event as any).hasAdditionalCosts),
-      additionalCostAmount: (event as any).additionalCostAmount ?? undefined,
-      additionalCostInstallments: (event as any).additionalCostInstallments ?? 1,
-      additionalCostDescription: (event as any).additionalCostDescription || '',
-      audienceWholeSchool: Boolean((event as any).audienceWholeSchool ?? true),
-      audienceAcademicPeriodIds: (event as any).audienceAcademicPeriodIds ?? [],
-      audienceLevelIds: (event as any).audienceLevelIds ?? [],
-      audienceClassIds: (event as any).audienceClassIds ?? [],
+      hasAdditionalCosts: Boolean(eventExtras.hasAdditionalCosts),
+      additionalCostAmount: eventExtras.additionalCostAmount ?? undefined,
+      additionalCostInstallments: eventExtras.additionalCostInstallments ?? 1,
+      additionalCostDescription: eventExtras.additionalCostDescription || '',
+      audienceWholeSchool: Boolean(eventExtras.audienceWholeSchool ?? true),
+      audienceAcademicPeriodIds: eventExtras.audienceAcademicPeriodIds ?? [],
+      audienceLevelIds: eventExtras.audienceLevelIds ?? [],
+      audienceClassIds: eventExtras.audienceClassIds ?? [],
     })
   }, [event, form])
 

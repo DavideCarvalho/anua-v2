@@ -28,9 +28,9 @@ import { api } from '~/lib/api'
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   fileUrl: z.string().url('Informe uma URL válida'),
-  quantity: z.preprocess((v) => Number(v), z.number().min(1)),
+  quantity: z.number().min(1),
   dueDate: z.string().min(1, 'Data é obrigatória'),
-  frontAndBack: z.boolean().default(false),
+  frontAndBack: z.boolean(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -48,7 +48,7 @@ export function NewPrintRequestModal({
   const createRequest = useMutation(api.api.v1.printRequests.createPrintRequest.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema),
     defaultValues: {
       frontAndBack: false,
       quantity: 1,
@@ -62,7 +62,7 @@ export function NewPrintRequestModal({
           name: values.name,
           fileUrl: values.fileUrl,
           quantity: values.quantity,
-          dueDate: new Date(values.dueDate),
+          dueDate: values.dueDate,
           frontAndBack: values.frontAndBack,
         },
       })
@@ -128,7 +128,10 @@ export function NewPrintRequestModal({
                     <Input
                       type="number"
                       min={1}
-                      {...field}
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      value={typeof field.value === 'number' ? field.value : 0}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>

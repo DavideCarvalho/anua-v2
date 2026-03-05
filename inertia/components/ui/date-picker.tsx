@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
-import { DayPicker } from 'react-day-picker'
+import { DayPicker, type Matcher } from 'react-day-picker'
 
 import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
@@ -26,6 +26,16 @@ export function DatePicker({
   toDate,
   className,
 }: DatePickerProps) {
+  let disabledMatcher: Matcher | Matcher[] | undefined
+
+  if (fromDate && toDate) {
+    disabledMatcher = { before: fromDate, after: toDate }
+  } else if (fromDate) {
+    disabledMatcher = { before: fromDate }
+  } else if (toDate) {
+    disabledMatcher = { after: toDate }
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -49,7 +59,7 @@ export function DatePicker({
           selected={date}
           onSelect={onChange}
           locale={ptBR}
-          disabled={fromDate || toDate ? ({ before: fromDate, after: toDate } as any) : undefined}
+          disabled={disabledMatcher}
           components={{
             PreviousMonthButton: (props) => (
               <button

@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
 const schema = z.object({
@@ -33,6 +33,7 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
+type FormInput = z.input<typeof schema>
 
 export function DocusealTemplateBuilder({ contractId }: { contractId: string }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -47,9 +48,9 @@ export function DocusealTemplateBuilder({ contractId }: { contractId: string }) 
   const uploadTemplate = useMutation(api.api.v1.contracts.uploadDocusealTemplate.mutationOptions())
   const deleteTemplate = useMutation(api.api.v1.contracts.deleteDocusealTemplate.mutationOptions())
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
-    defaultValues: { file: undefined as any },
+  const form = useForm<FormInput, undefined, FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {},
   })
 
   const handleUpload = async () => {
@@ -89,7 +90,7 @@ export function DocusealTemplateBuilder({ contractId }: { contractId: string }) 
   }
 
   const handleDelete = async () => {
-    const promise = deleteTemplate.mutateAsync({ params: { id: contractId } }).then(() => {
+    const promise = deleteTemplate.mutateAsync({ params: { contractId } }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['contract-docuseal-template', contractId] })
       toast.success('Template removido com sucesso')
       refetch()

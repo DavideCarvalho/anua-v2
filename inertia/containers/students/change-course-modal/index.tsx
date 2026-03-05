@@ -156,7 +156,7 @@ export function ChangeStudentCourseModal({
 
   const { data: academicPeriodsData, isLoading: isLoadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
-      query: { limit: 50, isActive: true },
+      query: { limit: 50 },
     })
   )
 

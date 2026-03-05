@@ -68,7 +68,13 @@ type StudentDocument = NonNullable<Enrollment['student']>['documents'][number]
 const STATUS_OPTIONS = [
   { label: 'Pendente de Revisão', value: 'PENDING_DOCUMENT_REVIEW' },
   { label: 'Matriculado', value: 'REGISTERED' },
-]
+] as const
+
+type EnrollmentStatus = (typeof STATUS_OPTIONS)[number]['value']
+
+function isEnrollmentStatus(value: string): value is EnrollmentStatus {
+  return STATUS_OPTIONS.some((option) => option.value === value)
+}
 
 const ENROLLMENT_STATUS_LABELS: Record<string, string> = {
   PENDING_DOCUMENT_REVIEW: 'Pendente de Revisão',
@@ -156,6 +162,8 @@ function EnrollmentsTableContent({ schoolId, academicPeriodId, levelId }: Enroll
   })
 
   const { status: statusFilter, page, limit } = filters
+  const normalizedStatus: Route.Query<'api.v1.enrollments.index'>['status'] =
+    statusFilter && isEnrollmentStatus(statusFilter) ? statusFilter : undefined
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
@@ -173,7 +181,7 @@ function EnrollmentsTableContent({ schoolId, academicPeriodId, levelId }: Enroll
         schoolId,
         academicPeriodId,
         levelId,
-        status: statusFilter as any,
+        status: normalizedStatus,
         page,
         limit,
       },

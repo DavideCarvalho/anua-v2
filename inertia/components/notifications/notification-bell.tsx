@@ -15,6 +15,21 @@ interface NotificationBellProps {
   allNotificationsRoute: 'web.escola.notificacoes' | 'web.responsavel.comunicados'
 }
 
+type NotificationItem = {
+  id: string
+  title: string
+  message: string
+  type: string
+  createdAt: Date | string
+  isRead?: boolean
+  readAt?: Date | string | null
+}
+
+type NotificationsResponse = {
+  data: NotificationItem[]
+  unreadCount: number
+}
+
 export function NotificationBell({ allNotificationsRoute }: NotificationBellProps) {
   const { data, isLoading } = useQuery({
     ...api.api.v1.notifications.index.queryOptions({ query: { page: 1, limit: 8 } }),
@@ -24,7 +39,9 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
   const markReadMutation = useMutation(api.api.v1.notifications.markRead.mutationOptions())
   const markAllReadMutation = useMutation(api.api.v1.notifications.markAllRead.mutationOptions())
 
-  const notifications = (data?.data ?? []).map((notification) => {
+  const notificationResponse = data as NotificationsResponse | undefined
+
+  const notifications = (notificationResponse?.data ?? []).map((notification: NotificationItem) => {
     const isRead = notification.isRead ?? Boolean(notification.readAt)
 
     return {
@@ -33,7 +50,9 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
     }
   })
 
-  const unreadCount = data?.unreadCount ?? notifications.filter((n) => !n.isRead).length
+  const unreadCount =
+    notificationResponse?.unreadCount ??
+    notifications.filter((n: { isRead: boolean }) => !n.isRead).length
 
   const handleMarkRead = async (notificationId: string, event?: MouseEvent<HTMLElement>) => {
     event?.stopPropagation()
@@ -93,7 +112,7 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
         ) : (
           <ScrollArea className="h-[320px]">
             <div className="divide-y">
-              {notifications.map((notification) => (
+              {notifications.map((notification: NotificationItem & { isRead: boolean }) => (
                 <button
                   key={notification.id}
                   type="button"
@@ -156,7 +175,7 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
         <div className="border-t p-2">
           <Link
             route={allNotificationsRoute}
-            params={undefined}
+            routeParams={undefined}
             className="flex w-full items-center justify-center rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
           >
             Ver todas

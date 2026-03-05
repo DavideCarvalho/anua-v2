@@ -22,7 +22,6 @@ export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
   const coursesQuery = useQuery(
     api.api.v1.academicPeriods.listCourses.queryOptions({
       params: { id: academicPeriodId },
-      query: { isActive: true },
     })
   )
 
@@ -59,7 +58,7 @@ export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
           </div>
         )}
 
-        {error && (
+        {Boolean(error) && (
           <Card className="border-destructive">
             <CardContent className="pt-6">
               <p className="text-sm text-destructive">

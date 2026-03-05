@@ -103,7 +103,11 @@ export function MarketplaceOrdersContainer() {
               <TableBody>
                 {orders.map((order: Order) => (
                   <TableRow key={order.id}>
-                    <TableCell>{new Date(order.createdAt).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString('pt-BR')
+                        : '—'}
+                    </TableCell>
                     <TableCell>{order.store?.name ?? '—'}</TableCell>
                     <TableCell>
                       <div className="text-sm">

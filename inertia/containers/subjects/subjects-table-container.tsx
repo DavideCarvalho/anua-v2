@@ -98,7 +98,7 @@ function SubjectsTableContent({
   }
 
   const rows = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   return (
     <Card>
@@ -146,16 +146,16 @@ function SubjectsTableContent({
               <Button
                 variant="outline"
                 size="sm"
-                disabled={meta.currentPage <= 1}
-                onClick={() => setFilters({ page: meta.currentPage - 1 })}
+                disabled={Number(meta.currentPage) <= 1}
+                onClick={() => setFilters({ page: Number(meta.currentPage) - 1 })}
               >
                 Anterior
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                disabled={meta.currentPage >= meta.lastPage}
-                onClick={() => setFilters({ page: meta.currentPage + 1 })}
+                disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                onClick={() => setFilters({ page: Number(meta.currentPage) + 1 })}
               >
                 Próxima
               </Button>

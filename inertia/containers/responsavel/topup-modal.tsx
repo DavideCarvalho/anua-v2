@@ -65,7 +65,7 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
     try {
       const result = await createTopUp.mutateAsync({
         params: { studentId },
-        body: { amount: amountInCents, paymentMethod },
+        body: { studentId, amount: amountInCents, paymentMethod },
       })
       queryClient.invalidateQueries({ queryKey: ['responsavel', 'wallet-top-ups'] })
       const response = result as { paymentDetails: PaymentResult }

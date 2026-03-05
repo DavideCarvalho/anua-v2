@@ -19,7 +19,7 @@ export function AttendanceTrendsChart() {
       title="Tendência de Presença"
       description="Taxa de presença ao longo do tempo"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.trends && data.trends.length > 0 ? (
         <div className="space-y-2">

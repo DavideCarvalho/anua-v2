@@ -1,17 +1,17 @@
-/// <reference path="../adonisrc.ts" />
-/// <reference path="../config/inertia.ts" />
+/// <reference path="../../adonisrc.ts" />
+/// <reference path="../../config/inertia.ts" />
 
-import './css/app.css'
+import '../css/app.css'
 import { hydrateRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
 import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
-import { ThemeProvider } from './components/theme-provider'
-import { NuqsAdapter } from './lib/nuqs_inertia_adapter'
-import { AuthUserProvider } from './components/auth-user-provider'
-import type { SharedProps } from './lib/types'
+import { ThemeProvider } from '../components/theme-provider'
+import { NuqsAdapter } from './nuqs_inertia_adapter'
+import { AuthUserProvider } from '../components/auth-user-provider'
+import type { SharedProps } from './types'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Anua'
 

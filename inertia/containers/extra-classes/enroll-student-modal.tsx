@@ -178,10 +178,7 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
             <div className="rounded-lg border p-3 bg-muted/50">
               <p className="text-sm text-muted-foreground">Contrato: {extraClass.contract.name}</p>
               <p className="text-sm font-medium">
-                Valor:{' '}
-                {brazilianRealFormatter(
-                  (extraClass.contract.amount ?? extraClass.contract.ammount) / 100
-                )}
+                Valor: {brazilianRealFormatter(extraClass.contract.amount / 100)}
               </p>
             </div>
           )}

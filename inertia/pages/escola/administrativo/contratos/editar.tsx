@@ -51,7 +51,10 @@ export default function EditarContratoPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : error ? (
-          <div className="text-sm text-destructive">Erro ao carregar contrato: {error.message}</div>
+          <div className="text-sm text-destructive">
+            Erro ao carregar contrato:{' '}
+            {error instanceof Error ? error.message : 'Erro desconhecido'}
+          </div>
         ) : schoolId && contract ? (
           <ContractForm key={contract.id} schoolId={schoolId} initialData={contract} />
         ) : (

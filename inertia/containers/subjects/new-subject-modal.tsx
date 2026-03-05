@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -45,7 +46,7 @@ export function NewSubjectModal({
   const createSubject = useMutation(api.api.v1.subjects.store.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: { name: '' },
   })
 

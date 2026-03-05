@@ -33,7 +33,7 @@ import { Skeleton } from '../../../components/ui/skeleton'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-type SubscriptionInvoicesResponse = Route.Response<'api.v1.subscriptionInvoices.index'>
+type SubscriptionInvoicesResponse = Route.Response<'api.v1.subscription_invoices.index'>
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../../lib/formatters'
 
 const STATUS_OPTIONS = [
@@ -94,11 +94,12 @@ export default function BillingFaturasPage() {
     })
   )
 
-  const invoices = (data?.data ?? []) as SubscriptionInvoicesResponse['data']
+  type Invoice = SubscriptionInvoicesResponse extends { data: (infer T)[] } ? T : never
+  const invoices: Invoice[] = (data?.data ?? []) as Invoice[]
   const meta = data?.meta
 
   const filteredInvoices = search
-    ? invoices.filter((invoice) =>
+    ? invoices.filter((invoice: Invoice) =>
         invoice.subscription?.school?.name?.toLowerCase().includes(search.toLowerCase())
       )
     : invoices
@@ -168,7 +169,7 @@ export default function BillingFaturasPage() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-destructive">Erro ao carregar faturas</h3>
                     <p className="text-sm text-muted-foreground">
-                      {error?.message || 'Ocorreu um erro inesperado'}
+                      {error instanceof Error ? error.message : 'Ocorreu um erro inesperado'}
                     </p>
                   </div>
                   <Button variant="outline" onClick={() => refetch()}>
@@ -198,7 +199,7 @@ export default function BillingFaturasPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredInvoices.map((invoice: any) => (
+                      {filteredInvoices.map((invoice: Invoice) => (
                         <TableRow key={invoice.id}>
                           <TableCell className="font-medium">
                             {invoice.subscription?.school?.name || 'Escola não encontrada'}

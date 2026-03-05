@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AdminLayout } from '../../components/layouts'
 import { AdminStatsContainer } from '../../containers/admin-stats-container'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Building2, DollarSign, Loader2 } from 'lucide-react'
 
@@ -10,7 +11,7 @@ export default function AdminDashboard() {
   const { data: schoolsData, isLoading: isLoadingSchools } = useQuery(
     api.api.v1.schools.index.queryOptions({ query: { page: 1, limit: 5 } })
   )
-  const recentSchools = (schoolsData as any)?.data ?? []
+  const recentSchools: Route.Response<'api.v1.schools.index'>['data'] = schoolsData?.data ?? []
 
   return (
     <AdminLayout>
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {recentSchools.map((school: any) => (
+                  {recentSchools.map((school) => (
                     <a
                       key={school.id}
                       href={`/admin/escolas/${school.id}`}
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{school.name}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {school.city || 'Cidade não informada'}
+                          {('city' in school && school.city) || 'Cidade não informada'}
                         </p>
                       </div>
                     </a>

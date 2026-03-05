@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import {

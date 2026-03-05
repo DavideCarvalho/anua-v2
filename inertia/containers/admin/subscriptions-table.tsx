@@ -104,7 +104,7 @@ export function SubscriptionsTable({ status }: SubscriptionsTableProps) {
 
   const handleCancel = async (id: string) => {
     try {
-      await cancelMutation.mutateAsync({ params: { id } })
+      await cancelMutation.mutateAsync({ params: { id }, body: { reason: 'Cancelado pelo admin' } })
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
     } catch {}
   }

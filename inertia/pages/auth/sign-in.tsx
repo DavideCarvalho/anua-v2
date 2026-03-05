@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { router } from '@inertiajs/react'
+import { useMutation } from '@tanstack/react-query'
 import confetti from 'canvas-confetti'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, CheckCircle2, Loader2, Mail, Sparkles } from 'lucide-react'
@@ -9,7 +10,7 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 
 import { FloatingOrbs } from './sign-in/components/decorative/floating-orbs'
 import { GridPattern } from './sign-in/components/decorative/grid-pattern'
@@ -34,6 +35,9 @@ export default function SignIn() {
   const [codeInput, setCodeInput] = useState<string>('')
   const [resendCooldown, setResendCooldown] = useState<number>(0)
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const sendCodeMutation = useMutation(api.api.v1.auth.sendCode.mutationOptions())
+  const verifyCodeMutation = useMutation(api.api.v1.auth.verifyCode.mutationOptions())
 
   // Confetti effect on success
   useEffect(() => {
@@ -79,12 +83,12 @@ export default function SignIn() {
       setFlowState('loading')
       setErrorMessage('')
 
-      const response = await tuyau.api.api.v1.auth.sendCode({
+      const response = await sendCodeMutation.mutateAsync({
         body: { email: emailAddress },
       })
 
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao enviar código')
+      if (!response?.message) {
+        throw new Error('Erro ao enviar código')
       }
 
       setFlowState('idle')
@@ -135,12 +139,12 @@ export default function SignIn() {
       setFlowState('loading')
       setErrorMessage('')
 
-      const response = await tuyau.api.api.v1.auth.verifyCode({
+      const response = await verifyCodeMutation.mutateAsync({
         body: { email, code: codeInput },
       })
 
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Código inválido')
+      if (!response?.message) {
+        throw new Error('Código inválido')
       }
 
       // Sucesso!

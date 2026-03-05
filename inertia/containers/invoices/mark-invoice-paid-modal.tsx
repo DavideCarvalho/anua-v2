@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -68,7 +69,7 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
   const markPaid = useMutation(api.api.v1.invoices.markPaid.mutationOptions())
 
   const form = useForm<MarkPaidFormData>({
-    resolver: zodResolver(markPaidSchema) as any,
+    resolver: zodResolver(markPaidSchema) as Resolver<MarkPaidFormData>,
     defaultValues: {
       paymentMethod: undefined,
       netAmountReceivedReais: Number(invoice.totalAmount) / 100,

@@ -31,7 +31,7 @@ export function TopSellingItemsTable() {
       title="Itens Mais Vendidos"
       description="Top 10 produtos por quantidade vendida"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.items && data.items.length > 0 ? (
         <Table>

@@ -17,6 +17,7 @@ import {
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Resolver } from 'react-hook-form'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -41,10 +42,10 @@ export function NewSchoolPartnerModal({
   onSubmit: () => void
 }) {
   const queryClient = useQueryClient()
-  const createPartner = useMutation(api.api.v1.schoolPartners.store.mutationOptions())
+  const createPartner = useMutation(api.api.v1.schoolPartners.createSchoolPartner.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: {
       discountPercentage: 0,
       partnershipStartDate: new Date().toISOString().slice(0, 10),
@@ -61,11 +62,9 @@ export function NewSchoolPartnerModal({
           phone: values.phone || undefined,
           contactName: values.contactName || undefined,
           discountPercentage: values.discountPercentage,
-          partnershipStartDate: new Date(values.partnershipStartDate),
-          partnershipEndDate: values.partnershipEndDate
-            ? new Date(values.partnershipEndDate)
-            : undefined,
-        } as any,
+          partnershipStartDate: values.partnershipStartDate,
+          partnershipEndDate: values.partnershipEndDate || undefined,
+        },
       })
       .then(() => {
         queryClient.invalidateQueries({ queryKey: ['school-partners'] })

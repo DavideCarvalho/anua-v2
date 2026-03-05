@@ -45,6 +45,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import { brazilianRealFormatter, brazilianDateFormatter } from '../../lib/formatters'
 
+type ClaimStatus = 'PENDING' | 'APPROVED' | 'PAID' | 'REJECTED'
+
 const STATUS_OPTIONS = [
   { label: 'Pendente', value: 'PENDING' },
   { label: 'Aprovado', value: 'APPROVED' },
@@ -129,7 +131,7 @@ function InsuranceClaimsTableContent() {
   const { data } = useQuery(
     api.api.v1.insurance.claims.index.queryOptions({
       query: {
-        status: statusFilter as any,
+        status: (statusFilter as ClaimStatus | null) ?? undefined,
         page,
         limit,
       },
@@ -145,9 +147,14 @@ function InsuranceClaimsTableContent() {
 
   const handleApprove = (claimId: string) => {
     toast.promise(
-      approveMutation.mutateAsync({ params: { claimId } }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
-      }),
+      approveMutation
+        .mutateAsync({
+          params: { claimId },
+          body: { claimId },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
+        }),
       {
         loading: 'Aprovando sinistro...',
         success: 'Sinistro aprovado com sucesso!',
@@ -169,7 +176,7 @@ function InsuranceClaimsTableContent() {
       rejectMutation
         .mutateAsync({
           params: { claimId: selectedClaimId },
-          body: { rejectionReason: rejectionReason.trim() },
+          body: { claimId: selectedClaimId, rejectionReason: rejectionReason.trim() },
         })
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
@@ -188,7 +195,7 @@ function InsuranceClaimsTableContent() {
 
   const handleMarkPaid = (claimId: string) => {
     toast.promise(
-      markPaidMutation.mutateAsync({ params: { claimId } }).then(() => {
+      markPaidMutation.mutateAsync({ params: { claimId }, body: { claimId } }).then(() => {
         queryClient.invalidateQueries({ queryKey: ['insurance', 'claims'] })
       }),
       {

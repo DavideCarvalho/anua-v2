@@ -132,7 +132,7 @@ function ScholarshipsTableContent({
   )
 
   const rows = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   return (
     <div className="space-y-4">
@@ -154,7 +154,7 @@ function ScholarshipsTableContent({
 
       {isLoading && <ScholarshipsListSkeleton />}
 
-      {error && (
+      {error instanceof Error && (
         <ScholarshipsListErrorFallback error={error} resetErrorBoundary={() => refetch()} />
       )}
 
@@ -256,7 +256,7 @@ function ScholarshipsTableContent({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page >= meta.lastPage}
+                  disabled={page >= Number(meta.lastPage)}
                   onClick={() => setFilters({ page: page + 1 })}
                 >
                   <ChevronRight className="h-4 w-4" />

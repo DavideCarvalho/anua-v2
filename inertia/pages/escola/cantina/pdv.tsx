@@ -22,12 +22,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
 type StudentsResponse = Route.Response<'api.v1.students.index'>
-type CanteenItemsResponse = Route.Response<'api.v1.canteenItems.index'>
+type CanteenItemsResponse = Route.Response<'api.v1.canteen_items.index'>
+type StudentEnrollment = Route.Response<'api.v1.students.enrollments.list'>[number]
 interface CreateCanteenPurchasePayload {
   userId: string
   canteenId: string
-  paymentMethod: string
-  studentHasLevelId?: string
+  paymentMethod: PaymentMethod
+  studentHasLevelId?: string | null
   items: Array<{ canteenItemId: string; quantity: number }>
 }
 import type { SharedProps } from '../../../lib/types'

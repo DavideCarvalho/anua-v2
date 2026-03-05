@@ -43,9 +43,25 @@ import {
 } from '~/components/enrollment'
 
 type StudentEnrollment = Route.Response<'api.v1.students.enrollments.list'>[number]
-type UpdateEnrollmentPayload = Parameters<
-  ReturnType<typeof api.api.v1.students.enrollments.update.mutationOptions>['mutationFn']
->[0]
+type UpdateEnrollmentPayload = {
+  contractId?: string | null
+  scholarshipId?: string | null
+  paymentMethod?: 'BOLETO' | 'PIX' | null
+  paymentDay?: number
+  installments?: number
+  individualDiscount?:
+    | {
+        name: string
+        discountType: 'PERCENTAGE'
+        discountPercentage: number
+      }
+    | {
+        name: string
+        discountType: 'FLAT'
+        discountValue: number
+      }
+    | null
+}
 import { formatCurrency } from '~/lib/utils'
 
 const schema = z
@@ -148,13 +164,7 @@ export function EnrollmentTabContent({
   const { mutateAsync: updateEnrollment, isPending } = updateEnrollmentMutation
 
   const currentIndividualDiscount = useMemo(() => {
-    const discounts = ((enrollment as any).individualDiscounts ?? []) as Array<{
-      discountType: 'PERCENTAGE' | 'FLAT'
-      discountPercentage?: number | null
-      discountValue?: number | null
-    }>
-
-    return discounts[0] ?? null
+    return enrollment.individualDiscounts[0] ?? null
   }, [enrollment])
 
   const hasValidIndividualDiscount =
@@ -177,7 +187,14 @@ export function EnrollmentTabContent({
       ? 'SCHOLARSHIP'
       : 'NONE'
 
-  const levelContractId = (enrollment.level as any)?.contractId ?? ''
+  const levelContractId =
+    'level' in enrollment &&
+    enrollment.level &&
+    typeof enrollment.level === 'object' &&
+    'contractId' in enrollment.level &&
+    typeof enrollment.level.contractId === 'string'
+      ? enrollment.level.contractId
+      : ''
   const initialContractSelection = enrollment.contractId ?? LEVEL_DEFAULT_CONTRACT_OPTION
 
   const form = useForm<FormData>({

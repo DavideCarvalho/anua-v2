@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from '../../components/ui/form'
 import { Input } from '../../components/ui/input'
-import { tuyau } from '../../lib/api'
+import { api } from '~/lib/api'
 import { type CreateSchoolChainFormData, createSchoolChainSchema } from './schema'
 
 interface CreateSchoolChainDialogProps {
@@ -48,13 +48,18 @@ export function CreateSchoolChainDialog({
     },
   })
 
-  const { mutateAsync: createSchoolChain, isPending } = useMutation({
-    mutationFn: async (data: CreateSchoolChainFormData) => {
-      const slug = data.name
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-      const response = await tuyau.api.api.v1.schoolChains({
+  const createSchoolChainMutation = useMutation(
+    api.api.v1.schoolChains.createSchoolChain.mutationOptions()
+  )
+  const isPending = createSchoolChainMutation.isPending
+
+  const createSchoolChain = async (data: CreateSchoolChainFormData) => {
+    const slug = data.name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+    const response = await createSchoolChainMutation.mutateAsync({
+      body: {
         name: data.name,
         slug,
         subscriptionLevel: 'NETWORK',
@@ -62,13 +67,10 @@ export function CreateSchoolChainDialog({
         directorEmail: data.directorEmail,
         directorPhone: data.directorPhone,
         directorDocumentNumber: data.directorDocumentNumber,
-      })
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao criar rede')
-      }
-      return response.data
-    },
-  })
+      },
+    })
+    return response
+  }
 
   const onSubmit = async (data: CreateSchoolChainFormData) => {
     try {

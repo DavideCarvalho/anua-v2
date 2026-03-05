@@ -69,7 +69,7 @@ export function IncidentsByTypeChart() {
       title="Ocorrências por Tipo"
       description="Distribuição por categoria"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.byType && data.byType.length > 0 ? (
         <div className="flex flex-wrap gap-2">
@@ -108,7 +108,7 @@ export function IncidentsBySchoolTable() {
       title="Ocorrências por Escola"
       description="Top escolas com mais registros"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.bySchool && data.bySchool.length > 0 ? (
         <div className="space-y-3">

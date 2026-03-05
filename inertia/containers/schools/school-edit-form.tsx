@@ -8,6 +8,7 @@ import {
   useQuery,
 } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { Building2, AlertCircle, Loader2, User, UserPlus, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -37,8 +38,7 @@ import {
 } from '../../components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Label } from '../../components/ui/label'
-import { tuyau } from '../../lib/api'
-import { api } from '~/lib/api'
+import { api, tuyau } from '../../lib/api'
 import { schoolEditSchema, type SchoolEditFormData } from './school_edit_schema'
 
 const newDirectorSchema = z.object({
@@ -106,13 +106,12 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
 
   // Buscar usuários da escola para o select
   const { data: schoolUsers, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['school-users', schoolId],
-    queryFn: () => (tuyau.api.api.v1.schools as any)({ id: schoolId }).users,
+    ...api.api.v1.schools.users.queryOptions({ params: { id: schoolId } }),
     enabled: directorMode === 'select',
   })
 
   const form = useForm<SchoolEditFormData>({
-    resolver: zodResolver(schoolEditSchema) as any,
+    resolver: zodResolver(schoolEditSchema) as Resolver<SchoolEditFormData>,
     defaultValues: {
       name: school?.name || '',
       logoUrl: school?.logoUrl || null,
@@ -141,10 +140,7 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
         params: { id: schoolId },
         body: data,
       })
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao atualizar escola')
-      }
-      return response.data
+      return response
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school', schoolId] })

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -35,6 +36,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { formatCurrency } from '~/lib/utils'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 const ACTIONABLE_STATUSES = ['OPEN', 'PENDING', 'OVERDUE']
 
@@ -81,6 +83,8 @@ const agreementSchema = z.object({
 })
 
 type AgreementFormData = z.infer<typeof agreementSchema>
+type InvoicesIndexResponse = Route.Response<'api.v1.invoices.index'>
+type InvoiceItem = InvoicesIndexResponse['data'][number]
 
 function getDiscountAmountInCents(
   installmentAmount: number,
@@ -112,20 +116,20 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
   const createAgreement = useMutation(api.api.v1.agreements.store.mutationOptions())
   const [discountsOpen, setDiscountsOpen] = useState(false)
 
-  const studentId = (invoice as any).studentId || invoice.student?.id
+  const selectedStudentId = invoice.student?.id
 
   const { data: invoicesData, isLoading } = useQuery({
     ...api.api.v1.invoices.index.queryOptions({
-      query: { studentId, limit: 100 },
+      query: { studentId: selectedStudentId, limit: 100 },
     }),
-    enabled: open && !!studentId,
+    enabled: open && !!selectedStudentId,
   })
 
   const allInvoices = useMemo(() => {
-    const list = (invoicesData as any)?.data ?? []
+    const list: InvoiceItem[] = invoicesData?.data ?? []
     return list
-      .filter((inv: any) => ACTIONABLE_STATUSES.includes(inv.status))
-      .sort((a: any, b: any) => {
+      .filter((inv) => !!inv.status && ACTIONABLE_STATUSES.includes(inv.status))
+      .sort((a, b) => {
         const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0
         const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0
         return dateA - dateB
@@ -133,7 +137,7 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
   }, [invoicesData])
 
   const form = useForm<AgreementFormData>({
-    resolver: zodResolver(agreementSchema) as any,
+    resolver: zodResolver(agreementSchema) as Resolver<AgreementFormData>,
     defaultValues: {
       selectedInvoiceIds: [invoice.id],
       installments: 3,
@@ -179,8 +183,8 @@ export function CreateAgreementModal({ invoice, open, onOpenChange }: CreateAgre
 
   const totalAmount = useMemo(() => {
     return allInvoices
-      .filter((inv: any) => selectedIds.includes(inv.id))
-      .reduce((sum: number, inv: any) => sum + Number(inv.totalAmount), 0)
+      .filter((inv) => selectedIds.includes(inv.id))
+      .reduce((sum, inv) => sum + Number(inv.totalAmount), 0)
   }, [allInvoices, selectedIds])
 
   const renegotiationDiscountAmount = useMemo(() => {

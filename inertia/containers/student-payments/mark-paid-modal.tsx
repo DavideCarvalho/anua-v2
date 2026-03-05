@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
@@ -70,7 +71,7 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
   const markPaid = useMutation(api.api.v1.studentPayments.markPaid.mutationOptions())
 
   const form = useForm<MarkPaidFormData>({
-    resolver: zodResolver(markPaidSchema) as any,
+    resolver: zodResolver(markPaidSchema) as Resolver<MarkPaidFormData>,
     defaultValues: {
       paidAt: new Date().toISOString().split('T')[0],
       paymentMethod: undefined,

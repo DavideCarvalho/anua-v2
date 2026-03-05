@@ -95,7 +95,7 @@ export function EditExtraClassModal({
   const updateMutation = useMutation(api.api.v1.extraClasses.update.mutationOptions())
 
   const { data: teachersData } = useQuery(
-    api.api.v1.teachers.index.queryOptions({ query: { limit: 100 } })
+    api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } })
   )
   const { data: contractsData } = useQuery(
     api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
@@ -113,7 +113,7 @@ export function EditExtraClassModal({
         teacherId: extraClass.teacherId,
         maxStudents: extraClass.maxStudents ?? '',
         schedules:
-          extraClass.schedules.length > 0
+          extraClass.schedules && extraClass.schedules.length > 0
             ? extraClass.schedules.map((s) => ({
                 weekDay: s.weekDay,
                 startTime: s.startTime,
@@ -188,7 +188,7 @@ export function EditExtraClassModal({
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teachers.map((t) => (
+                    {teachers.map((t: { id: string; user?: { name?: string | null } }) => (
                       <SelectItem key={t.id} value={t.id}>
                         {t.user?.name ?? t.id}
                       </SelectItem>

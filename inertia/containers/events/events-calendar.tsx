@@ -116,17 +116,25 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
     return { start: currentDate, end: currentDate }
   }, [currentDate, view])
 
-  const { data } = useSuspenseQuery(
-    api.api.v1.events.index.queryOptions({
+  const { data } = useSuspenseQuery({
+    ...api.api.v1.events.index.queryOptions({
       query: {
         schoolId,
         startDate: dateRange.start.toISOString(),
         endDate: dateRange.end.toISOString(),
       },
-    })
-  )
+    }),
+    select: (response) => {
+      const rawData =
+        response && typeof response === 'object' && 'data' in response
+          ? ((response as { data?: APIEvent[] }).data ?? [])
+          : []
 
-  const events = ((data as any)?.data ?? []) as APIEvent[]
+      return { data: rawData }
+    },
+  })
+
+  const events = data.data
 
   // Converter eventos da API para formato do calendário
   const calendarEvents: CalendarEvent[] = useMemo(() => {

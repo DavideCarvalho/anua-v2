@@ -79,7 +79,7 @@ function SchoolPartnersTableContent({ onEdit }: { onEdit: (id: string) => void }
 
   const { data, isLoading } = useQuery(
     api.api.v1.schoolPartners.listSchoolPartners.queryOptions({
-      query: { page, limit, search: search || undefined },
+      query: { page, limit },
     })
   )
 
@@ -88,7 +88,10 @@ function SchoolPartnersTableContent({ onEdit }: { onEdit: (id: string) => void }
   }
 
   const rows = data?.data ?? []
-  const meta = data?.meta ?? null
+  const filteredRows = search
+    ? rows.filter((row) => row.name.toLowerCase().includes(search.toLowerCase()))
+    : rows
+  const meta = data?.metadata ?? null
 
   return (
     <Card>
@@ -119,7 +122,7 @@ function SchoolPartnersTableContent({ onEdit }: { onEdit: (id: string) => void }
               </tr>
             </thead>
             <tbody>
-              {rows.map((row: any) => (
+              {filteredRows.map((row: any) => (
                 <tr key={row.id} className="border-t">
                   <td className="p-3 font-medium">{row.name}</td>
                   <td className="p-3 text-muted-foreground">{row.cnpj}</td>
@@ -155,16 +158,16 @@ function SchoolPartnersTableContent({ onEdit }: { onEdit: (id: string) => void }
               <Button
                 variant="outline"
                 size="sm"
-                disabled={meta.currentPage <= 1}
-                onClick={() => setFilters({ page: meta.currentPage - 1 })}
+                disabled={Number(meta.currentPage) <= 1}
+                onClick={() => setFilters({ page: Number(meta.currentPage) - 1 })}
               >
                 Anterior
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                disabled={meta.currentPage >= meta.lastPage}
-                onClick={() => setFilters({ page: meta.currentPage + 1 })}
+                disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                onClick={() => setFilters({ page: Number(meta.currentPage) + 1 })}
               >
                 Próxima
               </Button>

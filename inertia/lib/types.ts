@@ -120,7 +120,7 @@ export function isStoreOwner(user: UserDto | null): boolean {
 }
 
 export interface AuditEntry {
-  id: string
+  id: string | number
   event: 'created' | 'updated' | 'deleted'
   oldValues: Record<string, unknown> | null
   newValues: Record<string, unknown> | null
@@ -131,5 +131,5 @@ export interface AuditEntry {
     source?: string
     user_name?: string
   } | null
-  createdAt: string
+  createdAt: string | Date
 }

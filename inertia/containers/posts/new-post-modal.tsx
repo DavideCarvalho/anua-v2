@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -77,7 +78,7 @@ export function NewPostModal({ open, onOpenChange, schoolId, classId }: NewPostM
   const createPostMutation = useMutation(api.api.v1.posts.store.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       content: '',
       type: PostType.TEXT,

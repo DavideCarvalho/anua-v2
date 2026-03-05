@@ -72,7 +72,7 @@ interface AcademicPeriodCourse {
   levels: CourseLevel[]
 }
 
-type ContractsMeta = ContractsResponse extends { meta: infer T } ? T : null
+type ContractsMeta = ContractsResponse extends { metadata: infer T } ? T : null
 
 // Loading Skeleton
 function ContractsListSkeleton() {
@@ -310,7 +310,7 @@ function ContractsListContent() {
   }
 
   const contracts: ContractItem[] = (data?.data ?? []) as ContractItem[]
-  const meta: ContractsMeta = (data?.meta ?? null) as ContractsMeta
+  const meta: ContractsMeta = (data?.metadata ?? null) as ContractsMeta
 
   return (
     <div className="space-y-4">
@@ -439,7 +439,9 @@ function ContractsListContent() {
 
       {isLoading && <ContractsListSkeleton />}
 
-      {error && <ContractsListErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
+      {error instanceof Error && (
+        <ContractsListErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+      )}
 
       {!isLoading && !error && contracts.length === 0 && (
         <Card>
@@ -539,7 +541,7 @@ function ContractsListContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page >= meta.lastPage}
+                  disabled={page >= Number(meta.lastPage)}
                   onClick={() => setFilters({ page: page + 1 })}
                 >
                   <ChevronRight className="h-4 w-4" />

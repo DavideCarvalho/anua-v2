@@ -48,8 +48,9 @@ export function EditStudentModal({
   const [isInitialized, setIsInitialized] = useState(false)
 
   const queryClient = useQueryClient()
+  const studentQueryOptions = api.api.v1.students.show.queryOptions({ params: { id: studentId } })
   const { data: student, isLoading } = useQuery({
-    ...api.api.v1.students.show.queryOptions({ params: { id: studentId } }),
+    ...studentQueryOptions,
     enabled: open && !!studentId,
   })
 
@@ -321,7 +322,7 @@ export function EditStudentModal({
       })
 
       queryClient.invalidateQueries({ queryKey: ['students'] })
-      queryClient.invalidateQueries({ queryKey: ['student', studentId] })
+      queryClient.invalidateQueries({ queryKey: studentQueryOptions.queryKey })
       toast.success('Aluno atualizado com sucesso!')
       handleClose()
       onSuccess?.()

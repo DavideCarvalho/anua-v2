@@ -51,6 +51,36 @@ interface Exam {
   gradesCount: number
 }
 
+function toExam(record: Record<string, unknown>): Exam {
+  return {
+    id: String(record.id ?? ''),
+    title: String(record.title ?? ''),
+    description: typeof record.description === 'string' ? record.description : null,
+    scheduledDate: String(record.scheduledDate ?? ''),
+    maxScore: Number(record.maxScore ?? 0),
+    type: String(record.type ?? ''),
+    status: String(record.status ?? ''),
+    classId: String(record.classId ?? ''),
+    academicPeriodId: String(record.academicPeriodId ?? ''),
+    courseId: typeof record.courseId === 'string' ? record.courseId : null,
+    class:
+      record.class && typeof record.class === 'object'
+        ? {
+            id: String((record.class as Record<string, unknown>).id ?? ''),
+            name: String((record.class as Record<string, unknown>).name ?? ''),
+          }
+        : null,
+    subject:
+      record.subject && typeof record.subject === 'object'
+        ? {
+            id: String((record.subject as Record<string, unknown>).id ?? ''),
+            name: String((record.subject as Record<string, unknown>).name ?? ''),
+          }
+        : null,
+    gradesCount: Number(record.gradesCount ?? 0),
+  }
+}
+
 interface ExamsListProps {
   classId?: string
   subjectId?: string
@@ -79,9 +109,19 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
 
   const queryClient = useQueryClient()
-  const { data, isLoading, isError } = useQuery(
-    api.api.v1.exams.index.queryOptions({ query: { classId, subjectId } })
-  )
+  const { data, isLoading, isError } = useQuery({
+    ...api.api.v1.exams.index.queryOptions({ query: { classId, subjectId } }),
+    select: (response) => {
+      const rawData =
+        response && typeof response === 'object' && 'data' in response
+          ? ((response as { data?: Record<string, unknown>[] }).data ?? [])
+          : []
+
+      return {
+        data: rawData.map((item) => toExam(item)),
+      }
+    },
+  })
 
   const deleteMutation = useMutation(api.api.v1.exams.destroy.mutationOptions())
 
@@ -110,7 +150,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
     return <div className="text-center text-destructive py-8">Erro ao carregar provas</div>
   }
 
-  const exams: Exam[] = (data?.data ?? []) as any
+  const exams = data?.data ?? []
 
   if (exams.length === 0) {
     return <ExamsListEmpty />

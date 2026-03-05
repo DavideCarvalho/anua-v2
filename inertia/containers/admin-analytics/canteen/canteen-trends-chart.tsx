@@ -24,7 +24,7 @@ export function CanteenTrendsChart() {
       title="Tendência de Vendas"
       description="Receita ao longo do tempo"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.trends && data.trends.length > 0 ? (
         <div className="space-y-2">

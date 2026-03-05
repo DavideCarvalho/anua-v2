@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
-import { Head } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
+import type React from 'react'
 import { AlunoLayout } from '../../components/layouts/aluno-layout'
 import { Card, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { ShoppingBag, UtensilsCrossed, Trophy } from 'lucide-react'
 
 import { RpgCanvas } from '../../components/rpg/rpg-canvas'
 import { staggerContainer, fadeUp } from '../../lib/gamified-animations'
+import type { SharedProps } from '../../lib/types'
 
 interface Achievement {
   id: string
@@ -18,7 +20,7 @@ interface Achievement {
 }
 
 interface DashboardProps {
-  gamified: boolean
+  gamified?: boolean
   student: { id: string; name: string }
   recentAchievements?: Achievement[]
   avatar: {
@@ -44,13 +46,16 @@ const rarityGlow: Record<string, string> = {
   legendary: 'border-gf-gold-dark shadow-[0_0_8px_rgba(245,158,11,0.3)]',
 }
 
-export default function AlunoDashboardPage({
-  gamified,
+const AlunoDashboardPage: React.FC<DashboardProps> = ({
+  gamified: gamifiedProp,
   student,
   avatar,
   gamification,
   recentAchievements = [],
-}: DashboardProps) {
+}) => {
+  const { props } = usePage<SharedProps>()
+  const gamified = gamifiedProp ?? props.gamified ?? false
+
   return (
     <AlunoLayout>
       <Head title={gamified ? 'Meu Cantinho' : 'Início'} />
@@ -133,3 +138,5 @@ export default function AlunoDashboardPage({
     </AlunoLayout>
   )
 }
+
+export default AlunoDashboardPage

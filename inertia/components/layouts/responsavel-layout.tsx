@@ -139,7 +139,7 @@ const commonNavigation: NavItem[] = [
   },
   // {
   //   title: 'Loja',
-  //   route: 'web.responsavel.loja' as any,
+  //   route: 'web.responsavel.loja',
   //   href: '/responsavel/loja',
   //   icon: ShoppingBag,
   // },

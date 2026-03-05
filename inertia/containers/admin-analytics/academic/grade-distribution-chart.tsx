@@ -19,7 +19,7 @@ export function GradeDistributionChart() {
       title="Distribuição de Notas"
       description="Quantidade de alunos por faixa de nota"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.distribution && data.distribution.length > 0 ? (
         <div className="space-y-3">

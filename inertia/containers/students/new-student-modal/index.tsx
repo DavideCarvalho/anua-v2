@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -60,7 +61,7 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
   const academicPeriods = academicPeriodsData?.data ?? []
 
   const form = useForm<NewStudentFormData>({
-    resolver: zodResolver(newStudentSchema) as any,
+    resolver: zodResolver(newStudentSchema) as Resolver<NewStudentFormData>,
     defaultValues: {
       basicInfo: {
         name: '',

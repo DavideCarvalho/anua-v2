@@ -161,19 +161,12 @@ export function ExtraClassesTable({
                   {rows.map((ec: ExtraClass) => (
                     <TableRow key={ec.id}>
                       <TableCell className="font-medium">
-                        <div>
-                          {ec.name}
-                          {ec.academicPeriod && (
-                            <p className="text-xs text-muted-foreground">
-                              {ec.academicPeriod.name}
-                            </p>
-                          )}
-                        </div>
+                        <div>{ec.name}</div>
                       </TableCell>
-                      <TableCell>{ec.teacher?.user?.name ?? '-'}</TableCell>
+                      <TableCell>{ec.teacherName ?? '-'}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {ec.schedules.map((s) => (
+                          {(ec.schedules ?? []).map((s) => (
                             <Badge key={s.id} variant="outline" className="text-xs">
                               {DAY_LABELS[s.weekDay]} {s.startTime}-{s.endTime}
                             </Badge>
@@ -184,15 +177,15 @@ export function ExtraClassesTable({
                         {ec.maxStudents ? (
                           <span
                             className={
-                              ec.enrollmentCount >= ec.maxStudents
+                              (ec.enrollmentCount ?? 0) >= ec.maxStudents
                                 ? 'text-destructive font-medium'
                                 : ''
                             }
                           >
-                            {ec.enrollmentCount}/{ec.maxStudents}
+                            {ec.enrollmentCount ?? 0}/{ec.maxStudents}
                           </span>
                         ) : (
-                          <span>{ec.enrollmentCount}</span>
+                          <span>{ec.enrollmentCount ?? 0}</span>
                         )}
                       </TableCell>
                       <TableCell className="text-center">

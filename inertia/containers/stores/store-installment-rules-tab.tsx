@@ -28,16 +28,17 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
-import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
-
-type StoreInstallmentRulesResponse = Route.Response<'api.v1.storeInstallmentRules.index'>
 
 interface StoreInstallmentRulesTabProps {
   storeId: string
 }
 
-type InstallmentRule = StoreInstallmentRulesResponse[number]
+type InstallmentRule = {
+  id: string
+  minAmount: number
+  maxInstallments: number
+}
 
 export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabProps) {
   const [createOpen, setCreateOpen] = useState(false)
@@ -51,7 +52,9 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
     api.api.v1.storeInstallmentRules.index.queryOptions({ query: { storeId } })
   )
 
-  const rulesList = rulesData ?? []
+  const rulesList: InstallmentRule[] = Array.isArray(rulesData)
+    ? (rulesData as InstallmentRule[])
+    : []
 
   const createMutation = useMutation(api.api.v1.storeInstallmentRules.store.mutationOptions())
   const updateMutation = useMutation(api.api.v1.storeInstallmentRules.update.mutationOptions())

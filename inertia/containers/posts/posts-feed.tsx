@@ -4,7 +4,10 @@ import { Inbox } from 'lucide-react'
 import { Card, CardContent } from '../../components/ui/card'
 
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 import { PostCard } from './post-card'
+
+type PostsResponse = Route.Response<'api.v1.posts.index'>['data']
 
 interface PostsFeedProps {
   schoolId: string
@@ -17,7 +20,7 @@ export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) 
     api.api.v1.posts.index.queryOptions({ query: { schoolId, classId } })
   )
 
-  const posts = (data as any)?.data ?? []
+  const posts: PostsResponse = data?.data ?? []
 
   if (isLoading) {
     return <PostsFeedSkeleton />
@@ -39,7 +42,7 @@ export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) 
 
   return (
     <div className="space-y-4">
-      {posts.map((post: any) => (
+      {posts.map((post) => (
         <PostCard key={post.id} post={post} currentUserId={currentUserId} />
       ))}
     </div>

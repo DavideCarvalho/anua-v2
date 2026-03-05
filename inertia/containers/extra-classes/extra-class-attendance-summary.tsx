@@ -87,17 +87,17 @@ export function ExtraClassAttendanceSummary({
                   <TableCell className="font-medium">{s.studentName}</TableCell>
                   <TableCell className="text-center">
                     <Badge variant="default" className="bg-green-500">
-                      {s.presentCount}
+                      {s.present}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="destructive">{s.absentCount}</Badge>
+                    <Badge variant="destructive">{s.absent}</Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="secondary">{s.lateCount}</Badge>
+                    <Badge variant="secondary">{s.late}</Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline">{s.justifiedCount}</Badge>
+                    <Badge variant="outline">{s.justified}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 justify-center">

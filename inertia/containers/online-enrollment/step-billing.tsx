@@ -17,18 +17,15 @@ import {
 import { Alert, AlertDescription } from '../../components/ui/alert'
 
 import type { EnrollmentFormData } from './enrollment-form'
+import type { Route } from '@tuyau/core/types'
 import { useMutation } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
+type EnrollmentInfoContract = Route.Response<'api.v1.enrollment.info'>['contract']
+
 interface StepBillingProps {
   schoolId: string
-  contract: {
-    enrollmentValue: number
-    amount: number
-    paymentType: string
-    enrollmentValueInstallments: number
-    installments: number
-  } | null
+  contract: EnrollmentInfoContract
 }
 
 export function StepBilling({ schoolId, contract }: StepBillingProps) {
@@ -46,6 +43,8 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
   )
 
   const paymentMethod = watch('billing.paymentMethod')
+  const enrollmentValue = contract?.enrollmentValue ?? 0
+  const monthlyValue = contract?.amount ?? 0
 
   const handleApplyScholarship = async () => {
     if (!scholarshipCode) return
@@ -97,11 +96,11 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
                   {appliedScholarship
                     ? formatCurrency(
                         calculateDiscountedValue(
-                          contract.enrollmentValue,
+                          enrollmentValue,
                           appliedScholarship.enrollmentDiscountPercentage
                         )
                       )
-                    : formatCurrency(contract.enrollmentValue)}
+                    : formatCurrency(enrollmentValue)}
                 </p>
                 {appliedScholarship && appliedScholarship.enrollmentDiscountPercentage > 0 && (
                   <p className="text-xs text-green-600">
@@ -115,11 +114,11 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
                   {appliedScholarship
                     ? formatCurrency(
                         calculateDiscountedValue(
-                          contract.amount,
+                          monthlyValue,
                           appliedScholarship.discountPercentage
                         )
                       )
-                    : formatCurrency(contract.amount)}
+                    : formatCurrency(monthlyValue)}
                 </p>
                 {appliedScholarship && appliedScholarship.discountPercentage > 0 && (
                   <p className="text-xs text-green-600">
@@ -257,7 +256,7 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
                 <SelectContent>
                   {[1, 2, 3, 4, 5, 6].map((n) => (
                     <SelectItem key={n} value={String(n)}>
-                      {n}x {contract && formatCurrency(contract.enrollmentValue / n)}
+                      {n}x {formatCurrency(enrollmentValue / n)}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -22,6 +22,8 @@ export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps
   // Create distribution buckets if data exists
   const distribution = data?.distribution || []
   const maxCount = Math.max(...distribution.map((d: any) => d.count), 1)
+  const passRate =
+    data && 'passRate' in data && typeof data.passRate === 'number' ? data.passRate : null
 
   const getBarColor = (range: string) => {
     if (
@@ -104,7 +106,7 @@ export function GradeDistributionChart({ schoolId }: GradeDistributionChartProps
               <p className="text-xs text-muted-foreground">Mediana</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold">{(data as any).passRate?.toFixed(1) || '-'}%</p>
+              <p className="text-2xl font-bold">{passRate !== null ? passRate.toFixed(1) : '-'}%</p>
               <p className="text-xs text-muted-foreground">Taxa de Aprovacao</p>
             </div>
           </div>

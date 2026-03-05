@@ -5,12 +5,13 @@ import { Badge } from '../components/ui/badge'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-type MarketplaceStore = NonNullable<Route.Response<'api.v1.marketplace.stores.index'>>[number]
+type MarketplaceStoresResponse = Awaited<Route.Response<'api.v1.marketplace.stores.index'>>
+type MarketplaceStore = MarketplaceStoresResponse[number]
 
 export function MarketplaceStoresContainer() {
   const { data, isLoading } = useQuery(api.api.v1.marketplace.stores.index.queryOptions({}))
 
-  const stores: MarketplaceStore[] = data ?? []
+  const stores: MarketplaceStore[] = (data as MarketplaceStoresResponse | undefined) ?? []
 
   if (isLoading) {
     return <div className="text-center py-12 text-muted-foreground">Carregando...</div>

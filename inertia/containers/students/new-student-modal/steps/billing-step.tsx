@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { useQuery } from '@tanstack/react-query'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import {
   Select,
@@ -71,8 +71,10 @@ export function BillingStep() {
   const contractId = selectedLevel?.contractId
 
   // Fetch contract details
+  const contractQueryInput = contractId ? ({ params: { id: contractId } } as const) : skipToken
+
   const { data: contractData, isLoading: isLoadingContract } = useQuery({
-    ...api.api.v1.contracts.show.queryOptions({ params: { id: contractId } }),
+    ...api.api.v1.contracts.show.queryOptions(contractQueryInput),
     enabled: !!contractId,
   })
 

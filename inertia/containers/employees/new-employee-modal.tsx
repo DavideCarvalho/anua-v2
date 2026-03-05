@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Input } from '../../components/ui/input'
-import { tuyau } from '../../lib/api'
+import { api } from '~/lib/api'
 
 const EMPLOYEE_ROLES = [
   { value: 'SCHOOL_DIRECTOR', label: 'Diretor' },
@@ -69,34 +69,36 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
     },
   })
 
-  const { mutateAsync: createEmployee, isPending } = useMutation({
-    mutationFn: async (values: FormValues) => {
-      const response = await tuyau.api.api.v1.users({
+  const createEmployeeMutation = useMutation(api.api.v1.users.store.mutationOptions())
+  const isPending = createEmployeeMutation.isPending
+
+  const createEmployee = async (values: FormValues) => {
+    const result = await createEmployeeMutation.mutateAsync({
+      body: {
         name: values.name,
         email: values.email,
         password: Math.random().toString(36).slice(-8) + 'A1!',
         schoolId,
         roleId: values.role,
-      })
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao criar funcionário')
-      }
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['school-employees'] })
-    },
-  })
+      },
+    })
+
+    queryClient.invalidateQueries({ queryKey: ['school-employees'] })
+    return result
+  }
 
   async function onSubmit(values: FormValues) {
     try {
       const result = await createEmployee(values)
-      if ((result as any)?.generatedPassword) {
-        setGeneratedPassword((result as any).generatedPassword)
-      } else {
-        toast.success('Funcionário criado com sucesso!')
-        handleClose()
+      if (result && typeof result === 'object' && 'generatedPassword' in result) {
+        const generated = result.generatedPassword
+        if (typeof generated === 'string' && generated.length > 0) {
+          setGeneratedPassword(generated)
+          return
+        }
       }
+      toast.success('Funcionário criado com sucesso!')
+      handleClose()
     } catch (error) {
       toast.error('Erro ao criar funcionário', {
         description: error instanceof Error ? error.message : 'Ocorreu um erro desconhecido',

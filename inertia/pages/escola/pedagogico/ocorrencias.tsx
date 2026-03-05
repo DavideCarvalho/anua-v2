@@ -42,6 +42,7 @@ import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 import {
   brazilianDateFormatter,
   formatSegmentName,
@@ -66,6 +67,9 @@ const TYPE_OPTIONS = [
   { value: 'PRAISE', label: 'Elogio ao aluno' },
   { value: 'OTHER', label: 'Outro' },
 ] as const
+
+type PeriodCourse = Route.Response<'api.v1.academic_periods.list_courses'>[number]
+type OccurrenceTypeQuery = Route.Query<'api.v1.occurrences.index'>['type']
 
 const schema = z.object({
   studentId: z.string().min(1, 'Selecione um aluno'),
@@ -108,14 +112,13 @@ function NewOccurrenceModal({
   })
   const { data: academicPeriodsData } = useQuery({
     ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
-      query: { page: 1, limit: 100, isActive: true },
+      query: { page: 1, limit: 100 },
     }),
     enabled: open,
   })
   const { data: periodCoursesData } = useQuery({
     ...api.api.v1.academicPeriods.listCourses.queryOptions({
       params: { id: selectedAcademicPeriodId },
-      query: { isActive: true },
     }),
     enabled: open && !!selectedAcademicPeriodId,
   })
@@ -128,7 +131,7 @@ function NewOccurrenceModal({
 
   const students = studentsData?.data ?? []
   const academicPeriods = academicPeriodsData?.data ?? []
-  const courses = (periodCoursesData?.data ?? periodCoursesData ?? []) as any[]
+  const courses: PeriodCourse[] = periodCoursesData ?? []
   const teacherClasses = teacherClassesData?.data ?? []
 
   const selectedPeriod = academicPeriods.find(
@@ -621,7 +624,7 @@ export default function OcorrenciasPage() {
         page,
         limit,
         search: debouncedSearch || undefined,
-        type: type && type !== 'all' ? (type as any) : undefined,
+        type: type && type !== 'all' ? (type as OccurrenceTypeQuery) : undefined,
         academicPeriodId:
           academicPeriodId && academicPeriodId !== 'all' ? academicPeriodId : undefined,
         classId: classId && classId !== 'all' ? classId : undefined,
@@ -871,7 +874,9 @@ export default function OcorrenciasPage() {
                           className="cursor-pointer"
                           onClick={() => setSelectedOccurrenceId(occurrence.id)}
                         >
-                          <TableCell>{brazilianDateFormatter(occurrence.date)}</TableCell>
+                          <TableCell>
+                            {occurrence.date ? brazilianDateFormatter(occurrence.date) : '-'}
+                          </TableCell>
                           <TableCell className="font-medium">{occurrence.student.name}</TableCell>
                           <TableCell>{occurrence.class.name}</TableCell>
                           <TableCell>
@@ -974,7 +979,12 @@ export default function OcorrenciasPage() {
                   <InfoField label="Aluno" value={occurrenceDetail.student.name} />
                   <InfoField label="Turma" value={occurrenceDetail.class.name} />
                   <InfoField label="Tipo" value={typeLabel(occurrenceDetail.type)} />
-                  <InfoField label="Data" value={brazilianDateFormatter(occurrenceDetail.date)} />
+                  <InfoField
+                    label="Data"
+                    value={
+                      occurrenceDetail.date ? brazilianDateFormatter(occurrenceDetail.date) : '-'
+                    }
+                  />
                   <InfoField label="Professor" value={occurrenceDetail.teacher?.name || '-'} />
                   <InfoField label="Materia" value={occurrenceDetail.subject?.name || '-'} />
                 </div>

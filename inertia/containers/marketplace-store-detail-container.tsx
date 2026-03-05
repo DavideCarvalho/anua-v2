@@ -15,6 +15,10 @@ import { formatCurrency } from '../lib/utils'
 
 type MarketplaceItem = NonNullable<MarketplaceItemsResponse>['data'][number]
 
+interface MarketplaceStoreContextResponse {
+  hasOnlinePayment: boolean
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   CANTEEN_FOOD: 'Alimento',
   CANTEEN_DRINK: 'Bebida',
@@ -42,13 +46,27 @@ export function MarketplaceStoreDetailContainer({
   const { data, isLoading } = useQuery(
     api.api.v1.marketplace.stores.items.queryOptions({
       params: { storeId },
-      query: { page: 1, limit: 20 },
     })
   )
+  const { data: contextData } = useQuery<MarketplaceStoreContextResponse>({
+    queryKey: ['marketplace', 'stores', storeId, 'context'],
+    queryFn: async () => {
+      const response = await fetch(`/api/v1/marketplace/stores/${storeId}/context`, {
+        method: 'GET',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar contexto da loja')
+      }
+
+      return response.json() as Promise<MarketplaceStoreContextResponse>
+    },
+  })
   const cart = useCart()
 
   const items: MarketplaceItem[] = data?.data ?? []
-  const hasOnlinePayment: boolean = (data as any)?.hasOnlinePayment ?? false
+  const hasOnlinePayment = contextData?.hasOnlinePayment ?? false
 
   if (isLoading) {
     return <div className="text-center py-12 text-muted-foreground">Carregando...</div>

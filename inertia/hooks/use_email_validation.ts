@@ -1,10 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { tuyau } from '~/lib/api'
 
 interface EmailValidationResult {
   isValid: boolean
   error?: string
   existingUserName?: string | null
+}
+
+interface CheckEmailResponse {
+  exists: boolean
 }
 
 interface UseEmailValidationOptions {
@@ -72,15 +75,25 @@ export function useEmailValidation(options: UseEmailValidationOptions = {}) {
         try {
           abortControllerRef.current = new AbortController()
 
-          const response = await tuyau.$route('api.v1.students.checkEmail')({
-            query: {
-              email: trimmed,
-              academicPeriodId,
-              ...(excludeUserId && { excludeUserId }),
-            },
+          const params = new URLSearchParams({ email: trimmed, academicPeriodId })
+
+          if (excludeUserId) {
+            params.set('excludeUserId', excludeUserId)
+          }
+
+          const response = await fetch(`/api/v1/students/check-email?${params.toString()}`, {
+            method: 'GET',
+            credentials: 'include',
+            signal: abortControllerRef.current.signal,
           })
 
-          if (response.exists) {
+          if (!response.ok) {
+            throw new Error('Erro ao validar email')
+          }
+
+          const payload = (await response.json()) as CheckEmailResponse
+
+          if (payload.exists) {
             setValidationResult({
               isValid: false,
               error: 'Email já cadastrado',

@@ -81,7 +81,7 @@ export function EnrollmentsByLevelChart() {
       title="Alunos por Série"
       description="Distribuição de matrículas por ano/semestre"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.byLevel && data.byLevel.length > 0 ? (
         <div className="space-y-3">

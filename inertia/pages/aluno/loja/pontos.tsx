@@ -1,8 +1,15 @@
 import { useState } from 'react'
+import type React from 'react'
 import { Head, usePage } from '@inertiajs/react'
 import { motion } from 'framer-motion'
 import { AlunoLayout } from '../../../components/layouts/aluno-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
 import { Badge } from '../../../components/ui/badge'
 import {
@@ -35,6 +42,14 @@ interface AvatarItem {
   metadata?: Record<string, unknown> | null
 }
 
+function getStringMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+  key: string
+): string {
+  const value = metadata?.[key]
+  return typeof value === 'string' ? value : ''
+}
+
 interface PontosPageProps {
   gamified?: boolean
   items: AvatarItem[]
@@ -60,12 +75,12 @@ const categoryLabels: Record<string, { label: string; icon: React.ElementType }>
   AVATAR_ACCESSORY: { label: 'Acessórios', icon: Gem },
 }
 
-export default function AlunoLojaPontosPage({
+const AlunoLojaPontosPage: React.FC<PontosPageProps> = ({
   gamified: gamifiedProp,
   itemsByCategory,
   avatar,
   points,
-}: PontosPageProps) {
+}) => {
   const { props } = usePage<SharedProps>()
   const gamified = gamifiedProp ?? props.gamified ?? false
 
@@ -84,7 +99,7 @@ export default function AlunoLojaPontosPage({
     }) => {
       const res = await fetch('/api/v1/students/me/avatar/purchase', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ storeItemId, slot }),
         credentials: 'include',
       })
@@ -115,12 +130,14 @@ export default function AlunoLojaPontosPage({
 
   const getPreviewAvatarProps = () => {
     if (!previewItem || !previewCategory) return { ...avatar }
-    const meta = (previewItem.metadata ?? {}) as Record<string, string>
+    const style = getStringMetadata(previewItem.metadata, 'style')
+    const color = getStringMetadata(previewItem.metadata, 'color')
+
     if (previewCategory === 'AVATAR_HAIR') {
       return {
         ...avatar,
-        hairStyle: meta.style ?? previewItem.id,
-        hairColor: meta.color ?? 'brown',
+        hairStyle: style || previewItem.id,
+        hairColor: color || 'brown',
       }
     }
     if (previewCategory === 'AVATAR_OUTFIT') {
@@ -168,7 +185,9 @@ export default function AlunoLojaPontosPage({
                   hairStyle={previewItem ? getPreviewAvatarProps().hairStyle : avatar.hairStyle}
                   hairColor={previewItem ? getPreviewAvatarProps().hairColor : avatar.hairColor}
                   outfit={previewItem ? getPreviewAvatarProps().outfit : avatar.outfit}
-                  accessories={previewItem ? getPreviewAvatarProps().accessories : avatar.accessories}
+                  accessories={
+                    previewItem ? getPreviewAvatarProps().accessories : avatar.accessories
+                  }
                   label={previewItem ? `Provando: ${previewItem.name}` : 'Seu Avatar'}
                 />
               </div>
@@ -263,18 +282,13 @@ export default function AlunoLojaPontosPage({
           >
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle className="font-display">
-                  {previewItem?.name}
-                </DialogTitle>
+                <DialogTitle className="font-display">{previewItem?.name}</DialogTitle>
                 <DialogDescription className="font-body">
                   Veja como ficará seu avatar com este item
                 </DialogDescription>
               </DialogHeader>
               <div className="flex justify-center py-4">
-                <DiceBearAvatar
-                  {...getPreviewAvatarProps()}
-                  variant="large"
-                />
+                <DiceBearAvatar {...getPreviewAvatarProps()} variant="large" />
               </div>
               <DialogFooter>
                 <Button
@@ -439,18 +453,11 @@ export default function AlunoLojaPontosPage({
         >
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>
-                Preview: {previewItem?.name}
-              </DialogTitle>
-              <DialogDescription>
-                Veja como ficará seu boneco com este item
-              </DialogDescription>
+              <DialogTitle>Preview: {previewItem?.name}</DialogTitle>
+              <DialogDescription>Veja como ficará seu boneco com este item</DialogDescription>
             </DialogHeader>
             <div className="flex justify-center py-4">
-              <AvatarComposed
-                {...getPreviewAvatarProps()}
-                className="max-w-[200px]"
-              />
+              <AvatarComposed {...getPreviewAvatarProps()} className="max-w-[200px]" />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setPreviewItem(null)}>
@@ -468,7 +475,9 @@ export default function AlunoLojaPontosPage({
                     setPreviewItem(null)
                   }}
                 >
-                  {purchasingId === previewItem.id ? 'Comprando...' : `Comprar por ${previewItem.price} pts`}
+                  {purchasingId === previewItem.id
+                    ? 'Comprando...'
+                    : `Comprar por ${previewItem.price} pts`}
                 </Button>
               )}
             </DialogFooter>
@@ -478,3 +487,5 @@ export default function AlunoLojaPontosPage({
     </AlunoLayout>
   )
 }
+
+export default AlunoLojaPontosPage

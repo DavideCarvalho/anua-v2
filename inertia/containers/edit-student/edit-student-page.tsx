@@ -48,11 +48,10 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
 
   const queryClient = useQueryClient()
   const fullUpdateStudent = useMutation(api.api.v1.students.fullUpdate.mutationOptions())
+  const studentQueryOptions = api.api.v1.students.show.queryOptions({ params: { id: studentId } })
 
   // ── Data loading ────────────────────────────────────────────────────
-  const { data: student, isLoading } = useQuery(
-    api.api.v1.students.show.queryOptions({ params: { id: studentId } })
-  )
+  const { data: student, isLoading } = useQuery(studentQueryOptions)
 
   // Derive academicPeriodId from student data
   const academicPeriodId = useMemo(() => {
@@ -457,7 +456,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
       })
 
       queryClient.invalidateQueries({ queryKey: ['students'] })
-      queryClient.invalidateQueries({ queryKey: ['student', studentId] })
+      queryClient.invalidateQueries({ queryKey: studentQueryOptions.queryKey })
       toast.success('Aluno atualizado com sucesso!')
       router.visit('/escola/administrativo/alunos')
     } catch (error: any) {

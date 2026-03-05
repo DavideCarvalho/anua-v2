@@ -87,7 +87,7 @@ export function TopStudentsTable() {
       title="Top 10 Alunos"
       description="Ranking por pontuação"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.topStudents && data.topStudents.length > 0 ? (
         <Table>

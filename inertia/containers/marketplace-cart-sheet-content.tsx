@@ -53,7 +53,7 @@ export function CartSheetContent({
   // Fetch active academic period to calculate max installments for BILL
   const { data: academicPeriodsData } = useQuery({
     ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
-      query: { isActive: true, limit: 1 },
+      query: { limit: 1 },
     }),
     enabled: paymentOption === 'BILL',
   })

@@ -1,11 +1,14 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { validateDocument } from '~/lib/document_validators'
-import { tuyau } from '~/lib/api'
 
 interface DocumentValidationResult {
   isValid: boolean
   error?: string
   existingUserName?: string | null
+}
+
+interface CheckDocumentResponse {
+  exists: boolean
 }
 
 interface UseDocumentValidationOptions {
@@ -80,15 +83,28 @@ export function useDocumentValidation(options: UseDocumentValidationOptions = {}
         try {
           abortControllerRef.current = new AbortController()
 
-          const response = await tuyau.$route('api.v1.students.checkDocument')({
-            query: {
-              documentNumber: cleanNumber,
-              academicPeriodId,
-              ...(excludeUserId && { excludeUserId }),
-            },
+          const params = new URLSearchParams({
+            documentNumber: cleanNumber,
+            academicPeriodId,
           })
 
-          if (response.exists) {
+          if (excludeUserId) {
+            params.set('excludeUserId', excludeUserId)
+          }
+
+          const response = await fetch(`/api/v1/students/check-document?${params.toString()}`, {
+            method: 'GET',
+            credentials: 'include',
+            signal: abortControllerRef.current.signal,
+          })
+
+          if (!response.ok) {
+            throw new Error('Erro ao validar documento')
+          }
+
+          const payload = (await response.json()) as CheckDocumentResponse
+
+          if (payload.exists) {
             setValidationResult({
               isValid: false,
               error: 'Documento já cadastrado',

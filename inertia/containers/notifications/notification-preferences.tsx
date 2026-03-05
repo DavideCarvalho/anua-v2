@@ -8,34 +8,53 @@ import { Label } from '../../components/ui/label'
 import { Separator } from '../../components/ui/separator'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-interface NotificationPreference {
-  id: string
-  type: string
-  channel: string
-  enabled: boolean
+interface NotificationPreferenceShape {
+  notificationType?: string
+  type?: string
+}
+
+type PreferencesResponse = Awaited<Route.Response<'api.v1.notification_preferences.show'>>
+
+type ApiChannel = 'IN_APP' | 'EMAIL' | 'PUSH' | 'SMS' | 'WHATSAPP'
+
+function toApiChannel(channel: string): ApiChannel {
+  if (channel === 'in_app') return 'IN_APP'
+  if (channel === 'email') return 'EMAIL'
+  if (channel === 'push') return 'PUSH'
+  if (channel === 'sms') return 'SMS'
+  return 'WHATSAPP'
 }
 
 export function NotificationPreferences() {
   const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(api.api.v1.notificationPreferences.index.queryOptions({}))
+  const { data } = useSuspenseQuery(api.api.v1.notificationPreferences.show.queryOptions({}))
   const updateMutation = useMutation(api.api.v1.notificationPreferences.update.mutationOptions())
 
-  const preferences = (data?.preferences ?? []) as unknown as NotificationPreference[]
-  const grouped = (data?.grouped as Record<string, Record<string, boolean>>) ?? {}
+  const preferencesData: PreferencesResponse | undefined = data
+  const grouped = preferencesData?.grouped ?? {}
 
   const handleToggle = (type: string, channel: string, currentValue: boolean) => {
-    toast.promise(
-      updateMutation
-        .mutateAsync({
-          body: {
-            preferences: [{ type, channel, enabled: !currentValue }] as any,
+    const payload = {
+      body: {
+        preferences: [
+          {
+            type: type as Parameters<
+              typeof updateMutation.mutateAsync
+            >[0]['body']['preferences'][number]['type'],
+            channel: toApiChannel(channel),
+            enabled: !currentValue,
           },
-        })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
-        }),
+        ],
+      },
+    } satisfies Parameters<typeof updateMutation.mutateAsync>[0]
+
+    toast.promise(
+      updateMutation.mutateAsync(payload).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['notification-preferences'] })
+      }),
       {
         loading: 'Atualizando preferência...',
         success: 'Preferência atualizada!',
@@ -44,8 +63,14 @@ export function NotificationPreferences() {
     )
   }
 
-  // Get unique types from preferences
-  const types = [...new Set(preferences.map((p) => p.type))]
+  // Get unique types from grouped map (fallback to preferences)
+  const groupedTypes = Object.keys(grouped)
+  const fallbackTypes = ((preferencesData?.preferences ?? []) as NotificationPreferenceShape[]).map(
+    (p) => p.notificationType ?? p.type ?? ''
+  )
+  const types = [
+    ...new Set((groupedTypes.length > 0 ? groupedTypes : fallbackTypes).filter(Boolean)),
+  ]
 
   // Group types by category
   const gamificationTypes = types.filter((t) =>

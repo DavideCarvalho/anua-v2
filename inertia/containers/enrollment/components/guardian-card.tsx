@@ -113,7 +113,7 @@ export function GuardianCard({
                 value={email}
                 onChange={setEmail}
                 academicPeriodId={academicPeriodId}
-                excludeUserId={(guardian as any).id}
+                excludeUserId={guardian.id}
                 onValidationChange={setIsEmailValid}
               />
               {isEmailDuplicate && (

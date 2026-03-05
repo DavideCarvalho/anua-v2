@@ -52,11 +52,7 @@ interface ScheduleConfigFormProps {
   onGenerate: (result: GenerateResult) => void
 }
 
-export function ScheduleConfigForm({
-  classId,
-  academicPeriodId,
-  onGenerate,
-}: ScheduleConfigFormProps) {
+export function ScheduleConfigForm({ classId, onGenerate }: ScheduleConfigFormProps) {
   const [config, setConfig] = useState<ScheduleConfig>({
     startTime: '07:30',
     classesPerDay: 6,
@@ -70,6 +66,29 @@ export function ScheduleConfigForm({
 
   const handleChange = (field: keyof ScheduleConfig, value: string | number) => {
     setConfig((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleGenerate = async () => {
+    try {
+      const result = await generateMutation.mutateAsync({
+        params: { classId },
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['classSchedule'] })
+
+      if (result.unscheduled?.length > 0) {
+        toast.warning(
+          `Grade gerada com ${result.unscheduled.length} aula(s) não alocada(s). Arraste-as para os horários disponíveis.`
+        )
+      } else {
+        toast.success('Grade gerada com sucesso!')
+      }
+
+      onGenerate(result)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao gerar grade'
+      toast.error(message)
+    }
   }
 
   return (
@@ -149,34 +168,7 @@ export function ScheduleConfigForm({
 
           {/* Generate button */}
           <div className="flex justify-end">
-            <Button
-              onClick={() =>
-                generateMutation.mutate(
-                  {
-                    params: { classId },
-                    body: { academicPeriodId, config },
-                  },
-                  {
-                    onSuccess: (result: any) => {
-                      queryClient.invalidateQueries({ queryKey: ['classSchedule'] })
-                      if (result.unscheduled?.length > 0) {
-                        toast.warning(
-                          `Grade gerada com ${result.unscheduled.length} aula(s) não alocada(s). Arraste-as para os horários disponíveis.`
-                        )
-                      } else {
-                        toast.success('Grade gerada com sucesso!')
-                      }
-                      onGenerate(result)
-                    },
-                    onError: (error: Error) => {
-                      toast.error(error.message)
-                    },
-                  }
-                )
-              }
-              disabled={generateMutation.isPending}
-              size="lg"
-            >
+            <Button onClick={handleGenerate} disabled={generateMutation.isPending} size="lg">
               <Wand2 className="mr-2 h-4 w-4" />
               {generateMutation.isPending ? 'Gerando...' : 'Gerar Grade'}
             </Button>

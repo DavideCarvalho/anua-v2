@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -28,6 +29,7 @@ import { Checkbox } from '../../components/ui/checkbox'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -45,6 +47,7 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
+type UpdateScholarshipBody = Route.Body<'api.v1.scholarships.update_scholarship'>
 
 function generateCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -75,7 +78,7 @@ export function EditScholarshipModal({
   })
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: {
       name: '',
       discountType: 'PERCENTAGE',
@@ -111,13 +114,17 @@ export function EditScholarshipModal({
   }, [scholarship, form])
 
   async function handleSubmit(values: FormValues) {
-    const payload: any = {
+    const payload: UpdateScholarshipBody = {
       name: values.name,
       discountType: values.discountType,
       type: values.type,
       description: values.description,
       schoolPartnerId: values.schoolPartnerId,
       code: values.code || undefined,
+      discountPercentage: undefined,
+      enrollmentDiscountPercentage: undefined,
+      discountValue: undefined,
+      enrollmentDiscountValue: undefined,
     }
 
     if (values.discountType === 'PERCENTAGE') {

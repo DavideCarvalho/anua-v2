@@ -31,13 +31,6 @@ interface TeacherAbsencesTableProps {
   status?: string
 }
 
-interface TeacherOption {
-  id: string
-  user?: {
-    name?: string | null
-  } | null
-}
-
 interface AbsenceItem {
   id: string
   status: string

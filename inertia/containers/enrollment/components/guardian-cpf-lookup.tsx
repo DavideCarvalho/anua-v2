@@ -15,10 +15,10 @@ import {
 } from '~/components/ui/select'
 import { cn } from '~/lib/utils'
 import { tuyau } from '~/lib/api'
-import type { Route } from '@tuyau/core/types'
 import { EmailInput } from '~/components/forms/email-input'
 import type { EnrollmentFormData } from '../schema'
 import { DocumentType, DocumentTypeLabels } from '../schema'
+import { Route } from '@tuyau/core/types'
 
 interface GuardianCpfLookupProps {
   schoolId: string
@@ -29,7 +29,17 @@ interface GuardianCpfLookupProps {
   academicPeriodId?: string
 }
 
-type LookupResult = Route.Response<'api.v1.students.lookupResponsible'>
+// type LookupResult = {
+//   id: string
+//   name: string
+//   email: string | null
+//   phone: string | null
+//   documentType: string | null
+//   documentNumber: string | null
+//   birthDate: string | null
+// }
+
+type LookupResult = Route.Response<'api.v1.students.lookup_responsible'>
 
 function formatCpf(value: string) {
   const digits = value.replace(/\D/g, '').slice(0, 11)
@@ -115,11 +125,14 @@ export function GuardianCpfLookup({
     if (!canSearch) return
     setIsSearching(true)
     try {
-      const data = await tuyau.api.api.v1.students['lookup-responsible']({
-        query: { documentNumber: cleanedDoc, schoolId },
+      const data = await tuyau.api.api.v1.students.lookupResponsible({
+        query: {
+          documentNumber: cleanedDoc,
+          schoolId,
+        },
       })
 
-      setFoundResponsible(data)
+      setFoundResponsible(data as LookupResult)
       setSearched(true)
     } catch {
       setFoundResponsible(null)

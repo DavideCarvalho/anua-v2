@@ -75,6 +75,7 @@ const schema = z.object({
 })
 
 export type AcademicPeriodFormValues = z.infer<typeof schema>
+type AcademicPeriodFormInput = z.input<typeof schema>
 
 const steps = [
   {
@@ -96,10 +97,12 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const queryClient = useQueryClient()
-  const createMutation = useMutation(api.api.v1.academicPeriods.store.mutationOptions())
+  const createMutation = useMutation(
+    api.api.v1.academicPeriods.createAcademicPeriod.mutationOptions()
+  )
 
-  const form = useForm<AcademicPeriodFormValues>({
-    resolver: zodResolver(schema) as any,
+  const form = useForm<AcademicPeriodFormInput, undefined, AcademicPeriodFormValues>({
+    resolver: zodResolver(schema),
     defaultValues: {
       schoolId,
       previousPeriodId: null,

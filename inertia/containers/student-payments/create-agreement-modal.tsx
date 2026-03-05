@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -35,6 +36,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { formatCurrency } from '~/lib/utils'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 const ACTIONABLE_STATUSES = ['NOT_PAID', 'PENDING', 'OVERDUE']
 
@@ -81,6 +83,8 @@ const agreementSchema = z.object({
 })
 
 type AgreementFormData = z.infer<typeof agreementSchema>
+type StudentPaymentsIndexResponse = Route.Response<'api.v1.student_payments.index'>
+type StudentPaymentItem = StudentPaymentsIndexResponse['data'][number]
 
 function getDiscountAmountInCents(
   installmentAmount: number,
@@ -116,12 +120,15 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
   })
 
   const allPayments = useMemo(() => {
-    const list = (paymentsData as any)?.data ?? []
-    return list.filter((p: any) => ACTIONABLE_STATUSES.includes(p.status) && p.type !== 'AGREEMENT')
+    const list: StudentPaymentItem[] = paymentsData?.data ?? []
+    return list.filter((paymentItem) => {
+      const status = paymentItem.status
+      return !!status && ACTIONABLE_STATUSES.includes(status) && paymentItem.type !== 'AGREEMENT'
+    })
   }, [paymentsData])
 
   const form = useForm<AgreementFormData>({
-    resolver: zodResolver(agreementSchema) as any,
+    resolver: zodResolver(agreementSchema) as Resolver<AgreementFormData>,
     defaultValues: {
       selectedPaymentIds: [payment.id],
       installments: 3,
@@ -167,8 +174,8 @@ export function CreateAgreementModal({ payment, open, onOpenChange }: CreateAgre
 
   const totalAmount = useMemo(() => {
     return allPayments
-      .filter((p: any) => selectedIds.includes(p.id))
-      .reduce((sum: number, p: any) => sum + Number(p.amount), 0)
+      .filter((paymentItem) => selectedIds.includes(paymentItem.id))
+      .reduce((sum, paymentItem) => sum + Number(paymentItem.amount), 0)
   }, [allPayments, selectedIds])
 
   const renegotiationDiscountAmount = useMemo(() => {

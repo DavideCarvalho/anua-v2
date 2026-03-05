@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { LaunchGradesModal } from './launch-grades-modal'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 interface AssignmentsTableProps {
   classId: string
@@ -25,27 +26,8 @@ interface AssignmentsTableProps {
   academicPeriodId: string
 }
 
-interface Assignment {
-  id: string
-  name: string
-  description: string | null
-  dueDate: string
-  grade: number
-  teacherHasClass: {
-    subject: {
-      id: string
-      name: string
-    }
-    teacher: {
-      user: {
-        name: string
-      }
-    }
-  }
-  $extras: {
-    submissionsCount: number
-  }
-}
+type AssignmentsResponse = Route.Response<'api.v1.assignments.index'>
+type Assignment = AssignmentsResponse['data'][number]
 
 function AssignmentsTableSkeleton() {
   return (
@@ -95,7 +77,7 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
       return
     }
     try {
-      await deleteMutation.mutateAsync({ params: { id: assignmentId }, body: {} })
+      await deleteMutation.mutateAsync({ params: { id: assignmentId } })
       toast.success('Atividade excluida com sucesso!')
     } catch {
       toast.error('Erro ao excluir atividade')
@@ -110,16 +92,14 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
     return <div className="text-center text-destructive py-8">Erro ao carregar atividades</div>
   }
 
-  const assignments = (response as any).data || []
-  const meta = (response as any).meta as
-    | { total: number; perPage: number; currentPage: number; lastPage: number }
-    | undefined
+  const assignments = response.data
+  const meta = response.metadata
 
   if (assignments.length === 0) {
     return <AssignmentsTableEmpty />
   }
 
-  const getStatus = (dueDate: string) => {
+  function getStatus(dueDate: string) {
     const date = new Date(dueDate)
     if (isAfter(date, new Date())) {
       return { label: 'Esperando entregas', variant: 'secondary' as const }
@@ -144,16 +124,16 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assignments.map((assignment: Assignment) => {
-            const status = getStatus(assignment.dueDate)
-            const hasGrades = (assignment.$extras?.submissionsCount || 0) > 0
+          {assignments.map((assignment) => {
+            const status = getStatus(assignment.dueDate ?? '')
+            const hasGrades = (assignment.submissionsCount ?? 0) > 0
 
             return (
               <TableRow key={assignment.id}>
                 <TableCell className="font-medium">{assignment.name}</TableCell>
                 <TableCell>{assignment.teacherHasClass?.subject?.name || '-'}</TableCell>
                 <TableCell>
-                  {format(new Date(assignment.dueDate), "dd 'de' MMMM", { locale: ptBR })}
+                  {format(new Date(assignment.dueDate ?? ''), "dd 'de' MMMM", { locale: ptBR })}
                 </TableCell>
                 <TableCell>{assignment.grade}</TableCell>
                 <TableCell>
@@ -187,7 +167,7 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
                         {hasGrades && (
                           <TooltipContent>
                             <p>
-                              Não é possível excluir. Existem {assignment.$extras.submissionsCount}{' '}
+                              Não é possível excluir. Existem {assignment.submissionsCount ?? 0}{' '}
                               nota(s) lançada(s).
                             </p>
                           </TooltipContent>
@@ -203,10 +183,10 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
       </Table>
 
       {/* Pagination */}
-      {meta && meta.lastPage > 1 && (
+      {meta && meta.lastPage && Number(meta.lastPage) > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Página {meta.currentPage} de {meta.lastPage}
+            Página {Number(meta.currentPage)} de {Number(meta.lastPage)}
           </p>
           <div className="flex gap-2">
             <Button
@@ -221,7 +201,7 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
               variant="outline"
               size="sm"
               onClick={() => setPage((p) => p + 1)}
-              disabled={page >= meta.lastPage}
+              disabled={page >= Number(meta.lastPage ?? 0)}
             >
               Próximo
             </Button>

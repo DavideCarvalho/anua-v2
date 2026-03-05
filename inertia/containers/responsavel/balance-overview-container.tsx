@@ -4,25 +4,14 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Wallet, TrendingUp, TrendingDown, Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
-import { tuyau } from '../../lib/api'
+import { api } from '../../lib/api'
 import { formatCurrency } from '../../lib/utils'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { TopUpModal } from './topup-modal'
 
 function useBalanceQueryOptions(studentId: string) {
-  return {
-    queryKey: ['responsavel', 'student', studentId, 'balance'],
-    queryFn: async () => {
-      const response = await tuyau.$route('api.v1.responsavel.api.studentBalance', { studentId })
-
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar saldo')
-      }
-      return response.data
-    },
-    enabled: !!studentId,
-  }
+  return api.api.v1.responsavel.api.studentBalance.queryOptions({ params: { studentId } })
 }
 
 function BalanceOverviewSkeleton() {
@@ -44,7 +33,10 @@ function BalanceOverviewSkeleton() {
 
 function BalanceOverviewContent({ studentId }: { studentId: string }) {
   const [topUpOpen, setTopUpOpen] = useState(false)
-  const { data, isLoading, isError, error } = useQuery(useBalanceQueryOptions(studentId))
+  const { data, isLoading, isError, error } = useQuery({
+    ...useBalanceQueryOptions(studentId),
+    enabled: !!studentId,
+  })
 
   if (isLoading) {
     return <BalanceOverviewSkeleton />
@@ -123,17 +115,21 @@ export function BalanceOverviewContainer({ studentId }: { studentId: string }) {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Erro ao carregar saldo: {(error as Error).message}
-                <button onClick={resetErrorBoundary} className="ml-2 underline">
-                  Tentar novamente
-                </button>
-              </AlertDescription>
-            </Alert>
-          )}
+          fallbackRender={({ error, resetErrorBoundary }) => {
+            const message = error instanceof Error ? error.message : 'Erro desconhecido'
+
+            return (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Erro ao carregar saldo: {message}
+                  <button onClick={resetErrorBoundary} className="ml-2 underline">
+                    Tentar novamente
+                  </button>
+                </AlertDescription>
+              </Alert>
+            )
+          }}
         >
           <BalanceOverviewContent studentId={studentId} />
         </ErrorBoundary>

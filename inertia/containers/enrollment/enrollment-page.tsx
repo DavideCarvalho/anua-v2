@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -49,7 +50,7 @@ export function EnrollmentPage() {
 
   // ── Form setup ────────────────────────────────────────────────────────
   const form = useForm<EnrollmentFormData>({
-    resolver: zodResolver(enrollmentSchema) as any,
+    resolver: zodResolver(enrollmentSchema) as Resolver<EnrollmentFormData>,
     defaultValues: {
       basicInfo: {
         name: '',

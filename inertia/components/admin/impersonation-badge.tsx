@@ -64,7 +64,7 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
         roleFilter: roleFilter === 'all' ? undefined : roleFilter,
         schoolFilter: schoolFilter === 'all' ? undefined : schoolFilter,
         page,
-        limit: 20,
+        limit: 200,
       },
     })
   )

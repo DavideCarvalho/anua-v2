@@ -66,16 +66,10 @@ export function StudentDocumentsContainer({
   studentId,
   studentName,
 }: StudentDocumentsContainerProps) {
-  const {
-    data: rawData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     ...api.api.v1.responsavel.api.studentDocuments.queryOptions({ params: { studentId } }),
     enabled: !!studentId,
   })
-  const data = (rawData as any)?.data ?? rawData
 
   if (isLoading) {
     return <StudentDocumentsContainerSkeleton />

@@ -45,7 +45,7 @@ export function InsuranceStatsCards() {
               Erro ao carregar estatísticas de seguro
             </h3>
             <p className="text-sm text-muted-foreground">
-              {error?.message || 'Ocorreu um erro inesperado'}
+              {error instanceof Error ? error.message : 'Ocorreu um erro inesperado'}
             </p>
           </div>
           <Button variant="outline" onClick={() => refetch()}>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, FormProvider } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Loader2, ExternalLink, CheckCircle2, FileText, Building2, MapPin } from 'lucide-react'
@@ -18,7 +19,7 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Stepper, type Step } from '../students/new-student-modal/components/stepper'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
 const formSchema = z.object({
@@ -67,11 +68,10 @@ export function AsaasOnboardingWizard({
     STEPS_CONFIG.map(() => 'pending')
   )
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const queryClient = useQueryClient()
   const createMutation = useMutation(api.api.v1.asaas.subaccounts.create.mutationOptions())
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       name: '',
       email: '',
@@ -418,7 +418,10 @@ export function AsaasOnboardingWizard({
                             min={0}
                             step={0.01}
                             placeholder="Ex: 10000"
-                            {...field}
+                            name={field.name}
+                            ref={field.ref}
+                            onBlur={field.onBlur}
+                            value={typeof field.value === 'number' ? field.value : 0}
                             onChange={(e) => field.onChange(Number(e.target.value))}
                           />
                         </FormControl>

@@ -2,6 +2,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { Plus, Building2, AlertCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -29,7 +30,6 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group'
-import { tuyau } from '../../lib/api'
 import { api } from '~/lib/api'
 import { CreateSchoolChainDialog } from './create-school-chain-dialog'
 import { type SchoolOnboardingFormData, schoolOnboardingSchema } from './schema'
@@ -86,7 +86,7 @@ function OnboardingFormContent() {
   )
 
   const form = useForm<SchoolOnboardingFormData>({
-    resolver: zodResolver(schoolOnboardingSchema) as any,
+    resolver: zodResolver(schoolOnboardingSchema) as Resolver<SchoolOnboardingFormData>,
     defaultValues: {
       schoolName: '',
       isNetwork: false,
@@ -124,51 +124,46 @@ function OnboardingFormContent() {
   )
   const hasNetworkSubscription = selectedChain?.subscriptionLevel === 'NETWORK'
 
-  const { mutateAsync: createSchool, isPending } = useMutation({
-    mutationFn: async (data: SchoolOnboardingFormData) => {
+  const createSchoolMutation = useMutation(api.api.v1.admin.schools.onboarding.mutationOptions())
+  const isPending = createSchoolMutation.isPending
+
+  const onSubmit = async (data: SchoolOnboardingFormData) => {
+    try {
       const pricePerStudent = data.billingModel === 'PER_ACTIVE_STUDENT' ? data.pricePerStudent : 0
       const monthlyFixedPrice =
         data.billingModel === 'FIXED_MONTHLY' ? data.monthlyFixedPrice : undefined
 
-      const response = await tuyau.api.api.v1.admin.schools.onboarding({
-        name: data.schoolName,
-        schoolChainId: data.schoolChainId,
-        street: data.street,
-        number: data.number,
-        complement: data.complement,
-        neighborhood: data.neighborhood,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        directorName: data.directorName,
-        directorEmail: data.directorEmail,
-        directorPhone: data.directorPhone,
-        directorDocumentNumber: data.directorDocumentNumber,
-        isNetwork: data.isNetwork,
-        trialDays: data.trialDays,
-        billingModel: data.billingModel,
-        pricePerStudent,
-        monthlyFixedPrice,
-        platformFeeMode: data.platformFeeMode,
-        platformFeePercentage: data.platformFeePercentage,
-        platformFeeFixedAmount: data.platformFeeFixedAmount,
-        hasInsurance: data.hasInsurance,
-        insurancePercentage: data.insurancePercentage,
-        insuranceCoveragePercentage: data.insuranceCoveragePercentage,
-        insuranceClaimWaitingDays: data.insuranceClaimWaitingDays,
-      } as any)
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao criar escola')
-      }
-      return response.data
-    },
-  })
-
-  const onSubmit = async (data: SchoolOnboardingFormData) => {
-    try {
-      const result = await createSchool(data)
+      const result = await createSchoolMutation.mutateAsync({
+        body: {
+          name: data.schoolName,
+          schoolChainId: data.schoolChainId,
+          street: data.street,
+          number: data.number,
+          complement: data.complement,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+          zipCode: data.zipCode,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          directorName: data.directorName,
+          directorEmail: data.directorEmail,
+          directorPhone: data.directorPhone,
+          directorDocumentNumber: data.directorDocumentNumber,
+          isNetwork: data.isNetwork,
+          trialDays: data.trialDays,
+          billingModel: data.billingModel,
+          pricePerStudent,
+          monthlyFixedPrice,
+          platformFeeMode: data.platformFeeMode,
+          platformFeePercentage: data.platformFeePercentage,
+          platformFeeFixedAmount: data.platformFeeFixedAmount,
+          hasInsurance: data.hasInsurance,
+          insurancePercentage: data.insurancePercentage,
+          insuranceCoveragePercentage: data.insuranceCoveragePercentage,
+          insuranceClaimWaitingDays: data.insuranceClaimWaitingDays,
+        },
+      })
 
       toast.success('Escola criada com sucesso!', {
         description: `A escola ${result?.school?.name} foi criada e o diretor ${result?.director?.name} foi associado.`,

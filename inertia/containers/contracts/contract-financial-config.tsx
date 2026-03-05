@@ -13,6 +13,14 @@ interface ContractFinancialConfigProps {
   contractId: string
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+}
+
+function asNumber(value: unknown, fallback = 0): number {
+  return typeof value === 'number' ? value : fallback
+}
+
 export function ContractFinancialConfig({ contractId }: ContractFinancialConfigProps) {
   const queryClient = useQueryClient()
   const { data: paymentDaysData } = useSuspenseQuery(
@@ -82,19 +90,25 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
         <CardContent>
           {paymentDays.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {paymentDays.map((day: any) => (
-                <Badge key={day.id} variant="secondary" className="gap-2 px-3 py-1 text-sm">
-                  Dia {day.day}
-                  <button
-                    onClick={() => {
-                      handleRemovePaymentDay(day.id)
-                    }}
-                    className="hover:text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
+              {paymentDays.map((day) => {
+                const dayRecord = asRecord(day)
+                const dayId = String(dayRecord.id ?? '')
+                const dayNumber = asNumber(dayRecord.day)
+
+                return (
+                  <Badge key={dayId} variant="secondary" className="gap-2 px-3 py-1 text-sm">
+                    Dia {dayNumber}
+                    <button
+                      onClick={() => {
+                        handleRemovePaymentDay(dayId)
+                      }}
+                      className="hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )
+              })}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">Nenhum dia de pagamento configurado</p>
@@ -116,17 +130,21 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">Taxa de Juros (% ao mês)</p>
-                <p className="text-2xl font-bold">{(interestConfig as any).interestRate || 0}%</p>
+                <p className="text-2xl font-bold">
+                  {asNumber(asRecord(interestConfig).interestRate)}%
+                </p>
               </div>
               <div className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">Multa por Atraso (%)</p>
                 <p className="text-2xl font-bold">
-                  {(interestConfig as any).lateFeePercentage || 0}%
+                  {asNumber(asRecord(interestConfig).lateFeePercentage)}%
                 </p>
               </div>
               <div className="rounded-lg border p-4">
                 <p className="text-sm text-muted-foreground">Dias de Carência</p>
-                <p className="text-2xl font-bold">{(interestConfig as any).gracePeriodDays || 0}</p>
+                <p className="text-2xl font-bold">
+                  {asNumber(asRecord(interestConfig).gracePeriodDays)}
+                </p>
               </div>
             </div>
           ) : (
@@ -163,31 +181,38 @@ export function ContractFinancialConfig({ contractId }: ContractFinancialConfigP
         <CardContent>
           {discounts.length > 0 ? (
             <div className="space-y-2">
-              {discounts.map((discount: any) => (
-                <div
-                  key={discount.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-4">
-                    <Badge variant="outline" className="bg-green-50 text-green-700">
-                      {discount.discountPercentage || discount.percentage}% OFF
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      Pagamento até {discount.daysBeforeDue || discount.days} dias antes do
-                      vencimento
-                    </span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      handleRemoveDiscount(discount.id)
-                    }}
+              {discounts.map((discount) => {
+                const discountRecord = asRecord(discount)
+                const discountId = String(discountRecord.id ?? '')
+                const percentage =
+                  asNumber(discountRecord.discountPercentage) || asNumber(discountRecord.percentage)
+                const days = asNumber(discountRecord.daysBeforeDue) || asNumber(discountRecord.days)
+
+                return (
+                  <div
+                    key={discountId}
+                    className="flex items-center justify-between rounded-lg border p-3"
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-4">
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        {percentage}% OFF
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        Pagamento até {days} dias antes do vencimento
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        handleRemoveDiscount(discountId)
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">

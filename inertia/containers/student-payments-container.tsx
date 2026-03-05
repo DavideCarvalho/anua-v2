@@ -141,7 +141,7 @@ type Payment = StudentPaymentsResponse['data'][number]
 
 type ClassItem = ClassesResponse['data'][number]
 
-type PaginationMeta = StudentPaymentsResponse['meta']
+type PaginationMeta = StudentPaymentsResponse['metadata']
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '-'
@@ -252,7 +252,7 @@ function StudentPaymentsContent({
   )
 
   const payments: Payment[] = data?.data ?? []
-  const meta: PaginationMeta | undefined = data?.meta
+  const meta: PaginationMeta | undefined = data?.metadata
 
   return (
     <div className="space-y-4">
@@ -371,7 +371,9 @@ function StudentPaymentsContent({
 
       {isLoading && <StudentPaymentsSkeleton />}
 
-      {error && <StudentPaymentsErrorFallback error={error} resetErrorBoundary={() => refetch()} />}
+      {error instanceof Error && (
+        <StudentPaymentsErrorFallback error={error} resetErrorBoundary={() => refetch()} />
+      )}
 
       {!isLoading && !error && payments.length === 0 && (
         <Card>
@@ -492,7 +494,7 @@ function StudentPaymentsContent({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page >= meta.lastPage}
+                  disabled={page >= Number(meta.lastPage)}
                   onClick={() => setFilters({ page: page + 1 })}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -505,7 +507,17 @@ function StudentPaymentsContent({
 
       {selectedPayment && activeModal === 'edit' && (
         <EditPaymentModal
-          payment={selectedPayment}
+          payment={{
+            id: selectedPayment.id,
+            amount: Number(selectedPayment.amount ?? 0),
+            dueDate: selectedPayment.dueDate ?? new Date().toISOString(),
+            discountPercentage: Number(selectedPayment.discountPercentage ?? 0),
+            discountType: selectedPayment.discountType ?? undefined,
+            discountValue: selectedPayment.discountValue ?? undefined,
+            student: selectedPayment.student,
+            month: Number(selectedPayment.month ?? 1),
+            year: Number(selectedPayment.year ?? new Date().getFullYear()),
+          }}
           open
           onOpenChange={(open) => !open && closeModal()}
         />

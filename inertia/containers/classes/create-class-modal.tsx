@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useForm, useFieldArray, UseFormReturn } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
@@ -181,7 +182,7 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
   const schoolId = user?.schoolId
 
   const form = useForm<CreateClassFormValues>({
-    resolver: zodResolver(createClassSchema) as any,
+    resolver: zodResolver(createClassSchema) as Resolver<CreateClassFormValues>,
     defaultValues: {
       name: '',
       subjectsWithTeachers: [{ teacherId: '', subjectId: '', quantity: 1 }],
@@ -234,7 +235,7 @@ export function CreateClassModal({ open, onOpenChange, onCreated }: CreateClassM
         },
       },
       {
-        onSuccess: (result: any) => {
+        onSuccess: (result) => {
           toast.success('Turma criada com sucesso')
           onOpenChange(false)
           if (onCreated && result?.id) {

@@ -38,7 +38,7 @@ import { Checkbox } from '../../components/ui/checkbox'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
-const EventType = {
+const EventTypeOptions = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
   EXAM: 'EXAM',
   ASSIGNMENT: 'ASSIGNMENT',
@@ -46,7 +46,6 @@ const EventType = {
   PARENTS_MEETING: 'PARENTS_MEETING',
   CULTURAL_EVENT: 'CULTURAL_EVENT',
   SPORTS_EVENT: 'SPORTS_EVENT',
-  HOLIDAY: 'HOLIDAY',
   OTHER: 'OTHER',
 } as const
 
@@ -118,7 +117,8 @@ const formSchema = z
     })
   })
 
-type FormValues = z.infer<typeof formSchema>
+type FormInput = z.input<typeof formSchema>
+type FormValues = z.output<typeof formSchema>
 
 interface EditEventModalProps {
   open: boolean
@@ -150,12 +150,12 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
   const levels = levelsData?.data ?? []
   const classes = classesData?.data ?? []
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+  const form = useForm<FormInput, undefined, FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
-      type: EventType.ACADEMIC_EVENT,
+      type: EventTypeOptions.ACADEMIC_EVENT,
       status: EventStatus.DRAFT,
       visibility: EventVisibility.SCHOOL_ONLY,
       priority: EventPriority.NORMAL,
@@ -181,6 +181,15 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
     if (event) {
       const startsAt = new Date(String(event.startDate))
       const endsAt = event.endDate ? new Date(String(event.endDate)) : null
+      const eventExtra = event as Partial<{
+        hasAdditionalCosts: boolean
+        additionalCostAmount: number | null
+        additionalCostDescription: string | null
+        audienceWholeSchool: boolean
+        audienceAcademicPeriodIds: string[]
+        audienceLevelIds: string[]
+        audienceClassIds: string[]
+      }>
 
       form.reset({
         title: event.title,
@@ -197,26 +206,34 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
         location: event.location || '',
         isOnline: event.isOnline,
         onlineUrl: event.onlineUrl || '',
-        hasAdditionalCosts: Boolean((event as any).hasAdditionalCosts),
-        additionalCostAmount: (event as any).additionalCostAmount ?? undefined,
-        additionalCostDescription: (event as any).additionalCostDescription || '',
-        audienceWholeSchool: Boolean((event as any).audienceWholeSchool ?? true),
-        audienceAcademicPeriodIds: (event as any).audienceAcademicPeriodIds ?? [],
-        audienceLevelIds: (event as any).audienceLevelIds ?? [],
-        audienceClassIds: (event as any).audienceClassIds ?? [],
+        hasAdditionalCosts: Boolean(eventExtra.hasAdditionalCosts),
+        additionalCostAmount: eventExtra.additionalCostAmount ?? undefined,
+        additionalCostDescription: eventExtra.additionalCostDescription ?? '',
+        audienceWholeSchool: Boolean(eventExtra.audienceWholeSchool ?? true),
+        audienceAcademicPeriodIds: eventExtra.audienceAcademicPeriodIds ?? [],
+        audienceLevelIds: eventExtra.audienceLevelIds ?? [],
+        audienceClassIds: eventExtra.audienceClassIds ?? [],
       })
     }
   }, [event, form])
 
   const onSubmit = async (values: FormValues) => {
+    const {
+      onlineUrl: _onlineUrl,
+      type: _type,
+      status: _status,
+      visibility: _visibility,
+      priority: _priority,
+      ...bodyValues
+    } = values
+
     toast.promise(
       updateEventMutation.mutateAsync({
         params: { id: eventId },
         body: {
-          ...values,
+          ...bodyValues,
           startsAt: new Date(values.startsAt).toISOString(),
           endsAt: values.endsAt ? new Date(values.endsAt).toISOString() : undefined,
-          onlineUrl: values.onlineUrl || undefined,
           hasAdditionalCosts: values.hasAdditionalCosts,
           additionalCostAmount: values.hasAdditionalCosts ? values.additionalCostAmount : null,
           additionalCostDescription: values.hasAdditionalCosts
@@ -293,15 +310,22 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={EventType.ACADEMIC_EVENT}>Evento Academico</SelectItem>
-                      <SelectItem value={EventType.EXAM}>Prova</SelectItem>
-                      <SelectItem value={EventType.ASSIGNMENT}>Trabalho</SelectItem>
-                      <SelectItem value={EventType.FIELD_TRIP}>Passeio</SelectItem>
-                      <SelectItem value={EventType.PARENTS_MEETING}>Reuniao de Pais</SelectItem>
-                      <SelectItem value={EventType.CULTURAL_EVENT}>Evento Cultural</SelectItem>
-                      <SelectItem value={EventType.SPORTS_EVENT}>Evento Esportivo</SelectItem>
-                      <SelectItem value={EventType.HOLIDAY}>Feriado</SelectItem>
-                      <SelectItem value={EventType.OTHER}>Outro</SelectItem>
+                      <SelectItem value={EventTypeOptions.ACADEMIC_EVENT}>
+                        Evento Academico
+                      </SelectItem>
+                      <SelectItem value={EventTypeOptions.EXAM}>Prova</SelectItem>
+                      <SelectItem value={EventTypeOptions.ASSIGNMENT}>Trabalho</SelectItem>
+                      <SelectItem value={EventTypeOptions.FIELD_TRIP}>Passeio</SelectItem>
+                      <SelectItem value={EventTypeOptions.PARENTS_MEETING}>
+                        Reuniao de Pais
+                      </SelectItem>
+                      <SelectItem value={EventTypeOptions.CULTURAL_EVENT}>
+                        Evento Cultural
+                      </SelectItem>
+                      <SelectItem value={EventTypeOptions.SPORTS_EVENT}>
+                        Evento Esportivo
+                      </SelectItem>
+                      <SelectItem value={EventTypeOptions.OTHER}>Outro</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -423,16 +447,22 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
                       <div className="max-h-28 space-y-2 overflow-y-auto rounded-md border p-3">
                         {academicPeriods.map((period) => (
                           <label key={period.id} className="flex items-center gap-2 text-sm">
-                            <Checkbox
-                              checked={field.value.includes(period.id)}
-                              onCheckedChange={(checked) => {
-                                field.onChange(
-                                  checked
-                                    ? [...field.value, period.id]
-                                    : field.value.filter((id) => id !== period.id)
-                                )
-                              }}
-                            />
+                            {(() => {
+                              const selected = Array.isArray(field.value) ? field.value : []
+
+                              return (
+                                <Checkbox
+                                  checked={selected.includes(period.id)}
+                                  onCheckedChange={(checked) => {
+                                    field.onChange(
+                                      checked
+                                        ? [...selected, period.id]
+                                        : selected.filter((id) => id !== period.id)
+                                    )
+                                  }}
+                                />
+                              )
+                            })()}
                             <span>{period.name}</span>
                           </label>
                         ))}
@@ -451,16 +481,22 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
                       <div className="max-h-28 space-y-2 overflow-y-auto rounded-md border p-3">
                         {levels.map((level) => (
                           <label key={level.id} className="flex items-center gap-2 text-sm">
-                            <Checkbox
-                              checked={field.value.includes(level.id)}
-                              onCheckedChange={(checked) => {
-                                field.onChange(
-                                  checked
-                                    ? [...field.value, level.id]
-                                    : field.value.filter((id) => id !== level.id)
-                                )
-                              }}
-                            />
+                            {(() => {
+                              const selected = Array.isArray(field.value) ? field.value : []
+
+                              return (
+                                <Checkbox
+                                  checked={selected.includes(level.id)}
+                                  onCheckedChange={(checked) => {
+                                    field.onChange(
+                                      checked
+                                        ? [...selected, level.id]
+                                        : selected.filter((id) => id !== level.id)
+                                    )
+                                  }}
+                                />
+                              )
+                            })()}
                             <span>{level.name}</span>
                           </label>
                         ))}
@@ -478,16 +514,22 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
                       <div className="max-h-36 space-y-2 overflow-y-auto rounded-md border p-3">
                         {classes.map((classItem) => (
                           <label key={classItem.id} className="flex items-center gap-2 text-sm">
-                            <Checkbox
-                              checked={field.value.includes(classItem.id)}
-                              onCheckedChange={(checked) => {
-                                field.onChange(
-                                  checked
-                                    ? [...field.value, classItem.id]
-                                    : field.value.filter((id) => id !== classItem.id)
-                                )
-                              }}
-                            />
+                            {(() => {
+                              const selected = Array.isArray(field.value) ? field.value : []
+
+                              return (
+                                <Checkbox
+                                  checked={selected.includes(classItem.id)}
+                                  onCheckedChange={(checked) => {
+                                    field.onChange(
+                                      checked
+                                        ? [...selected, classItem.id]
+                                        : selected.filter((id) => id !== classItem.id)
+                                    )
+                                  }}
+                                />
+                              )
+                            })()}
                             <span>{classItem.name}</span>
                           </label>
                         ))}
@@ -664,8 +706,8 @@ export function EditEventModal({ open, onOpenChange, eventId }: EditEventModalPr
                           min="1"
                           step="1"
                           placeholder="Ex: 50"
-                          value={field.value ?? ''}
-                          onChange={(event) => field.onChange(event.target.value)}
+                          value={typeof field.value === 'number' ? field.value : ''}
+                          onChange={(event) => field.onChange(Number(event.target.value))}
                         />
                       </FormControl>
                       <FormMessage />

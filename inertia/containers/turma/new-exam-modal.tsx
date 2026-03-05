@@ -64,12 +64,6 @@ interface Subject {
   teacherId: string
 }
 
-interface TeacherClass {
-  teacherId: string
-  subject: { id: string; name: string } | null
-  teacher: { user: { id: string } } | null
-}
-
 const DIRECTOR_ROLES = ['SCHOOL_DIRECTOR', 'SCHOOL_COORDINATOR', 'ADMIN', 'SUPER_ADMIN']
 
 export function NewExamModal({
@@ -102,7 +96,9 @@ export function NewExamModal({
     const isDirectorOrAdmin = user?.role?.name && DIRECTOR_ROLES.includes(user.role.name)
     const result: Subject[] = []
     const seen = new Set<string>()
-    for (const tc of ((classData as any).teacherClasses || []) as TeacherClass[]) {
+    const teacherClasses = classData.teacherClasses
+
+    for (const tc of teacherClasses) {
       if (!tc.subject || seen.has(tc.subject.id)) continue
       const canSeeSubject = isDirectorOrAdmin || tc.teacher?.user?.id === user?.id
       if (canSeeSubject) {

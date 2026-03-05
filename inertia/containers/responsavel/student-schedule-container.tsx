@@ -120,7 +120,7 @@ export function StudentScheduleContainer({
           <div className="flex-1">
             <h3 className="font-semibold text-destructive">Erro ao carregar horário</h3>
             <p className="text-sm text-muted-foreground">
-              {error.message || 'Ocorreu um erro inesperado'}
+              {error instanceof Error ? error.message : 'Ocorreu um erro inesperado'}
             </p>
           </div>
           <Button variant="outline" onClick={() => refetch()}>

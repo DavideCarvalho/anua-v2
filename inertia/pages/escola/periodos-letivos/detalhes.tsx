@@ -21,10 +21,10 @@ type AcademicPeriodResponse = Route.Response<'api.v1.academic_periods.show_dashb
 type AcademicPeriodView = {
   id: string
   name: string
-  startDate: string | Date
-  endDate: string | Date
-  enrollmentStartDate: string | Date | null
-  enrollmentEndDate: string | Date | null
+  startDate: string | Date | undefined
+  endDate: string | Date | undefined
+  enrollmentStartDate: string | Date | null | undefined
+  enrollmentEndDate: string | Date | null | undefined
   isActive: boolean
   isClosed: boolean
   metrics?: {

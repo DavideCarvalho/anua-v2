@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { FC } from 'react'
 import { Plus } from 'lucide-react'
 
 import { EscolaLayout } from '../../../../../../../../components/layouts/escola-layout'
@@ -20,7 +21,7 @@ interface Props {
   academicPeriodId: string
 }
 
-export default function TurmaProvasPage({
+const TurmaProvasPage: FC<Props> = ({
   academicPeriodSlug,
   courseSlug,
   classSlug,
@@ -29,7 +30,7 @@ export default function TurmaProvasPage({
   className,
   courseName,
   academicPeriodId,
-}: Props) {
+}) => {
   const user = useAuthUser()
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -71,3 +72,5 @@ export default function TurmaProvasPage({
     </EscolaLayout>
   )
 }
+
+export default TurmaProvasPage

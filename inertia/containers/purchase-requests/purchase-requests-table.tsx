@@ -92,7 +92,7 @@ export function PurchaseRequestsTable({
   const deleteMutation = useMutation(api.api.v1.purchaseRequests.destroy.mutationOptions())
 
   const rows = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   const handleDelete = async (id: string) => {
     toast.promise(
@@ -345,16 +345,16 @@ export function PurchaseRequestsTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage <= 1}
-                  onClick={() => setPage(meta.currentPage - 1)}
+                  disabled={Number(meta.currentPage) <= 1}
+                  onClick={() => setPage(Number(meta.currentPage) - 1)}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage >= meta.lastPage}
-                  onClick={() => setPage(meta.currentPage + 1)}
+                  disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                  onClick={() => setPage(Number(meta.currentPage) + 1)}
                 >
                   Próxima
                 </Button>

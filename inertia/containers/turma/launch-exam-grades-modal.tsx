@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, Save, Users } from 'lucide-react'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -58,13 +59,9 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
-
-interface SaveGradePayload {
-  examId: string
-  studentId: string
-  score: number
-  absent: boolean
-}
+type ExamGradesRawResponse = Route.Response<'api.v1.exams.grades'>
+type ExamGradesResponse = Awaited<ExamGradesRawResponse>
+type ExamGradeItem = ExamGradesResponse[number]
 
 function LaunchExamGradesModalSkeleton() {
   return (
@@ -88,8 +85,6 @@ function LaunchExamGradesModalContent({
   examId,
   maxScore,
   classId,
-  courseId,
-  academicPeriodId,
   onOpenChange,
 }: Omit<LaunchExamGradesModalProps, 'open'>) {
   const queryClient = useQueryClient()
@@ -104,7 +99,6 @@ function LaunchExamGradesModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(
     api.api.v1.classes.students.queryOptions({
       params: { id: classId },
-      query: { courseId, academicPeriodId, limit: 1000 },
     })
   )
   const students = studentsResponse?.data || []
@@ -117,8 +111,8 @@ function LaunchExamGradesModalContent({
 
   const existingGrades = (() => {
     if (!examGradesResponse) return []
-    const grades = examGradesResponse ?? []
-    return grades.map((g: any) => ({
+    const grades: ExamGradeItem[] = examGradesResponse
+    return grades.map((g) => ({
       studentId: g.studentId,
       score: g.score,
       attended: g.attended,

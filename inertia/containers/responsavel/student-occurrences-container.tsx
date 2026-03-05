@@ -79,11 +79,6 @@ export function StudentOccurrencesContainer({
   const { data, isLoading, isError, error } = useQuery(
     api.api.v1.responsavel.api.studentOccurrences.queryOptions({
       params: { studentId },
-      query: {
-        type: typeFilter === 'all' ? undefined : typeFilter,
-        status: statusFilter === 'all' ? undefined : statusFilter,
-        severity: severityFilter === 'all' ? undefined : severityFilter,
-      },
     })
   )
 

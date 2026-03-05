@@ -35,7 +35,7 @@ function formatDate(dateString: string): string {
 }
 
 type AcademicPeriod = NonNullable<
-  Route.Response<'api.v1.academicPeriods.listAcademicPeriods'>['data']
+  Awaited<Route.Response<'api.v1.academic_periods.list_academic_periods'>>['data']
 >[number]
 
 function PeriodosLetivosGridSkeleton() {

@@ -115,7 +115,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{reservation.student?.user?.name || '-'}</span>
+                      <span className="font-medium">{reservation.student?.id || '-'}</span>
                     </div>
                   </TableCell>
                   <TableCell>

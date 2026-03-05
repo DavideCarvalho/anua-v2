@@ -1,19 +1,13 @@
-import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Loader2, Copy, Check } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '../../components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -42,8 +36,6 @@ interface NewTeacherModalProps {
 
 export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModalProps) {
   const queryClient = useQueryClient()
-  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
 
   const { data: subjectsData } = useQuery(
     api.api.v1.subjects.index.queryOptions({
@@ -54,7 +46,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
   const subjects = subjectsData?.data ?? []
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       name: '',
       email: '',
@@ -66,7 +58,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
 
   async function onSubmit(values: FormValues) {
     try {
-      const result = await createTeacher.mutateAsync({
+      await createTeacher.mutateAsync({
         body: {
           name: values.name,
           email: values.email,
@@ -75,13 +67,8 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
         },
       })
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
-
-      if ((result as any)?.generatedPassword) {
-        setGeneratedPassword((result as any).generatedPassword)
-      } else {
-        toast.success('Professor criado com sucesso!')
-        handleClose()
-      }
+      toast.success('Professor criado com sucesso!')
+      handleClose()
     } catch (error) {
       toast.error('Erro ao criar professor', {
         description: error instanceof Error ? error.message : 'Ocorreu um erro desconhecido',
@@ -91,54 +78,7 @@ export function NewTeacherModal({ schoolId, open, onOpenChange }: NewTeacherModa
 
   function handleClose() {
     form.reset()
-    setGeneratedPassword(null)
-    setCopied(false)
     onOpenChange(false)
-  }
-
-  function handleCopyPassword() {
-    if (generatedPassword) {
-      navigator.clipboard.writeText(generatedPassword)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
-
-  if (generatedPassword) {
-    return (
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Professor criado com sucesso!</DialogTitle>
-            <DialogDescription>
-              Copie a senha gerada abaixo e envie para o professor.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Senha temporária:</p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-lg font-mono bg-background p-2 rounded border">
-                  {generatedPassword}
-                </code>
-                <Button variant="outline" size="icon" onClick={handleCopyPassword}>
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              O professor deverá alterar a senha no primeiro acesso.
-            </p>
-
-            <div className="flex justify-end">
-              <Button onClick={handleClose}>Fechar</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
   }
 
   return (

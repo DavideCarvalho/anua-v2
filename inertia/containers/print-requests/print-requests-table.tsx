@@ -14,6 +14,7 @@ import { ptBR } from 'date-fns/locale'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -33,8 +34,14 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
 
+type PrintRequestsListResponse = Route.Response<'api.v1.print_requests.list_print_requests'>
+type PrintRequest = PrintRequestsListResponse['data'][number]
+type PrintRequestStatus = NonNullable<
+  Route.Query<'api.v1.print_requests.list_print_requests'>['statuses']
+>[number]
+
 interface PrintRequestsTableProps {
-  statuses?: string[]
+  statuses?: PrintRequestStatus[]
 }
 
 const statusConfig: Record<
@@ -54,8 +61,13 @@ const statusConfig: Record<
 
 export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
   const queryClient = useQueryClient()
+  const requestStatuses = statuses as
+    | ('REQUESTED' | 'APPROVED' | 'REJECTED' | 'PRINTED' | 'REVIEW')[]
+    | undefined
   const { data } = useSuspenseQuery(
-    api.api.v1.printRequests.listPrintRequests.queryOptions({ query: { statuses } })
+    api.api.v1.printRequests.listPrintRequests.queryOptions({
+      query: { statuses: requestStatuses },
+    })
   )
   const approveMutation = useMutation(
     api.api.v1.printRequests.approvePrintRequest.mutationOptions()
@@ -66,7 +78,7 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
   )
   const reviewMutation = useMutation(api.api.v1.printRequests.reviewPrintRequest.mutationOptions())
 
-  const requests = (data as any)?.data ?? []
+  const requests: PrintRequest[] = data?.data ?? []
 
   if (requests.length === 0) {
     return (
@@ -102,7 +114,7 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requests.map((request: any) => {
+            {requests.map((request: PrintRequest) => {
               const config = statusConfig[request.status] || statusConfig.REQUESTED
 
               return (
@@ -185,7 +197,18 @@ export function PrintRequestsTable({ statuses }: PrintRequestsTableProps) {
                             variant="ghost"
                             onClick={() =>
                               reviewMutation.mutate(
-                                { params: { id: request.id } },
+                                {
+                                  params: { id: request.id },
+                                  body: {
+                                    name: request.name,
+                                    fileUrl: request.path,
+                                    quantity: request.quantity,
+                                    dueDate: request.dueDate
+                                      ? new Date(request.dueDate).toISOString()
+                                      : new Date().toISOString(),
+                                    frontAndBack: request.frontAndBack,
+                                  },
+                                },
                                 {
                                   onSuccess: () =>
                                     queryClient.invalidateQueries({

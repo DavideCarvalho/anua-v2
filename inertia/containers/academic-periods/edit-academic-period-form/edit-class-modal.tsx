@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Plus, Minus } from 'lucide-react'
@@ -84,7 +85,7 @@ export function EditClassModal({
   initialData,
 }: EditClassModalProps) {
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: {
       name: '',
       teachers: [],
@@ -92,7 +93,7 @@ export function EditClassModal({
   })
 
   const { fields, append, remove } = useFieldArray({
-    control: form.control as any,
+    control: form.control,
     name: 'teachers',
   })
 

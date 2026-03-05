@@ -21,8 +21,14 @@ import {
 import { Badge } from '../../components/ui/badge'
 
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
-const STATUS_OPTIONS = [
+type PrintRequestsListResponse = Route.Response<'api.v1.print_requests.list_print_requests'>
+type PrintRequestItem = PrintRequestsListResponse['data'][number]
+type PrintRequestsQuery = Route.Query<'api.v1.print_requests.list_print_requests'>
+type PrintRequestStatus = NonNullable<PrintRequestsQuery['statuses']>[number]
+
+const STATUS_OPTIONS: { label: string; value: PrintRequestStatus }[] = [
   { label: 'Pedido', value: 'REQUESTED' },
   { label: 'Aprovado', value: 'APPROVED' },
   { label: 'Rejeitado', value: 'REJECTED' },
@@ -48,14 +54,14 @@ export function PrintRequestTable({
   onMarkPrinted: (id: string) => void
 }) {
   const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  const [statusFilter, setStatusFilter] = useState<PrintRequestStatus | undefined>()
 
   const { data } = useSuspenseQuery(
     api.api.v1.printRequests.listPrintRequests.queryOptions({
       query: {
         page,
         limit: 10,
-        statuses: statusFilter ? [statusFilter as any] : undefined,
+        statuses: statusFilter ? [statusFilter] : undefined,
       },
     })
   )
@@ -81,7 +87,13 @@ export function PrintRequestTable({
           <div className="text-sm font-medium">Status</div>
           <Select
             value={statusFilter || 'all'}
-            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
+            onValueChange={(value) =>
+              setStatusFilter(
+                value === 'all'
+                  ? undefined
+                  : STATUS_OPTIONS.find((status) => status.value === value)?.value
+              )
+            }
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Todos" />
@@ -112,7 +124,7 @@ export function PrintRequestTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((row: any) => (
+              {rows.map((row: PrintRequestItem) => (
                 <TableRow key={row.id}>
                   <TableCell className="font-medium">{row.name}</TableCell>
                   <TableCell>{row.quantity}</TableCell>

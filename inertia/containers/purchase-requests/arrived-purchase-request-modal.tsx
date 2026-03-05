@@ -63,7 +63,7 @@ export function ArrivedPurchaseRequestModal({
       markArrivedMutation
         .mutateAsync({
           params: { id: purchaseRequestId },
-          body: { arrivalDate: data.arrivalDate },
+          body: { arrivalDate: data.arrivalDate.toISOString() },
         })
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })

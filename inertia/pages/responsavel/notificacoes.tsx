@@ -6,20 +6,10 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Alert, AlertDescription } from '../../components/ui/alert'
-import { tuyau } from '../../lib/api'
+import { api } from '../../lib/api'
+import type { Route } from '@tuyau/core/types'
 
-function useNotificationsQueryOptions() {
-  return {
-    queryKey: ['responsavel', 'notifications'],
-    queryFn: async () => {
-      const response = await tuyau.api.api.v1.responsavel.api.notifications()
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar notificações')
-      }
-      return response.data
-    },
-  }
-}
+type NotificationsResponse = Awaited<Route.Response<'api.v1.responsavel.api.notifications'>>
 
 const TYPE_ICONS: Record<string, typeof Bell> = {
   POST: MessageSquare,
@@ -37,13 +27,10 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
 }
 
 function NotificacoesContent() {
-  const {
-    data: rawNotificationsData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery(useNotificationsQueryOptions())
-  const notificationsData = rawNotificationsData as any
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.responsavel.api.notifications.queryOptions({})
+  )
+  const notificationsData = data as NotificationsResponse | undefined
 
   if (isLoading) {
     return <NotificacoesSkeleton />
@@ -65,9 +52,16 @@ function NotificacoesContent() {
     return null
   }
 
-  const formatDate = (date: Date | string) => {
+  const formatDate = (date: Date | string | { toJSDate?: () => Date }) => {
     const now = new Date()
-    const notifDate = new Date(date)
+    let notifDate: Date
+    if (date instanceof Date) {
+      notifDate = date
+    } else if (typeof date === 'string') {
+      notifDate = new Date(date)
+    } else {
+      notifDate = date.toJSDate ? date.toJSDate() : new Date()
+    }
     const diffMs = now.getTime() - notifDate.getTime()
     const diffMins = Math.floor(diffMs / 60000)
     const diffHours = Math.floor(diffMs / 3600000)
@@ -100,7 +94,7 @@ function NotificacoesContent() {
       {/* Lista de Notificações */}
       {notificationsData.data.length > 0 ? (
         <div className="space-y-2">
-          {notificationsData.data.map((notification: any) => {
+          {notificationsData.data.map((notification) => {
             const Icon = TYPE_ICONS[notification.type as keyof typeof TYPE_ICONS] || Bell
 
             return (

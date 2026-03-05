@@ -20,6 +20,7 @@ import { ScrollArea } from '~/components/ui/scroll-area'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 interface LaunchGradesModalProps {
   assignmentId: string
@@ -45,6 +46,9 @@ interface StudentGrade {
   grade: number | null
   submittedAt: string | null
 }
+
+type AssignmentSubmissionsResponse = Route.Response<'api.v1.assignments.submissions'>
+type AssignmentSubmission = AssignmentSubmissionsResponse['data'][number]
 
 const schema = z.object({
   grades: z.array(
@@ -81,8 +85,6 @@ function LaunchGradesModalContent({
   assignmentId,
   maxGrade,
   classId,
-  courseId,
-  academicPeriodId,
   onOpenChange,
 }: Omit<LaunchGradesModalProps, 'open'>) {
   const today = new Date().toISOString().split('T')[0]
@@ -98,22 +100,20 @@ function LaunchGradesModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(
     api.api.v1.classes.students.queryOptions({
       params: { id: classId },
-      query: { courseId, academicPeriodId, limit: 1000 },
     })
   )
   const students = studentsResponse?.data || []
 
   const { data: submissionsResponse, isLoading: isLoadingGrades } = useQuery(
-    api.api.v1.assignments.submissions.index.queryOptions({
+    api.api.v1.assignments.submissions.queryOptions({
       params: { id: assignmentId },
-      query: { limit: 1000 },
     })
   )
 
   const existingGrades = (() => {
     if (!submissionsResponse) return []
-    const submissions = submissionsResponse?.data ?? []
-    return submissions.map((s: any) => ({
+    const submissions: AssignmentSubmission[] = submissionsResponse?.data ?? []
+    return submissions.map((s) => ({
       studentId: s.studentId,
       grade: s.grade,
       submittedAt: s.submittedAt ? s.submittedAt.split('T')[0] : null,
@@ -176,8 +176,9 @@ function LaunchGradesModalContent({
       queryClient.invalidateQueries({ queryKey: ['assignment-grades', assignmentId] })
       toast.success('Notas salvas com sucesso!')
       onOpenChange(false)
-    } catch (error: any) {
-      toast.error(error?.message || 'Erro ao salvar notas')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao salvar notas'
+      toast.error(message)
     }
   }
 

@@ -1,7 +1,6 @@
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { ErrorBoundary } from 'react-error-boundary'
-import { api } from '../lib/api'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
@@ -18,7 +17,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { api } from '../lib/api'
+import type { Route } from '@tuyau/core/types'
 import { formatCurrency } from '../lib/utils'
 
 // Loading Skeleton
@@ -64,8 +63,9 @@ function CanteenPurchasesErrorFallback({
   )
 }
 
+type CanteenPurchasesResponse = Route.Response<'api.v1.canteen_purchases.index'>
 type CanteenPurchase = CanteenPurchasesResponse['data'][number]
-type CanteenPurchasesMeta = CanteenPurchasesResponse['meta']
+type CanteenPurchasesMeta = CanteenPurchasesResponse['metadata']
 
 const statusConfig: Record<string, { label: string; className: string; icon: LucideIcon }> = {
   PENDING: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-700', icon: Clock },
@@ -108,13 +108,13 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
   const { search, page, limit } = filters
 
   const { data, isLoading, error, refetch } = useQuery(
-    api.canteen_purchases.index.queryOptions({
+    api.api.v1.canteenPurchases.index.queryOptions({
       query: { page, limit, canteenId, search: search || undefined },
     })
   )
 
   const purchases: CanteenPurchase[] = data?.data ?? []
-  const meta: CanteenPurchasesMeta | null = data?.meta ?? null
+  const meta: CanteenPurchasesMeta | null = data?.metadata ?? null
 
   return (
     <div className="space-y-4">
@@ -132,7 +132,7 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
 
       {isLoading && <CanteenPurchasesSkeleton />}
 
-      {error && (
+      {error instanceof Error && (
         <CanteenPurchasesErrorFallback error={error} resetErrorBoundary={() => refetch()} />
       )}
 
@@ -180,9 +180,7 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
                           <span className="font-medium">{purchase.user?.name || '-'}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-muted-foreground">
-                        {purchase.itemsPurchased?.length || 0} item(s)
-                      </td>
+                      <td className="p-4 text-muted-foreground">-</td>
                       <td className="p-4 font-semibold">
                         {formatCurrency(Number(purchase.totalAmount || 0))}
                       </td>
@@ -226,7 +224,7 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page >= meta.lastPage}
+                  disabled={page >= Number(meta.lastPage)}
                   onClick={() => setFilters({ page: page + 1 })}
                 >
                   <ChevronRight className="h-4 w-4" />

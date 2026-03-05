@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -25,12 +26,14 @@ import {
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
 })
 
 type FormValues = z.infer<typeof schema>
+type UpdateSubjectBody = Route.Body<'api.v1.subjects.update'>
 
 export function EditSubjectModal({
   subjectId,
@@ -50,7 +53,7 @@ export function EditSubjectModal({
   })
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema) as Resolver<FormValues>,
     defaultValues: { name: '' },
   })
 
@@ -62,23 +65,20 @@ export function EditSubjectModal({
   async function handleSubmit(values: FormValues) {
     if (!subject) return
 
-    const promise = updateSubject
-      .mutateAsync({
+    const body: UpdateSubjectBody = { name: values.name }
+
+    try {
+      await updateSubject.mutateAsync({
         params: { id: subjectId },
-        body: { name: values.name } as any,
-      })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ['subjects'] })
-        toast.success('Matéria alterada com sucesso!')
-        onCancel()
+        body,
       })
 
-    toast.promise(promise, {
-      loading: 'Alterando matéria...',
-      error: 'Erro ao alterar matéria',
-    })
-
-    return promise
+      queryClient.invalidateQueries({ queryKey: ['subjects'] })
+      toast.success('Matéria alterada com sucesso!')
+      onCancel()
+    } catch {
+      toast.error('Erro ao alterar matéria')
+    }
   }
 
   return (

@@ -54,7 +54,9 @@ function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesA
     if (!classData) return []
     const result: Subject[] = []
     const seen = new Set<string>()
-    for (const tc of (classData as any).teacherClasses || []) {
+    const teacherClasses = classData.teacherClasses
+
+    for (const tc of teacherClasses) {
       if (tc.subject && !seen.has(tc.subject.id)) {
         seen.add(tc.subject.id)
         result.push({ id: tc.subject.id, name: tc.subject.name })

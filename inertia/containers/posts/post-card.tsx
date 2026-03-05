@@ -17,23 +17,12 @@ import {
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 
-interface Post {
-  id: string
-  content: string
-  type: string
-  visibility: string
-  attachmentUrl: string | null
-  createdAt: string
-  author: {
-    id: string
-    name: string
-    avatarUrl: string | null
-  }
-  $extras: {
-    likes_count: number
-    comments_count: number
-  }
+type Post = Route.Response<'api.v1.posts.index'>['data'][number]
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
 }
 
 interface PostCardProps {
@@ -43,22 +32,40 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps) {
+  const postRecord = asRecord(post)
+  const authorRecord = asRecord(postRecord.author ?? postRecord.user)
+  const extras = asRecord(postRecord.$extras)
+
+  const postId = String(post.id)
+  const authorId = String(authorRecord.id ?? post.userId ?? '')
+  const authorName = typeof authorRecord.name === 'string' ? authorRecord.name : 'Usuario'
+  const authorAvatarUrl = typeof authorRecord.avatarUrl === 'string' ? authorRecord.avatarUrl : null
+  const postType = typeof postRecord.type === 'string' ? postRecord.type : 'TEXT'
+  const visibility =
+    typeof postRecord.visibility === 'string' ? postRecord.visibility : 'SCHOOL_ONLY'
+  const attachmentUrl =
+    typeof postRecord.attachmentUrl === 'string' ? postRecord.attachmentUrl : null
+  const createdAt = post.createdAt ? String(post.createdAt) : new Date().toISOString()
+  const commentsCount = typeof extras.comments_count === 'number' ? extras.comments_count : 0
+
   const [isLiked, setIsLiked] = useState(false)
-  const [likeCount, setLikeCount] = useState(post.$extras?.likes_count ?? 0)
+  const [likeCount, setLikeCount] = useState(
+    typeof extras.likes_count === 'number' ? extras.likes_count : 0
+  )
 
   const queryClient = useQueryClient()
   const likeMutation = useMutation(api.api.v1.posts.like.mutationOptions())
   const unlikeMutation = useMutation(api.api.v1.posts.unlike.mutationOptions())
   const deleteMutation = useMutation(api.api.v1.posts.destroy.mutationOptions())
 
-  const isAuthor = currentUserId === post.author.id
+  const isAuthor = currentUserId === authorId
 
   const handleLike = async () => {
     if (isLiked) {
       setIsLiked(false)
       setLikeCount((c) => c - 1)
       try {
-        await unlikeMutation.mutateAsync({ params: { id: post.id } })
+        await unlikeMutation.mutateAsync({ params: { id: postId } })
         queryClient.invalidateQueries({ queryKey: ['posts'] })
       } catch {
         setIsLiked(true)
@@ -69,7 +76,7 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
       setIsLiked(true)
       setLikeCount((c) => c + 1)
       try {
-        await likeMutation.mutateAsync({ params: { id: post.id } })
+        await likeMutation.mutateAsync({ params: { id: postId } })
         queryClient.invalidateQueries({ queryKey: ['posts'] })
       } catch {
         setIsLiked(false)
@@ -79,17 +86,14 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
     }
   }
 
-  const handleDelete = () => {
-    toast.promise(
-      deleteMutation.mutateAsync({ params: { id: post.id } }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['posts'] })
-      }),
-      {
-        loading: 'Excluindo post...',
-        success: 'Post excluido!',
-        error: 'Erro ao excluir post',
-      }
-    )
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync({ params: { id: postId } })
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      toast.success('Post excluido!')
+    } catch {
+      toast.error('Erro ao excluir post')
+    }
   }
 
   const getTypeLabel = (type: string) => {
@@ -118,9 +122,9 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={post.author.avatarUrl || undefined} />
+            <AvatarImage src={authorAvatarUrl || undefined} />
             <AvatarFallback>
-              {post.author.name
+              {authorName
                 .split(' ')
                 .map((n) => n[0])
                 .join('')
@@ -129,20 +133,20 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">{post.author.name}</p>
+            <p className="font-medium">{authorName}</p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span>
-                {formatDistanceToNow(new Date(post.createdAt), {
+                {formatDistanceToNow(new Date(createdAt), {
                   addSuffix: true,
                   locale: ptBR,
                 })}
               </span>
               <span>•</span>
-              <span>{getVisibilityLabel(post.visibility)}</span>
-              {post.type === 'ANNOUNCEMENT' && (
+              <span>{getVisibilityLabel(visibility)}</span>
+              {postType === 'ANNOUNCEMENT' && (
                 <>
                   <span>•</span>
-                  <span className="font-medium text-primary">{getTypeLabel(post.type)}</span>
+                  <span className="font-medium text-primary">{getTypeLabel(postType)}</span>
                 </>
               )}
             </div>
@@ -175,10 +179,10 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
 
       <CardContent className="pb-2">
         <p className="whitespace-pre-wrap">{post.content}</p>
-        {post.attachmentUrl && (
+        {attachmentUrl && (
           <div className="mt-3">
             <img
-              src={post.attachmentUrl}
+              src={attachmentUrl}
               alt="Anexo do post"
               className="max-h-96 rounded-lg object-cover"
             />
@@ -203,10 +207,10 @@ export function PostCard({ post, currentUserId, onCommentClick }: PostCardProps)
             variant="ghost"
             size="sm"
             className="gap-2"
-            onClick={() => onCommentClick?.(post.id)}
+            onClick={() => onCommentClick?.(postId)}
           >
             <MessageCircle className="h-4 w-4" />
-            {(post.$extras?.comments_count ?? 0) > 0 && <span>{post.$extras.comments_count}</span>}
+            {commentsCount > 0 && <span>{commentsCount}</span>}
           </Button>
         </div>
       </CardFooter>

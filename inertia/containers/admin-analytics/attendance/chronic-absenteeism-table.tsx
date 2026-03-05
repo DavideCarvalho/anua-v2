@@ -29,7 +29,7 @@ export function ChronicAbsenteeismTable() {
       title="Absenteísmo Crônico"
       description={`Alunos com mais de ${data?.threshold || 20}% de faltas`}
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
       {data && data.students && data.students.length > 0 ? (
         <>

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
+import type { Route } from '@tuyau/core/types'
 import { toast } from 'sonner'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog'
@@ -31,12 +32,10 @@ import { api } from '~/lib/api'
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   discountType: z.enum(['PERCENTAGE', 'FLAT']),
-  discountPercentage: z.preprocess((v) => Number(v), z.number().min(0).max(100)).optional(),
-  enrollmentDiscountPercentage: z
-    .preprocess((v) => Number(v), z.number().min(0).max(100))
-    .optional(),
-  discountValue: z.preprocess((v) => Number(v), z.number().min(0)).optional(),
-  enrollmentDiscountValue: z.preprocess((v) => Number(v), z.number().min(0)).optional(),
+  discountPercentage: z.coerce.number().min(0).max(100).optional(),
+  enrollmentDiscountPercentage: z.coerce.number().min(0).max(100).optional(),
+  discountValue: z.coerce.number().min(0).optional(),
+  enrollmentDiscountValue: z.coerce.number().min(0).optional(),
   type: z.enum(['PHILANTHROPIC', 'DISCOUNT', 'COMPANY_PARTNERSHIP', 'FREE']),
   description: z.string().optional(),
   schoolPartnerId: z.string().optional(),
@@ -44,6 +43,10 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
+type FormInput = z.input<typeof schema>
+type CreateScholarshipBody = Route.Body<'api.v1.scholarships.create_scholarship'>
+type ListSchoolPartnersResponse = Route.Response<'api.v1.school_partners.list_school_partners'>
+type SchoolPartnerItem = ListSchoolPartnersResponse['data'][number]
 
 export function NewScholarshipModal({
   open,
@@ -56,14 +59,16 @@ export function NewScholarshipModal({
 }) {
   const queryClient = useQueryClient()
   const createScholarship = useMutation(api.api.v1.scholarships.createScholarship.mutationOptions())
-  const { data: partnersData } = useQuery(api.api.v1.schoolPartners.index.queryOptions({}))
+  const { data: partnersData } = useQuery(
+    api.api.v1.schoolPartners.listSchoolPartners.queryOptions({})
+  )
 
   const partners = useMemo(() => {
-    return (partnersData as any)?.data ?? []
+    return partnersData?.data ?? []
   }, [partnersData])
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+  const form = useForm<FormInput, undefined, FormValues>({
+    resolver: zodResolver(schema),
     defaultValues: {
       discountType: 'PERCENTAGE',
       discountPercentage: 0,
@@ -79,7 +84,7 @@ export function NewScholarshipModal({
   const isFlat = discountType === 'FLAT'
 
   async function handleSubmit(values: FormValues) {
-    const payload: any = {
+    const payload: CreateScholarshipBody = {
       name: values.name,
       discountType: values.discountType,
       type: values.type,
@@ -169,7 +174,7 @@ export function NewScholarshipModal({
                           type="number"
                           step="0.01"
                           {...field}
-                          value={field.value ?? 0}
+                          value={typeof field.value === 'number' ? field.value : 0}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
@@ -189,7 +194,7 @@ export function NewScholarshipModal({
                           type="number"
                           step="0.01"
                           {...field}
-                          value={field.value ?? 0}
+                          value={typeof field.value === 'number' ? field.value : 0}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
@@ -210,7 +215,7 @@ export function NewScholarshipModal({
                         <Input
                           type="number"
                           {...field}
-                          value={field.value ?? 0}
+                          value={typeof field.value === 'number' ? field.value : 0}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
@@ -229,7 +234,7 @@ export function NewScholarshipModal({
                         <Input
                           type="number"
                           {...field}
-                          value={field.value ?? 0}
+                          value={typeof field.value === 'number' ? field.value : 0}
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
@@ -277,7 +282,7 @@ export function NewScholarshipModal({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {partners.map((partner: any) => (
+                      {partners.map((partner: SchoolPartnerItem) => (
                         <SelectItem key={partner.id} value={partner.id}>
                           {partner.name}
                         </SelectItem>

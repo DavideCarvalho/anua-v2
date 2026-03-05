@@ -23,7 +23,8 @@ import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
-type Product = NonNullable<Route.Response<'api.v1.store_owner.products'>>['data'][number]
+type ProductsResponse = Awaited<Route.Response<'api.v1.store_owner.products.index'>>
+type Product = ProductsResponse['data'][number]
 
 interface Props {
   product: Product

@@ -15,7 +15,9 @@ import {
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-type ContractSignatureStatsResponse = Route.Response<'api.v1.contracts.getSignatureStats'>
+type ContractSignatureStatsResponse = Awaited<
+  Route.Response<'api.v1.contracts.get_signature_stats'>
+>
 
 export function SignatureStatusTable({ contractId }: { contractId: string }) {
   const { data, isLoading } = useQuery(

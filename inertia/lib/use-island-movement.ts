@@ -67,7 +67,6 @@ function isPointInPolygon(point: Position, polygon: Position[]): boolean {
 const SCENE_WIDTH = 400
 const SCENE_HEIGHT = 300
 const DEFAULT_SPEED = 120
-const PROXIMITY_THRESHOLD = 40
 const TAP_ARRIVAL_THRESHOLD = 4
 
 export function useIslandMovement(config: UseIslandMovementConfig): UseIslandMovementReturn {

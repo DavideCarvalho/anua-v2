@@ -40,6 +40,7 @@ import {
 } from '../ui/sidebar'
 import { registry } from '~/generated/registry'
 import { DiceBearAvatar } from '../avatar/dicebear-avatar'
+import { ImpersonationBanner } from '../admin/impersonation-banner'
 
 interface NavItem {
   title: string
@@ -49,41 +50,41 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { title: 'Início', route: 'web.aluno.dashboard' as any, href: '/aluno', icon: Home },
+  { title: 'Início', route: 'web.aluno.dashboard', href: '/aluno', icon: Home },
   {
     title: 'Loja de Pontos',
-    route: 'web.aluno.loja.pontos' as any,
+    route: 'web.aluno.loja.pontos',
     href: '/aluno/loja/pontos',
     icon: Sparkles,
   },
-  { title: 'Loja', route: 'web.aluno.loja.index' as any, href: '/aluno/loja', icon: ShoppingBag },
+  { title: 'Loja', route: 'web.aluno.loja.index', href: '/aluno/loja', icon: ShoppingBag },
   {
     title: 'Carrinho',
-    route: 'web.aluno.loja.carrinho' as any,
+    route: 'web.aluno.loja.carrinho',
     href: '/aluno/loja/carrinho',
     icon: ShoppingCart,
   },
   {
     title: 'Meus Pedidos',
-    route: 'web.aluno.loja.pedidos' as any,
+    route: 'web.aluno.loja.pedidos',
     href: '/aluno/loja/pedidos',
     icon: ClipboardList,
   },
-  { title: 'Idle', route: 'web.aluno.idle' as any, href: '/aluno/idle', icon: Gamepad2 },
+  { title: 'Idle', route: 'web.aluno.idle', href: '/aluno/idle', icon: Gamepad2 },
 ]
 
 const gamifiedNavigation: NavItem[] = [
-  { title: 'Meu Cantinho', route: 'web.aluno.dashboard' as any, href: '/aluno', icon: Home },
+  { title: 'Meu Cantinho', route: 'web.aluno.dashboard', href: '/aluno', icon: Home },
   {
     title: 'Baú',
-    route: 'web.aluno.loja.pontos' as any,
+    route: 'web.aluno.loja.pontos',
     href: '/aluno/loja/pontos',
     icon: Gem,
   },
-  { title: 'Idle', route: 'web.aluno.idle' as any, href: '/aluno/idle', icon: Gamepad2 },
+  { title: 'Idle', route: 'web.aluno.idle', href: '/aluno/idle', icon: Gamepad2 },
   {
     title: 'Mercadinho',
-    route: 'web.aluno.loja.index' as any,
+    route: 'web.aluno.loja.index',
     href: '/aluno/loja',
     icon: ShoppingBag,
   },
@@ -114,7 +115,7 @@ function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link route={'web.aluno.dashboard' as any} params={undefined as any}>
+              <Link href="/aluno">
                 <div
                   className={cn(
                     'flex aspect-square size-8 items-center justify-center rounded-lg text-primary-foreground',
@@ -143,7 +144,7 @@ function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                      <Link route={item.route as any} params={undefined as any}>
+                      <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
                         {item.icon === ShoppingCart && <CartBadge />}
@@ -323,6 +324,7 @@ export function AlunoLayout({ children }: PropsWithChildren) {
 
   return (
     <CartProvider>
+      <ImpersonationBanner />
       {gamified ? (
         <AlunoLayoutContent>{children}</AlunoLayoutContent>
       ) : (

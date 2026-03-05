@@ -16,7 +16,7 @@ import {
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-type AtRiskStudentsResponse = Route.Response<'api.v1.grades.atRisk'>
+type AtRiskStudentsResponse = Awaited<Route.Response<'api.v1.grades.at_risk'>>
 
 interface AtRiskStudentsTableProps {
   schoolId?: string
@@ -27,13 +27,15 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
     api.api.v1.grades.atRisk.queryOptions({ query: { schoolId, limit: 20 } })
   )
 
-  if (isLoading || !data) {
+  const response = data as AtRiskStudentsResponse | undefined
+
+  if (isLoading || !response) {
     return <AtRiskStudentsTableSkeleton />
   }
 
   type AtRiskStudent = AtRiskStudentsResponse['topStudents'][number]
 
-  if (data.totalAtRisk === 0) {
+  if (response.totalAtRisk === 0) {
     return (
       <Card>
         <CardHeader>
@@ -68,7 +70,7 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
             <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
           </div>
           <Badge variant="destructive" className="text-lg">
-            {data.totalAtRisk} ({data.atRiskPercentage}%)
+            {response.totalAtRisk} ({response.atRiskPercentage}%)
           </Badge>
         </div>
       </CardHeader>
@@ -85,7 +87,7 @@ export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.topStudents.map((student: AtRiskStudent) => (
+            {response.topStudents.map((student: AtRiskStudent) => (
               <TableRow key={student.studentId}>
                 <TableCell className="font-medium">{student.studentName}</TableCell>
                 <TableCell className="text-muted-foreground">{student.studentEmail}</TableCell>

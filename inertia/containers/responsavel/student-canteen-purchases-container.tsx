@@ -1,11 +1,9 @@
-import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Clock, Receipt, UtensilsCrossed } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
-import { Button } from '../../components/ui/button'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
@@ -57,11 +55,9 @@ function StudentCanteenPurchasesSkeleton() {
 }
 
 function StudentCanteenPurchasesContent({ studentId }: { studentId: string }) {
-  const [page, setPage] = useState(1)
   const { data, isLoading, isError, error } = useQuery(
     api.api.v1.responsavel.api.studentCanteenPurchases.queryOptions({
       params: { studentId },
-      query: { page, limit: 10 },
     })
   )
 
@@ -114,37 +110,18 @@ function StudentCanteenPurchasesContent({ studentId }: { studentId: string }) {
                 </div>
 
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    {purchase.itemsPurchased?.length ?? 0} item(s)
-                  </span>
+                  <span className="text-sm text-muted-foreground">-</span>
                   {getStatusBadge(purchase.status)}
                 </div>
               </div>
             ))}
 
-            {data.meta && (
+            {data.metadata && (
               <div className="flex items-center justify-between pt-2">
                 <p className="text-sm text-muted-foreground">
-                  Página {data.meta.currentPage} de {data.meta.lastPage}
+                  Página {data.metadata.currentPage} de {data.metadata.lastPage}
                 </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={data.meta.currentPage === 1}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => p + 1)}
-                    disabled={data.meta.currentPage === data.meta.lastPage}
-                  >
-                    Próxima
-                  </Button>
-                </div>
+                <span className="text-xs text-muted-foreground">Paginação disponível em breve</span>
               </div>
             )}
           </div>

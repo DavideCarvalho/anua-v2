@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2, ChevronLeft, ChevronRight, Save } from 'lucide-react'
 
 import { Button } from '~/components/ui/button'
-import { tuyau } from '~/lib/api'
+import { api } from '~/lib/api'
 
 import { Stepper } from './stepper'
 import { CalendarForm } from './calendar-form'
@@ -75,8 +76,12 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
   const queryClient = useQueryClient()
   const steps = getSteps(academicPeriod.segment)
 
-  const form = useForm<EditAcademicPeriodFormValues>({
-    resolver: zodResolver(editAcademicPeriodSchema) as any,
+  const form = useForm<
+    z.input<typeof editAcademicPeriodSchema>,
+    undefined,
+    EditAcademicPeriodFormValues
+  >({
+    resolver: zodResolver(editAcademicPeriodSchema),
     defaultValues: {
       calendar: {
         name: academicPeriod.name,
@@ -94,42 +99,43 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     },
   })
 
+  const updateAcademicPeriodMutation = useMutation(
+    api.api.v1.academicPeriods.updateAcademicPeriod.mutationOptions()
+  )
   const updatePeriodMutation = useMutation({
     mutationFn: async (data: EditAcademicPeriodFormValues) => {
-      // Update basic period info
-      await tuyau.api.api.v1.academicPeriods({ id: academicPeriod.id })({
-        name: data.calendar.name,
-        segment: data.calendar.segment,
-        startDate: data.calendar.startDate.toISOString(),
-        endDate: data.calendar.endDate.toISOString(),
-        enrollmentStartDate: data.calendar.enrollmentStartDate?.toISOString(),
-        enrollmentEndDate: data.calendar.enrollmentEndDate?.toISOString(),
-      })
-
-      // Update courses
-      await tuyau.api.api.v1.academicPeriods({ id: academicPeriod.id }).courses({
-        courses: data.courses.map((course) => ({
-          id: course.id,
-          courseId: course.courseId,
-          levels: course.levels.map((level) => ({
-            id: level.id,
-            levelId: level.levelId ?? '',
-            name: level.name,
-            order: level.order,
-            contractId: level.contractId ?? undefined,
-            isActive: level.isActive,
-            classes: level.classes?.map((cls) => ({
-              id: cls.id,
-              name: cls.name,
-              teachers: cls.teachers?.map((t) => ({
-                id: t.id,
-                teacherId: t.teacherId,
-                subjectId: t.subjectId,
-                subjectQuantity: t.subjectQuantity,
+      await updateAcademicPeriodMutation.mutateAsync({
+        params: { id: academicPeriod.id },
+        body: {
+          name: data.calendar.name,
+          segment: data.calendar.segment,
+          startDate: data.calendar.startDate.toISOString(),
+          endDate: data.calendar.endDate.toISOString(),
+          enrollmentStartDate: data.calendar.enrollmentStartDate?.toISOString(),
+          enrollmentEndDate: data.calendar.enrollmentEndDate?.toISOString(),
+          courses: data.courses.map((course) => ({
+            id: course.id,
+            courseId: course.courseId,
+            levels: course.levels.map((level) => ({
+              id: level.id,
+              levelId: level.levelId ?? '',
+              name: level.name,
+              order: level.order,
+              contractId: level.contractId ?? undefined,
+              isActive: level.isActive,
+              classes: level.classes?.map((cls) => ({
+                id: cls.id,
+                name: cls.name,
+                teachers: cls.teachers?.map((t) => ({
+                  id: t.id,
+                  teacherId: t.teacherId,
+                  subjectId: t.subjectId,
+                  subjectQuantity: t.subjectQuantity,
+                })),
               })),
             })),
           })),
-        })),
+        },
       })
     },
     onSuccess: () => {

@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { Textarea } from '../../components/ui/textarea'
-import { tuyau } from '../../lib/api'
+import { api } from '~/lib/api'
 
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -61,9 +61,12 @@ export function NewContractModal({ schoolId, open, onOpenChange }: NewContractMo
     },
   })
 
-  const { mutateAsync: createContract, isPending } = useMutation({
-    mutationFn: async (values: FormValues) => {
-      const response = await tuyau.api.api.v1.contracts({
+  const createContractMutation = useMutation(api.api.v1.contracts.store.mutationOptions())
+  const isPending = createContractMutation.isPending
+
+  const createContract = async (values: FormValues) => {
+    const result = await createContractMutation.mutateAsync({
+      body: {
         schoolId,
         name: values.name,
         description: values.description || undefined,
@@ -76,17 +79,12 @@ export function NewContractModal({ schoolId, open, onOpenChange }: NewContractMo
           ? Number(values.enrollmentValueInstallments)
           : undefined,
         installments: Number(values.installments),
-      })
-      if (response.error) {
-        const errorValue = response.error.value as { message?: string; errors?: unknown[] }
-        throw new Error(errorValue?.message || 'Erro ao criar contrato')
-      }
-      return response.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contracts'] })
-    },
-  })
+      },
+    })
+
+    queryClient.invalidateQueries({ queryKey: ['contracts'] })
+    return result
+  }
 
   async function onSubmit(values: FormValues) {
     try {

@@ -33,18 +33,24 @@ import {
 } from '../../components/ui/select'
 import { Switch } from '../../components/ui/switch'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 import { useAuthUser } from '../../stores/auth_store'
 
+type AchievementCategory = Route.Body<'api.v1.achievements.store'>['category']
+type Achievement = Route.Response<'api.v1.achievements.index'>['data'][number]
+
 const ACHIEVEMENT_TYPES = [
-  { value: 'ACADEMIC_PERFORMANCE', label: 'Desempenho Acadêmico', color: 'bg-blue-500' },
+  { value: 'ACADEMIC', label: 'Desempenho Acadêmico', color: 'bg-blue-500' },
   { value: 'ATTENDANCE', label: 'Frequência', color: 'bg-green-500' },
   { value: 'BEHAVIOR', label: 'Comportamento', color: 'bg-purple-500' },
-  { value: 'PARTICIPATION', label: 'Participação', color: 'bg-yellow-500' },
-  { value: 'STREAK', label: 'Sequência', color: 'bg-orange-500' },
   { value: 'SOCIAL', label: 'Social', color: 'bg-pink-500' },
   { value: 'SPECIAL', label: 'Especial', color: 'bg-indigo-500' },
-]
+] as const satisfies ReadonlyArray<{
+  value: AchievementCategory
+  label: string
+  color: string
+}>
 
 function getTypeBadge(type: string) {
   const typeInfo = ACHIEVEMENT_TYPES.find((t) => t.value === type)
@@ -59,7 +65,7 @@ function getTypeBadge(type: string) {
 interface AchievementFormData {
   name: string
   description: string
-  type: string
+  type: AchievementCategory
   pointsReward: number
   iconUrl: string
   badgeColor: string
@@ -70,7 +76,7 @@ interface AchievementFormData {
 const defaultFormData: AchievementFormData = {
   name: '',
   description: '',
-  type: 'ACADEMIC_PERFORMANCE',
+  type: 'ACADEMIC',
   pointsReward: 100,
   iconUrl: '',
   badgeColor: '#3B82F6',
@@ -103,7 +109,7 @@ export function AchievementsTable() {
       body: {
         name: formData.name,
         description: formData.description,
-        category: formData.type as any,
+        category: formData.type,
         points: formData.pointsReward,
         schoolId: schoolId || undefined,
         icon: formData.iconUrl || undefined,
@@ -116,17 +122,17 @@ export function AchievementsTable() {
     setFormData(defaultFormData)
   }
 
-  const handleEdit = (achievement: any) => {
+  const handleEdit = (achievement: Achievement) => {
     setEditingId(achievement.id)
     setFormData({
       name: achievement.name,
       description: achievement.description,
-      type: achievement.type,
-      pointsReward: achievement.pointsReward,
-      iconUrl: achievement.iconUrl || '',
-      badgeColor: achievement.badgeColor || '#3B82F6',
+      type: achievement.category,
+      pointsReward: achievement.points,
+      iconUrl: achievement.icon || '',
+      badgeColor: '#3B82F6',
       isActive: achievement.isActive,
-      isRepeatable: achievement.isRepeatable,
+      isRepeatable: achievement.recurrencePeriod !== 'ONCE',
     })
   }
 
@@ -137,7 +143,7 @@ export function AchievementsTable() {
       body: {
         name: formData.name,
         description: formData.description,
-        category: formData.type as any,
+        category: formData.type,
         points: formData.pointsReward,
         icon: formData.iconUrl || undefined,
         isActive: formData.isActive,
@@ -154,7 +160,7 @@ export function AchievementsTable() {
     queryClient.invalidateQueries({ queryKey: ['achievements'] })
   }
 
-  const achievementsList = achievements?.data || []
+  const achievementsList = achievements?.data ?? []
 
   return (
     <Card>
@@ -215,20 +221,20 @@ export function AchievementsTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {achievementsList.map((achievement: any) => (
+              {achievementsList.map((achievement) => (
                 <TableRow key={achievement.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {achievement.iconUrl ? (
+                      {achievement.icon ? (
                         <img
-                          src={achievement.iconUrl}
+                          src={achievement.icon}
                           alt=""
                           className="h-8 w-8 rounded object-cover"
                         />
                       ) : (
                         <div
                           className="flex h-8 w-8 items-center justify-center rounded"
-                          style={{ backgroundColor: achievement.badgeColor || '#3B82F6' }}
+                          style={{ backgroundColor: '#3B82F6' }}
                         >
                           <Star className="h-4 w-4 text-white" />
                         </div>
@@ -241,9 +247,9 @@ export function AchievementsTable() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{getTypeBadge(achievement.type)}</TableCell>
+                  <TableCell>{getTypeBadge(achievement.category)}</TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline">{achievement.pointsReward} pts</Badge>
+                    <Badge variant="outline">{achievement.points} pts</Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={achievement.isActive ? 'default' : 'secondary'}>
@@ -251,7 +257,7 @@ export function AchievementsTable() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    {achievement.isRepeatable ? (
+                    {achievement.recurrencePeriod !== 'ONCE' ? (
                       <Badge variant="outline">Sim</Badge>
                     ) : (
                       <span className="text-muted-foreground">Não</span>

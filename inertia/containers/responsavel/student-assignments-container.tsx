@@ -61,10 +61,6 @@ export function StudentAssignmentsContainer({
   const { data, isLoading, isError, error } = useQuery(
     api.api.v1.responsavel.api.studentAssignments.queryOptions({
       params: { studentId },
-      query: {
-        status: statusFilter === 'all' ? undefined : statusFilter,
-        subjectId: subjectFilter === 'all' ? undefined : subjectFilter,
-      },
     })
   )
 

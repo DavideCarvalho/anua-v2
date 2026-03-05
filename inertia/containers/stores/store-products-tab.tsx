@@ -23,7 +23,7 @@ import { formatCurrency } from '../../lib/utils'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
-type StoreItemsResponse = Route.Response<'api.v1.storeItems.index'>
+type StoreItemsResponse = Awaited<Route.Response<'api.v1.store_items.index'>>
 import { CreateProductModal } from './create-product-modal'
 import { EditProductModal } from './edit-product-modal'
 

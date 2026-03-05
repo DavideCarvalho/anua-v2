@@ -71,9 +71,11 @@ function ComunicadosContent() {
             </div>
             <CardDescription className="flex items-center gap-2">
               <Calendar className="h-3 w-3" />
-              {format(new Date(notification.createdAt), "dd 'de' MMMM 'de' yyyy, HH:mm", {
-                locale: ptBR,
-              })}
+              {notification.createdAt
+                ? format(new Date(notification.createdAt), "dd 'de' MMMM 'de' yyyy, HH:mm", {
+                    locale: ptBR,
+                  })
+                : 'Data indisponível'}
             </CardDescription>
           </CardHeader>
           <CardContent>

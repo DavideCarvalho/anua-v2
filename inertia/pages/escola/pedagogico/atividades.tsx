@@ -93,10 +93,10 @@ export default function AtividadesPage() {
           classId={selectedClass || undefined}
           subjectId={selectedSubject || undefined}
           onView={(id) => {
-            router.visit({ route: 'web.escola.pedagogico.atividades.show', params: { id } })
+            router.visit({ route: 'web.escola.pedagogico.atividades.show', routeParams: { id } })
           }}
           onEdit={(id) => {
-            router.visit({ route: 'web.escola.pedagogico.atividades.edit', params: { id } })
+            router.visit({ route: 'web.escola.pedagogico.atividades.edit', routeParams: { id } })
           }}
         />
       </div>

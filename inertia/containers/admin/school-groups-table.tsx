@@ -5,7 +5,7 @@ import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
-type SchoolGroupsResponse = Route.Response<'api.v1.school_groups.index'>
+type SchoolGroupsResponse = Route.Response<'api.v1.school_groups.list_school_groups'>
 
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -32,17 +32,16 @@ interface SchoolGroupsTableProps {
 
 type SchoolGroupRow = SchoolGroupsResponse['data'][number] & {
   description?: string | null
-  schools?: Array<unknown>
 }
 
 export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroupsTableProps) {
   const queryClient = useQueryClient()
   const { data, isLoading } = useQuery(
-    api.api.v1.schoolGroups.index.queryOptions({
+    api.api.v1.schoolGroups.listSchoolGroups.queryOptions({
       query: { schoolChainId },
     })
   )
-  const deleteMutation = useMutation(api.api.v1.schoolGroups.destroy.mutationOptions())
+  const deleteMutation = useMutation(api.api.v1.schoolGroups.deleteSchoolGroup.mutationOptions())
 
   const groups = data?.data ?? []
 
@@ -110,13 +109,11 @@ export function SchoolGroupsTable({ schoolChainId, onCreateGroup }: SchoolGroups
                     <span className="font-medium">{group.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                  {group.description || '-'}
-                </TableCell>
+                <TableCell className="text-muted-foreground max-w-[200px] truncate">-</TableCell>
                 <TableCell>
                   <Badge variant="outline">{group.schoolChain?.name || '-'}</Badge>
                 </TableCell>
-                <TableCell className="text-center">{group.schools?.length || 0}</TableCell>
+                <TableCell className="text-center">-</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

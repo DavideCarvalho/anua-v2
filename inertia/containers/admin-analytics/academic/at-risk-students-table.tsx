@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle } from 'lucide-react'
 import { useSearchParams } from '../../../hooks/use_search_params'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
 import { ChartContainer } from '../shared/chart-container'
 import {
   Table,
@@ -12,6 +13,9 @@ import {
   TableRow,
 } from '../../../components/ui/table'
 import { Badge } from '../../../components/ui/badge'
+
+type AtRiskResponse = Route.Response<'api.v1.grades.at_risk'>
+type AtRiskStudent = AtRiskResponse['topStudents'][number]
 
 export function AtRiskStudentsTable() {
   const { params } = useSearchParams()
@@ -24,14 +28,16 @@ export function AtRiskStudentsTable() {
     })
   )
 
+  const students: AtRiskStudent[] = data?.topStudents ?? []
+
   return (
     <ChartContainer
       title="Alunos em Risco Acadêmico"
       description="Estudantes com média abaixo do mínimo da escola"
       isLoading={isLoading}
-      error={error}
+      error={error instanceof Error ? error : undefined}
     >
-      {data && (data as any).students && (data as any).students.length > 0 ? (
+      {students.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -42,9 +48,9 @@ export function AtRiskStudentsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(data as any).students.slice(0, 10).map((student: any) => (
-              <TableRow key={student.id}>
-                <TableCell className="font-medium">{student.name}</TableCell>
+            {students.slice(0, 10).map((student) => (
+              <TableRow key={student.studentId}>
+                <TableCell className="font-medium">{student.studentName}</TableCell>
                 <TableCell>{student.schoolName}</TableCell>
                 <TableCell className="text-right">{student.averageGrade?.toFixed(1)}%</TableCell>
                 <TableCell className="text-right">

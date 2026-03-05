@@ -1,29 +1,17 @@
-import { useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ArrowUpCircle, ArrowDownCircle, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
-import { tuyau } from '../../lib/api'
+import { api } from '../../lib/api'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
+import type { Route } from '@tuyau/core/types'
+import { parseAsInteger, useQueryState } from 'nuqs'
 
-function useBalanceQueryOptions(studentId: string, page: number = 1) {
-  return {
-    queryKey: ['responsavel', 'student', studentId, 'transactions', page],
-    queryFn: async () => {
-      const response = await tuyau.$route('api.v1.responsavel.api.studentBalance', { studentId })({
-        query: { page, limit: 20 },
-      })
-      if (response.error) {
-        throw new Error((response.error as any).value?.message || 'Erro ao carregar transacoes')
-      }
-      return response.data
-    },
-    enabled: !!studentId,
-  }
-}
+type StudentBalanceResponse = Awaited<Route.Response<'api.v1.responsavel.api.student_balance'>>
+type StudentBalanceTransaction = StudentBalanceResponse['data'][number]
 
 function TransactionsHistorySkeleton() {
   return (
@@ -43,8 +31,15 @@ function TransactionsHistorySkeleton() {
 }
 
 function TransactionsHistoryContent({ studentId }: { studentId: string }) {
-  const [page, setPage] = useState(1)
-  const { data, isLoading, isError, error } = useQuery(useBalanceQueryOptions(studentId, page))
+  const [page, setPage] = useQueryState('txPage', parseAsInteger.withDefault(1))
+  const balanceQueryInput = {
+    params: { studentId },
+    query: { page, limit: 20 },
+  }
+
+  const { data, isLoading, isError, error } = useQuery(
+    api.api.v1.responsavel.api.studentBalance.queryOptions(balanceQueryInput)
+  )
 
   if (isLoading) {
     return <TransactionsHistorySkeleton />
@@ -105,7 +100,7 @@ function TransactionsHistoryContent({ studentId }: { studentId: string }) {
       <CardContent>
         {data.data.length > 0 ? (
           <div className="space-y-3">
-            {data.data.map((transaction) => (
+            {data.data.map((transaction: StudentBalanceTransaction) => (
               <div
                 key={transaction.id}
                 className="flex items-center justify-between rounded-lg border p-3"
@@ -150,7 +145,7 @@ function TransactionsHistoryContent({ studentId }: { studentId: string }) {
                     variant="outline"
                     size="sm"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={data.meta.currentPage === 1}
+                    disabled={Number(data.meta.currentPage) === 1}
                   >
                     Anterior
                   </Button>
@@ -158,7 +153,7 @@ function TransactionsHistoryContent({ studentId }: { studentId: string }) {
                     variant="outline"
                     size="sm"
                     onClick={() => setPage((p) => p + 1)}
-                    disabled={data.meta.currentPage === data.meta.lastPage}
+                    disabled={Number(data.meta.currentPage) === Number(data.meta.lastPage)}
                   >
                     Próxima
                   </Button>

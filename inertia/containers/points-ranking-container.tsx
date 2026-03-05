@@ -5,6 +5,10 @@ import { Trophy, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
+
+type RankingResponse = Route.Response<'api.v1.student_gamifications.ranking'>
+type RankingItem = RankingResponse['ranking'][number]
 
 function PointsRankingSkeleton() {
   return (
@@ -50,7 +54,7 @@ function PointsRankingContent({ schoolId }: { schoolId: string }) {
     })
   )
 
-  const ranking = (data as any)?.ranking ?? []
+  const ranking: RankingResponse['ranking'] = data?.ranking ?? []
 
   if (ranking.length === 0) {
     return (
@@ -71,15 +75,13 @@ function PointsRankingContent({ schoolId }: { schoolId: string }) {
         </div>
 
         <div className="space-y-3">
-          {ranking.map((item: any) => (
+          {ranking.map((item: RankingItem) => (
             <div key={item.studentId} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-7 text-sm text-muted-foreground">#{item.rank}</div>
-                <div className="font-medium">
-                  {item.student?.user?.name || item.student?.name || 'Aluno'}
-                </div>
+                <div className="font-medium">{item.student?.user?.name || 'Aluno'}</div>
               </div>
-              <div className="text-sm font-semibold">{item.points} pts</div>
+              <div className="text-sm font-semibold">{item.totalPoints} pts</div>
             </div>
           ))}
         </div>
@@ -95,7 +97,10 @@ export function PointsRankingContainer({ schoolId }: { schoolId: string }) {
         <ErrorBoundary
           onReset={reset}
           fallbackRender={({ error, resetErrorBoundary }) => (
-            <PointsRankingError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
+            <PointsRankingError
+              error={error instanceof Error ? error : new Error('Erro ao carregar ranking')}
+              resetErrorBoundary={resetErrorBoundary}
+            />
           )}
         >
           <Suspense fallback={<PointsRankingSkeleton />}>

@@ -30,8 +30,8 @@ import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
 const schema = z.object({
-  finalQuantity: z.coerce.number().min(1, 'Informe a quantidade comprada'),
-  finalUnitValue: z.coerce.number().min(0, 'Informe o valor unitário'),
+  finalQuantity: z.number().min(1, 'Informe a quantidade comprada'),
+  finalUnitValue: z.number().min(0, 'Informe o valor unitário'),
   estimatedArrivalDate: z.date(),
 })
 
@@ -56,7 +56,7 @@ export function BoughtPurchaseRequestModal({
   const markBoughtMutation = useMutation(api.api.v1.purchaseRequests.markBought.mutationOptions())
 
   const form = useForm<FormData>({
-    resolver: zodResolver(schema) as any,
+    resolver: zodResolver(schema),
     defaultValues: {
       finalQuantity: purchaseRequest?.quantity ?? 1,
       finalUnitValue: purchaseRequest?.unitValue ?? 0,
@@ -77,7 +77,7 @@ export function BoughtPurchaseRequestModal({
             finalQuantity: data.finalQuantity,
             finalUnitValue: data.finalUnitValue,
             finalValue: data.finalQuantity * data.finalUnitValue,
-            estimatedArrivalDate: data.estimatedArrivalDate,
+            estimatedArrivalDate: data.estimatedArrivalDate.toISOString(),
           },
         })
         .then(() => {
@@ -128,7 +128,15 @@ export function BoughtPurchaseRequestModal({
                   <FormItem>
                     <FormLabel>Quantidade comprada*</FormLabel>
                     <FormControl>
-                      <Input type="number" min={1} {...field} />
+                      <Input
+                        type="number"
+                        min={1}
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,7 +150,16 @@ export function BoughtPurchaseRequestModal({
                   <FormItem>
                     <FormLabel>Valor unitário comprado*</FormLabel>
                     <FormControl>
-                      <Input type="number" min={0} step={0.01} {...field} />
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
