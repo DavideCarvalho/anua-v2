@@ -8,6 +8,14 @@ const posthogOtelEndpointBase =
   env.get('POSTHOG_OTEL_ENDPOINT_BASE') ?? 'https://us.i.posthog.com/i'
 const localCollectorEndpoint = env.get('OTEL_COLLECTOR_ENDPOINT') ?? 'http://localhost:4318'
 
+function sanitizeHeaderValue(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  return value.replace(/[\r\n]+/g, '').trim()
+}
+
 function resolveEvlogLevel(level: unknown): 'info' | 'warn' | 'error' | 'debug' {
   if (typeof level === 'number') {
     if (level >= 50) return 'error'
@@ -59,7 +67,9 @@ function resolveDestinations():
   | Record<string, ReturnType<(typeof destinations)['otlp']>>
   | undefined {
   if (otelExportTarget === 'posthog') {
-    if (!posthogProjectToken) {
+    const sanitizedPosthogToken = sanitizeHeaderValue(posthogProjectToken)
+
+    if (!sanitizedPosthogToken) {
       return undefined
     }
 
@@ -68,7 +78,7 @@ function resolveDestinations():
         endpoint: posthogOtelEndpointBase,
         signals: ['traces'],
         headers: {
-          Authorization: `Bearer ${posthogProjectToken}`,
+          Authorization: `Bearer ${sanitizedPosthogToken}`,
         },
       }),
     }

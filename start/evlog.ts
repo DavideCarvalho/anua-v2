@@ -10,6 +10,17 @@ const evlogDrainTarget = env.get('EVLOG_DRAIN_TARGET') ?? 'none'
 const posthogApiKey = env.get('POSTHOG_PROJECT_TOKEN')
 const posthogHost = env.get('EVLOG_POSTHOG_HOST') ?? 'https://us.i.posthog.com'
 
+function sanitizeHeaderValue(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  return value.replace(/[\r\n]+/g, '').trim()
+}
+
+const sanitizedPosthogApiKey = sanitizeHeaderValue(posthogApiKey)
+const sanitizedPosthogHost = posthogHost.trim()
+
 const baseConfig = {
   enabled: evlogEnabled,
   pretty: isDev,
@@ -20,15 +31,15 @@ const baseConfig = {
   },
 }
 
-if (evlogDrainTarget === 'posthog' && posthogApiKey) {
+if (evlogDrainTarget === 'posthog' && sanitizedPosthogApiKey) {
   const pipeline = createDrainPipeline<DrainContext>({
     batch: { size: 50, intervalMs: 5000 },
     retry: { maxAttempts: 3, backoff: 'exponential', initialDelayMs: 1000 },
     maxBufferSize: 1000,
   })
   const posthogDrain = createPostHogDrain({
-    apiKey: posthogApiKey,
-    host: posthogHost,
+    apiKey: sanitizedPosthogApiKey,
+    host: sanitizedPosthogHost,
     timeout: 15000,
   })
   const drain = pipeline(async (batch: DrainContext[]) => {
