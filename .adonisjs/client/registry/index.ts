@@ -3192,6 +3192,12 @@ const routes = {
     tokens: [{"old":"/api/v1/marketplace/stores/:storeId/items","type":0,"val":"api","end":""},{"old":"/api/v1/marketplace/stores/:storeId/items","type":0,"val":"v1","end":""},{"old":"/api/v1/marketplace/stores/:storeId/items","type":0,"val":"marketplace","end":""},{"old":"/api/v1/marketplace/stores/:storeId/items","type":0,"val":"stores","end":""},{"old":"/api/v1/marketplace/stores/:storeId/items","type":1,"val":"storeId","end":""},{"old":"/api/v1/marketplace/stores/:storeId/items","type":0,"val":"items","end":""}],
     types: placeholder as Registry['api.v1.marketplace.stores.items']['types'],
   },
+  'api.v1.marketplace.stores.context': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/marketplace/stores/:storeId/context',
+    tokens: [{"old":"/api/v1/marketplace/stores/:storeId/context","type":0,"val":"api","end":""},{"old":"/api/v1/marketplace/stores/:storeId/context","type":0,"val":"v1","end":""},{"old":"/api/v1/marketplace/stores/:storeId/context","type":0,"val":"marketplace","end":""},{"old":"/api/v1/marketplace/stores/:storeId/context","type":0,"val":"stores","end":""},{"old":"/api/v1/marketplace/stores/:storeId/context","type":1,"val":"storeId","end":""},{"old":"/api/v1/marketplace/stores/:storeId/context","type":0,"val":"context","end":""}],
+    types: placeholder as Registry['api.v1.marketplace.stores.context']['types'],
+  },
   'api.v1.marketplace.installment_options': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/marketplace/installment-options',

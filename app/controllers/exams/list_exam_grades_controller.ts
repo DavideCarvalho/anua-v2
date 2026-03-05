@@ -19,6 +19,8 @@ export default class ListExamGradesController {
       .preload('student')
       .orderBy('createdAt', 'desc')
 
-    return response.ok(serialize(ExamGradeTransformer.transform(grades)))
+    const serialized = await serialize(ExamGradeTransformer.transform(grades))
+
+    return response.ok(serialized)
   }
 }

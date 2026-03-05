@@ -2,6 +2,29 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { getAtRiskStudentsValidator } from '#validators/grades'
 
+interface AtRiskStudent {
+  studentId: string
+  studentName: string
+  studentEmail: string
+  schoolId: string
+  schoolName: string
+  averageGrade: number
+  minimumRequired: number
+  assignmentsCount: number
+  deficit: number
+}
+
+interface AtRiskStudentRow {
+  student_id: string
+  student_name: string
+  student_email: string
+  school_id: string
+  school_name: string
+  average_grade: string | number
+  school_min_grade: string | number
+  assignments_count: string | number
+}
+
 export default class GetAtRiskStudentsController {
   async handle({ request, response }: HttpContext) {
     const {
@@ -63,17 +86,19 @@ export default class GetAtRiskStudentsController {
       params
     )
 
-    const atRiskStudents = studentsResult.rows.map((row: any) => ({
-      studentId: row.student_id,
-      studentName: row.student_name,
-      studentEmail: row.student_email,
-      schoolId: row.school_id,
-      schoolName: row.school_name,
-      averageGrade: Math.round(Number(row.average_grade) * 10) / 10,
-      minimumRequired: Number(row.school_min_grade),
-      assignmentsCount: Number(row.assignments_count),
-      deficit: Math.round((Number(row.school_min_grade) - Number(row.average_grade)) * 10) / 10,
-    }))
+    const atRiskStudents: AtRiskStudent[] = (studentsResult.rows as AtRiskStudentRow[]).map(
+      (row) => ({
+        studentId: row.student_id,
+        studentName: row.student_name,
+        studentEmail: row.student_email,
+        schoolId: row.school_id,
+        schoolName: row.school_name,
+        averageGrade: Math.round(Number(row.average_grade) * 10) / 10,
+        minimumRequired: Number(row.school_min_grade),
+        assignmentsCount: Number(row.assignments_count),
+        deficit: Math.round((Number(row.school_min_grade) - Number(row.average_grade)) * 10) / 10,
+      })
+    )
 
     // Group by school
     const bySchool = new Map<
@@ -82,11 +107,11 @@ export default class GetAtRiskStudentsController {
         schoolId: string
         schoolName: string
         count: number
-        students: typeof atRiskStudents
+        students: AtRiskStudent[]
       }
     >()
 
-    atRiskStudents.forEach((student: (typeof atRiskStudents)[number]) => {
+    atRiskStudents.forEach((student) => {
       const existing = bySchool.get(student.schoolId) ?? {
         schoolId: student.schoolId,
         schoolName: student.schoolName,

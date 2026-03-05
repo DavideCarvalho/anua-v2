@@ -8,9 +8,9 @@ import AppException from '#exceptions/app_exception'
 
 export default class ShowTurmaSituacaoPageController {
   async handle({ inertia, params, auth }: HttpContext) {
-    const academicPeriodSlug = params.slug
-    const courseSlug = params.cursoSlug
-    const classSlug = params.turmaSlug
+    const academicPeriodSlug = String(params.slug)
+    const courseSlug = String(params.cursoSlug)
+    const classSlug = String(params.turmaSlug)
 
     // Find the academic period by slug
     const academicPeriod = await AcademicPeriod.query().where('slug', academicPeriodSlug).first()

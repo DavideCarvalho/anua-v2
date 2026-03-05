@@ -317,6 +317,7 @@ export const controllers = {
   },
   marketplace: {
     GetInstallmentOptions: () => import('#controllers/marketplace/get_installment_options_controller'),
+    GetMarketplaceStoreContext: () => import('#controllers/marketplace/get_marketplace_store_context_controller'),
     ListMarketplaceStores: () => import('#controllers/marketplace/list_marketplace_stores_controller'),
     ListMyOrders: () => import('#controllers/marketplace/list_my_orders_controller'),
     ListStoreItems: () => import('#controllers/marketplace/list_store_items_controller'),

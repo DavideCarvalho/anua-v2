@@ -14,6 +14,29 @@ export const listStudentsValidator = vine.compile(
   })
 )
 
+export const lookupResponsibleValidator = vine.compile(
+  vine.object({
+    schoolId: vine.string().uuid(),
+    documentNumber: vine.string().trim().minLength(1),
+  })
+)
+
+export const checkDocumentValidator = vine.compile(
+  vine.object({
+    documentNumber: vine.string().trim().minLength(1),
+    academicPeriodId: vine.string().trim().minLength(1),
+    excludeUserId: vine.string().trim().optional(),
+  })
+)
+
+export const checkEmailValidator = vine.compile(
+  vine.object({
+    email: vine.string().trim().email(),
+    academicPeriodId: vine.string().trim().minLength(1),
+    excludeUserId: vine.string().trim().optional(),
+  })
+)
+
 export const createStudentValidator = vine.compile(
   vine.object({
     // User fields (will create a user too)

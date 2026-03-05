@@ -9,6 +9,14 @@ import {
   BalancePaginationMetaDto,
 } from '#models/dto/student_balance_response.dto'
 import AppException from '#exceptions/app_exception'
+import vine from '@vinejs/vine'
+
+const getStudentBalanceValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)
 
 interface BalanceRow {
   total_credits: string | number
@@ -22,8 +30,9 @@ export default class GetStudentBalanceController {
     }
 
     const { studentId } = params
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const payload = await request.validateUsing(getStudentBalanceValidator)
+    const page = payload.page ?? 1
+    const limit = payload.limit ?? 20
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()

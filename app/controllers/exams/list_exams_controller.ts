@@ -80,18 +80,7 @@ export default class ListExamsController {
 
     const data = exams.all()
     const metadata = exams.getMeta()
-    const paginated = (await serialize(ExamTransformer.paginate(data, metadata))) as unknown as {
-      data: Record<string, unknown>[]
-      meta: unknown
-    }
 
-    if (courseIdMap.size > 0) {
-      paginated.data = paginated.data.map((item) => ({
-        ...item,
-        courseId: examData.find((e) => e.id === item.id)?.$extras?.courseId,
-      }))
-    }
-
-    return paginated
+    return serialize(ExamTransformer.paginate(data, metadata))
   }
 }

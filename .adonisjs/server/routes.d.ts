@@ -535,6 +535,7 @@ export type ScannedRoutes = {
     'api.v1.store_owner.settlements.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.stores.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.stores.items': { paramsTuple: [ParamValue]; params: {'storeId': ParamValue} }
+    'api.v1.marketplace.stores.context': { paramsTuple: [ParamValue]; params: {'storeId': ParamValue} }
     'api.v1.marketplace.installment_options': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.checkout': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.orders.index': { paramsTuple?: []; params?: {} }
@@ -990,6 +991,7 @@ export type ScannedRoutes = {
     'api.v1.store_owner.settlements.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.stores.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.stores.items': { paramsTuple: [ParamValue]; params: {'storeId': ParamValue} }
+    'api.v1.marketplace.stores.context': { paramsTuple: [ParamValue]; params: {'storeId': ParamValue} }
     'api.v1.marketplace.installment_options': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.orders.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.orders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1384,6 +1386,7 @@ export type ScannedRoutes = {
     'api.v1.store_owner.settlements.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.stores.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.stores.items': { paramsTuple: [ParamValue]; params: {'storeId': ParamValue} }
+    'api.v1.marketplace.stores.context': { paramsTuple: [ParamValue]; params: {'storeId': ParamValue} }
     'api.v1.marketplace.installment_options': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.orders.index': { paramsTuple?: []; params?: {} }
     'api.v1.marketplace.orders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

@@ -8,12 +8,30 @@ import StudentGamification from '#models/student_gamification'
 import AppException from '#exceptions/app_exception'
 
 const AVATAR_CATEGORIES = ['AVATAR_HAIR', 'AVATAR_OUTFIT', 'AVATAR_ACCESSORY'] as const
-const GAMIFIED_AGE_THRESHOLD = 14
 
-function calculateAge(birthDate: DateTime | null): number | null {
-  if (!birthDate || !birthDate.isValid) return null
-  const now = DateTime.now()
-  return Math.floor(now.diff(birthDate, 'years').years)
+type JsonPrimitive = string | number | boolean | null
+
+function toPrimitiveMetadata(
+  metadata: Record<string, unknown> | null
+): Record<string, JsonPrimitive> | null {
+  if (!metadata) {
+    return null
+  }
+
+  const normalized: Record<string, JsonPrimitive> = {}
+
+  for (const [key, value] of Object.entries(metadata)) {
+    if (
+      value === null ||
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      normalized[key] = value
+    }
+  }
+
+  return normalized
 }
 
 async function getStudentSchoolIds(studentId: string): Promise<string[]> {
@@ -58,15 +76,6 @@ export default class ShowAlunoLojaPontosPageController {
       throw AppException.notFound('Aluno não encontrado')
     }
 
-    const birthDate =
-      student.user?.birthDate instanceof DateTime
-        ? student.user.birthDate
-        : student.user?.birthDate
-          ? DateTime.fromISO(String(student.user.birthDate))
-          : null
-    const age = calculateAge(birthDate)
-    const gamified = age !== null && age <= GAMIFIED_AGE_THRESHOLD
-
     const schoolIds = await getStudentSchoolIds(student.id)
     const now = DateTime.now()
 
@@ -109,7 +118,6 @@ export default class ShowAlunoLojaPontosPageController {
     }
 
     return inertia.render('aluno/loja/pontos', {
-      gamified,
       items: items.map((i) => ({
         id: i.id,
         name: i.name,
@@ -117,7 +125,7 @@ export default class ShowAlunoLojaPontosPageController {
         price: i.price,
         category: i.category,
         imageUrl: i.imageUrl,
-        metadata: i.metadata,
+        metadata: toPrimitiveMetadata(i.metadata),
       })),
       itemsByCategory: {
         AVATAR_HAIR: itemsByCategory.AVATAR_HAIR.map((i) => ({
@@ -126,7 +134,7 @@ export default class ShowAlunoLojaPontosPageController {
           description: i.description,
           price: i.price,
           imageUrl: i.imageUrl,
-          metadata: i.metadata,
+          metadata: toPrimitiveMetadata(i.metadata),
         })),
         AVATAR_OUTFIT: itemsByCategory.AVATAR_OUTFIT.map((i) => ({
           id: i.id,
@@ -134,7 +142,7 @@ export default class ShowAlunoLojaPontosPageController {
           description: i.description,
           price: i.price,
           imageUrl: i.imageUrl,
-          metadata: i.metadata,
+          metadata: toPrimitiveMetadata(i.metadata),
         })),
         AVATAR_ACCESSORY: itemsByCategory.AVATAR_ACCESSORY.map((i) => ({
           id: i.id,
@@ -142,7 +150,7 @@ export default class ShowAlunoLojaPontosPageController {
           description: i.description,
           price: i.price,
           imageUrl: i.imageUrl,
-          metadata: i.metadata,
+          metadata: toPrimitiveMetadata(i.metadata),
         })),
       },
       avatar: {

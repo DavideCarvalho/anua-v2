@@ -1,6 +1,6 @@
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import type StudentPayment from '#models/student_payment'
-import StudentTransformer from './student_transformer.ts'
+import StudentTransformer from './student_transformer.js'
 
 export default class StudentPaymentTransformer extends BaseTransformer<StudentPayment> {
   toObject() {

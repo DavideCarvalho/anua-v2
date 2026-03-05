@@ -6,3 +6,10 @@ export const updateProfileValidator = vine.compile(
     phone: vine.string().trim().optional(),
   })
 )
+
+export const getStudentBalanceValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)

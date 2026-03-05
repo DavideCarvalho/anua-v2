@@ -2511,7 +2511,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/student').checkDocumentValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/check_document_controller').default['handle']>>>
     }
   }
@@ -2522,7 +2522,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/student').checkEmailValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/check_email_controller').default['handle']>>>
     }
   }
@@ -2533,7 +2533,7 @@ export interface Registry {
       body: {}
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/student').lookupResponsibleValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/lookup_responsible_controller').default['handle']>>>
     }
   }
@@ -3369,7 +3369,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { classId: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/schedules').getClassScheduleValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/schedules/get_class_schedule_controller').default['handle']>>>
     }
   }
@@ -3377,10 +3377,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/schedules/class/:classId'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/schedules').saveClassScheduleValidator)>>
       paramsTuple: [ParamValue]
       params: { classId: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/schedules').saveClassScheduleValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/schedules/save_class_schedule_controller').default['handle']>>>
     }
   }
@@ -3399,10 +3399,10 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/schedules/validate-conflict'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/schedules').validateTeacherScheduleConflictValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/schedules').validateTeacherScheduleConflictValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/schedules/validate_teacher_schedule_conflict_controller').default['handle']>>>
     }
   }
@@ -5846,6 +5846,17 @@ export interface Registry {
       params: { storeId: ParamValue }
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/marketplace/list_store_items_controller').default['handle']>>>
+    }
+  }
+  'api.v1.marketplace.stores.context': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/marketplace/stores/:storeId/context'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { storeId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/marketplace/get_marketplace_store_context_controller').default['handle']>>>
     }
   }
   'api.v1.marketplace.installment_options': {

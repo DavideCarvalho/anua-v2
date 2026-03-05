@@ -79,6 +79,42 @@ export const updateAcademicPeriodValidator = vine.compile(
     minimumAttendanceOverride: vine.number().optional(),
     isActive: vine.boolean().optional(),
     isClosed: vine.boolean().optional(),
+    courses: vine
+      .array(
+        vine.object({
+          id: vine.string().optional(),
+          courseId: vine.string(),
+          levels: vine.array(
+            vine.object({
+              id: vine.string().optional(),
+              levelId: vine.string().optional(),
+              name: vine.string().trim(),
+              order: vine.number(),
+              contractId: vine.string().optional(),
+              isActive: vine.boolean().optional(),
+              classes: vine
+                .array(
+                  vine.object({
+                    id: vine.string().optional(),
+                    name: vine.string(),
+                    teachers: vine
+                      .array(
+                        vine.object({
+                          id: vine.string().optional(),
+                          teacherId: vine.string(),
+                          subjectId: vine.string(),
+                          subjectQuantity: vine.number(),
+                        })
+                      )
+                      .optional(),
+                  })
+                )
+                .optional(),
+            })
+          ),
+        })
+      )
+      .optional(),
   })
 )
 

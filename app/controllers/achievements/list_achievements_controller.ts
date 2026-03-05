@@ -55,23 +55,23 @@ export default class ListAchievementsController {
       }
     }
 
-    const paginated = serialize(AchievementTransformer.paginate(data, metadata)) as unknown as {
-      data: Record<string, unknown>[]
-      meta: unknown
+    const paginated = await serialize(AchievementTransformer.paginate(data, metadata))
+
+    if (configByAchievementId.size === 0) {
+      return paginated
     }
 
-    if (configByAchievementId.size > 0) {
-      paginated.data = paginated.data.map((item) => {
-        const config = configByAchievementId.get(item.id as string)
+    return {
+      ...paginated,
+      data: paginated.data.map((item) => {
+        const config = configByAchievementId.get(item.id)
         return {
           ...item,
           schoolAchievementConfig: config
             ? SchoolAchievementConfigTransformer.transform(config)
             : undefined,
         }
-      })
+      }),
     }
-
-    return paginated
   }
 }

@@ -2,18 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import AcademicPeriod from '#models/academic_period'
 import AppException from '#exceptions/app_exception'
+import { checkDocumentValidator } from '#validators/student'
 
 export default class CheckDocumentController {
   async handle({ request, response }: HttpContext) {
-    const { documentNumber, excludeUserId, academicPeriodId } = request.qs()
-
-    if (!documentNumber) {
-      throw AppException.badRequest('Número do documento é obrigatório')
-    }
-
-    if (!academicPeriodId) {
-      throw AppException.badRequest('Período letivo é obrigatório')
-    }
+    const { documentNumber, excludeUserId, academicPeriodId } =
+      await request.validateUsing(checkDocumentValidator)
 
     const academicPeriod = await AcademicPeriod.find(academicPeriodId)
     if (!academicPeriod) {

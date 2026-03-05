@@ -19,10 +19,13 @@ export default class AssignmentTransformer extends BaseTransformer<Assignment> {
       ]),
       teacherHasClass: TeacherHasClassTransformer.transform(
         this.whenLoaded(this.resource.teacherHasClass)
-      ),
+      )?.depth(6),
       academicPeriod: AcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.academicPeriod)
       ),
+      submissionsCount:
+        (this.resource as { $extras?: { submissionsCount?: number } }).$extras?.submissionsCount ??
+        0,
     }
   }
 }

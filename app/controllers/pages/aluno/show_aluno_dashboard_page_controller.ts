@@ -1,18 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import Student from '#models/student'
 import StudentAvatar from '#models/student_avatar'
 import StudentGamification from '#models/student_gamification'
 import StudentAchievement from '#models/student_achievement'
 import AppException from '#exceptions/app_exception'
-
-const GAMIFIED_AGE_THRESHOLD = 14
-
-function calculateAge(birthDate: DateTime | null): number | null {
-  if (!birthDate || !birthDate.isValid) return null
-  const now = DateTime.now()
-  return Math.floor(now.diff(birthDate, 'years').years)
-}
 
 export default class ShowAlunoDashboardPageController {
   async handle({ inertia, auth, effectiveUser }: HttpContext) {
@@ -31,15 +22,6 @@ export default class ShowAlunoDashboardPageController {
     if (!student) {
       throw AppException.notFound('Aluno não encontrado')
     }
-
-    const birthDate =
-      student.user?.birthDate instanceof DateTime
-        ? student.user.birthDate
-        : student.user?.birthDate
-          ? DateTime.fromISO(String(student.user.birthDate))
-          : null
-    const age = calculateAge(birthDate)
-    const gamified = age !== null && age <= GAMIFIED_AGE_THRESHOLD
 
     let avatar = await StudentAvatar.query().where('studentId', student.id).first()
     if (!avatar) {
@@ -70,7 +52,6 @@ export default class ShowAlunoDashboardPageController {
     const streak = gamification?.streak ?? 0
 
     return inertia.render('aluno/dashboard', {
-      gamified,
       student: {
         id: student.id,
         name: student.user?.name ?? 'Aluno',

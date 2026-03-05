@@ -21,9 +21,9 @@ export default class TeacherHasClassTransformer extends BaseTransformer<TeacherH
         'createdAt',
         'updatedAt',
       ]),
-      teacher: TeacherTransformer.transform(this.whenLoaded(this.resource.teacher)),
-      class: ClassTransformer.transform(this.whenLoaded(this.resource.class)),
-      subject: SubjectTransformer.transform(this.whenLoaded(this.resource.subject)),
+      teacher: TeacherTransformer.transform(this.whenLoaded(this.resource.teacher))?.depth(6),
+      class: ClassTransformer.transform(this.whenLoaded(this.resource.class))?.depth(6),
+      subject: SubjectTransformer.transform(this.whenLoaded(this.resource.subject))?.depth(6),
     }
   }
 }

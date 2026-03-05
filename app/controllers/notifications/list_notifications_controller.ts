@@ -36,7 +36,7 @@ export default class ListNotificationsController {
 
     const data = notifications.all()
     const metadata = notifications.getMeta()
-    const paginated = serialize(NotificationTransformer.paginate(data, metadata))
+    const paginated = await serialize(NotificationTransformer.paginate(data, metadata))
 
     return response.ok({
       ...paginated,

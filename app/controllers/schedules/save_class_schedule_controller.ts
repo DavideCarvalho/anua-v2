@@ -4,6 +4,7 @@ import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import db from '@adonisjs/lucid/services/db'
 import AppException from '#exceptions/app_exception'
+import { saveClassScheduleValidator } from '#validators/schedules'
 
 interface SlotInput {
   teacherHasClassId: string | null
@@ -15,10 +16,9 @@ interface SlotInput {
 export default class SaveClassScheduleController {
   async handle({ params, request, response, logger }: HttpContext) {
     const classId = params.classId
-    const { academicPeriodId, slots } = request.body() as {
-      academicPeriodId: string
-      slots: SlotInput[]
-    }
+    const payload = await request.validateUsing(saveClassScheduleValidator)
+    const academicPeriodId = payload.academicPeriodId
+    const slots = payload.slots as SlotInput[]
 
     if (!academicPeriodId) {
       throw AppException.badRequest('academicPeriodId é obrigatório')

@@ -17,7 +17,7 @@ export default class ClassDetailDto extends BaseModelDto {
   declare level?: LevelDto
   declare students?: StudentDto[]
   declare teachers?: TeacherDto[]
-  declare teacherClasses?: TeacherHasClassDto[]
+  declare teacherClasses: TeacherHasClassDto[]
 
   constructor(model?: Class_) {
     super()
@@ -38,6 +38,6 @@ export default class ClassDetailDto extends BaseModelDto {
     this.teachers = model.teachers ? TeacherDto.fromArray(model.teachers) : undefined
     this.teacherClasses = model.teacherClasses
       ? TeacherHasClassDto.fromArray(model.teacherClasses)
-      : undefined
+      : []
   }
 }

@@ -4,7 +4,7 @@ import ClassDetailDto from '#models/dto/class_detail.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowClassController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params }: HttpContext) {
     const classEntity = await Class_.query()
       .where('id', params.id)
       .preload('level')
@@ -23,6 +23,6 @@ export default class ShowClassController {
       throw AppException.notFound('Turma não encontrada')
     }
 
-    return response.ok(new ClassDetailDto(classEntity))
+    return new ClassDetailDto(classEntity)
   }
 }

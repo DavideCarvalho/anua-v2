@@ -3,11 +3,13 @@ import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import TeacherHasClass from '#models/teacher_has_class'
 import AppException from '#exceptions/app_exception'
+import { getClassScheduleValidator } from '#validators/schedules'
 
 export default class GetClassScheduleController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.classId
-    const academicPeriodId = request.input('academicPeriodId')
+    const payload = await request.validateUsing(getClassScheduleValidator)
+    const academicPeriodId = payload.academicPeriodId
 
     if (!academicPeriodId) {
       throw AppException.badRequest('academicPeriodId é obrigatório')

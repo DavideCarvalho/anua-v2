@@ -3,7 +3,6 @@ import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
 import StoreItemTransformer from '#transformers/store_item_transformer'
 import Store from '#models/store'
-import School from '#models/school'
 import AppException from '#exceptions/app_exception'
 
 export default class ListStoreItemsController {
@@ -23,19 +22,16 @@ export default class ListStoreItemsController {
       throw AppException.notFound('Loja não encontrada')
     }
 
-    const school = await School.find(store.schoolId)
-    const hasOnlinePayment = school?.paymentConfigStatus === 'ACTIVE'
-
     const now = DateTime.now()
     const query = StoreItem.query()
       .where('storeId', storeId)
       .whereNull('deletedAt')
       .where('isActive', true)
       .where((q) => {
-        q.whereNull('availableFrom').orWhere('availableFrom', '<=', now.toSQL()!)
+        q.whereNull('availableFrom').orWhere('availableFrom', '<=', now.toSQL())
       })
       .where((q) => {
-        q.whereNull('availableUntil').orWhere('availableUntil', '>=', now.toSQL()!)
+        q.whereNull('availableUntil').orWhere('availableUntil', '>=', now.toSQL())
       })
       .orderBy('name', 'asc')
 
@@ -44,8 +40,6 @@ export default class ListStoreItemsController {
     const items = await query.paginate(page, limit)
     const list = items.all()
     const metadata = items.getMeta()
-    const paginated = serialize(StoreItemTransformer.paginate(list, metadata))
-
-    return { ...paginated, hasOnlinePayment }
+    return serialize(StoreItemTransformer.paginate(list, metadata))
   }
 }

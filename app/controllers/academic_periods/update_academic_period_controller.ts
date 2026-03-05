@@ -4,9 +4,10 @@ import AcademicPeriod from '#models/academic_period'
 import { updateAcademicPeriodValidator } from '#validators/academic_period'
 import AcademicPeriodDto from '#models/dto/academic_period.dto'
 import AppException from '#exceptions/app_exception'
+import { syncAcademicPeriodCourses } from '#services/academic_periods/sync_academic_period_courses_service'
 
 export default class UpdateAcademicPeriodController {
-  async handle({ request, params }: HttpContext) {
+  async handle({ request, params, auth }: HttpContext) {
     const payload = await request.validateUsing(updateAcademicPeriodValidator)
 
     const academicPeriod = await AcademicPeriod.find(params.id)
@@ -50,6 +51,14 @@ export default class UpdateAcademicPeriodController {
     })
 
     await academicPeriod.save()
+
+    if (payload.courses) {
+      await syncAcademicPeriodCourses(
+        academicPeriod,
+        { courses: payload.courses },
+        auth.user ? { id: auth.user.id, name: auth.user.name ?? 'Unknown' } : null
+      )
+    }
 
     return new AcademicPeriodDto(academicPeriod)
   }

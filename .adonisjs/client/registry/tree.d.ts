@@ -776,6 +776,7 @@ export interface ApiDefinition {
         stores: {
           index: typeof routes['api.v1.marketplace.stores.index']
           items: typeof routes['api.v1.marketplace.stores.items']
+          context: typeof routes['api.v1.marketplace.stores.context']
         }
         installmentOptions: typeof routes['api.v1.marketplace.installment_options']
         checkout: typeof routes['api.v1.marketplace.checkout']

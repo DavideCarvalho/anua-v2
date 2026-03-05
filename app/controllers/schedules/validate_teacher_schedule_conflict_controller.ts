@@ -3,20 +3,15 @@ import TeacherHasClass from '#models/teacher_has_class'
 import TeacherAvailability from '#models/teacher_availability'
 import db from '@adonisjs/lucid/services/db'
 import AppException from '#exceptions/app_exception'
+import { validateTeacherScheduleConflictValidator } from '#validators/schedules'
 
 const DAYS_OF_WEEK = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
 export default class ValidateTeacherScheduleConflictController {
   async handle({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(validateTeacherScheduleConflictValidator)
     const { teacherHasClassId, classWeekDay, startTime, endTime, academicPeriodId, classId } =
-      request.only([
-        'teacherHasClassId',
-        'classWeekDay',
-        'startTime',
-        'endTime',
-        'academicPeriodId',
-        'classId',
-      ])
+      payload
 
     if (!teacherHasClassId || !classWeekDay || !startTime || !endTime || !academicPeriodId) {
       throw AppException.badRequest(

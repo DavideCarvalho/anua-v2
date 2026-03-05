@@ -45,6 +45,7 @@ export default class ShowTurmaProvasPageController {
         courseSlug,
         classSlug,
         classId: classRecord.id,
+        courseId: course.id,
         className: classRecord.name,
         courseName: course.name,
         academicPeriodId: academicPeriod.id,
