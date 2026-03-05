@@ -42,6 +42,7 @@ import type PostTransformer from '#transformers/post_transformer'
 import type PurchaseRequestTransformer from '#transformers/purchase_request_transformer'
 import type ResponsibleAddressTransformer from '#transformers/responsible_address_transformer'
 import type RoleTransformer from '#transformers/role_transformer'
+import type ScheduleConflictValidationTransformer from '#transformers/schedule_conflict_validation_transformer'
 import type ScholarshipTransformer from '#transformers/scholarship_transformer'
 import type SchoolAchievementConfigTransformer from '#transformers/school_achievement_config_transformer'
 import type SchoolChainTransformer from '#transformers/school_chain_transformer'
@@ -218,6 +219,10 @@ export namespace Data {
   export type Role = InferData<RoleTransformer>
   export namespace Role {
     export type Variants = InferVariants<RoleTransformer>
+  }
+  export type ScheduleConflictValidation = InferData<ScheduleConflictValidationTransformer>
+  export namespace ScheduleConflictValidation {
+    export type Variants = InferVariants<ScheduleConflictValidationTransformer>
   }
   export type Scholarship = InferData<ScholarshipTransformer>
   export namespace Scholarship {

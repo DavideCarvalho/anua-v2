@@ -74,7 +74,7 @@ export default class SaveClassScheduleController {
         }
       })
 
-      return response.ok({ success: true })
+      return response.noContent()
     } catch (error) {
       logger.error({ error }, 'Error saving schedule')
       throw AppException.internalServerError('Falha ao salvar grade de horários')

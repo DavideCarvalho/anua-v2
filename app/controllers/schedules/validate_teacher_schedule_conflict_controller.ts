@@ -4,11 +4,14 @@ import TeacherAvailability from '#models/teacher_availability'
 import db from '@adonisjs/lucid/services/db'
 import AppException from '#exceptions/app_exception'
 import { validateTeacherScheduleConflictValidator } from '#validators/schedules'
+import ScheduleConflictValidationTransformer, {
+  type ScheduleConflictValidation,
+} from '#transformers/schedule_conflict_validation_transformer'
 
 const DAYS_OF_WEEK = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
 export default class ValidateTeacherScheduleConflictController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, serialize }: HttpContext): Promise<ScheduleConflictValidation> {
     const payload = await request.validateUsing(validateTeacherScheduleConflictValidator)
     const { teacherHasClassId, classWeekDay, startTime, endTime, academicPeriodId, classId } =
       payload
@@ -39,11 +42,13 @@ export default class ValidateTeacherScheduleConflictController {
     const isAvailable = this.isTeacherAvailableForSlot(availabilities, dayName, startTime, endTime)
 
     if (!isAvailable) {
-      return response.ok({
-        hasConflict: true,
-        reason: 'O professor não está disponível neste horário',
-        teacherName: teacherHasClass.teacher.user?.name || 'Professor',
-      })
+      return serialize(
+        ScheduleConflictValidationTransformer.transform({
+          hasConflict: true,
+          reason: 'O professor não está disponível neste horário',
+          teacherName: teacherHasClass.teacher.user?.name || 'Professor',
+        })
+      )
     }
 
     // Check if teacher is occupied in another class at this time
@@ -56,16 +61,16 @@ export default class ValidateTeacherScheduleConflictController {
     )
 
     if (isOccupied) {
-      return response.ok({
-        hasConflict: true,
-        reason: 'O professor já está ocupado em outra turma neste horário',
-        teacherName: teacherHasClass.teacher.user?.name || 'Professor',
-      })
+      return serialize(
+        ScheduleConflictValidationTransformer.transform({
+          hasConflict: true,
+          reason: 'O professor já está ocupado em outra turma neste horário',
+          teacherName: teacherHasClass.teacher.user?.name || 'Professor',
+        })
+      )
     }
 
-    return response.ok({
-      hasConflict: false,
-    })
+    return serialize(ScheduleConflictValidationTransformer.transform({ hasConflict: false }))
   }
 
   private isTeacherAvailableForSlot(
