@@ -29,7 +29,7 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   const options = await page.locator('[role="option"]').all()
   console.log(`Found ${options.length} options`)
 
-  const optionTexts = await Promise.all(options.slice(0, 5).map((opt) => opt.textContent()))
+  const optionTexts = await Promise.all(options.slice(0, 5).map((opt: any) => opt.textContent()))
   console.log('First 5 options:', optionTexts)
 
   const academicPeriodOption = page.getByRole('option', { name: academicPeriodName }).first()
