@@ -47,6 +47,9 @@ jobs:
       - name: Typecheck (inertia)
         run: pnpm exec tsc -p inertia/tsconfig.json --noEmit
 
+      - name: Typecheck (tests)
+        run: pnpm exec tsc --noEmit -p tests/tsconfig.json
+
       - name: Build
         run: pnpm run build
 

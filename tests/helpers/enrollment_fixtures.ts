@@ -8,7 +8,7 @@ import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
-import type { School } from '#models/school'
+import type School from '#models/school'
 
 export async function createEnrollmentFixtures(school: School) {
   const now = DateTime.now()

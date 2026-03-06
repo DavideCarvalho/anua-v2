@@ -15,6 +15,25 @@ const ADDRESS_NEIGHBORHOOD = 'Bela Vista'
 const ADDRESS_CITY = 'São Paulo'
 const ADDRESS_STATE = 'SP'
 
+async function selectAcademicPeriod(page: any, academicPeriodId: string) {
+  const academicPeriodField = page
+    .locator('div')
+    .filter({ has: page.getByText('Período Letivo *') })
+    .first()
+
+  const academicPeriodTrigger = academicPeriodField.getByRole('combobox')
+
+  await academicPeriodTrigger.waitFor({ state: 'visible', timeout: 30000 })
+  await academicPeriodTrigger.click()
+
+  const academicPeriodOption = page
+    .locator(`[role="option"][data-value="${academicPeriodId}"]`)
+    .first()
+
+  await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
+  await academicPeriodOption.click({ force: true })
+}
+
 test.group('Matricular aluno - E2E (browser)', (group) => {
   group.each.setup(async () => {
     await db.beginGlobalTransaction()
@@ -32,11 +51,7 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     const page = await visit!('/escola/administrativo/matriculas/nova')
 
     // Wait for page and select academic period
-    await page
-      .getByRole('combobox')
-      .filter({ hasText: /selecione o período letivo|período teste/i })
-      .click()
-    await page.getByRole('option', { name: academicPeriod.name }).click()
+    await selectAcademicPeriod(page, academicPeriod.id)
 
     // Step 0: Student info (child - no document/phone required)
     await page.getByLabel(/nome do aluno/i).fill(STUDENT_NAME)

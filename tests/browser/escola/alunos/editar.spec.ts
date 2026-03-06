@@ -134,6 +134,25 @@ async function waitForEnrollmentBillingUpdateById(enrollmentId: string) {
   return null
 }
 
+async function selectAcademicPeriod(page: any, academicPeriodId: string) {
+  const academicPeriodField = page
+    .locator('div')
+    .filter({ has: page.getByText('Período Letivo *') })
+    .first()
+
+  const academicPeriodTrigger = academicPeriodField.getByRole('combobox')
+
+  await academicPeriodTrigger.waitFor({ state: 'visible', timeout: 30000 })
+  await academicPeriodTrigger.click()
+
+  const academicPeriodOption = page
+    .locator(`[role="option"][data-value="${academicPeriodId}"]`)
+    .first()
+
+  await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
+  await academicPeriodOption.click({ force: true })
+}
+
 test.group('Editar aluno - E2E (browser)', (group) => {
   test('enrolls via UI, edits all sections, and validates payments/invoices', async (ctx: any) => {
     const { visit, browserContext, assert } = ctx
@@ -147,11 +166,7 @@ test.group('Editar aluno - E2E (browser)', (group) => {
     // Create student via full UI enrollment flow
     const page = await visit('/escola/administrativo/matriculas/nova')
 
-    await page
-      .getByRole('combobox')
-      .filter({ hasText: /selecione o período letivo|período teste/i })
-      .click()
-    await page.getByRole('option', { name: academicPeriod.name }).click()
+    await selectAcademicPeriod(page, academicPeriod.id)
 
     await page.getByLabel(/nome do aluno/i).fill(STUDENT_NAME_ORIGINAL)
     await page
