@@ -12,7 +12,7 @@ import type School from '#models/school'
 
 export async function createEnrollmentFixtures(school: School) {
   const now = DateTime.now()
-  const startDate = now.minus({ months: 1 })
+  const startDate = now.plus({ days: 1 })
   const endDate = now.plus({ years: 1 })
 
   const academicPeriod = await AcademicPeriod.create({
@@ -20,7 +20,7 @@ export async function createEnrollmentFixtures(school: School) {
     name: `Período Teste ${Date.now()}`,
     startDate,
     endDate,
-    enrollmentStartDate: startDate,
+    enrollmentStartDate: now,
     enrollmentEndDate: endDate,
     isActive: true,
     segment: 'ELEMENTARY',
