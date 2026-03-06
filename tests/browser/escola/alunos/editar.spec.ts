@@ -135,40 +135,17 @@ async function waitForEnrollmentBillingUpdateById(enrollmentId: string) {
 }
 
 async function selectAcademicPeriod(page: any, academicPeriodName: string) {
-  // First, verify API returns data
-  const apiResponse = await page.evaluate(async () => {
-    const response = await fetch('/api/v1/academic-periods?limit=50')
-    const data = await response.json()
-    return { status: response.status, data }
-  })
-  console.log('API response status:', apiResponse.status)
-  console.log('API response data:', JSON.stringify(apiResponse.data).substring(0, 500))
-
-  const academicPeriodTrigger = page
+  const trigger = page
     .locator('button[role="combobox"]:visible')
     .filter({ hasText: /selecione o período letivo|período teste/i })
     .first()
 
-  await academicPeriodTrigger.waitFor({ state: 'visible', timeout: 30000 })
-  await academicPeriodTrigger.click({ force: true })
+  await trigger.waitFor({ state: 'visible', timeout: 30000 })
+  await trigger.click()
 
-  await page.waitForTimeout(5000)
-
-  const options = await page.locator('[role="option"]').all()
-  console.log(`Found ${options.length} options`)
-
-  const optionTexts = await Promise.all(options.slice(0, 5).map((opt: any) => opt.textContent()))
-  console.log('First 5 options:', optionTexts)
-
-  const academicPeriodOption = page.getByRole('option', { name: academicPeriodName }).first()
-
-  try {
-    await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
-    await academicPeriodOption.click()
-  } catch (error) {
-    await page.screenshot({ path: 'dropdown-error.png', fullPage: true })
-    throw error
-  }
+  const option = page.getByRole('option', { name: academicPeriodName }).first()
+  await option.waitFor({ state: 'visible', timeout: 10000 })
+  await option.click()
 }
 
 test.group('Editar aluno - E2E (browser)', (group) => {
