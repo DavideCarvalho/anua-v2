@@ -22,69 +22,35 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
     .first()
 
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
-  console.log('Trigger found, clicking...')
-
-  // Check console for errors
-  const consoleMessages: string[] = []
-  page.on('console', (msg: any) => {
-    if (msg.type() === 'error') {
-      consoleMessages.push(`Console error: ${msg.text()}`)
-    }
-  })
-
   await trigger.click()
-  console.log('Trigger clicked')
 
-  // Wait a bit for dropdown to potentially open
-  await page.waitForTimeout(2000)
+  // Wait for dropdown to open and React Query to potentially load data
+  // In CI, resources are limited, so we give more time
+  await page.waitForTimeout(3000)
 
-  // Check if dropdown opened
-  const listbox = await page.$('[role="listbox"]')
-  console.log('Listbox found:', !!listbox)
+  // Check for options - wait up to 30s total
+  const maxWaitTime = 30000
+  const checkInterval = 1000
+  let totalWaitTime = 0
+  let found = false
 
-  // Check for options
-  const optionCount = await page.locator('[role="option"]').count()
-  console.log('Option count:', optionCount)
-
-  // Check for React Query data in window
-  const queryData = await page.evaluate(() => {
-    // @ts-ignore
-    const queryClient = window.__REACT_QUERY_DEVTOOLS_GLOBAL_QUERY_CLIENT__
-    if (!queryClient) return 'No query client found'
-
-    const queries = queryClient.getQueryCache().getAll()
-    const academicPeriodQuery = queries.find(
-      (q: any) => q.queryKey && q.queryKey[0] && q.queryKey[0].includes?.('academicPeriods')
-    )
-
-    return {
-      hasQuery: !!academicPeriodQuery,
-      status: academicPeriodQuery?.state?.status,
-      data: academicPeriodQuery?.state?.data ? 'has data' : 'no data',
-      error: academicPeriodQuery?.state?.error,
+  while (totalWaitTime < maxWaitTime) {
+    const optionCount = await page.locator('[role="option"]').count()
+    if (optionCount > 0) {
+      found = true
+      break
     }
-  })
-  console.log('React Query state:', JSON.stringify(queryData))
-
-  // Log console errors
-  if (consoleMessages.length > 0) {
-    console.log('Console errors:', consoleMessages.join('\n'))
+    await page.waitForTimeout(checkInterval)
+    totalWaitTime += checkInterval
   }
 
-  // Take screenshot
-  await page.screenshot({ path: 'dropdown-debug.png', fullPage: true })
-
-  // Wait for dropdown content to render
-  // React Query may use cached data or fetch - we just need to wait for options
-  await page.waitForSelector('[role="option"]', { state: 'visible', timeout: 20000 })
-
-  // Small delay to ensure all options are rendered
-  await page.waitForTimeout(1000)
+  if (!found) {
+    throw new Error(`No options found after ${maxWaitTime}ms timeout`)
+  }
 
   const option = page.getByRole('option', { name: academicPeriodName }).first()
   await option.waitFor({ state: 'visible', timeout: 5000 })
   await option.click()
-  console.log('Option selected')
 }
 
 test.group('Matricular aluno - E2E (browser)', (group) => {
