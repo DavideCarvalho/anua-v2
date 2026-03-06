@@ -46,3 +46,4 @@ infra/terraform/**/.terraform.lock.hcl
 infra/terraform/**/terraform.tfvars
 infra/terraform/**/*.auto.tfvars
 infra/terraform/**/*.tfplan
+node_modules
