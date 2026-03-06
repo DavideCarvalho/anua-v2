@@ -143,8 +143,12 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
   await trigger.click()
 
-  // Wait for any option to appear (proves dropdown opened and loaded)
-  await page.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: 10000 })
+  // Wait for dropdown to open and options to render
+  // The options are loaded via React Query which may take time in CI
+  await page.waitForSelector('[role="option"]', { state: 'visible', timeout: 15000 })
+
+  // Add a small delay to ensure all options are rendered
+  await page.waitForTimeout(500)
 
   const option = page.getByRole('option', { name: academicPeriodName }).first()
   await option.waitFor({ state: 'visible', timeout: 5000 })
@@ -163,6 +167,14 @@ test.group('Editar aluno - E2E (browser)', (group) => {
 
     // Create student via full UI enrollment flow
     const page = await visit('/escola/administrativo/matriculas/nova')
+
+    // Wait for the academic periods to load (React Query)
+    // This ensures the data is available before we interact with the dropdown
+    await page.waitForResponse(
+      (response: any) =>
+        response.url().includes('/api/v1/academic-periods') && response.status() === 200,
+      { timeout: 15000 }
+    )
 
     await selectAcademicPeriod(page, academicPeriod.name)
 
