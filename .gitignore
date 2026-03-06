@@ -24,7 +24,6 @@ logs/*
 dogfood-output/
 
 # AdonisJS generated artifacts
-.adonisjs/
 inertia/generated/
 
 # Editors specific

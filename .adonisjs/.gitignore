@@ -1,0 +1,6 @@
+# Ignore everything in .adonisjs except registry
+/*
+!/client/
+/client/*
+!/client/registry/
+
