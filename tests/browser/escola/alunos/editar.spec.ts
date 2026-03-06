@@ -386,7 +386,11 @@ test.group('Editar aluno - E2E (browser)', (group) => {
 
     // Billing update via dedicated payment modal (stable flow)
     await page.goto('/escola/administrativo/alunos')
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(2000)
+
     await page.getByPlaceholder('Buscar alunos...').fill(STUDENT_NAME_EDITED)
+    await page.waitForTimeout(3000)
     await page.assertTextContains('body', STUDENT_NAME_EDITED)
 
     const editedStudentRow = page.locator('tr').filter({ hasText: STUDENT_NAME_EDITED })
