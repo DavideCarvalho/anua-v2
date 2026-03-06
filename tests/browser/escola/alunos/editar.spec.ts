@@ -208,6 +208,7 @@ test.group('Editar aluno - E2E (browser)', (group) => {
 
     // Create student via full UI enrollment flow
     const page = await visit('/escola/administrativo/matriculas/nova')
+    await page.waitForURL('**/matriculas/nova**', { timeout: 10000 })
 
     await selectAcademicPeriod(page, academicPeriod.name)
 

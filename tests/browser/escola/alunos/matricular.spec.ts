@@ -104,6 +104,7 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     await browserContext!.loginAs(user)
 
     const page = await visit!('/escola/administrativo/matriculas/nova')
+    await page.waitForURL('**/matriculas/nova**', { timeout: 10000 })
 
     // Wait for page and select academic period
     await selectAcademicPeriod(page, academicPeriod.name)
