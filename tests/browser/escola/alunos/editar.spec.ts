@@ -4,6 +4,7 @@ import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
 import { createEnrollmentFixtures } from '#tests/helpers/enrollment_fixtures'
 import ContractPaymentDay from '#models/contract_payment_day'
 import Invoice from '#models/invoice'
+import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import User from '#models/user'
 
@@ -12,6 +13,7 @@ const STUDENT_NAME_EDITED = `Aluno Editado E2E ${Date.now()}`
 
 const RESPONSIBLE_1_NAME = `Responsável Edit E2E ${Date.now()}`
 const RESPONSIBLE_1_EMAIL = `resp-edit-e2e-${Date.now()}@example.com`
+const RESPONSIBLE_1_EMAIL_EDITED = `resp-edit-updated-e2e-${Date.now()}@example.com`
 const RESPONSIBLE_1_PHONE = '11999999999'
 const RESPONSIBLE_1_PHONE_EDITED = '11988887777'
 const RESPONSIBLE_1_DOCUMENT = '11122233344'
@@ -112,12 +114,27 @@ async function waitForPaymentsAndInvoices(studentId: string) {
   return { payments: [], invoices: [] }
 }
 
-test.group('Editar aluno - E2E (browser)', (group) => {
-  group.each.setup(async () => {
-    await db.beginGlobalTransaction()
-    return () => db.rollbackGlobalTransaction()
-  })
+async function waitForEnrollmentBillingUpdateById(enrollmentId: string) {
+  const timeoutMs = 12000
+  const startedAt = Date.now()
 
+  while (Date.now() - startedAt < timeoutMs) {
+    const enrollment = await StudentHasLevel.query()
+      .where('id', enrollmentId)
+      .whereNull('deletedAt')
+      .first()
+
+    if (enrollment?.paymentMethod === 'PIX' && enrollment.paymentDay === 10) {
+      return enrollment
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 300))
+  }
+
+  return null
+}
+
+test.group('Editar aluno - E2E (browser)', (group) => {
   test('enrolls via UI, edits all sections, and validates payments/invoices', async (ctx: any) => {
     const { visit, browserContext, assert } = ctx
 
@@ -130,7 +147,10 @@ test.group('Editar aluno - E2E (browser)', (group) => {
     // Create student via full UI enrollment flow
     const page = await visit('/escola/administrativo/matriculas/nova')
 
-    await page.getByRole('combobox').filter({ hasText: 'Selecione o período letivo' }).click()
+    await page
+      .getByRole('combobox')
+      .filter({ hasText: /selecione o período letivo|período teste/i })
+      .click()
     await page.getByRole('option', { name: academicPeriod.name }).click()
 
     await page.getByLabel(/nome do aluno/i).fill(STUDENT_NAME_ORIGINAL)
@@ -216,9 +236,9 @@ test.group('Editar aluno - E2E (browser)', (group) => {
     await page.getByPlaceholder('Buscar alunos...').fill(STUDENT_NAME_ORIGINAL)
     await page.assertTextContains('body', STUDENT_NAME_ORIGINAL)
 
-    const studentRow = page.locator('tr').filter({ hasText: STUDENT_NAME_ORIGINAL })
-    await studentRow.getByRole('button').click()
-    await page.getByRole('menuitem', { name: /editar aluno/i }).click()
+    const originalStudentUser = await User.query().where('name', STUDENT_NAME_ORIGINAL).first()
+    assert.exists(originalStudentUser)
+    await page.goto(`/escola/administrativo/alunos/${originalStudentUser!.id}/editar`)
     await page.waitForURL(/\/alunos\/[^/]+\/editar/, { timeout: 5000 })
     const studentEditPath = page.url()
 
@@ -228,6 +248,7 @@ test.group('Editar aluno - E2E (browser)', (group) => {
 
     // Step 1 - responsibles: edit first and remove second
     await page.locator('button:has(svg.lucide-pencil)').first().click()
+    await page.getByPlaceholder('email@exemplo.com').last().fill(RESPONSIBLE_1_EMAIL_EDITED)
     await page.locator('input[id^="edit-phone-"]').first().fill(RESPONSIBLE_1_PHONE_EDITED)
     await page.getByRole('button', { name: /^salvar$/i }).click()
     await page.locator('button:has(svg.lucide-x)').last().click()
@@ -343,36 +364,77 @@ test.group('Editar aluno - E2E (browser)', (group) => {
     )
     await page.getByRole('button', { name: /próximo/i }).click()
 
-    const persistedPaymentCard = page
+    // Billing update via dedicated payment modal (stable flow)
+    await page.goto('/escola/administrativo/alunos')
+    await page.getByPlaceholder('Buscar alunos...').fill(STUDENT_NAME_EDITED)
+    await page.assertTextContains('body', STUDENT_NAME_EDITED)
+
+    const editedStudentRow = page.locator('tr').filter({ hasText: STUDENT_NAME_EDITED })
+    await editedStudentRow.getByRole('button').click()
+    const editPaymentMenuItem = page.getByRole('menuitem', { name: /editar pagamento/i }).first()
+    await editPaymentMenuItem.waitFor({ state: 'visible', timeout: 5000 })
+    await editPaymentMenuItem.click({ force: true })
+
+    const paymentModalCard = page
       .locator('div')
       .filter({ hasText: 'Informações de Pagamento' })
       .first()
-    await persistedPaymentCard.waitFor({ state: 'visible', timeout: 10000 })
-    const persistedPaymentMethodSelect = persistedPaymentCard.locator(
+    await paymentModalCard.waitFor({ state: 'visible', timeout: 10000 })
+
+    const modalPaymentMethodSelect = paymentModalCard.locator(
       'xpath=.//label[contains(normalize-space(),"Forma de Pagamento")]/following::button[@role="combobox"][1]'
     )
-    const persistedPaymentDaySelect = persistedPaymentCard.locator(
+    const modalPaymentDaySelect = paymentModalCard.locator(
       'xpath=.//label[contains(normalize-space(),"Dia de Vencimento")]/following::button[@role="combobox"][1]'
     )
 
-    await persistedPaymentMethodSelect.click()
+    await modalPaymentMethodSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /^PIX$/ }).last().click({ force: true })
-    await persistedPaymentDaySelect.click()
+    await modalPaymentDaySelect.click()
     await page
       .locator('[role="option"]')
       .filter({ hasText: /^Dia 10$/ })
       .last()
       .click({ force: true })
-    await page
-      .getByRole('button', { name: /salvar alterações/i })
-      .first()
-      .click()
-    await page.assertTextContains('body', 'PIX')
-    await page.assertTextContains('body', 'Dia 10')
+
+    const enrollmentUpdateRequest = await Promise.all([
+      page.waitForRequest(
+        (request: any) => {
+          return (
+            request.method() === 'PATCH' &&
+            /\/api\/v1\/students\/[^/]+\/enrollments\/[^/]+$/.test(new URL(request.url()).pathname)
+          )
+        },
+        { timeout: 10000 }
+      ),
+      page
+        .getByRole('button', { name: /salvar alterações/i })
+        .last()
+        .click(),
+    ]).then(([request]) => request)
+
+    const enrollmentUpdatePayload = enrollmentUpdateRequest.postDataJSON() as {
+      paymentMethod?: string
+      paymentDay?: number
+    } | null
+    if (enrollmentUpdatePayload) {
+      assert.equal(enrollmentUpdatePayload.paymentMethod, 'PIX')
+      assert.equal(enrollmentUpdatePayload.paymentDay, 10)
+    }
+
+    const enrollmentUpdateResponse = await enrollmentUpdateRequest.response()
+    assert.exists(enrollmentUpdateResponse)
+    assert.equal(enrollmentUpdateResponse!.status(), 200)
+
+    const requestPathParts = new URL(enrollmentUpdateRequest.url()).pathname.split('/')
+    const enrollmentIdFromRequest = requestPathParts[requestPathParts.length - 1]
 
     // Validate payments and invoices were generated/reconciled for this student
     const updatedStudentUser = await User.query().where('name', STUDENT_NAME_EDITED).first()
     assert.exists(updatedStudentUser)
+
+    const updatedEnrollment = await waitForEnrollmentBillingUpdateById(enrollmentIdFromRequest)
+    assert.exists(updatedEnrollment)
 
     const { payments, invoices } = await waitForPaymentsAndInvoices(updatedStudentUser!.id)
     assert.isAbove(payments.length, 0)

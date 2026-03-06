@@ -32,7 +32,10 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     const page = await visit!('/escola/administrativo/matriculas/nova')
 
     // Wait for page and select academic period
-    await page.getByRole('combobox').filter({ hasText: 'Selecione o período letivo' }).click()
+    await page
+      .getByRole('combobox')
+      .filter({ hasText: /selecione o período letivo|período teste/i })
+      .click()
     await page.getByRole('option', { name: academicPeriod.name }).click()
 
     // Step 0: Student info (child - no document/phone required)
