@@ -143,16 +143,23 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   await academicPeriodTrigger.waitFor({ state: 'visible', timeout: 30000 })
   await academicPeriodTrigger.click({ force: true })
 
-  await page
-    .locator('[role="option"]')
-    .first()
-    .waitFor({ state: 'visible', timeout: 15000 })
-    .catch(() => {})
-  await page.waitForTimeout(3000)
+  await page.waitForTimeout(5000)
+
+  const options = await page.locator('[role="option"]').all()
+  console.log(`Found ${options.length} options`)
+
+  const optionTexts = await Promise.all(options.slice(0, 5).map((opt: any) => opt.textContent()))
+  console.log('First 5 options:', optionTexts)
 
   const academicPeriodOption = page.getByRole('option', { name: academicPeriodName }).first()
-  await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
-  await academicPeriodOption.click()
+
+  try {
+    await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
+    await academicPeriodOption.click()
+  } catch (error) {
+    await page.screenshot({ path: 'dropdown-error.png', fullPage: true })
+    throw error
+  }
 }
 
 test.group('Editar aluno - E2E (browser)', (group) => {
