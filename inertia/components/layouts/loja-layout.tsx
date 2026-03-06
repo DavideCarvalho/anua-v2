@@ -23,7 +23,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '../ui/sidebar'
-import { registry } from '~/generated/registry'
+import { registry } from '@generated/registry/index.ts'
 
 interface NavItem {
   title: string

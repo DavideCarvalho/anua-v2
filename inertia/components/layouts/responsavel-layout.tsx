@@ -28,7 +28,7 @@ import { StudentSelectorWithData } from '../responsavel/student-selector'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'
-import { registry } from '~/generated/registry'
+import { registry } from '@generated/registry/index.ts'
 import { useAuthUser } from '../../stores/auth_store'
 
 interface NavItem {

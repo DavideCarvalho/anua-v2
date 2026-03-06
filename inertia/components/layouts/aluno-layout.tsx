@@ -38,7 +38,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '../ui/sidebar'
-import { registry } from '~/generated/registry'
+import { registry } from '@generated/registry/index.ts'
 import { DiceBearAvatar } from '../avatar/dicebear-avatar'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 

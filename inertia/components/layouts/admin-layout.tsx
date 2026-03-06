@@ -40,7 +40,7 @@ import {
   SidebarTrigger,
 } from '../ui/sidebar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
-import { registry } from '~/generated/registry'
+import { registry } from '@generated/registry/index.ts'
 
 interface NavItem {
   title: string

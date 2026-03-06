@@ -29,7 +29,7 @@ import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
 import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useAuthUser } from '../../stores/auth_store'
-import { registry } from '~/generated/registry'
+import { registry } from '@generated/registry/index.ts'
 
 interface NavItem {
   title: string
