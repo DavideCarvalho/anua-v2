@@ -26,15 +26,17 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
       return { error: error.message }
     }
   })
-  
+
   console.log('API Response:', JSON.stringify(apiResponse).substring(0, 500))
-  
+
   if (apiResponse.error) {
     throw new Error(`API request failed: ${apiResponse.error}`)
   }
-  
+
   if (!apiResponse.data?.data?.length) {
-    throw new Error(`API returned no academic periods. Response: ${JSON.stringify(apiResponse.data)}`)
+    throw new Error(
+      `API returned no academic periods. Response: ${JSON.stringify(apiResponse.data)}`
+    )
   }
 
   const trigger = page
