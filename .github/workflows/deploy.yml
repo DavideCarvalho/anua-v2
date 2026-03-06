@@ -119,6 +119,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Clear Vite cache
+        run: rm -rf node_modules/.vite
+
       - name: Migrate, verify schema, and run tests
         run: |
           node ace migration:fresh --force
