@@ -1,4 +1,4 @@
-import { registry } from '@generated/registry/index.ts'
+import { registry } from '@generated/registry/index'
 import { createTuyau } from '@tuyau/core/client'
 import { createTuyauReactQueryClient } from '@tuyau/react-query'
 import { superjson } from '@tuyau/superjson/plugin'
