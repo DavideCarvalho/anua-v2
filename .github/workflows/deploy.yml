@@ -76,7 +76,7 @@ jobs:
     env:
       NODE_ENV: test
       PORT: 3333
-      HOST: 127.0.0.1
+      HOST: localhost
       APP_KEY: 0123456789abcdef0123456789abcdef
       LOG_LEVEL: error
       SESSION_DRIVER: cookie
