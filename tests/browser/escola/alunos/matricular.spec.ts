@@ -16,6 +16,15 @@ const ADDRESS_CITY = 'São Paulo'
 const ADDRESS_STATE = 'SP'
 
 async function selectAcademicPeriod(page: any, academicPeriodName: string) {
+  // First, verify API returns data
+  const apiResponse = await page.evaluate(async () => {
+    const response = await fetch('/api/v1/academic-periods?limit=50')
+    const data = await response.json()
+    return { status: response.status, data }
+  })
+  console.log('API response status:', apiResponse.status)
+  console.log('API response data:', JSON.stringify(apiResponse.data).substring(0, 500))
+
   const academicPeriodTrigger = page
     .locator('button[role="combobox"]:visible')
     .filter({ hasText: /selecione o período letivo|período teste/i })
