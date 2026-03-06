@@ -5,18 +5,7 @@ import { superjson } from '@tuyau/superjson/plugin'
 import { QueryClient } from '@tanstack/react-query'
 
 // Use empty string for relative URLs (same-origin requests)
-// Treat "/" as empty string to avoid malformed URLs
-const rawApiUrl = import.meta.env.VITE_API_URL
-const apiUrl = rawApiUrl === '/' ? '' : rawApiUrl || ''
-
-// Debug: Log the API URL being used
-if (typeof window !== 'undefined') {
-  console.log('API Configuration:', {
-    rawApiUrl,
-    apiUrl,
-    finalUrl: apiUrl + '/api/v1/academic-periods',
-  })
-}
+const apiUrl = import.meta.env.VITE_API_URL || ''
 
 export const queryClient = new QueryClient()
 
