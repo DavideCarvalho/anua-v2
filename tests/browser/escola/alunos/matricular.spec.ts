@@ -22,34 +22,18 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
     .first()
 
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
-
-  console.log('Clicking dropdown trigger...')
   await trigger.click()
-  console.log('Dropdown clicked, waiting for options...')
 
-  // Wait for dropdown to open and options to render
-  // The options are loaded via React Query which may take time in CI
-  try {
-    await page.waitForSelector('[role="option"]', { state: 'visible', timeout: 15000 })
-    console.log('Options found!')
-  } catch (error) {
-    console.log('Timeout waiting for options, taking screenshot...')
-    await page.screenshot({ path: 'no-options.png', fullPage: true })
+  // Wait for dropdown content to render
+  // React Query may use cached data or fetch - we just need to wait for options
+  await page.waitForSelector('[role="option"]', { state: 'visible', timeout: 20000 })
 
-    // Check what's in the dropdown
-    const content = await page.locator('[role="listbox"], [role="list"]').first().textContent()
-    console.log('Dropdown content:', content)
-
-    throw error
-  }
-
-  // Add a small delay to ensure all options are rendered
-  await page.waitForTimeout(500)
+  // Small delay to ensure all options are rendered
+  await page.waitForTimeout(1000)
 
   const option = page.getByRole('option', { name: academicPeriodName }).first()
   await option.waitFor({ state: 'visible', timeout: 5000 })
   await option.click()
-  console.log('Option selected!')
 }
 
 test.group('Matricular aluno - E2E (browser)', (group) => {
@@ -67,18 +51,6 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     await browserContext!.loginAs(user)
 
     const page = await visit!('/escola/administrativo/matriculas/nova')
-
-    // Wait for the academic periods to load (React Query)
-    // This ensures the data is available before we interact with the dropdown
-    await page.waitForResponse(
-      (response: any) =>
-        response.url().includes('/api/v1/academic-periods') && response.status() === 200,
-      { timeout: 15000 }
-    )
-
-    // Check if options are already in the DOM
-    const optionsBeforeClick = await page.locator('[role="option"]').count()
-    console.log(`Options before click: ${optionsBeforeClick}`)
 
     // Wait for page and select academic period
     await selectAcademicPeriod(page, academicPeriod.name)
