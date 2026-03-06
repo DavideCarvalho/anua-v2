@@ -24,6 +24,14 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
   console.log('Trigger found, clicking...')
 
+  // Check console for errors
+  const consoleMessages: string[] = []
+  page.on('console', (msg: any) => {
+    if (msg.type() === 'error') {
+      consoleMessages.push(`Console error: ${msg.text()}`)
+    }
+  })
+
   await trigger.click()
   console.log('Trigger clicked')
 
@@ -37,6 +45,31 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   // Check for options
   const optionCount = await page.locator('[role="option"]').count()
   console.log('Option count:', optionCount)
+
+  // Check for React Query data in window
+  const queryData = await page.evaluate(() => {
+    // @ts-ignore
+    const queryClient = window.__REACT_QUERY_DEVTOOLS_GLOBAL_QUERY_CLIENT__
+    if (!queryClient) return 'No query client found'
+
+    const queries = queryClient.getQueryCache().getAll()
+    const academicPeriodQuery = queries.find(
+      (q: any) => q.queryKey && q.queryKey[0] && q.queryKey[0].includes?.('academicPeriods')
+    )
+
+    return {
+      hasQuery: !!academicPeriodQuery,
+      status: academicPeriodQuery?.state?.status,
+      data: academicPeriodQuery?.state?.data ? 'has data' : 'no data',
+      error: academicPeriodQuery?.state?.error,
+    }
+  })
+  console.log('React Query state:', JSON.stringify(queryData))
+
+  // Log console errors
+  if (consoleMessages.length > 0) {
+    console.log('Console errors:', consoleMessages.join('\n'))
+  }
 
   // Take screenshot
   await page.screenshot({ path: 'dropdown-debug.png', fullPage: true })
