@@ -6,7 +6,17 @@ import { QueryClient } from '@tanstack/react-query'
 
 // Use empty string for relative URLs (same-origin requests)
 // Treat "/" as empty string to avoid malformed URLs
-const apiUrl = import.meta.env.VITE_API_URL === '/' ? '' : import.meta.env.VITE_API_URL || ''
+const rawApiUrl = import.meta.env.VITE_API_URL
+const apiUrl = rawApiUrl === '/' ? '' : rawApiUrl || ''
+
+// Debug: Log the API URL being used
+if (typeof window !== 'undefined') {
+  console.log('API Configuration:', {
+    rawApiUrl,
+    apiUrl,
+    finalUrl: apiUrl + '/api/v1/academic-periods',
+  })
+}
 
 export const queryClient = new QueryClient()
 
