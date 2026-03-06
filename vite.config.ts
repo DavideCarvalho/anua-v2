@@ -21,6 +21,7 @@ export default defineConfig({
       '~': path.resolve(__dirname, 'inertia'),
       '~/': path.resolve(__dirname, 'inertia/'),
       '~registry': path.resolve(__dirname, '.adonisjs/client/registry/index.ts'),
+      '@generated': path.resolve(__dirname, '.adonisjs/client'),
     },
   },
 })

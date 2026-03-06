@@ -1,1 +1,1 @@
-export { registry } from '../../.adonisjs/client/registry/index'
+export { registry } from '@generated/registry/index'
