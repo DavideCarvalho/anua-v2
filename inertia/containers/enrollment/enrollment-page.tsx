@@ -109,15 +109,17 @@ export function EnrollmentPage() {
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 50 } })
   )
   const academicPeriods = academicPeriodsQuery.data?.data ?? []
-  
-  // Debug: Log query state in development
-  if (import.meta.env.DEV) {
-    console.log('Academic Periods Query:', {
+
+  // Debug: Log React Query state in browser console
+  if (typeof window !== 'undefined') {
+    console.log('Academic Periods Query State:', {
       status: academicPeriodsQuery.status,
       isLoading: academicPeriodsQuery.isLoading,
+      isFetching: academicPeriodsQuery.isFetching,
       isError: academicPeriodsQuery.isError,
       error: academicPeriodsQuery.error,
       dataLength: academicPeriods.length,
+      data: academicPeriods.slice(0, 3), // First 3 periods
     })
   }
 

@@ -16,6 +16,16 @@ const ADDRESS_CITY = 'São Paulo'
 const ADDRESS_STATE = 'SP'
 
 async function selectAcademicPeriod(page: any, academicPeriodName: string) {
+  // Capture browser console logs
+  const browserLogs: string[] = []
+  page.on('console', (msg: any) => {
+    const text = msg.text()
+    browserLogs.push(text)
+    if (text.includes('Academic Periods Query State')) {
+      console.log('BROWSER:', text)
+    }
+  })
+
   // First, verify API is accessible and returns data
   const apiResponse = await page.evaluate(async () => {
     try {
@@ -69,6 +79,8 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   }
 
   if (!found) {
+    // Log all browser console messages
+    console.log('All browser logs:', browserLogs.join('\n'))
     throw new Error(`No options found after ${maxWaitTime}ms timeout`)
   }
 
