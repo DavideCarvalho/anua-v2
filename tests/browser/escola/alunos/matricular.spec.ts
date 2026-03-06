@@ -24,8 +24,11 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
   await trigger.click()
 
+  // Wait for any option to appear (proves dropdown opened and loaded)
+  await page.locator('[role="option"]').first().waitFor({ state: 'visible', timeout: 10000 })
+
   const option = page.getByRole('option', { name: academicPeriodName }).first()
-  await option.waitFor({ state: 'visible', timeout: 10000 })
+  await option.waitFor({ state: 'visible', timeout: 5000 })
   await option.click()
 }
 
