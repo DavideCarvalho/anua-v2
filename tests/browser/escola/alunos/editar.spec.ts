@@ -143,6 +143,8 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   await academicPeriodTrigger.waitFor({ state: 'visible', timeout: 30000 })
   await academicPeriodTrigger.click()
 
+  await page.waitForTimeout(1000)
+
   const academicPeriodOption = page.getByRole('option', { name: academicPeriodName }).first()
   await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
   await academicPeriodOption.click()
