@@ -23,8 +23,8 @@ logs/*
 # Dogfood artifacts
 dogfood-output/
 
-# Server stats persisted debug cache
-.adonisjs/server-stats/
+# AdonisJS generated artifacts
+.adonisjs/
 
 # Editors specific
 .fleet
