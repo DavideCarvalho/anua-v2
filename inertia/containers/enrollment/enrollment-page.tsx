@@ -105,10 +105,21 @@ export function EnrollmentPage() {
   const classId = form.watch('billing.classId')
 
   // ── Queries for academic data ─────────────────────────────────────────
-  const { data: academicPeriodsData } = useQuery(
+  const academicPeriodsQuery = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 50 } })
   )
-  const academicPeriods = academicPeriodsData?.data ?? []
+  const academicPeriods = academicPeriodsQuery.data?.data ?? []
+  
+  // Debug: Log query state in development
+  if (import.meta.env.DEV) {
+    console.log('Academic Periods Query:', {
+      status: academicPeriodsQuery.status,
+      isLoading: academicPeriodsQuery.isLoading,
+      isError: academicPeriodsQuery.isError,
+      error: academicPeriodsQuery.error,
+      dataLength: academicPeriods.length,
+    })
+  }
 
   const { data: coursesData } = useQuery({
     ...api.api.v1.academicPeriods.listCourses.queryOptions({
