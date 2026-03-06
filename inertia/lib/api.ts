@@ -4,9 +4,9 @@ import { createTuyauReactQueryClient } from '@tuyau/react-query'
 import { superjson } from '@tuyau/superjson/plugin'
 import { QueryClient } from '@tanstack/react-query'
 
-// Use relative URL for same-origin requests
-// Empty string means requests will be relative to current origin
-const apiUrl = import.meta.env.VITE_API_URL || ''
+// Use empty string for relative URLs (same-origin requests)
+// Treat "/" as empty string to avoid malformed URLs
+const apiUrl = import.meta.env.VITE_API_URL === '/' ? '' : (import.meta.env.VITE_API_URL || '')
 
 export const queryClient = new QueryClient()
 
