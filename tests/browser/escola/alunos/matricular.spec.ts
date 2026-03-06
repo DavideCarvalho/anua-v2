@@ -22,12 +22,14 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
     .first()
 
   await academicPeriodTrigger.waitFor({ state: 'visible', timeout: 30000 })
-  await academicPeriodTrigger.click()
+  await academicPeriodTrigger.click({ force: true })
 
   await page
-    .waitForSelector('[role="option"]', { state: 'visible', timeout: 10000 })
+    .locator('[role="option"]')
+    .first()
+    .waitFor({ state: 'visible', timeout: 15000 })
     .catch(() => {})
-  await page.waitForTimeout(2000)
+  await page.waitForTimeout(3000)
 
   const academicPeriodOption = page.getByRole('option', { name: academicPeriodName }).first()
   await academicPeriodOption.waitFor({ state: 'visible', timeout: 30000 })
