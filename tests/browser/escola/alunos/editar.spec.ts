@@ -141,7 +141,24 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
     .first()
 
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
+  console.log('Trigger found, clicking...')
+
   await trigger.click()
+  console.log('Trigger clicked')
+
+  // Wait a bit for dropdown to potentially open
+  await page.waitForTimeout(2000)
+
+  // Check if dropdown opened
+  const listbox = await page.$('[role="listbox"]')
+  console.log('Listbox found:', !!listbox)
+
+  // Check for options
+  const optionCount = await page.locator('[role="option"]').count()
+  console.log('Option count:', optionCount)
+
+  // Take screenshot
+  await page.screenshot({ path: 'dropdown-debug.png', fullPage: true })
 
   // Wait for dropdown content to render
   // React Query may use cached data or fetch - we just need to wait for options
@@ -153,6 +170,7 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   const option = page.getByRole('option', { name: academicPeriodName }).first()
   await option.waitFor({ state: 'visible', timeout: 5000 })
   await option.click()
+  console.log('Option selected')
 }
 
 test.group('Editar aluno - E2E (browser)', (group) => {
