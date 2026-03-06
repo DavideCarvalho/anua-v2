@@ -16,6 +16,27 @@ const ADDRESS_CITY = 'São Paulo'
 const ADDRESS_STATE = 'SP'
 
 async function selectAcademicPeriod(page: any, academicPeriodName: string) {
+  // First, verify API is accessible and returns data
+  const apiResponse = await page.evaluate(async () => {
+    try {
+      const response = await fetch('/api/v1/academic-periods?limit=50')
+      const data = await response.json()
+      return { status: response.status, data }
+    } catch (error: any) {
+      return { error: error.message }
+    }
+  })
+  
+  console.log('API Response:', JSON.stringify(apiResponse).substring(0, 500))
+  
+  if (apiResponse.error) {
+    throw new Error(`API request failed: ${apiResponse.error}`)
+  }
+  
+  if (!apiResponse.data?.data?.length) {
+    throw new Error(`API returned no academic periods. Response: ${JSON.stringify(apiResponse.data)}`)
+  }
+
   const trigger = page
     .locator('button[role="combobox"]:visible')
     .filter({ hasText: /selecione o período letivo|período teste/i })
@@ -36,6 +57,7 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
 
   while (totalWaitTime < maxWaitTime) {
     const optionCount = await page.locator('[role="option"]').count()
+    console.log(`Option count after ${totalWaitTime}ms: ${optionCount}`)
     if (optionCount > 0) {
       found = true
       break
