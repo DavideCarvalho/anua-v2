@@ -9,12 +9,12 @@ test.group('Dashboard page (browser)', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('redirects unauthenticated request to login', async ({ visit, route }) => {
-    const page = await visit(route('web.dashboard'))
+  test('redirects unauthenticated request to login', async ({ visit }) => {
+    const page = await visit('/dashboard')
     await page.assertPath('/login')
   })
 
-  test('redirects ADMIN user to /admin', async ({ visit, browserContext, route }) => {
+  test('redirects ADMIN user to /admin', async ({ visit, browserContext }) => {
     const role = await Role.create({ name: 'ADMIN' })
     const user = await User.create({
       name: 'Admin User',
@@ -27,16 +27,16 @@ test.group('Dashboard page (browser)', (group) => {
     })
 
     await browserContext.loginAs(user)
-    const page = await visit(route('web.dashboard'))
+    const page = await visit('/dashboard')
     await page.assertPath('/admin')
   })
 
-  test('redirects DIRECTOR with school to /escola', async ({ visit, browserContext, route }) => {
+  test('redirects DIRECTOR with school to /escola', async ({ visit, browserContext }) => {
     const { createEscolaAuthUser } = await import('#tests/helpers/escola_auth')
     const { user } = await createEscolaAuthUser()
 
     await browserContext.loginAs(user)
-    const page = await visit(route('web.dashboard'))
+    const page = await visit('/dashboard')
     await page.assertPath('/escola')
   })
 })
