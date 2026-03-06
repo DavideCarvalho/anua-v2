@@ -35,12 +35,14 @@ export function DiceBearAvatar({
 }: DiceBearAvatarProps) {
   const dataUri = useMemo(() => {
     const safeAccessories = Array.isArray(accessories) ? accessories : []
-    const combinedSeed = seed ?? [skinTone, hairStyle, hairColor, outfit, ...safeAccessories].filter(Boolean).join('-')
+    const combinedSeed =
+      seed ?? [skinTone, hairStyle, hairColor, outfit, ...safeAccessories].filter(Boolean).join('-')
 
     const size = variant === 'compact' ? 40 : variant === 'large' ? 224 : 160
-    const avatar = style === 'pixel-art'
-      ? createAvatar(pixelArt, { seed: combinedSeed, size })
-      : createAvatar(adventurer, { seed: combinedSeed, size })
+    const avatar =
+      style === 'pixel-art'
+        ? createAvatar(pixelArt, { seed: combinedSeed, size })
+        : createAvatar(adventurer, { seed: combinedSeed, size })
 
     return avatar.toDataUri()
   }, [skinTone, hairStyle, hairColor, outfit, accessories, seed, variant, style])
@@ -49,11 +51,7 @@ export function DiceBearAvatar({
     <img
       src={dataUri}
       alt="Avatar"
-      className={cn(
-        'rounded-full object-contain',
-        sizeMap[variant],
-        className
-      )}
+      className={cn('rounded-full object-contain', sizeMap[variant], className)}
     />
   )
 }

@@ -36,6 +36,7 @@ import {
   registerNotificationApiRoutes,
   registerNotificationPreferenceApiRoutes,
 } from './notifications.js'
+import { registerSchoolAnnouncementApiRoutes } from './school_announcements.js'
 import { registerPostApiRoutes, registerCommentApiRoutes } from './posts.js'
 import { registerExtraClassApiRoutes } from './extra_classes.js'
 import { registerAttendanceApiRoutes } from './attendance.js'
@@ -134,6 +135,7 @@ export function registerApiRoutes() {
   registerEnrollmentManagementApiRoutes()
   registerNotificationApiRoutes()
   registerNotificationPreferenceApiRoutes()
+  registerSchoolAnnouncementApiRoutes()
   registerPostApiRoutes()
   registerCommentApiRoutes()
   registerExtraClassApiRoutes()

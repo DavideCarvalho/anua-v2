@@ -15,9 +15,7 @@ export function GamifiedCartContainer({
     return (
       <div className="flex flex-col items-center rounded-2xl border-2 border-dashed border-gf-accent/30 py-16 text-center">
         <Backpack className="size-12 text-gf-accent/40" />
-        <h3 className="mt-4 font-display text-lg font-semibold">
-          Sua mochila está vazia!
-        </h3>
+        <h3 className="mt-4 font-display text-lg font-semibold">Sua mochila está vazia!</h3>
         <p className="mt-2 font-body text-sm text-muted-foreground">
           Visite o mercadinho para encontrar coisas legais
         </p>

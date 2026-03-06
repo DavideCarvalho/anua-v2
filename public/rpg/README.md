@@ -3,6 +3,7 @@
 ## Cute Fantasy (Kenmi Art, premium)
 
 Chão e objetos em `cute-fantasy/` e `objects/`:
+
 - **grass** (id 1) → Grass_Tiles_1–4.png (16 tiles variados)
 - **water** (id 2) → Water_Middle.png
 - **Mercadinho** → objects/market.png (House_1_Wood_Base_Red)

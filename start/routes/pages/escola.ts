@@ -61,6 +61,12 @@ const ShowNotificacoesPageController = () =>
   import('#controllers/pages/escola/show_notificacoes_page_controller')
 const ShowNotificacoesPreferenciasPageController = () =>
   import('#controllers/pages/escola/show_notificacoes_preferencias_page_controller')
+const ShowComunicadosPageController = () =>
+  import('#controllers/pages/escola/show_comunicados_page_controller')
+const ShowNovoComunicadoPageController = () =>
+  import('#controllers/pages/escola/show_novo_comunicado_page_controller')
+const ShowEditarComunicadoPageController = () =>
+  import('#controllers/pages/escola/show_editar_comunicado_page_controller')
 const ShowEventosPageController = () =>
   import('#controllers/pages/escola/show_eventos_page_controller')
 const ShowNovoEventoPageController = () =>
@@ -259,6 +265,13 @@ export function registerEscolaPageRoutes() {
       router
         .get('/notificacoes/preferencias', [ShowNotificacoesPreferenciasPageController])
         .as('notificacoes.preferencias')
+
+      // Comunicados
+      router.get('/comunicados', [ShowComunicadosPageController]).as('comunicados')
+      router.get('/comunicados/novo', [ShowNovoComunicadoPageController]).as('comunicados.novo')
+      router
+        .get('/comunicados/:id/editar', [ShowEditarComunicadoPageController])
+        .as('comunicados.editar')
 
       // Eventos
       router.get('/eventos', [ShowEventosPageController]).as('eventos')

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
@@ -56,7 +57,7 @@ export function PrintRequestTable({
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<PrintRequestStatus | undefined>()
 
-  const { data } = useSuspenseQuery(
+  const { data, isLoading, isError } = useQuery(
     api.api.v1.printRequests.listPrintRequests.queryOptions({
       query: {
         page,
@@ -68,6 +69,22 @@ export function PrintRequestTable({
 
   const rows = data?.data ?? []
   const meta = data?.meta ?? null
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="text-center text-destructive py-8">
+        Erro ao carregar solicitações de impressão
+      </div>
+    )
+  }
 
   const statusBadge = useMemo(
     () => ({

@@ -111,7 +111,8 @@ export function AvatarComposed({
     <div
       className={cn(
         'flex aspect-square w-full items-center justify-center',
-        !isCompact && 'max-w-[280px] rounded-xl bg-gradient-to-b from-amber-100 to-orange-200 dark:from-amber-950/50 dark:to-orange-900/30 p-4',
+        !isCompact &&
+          'max-w-[280px] rounded-xl bg-gradient-to-b from-amber-100 to-orange-200 dark:from-amber-950/50 dark:to-orange-900/30 p-4',
         isCompact && 'size-full max-w-[48px] max-h-[48px] min-w-0 min-h-0',
         className
       )}
@@ -148,7 +149,13 @@ export function AvatarComposed({
           <ellipse cx="-5" cy="-23" rx="0.8" ry="1" fill="white" />
           <ellipse cx="5" cy="-23" rx="0.8" ry="1" fill="white" />
           {/* Smile */}
-          <path d="M -4 -19 Q 0 -16 4 -19" stroke="#5c4033" strokeWidth="1" fill="none" strokeLinecap="round" />
+          <path
+            d="M -4 -19 Q 0 -16 4 -19"
+            stroke="#5c4033"
+            strokeWidth="1"
+            fill="none"
+            strokeLinecap="round"
+          />
 
           {/* Accessories - layer 4 (around head) */}
           {accessoriesList.slice(0, 3).map((_, i) => {
@@ -156,7 +163,15 @@ export function AvatarComposed({
             const x = Math.sin((angle * Math.PI) / 180) * 22
             const y = -22 + Math.cos((angle * Math.PI) / 180) * 22
             return (
-              <circle key={i} cx={x} cy={y} r="3.5" fill="#ecc94b" stroke="#d69e2e" strokeWidth="1" />
+              <circle
+                key={i}
+                cx={x}
+                cy={y}
+                r="3.5"
+                fill="#ecc94b"
+                stroke="#d69e2e"
+                strokeWidth="1"
+              />
             )
           })}
         </g>

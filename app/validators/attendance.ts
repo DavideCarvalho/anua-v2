@@ -42,3 +42,12 @@ export const batchCreateAttendanceValidator = vine.compile(
     ),
   })
 )
+
+export const getClassStudentsAttendanceValidator = vine.compile(
+  vine.object({
+    courseId: vine.string().trim(),
+    academicPeriodId: vine.string().trim(),
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)

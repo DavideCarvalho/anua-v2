@@ -112,14 +112,19 @@ export default function SignIn() {
   // Handle email submission
   const onEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!emailInput || !emailInput.includes('@')) {
+
+    const normalizedEmailInput = emailInput.trim().toLowerCase()
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmailInput)
+
+    if (!isValidEmail) {
       setErrorMessage('Digite um e-mail válido')
       setFlowState('error')
       return
     }
 
-    setEmail(emailInput)
-    const success = await sendCode(emailInput)
+    setEmailInput(normalizedEmailInput)
+    setEmail(normalizedEmailInput)
+    const success = await sendCode(normalizedEmailInput)
     if (success) {
       setFormStep(FormStep.CODE)
       setResendCooldown(30)
@@ -384,6 +389,7 @@ function EmailState({
                   id="email"
                   type="email"
                   placeholder="seu@email.com"
+                  required
                   autoComplete="email"
                   autoFocus
                   disabled={flowState === 'loading'}

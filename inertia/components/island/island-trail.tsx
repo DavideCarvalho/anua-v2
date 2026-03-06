@@ -11,11 +11,7 @@ export function IslandTrail({ progress, level }: IslandTrailProps) {
 
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 5 }}>
-      <svg
-        className="h-full w-full"
-        viewBox="0 0 400 300"
-        preserveAspectRatio="xMidYMid meet"
-      >
+      <svg className="h-full w-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id="trail-gradient" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#FCD34D" />
@@ -48,13 +44,32 @@ export function IslandTrail({ progress, level }: IslandTrailProps) {
 
         {/* Start marker */}
         <circle cx="110" cy="200" r="6" fill="#FCD34D" stroke="#F59E0B" strokeWidth="2" />
-        <text x="110" y="218" textAnchor="middle" className="fill-gf-gold-dark font-display text-[9px] font-bold">
+        <text
+          x="110"
+          y="218"
+          textAnchor="middle"
+          className="fill-gf-gold-dark font-display text-[9px] font-bold"
+        >
           Nv.{level}
         </text>
 
         {/* End marker */}
-        <circle cx="280" cy="135" r="6" fill="#D4A574" stroke="#8B5E3C" strokeWidth="2" opacity="0.5" />
-        <text x="280" y="125" textAnchor="middle" className="fill-gf-secondary font-display text-[9px] font-bold" opacity="0.5">
+        <circle
+          cx="280"
+          cy="135"
+          r="6"
+          fill="#D4A574"
+          stroke="#8B5E3C"
+          strokeWidth="2"
+          opacity="0.5"
+        />
+        <text
+          x="280"
+          y="125"
+          textAnchor="middle"
+          className="fill-gf-secondary font-display text-[9px] font-bold"
+          opacity="0.5"
+        >
           Nv.{level + 1}
         </text>
       </svg>

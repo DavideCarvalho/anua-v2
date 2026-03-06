@@ -18,11 +18,7 @@ export function IslandObject({ children, label, position, badge, isActive }: Isl
     >
       <div className="relative">
         <motion.div
-          animate={
-            isActive
-              ? { scale: 1.1 }
-              : { scale: 1 }
-          }
+          animate={isActive ? { scale: 1.1 } : { scale: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           className={isActive ? 'drop-shadow-[0_0_12px_rgba(13,148,136,0.4)]' : ''}
         >
@@ -35,11 +31,7 @@ export function IslandObject({ children, label, position, badge, isActive }: Isl
           </motion.div>
 
           {/* Badge (e.g. cart count) */}
-          {badge && (
-            <div className="absolute -right-1 -top-1 z-10">
-              {badge}
-            </div>
-          )}
+          {badge && <div className="absolute -right-1 -top-1 z-10">{badge}</div>}
 
           {/* Label */}
           <div

@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Bell, MessageSquare, Calendar, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
@@ -9,12 +9,61 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 
-import { api } from '~/lib/api'
+type AnnouncementItem = {
+  id: string
+  title: string
+  body: string
+  createdAt: string
+  publishedAt: string | null
+  requiresAcknowledgement?: boolean
+  acknowledgementDueAt?: string | null
+  acknowledgementStatus?: 'NOT_REQUIRED' | 'PENDING_ACK' | 'ACKNOWLEDGED' | 'EXPIRED_UNACKNOWLEDGED'
+}
+
+type AnnouncementResponse = {
+  data: AnnouncementItem[]
+}
+
+async function listComunicados(): Promise<AnnouncementResponse> {
+  const response = await fetch('/api/v1/responsavel/comunicados?limit=20', {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error('Falha ao carregar comunicados')
+  }
+
+  return response.json()
+}
 
 function ComunicadosContent() {
-  const { data, isLoading, isError, error } = useQuery(
-    api.api.v1.notifications.index.queryOptions({ query: { limit: 20 } })
-  )
+  const queryClient = useQueryClient()
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['responsavel-comunicados'],
+    queryFn: listComunicados,
+  })
+
+  const acknowledgeMutation = useMutation({
+    mutationFn: async (announcementId: string) => {
+      const response = await fetch(
+        `/api/v1/responsavel/comunicados/${announcementId}/acknowledge`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Falha ao registrar ciência')
+      }
+
+      return response.json()
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['responsavel-comunicados'] })
+      await queryClient.invalidateQueries({ queryKey: ['responsavel-pending-ack'] })
+    },
+  })
 
   if (isLoading) {
     return <ComunicadosSkeleton />
@@ -34,9 +83,9 @@ function ComunicadosContent() {
     )
   }
 
-  const notifications = data?.data ?? []
+  const announcements = data?.data ?? []
 
-  if (notifications.length === 0) {
+  if (announcements.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -52,34 +101,54 @@ function ComunicadosContent() {
 
   return (
     <div className="space-y-4">
-      {notifications.map((notification) => (
-        <Card
-          key={notification.id}
-          className={notification.readAt ? 'opacity-75' : 'border-primary/50'}
-        >
+      {announcements.map((announcement) => (
+        <Card key={announcement.id} className="border-primary/20">
           <CardHeader className="pb-2">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-primary" />
-                <CardTitle className="text-base">{notification.title}</CardTitle>
+                <CardTitle className="text-base">{announcement.title}</CardTitle>
               </div>
-              {!notification.readAt && (
-                <Badge variant="default" className="text-xs">
-                  Novo
-                </Badge>
-              )}
+              <Badge variant="outline" className="text-xs">
+                Comunicado
+              </Badge>
             </div>
             <CardDescription className="flex items-center gap-2">
               <Calendar className="h-3 w-3" />
-              {notification.createdAt
-                ? format(new Date(notification.createdAt), "dd 'de' MMMM 'de' yyyy, HH:mm", {
-                    locale: ptBR,
-                  })
+              {(announcement.publishedAt ?? announcement.createdAt)
+                ? format(
+                    new Date(announcement.publishedAt ?? announcement.createdAt),
+                    "dd 'de' MMMM 'de' yyyy, HH:mm",
+                    {
+                      locale: ptBR,
+                    }
+                  )
                 : 'Data indisponível'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{notification.message}</p>
+            <p className="text-sm text-muted-foreground">{announcement.body}</p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <Badge variant="secondary" className="text-xs">
+                {announcement.acknowledgementStatus === 'ACKNOWLEDGED' && 'Ciente confirmado'}
+                {announcement.acknowledgementStatus === 'PENDING_ACK' && 'Aguardando ciência'}
+                {announcement.acknowledgementStatus === 'EXPIRED_UNACKNOWLEDGED' &&
+                  'Ciência expirada'}
+                {(announcement.acknowledgementStatus === 'NOT_REQUIRED' ||
+                  !announcement.acknowledgementStatus) &&
+                  'Ciência não exigida'}
+              </Badge>
+
+              {announcement.acknowledgementStatus === 'PENDING_ACK' && (
+                <button
+                  className="rounded-md border px-3 py-1 text-xs font-medium hover:bg-muted"
+                  onClick={() => acknowledgeMutation.mutate(announcement.id)}
+                  disabled={acknowledgeMutation.isPending}
+                >
+                  Li e estou ciente
+                </button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -116,7 +185,7 @@ export default function ComunicadosPage() {
             <Bell className="h-6 w-6" />
             Comunicados
           </h1>
-          <p className="text-muted-foreground">Comunicados e notificacoes da escola</p>
+          <p className="text-muted-foreground">Comunicados oficiais enviados pela escola</p>
         </div>
 
         <ErrorBoundary

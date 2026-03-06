@@ -3,12 +3,19 @@ import Class from '#models/class'
 import Student from '#models/student'
 
 export default class ShowPresencaPageController {
-  async handle({ inertia, params }: HttpContext) {
-    const { schoolSlug } = params
+  async handle({ inertia, selectedSchoolIds }: HttpContext) {
+    const schoolId = selectedSchoolIds?.[0]
+    if (!schoolId) {
+      return inertia.render('escola/pedagogico/presenca', {
+        schoolId: '',
+        classes: [],
+        students: [],
+      })
+    }
 
     const classes = await Class.query()
       .whereHas('level', (query) => {
-        query.where('schoolId', schoolSlug)
+        query.where('schoolId', schoolId)
       })
       .select('id', 'name')
       .orderBy('name')
@@ -16,7 +23,7 @@ export default class ShowPresencaPageController {
     const students = await Student.query()
       .whereHas('class', (query) => {
         query.whereHas('level', (q) => {
-          q.where('schoolId', schoolSlug)
+          q.where('schoolId', schoolId)
         })
       })
       .where('enrollmentStatus', 'REGISTERED')
@@ -24,7 +31,7 @@ export default class ShowPresencaPageController {
       .select('id', 'classId')
 
     return inertia.render('escola/pedagogico/presenca', {
-      schoolId: schoolSlug,
+      schoolId,
       classes: classes.map((c) => ({ id: c.id, name: c.name })),
       students: students.map((s) => ({
         id: s.id,

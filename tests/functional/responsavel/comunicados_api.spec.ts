@@ -1,4 +1,6 @@
 import { test } from '@japa/runner'
+import '@japa/api-client'
+import '#config/auth'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import Role from '#models/role'

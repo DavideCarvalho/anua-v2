@@ -219,6 +219,11 @@ export function StudentStatusTable({
   } = useQuery({
     ...api.api.v1.classes.studentStatus.queryOptions({
       params: { id: classId },
+      query: {
+        subjectId: subjectId!,
+        courseId,
+        academicPeriodId,
+      },
     }),
     enabled: !!subjectId && !!classId && !!courseId && !!academicPeriodId,
   })

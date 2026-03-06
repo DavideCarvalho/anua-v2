@@ -14,12 +14,24 @@ export default function AlunoCarrinhoPage() {
       <Head title={gamified ? 'Mochila' : 'Carrinho'} />
       <div className="space-y-6">
         <div>
-          <h1 className={gamified ? 'flex items-center gap-2 font-display text-2xl font-bold text-gf-primary-dark dark:text-gf-primary-light' : 'text-2xl font-bold tracking-tight'}>
+          <h1
+            className={
+              gamified
+                ? 'flex items-center gap-2 font-display text-2xl font-bold text-gf-primary-dark dark:text-gf-primary-light'
+                : 'text-2xl font-bold tracking-tight'
+            }
+          >
             {gamified && <Backpack className="size-6" />}
             {gamified ? 'Mochila' : 'Carrinho'}
           </h1>
-          <p className={gamified ? 'font-body text-sm text-muted-foreground' : 'text-muted-foreground'}>
-            {gamified ? 'Confira os itens que você escolheu!' : 'Revise seus itens e finalize a compra'}
+          <p
+            className={
+              gamified ? 'font-body text-sm text-muted-foreground' : 'text-muted-foreground'
+            }
+          >
+            {gamified
+              ? 'Confira os itens que você escolheu!'
+              : 'Revise seus itens e finalize a compra'}
           </p>
         </div>
         {gamified ? <GamifiedCartContainer /> : <MarketplaceCartContainer />}

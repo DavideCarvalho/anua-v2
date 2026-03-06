@@ -226,6 +226,7 @@ export default function Home() {
                       <input
                         type="email"
                         placeholder="Seu melhor email"
+                        required
                         className="w-full rounded-full border border-input bg-background px-6 py-3 text-foreground placeholder-muted-foreground focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600"
                       />
                       <button
@@ -693,27 +694,32 @@ function Contact() {
           <form className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Nome</Label>
-              <Input id="name" placeholder="Digite seu nome" />
+              <Input id="name" placeholder="Digite seu nome" required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Digite seu email" />
+              <Input id="email" type="email" placeholder="Digite seu email" required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="schoolName">Nome da Escola</Label>
-              <Input id="schoolName" placeholder="Digite o nome da escola" />
+              <Input id="schoolName" placeholder="Digite o nome da escola" required />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="phone">Telefone</Label>
-              <Input id="phone" type="tel" placeholder="Digite seu telefone" />
+              <Input id="phone" type="tel" placeholder="Digite seu telefone" required />
             </div>
 
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="message">Mensagem</Label>
-              <Textarea id="message" placeholder="Digite sua mensagem" className="min-h-[120px]" />
+              <Textarea
+                id="message"
+                placeholder="Digite sua mensagem"
+                className="min-h-[120px]"
+                required
+              />
             </div>
 
             <div className="sm:col-span-2">

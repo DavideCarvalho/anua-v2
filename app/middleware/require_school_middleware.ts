@@ -14,6 +14,14 @@ export default class RequireSchoolMiddleware {
     const { response, selectedSchoolIds } = ctx
 
     if (!selectedSchoolIds || selectedSchoolIds.length === 0) {
+      const originalRole = ctx.impersonation?.originalUser?.role
+      if (
+        ctx.impersonation?.isImpersonating &&
+        (originalRole === 'SUPER_ADMIN' || originalRole === 'ADMIN')
+      ) {
+        return response.redirect('/admin')
+      }
+
       return response.redirect('/dashboard')
     }
 

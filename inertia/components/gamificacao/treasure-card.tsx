@@ -39,9 +39,7 @@ export function TreasureCard({
         <div className="space-y-2 p-3">
           <h4 className="font-display text-sm font-bold">{name}</h4>
           {description && (
-            <p className="font-body text-xs text-muted-foreground line-clamp-2">
-              {description}
-            </p>
+            <p className="font-body text-xs text-muted-foreground line-clamp-2">{description}</p>
           )}
           <div className="flex items-center gap-1 font-display text-sm font-bold text-gf-gold-dark">
             <Coins className="size-4" />

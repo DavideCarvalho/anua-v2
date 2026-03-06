@@ -20,12 +20,7 @@ export function Mailbox({ className }: { className?: string }) {
       <rect x="6" y="8" width="44" height="30" rx="6" stroke="#5B21B6" strokeWidth="2" />
 
       {/* Rounded top */}
-      <path
-        d="M6 20 C6 10, 50 10, 50 20"
-        fill="#8B5CF6"
-        stroke="#5B21B6"
-        strokeWidth="2"
-      />
+      <path d="M6 20 C6 10, 50 10, 50 20" fill="#8B5CF6" stroke="#5B21B6" strokeWidth="2" />
 
       {/* Mail slot */}
       <rect x="14" y="22" width="28" height="4" rx="2" fill="#4C1D95" />

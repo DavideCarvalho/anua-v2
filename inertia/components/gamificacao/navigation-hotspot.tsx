@@ -31,15 +31,11 @@ export function NavigationHotspot({
             gradient
           )}
         >
-          {badge && (
-            <div className="absolute right-3 top-3">{badge}</div>
-          )}
+          {badge && <div className="absolute right-3 top-3">{badge}</div>}
           <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-white/30 backdrop-blur-sm dark:bg-black/20">
             {icon}
           </div>
-          <h3 className="font-display text-lg font-bold text-white drop-shadow-sm">
-            {title}
-          </h3>
+          <h3 className="font-display text-lg font-bold text-white drop-shadow-sm">{title}</h3>
           <p className="font-body text-sm text-white/80">{description}</p>
         </motion.div>
       </Link>

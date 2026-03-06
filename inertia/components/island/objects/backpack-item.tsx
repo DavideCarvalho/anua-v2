@@ -26,11 +26,7 @@ export function BackpackItem({ className }: { className?: string }) {
       <rect x="16" y="32" width="32" height="18" rx="4" stroke="#E11D48" strokeWidth="1.5" />
 
       {/* Pocket flap */}
-      <path
-        d="M16 36 L48 36"
-        stroke="#E11D48"
-        strokeWidth="1.5"
-      />
+      <path d="M16 36 L48 36" stroke="#E11D48" strokeWidth="1.5" />
 
       {/* Clasp/buckle */}
       <rect x="28" y="28" width="8" height="6" rx="1" fill="#FCD34D" />

@@ -33,15 +33,9 @@ export function IslandAvatar({
       }}
     >
       <motion.div
-        animate={
-          isMoving
-            ? { y: [0, -3, 0] }
-            : { y: 0 }
-        }
+        animate={isMoving ? { y: [0, -3, 0] } : { y: 0 }}
         transition={
-          isMoving
-            ? { duration: 0.25, repeat: Infinity, ease: 'easeInOut' }
-            : { duration: 0.2 }
+          isMoving ? { duration: 0.25, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }
         }
         className="relative"
       >

@@ -73,10 +73,7 @@ export function RpgInteractionPrompt({
 
   switch (promptType) {
     case 'enter':
-      label =
-        nearbyZoneId === 'mailbox'
-          ? 'Abrir Correio?'
-          : `Entrar em ${nearbyZone.label}?`
+      label = nearbyZoneId === 'mailbox' ? 'Abrir Correio?' : `Entrar em ${nearbyZone.label}?`
       buttonText = nearbyZoneId === 'mailbox' ? 'Abrir' : 'Entrar'
       hintText = 'Pressione [Enter]'
       break
@@ -95,10 +92,7 @@ export function RpgInteractionPrompt({
   }
 
   return (
-    <div
-      className="absolute left-1/2 -translate-x-1/2"
-      style={{ bottom: '6%', zIndex: 30 }}
-    >
+    <div className="absolute left-1/2 -translate-x-1/2" style={{ bottom: '6%', zIndex: 30 }}>
       <div className="relative">
         {/* Wooden sign board */}
         <div className="flex flex-col items-center gap-0.5 rounded-lg border-2 border-[#8B5E3C] bg-[#DEB887] px-3 py-1.5 shadow-[2px_2px_0px_#6B3F1F] dark:border-[#6B3F1F] dark:bg-[#8B5E3C]">

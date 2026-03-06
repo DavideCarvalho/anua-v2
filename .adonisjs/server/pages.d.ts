@@ -79,6 +79,9 @@ declare module '@adonisjs/inertia/types' {
     'escola/cantina/reservas': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/reservas.tsx'))['default']>
     'escola/cantina/transferencias': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/transferencias.tsx'))['default']>
     'escola/cantina/vendas': ExtractProps<(typeof import('../../inertia/pages/escola/cantina/vendas.tsx'))['default']>
+    'escola/comunicados': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados.tsx'))['default']>
+    'escola/comunicados/editar': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados/editar.tsx'))['default']>
+    'escola/comunicados/novo': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados/novo.tsx'))['default']>
     'escola/configuracoes/index': ExtractProps<(typeof import('../../inertia/pages/escola/configuracoes/index.tsx'))['default']>
     'escola/desempenho': ExtractProps<(typeof import('../../inertia/pages/escola/desempenho.tsx'))['default']>
     'escola/eventos': ExtractProps<(typeof import('../../inertia/pages/escola/eventos.tsx'))['default']>

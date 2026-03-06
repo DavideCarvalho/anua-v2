@@ -44,12 +44,7 @@ interface Props {
   onSuccess?: () => void
 }
 
-export function CreateRecompensaItemModal({
-  schoolId,
-  open,
-  onOpenChange,
-  onSuccess,
-}: Props) {
+export function CreateRecompensaItemModal({ schoolId, open, onOpenChange, onSuccess }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')

@@ -34,11 +34,7 @@ const STARS_DARK = [
 export function IslandDecorations() {
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 3 }}>
-      <svg
-        className="h-full w-full"
-        viewBox="0 0 400 300"
-        preserveAspectRatio="xMidYMid meet"
-      >
+      <svg className="h-full w-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
         {/* Grass tufts */}
         {GRASS_TUFTS.map((g, i) => (
           <g
@@ -47,9 +43,33 @@ export function IslandDecorations() {
             className="animate-[gf-sway_3s_ease-in-out_infinite]"
             style={{ animationDelay: `${i * 0.4}s` }}
           >
-            <line x1="0" y1="0" x2="-3" y2="-10" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
-            <line x1="0" y1="0" x2="0" y2="-12" stroke="#10B981" strokeWidth="2" strokeLinecap="round" />
-            <line x1="0" y1="0" x2="3" y2="-9" stroke="#059669" strokeWidth="2" strokeLinecap="round" />
+            <line
+              x1="0"
+              y1="0"
+              x2="-3"
+              y2="-10"
+              stroke="#059669"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="-12"
+              stroke="#10B981"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <line
+              x1="0"
+              y1="0"
+              x2="3"
+              y2="-9"
+              stroke="#059669"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
           </g>
         ))}
 

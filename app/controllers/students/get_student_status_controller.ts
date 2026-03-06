@@ -10,6 +10,7 @@ import ExamGrade from '#models/exam_grade'
 import { getStudents } from '#services/class_students_service'
 import AppException from '#exceptions/app_exception'
 import StudentStatusResultDto from '#models/dto/student_status_result.dto'
+import { getStudentStatusValidator } from '#validators/student_status'
 
 type StudentStatus = 'APPROVED' | 'AT_RISK_GRADE' | 'AT_RISK_ATTENDANCE' | 'FAILED' | 'IN_PROGRESS'
 
@@ -28,17 +29,10 @@ interface StudentStatusResult {
 export default class GetStudentStatusController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.id
-    const subjectId = request.input('subjectId')
-    const courseId = request.input('courseId')
-    const academicPeriodId = request.input('academicPeriodId')
-
-    if (!subjectId) {
-      throw AppException.badRequest('subjectId é obrigatório')
-    }
-
-    if (!courseId || !academicPeriodId) {
-      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
-    }
+    const filters = await request.validateUsing(getStudentStatusValidator)
+    const subjectId = filters.subjectId
+    const courseId = filters.courseId
+    const academicPeriodId = filters.academicPeriodId
 
     // Find the class
     const classEntity = await Class_.query().where('id', classId).preload('school').first()

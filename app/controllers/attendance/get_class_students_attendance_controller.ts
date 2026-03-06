@@ -4,24 +4,22 @@ import StudentHasLevel from '#models/student_has_level'
 import db from '@adonisjs/lucid/services/db'
 import GetClassStudentsAttendanceResponseDto from './dtos/get_class_students_attendance_response.dto.js'
 import AppException from '#exceptions/app_exception'
+import { getClassStudentsAttendanceValidator } from '#validators/attendance'
 
 export default class GetClassStudentsAttendanceController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.classId
-    const courseId = request.input('courseId')
-    const academicPeriodId = request.input('academicPeriodId')
-
-    if (!courseId || !academicPeriodId) {
-      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
-    }
+    const filters = await request.validateUsing(getClassStudentsAttendanceValidator)
+    const courseId = filters.courseId
+    const academicPeriodId = filters.academicPeriodId
 
     const classEntity = await Class_.find(classId)
     if (!classEntity) {
       throw AppException.notFound('Turma não encontrada')
     }
 
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const page = filters.page ?? 1
+    const limit = filters.limit ?? 20
 
     // Get students using validated context (course + period)
     const studentLevels = await StudentHasLevel.query()

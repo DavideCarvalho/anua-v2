@@ -59,7 +59,7 @@ function getAttendanceBadgeVariant(percentage: number) {
   return 'destructive'
 }
 
-function AttendancesTableContent({ classId }: AttendancesTableProps) {
+function AttendancesTableContent({ classId, academicPeriodId, courseId }: AttendancesTableProps) {
   const [page, setPage] = useState(1)
 
   const {
@@ -69,6 +69,7 @@ function AttendancesTableContent({ classId }: AttendancesTableProps) {
   } = useQuery(
     api.api.v1.attendance.classStudents.queryOptions({
       params: { classId },
+      query: { academicPeriodId, courseId, page, limit: 20 },
     })
   )
 

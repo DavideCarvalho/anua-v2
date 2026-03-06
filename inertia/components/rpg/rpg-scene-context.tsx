@@ -28,11 +28,7 @@ export function RpgSceneProvider({ children }: { children: ReactNode }) {
     _setState((prev) => ({ ...prev, ...patch }))
   }, [])
 
-  return (
-    <RpgSceneContext.Provider value={{ state, setState }}>
-      {children}
-    </RpgSceneContext.Provider>
-  )
+  return <RpgSceneContext.Provider value={{ state, setState }}>{children}</RpgSceneContext.Provider>
 }
 
 export function useRpgSceneState(): RpgSceneState {

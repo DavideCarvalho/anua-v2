@@ -1,4 +1,5 @@
 import { Head, usePage } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ResponsavelLayout } from '../../components/layouts'
 import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
@@ -80,6 +81,42 @@ function ResponsavelContent() {
   return <DashboardOverviewContainer studentId={studentId} />
 }
 
+function PendingAcknowledgementBanner() {
+  const { data } = useQuery({
+    queryKey: ['responsavel-pending-ack'],
+    queryFn: async () => {
+      const response = await fetch('/api/v1/responsavel/comunicados/pending-ack', {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        return { data: [] as Array<{ id: string }> }
+      }
+
+      return (await response.json()) as { data: Array<{ id: string }> }
+    },
+  })
+
+  const pendingCount = data?.data?.length ?? 0
+
+  if (pendingCount === 0) {
+    return null
+  }
+
+  return (
+    <Alert>
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>
+        Você possui {pendingCount} comunicado(s) aguardando ciência. Acesse{' '}
+        <Link className="underline" href="/responsavel/comunicados">
+          Comunicados
+        </Link>{' '}
+        para confirmar.
+      </AlertDescription>
+    </Alert>
+  )
+}
+
 function ResponsavelSkeleton() {
   return (
     <Card>
@@ -106,6 +143,8 @@ export default function ResponsavelDashboard() {
           <h1 className="text-2xl font-bold tracking-tight">Olá, {user?.name?.split(' ')[0]}!</h1>
           <p className="text-muted-foreground">Acompanhe o desempenho dos seus filhos</p>
         </div>
+
+        <PendingAcknowledgementBanner />
 
         {/* Dashboard Overview */}
         <ErrorBoundary

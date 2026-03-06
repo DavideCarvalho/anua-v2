@@ -15,7 +15,14 @@ import { islandEntrance, staggerContainer } from '../../lib/gamified-animations'
 import { useIslandMovement, type InteractionZone } from '../../lib/use-island-movement'
 
 const INTERACTION_ZONES: InteractionZone[] = [
-  { id: 'treasure', x: 80, y: 80, radius: 40, href: '/aluno/loja/pontos', label: 'Baú de Tesouros' },
+  {
+    id: 'treasure',
+    x: 80,
+    y: 80,
+    radius: 40,
+    href: '/aluno/loja/pontos',
+    label: 'Baú de Tesouros',
+  },
   { id: 'market', x: 300, y: 70, radius: 40, href: '/aluno/loja', label: 'Mercadinho' },
   { id: 'mailbox', x: 310, y: 195, radius: 40, href: '/aluno/loja/pedidos', label: 'Correio' },
 ]
@@ -37,12 +44,9 @@ interface IslandSceneProps {
 }
 
 export function IslandScene({ avatar, gamification }: IslandSceneProps) {
-  const handleInteract = useCallback(
-    (zone: InteractionZone) => {
-      router.visit(zone.href)
-    },
-    []
-  )
+  const handleInteract = useCallback((zone: InteractionZone) => {
+    router.visit(zone.href)
+  }, [])
 
   const { position, direction, isMoving, nearbyZone, handleSceneClick } = useIslandMovement({
     zones: INTERACTION_ZONES,
@@ -58,10 +62,14 @@ export function IslandScene({ avatar, gamification }: IslandSceneProps) {
       className="relative mx-auto w-full max-w-[600px]"
     >
       {/* Dark mode starry background */}
-      <div className="absolute -inset-4 hidden rounded-2xl dark:block" style={{
-        background: 'radial-gradient(1px 1px at 20% 30%, white 50%, transparent 100%), radial-gradient(1px 1px at 70% 60%, white 50%, transparent 100%), radial-gradient(1px 1px at 40% 80%, white 50%, transparent 100%), radial-gradient(1px 1px at 80% 20%, white 50%, transparent 100%)',
-        opacity: 0.3,
-      }} />
+      <div
+        className="absolute -inset-4 hidden rounded-2xl dark:block"
+        style={{
+          background:
+            'radial-gradient(1px 1px at 20% 30%, white 50%, transparent 100%), radial-gradient(1px 1px at 70% 60%, white 50%, transparent 100%), radial-gradient(1px 1px at 40% 80%, white 50%, transparent 100%), radial-gradient(1px 1px at 80% 20%, white 50%, transparent 100%)',
+          opacity: 0.3,
+        }}
+      />
 
       {/* Scene container with aspect ratio */}
       <motion.div
@@ -78,10 +86,7 @@ export function IslandScene({ avatar, gamification }: IslandSceneProps) {
         <IslandDecorations />
 
         {/* Layer 3: Trail */}
-        <IslandTrail
-          progress={gamification.levelProgress}
-          level={gamification.currentLevel}
-        />
+        <IslandTrail progress={gamification.levelProgress} level={gamification.currentLevel} />
 
         {/* Layer 4: Interactive objects */}
         <IslandObject

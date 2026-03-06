@@ -17,6 +17,7 @@ import {
   X,
   ChevronDown,
   School,
+  Megaphone,
 } from 'lucide-react'
 import { useState } from 'react'
 import { buttonVariants } from '../ui/button'
@@ -106,6 +107,12 @@ const navigation: NavItem[] = [
     route: 'web.escola.periodosLetivos',
     href: '/escola/periodos-letivos',
     icon: Calendar,
+  },
+  {
+    title: 'Comunicados',
+    route: 'web.escola.comunicados',
+    href: '/escola/comunicados',
+    icon: Megaphone,
   },
   {
     title: 'Cantina',

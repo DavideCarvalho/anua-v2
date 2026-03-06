@@ -130,113 +130,115 @@ export function StoreItemsTable({ schoolId }: StoreItemsTableProps) {
             Novo Item
           </Button>
         </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Modo</TableHead>
-              <TableHead className="text-center">Estoque</TableHead>
-              <TableHead className="text-center">Ativo</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      {categoryIcons[item.category] || categoryIcons.DEFAULT}
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Item</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Preço</TableHead>
+                <TableHead>Modo</TableHead>
+                <TableHead className="text-center">Estoque</TableHead>
+                <TableHead className="text-center">Ativo</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        {categoryIcons[item.category] || categoryIcons.DEFAULT}
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        {item.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-1">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                          {item.description}
-                        </p>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {categoryLabels[item.category] || item.category}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{formatCurrency(item.price)}</span>
+                      {item.paymentMode === 'POINTS_ONLY' && (
+                        <span className="text-xs text-muted-foreground">
+                          = {Math.round(item.price * (item.pointsToMoneyRate || 100))} pts
+                        </span>
                       )}
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{categoryLabels[item.category] || item.category}</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{formatCurrency(item.price)}</span>
-                    {item.paymentMode === 'POINTS_ONLY' && (
-                      <span className="text-xs text-muted-foreground">
-                        = {Math.round(item.price * (item.pointsToMoneyRate || 100))} pts
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      item.paymentMode === 'POINTS_ONLY'
-                        ? 'default'
-                        : item.paymentMode === 'HYBRID'
-                          ? 'secondary'
-                          : 'outline'
-                    }
-                  >
-                    {paymentModeLabels[item.paymentMode] || item.paymentMode}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-center">
-                  {item.totalStock !== null ? item.totalStock : '∞'}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Switch
-                    checked={item.isActive}
-                    onCheckedChange={async () => {
-                      try {
-                        await toggleMutation.mutateAsync({ params: { id: item.id } })
-                        queryClient.invalidateQueries({ queryKey: ['store-items'] })
-                      } catch {
-                        toast.error('Erro ao alterar status do item.')
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        item.paymentMode === 'POINTS_ONLY'
+                          ? 'default'
+                          : item.paymentMode === 'HYBRID'
+                            ? 'secondary'
+                            : 'outline'
                       }
-                    }}
-                    disabled={toggleMutation.isPending}
-                  />
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem>Ver Pedidos</DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={async () => {
-                          try {
-                            await deleteMutation.mutateAsync({ params: { id: item.id } })
-                            queryClient.invalidateQueries({ queryKey: ['store-items'] })
-                            toast.success('Item excluído com sucesso!')
-                          } catch {
-                            toast.error('Erro ao excluir item.')
-                          }
-                        }}
-                      >
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                    >
+                      {paymentModeLabels[item.paymentMode] || item.paymentMode}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {item.totalStock !== null ? item.totalStock : '∞'}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Switch
+                      checked={item.isActive}
+                      onCheckedChange={async () => {
+                        try {
+                          await toggleMutation.mutateAsync({ params: { id: item.id } })
+                          queryClient.invalidateQueries({ queryKey: ['store-items'] })
+                        } catch {
+                          toast.error('Erro ao alterar status do item.')
+                        }
+                      }}
+                      disabled={toggleMutation.isPending}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem>Ver Pedidos</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={async () => {
+                            try {
+                              await deleteMutation.mutateAsync({ params: { id: item.id } })
+                              queryClient.invalidateQueries({ queryKey: ['store-items'] })
+                              toast.success('Item excluído com sucesso!')
+                            } catch {
+                              toast.error('Erro ao excluir item.')
+                            }
+                          }}
+                        >
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       <CreateRecompensaItemModal
         schoolId={schoolId}
         open={showCreateModal}

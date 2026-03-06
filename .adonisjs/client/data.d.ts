@@ -45,6 +45,9 @@ import type RoleTransformer from '#transformers/role_transformer'
 import type ScheduleConflictValidationTransformer from '#transformers/schedule_conflict_validation_transformer'
 import type ScholarshipTransformer from '#transformers/scholarship_transformer'
 import type SchoolAchievementConfigTransformer from '#transformers/school_achievement_config_transformer'
+import type SchoolAnnouncementAudienceTransformer from '#transformers/school_announcement_audience_transformer'
+import type SchoolAnnouncementRecipientTransformer from '#transformers/school_announcement_recipient_transformer'
+import type SchoolAnnouncementTransformer from '#transformers/school_announcement_transformer'
 import type SchoolChainTransformer from '#transformers/school_chain_transformer'
 import type SchoolGroupTransformer from '#transformers/school_group_transformer'
 import type SchoolPartnerTransformer from '#transformers/school_partner_transformer'
@@ -231,6 +234,18 @@ export namespace Data {
   export type SchoolAchievementConfig = InferData<SchoolAchievementConfigTransformer>
   export namespace SchoolAchievementConfig {
     export type Variants = InferVariants<SchoolAchievementConfigTransformer>
+  }
+  export type SchoolAnnouncementAudience = InferData<SchoolAnnouncementAudienceTransformer>
+  export namespace SchoolAnnouncementAudience {
+    export type Variants = InferVariants<SchoolAnnouncementAudienceTransformer>
+  }
+  export type SchoolAnnouncementRecipient = InferData<SchoolAnnouncementRecipientTransformer>
+  export namespace SchoolAnnouncementRecipient {
+    export type Variants = InferVariants<SchoolAnnouncementRecipientTransformer>
+  }
+  export type SchoolAnnouncement = InferData<SchoolAnnouncementTransformer>
+  export namespace SchoolAnnouncement {
+    export type Variants = InferVariants<SchoolAnnouncementTransformer>
   }
   export type SchoolChain = InferData<SchoolChainTransformer>
   export namespace SchoolChain {

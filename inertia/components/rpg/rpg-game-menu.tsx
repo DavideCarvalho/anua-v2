@@ -15,10 +15,7 @@ export function RpgGameMenu({ onOpenMochila, onOpenCorreio }: RpgGameMenuProps) 
   const { totalItems } = useCart()
 
   return (
-    <div
-      className="absolute bottom-3 right-3 flex gap-1.5"
-      style={{ zIndex: 25 }}
-    >
+    <div className="absolute bottom-3 right-3 flex gap-1.5" style={{ zIndex: 25 }}>
       {/* Mochila button */}
       <button
         type="button"
@@ -29,9 +26,7 @@ export function RpgGameMenu({ onOpenMochila, onOpenCorreio }: RpgGameMenuProps) 
         <Backpack className="size-5 text-[#5C3A21] dark:text-amber-100" />
         {totalItems > 0 && (
           <span className="absolute -right-1 -top-1">
-            <Badge className="h-4 min-w-4 justify-center px-1 text-[10px]">
-              {totalItems}
-            </Badge>
+            <Badge className="h-4 min-w-4 justify-center px-1 text-[10px]">{totalItems}</Badge>
           </span>
         )}
       </button>

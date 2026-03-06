@@ -13,13 +13,7 @@ interface RpgInGamePanelProps {
  * In-game menu panel — appears centered over the game, like a real RPG menu.
  * Wooden frame, no side drawer. Covers only the game area.
  */
-export function RpgInGamePanel({
-  open,
-  onOpenChange,
-  title,
-  icon,
-  children,
-}: RpgInGamePanelProps) {
+export function RpgInGamePanel({ open, onOpenChange, title, icon, children }: RpgInGamePanelProps) {
   useEffect(() => {
     if (!open) return
     function onKeyDown(e: KeyboardEvent) {
@@ -71,9 +65,7 @@ export function RpgInGamePanel({
         </div>
 
         {/* Conteúdo — área clara */}
-        <div className="flex-1 overflow-y-auto bg-[#F5E6D3] p-4 dark:bg-[#4A3728]">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto bg-[#F5E6D3] p-4 dark:bg-[#4A3728]">{children}</div>
       </div>
     </div>
   )

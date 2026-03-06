@@ -63,19 +63,14 @@ export function OrderJourney({ status }: OrderJourneyProps) {
             <div
               className={cn(
                 'flex size-7 items-center justify-center rounded-full transition-colors',
-                reached
-                  ? 'bg-gf-primary text-white'
-                  : 'bg-muted text-muted-foreground'
+                reached ? 'bg-gf-primary text-white' : 'bg-muted text-muted-foreground'
               )}
             >
               <Icon className="size-3.5" />
             </div>
             {i < steps.length - 1 && (
               <div
-                className={cn(
-                  'h-0.5 w-4 sm:w-6',
-                  i < currentIdx ? 'bg-gf-primary' : 'bg-muted'
-                )}
+                className={cn('h-0.5 w-4 sm:w-6', i < currentIdx ? 'bg-gf-primary' : 'bg-muted')}
               />
             )}
           </div>
