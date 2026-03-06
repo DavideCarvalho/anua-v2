@@ -34,6 +34,13 @@ const GetStudentOverviewController = () =>
   import('#controllers/responsavel/get_student_overview_controller')
 const GetResponsavelNotificationsController = () =>
   import('#controllers/responsavel/get_notifications_controller')
+const ListComunicadosController = () =>
+  import('#controllers/responsavel/list_comunicados_controller')
+const ShowComunicadoController = () => import('#controllers/responsavel/show_comunicado_controller')
+const AcknowledgeComunicadoController = () =>
+  import('#controllers/responsavel/acknowledge_comunicado_controller')
+const ListPendingAcknowledgementsController = () =>
+  import('#controllers/responsavel/list_pending_acknowledgements_controller')
 const UpdateResponsavelProfileController = () =>
   import('#controllers/responsavel/update_profile_controller')
 const CreateInvoiceAsaasChargeController = () =>
@@ -97,6 +104,14 @@ export function registerResponsavelApiRoutes() {
         .get('/students/:studentId/gamification', [GetResponsavelStudentGamificationController])
         .as('student_gamification')
       router.get('/notifications', [GetResponsavelNotificationsController]).as('notifications')
+      router.get('/comunicados', [ListComunicadosController]).as('comunicados.list')
+      router
+        .get('/comunicados/pending-ack', [ListPendingAcknowledgementsController])
+        .as('comunicados.pending_ack')
+      router.get('/comunicados/:id', [ShowComunicadoController]).as('comunicados.details')
+      router
+        .post('/comunicados/:id/acknowledge', [AcknowledgeComunicadoController])
+        .as('comunicados.acknowledge')
       router.put('/profile', [UpdateResponsavelProfileController]).as('update_profile')
 
       // Invoice checkout (Asaas on-demand charge)

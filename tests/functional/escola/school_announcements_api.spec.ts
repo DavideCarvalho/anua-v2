@@ -104,6 +104,7 @@ test.group('School announcements API', (group) => {
 
     const createResponse = await client
       .post('/api/v1/school-announcements')
+      .loginAs(user)
       .json({
         title: `Comunicado ${seed}`,
         body: 'Corpo do comunicado',
@@ -114,7 +115,6 @@ test.group('School announcements API', (group) => {
         audienceLevelIds: [],
         audienceAcademicPeriodIds: [],
       })
-      .loginAs(user)
 
     createResponse.assertStatus(201)
     const createBody = createResponse.body()
@@ -138,6 +138,7 @@ test.group('School announcements API', (group) => {
 
     const createResponse = await client
       .post('/api/v1/school-announcements')
+      .loginAs(user)
       .json({
         title: `Comunicado ${seed}`,
         body: 'Sem publico',
@@ -146,7 +147,6 @@ test.group('School announcements API', (group) => {
         audienceLevelIds: [],
         audienceAcademicPeriodIds: [],
       })
-      .loginAs(user)
 
     createResponse.assertStatus(201)
     const created = createResponse.body()
@@ -174,6 +174,7 @@ test.group('School announcements API', (group) => {
 
     const createResponse = await client
       .post('/api/v1/school-announcements')
+      .loginAs(user)
       .json({
         title: `Comunicado ${seed}`,
         body: 'Publicar para turma',
@@ -184,7 +185,6 @@ test.group('School announcements API', (group) => {
         audienceLevelIds: [],
         audienceAcademicPeriodIds: [],
       })
-      .loginAs(user)
 
     createResponse.assertStatus(201)
     const created = createResponse.body()
@@ -228,6 +228,7 @@ test.group('School announcements API', (group) => {
 
     const createResponse = await client
       .post('/api/v1/school-announcements')
+      .loginAs(user)
       .json({
         title: `Comunicado ${seed}`,
         body: 'Primeira publicacao',
@@ -236,7 +237,6 @@ test.group('School announcements API', (group) => {
         audienceLevelIds: [],
         audienceAcademicPeriodIds: [],
       })
-      .loginAs(user)
 
     createResponse.assertStatus(201)
     const created = createResponse.body()
@@ -273,6 +273,7 @@ test.group('School announcements API', (group) => {
 
     const createResponse = await client
       .post('/api/v1/school-announcements')
+      .loginAs(user)
       .json({
         title: `Comunicado ${seed}`,
         body: 'Publico invalido',
@@ -281,7 +282,6 @@ test.group('School announcements API', (group) => {
         audienceLevelIds: [],
         audienceAcademicPeriodIds: [],
       })
-      .loginAs(user)
 
     createResponse.assertStatus(400)
     assert.include(createResponse.text(), 'Turma inválida para a escola selecionada')
