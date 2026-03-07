@@ -3,10 +3,7 @@ import Role from '#models/role'
 import School from '#models/school'
 import UserHasSchool from '#models/user_has_school'
 
-export async function createEscolaAuthUser() {
-  const directorRole = await Role.create({ name: 'SCHOOL_DIRECTOR' })
-
-  // Create all roles needed for tests
+export async function createTestRoles() {
   const rolesToCreate = [
     'SUPER_ADMIN',
     'ADMIN',
@@ -21,6 +18,12 @@ export async function createEscolaAuthUser() {
   for (const roleName of rolesToCreate) {
     await Role.firstOrCreate({ name: roleName }, { name: roleName })
   }
+}
+
+export async function createEscolaAuthUser() {
+  await createTestRoles()
+
+  const directorRole = await Role.findByOrFail({ name: 'SCHOOL_DIRECTOR' })
 
   const school = await School.create({
     name: 'Test School',
