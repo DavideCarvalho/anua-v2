@@ -174,23 +174,22 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     const confirmBtn = page.getByRole('button', { name: /confirmar matrícula/i })
     await confirmBtn.waitFor({ state: 'visible', timeout: 10000 })
 
-    // Debug: check if there are any error toasts before clicking
-    const errorToasts = await page.locator('[role="alert"], .toast-error').count()
-    console.log('Error toasts before confirm:', errorToasts)
+    // Debug: test API directly before clicking confirm
+    const testApiResponse = await page.evaluate(async () => {
+      try {
+        const response = await fetch('/api/v1/students/enroll', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ test: true }),
+        })
+        return { status: status, statusText: response.statusText }
+      } catch (error: any) {
+        return { error: error.message }
+      }
+    })
+    console.log('Enrollment API test:', testApiResponse)
 
     await confirmBtn.click()
-
-    // Wait a bit for the enrollment to process
-    await page.waitForTimeout(3000)
-
-    // Check if we were redirected or if there's an error
-    const currentUrl = page.url()
-    console.log('Current URL after confirm:', currentUrl)
-
-    const errorAfterConfirm = await page
-      .locator('[role="alert"], .toast-error, [class*="error"]')
-      .count()
-    console.log('Errors after confirm:', errorAfterConfirm)
 
     // Success: redirect to matrículas
     await page.assertPath('/escola/administrativo/matriculas')
