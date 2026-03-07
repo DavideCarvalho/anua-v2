@@ -4,9 +4,23 @@ import School from '#models/school'
 import UserHasSchool from '#models/user_has_school'
 
 export async function createEscolaAuthUser() {
-  const directorRole = await Role.create({ name: 'DIRECTOR' })
-  await Role.create({ name: 'STUDENT' })
-  await Role.create({ name: 'STUDENT_RESPONSIBLE' })
+  const directorRole = await Role.create({ name: 'SCHOOL_DIRECTOR' })
+
+  // Create all roles needed for tests
+  const rolesToCreate = [
+    'SUPER_ADMIN',
+    'ADMIN',
+    'SCHOOL_DIRECTOR',
+    'SCHOOL_ADMINISTRATIVE',
+    'SCHOOL_TEACHER',
+    'SCHOOL_COORDINATOR',
+    'SCHOOL_CHAIN_DIRECTOR',
+    'STUDENT',
+    'STUDENT_RESPONSIBLE',
+  ]
+  for (const roleName of rolesToCreate) {
+    await Role.firstOrCreate({ name: roleName }, { name: roleName })
+  }
 
   const school = await School.create({
     name: 'Test School',
