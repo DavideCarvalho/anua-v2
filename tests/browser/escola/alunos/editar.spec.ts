@@ -288,6 +288,12 @@ test.group('Editar aluno - E2E (browser)', (group) => {
     await page.getByRole('button', { name: /próximo/i }).click()
 
     await page.getByRole('button', { name: /confirmar matrícula/i }).click()
+
+    // Debug: wait and check what happened
+    await page.waitForTimeout(3000)
+    const currentUrl = page.url()
+    console.log('Current URL after confirm (editar):', currentUrl)
+
     await page.assertPath('/escola/administrativo/matriculas')
 
     // Open edit flow

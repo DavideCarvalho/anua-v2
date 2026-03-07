@@ -173,7 +173,24 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     // Step 5: Review - wait for confirm button and click
     const confirmBtn = page.getByRole('button', { name: /confirmar matrícula/i })
     await confirmBtn.waitFor({ state: 'visible', timeout: 10000 })
+
+    // Debug: check if there are any error toasts before clicking
+    const errorToasts = await page.locator('[role="alert"], .toast-error').count()
+    console.log('Error toasts before confirm:', errorToasts)
+
     await confirmBtn.click()
+
+    // Wait a bit for the enrollment to process
+    await page.waitForTimeout(3000)
+
+    // Check if we were redirected or if there's an error
+    const currentUrl = page.url()
+    console.log('Current URL after confirm:', currentUrl)
+
+    const errorAfterConfirm = await page
+      .locator('[role="alert"], .toast-error, [class*="error"]')
+      .count()
+    console.log('Errors after confirm:', errorAfterConfirm)
 
     // Success: redirect to matrículas
     await page.assertPath('/escola/administrativo/matriculas')
