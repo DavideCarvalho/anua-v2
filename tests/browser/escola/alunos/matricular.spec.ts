@@ -182,7 +182,7 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ test: true }),
         })
-        return { status: status, statusText: response.statusText }
+        return { status: response.status, statusText: response.statusText }
       } catch (error: any) {
         return { error: error.message }
       }
