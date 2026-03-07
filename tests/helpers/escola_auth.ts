@@ -4,7 +4,10 @@ import School from '#models/school'
 import UserHasSchool from '#models/user_has_school'
 
 export async function createEscolaAuthUser() {
-  const role = await Role.create({ name: 'DIRECTOR' })
+  const directorRole = await Role.create({ name: 'DIRECTOR' })
+  await Role.create({ name: 'STUDENT' })
+  await Role.create({ name: 'STUDENT_RESPONSIBLE' })
+
   const school = await School.create({
     name: 'Test School',
     slug: `test-school-${Date.now()}`,
@@ -16,12 +19,12 @@ export async function createEscolaAuthUser() {
     active: true,
     whatsappContact: false,
     grossSalary: 0,
-    roleId: role.id,
+    roleId: directorRole.id,
   })
   await UserHasSchool.create({
     userId: user.id,
     schoolId: school.id,
     isDefault: true,
   })
-  return { user, school, role }
+  return { user, school, role: directorRole }
 }
