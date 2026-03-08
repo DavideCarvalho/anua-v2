@@ -173,6 +173,10 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
   await trigger.press('ArrowDown')
   await page.waitForTimeout(500)
   await trigger.press('Enter')
+  await page.waitForTimeout(1000)
+
+  // Ensure dropdown is closed by pressing Escape
+  await page.keyboard.press('Escape')
   await page.waitForTimeout(500)
 }
 
