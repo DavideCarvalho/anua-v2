@@ -300,8 +300,8 @@ test.group('Editar aluno - E2E (browser)', (group) => {
 
     await page.getByRole('button', { name: /confirmar matrícula/i }).click()
 
-    // Wait for enrollment to complete or fail
-    await page.waitForTimeout(5000)
+    // Wait for enrollment to complete or fail (longer timeout for CI)
+    await page.waitForTimeout(10000)
 
     const currentUrl = page.url()
     console.log('Current URL after confirm (editar):', currentUrl)
