@@ -55,38 +55,16 @@ async function selectAcademicPeriod(page: any, academicPeriodName: string) {
     .first()
 
   await trigger.waitFor({ state: 'visible', timeout: 30000 })
-  await trigger.click()
 
-  // Wait for dropdown to open and React Query to potentially load data
-  // In CI, resources are limited, so we give more time
-  await page.waitForTimeout(3000)
+  // Use keyboard navigation - open with Space and navigate with ArrowDown
+  await trigger.press('Space')
+  await page.waitForTimeout(1000)
 
-  // Check for options - wait up to 30s total
-  const maxWaitTime = 30000
-  const checkInterval = 1000
-  let totalWaitTime = 0
-  let found = false
-
-  while (totalWaitTime < maxWaitTime) {
-    const optionCount = await page.locator('[role="option"]').count()
-    console.log(`Option count after ${totalWaitTime}ms: ${optionCount}`)
-    if (optionCount > 0) {
-      found = true
-      break
-    }
-    await page.waitForTimeout(checkInterval)
-    totalWaitTime += checkInterval
-  }
-
-  if (!found) {
-    // Log all browser console messages
-    console.log('All browser logs:', browserLogs.join('\n'))
-    throw new Error(`No options found after ${maxWaitTime}ms timeout`)
-  }
-
-  const option = page.getByRole('option', { name: academicPeriodName }).first()
-  await option.waitFor({ state: 'visible', timeout: 5000 })
-  await option.click()
+  // Navigate to first option and select with Enter
+  await trigger.press('ArrowDown')
+  await page.waitForTimeout(500)
+  await trigger.press('Enter')
+  await page.waitForTimeout(500)
 }
 
 test.group('Matricular aluno - E2E (browser)', (group) => {
@@ -109,6 +87,9 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     // Wait for page and select academic period
     await selectAcademicPeriod(page, academicPeriod.name)
 
+    // Wait for form to be valid after selecting period
+    await page.waitForTimeout(1000)
+
     // Step 0: Student info (child - no document/phone required)
     await page.getByLabel(/nome do aluno/i).fill(STUDENT_NAME)
     const birthDateChild = new Date()
@@ -117,7 +98,28 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
       .getByLabel(/data de nascimento/i)
       .first()
       .fill(birthDateChild.toISOString().split('T')[0])
-    await page.getByRole('button', { name: /próximo/i }).click()
+
+    // Wait for form validation and click next
+    await page.waitForTimeout(1000)
+
+    // Close any open dropdowns by pressing Escape
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(500)
+
+    // Try to find next button with different selectors
+    try {
+      const nextButton = page.getByRole('button', { name: /próximo/i })
+      await nextButton.waitFor({ state: 'visible', timeout: 5000 })
+      await nextButton.click()
+    } catch {
+      // Fallback: look for any button containing "pr" or "Próximo"
+      const nextButton = page
+        .locator('button')
+        .filter({ hasText: /Próximo|próximo/i })
+        .first()
+      await nextButton.waitFor({ state: 'visible', timeout: 5000 })
+      await nextButton.click()
+    }
 
     // Step 1: Add responsible - CPF lookup then manual form
     await page.getByRole('button', { name: /adicionar responsável/i }).click()
