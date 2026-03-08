@@ -287,12 +287,25 @@ test.group('Editar aluno - E2E (browser)', (group) => {
     await page.getByRole('option', { name: 'Dia 5' }).click()
     await page.getByRole('button', { name: /próximo/i }).click()
 
+    // Capture console errors before clicking confirm
+    const browserErrors: string[] = []
+    page.on('console', (msg: any) => {
+      if (msg.type() === 'error') {
+        browserErrors.push(msg.text())
+      }
+    })
+    page.on('pageerror', (error: any) => {
+      browserErrors.push(`Page error: ${error.message}`)
+    })
+
     await page.getByRole('button', { name: /confirmar matrícula/i }).click()
 
-    // Debug: wait and check what happened
-    await page.waitForTimeout(3000)
+    // Wait for enrollment to complete or fail
+    await page.waitForTimeout(5000)
+
     const currentUrl = page.url()
     console.log('Current URL after confirm (editar):', currentUrl)
+    console.log('Browser errors:', browserErrors.join('\n'))
 
     await page.assertPath('/escola/administrativo/matriculas')
 

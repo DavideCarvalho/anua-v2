@@ -174,22 +174,22 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     const confirmBtn = page.getByRole('button', { name: /confirmar matrícula/i })
     await confirmBtn.waitFor({ state: 'visible', timeout: 10000 })
 
-    // Debug: test API directly before clicking confirm
-    const testApiResponse = await page.evaluate(async () => {
-      try {
-        const response = await fetch('/api/v1/students/enroll', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ test: true }),
-        })
-        return { status: response.status, statusText: response.statusText }
-      } catch (error: any) {
-        return { error: error.message }
+    // Capture console errors
+    const browserErrors: string[] = []
+    page.on('console', (msg: any) => {
+      if (msg.type() === 'error') {
+        browserErrors.push(msg.text())
       }
     })
-    console.log('Enrollment API test:', testApiResponse)
+    page.on('pageerror', (error: any) => {
+      browserErrors.push(`Page error: ${error.message}`)
+    })
 
     await confirmBtn.click()
+
+    // Wait for enrollment with longer timeout
+    await page.waitForTimeout(5000)
+    console.log('Browser errors:', browserErrors.join('\n'))
 
     // Success: redirect to matrículas
     await page.assertPath('/escola/administrativo/matriculas')
@@ -202,7 +202,12 @@ test.group('Matricular aluno - E2E (browser)', (group) => {
     // Open edit page and verify all data was saved correctly
     const studentRow = page.locator('tr').filter({ hasText: STUDENT_NAME })
     await studentRow.getByRole('button').click()
-    await page.getByRole('menuitem', { name: /editar aluno/i }).click()
+
+    // Wait for menu to be stable before clicking
+    const menuItem = page.getByRole('menuitem', { name: /editar aluno/i })
+    await menuItem.waitFor({ state: 'visible', timeout: 5000 })
+    await page.waitForTimeout(500) // Small delay for menu animation
+    await menuItem.click()
 
     await page.waitForURL(/\/alunos\/[^/]+\/editar/, { timeout: 5000 })
     await page.getByRole('button', { name: /revisão/i }).click()
