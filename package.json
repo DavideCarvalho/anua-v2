@@ -16,7 +16,6 @@
     "test:browser": "node ace test browser",
     "test:queue": "node ace test functional --files tests/functional/queue/jobs_dispatch.spec.ts --files tests/functional/queue/jobs_execution.spec.ts",
     "test:queue:pglite": "pglite-server --db=memory:// --host=127.0.0.1 --port=55432 --run \"sh scripts/run_queue_tests_with_pglite.sh\"",
-    "ci:local": "bash scripts/ci-local.sh",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
