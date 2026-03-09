@@ -151,7 +151,10 @@ export function CreateExtraClassModal({
               <Label>Período Letivo</Label>
               <Select
                 value={form.watch('academicPeriodId')}
-                onValueChange={(v) => form.setValue('academicPeriodId', v)}
+                onValueChange={(v: string | null) => {
+                  if (!v) return
+                  form.setValue('academicPeriodId', v)
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -175,7 +178,10 @@ export function CreateExtraClassModal({
               <Label>Professor</Label>
               <Select
                 value={form.watch('teacherId')}
-                onValueChange={(v) => form.setValue('teacherId', v)}
+                onValueChange={(v: string | null) => {
+                  if (!v) return
+                  form.setValue('teacherId', v)
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -201,7 +207,10 @@ export function CreateExtraClassModal({
               <Label>Contrato</Label>
               <Select
                 value={form.watch('contractId')}
-                onValueChange={(v) => form.setValue('contractId', v)}
+                onValueChange={(v: string | null) => {
+                  if (!v) return
+                  form.setValue('contractId', v)
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -248,7 +257,8 @@ export function CreateExtraClassModal({
                 <div key={field.id} className="flex items-center gap-2">
                   <Select
                     value={String(form.watch(`schedules.${index}.weekDay`))}
-                    onValueChange={(v) => {
+                    onValueChange={(v: string | null) => {
+                      if (!v) return
                       const schedules = form.getValues('schedules')
                       const nextSchedules = schedules.map((schedule, scheduleIndex) =>
                         scheduleIndex === index ? { ...schedule, weekDay: Number(v) } : schedule
