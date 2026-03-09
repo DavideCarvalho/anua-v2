@@ -52,7 +52,7 @@ export default function ProvasPage() {
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Select
                 value={selectedClass || 'all'}
-                onValueChange={(v) => setSelectedClass(v === 'all' ? '' : v)}
+                onValueChange={(v, _event) => v !== null && setSelectedClass(v === 'all' ? '' : v)}
               >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Todas as turmas" />
@@ -68,7 +68,9 @@ export default function ProvasPage() {
               </Select>
               <Select
                 value={selectedSubject || 'all'}
-                onValueChange={(v) => setSelectedSubject(v === 'all' ? '' : v)}
+                onValueChange={(v, _event) =>
+                  v !== null && setSelectedSubject(v === 'all' ? '' : v)
+                }
               >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Todas as materias" />

@@ -175,7 +175,7 @@ export default class EnrollStudentController {
           id: userId,
           name: data.basicInfo.name,
           slug: userSlug,
-          email: data.basicInfo.email || null,
+          email: studentEmail,
           phone: data.basicInfo.phone || null,
           birthDate: DateTime.fromISO(data.basicInfo.birthDate),
           documentType: data.basicInfo.documentType,
@@ -224,7 +224,7 @@ export default class EnrollStudentController {
             responsibleUser = existingResponsible
             // Update email only if user hasn't verified theirs yet
             if (!existingResponsible.emailVerifiedAt && respData.email) {
-              existingResponsible.email = respData.email
+              existingResponsible.email = respData.email.trim().toLowerCase()
               await existingResponsible.useTransaction(trx).save()
             }
           } else {
@@ -237,7 +237,7 @@ export default class EnrollStudentController {
                 id: respId,
                 name: respData.name,
                 slug: respSlug,
-                email: respData.email,
+                email: respData.email?.trim().toLowerCase() || null,
                 phone: respData.phone,
                 birthDate: DateTime.fromISO(respData.birthDate),
                 documentType: respData.documentType,

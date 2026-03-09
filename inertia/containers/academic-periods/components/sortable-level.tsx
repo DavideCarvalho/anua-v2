@@ -153,7 +153,7 @@ export function SortableLevel({
           </Button>
 
           <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger>
               <Button
                 type="button"
                 variant="ghost"

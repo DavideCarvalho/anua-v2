@@ -409,7 +409,13 @@ function ChallengeForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="category">Categoria</Label>
-          <Select value={formData.category} onValueChange={(value) => onChange('category', value)}>
+          <Select
+            value={formData.category}
+            onValueChange={(value: string | null) => {
+              if (!value) return
+              onChange('category', value)
+            }}
+          >
             <SelectTrigger id="category">
               <SelectValue />
             </SelectTrigger>
@@ -466,7 +472,10 @@ function ChallengeForm({
           <Label htmlFor="recurrencePeriod">Período de Recorrência</Label>
           <Select
             value={formData.recurrencePeriod}
-            onValueChange={(value) => onChange('recurrencePeriod', value)}
+            onValueChange={(value: string | null) => {
+              if (!value) return
+              onChange('recurrencePeriod', value)
+            }}
           >
             <SelectTrigger id="recurrencePeriod">
               <SelectValue />

@@ -223,7 +223,7 @@ function SortableLevelItem({
 
           {isActive ? (
             <AlertDialog>
-              <AlertDialogTrigger asChild>
+              <AlertDialogTrigger>
                 <Button
                   type="button"
                   variant="ghost"

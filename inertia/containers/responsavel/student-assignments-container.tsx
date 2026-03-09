@@ -227,7 +227,10 @@ export function StudentAssignmentsContainer({
             </div>
 
             {data.subjects.length > 0 && (
-              <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+              <Select
+                value={subjectFilter}
+                onValueChange={(v: string | null) => setSubjectFilter(v || '')}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Materia" />
                 </SelectTrigger>

@@ -350,7 +350,9 @@ function NewAttendanceModalContent({
               ) : (
                 <Select
                   value={form.watch('subjectId')}
-                  onValueChange={(value) => form.setValue('subjectId', value)}
+                  onValueChange={(value, _event) =>
+                    value !== null && form.setValue('subjectId', value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a matéria" />

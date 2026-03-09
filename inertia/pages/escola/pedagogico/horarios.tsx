@@ -109,7 +109,8 @@ export default function HorariosPage() {
                 <Label>Período Letivo</Label>
                 <Select
                   value={selectedAcademicPeriodId}
-                  onValueChange={(value) => {
+                  onValueChange={(value, _event) => {
+                    if (value === null) return
                     setSelectedAcademicPeriodId(value)
                     setSelectedClassId('')
                     setShowConfigForm(false)
@@ -135,7 +136,8 @@ export default function HorariosPage() {
                 <Label>Turma</Label>
                 <Select
                   value={selectedClassId}
-                  onValueChange={(value) => {
+                  onValueChange={(value, _event) => {
+                    if (value === null) return
                     setSelectedClassId(value)
                     setShowConfigForm(false)
                   }}

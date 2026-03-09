@@ -391,7 +391,7 @@ export default function ConfiguracaoPagamentosPage() {
                     </Button>
                   </div>
 
-                  <Accordion type="single" collapsible className="w-full">
+                  <Accordion collapsible className="w-full">
                     <AccordionItem value="advanced-taxes" className="border rounded-md px-4">
                       <AccordionTrigger>
                         Tributos avançados (PIS/COFINS/CSLL/INSS/IR)

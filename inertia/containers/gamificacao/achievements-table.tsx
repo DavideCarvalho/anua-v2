@@ -357,7 +357,13 @@ function AchievementForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="type">Tipo</Label>
-          <Select value={formData.type} onValueChange={(value) => onChange('type', value)}>
+          <Select
+            value={formData.type}
+            onValueChange={(value: string | null) => {
+              if (!value) return
+              onChange('type', value)
+            }}
+          >
             <SelectTrigger id="type">
               <SelectValue />
             </SelectTrigger>

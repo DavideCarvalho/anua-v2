@@ -119,7 +119,8 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
               <Label htmlFor="create-category">Categoria</Label>
               <Select
                 value={category}
-                onValueChange={(value) => {
+                onValueChange={(value: string | null) => {
+                  if (!value) return
                   if (isCategoryValue(value)) {
                     setCategory(value)
                   }

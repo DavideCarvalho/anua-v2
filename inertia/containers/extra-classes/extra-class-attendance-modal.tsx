@@ -185,7 +185,10 @@ export function ExtraClassAttendanceModal({
                     <TableCell>
                       <Select
                         value={entry.status}
-                        onValueChange={(v) => updateEntry(index, 'status', v)}
+                        onValueChange={(v: string | null) => {
+                          if (!v) return
+                          updateEntry(index, 'status', v)
+                        }}
                       >
                         <SelectTrigger className="w-36">
                           <SelectValue />

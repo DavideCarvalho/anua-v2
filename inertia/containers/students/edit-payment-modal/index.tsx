@@ -559,7 +559,10 @@ export function EnrollmentTabContent({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contrato</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={(v, _event) => v !== null && field.onChange(v)}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione um contrato" />
@@ -617,7 +620,8 @@ export function EnrollmentTabContent({
                   <FormLabel>Benefício</FormLabel>
                   <Select
                     value={field.value}
-                    onValueChange={(value: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL') => {
+                    onValueChange={(value: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL' | null) => {
+                      if (value === null) return
                       field.onChange(value)
 
                       if (value !== 'SCHOLARSHIP') {
@@ -674,7 +678,8 @@ export function EnrollmentTabContent({
                       <FormLabel>Desconto Individual</FormLabel>
                       <Select
                         value={field.value}
-                        onValueChange={(value: 'PERCENTAGE' | 'FLAT') => {
+                        onValueChange={(value: 'PERCENTAGE' | 'FLAT' | null) => {
+                          if (value === null) return
                           field.onChange(value)
 
                           if (value === 'PERCENTAGE') {
@@ -794,7 +799,10 @@ export function EnrollmentTabContent({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Forma de Pagamento*</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(v, _event) => v !== null && field.onChange(v)}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue />
@@ -820,7 +828,9 @@ export function EnrollmentTabContent({
                   <FormItem>
                     <FormLabel>Dia de Vencimento*</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(Number(value))}
+                      onValueChange={(value, _event) =>
+                        value !== null && field.onChange(Number(value))
+                      }
                       value={field.value?.toString()}
                     >
                       <FormControl>
@@ -849,7 +859,9 @@ export function EnrollmentTabContent({
                     <FormItem>
                       <FormLabel>Parcelas*</FormLabel>
                       <Select
-                        onValueChange={(value) => field.onChange(Number(value))}
+                        onValueChange={(value, _event) =>
+                          value !== null && field.onChange(Number(value))
+                        }
                         value={field.value?.toString()}
                       >
                         <FormControl>

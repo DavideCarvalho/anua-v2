@@ -188,7 +188,9 @@ export function NewExamModal({
               ) : (
                 <Select
                   value={form.watch('subjectId')}
-                  onValueChange={(value) => form.setValue('subjectId', value)}
+                  onValueChange={(value, _event) =>
+                    value !== null && form.setValue('subjectId', value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a materia" />
@@ -214,7 +216,9 @@ export function NewExamModal({
                 <Label>Tipo de prova *</Label>
                 <Select
                   value={form.watch('type')}
-                  onValueChange={(value) => form.setValue('type', value as FormValues['type'])}
+                  onValueChange={(value, _event) =>
+                    value !== null && form.setValue('type', value as FormValues['type'])
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo" />

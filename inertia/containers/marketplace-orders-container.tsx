@@ -59,7 +59,7 @@ export function MarketplaceOrdersContainer() {
   return (
     <div className="space-y-4">
       <div className="flex gap-4">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(v: string | null) => setStatusFilter(v || '')}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Todos os status" />
           </SelectTrigger>

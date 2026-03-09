@@ -437,7 +437,10 @@ export default function NovoEventoPage() {
         {userSchools.length > 1 && (
           <div className="max-w-sm space-y-2">
             <Label>Escola do evento</Label>
-            <Select value={eventSchoolId} onValueChange={setEventSchoolId}>
+            <Select
+              value={eventSchoolId}
+              onValueChange={(v, _event) => v !== null && setEventSchoolId(v)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a escola" />
               </SelectTrigger>
@@ -512,7 +515,10 @@ export default function NovoEventoPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tipo *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select
+                            onValueChange={(v, _event) => v !== null && field.onChange(v)}
+                            value={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue />

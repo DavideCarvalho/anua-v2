@@ -170,7 +170,10 @@ export function TeacherAbsencesTable({ status }: TeacherAbsencesTableProps) {
         <CardTitle>Ausências de Professores</CardTitle>
         <CardDescription>{absences.length} registro(s)</CardDescription>
         <div className="pt-2">
-          <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+          <Select
+            value={selectedTeacherId}
+            onValueChange={(v, _event) => v !== null && setSelectedTeacherId(v)}
+          >
             <SelectTrigger className="w-full max-w-sm">
               <SelectValue placeholder="Selecione um professor" />
             </SelectTrigger>

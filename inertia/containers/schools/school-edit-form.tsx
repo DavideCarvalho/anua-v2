@@ -695,7 +695,10 @@ function EditFormContent({ schoolId }: { schoolId: string }) {
                           Carregando usuários...
                         </div>
                       ) : (
-                        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                        <Select
+                          value={selectedUserId}
+                          onValueChange={(v: string | null) => setSelectedUserId(v || '')}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione um usuário" />
                           </SelectTrigger>

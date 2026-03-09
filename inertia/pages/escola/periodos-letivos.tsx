@@ -192,7 +192,7 @@ export default function PeriodosLetivosPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <AlertDialogTrigger asChild>
+                              <AlertDialogTrigger>
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
                                   onSelect={(e) => e.preventDefault()}

@@ -188,7 +188,8 @@ export function StepMedicalInfo() {
                   <Label className="text-xs">Parentesco *</Label>
                   <Select
                     value={watch(`emergencyContacts.${index}.relationship`)}
-                    onValueChange={(value) => {
+                    onValueChange={(value: string | null) => {
+                      if (!value) return
                       if (isRelationship(value)) {
                         setValue(`emergencyContacts.${index}.relationship`, value)
                       }

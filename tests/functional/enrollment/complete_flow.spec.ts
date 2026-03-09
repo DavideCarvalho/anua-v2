@@ -307,4 +307,88 @@ test.group('Edição de Aluno - API Flow', (group) => {
       'Payment amounts should remain unchanged after editing student'
     )
   })
+
+  test('saves email in lowercase when enrolling', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { academicPeriod, course, contract, level, classEntity } =
+      await createEnrollmentFixtures(school)
+
+    const enrollmentData = {
+      basicInfo: {
+        name: 'Aluno Uppercase Email',
+        email: 'ALUNO.UPPERCASE@TEST.COM',
+        phone: '11999999999',
+        birthDate: new Date(2014, 0, 1).toISOString(),
+        documentType: 'CPF',
+        documentNumber: '12345678902',
+        isSelfResponsible: false,
+        whatsappContact: true,
+      },
+      responsibles: [
+        {
+          name: 'Responsável Uppercase Email',
+          email: 'RESPONSAVEL.UPPERCASE@TEST.COM',
+          phone: '11988888888',
+          birthDate: new Date(1985, 0, 1).toISOString(),
+          documentType: 'CPF',
+          documentNumber: '98765432102',
+          isPedagogical: true,
+          isFinancial: true,
+        },
+      ],
+      address: {
+        zipCode: '01310100',
+        street: 'Avenida Paulista',
+        number: '1000',
+        complement: 'Apto 101',
+        neighborhood: 'Bela Vista',
+        city: 'São Paulo',
+        state: 'SP',
+      },
+      medicalInfo: {
+        conditions: 'Nenhuma',
+        medications: [],
+        emergencyContacts: [],
+      },
+      billing: {
+        academicPeriodId: academicPeriod.id,
+        courseId: course.id,
+        levelId: level.id,
+        classId: classEntity.id,
+        contractId: contract.id,
+        monthlyFee: contract.ammount,
+        enrollmentFee: contract.enrollmentValue,
+        paymentDate: 5,
+        paymentMethod: 'BOLETO',
+        installments: 12,
+        enrollmentInstallments: 1,
+        flexibleInstallments: true,
+        scholarshipId: null,
+        discountPercentage: 0,
+        enrollmentDiscountPercentage: 0,
+      },
+    }
+
+    const response = await client.post('/api/v1/students/enroll').loginAs(user).json(enrollmentData)
+
+    response.assertStatus(201)
+
+    // Verify student email is saved in lowercase
+    const studentUser = await User.query().where('name', 'Aluno Uppercase Email').first()
+    assert.exists(studentUser, 'Student user should be created')
+    assert.equal(
+      studentUser!.email,
+      'aluno.uppercase@test.com',
+      'Student email should be lowercase'
+    )
+
+    // Verify responsible email is saved in lowercase
+    const responsibleUser = await User.query().where('name', 'Responsável Uppercase Email').first()
+    assert.exists(responsibleUser, 'Responsible user should be created')
+    assert.equal(
+      responsibleUser!.email,
+      'responsavel.uppercase@test.com',
+      'Responsible email should be lowercase'
+    )
+  })
 })

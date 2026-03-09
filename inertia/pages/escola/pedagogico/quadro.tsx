@@ -132,7 +132,8 @@ export default function QuadroPage() {
                 <Label>Período Letivo</Label>
                 <Select
                   value={selectedAcademicPeriodId}
-                  onValueChange={(value) => {
+                  onValueChange={(value, _event) => {
+                    if (value === null) return
                     setSelectedAcademicPeriodId(value)
                     setSelectedClassId('')
                   }}
@@ -157,7 +158,7 @@ export default function QuadroPage() {
                 <Label>Turma</Label>
                 <Select
                   value={selectedClassId}
-                  onValueChange={setSelectedClassId}
+                  onValueChange={(v, _event) => v !== null && setSelectedClassId(v)}
                   disabled={!selectedAcademicPeriodId || loadingClasses}
                 >
                   <SelectTrigger>

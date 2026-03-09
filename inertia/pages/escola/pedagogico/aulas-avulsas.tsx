@@ -64,7 +64,10 @@ export default function AulasAvulsasPage({ schoolId }: Props) {
         <div className="flex items-end gap-4">
           <div className="space-y-2">
             <Label>Período Letivo</Label>
-            <Select value={selectedAcademicPeriodId} onValueChange={setSelectedAcademicPeriodId}>
+            <Select
+              value={selectedAcademicPeriodId}
+              onValueChange={(v, _event) => v !== null && setSelectedAcademicPeriodId(v)}
+            >
               <SelectTrigger className="w-[250px]">
                 <SelectValue placeholder="Todos os períodos" />
               </SelectTrigger>

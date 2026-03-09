@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Student from '#models/student'
@@ -32,9 +33,12 @@ export default class UpdateStudentController {
 
     const data = await request.validateUsing(updateStudentValidator)
 
+    // Normalize email to lowercase
+    const normalizedEmail = data.email?.trim().toLowerCase()
+
     // Check email conflict
-    if (data.email && data.email !== student.user.email) {
-      const existingUser = await User.findBy('email', data.email)
+    if (normalizedEmail && normalizedEmail !== student.user.email?.toLowerCase()) {
+      const existingUser = await User.findBy('email', normalizedEmail)
       if (existingUser) {
         throw AppException.operationFailedWithProvidedData(409)
       }
@@ -44,44 +48,29 @@ export default class UpdateStudentController {
 
     try {
       // Update user fields
-      const userFields = ['name', 'email', 'phone', 'birthDate', 'documentType', 'documentNumber']
-      const userUpdates: Record<string, unknown> = {}
-
-      for (const field of userFields) {
-        if (data[field as keyof typeof data] !== undefined) {
-          userUpdates[field] = data[field as keyof typeof data]
-        }
-      }
-
-      if (Object.keys(userUpdates).length > 0) {
-        student.user.merge(userUpdates)
-        await student.user.useTransaction(trx).save()
-      }
+      student.user.merge({
+        name: data.name,
+        email: normalizedEmail,
+        phone: data.phone,
+        birthDate: data.birthDate ? DateTime.fromJSDate(data.birthDate) : undefined,
+        documentType: data.documentType,
+        documentNumber: data.documentNumber,
+      })
+      await student.user.useTransaction(trx).save()
 
       // Update student fields
-      const studentFields = [
-        'discountPercentage',
-        'monthlyPaymentAmount',
-        'isSelfResponsible',
-        'paymentDate',
-        'classId',
-        'contractId',
-        'canteenLimit',
-        'balance',
-        'enrollmentStatus',
-      ]
-      const studentUpdates: Record<string, unknown> = {}
-
-      for (const field of studentFields) {
-        if (data[field as keyof typeof data] !== undefined) {
-          studentUpdates[field] = data[field as keyof typeof data]
-        }
-      }
-
-      if (Object.keys(studentUpdates).length > 0) {
-        student.merge(studentUpdates)
-        await student.useTransaction(trx).save()
-      }
+      student.merge({
+        descountPercentage: data.discountPercentage,
+        monthlyPaymentAmount: data.monthlyPaymentAmount,
+        isSelfResponsible: data.isSelfResponsible,
+        paymentDate: data.paymentDate,
+        classId: data.classId,
+        contractId: data.contractId,
+        canteenLimit: data.canteenLimit,
+        balance: data.balance,
+        enrollmentStatus: data.enrollmentStatus,
+      })
+      await student.useTransaction(trx).save()
 
       // Handle class change with StudentHasLevel
       if (data.classId && data.academicPeriodId && data.levelId) {

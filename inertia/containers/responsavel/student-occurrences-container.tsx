@@ -217,7 +217,7 @@ export function StudentOccurrencesContainer({
               <span className="text-sm font-medium">Filtros:</span>
             </div>
 
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={(v: string | null) => setTypeFilter(v || '')}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
@@ -232,7 +232,10 @@ export function StudentOccurrencesContainer({
               </SelectContent>
             </Select>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select
+              value={statusFilter}
+              onValueChange={(v: string | null) => setStatusFilter(v || '')}
+            >
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -245,7 +248,10 @@ export function StudentOccurrencesContainer({
               </SelectContent>
             </Select>
 
-            <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <Select
+              value={severityFilter}
+              onValueChange={(v: string | null) => setSeverityFilter(v || '')}
+            >
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Gravidade" />
               </SelectTrigger>

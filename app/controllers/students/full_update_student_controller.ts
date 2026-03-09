@@ -100,7 +100,7 @@ export default class FullUpdateStudentController {
       // 1. Update User
       student.user.merge({
         name: data.basicInfo.name,
-        email: data.basicInfo.email || null,
+        email: data.basicInfo.email?.trim().toLowerCase() || null,
         phone: data.basicInfo.phone || null,
         birthDate: DateTime.fromISO(data.basicInfo.birthDate),
         documentType: data.basicInfo.documentType,
@@ -148,7 +148,7 @@ export default class FullUpdateStudentController {
             responsibleUser.merge({
               name: respData.name,
               ...(!existingResponsible.emailVerifiedAt && respData.email
-                ? { email: respData.email }
+                ? { email: respData.email.trim().toLowerCase() }
                 : {}),
               phone: respData.phone,
               birthDate: DateTime.fromISO(respData.birthDate),

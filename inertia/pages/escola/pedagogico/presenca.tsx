@@ -128,7 +128,10 @@ export default function PresencaPage() {
           <CardContent className="py-4">
             <div className="flex items-center gap-4">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <Select
+                value={selectedClass}
+                onValueChange={(v, _event) => v !== null && setSelectedClass(v)}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Selecione a turma" />
                 </SelectTrigger>

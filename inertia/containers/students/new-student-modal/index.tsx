@@ -446,7 +446,6 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
       <DialogContent
         className="max-w-[700px] max-h-[90vh] flex flex-col p-0"
         onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         {/* Fixed Header */}
         <div className="p-6 pb-4 border-b shrink-0">
@@ -479,13 +478,15 @@ export function NewStudentModal({ open, onOpenChange }: NewStudentModalProps) {
             </div>
             <Select
               value={academicPeriodId || ''}
-              onValueChange={(value) => {
-                form.setValue('billing.academicPeriodId', value)
-                // Reset dependent fields when period changes
-                form.setValue('billing.courseId', '')
-                form.setValue('billing.levelId', '')
-                form.setValue('billing.classId', '')
-                form.setValue('billing.contractId', null)
+              onValueChange={(value, _event) => {
+                if (value !== null) {
+                  form.setValue('billing.academicPeriodId', value)
+                  // Reset dependent fields when period changes
+                  form.setValue('billing.courseId', '')
+                  form.setValue('billing.levelId', '')
+                  form.setValue('billing.classId', '')
+                  form.setValue('billing.contractId', null)
+                }
               }}
             >
               <SelectTrigger

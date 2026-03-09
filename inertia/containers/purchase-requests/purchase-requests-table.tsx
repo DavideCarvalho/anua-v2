@@ -114,7 +114,9 @@ export function PurchaseRequestsTable({
           <div className="text-sm font-medium">Status</div>
           <Select
             value={statusFilter || 'all'}
-            onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value)}
+            onValueChange={(value: string | null) =>
+              setStatusFilter(value === 'all' ? undefined : value || undefined)
+            }
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Todos" />
