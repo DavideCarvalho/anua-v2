@@ -28,7 +28,7 @@ export function DashboardFilters({
   const schools = schoolsRaw?.data ?? []
   const chains = chainsRaw?.data ?? []
 
-  function handleSchoolChange(value: string) {
+  function handleSchoolChange(value: string | null) {
     if (value && value !== 'all') {
       setParam('schoolId', value)
       deleteParam('schoolChainId')
@@ -37,7 +37,7 @@ export function DashboardFilters({
     }
   }
 
-  function handleChainChange(value: string) {
+  function handleChainChange(value: string | null) {
     if (value && value !== 'all') {
       setParam('schoolChainId', value)
       deleteParam('schoolId')

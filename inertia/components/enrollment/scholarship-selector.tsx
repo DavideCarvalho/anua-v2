@@ -36,8 +36,8 @@ export function ScholarshipSelector({
   disabled,
   isLoading,
 }: ScholarshipSelectorProps) {
-  const handleChange = (selectedValue: string) => {
-    if (selectedValue === 'none') {
+  const handleChange = (selectedValue: string | null) => {
+    if (!selectedValue || selectedValue === 'none') {
       onChange(null, null)
     } else {
       const scholarship = scholarships.find((s) => s.id === selectedValue)

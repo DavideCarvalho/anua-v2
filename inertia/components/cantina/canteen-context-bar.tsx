@@ -42,7 +42,8 @@ export function CanteenContextBar() {
   const canteens = props.canteens ?? []
   const canteenId = props.canteenId ?? null
 
-  const updateUrlCanteen = (nextCanteenId: string) => {
+  const updateUrlCanteen = (nextCanteenId: string | null) => {
+    if (!nextCanteenId) return
     const [path, queryString] = url.split('?')
     const params = new URLSearchParams(queryString ?? '')
     params.set('canteenId', nextCanteenId)
