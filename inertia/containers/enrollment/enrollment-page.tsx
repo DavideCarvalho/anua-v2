@@ -550,7 +550,8 @@ export function EnrollmentPage() {
           </div>
           <Select
             value={academicPeriodId || ''}
-            onValueChange={(value) => {
+            onValueChange={(value: string | null) => {
+              if (!value) return
               form.setValue('billing.academicPeriodId', value)
               // Reset dependent fields when period changes
               form.setValue('billing.courseId', '')
