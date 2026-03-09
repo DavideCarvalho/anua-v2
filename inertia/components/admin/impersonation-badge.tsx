@@ -222,9 +222,11 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
                   <Label htmlFor="role-filter">Filtrar por cargo</Label>
                   <Select
                     value={roleFilter}
-                    onValueChange={(value) => {
-                      setRoleFilter(value)
-                      setPage(1)
+                    onValueChange={(value, _event) => {
+                      if (value !== null) {
+                        setRoleFilter(value || undefined)
+                        setPage(1)
+                      }
                     }}
                   >
                     <SelectTrigger id="role-filter">
@@ -246,9 +248,11 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
                   <Label htmlFor="school-filter">Filtrar por escola</Label>
                   <Select
                     value={schoolFilter}
-                    onValueChange={(value) => {
-                      setSchoolFilter(value)
-                      setPage(1)
+                    onValueChange={(value, _event) => {
+                      if (value !== null) {
+                        setSchoolFilter(value || undefined)
+                        setPage(1)
+                      }
                     }}
                   >
                     <SelectTrigger id="school-filter">

@@ -88,7 +88,7 @@ export function MarketplaceStoreDetailContainer({
 
         {cart.totalItems > 0 && (
           <Sheet>
-            <SheetTrigger asChild>
+            <SheetTrigger>
               <Button className="relative gap-2">
                 <ShoppingCart className="h-4 w-4" />
                 Carrinho

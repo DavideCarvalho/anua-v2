@@ -272,7 +272,7 @@ export function StudentAssignmentsContainer({
               </p>
             </div>
           ) : (
-            <Accordion type="single" collapsible className="space-y-2">
+            <Accordion collapsible className="space-y-2">
               {data.assignments.map((assignment: Assignment) => {
                 const dueInfo = formatDueDate(String(assignment.dueDate))
                 return (

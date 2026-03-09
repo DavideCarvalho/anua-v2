@@ -205,7 +205,7 @@ export function ChallengesTable() {
           <CardDescription>Gerencie os desafios disponíveis para os alunos</CardDescription>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Novo Desafio
@@ -308,7 +308,7 @@ export function ChallengesTable() {
                           }
                         }}
                       >
-                        <DialogTrigger asChild>
+                        <DialogTrigger>
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(challenge)}>
                             <Pencil className="h-4 w-4" />
                           </Button>

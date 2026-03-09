@@ -286,7 +286,7 @@ export function CartSheetContent({
           <span>Total</span>
           <span>{formatCurrency(cart.totalPrice)}</span>
         </div>
-        <SheetClose asChild>
+        <SheetClose>
           <Button
             className="w-full"
             size="lg"

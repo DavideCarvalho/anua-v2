@@ -282,7 +282,10 @@ export function MedicalInfoStep() {
                             ? String(currentResponsibleIndex)
                             : 'manual'
                         }
-                        onValueChange={(value) => handleSelectResponsible(index, value)}
+                        onValueChange={(value: string | null) => {
+                          if (!value) return
+                          handleSelectResponsible(index, value)
+                        }}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Selecionar responsável" />
