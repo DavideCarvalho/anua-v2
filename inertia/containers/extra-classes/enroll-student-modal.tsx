@@ -111,7 +111,10 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
             <Label>Aluno</Label>
             <Select
               value={form.watch('studentId')}
-              onValueChange={(v) => form.setValue('studentId', v)}
+              onValueChange={(v: string | null) => {
+                if (!v) return
+                form.setValue('studentId', v)
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o aluno" />
@@ -134,9 +137,10 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
               <Label>Forma de Pagamento</Label>
               <Select
                 value={form.watch('paymentMethod')}
-                onValueChange={(v: FormOutput['paymentMethod']) =>
+                onValueChange={(v: FormOutput['paymentMethod'] | null) => {
+                  if (!v) return
                   form.setValue('paymentMethod', v)
-                }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
