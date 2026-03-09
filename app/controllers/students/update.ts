@@ -58,19 +58,32 @@ export default class UpdateStudentController {
       })
       await student.user.useTransaction(trx).save()
 
-      // Update student fields
-      student.merge({
-        descountPercentage: data.discountPercentage,
-        monthlyPaymentAmount: data.monthlyPaymentAmount,
-        isSelfResponsible: data.isSelfResponsible,
-        paymentDate: data.paymentDate,
-        classId: data.classId,
-        contractId: data.contractId,
-        canteenLimit: data.canteenLimit,
-        balance: data.balance,
-        enrollmentStatus: data.enrollmentStatus,
-      })
-      await student.useTransaction(trx).save()
+      // Update student fields only if any student field is provided
+      const hasStudentUpdates =
+        data.discountPercentage !== undefined ||
+        data.monthlyPaymentAmount !== undefined ||
+        data.isSelfResponsible !== undefined ||
+        data.paymentDate !== undefined ||
+        data.classId !== undefined ||
+        data.contractId !== undefined ||
+        data.canteenLimit !== undefined ||
+        data.balance !== undefined ||
+        data.enrollmentStatus !== undefined
+
+      if (hasStudentUpdates) {
+        student.merge({
+          descountPercentage: data.discountPercentage,
+          monthlyPaymentAmount: data.monthlyPaymentAmount,
+          isSelfResponsible: data.isSelfResponsible,
+          paymentDate: data.paymentDate,
+          classId: data.classId,
+          contractId: data.contractId,
+          canteenLimit: data.canteenLimit,
+          balance: data.balance,
+          enrollmentStatus: data.enrollmentStatus,
+        })
+        await student.useTransaction(trx).save()
+      }
 
       // Handle class change with StudentHasLevel
       if (data.classId && data.academicPeriodId && data.levelId) {
