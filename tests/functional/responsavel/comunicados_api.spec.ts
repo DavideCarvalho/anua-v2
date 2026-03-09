@@ -109,7 +109,6 @@ test.group('Responsavel comunicados API', (group) => {
       titleSeed: `${seed}-other-responsible`,
     })
 
-    // @ts-expect-error Auth client typing is not inferred for this test context
     const response = await client.get('/api/v1/responsavel/comunicados').loginAs(responsible)
     response.assertStatus(200)
 
@@ -136,7 +135,6 @@ test.group('Responsavel comunicados API', (group) => {
 
     const response = await client
       .get(`/api/v1/responsavel/comunicados/${target.announcement.id}`)
-      // @ts-expect-error Auth client typing is not inferred for this test context
       .loginAs(responsible)
 
     response.assertStatus(200)
@@ -181,7 +179,6 @@ test.group('Responsavel comunicados API', (group) => {
 
     const response = await client
       .get('/api/v1/responsavel/comunicados/pending-ack')
-      // @ts-expect-error Auth client typing is not inferred for this test context
       .loginAs(responsible)
 
     response.assertStatus(200)
@@ -210,7 +207,6 @@ test.group('Responsavel comunicados API', (group) => {
 
     const response = await client
       .post(`/api/v1/responsavel/comunicados/${target.announcement.id}/acknowledge`)
-      // @ts-expect-error Auth client typing is not inferred for this test context
       .loginAs(responsible)
 
     response.assertStatus(200)

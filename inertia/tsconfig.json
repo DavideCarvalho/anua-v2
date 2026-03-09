@@ -14,5 +14,6 @@
     "./**/*.tsx",
     "../.adonisjs/client/**/*.ts",
     "../.adonisjs/server/**/*.ts"
-  ]
+  ],
+  "exclude": ["../app/**/*", "../start/**/*", "../providers/**/*", "../adonisrc.ts"]
 }

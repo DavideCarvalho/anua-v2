@@ -130,7 +130,7 @@ function StudentsListContent({
   onEditPayment: (student: StudentAction) => void
   onDeleteStudent: (student: StudentAction) => void
 }) {
-  const { data } = useQuery(
+  const { data, isLoading } = useQuery(
     api.api.v1.students.index.queryOptions({
       query: {
         page,
@@ -145,6 +145,10 @@ function StudentsListContent({
 
   const students = data?.data ?? []
   const meta = data?.metadata ?? null
+
+  if (isLoading) {
+    return <StudentsListSkeleton />
+  }
 
   if (students.length === 0) {
     return (
@@ -388,7 +392,7 @@ export function StudentsListContainer() {
             {/* Academic Period Filter */}
             <Select
               value={academicPeriodId || 'all'}
-              onValueChange={(value) =>
+              onValueChange={(value: string) =>
                 setFilters({
                   academicPeriodId: value === 'all' ? null : value,
                   courseId: null,
@@ -413,7 +417,7 @@ export function StudentsListContainer() {
             {/* Course Filter */}
             <Select
               value={courseId || 'all'}
-              onValueChange={(value) =>
+              onValueChange={(value: string) =>
                 setFilters({
                   courseId: value === 'all' ? null : value,
                   classId: null,
@@ -438,7 +442,7 @@ export function StudentsListContainer() {
             {/* Class Filter */}
             <Select
               value={classId || 'all'}
-              onValueChange={(value) =>
+              onValueChange={(value: string) =>
                 setFilters({ classId: value === 'all' ? null : value, page: 1 })
               }
               disabled={!courseId}
