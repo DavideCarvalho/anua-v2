@@ -106,7 +106,8 @@ function SubjectTeacherRow({
         <Label className="text-xs text-muted-foreground">Professor</Label>
         <Select
           value={selectedTeacherId || ''}
-          onValueChange={(value) => {
+          onValueChange={(value: string | null) => {
+            if (!value) return
             form.setValue(`subjectsWithTeachers.${index}.teacherId`, value)
             form.setValue(`subjectsWithTeachers.${index}.subjectId`, '')
           }}
@@ -128,7 +129,8 @@ function SubjectTeacherRow({
         <Label className="text-xs text-muted-foreground">Matéria</Label>
         <Select
           value={selectedSubjectId || ''}
-          onValueChange={(value) => {
+          onValueChange={(value: string | null) => {
+            if (!value) return
             form.setValue(`subjectsWithTeachers.${index}.subjectId`, value)
           }}
           disabled={!selectedTeacherId || !!hasNoSubjects}
