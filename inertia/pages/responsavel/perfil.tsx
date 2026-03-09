@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { User, Mail, Phone, MapPin, Shield, Pencil } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
