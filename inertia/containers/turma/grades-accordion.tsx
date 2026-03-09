@@ -78,7 +78,7 @@ function GradesAccordionContent({ classId, courseId, academicPeriodId }: GradesA
   }
 
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion className="w-full">
       {subjects.map((subject) => (
         <AccordionItem key={subject.id} value={subject.id}>
           <AccordionTrigger className="text-base font-semibold">

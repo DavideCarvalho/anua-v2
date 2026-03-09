@@ -292,7 +292,7 @@ export function StudentOccurrencesContainer({
               </p>
             </div>
           ) : (
-            <Accordion collapsible className="space-y-2">
+            <Accordion className="space-y-2">
               {data.occurrences.map((occurrence: Occurrence) => {
                 const typeConfig = TYPE_CONFIG[occurrence.type as keyof typeof TYPE_CONFIG]
                 const statusConfig = STATUS_CONFIG[occurrence.status as keyof typeof STATUS_CONFIG]
