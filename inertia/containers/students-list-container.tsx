@@ -392,14 +392,15 @@ export function StudentsListContainer() {
             {/* Academic Period Filter */}
             <Select
               value={academicPeriodId || 'all'}
-              onValueChange={(value: string) =>
+              onValueChange={(value: string | null) => {
+                if (!value) return
                 setFilters({
                   academicPeriodId: value === 'all' ? null : value,
                   courseId: null,
                   classId: null,
                   page: 1,
                 })
-              }
+              }}
             >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Período Letivo" />
@@ -417,13 +418,14 @@ export function StudentsListContainer() {
             {/* Course Filter */}
             <Select
               value={courseId || 'all'}
-              onValueChange={(value: string) =>
+              onValueChange={(value: string | null) => {
+                if (!value) return
                 setFilters({
                   courseId: value === 'all' ? null : value,
                   classId: null,
                   page: 1,
                 })
-              }
+              }}
               disabled={!academicPeriodId}
             >
               <SelectTrigger className="w-[200px]">
@@ -442,9 +444,10 @@ export function StudentsListContainer() {
             {/* Class Filter */}
             <Select
               value={classId || 'all'}
-              onValueChange={(value: string) =>
+              onValueChange={(value: string | null) => {
+                if (!value) return
                 setFilters({ classId: value === 'all' ? null : value, page: 1 })
-              }
+              }}
               disabled={!courseId}
             >
               <SelectTrigger className="w-[200px]">

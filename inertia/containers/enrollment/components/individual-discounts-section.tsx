@@ -78,7 +78,8 @@ export function IndividualDiscountsSection() {
                     <Label>Tipo de Desconto</Label>
                     <Select
                       value={discountType}
-                      onValueChange={(value: 'PERCENTAGE' | 'FLAT') => {
+                      onValueChange={(value: 'PERCENTAGE' | 'FLAT' | null) => {
+                        if (!value) return
                         form.setValue(`billing.individualDiscounts.${index}.discountType`, value)
                         // Reset values when changing type
                         if (value === 'PERCENTAGE') {

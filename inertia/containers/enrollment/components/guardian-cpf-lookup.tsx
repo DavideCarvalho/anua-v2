@@ -104,7 +104,8 @@ export function GuardianCpfLookup({
   const isEmailDuplicate =
     email.trim().toLowerCase() !== '' && existingEmails.includes(email.trim().toLowerCase())
 
-  function handleDocumentTypeChange(val: string) {
+  function handleDocumentTypeChange(val: string | null) {
+    if (!val) return
     setDocumentType(val as (typeof DocumentType)[number])
     setDocumentInput('')
     setSearched(false)
