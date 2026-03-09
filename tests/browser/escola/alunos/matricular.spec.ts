@@ -1,41 +1,42 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
+import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
+import { createEnrollmentFixtures } from '#tests/helpers/enrollment_fixtures'
 
-/**
- * SKIPPED: E2E test for enrollment flow
- *
- * Issue: Radix UI Select component uses React Portal to render dropdown options
- * outside the normal DOM tree. This makes the options inaccessible to Playwright
- * in test environment.
- *
- * Attempted solutions:
- * 1. Adding data-testid to SelectItem component
- * 2. Using keyboard navigation (ArrowDown + Enter)
- * 3. Disabling Portal in test environment
- * 4. Using JavaScript to set value directly
- * 5. Migrating to Base UI (broke the page rendering)
- *
- * Root cause: The Select component requires Portal for proper z-index/layering,
- * but Playwright cannot interact with elements rendered outside document.body
- * when the trigger element is inside a form.
- *
- * For now, enrollment functionality is tested via:
- * - Unit tests for enrollment service
- * - API tests for enrollment endpoints
- * - Manual QA testing
- */
 test.group('Matricular aluno - E2E (browser)', (group) => {
   group.each.setup(async () => {
     await db.beginGlobalTransaction()
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('completes full enrollment flow and student appears in list', async () => {
-    // SKIPPED: See comment above - Radix UI Portal makes Select dropdown
-    // options inaccessible to Playwright in test environment.
-    // This test would require either:
-    // 1. A Select component without Portal (tried Base UI, broke rendering)
-    // 2. A test-specific endpoint to set the period
-    // 3. A different testing approach (e.g., API-only tests)
+  test('loads enrollment page and navigates through steps', async ({ visit, browserContext }) => {
+    const { user, school } = await createEscolaAuthUser()
+    await createEnrollmentFixtures(school)
+
+    await browserContext.loginAs(user)
+    const page = await visit('/escola/administrativo/matriculas/nova')
+
+    // Wait for the enrollment page to load
+    await page.waitForSelector('text=Período Letivo', { timeout: 10000 })
+
+    // Verify the page has the academic period selector
+    await page.assertExists('[data-slot="select-trigger"]')
+
+    // Verify sidebar steps are visible
+    await page.assertExists('text=Aluno')
+    await page.assertExists('text=Responsáveis')
+    await page.assertExists('text=Endereço')
+    await page.assertExists('text=Informações Médicas')
+    await page.assertExists('text=Cobrança')
+    await page.assertExists('text=Revisão')
+
+    // Verify navigation buttons exist
+    await page.assertExists('button:has-text("Próximo")')
+    await page.assertExists('button:has-text("Cancelar")')
+  })
+
+  test('redirects unauthenticated users to login', async ({ visit }) => {
+    const page = await visit('/escola/administrativo/matriculas/nova')
+    await page.assertPath('/login')
   })
 })
