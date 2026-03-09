@@ -1,8 +1,19 @@
 import { Collapsible as CollapsiblePrimitive } from '@base-ui/react/collapsible'
 import * as React from 'react'
 
-function Collapsible({ ...props }: CollapsiblePrimitive.Root.Props) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
+function Collapsible({
+  asChild,
+  children,
+  ...props
+}: CollapsiblePrimitive.Root.Props & { asChild?: boolean; children?: React.ReactNode }) {
+  if (asChild && React.isValidElement(children)) {
+    return <CollapsiblePrimitive.Root {...props} render={children} />
+  }
+  return (
+    <CollapsiblePrimitive.Root data-slot="collapsible" {...props}>
+      {children}
+    </CollapsiblePrimitive.Root>
+  )
 }
 
 function CollapsibleTrigger({
@@ -22,8 +33,19 @@ function CollapsibleTrigger({
   )
 }
 
-function CollapsibleContent({ ...props }: CollapsiblePrimitive.Panel.Props) {
-  return <CollapsiblePrimitive.Panel data-slot="collapsible-content" {...props} />
+function CollapsibleContent({
+  asChild,
+  children,
+  ...props
+}: CollapsiblePrimitive.Panel.Props & { asChild?: boolean; children?: React.ReactNode }) {
+  if (asChild && React.isValidElement(children)) {
+    return <CollapsiblePrimitive.Panel {...props} render={children} />
+  }
+  return (
+    <CollapsiblePrimitive.Panel data-slot="collapsible-content" {...props}>
+      {children}
+    </CollapsiblePrimitive.Panel>
+  )
 }
 
 export { Collapsible, CollapsibleTrigger, CollapsibleContent }
