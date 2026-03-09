@@ -7,6 +7,7 @@ import { createEnrollmentFixtures } from '#tests/helpers/enrollment_fixtures'
 import Student from '#models/student'
 import StudentHasLevel from '#models/student_has_level'
 import User from '#models/user'
+import StudentPayment from '#models/student_payment'
 
 test.group('Matrícula - API Flow', (group) => {
   group.each.setup(async () => {
@@ -95,6 +96,34 @@ test.group('Matrícula - API Flow', (group) => {
 
     assert.exists(enrollment, 'Enrollment should be created')
     assert.equal(enrollment?.levelId, level.id)
+
+    // Wait for worker to generate invoices (async process)
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    // Verify student payments were generated
+    const payments = await StudentPayment.query()
+      .where('studentId', student!.id)
+      .orderBy('year', 'asc')
+      .orderBy('month', 'asc')
+
+    assert.isAbove(payments.length, 0, 'Student payments should be generated')
+
+    // Verify payment details
+    const tuitionPayments = payments.filter((payment) => payment.type === 'TUITION')
+    assert.isAbove(tuitionPayments.length, 0, 'Tuition payments should be generated')
+
+    // Verify payment amounts match contract
+    tuitionPayments.forEach((payment) => {
+      assert.equal(
+        payment.amount,
+        contract.ammount,
+        'Payment amount should match contract monthly fee'
+      )
+      assert.isTrue(
+        ['NOT_PAID', 'PENDING'].includes(payment.status),
+        'Payment should have valid initial status'
+      )
+    })
 
     // Verify student appears in list
     const listResponse = await client
@@ -191,6 +220,23 @@ test.group('Edição de Aluno - API Flow', (group) => {
     assert.exists(student)
     const studentId = student!.id
 
+    // Verify student payments were generated for the student
+    const payments = await StudentPayment.query()
+      .where('studentId', student!.id)
+      .orderBy('year', 'asc')
+      .orderBy('month', 'asc')
+
+    assert.isAbove(payments.length, 0, 'Student payments should be generated after enrollment')
+
+    // Verify payment details match contract
+    const tuitionPayments = payments.filter((payment) => payment.type === 'TUITION')
+    assert.isAbove(tuitionPayments.length, 0, 'Tuition payments should be generated')
+    assert.equal(
+      tuitionPayments[0].amount,
+      contract.ammount,
+      'Payment amount should match contract'
+    )
+
     // Step 2: Verify student is in list
     const listResponse1 = await client
       .get('/api/v1/students')
@@ -238,5 +284,27 @@ test.group('Edição de Aluno - API Flow', (group) => {
     listResponse3.assertStatus(200)
     const students3 = listResponse3.body().data
     assert.equal(students3.length, 0, 'Old name should not return results')
+
+    // Step 6: Verify student payments are still intact after editing student info
+    const paymentsAfterEdit = await StudentPayment.query()
+      .where('studentId', studentId)
+      .orderBy('year', 'asc')
+      .orderBy('month', 'asc')
+
+    assert.isAbove(
+      paymentsAfterEdit.length,
+      0,
+      'Student payments should still exist after editing student'
+    )
+
+    // Verify payment amounts weren't changed
+    const tuitionPaymentsAfterEdit = paymentsAfterEdit.filter(
+      (payment) => payment.type === 'TUITION'
+    )
+    assert.equal(
+      tuitionPaymentsAfterEdit[0].amount,
+      contract.ammount,
+      'Payment amounts should remain unchanged after editing student'
+    )
   })
 })
