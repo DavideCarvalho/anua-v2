@@ -245,8 +245,7 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
-        onPointerDownOutside={(event) => event.preventDefault()}
-        onInteractOutside={(event) => event.preventDefault()}
+        onInteractOutside={(event: Event) => event.preventDefault()}
       >
         <DialogHeader className="sticky top-0 z-10 border-b bg-background pb-4">
           <DialogTitle>Criar Novo Evento</DialogTitle>

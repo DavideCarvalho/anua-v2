@@ -241,8 +241,7 @@ export function AsaasOnboardingWizard({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         className="max-w-[600px] max-h-[90vh] flex flex-col p-0"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(e: Event) => e.preventDefault()}
       >
         {/* Fixed Header with Stepper */}
         <div className="p-6 pb-4 border-b shrink-0">
