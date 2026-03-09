@@ -3,7 +3,7 @@ import db from '@adonisjs/lucid/services/db'
 
 /**
  * SKIPPED: E2E test for editing student enrollment
- * 
+ *
  * Issue: Same as matricular.spec.ts - Radix UI Select Portal rendering
  * makes dropdown options inaccessible to Playwright.
  */
