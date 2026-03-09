@@ -478,18 +478,28 @@ const sidebarMenuButtonVariants = cva(
 
 function SidebarMenuButton({
   render,
+  asChild,
   isActive = false,
   variant = 'default',
   size = 'default',
   tooltip,
   className,
+  children,
   ...props
 }: useRender.ComponentProps<'button'> &
   React.ComponentProps<'button'> & {
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
+    asChild?: boolean
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const { isMobile, state } = useSidebar()
+
+  // Handle asChild pattern
+  let renderProp = render
+  if (asChild && children) {
+    renderProp = children as useRender.ComponentProps<'button'>['render']
+  }
+
   const comp = useRender({
     defaultTagName: 'button',
     props: mergeProps<'button'>(
@@ -498,7 +508,7 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: !tooltip ? render : <TooltipTrigger render={render} />,
+    render: !tooltip ? renderProp : <TooltipTrigger render={renderProp} />,
     state: {
       slot: 'sidebar-menu-button',
       sidebar: 'menu-button',
@@ -634,15 +644,24 @@ function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<'li'>)
 
 function SidebarMenuSubButton({
   render,
+  asChild,
   size = 'md',
   isActive = false,
   className,
+  children,
   ...props
 }: useRender.ComponentProps<'a'> &
   React.ComponentProps<'a'> & {
     size?: 'sm' | 'md'
     isActive?: boolean
+    asChild?: boolean
   }) {
+  // Handle asChild pattern
+  let renderProp = render
+  if (asChild && children) {
+    renderProp = children as useRender.ComponentProps<'a'>['render']
+  }
+
   return useRender({
     defaultTagName: 'a',
     props: mergeProps<'a'>(
@@ -654,7 +673,7 @@ function SidebarMenuSubButton({
       },
       props
     ),
-    render,
+    render: renderProp,
     state: {
       slot: 'sidebar-menu-sub-button',
       sidebar: 'menu-sub-button',
