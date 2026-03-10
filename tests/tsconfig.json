@@ -14,11 +14,17 @@
     "noEmit": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "types": ["@types/node"]
+    "types": [
+      "@types/node",
+      "@japa/runner/types",
+      "@japa/assert/types",
+      "@japa/api-client/types",
+      "@japa/browser-client/types"
+    ]
   },
   "include": [
-    "./bootstrap.ts",
-    "./helpers/**/*.ts",
+    "./**/*.ts",
+    "./**/*.spec.ts",
     "./types/**/*.d.ts",
     "../config/auth.ts",
     "../.adonisjs/server/**/*.d.ts"
