@@ -454,7 +454,10 @@ test.group('Attendance Authorization - Edge Cases', (group) => {
 
   test('user without school association CANNOT access', async ({ client, assert }) => {
     const RoleModel = await import('#models/role')
-    const role = await RoleModel.default.findByOrFail('name', 'SCHOOL_DIRECTOR')
+    const role = await RoleModel.default.firstOrCreate(
+      { name: 'SCHOOL_DIRECTOR' },
+      { name: 'SCHOOL_DIRECTOR' }
+    )
     const UserModel = await import('#models/user')
     const userWithoutSchool = await UserModel.default.create({
       name: `User No School ${Date.now()}`,
@@ -472,6 +475,6 @@ test.group('Attendance Authorization - Edge Cases', (group) => {
       .loginAs(userWithoutSchool)
 
     // Should return 403 after authorization middleware
-    assert.isTrue(true, 'TODO: Should return 403 for user without school')
+    assert.equal(response.status(), 403, 'Should return 403 for user without school')
   })
 })

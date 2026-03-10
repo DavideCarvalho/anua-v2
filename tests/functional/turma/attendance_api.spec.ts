@@ -43,13 +43,17 @@ test.group('Attendance API - Basic auth', (group) => {
     assert.isTrue(response.header('location')?.startsWith('/login'))
   })
 
-  test('returns 404 for non-existent class', async ({ client }) => {
+  test('returns 403 for non-existent class (authorization check fails first)', async ({
+    client,
+  }) => {
     const { user } = await createEscolaAuthUser()
     const response = await client
       .get(`/api/v1/attendance/class/${FAKE_UUID}/students`)
       .qs({ courseId: FAKE_UUID, academicPeriodId: FAKE_UUID })
       .loginAs(user)
-    response.assertStatus(404)
+    // With authorization middleware, it checks school access first and returns 403
+    // because the class doesn't exist, so user can't have access to its school
+    response.assertStatus(403)
   })
 })
 
@@ -299,7 +303,7 @@ test.group('Attendance API - Complete flow', (group) => {
     const { user, school } = await createEscolaAuthUser()
     const fixtures = await createAttendanceFixtures(school)
 
-    // Test with non-existent classId
+    // Test with non-existent classId - middleware returns 403 before controller checks
     const response = await client
       .post('/api/v1/attendance/batch')
       .loginAs(user)
@@ -311,6 +315,7 @@ test.group('Attendance API - Complete flow', (group) => {
         attendances: [{ studentId: fixtures.students[0].id, status: 'PRESENT' }],
       })
 
-    response.assertStatus(400)
+    // With authorization middleware, it returns 403 because the class doesn't exist
+    response.assertStatus(403)
   })
 })
