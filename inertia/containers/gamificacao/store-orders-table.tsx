@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
+import { Route } from '@tuyau/core/types'
 
 interface StoreOrdersTableProps {
   schoolId: string
@@ -57,6 +58,8 @@ const statusConfig: Record<
   REJECTED: { label: 'Rejeitado', variant: 'destructive', icon: <X className="h-3 w-3" /> },
 }
 
+type StoreOrder = Route.Response<'api.v1.store_orders.index'>['data'][number]
+
 export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const queryClient = useQueryClient()
   const { data, isLoading } = useQuery(
@@ -66,7 +69,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const rejectMutation = useMutation(api.api.v1.storeOrders.reject.mutationOptions())
   const deliverMutation = useMutation(api.api.v1.storeOrders.deliver.mutationOptions())
 
-  const orders = data?.data ?? []
+  const orders = data?.data ?? ([] as StoreOrder[])
 
   const handleApprove = async (id: string) => {
     try {
@@ -149,7 +152,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
               return (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">
-                    {order.student?.user?.name ?? order.student?.name ?? '-'}
+                    {order.student?.user?.name ?? order.studentId ?? '-'}
                   </TableCell>
                   <TableCell>{order.orderNumber}</TableCell>
                   <TableCell className="text-center">-</TableCell>

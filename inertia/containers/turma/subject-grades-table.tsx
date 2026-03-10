@@ -34,7 +34,7 @@ interface StudentGrade {
     assignment: {
       id: string
       name: string
-      maxGrade: number
+      maxGrade: number | null
     }
     grade: number | null
   }[]
@@ -70,7 +70,7 @@ function GradesTableEmpty() {
 interface SelectedAssignment {
   id: string
   name: string
-  maxGrade: number
+  maxGrade: number | null
 }
 
 function SubjectGradesTableContent({

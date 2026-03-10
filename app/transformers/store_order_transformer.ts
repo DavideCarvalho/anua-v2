@@ -41,17 +41,19 @@ export default class StoreOrderTransformer extends BaseTransformer<StoreOrder> {
         'createdAt',
         'updatedAt',
       ]),
-      student: StudentTransformer.transform(this.whenLoaded(this.resource.student)),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
-      store: StoreTransformer.transform(this.whenLoaded(this.resource.store)),
-      approver: UserTransformer.transform(this.whenLoaded(this.resource.approver)),
-      preparer: UserTransformer.transform(this.whenLoaded(this.resource.preparer)),
-      deliverer: UserTransformer.transform(this.whenLoaded(this.resource.deliverer)),
+      student: StudentTransformer.transform(this.whenLoaded(this.resource.student))?.depth(5),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(5),
+      store: StoreTransformer.transform(this.whenLoaded(this.resource.store))?.depth(5),
+      approver: UserTransformer.transform(this.whenLoaded(this.resource.approver))?.depth(5),
+      preparer: UserTransformer.transform(this.whenLoaded(this.resource.preparer))?.depth(5),
+      deliverer: UserTransformer.transform(this.whenLoaded(this.resource.deliverer))?.depth(5),
       studentPayment: StudentPaymentTransformer.transform(
         this.whenLoaded(this.resource.studentPayment)
-      ),
-      settlement: StoreSettlementTransformer.transform(this.whenLoaded(this.resource.settlement)),
-      items: StoreOrderItemTransformer.transform(this.whenLoaded(this.resource.items)),
+      )?.depth(5),
+      settlement: StoreSettlementTransformer.transform(
+        this.whenLoaded(this.resource.settlement)
+      )?.depth(5),
+      items: StoreOrderItemTransformer.transform(this.whenLoaded(this.resource.items))?.depth(5),
     }
   }
 }
