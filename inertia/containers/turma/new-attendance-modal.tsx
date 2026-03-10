@@ -710,7 +710,11 @@ function NewAttendanceModalContent({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-6">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <form
+            id="attendance-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
             {/* Subject Select */}
             <div className="space-y-2">
               <Label>Matéria *</Label>
@@ -888,7 +892,7 @@ function NewAttendanceModalContent({
             </Button>
             <Button
               type="submit"
-              onClick={form.handleSubmit(onSubmit)}
+              form="attendance-form"
               disabled={createMutation.isPending || !subjectId || selectedDates.length === 0}
               className="flex-1 sm:flex-none"
             >

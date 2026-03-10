@@ -141,13 +141,9 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
 
   const selectedUser = config?.users?.find((u) => u.id === selectedUserId)
 
-  // Check if we're on admin route
-  const { url } = usePage()
-  const isAdminRoute = url.startsWith('/admin')
-
-  // Show badge when user is ADMIN/SUPER_ADMIN or has active impersonation or is on admin route
-  const shouldShow =
-    ['ADMIN', 'SUPER_ADMIN'].includes(roleName) || hasActiveImpersonation || isAdminRoute
+  // Always show in admin context - this component is only used in admin layout
+  // The user check is handled at the API level
+  const shouldShow = true
 
   if (!shouldShow) {
     return null
