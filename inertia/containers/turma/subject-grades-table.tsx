@@ -89,6 +89,7 @@ function SubjectGradesTableContent({
   } = useQuery(
     api.api.v1.grades.classSubject.queryOptions({
       params: { classId, subjectId },
+      query: { courseId, academicPeriodId },
     })
   )
 

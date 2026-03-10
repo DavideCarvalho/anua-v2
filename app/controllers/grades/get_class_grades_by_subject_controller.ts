@@ -3,6 +3,7 @@ import Assignment from '#models/assignment'
 import TeacherHasClass from '#models/teacher_has_class'
 import StudentHasAssignment from '#models/student_has_assignment'
 import { getStudents } from '#services/class_students_service'
+import { getClassGradesBySubjectValidator } from '#validators/grades'
 import AppException from '#exceptions/app_exception'
 
 interface StudentGradeData {
@@ -16,7 +17,7 @@ interface StudentGradeData {
     assignment: {
       id: string
       name: string
-      maxGrade: number
+      maxGrade: number | null
     }
     grade: number | null
   }[]
@@ -26,12 +27,9 @@ export default class GetClassGradesBySubjectController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.classId
     const subjectId = params.subjectId
-    const courseId = request.input('courseId')
-    const academicPeriodId = request.input('academicPeriodId')
-
-    if (!courseId || !academicPeriodId) {
-      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
-    }
+    const { courseId, academicPeriodId } = await request.validateUsing(
+      getClassGradesBySubjectValidator
+    )
 
     // Get the school's calculation algorithm
     const teacherHasClass = await TeacherHasClass.query()
@@ -75,9 +73,9 @@ export default class GetClassGradesBySubjectController {
     // Calculate max possible grade based on algorithm
     const maxPossibleGrade =
       calculationAlgorithm === 'SUM'
-        ? assignments.reduce((sum, a) => sum + a.grade, 0)
+        ? assignments.reduce((sum, a) => sum + (a.grade ?? 0), 0)
         : assignments.length > 0
-          ? assignments.reduce((sum, a) => sum + a.grade, 0) / assignments.length
+          ? assignments.reduce((sum, a) => sum + (a.grade ?? 0), 0) / assignments.length
           : 0
 
     // Build response data

@@ -210,7 +210,7 @@ export class AssignmentSchema extends BaseModel {
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
-  declare grade: number
+  declare grade: number | null
   @column()
   declare teacherHasClassId: string
   @column()
@@ -1395,7 +1395,7 @@ export class InsuranceClaimSchema extends BaseModel {
 }
 
 export class InvoiceSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'contractId', 'type', 'month', 'year', 'dueDate', 'status', 'totalAmount', 'netAmountReceived', 'paidAt', 'paymentMethod', 'paymentGatewayId', 'paymentGateway', 'observation', 'createdAt', 'updatedAt', 'invoiceUrl', 'baseAmount', 'discountAmount', 'fineAmount', 'interestAmount', 'lastNotifiedAt', 'platformFeeAmount', 'chargedAmount', 'nfseId', 'nfseStatus', 'nfseNumber', 'nfsePdfUrl', 'nfseXmlUrl', 'nfseRpsNumber', 'nfseIssuedAt', 'nfseErrorMessage'] as const
+  static $columns = ['id', 'studentId', 'contractId', 'type', 'month', 'year', 'dueDate', 'status', 'totalAmount', 'netAmountReceived', 'paidAt', 'paymentMethod', 'paymentGatewayId', 'paymentGateway', 'observation', 'createdAt', 'updatedAt', 'invoiceUrl', 'baseAmount', 'discountAmount', 'fineAmount', 'interestAmount', 'lastNotifiedAt', 'nfseId', 'nfseStatus', 'nfseNumber', 'nfsePdfUrl', 'nfseXmlUrl', 'nfseRpsNumber', 'nfseIssuedAt', 'nfseErrorMessage', 'platformFeeAmount', 'chargedAmount'] as const
   $columns = InvoiceSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -1444,10 +1444,6 @@ export class InvoiceSchema extends BaseModel {
   @column.dateTime()
   declare lastNotifiedAt: DateTime | null
   @column()
-  declare platformFeeAmount: number
-  @column()
-  declare chargedAmount: number
-  @column()
   declare nfseId: string | null
   @column()
   declare nfseStatus: string | null
@@ -1463,6 +1459,10 @@ export class InvoiceSchema extends BaseModel {
   declare nfseIssuedAt: DateTime | null
   @column()
   declare nfseErrorMessage: string | null
+  @column()
+  declare platformFeeAmount: number
+  @column()
+  declare chargedAmount: number
 }
 
 export class LeaderboardSchema extends BaseModel {
@@ -2905,7 +2905,7 @@ export class StudentHasExtraClassAttendanceSchema extends BaseModel {
 }
 
 export class StudentHasLevelSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'levelAssignedToCourseAcademicPeriodId', 'scholarshipId', 'academicPeriodId', 'levelId', 'classId', 'contractId', 'contractUrl', 'paymentMethod', 'enrollmentInstallments', 'installments', 'paymentDay', 'docusealSubmissionId', 'docusealSignatureStatus', 'documentSignedAt', 'enrollmentPaymentId', 'signedContractFilePath', 'deletedAt', 'createdAt', 'updatedAt'] as const
+  static $columns = ['id', 'studentId', 'levelAssignedToCourseAcademicPeriodId', 'scholarshipId', 'academicPeriodId', 'levelId', 'classId', 'contractId', 'contractUrl', 'paymentMethod', 'enrollmentInstallments', 'installments', 'paymentDay', 'docusealSubmissionId', 'docusealSignatureStatus', 'documentSignedAt', 'enrollmentPaymentId', 'signedContractFilePath', 'createdAt', 'updatedAt', 'deletedAt'] as const
   $columns = StudentHasLevelSchema.$columns
   @column({ isPrimary: true })
   declare id: string
@@ -2944,11 +2944,11 @@ export class StudentHasLevelSchema extends BaseModel {
   @column()
   declare signedContractFilePath: string | null
   @column.dateTime()
-  declare deletedAt: DateTime | null
-  @column.dateTime()
   declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
 }
 
 export class StudentHasResponsibleSchema extends BaseModel {
@@ -3705,6 +3705,17 @@ export class AuditSchema extends BaseModel {
   declare userId: string | null
 }
 
+export class BentocacheSchema extends BaseModel {
+  static $columns = ['key', 'value', 'expiresAt'] as const
+  $columns = BentocacheSchema.$columns
+  @column()
+  declare key: string
+  @column()
+  declare value: string
+  @column.dateTime()
+  declare expiresAt: DateTime
+}
+
 export class ExamAttachmentSchema extends BaseModel {
   static $columns = ['id', 'examId', 'title', 'fileName', 'fileUrl', 'fileSize', 'mimeType', 'uploadedBy', 'createdAt'] as const
   $columns = ExamAttachmentSchema.$columns
@@ -3872,6 +3883,96 @@ export class RateLimitSchema extends BaseModel {
   declare points: number
   @column()
   declare expire: bigint | number
+}
+
+export class SidequestJobSchema extends BaseModel {
+  static $columns = ['id', 'queue', 'state', 'script', 'class', 'args', 'constructorArgs', 'timeout', 'attempt', 'maxAttempts', 'result', 'errors', 'insertedAt', 'attemptedAt', 'availableAt', 'completedAt', 'failedAt', 'canceledAt', 'claimedBy', 'claimedAt', 'uniqueDigest', 'uniquenessConfig', 'retryDelay', 'backoffStrategy'] as const
+  $columns = SidequestJobSchema.$columns
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare queue: string
+  @column()
+  declare state: string
+  @column()
+  declare script: string
+  @column()
+  declare class: string
+  @column()
+  declare args: any
+  @column()
+  declare constructorArgs: any
+  @column()
+  declare timeout: number | null
+  @column()
+  declare attempt: number
+  @column()
+  declare maxAttempts: number
+  @column()
+  declare result: any | null
+  @column()
+  declare errors: any | null
+  @column.dateTime()
+  declare insertedAt: DateTime
+  @column.dateTime()
+  declare attemptedAt: DateTime | null
+  @column.dateTime()
+  declare availableAt: DateTime
+  @column.dateTime()
+  declare completedAt: DateTime | null
+  @column.dateTime()
+  declare failedAt: DateTime | null
+  @column.dateTime()
+  declare canceledAt: DateTime | null
+  @column()
+  declare claimedBy: string | null
+  @column.dateTime()
+  declare claimedAt: DateTime | null
+  @column()
+  declare uniqueDigest: string | null
+  @column()
+  declare uniquenessConfig: any | null
+  @column()
+  declare retryDelay: number | null
+  @column()
+  declare backoffStrategy: string
+}
+
+export class SidequestMigrationSchema extends BaseModel {
+  static $columns = ['id', 'name', 'batch', 'migrationTime'] as const
+  $columns = SidequestMigrationSchema.$columns
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string | null
+  @column()
+  declare batch: number | null
+  @column.dateTime()
+  declare migrationTime: DateTime | null
+}
+
+export class SidequestMigrationsLockSchema extends BaseModel {
+  static $columns = ['index', 'isLocked'] as const
+  $columns = SidequestMigrationsLockSchema.$columns
+  @column()
+  declare index: number
+  @column()
+  declare isLocked: number | null
+}
+
+export class SidequestQueueSchema extends BaseModel {
+  static $columns = ['id', 'name', 'state', 'concurrency', 'priority'] as const
+  $columns = SidequestQueueSchema.$columns
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column()
+  declare name: string
+  @column()
+  declare state: string
+  @column()
+  declare concurrency: number
+  @column()
+  declare priority: number
 }
 
 export class SpatialRefSySchema extends BaseModel {

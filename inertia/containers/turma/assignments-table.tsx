@@ -135,7 +135,7 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
                 <TableCell>
                   {format(new Date(assignment.dueDate ?? ''), "dd 'de' MMMM", { locale: ptBR })}
                 </TableCell>
-                <TableCell>{assignment.grade}</TableCell>
+                <TableCell>{assignment.grade ?? '-'}</TableCell>
                 <TableCell>
                   <Badge variant={status.variant}>{status.label}</Badge>
                 </TableCell>

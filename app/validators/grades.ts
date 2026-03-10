@@ -47,3 +47,10 @@ export const batchSaveGradesValidator = vine.compile(
     ),
   })
 )
+
+export const getClassGradesBySubjectValidator = vine.compile(
+  vine.object({
+    courseId: vine.string().uuid(),
+    academicPeriodId: vine.string().uuid(),
+  })
+)

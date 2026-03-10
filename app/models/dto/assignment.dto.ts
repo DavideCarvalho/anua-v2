@@ -8,9 +8,9 @@ export default class AssignmentDto extends BaseModelDto {
   declare title: string
   declare description: string | null
   declare dueDate: Date
-  declare grade: number
+  declare grade: number | null
   /** Alias for grade — used by frontend */
-  declare maxScore: number
+  declare maxScore: number | null
   declare teacherHasClassId: string
   declare academicPeriodId: string
   declare createdAt: Date

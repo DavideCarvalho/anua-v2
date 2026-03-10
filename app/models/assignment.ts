@@ -29,7 +29,7 @@ export default class Assignment extends BaseModel {
   declare dueDate: DateTime
 
   @column()
-  declare grade: number
+  declare grade: number | null
 
   @column()
   declare teacherHasClassId: string

@@ -3336,7 +3336,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/class').listClassStudentsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/classes/list_class_students_controller').default['handle']>>>
     }
   }
@@ -3787,7 +3787,7 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue, ParamValue]
       params: { classId: ParamValue; subjectId: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/grades').getClassGradesBySubjectValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/grades/get_class_grades_by_subject_controller').default['handle']>>>
     }
   }

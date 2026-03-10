@@ -33,7 +33,7 @@ export default class GradeSubmissionController {
     await submission.load('assignment')
 
     // Trigger gamification event for grade
-    if (payload.grade !== null && payload.grade !== undefined) {
+    if (payload.grade !== null && payload.grade !== undefined && assignment.grade !== null) {
       gamificationEventService
         .emitGradeReceived({
           gradeId: submission.id,

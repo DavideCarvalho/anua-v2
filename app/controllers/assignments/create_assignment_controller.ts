@@ -49,7 +49,7 @@ export default class CreateAssignmentController {
     const assignment = await Assignment.create({
       name: payload.title,
       description: payload.description,
-      grade: payload.maxScore ?? 100,
+      grade: payload.maxScore,
       dueDate: DateTime.fromJSDate(payload.dueDate),
       teacherHasClassId: teacherHasClass.id,
       academicPeriodId,

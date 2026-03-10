@@ -25,7 +25,7 @@ import type { Route } from '@tuyau/core/types'
 interface LaunchGradesModalProps {
   assignmentId: string
   assignmentName: string
-  maxGrade: number
+  maxGrade: number | null
   classId: string
   courseId: string
   academicPeriodId: string
@@ -218,7 +218,7 @@ function LaunchGradesModalContent({
                     <Input
                       type="number"
                       min={0}
-                      max={maxGrade}
+                      max={maxGrade || undefined}
                       step="0.1"
                       inputMode="decimal"
                       placeholder="0"
@@ -233,7 +233,9 @@ function LaunchGradesModalContent({
                         form.setValue(`grades.${index}.grade`, grade)
                       }}
                     />
-                    <span className="text-sm text-muted-foreground">/ {maxGrade}</span>
+                    {maxGrade !== null && (
+                      <span className="text-sm text-muted-foreground">/ {maxGrade}</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -275,7 +277,8 @@ export function LaunchGradesModal({
         <DialogHeader>
           <DialogTitle>{assignmentName}</DialogTitle>
           <DialogDescription>
-            Lançar notas para esta atividade. Nota máxima: {maxGrade}
+            Lançar notas para esta atividade
+            {maxGrade !== null && <span>. Nota máxima: {maxGrade}</span>}
           </DialogDescription>
         </DialogHeader>
 

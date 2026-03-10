@@ -138,7 +138,7 @@ export default class GetStudentStatusController {
     const totalClasses = attendanceRecords.length
 
     // Calculate max possible grade based on algorithm (assignments + exams)
-    const totalAssignmentPoints = assignments.reduce((sum, a) => sum + a.grade, 0)
+    const totalAssignmentPoints = assignments.reduce((sum, a) => sum + (a.grade ?? 0), 0)
     const totalExamPoints = exams.reduce((sum, e) => sum + e.maxScore, 0)
     const totalItems = assignments.length + exams.length
 
