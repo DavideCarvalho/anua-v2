@@ -47,7 +47,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       (ctx as HttpContext & { effectiveUser?: typeof auth.user }).effectiveUser ?? auth.user
     let userDto = null
     if (user) {
-      if (!user.$preloaded.role) await user.load('role')
+      await user.load('role')
       const firstSelectedSchoolId = (ctx as HttpContext & { selectedSchoolIds?: string[] })
         .selectedSchoolIds?.[0]
       if (!user.$preloaded.school && firstSelectedSchoolId) {

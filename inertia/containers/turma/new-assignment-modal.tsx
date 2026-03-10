@@ -32,12 +32,20 @@ import { api } from '~/lib/api'
 const schema = z.object({
   name: z.string().min(1, 'Qual o nome da atividade?'),
   dueDate: z.date({ message: 'Quando é a data de entrega?' }),
+  noGrade: z.boolean().optional(),
   grade: z.number().min(0).optional(),
   subjectId: z.string().min(1, 'Qual matéria?'),
   description: z.string().optional(),
 })
 
-type FormValues = z.infer<typeof schema>
+type FormValues = {
+  name: string
+  dueDate: Date
+  noGrade?: boolean
+  grade?: number
+  subjectId: string
+  description?: string
+}
 
 interface NewAssignmentModalProps {
   classId: string
@@ -67,9 +75,10 @@ export function NewAssignmentModal({
     defaultValues: {
       name: '',
       dueDate: new Date(),
+      noGrade: false,
       grade: undefined,
-      description: '',
       subjectId: '',
+      description: '',
     },
   })
 
@@ -110,9 +119,10 @@ export function NewAssignmentModal({
       form.reset({
         name: '',
         dueDate: new Date(),
+        noGrade: false,
         grade: undefined,
-        description: '',
         subjectId: subjects?.length === 1 ? subjects[0]?.id : '',
+        description: '',
       })
     }
   }, [open, form, subjects])
@@ -131,7 +141,7 @@ export function NewAssignmentModal({
         body: {
           title: data.name,
           description: data.description,
-          maxScore: data.grade ?? null,
+          maxScore: data.noGrade ? null : (data.grade ?? null),
           dueDate: data.dueDate.toISOString(),
           classId,
           subjectId: data.subjectId,
@@ -201,17 +211,34 @@ export function NewAssignmentModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="grade">Quanto vale?</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="grade">Quanto vale?</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="noGrade"
+                    {...form.register('noGrade')}
+                    onChange={(e) => {
+                      form.setValue('noGrade', e.target.checked)
+                      if (e.target.checked) {
+                        form.setValue('grade', undefined)
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <Label htmlFor="noGrade" className="text-sm font-normal cursor-pointer">
+                    Sem nota
+                  </Label>
+                </div>
+              </div>
               <Input
                 id="grade"
                 type="number"
                 min={0}
                 step={0.1}
+                disabled={form.watch('noGrade')}
                 {...form.register('grade', { valueAsNumber: true })}
               />
-              <p className="text-xs text-muted-foreground">
-                Deixe em branco se a atividade não tiver nota
-              </p>
               {form.formState.errors.grade && (
                 <p className="text-sm text-destructive">{form.formState.errors.grade.message}</p>
               )}

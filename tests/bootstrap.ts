@@ -1,5 +1,6 @@
 import { assert } from '@japa/assert'
 import app from '@adonisjs/core/services/app'
+import db from '@adonisjs/lucid/services/db'
 import type { Config } from '@japa/runner/types'
 import { pluginAdonisJS } from '@japa/plugin-adonisjs'
 import { apiClient } from '@japa/api-client'
@@ -37,8 +38,18 @@ export const plugins: Config['plugins'] = [
  * The teardown functions are executed after all the tests
  */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
-  setup: [],
-  teardown: [],
+  setup: [
+    // Global transaction for all tests - ensures data is rolled back after each test
+    async () => {
+      await db.beginGlobalTransaction()
+    },
+  ],
+  teardown: [
+    // Rollback global transaction after all tests
+    async () => {
+      await db.rollbackGlobalTransaction()
+    },
+  ],
 }
 
 /**

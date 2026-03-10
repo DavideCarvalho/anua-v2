@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { usePage } from '@inertiajs/react'
 import { Shield, Eye, RefreshCw, Check, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -140,8 +141,13 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
 
   const selectedUser = config?.users?.find((u) => u.id === selectedUserId)
 
-  // Show badge when user is ADMIN/SUPER_ADMIN or has active impersonation
-  const shouldShow = ['ADMIN', 'SUPER_ADMIN'].includes(roleName) || hasActiveImpersonation
+  // Check if we're on admin route
+  const { url } = usePage()
+  const isAdminRoute = url.startsWith('/admin')
+
+  // Show badge when user is ADMIN/SUPER_ADMIN or has active impersonation or is on admin route
+  const shouldShow =
+    ['ADMIN', 'SUPER_ADMIN'].includes(roleName) || hasActiveImpersonation || isAdminRoute
 
   if (!shouldShow) {
     return null
@@ -156,6 +162,7 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
               size="lg"
               tooltip={hasActiveImpersonation ? 'Personificação Ativa' : 'Personificar Usuário'}
               className={cn(
+                'hover:bg-accent hover:text-accent-foreground',
                 hasActiveImpersonation &&
                   'bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/50'
               )}
