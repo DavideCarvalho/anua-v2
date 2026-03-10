@@ -3,16 +3,14 @@ import Class_ from '#models/class'
 import StudentHasLevel from '#models/student_has_level'
 import StudentDto from '#models/dto/student.dto'
 import AppException from '#exceptions/app_exception'
+import { listClassStudentsValidator } from '#validators/class'
 
 export default class ListClassStudentsController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.id
-    const courseId = request.input('courseId')
-    const academicPeriodId = request.input('academicPeriodId')
-
-    if (!courseId || !academicPeriodId) {
-      throw AppException.badRequest('courseId e academicPeriodId são obrigatórios')
-    }
+    const query = await request.validateUsing(listClassStudentsValidator)
+    const courseId = query.courseId
+    const academicPeriodId = query.academicPeriodId
 
     const classEntity = await Class_.find(classId)
     if (!classEntity) {

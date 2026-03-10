@@ -67,3 +67,12 @@ export const updateClassWithTeachersValidator = vine.compile(
     ),
   })
 )
+
+export const listClassStudentsValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    courseId: vine.string().uuid(),
+    academicPeriodId: vine.string().uuid(),
+  })
+)
