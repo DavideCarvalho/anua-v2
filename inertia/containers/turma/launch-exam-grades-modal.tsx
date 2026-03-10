@@ -85,6 +85,8 @@ function LaunchExamGradesModalContent({
   examId,
   maxScore,
   classId,
+  courseId,
+  academicPeriodId,
   onOpenChange,
 }: Omit<LaunchExamGradesModalProps, 'open'>) {
   const queryClient = useQueryClient()
@@ -99,6 +101,7 @@ function LaunchExamGradesModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(
     api.api.v1.classes.students.queryOptions({
       params: { id: classId },
+      query: { courseId, academicPeriodId },
     })
   )
   const students = studentsResponse?.data || []

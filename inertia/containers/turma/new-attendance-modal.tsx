@@ -4,7 +4,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { Calendar, CheckCircle, Loader2, Search, Users, X, XCircle } from 'lucide-react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import {
+  Calendar as CalendarIcon,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Search,
+  Users,
+  X,
+  XCircle,
+} from 'lucide-react'
 
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -61,6 +73,12 @@ interface Subject {
   teacherId: string
 }
 
+interface AvailableDate {
+  date: string
+  label: string
+  slotId: string
+}
+
 // Helper function to get initials from name
 function getInitials(name: string): string {
   return name
@@ -101,6 +119,353 @@ function NoStudentsEmpty() {
         </p>
       </CardContent>
     </Card>
+  )
+}
+
+// Calendar-based date picker component
+interface DateCalendarPickerProps {
+  availableDates: AvailableDate[]
+  selectedDates: string[]
+  onToggleDate: (date: string) => void
+  onClear: () => void
+  isLoading: boolean
+  subjectId: string
+  error?: string
+}
+
+function DateCalendarPicker({
+  availableDates,
+  selectedDates,
+  onToggleDate,
+  onClear,
+  isLoading,
+  subjectId,
+  error,
+}: DateCalendarPickerProps) {
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+
+  // Group dates by day
+  const datesByDay = useMemo(() => {
+    const grouped = new Map<string, AvailableDate[]>()
+    for (const date of availableDates) {
+      const dayKey = date.date.split('T')[0]
+      if (!grouped.has(dayKey)) {
+        grouped.set(dayKey, [])
+      }
+      grouped.get(dayKey)!.push(date)
+    }
+    return grouped
+  }, [availableDates])
+
+  // Get unique days that have classes
+  const classDays = useMemo(() => {
+    return new Set(datesByDay.keys())
+  }, [datesByDay])
+
+  // Check selection status for a day
+  const getDaySelectionStatus = (date: Date) => {
+    const dayKey = format(date, 'yyyy-MM-dd')
+    const dayDates = datesByDay.get(dayKey) || []
+    if (dayDates.length === 0) return 'none'
+
+    const selectedCount = dayDates.filter((d) => selectedDates.includes(d.date)).length
+    if (selectedCount === 0) return 'none'
+    if (selectedCount === dayDates.length) return 'all'
+    return 'partial'
+  }
+
+  // Get counts for a day
+  const getDayCounts = (date: Date) => {
+    const dayKey = format(date, 'yyyy-MM-dd')
+    const dayDates = datesByDay.get(dayKey) || []
+    const selectedCount = dayDates.filter((d) => selectedDates.includes(d.date)).length
+    return { selected: selectedCount, total: dayDates.length }
+  }
+
+  // Handle day click
+  const handleDayClick = (date: Date) => {
+    const dayKey = format(date, 'yyyy-MM-dd')
+    if (datesByDay.has(dayKey)) {
+      setSelectedDay(date)
+    }
+  }
+
+  // Toggle all times for selected day
+  const toggleAllForDay = (selectAll: boolean) => {
+    if (!selectedDay) return
+    const dayKey = format(selectedDay, 'yyyy-MM-dd')
+    const dayDates = datesByDay.get(dayKey) || []
+
+    if (selectAll) {
+      dayDates.forEach((d) => {
+        if (!selectedDates.includes(d.date)) {
+          onToggleDate(d.date)
+        }
+      })
+    } else {
+      dayDates.forEach((d) => {
+        if (selectedDates.includes(d.date)) {
+          onToggleDate(d.date)
+        }
+      })
+    }
+  }
+
+  // Generate calendar days
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDay = firstDay.getDay()
+
+    const days: (Date | null)[] = []
+    for (let i = 0; i < startingDay; i++) {
+      days.push(null)
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i))
+    }
+    return days
+  }
+
+  const calendarDays = useMemo(() => getDaysInMonth(currentMonth), [currentMonth])
+
+  const goToPreviousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+  }
+
+  const goToNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+  }
+
+  if (!subjectId) {
+    return (
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <CalendarIcon className="h-4 w-4" />
+          Datas das Aulas
+        </Label>
+        <p className="text-sm text-muted-foreground">
+          Selecione a matéria para ver os dias de aula.
+        </p>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <CalendarIcon className="h-4 w-4" />
+          Datas das Aulas
+        </Label>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Carregando dias de aula...
+        </div>
+      </div>
+    )
+  }
+
+  if (availableDates.length === 0) {
+    return (
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <CalendarIcon className="h-4 w-4" />
+          Datas das Aulas
+        </Label>
+        <p className="text-sm text-destructive">
+          Nenhum dia de aula para esta matéria. Verifique o quadro de horários e o período letivo.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="flex items-center gap-2">
+          <CalendarIcon className="h-4 w-4" />
+          Datas das Aulas
+          {selectedDates.length > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {selectedDates.length} horário{selectedDates.length > 1 ? 's' : ''}
+            </Badge>
+          )}
+        </Label>
+        {selectedDates.length > 0 && (
+          <Button type="button" variant="ghost" size="sm" onClick={onClear}>
+            Limpar
+          </Button>
+        )}
+      </div>
+
+      <Card>
+        <CardContent className="p-3">
+          {/* Calendar Header */}
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={goToPreviousMonth}
+              className="h-8 w-8"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium">
+              {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={goToNextMonth}
+              className="h-8 w-8"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Weekday Headers */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
+              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((date, index) => {
+              if (!date) {
+                return <div key={`empty-${index}`} className="h-10" />
+              }
+
+              const dayKey = format(date, 'yyyy-MM-dd')
+              const hasClass = classDays.has(dayKey)
+              const selectionStatus = getDaySelectionStatus(date)
+              const counts = getDayCounts(date)
+              const isSelectedDay = selectedDay && format(selectedDay, 'yyyy-MM-dd') === dayKey
+
+              return (
+                <button
+                  key={dayKey}
+                  type="button"
+                  onClick={() => hasClass && handleDayClick(date)}
+                  disabled={!hasClass}
+                  className={cn(
+                    'h-10 w-full rounded-md text-sm relative flex flex-col items-center justify-center transition-colors',
+                    !hasClass && 'text-muted-foreground/30 cursor-default',
+                    hasClass && 'hover:bg-accent cursor-pointer',
+                    selectionStatus === 'all' &&
+                      'bg-primary text-primary-foreground hover:bg-primary/90',
+                    selectionStatus === 'partial' && 'ring-2 ring-primary ring-offset-1',
+                    isSelectedDay && 'ring-2 ring-blue-400 ring-offset-2',
+                    hasClass &&
+                      selectionStatus === 'none' &&
+                      'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                  )}
+                >
+                  <span className="text-xs font-medium">{date.getDate()}</span>
+                  {hasClass && (
+                    <span className="text-[9px] leading-none mt-0.5">
+                      {selectionStatus === 'all'
+                        ? '✓'
+                        : selectionStatus === 'partial'
+                          ? `${counts.selected}/${counts.total}`
+                          : counts.total}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Legend */}
+          <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <div className="h-3 w-3 rounded-sm bg-blue-50 border border-blue-200 dark:bg-blue-950" />
+              <span>Com aula</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="h-3 w-3 rounded-sm bg-primary" />
+              <span>Selecionado</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="h-3 w-3 rounded-sm ring-2 ring-primary" />
+              <span>Parcial</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Day Details Panel */}
+      {selectedDay && (
+        <Card>
+          <CardContent className="p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-sm">
+                {format(selectedDay, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              </h4>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedDay(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {(() => {
+                  const counts = getDayCounts(selectedDay)
+                  const status = getDaySelectionStatus(selectedDay)
+                  if (status === 'all') return 'Todos os horários selecionados'
+                  if (status === 'partial')
+                    return `${counts.selected} de ${counts.total} selecionados`
+                  return `${counts.total} horários disponíveis`
+                })()}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => toggleAllForDay(getDaySelectionStatus(selectedDay) !== 'all')}
+              >
+                {getDaySelectionStatus(selectedDay) === 'all' ? 'Desmarcar todos' : 'Marcar todos'}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {(datesByDay.get(format(selectedDay, 'yyyy-MM-dd')) || []).map((dateInfo) => (
+                <label
+                  key={dateInfo.date}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 rounded-lg border p-2.5 transition-colors hover:bg-accent',
+                    selectedDates.includes(dateInfo.date) && 'border-primary bg-primary/5'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedDates.includes(dateInfo.date)}
+                    onChange={() => onToggleDate(dateInfo.date)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="flex-1 text-sm">{dateInfo.label}</span>
+                  {selectedDates.includes(dateInfo.date) && (
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                  )}
+                </label>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
   )
 }
 
@@ -162,21 +527,24 @@ function NewAttendanceModalContent({
     }),
     enabled: open && !!subjectId,
   })
-  const availableDates = availableDatesResponse?.dates ?? []
+  const availableDates = useMemo(
+    () => availableDatesResponse?.dates ?? [],
+    [availableDatesResponse]
+  )
 
   // Auto-select first subject if only one
   useEffect(() => {
     if (subjects && subjects.length === 1 && subjects[0]) {
       form.setValue('subjectId', subjects[0].id)
     }
-  }, [subjects])
+  }, [subjects, form])
 
   // When subject changes, clear date selection
   useEffect(() => {
     if (subjectId) {
       form.setValue('dates', [])
     }
-  }, [subjectId])
+  }, [subjectId, form])
 
   // Track if we've initialized for current modal open
   const [hasInitialized, setHasInitialized] = useState(false)
@@ -203,7 +571,7 @@ function NewAttendanceModalContent({
     form.setValue('dates', [])
     setSearchQuery('')
     setHasInitialized(true)
-  }, [open, students, hasInitialized])
+  }, [open, students, hasInitialized, form])
 
   const createMutation = useMutation(api.api.v1.attendance.batch.mutationOptions())
 
@@ -249,14 +617,7 @@ function NewAttendanceModalContent({
     }
   }
 
-  // Select/deselect all dates
-  function selectAllDates() {
-    form.setValue(
-      'dates',
-      availableDates.map((d) => d.date)
-    )
-  }
-
+  // Deselect all dates
   function deselectAllDates() {
     form.setValue('dates', [])
   }
@@ -350,7 +711,7 @@ function NewAttendanceModalContent({
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-6">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            {/* Subject Select — first, like school-super-app */}
+            {/* Subject Select */}
             <div className="space-y-2">
               <Label>Matéria *</Label>
               {isLoadingSubjects ? (
@@ -387,62 +748,16 @@ function NewAttendanceModalContent({
               )}
             </div>
 
-            {/* Date Selection — multiple dates allowed */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Datas das Aulas
-                {selectedDates.length > 0 && (
-                  <Badge variant="secondary" className="ml-2">
-                    {selectedDates.length} selecionada{selectedDates.length > 1 ? 's' : ''}
-                  </Badge>
-                )}
-              </Label>
-              {!subjectId ? (
-                <p className="text-sm text-muted-foreground">
-                  Selecione a matéria para ver os dias de aula.
-                </p>
-              ) : isLoadingDates ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Carregando dias de aula...
-                </div>
-              ) : availableDates.length === 0 ? (
-                <p className="text-sm text-destructive">
-                  Nenhum dia de aula para esta matéria. Verifique o quadro de horários e o período
-                  letivo.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={deselectAllDates}>
-                      Limpar
-                    </Button>
-                  </div>
-                  <div className="h-[120px] overflow-y-auto rounded-md border p-2">
-                    <div className="space-y-2">
-                      {availableDates.map((d) => (
-                        <label
-                          key={d.date}
-                          className="flex cursor-pointer items-center gap-2 rounded p-1 hover:bg-muted"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedDates.includes(d.date)}
-                            onChange={() => toggleDate(d.date)}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                          <span className="text-sm">{d.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-              {form.formState.errors.dates && (
-                <p className="text-sm text-destructive">{form.formState.errors.dates.message}</p>
-              )}
-            </div>
+            {/* Date Selection - Calendar */}
+            <DateCalendarPicker
+              availableDates={availableDates}
+              selectedDates={selectedDates}
+              onToggleDate={toggleDate}
+              onClear={deselectAllDates}
+              isLoading={isLoadingDates}
+              subjectId={subjectId}
+              error={form.formState.errors.dates?.message}
+            />
 
             {/* Statistics */}
             {studentsAttendances.length > 0 && <AttendanceStats />}

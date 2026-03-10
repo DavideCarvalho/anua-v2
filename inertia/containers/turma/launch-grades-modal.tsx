@@ -85,6 +85,8 @@ function LaunchGradesModalContent({
   assignmentId,
   maxGrade,
   classId,
+  courseId,
+  academicPeriodId,
   onOpenChange,
 }: Omit<LaunchGradesModalProps, 'open'>) {
   const today = new Date().toISOString().split('T')[0]
@@ -100,6 +102,7 @@ function LaunchGradesModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery(
     api.api.v1.classes.students.queryOptions({
       params: { id: classId },
+      query: { courseId, academicPeriodId },
     })
   )
   const students = studentsResponse?.data || []
