@@ -68,28 +68,58 @@ export default class BatchCreateAttendanceController {
         date = DateTime.fromISO(String(rawDate))
       }
 
-      const weekday = date.weekday
-      const timeStr = date.toFormat('HH:mm')
+      const normalizedDate = date.toUTC().set({ second: 0, millisecond: 0 })
+      const weekday = normalizedDate.weekday
+      const timeStr = normalizedDate.toFormat('HH:mm')
 
       // Find the exact slot matching weekday and time
-      let slot = allSlots.find((s) => s.classWeekDay === weekday && s.startTime === timeStr)
+      // Prefer exact start-time match to avoid boundary ambiguity
+      // Example: 08:15 can be end of previous slot and start of next slot
+      const slotByStart = allSlots.find((s) => {
+        if (s.classWeekDay !== weekday) return false
+        const start = String(s.startTime)
+        return start.startsWith(timeStr)
+      })
 
-      // Fallback: first slot for that weekday
-      if (!slot) {
-        slot = allSlots
-          .filter((s) => s.classWeekDay === weekday)
-          .sort((a, b) => (a.startTime as string).localeCompare(b.startTime as string))[0]
-      }
+      // Fallback to end-time only when start-time is not found
+      const slotByEnd = allSlots.find((s) => {
+        if (s.classWeekDay !== weekday) return false
+        const end = String(s.endTime)
+        return end.startsWith(timeStr)
+      })
+
+      const slot = slotByStart ?? slotByEnd
 
       if (!slot) {
         // Skip this date if no slot found (shouldn't happen with valid available-dates)
         continue
       }
 
-      const attendance = await Attendance.create({
-        calendarSlotId: slot.id,
-        date,
-      })
+      // Check if attendance already exists for this slot and date
+      const dateSql = normalizedDate.toSQL({ includeOffset: false })
+      if (!dateSql) {
+        continue
+      }
+
+      const existingAttendance = await Attendance.query()
+        .where('calendarSlotId', slot.id)
+        .where('date', dateSql)
+        .first()
+
+      let attendance: Attendance
+
+      if (existingAttendance) {
+        // Update existing attendance - remove old student records and create new ones
+        await StudentHasAttendance.query().where('attendanceId', existingAttendance.id).delete()
+
+        attendance = existingAttendance
+      } else {
+        // Create new attendance
+        attendance = await Attendance.create({
+          calendarSlotId: slot.id,
+          date: normalizedDate,
+        })
+      }
 
       const studentAttendanceRecords = data.attendances.map((item) => ({
         studentId: item.studentId,

@@ -1,6 +1,7 @@
 import { assert } from '@japa/assert'
 import app from '@adonisjs/core/services/app'
-import db from '@adonisjs/lucid/services/db'
+import { readdir, readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type { Config } from '@japa/runner/types'
 import { pluginAdonisJS } from '@japa/plugin-adonisjs'
 import { apiClient } from '@japa/api-client'
@@ -39,17 +40,59 @@ export const plugins: Config['plugins'] = [
  */
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
   setup: [
-    // Global transaction for all tests - ensures data is rolled back after each test
     async () => {
-      await db.beginGlobalTransaction()
+      const specsWithoutTransaction = await findSpecsWithoutTransaction(app.makePath('tests'))
+
+      if (specsWithoutTransaction.length > 0) {
+        const files = specsWithoutTransaction.map((file) => ` - ${file}`).join('\n')
+        throw new Error(
+          [
+            'Found test files without required DB transaction safeguards.',
+            'Every *.spec.ts must include beginGlobalTransaction and rollbackGlobalTransaction.',
+            files,
+          ].join('\n')
+        )
+      }
     },
   ],
-  teardown: [
-    // Rollback global transaction after all tests
-    async () => {
-      await db.rollbackGlobalTransaction()
-    },
-  ],
+  teardown: [],
+}
+
+async function findSpecsWithoutTransaction(rootDir: string): Promise<string[]> {
+  const files = await collectSpecFiles(rootDir)
+  const missing: string[] = []
+
+  for (const filePath of files) {
+    const content = await readFile(filePath, 'utf8')
+    const hasBegin = content.includes('beginGlobalTransaction')
+    const hasRollback = content.includes('rollbackGlobalTransaction')
+
+    if (!hasBegin || !hasRollback) {
+      missing.push(filePath.replace(`${rootDir}/`, ''))
+    }
+  }
+
+  return missing
+}
+
+async function collectSpecFiles(dir: string): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true })
+  const files: string[] = []
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name)
+
+    if (entry.isDirectory()) {
+      files.push(...(await collectSpecFiles(fullPath)))
+      continue
+    }
+
+    if (entry.isFile() && fullPath.endsWith('.spec.ts')) {
+      files.push(fullPath)
+    }
+  }
+
+  return files
 }
 
 /**

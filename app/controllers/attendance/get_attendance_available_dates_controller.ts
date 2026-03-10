@@ -23,6 +23,13 @@ function toDateTime(v: DateTime | Date | string): DateTime {
   return DateTime.fromISO(String(v))
 }
 
+function normalizeTime(value: string): string {
+  const parts = String(value).split(':')
+  const hh = parts[0] ?? '00'
+  const mm = parts[1] ?? '00'
+  return `${hh}:${mm}`
+}
+
 /**
  * GET /api/v1/attendance/available-dates
  * Query: classId, academicPeriodId, subjectId
@@ -71,11 +78,13 @@ export default class GetAttendanceAvailableDatesController {
 
     // Group all slots by weekday (not just one per day)
     const slotsByWeekday = new Map<number, CalendarSlot[]>()
+    const slotSignatureById = new Map<string, string>()
     for (const s of slots) {
       if (!slotsByWeekday.has(s.classWeekDay)) {
         slotsByWeekday.set(s.classWeekDay, [])
       }
       slotsByWeekday.get(s.classWeekDay)!.push(s)
+      slotSignatureById.set(s.id, `${s.classWeekDay}|${normalizeTime(String(s.startTime))}`)
     }
 
     const holidays = await AcademicPeriodHoliday.query()
@@ -111,9 +120,11 @@ export default class GetAttendanceAvailableDatesController {
 
     const existingSet = new Set(
       existing.map((a) => {
+        const slotSignature = slotSignatureById.get(a.calendarSlotId)
+        if (!slotSignature) return ''
         const d = a.date as DateTime
         const dt = d instanceof DateTime ? d : DateTime.fromJSDate(d as unknown as Date)
-        return `${a.calendarSlotId}|${dt.toFormat('yyyy-MM-dd HH:mm')}`
+        return `${slotSignature}|${dt.toISODate()}`
       })
     )
 
@@ -141,7 +152,7 @@ export default class GetAttendanceAvailableDatesController {
           if (dt.weekday !== weekday) continue
           if (holidayDates.has(dt.toISODate() ?? '')) continue
 
-          const key = `${slot.id}|${dt.toFormat('yyyy-MM-dd HH:mm')}`
+          const key = `${slot.classWeekDay}|${normalizeTime(String(slot.startTime))}|${dt.toISODate()}`
           if (existingSet.has(key)) continue
 
           results.push({

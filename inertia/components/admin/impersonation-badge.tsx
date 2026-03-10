@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { usePage } from '@inertiajs/react'
 import { Shield, Eye, RefreshCw, Check, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -42,7 +41,7 @@ function translateRole(roleName: string): string {
   return ROLE_TRANSLATIONS[roleName] || roleName
 }
 
-export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
+export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgeProps) {
   const queryClient = useQueryClient()
 
   // State for user search and filters

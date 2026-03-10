@@ -672,8 +672,8 @@ function NewAttendanceModalContent({
         attendances,
       },
     })
-    queryClient.invalidateQueries({ queryKey: ['class-students-attendance', classId] })
-    queryClient.invalidateQueries({ queryKey: ['attendance-available-dates'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.attendance.classStudents.pathKey() })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.attendance.availableDates.pathKey() })
     toast.success('Presença registrada com sucesso!')
     onOpenChange(false)
     form.reset()

@@ -1,10 +1,16 @@
 import { test } from '@japa/runner'
 import { QueueManager } from '@adonisjs/queue'
+import db from '@adonisjs/lucid/services/db'
 import GenerateMissingPaymentsJob from '#jobs/payments/generate_missing_payments_job'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
 import SendEventInvitationsJob from '#jobs/events/send_event_invitations_job'
 
 test.group('Queue job dispatch', (group) => {
+  group.each.setup(async () => {
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
+  })
+
   group.each.teardown(() => {
     QueueManager.restore()
   })

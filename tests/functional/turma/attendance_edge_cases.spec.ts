@@ -11,6 +11,7 @@ import StudentHasAttendance from '#models/student_has_attendance'
 import AcademicPeriodHoliday from '#models/academic_period_holiday'
 import TeacherHasClass from '#models/teacher_has_class'
 import Calendar from '#models/calendar'
+import CalendarSlot from '#models/calendar_slot'
 
 const FAKE_UUID = '11111111-1111-4111-8111-111111111111'
 
@@ -659,6 +660,184 @@ test.group('Attendance Edge Cases - Data Integrity', (group) => {
     const datesAfter = datesResponse2.body().dates
     const dateStillAvailable = datesAfter.some((d: any) => d.date === dates[0].date)
     assert.isFalse(dateStillAvailable, 'Registered date should not be available anymore')
+  })
+
+  test('posting same date twice updates existing attendance instead of duplicating', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    const datesResponse = await client
+      .get('/api/v1/attendance/available-dates')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+      })
+      .loginAs(user)
+
+    const dates = datesResponse.body().dates
+    assert.isAtLeast(dates.length, 1, 'Should have available dates')
+
+    const selectedDate = dates[0].date
+
+    const first = await client
+      .post('/api/v1/attendance/batch')
+      .loginAs(user)
+      .json({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+        dates: [selectedDate],
+        attendances: [{ studentId: fixtures.students[0].id, status: 'PRESENT' }],
+      })
+
+    first.assertStatus(201)
+
+    const second = await client
+      .post('/api/v1/attendance/batch')
+      .loginAs(user)
+      .json({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+        dates: [selectedDate],
+        attendances: [{ studentId: fixtures.students[0].id, status: 'ABSENT' }],
+      })
+
+    second.assertStatus(201)
+
+    const firstAttendanceId = first.body().results[0].attendance.id
+    const secondAttendanceId = second.body().results[0].attendance.id
+    assert.equal(secondAttendanceId, firstAttendanceId, 'Should reuse same attendance row')
+
+    const attendanceRows = await Attendance.query()
+      .where('calendarSlotId', first.body().results[0].attendance.calendarSlotId)
+      .where('date', first.body().results[0].attendance.date)
+
+    assert.equal(attendanceRows.length, 1, 'Should keep only one attendance row for same slot/date')
+
+    const studentRows = await StudentHasAttendance.query().where('attendanceId', firstAttendanceId)
+    assert.equal(studentRows.length, 1, 'Should replace student attendance rows on re-post')
+    assert.equal(studentRows[0]?.status, 'ABSENT', 'Second payload should win')
+  })
+
+  test('boundary hour uses slot start time instead of previous slot end time', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    const [slot1, slot2] = fixtures.slots
+
+    await slot1.merge({ startTime: '07:30', endTime: '08:15' }).save()
+    await slot2.merge({ startTime: '08:15', endTime: '09:00' }).save()
+
+    const datesResponse = await client
+      .get('/api/v1/attendance/available-dates')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+      })
+      .loginAs(user)
+
+    datesResponse.assertStatus(200)
+
+    const targetDate = datesResponse.body().dates.find((d: any) => d.date.includes('T08:15:00'))
+    assert.exists(targetDate, 'Should have an available date for boundary hour 08:15')
+
+    const batchResponse = await client
+      .post('/api/v1/attendance/batch')
+      .loginAs(user)
+      .json({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+        dates: [targetDate.date],
+        attendances: [{ studentId: fixtures.students[0].id, status: 'PRESENT' }],
+      })
+
+    batchResponse.assertStatus(201)
+    assert.equal(
+      batchResponse.body().results[0].attendance.calendarSlotId,
+      slot2.id,
+      'Boundary time must match the slot start time'
+    )
+  })
+
+  test('available dates should hide duplicated slot time after attendance is posted once', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    const baseSlot = fixtures.slots[0]
+    if (!baseSlot) throw new Error('Missing base slot')
+
+    const duplicateTeacherHasClass = await TeacherHasClass.create({
+      teacherId: fixtures.teacher.id,
+      classId: fixtures.classEntity.id,
+      subjectId: fixtures.subject.id,
+      subjectQuantity: 1,
+      isActive: true,
+    })
+
+    await CalendarSlot.create({
+      calendarId: fixtures.calendar.id,
+      teacherHasClassId: duplicateTeacherHasClass.id,
+      classWeekDay: baseSlot.classWeekDay,
+      startTime: baseSlot.startTime,
+      endTime: baseSlot.endTime,
+      minutes: baseSlot.minutes,
+      isBreak: false,
+    })
+
+    const firstAvailable = await client
+      .get('/api/v1/attendance/available-dates')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+      })
+      .loginAs(user)
+
+    firstAvailable.assertStatus(200)
+    const chosen = firstAvailable.body().dates[0]
+    assert.exists(chosen, 'Should have one available date to register')
+
+    const createResponse = await client
+      .post('/api/v1/attendance/batch')
+      .loginAs(user)
+      .json({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+        dates: [chosen.date],
+        attendances: [{ studentId: fixtures.students[0].id, status: 'PRESENT' }],
+      })
+
+    createResponse.assertStatus(201)
+
+    const secondAvailable = await client
+      .get('/api/v1/attendance/available-dates')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectId: fixtures.subject.id,
+      })
+      .loginAs(user)
+
+    secondAvailable.assertStatus(200)
+    const stillThere = secondAvailable.body().dates.some((d: any) => d.date === chosen.date)
+    assert.isFalse(
+      stillThere,
+      'Date should disappear after first attendance even with duplicate slot'
+    )
   })
 
   test('batch create with empty attendances array creates attendance without students', async ({
