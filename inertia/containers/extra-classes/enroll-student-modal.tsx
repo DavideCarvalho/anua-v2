@@ -122,7 +122,7 @@ export function EnrollStudentModal({ extraClassId, open, onOpenChange }: EnrollS
               <SelectContent>
                 {students.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.user?.name ?? s.id}
+                    {s.user?.name ?? 'Aluno não identificado'}
                   </SelectItem>
                 ))}
               </SelectContent>

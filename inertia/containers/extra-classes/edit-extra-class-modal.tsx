@@ -193,7 +193,7 @@ export function EditExtraClassModal({
                   <SelectContent>
                     {teachers.map((t: { id: string; user?: { name?: string | null } }) => (
                       <SelectItem key={t.id} value={t.id}>
-                        {t.user?.name ?? t.id}
+                        {t.user?.name ?? 'Professor não identificado'}
                       </SelectItem>
                     ))}
                   </SelectContent>
