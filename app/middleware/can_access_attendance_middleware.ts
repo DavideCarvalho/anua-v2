@@ -1,8 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
+import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import Course from '#models/course'
+import CourseHasAcademicPeriod from '#models/course_has_academic_period'
+import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import UserHasSchool from '#models/user_has_school'
+import Class_ from '#models/class'
+import CoordinatorHasLevel from '#models/coordinator_has_level'
+import User from '#models/user'
 import AppException from '#exceptions/app_exception'
 
 /**
@@ -76,12 +82,11 @@ export default class CanAccessAttendanceMiddleware {
   /**
    * Check if user belongs to the school
    */
-  private async checkSchoolAccess(user: any, request: any): Promise<boolean> {
+  private async checkSchoolAccess(user: User, request: HttpContext['request']): Promise<boolean> {
     const classId = request.input('classId') || request.param('classId')
 
     // If classId is provided, check if user has access to that class's school
     if (classId) {
-      const Class_ = (await import('#models/class')).default
       const classEntity = await Class_.find(classId)
 
       if (!classEntity) return false
@@ -104,13 +109,15 @@ export default class CanAccessAttendanceMiddleware {
    * 1. They are coordinator of the course (Course.coordinatorId)
    * 2. They are coordinator of the level (via CoordinatorHasLevel)
    */
-  private async checkCoordinatorAccess(user: any, request: any): Promise<boolean> {
+  private async checkCoordinatorAccess(
+    user: User,
+    request: HttpContext['request']
+  ): Promise<boolean> {
     const classId = request.input('classId') || request.param('classId')
 
     if (!classId) return false
 
     // Get the class to find its level
-    const Class_ = (await import('#models/class')).default
     const classEntity = await Class_.find(classId)
 
     if (!classEntity) return false
@@ -118,26 +125,34 @@ export default class CanAccessAttendanceMiddleware {
     // Check if coordinator is assigned to any course that has this level
     const courseCoordinator = await Course.query()
       .where('coordinatorId', user.id)
-      .whereHas('courseAcademicPeriods', (cap: any) => {
-        cap.whereHas('levelAssignments', (la: any) => {
-          if (classEntity.levelId) {
-            la.where('levelId', classEntity.levelId)
-          }
-        })
-      })
+      .whereHas(
+        'courseAcademicPeriods',
+        (capQuery: ModelQueryBuilderContract<typeof CourseHasAcademicPeriod>) => {
+          capQuery.whereHas(
+            'levelAssignments',
+            (laQuery: ModelQueryBuilderContract<typeof LevelAssignedToCourseHasAcademicPeriod>) => {
+              if (classEntity.levelId) {
+                laQuery.where('levelId', classEntity.levelId)
+              }
+            }
+          )
+        }
+      )
       .first()
 
     if (courseCoordinator) return true
 
     // Check via CoordinatorHasLevel table directly
-    const CoordinatorHasLevel = (await import('#models/coordinator_has_level')).default
     const levelCoordinator = await CoordinatorHasLevel.query()
       .where('coordinatorId', user.id)
-      .whereHas('levelAssignedToCourseHasAcademicPeriod' as any, (la: any) => {
-        if (classEntity.levelId) {
-          la.where('levelId', classEntity.levelId)
+      .whereHas(
+        'levelAssignedToCourseHasAcademicPeriod',
+        (laQuery: ModelQueryBuilderContract<typeof LevelAssignedToCourseHasAcademicPeriod>) => {
+          if (classEntity.levelId) {
+            laQuery.where('levelId', classEntity.levelId)
+          }
         }
-      })
+      )
       .first()
 
     return !!levelCoordinator
@@ -146,7 +161,7 @@ export default class CanAccessAttendanceMiddleware {
   /**
    * Check if teacher teaches the subject in the class
    */
-  private async checkTeacherAccess(user: any, request: any): Promise<boolean> {
+  private async checkTeacherAccess(user: User, request: HttpContext['request']): Promise<boolean> {
     const classId = request.input('classId') || request.param('classId')
     const subjectId = request.input('subjectId')
 
