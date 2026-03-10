@@ -59,4 +59,5 @@ export const middleware = router.named({
   requireRole: () => import('#middleware/require_role_middleware'),
   impersonation: () => import('#middleware/impersonation_middleware'),
   storeOwner: () => import('#middleware/store_owner_middleware'),
+  canAccessAttendance: () => import('#middleware/can_access_attendance_middleware'),
 })

@@ -31,5 +31,5 @@ export function registerAttendanceApiRoutes() {
         .as('attendance.class_students')
     })
     .prefix('/attendance')
-    .use([middleware.auth(), middleware.impersonation()])
+    .use([middleware.auth(), middleware.impersonation(), middleware.canAccessAttendance()])
 }
