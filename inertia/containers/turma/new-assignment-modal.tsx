@@ -32,7 +32,7 @@ import { api } from '~/lib/api'
 const schema = z.object({
   name: z.string().min(1, 'Qual o nome da atividade?'),
   dueDate: z.date({ message: 'Quando é a data de entrega?' }),
-  grade: z.number({ message: 'Qual a nota?' }).min(0),
+  grade: z.number().min(0).optional(),
   subjectId: z.string().min(1, 'Qual matéria?'),
   description: z.string().optional(),
 })
@@ -67,7 +67,7 @@ export function NewAssignmentModal({
     defaultValues: {
       name: '',
       dueDate: new Date(),
-      grade: 10,
+      grade: undefined,
       description: '',
       subjectId: '',
     },
@@ -110,7 +110,7 @@ export function NewAssignmentModal({
       form.reset({
         name: '',
         dueDate: new Date(),
-        grade: 10,
+        grade: undefined,
         description: '',
         subjectId: subjects?.length === 1 ? subjects[0]?.id : '',
       })
@@ -131,7 +131,7 @@ export function NewAssignmentModal({
         body: {
           title: data.name,
           description: data.description,
-          maxScore: data.grade,
+          maxScore: data.grade ?? null,
           dueDate: data.dueDate.toISOString(),
           classId,
           subjectId: data.subjectId,
@@ -179,7 +179,10 @@ export function NewAssignmentModal({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione a matéria" />
+                    <SelectValue placeholder="Selecione a matéria">
+                      {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
+                        (form.watch('subjectId') ? 'Carregando...' : 'Selecione a matéria')}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {subjects?.map((subject) => (
@@ -198,7 +201,7 @@ export function NewAssignmentModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="grade">Quanto vale? *</Label>
+              <Label htmlFor="grade">Quanto vale?</Label>
               <Input
                 id="grade"
                 type="number"
@@ -206,6 +209,9 @@ export function NewAssignmentModal({
                 step={0.1}
                 {...form.register('grade', { valueAsNumber: true })}
               />
+              <p className="text-xs text-muted-foreground">
+                Deixe em branco se a atividade não tiver nota
+              </p>
               {form.formState.errors.grade && (
                 <p className="text-sm text-destructive">{form.formState.errors.grade.message}</p>
               )}

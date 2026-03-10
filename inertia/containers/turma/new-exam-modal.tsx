@@ -193,7 +193,10 @@ export function NewExamModal({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione a materia" />
+                    <SelectValue placeholder="Selecione a materia">
+                      {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
+                        (form.watch('subjectId') ? 'Carregando...' : 'Selecione a materia')}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {subjects?.map((subject) => (
