@@ -211,21 +211,17 @@ function AppSidebar() {
         <ImpersonationBadge roleName={user?.role?.name || ''} />
 
         {/* User info */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
-                {user?.name?.charAt(0).toUpperCase() || 'A'}
-              </div>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-medium truncate">{user?.name}</span>
-                <span className="text-xs text-muted-foreground truncate">
-                  {formatRoleName(user?.role?.name)}
-                </span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex w-full items-center gap-3 rounded-md p-2">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+            {user?.name?.charAt(0).toUpperCase() || 'A'}
+          </div>
+          <div className="flex flex-col gap-0.5 leading-none">
+            <span className="font-medium truncate">{user?.name}</span>
+            <span className="text-xs text-muted-foreground truncate">
+              {formatRoleName(user?.role?.name)}
+            </span>
+          </div>
+        </div>
 
         {/* Logout */}
         <Link

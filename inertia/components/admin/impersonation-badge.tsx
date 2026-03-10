@@ -11,7 +11,7 @@ import { Label } from '../ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Input } from '../ui/input'
 import { ScrollArea } from '../ui/scroll-area'
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '../ui/sidebar'
+import { SidebarMenu, SidebarMenuItem } from '../ui/sidebar'
 import { cn } from '../../lib/utils'
 
 import { useMutation } from '@tanstack/react-query'
@@ -154,11 +154,9 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              tooltip={hasActiveImpersonation ? 'Personificação Ativa' : 'Personificar Usuário'}
+            <button
               className={cn(
-                'hover:bg-accent hover:text-accent-foreground',
+                'flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-accent hover:text-accent-foreground transition-colors',
                 hasActiveImpersonation &&
                   'bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/50'
               )}
@@ -182,7 +180,7 @@ export function ImpersonationBadge({ roleName }: ImpersonationBadgeProps) {
               {hasActiveImpersonation && (
                 <span className="ml-auto flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
               )}
-            </SidebarMenuButton>
+            </button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-[400px] p-4" align="start" side="right" sideOffset={8}>
