@@ -23,23 +23,6 @@ interface SubjectGradesTableProps {
   academicPeriodId: string
 }
 
-interface StudentGrade {
-  id: string
-  name: string
-  finalGrade: number
-  gradedCount: number
-  totalCount: number
-  maxPossibleGrade: number
-  grades: {
-    assignment: {
-      id: string
-      name: string
-      maxGrade: number | null
-    }
-    grade: number | null
-  }[]
-}
-
 function GradesTableSkeleton() {
   return (
     <div className="py-8 text-center">
@@ -192,7 +175,7 @@ function SubjectGradesTableContent({
                         <div className="space-y-2">
                           <h4 className="text-sm font-semibold">Notas Individuais</h4>
                           <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                            {student.grades.map((gradeItem: StudentGrade['grades'][number]) => (
+                            {student.grades.map((gradeItem) => (
                               <div
                                 key={gradeItem.assignment.id}
                                 className="flex items-center justify-between rounded-md border bg-background p-2"
