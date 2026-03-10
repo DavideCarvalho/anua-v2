@@ -453,12 +453,10 @@ test.group('Attendance Authorization - Edge Cases', (group) => {
   })
 
   test('user without school association CANNOT access', async ({ client, assert }) => {
-    const role = await (
-      await import('#models/role')
-    ).default.findByOrFail('name', 'SCHOOL_DIRECTOR')
-    const userWithoutSchool = await (
-      await import('#models/user')
-    ).default.create({
+    const RoleModel = await import('#models/role')
+    const role = await RoleModel.default.findByOrFail('name', 'SCHOOL_DIRECTOR')
+    const UserModel = await import('#models/user')
+    const userWithoutSchool = await UserModel.default.create({
       name: `User No School ${Date.now()}`,
       slug: `user-no-school-${Date.now()}`,
       email: `user-no-school-${Date.now()}@test.com`,

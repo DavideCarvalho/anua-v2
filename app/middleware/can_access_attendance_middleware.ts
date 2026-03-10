@@ -1,14 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type CourseHasAcademicPeriod from '#models/course_has_academic_period'
+import type LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
+import type User from '#models/user'
 import Course from '#models/course'
-import CourseHasAcademicPeriod from '#models/course_has_academic_period'
-import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import UserHasSchool from '#models/user_has_school'
 import Class_ from '#models/class'
 import CoordinatorHasLevel from '#models/coordinator_has_level'
-import User from '#models/user'
 import AppException from '#exceptions/app_exception'
 
 /**
