@@ -126,6 +126,7 @@ function NewAttendanceModalContent({
   const { data: studentsResponse, isLoading: isLoadingStudents } = useQuery({
     ...api.api.v1.classes.students.queryOptions({
       params: { id: classId },
+      query: { courseId: _courseId, academicPeriodId },
     }),
     enabled: open,
   })
@@ -156,7 +157,9 @@ function NewAttendanceModalContent({
 
   const subjectId = form.watch('subjectId')
   const { data: availableDatesResponse, isLoading: isLoadingDates } = useQuery({
-    ...api.api.v1.attendance.availableDates.queryOptions({}),
+    ...api.api.v1.attendance.availableDates.queryOptions({
+      query: { classId, academicPeriodId, subjectId },
+    }),
     enabled: open && !!subjectId,
   })
   const availableDates = availableDatesResponse?.dates ?? []
@@ -276,9 +279,17 @@ function NewAttendanceModalContent({
   }
 
   function toggleAttendance(index: number) {
-    const current = form.getValues(`attendances.${index}.status`)
-    const newStatus = current === 'PRESENT' ? 'ABSENT' : 'PRESENT'
-    form.setValue(`attendances.${index}.status`, newStatus)
+    const currentAttendances = form.getValues('attendances')
+    const currentStatus = currentAttendances[index].status
+    const newStatus = currentStatus === 'PRESENT' ? 'ABSENT' : 'PRESENT'
+
+    const updatedAttendances = currentAttendances.map((attendance, i) =>
+      i === index
+        ? ({ ...attendance, status: newStatus } as (typeof currentAttendances)[number])
+        : attendance
+    )
+
+    form.setValue('attendances', updatedAttendances, { shouldDirty: true, shouldTouch: true })
   }
 
   async function onSubmit(data: FormValues) {
@@ -355,7 +366,10 @@ function NewAttendanceModalContent({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione a matéria" />
+                    <SelectValue placeholder="Selecione a matéria">
+                      {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
+                        (form.watch('subjectId') ? 'Carregando...' : 'Selecione a matéria')}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {subjects?.map((subject) => (
@@ -401,9 +415,6 @@ function NewAttendanceModalContent({
               ) : (
                 <div className="space-y-2">
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" size="sm" onClick={selectAllDates}>
-                      Selecionar Todas
-                    </Button>
                     <Button type="button" variant="outline" size="sm" onClick={deselectAllDates}>
                       Limpar
                     </Button>
@@ -536,9 +547,8 @@ function NewAttendanceModalContent({
                           <input
                             type="checkbox"
                             checked={isPresent}
-                            onChange={() => toggleAttendance(originalIndex)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="h-4 w-4 rounded border-gray-300"
+                            readOnly
+                            className="h-4 w-4 rounded border-gray-300 pointer-events-none"
                           />
                         </div>
                       </div>
