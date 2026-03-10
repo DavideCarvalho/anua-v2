@@ -91,8 +91,8 @@ export function AssignmentsList({
             {rows.map((assignment: AssignmentRow) => (
               <TableRow key={assignment.id}>
                 <TableCell className="font-medium">{assignment.name}</TableCell>
-                <TableCell>{assignment.teacherHasClass?.classId || '-'}</TableCell>
-                <TableCell>{assignment.teacherHasClass?.subjectId || '-'}</TableCell>
+                <TableCell>{assignment.teacherHasClass?.class?.name || '-'}</TableCell>
+                <TableCell>{assignment.teacherHasClass?.subject?.name || '-'}</TableCell>
                 <TableCell className="text-center">{assignment.grade} pts</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">

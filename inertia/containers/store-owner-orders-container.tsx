@@ -374,7 +374,7 @@ export function StoreOwnerOrdersContainer() {
               {orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
-                  <TableCell>{order.student?.id ?? '—'}</TableCell>
+                  <TableCell>{order.student?.user?.name ?? '—'}</TableCell>
                   <TableCell>
                     <div className="text-sm">
                       {order.items?.map(

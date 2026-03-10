@@ -426,7 +426,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               {ordersList.map((order: Order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
-                  <TableCell>{order.student?.id ?? order.studentId}</TableCell>
+                  <TableCell>{order.student?.user?.name ?? order.student?.name ?? '—'}</TableCell>
                   <TableCell>{formatCurrency(order.totalMoney)}</TableCell>
                   <TableCell>
                     <Badge variant="outline">

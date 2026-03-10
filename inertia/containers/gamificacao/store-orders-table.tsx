@@ -148,7 +148,9 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
 
               return (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.student?.id || '-'}</TableCell>
+                  <TableCell className="font-medium">
+                    {order.student?.user?.name ?? order.student?.name ?? '-'}
+                  </TableCell>
                   <TableCell>{order.orderNumber}</TableCell>
                   <TableCell className="text-center">-</TableCell>
                   <TableCell className="text-center font-medium">{order.totalPoints} pts</TableCell>
