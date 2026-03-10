@@ -164,11 +164,24 @@ export default class CanAccessAttendanceMiddleware {
   private async checkTeacherAccess(user: User, request: HttpContext['request']): Promise<boolean> {
     const classId = request.input('classId') || request.param('classId')
     const subjectId = request.input('subjectId')
+    const subjectIdsInput = request.input('subjectIds')
+    const subjectIds = Array.from(
+      new Set(
+        [
+          ...(Array.isArray(subjectIdsInput)
+            ? subjectIdsInput
+            : typeof subjectIdsInput === 'string' && subjectIdsInput
+              ? [subjectIdsInput]
+              : []),
+          ...(subjectId ? [subjectId] : []),
+        ].filter(Boolean)
+      )
+    ) as string[]
 
     if (!classId) return false
 
-    // For available-dates and batch create, subjectId is required
-    if (!subjectId) {
+    // For class students stats, no subjectId(s) is sent
+    if (subjectIds.length === 0) {
       // For class students stats, check if teacher teaches ANY subject in the class
       const teacherClass = await TeacherHasClass.query()
         .where('teacherId', user.id)
@@ -178,14 +191,15 @@ export default class CanAccessAttendanceMiddleware {
       return !!teacherClass
     }
 
-    // Check if teacher teaches this specific subject in this class
-    const teacherClass = await TeacherHasClass.query()
+    // Check if teacher teaches all requested subjects in this class
+    const teacherClasses = await TeacherHasClass.query()
       .where('teacherId', user.id)
       .where('classId', classId)
-      .where('subjectId', subjectId)
+      .whereIn('subjectId', subjectIds)
       .where('isActive', true)
-      .first()
+      .select('subjectId')
 
-    return !!teacherClass
+    const allowedSubjects = new Set(teacherClasses.map((item) => item.subjectId))
+    return subjectIds.every((id) => allowedSubjects.has(id))
   }
 }

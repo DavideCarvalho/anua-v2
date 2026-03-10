@@ -74,13 +74,6 @@ interface TeacherHasClass {
   }
 }
 
-interface SaveSlotInput {
-  teacherHasClassId: string | null
-  classWeekDay: number
-  startTime: string
-  endTime: string
-}
-
 interface ScheduleData {
   calendar: {
     id: string
@@ -135,24 +128,7 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     refetch: () => void
   }
 
-  const saveMutation = useMutation({
-    mutationFn: async (slots: SaveSlotInput[]) => {
-      const response = await fetch(`/api/v1/schedules/class/${classId}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ academicPeriodId, slots }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao salvar horários')
-      }
-
-      return response.json()
-    },
-  })
+  const saveMutation = useMutation(api.api.v1.schedules.saveClassSchedule.mutationOptions())
   const validateConflictMutation = useMutation(
     api.api.v1.schedules.validateConflict.mutationOptions()
   )
@@ -222,7 +198,13 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     }))
 
     try {
-      await saveMutation.mutateAsync(saveInput)
+      await saveMutation.mutateAsync({
+        params: { classId },
+        body: {
+          academicPeriodId,
+          slots: saveInput,
+        },
+      } as any)
       queryClient.invalidateQueries({ queryKey: ['classSchedule', classId, academicPeriodId] })
       toast.success('Horários salvos com sucesso!')
       setIsDirty(false)

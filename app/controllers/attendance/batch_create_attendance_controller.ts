@@ -17,6 +17,14 @@ export default class BatchCreateAttendanceController {
   async handle({ request, response }: HttpContext) {
     const data = await request.validateUsing(batchCreateAttendanceValidator)
 
+    const subjectIds = Array.from(
+      new Set([...(data.subjectIds ?? []), ...(data.subjectId ? [data.subjectId] : [])])
+    )
+
+    if (subjectIds.length === 0) {
+      throw AppException.badRequest('Informe pelo menos uma matéria para registrar presença.')
+    }
+
     const calendar = await Calendar.query()
       .where('classId', data.classId)
       .where('academicPeriodId', data.academicPeriodId)
@@ -33,7 +41,7 @@ export default class BatchCreateAttendanceController {
       .where('calendarId', calendar.id)
       .where('isBreak', false)
       .whereNotNull('teacherHasClassId')
-      .whereHas('teacherHasClass', (q) => q.where('subjectId', data.subjectId))
+      .whereHas('teacherHasClass', (q) => q.whereIn('subjectId', subjectIds))
 
     if (allSlots.length === 0) {
       const hasAnySlots = await CalendarSlot.query()
@@ -50,7 +58,7 @@ export default class BatchCreateAttendanceController {
       }
 
       throw AppException.badRequest(
-        'Nenhum horário encontrado para esta matéria no calendário da turma. Verifique se a matéria está configurada no quadro de horários.'
+        'Nenhum horário encontrado para as matérias selecionadas no calendário da turma. Verifique se elas estão configuradas no quadro de horários.'
       )
     }
 

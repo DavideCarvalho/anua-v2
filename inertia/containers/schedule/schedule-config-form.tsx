@@ -52,7 +52,11 @@ interface ScheduleConfigFormProps {
   onGenerate: (result: GenerateResult) => void
 }
 
-export function ScheduleConfigForm({ classId, onGenerate }: ScheduleConfigFormProps) {
+export function ScheduleConfigForm({
+  classId,
+  academicPeriodId,
+  onGenerate,
+}: ScheduleConfigFormProps) {
   const [config, setConfig] = useState<ScheduleConfig>({
     startTime: '07:30',
     classesPerDay: 6,
@@ -72,7 +76,11 @@ export function ScheduleConfigForm({ classId, onGenerate }: ScheduleConfigFormPr
     try {
       const result = await generateMutation.mutateAsync({
         params: { classId },
-      })
+        body: {
+          academicPeriodId,
+          config,
+        },
+      } as any)
 
       queryClient.invalidateQueries({ queryKey: ['classSchedule'] })
 

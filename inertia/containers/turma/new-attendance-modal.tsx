@@ -31,13 +31,6 @@ import {
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Progress } from '~/components/ui/progress'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { cn } from '~/lib/utils'
 import { ErrorBoundary } from '~/components/error-boundary'
 
@@ -45,7 +38,7 @@ import { api } from '~/lib/api'
 
 const schema = z.object({
   dates: z.array(z.string()).min(1, 'Selecione pelo menos uma data'),
-  subjectId: z.string().min(1, 'Selecione a matéria'),
+  subjectIds: z.array(z.string()).min(1, 'Selecione pelo menos uma matéria'),
   attendances: z.array(
     z.object({
       student: z.object({
@@ -129,7 +122,7 @@ interface DateCalendarPickerProps {
   onToggleDate: (date: string) => void
   onClear: () => void
   isLoading: boolean
-  subjectId: string
+  hasSubjectsSelected: boolean
   error?: string
 }
 
@@ -139,7 +132,7 @@ function DateCalendarPicker({
   onToggleDate,
   onClear,
   isLoading,
-  subjectId,
+  hasSubjectsSelected,
   error,
 }: DateCalendarPickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
@@ -241,7 +234,7 @@ function DateCalendarPicker({
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
   }
 
-  if (!subjectId) {
+  if (!hasSubjectsSelected) {
     return (
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
@@ -483,7 +476,7 @@ function NewAttendanceModalContent({
     resolver: zodResolver(schema),
     defaultValues: {
       dates: [],
-      subjectId: '',
+      subjectIds: [],
       attendances: [],
     },
   })
@@ -520,12 +513,12 @@ function NewAttendanceModalContent({
     return result
   }, [classData])
 
-  const subjectId = form.watch('subjectId')
+  const subjectIds = form.watch('subjectIds')
   const { data: availableDatesResponse, isLoading: isLoadingDates } = useQuery({
     ...api.api.v1.attendance.availableDates.queryOptions({
-      query: { classId, academicPeriodId, subjectId },
+      query: { classId, academicPeriodId, subjectIds },
     }),
-    enabled: open && !!subjectId,
+    enabled: open && subjectIds.length > 0,
   })
   const availableDates = useMemo(
     () => availableDatesResponse?.dates ?? [],
@@ -535,16 +528,16 @@ function NewAttendanceModalContent({
   // Auto-select first subject if only one
   useEffect(() => {
     if (subjects && subjects.length === 1 && subjects[0]) {
-      form.setValue('subjectId', subjects[0].id)
+      form.setValue('subjectIds', [subjects[0].id])
     }
   }, [subjects, form])
 
   // When subject changes, clear date selection
   useEffect(() => {
-    if (subjectId) {
+    if (subjectIds.length > 0) {
       form.setValue('dates', [])
     }
-  }, [subjectId, form])
+  }, [subjectIds.join(','), form])
 
   // Track if we've initialized for current modal open
   const [hasInitialized, setHasInitialized] = useState(false)
@@ -667,13 +660,17 @@ function NewAttendanceModalContent({
       body: {
         classId,
         academicPeriodId,
-        subjectId: data.subjectId,
+        subjectIds: data.subjectIds,
         dates: data.dates.map((d) => new Date(d).toISOString()),
         attendances,
       },
     })
-    queryClient.invalidateQueries({ queryKey: api.api.v1.attendance.classStudents.pathKey() })
-    queryClient.invalidateQueries({ queryKey: api.api.v1.attendance.availableDates.pathKey() })
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: api.api.v1.attendance.classStudents.pathKey() }),
+      queryClient.invalidateQueries({ queryKey: api.api.v1.attendance.availableDates.pathKey() }),
+      queryClient.invalidateQueries({ queryKey: api.api.v1.classes.students.pathKey() }),
+      queryClient.invalidateQueries({ queryKey: api.api.v1.classes.show.pathKey() }),
+    ])
     toast.success('Presença registrada com sucesso!')
     onOpenChange(false)
     form.reset()
@@ -717,37 +714,55 @@ function NewAttendanceModalContent({
           >
             {/* Subject Select */}
             <div className="space-y-2">
-              <Label>Matéria *</Label>
+              <Label>Matérias *</Label>
               {isLoadingSubjects ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Carregando matérias...
                 </div>
               ) : (
-                <Select
-                  value={form.watch('subjectId')}
-                  onValueChange={(value, _event) =>
-                    value !== null && form.setValue('subjectId', value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a matéria">
-                      {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
-                        (form.watch('subjectId') ? 'Carregando...' : 'Selecione a matéria')}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjects?.map((subject) => (
-                      <SelectItem key={subject.id} value={subject.id}>
-                        {subject.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Card>
+                  <CardContent className="space-y-2 p-3">
+                    {subjects.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Nenhuma matéria disponível.</p>
+                    ) : (
+                      subjects.map((subject) => {
+                        const checked = subjectIds.includes(subject.id)
+                        return (
+                          <label
+                            key={subject.id}
+                            className={cn(
+                              'flex cursor-pointer items-center gap-3 rounded-lg border p-2.5 transition-colors hover:bg-accent',
+                              checked && 'border-primary bg-primary/5'
+                            )}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                const current = form.getValues('subjectIds')
+                                if (checked) {
+                                  form.setValue(
+                                    'subjectIds',
+                                    current.filter((id) => id !== subject.id)
+                                  )
+                                  return
+                                }
+                                form.setValue('subjectIds', [...current, subject.id])
+                              }}
+                              className="h-4 w-4 rounded border-gray-300"
+                            />
+                            <span className="text-sm">{subject.name}</span>
+                          </label>
+                        )
+                      })
+                    )}
+                  </CardContent>
+                </Card>
               )}
-              {form.formState.errors.subjectId && (
+              {form.formState.errors.subjectIds && (
                 <p className="text-sm text-destructive">
-                  {form.formState.errors.subjectId.message}
+                  {form.formState.errors.subjectIds.message}
                 </p>
               )}
             </div>
@@ -759,7 +774,7 @@ function NewAttendanceModalContent({
               onToggleDate={toggleDate}
               onClear={deselectAllDates}
               isLoading={isLoadingDates}
-              subjectId={subjectId}
+              hasSubjectsSelected={subjectIds.length > 0}
               error={form.formState.errors.dates?.message}
             />
 
@@ -893,7 +908,9 @@ function NewAttendanceModalContent({
             <Button
               type="submit"
               form="attendance-form"
-              disabled={createMutation.isPending || !subjectId || selectedDates.length === 0}
+              disabled={
+                createMutation.isPending || subjectIds.length === 0 || selectedDates.length === 0
+              }
               className="flex-1 sm:flex-none"
             >
               {createMutation.isPending ? (

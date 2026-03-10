@@ -43,9 +43,25 @@ export default class GetAttendanceAvailableDatesController {
     const classId = request.input('classId')
     const academicPeriodId = request.input('academicPeriodId')
     const subjectId = request.input('subjectId')
+    const subjectIdsInput = request.input('subjectIds')
 
-    if (!classId || !academicPeriodId || !subjectId) {
-      throw AppException.badRequest('classId, academicPeriodId e subjectId são obrigatórios.')
+    const subjectIds = Array.from(
+      new Set(
+        [
+          ...(Array.isArray(subjectIdsInput)
+            ? subjectIdsInput
+            : typeof subjectIdsInput === 'string' && subjectIdsInput
+              ? [subjectIdsInput]
+              : []),
+          ...(subjectId ? [subjectId] : []),
+        ].filter(Boolean)
+      )
+    ) as string[]
+
+    if (!classId || !academicPeriodId || subjectIds.length === 0) {
+      throw AppException.badRequest(
+        'classId, academicPeriodId e pelo menos uma matéria (subjectId/subjectIds) são obrigatórios.'
+      )
     }
 
     const calendar = await Calendar.query()
@@ -68,7 +84,7 @@ export default class GetAttendanceAvailableDatesController {
       .where('calendarId', calendar.id)
       .where('isBreak', false)
       .whereNotNull('teacherHasClassId')
-      .whereHas('teacherHasClass', (q) => q.where('subjectId', subjectId))
+      .whereHas('teacherHasClass', (q) => q.whereIn('subjectId', subjectIds))
       .orderBy('classWeekDay')
       .orderBy('startTime')
 

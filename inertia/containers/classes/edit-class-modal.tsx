@@ -107,88 +107,99 @@ function SubjectTeacherRow({
   }, [teacherSubjectsData, initialSubject, selectedSubjectId])
 
   const hasNoSubjects = selectedTeacherId && !isLoadingSubjects && teacherSubjects.length === 0
+  const selectedTeacherName =
+    teachers.find((teacher) => teacher.id === selectedTeacherId)?.user?.name || ''
+  const selectedSubjectName =
+    teacherSubjects.find((subject) => subject.id === selectedSubjectId)?.name ||
+    (initialSubject?.id === selectedSubjectId ? initialSubject.name : '')
 
   return (
-    <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-      <div className="flex-1 space-y-3">
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <Label className="text-xs text-muted-foreground">Professor</Label>
-            <Select
-              value={selectedTeacherId || ''}
-              onValueChange={(value: string | null) => {
-                if (!value) return
-                form.setValue(`subjectsWithTeachers.${index}.teacherId`, value)
-                form.setValue(`subjectsWithTeachers.${index}.subjectId`, '')
-              }}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={teacher.id}>
-                    {teacher.user?.name || 'Professor'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <div className="rounded-lg border bg-muted/30 p-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start">
+        <div className="flex-1 space-y-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Professor</Label>
+              <Select
+                value={selectedTeacherId || ''}
+                onValueChange={(value: string | null) => {
+                  if (!value) return
+                  form.setValue(`subjectsWithTeachers.${index}.teacherId`, value)
+                  form.setValue(`subjectsWithTeachers.${index}.subjectId`, '')
+                }}
+              >
+                <SelectTrigger className="mt-1 w-full min-w-0">
+                  <SelectValue placeholder="Selecione...">
+                    {selectedTeacherName || 'Selecione...'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.user?.name || 'Professor'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Matéria</Label>
+              <Select
+                value={selectedSubjectId || ''}
+                onValueChange={(value: string | null) => {
+                  if (!value) return
+                  form.setValue(`subjectsWithTeachers.${index}.subjectId`, value)
+                }}
+                disabled={!selectedTeacherId || !!hasNoSubjects}
+              >
+                <SelectTrigger className="mt-1 w-full min-w-0">
+                  <SelectValue placeholder={hasNoSubjects ? 'Sem disciplinas' : 'Selecione...'}>
+                    {selectedSubjectName || (hasNoSubjects ? 'Sem disciplinas' : 'Selecione...')}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {teacherSubjects.map((subject) => (
+                    <SelectItem key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Aulas/semana</Label>
+              <Input
+                type="number"
+                min={1}
+                max={20}
+                className="mt-1"
+                {...form.register(`subjectsWithTeachers.${index}.quantity`, {
+                  valueAsNumber: true,
+                })}
+              />
+            </div>
           </div>
 
-          <div>
-            <Label className="text-xs text-muted-foreground">Matéria</Label>
-            <Select
-              value={selectedSubjectId || ''}
-              onValueChange={(value: string | null) => {
-                if (!value) return
-                form.setValue(`subjectsWithTeachers.${index}.subjectId`, value)
-              }}
-              disabled={!selectedTeacherId || !!hasNoSubjects}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder={hasNoSubjects ? 'Sem disciplinas' : 'Selecione...'} />
-              </SelectTrigger>
-              <SelectContent>
-                {teacherSubjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-xs text-muted-foreground">Aulas/semana</Label>
-            <Input
-              type="number"
-              min={1}
-              max={20}
-              className="mt-1"
-              {...form.register(`subjectsWithTeachers.${index}.quantity`, {
-                valueAsNumber: true,
-              })}
-            />
-          </div>
+          {hasNoSubjects && (
+            <div className="flex items-center gap-2 text-sm text-amber-600">
+              <AlertCircle className="h-4 w-4" />
+              <span>Professor sem disciplinas cadastradas</span>
+            </div>
+          )}
         </div>
 
-        {hasNoSubjects && (
-          <div className="flex items-center gap-2 text-amber-600 text-sm">
-            <AlertCircle className="h-4 w-4" />
-            <span>Professor sem disciplinas cadastradas</span>
-          </div>
-        )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="self-end text-destructive hover:text-destructive md:self-start md:mt-6"
+          onClick={() => remove(index)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="text-destructive hover:text-destructive self-start mt-6"
-        onClick={() => remove(index)}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
     </div>
   )
 }
@@ -310,7 +321,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-[98vw] max-w-[1280px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Turma</DialogTitle>
         </DialogHeader>

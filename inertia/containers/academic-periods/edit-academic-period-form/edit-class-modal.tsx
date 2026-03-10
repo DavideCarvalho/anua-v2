@@ -125,7 +125,7 @@ export function EditClassModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+      <DialogContent className="max-h-[90vh] w-[98vw] sm:max-w-[1280px] flex flex-col">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
@@ -184,17 +184,22 @@ export function EditClassModal({
                         </Button>
                       </div>
 
-                      <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <FormField
                           control={form.control}
                           name={`teachers.${index}.teacherId`}
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                               <FormLabel>Professor</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione" />
+                                  <SelectTrigger className="w-full min-w-0">
+                                    <SelectValue placeholder="Selecione">
+                                      {teachers.find((teacher) => teacher.id === field.value)?.user
+                                        .name ||
+                                        initialData?.teachers?.[index]?.teacherName ||
+                                        'Selecione'}
+                                    </SelectValue>
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -214,12 +219,17 @@ export function EditClassModal({
                           control={form.control}
                           name={`teachers.${index}.subjectId`}
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                               <FormLabel>Disciplina</FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione" />
+                                  <SelectTrigger className="w-full min-w-0">
+                                    <SelectValue placeholder="Selecione">
+                                      {subjects.find((subject) => subject.id === field.value)
+                                        ?.name ||
+                                        initialData?.teachers?.[index]?.subjectName ||
+                                        'Selecione'}
+                                    </SelectValue>
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -239,7 +249,7 @@ export function EditClassModal({
                           control={form.control}
                           name={`teachers.${index}.subjectQuantity`}
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                               <FormLabel>Aulas/semana</FormLabel>
                               <FormControl>
                                 <Input

@@ -222,6 +222,51 @@ test.group('Attendance Deep Integration - Complete Flow', (group) => {
     assert.equal(studentData.presentCount, 2, 'Student should have 2 presents')
   })
 
+  test('director can register attendance selecting multiple subjects at once', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+    const { subject: secondSubject } = await createSecondSubjectWithTeacher(school, fixtures)
+
+    const availableResponse = await client
+      .get('/api/v1/attendance/available-dates')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectIds: [fixtures.subject.id, secondSubject.id],
+      })
+      .loginAs(user)
+
+    availableResponse.assertStatus(200)
+    const dates = availableResponse.body().dates
+    assert.isAtLeast(dates.length, 2, 'Should return union of dates from selected subjects')
+
+    const hasFirstSubjectDay = dates.some((d: any) => DateTime.fromISO(d.date).weekday === 4)
+    const hasSecondSubjectDay = dates.some((d: any) => DateTime.fromISO(d.date).weekday === 2)
+    assert.isTrue(hasFirstSubjectDay, 'Should include first subject weekdays')
+    assert.isTrue(hasSecondSubjectDay, 'Should include second subject weekdays')
+
+    const batchResponse = await client
+      .post('/api/v1/attendance/batch')
+      .loginAs(user)
+      .json({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+        subjectIds: [fixtures.subject.id, secondSubject.id],
+        dates: [dates[0].date, dates[1].date],
+        attendances: [{ studentId: fixtures.students[0].id, status: 'PRESENT' }],
+      })
+
+    batchResponse.assertStatus(201)
+    assert.equal(
+      batchResponse.body().count,
+      2,
+      'Should register attendance for both selected dates'
+    )
+  })
+
   test('register attendance in multiple time slots on same day', async ({ client, assert }) => {
     const { user, school } = await createEscolaAuthUser()
     const fixtures = await createAttendanceAuthFixtures(school)

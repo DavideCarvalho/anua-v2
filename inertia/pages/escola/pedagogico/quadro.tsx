@@ -142,7 +142,10 @@ export default function QuadroPage() {
                   <SelectTrigger>
                     <SelectValue
                       placeholder={loadingPeriods ? 'Carregando...' : 'Selecione um período'}
-                    />
+                    >
+                      {academicPeriods.find((ap) => ap.id === selectedAcademicPeriodId)?.name ||
+                        (loadingPeriods ? 'Carregando...' : 'Selecione um período')}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {academicPeriods.map((ap) => (
@@ -170,7 +173,15 @@ export default function QuadroPage() {
                             ? 'Carregando...'
                             : 'Selecione uma turma'
                       }
-                    />
+                    >
+                      {selectedClass
+                        ? `${selectedClass.name}${selectedClass.level?.name ? ` - ${selectedClass.level.name}` : ''}`
+                        : !selectedAcademicPeriodId
+                          ? 'Selecione um período primeiro'
+                          : loadingClasses
+                            ? 'Carregando...'
+                            : 'Selecione uma turma'}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {classes.map((c) => (
