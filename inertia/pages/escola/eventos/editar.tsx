@@ -48,6 +48,17 @@ const EventType = {
   OTHER: 'OTHER',
 } as const
 
+const eventTypeLabels: Record<string, string> = {
+  [EventType.ACADEMIC_EVENT]: 'Evento Acadêmico',
+  [EventType.EXAM]: 'Prova',
+  [EventType.ASSIGNMENT]: 'Trabalho',
+  [EventType.FIELD_TRIP]: 'Passeio',
+  [EventType.PARENTS_MEETING]: 'Reunião de pais',
+  [EventType.CULTURAL_EVENT]: 'Evento cultural',
+  [EventType.SPORTS_EVENT]: 'Evento esportivo',
+  [EventType.OTHER]: 'Outro',
+}
+
 const steps = [
   { title: 'Informações', description: 'Dados do evento' },
   { title: 'Público', description: 'Quem vai receber' },
@@ -405,7 +416,7 @@ export default function EditarEventoPage({ eventId }: Props) {
         loading: 'Salvando evento...',
         success: () => {
           queryClient.invalidateQueries({ queryKey: ['events'] })
-          router.visit('/escola/eventos')
+          router.visit('/escola/pedagogico/calendario')
           return 'Evento atualizado com sucesso!'
         },
         error: 'Erro ao atualizar evento',
@@ -437,7 +448,7 @@ export default function EditarEventoPage({ eventId }: Props) {
               <p className="text-sm text-muted-foreground">Atualize o evento por etapas</p>
             </div>
             <Button type="button" variant="outline" asChild>
-              <Link href="/escola/eventos">
+              <Link route="web.escola.pedagogico.calendario">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar para eventos
               </Link>
@@ -493,7 +504,9 @@ export default function EditarEventoPage({ eventId }: Props) {
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue />
+                                  <SelectValue>
+                                    {eventTypeLabels[field.value] ?? field.value}
+                                  </SelectValue>
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -893,7 +906,7 @@ export default function EditarEventoPage({ eventId }: Props) {
                     disabled={updateEventMutation.isPending}
                     asChild
                   >
-                    <Link href="/escola/eventos">Cancelar</Link>
+                    <Link route="web.escola.pedagogico.calendario">Cancelar</Link>
                   </Button>
                   {!isLastStep ? (
                     <Button type="button" onClick={handleNext}>

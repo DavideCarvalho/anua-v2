@@ -7,6 +7,7 @@ import Assignment from '#models/assignment'
 import Class_ from '#models/class'
 import Event from '#models/event'
 import Exam from '#models/exam'
+import TeacherHasClass from '#models/teacher_has_class'
 import { listPedagogicalCalendarValidator } from '#validators/pedagogical_calendar'
 
 type SourceType = 'EVENT' | 'ASSIGNMENT' | 'EXAM' | 'HOLIDAY' | 'WEEKEND_CLASS_DAY'
@@ -26,6 +27,16 @@ interface CalendarItem {
   meta: Record<string, unknown>
 }
 
+function applyTimeToDate(baseDate: DateTime, time: string | null): DateTime {
+  if (!time) return baseDate.startOf('day')
+
+  const [hourString, minuteString] = time.split(':')
+  const hour = Number.parseInt(hourString ?? '0', 10)
+  const minute = Number.parseInt(minuteString ?? '0', 10)
+
+  return baseDate.set({ hour, minute, second: 0, millisecond: 0 })
+}
+
 export default class ListPedagogicalCalendarController {
   async handle({ request, response, selectedSchoolIds }: HttpContext) {
     const { classId, startDate, endDate } = await request.validateUsing(
@@ -43,62 +54,108 @@ export default class ListPedagogicalCalendarController {
       return response.badRequest({ message: 'Intervalo de datas inválido' })
     }
 
-    const classRecord = await Class_.query()
-      .where('id', classId)
-      .whereIn('schoolId', selectedSchoolIds ?? [])
-      .preload('academicPeriods', (query) => {
-        query.whereNull('AcademicPeriod.deletedAt')
-      })
-      .first()
+    const classesQuery = Class_.query().whereIn('schoolId', selectedSchoolIds ?? [])
 
-    if (!classRecord) {
+    if (classId) {
+      classesQuery.where('id', classId)
+    }
+
+    const classRecords = await classesQuery.preload('academicPeriods', (query) => {
+      query.whereNull('AcademicPeriod.deletedAt')
+    })
+
+    if (classId && classRecords.length === 0) {
       return response.notFound({ message: 'Turma não encontrada' })
     }
 
-    const academicPeriodIds = classRecord.academicPeriods.map((period) => period.id)
-    const levelId = classRecord.levelId
+    if (classRecords.length === 0) {
+      return response.ok({ data: [] })
+    }
+
+    const schoolId = classRecords[0].schoolId
+    const classIds = classRecords.map((record) => record.id)
+    const levelIds = Array.from(
+      new Set(
+        classRecords
+          .map((record) => record.levelId)
+          .filter((levelId): levelId is string => !!levelId)
+      )
+    )
+
+    const academicPeriodIds = Array.from(
+      new Set(
+        classRecords
+          .flatMap((record) => record.academicPeriods.map((period) => period.id))
+          .filter((periodId): periodId is string => !!periodId)
+      )
+    )
 
     const events = await Event.query()
-      .where('Event.schoolId', classRecord.schoolId)
+      .where('Event.schoolId', schoolId)
       .where('Event.startDate', '>=', rangeStart.toSQL()!)
       .where('Event.startDate', '<=', rangeEnd.toSQL()!)
       .where((query) => {
-        query
-          .whereHas('eventAudiences', (audienceQuery) => {
-            audienceQuery.where('scopeType', 'SCHOOL').where('scopeId', classRecord.schoolId)
+        query.whereHas('eventAudiences', (audienceQuery) => {
+          audienceQuery.where('scopeType', 'SCHOOL').where('scopeId', schoolId)
+        })
+
+        if (classIds.length > 0) {
+          query.orWhereHas('eventAudiences', (audienceQuery) => {
+            audienceQuery.where('scopeType', 'CLASS').whereIn('scopeId', classIds)
           })
-          .orWhereHas('eventAudiences', (audienceQuery) => {
-            audienceQuery.where('scopeType', 'CLASS').where('scopeId', classRecord.id)
+        }
+
+        if (academicPeriodIds.length > 0) {
+          query.orWhereHas('eventAudiences', (audienceQuery) => {
+            audienceQuery
+              .where('scopeType', 'ACADEMIC_PERIOD')
+              .whereIn('scopeId', academicPeriodIds)
           })
-          .orWhereHas('eventAudiences', (audienceQuery) => {
-            if (academicPeriodIds.length > 0) {
-              audienceQuery
-                .where('scopeType', 'ACADEMIC_PERIOD')
-                .whereIn('scopeId', academicPeriodIds)
-            }
+        }
+
+        if (levelIds.length > 0) {
+          query.orWhereHas('eventAudiences', (audienceQuery) => {
+            audienceQuery.where('scopeType', 'LEVEL').whereIn('scopeId', levelIds)
           })
-          .orWhereHas('eventAudiences', (audienceQuery) => {
-            if (levelId) {
-              audienceQuery.where('scopeType', 'LEVEL').where('scopeId', levelId)
-            }
-          })
+        }
       })
 
     const assignments = await Assignment.query()
       .whereHas('teacherHasClass', (query) => {
-        query.where('classId', classRecord.id)
+        query.whereIn('classId', classIds)
       })
       .where('dueDate', '>=', rangeStart.toSQL()!)
       .where('dueDate', '<=', rangeEnd.toSQL()!)
       .preload('teacherHasClass', (query) => {
+        query.preload('class')
         query.preload('subject')
       })
 
     const exams = await Exam.query()
-      .where('classId', classRecord.id)
+      .whereIn('classId', classIds)
       .where('examDate', '>=', rangeStart.toSQL()!)
       .where('examDate', '<=', rangeEnd.toSQL()!)
       .preload('subject')
+
+    const classSchedules = await TeacherHasClass.query()
+      .whereIn('classId', classIds)
+      .where('isActive', true)
+      .select('classId', 'subjectId', 'startTime', 'endTime')
+
+    const scheduleByClassAndSubject = new Map<
+      string,
+      { startTime: string | null; endTime: string | null }
+    >()
+
+    for (const schedule of classSchedules) {
+      const key = `${schedule.classId}:${schedule.subjectId}`
+      if (!scheduleByClassAndSubject.has(key)) {
+        scheduleByClassAndSubject.set(key, {
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+        })
+      }
+    }
 
     const holidays = await AcademicPeriodHoliday.query()
       .whereIn('academicPeriodId', academicPeriodIds)
@@ -120,7 +177,7 @@ export default class ListPedagogicalCalendarController {
       isAllDay: event.isAllDay,
       readonly: false,
       schoolId: event.schoolId,
-      classId: classRecord.id,
+      classId: null,
       academicPeriodId: academicPeriodIds[0] ?? null,
       meta: {
         eventType: event.type,
@@ -128,42 +185,67 @@ export default class ListPedagogicalCalendarController {
       },
     }))
 
-    const assignmentItems: CalendarItem[] = assignments.map((assignment) => ({
-      sourceType: 'ASSIGNMENT',
-      sourceId: assignment.id,
-      title: assignment.name,
-      description: assignment.description,
-      startAt: assignment.dueDate.toISO()!,
-      endAt: null,
-      isAllDay: true,
-      readonly: false,
-      schoolId: classRecord.schoolId,
-      classId: classRecord.id,
-      academicPeriodId: assignment.academicPeriodId,
-      meta: {
-        maxScore: assignment.grade,
-        subjectName: assignment.teacherHasClass?.subject?.name,
-      },
-    }))
+    const assignmentItems: CalendarItem[] = assignments.map((assignment) => {
+      const classStartTime = assignment.teacherHasClass?.startTime ?? null
+      const classEndTime = assignment.teacherHasClass?.endTime ?? null
 
-    const examItems: CalendarItem[] = exams.map((exam) => ({
-      sourceType: 'EXAM',
-      sourceId: exam.id,
-      title: exam.title,
-      description: exam.description,
-      startAt: exam.examDate.toISO()!,
-      endAt: null,
-      isAllDay: true,
-      readonly: false,
-      schoolId: classRecord.schoolId,
-      classId: classRecord.id,
-      academicPeriodId: exam.academicPeriodId,
-      meta: {
-        examType: exam.type,
-        status: exam.status,
-        subjectName: exam.subject?.name,
-      },
-    }))
+      const startAt = applyTimeToDate(assignment.dueDate, classStartTime)
+      const endAt = classEndTime
+        ? applyTimeToDate(assignment.dueDate, classEndTime)
+        : classStartTime
+          ? startAt.plus({ minutes: 50 })
+          : null
+
+      return {
+        sourceType: 'ASSIGNMENT',
+        sourceId: assignment.id,
+        title: assignment.name,
+        description: assignment.description,
+        startAt: startAt.toISO()!,
+        endAt: endAt?.toISO() ?? null,
+        isAllDay: !classStartTime,
+        readonly: false,
+        schoolId,
+        classId: assignment.teacherHasClass?.classId ?? null,
+        academicPeriodId: assignment.academicPeriodId,
+        meta: {
+          maxScore: assignment.grade,
+          subjectName: assignment.teacherHasClass?.subject?.name,
+        },
+      }
+    })
+
+    const examItems: CalendarItem[] = exams.map((exam) => {
+      const schedule = scheduleByClassAndSubject.get(`${exam.classId}:${exam.subjectId ?? ''}`)
+      const startTime = schedule?.startTime ?? null
+      const endTime = schedule?.endTime ?? null
+
+      const startAt = applyTimeToDate(exam.examDate, startTime)
+      const endAt = endTime
+        ? applyTimeToDate(exam.examDate, endTime)
+        : startTime
+          ? startAt.plus({ minutes: 50 })
+          : null
+
+      return {
+        sourceType: 'EXAM',
+        sourceId: exam.id,
+        title: exam.title,
+        description: exam.description,
+        startAt: startAt.toISO()!,
+        endAt: endAt?.toISO() ?? null,
+        isAllDay: !startTime,
+        readonly: false,
+        schoolId,
+        classId: exam.classId,
+        academicPeriodId: exam.academicPeriodId,
+        meta: {
+          examType: exam.type,
+          status: exam.status,
+          subjectName: exam.subject?.name,
+        },
+      }
+    })
 
     const holidayItems: CalendarItem[] = holidays.map((holiday) => ({
       sourceType: 'HOLIDAY',
@@ -174,8 +256,8 @@ export default class ListPedagogicalCalendarController {
       endAt: null,
       isAllDay: true,
       readonly: true,
-      schoolId: classRecord.schoolId,
-      classId: classRecord.id,
+      schoolId,
+      classId: null,
       academicPeriodId: holiday.academicPeriodId,
       meta: {},
     }))
@@ -189,8 +271,8 @@ export default class ListPedagogicalCalendarController {
       endAt: null,
       isAllDay: true,
       readonly: true,
-      schoolId: classRecord.schoolId,
-      classId: classRecord.id,
+      schoolId,
+      classId: null,
       academicPeriodId: weekendClassDay.academicPeriodId,
       meta: {},
     }))

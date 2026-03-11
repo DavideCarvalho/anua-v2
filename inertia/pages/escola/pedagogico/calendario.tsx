@@ -1,17 +1,9 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { PedagogicalCalendar } from '../../../containers/pedagogico/pedagogical-calendar'
 
-interface PageProps {
-  schoolId: string
-  classes: Array<{ id: string; name: string }>
-  [key: string]: unknown
-}
-
 export default function PedagogicoCalendarioPage() {
-  const { schoolId, classes = [] } = usePage<PageProps>().props
-
   return (
     <EscolaLayout>
       <Head title="Calendário" />
@@ -24,7 +16,7 @@ export default function PedagogicoCalendarioPage() {
           </p>
         </div>
 
-        <PedagogicalCalendar schoolId={schoolId} classes={classes} />
+        <PedagogicalCalendar />
       </div>
     </EscolaLayout>
   )

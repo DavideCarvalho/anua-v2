@@ -53,6 +53,7 @@ interface NewAssignmentModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   user: UserDto | null
+  defaultDate?: Date
 }
 
 interface Subject {
@@ -69,12 +70,13 @@ export function NewAssignmentModal({
   open,
   onOpenChange,
   user,
+  defaultDate,
 }: NewAssignmentModalProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
-      dueDate: new Date(),
+      dueDate: defaultDate ?? new Date(),
       noGrade: false,
       grade: undefined,
       subjectId: '',
@@ -90,14 +92,14 @@ export function NewAssignmentModal({
 
   const subjects = useMemo(() => {
     if (!classData) return []
-    const isDirectorOrAdmin = user?.role?.name && DIRECTOR_ROLES.includes(user.role.name)
+    const canSeeAllSubjects = !user || (user.role?.name && DIRECTOR_ROLES.includes(user.role.name))
     const result: Subject[] = []
     const seen = new Set<string>()
     const teacherClasses = classData.teacherClasses
 
     for (const tc of teacherClasses) {
       if (!tc.subject || seen.has(tc.subject.id)) continue
-      const canSeeSubject = isDirectorOrAdmin || tc.teacher?.user?.id === user?.id
+      const canSeeSubject = canSeeAllSubjects || tc.teacher?.user?.id === user?.id
       if (canSeeSubject) {
         seen.add(tc.subject.id)
         result.push({ id: tc.subject.id, name: tc.subject.name, teacherId: tc.teacherId })
@@ -118,14 +120,14 @@ export function NewAssignmentModal({
     if (open) {
       form.reset({
         name: '',
-        dueDate: new Date(),
+        dueDate: defaultDate ?? new Date(),
         noGrade: false,
         grade: undefined,
         subjectId: subjects?.length === 1 ? subjects[0]?.id : '',
         description: '',
       })
     }
-  }, [open, form, subjects])
+  }, [open, form, subjects, defaultDate])
 
   const createMutation = useMutation(api.api.v1.assignments.store.mutationOptions())
 

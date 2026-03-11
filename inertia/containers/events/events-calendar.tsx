@@ -1,7 +1,16 @@
 import type { View } from 'react-big-calendar'
 import { useCallback, useMemo, useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { endOfMonth, endOfWeek, format, getDay, parse, startOfMonth, startOfWeek } from 'date-fns'
+import {
+  endOfMonth,
+  endOfWeek,
+  format,
+  getDay,
+  isSameDay,
+  parse,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar, ShieldAlert } from 'lucide-react'
 import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'
@@ -98,6 +107,7 @@ interface EventsCalendarProps {
 export function EventsCalendar({ schoolId }: EventsCalendarProps) {
   const [selectedEvent, setSelectedEvent] = useState<APIEvent | null>(null)
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const [view, setView] = useState<View>('month')
 
   // Calcular range baseado na view
@@ -153,11 +163,28 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
 
   const handleNavigate = useCallback((newDate: Date) => {
     setCurrentDate(newDate)
+    setSelectedDate(newDate)
+  }, [])
+
+  const handleSelectSlot = useCallback((slot: { start: Date }) => {
+    setCurrentDate(slot.start)
+    setSelectedDate(slot.start)
   }, [])
 
   const handleViewChange = useCallback((newView: View) => {
     setView(newView)
   }, [])
+
+  const dayPropGetter = useCallback(
+    (date: Date) => {
+      if (isSameDay(date, selectedDate)) {
+        return { className: 'rbc-day-selected' }
+      }
+
+      return { className: '' }
+    },
+    [selectedDate]
+  )
 
   // Estilo dos eventos baseado no tipo
   const eventStyleGetter = useCallback((event: CalendarEvent): { className: string } => {
@@ -205,11 +232,14 @@ export function EventsCalendar({ schoolId }: EventsCalendarProps) {
             culture="pt-BR"
             messages={messages}
             onSelectEvent={handleSelectEvent}
+            selectable
+            onSelectSlot={handleSelectSlot}
             onNavigate={handleNavigate}
             onView={handleViewChange}
             view={view}
             date={currentDate}
             eventPropGetter={eventStyleGetter}
+            dayPropGetter={dayPropGetter}
             views={['month', 'week', 'day', 'agenda']}
             components={{
               event: CustomEvent,

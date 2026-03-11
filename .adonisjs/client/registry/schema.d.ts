@@ -845,7 +845,7 @@ export interface Registry {
   }
   'web.escola.eventos': {
     methods: ["GET","HEAD"]
-    pattern: '/escola/eventos'
+    pattern: '/escola/calendario'
     types: {
       body: {}
       paramsTuple: []
@@ -856,7 +856,7 @@ export interface Registry {
   }
   'web.escola.eventos.novo': {
     methods: ["GET","HEAD"]
-    pattern: '/escola/eventos/novo'
+    pattern: '/escola/calendario/novo'
     types: {
       body: {}
       paramsTuple: []
@@ -867,7 +867,7 @@ export interface Registry {
   }
   'web.escola.eventos.editar': {
     methods: ["GET","HEAD"]
-    pattern: '/escola/eventos/:eventId/editar'
+    pattern: '/escola/calendario/:eventId/editar'
     types: {
       body: {}
       paramsTuple: [ParamValue]
@@ -878,7 +878,7 @@ export interface Registry {
   }
   'web.escola.eventos.autorizacoes': {
     methods: ["GET","HEAD"]
-    pattern: '/escola/eventos/:eventId/autorizacoes'
+    pattern: '/escola/calendario/:eventId/autorizacoes'
     types: {
       body: {}
       paramsTuple: [ParamValue]

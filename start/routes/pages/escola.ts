@@ -276,11 +276,13 @@ export function registerEscolaPageRoutes() {
         .as('comunicados.editar')
 
       // Eventos
-      router.get('/eventos', [ShowEventosPageController]).as('eventos')
-      router.get('/eventos/novo', [ShowNovoEventoPageController]).as('eventos.novo')
-      router.get('/eventos/:eventId/editar', [ShowEditarEventoPageController]).as('eventos.editar')
+      router.get('/calendario', [ShowEventosPageController]).as('eventos')
+      router.get('/calendario/novo', [ShowNovoEventoPageController]).as('eventos.novo')
       router
-        .get('/eventos/:eventId/autorizacoes', [ShowEventoAutorizacoesPageController])
+        .get('/calendario/:eventId/editar', [ShowEditarEventoPageController])
+        .as('eventos.editar')
+      router
+        .get('/calendario/:eventId/autorizacoes', [ShowEventoAutorizacoesPageController])
         .as('eventos.autorizacoes')
 
       // Mural

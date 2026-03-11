@@ -56,6 +56,7 @@ interface NewExamModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   user: UserDto | null
+  defaultDate?: Date
 }
 
 interface Subject {
@@ -72,12 +73,13 @@ export function NewExamModal({
   open,
   onOpenChange,
   user,
+  defaultDate,
 }: NewExamModalProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: '',
-      scheduledDate: new Date(),
+      scheduledDate: defaultDate ?? new Date(),
       maxScore: 10,
       type: 'WRITTEN',
       description: '',
@@ -93,14 +95,14 @@ export function NewExamModal({
 
   const subjects = useMemo(() => {
     if (!classData) return []
-    const isDirectorOrAdmin = user?.role?.name && DIRECTOR_ROLES.includes(user.role.name)
+    const canSeeAllSubjects = !user || (user.role?.name && DIRECTOR_ROLES.includes(user.role.name))
     const result: Subject[] = []
     const seen = new Set<string>()
     const teacherClasses = classData.teacherClasses
 
     for (const tc of teacherClasses) {
       if (!tc.subject || seen.has(tc.subject.id)) continue
-      const canSeeSubject = isDirectorOrAdmin || tc.teacher?.user?.id === user?.id
+      const canSeeSubject = canSeeAllSubjects || tc.teacher?.user?.id === user?.id
       if (canSeeSubject) {
         seen.add(tc.subject.id)
         result.push({ id: tc.subject.id, name: tc.subject.name, teacherId: tc.teacherId })
@@ -121,14 +123,14 @@ export function NewExamModal({
     if (open) {
       form.reset({
         title: '',
-        scheduledDate: new Date(),
+        scheduledDate: defaultDate ?? new Date(),
         maxScore: 10,
         type: 'WRITTEN',
         description: '',
         subjectId: subjects?.length === 1 ? subjects[0]?.id : '',
       })
     }
-  }, [open, form, subjects])
+  }, [open, form, subjects, defaultDate])
 
   const createMutation = useMutation(api.api.v1.exams.store.mutationOptions())
 

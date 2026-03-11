@@ -92,7 +92,9 @@ export function EventDetailsModal({ open, onOpenChange, event }: EventDetailsMod
             Fechar
           </Button>
           <Button asChild>
-            <Link href={`/escola/eventos/${event.id}/editar`}>Editar evento</Link>
+            <Link route="web.escola.eventos.editar" routeParams={{ eventId: event.id }}>
+              Editar evento
+            </Link>
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -7,8 +7,10 @@ import { DateTime } from 'luxon'
 import AcademicPeriod from '#models/academic_period'
 import AcademicPeriodHoliday from '#models/academic_period_holiday'
 import AcademicPeriodWeekendClass from '#models/academic_period_weekend_class'
+import Assignment from '#models/assignment'
 import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
+import Exam from '#models/exam'
 import Level from '#models/level'
 import Role from '#models/role'
 import Subject from '#models/subject'
@@ -83,7 +85,7 @@ async function createPedagogicalFlowContext(schoolId: string) {
     hourlyRate: 50,
   })
 
-  await TeacherHasClass.create({
+  const teacherHasClass = await TeacherHasClass.create({
     teacherId: teacher.id,
     classId: classEntity.id,
     subjectId: subject.id,
@@ -113,6 +115,7 @@ async function createPedagogicalFlowContext(schoolId: string) {
     classEntity,
     subject,
     teacher,
+    teacherHasClass,
     holidayDate,
     weekendClassDate,
   }
@@ -288,5 +291,81 @@ test.group('Pedagogical calendar flow', (group) => {
 
     assert.include(assignmentTitles, 'Atividade Turma Principal')
     assert.notInclude(assignmentTitles, 'Atividade Outra Turma')
+  })
+
+  test('uses class schedule time for assignment and exam in calendar payload', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher, teacherHasClass, academicPeriod } =
+      await createPedagogicalFlowContext(school.id)
+
+    await teacherHasClass.merge({ startTime: '07:30', endTime: '08:20' }).save()
+
+    const day = DateTime.now().plus({ days: 1 }).startOf('day')
+
+    await Assignment.create({
+      name: 'Atividade com horario da aula',
+      description: null,
+      dueDate: day,
+      grade: 10,
+      teacherHasClassId: teacherHasClass.id,
+      academicPeriodId: academicPeriod.id,
+    })
+
+    await Exam.create({
+      title: 'Prova com horario da aula',
+      description: null,
+      examDate: day,
+      startTime: day.set({ hour: 9, minute: 0 }),
+      endTime: day.set({ hour: 10, minute: 0 }),
+      location: null,
+      maxScore: 10,
+      weight: 1,
+      type: 'WRITTEN',
+      status: 'SCHEDULED',
+      instructions: null,
+      schoolId: school.id,
+      classId: classEntity.id,
+      subjectId: subject.id,
+      teacherId: teacher.id,
+      academicPeriodId: academicPeriod.id,
+    })
+
+    const response = await client
+      .get('/api/v1/pedagogical-calendar')
+      .loginAs(user)
+      .qs({
+        classId: classEntity.id,
+        startDate: day.startOf('day').toISO(),
+        endDate: day.endOf('day').toISO(),
+      })
+
+    response.assertStatus(200)
+
+    const body = response.body() as {
+      data: Array<{
+        sourceType: string
+        title: string
+        startAt: string
+        endAt: string | null
+        isAllDay: boolean
+      }>
+    }
+
+    const assignmentItem = body.data.find((item) => item.sourceType === 'ASSIGNMENT')
+    const examItem = body.data.find((item) => item.sourceType === 'EXAM')
+
+    assert.exists(assignmentItem)
+    assert.exists(examItem)
+
+    assert.equal(DateTime.fromISO(assignmentItem!.startAt).toFormat('HH:mm'), '07:30')
+    assert.equal(DateTime.fromISO(assignmentItem!.endAt!).toFormat('HH:mm'), '08:20')
+    assert.equal(assignmentItem!.isAllDay, false)
+
+    assert.equal(DateTime.fromISO(examItem!.startAt).toFormat('HH:mm'), '07:30')
+    assert.equal(DateTime.fromISO(examItem!.endAt!).toFormat('HH:mm'), '08:20')
+    assert.equal(examItem!.isAllDay, false)
   })
 })

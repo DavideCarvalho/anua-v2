@@ -140,9 +140,10 @@ interface NewEventModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   schoolId: string
+  defaultDate?: Date
 }
 
-export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalProps) {
+export function NewEventModal({ open, onOpenChange, schoolId, defaultDate }: NewEventModalProps) {
   const queryClient = useQueryClient()
   const createEventMutation = useMutation(api.api.v1.events.store.mutationOptions())
   const { data: periodsData } = useQuery(
@@ -186,6 +187,22 @@ export function NewEventModal({ open, onOpenChange, schoolId }: NewEventModalPro
       audienceClassIds: [],
     },
   })
+
+  const formatDateInput = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  useEffect(() => {
+    if (!open) return
+    if (!defaultDate) return
+
+    const dateValue = formatDateInput(defaultDate)
+    form.setValue('startsAt', dateValue)
+    form.setValue('endsAt', dateValue)
+  }, [defaultDate, form, open])
 
   // Auto-set isExternal when type is FIELD_TRIP
   useEffect(() => {

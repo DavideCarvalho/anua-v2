@@ -1,39 +1,22 @@
-import { Link } from '@adonisjs/inertia/react'
-import { Head, usePage } from '@inertiajs/react'
-import { Suspense } from 'react'
-import { Plus } from 'lucide-react'
+import { Head } from '@inertiajs/react'
 
 import { EscolaLayout } from '../../components/layouts'
-import { Button } from '../../components/ui/button'
-
-import { EventsCalendar, EventsCalendarSkeleton } from '../../containers/events/events-calendar'
-
-interface PageProps {
-  schoolId: string
-  [key: string]: any
-}
+import { PedagogicalCalendar } from '../../containers/pedagogico/pedagogical-calendar'
 
 export default function EventosPage() {
-  const { schoolId } = usePage<PageProps>().props
-
   return (
     <EscolaLayout>
-      <Head title="Eventos" />
+      <Head title="Calendário" />
 
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Calendario de Eventos</h1>
-          <Button asChild>
-            <Link href="/escola/eventos/novo">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Evento
-            </Link>
-          </Button>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Calendário Pedagógico</h1>
+          <p className="text-sm text-muted-foreground">
+            Visualize e organize atividades, provas, eventos e dias especiais da turma.
+          </p>
         </div>
 
-        <Suspense fallback={<EventsCalendarSkeleton />}>
-          <EventsCalendar schoolId={schoolId} />
-        </Suspense>
+        <PedagogicalCalendar />
       </div>
     </EscolaLayout>
   )

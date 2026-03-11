@@ -1,0 +1,28 @@
+.pedagogical-rbc .rbc-off-range-bg {
+  background-color: hsl(var(--muted) / 0.28);
+}
+
+.pedagogical-rbc .rbc-off-range {
+  color: hsl(var(--muted-foreground));
+}
+
+.pedagogical-rbc .rbc-month-row {
+  min-height: 7.2rem;
+}
+
+.pedagogical-rbc .rbc-date-cell {
+  padding: 0.35rem 0.45rem;
+  font-weight: 500;
+}
+
+.pedagogical-rbc .rbc-row-segment {
+  padding: 0 2px 2px;
+}
+
+.pedagogical-rbc .rbc-event {
+  border-radius: 0.45rem;
+}
+
+.pedagogical-rbc .pedagogical-rbc-holiday-event {
+  box-shadow: inset 0 0 0 1px hsl(28 90% 45% / 0.35);
+}

@@ -55,6 +55,17 @@ const EventVisibility = {
   INTERNAL: 'INTERNAL',
 } as const
 
+const eventTypeLabels: Record<string, string> = {
+  [EventType.ACADEMIC_EVENT]: 'Evento Acadêmico',
+  [EventType.EXAM]: 'Prova',
+  [EventType.ASSIGNMENT]: 'Trabalho',
+  [EventType.FIELD_TRIP]: 'Passeio',
+  [EventType.PARENTS_MEETING]: 'Reunião de pais',
+  [EventType.CULTURAL_EVENT]: 'Evento cultural',
+  [EventType.SPORTS_EVENT]: 'Evento esportivo',
+  [EventType.OTHER]: 'Outro',
+}
+
 const steps = [
   { title: 'Informações', description: 'Dados do evento' },
   { title: 'Público', description: 'Quem vai receber' },
@@ -416,7 +427,7 @@ export default function NovoEventoPage() {
       loading: 'Criando evento...',
       success: () => {
         queryClient.invalidateQueries({ queryKey: ['events'] })
-        router.visit('/escola/eventos')
+        router.visit('/escola/pedagogico/calendario')
         return 'Evento criado com sucesso!'
       },
       error: 'Erro ao criar evento',
@@ -460,7 +471,7 @@ export default function NovoEventoPage() {
             <p className="text-sm text-muted-foreground">Crie um evento por etapas</p>
           </div>
           <Button type="button" variant="outline" asChild>
-            <Link href="/escola/eventos">
+            <Link route="web.escola.pedagogico.calendario">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar para eventos
             </Link>
@@ -521,7 +532,9 @@ export default function NovoEventoPage() {
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue />
+                                <SelectValue>
+                                  {eventTypeLabels[field.value] ?? field.value}
+                                </SelectValue>
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -956,7 +969,7 @@ export default function NovoEventoPage() {
                   disabled={createEventMutation.isPending}
                   asChild
                 >
-                  <Link href="/escola/eventos">Cancelar</Link>
+                  <Link route="web.escola.pedagogico.calendario">Cancelar</Link>
                 </Button>
 
                 {!isLastStep ? (
