@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -44,7 +44,9 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [maxVisitedStep, setMaxVisitedStep] = useState(0)
   const [stepsStatus, setStepsStatus] = useState<StepStatus[]>(STEPS_CONFIG.map(() => 'pending'))
+  const [changedSteps, setChangedSteps] = useState<boolean[]>(STEPS_CONFIG.map(() => false))
   const [isInitialized, setIsInitialized] = useState(false)
+  const skipUnsavedWarningRef = useRef(false)
 
   const queryClient = useQueryClient()
   const fullUpdateStudent = useMutation(api.api.v1.students.fullUpdate.mutationOptions())
@@ -206,10 +208,45 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
 
   // ── Watchers ──────────────────────────────────────────────────────────
   const isSelfResponsible = form.watch('basicInfo.isSelfResponsible')
+  const hasUnsavedChanges = form.formState.isDirty
+
+  function confirmDiscardChanges() {
+    if (!hasUnsavedChanges) return true
+    return window.confirm('Você tem alterações não salvas. Deseja sair sem salvar?')
+  }
+
+  useEffect(() => {
+    const removeBeforeListener = router.on('before', (event) => {
+      if (skipUnsavedWarningRef.current) return
+      if (!hasUnsavedChanges) return
+      if (!confirmDiscardChanges()) {
+        event.preventDefault()
+      }
+    })
+
+    return () => {
+      removeBeforeListener()
+    }
+  }, [hasUnsavedChanges])
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (skipUnsavedWarningRef.current) return
+      if (!hasUnsavedChanges) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [hasUnsavedChanges])
 
   // ── Clear step error when form data changes ─────────────────────────
   useEffect(() => {
-    const subscription = form.watch(() => {
+    const subscription = form.watch((_value, { name }) => {
       if (stepsStatus[currentStep] === 'error') {
         setStepsStatus((prev) => {
           const next = [...prev]
@@ -218,14 +255,40 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
         })
         form.clearErrors('root')
       }
+
+      if (!isInitialized || !name) return
+
+      const stepIndex = (() => {
+        if (name.startsWith('basicInfo.')) return 0
+        if (name.startsWith('responsibles')) return 1
+        if (name.startsWith('address.')) return 2
+        if (name.startsWith('medicalInfo.')) return 3
+        return -1
+      })()
+
+      if (stepIndex >= 0) {
+        setChangedSteps((prev) => {
+          if (prev[stepIndex]) return prev
+          const next = [...prev]
+          next[stepIndex] = true
+          return next
+        })
+      }
     })
     return () => subscription.unsubscribe()
-  }, [currentStep, stepsStatus, form])
+  }, [currentStep, isInitialized, stepsStatus, form])
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) {
+      setChangedSteps(STEPS_CONFIG.map(() => false))
+    }
+  }, [hasUnsavedChanges])
 
   // ── Sidebar steps ─────────────────────────────────────────────────────
   const steps: EnrollmentStep[] = STEPS_CONFIG.map((step, index) => ({
     ...step,
     status: (index === 1 && isSelfResponsible ? 'disabled' : stepsStatus[index]) as StepStatus,
+    hasChanges: changedSteps[index],
   }))
 
   // ── Validation ────────────────────────────────────────────────────────
@@ -458,6 +521,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
       queryClient.invalidateQueries({ queryKey: ['students'] })
       queryClient.invalidateQueries({ queryKey: studentQueryOptions.queryKey })
       toast.success('Aluno atualizado com sucesso!')
+      skipUnsavedWarningRef.current = true
       router.visit('/escola/administrativo/alunos')
     } catch (error: any) {
       console.error('Error updating student:', error)
@@ -549,6 +613,14 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
               Anterior
             </Button>
             <div className="flex gap-2">
+              {hasUnsavedChanges && (
+                <div
+                  data-slot="unsaved-form-indicator"
+                  className="inline-flex items-center rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 text-xs font-medium text-amber-700"
+                >
+                  Alterações não salvas
+                </div>
+              )}
               <Button
                 type="button"
                 variant="outline"
@@ -556,15 +628,14 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
               >
                 Cancelar
               </Button>
-              {isLastStep ? (
-                <Button
-                  type="button"
-                  disabled={fullUpdateStudent.isPending}
-                  onClick={() => form.handleSubmit(handleSubmit)()}
-                >
-                  {fullUpdateStudent.isPending ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-              ) : (
+              <Button
+                type="button"
+                disabled={fullUpdateStudent.isPending}
+                onClick={() => form.handleSubmit(handleSubmit)()}
+              >
+                {fullUpdateStudent.isPending ? 'Salvando...' : 'Salvar'}
+              </Button>
+              {!isLastStep && (
                 <Button type="button" onClick={handleNext}>
                   Próximo
                 </Button>

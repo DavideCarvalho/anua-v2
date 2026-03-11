@@ -7,6 +7,7 @@ export interface EnrollmentStep {
   title: string
   description: string
   status: StepStatus
+  hasChanges?: boolean
 }
 
 interface EnrollmentSidebarProps {
@@ -24,6 +25,14 @@ export function EnrollmentSidebar({ steps, currentStep, onStepClick }: Enrollmen
           Etapa {currentStep + 1} de {steps.length}
         </span>
         <span className="text-sm font-medium">{steps[currentStep]?.title}</span>
+        {steps[currentStep]?.hasChanges && (
+          <span
+            data-slot="step-unsaved-dot"
+            data-step-unsaved-dot={currentStep}
+            className="h-1.5 w-1.5 rounded-full bg-amber-500"
+            aria-label={`Etapa ${steps[currentStep]?.title} com alterações não salvas`}
+          />
+        )}
       </div>
 
       {/* Desktop: vertical sidebar */}
@@ -51,14 +60,24 @@ export function EnrollmentSidebar({ steps, currentStep, onStepClick }: Enrollmen
                   >
                     <StepCircle index={index} status={step.status} isActive={isActive} />
                     <div className="min-w-0 pt-0.5">
-                      <p
-                        className={cn(
-                          'text-sm font-medium leading-tight',
-                          isDisabled && 'text-muted-foreground'
+                      <div className="flex items-center gap-1.5">
+                        <p
+                          className={cn(
+                            'text-sm font-medium leading-tight',
+                            isDisabled && 'text-muted-foreground'
+                          )}
+                        >
+                          {step.title}
+                        </p>
+                        {step.hasChanges && (
+                          <span
+                            data-slot="step-unsaved-dot"
+                            data-step-unsaved-dot={index}
+                            className="h-1.5 w-1.5 rounded-full bg-amber-500"
+                            aria-label={`Etapa ${step.title} com alterações não salvas`}
+                          />
                         )}
-                      >
-                        {step.title}
-                      </p>
+                      </div>
                       <p
                         className={cn(
                           'mt-0.5 text-xs leading-tight',
