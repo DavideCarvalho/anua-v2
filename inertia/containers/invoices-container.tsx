@@ -789,7 +789,12 @@ function InvoicesContent() {
           }
         >
           <SelectTrigger className="w-56">
-            <SelectValue placeholder="Período letivo" />
+            <SelectValue placeholder="Período letivo">
+              {filterAcademicPeriodId
+                ? academicPeriods.find((period) => period.id === filterAcademicPeriodId)?.name ||
+                  'Período letivo'
+                : 'Todos os períodos'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os períodos</SelectItem>
@@ -813,7 +818,11 @@ function InvoicesContent() {
           disabled={!filterAcademicPeriodId}
         >
           <SelectTrigger className="w-56">
-            <SelectValue placeholder="Curso" />
+            <SelectValue placeholder="Curso">
+              {filterCourseId
+                ? courses.find((course) => course.courseId === filterCourseId)?.name || 'Curso'
+                : 'Todos os cursos'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os cursos</SelectItem>
@@ -831,7 +840,14 @@ function InvoicesContent() {
           disabled={!filterCourseId}
         >
           <SelectTrigger className="w-56">
-            <SelectValue placeholder="Turma" />
+            <SelectValue placeholder="Turma">
+              {filterClassId
+                ? (() => {
+                    const cls = classes.find((item) => item.id === filterClassId)
+                    return cls ? `${cls.name} (${cls.levelName})` : 'Turma'
+                  })()
+                : 'Todas as turmas'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas as turmas</SelectItem>
@@ -848,7 +864,9 @@ function InvoicesContent() {
           onValueChange={(v) => setFilters({ month: v === '_all' ? null : Number(v), page: 1 })}
         >
           <SelectTrigger className="w-36">
-            <SelectValue placeholder="Mês" />
+            <SelectValue placeholder="Mês">
+              {filterMonth ? monthLabels[filterMonth - 1] || 'Mês' : 'Todos meses'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="_all">Todos meses</SelectItem>
@@ -865,7 +883,9 @@ function InvoicesContent() {
           onValueChange={(v) => setFilters({ year: v === '_all' ? null : Number(v), page: 1 })}
         >
           <SelectTrigger className="w-28">
-            <SelectValue placeholder="Ano" />
+            <SelectValue placeholder="Ano">
+              {filterYear ? String(filterYear) : 'Todos anos'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="_all">Todos anos</SelectItem>

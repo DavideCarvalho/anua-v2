@@ -582,6 +582,12 @@ const routes = {
     tokens: [{"old":"/escola/pedagogico/aulas-avulsas","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/aulas-avulsas","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/aulas-avulsas","type":0,"val":"aulas-avulsas","end":""}],
     types: placeholder as Registry['web.escola.pedagogico.aulasAvulsas']['types'],
   },
+  'web.escola.pedagogico.calendario': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/pedagogico/calendario',
+    tokens: [{"old":"/escola/pedagogico/calendario","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/calendario","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/calendario","type":0,"val":"calendario","end":""}],
+    types: placeholder as Registry['web.escola.pedagogico.calendario']['types'],
+  },
   'web.escola.pedagogico.cursosNiveis': {
     methods: ["GET","HEAD"],
     pattern: '/escola/pedagogico/cursos-niveis',
@@ -3959,6 +3965,12 @@ const routes = {
     pattern: '/api/v1/admin/jobs/generate-missing-payments',
     tokens: [{"old":"/api/v1/admin/jobs/generate-missing-payments","type":0,"val":"api","end":""},{"old":"/api/v1/admin/jobs/generate-missing-payments","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/jobs/generate-missing-payments","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/jobs/generate-missing-payments","type":0,"val":"jobs","end":""},{"old":"/api/v1/admin/jobs/generate-missing-payments","type":0,"val":"generate-missing-payments","end":""}],
     types: placeholder as Registry['api.v1.admin.jobs.generate_missing_payments']['types'],
+  },
+  'api.v1.pedagogical_calendar.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/pedagogical-calendar',
+    tokens: [{"old":"/api/v1/pedagogical-calendar","type":0,"val":"api","end":""},{"old":"/api/v1/pedagogical-calendar","type":0,"val":"v1","end":""},{"old":"/api/v1/pedagogical-calendar","type":0,"val":"pedagogical-calendar","end":""}],
+    types: placeholder as Registry['api.v1.pedagogical_calendar.index']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

@@ -14,10 +14,16 @@ const HIDE_FINANCIAL_INFO_STORAGE_KEY = 'escola:hide-financial-info'
 export default function EscolaDashboard() {
   const user = useAuthUser()
   const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
-  const [hideFinancialInfo, setHideFinancialInfo] = useState(false)
+  const [hideFinancialInfo, setHideFinancialInfo] = useState(true)
 
   useEffect(() => {
     const storedPreference = window.localStorage.getItem(HIDE_FINANCIAL_INFO_STORAGE_KEY)
+    if (storedPreference === null) {
+      setHideFinancialInfo(true)
+      window.localStorage.setItem(HIDE_FINANCIAL_INFO_STORAGE_KEY, 'true')
+      return
+    }
+
     setHideFinancialInfo(storedPreference === 'true')
   }, [])
 

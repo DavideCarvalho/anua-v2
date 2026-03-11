@@ -122,6 +122,8 @@ const ShowPresencaPageController = () =>
   import('#controllers/pages/escola/show_presenca_page_controller')
 const ShowAulasAvulsasPageController = () =>
   import('#controllers/pages/escola/show_aulas_avulsas_page_controller')
+const ShowPedagogicoCalendarioPageController = () =>
+  import('#controllers/pages/escola/show_pedagogico_calendario_page_controller')
 const ShowCantinaCardapioPageController = () =>
   import('#controllers/pages/escola/show_cantina_cardapio_page_controller')
 const ShowCantinaPdvPageController = () =>
@@ -316,6 +318,9 @@ export function registerEscolaPageRoutes() {
       router
         .get('/pedagogico/aulas-avulsas', [ShowAulasAvulsasPageController])
         .as('pedagogico.aulasAvulsas')
+      router
+        .get('/pedagogico/calendario', [ShowPedagogicoCalendarioPageController])
+        .as('pedagogico.calendario')
       router
         .get('/pedagogico/cursos-niveis', [ShowCursosNiveisPageController])
         .as('pedagogico.cursosNiveis')

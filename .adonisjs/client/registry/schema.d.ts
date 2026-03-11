@@ -1063,6 +1063,17 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_aulas_avulsas_page_controller').default['handle']>>>
     }
   }
+  'web.escola.pedagogico.calendario': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/pedagogico/calendario'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_pedagogico_calendario_page_controller').default['handle']>>>
+    }
+  }
   'web.escola.pedagogico.cursosNiveis': {
     methods: ["GET","HEAD"]
     pattern: '/escola/pedagogico/cursos-niveis'
@@ -7254,6 +7265,17 @@ export interface Registry {
       params: {}
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/trigger_missing_payments_controller').default['handle']>>>
+    }
+  }
+  'api.v1.pedagogical_calendar.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/pedagogical-calendar'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/pedagogical_calendar').listPedagogicalCalendarValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pedagogical_calendar/list_pedagogical_calendar_controller').default['handle']>>>
     }
   }
 }

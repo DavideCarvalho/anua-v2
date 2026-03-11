@@ -100,6 +100,7 @@ import {
 } from './admin.js'
 import { registerDashboardApiRoutes } from './dashboard.js'
 import { registerResponsavelApiRoutes as registerResponsavelDashboardApiRoutes } from './responsavel.js'
+import { registerPedagogicalCalendarApiRoutes } from './pedagogical_calendar.js'
 
 export function registerApiRoutes() {
   registerAuthApiRoutes()
@@ -182,4 +183,5 @@ export function registerApiRoutes() {
   registerImpersonationApiRoutes()
   registerAdminOnboardingApiRoutes()
   registerAdminJobsApiRoutes()
+  registerPedagogicalCalendarApiRoutes()
 }

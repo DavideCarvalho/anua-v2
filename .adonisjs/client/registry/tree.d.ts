@@ -135,6 +135,7 @@ export interface ApiDefinition {
         }
         presenca: typeof routes['web.escola.pedagogico.presenca']
         aulasAvulsas: typeof routes['web.escola.pedagogico.aulasAvulsas']
+        calendario: typeof routes['web.escola.pedagogico.calendario']
         cursosNiveis: typeof routes['web.escola.pedagogico.cursosNiveis']
       }
       cantina: {
@@ -960,6 +961,9 @@ export interface ApiDefinition {
         jobs: {
           generateMissingPayments: typeof routes['api.v1.admin.jobs.generate_missing_payments']
         }
+      }
+      pedagogicalCalendar: {
+        index: typeof routes['api.v1.pedagogical_calendar.index']
       }
     }
   }

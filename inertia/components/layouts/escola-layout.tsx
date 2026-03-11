@@ -91,9 +91,9 @@ const navigation: NavItem[] = [
         href: '/escola/pedagogico/aulas-avulsas',
       },
       {
-        title: 'Eventos',
+        title: 'Calendário',
         route: 'web.escola.eventos',
-        href: '/escola/eventos',
+        href: '/escola/pedagogico/calendario',
       },
       {
         title: 'Registro diário',

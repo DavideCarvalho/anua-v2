@@ -89,8 +89,10 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
           observation: data.observation || undefined,
         },
       })
-      await queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      await queryClient.invalidateQueries({ queryKey: ['student-pending-invoices'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: api.api.v1.invoices.index.pathKey() }),
+        queryClient.invalidateQueries({ queryKey: ['student-pending-invoices'] }),
+      ])
       toast.success('Fatura marcada como paga')
       onOpenChange(false)
     } catch {
