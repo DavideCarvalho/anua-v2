@@ -112,10 +112,12 @@ export default class ValidateTeacherScheduleConflictController {
       SELECT cs."classWeekDay", cs."startTime", cs."endTime"
       FROM "CalendarSlot" cs
       JOIN "Calendar" c ON cs."calendarId" = c.id
+      JOIN "Class" cl ON c."classId" = cl.id
       JOIN "TeacherHasClass" thc ON cs."teacherHasClassId" = thc.id
       WHERE c."academicPeriodId" = :academicPeriodId
         AND c."isActive" = true
         AND c."isCanceled" = false
+        AND cl."isArchived" = false
         AND thc."teacherId" = :teacherId
         AND cs."isBreak" = false
         AND (
@@ -148,6 +150,7 @@ export default class ValidateTeacherScheduleConflictController {
       WHERE c."academicPeriodId" = :academicPeriodId
         AND c."isActive" = true
         AND c."isCanceled" = false
+        AND cl."isArchived" = false
         AND c."classId" != :excludeClassId
         AND thc."teacherId" = :teacherId
         AND cs."isBreak" = false
