@@ -377,10 +377,12 @@ export default class GenerateClassScheduleController {
         cs."endTime"
       FROM "CalendarSlot" cs
       INNER JOIN "Calendar" c ON cs."calendarId" = c."id"
+      INNER JOIN "Class" cl ON c."classId" = cl."id"
       INNER JOIN "TeacherHasClass" thc ON cs."teacherHasClassId" = thc."id"
       WHERE c."academicPeriodId" = :academicPeriodId
         AND c."isActive" = true
         AND c."isCanceled" = false
+        AND cl."isArchived" = false
         AND c."classId" != :excludeClassId
         AND thc."teacherId" = ANY(:teacherIds)
         AND cs."isBreak" = false
