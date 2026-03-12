@@ -33,7 +33,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
       const scrollSpeed = 15
 
       const scrollContainer =
-        scrollArea.querySelector('[data-radix-scroll-area-viewport]') || scrollArea
+        scrollArea.querySelector('[data-slot="scroll-area-viewport"]') || scrollArea
 
       if (e.clientY < rect.top + 60) {
         scrollContainer.scrollTop -= scrollSpeed
@@ -92,7 +92,8 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
           </div>
         </div>
 
-        <ScrollArea className="h-[800px]" type="always" ref={scrollAreaRef}>
+        <div ref={scrollAreaRef}>
+        <ScrollArea className="h-[800px]">
           <div className="flex">
             {/* Hours column */}
             <div className="relative w-18">
@@ -154,6 +155,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
             </div>
           </div>
         </ScrollArea>
+        </div>
       </div>
 
       <div className="hidden w-72 divide-y border-l md:block">
@@ -182,7 +184,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
           )}
 
           {currentEvents.length > 0 && (
-            <ScrollArea className="h-[422px] px-4" type="always">
+            <ScrollArea className="h-[422px] px-4">
               <div className="space-y-6 pb-4">
                 {currentEvents.map((event) => {
                   const user = users.find((user) => user.id === event.user.id)
