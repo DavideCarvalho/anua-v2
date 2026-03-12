@@ -8,401 +8,407 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class AbsenceSchema extends BaseModel {
-  static $columns = ['id', 'date', 'reason', 'status', 'description', 'rejectionReason', 'isExcused', 'createdAt', 'updatedAt', 'userId', 'timesheetEntryId'] as const
+  static $columns = ['createdAt', 'date', 'description', 'id', 'isExcused', 'reason', 'rejectionReason', 'status', 'timesheetEntryId', 'updatedAt', 'userId'] as const
   $columns = AbsenceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column.date()
   declare date: DateTime
   @column()
-  declare reason: any
-  @column()
-  declare status: any
-  @column()
   declare description: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isExcused: boolean
+  @column()
+  declare reason: any
   @column()
   declare rejectionReason: string | null
   @column()
-  declare isExcused: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare status: any
+  @column()
+  declare timesheetEntryId: string | null
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
   declare userId: string
-  @column()
-  declare timesheetEntryId: string | null
 }
 
 export class AcademicPeriodSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'startDate', 'endDate', 'enrollmentStartDate', 'enrollmentEndDate', 'isActive', 'segment', 'createdAt', 'updatedAt', 'schoolId', 'isClosed', 'previousAcademicPeriodId', 'minimumGradeOverride', 'minimumAttendanceOverride', 'deletedAt'] as const
+  static $columns = ['createdAt', 'deletedAt', 'endDate', 'enrollmentEndDate', 'enrollmentStartDate', 'id', 'isActive', 'isClosed', 'minimumAttendanceOverride', 'minimumGradeOverride', 'name', 'previousAcademicPeriodId', 'schoolId', 'segment', 'slug', 'startDate', 'updatedAt'] as const
   $columns = AcademicPeriodSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column.date()
+  declare endDate: DateTime
+  @column.date()
+  declare enrollmentEndDate: DateTime | null
+  @column.date()
+  declare enrollmentStartDate: DateTime | null
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare isActive: boolean
+  @column()
+  declare isClosed: boolean
+  @column()
+  declare minimumAttendanceOverride: number | null
+  @column()
+  declare minimumGradeOverride: number | null
+  @column()
   declare name: string
+  @column()
+  declare previousAcademicPeriodId: string | null
+  @column()
+  declare schoolId: string
+  @column()
+  declare segment: any
   @column()
   declare slug: string
   @column.date()
   declare startDate: DateTime
-  @column.date()
-  declare endDate: DateTime
-  @column.date()
-  declare enrollmentStartDate: DateTime | null
-  @column.date()
-  declare enrollmentEndDate: DateTime | null
-  @column()
-  declare isActive: boolean
-  @column()
-  declare segment: any
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare schoolId: string
-  @column()
-  declare isClosed: boolean
-  @column()
-  declare previousAcademicPeriodId: string | null
-  @column()
-  declare minimumGradeOverride: number | null
-  @column()
-  declare minimumAttendanceOverride: number | null
-  @column.dateTime()
-  declare deletedAt: DateTime | null
 }
 
 export class AcademicPeriodHolidaySchema extends BaseModel {
-  static $columns = ['id', 'date', 'createdAt', 'updatedAt', 'academicPeriodId'] as const
+  static $columns = ['academicPeriodId', 'createdAt', 'date', 'id', 'updatedAt'] as const
   $columns = AcademicPeriodHolidaySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column.date()
-  declare date: DateTime
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare academicPeriodId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class AcademicPeriodWeekendClassSchema extends BaseModel {
-  static $columns = ['id', 'academicPeriodId', 'date', 'createdAt', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'createdAt', 'date', 'id', 'updatedAt'] as const
   $columns = AcademicPeriodWeekendClassSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
   declare academicPeriodId: string
-  @column.date()
-  declare date: DateTime
   @column.dateTime()
   declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class AchievementSchema extends BaseModel {
-  static $columns = ['id', 'slug', 'name', 'description', 'icon', 'points', 'category', 'criteria', 'isSecret', 'rarity', 'maxUnlocks', 'recurrencePeriod', 'schoolId', 'schoolChainId', 'isActive', 'deletedAt', 'createdAt', 'updatedAt'] as const
+  static $columns = ['category', 'createdAt', 'criteria', 'deletedAt', 'description', 'icon', 'id', 'isActive', 'isSecret', 'maxUnlocks', 'name', 'points', 'rarity', 'recurrencePeriod', 'schoolChainId', 'schoolId', 'slug', 'updatedAt'] as const
   $columns = AchievementSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare slug: string
+  declare category: any
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare name: string
+  declare criteria: any
+  @column.dateTime()
+  declare deletedAt: DateTime | null
   @column()
   declare description: string
   @column()
   declare icon: string | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
-  declare points: number
-  @column()
-  declare category: any
-  @column()
-  declare criteria: any
+  declare isActive: boolean
   @column()
   declare isSecret: boolean
   @column()
-  declare rarity: any
-  @column()
   declare maxUnlocks: number | null
+  @column()
+  declare name: string
+  @column()
+  declare points: number
+  @column()
+  declare rarity: any
   @column()
   declare recurrencePeriod: any | null
   @column()
-  declare schoolId: string | null
-  @column()
   declare schoolChainId: string | null
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare deletedAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare schoolId: string | null
+  @column()
+  declare slug: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class AgreementSchema extends BaseModel {
-  static $columns = ['id', 'totalAmount', 'installments', 'startDate', 'paymentDay', 'createdAt', 'updatedAt', 'paymentMethod', 'billingType', 'finePercentage', 'dailyInterestPercentage', 'invoiceId'] as const
+  static $columns = ['billingType', 'createdAt', 'dailyInterestPercentage', 'finePercentage', 'id', 'installments', 'invoiceId', 'paymentDay', 'paymentMethod', 'startDate', 'totalAmount', 'updatedAt'] as const
   $columns = AgreementSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare totalAmount: number
-  @column()
-  declare installments: number
-  @column.date()
-  declare startDate: DateTime
-  @column()
-  declare paymentDay: number
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare paymentMethod: string | null
   @column()
   declare billingType: string
-  @column()
-  declare finePercentage: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare dailyInterestPercentage: string | null
   @column()
-  declare invoiceId: string | null
-}
-
-export class AgreementEarlyDiscountSchema extends BaseModel {
-  static $columns = ['id', 'agreementId', 'percentage', 'daysBeforeDeadline', 'createdAt', 'updatedAt', 'discountType', 'flatAmount'] as const
-  $columns = AgreementEarlyDiscountSchema.$columns
+  declare finePercentage: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare agreementId: string
+  declare installments: number
   @column()
-  declare percentage: number | null
+  declare invoiceId: string | null
   @column()
-  declare daysBeforeDeadline: number
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare paymentDay: number
+  @column()
+  declare paymentMethod: string | null
+  @column.date()
+  declare startDate: DateTime
+  @column()
+  declare totalAmount: number
   @column.dateTime()
   declare updatedAt: DateTime
+}
+
+export class AgreementEarlyDiscountSchema extends BaseModel {
+  static $columns = ['agreementId', 'createdAt', 'daysBeforeDeadline', 'discountType', 'flatAmount', 'id', 'percentage', 'updatedAt'] as const
+  $columns = AgreementEarlyDiscountSchema.$columns
+  @column()
+  declare agreementId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare daysBeforeDeadline: number
   @column()
   declare discountType: string
   @column()
   declare flatAmount: number | null
-}
-
-export class AssignmentSchema extends BaseModel {
-  static $columns = ['id', 'name', 'description', 'dueDate', 'createdAt', 'updatedAt', 'grade', 'teacherHasClassId', 'academicPeriodId'] as const
-  $columns = AssignmentSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare name: string
+  declare percentage: number | null
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class AssignmentSchema extends BaseModel {
+  static $columns = ['academicPeriodId', 'createdAt', 'description', 'dueDate', 'grade', 'id', 'name', 'teacherHasClassId', 'updatedAt'] as const
+  $columns = AssignmentSchema.$columns
+  @column()
+  declare academicPeriodId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare description: string | null
   @column.dateTime()
   declare dueDate: DateTime
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare grade: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
   @column()
   declare teacherHasClassId: string
-  @column()
-  declare academicPeriodId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class AttendanceSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'note', 'date', 'calendarSlotId'] as const
+  static $columns = ['calendarSlotId', 'createdAt', 'date', 'id', 'note', 'updatedAt'] as const
   $columns = AttendanceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare calendarSlotId: string
   @column.dateTime()
   declare createdAt: DateTime
   @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare note: string | null
-  @column.dateTime()
   declare date: DateTime
-  @column()
-  declare calendarSlotId: string
-}
-
-export class AuditLogSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'action', 'entity', 'entityId', 'details', 'createdAt'] as const
-  $columns = AuditLogSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare userId: string
+  declare note: string | null
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class AuditLogSchema extends BaseModel {
+  static $columns = ['action', 'createdAt', 'details', 'entity', 'entityId', 'id', 'userId'] as const
+  $columns = AuditLogSchema.$columns
   @column()
   declare action: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare details: any | null
   @column()
   declare entity: string
   @column()
   declare entityId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
-  declare details: any | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare userId: string
 }
 
 export class CalendarSchema extends BaseModel {
-  static $columns = ['id', 'classId', 'name', 'createdAt', 'updatedAt', 'isActive', 'academicPeriodId', 'isCanceled', 'isApproved', 'canceledForNextCalendarId'] as const
+  static $columns = ['academicPeriodId', 'canceledForNextCalendarId', 'classId', 'createdAt', 'id', 'isActive', 'isApproved', 'isCanceled', 'name', 'updatedAt'] as const
   $columns = CalendarSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare classId: string
-  @column()
-  declare name: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare isActive: boolean
   @column()
   declare academicPeriodId: string
   @column()
-  declare isCanceled: boolean
-  @column()
-  declare isApproved: boolean
-  @column()
   declare canceledForNextCalendarId: string | null
-}
-
-export class CalendarConfigSchema extends BaseModel {
-  static $columns = ['id', 'classesConfig', 'classesClashConfig', 'createdAt', 'updatedAt'] as const
-  $columns = CalendarConfigSchema.$columns
+  @column()
+  declare classId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare classesConfig: any | null
+  declare isActive: boolean
+  @column()
+  declare isApproved: boolean
+  @column()
+  declare isCanceled: boolean
+  @column()
+  declare name: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class CalendarConfigSchema extends BaseModel {
+  static $columns = ['classesClashConfig', 'classesConfig', 'createdAt', 'id', 'updatedAt'] as const
+  $columns = CalendarConfigSchema.$columns
   @column()
   declare classesClashConfig: any | null
+  @column()
+  declare classesConfig: any | null
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class CalendarSlotSchema extends BaseModel {
-  static $columns = ['id', 'teacherHasClassId', 'classWeekDay', 'startTime', 'endTime', 'minutes', 'createdAt', 'updatedAt', 'calendarId', 'isBreak'] as const
+  static $columns = ['calendarId', 'classWeekDay', 'createdAt', 'endTime', 'id', 'isBreak', 'minutes', 'startTime', 'teacherHasClassId', 'updatedAt'] as const
   $columns = CalendarSlotSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare teacherHasClassId: string | null
-  @column()
-  declare classWeekDay: number
-  @column()
-  declare startTime: string
-  @column()
-  declare endTime: string
-  @column()
-  declare minutes: number
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare calendarId: string
   @column()
+  declare classWeekDay: number
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
   declare isBreak: boolean
+  @column()
+  declare minutes: number
+  @column()
+  declare startTime: string
+  @column()
+  declare teacherHasClassId: string | null
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class CalendarSlotContentSchema extends BaseModel {
-  static $columns = ['id', 'title', 'content', 'calendarSlotId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['calendarSlotId', 'content', 'createdAt', 'id', 'title', 'updatedAt'] as const
   $columns = CalendarSlotContentSchema.$columns
+  @column()
+  declare calendarSlotId: string
+  @column()
+  declare content: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare title: string
-  @column()
-  declare content: string
-  @column()
-  declare calendarSlotId: string
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class CanteenSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'createdAt', 'updatedAt', 'responsibleUserId', 'name'] as const
+  static $columns = ['createdAt', 'id', 'name', 'responsibleUserId', 'schoolId', 'updatedAt'] as const
   $columns = CanteenSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare schoolId: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  declare name: string
   @column()
   declare responsibleUserId: string
   @column()
-  declare name: string
+  declare schoolId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class CanteenFinancialSettingSchema extends BaseModel {
-  static $columns = ['id', 'canteenId', 'platformFeePercentage', 'pixKey', 'pixKeyType', 'bankName', 'accountHolder', 'createdAt', 'updatedAt'] as const
+  static $columns = ['accountHolder', 'bankName', 'canteenId', 'createdAt', 'id', 'pixKey', 'pixKeyType', 'platformFeePercentage', 'updatedAt'] as const
   $columns = CanteenFinancialSettingSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare accountHolder: string | null
+  @column()
+  declare bankName: string | null
   @column()
   declare canteenId: string
-  @column()
-  declare platformFeePercentage: number
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare pixKey: string | null
   @column()
   declare pixKeyType: any | null
   @column()
-  declare bankName: string | null
-  @column()
-  declare accountHolder: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare platformFeePercentage: number
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class CanteenItemSchema extends BaseModel {
-  static $columns = ['id', 'name', 'description', 'price', 'canteenId', 'category', 'isActive', 'createdAt', 'updatedAt', 'image'] as const
+  static $columns = ['canteenId', 'category', 'createdAt', 'description', 'id', 'image', 'isActive', 'name', 'price', 'updatedAt'] as const
   $columns = CanteenItemSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare description: string | null
-  @column()
-  declare price: number
   @column()
   declare canteenId: string
   @column()
   declare category: string | null
-  @column()
-  declare isActive: boolean
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare image: string | null
+  @column()
+  declare isActive: boolean
+  @column()
+  declare name: string
+  @column()
+  declare price: number
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class CanteenItemPurchasedSchema extends BaseModel {
-  static $columns = ['id', 'price', 'quantity', 'createdAt', 'updatedAt', 'canteenPurchaseId', 'canteenItemId'] as const
+  static $columns = ['canteenItemId', 'canteenPurchaseId', 'createdAt', 'id', 'price', 'quantity', 'updatedAt'] as const
   $columns = CanteenItemPurchasedSchema.$columns
+  @column()
+  declare canteenItemId: string
+  @column()
+  declare canteenPurchaseId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
@@ -410,251 +416,245 @@ export class CanteenItemPurchasedSchema extends BaseModel {
   @column()
   declare quantity: number
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare canteenPurchaseId: string
-  @column()
-  declare canteenItemId: string
 }
 
 export class CanteenMealSchema extends BaseModel {
-  static $columns = ['id', 'canteenId', 'date', 'mealType', 'name', 'description', 'price', 'maxServings', 'availableServings', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['availableServings', 'canteenId', 'createdAt', 'date', 'description', 'id', 'isActive', 'maxServings', 'mealType', 'name', 'price', 'updatedAt'] as const
   $columns = CanteenMealSchema.$columns
+  @column()
+  declare availableServings: number | null
+  @column()
+  declare canteenId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column()
+  declare description: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare canteenId: string
-  @column.date()
-  declare date: DateTime
+  declare isActive: boolean
+  @column()
+  declare maxServings: number | null
   @column()
   declare mealType: any
   @column()
   declare name: string
   @column()
-  declare description: string | null
-  @column()
   declare price: number
-  @column()
-  declare maxServings: number | null
-  @column()
-  declare availableServings: number | null
-  @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class CanteenMealReservationSchema extends BaseModel {
-  static $columns = ['id', 'mealId', 'studentId', 'status', 'reservedAt', 'servedAt', 'cancelledAt', 'createdAt', 'updatedAt'] as const
+  static $columns = ['cancelledAt', 'createdAt', 'id', 'mealId', 'reservedAt', 'servedAt', 'status', 'studentId', 'updatedAt'] as const
   $columns = CanteenMealReservationSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare mealId: string
-  @column()
-  declare studentId: string
-  @column()
-  declare status: any
-  @column.dateTime()
-  declare reservedAt: DateTime
-  @column.dateTime()
-  declare servedAt: DateTime | null
   @column.dateTime()
   declare cancelledAt: DateTime | null
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare mealId: string
+  @column.dateTime()
+  declare reservedAt: DateTime
+  @column.dateTime()
+  declare servedAt: DateTime | null
+  @column()
+  declare status: any
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class CanteenMonthlyTransferSchema extends BaseModel {
-  static $columns = ['id', 'canteenId', 'month', 'year', 'totalPurchasesAmount', 'platformFeeAmount', 'transferAmount', 'status', 'approvedBy', 'approvedAt', 'processedAt', 'pixTransactionId', 'pixQrCode', 'pixKeySnapshot', 'failureReason', 'notes', 'createdAt', 'updatedAt'] as const
+  static $columns = ['approvedAt', 'approvedBy', 'canteenId', 'createdAt', 'failureReason', 'id', 'month', 'notes', 'pixKeySnapshot', 'pixQrCode', 'pixTransactionId', 'platformFeeAmount', 'processedAt', 'status', 'totalPurchasesAmount', 'transferAmount', 'updatedAt', 'year'] as const
   $columns = CanteenMonthlyTransferSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column.dateTime()
+  declare approvedAt: DateTime | null
+  @column()
+  declare approvedBy: string | null
   @column()
   declare canteenId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare failureReason: string | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare month: number
   @column()
-  declare year: number
-  @column()
-  declare totalPurchasesAmount: number
-  @column()
-  declare platformFeeAmount: number
-  @column()
-  declare transferAmount: number
-  @column()
-  declare status: any
-  @column()
-  declare approvedBy: string | null
-  @column.dateTime()
-  declare approvedAt: DateTime | null
-  @column.dateTime()
-  declare processedAt: DateTime | null
-  @column()
-  declare pixTransactionId: string | null
-  @column()
-  declare pixQrCode: string | null
+  declare notes: string | null
   @column()
   declare pixKeySnapshot: string | null
   @column()
-  declare failureReason: string | null
+  declare pixQrCode: string | null
   @column()
-  declare notes: string | null
+  declare pixTransactionId: string | null
+  @column()
+  declare platformFeeAmount: number
   @column.dateTime()
-  declare createdAt: DateTime
+  declare processedAt: DateTime | null
+  @column()
+  declare status: any
+  @column()
+  declare totalPurchasesAmount: number
+  @column()
+  declare transferAmount: number
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare year: number
 }
 
 export class CanteenPurchaseSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'canteenId', 'totalAmount', 'paymentMethod', 'status', 'paidAt', 'createdAt', 'updatedAt', 'monthlyTransferId', 'studentPaymentId'] as const
+  static $columns = ['canteenId', 'createdAt', 'id', 'monthlyTransferId', 'paidAt', 'paymentMethod', 'status', 'studentPaymentId', 'totalAmount', 'updatedAt', 'userId'] as const
   $columns = CanteenPurchaseSchema.$columns
+  @column()
+  declare canteenId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare userId: string
-  @column()
-  declare canteenId: string
-  @column()
-  declare totalAmount: number
+  declare monthlyTransferId: string | null
+  @column.dateTime()
+  declare paidAt: DateTime | null
   @column()
   declare paymentMethod: string
   @column()
   declare status: string
-  @column.dateTime()
-  declare paidAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare studentPaymentId: string | null
+  @column()
+  declare totalAmount: number
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
-  declare monthlyTransferId: string | null
-  @column()
-  declare studentPaymentId: string | null
+  declare userId: string
 }
 
 export class ChallengeSchema extends BaseModel {
-  static $columns = ['id', 'name', 'description', 'icon', 'points', 'category', 'criteria', 'isRecurring', 'recurrencePeriod', 'startDate', 'endDate', 'schoolId', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['category', 'createdAt', 'criteria', 'description', 'endDate', 'icon', 'id', 'isActive', 'isRecurring', 'name', 'points', 'recurrencePeriod', 'schoolId', 'startDate', 'updatedAt'] as const
   $columns = ChallengeSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare description: string
-  @column()
-  declare icon: string | null
-  @column()
-  declare points: number
   @column()
   declare category: any
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare criteria: any
   @column()
-  declare isRecurring: boolean
-  @column()
-  declare recurrencePeriod: any | null
-  @column.date()
-  declare startDate: DateTime | null
+  declare description: string
   @column.date()
   declare endDate: DateTime | null
   @column()
-  declare schoolId: string | null
+  declare icon: string | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare isRecurring: boolean
+  @column()
+  declare name: string
+  @column()
+  declare points: number
+  @column()
+  declare recurrencePeriod: any | null
+  @column()
+  declare schoolId: string | null
+  @column.date()
+  declare startDate: DateTime | null
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ClassSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'schoolId', 'levelId', 'isArchived', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'isArchived', 'levelId', 'name', 'schoolId', 'slug', 'updatedAt'] as const
   $columns = ClassSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare schoolId: string
+  declare isArchived: boolean
   @column()
   declare levelId: string | null
   @column()
-  declare isArchived: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare name: string
+  @column()
+  declare schoolId: string
+  @column()
+  declare slug: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ClassHasAcademicPeriodSchema extends BaseModel {
-  static $columns = ['id', 'classId', 'academicPeriodId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'classId', 'createdAt', 'id', 'updatedAt'] as const
   $columns = ClassHasAcademicPeriodSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare classId: string
   @column()
   declare academicPeriodId: string
+  @column()
+  declare classId: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ClassScheduleSchema extends BaseModel {
-  static $columns = ['id', 'classId', 'name', 'createdAt', 'updatedAt', 'isActive'] as const
+  static $columns = ['classId', 'createdAt', 'id', 'isActive', 'name', 'updatedAt'] as const
   $columns = ClassScheduleSchema.$columns
+  @column()
+  declare classId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare classId: string
+  declare isActive: boolean
   @column()
   declare name: string
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare isActive: boolean
 }
 
 export class CommentSchema extends BaseModel {
-  static $columns = ['id', 'uuid', 'postId', 'comment', 'createdAt', 'updatedAt', 'userId'] as const
+  static $columns = ['comment', 'createdAt', 'id', 'postId', 'updatedAt', 'userId', 'uuid'] as const
   $columns = CommentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: number
-  @column()
-  declare uuid: string
-  @column()
-  declare postId: number
   @column()
   declare comment: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare postId: number
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
   declare userId: string
+  @column()
+  declare uuid: string
 }
 
 export class CommentLikeSchema extends BaseModel {
-  static $columns = ['id', 'commentId', 'createdAt', 'updatedAt', 'userId'] as const
+  static $columns = ['commentId', 'createdAt', 'id', 'updatedAt', 'userId'] as const
   $columns = CommentLikeSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
   declare commentId: number
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
@@ -662,611 +662,611 @@ export class CommentLikeSchema extends BaseModel {
 }
 
 export class ContractSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'academicPeriodId', 'name', 'description', 'endDate', 'enrollmentValue', 'ammount', 'docusealTemplateId', 'paymentType', 'enrollmentValueInstallments', 'enrollmentPaymentUntilDays', 'installments', 'flexibleInstallments', 'isActive', 'createdAt', 'updatedAt', 'hasInsurance'] as const
+  static $columns = ['academicPeriodId', 'ammount', 'createdAt', 'description', 'docusealTemplateId', 'endDate', 'enrollmentPaymentUntilDays', 'enrollmentValue', 'enrollmentValueInstallments', 'flexibleInstallments', 'hasInsurance', 'id', 'installments', 'isActive', 'name', 'paymentType', 'schoolId', 'updatedAt'] as const
   $columns = ContractSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare schoolId: string
   @column()
   declare academicPeriodId: string | null
   @column()
-  declare name: string
+  declare ammount: number
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare description: string | null
+  @column()
+  declare docusealTemplateId: string | null
   @column.date()
   declare endDate: DateTime | null
   @column()
+  declare enrollmentPaymentUntilDays: number | null
+  @column()
   declare enrollmentValue: number | null
-  @column()
-  declare ammount: number
-  @column()
-  declare docusealTemplateId: string | null
-  @column()
-  declare paymentType: any
   @column()
   declare enrollmentValueInstallments: number
   @column()
-  declare enrollmentPaymentUntilDays: number | null
-  @column()
-  declare installments: number
-  @column()
   declare flexibleInstallments: boolean
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
   declare hasInsurance: boolean
-}
-
-export class ContractDocumentSchema extends BaseModel {
-  static $columns = ['id', 'contractId', 'name', 'description', 'required', 'createdAt', 'updatedAt'] as const
-  $columns = ContractDocumentSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare contractId: string
+  declare installments: number
+  @column()
+  declare isActive: boolean
   @column()
   declare name: string
   @column()
-  declare description: string | null
+  declare paymentType: any
   @column()
-  declare required: boolean
+  declare schoolId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class ContractDocumentSchema extends BaseModel {
+  static $columns = ['contractId', 'createdAt', 'description', 'id', 'name', 'required', 'updatedAt'] as const
+  $columns = ContractDocumentSchema.$columns
+  @column()
+  declare contractId: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare required: boolean
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ContractEarlyDiscountSchema extends BaseModel {
-  static $columns = ['id', 'contractId', 'percentage', 'daysBeforeDeadline', 'createdAt', 'updatedAt'] as const
+  static $columns = ['contractId', 'createdAt', 'daysBeforeDeadline', 'id', 'percentage', 'updatedAt'] as const
   $columns = ContractEarlyDiscountSchema.$columns
+  @column()
+  declare contractId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare daysBeforeDeadline: number
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare contractId: string
-  @column()
   declare percentage: string
-  @column()
-  declare daysBeforeDeadline: number
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ContractInterestConfigSchema extends BaseModel {
-  static $columns = ['id', 'contractId', 'delayInterestPercentage', 'delayInterestPerDayDelayed'] as const
+  static $columns = ['contractId', 'delayInterestPercentage', 'delayInterestPerDayDelayed', 'id'] as const
   $columns = ContractInterestConfigSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
   declare contractId: string
   @column()
   declare delayInterestPercentage: string
   @column()
   declare delayInterestPerDayDelayed: string
+  @column({ isPrimary: true })
+  declare id: string
 }
 
 export class ContractPaymentDaySchema extends BaseModel {
-  static $columns = ['id', 'contractId', 'day'] as const
+  static $columns = ['contractId', 'day', 'id'] as const
   $columns = ContractPaymentDaySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
   declare contractId: string
   @column()
   declare day: number
+  @column({ isPrimary: true })
+  declare id: string
 }
 
 export class CoordinatorHasLevelSchema extends BaseModel {
-  static $columns = ['id', 'coordinatorId', 'levelAssignedToCourseHasAcademicPeriodId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['coordinatorId', 'createdAt', 'id', 'levelAssignedToCourseHasAcademicPeriodId', 'updatedAt'] as const
   $columns = CoordinatorHasLevelSchema.$columns
+  @column()
+  declare coordinatorId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare coordinatorId: string
-  @column()
   declare levelAssignedToCourseHasAcademicPeriodId: string
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class CourseSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'schoolId', 'version', 'coordinatorId', 'enrollmentMinimumAge', 'enrollmentMaximumAge', 'maxStudentsPerClass', 'createdAt', 'updatedAt'] as const
+  static $columns = ['coordinatorId', 'createdAt', 'enrollmentMaximumAge', 'enrollmentMinimumAge', 'id', 'maxStudentsPerClass', 'name', 'schoolId', 'slug', 'updatedAt', 'version'] as const
   $columns = CourseSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare schoolId: string
-  @column()
-  declare version: number
   @column()
   declare coordinatorId: string | null
-  @column()
-  declare enrollmentMinimumAge: number | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare enrollmentMaximumAge: number | null
   @column()
-  declare maxStudentsPerClass: number | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-}
-
-export class CourseHasAcademicPeriodSchema extends BaseModel {
-  static $columns = ['id', 'courseId', 'academicPeriodId', 'createdAt', 'updatedAt'] as const
-  $columns = CourseHasAcademicPeriodSchema.$columns
+  declare enrollmentMinimumAge: number | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare courseId: string
+  declare maxStudentsPerClass: number | null
+  @column()
+  declare name: string
+  @column()
+  declare schoolId: string
+  @column()
+  declare slug: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare version: number
+}
+
+export class CourseHasAcademicPeriodSchema extends BaseModel {
+  static $columns = ['academicPeriodId', 'courseId', 'createdAt', 'id', 'updatedAt'] as const
+  $columns = CourseHasAcademicPeriodSchema.$columns
   @column()
   declare academicPeriodId: string
+  @column()
+  declare courseId: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class EmployeeBenefitSchema extends BaseModel {
-  static $columns = ['id', 'name', 'value', 'description', 'deductionPercentage', 'userId'] as const
+  static $columns = ['deductionPercentage', 'description', 'id', 'name', 'userId', 'value'] as const
   $columns = EmployeeBenefitSchema.$columns
+  @column()
+  declare deductionPercentage: string
+  @column()
+  declare description: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare name: string
   @column()
-  declare value: string
-  @column()
-  declare description: string | null
-  @column()
-  declare deductionPercentage: string
-  @column()
   declare userId: string
+  @column()
+  declare value: string
 }
 
 export class EmployeeTimesheetSchema extends BaseModel {
-  static $columns = ['id', 'timesheetId', 'userId', 'status', 'createdAt', 'updatedAt', 'closedAt', 'observations'] as const
+  static $columns = ['closedAt', 'createdAt', 'id', 'observations', 'status', 'timesheetId', 'updatedAt', 'userId'] as const
   $columns = EmployeeTimesheetSchema.$columns
+  @column.dateTime()
+  declare closedAt: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare timesheetId: string
-  @column()
-  declare userId: string
+  declare observations: string | null
   @column()
   declare status: any
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare timesheetId: string
   @column.dateTime()
   declare updatedAt: DateTime
-  @column.dateTime()
-  declare closedAt: DateTime | null
   @column()
-  declare observations: string | null
+  declare userId: string
 }
 
 export class EventSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'title', 'description', 'shortDescription', 'type', 'status', 'visibility', 'priority', 'startDate', 'endDate', 'startTime', 'endTime', 'isAllDay', 'location', 'locationDetails', 'isOnline', 'onlineUrl', 'isExternal', 'organizerId', 'maxParticipants', 'currentParticipants', 'requiresRegistration', 'registrationDeadline', 'requiresParentalConsent', 'allowComments', 'sendNotifications', 'isRecurring', 'recurringPattern', 'bannerUrl', 'attachments', 'tags', 'metadata', 'schoolId', 'createdBy', 'hasAdditionalCosts', 'additionalCostAmount', 'additionalCostDescription', 'additionalCostInstallments'] as const
+  static $columns = ['additionalCostAmount', 'additionalCostDescription', 'additionalCostInstallments', 'allowComments', 'attachments', 'bannerUrl', 'createdAt', 'createdBy', 'currentParticipants', 'description', 'endDate', 'endTime', 'hasAdditionalCosts', 'id', 'isAllDay', 'isExternal', 'isOnline', 'isRecurring', 'location', 'locationDetails', 'maxParticipants', 'metadata', 'onlineUrl', 'organizerId', 'priority', 'recurringPattern', 'registrationDeadline', 'requiresParentalConsent', 'requiresRegistration', 'schoolId', 'sendNotifications', 'shortDescription', 'startDate', 'startTime', 'status', 'tags', 'title', 'type', 'updatedAt', 'visibility'] as const
   $columns = EventSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare title: string
-  @column()
-  declare description: string | null
-  @column()
-  declare shortDescription: string | null
-  @column()
-  declare type: any
-  @column()
-  declare status: any
-  @column()
-  declare visibility: any
-  @column()
-  declare priority: any
-  @column.dateTime()
-  declare startDate: DateTime
-  @column.dateTime()
-  declare endDate: DateTime | null
-  @column()
-  declare startTime: string | null
-  @column()
-  declare endTime: string | null
-  @column()
-  declare isAllDay: boolean
-  @column()
-  declare location: string | null
-  @column()
-  declare locationDetails: string | null
-  @column()
-  declare isOnline: boolean
-  @column()
-  declare onlineUrl: string | null
-  @column()
-  declare isExternal: boolean
-  @column()
-  declare organizerId: string | null
-  @column()
-  declare maxParticipants: number | null
-  @column()
-  declare currentParticipants: number
-  @column()
-  declare requiresRegistration: boolean
-  @column.dateTime()
-  declare registrationDeadline: DateTime | null
-  @column()
-  declare requiresParentalConsent: boolean
-  @column()
-  declare allowComments: boolean
-  @column()
-  declare sendNotifications: boolean
-  @column()
-  declare isRecurring: boolean
-  @column()
-  declare recurringPattern: any | null
-  @column()
-  declare bannerUrl: string | null
-  @column()
-  declare attachments: any | null
-  @column()
-  declare tags: any | null
-  @column()
-  declare metadata: any | null
-  @column()
-  declare schoolId: string
-  @column()
-  declare createdBy: string
-  @column()
-  declare hasAdditionalCosts: boolean
   @column()
   declare additionalCostAmount: number | null
   @column()
   declare additionalCostDescription: string | null
   @column()
   declare additionalCostInstallments: number | null
+  @column()
+  declare allowComments: boolean
+  @column()
+  declare attachments: any | null
+  @column()
+  declare bannerUrl: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare createdBy: string
+  @column()
+  declare currentParticipants: number
+  @column()
+  declare description: string | null
+  @column.dateTime()
+  declare endDate: DateTime | null
+  @column()
+  declare endTime: string | null
+  @column()
+  declare hasAdditionalCosts: boolean
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isAllDay: boolean
+  @column()
+  declare isExternal: boolean
+  @column()
+  declare isOnline: boolean
+  @column()
+  declare isRecurring: boolean
+  @column()
+  declare location: string | null
+  @column()
+  declare locationDetails: string | null
+  @column()
+  declare maxParticipants: number | null
+  @column()
+  declare metadata: any | null
+  @column()
+  declare onlineUrl: string | null
+  @column()
+  declare organizerId: string | null
+  @column()
+  declare priority: any
+  @column()
+  declare recurringPattern: any | null
+  @column.dateTime()
+  declare registrationDeadline: DateTime | null
+  @column()
+  declare requiresParentalConsent: boolean
+  @column()
+  declare requiresRegistration: boolean
+  @column()
+  declare schoolId: string
+  @column()
+  declare sendNotifications: boolean
+  @column()
+  declare shortDescription: string | null
+  @column.dateTime()
+  declare startDate: DateTime
+  @column()
+  declare startTime: string | null
+  @column()
+  declare status: any
+  @column()
+  declare tags: any | null
+  @column()
+  declare title: string
+  @column()
+  declare type: any
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare visibility: any
 }
 
 export class EventAttachmentSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'eventId', 'fileName', 'originalName', 'mimeType', 'size', 'url', 'description'] as const
+  static $columns = ['createdAt', 'description', 'eventId', 'fileName', 'id', 'mimeType', 'originalName', 'size', 'url'] as const
   $columns = EventAttachmentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare description: string | null
   @column()
   declare eventId: string
   @column()
   declare fileName: string
-  @column()
-  declare originalName: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare mimeType: string
+  @column()
+  declare originalName: string
   @column()
   declare size: number
   @column()
   declare url: string
-  @column()
-  declare description: string | null
 }
 
 export class EventAudienceSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'eventId', 'scopeType', 'scopeId'] as const
+  static $columns = ['createdAt', 'eventId', 'id', 'scopeId', 'scopeType', 'updatedAt'] as const
   $columns = EventAudienceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare eventId: string
-  @column()
-  declare scopeType: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare scopeId: string
+  @column()
+  declare scopeType: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class EventClassSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'eventId', 'classId'] as const
+  static $columns = ['classId', 'createdAt', 'eventId', 'id'] as const
   $columns = EventClassSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare classId: string
   @column.dateTime()
   declare createdAt: DateTime
   @column()
   declare eventId: string
-  @column()
-  declare classId: string
+  @column({ isPrimary: true })
+  declare id: string
 }
 
 export class EventCommentSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'eventId', 'userId', 'content', 'parentId'] as const
+  static $columns = ['content', 'createdAt', 'eventId', 'id', 'parentId', 'updatedAt', 'userId'] as const
   $columns = EventCommentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare content: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare eventId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare parentId: string | null
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
-  declare eventId: string
-  @column()
   declare userId: string
-  @column()
-  declare content: string
-  @column()
-  declare parentId: string | null
 }
 
 export class EventLevelSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'eventId', 'levelId'] as const
+  static $columns = ['createdAt', 'eventId', 'id', 'levelId'] as const
   $columns = EventLevelSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column.dateTime()
   declare createdAt: DateTime
   @column()
   declare eventId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare levelId: string
 }
 
 export class EventNotificationSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'sentAt', 'eventId', 'userId', 'type', 'title', 'message', 'scheduledFor', 'isSent', 'sentVia'] as const
+  static $columns = ['createdAt', 'eventId', 'id', 'isSent', 'message', 'scheduledFor', 'sentAt', 'sentVia', 'title', 'type', 'userId'] as const
   $columns = EventNotificationSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare sentAt: DateTime | null
   @column()
   declare eventId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
-  declare userId: string
-  @column()
-  declare type: string
-  @column()
-  declare title: string
+  declare isSent: boolean
   @column()
   declare message: string
   @column.dateTime()
   declare scheduledFor: DateTime | null
-  @column()
-  declare isSent: boolean
+  @column.dateTime()
+  declare sentAt: DateTime | null
   @column()
   declare sentVia: any | null
+  @column()
+  declare title: string
+  @column()
+  declare type: string
+  @column()
+  declare userId: string
 }
 
 export class EventParentalConsentSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'eventId', 'studentId', 'responsibleId', 'status', 'respondedAt', 'expiresAt', 'approvalNotes', 'denialReason', 'signature', 'ipAddress', 'emailSentAt', 'reminderSentAt', 'reminderCount', 'metadata'] as const
+  static $columns = ['approvalNotes', 'createdAt', 'denialReason', 'emailSentAt', 'eventId', 'expiresAt', 'id', 'ipAddress', 'metadata', 'reminderCount', 'reminderSentAt', 'respondedAt', 'responsibleId', 'signature', 'status', 'studentId', 'updatedAt'] as const
   $columns = EventParentalConsentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare approvalNotes: string | null
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare denialReason: string | null
   @column.dateTime()
-  declare updatedAt: DateTime
+  declare emailSentAt: DateTime | null
   @column()
   declare eventId: string
+  @column.dateTime()
+  declare expiresAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
-  declare studentId: string
+  declare ipAddress: string | null
+  @column()
+  declare metadata: any | null
+  @column()
+  declare reminderCount: number
+  @column.dateTime()
+  declare reminderSentAt: DateTime | null
+  @column.dateTime()
+  declare respondedAt: DateTime | null
   @column()
   declare responsibleId: string
   @column()
-  declare status: any
-  @column.dateTime()
-  declare respondedAt: DateTime | null
-  @column.dateTime()
-  declare expiresAt: DateTime | null
-  @column()
-  declare approvalNotes: string | null
-  @column()
-  declare denialReason: string | null
-  @column()
   declare signature: string | null
   @column()
-  declare ipAddress: string | null
-  @column.dateTime()
-  declare emailSentAt: DateTime | null
-  @column.dateTime()
-  declare reminderSentAt: DateTime | null
+  declare status: any
   @column()
-  declare reminderCount: number
-  @column()
-  declare metadata: any | null
+  declare studentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class EventParticipantSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'eventId', 'userId', 'registrationDate', 'status', 'notes'] as const
+  static $columns = ['createdAt', 'eventId', 'id', 'notes', 'registrationDate', 'status', 'updatedAt', 'userId'] as const
   $columns = EventParticipantSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare eventId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
-  declare userId: string
+  declare notes: string | null
   @column.dateTime()
   declare registrationDate: DateTime
   @column()
   declare status: string
-  @column()
-  declare notes: string | null
-}
-
-export class EventRecurrenceSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'eventId', 'pattern', 'interval', 'daysOfWeek', 'dayOfMonth', 'endDate', 'occurrences'] as const
-  $columns = EventRecurrenceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column()
-  declare eventId: string
-  @column()
-  declare pattern: string
-  @column()
-  declare interval: number
-  @column()
-  declare daysOfWeek: any | null
-  @column()
-  declare dayOfMonth: number | null
-  @column.dateTime()
-  declare endDate: DateTime | null
-  @column()
-  declare occurrences: number | null
-}
-
-export class EventStudentPaymentSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'eventId', 'studentId', 'responsibleId', 'eventParentalConsentId', 'studentPaymentId', 'status'] as const
-  $columns = EventStudentPaymentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
-  declare eventId: string
-  @column()
-  declare studentId: string
-  @column()
-  declare responsibleId: string | null
-  @column()
-  declare eventParentalConsentId: string | null
-  @column()
-  declare studentPaymentId: string
-  @column()
-  declare status: string
+  declare userId: string
 }
 
-export class ExtraClassSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'description', 'schoolId', 'academicPeriodId', 'contractId', 'teacherId', 'maxStudents', 'isActive', 'createdAt', 'updatedAt'] as const
-  $columns = ExtraClassSchema.$columns
+export class EventRecurrenceSchema extends BaseModel {
+  static $columns = ['createdAt', 'dayOfMonth', 'daysOfWeek', 'endDate', 'eventId', 'id', 'interval', 'occurrences', 'pattern'] as const
+  $columns = EventRecurrenceSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare dayOfMonth: number | null
+  @column()
+  declare daysOfWeek: any | null
+  @column.dateTime()
+  declare endDate: DateTime | null
+  @column()
+  declare eventId: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare name: string
+  declare interval: number
   @column()
-  declare slug: string
+  declare occurrences: number | null
   @column()
-  declare description: string | null
+  declare pattern: string
+}
+
+export class EventStudentPaymentSchema extends BaseModel {
+  static $columns = ['createdAt', 'eventId', 'eventParentalConsentId', 'id', 'responsibleId', 'status', 'studentId', 'studentPaymentId', 'updatedAt'] as const
+  $columns = EventStudentPaymentSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare schoolId: string
+  declare eventId: string
+  @column()
+  declare eventParentalConsentId: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare responsibleId: string | null
+  @column()
+  declare status: string
+  @column()
+  declare studentId: string
+  @column()
+  declare studentPaymentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class ExtraClassSchema extends BaseModel {
+  static $columns = ['academicPeriodId', 'contractId', 'createdAt', 'description', 'id', 'isActive', 'maxStudents', 'name', 'schoolId', 'slug', 'teacherId', 'updatedAt'] as const
+  $columns = ExtraClassSchema.$columns
   @column()
   declare academicPeriodId: string
   @column()
   declare contractId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare teacherId: string
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isActive: boolean
   @column()
   declare maxStudents: number | null
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare name: string
+  @column()
+  declare schoolId: string
+  @column()
+  declare slug: string
+  @column()
+  declare teacherId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ExtraClassAttendanceSchema extends BaseModel {
-  static $columns = ['id', 'extraClassId', 'extraClassScheduleId', 'date', 'note', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'date', 'extraClassId', 'extraClassScheduleId', 'id', 'note', 'updatedAt'] as const
   $columns = ExtraClassAttendanceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare date: DateTime
   @column()
   declare extraClassId: string
   @column()
   declare extraClassScheduleId: string
-  @column.dateTime()
-  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare note: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ExtraClassScheduleSchema extends BaseModel {
-  static $columns = ['id', 'extraClassId', 'weekDay', 'startTime', 'endTime', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'endTime', 'extraClassId', 'id', 'startTime', 'updatedAt', 'weekDay'] as const
   $columns = ExtraClassScheduleSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string
+  @column()
+  declare extraClassId: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare extraClassId: string
-  @column()
-  declare weekDay: number
-  @column()
   declare startTime: string
-  @column()
-  declare endTime: string
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare weekDay: number
 }
 
 export class FixedClassSchema extends BaseModel {
-  static $columns = ['id', 'classScheduleId', 'teacherId', 'classId', 'subjectId', 'subjectQuantity', 'classWeekDay', 'startTime', 'endTime', 'createdAt', 'updatedAt'] as const
+  static $columns = ['classId', 'classScheduleId', 'classWeekDay', 'createdAt', 'endTime', 'id', 'startTime', 'subjectId', 'subjectQuantity', 'teacherId', 'updatedAt'] as const
   $columns = FixedClassSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare classId: string
   @column()
   declare classScheduleId: string
   @column()
-  declare teacherId: string
+  declare classWeekDay: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare classId: string
+  declare endTime: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare startTime: string
   @column()
   declare subjectId: string
   @column()
   declare subjectQuantity: number
   @column()
-  declare classWeekDay: string
-  @column()
-  declare startTime: string
-  @column()
-  declare endTime: string
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare teacherId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class GamificationEventSchema extends BaseModel {
-  static $columns = ['id', 'type', 'entityType', 'entityId', 'studentId', 'metadata', 'processed', 'processedAt', 'error', 'createdAt'] as const
+  static $columns = ['createdAt', 'entityId', 'entityType', 'error', 'id', 'metadata', 'processed', 'processedAt', 'studentId', 'type'] as const
   $columns = GamificationEventSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare type: string
-  @column()
-  declare entityType: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare entityId: string
   @column()
-  declare studentId: string
+  declare entityType: string
+  @column()
+  declare error: string | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare metadata: any
   @column()
@@ -1274,114 +1274,110 @@ export class GamificationEventSchema extends BaseModel {
   @column.dateTime()
   declare processedAt: DateTime | null
   @column()
-  declare error: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentId: string
+  @column()
+  declare type: string
 }
 
 export class IndividualDiscountSchema extends BaseModel {
-  static $columns = ['id', 'name', 'description', 'enrollmentDiscountPercentage', 'discountPercentage', 'enrollmentDiscountValue', 'discountValue', 'discountType', 'isActive', 'validFrom', 'validUntil', 'schoolId', 'studentId', 'studentHasLevelId', 'createdById', 'createdAt', 'updatedAt', 'deletedAt'] as const
+  static $columns = ['createdAt', 'createdById', 'deletedAt', 'description', 'discountPercentage', 'discountType', 'discountValue', 'enrollmentDiscountPercentage', 'enrollmentDiscountValue', 'id', 'isActive', 'name', 'schoolId', 'studentHasLevelId', 'studentId', 'updatedAt', 'validFrom', 'validUntil'] as const
   $columns = IndividualDiscountSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare name: string
+  declare createdById: string
+  @column.dateTime()
+  declare deletedAt: DateTime | null
   @column()
   declare description: string | null
   @column()
-  declare enrollmentDiscountPercentage: number | null
-  @column()
   declare discountPercentage: number | null
-  @column()
-  declare enrollmentDiscountValue: number | null
-  @column()
-  declare discountValue: number | null
   @column()
   declare discountType: string
   @column()
+  declare discountValue: number | null
+  @column()
+  declare enrollmentDiscountPercentage: number | null
+  @column()
+  declare enrollmentDiscountValue: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
   declare isActive: boolean
+  @column()
+  declare name: string
+  @column()
+  declare schoolId: string
+  @column()
+  declare studentHasLevelId: string | null
+  @column()
+  declare studentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
   @column.dateTime()
   declare validFrom: DateTime | null
   @column.dateTime()
   declare validUntil: DateTime | null
-  @column()
-  declare schoolId: string
-  @column()
-  declare studentId: string
-  @column()
-  declare studentHasLevelId: string | null
-  @column()
-  declare createdById: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column.dateTime()
-  declare deletedAt: DateTime | null
 }
 
 export class InsuranceBillingSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'schoolId', 'period', 'insuredStudentsCount', 'averageTuition', 'insurancePercentage', 'totalAmount', 'status', 'dueDate', 'paidAt', 'invoiceUrl', 'paymentGatewayId', 'notes', 'lastReminderSentAt'] as const
+  static $columns = ['averageTuition', 'createdAt', 'dueDate', 'id', 'insurancePercentage', 'insuredStudentsCount', 'invoiceUrl', 'lastReminderSentAt', 'notes', 'paidAt', 'paymentGatewayId', 'period', 'schoolId', 'status', 'totalAmount', 'updatedAt'] as const
   $columns = InsuranceBillingSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare averageTuition: number
   @column.dateTime()
   declare createdAt: DateTime
   @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare schoolId: string
-  @column.dateTime()
-  declare period: DateTime
-  @column()
-  declare insuredStudentsCount: number
-  @column()
-  declare averageTuition: number
+  declare dueDate: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare insurancePercentage: number
   @column()
-  declare totalAmount: number
-  @column()
-  declare status: any
-  @column.dateTime()
-  declare dueDate: DateTime
-  @column.dateTime()
-  declare paidAt: DateTime | null
+  declare insuredStudentsCount: number
   @column()
   declare invoiceUrl: string | null
-  @column()
-  declare paymentGatewayId: string | null
+  @column.dateTime()
+  declare lastReminderSentAt: DateTime | null
   @column()
   declare notes: string | null
   @column.dateTime()
-  declare lastReminderSentAt: DateTime | null
+  declare paidAt: DateTime | null
+  @column()
+  declare paymentGatewayId: string | null
+  @column.dateTime()
+  declare period: DateTime
+  @column()
+  declare schoolId: string
+  @column()
+  declare status: any
+  @column()
+  declare totalAmount: number
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class InsuranceClaimSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'studentPaymentId', 'claimDate', 'overdueAmount', 'coveragePercentage', 'coveredAmount', 'status', 'approvedAt', 'approvedBy', 'paidAt', 'rejectedAt', 'rejectedBy', 'rejectionReason', 'notes'] as const
+  static $columns = ['approvedAt', 'approvedBy', 'claimDate', 'coveragePercentage', 'coveredAmount', 'createdAt', 'id', 'notes', 'overdueAmount', 'paidAt', 'rejectedAt', 'rejectedBy', 'rejectionReason', 'status', 'studentPaymentId', 'updatedAt'] as const
   $columns = InsuranceClaimSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare studentPaymentId: string
-  @column.dateTime()
-  declare claimDate: DateTime
-  @column()
-  declare overdueAmount: number
-  @column()
-  declare coveragePercentage: number
-  @column()
-  declare coveredAmount: number
-  @column()
-  declare status: any
   @column.dateTime()
   declare approvedAt: DateTime | null
   @column()
   declare approvedBy: string | null
+  @column.dateTime()
+  declare claimDate: DateTime
+  @column()
+  declare coveragePercentage: number
+  @column()
+  declare coveredAmount: number
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare notes: string | null
+  @column()
+  declare overdueAmount: number
   @column.dateTime()
   declare paidAt: DateTime | null
   @column.dateTime()
@@ -1391,499 +1387,503 @@ export class InsuranceClaimSchema extends BaseModel {
   @column()
   declare rejectionReason: string | null
   @column()
-  declare notes: string | null
+  declare status: any
+  @column()
+  declare studentPaymentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class InvoiceSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'contractId', 'type', 'month', 'year', 'dueDate', 'status', 'totalAmount', 'netAmountReceived', 'paidAt', 'paymentMethod', 'paymentGatewayId', 'paymentGateway', 'observation', 'createdAt', 'updatedAt', 'invoiceUrl', 'baseAmount', 'discountAmount', 'fineAmount', 'interestAmount', 'lastNotifiedAt', 'nfseId', 'nfseStatus', 'nfseNumber', 'nfsePdfUrl', 'nfseXmlUrl', 'nfseRpsNumber', 'nfseIssuedAt', 'nfseErrorMessage', 'platformFeeAmount', 'chargedAmount'] as const
+  static $columns = ['baseAmount', 'chargedAmount', 'contractId', 'createdAt', 'discountAmount', 'dueDate', 'fineAmount', 'id', 'interestAmount', 'invoiceUrl', 'lastNotifiedAt', 'month', 'netAmountReceived', 'nfseErrorMessage', 'nfseId', 'nfseIssuedAt', 'nfseNumber', 'nfsePdfUrl', 'nfseRpsNumber', 'nfseStatus', 'nfseXmlUrl', 'observation', 'paidAt', 'paymentGateway', 'paymentGatewayId', 'paymentMethod', 'platformFeeAmount', 'status', 'studentId', 'totalAmount', 'type', 'updatedAt', 'year'] as const
   $columns = InvoiceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
-  @column()
-  declare contractId: string | null
-  @column()
-  declare type: any
-  @column()
-  declare month: number | null
-  @column()
-  declare year: number | null
-  @column.date()
-  declare dueDate: DateTime
-  @column()
-  declare status: any
-  @column()
-  declare totalAmount: number
-  @column()
-  declare netAmountReceived: number | null
-  @column.dateTime()
-  declare paidAt: DateTime | null
-  @column()
-  declare paymentMethod: string | null
-  @column()
-  declare paymentGatewayId: string | null
-  @column()
-  declare paymentGateway: string | null
-  @column()
-  declare observation: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare invoiceUrl: string | null
   @column()
   declare baseAmount: number
   @column()
+  declare chargedAmount: number
+  @column()
+  declare contractId: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
   declare discountAmount: number
+  @column.date()
+  declare dueDate: DateTime
   @column()
   declare fineAmount: number
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare interestAmount: number
+  @column()
+  declare invoiceUrl: string | null
   @column.dateTime()
   declare lastNotifiedAt: DateTime | null
   @column()
-  declare nfseId: string | null
+  declare month: number | null
   @column()
-  declare nfseStatus: string | null
+  declare netAmountReceived: number | null
+  @column()
+  declare nfseErrorMessage: string | null
+  @column()
+  declare nfseId: string | null
+  @column.dateTime()
+  declare nfseIssuedAt: DateTime | null
   @column()
   declare nfseNumber: string | null
   @column()
   declare nfsePdfUrl: string | null
   @column()
+  declare nfseRpsNumber: string | null
+  @column()
+  declare nfseStatus: string | null
+  @column()
   declare nfseXmlUrl: string | null
   @column()
-  declare nfseRpsNumber: string | null
+  declare observation: string | null
   @column.dateTime()
-  declare nfseIssuedAt: DateTime | null
+  declare paidAt: DateTime | null
   @column()
-  declare nfseErrorMessage: string | null
+  declare paymentGateway: string | null
+  @column()
+  declare paymentGatewayId: string | null
+  @column()
+  declare paymentMethod: string | null
   @column()
   declare platformFeeAmount: number
   @column()
-  declare chargedAmount: number
+  declare status: any
+  @column()
+  declare studentId: string
+  @column()
+  declare totalAmount: number
+  @column()
+  declare type: any
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare year: number | null
 }
 
 export class LeaderboardSchema extends BaseModel {
-  static $columns = ['id', 'name', 'type', 'period', 'startDate', 'endDate', 'schoolId', 'classId', 'subjectId', 'isActive', 'createdAt'] as const
+  static $columns = ['classId', 'createdAt', 'endDate', 'id', 'isActive', 'name', 'period', 'schoolId', 'startDate', 'subjectId', 'type'] as const
   $columns = LeaderboardSchema.$columns
+  @column()
+  declare classId: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.date()
+  declare endDate: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare isActive: boolean
+  @column()
   declare name: string
   @column()
-  declare type: any
-  @column()
   declare period: any
-  @column.date()
-  declare startDate: DateTime
-  @column.date()
-  declare endDate: DateTime
   @column()
   declare schoolId: string | null
-  @column()
-  declare classId: string | null
+  @column.date()
+  declare startDate: DateTime
   @column()
   declare subjectId: string | null
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare type: any
 }
 
 export class LeaderboardEntrySchema extends BaseModel {
-  static $columns = ['id', 'leaderboardId', 'studentId', 'score', 'rank', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'leaderboardId', 'rank', 'score', 'studentId', 'updatedAt'] as const
   $columns = LeaderboardEntrySchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare leaderboardId: string
   @column()
-  declare studentId: string
+  declare rank: number
   @column()
   declare score: number
   @column()
-  declare rank: number
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class LevelSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'order', 'schoolId', 'contractId', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['contractId', 'createdAt', 'id', 'isActive', 'name', 'order', 'schoolId', 'slug', 'updatedAt'] as const
   $columns = LevelSchema.$columns
+  @column()
+  declare contractId: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare name: string
+  declare isActive: boolean
   @column()
-  declare slug: string
+  declare name: string
   @column()
   declare order: number
   @column()
   declare schoolId: string
   @column()
-  declare contractId: string | null
-  @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare slug: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class LevelAssignedToCourseHasAcademicPeriodSchema extends BaseModel {
-  static $columns = ['id', 'levelId', 'courseHasAcademicPeriodId', 'isActive'] as const
+  static $columns = ['courseHasAcademicPeriodId', 'id', 'isActive', 'levelId'] as const
   $columns = LevelAssignedToCourseHasAcademicPeriodSchema.$columns
+  @column()
+  declare courseHasAcademicPeriodId: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare levelId: string
-  @column()
-  declare courseHasAcademicPeriodId: string
-  @column()
   declare isActive: boolean
+  @column()
+  declare levelId: string
 }
 
 export class NotificationSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'userId', 'type', 'title', 'message', 'data', 'isRead', 'readAt', 'sentViaInApp', 'sentViaEmail', 'sentViaPush', 'sentViaSms', 'sentViaWhatsApp', 'emailSentAt', 'emailError', 'actionUrl'] as const
+  static $columns = ['actionUrl', 'createdAt', 'data', 'emailError', 'emailSentAt', 'id', 'isRead', 'message', 'readAt', 'sentViaEmail', 'sentViaInApp', 'sentViaPush', 'sentViaSms', 'sentViaWhatsApp', 'title', 'type', 'updatedAt', 'userId'] as const
   $columns = NotificationSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare actionUrl: string | null
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare userId: string
-  @column()
-  declare type: any
-  @column()
-  declare title: string
-  @column()
-  declare message: string
   @column()
   declare data: any | null
   @column()
+  declare emailError: string | null
+  @column.dateTime()
+  declare emailSentAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
   declare isRead: boolean
+  @column()
+  declare message: string
   @column.dateTime()
   declare readAt: DateTime | null
   @column()
-  declare sentViaInApp: boolean
-  @column()
   declare sentViaEmail: boolean
+  @column()
+  declare sentViaInApp: boolean
   @column()
   declare sentViaPush: boolean
   @column()
   declare sentViaSms: boolean
   @column()
   declare sentViaWhatsApp: boolean
-  @column.dateTime()
-  declare emailSentAt: DateTime | null
   @column()
-  declare emailError: string | null
+  declare title: string
   @column()
-  declare actionUrl: string | null
-}
-
-export class NotificationPreferenceSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'userId', 'notificationType', 'enableInApp', 'enableEmail', 'enablePush', 'enableSms', 'enableWhatsApp'] as const
-  $columns = NotificationPreferenceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare type: any
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
   declare userId: string
-  @column()
-  declare notificationType: any
-  @column()
-  declare enableInApp: boolean
+}
+
+export class NotificationPreferenceSchema extends BaseModel {
+  static $columns = ['createdAt', 'enableEmail', 'enableInApp', 'enablePush', 'enableSms', 'enableWhatsApp', 'id', 'notificationType', 'updatedAt', 'userId'] as const
+  $columns = NotificationPreferenceSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare enableEmail: boolean
+  @column()
+  declare enableInApp: boolean
   @column()
   declare enablePush: boolean
   @column()
   declare enableSms: boolean
   @column()
   declare enableWhatsApp: boolean
-}
-
-export class OccurenceSchema extends BaseModel {
-  static $columns = ['id', 'date', 'createdAt', 'updatedAt', 'studentId', 'text', 'type', 'teacherHasClassId'] as const
-  $columns = OccurenceSchema.$columns
   @column({ isPrimary: true })
   declare id: string
-  @column.date()
-  declare date: DateTime
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare notificationType: any
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
+  declare userId: string
+}
+
+export class OccurenceSchema extends BaseModel {
+  static $columns = ['createdAt', 'date', 'id', 'studentId', 'teacherHasClassId', 'text', 'type', 'updatedAt'] as const
+  $columns = OccurenceSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
   declare studentId: string
+  @column()
+  declare teacherHasClassId: string
   @column()
   declare text: string
   @column()
   declare type: any
-  @column()
-  declare teacherHasClassId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class OrderStatusHistorySchema extends BaseModel {
-  static $columns = ['id', 'orderId', 'fromStatus', 'toStatus', 'changedBy', 'notes', 'createdAt'] as const
+  static $columns = ['changedBy', 'createdAt', 'fromStatus', 'id', 'notes', 'orderId', 'toStatus'] as const
   $columns = OrderStatusHistorySchema.$columns
+  @column()
+  declare changedBy: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare fromStatus: any | null
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare notes: string | null
   @column()
   declare orderId: string
   @column()
-  declare fromStatus: any | null
-  @column()
   declare toStatus: any
-  @column()
-  declare changedBy: string | null
-  @column()
-  declare notes: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
 }
 
 export class PaymentSettingSchema extends BaseModel {
-  static $columns = ['id', 'pricePerStudent', 'trialDays', 'discount', 'platformFeePercentage', 'isActive', 'createdAt', 'updatedAt', 'schoolId', 'schoolChainId', 'platformFeeMode', 'platformFeeFixedAmount', 'billingModel', 'monthlyFixedPrice'] as const
+  static $columns = ['billingModel', 'createdAt', 'discount', 'id', 'isActive', 'monthlyFixedPrice', 'platformFeeFixedAmount', 'platformFeeMode', 'platformFeePercentage', 'pricePerStudent', 'schoolChainId', 'schoolId', 'trialDays', 'updatedAt'] as const
   $columns = PaymentSettingSchema.$columns
+  @column()
+  declare billingModel: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare discount: number
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare pricePerStudent: number
-  @column()
-  declare trialDays: number
-  @column()
-  declare discount: number
-  @column()
-  declare platformFeePercentage: number
-  @column()
   declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
-  declare schoolId: string | null
-  @column()
-  declare schoolChainId: string | null
-  @column()
-  declare platformFeeMode: any
+  declare monthlyFixedPrice: number | null
   @column()
   declare platformFeeFixedAmount: number
   @column()
-  declare billingModel: string
+  declare platformFeeMode: any
   @column()
-  declare monthlyFixedPrice: number | null
+  declare platformFeePercentage: number
+  @column()
+  declare pricePerStudent: number
+  @column()
+  declare schoolChainId: string | null
+  @column()
+  declare schoolId: string | null
+  @column()
+  declare trialDays: number
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class PaymentStatusHistorySchema extends BaseModel {
-  static $columns = ['id', 'paymentId', 'previousStatus', 'newStatus', 'changedBy', 'changedAt', 'observation'] as const
+  static $columns = ['changedAt', 'changedBy', 'id', 'newStatus', 'observation', 'paymentId', 'previousStatus'] as const
   $columns = PaymentStatusHistorySchema.$columns
+  @column.dateTime()
+  declare changedAt: DateTime
+  @column()
+  declare changedBy: string
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare newStatus: any
+  @column()
+  declare observation: string | null
   @column()
   declare paymentId: string
   @column()
   declare previousStatus: any
-  @column()
-  declare newStatus: any
-  @column()
-  declare changedBy: string
-  @column.dateTime()
-  declare changedAt: DateTime
-  @column()
-  declare observation: string | null
 }
 
 export class PlatformSettingSchema extends BaseModel {
-  static $columns = ['id', 'defaultTrialDays', 'defaultPricePerStudent', 'createdAt', 'updatedAt', 'defaultStorePlatformFeePercentage'] as const
+  static $columns = ['createdAt', 'defaultPricePerStudent', 'defaultStorePlatformFeePercentage', 'defaultTrialDays', 'id', 'updatedAt'] as const
   $columns = PlatformSettingSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare defaultTrialDays: number
-  @column()
-  declare defaultPricePerStudent: number
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  @column()
+  declare defaultPricePerStudent: number
   @column()
   declare defaultStorePlatformFeePercentage: number
+  @column()
+  declare defaultTrialDays: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class PointTransactionSchema extends BaseModel {
-  static $columns = ['id', 'studentGamificationId', 'points', 'balanceAfter', 'type', 'reason', 'relatedEntityType', 'relatedEntityId', 'createdAt'] as const
+  static $columns = ['balanceAfter', 'createdAt', 'id', 'points', 'reason', 'relatedEntityId', 'relatedEntityType', 'studentGamificationId', 'type'] as const
   $columns = PointTransactionSchema.$columns
+  @column()
+  declare balanceAfter: number
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentGamificationId: string
-  @column()
   declare points: number
-  @column()
-  declare balanceAfter: number
-  @column()
-  declare type: any
   @column()
   declare reason: string | null
   @column()
+  declare relatedEntityId: string | null
+  @column()
   declare relatedEntityType: string | null
   @column()
-  declare relatedEntityId: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentGamificationId: string
+  @column()
+  declare type: any
 }
 
 export class PostSchema extends BaseModel {
-  static $columns = ['id', 'uuid', 'content', 'createdAt', 'updatedAt', 'userId', 'schoolId'] as const
+  static $columns = ['content', 'createdAt', 'id', 'schoolId', 'updatedAt', 'userId', 'uuid'] as const
   $columns = PostSchema.$columns
-  @column({ isPrimary: true })
-  declare id: number
-  @column()
-  declare uuid: string
   @column()
   declare content: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare schoolId: string | null
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
   declare userId: string
   @column()
-  declare schoolId: string | null
+  declare uuid: string
 }
 
 export class PrintRequestSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'name', 'path', 'status', 'frontAndBack', 'rejectedFeedback', 'quantity', 'dueDate', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'dueDate', 'frontAndBack', 'id', 'name', 'path', 'quantity', 'rejectedFeedback', 'status', 'updatedAt', 'userId'] as const
   $columns = PrintRequestSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare dueDate: DateTime
+  @column()
+  declare frontAndBack: boolean
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare userId: string
   @column()
   declare name: string
   @column()
   declare path: string
   @column()
-  declare status: string
-  @column()
-  declare frontAndBack: boolean
+  declare quantity: number
   @column()
   declare rejectedFeedback: string | null
   @column()
-  declare quantity: number
-  @column.dateTime()
-  declare dueDate: DateTime
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare status: string
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare userId: string
 }
 
 export class PurchaseRequestSchema extends BaseModel {
-  static $columns = ['id', 'productName', 'quantity', 'finalQuantity', 'status', 'createdAt', 'updatedAt', 'proposal', 'schoolId', 'dueDate', 'value', 'unitValue', 'finalUnitValue', 'finalValue', 'description', 'productUrl', 'purchaseDate', 'estimatedArrivalDate', 'arrivalDate', 'rejectionReason', 'requestingUserId', 'receiptPath'] as const
+  static $columns = ['arrivalDate', 'createdAt', 'description', 'dueDate', 'estimatedArrivalDate', 'finalQuantity', 'finalUnitValue', 'finalValue', 'id', 'productName', 'productUrl', 'proposal', 'purchaseDate', 'quantity', 'receiptPath', 'rejectionReason', 'requestingUserId', 'schoolId', 'status', 'unitValue', 'updatedAt', 'value'] as const
   $columns = PurchaseRequestSchema.$columns
+  @column.dateTime()
+  declare arrivalDate: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column.dateTime()
+  declare dueDate: DateTime
+  @column.dateTime()
+  declare estimatedArrivalDate: DateTime | null
+  @column()
+  declare finalQuantity: number | null
+  @column()
+  declare finalUnitValue: number | null
+  @column()
+  declare finalValue: number | null
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare productName: string
   @column()
-  declare quantity: number
-  @column()
-  declare finalQuantity: number | null
-  @column()
-  declare status: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  declare productUrl: string | null
   @column()
   declare proposal: string | null
-  @column()
-  declare schoolId: string
-  @column.dateTime()
-  declare dueDate: DateTime
-  @column()
-  declare value: number
-  @column()
-  declare unitValue: number
-  @column()
-  declare finalUnitValue: number | null
-  @column()
-  declare finalValue: number | null
-  @column()
-  declare description: string | null
-  @column()
-  declare productUrl: string | null
   @column.dateTime()
   declare purchaseDate: DateTime | null
-  @column.dateTime()
-  declare estimatedArrivalDate: DateTime | null
-  @column.dateTime()
-  declare arrivalDate: DateTime | null
+  @column()
+  declare quantity: number
+  @column()
+  declare receiptPath: string | null
   @column()
   declare rejectionReason: string | null
   @column()
   declare requestingUserId: string
   @column()
-  declare receiptPath: string | null
+  declare schoolId: string
+  @column()
+  declare status: string
+  @column()
+  declare unitValue: number
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare value: number
 }
 
 export class ResponsibleAddressSchema extends BaseModel {
-  static $columns = ['id', 'responsibleId', 'street', 'number', 'complement', 'neighborhood', 'city', 'state', 'zipCode', 'latitude', 'longitude', 'location', 'createdAt', 'updatedAt'] as const
+  static $columns = ['city', 'complement', 'createdAt', 'id', 'latitude', 'location', 'longitude', 'neighborhood', 'number', 'responsibleId', 'state', 'street', 'updatedAt', 'zipCode'] as const
   $columns = ResponsibleAddressSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare responsibleId: string
-  @column()
-  declare street: string
-  @column()
-  declare number: string
-  @column()
-  declare complement: string | null
-  @column()
-  declare neighborhood: string
   @column()
   declare city: string
   @column()
-  declare state: string
-  @column()
-  declare zipCode: string
-  @column()
-  declare latitude: number | null
-  @column()
-  declare longitude: number | null
-  @column()
-  declare location: any | null
+  declare complement: string | null
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-}
-
-export class ResponsibleUserAcceptedOccurenceSchema extends BaseModel {
-  static $columns = ['id', 'responsibleUserId', 'occurenceId', 'createdAt', 'updatedAt'] as const
-  $columns = ResponsibleUserAcceptedOccurenceSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare responsibleUserId: string
+  declare latitude: number | null
   @column()
-  declare occurenceId: string
+  declare location: any | null
+  @column()
+  declare longitude: number | null
+  @column()
+  declare neighborhood: string
+  @column()
+  declare number: string
+  @column()
+  declare responsibleId: string
+  @column()
+  declare state: string
+  @column()
+  declare street: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare zipCode: string
+}
+
+export class ResponsibleUserAcceptedOccurenceSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'occurenceId', 'responsibleUserId', 'updatedAt'] as const
+  $columns = ResponsibleUserAcceptedOccurenceSchema.$columns
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare occurenceId: string
+  @column()
+  declare responsibleUserId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
@@ -1898,85 +1898,111 @@ export class RoleSchema extends BaseModel {
 }
 
 export class ScholarshipSchema extends BaseModel {
-  static $columns = ['id', 'name', 'enrollmentDiscountPercentage', 'discountPercentage', 'type', 'isActive', 'schoolId', 'schoolPartnerId', 'description', 'code', 'enrollmentDiscountValue', 'discountValue', 'discountType'] as const
+  static $columns = ['code', 'description', 'discountPercentage', 'discountType', 'discountValue', 'enrollmentDiscountPercentage', 'enrollmentDiscountValue', 'id', 'isActive', 'name', 'schoolId', 'schoolPartnerId', 'type'] as const
   $columns = ScholarshipSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare name: string
+  declare code: string | null
   @column()
-  declare enrollmentDiscountPercentage: number
+  declare description: string | null
   @column()
   declare discountPercentage: number
   @column()
-  declare type: any
+  declare discountType: string
+  @column()
+  declare discountValue: number | null
+  @column()
+  declare enrollmentDiscountPercentage: number
+  @column()
+  declare enrollmentDiscountValue: number | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare isActive: boolean
+  @column()
+  declare name: string
   @column()
   declare schoolId: string
   @column()
   declare schoolPartnerId: string | null
   @column()
-  declare description: string | null
-  @column()
-  declare code: string | null
-  @column()
-  declare enrollmentDiscountValue: number | null
-  @column()
-  declare discountValue: number | null
-  @column()
-  declare discountType: string
+  declare type: any
 }
 
 export class SchoolSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'name', 'slug', 'street', 'number', 'complement', 'neighborhood', 'city', 'state', 'zipCode', 'latitude', 'longitude', 'location', 'logoUrl', 'asaasAccountId', 'asaasWebhookToken', 'asaasWalletId', 'asaasApiKey', 'asaasDocumentUrl', 'asaasCommercialInfoIsExpired', 'asaasCommercialInfoScheduledDate', 'paymentConfigStatus', 'paymentConfigStatusUpdatedAt', 'pixKey', 'pixKeyType', 'usePlatformManagedPayments', 'enablePaymentNotifications', 'schoolChainId', 'minimumGrade', 'calculationAlgorithm', 'minimumAttendancePercentage', 'hasInsurance', 'insurancePercentage', 'insuranceCoveragePercentage', 'insuranceClaimWaitingDays', 'nfseEnabled', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfseIssPercentage', 'nfseCofinsPercentage', 'nfsePisPercentage', 'nfseCsllPercentage', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseDeductions'] as const
+  static $columns = ['asaasAccountId', 'asaasApiKey', 'asaasCommercialInfoIsExpired', 'asaasCommercialInfoScheduledDate', 'asaasDocumentUrl', 'asaasWalletId', 'asaasWebhookToken', 'calculationAlgorithm', 'city', 'complement', 'createdAt', 'enablePaymentNotifications', 'hasInsurance', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'latitude', 'location', 'logoUrl', 'longitude', 'minimumAttendancePercentage', 'minimumGrade', 'name', 'neighborhood', 'nfseCofinsPercentage', 'nfseCsllPercentage', 'nfseDeductions', 'nfseEnabled', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseIssPercentage', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfsePisPercentage', 'number', 'paymentConfigStatus', 'paymentConfigStatusUpdatedAt', 'pixKey', 'pixKeyType', 'schoolChainId', 'slug', 'state', 'street', 'updatedAt', 'usePlatformManagedPayments', 'zipCode'] as const
   $columns = SchoolSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column()
+  declare asaasAccountId: string | null
+  @column()
+  declare asaasApiKey: string | null
+  @column()
+  declare asaasCommercialInfoIsExpired: boolean | null
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  declare asaasCommercialInfoScheduledDate: DateTime | null
   @column()
-  declare name: string
+  declare asaasDocumentUrl: string | null
   @column()
-  declare slug: string
+  declare asaasWalletId: string | null
   @column()
-  declare street: string | null
+  declare asaasWebhookToken: string | null
   @column()
-  declare number: string | null
-  @column()
-  declare complement: string | null
-  @column()
-  declare neighborhood: string | null
+  declare calculationAlgorithm: string
   @column()
   declare city: string | null
   @column()
-  declare state: string | null
+  declare complement: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare zipCode: string | null
+  declare enablePaymentNotifications: boolean
+  @column()
+  declare hasInsurance: boolean | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare insuranceClaimWaitingDays: number | null
+  @column()
+  declare insuranceCoveragePercentage: number | null
+  @column()
+  declare insurancePercentage: number | null
   @column()
   declare latitude: number | null
-  @column()
-  declare longitude: number | null
   @column()
   declare location: any | null
   @column()
   declare logoUrl: string | null
   @column()
-  declare asaasAccountId: string | null
+  declare longitude: number | null
   @column()
-  declare asaasWebhookToken: string | null
+  declare minimumAttendancePercentage: number
   @column()
-  declare asaasWalletId: string | null
+  declare minimumGrade: number
   @column()
-  declare asaasApiKey: string | null
+  declare name: string
   @column()
-  declare asaasDocumentUrl: string | null
+  declare neighborhood: string | null
   @column()
-  declare asaasCommercialInfoIsExpired: boolean | null
-  @column.dateTime()
-  declare asaasCommercialInfoScheduledDate: DateTime | null
+  declare nfseCofinsPercentage: string | null
+  @column()
+  declare nfseCsllPercentage: string | null
+  @column()
+  declare nfseDeductions: number | null
+  @column()
+  declare nfseEnabled: boolean
+  @column()
+  declare nfseInssPercentage: string | null
+  @column()
+  declare nfseIrPercentage: string | null
+  @column()
+  declare nfseIssPercentage: string | null
+  @column()
+  declare nfseMunicipalServiceCode: string | null
+  @column()
+  declare nfseMunicipalServiceName: string | null
+  @column()
+  declare nfsePisPercentage: string | null
+  @column()
+  declare number: string | null
   @column()
   declare paymentConfigStatus: any
   @column.dateTime()
@@ -1986,302 +2012,268 @@ export class SchoolSchema extends BaseModel {
   @column()
   declare pixKeyType: any | null
   @column()
-  declare usePlatformManagedPayments: boolean
-  @column()
-  declare enablePaymentNotifications: boolean
-  @column()
   declare schoolChainId: string | null
   @column()
-  declare minimumGrade: number
+  declare slug: string
   @column()
-  declare calculationAlgorithm: string
+  declare state: string | null
   @column()
-  declare minimumAttendancePercentage: number
+  declare street: string | null
+  @column.dateTime()
+  declare updatedAt: DateTime
   @column()
-  declare hasInsurance: boolean | null
+  declare usePlatformManagedPayments: boolean
   @column()
-  declare insurancePercentage: number | null
-  @column()
-  declare insuranceCoveragePercentage: number | null
-  @column()
-  declare insuranceClaimWaitingDays: number | null
-  @column()
-  declare nfseEnabled: boolean
-  @column()
-  declare nfseMunicipalServiceCode: string | null
-  @column()
-  declare nfseMunicipalServiceName: string | null
-  @column()
-  declare nfseIssPercentage: string | null
-  @column()
-  declare nfseCofinsPercentage: string | null
-  @column()
-  declare nfsePisPercentage: string | null
-  @column()
-  declare nfseCsllPercentage: string | null
-  @column()
-  declare nfseInssPercentage: string | null
-  @column()
-  declare nfseIrPercentage: string | null
-  @column()
-  declare nfseDeductions: number | null
+  declare zipCode: string | null
 }
 
 export class SchoolAchievementConfigSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'achievementId', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['achievementId', 'createdAt', 'id', 'isActive', 'schoolId', 'updatedAt'] as const
   $columns = SchoolAchievementConfigSchema.$columns
+  @column()
+  declare achievementId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare schoolId: string
-  @column()
-  declare achievementId: string
-  @column()
   declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare schoolId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class SchoolAnnouncementSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'title', 'body', 'status', 'publishedAt', 'createdByUserId', 'createdAt', 'updatedAt', 'requiresAcknowledgement', 'acknowledgementDueAt'] as const
+  static $columns = ['acknowledgementDueAt', 'body', 'createdAt', 'createdByUserId', 'id', 'publishedAt', 'requiresAcknowledgement', 'schoolId', 'status', 'title', 'updatedAt'] as const
   $columns = SchoolAnnouncementSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare schoolId: string
-  @column()
-  declare title: string
+  @column.dateTime()
+  declare acknowledgementDueAt: DateTime | null
   @column()
   declare body: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare status: string
+  declare createdByUserId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare publishedAt: DateTime | null
   @column()
-  declare createdByUserId: string
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare requiresAcknowledgement: boolean
+  @column()
+  declare schoolId: string
+  @column()
+  declare status: string
+  @column()
+  declare title: string
   @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare requiresAcknowledgement: boolean
-  @column.dateTime()
-  declare acknowledgementDueAt: DateTime | null
 }
 
 export class SchoolAnnouncementAudienceSchema extends BaseModel {
-  static $columns = ['id', 'announcementId', 'scopeType', 'scopeId', 'createdAt'] as const
+  static $columns = ['announcementId', 'createdAt', 'id', 'scopeId', 'scopeType'] as const
   $columns = SchoolAnnouncementAudienceSchema.$columns
+  @column()
+  declare announcementId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare announcementId: string
+  declare scopeId: string
   @column()
   declare scopeType: string
-  @column()
-  declare scopeId: string
-  @column.dateTime()
-  declare createdAt: DateTime
 }
 
 export class SchoolAnnouncementRecipientSchema extends BaseModel {
-  static $columns = ['id', 'announcementId', 'responsibleId', 'studentId', 'notificationId', 'createdAt', 'acknowledgedAt'] as const
+  static $columns = ['acknowledgedAt', 'announcementId', 'createdAt', 'id', 'notificationId', 'responsibleId', 'studentId'] as const
   $columns = SchoolAnnouncementRecipientSchema.$columns
+  @column.dateTime()
+  declare acknowledgedAt: DateTime | null
+  @column()
+  declare announcementId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare announcementId: string
+  declare notificationId: string | null
   @column()
   declare responsibleId: string
   @column()
   declare studentId: string | null
-  @column()
-  declare notificationId: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare acknowledgedAt: DateTime | null
 }
 
 export class SchoolChainSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'subscriptionLevel', 'asaasAccountId', 'asaasWebhookToken', 'asaasWalletId', 'asaasApiKey', 'allowSchoolsToOverridePaymentConfig', 'allowSchoolsToOverrideNotifications', 'usePlatformManagedPayments', 'enablePaymentNotifications', 'createdAt', 'updatedAt', 'hasInsuranceByDefault', 'insurancePercentage', 'insuranceCoveragePercentage', 'insuranceClaimWaitingDays', 'nfseEnabled', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfseIssPercentage', 'nfseCofinsPercentage', 'nfsePisPercentage', 'nfseCsllPercentage', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseDeductions'] as const
+  static $columns = ['allowSchoolsToOverrideNotifications', 'allowSchoolsToOverridePaymentConfig', 'asaasAccountId', 'asaasApiKey', 'asaasWalletId', 'asaasWebhookToken', 'createdAt', 'enablePaymentNotifications', 'hasInsuranceByDefault', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'name', 'nfseCofinsPercentage', 'nfseCsllPercentage', 'nfseDeductions', 'nfseEnabled', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseIssPercentage', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfsePisPercentage', 'slug', 'subscriptionLevel', 'updatedAt', 'usePlatformManagedPayments'] as const
   $columns = SchoolChainSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare subscriptionLevel: any
-  @column()
-  declare asaasAccountId: string | null
-  @column()
-  declare asaasWebhookToken: string | null
-  @column()
-  declare asaasWalletId: string | null
-  @column()
-  declare asaasApiKey: string | null
-  @column()
-  declare allowSchoolsToOverridePaymentConfig: boolean
   @column()
   declare allowSchoolsToOverrideNotifications: boolean
   @column()
-  declare usePlatformManagedPayments: boolean
+  declare allowSchoolsToOverridePaymentConfig: boolean
   @column()
-  declare enablePaymentNotifications: boolean
+  declare asaasAccountId: string | null
+  @column()
+  declare asaasApiKey: string | null
+  @column()
+  declare asaasWalletId: string | null
+  @column()
+  declare asaasWebhookToken: string | null
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  @column()
+  declare enablePaymentNotifications: boolean
   @column()
   declare hasInsuranceByDefault: boolean
-  @column()
-  declare insurancePercentage: number | null
-  @column()
-  declare insuranceCoveragePercentage: number | null
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare insuranceClaimWaitingDays: number | null
   @column()
-  declare nfseEnabled: boolean
+  declare insuranceCoveragePercentage: number | null
   @column()
-  declare nfseMunicipalServiceCode: string | null
+  declare insurancePercentage: number | null
   @column()
-  declare nfseMunicipalServiceName: string | null
-  @column()
-  declare nfseIssPercentage: string | null
+  declare name: string
   @column()
   declare nfseCofinsPercentage: string | null
   @column()
-  declare nfsePisPercentage: string | null
-  @column()
   declare nfseCsllPercentage: string | null
+  @column()
+  declare nfseDeductions: number | null
+  @column()
+  declare nfseEnabled: boolean
   @column()
   declare nfseInssPercentage: string | null
   @column()
   declare nfseIrPercentage: string | null
   @column()
-  declare nfseDeductions: number | null
+  declare nfseIssPercentage: string | null
+  @column()
+  declare nfseMunicipalServiceCode: string | null
+  @column()
+  declare nfseMunicipalServiceName: string | null
+  @column()
+  declare nfsePisPercentage: string | null
+  @column()
+  declare slug: string
+  @column()
+  declare subscriptionLevel: any
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare usePlatformManagedPayments: boolean
 }
 
 export class SchoolChainAchievementConfigSchema extends BaseModel {
-  static $columns = ['id', 'schoolChainId', 'achievementId', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['achievementId', 'createdAt', 'id', 'isActive', 'schoolChainId', 'updatedAt'] as const
   $columns = SchoolChainAchievementConfigSchema.$columns
+  @column()
+  declare achievementId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare schoolChainId: string
-  @column()
-  declare achievementId: string
-  @column()
   declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare schoolChainId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class SchoolGamificationSettingSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'pointsToMoneyRate', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'pointsToMoneyRate', 'schoolId', 'updatedAt'] as const
   $columns = SchoolGamificationSettingSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare schoolId: string
-  @column()
   declare pointsToMoneyRate: number
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare schoolId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class SchoolGroupSchema extends BaseModel {
-  static $columns = ['id', 'createdAt', 'updatedAt', 'name', 'schoolChainId', 'type', 'isAutoGenerated', 'hasInsurance', 'insurancePercentage', 'insuranceCoveragePercentage', 'insuranceClaimWaitingDays'] as const
+  static $columns = ['createdAt', 'hasInsurance', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'isAutoGenerated', 'name', 'schoolChainId', 'type', 'updatedAt'] as const
   $columns = SchoolGroupSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  @column()
+  declare hasInsurance: boolean | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare insuranceClaimWaitingDays: number | null
+  @column()
+  declare insuranceCoveragePercentage: number | null
+  @column()
+  declare insurancePercentage: number | null
+  @column()
+  declare isAutoGenerated: boolean
   @column()
   declare name: string
   @column()
   declare schoolChainId: string
   @column()
   declare type: any
-  @column()
-  declare isAutoGenerated: boolean
-  @column()
-  declare hasInsurance: boolean | null
-  @column()
-  declare insurancePercentage: number | null
-  @column()
-  declare insuranceCoveragePercentage: number | null
-  @column()
-  declare insuranceClaimWaitingDays: number | null
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class SchoolHasGroupSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'schoolGroupId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'schoolGroupId', 'schoolId', 'updatedAt'] as const
   $columns = SchoolHasGroupSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare schoolId: string
-  @column()
   declare schoolGroupId: string
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare schoolId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class SchoolPartnerSchema extends BaseModel {
-  static $columns = ['id', 'name', 'cnpj', 'email', 'phone', 'contactName', 'discountPercentage', 'partnershipStartDate', 'partnershipEndDate', 'isActive', 'createdAt', 'updatedAt', 'schoolId'] as const
+  static $columns = ['cnpj', 'contactName', 'createdAt', 'discountPercentage', 'email', 'id', 'isActive', 'name', 'partnershipEndDate', 'partnershipStartDate', 'phone', 'schoolId', 'updatedAt'] as const
   $columns = SchoolPartnerSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
   @column()
   declare cnpj: string
   @column()
-  declare email: string | null
-  @column()
-  declare phone: string | null
-  @column()
   declare contactName: string | null
-  @column()
-  declare discountPercentage: number
-  @column.date()
-  declare partnershipStartDate: DateTime
-  @column.date()
-  declare partnershipEndDate: DateTime | null
-  @column()
-  declare isActive: boolean
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
-  declare schoolId: string
-}
-
-export class SchoolUsageMetricSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'month', 'year', 'activeStudents', 'activeTeachers', 'activeUsers', 'classesCreated', 'assignmentsCreated', 'attendanceRecords', 'totalRevenue', 'totalEnrollments', 'loginCount', 'lastActivityAt', 'createdAt'] as const
-  $columns = SchoolUsageMetricSchema.$columns
+  declare discountPercentage: number
+  @column()
+  declare email: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare isActive: boolean
+  @column()
+  declare name: string
+  @column.date()
+  declare partnershipEndDate: DateTime | null
+  @column.date()
+  declare partnershipStartDate: DateTime
+  @column()
+  declare phone: string | null
+  @column()
   declare schoolId: string
-  @column()
-  declare month: number
-  @column()
-  declare year: number
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class SchoolUsageMetricSchema extends BaseModel {
+  static $columns = ['activeStudents', 'activeTeachers', 'activeUsers', 'assignmentsCreated', 'attendanceRecords', 'classesCreated', 'createdAt', 'id', 'lastActivityAt', 'loginCount', 'month', 'schoolId', 'totalEnrollments', 'totalRevenue', 'year'] as const
+  $columns = SchoolUsageMetricSchema.$columns
   @column()
   declare activeStudents: number
   @column()
@@ -2289,706 +2281,714 @@ export class SchoolUsageMetricSchema extends BaseModel {
   @column()
   declare activeUsers: number
   @column()
-  declare classesCreated: number
-  @column()
   declare assignmentsCreated: number
   @column()
   declare attendanceRecords: number
   @column()
-  declare totalRevenue: number
-  @column()
-  declare totalEnrollments: number
-  @column()
-  declare loginCount: number
-  @column.dateTime()
-  declare lastActivityAt: DateTime | null
+  declare classesCreated: number
   @column.dateTime()
   declare createdAt: DateTime
-}
-
-export class StoreSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'ownerUserId', 'name', 'description', 'type', 'commissionPercentage', 'isActive', 'createdAt', 'updatedAt', 'deletedAt'] as const
-  $columns = StoreSchema.$columns
   @column({ isPrimary: true })
   declare id: string
+  @column.dateTime()
+  declare lastActivityAt: DateTime | null
+  @column()
+  declare loginCount: number
+  @column()
+  declare month: number
   @column()
   declare schoolId: string
   @column()
-  declare ownerUserId: string | null
+  declare totalEnrollments: number
   @column()
-  declare name: string
+  declare totalRevenue: number
   @column()
-  declare description: string | null
-  @column()
-  declare type: any
+  declare year: number
+}
+
+export class StoreSchema extends BaseModel {
+  static $columns = ['commissionPercentage', 'createdAt', 'deletedAt', 'description', 'id', 'isActive', 'name', 'ownerUserId', 'schoolId', 'type', 'updatedAt'] as const
+  $columns = StoreSchema.$columns
   @column()
   declare commissionPercentage: number | null
-  @column()
-  declare isActive: boolean
   @column.dateTime()
   declare createdAt: DateTime
   @column.dateTime()
-  declare updatedAt: DateTime
-  @column.dateTime()
   declare deletedAt: DateTime | null
-}
-
-export class StoreFinancialSettingSchema extends BaseModel {
-  static $columns = ['id', 'storeId', 'platformFeePercentage', 'pixKey', 'pixKeyType', 'bankName', 'accountHolder', 'createdAt', 'updatedAt'] as const
-  $columns = StoreFinancialSettingSchema.$columns
+  @column()
+  declare description: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare storeId: string
+  declare isActive: boolean
   @column()
-  declare platformFeePercentage: number | null
+  declare name: string
+  @column()
+  declare ownerUserId: string | null
+  @column()
+  declare schoolId: string
+  @column()
+  declare type: any
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class StoreFinancialSettingSchema extends BaseModel {
+  static $columns = ['accountHolder', 'bankName', 'createdAt', 'id', 'pixKey', 'pixKeyType', 'platformFeePercentage', 'storeId', 'updatedAt'] as const
+  $columns = StoreFinancialSettingSchema.$columns
+  @column()
+  declare accountHolder: string | null
+  @column()
+  declare bankName: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare pixKey: string | null
   @column()
   declare pixKeyType: string | null
   @column()
-  declare bankName: string | null
+  declare platformFeePercentage: number | null
   @column()
-  declare accountHolder: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare storeId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StoreInstallmentRuleSchema extends BaseModel {
-  static $columns = ['id', 'storeId', 'minAmount', 'maxInstallments', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'isActive', 'maxInstallments', 'minAmount', 'storeId', 'updatedAt'] as const
   $columns = StoreInstallmentRuleSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare storeId: string
-  @column()
-  declare minAmount: number
+  declare isActive: boolean
   @column()
   declare maxInstallments: number
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare minAmount: number
+  @column()
+  declare storeId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StoreItemSchema extends BaseModel {
-  static $columns = ['id', 'name', 'description', 'price', 'paymentMode', 'pointsToMoneyRate', 'minPointsPercentage', 'maxPointsPercentage', 'category', 'imageUrl', 'totalStock', 'reservedStock', 'maxPerStudent', 'maxPerStudentPeriod', 'preparationTimeMinutes', 'requiresApproval', 'pickupLocation', 'isActive', 'schoolId', 'canteenItemId', 'availableFrom', 'availableUntil', 'createdAt', 'updatedAt', 'storeId', 'deletedAt', 'metadata'] as const
+  static $columns = ['availableFrom', 'availableUntil', 'canteenItemId', 'category', 'createdAt', 'deletedAt', 'description', 'id', 'imageUrl', 'isActive', 'maxPerStudent', 'maxPerStudentPeriod', 'maxPointsPercentage', 'metadata', 'minPointsPercentage', 'name', 'paymentMode', 'pickupLocation', 'pointsToMoneyRate', 'preparationTimeMinutes', 'price', 'requiresApproval', 'reservedStock', 'schoolId', 'storeId', 'totalStock', 'updatedAt'] as const
   $columns = StoreItemSchema.$columns
+  @column.date()
+  declare availableFrom: DateTime | null
+  @column.date()
+  declare availableUntil: DateTime | null
+  @column()
+  declare canteenItemId: string | null
+  @column()
+  declare category: any
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column()
+  declare description: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare name: string
-  @column()
-  declare description: string
-  @column()
-  declare price: number
-  @column()
-  declare paymentMode: any
-  @column()
-  declare pointsToMoneyRate: number
-  @column()
-  declare minPointsPercentage: number | null
-  @column()
-  declare maxPointsPercentage: number | null
-  @column()
-  declare category: any
-  @column()
   declare imageUrl: string | null
   @column()
-  declare totalStock: number | null
-  @column()
-  declare reservedStock: number
+  declare isActive: boolean
   @column()
   declare maxPerStudent: number | null
   @column()
   declare maxPerStudentPeriod: any | null
   @column()
-  declare preparationTimeMinutes: number | null
+  declare maxPointsPercentage: number | null
   @column()
-  declare requiresApproval: boolean
+  declare metadata: any | null
+  @column()
+  declare minPointsPercentage: number | null
+  @column()
+  declare name: string
+  @column()
+  declare paymentMode: any
   @column()
   declare pickupLocation: string | null
   @column()
-  declare isActive: boolean
+  declare pointsToMoneyRate: number
+  @column()
+  declare preparationTimeMinutes: number | null
+  @column()
+  declare price: number
+  @column()
+  declare requiresApproval: boolean
+  @column()
+  declare reservedStock: number
   @column()
   declare schoolId: string
   @column()
-  declare canteenItemId: string | null
-  @column.date()
-  declare availableFrom: DateTime | null
-  @column.date()
-  declare availableUntil: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare storeId: string | null
+  @column()
+  declare totalStock: number | null
   @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare storeId: string | null
-  @column.dateTime()
-  declare deletedAt: DateTime | null
-  @column()
-  declare metadata: any | null
 }
 
 export class StoreOrderSchema extends BaseModel {
-  static $columns = ['id', 'orderNumber', 'studentId', 'schoolId', 'status', 'totalPrice', 'totalPoints', 'totalMoney', 'createdAt', 'paidAt', 'approvedAt', 'preparingAt', 'readyAt', 'deliveredAt', 'canceledAt', 'estimatedReadyAt', 'studentNotes', 'internalNotes', 'cancellationReason', 'approvedBy', 'preparedBy', 'deliveredBy', 'updatedAt', 'studentPaymentId', 'storeId', 'paymentMode', 'paymentMethod', 'settlementId'] as const
+  static $columns = ['approvedAt', 'approvedBy', 'canceledAt', 'cancellationReason', 'createdAt', 'deliveredAt', 'deliveredBy', 'estimatedReadyAt', 'id', 'internalNotes', 'orderNumber', 'paidAt', 'paymentMethod', 'paymentMode', 'preparedBy', 'preparingAt', 'readyAt', 'schoolId', 'settlementId', 'status', 'storeId', 'studentId', 'studentNotes', 'studentPaymentId', 'totalMoney', 'totalPoints', 'totalPrice', 'updatedAt'] as const
   $columns = StoreOrderSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column.dateTime()
+  declare approvedAt: DateTime | null
   @column()
-  declare orderNumber: string
+  declare approvedBy: string | null
+  @column.dateTime()
+  declare canceledAt: DateTime | null
   @column()
-  declare studentId: string
-  @column()
-  declare schoolId: string
-  @column()
-  declare status: any
-  @column()
-  declare totalPrice: number
-  @column()
-  declare totalPoints: number
-  @column()
-  declare totalMoney: number
+  declare cancellationReason: string | null
   @column.dateTime()
   declare createdAt: DateTime
   @column.dateTime()
-  declare paidAt: DateTime | null
+  declare deliveredAt: DateTime | null
+  @column()
+  declare deliveredBy: string | null
   @column.dateTime()
-  declare approvedAt: DateTime | null
+  declare estimatedReadyAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare internalNotes: string | null
+  @column()
+  declare orderNumber: string
+  @column.dateTime()
+  declare paidAt: DateTime | null
+  @column()
+  declare paymentMethod: any | null
+  @column()
+  declare paymentMode: any | null
+  @column()
+  declare preparedBy: string | null
   @column.dateTime()
   declare preparingAt: DateTime | null
   @column.dateTime()
   declare readyAt: DateTime | null
-  @column.dateTime()
-  declare deliveredAt: DateTime | null
-  @column.dateTime()
-  declare canceledAt: DateTime | null
-  @column.dateTime()
-  declare estimatedReadyAt: DateTime | null
   @column()
-  declare studentNotes: string | null
+  declare schoolId: string
   @column()
-  declare internalNotes: string | null
+  declare settlementId: string | null
   @column()
-  declare cancellationReason: string | null
-  @column()
-  declare approvedBy: string | null
-  @column()
-  declare preparedBy: string | null
-  @column()
-  declare deliveredBy: string | null
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare studentPaymentId: string | null
+  declare status: any
   @column()
   declare storeId: string | null
   @column()
-  declare paymentMode: any | null
+  declare studentId: string
   @column()
-  declare paymentMethod: any | null
+  declare studentNotes: string | null
   @column()
-  declare settlementId: string | null
+  declare studentPaymentId: string | null
+  @column()
+  declare totalMoney: number
+  @column()
+  declare totalPoints: number
+  @column()
+  declare totalPrice: number
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class StoreOrderItemSchema extends BaseModel {
-  static $columns = ['id', 'orderId', 'storeItemId', 'quantity', 'unitPrice', 'paymentMode', 'pointsToMoneyRate', 'pointsPaid', 'moneyPaid', 'itemName', 'itemDescription', 'itemImageUrl', 'createdAt'] as const
+  static $columns = ['createdAt', 'id', 'itemDescription', 'itemImageUrl', 'itemName', 'moneyPaid', 'orderId', 'paymentMode', 'pointsPaid', 'pointsToMoneyRate', 'quantity', 'storeItemId', 'unitPrice'] as const
   $columns = StoreOrderItemSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare orderId: string
-  @column()
-  declare storeItemId: string
-  @column()
-  declare quantity: number
-  @column()
-  declare unitPrice: number
-  @column()
-  declare paymentMode: any
-  @column()
-  declare pointsToMoneyRate: number
-  @column()
-  declare pointsPaid: number
-  @column()
-  declare moneyPaid: number
-  @column()
-  declare itemName: string
   @column()
   declare itemDescription: string | null
   @column()
   declare itemImageUrl: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare itemName: string
+  @column()
+  declare moneyPaid: number
+  @column()
+  declare orderId: string
+  @column()
+  declare paymentMode: any
+  @column()
+  declare pointsPaid: number
+  @column()
+  declare pointsToMoneyRate: number
+  @column()
+  declare quantity: number
+  @column()
+  declare storeItemId: string
+  @column()
+  declare unitPrice: number
 }
 
 export class StoreSettlementSchema extends BaseModel {
-  static $columns = ['id', 'storeId', 'month', 'year', 'totalSalesAmount', 'commissionAmount', 'platformFeeAmount', 'transferAmount', 'status', 'approvedBy', 'approvedAt', 'processedAt', 'pixTransactionId', 'failureReason', 'notes', 'createdAt', 'updatedAt'] as const
+  static $columns = ['approvedAt', 'approvedBy', 'commissionAmount', 'createdAt', 'failureReason', 'id', 'month', 'notes', 'pixTransactionId', 'platformFeeAmount', 'processedAt', 'status', 'storeId', 'totalSalesAmount', 'transferAmount', 'updatedAt', 'year'] as const
   $columns = StoreSettlementSchema.$columns
+  @column.dateTime()
+  declare approvedAt: DateTime | null
+  @column()
+  declare approvedBy: string | null
+  @column()
+  declare commissionAmount: number
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare failureReason: string | null
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare storeId: string
   @column()
   declare month: number
   @column()
-  declare year: number
-  @column()
-  declare totalSalesAmount: number
-  @column()
-  declare commissionAmount: number
-  @column()
-  declare platformFeeAmount: number
-  @column()
-  declare transferAmount: number
-  @column()
-  declare status: any
-  @column()
-  declare approvedBy: string | null
-  @column.dateTime()
-  declare approvedAt: DateTime | null
-  @column.dateTime()
-  declare processedAt: DateTime | null
+  declare notes: string | null
   @column()
   declare pixTransactionId: string | null
   @column()
-  declare failureReason: string | null
-  @column()
-  declare notes: string | null
+  declare platformFeeAmount: number
   @column.dateTime()
-  declare createdAt: DateTime
+  declare processedAt: DateTime | null
+  @column()
+  declare status: any
+  @column()
+  declare storeId: string
+  @column()
+  declare totalSalesAmount: number
+  @column()
+  declare transferAmount: number
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare year: number
 }
 
 export class StudentSchema extends BaseModel {
-  static $columns = ['id', 'descountPercentage', 'monthlyPaymentAmount', 'isSelfResponsible', 'paymentDate', 'classId', 'contractId', 'canteenLimit', 'balance', 'enrollmentStatus'] as const
+  static $columns = ['balance', 'canteenLimit', 'classId', 'contractId', 'descountPercentage', 'enrollmentStatus', 'id', 'isSelfResponsible', 'monthlyPaymentAmount', 'paymentDate'] as const
   $columns = StudentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare descountPercentage: number
+  declare balance: number
   @column()
-  declare monthlyPaymentAmount: number
-  @column()
-  declare isSelfResponsible: boolean
-  @column()
-  declare paymentDate: number | null
+  declare canteenLimit: number | null
   @column()
   declare classId: string | null
   @column()
   declare contractId: string | null
   @column()
-  declare canteenLimit: number | null
-  @column()
-  declare balance: number
+  declare descountPercentage: number
   @column()
   declare enrollmentStatus: any
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isSelfResponsible: boolean
+  @column()
+  declare monthlyPaymentAmount: number
+  @column()
+  declare paymentDate: number | null
 }
 
 export class StudentAchievementSchema extends BaseModel {
-  static $columns = ['id', 'studentGamificationId', 'achievementId', 'unlockedAt', 'progress'] as const
+  static $columns = ['achievementId', 'id', 'progress', 'studentGamificationId', 'unlockedAt'] as const
   $columns = StudentAchievementSchema.$columns
+  @column()
+  declare achievementId: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentGamificationId: string
+  declare progress: number
   @column()
-  declare achievementId: string
+  declare studentGamificationId: string
   @column.dateTime()
   declare unlockedAt: DateTime
-  @column()
-  declare progress: number
 }
 
 export class StudentAddressSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'street', 'number', 'complement', 'neighborhood', 'city', 'state', 'zipCode', 'latitude', 'longitude', 'location'] as const
+  static $columns = ['city', 'complement', 'id', 'latitude', 'location', 'longitude', 'neighborhood', 'number', 'state', 'street', 'studentId', 'zipCode'] as const
   $columns = StudentAddressSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
-  @column()
-  declare street: string
-  @column()
-  declare number: string
-  @column()
-  declare complement: string | null
-  @column()
-  declare neighborhood: string
   @column()
   declare city: string
   @column()
-  declare state: string
-  @column()
-  declare zipCode: string
-  @column()
-  declare latitude: number | null
-  @column()
-  declare longitude: number | null
-  @column()
-  declare location: any | null
-}
-
-export class StudentAvatarSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'skinTone', 'hairStyle', 'hairColor', 'outfit', 'accessories', 'createdAt', 'updatedAt'] as const
-  $columns = StudentAvatarSchema.$columns
+  declare complement: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare latitude: number | null
+  @column()
+  declare location: any | null
+  @column()
+  declare longitude: number | null
+  @column()
+  declare neighborhood: string
+  @column()
+  declare number: string
+  @column()
+  declare state: string
+  @column()
+  declare street: string
+  @column()
   declare studentId: string
   @column()
-  declare skinTone: string
-  @column()
-  declare hairStyle: string
-  @column()
-  declare hairColor: string
-  @column()
-  declare outfit: string
+  declare zipCode: string
+}
+
+export class StudentAvatarSchema extends BaseModel {
+  static $columns = ['accessories', 'createdAt', 'hairColor', 'hairStyle', 'id', 'outfit', 'skinTone', 'studentId', 'updatedAt'] as const
+  $columns = StudentAvatarSchema.$columns
   @column()
   declare accessories: any
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare hairColor: string
+  @column()
+  declare hairStyle: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare outfit: string
+  @column()
+  declare skinTone: string
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentBalanceTransactionSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'amount', 'type', 'status', 'description', 'previousBalance', 'newBalance', 'canteenPurchaseId', 'storeOrderId', 'responsibleId', 'paymentGatewayId', 'paymentMethod', 'createdAt', 'updatedAt'] as const
+  static $columns = ['amount', 'canteenPurchaseId', 'createdAt', 'description', 'id', 'newBalance', 'paymentGatewayId', 'paymentMethod', 'previousBalance', 'responsibleId', 'status', 'storeOrderId', 'studentId', 'type', 'updatedAt'] as const
   $columns = StudentBalanceTransactionSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
   @column()
   declare amount: number
   @column()
-  declare type: any
-  @column()
-  declare status: any
+  declare canteenPurchaseId: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare description: string | null
-  @column()
-  declare previousBalance: number
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare newBalance: number
-  @column()
-  declare canteenPurchaseId: string | null
-  @column()
-  declare storeOrderId: string | null
-  @column()
-  declare responsibleId: string | null
   @column()
   declare paymentGatewayId: string | null
   @column()
   declare paymentMethod: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare previousBalance: number
+  @column()
+  declare responsibleId: string | null
+  @column()
+  declare status: any
+  @column()
+  declare storeOrderId: string | null
+  @column()
+  declare studentId: string
+  @column()
+  declare type: any
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentCanteenCategoryRestrictionSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'category', 'createdAt', 'updatedAt', 'createdBy'] as const
+  static $columns = ['category', 'createdAt', 'createdBy', 'id', 'studentId', 'updatedAt'] as const
   $columns = StudentCanteenCategoryRestrictionSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
   @column()
   declare category: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare createdBy: string | null
-}
-
-export class StudentChallengeSchema extends BaseModel {
-  static $columns = ['id', 'studentGamificationId', 'challengeId', 'progress', 'isCompleted', 'completedAt', 'startedAt'] as const
-  $columns = StudentChallengeSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentGamificationId: string
-  @column()
-  declare challengeId: string
-  @column()
-  declare progress: number
-  @column()
-  declare isCompleted: boolean
-  @column.dateTime()
-  declare completedAt: DateTime | null
-  @column.dateTime()
-  declare startedAt: DateTime
-}
-
-export class StudentDocumentSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'fileName', 'fileUrl', 'mimeType', 'size', 'status', 'reviewedBy', 'reviewedAt', 'rejectionReason', 'createdAt', 'updatedAt', 'contractDocumentId'] as const
-  $columns = StudentDocumentSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare studentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class StudentChallengeSchema extends BaseModel {
+  static $columns = ['challengeId', 'completedAt', 'id', 'isCompleted', 'progress', 'startedAt', 'studentGamificationId'] as const
+  $columns = StudentChallengeSchema.$columns
+  @column()
+  declare challengeId: string
+  @column.dateTime()
+  declare completedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isCompleted: boolean
+  @column()
+  declare progress: number
+  @column.dateTime()
+  declare startedAt: DateTime
+  @column()
+  declare studentGamificationId: string
+}
+
+export class StudentDocumentSchema extends BaseModel {
+  static $columns = ['contractDocumentId', 'createdAt', 'fileName', 'fileUrl', 'id', 'mimeType', 'rejectionReason', 'reviewedAt', 'reviewedBy', 'size', 'status', 'studentId', 'updatedAt'] as const
+  $columns = StudentDocumentSchema.$columns
+  @column()
+  declare contractDocumentId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare fileName: string
   @column()
   declare fileUrl: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare mimeType: string
+  @column()
+  declare rejectionReason: string | null
+  @column.dateTime()
+  declare reviewedAt: DateTime | null
+  @column()
+  declare reviewedBy: string | null
   @column()
   declare size: number
   @column()
   declare status: any
   @column()
-  declare reviewedBy: string | null
-  @column.dateTime()
-  declare reviewedAt: DateTime | null
-  @column()
-  declare rejectionReason: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare contractDocumentId: string
 }
 
 export class StudentEmergencyContactSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'userId', 'name', 'phone', 'createdAt', 'order', 'relationship', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'name', 'order', 'phone', 'relationship', 'studentId', 'updatedAt', 'userId'] as const
   $columns = StudentEmergencyContactSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare studentId: string
-  @column()
-  declare userId: string | null
   @column()
   declare name: string
   @column()
-  declare phone: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column()
   declare order: number
   @column()
+  declare phone: string
+  @column()
   declare relationship: any
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare userId: string | null
 }
 
 export class StudentGamificationSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'totalPoints', 'currentLevel', 'levelProgress', 'streak', 'longestStreak', 'lastActivityAt', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'currentLevel', 'id', 'lastActivityAt', 'levelProgress', 'longestStreak', 'streak', 'studentId', 'totalPoints', 'updatedAt'] as const
   $columns = StudentGamificationSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare currentLevel: number
   @column({ isPrimary: true })
   declare id: string
+  @column.dateTime()
+  declare lastActivityAt: DateTime | null
+  @column()
+  declare levelProgress: number
+  @column()
+  declare longestStreak: number
+  @column()
+  declare streak: number
   @column()
   declare studentId: string
   @column()
   declare totalPoints: number
-  @column()
-  declare currentLevel: number
-  @column()
-  declare levelProgress: number
-  @column()
-  declare streak: number
-  @column()
-  declare longestStreak: number
-  @column.dateTime()
-  declare lastActivityAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentHasAcademicPeriodSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'academicPeriodId', 'classId'] as const
+  static $columns = ['academicPeriodId', 'classId', 'id', 'studentId'] as const
   $columns = StudentHasAcademicPeriodSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
   @column()
   declare academicPeriodId: string
   @column()
   declare classId: string | null
-}
-
-export class StudentHasAssignmentSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'assignmentId', 'createdAt', 'updatedAt', 'grade', 'submittedAt'] as const
-  $columns = StudentHasAssignmentSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare studentId: string
+}
+
+export class StudentHasAssignmentSchema extends BaseModel {
+  static $columns = ['assignmentId', 'createdAt', 'grade', 'id', 'studentId', 'submittedAt', 'updatedAt'] as const
+  $columns = StudentHasAssignmentSchema.$columns
   @column()
   declare assignmentId: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare grade: number | null
-  @column.dateTime()
-  declare submittedAt: DateTime | null
-}
-
-export class StudentHasAttendanceSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'attendanceId', 'status', 'justification', 'createdAt', 'updatedAt'] as const
-  $columns = StudentHasAttendanceSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare studentId: string
+  @column.dateTime()
+  declare submittedAt: DateTime | null
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class StudentHasAttendanceSchema extends BaseModel {
+  static $columns = ['attendanceId', 'createdAt', 'id', 'justification', 'status', 'studentId', 'updatedAt'] as const
+  $columns = StudentHasAttendanceSchema.$columns
   @column()
   declare attendanceId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare justification: string | null
   @column()
   declare status: any
   @column()
-  declare justification: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentHasExtraClassSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'extraClassId', 'contractId', 'scholarshipId', 'paymentMethod', 'paymentDay', 'enrolledAt', 'cancelledAt', 'createdAt', 'updatedAt'] as const
+  static $columns = ['cancelledAt', 'contractId', 'createdAt', 'enrolledAt', 'extraClassId', 'id', 'paymentDay', 'paymentMethod', 'scholarshipId', 'studentId', 'updatedAt'] as const
   $columns = StudentHasExtraClassSchema.$columns
+  @column.dateTime()
+  declare cancelledAt: DateTime | null
+  @column()
+  declare contractId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare enrolledAt: DateTime
+  @column()
+  declare extraClassId: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentId: string
-  @column()
-  declare extraClassId: string
-  @column()
-  declare contractId: string
-  @column()
-  declare scholarshipId: string | null
+  declare paymentDay: number
   @column()
   declare paymentMethod: string
   @column()
-  declare paymentDay: number
-  @column.dateTime()
-  declare enrolledAt: DateTime
-  @column.dateTime()
-  declare cancelledAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare scholarshipId: string | null
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentHasExtraClassAttendanceSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'extraClassAttendanceId', 'status', 'justification', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'extraClassAttendanceId', 'id', 'justification', 'status', 'studentId', 'updatedAt'] as const
   $columns = StudentHasExtraClassAttendanceSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare extraClassAttendanceId: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentId: string
-  @column()
-  declare extraClassAttendanceId: string
+  declare justification: string | null
   @column()
   declare status: any
   @column()
-  declare justification: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentHasLevelSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'levelAssignedToCourseAcademicPeriodId', 'scholarshipId', 'academicPeriodId', 'levelId', 'classId', 'contractId', 'contractUrl', 'paymentMethod', 'enrollmentInstallments', 'installments', 'paymentDay', 'docusealSubmissionId', 'docusealSignatureStatus', 'documentSignedAt', 'enrollmentPaymentId', 'signedContractFilePath', 'createdAt', 'updatedAt', 'deletedAt'] as const
+  static $columns = ['academicPeriodId', 'classId', 'contractId', 'contractUrl', 'createdAt', 'deletedAt', 'documentSignedAt', 'docusealSignatureStatus', 'docusealSubmissionId', 'enrollmentInstallments', 'enrollmentPaymentId', 'id', 'installments', 'levelAssignedToCourseAcademicPeriodId', 'levelId', 'paymentDay', 'paymentMethod', 'scholarshipId', 'signedContractFilePath', 'studentId', 'updatedAt'] as const
   $columns = StudentHasLevelSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
-  @column()
-  declare levelAssignedToCourseAcademicPeriodId: string
-  @column()
-  declare scholarshipId: string | null
   @column()
   declare academicPeriodId: string | null
-  @column()
-  declare levelId: string | null
   @column()
   declare classId: string | null
   @column()
   declare contractId: string | null
   @column()
   declare contractUrl: string | null
-  @column()
-  declare paymentMethod: string | null
-  @column()
-  declare enrollmentInstallments: number | null
-  @column()
-  declare installments: number | null
-  @column()
-  declare paymentDay: number | null
-  @column()
-  declare docusealSubmissionId: string | null
-  @column()
-  declare docusealSignatureStatus: any | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
   @column.date()
   declare documentSignedAt: DateTime | null
   @column()
-  declare enrollmentPaymentId: string | null
+  declare docusealSignatureStatus: any | null
   @column()
-  declare signedContractFilePath: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column.dateTime()
-  declare deletedAt: DateTime | null
-}
-
-export class StudentHasResponsibleSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'responsibleId', 'isPedagogical', 'isFinancial', 'createdAt', 'updatedAt'] as const
-  $columns = StudentHasResponsibleSchema.$columns
+  declare docusealSubmissionId: string | null
+  @column()
+  declare enrollmentInstallments: number | null
+  @column()
+  declare enrollmentPaymentId: string | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentId: string
+  declare installments: number | null
   @column()
-  declare responsibleId: string
+  declare levelAssignedToCourseAcademicPeriodId: string
+  @column()
+  declare levelId: string | null
+  @column()
+  declare paymentDay: number | null
+  @column()
+  declare paymentMethod: string | null
+  @column()
+  declare scholarshipId: string | null
+  @column()
+  declare signedContractFilePath: string | null
+  @column()
+  declare studentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class StudentHasResponsibleSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'isFinancial', 'isPedagogical', 'responsibleId', 'studentId', 'updatedAt'] as const
+  $columns = StudentHasResponsibleSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isFinancial: boolean
   @column()
   declare isPedagogical: boolean
   @column()
-  declare isFinancial: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare responsibleId: string
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentHasSchoolPartnerSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'schoolPartnerId', 'academicPeriodId', 'startDate', 'endDate', 'isActive', 'createdAt', 'updatedAt', 'userId'] as const
+  static $columns = ['academicPeriodId', 'createdAt', 'endDate', 'id', 'isActive', 'schoolPartnerId', 'startDate', 'studentId', 'updatedAt', 'userId'] as const
   $columns = StudentHasSchoolPartnerSchema.$columns
+  @column()
+  declare academicPeriodId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.date()
+  declare endDate: DateTime | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentId: string
+  declare isActive: boolean
   @column()
   declare schoolPartnerId: string
-  @column()
-  declare academicPeriodId: string
   @column.date()
   declare startDate: DateTime
-  @column.date()
-  declare endDate: DateTime | null
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
@@ -2996,598 +2996,598 @@ export class StudentHasSchoolPartnerSchema extends BaseModel {
 }
 
 export class StudentMedicalInfoSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'conditions', 'documents', 'createdAt', 'updatedAt'] as const
+  static $columns = ['conditions', 'createdAt', 'documents', 'id', 'studentId', 'updatedAt'] as const
   $columns = StudentMedicalInfoSchema.$columns
+  @column()
+  declare conditions: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare documents: any | null
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare studentId: string
-  @column()
-  declare conditions: string | null
-  @column()
-  declare documents: any | null
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentMedicationSchema extends BaseModel {
-  static $columns = ['id', 'medicalInfoId', 'name', 'dosage', 'frequency', 'instructions', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'dosage', 'frequency', 'id', 'instructions', 'medicalInfoId', 'name', 'updatedAt'] as const
   $columns = StudentMedicationSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare medicalInfoId: string
-  @column()
-  declare name: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare dosage: string
   @column()
   declare frequency: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare instructions: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare medicalInfoId: string
+  @column()
+  declare name: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class StudentPaymentSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'amount', 'month', 'year', 'type', 'status', 'totalAmount', 'dueDate', 'installments', 'installmentNumber', 'discountPercentage', 'paidAt', 'emailSentAt', 'contractId', 'classHasAcademicPeriodId', 'studentHasLevelId', 'invoiceUrl', 'paymentGatewayId', 'paymentGateway', 'metadata', 'agreementId', 'insuranceBillingId', 'createdAt', 'updatedAt', 'invoiceId', 'studentHasExtraClassId', 'discountType', 'discountValue'] as const
+  static $columns = ['agreementId', 'amount', 'classHasAcademicPeriodId', 'contractId', 'createdAt', 'discountPercentage', 'discountType', 'discountValue', 'dueDate', 'emailSentAt', 'id', 'installmentNumber', 'installments', 'insuranceBillingId', 'invoiceId', 'invoiceUrl', 'metadata', 'month', 'paidAt', 'paymentGateway', 'paymentGatewayId', 'status', 'studentHasExtraClassId', 'studentHasLevelId', 'studentId', 'totalAmount', 'type', 'updatedAt', 'year'] as const
   $columns = StudentPaymentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
-  @column()
-  declare amount: number
-  @column()
-  declare month: number
-  @column()
-  declare year: number
-  @column()
-  declare type: any
-  @column()
-  declare status: any
-  @column()
-  declare totalAmount: number
-  @column.date()
-  declare dueDate: DateTime
-  @column()
-  declare installments: number
-  @column()
-  declare installmentNumber: number
-  @column()
-  declare discountPercentage: number
-  @column.date()
-  declare paidAt: DateTime | null
-  @column.dateTime()
-  declare emailSentAt: DateTime | null
-  @column()
-  declare contractId: string
-  @column()
-  declare classHasAcademicPeriodId: string | null
-  @column()
-  declare studentHasLevelId: string | null
-  @column()
-  declare invoiceUrl: string | null
-  @column()
-  declare paymentGatewayId: string | null
-  @column()
-  declare paymentGateway: any | null
-  @column()
-  declare metadata: any | null
   @column()
   declare agreementId: string | null
   @column()
-  declare insuranceBillingId: string | null
+  declare amount: number
+  @column()
+  declare classHasAcademicPeriodId: string | null
+  @column()
+  declare contractId: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
-  declare invoiceId: string | null
-  @column()
-  declare studentHasExtraClassId: string | null
+  declare discountPercentage: number
   @column()
   declare discountType: string
   @column()
   declare discountValue: number
-}
-
-export class StudentPaymentEmailNotificationSchema extends BaseModel {
-  static $columns = ['id', 'studentPaymentId', 'emailType', 'recipients', 'sentAt', 'daysOverdue', 'metadata'] as const
-  $columns = StudentPaymentEmailNotificationSchema.$columns
+  @column.date()
+  declare dueDate: DateTime
+  @column.dateTime()
+  declare emailSentAt: DateTime | null
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentPaymentId: string
+  declare installmentNumber: number
+  @column()
+  declare installments: number
+  @column()
+  declare insuranceBillingId: string | null
+  @column()
+  declare invoiceId: string | null
+  @column()
+  declare invoiceUrl: string | null
+  @column()
+  declare metadata: any | null
+  @column()
+  declare month: number
+  @column.date()
+  declare paidAt: DateTime | null
+  @column()
+  declare paymentGateway: any | null
+  @column()
+  declare paymentGatewayId: string | null
+  @column()
+  declare status: any
+  @column()
+  declare studentHasExtraClassId: string | null
+  @column()
+  declare studentHasLevelId: string | null
+  @column()
+  declare studentId: string
+  @column()
+  declare totalAmount: number
+  @column()
+  declare type: any
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare year: number
+}
+
+export class StudentPaymentEmailNotificationSchema extends BaseModel {
+  static $columns = ['daysOverdue', 'emailType', 'id', 'metadata', 'recipients', 'sentAt', 'studentPaymentId'] as const
+  $columns = StudentPaymentEmailNotificationSchema.$columns
+  @column()
+  declare daysOverdue: number | null
   @column()
   declare emailType: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare metadata: any | null
   @column()
   declare recipients: any
   @column.dateTime()
   declare sentAt: DateTime
   @column()
-  declare daysOverdue: number | null
-  @column()
-  declare metadata: any | null
+  declare studentPaymentId: string
 }
 
 export class SubjectSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'schoolId', 'createdAt', 'updatedAt', 'quantityNeededScheduled'] as const
+  static $columns = ['createdAt', 'id', 'name', 'quantityNeededScheduled', 'schoolId', 'slug', 'updatedAt'] as const
   $columns = SubjectSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare name: string
   @column()
-  declare slug: string
+  declare quantityNeededScheduled: number
   @column()
   declare schoolId: string
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare slug: string
   @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare quantityNeededScheduled: number
 }
 
 export class SubscriptionSchema extends BaseModel {
-  static $columns = ['id', 'planId', 'schoolId', 'schoolChainId', 'status', 'billingCycle', 'currentPeriodStart', 'currentPeriodEnd', 'trialEndsAt', 'canceledAt', 'pausedAt', 'blockedAt', 'pricePerStudent', 'activeStudents', 'monthlyAmount', 'discount', 'paymentGatewayId', 'paymentMethod', 'creditCardToken', 'creditCardHolderName', 'creditCardLastFourDigits', 'creditCardBrand', 'createdAt', 'updatedAt', 'billingModel', 'monthlyFixedPrice'] as const
+  static $columns = ['activeStudents', 'billingCycle', 'billingModel', 'blockedAt', 'canceledAt', 'createdAt', 'creditCardBrand', 'creditCardHolderName', 'creditCardLastFourDigits', 'creditCardToken', 'currentPeriodEnd', 'currentPeriodStart', 'discount', 'id', 'monthlyAmount', 'monthlyFixedPrice', 'pausedAt', 'paymentGatewayId', 'paymentMethod', 'planId', 'pricePerStudent', 'schoolChainId', 'schoolId', 'status', 'trialEndsAt', 'updatedAt'] as const
   $columns = SubscriptionSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare planId: string | null
-  @column()
-  declare schoolId: string | null
-  @column()
-  declare schoolChainId: string | null
-  @column()
-  declare status: any
-  @column()
-  declare billingCycle: any
-  @column.date()
-  declare currentPeriodStart: DateTime
-  @column.date()
-  declare currentPeriodEnd: DateTime
-  @column.date()
-  declare trialEndsAt: DateTime | null
-  @column.dateTime()
-  declare canceledAt: DateTime | null
-  @column.dateTime()
-  declare pausedAt: DateTime | null
-  @column.dateTime()
-  declare blockedAt: DateTime | null
-  @column()
-  declare pricePerStudent: number
   @column()
   declare activeStudents: number
   @column()
-  declare monthlyAmount: number
+  declare billingCycle: any
   @column()
-  declare discount: number
+  declare billingModel: string
+  @column.dateTime()
+  declare blockedAt: DateTime | null
+  @column.dateTime()
+  declare canceledAt: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
-  declare paymentGatewayId: string | null
-  @column()
-  declare paymentMethod: string | null
-  @column()
-  declare creditCardToken: string | null
+  declare creditCardBrand: string | null
   @column()
   declare creditCardHolderName: string | null
   @column()
   declare creditCardLastFourDigits: string | null
   @column()
-  declare creditCardBrand: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  declare creditCardToken: string | null
+  @column.date()
+  declare currentPeriodEnd: DateTime
+  @column.date()
+  declare currentPeriodStart: DateTime
   @column()
-  declare billingModel: string
-  @column()
-  declare monthlyFixedPrice: number | null
-}
-
-export class SubscriptionEmailNotificationSchema extends BaseModel {
-  static $columns = ['id', 'subscriptionInvoiceId', 'emailType', 'recipients', 'sentAt', 'daysOverdue', 'metadata'] as const
-  $columns = SubscriptionEmailNotificationSchema.$columns
+  declare discount: number
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare subscriptionInvoiceId: string
+  declare monthlyAmount: number
+  @column()
+  declare monthlyFixedPrice: number | null
+  @column.dateTime()
+  declare pausedAt: DateTime | null
+  @column()
+  declare paymentGatewayId: string | null
+  @column()
+  declare paymentMethod: string | null
+  @column()
+  declare planId: string | null
+  @column()
+  declare pricePerStudent: number
+  @column()
+  declare schoolChainId: string | null
+  @column()
+  declare schoolId: string | null
+  @column()
+  declare status: any
+  @column.date()
+  declare trialEndsAt: DateTime | null
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class SubscriptionEmailNotificationSchema extends BaseModel {
+  static $columns = ['daysOverdue', 'emailType', 'id', 'metadata', 'recipients', 'sentAt', 'subscriptionInvoiceId'] as const
+  $columns = SubscriptionEmailNotificationSchema.$columns
+  @column()
+  declare daysOverdue: number | null
   @column()
   declare emailType: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare metadata: any | null
   @column()
   declare recipients: any
   @column.dateTime()
   declare sentAt: DateTime
   @column()
-  declare daysOverdue: number | null
-  @column()
-  declare metadata: any | null
+  declare subscriptionInvoiceId: string
 }
 
 export class SubscriptionInvoiceSchema extends BaseModel {
-  static $columns = ['id', 'subscriptionId', 'academicPeriodId', 'month', 'year', 'activeStudents', 'amount', 'status', 'dueDate', 'paidAt', 'invoiceUrl', 'paymentGatewayId', 'description', 'paymentMethodSnapshot', 'creditCardLastFourDigits', 'creditCardBrand', 'metadata', 'createdAt', 'updatedAt', 'chargeRetryCount', 'nextChargeRetryAt', 'lastChargeAttemptAt', 'lastChargeError', 'collectionStatus'] as const
+  static $columns = ['academicPeriodId', 'activeStudents', 'amount', 'chargeRetryCount', 'collectionStatus', 'createdAt', 'creditCardBrand', 'creditCardLastFourDigits', 'description', 'dueDate', 'id', 'invoiceUrl', 'lastChargeAttemptAt', 'lastChargeError', 'metadata', 'month', 'nextChargeRetryAt', 'paidAt', 'paymentGatewayId', 'paymentMethodSnapshot', 'status', 'subscriptionId', 'updatedAt', 'year'] as const
   $columns = SubscriptionInvoiceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare subscriptionId: string
   @column()
   declare academicPeriodId: string | null
-  @column()
-  declare month: number
-  @column()
-  declare year: number
   @column()
   declare activeStudents: number
   @column()
   declare amount: number
   @column()
-  declare status: any
-  @column.date()
-  declare dueDate: DateTime
-  @column.date()
-  declare paidAt: DateTime | null
+  declare chargeRetryCount: number
   @column()
-  declare invoiceUrl: string | null
-  @column()
-  declare paymentGatewayId: string | null
-  @column()
-  declare description: string | null
-  @column()
-  declare paymentMethodSnapshot: string | null
-  @column()
-  declare creditCardLastFourDigits: string | null
+  declare collectionStatus: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare creditCardBrand: string | null
   @column()
-  declare metadata: any | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
+  declare creditCardLastFourDigits: string | null
   @column()
-  declare chargeRetryCount: number
-  @column.dateTime()
-  declare nextChargeRetryAt: DateTime | null
+  declare description: string | null
+  @column.date()
+  declare dueDate: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare invoiceUrl: string | null
   @column.dateTime()
   declare lastChargeAttemptAt: DateTime | null
   @column()
   declare lastChargeError: string | null
   @column()
-  declare collectionStatus: string
+  declare metadata: any | null
+  @column()
+  declare month: number
+  @column.dateTime()
+  declare nextChargeRetryAt: DateTime | null
+  @column.date()
+  declare paidAt: DateTime | null
+  @column()
+  declare paymentGatewayId: string | null
+  @column()
+  declare paymentMethodSnapshot: string | null
+  @column()
+  declare status: any
+  @column()
+  declare subscriptionId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare year: number
 }
 
 export class SubscriptionPlanSchema extends BaseModel {
-  static $columns = ['id', 'name', 'tier', 'description', 'monthlyPrice', 'annualPrice', 'maxStudents', 'maxTeachers', 'maxSchoolsInChain', 'features', 'isActive', 'createdAt', 'updatedAt'] as const
+  static $columns = ['annualPrice', 'createdAt', 'description', 'features', 'id', 'isActive', 'maxSchoolsInChain', 'maxStudents', 'maxTeachers', 'monthlyPrice', 'name', 'tier', 'updatedAt'] as const
   $columns = SubscriptionPlanSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare name: string
-  @column()
-  declare tier: any
+  declare annualPrice: number | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare description: string | null
   @column()
-  declare monthlyPrice: number
+  declare features: any
+  @column({ isPrimary: true })
+  declare id: string
   @column()
-  declare annualPrice: number | null
+  declare isActive: boolean
+  @column()
+  declare maxSchoolsInChain: number | null
   @column()
   declare maxStudents: number | null
   @column()
   declare maxTeachers: number | null
   @column()
-  declare maxSchoolsInChain: number | null
+  declare monthlyPrice: number
   @column()
-  declare features: any
+  declare name: string
   @column()
-  declare isActive: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare tier: any
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class SubscriptionStatusHistorySchema extends BaseModel {
-  static $columns = ['id', 'subscriptionId', 'fromStatus', 'toStatus', 'reason', 'changedAt'] as const
+  static $columns = ['changedAt', 'fromStatus', 'id', 'reason', 'subscriptionId', 'toStatus'] as const
   $columns = SubscriptionStatusHistorySchema.$columns
+  @column.dateTime()
+  declare changedAt: DateTime
+  @column()
+  declare fromStatus: any | null
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare reason: string | null
   @column()
   declare subscriptionId: string
   @column()
-  declare fromStatus: any | null
-  @column()
   declare toStatus: any
-  @column()
-  declare reason: string | null
-  @column.dateTime()
-  declare changedAt: DateTime
 }
 
 export class TeacherSchema extends BaseModel {
-  static $columns = ['id', 'hourlyRate'] as const
+  static $columns = ['hourlyRate', 'id'] as const
   $columns = TeacherSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
   declare hourlyRate: number
+  @column({ isPrimary: true })
+  declare id: string
 }
 
 export class TeacherAbsenceSchema extends BaseModel {
-  static $columns = ['id', 'absenceId', 'calendarSlotId', 'teacherIdTookPlace'] as const
+  static $columns = ['absenceId', 'calendarSlotId', 'id', 'teacherIdTookPlace'] as const
   $columns = TeacherAbsenceSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
   declare absenceId: string
   @column()
   declare calendarSlotId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column()
   declare teacherIdTookPlace: string | null
 }
 
 export class TeacherAvailabilitySchema extends BaseModel {
-  static $columns = ['id', 'teacherId', 'createdAt', 'updatedAt', 'day', 'startTime', 'endTime'] as const
+  static $columns = ['createdAt', 'day', 'endTime', 'id', 'startTime', 'teacherId', 'updatedAt'] as const
   $columns = TeacherAvailabilitySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare teacherId: string
   @column.dateTime()
   declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare day: string
   @column()
-  declare startTime: string
-  @column()
   declare endTime: string
-}
-
-export class TeacherHasClassSchema extends BaseModel {
-  static $columns = ['id', 'teacherId', 'classId', 'subjectId', 'subjectQuantity', 'classWeekDay', 'startTime', 'endTime', 'teacherAvailabilityId', 'createdAt', 'updatedAt', 'isActive'] as const
-  $columns = TeacherHasClassSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare startTime: string
+  @column()
   declare teacherId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class TeacherHasClassSchema extends BaseModel {
+  static $columns = ['classId', 'classWeekDay', 'createdAt', 'endTime', 'id', 'isActive', 'startTime', 'subjectId', 'subjectQuantity', 'teacherAvailabilityId', 'teacherId', 'updatedAt'] as const
+  $columns = TeacherHasClassSchema.$columns
   @column()
   declare classId: string
+  @column()
+  declare classWeekDay: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare endTime: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isActive: boolean
+  @column()
+  declare startTime: string | null
   @column()
   declare subjectId: string
   @column()
   declare subjectQuantity: number
   @column()
-  declare classWeekDay: string | null
-  @column()
-  declare startTime: string | null
-  @column()
-  declare endTime: string | null
-  @column()
   declare teacherAvailabilityId: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare teacherId: string
   @column.dateTime()
   declare updatedAt: DateTime
-  @column()
-  declare isActive: boolean
 }
 
 export class TeacherHasSubjectSchema extends BaseModel {
-  static $columns = ['id', 'teacherId', 'subjectId'] as const
+  static $columns = ['id', 'subjectId', 'teacherId'] as const
   $columns = TeacherHasSubjectSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare teacherId: string
-  @column()
   declare subjectId: string
+  @column()
+  declare teacherId: string
 }
 
 export class TimesheetSchema extends BaseModel {
-  static $columns = ['id', 'schoolId', 'name', 'month', 'year', 'status', 'createdAt', 'updatedAt', 'closedAt'] as const
+  static $columns = ['closedAt', 'createdAt', 'id', 'month', 'name', 'schoolId', 'status', 'updatedAt', 'year'] as const
   $columns = TimesheetSchema.$columns
+  @column.dateTime()
+  declare closedAt: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare schoolId: string
-  @column()
-  declare name: string
   @column()
   declare month: number
   @column()
-  declare year: number
+  declare name: string
+  @column()
+  declare schoolId: string
   @column()
   declare status: any
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
   declare updatedAt: DateTime
-  @column.dateTime()
-  declare closedAt: DateTime | null
+  @column()
+  declare year: number
 }
 
 export class TimesheetEntrySchema extends BaseModel {
-  static $columns = ['id', 'employeeTimesheetId', 'date', 'worked', 'entryTime', 'exitTime', 'observations', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'date', 'employeeTimesheetId', 'entryTime', 'exitTime', 'id', 'observations', 'updatedAt', 'worked'] as const
   $columns = TimesheetEntrySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare employeeTimesheetId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column.date()
   declare date: DateTime
   @column()
-  declare worked: boolean
+  declare employeeTimesheetId: string
   @column()
   declare entryTime: string | null
   @column()
   declare exitTime: string | null
-  @column()
-  declare observations: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-}
-
-export class TuitionTransferSchema extends BaseModel {
-  static $columns = ['id', 'studentPaymentId', 'schoolId', 'paymentAmount', 'platformFeeAmount', 'transferAmount', 'platformFeePercentage', 'status', 'pixTransactionId', 'pixTransactionStatus', 'failureReason', 'retryCount', 'lastRetryAt', 'processedAt', 'createdAt', 'updatedAt'] as const
-  $columns = TuitionTransferSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare studentPaymentId: string
+  declare observations: string | null
+  @column.dateTime()
+  declare updatedAt: DateTime
   @column()
-  declare schoolId: string
+  declare worked: boolean
+}
+
+export class TuitionTransferSchema extends BaseModel {
+  static $columns = ['createdAt', 'failureReason', 'id', 'lastRetryAt', 'paymentAmount', 'pixTransactionId', 'pixTransactionStatus', 'platformFeeAmount', 'platformFeePercentage', 'processedAt', 'retryCount', 'schoolId', 'status', 'studentPaymentId', 'transferAmount', 'updatedAt'] as const
+  $columns = TuitionTransferSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare failureReason: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare lastRetryAt: DateTime | null
   @column()
   declare paymentAmount: number
-  @column()
-  declare platformFeeAmount: number
-  @column()
-  declare transferAmount: number
-  @column()
-  declare platformFeePercentage: number
-  @column()
-  declare status: any
   @column()
   declare pixTransactionId: string | null
   @column()
   declare pixTransactionStatus: string | null
   @column()
-  declare failureReason: string | null
+  declare platformFeeAmount: number
   @column()
-  declare retryCount: number
-  @column.dateTime()
-  declare lastRetryAt: DateTime | null
+  declare platformFeePercentage: number
   @column.dateTime()
   declare processedAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare retryCount: number
+  @column()
+  declare schoolId: string
+  @column()
+  declare status: any
+  @column()
+  declare studentPaymentId: string
+  @column()
+  declare transferAmount: number
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['id', 'name', 'slug', 'email', 'schoolChainId', 'phone', 'whatsappContact', 'birthDate', 'documentType', 'documentNumber', 'asaasCustomerId', 'roleId', 'createdAt', 'updatedAt', 'imageUrl', 'active', 'deletedAt', 'deletedBy', 'grossSalary', 'schoolId', 'emailVerifiedAt', 'lastLoggedInAt'] as const
+  static $columns = ['active', 'asaasCustomerId', 'birthDate', 'createdAt', 'deletedAt', 'deletedBy', 'documentNumber', 'documentType', 'email', 'emailVerifiedAt', 'grossSalary', 'id', 'imageUrl', 'lastLoggedInAt', 'name', 'phone', 'roleId', 'schoolChainId', 'schoolId', 'slug', 'updatedAt', 'whatsappContact'] as const
   $columns = UserSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare name: string
-  @column()
-  declare slug: string
-  @column()
-  declare email: string | null
-  @column()
-  declare schoolChainId: string | null
-  @column()
-  declare phone: string | null
-  @column()
-  declare whatsappContact: boolean
-  @column.date()
-  declare birthDate: DateTime | null
-  @column()
-  declare documentType: string | null
-  @column()
-  declare documentNumber: string | null
-  @column()
-  declare asaasCustomerId: string | null
-  @column()
-  declare roleId: string
-  @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
-  declare updatedAt: DateTime
-  @column()
-  declare imageUrl: string | null
   @column()
   declare active: boolean
+  @column()
+  declare asaasCustomerId: string | null
+  @column.date()
+  declare birthDate: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
   @column.dateTime()
   declare deletedAt: DateTime | null
   @column()
   declare deletedBy: string | null
   @column()
-  declare grossSalary: number
+  declare documentNumber: string | null
   @column()
-  declare schoolId: string | null
+  declare documentType: string | null
+  @column()
+  declare email: string | null
   @column.dateTime()
   declare emailVerifiedAt: DateTime | null
+  @column()
+  declare grossSalary: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare imageUrl: string | null
   @column.dateTime()
   declare lastLoggedInAt: DateTime | null
+  @column()
+  declare name: string
+  @column()
+  declare phone: string | null
+  @column()
+  declare roleId: string
+  @column()
+  declare schoolChainId: string | null
+  @column()
+  declare schoolId: string | null
+  @column()
+  declare slug: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare whatsappContact: boolean
 }
 
 export class UserCredentialSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'credentialId', 'publicKey', 'counter', 'deviceName', 'transports', 'createdAt', 'lastUsedAt'] as const
+  static $columns = ['counter', 'createdAt', 'credentialId', 'deviceName', 'id', 'lastUsedAt', 'publicKey', 'transports', 'userId'] as const
   $columns = UserCredentialSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare userId: string
+  declare counter: bigint | number
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare credentialId: string
   @column()
-  declare publicKey: Buffer
-  @column()
-  declare counter: bigint | number
-  @column()
   declare deviceName: string | null
-  @column()
-  declare transports: any | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare lastUsedAt: DateTime
+  @column()
+  declare publicKey: Buffer
+  @column()
+  declare transports: any | null
+  @column()
+  declare userId: string
 }
 
 export class UserHasSchoolSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'schoolId', 'isDefault', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'isDefault', 'schoolId', 'updatedAt', 'userId'] as const
   $columns = UserHasSchoolSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare userId: string
+  declare isDefault: boolean
   @column()
   declare schoolId: string
-  @column()
-  declare isDefault: boolean
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare userId: string
 }
 
 export class UserHasSchoolGroupSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'schoolGroupId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'schoolGroupId', 'updatedAt', 'userId'] as const
   $columns = UserHasSchoolGroupSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare userId: string
-  @column()
   declare schoolGroupId: string
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare userId: string
 }
 
 export class UserLikedPostSchema extends BaseModel {
-  static $columns = ['id', 'postId', 'createdAt', 'updatedAt', 'userId'] as const
+  static $columns = ['createdAt', 'id', 'postId', 'updatedAt', 'userId'] as const
   $columns = UserLikedPostSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare postId: number
-  @column.dateTime()
-  declare createdAt: DateTime
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
@@ -3595,199 +3595,195 @@ export class UserLikedPostSchema extends BaseModel {
 }
 
 export class UserSchoolGroupSelectionSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'schoolGroupId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'schoolGroupId', 'updatedAt', 'userId'] as const
   $columns = UserSchoolGroupSelectionSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare userId: string
   @column()
   declare schoolGroupId: string
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare userId: string
 }
 
 export class UserSchoolSelectionSchema extends BaseModel {
-  static $columns = ['id', 'userId', 'schoolId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'schoolId', 'updatedAt', 'userId'] as const
   $columns = UserSchoolSelectionSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
-  @column()
-  declare userId: string
   @column()
   declare schoolId: string
   @column.dateTime()
-  declare createdAt: DateTime
-  @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare userId: string
 }
 
 export class WalletTopUpSchema extends BaseModel {
-  static $columns = ['id', 'studentId', 'responsibleUserId', 'amount', 'status', 'paymentGateway', 'paymentGatewayId', 'paymentMethod', 'paidAt', 'createdAt', 'updatedAt'] as const
+  static $columns = ['amount', 'createdAt', 'id', 'paidAt', 'paymentGateway', 'paymentGatewayId', 'paymentMethod', 'responsibleUserId', 'status', 'studentId', 'updatedAt'] as const
   $columns = WalletTopUpSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare studentId: string
-  @column()
-  declare responsibleUserId: string
   @column()
   declare amount: number
-  @column()
-  declare status: any
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare paidAt: DateTime | null
   @column()
   declare paymentGateway: string
   @column()
   declare paymentGatewayId: string | null
   @column()
   declare paymentMethod: string | null
-  @column.dateTime()
-  declare paidAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column()
+  declare responsibleUserId: string
+  @column()
+  declare status: any
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class WebhookEventSchema extends BaseModel {
-  static $columns = ['id', 'eventId', 'provider', 'eventType', 'payload', 'status', 'processedAt', 'error', 'attempts', 'createdAt', 'updatedAt'] as const
+  static $columns = ['attempts', 'createdAt', 'error', 'eventId', 'eventType', 'id', 'payload', 'processedAt', 'provider', 'status', 'updatedAt'] as const
   $columns = WebhookEventSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare eventId: string
-  @column()
-  declare provider: any
-  @column()
-  declare eventType: string
-  @column()
-  declare payload: any
-  @column()
-  declare status: any
-  @column.dateTime()
-  declare processedAt: DateTime | null
-  @column()
-  declare error: string | null
   @column()
   declare attempts: number
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare error: string | null
+  @column()
+  declare eventId: string
+  @column()
+  declare eventType: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare payload: any
+  @column.dateTime()
+  declare processedAt: DateTime | null
+  @column()
+  declare provider: any
+  @column()
+  declare status: any
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class AssignmentHistorySchema extends BaseModel {
-  static $columns = ['id', 'assignmentId', 'actorUserId', 'changedAt', 'changes', 'createdAt', 'updatedAt'] as const
+  static $columns = ['actorUserId', 'assignmentId', 'changedAt', 'changes', 'createdAt', 'id', 'updatedAt'] as const
   $columns = AssignmentHistorySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare assignmentId: string
   @column()
   declare actorUserId: string
+  @column()
+  declare assignmentId: string
   @column.dateTime()
   declare changedAt: DateTime
   @column()
   declare changes: any
   @column.dateTime()
   declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class AuditSchema extends BaseModel {
-  static $columns = ['id', 'userType', 'event', 'auditableType', 'oldValues', 'newValues', 'metadata', 'createdAt', 'updatedAt', 'auditableId', 'userId'] as const
+  static $columns = ['auditableId', 'auditableType', 'createdAt', 'event', 'id', 'metadata', 'newValues', 'oldValues', 'updatedAt', 'userId', 'userType'] as const
   $columns = AuditSchema.$columns
-  @column({ isPrimary: true })
-  declare id: number
-  @column()
-  declare userType: string | null
-  @column()
-  declare event: string
-  @column()
-  declare auditableType: string
-  @column()
-  declare oldValues: any | null
-  @column()
-  declare newValues: any | null
-  @column()
-  declare metadata: any | null
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime | null
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime | null
   @column()
   declare auditableId: string
   @column()
+  declare auditableType: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare event: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare metadata: any | null
+  @column()
+  declare newValues: any | null
+  @column()
+  declare oldValues: any | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
   declare userId: string | null
+  @column()
+  declare userType: string | null
 }
 
 export class BentocacheSchema extends BaseModel {
-  static $columns = ['key', 'value', 'expiresAt'] as const
+  static $columns = ['expiresAt', 'key', 'value'] as const
   $columns = BentocacheSchema.$columns
-  @column()
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
   declare key: string
   @column()
   declare value: string
-  @column.dateTime()
-  declare expiresAt: DateTime
 }
 
 export class ExamAttachmentSchema extends BaseModel {
-  static $columns = ['id', 'examId', 'title', 'fileName', 'fileUrl', 'fileSize', 'mimeType', 'uploadedBy', 'createdAt'] as const
+  static $columns = ['createdAt', 'examId', 'fileName', 'fileSize', 'fileUrl', 'id', 'mimeType', 'title', 'uploadedBy'] as const
   $columns = ExamAttachmentSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare examId: string
-  @column()
-  declare title: string
   @column()
   declare fileName: string
   @column()
-  declare fileUrl: string
-  @column()
   declare fileSize: number | null
   @column()
-  declare mimeType: string | null
-  @column()
-  declare uploadedBy: string
-  @column.dateTime()
-  declare createdAt: DateTime
-}
-
-export class ExamGradeSchema extends BaseModel {
-  static $columns = ['id', 'examId', 'studentId', 'score', 'attended', 'feedback', 'gradedAt', 'createdAt', 'updatedAt'] as const
-  $columns = ExamGradeSchema.$columns
+  declare fileUrl: string
   @column({ isPrimary: true })
   declare id: string
   @column()
-  declare examId: string
+  declare mimeType: string | null
   @column()
-  declare studentId: string
+  declare title: string
   @column()
-  declare score: number | null
+  declare uploadedBy: string
+}
+
+export class ExamGradeSchema extends BaseModel {
+  static $columns = ['attended', 'createdAt', 'examId', 'feedback', 'gradedAt', 'id', 'score', 'studentId', 'updatedAt'] as const
+  $columns = ExamGradeSchema.$columns
   @column()
   declare attended: boolean
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare examId: string
   @column()
   declare feedback: string | null
   @column.dateTime()
   declare gradedAt: DateTime | null
-  @column.dateTime()
-  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare score: number | null
+  @column()
+  declare studentId: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ExamHistorySchema extends BaseModel {
-  static $columns = ['id', 'examId', 'actorUserId', 'changedAt', 'changes', 'createdAt', 'updatedAt'] as const
+  static $columns = ['actorUserId', 'changedAt', 'changes', 'createdAt', 'examId', 'id', 'updatedAt'] as const
   $columns = ExamHistorySchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
-  @column()
-  declare examId: string
   @column()
   declare actorUserId: string
   @column.dateTime()
@@ -3796,234 +3792,238 @@ export class ExamHistorySchema extends BaseModel {
   declare changes: any
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare examId: string
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
   declare updatedAt: DateTime
 }
 
 export class ExamSchema extends BaseModel {
-  static $columns = ['id', 'title', 'description', 'examDate', 'startTime', 'endTime', 'location', 'maxScore', 'weight', 'type', 'status', 'instructions', 'schoolId', 'classId', 'subjectId', 'teacherId', 'academicPeriodId', 'createdAt', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'classId', 'createdAt', 'description', 'endTime', 'examDate', 'id', 'instructions', 'location', 'maxScore', 'schoolId', 'startTime', 'status', 'subjectId', 'teacherId', 'title', 'type', 'updatedAt', 'weight'] as const
   $columns = ExamSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare title: string
+  declare academicPeriodId: string
+  @column()
+  declare classId: string
+  @column.dateTime()
+  declare createdAt: DateTime
   @column()
   declare description: string | null
   @column.dateTime()
-  declare examDate: DateTime
-  @column.dateTime()
-  declare startTime: DateTime | null
-  @column.dateTime()
   declare endTime: DateTime | null
+  @column.dateTime()
+  declare examDate: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare instructions: string | null
   @column()
   declare location: any | null
   @column()
   declare maxScore: number
   @column()
-  declare weight: number
-  @column()
-  declare type: any
+  declare schoolId: string
+  @column.dateTime()
+  declare startTime: DateTime | null
   @column()
   declare status: any
-  @column()
-  declare instructions: string | null
-  @column()
-  declare schoolId: string
-  @column()
-  declare classId: string
   @column()
   declare subjectId: string | null
   @column()
   declare teacherId: string
   @column()
-  declare academicPeriodId: string
-  @column.dateTime()
-  declare createdAt: DateTime
+  declare title: string
+  @column()
+  declare type: any
   @column.dateTime()
   declare updatedAt: DateTime
+  @column()
+  declare weight: number
 }
 
 export class LockSchema extends BaseModel {
-  static $columns = ['key', 'owner', 'expiration'] as const
+  static $columns = ['expiration', 'key', 'owner'] as const
   $columns = LockSchema.$columns
   @column()
+  declare expiration: bigint | number
+  @column({ isPrimary: true })
   declare key: string
   @column()
   declare owner: string
-  @column()
-  declare expiration: bigint | number
 }
 
 export class QueueJobSchema extends BaseModel {
-  static $columns = ['id', 'queue', 'status', 'data', 'score', 'workerId', 'acquiredAt', 'executeAt', 'finishedAt', 'error'] as const
+  static $columns = ['acquiredAt', 'data', 'error', 'executeAt', 'finishedAt', 'id', 'queue', 'score', 'status', 'workerId'] as const
   $columns = QueueJobSchema.$columns
-  @column({ isPrimary: true })
-  declare id: string
   @column()
-  declare queue: string
-  @column()
-  declare status: string
+  declare acquiredAt: bigint | number | null
   @column()
   declare data: string
   @column()
-  declare score: bigint | number | null
-  @column()
-  declare workerId: string | null
-  @column()
-  declare acquiredAt: bigint | number | null
+  declare error: string | null
   @column()
   declare executeAt: bigint | number | null
   @column()
   declare finishedAt: bigint | number | null
-  @column()
-  declare error: string | null
-}
-
-export class QueueScheduleSchema extends BaseModel {
-  static $columns = ['id', 'status', 'name', 'payload', 'cronExpression', 'everyMs', 'timezone', 'fromDate', 'toDate', 'runLimit', 'runCount', 'nextRunAt', 'lastRunAt', 'createdAt'] as const
-  $columns = QueueScheduleSchema.$columns
   @column({ isPrimary: true })
   declare id: string
   @column()
+  declare queue: string
+  @column()
+  declare score: bigint | number | null
+  @column()
   declare status: string
   @column()
-  declare name: string
-  @column()
-  declare payload: string
+  declare workerId: string | null
+}
+
+export class QueueScheduleSchema extends BaseModel {
+  static $columns = ['createdAt', 'cronExpression', 'everyMs', 'fromDate', 'id', 'lastRunAt', 'name', 'nextRunAt', 'payload', 'runCount', 'runLimit', 'status', 'timezone', 'toDate'] as const
+  $columns = QueueScheduleSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
   @column()
   declare cronExpression: string | null
   @column()
   declare everyMs: bigint | number | null
-  @column()
-  declare timezone: string
   @column.dateTime()
   declare fromDate: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
   @column.dateTime()
-  declare toDate: DateTime | null
+  declare lastRunAt: DateTime | null
+  @column()
+  declare name: string
+  @column.dateTime()
+  declare nextRunAt: DateTime | null
+  @column()
+  declare payload: string
+  @column()
+  declare runCount: number
   @column()
   declare runLimit: number | null
   @column()
-  declare runCount: number
+  declare status: string
+  @column()
+  declare timezone: string
   @column.dateTime()
-  declare nextRunAt: DateTime | null
-  @column.dateTime()
-  declare lastRunAt: DateTime | null
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare toDate: DateTime | null
 }
 
 export class RateLimitSchema extends BaseModel {
-  static $columns = ['key', 'points', 'expire'] as const
+  static $columns = ['expire', 'key', 'points'] as const
   $columns = RateLimitSchema.$columns
   @column()
+  declare expire: bigint | number
+  @column({ isPrimary: true })
   declare key: string
   @column()
   declare points: number
-  @column()
-  declare expire: bigint | number
 }
 
 export class SidequestJobSchema extends BaseModel {
-  static $columns = ['id', 'queue', 'state', 'script', 'class', 'args', 'constructorArgs', 'timeout', 'attempt', 'maxAttempts', 'result', 'errors', 'insertedAt', 'attemptedAt', 'availableAt', 'completedAt', 'failedAt', 'canceledAt', 'claimedBy', 'claimedAt', 'uniqueDigest', 'uniquenessConfig', 'retryDelay', 'backoffStrategy'] as const
+  static $columns = ['args', 'attempt', 'attemptedAt', 'availableAt', 'backoffStrategy', 'canceledAt', 'claimedAt', 'claimedBy', 'class', 'completedAt', 'constructorArgs', 'errors', 'failedAt', 'id', 'insertedAt', 'maxAttempts', 'queue', 'result', 'retryDelay', 'script', 'state', 'timeout', 'uniqueDigest', 'uniquenessConfig'] as const
   $columns = SidequestJobSchema.$columns
-  @column({ isPrimary: true })
-  declare id: bigint | number
-  @column()
-  declare queue: string
-  @column()
-  declare state: string
-  @column()
-  declare script: string
-  @column()
-  declare class: string
   @column()
   declare args: any
   @column()
-  declare constructorArgs: any
-  @column()
-  declare timeout: number | null
-  @column()
   declare attempt: number
-  @column()
-  declare maxAttempts: number
-  @column()
-  declare result: any | null
-  @column()
-  declare errors: any | null
-  @column.dateTime()
-  declare insertedAt: DateTime
   @column.dateTime()
   declare attemptedAt: DateTime | null
   @column.dateTime()
   declare availableAt: DateTime
-  @column.dateTime()
-  declare completedAt: DateTime | null
-  @column.dateTime()
-  declare failedAt: DateTime | null
+  @column()
+  declare backoffStrategy: string
   @column.dateTime()
   declare canceledAt: DateTime | null
-  @column()
-  declare claimedBy: string | null
   @column.dateTime()
   declare claimedAt: DateTime | null
+  @column()
+  declare claimedBy: string | null
+  @column()
+  declare class: string
+  @column.dateTime()
+  declare completedAt: DateTime | null
+  @column()
+  declare constructorArgs: any
+  @column()
+  declare errors: any | null
+  @column.dateTime()
+  declare failedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: bigint | number
+  @column.dateTime()
+  declare insertedAt: DateTime
+  @column()
+  declare maxAttempts: number
+  @column()
+  declare queue: string
+  @column()
+  declare result: any | null
+  @column()
+  declare retryDelay: number | null
+  @column()
+  declare script: string
+  @column()
+  declare state: string
+  @column()
+  declare timeout: number | null
   @column()
   declare uniqueDigest: string | null
   @column()
   declare uniquenessConfig: any | null
-  @column()
-  declare retryDelay: number | null
-  @column()
-  declare backoffStrategy: string
 }
 
 export class SidequestMigrationSchema extends BaseModel {
-  static $columns = ['id', 'name', 'batch', 'migrationTime'] as const
+  static $columns = ['batch', 'id', 'migrationTime', 'name'] as const
   $columns = SidequestMigrationSchema.$columns
-  @column({ isPrimary: true })
-  declare id: number
-  @column()
-  declare name: string | null
   @column()
   declare batch: number | null
+  @column({ isPrimary: true })
+  declare id: number
   @column.dateTime()
   declare migrationTime: DateTime | null
+  @column()
+  declare name: string | null
 }
 
 export class SidequestMigrationsLockSchema extends BaseModel {
   static $columns = ['index', 'isLocked'] as const
   $columns = SidequestMigrationsLockSchema.$columns
-  @column()
+  @column({ isPrimary: true })
   declare index: number
   @column()
   declare isLocked: number | null
 }
 
 export class SidequestQueueSchema extends BaseModel {
-  static $columns = ['id', 'name', 'state', 'concurrency', 'priority'] as const
+  static $columns = ['concurrency', 'id', 'name', 'priority', 'state'] as const
   $columns = SidequestQueueSchema.$columns
+  @column()
+  declare concurrency: number
   @column({ isPrimary: true })
   declare id: bigint | number
   @column()
   declare name: string
   @column()
-  declare state: string
-  @column()
-  declare concurrency: number
-  @column()
   declare priority: number
+  @column()
+  declare state: string
 }
 
 export class SpatialRefSySchema extends BaseModel {
-  static $columns = ['srid', 'authName', 'authSrid', 'srtext', 'proj4Text'] as const
+  static $columns = ['authName', 'authSrid', 'proj4Text', 'srid', 'srtext'] as const
   $columns = SpatialRefSySchema.$columns
-  @column()
-  declare srid: number
   @column()
   declare authName: string | null
   @column()
   declare authSrid: number | null
   @column()
-  declare srtext: string | null
-  @column()
   declare proj4Text: string | null
+  @column({ isPrimary: true })
+  declare srid: number
+  @column()
+  declare srtext: string | null
 }

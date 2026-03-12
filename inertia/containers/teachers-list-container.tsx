@@ -372,7 +372,12 @@ export function TeachersListContainer() {
 
         <Select value={status} onValueChange={(value) => setFilters({ status: value, page: 1 })}>
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder="Status">
+              {(value) =>
+                ({ active: 'Ativos', inactive: 'Inativos', all: 'Todos' })[value as string] ??
+                'Status'
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">Ativos</SelectItem>
