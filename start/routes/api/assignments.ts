@@ -11,6 +11,8 @@ const UpdateAssignmentController = () =>
   import('#controllers/assignments/update_assignment_controller')
 const DeleteAssignmentController = () =>
   import('#controllers/assignments/delete_assignment_controller')
+const ListAssignmentHistoryController = () =>
+  import('#controllers/assignments/list_assignment_history_controller')
 const ListAssignmentSubmissionsController = () =>
   import('#controllers/assignments/list_assignment_submissions_controller')
 const SubmitAssignmentController = () =>
@@ -24,6 +26,7 @@ export function registerAssignmentApiRoutes() {
       router.get('/', [ListAssignmentsController]).as('assignments.index')
       router.post('/', [CreateAssignmentController]).as('assignments.store')
       router.get('/:id', [ShowAssignmentController]).as('assignments.show')
+      router.get('/:id/history', [ListAssignmentHistoryController]).as('assignments.history')
       router.put('/:id', [UpdateAssignmentController]).as('assignments.update')
       router.delete('/:id', [DeleteAssignmentController]).as('assignments.destroy')
       router

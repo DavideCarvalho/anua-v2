@@ -5,6 +5,7 @@ export default class ExamDto extends BaseModelDto {
   declare id: string
   declare title: string
   declare description: string | null
+  declare examDate: Date
   declare scheduledDate: Date
   declare maxScore: number
   declare weight: number
@@ -32,6 +33,7 @@ export default class ExamDto extends BaseModelDto {
     this.id = exam.id
     this.title = exam.title
     this.description = exam.description
+    this.examDate = exam.examDate.toJSDate()
     this.scheduledDate = exam.examDate.toJSDate()
     this.maxScore = exam.maxScore
     this.weight = exam.weight

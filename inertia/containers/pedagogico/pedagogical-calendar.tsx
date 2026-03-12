@@ -36,7 +36,6 @@ import {
 } from '~/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { NewEventModal } from '~/containers/events/new-event-modal'
 import { NewAssignmentModal } from '~/containers/turma/new-assignment-modal'
 import { NewExamModal } from '~/containers/turma/new-exam-modal'
@@ -65,6 +64,12 @@ interface CalendarItem {
   schoolId: string
   classId: string | null
   academicPeriodId: string | null
+  teacherName?: string | null
+  school?: { id: string; name: string } | null
+  class?: { id: string; name: string } | null
+  subject?: { id: string; name: string } | null
+  teacher?: { id: string; user?: { id: string; name: string } | null } | null
+  academicPeriod?: { id: string; name: string } | null
   meta: Record<string, unknown>
 }
 
@@ -214,6 +219,8 @@ export function PedagogicalCalendar() {
   const [newEventOpen, setNewEventOpen] = useState(false)
   const [newAssignmentOpen, setNewAssignmentOpen] = useState(false)
   const [newExamOpen, setNewExamOpen] = useState(false)
+  const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null)
+  const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [dayActionDate, setDayActionDate] = useState<Date | null>(null)
 
   const { data: classesData } = useQuery(api.api.v1.classes.sidebar.queryOptions({}))
@@ -275,31 +282,15 @@ export function PedagogicalCalendar() {
     }
   }, [currentDate, viewMode])
 
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      'pedagogical-calendar',
-      selectedClass,
-      range.start.toISOString(),
-      range.end.toISOString(),
-    ],
-    enabled: true,
-    queryFn: async (): Promise<{ data: CalendarItem[] }> => {
-      const params = new URLSearchParams({
+  const { data, isLoading } = useQuery(
+    api.api.v1.pedagogicalCalendar.index.queryOptions({
+      query: {
         startDate: range.start.toISOString(),
         endDate: range.end.toISOString(),
-      })
-
-      if (selectedClass !== 'ALL') {
-        params.set('classId', selectedClass)
-      }
-
-      const response = await fetch(`/api/v1/pedagogical-calendar?${params.toString()}`)
-      if (!response.ok) {
-        throw new Error('Não foi possível carregar o calendário pedagógico')
-      }
-      return response.json()
-    },
-  })
+        ...(selectedClass !== 'ALL' ? { classId: selectedClass } : {}),
+      },
+    })
+  )
 
   const items = data?.data ?? []
 
@@ -340,15 +331,18 @@ export function PedagogicalCalendar() {
     }, {})
   }, [filteredItems])
 
+  const fullCalendarSystemUser = useMemo<FullCalendarUser>(
+    () => ({
+      id: 'pedagogical-calendar',
+      name: 'Calendário Pedagógico',
+      picturePath: null,
+    }),
+    []
+  )
+
   const fullCalendarUsers = useMemo<FullCalendarUser[]>(() => {
-    return [
-      {
-        id: 'pedagogical-calendar',
-        name: 'Calendário Pedagógico',
-        picturePath: null,
-      },
-    ]
-  }, [])
+    return [fullCalendarSystemUser]
+  }, [fullCalendarSystemUser])
 
   const fullCalendarEvents = useMemo<FullCalendarEvent[]>(() => {
     const colorByType: Record<CalendarSourceType, FullCalendarEvent['color']> = {
@@ -371,20 +365,25 @@ export function PedagogicalCalendar() {
           color: colorByType[item.sourceType],
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
-          user: fullCalendarUsers[0],
+          sourceType: item.sourceType,
+          sourceId: item.sourceId,
+          readonly: item.readonly,
+          user:
+            item.sourceType === 'ASSIGNMENT' || item.sourceType === 'EXAM'
+              ? {
+                  id: item.teacher?.id ?? 'pedagogical-calendar',
+                  name: item.teacherName ?? item.teacher?.user?.name ?? 'Professor não informado',
+                  picturePath: null,
+                }
+              : fullCalendarSystemUser,
         }
       })
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-  }, [filteredItems, fullCalendarUsers])
+  }, [filteredItems, fullCalendarSystemUser])
 
   const selectedClassForCreation = selectedClass === 'ALL' ? '' : selectedClass
 
   const handleEmptyDayAction = (date: Date, action: 'assignment' | 'exam' | 'event') => {
-    if ((action === 'assignment' || action === 'exam') && selectedClass === 'ALL') {
-      toast.info('Selecione uma turma para criar atividade ou prova.')
-      return
-    }
-
     setDayActionDate(date)
 
     if (action === 'assignment') {
@@ -406,18 +405,12 @@ export function PedagogicalCalendar() {
     }
 
     if (item.sourceType === 'ASSIGNMENT') {
-      router.visit({
-        route: 'web.escola.pedagogico.atividades.edit',
-        routeParams: { id: item.sourceId },
-      })
+      setEditingAssignmentId(item.sourceId)
       return
     }
 
     if (item.sourceType === 'EXAM') {
-      router.visit({
-        route: 'web.escola.pedagogico.provas.edit',
-        routeParams: { id: item.sourceId },
-      })
+      setEditingExamId(item.sourceId)
       return
     }
 
@@ -464,20 +457,8 @@ export function PedagogicalCalendar() {
           </Tabs>
 
           <NewItemMenu
-            onCreateAssignment={() => {
-              if (selectedClass === 'ALL') {
-                toast.info('Selecione uma turma para criar atividade.')
-                return
-              }
-              setNewAssignmentOpen(true)
-            }}
-            onCreateExam={() => {
-              if (selectedClass === 'ALL') {
-                toast.info('Selecione uma turma para criar prova.')
-                return
-              }
-              setNewExamOpen(true)
-            }}
+            onCreateAssignment={() => setNewAssignmentOpen(true)}
+            onCreateExam={() => setNewExamOpen(true)}
             onCreateEvent={() => setNewEventOpen(true)}
           />
         </div>
@@ -640,6 +621,8 @@ export function PedagogicalCalendar() {
               selectedDate={currentDate}
               isLoading={isLoading}
               showHeader={false}
+              emptyDayActionLabel="Novo item"
+              onEmptyDayAction={handleEmptyDayAction}
             />
           </div>
         </div>
@@ -710,7 +693,9 @@ export function PedagogicalCalendar() {
           setNewAssignmentOpen(open)
           if (!open) {
             setDayActionDate(null)
-            queryClient.invalidateQueries({ queryKey: ['pedagogical-calendar'] })
+            queryClient.invalidateQueries({
+              queryKey: api.api.v1.pedagogicalCalendar.index.pathKey(),
+            })
           }
         }}
         user={user}
@@ -725,7 +710,9 @@ export function PedagogicalCalendar() {
           setNewExamOpen(open)
           if (!open) {
             setDayActionDate(null)
-            queryClient.invalidateQueries({ queryKey: ['pedagogical-calendar'] })
+            queryClient.invalidateQueries({
+              queryKey: api.api.v1.pedagogicalCalendar.index.pathKey(),
+            })
           }
         }}
         user={user}
@@ -738,11 +725,53 @@ export function PedagogicalCalendar() {
           setNewEventOpen(open)
           if (!open) {
             setDayActionDate(null)
-            queryClient.invalidateQueries({ queryKey: ['pedagogical-calendar'] })
+            queryClient.invalidateQueries({
+              queryKey: api.api.v1.pedagogicalCalendar.index.pathKey(),
+            })
           }
         }}
         schoolId={selectedSchoolId}
       />
+
+      {editingAssignmentId ? (
+        <NewAssignmentModal
+          classId=""
+          academicPeriodId=""
+          open={!!editingAssignmentId}
+          assignmentId={editingAssignmentId}
+          mode="edit"
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingAssignmentId(null)
+              queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
+              queryClient.invalidateQueries({
+                queryKey: api.api.v1.pedagogicalCalendar.index.pathKey(),
+              })
+            }
+          }}
+          user={user}
+        />
+      ) : null}
+
+      {editingExamId ? (
+        <NewExamModal
+          classId=""
+          academicPeriodId=""
+          open={!!editingExamId}
+          examId={editingExamId}
+          mode="edit"
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingExamId(null)
+              queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
+              queryClient.invalidateQueries({
+                queryKey: api.api.v1.pedagogicalCalendar.index.pathKey(),
+              })
+            }
+          }}
+          user={user}
+        />
+      ) : null}
     </div>
   )
 }

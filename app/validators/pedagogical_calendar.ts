@@ -7,3 +7,9 @@ export const listPedagogicalCalendarValidator = vine.compile(
     endDate: vine.string().trim().optional(),
   })
 )
+
+export const getPedagogicalCreationContextValidator = vine.compile(
+  vine.object({
+    academicPeriodId: vine.string().trim().optional(),
+  })
+)

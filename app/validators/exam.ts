@@ -25,7 +25,7 @@ export const updateExamValidator = vine.compile(
     maxScore: vine.number().min(0).optional(),
     type: vine.enum(['WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT', 'QUIZ']).optional(),
     status: vine.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
-    scheduledDate: vine.date().optional(),
+    scheduledDate: vine.date({ formats: ['iso8601'] }).optional(),
     durationMinutes: vine.number().min(1).optional().nullable(),
   })
 )

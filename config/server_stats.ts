@@ -10,10 +10,9 @@ import {
 } from 'adonisjs-server-stats/collectors'
 
 export default defineConfig({
-  intervalMs: 3000,
-  channelName: 'admin/server-stats',
-  endpoint: '/admin/api/server-stats',
-  transport: 'none',
+  pollInterval: 3000,
+  statsEndpoint: '/admin/api/server-stats',
+  realtime: false,
   collectors: [
     processCollector(),
     systemCollector(),
@@ -22,12 +21,14 @@ export default defineConfig({
     logCollector({ logPath: 'logs/adonisjs.log' }),
     appCollector(),
   ],
-  devToolbar: {
-    enabled: true,
+  toolbar: {
     tracing: true,
-    dashboard: true,
-    slowQueryThresholdMs: 100,
-    persistDebugData: true,
+    slowQueryThreshold: 100,
+    persist: true,
   },
-  shouldShow: (_ctx) => !app.inProduction,
+  dashboard: true,
+  advanced: {
+    channelName: 'admin/server-stats',
+  },
+  authorize: (_ctx) => !app.inProduction,
 })

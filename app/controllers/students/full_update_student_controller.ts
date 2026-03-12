@@ -144,12 +144,10 @@ export default class FullUpdateStudentController {
 
           if (existingResponsible) {
             responsibleUser = existingResponsible
-            // Update existing responsible data (skip email if already verified)
+            // Update existing responsible data
             responsibleUser.merge({
               name: respData.name,
-              ...(!existingResponsible.emailVerifiedAt && respData.email
-                ? { email: respData.email.trim().toLowerCase() }
-                : {}),
+              email: respData.email.trim().toLowerCase(),
               phone: respData.phone,
               birthDate: DateTime.fromISO(respData.birthDate),
               documentType: respData.documentType,

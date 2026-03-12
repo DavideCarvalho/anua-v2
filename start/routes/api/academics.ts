@@ -94,6 +94,7 @@ const ShowExamController = () => import('#controllers/exams/show_exam_controller
 const CreateExamController = () => import('#controllers/exams/create_exam_controller')
 const UpdateExamController = () => import('#controllers/exams/update_exam_controller')
 const DeleteExamController = () => import('#controllers/exams/delete_exam_controller')
+const ListExamHistoryController = () => import('#controllers/exams/list_exam_history_controller')
 const ListExamGradesController = () => import('#controllers/exams/list_exam_grades_controller')
 const SaveExamGradeController = () => import('#controllers/exams/save_exam_grade_controller')
 const BatchSaveExamGradesController = () =>
@@ -314,6 +315,7 @@ export function registerExamApiRoutes() {
       router.get('/', [ListExamsController]).as('exams.index')
       router.post('/', [CreateExamController]).as('exams.store')
       router.get('/:id', [ShowExamController]).as('exams.show')
+      router.get('/:id/history', [ListExamHistoryController]).as('exams.history')
       router.put('/:id', [UpdateExamController]).as('exams.update')
       router.delete('/:id', [DeleteExamController]).as('exams.destroy')
       router

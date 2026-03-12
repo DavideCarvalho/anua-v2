@@ -2,12 +2,14 @@ import { test } from '@japa/runner'
 import '@japa/api-client'
 import '#config/auth'
 import db from '@adonisjs/lucid/services/db'
+import { DateTime } from 'luxon'
 import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
 import { createEnrollmentFixtures } from '#tests/helpers/enrollment_fixtures'
 import Student from '#models/student'
 import StudentHasLevel from '#models/student_has_level'
 import User from '#models/user'
 import StudentPayment from '#models/student_payment'
+import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
 
 test.group('Matrícula - API Flow', (group) => {
   group.each.setup(async () => {
@@ -97,8 +99,7 @@ test.group('Matrícula - API Flow', (group) => {
     assert.exists(enrollment, 'Enrollment should be created')
     assert.equal(enrollment?.levelId, level.id)
 
-    // Wait for worker to generate invoices (async process)
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await GenerateStudentPaymentsJob.dispatch({ studentHasLevelId: enrollment!.id }).with('sync')
 
     // Verify student payments were generated
     const payments = await StudentPayment.query()
@@ -219,6 +220,15 @@ test.group('Edição de Aluno - API Flow', (group) => {
     const student = await Student.query().where('id', studentUser!.id).first()
     assert.exists(student)
     const studentId = student!.id
+
+    const enrollment = await StudentHasLevel.query()
+      .where('studentId', studentId)
+      .where('academicPeriodId', academicPeriod.id)
+      .first()
+
+    assert.exists(enrollment, 'Enrollment should be created')
+
+    await GenerateStudentPaymentsJob.dispatch({ studentHasLevelId: enrollment!.id }).with('sync')
 
     // Verify student payments were generated for the student
     const payments = await StudentPayment.query()
@@ -390,5 +400,135 @@ test.group('Edição de Aluno - API Flow', (group) => {
       'responsavel.uppercase@test.com',
       'Responsible email should be lowercase'
     )
+  })
+
+  test('updates responsible email on full update even when email is verified', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { academicPeriod, course, contract, level, classEntity } =
+      await createEnrollmentFixtures(school)
+
+    const enrollmentData = {
+      basicInfo: {
+        name: 'Aluno Update Full',
+        email: 'aluno.update.full@test.com',
+        phone: '11999999999',
+        birthDate: new Date(2014, 0, 1).toISOString(),
+        documentType: 'CPF' as const,
+        documentNumber: '12345678903',
+        isSelfResponsible: false,
+        whatsappContact: true,
+      },
+      responsibles: [
+        {
+          name: 'Responsável Update Full',
+          email: 'resp-antigo@test.com',
+          phone: '11988888888',
+          birthDate: new Date(1985, 0, 1).toISOString(),
+          documentType: 'CPF' as const,
+          documentNumber: '98765432103',
+          isPedagogical: true,
+          isFinancial: true,
+        },
+      ],
+      address: {
+        zipCode: '01310100',
+        street: 'Rua Original',
+        number: '100',
+        complement: 'Apto 10',
+        neighborhood: 'Centro',
+        city: 'São Paulo',
+        state: 'SP',
+      },
+      medicalInfo: {
+        conditions: 'Nenhuma',
+        medications: [],
+        emergencyContacts: [],
+      },
+      billing: {
+        academicPeriodId: academicPeriod.id,
+        courseId: course.id,
+        levelId: level.id,
+        classId: classEntity.id,
+        contractId: contract.id,
+        monthlyFee: contract.ammount,
+        enrollmentFee: contract.enrollmentValue,
+        paymentDate: 5,
+        paymentMethod: 'BOLETO',
+        installments: 12,
+        enrollmentInstallments: 1,
+        flexibleInstallments: true,
+        scholarshipId: null,
+        discountPercentage: 0,
+        enrollmentDiscountPercentage: 0,
+      },
+    }
+
+    const createResponse = await client
+      .post('/api/v1/students/enroll')
+      .loginAs(user)
+      .json(enrollmentData)
+    createResponse.assertStatus(201)
+
+    const studentUser = await User.query().where('name', 'Aluno Update Full').first()
+    assert.exists(studentUser, 'Student should be created')
+
+    const responsibleUser = await User.query().where('documentNumber', '98765432103').first()
+    assert.exists(responsibleUser, 'Responsible should be created')
+
+    responsibleUser!.emailVerifiedAt = DateTime.now()
+    await responsibleUser!.save()
+
+    const fullUpdatePayload = {
+      basicInfo: {
+        name: 'Aluno Update Full',
+        email: 'aluno.update.full@test.com',
+        phone: '11999999999',
+        birthDate: new Date(2014, 0, 1).toISOString(),
+        documentType: 'CPF' as const,
+        documentNumber: '12345678903',
+        isSelfResponsible: false,
+        whatsappContact: true,
+      },
+      responsibles: [
+        {
+          id: responsibleUser!.id,
+          name: 'Responsável Update Full',
+          email: 'resp-novo@test.com',
+          phone: '11988888888',
+          birthDate: new Date(1985, 0, 1).toISOString(),
+          documentType: 'CPF' as const,
+          documentNumber: '98765432103',
+          isPedagogical: true,
+          isFinancial: true,
+        },
+      ],
+      address: {
+        zipCode: '01310100',
+        street: 'Rua Original',
+        number: '100',
+        complement: 'Apto 10',
+        neighborhood: 'Centro',
+        city: 'São Paulo',
+        state: 'SP',
+      },
+      medicalInfo: {
+        conditions: 'Nenhuma',
+        medications: [],
+        emergencyContacts: [],
+      },
+    }
+
+    const fullUpdateResponse = await client
+      .put(`/api/v1/students/${studentUser!.id}/full`)
+      .loginAs(user)
+      .json(fullUpdatePayload)
+
+    fullUpdateResponse.assertStatus(200)
+
+    const updatedResponsible = await User.findOrFail(responsibleUser!.id)
+    assert.equal(updatedResponsible.email, 'resp-novo@test.com')
   })
 })

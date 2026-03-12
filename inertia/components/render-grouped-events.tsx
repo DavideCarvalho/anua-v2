@@ -8,8 +8,8 @@ interface RenderGroupedEventsProps {
   day: Date
 }
 
-const MAX_VISIBLE_EVENTS_PER_TIME = 3
-const STACK_OFFSET_PX = 18
+const MAX_VISIBLE_EVENTS_PER_TIME = 2
+const COLUMN_GAP_PX = 4
 
 export function RenderGroupedEvents({ groupedEvents, day }: RenderGroupedEventsProps) {
   const eventsByStartTime = new Map<string, Array<{ event: IEvent; groupIndex: number }>>()
@@ -30,15 +30,28 @@ export function RenderGroupedEvents({ groupedEvents, day }: RenderGroupedEventsP
     const hiddenCount = sortedItems.length - visibleItems.length
 
     visibleItems.forEach(({ event }, visibleIndex) => {
-      const style = getEventBlockStyle(event, day, 0, 1)
+      const style = getEventBlockStyle(event, day, visibleIndex, visibleItems.length)
+      const groupSize = visibleItems.length
+
+      const spacedStyle =
+        groupSize > 1
+          ? {
+              ...style,
+              width: `calc(${100 / groupSize}% - ${(COLUMN_GAP_PX * (groupSize - 1)) / groupSize}px)`,
+              left: `calc(${(visibleIndex * 100) / groupSize}% + ${visibleIndex * COLUMN_GAP_PX}px)`,
+            }
+          : style
 
       renderedBlocks.push(
         <div
           key={`${event.id}-${event.startDate}`}
           className="absolute box-border p-1"
-          style={{ ...style, top: `calc(${style.top} + ${visibleIndex * STACK_OFFSET_PX}px)` }}
+          style={spacedStyle}
         >
-          <EventBlock event={event} />
+          <EventBlock
+            event={event}
+            className={groupSize > 1 ? 'gap-0 px-1 py-1 text-[11px]' : undefined}
+          />
         </div>
       )
     })
@@ -48,7 +61,12 @@ export function RenderGroupedEvents({ groupedEvents, day }: RenderGroupedEventsP
 
       if (!badgeAnchor) return
 
-      const anchorStyle = getEventBlockStyle(badgeAnchor, day, 0, 1)
+      const anchorStyle = getEventBlockStyle(
+        badgeAnchor,
+        day,
+        Math.max(0, visibleItems.length - 1),
+        visibleItems.length
+      )
 
       renderedBlocks.push(
         <div
@@ -56,7 +74,7 @@ export function RenderGroupedEvents({ groupedEvents, day }: RenderGroupedEventsP
           className="pointer-events-none absolute box-border p-1"
           style={{
             ...anchorStyle,
-            top: `calc(${anchorStyle.top} + ${visibleItems.length * STACK_OFFSET_PX + 2}px)`,
+            top: `calc(${anchorStyle.top} + 2px)`,
           }}
         >
           <div className="w-fit max-w-full rounded border bg-background/95 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-muted-foreground">

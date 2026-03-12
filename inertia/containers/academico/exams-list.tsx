@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ClipboardList, Calendar, Trash2, Loader2, FileText } from 'lucide-react'
+import { ClipboardList, Calendar, Trash2, Loader2, FileText, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Badge } from '../../components/ui/badge'
@@ -35,6 +35,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 import { LaunchExamGradesModal } from '../turma/launch-exam-grades-modal'
+import { NewExamModal } from '../turma/new-exam-modal'
+import { useAuthUser } from '~/stores/auth_store'
 
 type Exam = Route.Response<'api.v1.exams.index'>['data'][number]
 
@@ -64,6 +66,8 @@ function ExamsListEmpty() {
 export function ExamsList({ classId, subjectId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
+  const [editingExamId, setEditingExamId] = useState<string | null>(null)
+  const user = useAuthUser()
 
   const queryClient = useQueryClient()
   const { data, isLoading, isError } = useQuery(
@@ -78,7 +82,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
       { params: { id: examToDelete.id } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['exams'] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
           toast.success('Prova excluida com sucesso!')
           setExamToDelete(null)
         },
@@ -197,6 +201,9 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
                       <ClipboardList className="h-4 w-4" />
                       <span>Lancar Notas</span>
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => setEditingExamId(exam.id)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -263,6 +270,20 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {editingExamId && (
+        <NewExamModal
+          classId={classId ?? ''}
+          academicPeriodId=""
+          open={!!editingExamId}
+          examId={editingExamId}
+          mode="edit"
+          onOpenChange={(open) => {
+            if (!open) setEditingExamId(null)
+          }}
+          user={user}
+        />
+      )}
     </div>
   )
 }

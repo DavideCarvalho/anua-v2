@@ -49,7 +49,11 @@ export function CalendarBody({ emptyDayActionLabel, onEmptyDayAction }: Calendar
           />
         )}
         {view === 'week' && (
-          <CalendarWeekView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />
+          <CalendarWeekView
+            singleDayEvents={singleDayEvents}
+            multiDayEvents={multiDayEvents}
+            onEmptyDayAction={onEmptyDayAction}
+          />
         )}
         {view === 'day' && (
           <CalendarDayView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />

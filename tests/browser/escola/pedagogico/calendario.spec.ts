@@ -7,6 +7,8 @@ import { DateTime } from 'luxon'
 
 import AcademicPeriod from '#models/academic_period'
 import Assignment from '#models/assignment'
+import Calendar from '#models/calendar'
+import CalendarSlot from '#models/calendar_slot'
 import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import Exam from '#models/exam'
@@ -20,6 +22,10 @@ import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
 
 async function createCalendarPageFixtures(schoolId: string, withSeedItems = true) {
   const now = DateTime.now()
+  let assignmentId: string | undefined
+  let examId: string | undefined
+  const seededAssignmentTitle = `Atividade Calendario ${now.toMillis()}`
+  const seededExamTitle = `Prova Bimestral ${now.toMillis()}`
 
   const level = await Level.create({
     name: `Nivel Calendario ${now.toMillis()}`,
@@ -93,18 +99,39 @@ async function createCalendarPageFixtures(schoolId: string, withSeedItems = true
     isActive: true,
   })
 
+  const calendar = await Calendar.create({
+    classId: classEntity.id,
+    academicPeriodId: academicPeriod.id,
+    name: `Grade ${now.toMillis()}`,
+    isActive: true,
+    isCanceled: false,
+    isApproved: true,
+    canceledForNextCalendarId: null,
+  })
+
+  await CalendarSlot.create({
+    teacherHasClassId: teacherHasClass.id,
+    classWeekDay: now.weekday % 7,
+    startTime: '08:00',
+    endTime: '08:50',
+    minutes: 50,
+    calendarId: calendar.id,
+    isBreak: false,
+  })
+
   if (withSeedItems) {
-    await Assignment.create({
-      name: 'Atividade Calendario',
+    const assignment = await Assignment.create({
+      name: seededAssignmentTitle,
       description: 'Criada no fluxo do semanario',
       dueDate: now.startOf('day'),
       grade: 10,
       teacherHasClassId: teacherHasClass.id,
       academicPeriodId: academicPeriod.id,
     })
+    assignmentId = assignment.id
 
-    await Exam.create({
-      title: 'Prova Bimestral',
+    const exam = await Exam.create({
+      title: seededExamTitle,
       description: 'Conteudo 1',
       examDate: now.startOf('day'),
       startTime: null,
@@ -121,11 +148,18 @@ async function createCalendarPageFixtures(schoolId: string, withSeedItems = true
       teacherId: teacher.id,
       academicPeriodId: academicPeriod.id,
     })
+    examId = exam.id
   }
 
   return {
     classId: classEntity.id,
+    className: classEntity.name,
+    academicPeriodName: academicPeriod.name,
     subjectName: subject.name,
+    assignmentId,
+    examId,
+    seededAssignmentTitle,
+    seededExamTitle,
   }
 }
 
@@ -230,5 +264,196 @@ test.group('Calendario pedagogico (browser)', (group) => {
     await calendarioPage.fill('input#title', examTitle)
     await calendarioPage.click('[role="dialog"] button:has-text("Cancelar")')
     await calendarioPage.assertNotExists('text=Criar nova prova')
+  })
+
+  test('edits assignment from calendar list', async ({ visit, browserContext, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classId, assignmentId, seededAssignmentTitle } = await createCalendarPageFixtures(
+      school.id,
+      true
+    )
+    const updatedTitle = `Atividade Editada ${Date.now()}`
+
+    await browserContext.loginAs(user)
+
+    const calendarioPage = await visit(`/escola/pedagogico/calendario?classId=${classId}`, {
+      timeout: 60_000,
+    })
+
+    await calendarioPage.click('text=Lista')
+    await calendarioPage.assertExists(`text=${seededAssignmentTitle}`)
+    const assignmentDetailsResponse = calendarioPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'GET' &&
+        response.url().includes('/api/v1/assignments/') &&
+        response.status() === 200
+      )
+    })
+
+    await calendarioPage.click(
+      `div.rounded-md.border.p-3:has-text("${seededAssignmentTitle}") button:has-text("Editar")`
+    )
+    await assignmentDetailsResponse
+    await calendarioPage.assertExists('text=Editar atividade')
+    const assignmentDialog = '[role="dialog"]:has-text("Editar atividade")'
+    await calendarioPage.assertExists(`${assignmentDialog} input#name`)
+
+    const updateResponse = calendarioPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'PUT' &&
+        response.url().includes('/api/v1/assignments/') &&
+        response.status() === 200
+      )
+    })
+
+    const calendarReload = calendarioPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'GET' &&
+        response.url().includes('/api/v1/pedagogical-calendar') &&
+        response.status() === 200
+      )
+    })
+
+    await calendarioPage.fill(`${assignmentDialog} input#name`, updatedTitle)
+    await calendarioPage.click(`${assignmentDialog} button:has-text("Salvar alterações")`)
+    await calendarioPage.assertNotExists('text=Editar atividade')
+
+    await updateResponse
+    await calendarReload
+
+    const updatedAssignment = await Assignment.findOrFail(assignmentId!)
+    assert.equal(updatedAssignment.name, updatedTitle)
+  })
+
+  test('edits exam from calendar list and keeps item visible', async ({
+    visit,
+    browserContext,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classId, examId, seededExamTitle } = await createCalendarPageFixtures(school.id, true)
+    const updatedTitle = `Prova Editada ${Date.now()}`
+
+    await browserContext.loginAs(user)
+
+    const calendarioPage = await visit(`/escola/pedagogico/calendario?classId=${classId}`, {
+      timeout: 60_000,
+    })
+
+    await calendarioPage.click('text=Lista')
+    await calendarioPage.assertExists(`text=${seededExamTitle}`)
+    const examDetailsResponse = calendarioPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'GET' &&
+        response.url().includes('/api/v1/exams/') &&
+        response.status() === 200
+      )
+    })
+
+    await calendarioPage.click(
+      `div.rounded-md.border.p-3:has-text("${seededExamTitle}") button:has-text("Editar")`
+    )
+    await examDetailsResponse
+    await calendarioPage.assertExists('text=Editar prova')
+    const examDialog = '[role="dialog"]:has-text("Editar prova")'
+    await calendarioPage.assertExists(`${examDialog} input#title`)
+
+    const updateResponse = calendarioPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'PUT' &&
+        response.url().includes('/api/v1/exams/') &&
+        response.status() === 200
+      )
+    })
+
+    const calendarReload = calendarioPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'GET' &&
+        response.url().includes('/api/v1/pedagogical-calendar') &&
+        response.status() === 200
+      )
+    })
+
+    await calendarioPage.fill(`${examDialog} input#title`, updatedTitle)
+    await calendarioPage.click(`${examDialog} button:has-text("Salvar alterações")`)
+    await calendarioPage.assertNotExists('text=Editar prova')
+
+    await updateResponse
+    await calendarReload
+
+    const updatedExam = await Exam.findOrFail(examId!)
+    assert.equal(updatedExam.title, updatedTitle)
+  })
+
+  test('opens context step when creating assignment with class filter ALL', async ({
+    visit,
+    browserContext,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { className, subjectName, academicPeriodName } = await createCalendarPageFixtures(
+      school.id,
+      false
+    )
+
+    await browserContext.loginAs(user)
+
+    const calendarioPage = await visit('/escola/pedagogico/calendario?classId=ALL', {
+      timeout: 60_000,
+    })
+
+    await calendarioPage.assertExists('button:has-text("Novo item")')
+    await calendarioPage.click('button:has-text("Novo item")')
+    await calendarioPage.click('[data-slot="popover-content"] button:has-text("Nova atividade")')
+    await calendarioPage.assertExists('text=Criar nova atividade')
+    await calendarioPage.assertExists('text=Periodo letivo')
+    await calendarioPage.assertExists('text=Turma')
+    await calendarioPage.assertExists('text=Materia')
+    await calendarioPage.assertNotExists('text=Selecione uma turma para criar atividade')
+
+    await calendarioPage.click('[role="dialog"] [data-slot="select-trigger"]')
+    await calendarioPage.keyboard.press('ArrowDown')
+    await calendarioPage.keyboard.press('Enter')
+    await calendarioPage.assertExists(
+      `[role="dialog"] [data-slot="select-trigger"]:has-text("${academicPeriodName}")`
+    )
+
+    await calendarioPage.click(
+      '[role="dialog"] [data-slot="select-trigger"]:has-text("Selecione a turma")'
+    )
+    await calendarioPage.keyboard.press('ArrowDown')
+    await calendarioPage.keyboard.press('Enter')
+    await calendarioPage.assertExists(
+      `[role="dialog"] [data-slot="select-trigger"]:has-text("${className}")`
+    )
+
+    await calendarioPage.click(
+      '[role="dialog"] [data-slot="select-trigger"]:has-text("Selecione a materia")'
+    )
+    await calendarioPage.keyboard.press('ArrowDown')
+    await calendarioPage.keyboard.press('Enter')
+    await calendarioPage.assertExists(
+      `[role="dialog"] [data-slot="select-trigger"]:has-text("${subjectName}")`
+    )
+  })
+
+  test('shows translated exam type label in edit modal select', async ({
+    visit,
+    browserContext,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    await createCalendarPageFixtures(school.id, true)
+
+    await browserContext.loginAs(user)
+
+    const provasPage = await visit('/escola/pedagogico/provas', { timeout: 60_000 })
+    await provasPage.assertExists('text=Prova Bimestral')
+    await provasPage.click('button:has(.lucide-pencil)')
+    await provasPage.assertExists('text=Editar prova')
+    await provasPage.assertExists(
+      '[role="dialog"] [data-slot="select-trigger"]:has-text("Escrita")'
+    )
+    await provasPage.assertNotExists(
+      '[role="dialog"] [data-slot="select-trigger"]:has-text("WRITTEN")'
+    )
   })
 })

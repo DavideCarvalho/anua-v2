@@ -18,6 +18,18 @@ const routes = {
     tokens: [{"old":"/admin/api/server-stats","type":0,"val":"admin","end":""},{"old":"/admin/api/server-stats","type":0,"val":"api","end":""},{"old":"/admin/api/server-stats","type":0,"val":"server-stats","end":""}],
     types: placeholder as Registry['server-stats.api']['types'],
   },
+  'server-stats.debug.config': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/api/debug/config',
+    tokens: [{"old":"/admin/api/debug/config","type":0,"val":"admin","end":""},{"old":"/admin/api/debug/config","type":0,"val":"api","end":""},{"old":"/admin/api/debug/config","type":0,"val":"debug","end":""},{"old":"/admin/api/debug/config","type":0,"val":"config","end":""}],
+    types: placeholder as Registry['server-stats.debug.config']['types'],
+  },
+  'server-stats.debug.diagnostics': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/api/debug/diagnostics',
+    tokens: [{"old":"/admin/api/debug/diagnostics","type":0,"val":"admin","end":""},{"old":"/admin/api/debug/diagnostics","type":0,"val":"api","end":""},{"old":"/admin/api/debug/diagnostics","type":0,"val":"debug","end":""},{"old":"/admin/api/debug/diagnostics","type":0,"val":"diagnostics","end":""}],
+    types: placeholder as Registry['server-stats.debug.diagnostics']['types'],
+  },
   'server-stats.debug.queries': {
     methods: ["GET","HEAD"],
     pattern: '/admin/api/debug/queries',
@@ -102,18 +114,6 @@ const routes = {
     tokens: [{"old":"/__stats/api/queries","type":0,"val":"__stats","end":""},{"old":"/__stats/api/queries","type":0,"val":"api","end":""},{"old":"/__stats/api/queries","type":0,"val":"queries","end":""}],
     types: placeholder as Registry['server-stats.queries']['types'],
   },
-  'server-stats.queries.grouped': {
-    methods: ["GET","HEAD"],
-    pattern: '/__stats/api/queries/grouped',
-    tokens: [{"old":"/__stats/api/queries/grouped","type":0,"val":"__stats","end":""},{"old":"/__stats/api/queries/grouped","type":0,"val":"api","end":""},{"old":"/__stats/api/queries/grouped","type":0,"val":"queries","end":""},{"old":"/__stats/api/queries/grouped","type":0,"val":"grouped","end":""}],
-    types: placeholder as Registry['server-stats.queries.grouped']['types'],
-  },
-  'server-stats.queries.explain': {
-    methods: ["GET","HEAD"],
-    pattern: '/__stats/api/queries/:id/explain',
-    tokens: [{"old":"/__stats/api/queries/:id/explain","type":0,"val":"__stats","end":""},{"old":"/__stats/api/queries/:id/explain","type":0,"val":"api","end":""},{"old":"/__stats/api/queries/:id/explain","type":0,"val":"queries","end":""},{"old":"/__stats/api/queries/:id/explain","type":1,"val":"id","end":""},{"old":"/__stats/api/queries/:id/explain","type":0,"val":"explain","end":""}],
-    types: placeholder as Registry['server-stats.queries.explain']['types'],
-  },
   'server-stats.events': {
     methods: ["GET","HEAD"],
     pattern: '/__stats/api/events',
@@ -156,6 +156,18 @@ const routes = {
     tokens: [{"old":"/__stats/api/traces/:id","type":0,"val":"__stats","end":""},{"old":"/__stats/api/traces/:id","type":0,"val":"api","end":""},{"old":"/__stats/api/traces/:id","type":0,"val":"traces","end":""},{"old":"/__stats/api/traces/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['server-stats.traces.show']['types'],
   },
+  'server-stats.queries.grouped': {
+    methods: ["GET","HEAD"],
+    pattern: '/__stats/api/queries/grouped',
+    tokens: [{"old":"/__stats/api/queries/grouped","type":0,"val":"__stats","end":""},{"old":"/__stats/api/queries/grouped","type":0,"val":"api","end":""},{"old":"/__stats/api/queries/grouped","type":0,"val":"queries","end":""},{"old":"/__stats/api/queries/grouped","type":0,"val":"grouped","end":""}],
+    types: placeholder as Registry['server-stats.queries.grouped']['types'],
+  },
+  'server-stats.queries.explain': {
+    methods: ["GET","HEAD"],
+    pattern: '/__stats/api/queries/:id/explain',
+    tokens: [{"old":"/__stats/api/queries/:id/explain","type":0,"val":"__stats","end":""},{"old":"/__stats/api/queries/:id/explain","type":0,"val":"api","end":""},{"old":"/__stats/api/queries/:id/explain","type":0,"val":"queries","end":""},{"old":"/__stats/api/queries/:id/explain","type":1,"val":"id","end":""},{"old":"/__stats/api/queries/:id/explain","type":0,"val":"explain","end":""}],
+    types: placeholder as Registry['server-stats.queries.explain']['types'],
+  },
   'server-stats.cache': {
     methods: ["GET","HEAD"],
     pattern: '/__stats/api/cache',
@@ -167,6 +179,12 @@ const routes = {
     pattern: '/__stats/api/cache/:key',
     tokens: [{"old":"/__stats/api/cache/:key","type":0,"val":"__stats","end":""},{"old":"/__stats/api/cache/:key","type":0,"val":"api","end":""},{"old":"/__stats/api/cache/:key","type":0,"val":"cache","end":""},{"old":"/__stats/api/cache/:key","type":1,"val":"key","end":""}],
     types: placeholder as Registry['server-stats.cache.show']['types'],
+  },
+  'server-stats.cache.delete': {
+    methods: ["DELETE"],
+    pattern: '/__stats/api/cache/:key',
+    tokens: [{"old":"/__stats/api/cache/:key","type":0,"val":"__stats","end":""},{"old":"/__stats/api/cache/:key","type":0,"val":"api","end":""},{"old":"/__stats/api/cache/:key","type":0,"val":"cache","end":""},{"old":"/__stats/api/cache/:key","type":1,"val":"key","end":""}],
+    types: placeholder as Registry['server-stats.cache.delete']['types'],
   },
   'server-stats.jobs': {
     methods: ["GET","HEAD"],
@@ -2010,6 +2028,12 @@ const routes = {
     tokens: [{"old":"/api/v1/exams/:id","type":0,"val":"api","end":""},{"old":"/api/v1/exams/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/exams/:id","type":0,"val":"exams","end":""},{"old":"/api/v1/exams/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.exams.show']['types'],
   },
+  'api.v1.exams.history': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/exams/:id/history',
+    tokens: [{"old":"/api/v1/exams/:id/history","type":0,"val":"api","end":""},{"old":"/api/v1/exams/:id/history","type":0,"val":"v1","end":""},{"old":"/api/v1/exams/:id/history","type":0,"val":"exams","end":""},{"old":"/api/v1/exams/:id/history","type":1,"val":"id","end":""},{"old":"/api/v1/exams/:id/history","type":0,"val":"history","end":""}],
+    types: placeholder as Registry['api.v1.exams.history']['types'],
+  },
   'api.v1.exams.update': {
     methods: ["PUT"],
     pattern: '/api/v1/exams/:id',
@@ -2585,6 +2609,12 @@ const routes = {
     pattern: '/api/v1/assignments/:id',
     tokens: [{"old":"/api/v1/assignments/:id","type":0,"val":"api","end":""},{"old":"/api/v1/assignments/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/assignments/:id","type":0,"val":"assignments","end":""},{"old":"/api/v1/assignments/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.assignments.show']['types'],
+  },
+  'api.v1.assignments.history': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/assignments/:id/history',
+    tokens: [{"old":"/api/v1/assignments/:id/history","type":0,"val":"api","end":""},{"old":"/api/v1/assignments/:id/history","type":0,"val":"v1","end":""},{"old":"/api/v1/assignments/:id/history","type":0,"val":"assignments","end":""},{"old":"/api/v1/assignments/:id/history","type":1,"val":"id","end":""},{"old":"/api/v1/assignments/:id/history","type":0,"val":"history","end":""}],
+    types: placeholder as Registry['api.v1.assignments.history']['types'],
   },
   'api.v1.assignments.update': {
     methods: ["PUT"],
@@ -3971,6 +4001,12 @@ const routes = {
     pattern: '/api/v1/pedagogical-calendar',
     tokens: [{"old":"/api/v1/pedagogical-calendar","type":0,"val":"api","end":""},{"old":"/api/v1/pedagogical-calendar","type":0,"val":"v1","end":""},{"old":"/api/v1/pedagogical-calendar","type":0,"val":"pedagogical-calendar","end":""}],
     types: placeholder as Registry['api.v1.pedagogical_calendar.index']['types'],
+  },
+  'api.v1.pedagogical_calendar.creation_context': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/pedagogical-calendar/creation-context',
+    tokens: [{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"api","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"v1","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"pedagogical-calendar","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"creation-context","end":""}],
+    types: placeholder as Registry['api.v1.pedagogical_calendar.creation_context']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

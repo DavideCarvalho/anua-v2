@@ -175,7 +175,7 @@ function LaunchGradesModalContent({
         },
       })
       queryClient.invalidateQueries({ queryKey: ['subject-grades'] })
-      queryClient.invalidateQueries({ queryKey: ['assignments'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
       queryClient.invalidateQueries({ queryKey: ['assignment-grades', assignmentId] })
       toast.success('Notas salvas com sucesso!')
       onOpenChange(false)

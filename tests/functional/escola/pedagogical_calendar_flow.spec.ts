@@ -8,15 +8,21 @@ import AcademicPeriod from '#models/academic_period'
 import AcademicPeriodHoliday from '#models/academic_period_holiday'
 import AcademicPeriodWeekendClass from '#models/academic_period_weekend_class'
 import Assignment from '#models/assignment'
+import Calendar from '#models/calendar'
+import CalendarSlot from '#models/calendar_slot'
 import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
+import Course from '#models/course'
+import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import Exam from '#models/exam'
 import Level from '#models/level'
+import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import Role from '#models/role'
 import Subject from '#models/subject'
 import Teacher from '#models/teacher'
 import TeacherHasClass from '#models/teacher_has_class'
 import User from '#models/user'
+import UserHasSchool from '#models/user_has_school'
 import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
 
 async function createPedagogicalFlowContext(schoolId: string) {
@@ -347,10 +353,18 @@ test.group('Pedagogical calendar flow', (group) => {
     const body = response.body() as {
       data: Array<{
         sourceType: string
+        sourceId: string | null
+        classId: string | null
+        academicPeriodId: string | null
+        teacherName?: string | null
         title: string
         startAt: string
         endAt: string | null
         isAllDay: boolean
+        class?: { id: string; name: string }
+        subject?: { id: string; name: string }
+        academicPeriod?: { id: string; name: string }
+        teacher?: { id: string }
       }>
     }
 
@@ -363,9 +377,382 @@ test.group('Pedagogical calendar flow', (group) => {
     assert.equal(DateTime.fromISO(assignmentItem!.startAt).toFormat('HH:mm'), '07:30')
     assert.equal(DateTime.fromISO(assignmentItem!.endAt!).toFormat('HH:mm'), '08:20')
     assert.equal(assignmentItem!.isAllDay, false)
+    assert.equal(assignmentItem!.class?.id, classEntity.id)
+    assert.equal(assignmentItem!.subject?.id, subject.id)
+    assert.equal(assignmentItem!.academicPeriod?.id, academicPeriod.id)
+    assert.equal(assignmentItem!.teacher?.id, teacher.id)
+    assert.isString(assignmentItem!.teacherName)
 
     assert.equal(DateTime.fromISO(examItem!.startAt).toFormat('HH:mm'), '07:30')
     assert.equal(DateTime.fromISO(examItem!.endAt!).toFormat('HH:mm'), '08:20')
     assert.equal(examItem!.isAllDay, false)
+    assert.equal(examItem!.class?.id, classEntity.id)
+    assert.equal(examItem!.subject?.id, subject.id)
+    assert.equal(examItem!.academicPeriod?.id, academicPeriod.id)
+    assert.equal(examItem!.teacher?.id, teacher.id)
+    assert.isString(examItem!.teacherName)
+  })
+
+  test('prefers schedule with defined time when class subject has multiple links', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher, teacherHasClass, academicPeriod } =
+      await createPedagogicalFlowContext(school.id)
+
+    await teacherHasClass
+      .merge({
+        startTime: null,
+        endTime: null,
+        isActive: true,
+      })
+      .save()
+
+    await TeacherHasClass.create({
+      teacherId: teacher.id,
+      classId: classEntity.id,
+      subjectId: subject.id,
+      subjectQuantity: 1,
+      classWeekDay: null,
+      startTime: '12:40',
+      endTime: '13:30',
+      teacherAvailabilityId: null,
+      isActive: true,
+    })
+
+    const day = DateTime.now().plus({ days: 2 }).startOf('day')
+
+    await Exam.create({
+      title: 'Prova Lingua Portuguesa',
+      description: null,
+      examDate: day,
+      startTime: null,
+      endTime: null,
+      location: null,
+      maxScore: 10,
+      weight: 1,
+      type: 'WRITTEN',
+      status: 'SCHEDULED',
+      instructions: null,
+      schoolId: school.id,
+      classId: classEntity.id,
+      subjectId: subject.id,
+      teacherId: teacher.id,
+      academicPeriodId: academicPeriod.id,
+    })
+
+    const response = await client
+      .get('/api/v1/pedagogical-calendar')
+      .loginAs(user)
+      .qs({
+        classId: classEntity.id,
+        startDate: day.startOf('day').toISO(),
+        endDate: day.endOf('day').toISO(),
+      })
+
+    response.assertStatus(200)
+
+    const body = response.body() as {
+      data: Array<{
+        sourceType: string
+        title: string
+        startAt: string
+        endAt: string | null
+        isAllDay: boolean
+      }>
+    }
+
+    const examItem = body.data.find((item) => item.sourceType === 'EXAM')
+    assert.exists(examItem)
+
+    assert.equal(DateTime.fromISO(examItem!.startAt).toFormat('HH:mm'), '12:40')
+    assert.equal(DateTime.fromISO(examItem!.endAt!).toFormat('HH:mm'), '13:30')
+    assert.equal(examItem!.isAllDay, false)
+  })
+
+  test('uses school calendar slot time for exam when teacher-class link has no time', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher, teacherHasClass, academicPeriod } =
+      await createPedagogicalFlowContext(school.id)
+
+    await teacherHasClass.merge({ startTime: null, endTime: null, isActive: true }).save()
+
+    const examDate = DateTime.now().plus({ days: 1 }).startOf('day')
+    const classWeekDay = examDate.toJSDate().getDay()
+
+    const calendar = await Calendar.create({
+      classId: classEntity.id,
+      academicPeriodId: academicPeriod.id,
+      name: 'Grade de Horarios',
+      isActive: true,
+      isCanceled: false,
+      isApproved: true,
+      canceledForNextCalendarId: null,
+    })
+
+    await CalendarSlot.create({
+      teacherHasClassId: teacherHasClass.id,
+      classWeekDay,
+      startTime: '10:10',
+      endTime: '11:00',
+      minutes: 50,
+      calendarId: calendar.id,
+      isBreak: false,
+    })
+
+    await Exam.create({
+      title: 'Prova com horario da grade',
+      description: null,
+      examDate,
+      startTime: null,
+      endTime: null,
+      location: null,
+      maxScore: 10,
+      weight: 1,
+      type: 'WRITTEN',
+      status: 'SCHEDULED',
+      instructions: null,
+      schoolId: school.id,
+      classId: classEntity.id,
+      subjectId: subject.id,
+      teacherId: teacher.id,
+      academicPeriodId: academicPeriod.id,
+    })
+
+    const response = await client
+      .get('/api/v1/pedagogical-calendar')
+      .loginAs(user)
+      .qs({
+        classId: classEntity.id,
+        startDate: examDate.startOf('day').toISO(),
+        endDate: examDate.endOf('day').toISO(),
+      })
+
+    response.assertStatus(200)
+
+    const body = response.body() as {
+      data: Array<{
+        sourceType: string
+        title: string
+        startAt: string
+        endAt: string | null
+        isAllDay: boolean
+      }>
+    }
+
+    const examItem = body.data.find((item) => item.sourceType === 'EXAM')
+    assert.exists(examItem)
+
+    assert.equal(DateTime.fromISO(examItem!.startAt).toFormat('HH:mm'), '10:10')
+    assert.equal(DateTime.fromISO(examItem!.endAt!).toFormat('HH:mm'), '11:00')
+    assert.equal(examItem!.isAllDay, false)
+  })
+
+  test('returns creation context for teacher only from active calendar slots in active period', async ({
+    client,
+    assert,
+  }) => {
+    const { school } = await createEscolaAuthUser()
+
+    const main = await createPedagogicalFlowContext(school.id)
+    const other = await createPedagogicalFlowContext(school.id)
+
+    const teacherRole = await Role.firstOrCreate(
+      { name: 'SCHOOL_TEACHER' },
+      { name: 'SCHOOL_TEACHER' }
+    )
+
+    const teacherUser = await User.create({
+      name: `Teacher Context ${Date.now()}`,
+      slug: `teacher-context-${Date.now()}`,
+      email: `teacher-context-${Date.now()}@example.com`,
+      active: true,
+      whatsappContact: false,
+      grossSalary: 0,
+      roleId: teacherRole.id,
+    })
+
+    await Teacher.create({
+      id: teacherUser.id,
+      hourlyRate: 50,
+    })
+
+    await UserHasSchool.create({
+      userId: teacherUser.id,
+      schoolId: school.id,
+      isDefault: true,
+    })
+
+    await main.teacherHasClass.merge({ teacherId: teacherUser.id, isActive: true }).save()
+
+    const mainCalendar = await Calendar.create({
+      classId: main.classEntity.id,
+      academicPeriodId: main.academicPeriod.id,
+      name: 'Grade ativa principal',
+      isActive: true,
+      isCanceled: false,
+      isApproved: true,
+      canceledForNextCalendarId: null,
+    })
+
+    await CalendarSlot.create({
+      teacherHasClassId: main.teacherHasClass.id,
+      classWeekDay: 1,
+      startTime: '08:00',
+      endTime: '08:50',
+      minutes: 50,
+      calendarId: mainCalendar.id,
+      isBreak: false,
+    })
+
+    const otherCalendar = await Calendar.create({
+      classId: other.classEntity.id,
+      academicPeriodId: other.academicPeriod.id,
+      name: 'Grade ativa secundaria',
+      isActive: true,
+      isCanceled: false,
+      isApproved: true,
+      canceledForNextCalendarId: null,
+    })
+
+    await CalendarSlot.create({
+      teacherHasClassId: other.teacherHasClass.id,
+      classWeekDay: 2,
+      startTime: '09:00',
+      endTime: '09:50',
+      minutes: 50,
+      calendarId: otherCalendar.id,
+      isBreak: false,
+    })
+
+    const response = await client
+      .get('/api/v1/pedagogical-calendar/creation-context')
+      .loginAs(teacherUser)
+
+    response.assertStatus(200)
+
+    const body = response.body() as {
+      data: {
+        classes: Array<{ id: string }>
+        subjects: Array<{ id: string }>
+        rows: Array<{ classId: string; subjectId: string; teacherId: string }>
+      }
+    }
+
+    assert.lengthOf(body.data.classes, 1)
+    assert.lengthOf(body.data.subjects, 1)
+    assert.equal(body.data.classes[0]?.id, main.classEntity.id)
+    assert.equal(body.data.rows[0]?.teacherId, teacherUser.id)
+  })
+
+  test('returns creation context for coordinator only within coordinated levels', async ({
+    client,
+    assert,
+  }) => {
+    const { school } = await createEscolaAuthUser()
+
+    const main = await createPedagogicalFlowContext(school.id)
+    const other = await createPedagogicalFlowContext(school.id)
+
+    const coordinatorRole = await Role.firstOrCreate(
+      { name: 'SCHOOL_COORDINATOR' },
+      { name: 'SCHOOL_COORDINATOR' }
+    )
+
+    const coordinatorUser = await User.create({
+      name: `Coordinator Context ${Date.now()}`,
+      slug: `coordinator-context-${Date.now()}`,
+      email: `coordinator-context-${Date.now()}@example.com`,
+      active: true,
+      whatsappContact: false,
+      grossSalary: 0,
+      roleId: coordinatorRole.id,
+    })
+
+    await UserHasSchool.create({
+      userId: coordinatorUser.id,
+      schoolId: school.id,
+      isDefault: true,
+    })
+
+    const course = await Course.create({
+      name: `Curso ${Date.now()}`,
+      schoolId: school.id,
+      version: 1,
+      coordinatorId: coordinatorUser.id,
+      enrollmentMinimumAge: null,
+      enrollmentMaximumAge: null,
+      maxStudentsPerClass: null,
+    })
+
+    const courseAcademicPeriod = await CourseHasAcademicPeriod.create({
+      courseId: course.id,
+      academicPeriodId: main.academicPeriod.id,
+    })
+
+    await LevelAssignedToCourseHasAcademicPeriod.create({
+      levelId: main.classEntity.levelId!,
+      courseHasAcademicPeriodId: courseAcademicPeriod.id,
+      isActive: true,
+    })
+
+    const mainCalendar = await Calendar.create({
+      classId: main.classEntity.id,
+      academicPeriodId: main.academicPeriod.id,
+      name: 'Grade coordenada',
+      isActive: true,
+      isCanceled: false,
+      isApproved: true,
+      canceledForNextCalendarId: null,
+    })
+
+    await CalendarSlot.create({
+      teacherHasClassId: main.teacherHasClass.id,
+      classWeekDay: 2,
+      startTime: '10:00',
+      endTime: '10:50',
+      minutes: 50,
+      calendarId: mainCalendar.id,
+      isBreak: false,
+    })
+
+    const otherCalendar = await Calendar.create({
+      classId: other.classEntity.id,
+      academicPeriodId: other.academicPeriod.id,
+      name: 'Grade nao coordenada',
+      isActive: true,
+      isCanceled: false,
+      isApproved: true,
+      canceledForNextCalendarId: null,
+    })
+
+    await CalendarSlot.create({
+      teacherHasClassId: other.teacherHasClass.id,
+      classWeekDay: 4,
+      startTime: '14:00',
+      endTime: '14:50',
+      minutes: 50,
+      calendarId: otherCalendar.id,
+      isBreak: false,
+    })
+
+    const response = await client
+      .get('/api/v1/pedagogical-calendar/creation-context')
+      .loginAs(coordinatorUser)
+
+    response.assertStatus(200)
+
+    const body = response.body() as {
+      data: {
+        classes: Array<{ id: string }>
+      }
+    }
+
+    assert.lengthOf(body.data.classes, 1)
+    assert.equal(body.data.classes[0]?.id, main.classEntity.id)
   })
 })

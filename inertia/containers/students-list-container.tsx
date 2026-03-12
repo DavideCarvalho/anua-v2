@@ -312,6 +312,10 @@ export function StudentsListContainer() {
 
   const { search, academicPeriodId, courseId, classId, page, limit } = filters
 
+  const selectedAcademicPeriodId = academicPeriodId === 'all' ? null : academicPeriodId
+  const selectedCourseId = courseId === 'all' ? null : courseId
+  const selectedClassId = classId === 'all' ? null : classId
+
   const [searchInput, setSearchInput] = useState(search || '')
 
   useEffect(() => {
@@ -338,14 +342,17 @@ export function StudentsListContainer() {
 
   // Fetch courses for selected academic period
   const { data: coursesData } = useQuery({
-    ...api.api.v1.academicPeriods.listCourses.queryOptions({ params: { id: academicPeriodId! } }),
+    ...api.api.v1.academicPeriods.listCourses.queryOptions({
+      params: { id: selectedAcademicPeriodId! },
+    }),
+    enabled: !!selectedAcademicPeriodId,
   })
   const courses = coursesData ?? []
 
   // Get classes for selected course (from courses data)
   const classes = useMemo(() => {
-    if (!courseId || !courses.length) return []
-    const selectedCourse = courses.find((c) => c.courseId === courseId)
+    if (!selectedCourseId || !courses.length) return []
+    const selectedCourse = courses.find((c) => c.courseId === selectedCourseId)
     if (!selectedCourse) return []
     // Flatten classes from all levels
     return selectedCourse.levels.flatMap((level) =>
@@ -354,9 +361,22 @@ export function StudentsListContainer() {
         levelName: level.name,
       }))
     )
-  }, [courseId, courses])
+  }, [selectedCourseId, courses])
 
-  const hasActiveFilters = search || academicPeriodId || courseId || classId
+  const hasActiveFilters = search || selectedAcademicPeriodId || selectedCourseId || selectedClassId
+
+  const selectedAcademicPeriodName = selectedAcademicPeriodId
+    ? (academicPeriods.find((period: any) => period.id === selectedAcademicPeriodId)?.name ??
+      'Período Letivo')
+    : 'Todos os períodos'
+
+  const selectedCourseName = selectedCourseId
+    ? (courses.find((course) => course.courseId === selectedCourseId)?.name ?? 'Curso')
+    : 'Todos os cursos'
+
+  const selectedClassName = selectedClassId
+    ? (classes.find((cls) => cls.id === selectedClassId)?.name ?? 'Turma')
+    : 'Todas as turmas'
 
   const clearFilters = () => {
     setFilters({ search: null, academicPeriodId: null, courseId: null, classId: null, page: 1 })
@@ -391,7 +411,7 @@ export function StudentsListContainer() {
 
             {/* Academic Period Filter */}
             <Select
-              value={academicPeriodId || 'all'}
+              value={selectedAcademicPeriodId || 'all'}
               onValueChange={(value: string | null) => {
                 if (!value) return
                 setFilters({
@@ -403,7 +423,7 @@ export function StudentsListContainer() {
               }}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Período Letivo" />
+                <SelectValue>{selectedAcademicPeriodName}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os períodos</SelectItem>
@@ -417,7 +437,7 @@ export function StudentsListContainer() {
 
             {/* Course Filter */}
             <Select
-              value={courseId || 'all'}
+              value={selectedCourseId || 'all'}
               onValueChange={(value: string | null) => {
                 if (!value) return
                 setFilters({
@@ -426,10 +446,10 @@ export function StudentsListContainer() {
                   page: 1,
                 })
               }}
-              disabled={!academicPeriodId}
+              disabled={!selectedAcademicPeriodId}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Curso" />
+                <SelectValue>{selectedCourseName}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os cursos</SelectItem>
@@ -443,15 +463,15 @@ export function StudentsListContainer() {
 
             {/* Class Filter */}
             <Select
-              value={classId || 'all'}
+              value={selectedClassId || 'all'}
               onValueChange={(value: string | null) => {
                 if (!value) return
                 setFilters({ classId: value === 'all' ? null : value, page: 1 })
               }}
-              disabled={!courseId}
+              disabled={!selectedCourseId}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Turma" />
+                <SelectValue>{selectedClassName}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as turmas</SelectItem>
@@ -523,9 +543,9 @@ export function StudentsListContainer() {
                 search={search}
                 page={page}
                 limit={limit}
-                academicPeriodId={academicPeriodId}
-                courseId={courseId}
-                classId={classId}
+                academicPeriodId={selectedAcademicPeriodId}
+                courseId={selectedCourseId}
+                classId={selectedClassId}
                 onPageChange={(p) => setFilters({ page: p })}
                 onEditStudent={(student) =>
                   router.visit(`/escola/administrativo/alunos/${student.id}/editar`)

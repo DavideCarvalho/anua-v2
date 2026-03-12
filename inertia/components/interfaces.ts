@@ -16,6 +16,9 @@ export interface IEvent {
   color: TEventColor
   description: string
   user: IUser
+  sourceType?: 'EVENT' | 'ASSIGNMENT' | 'EXAM' | 'HOLIDAY' | 'WEEKEND_CLASS_DAY'
+  sourceId?: string | null
+  readonly?: boolean
 }
 
 export interface ICalendarCell {

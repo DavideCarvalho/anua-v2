@@ -112,7 +112,7 @@ export function DayCell({
         animate={{ opacity: 1, y: 0 }}
         transition={transition}
       >
-        <DroppableArea date={date} className="w-full h-full py-2">
+        <DroppableArea date={date} className="relative w-full h-full py-2">
           <motion.span
             className={cn(
               'h-6 px-1 text-xs font-semibold lg:px-2',
@@ -131,75 +131,82 @@ export function DayCell({
             )}
           >
             {cellEvents.length === 0 ? (
-              <div className="w-full h-full flex justify-center items-center group">
-                {onEmptyDayAction ? (
-                  <Popover open={isDayMenuOpen} onOpenChange={setIsDayMenuOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="border opacity-0 max-md:opacity-100 group-hover:opacity-100 transition-opacity duration-200"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span className="max-sm:hidden">{emptyDayActionLabel ?? 'Novo item'}</span>
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      align="center"
-                      side="bottom"
-                      className="w-48 p-1.5 gap-1 duration-0 data-open:animate-none data-closed:animate-none"
-                    >
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => {
-                          setIsDayMenuOpen(false)
-                          onEmptyDayAction(date, 'assignment')
-                        }}
-                      >
-                        Nova atividade
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => {
-                          setIsDayMenuOpen(false)
-                          onEmptyDayAction(date, 'exam')
-                        }}
-                      >
-                        Nova prova
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="justify-start h-8"
-                        onClick={() => {
-                          setIsDayMenuOpen(false)
-                          onEmptyDayAction(date, 'event')
-                        }}
-                      >
-                        Novo evento
-                      </Button>
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <AddEditEventDialog startDate={date}>
-                    <Button
-                      variant="ghost"
-                      className="border opacity-0 max-md:opacity-100 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="max-sm:hidden">Novo evento</span>
-                    </Button>
-                  </AddEditEventDialog>
-                )}
-              </div>
+              <div className="w-full h-full" />
             ) : (
               [0, 1, 2].map(renderEventAtPosition)
             )}
           </motion.div>
+
+          {currentMonth && (
+            <div className="absolute right-1 top-1 z-20 group">
+              {onEmptyDayAction ? (
+                <Popover open={isDayMenuOpen} onOpenChange={setIsDayMenuOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 border bg-background/90 opacity-100 md:opacity-70 md:hover:opacity-100 transition-opacity duration-200"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="end"
+                    side="bottom"
+                    className="w-48 p-1.5 gap-1 duration-0 data-open:animate-none data-closed:animate-none"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="justify-start h-8"
+                      onClick={() => {
+                        setIsDayMenuOpen(false)
+                        onEmptyDayAction(date, 'assignment')
+                      }}
+                    >
+                      Nova atividade
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="justify-start h-8"
+                      onClick={() => {
+                        setIsDayMenuOpen(false)
+                        onEmptyDayAction(date, 'exam')
+                      }}
+                    >
+                      Nova prova
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="justify-start h-8"
+                      onClick={() => {
+                        setIsDayMenuOpen(false)
+                        onEmptyDayAction(date, 'event')
+                      }}
+                    >
+                      Novo evento
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <AddEditEventDialog startDate={date}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 border bg-background/90 opacity-100 md:opacity-70 md:hover:opacity-100 transition-opacity duration-200"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </AddEditEventDialog>
+              )}
+            </div>
+          )}
 
           {showMobileMore && (
             <div className="flex justify-end items-end mx-2">
@@ -241,7 +248,7 @@ export function DayCell({
     ]
   )
 
-  if (isMobile && currentMonth && cellEvents.length > 0) {
+  if (isMobile && currentMonth && cellEvents.length > 0 && !onEmptyDayAction) {
     return (
       <EventListDialog date={date} events={cellEvents}>
         {cellContent}

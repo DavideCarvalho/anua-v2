@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { format, isAfter, isBefore, isToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { ClipboardList, Trash2, Loader2, FileText } from 'lucide-react'
+import { ClipboardList, Trash2, Loader2, FileText, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -16,9 +16,11 @@ import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { LaunchGradesModal } from './launch-grades-modal'
+import { NewAssignmentModal } from './new-assignment-modal'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import type { Route } from '@tuyau/core/types'
+import { useAuthUser } from '~/stores/auth_store'
 
 interface AssignmentsTableProps {
   classId: string
@@ -52,6 +54,8 @@ function AssignmentsTableEmpty() {
 export function AssignmentsTable({ classId, courseId, academicPeriodId }: AssignmentsTableProps) {
   const [page, setPage] = useState(1)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
+  const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null)
+  const user = useAuthUser()
 
   const {
     data: response,
@@ -150,6 +154,13 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
                       <ClipboardList className="h-4 w-4" />
                       <span>Lançar Notas</span>
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingAssignmentId(assignment.id)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -222,6 +233,20 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
           onOpenChange={(open) => {
             if (!open) setSelectedAssignment(null)
           }}
+        />
+      )}
+
+      {editingAssignmentId && (
+        <NewAssignmentModal
+          classId={classId}
+          academicPeriodId={academicPeriodId}
+          open={!!editingAssignmentId}
+          assignmentId={editingAssignmentId}
+          mode="edit"
+          onOpenChange={(open) => {
+            if (!open) setEditingAssignmentId(null)
+          }}
+          user={user}
         />
       )}
     </div>

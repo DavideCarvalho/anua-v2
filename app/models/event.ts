@@ -125,16 +125,16 @@ export default class Event extends BaseModel {
   @column({ columnName: 'requiresParentalConsent' })
   declare requiresParentalConsent: boolean
 
-  @column({ columnName: 'hasAdditionalCosts' })
+  @column({ columnName: 'has_additional_costs' })
   declare hasAdditionalCosts: boolean
 
-  @column({ columnName: 'additionalCostAmount' })
+  @column({ columnName: 'additional_cost_amount' })
   declare additionalCostAmount: number | null
 
-  @column({ columnName: 'additionalCostInstallments' })
+  @column({ columnName: 'additional_cost_installments' })
   declare additionalCostInstallments: number | null
 
-  @column({ columnName: 'additionalCostDescription' })
+  @column({ columnName: 'additional_cost_description' })
   declare additionalCostDescription: string | null
 
   @column({ columnName: 'allowComments' })

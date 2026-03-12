@@ -3678,6 +3678,25 @@ export class WebhookEventSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class AssignmentHistorySchema extends BaseModel {
+  static $columns = ['id', 'assignmentId', 'actorUserId', 'changedAt', 'changes', 'createdAt', 'updatedAt'] as const
+  $columns = AssignmentHistorySchema.$columns
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare assignmentId: string
+  @column()
+  declare actorUserId: string
+  @column.dateTime()
+  declare changedAt: DateTime
+  @column()
+  declare changes: any
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
 export class AuditSchema extends BaseModel {
   static $columns = ['id', 'userType', 'event', 'auditableType', 'oldValues', 'newValues', 'metadata', 'createdAt', 'updatedAt', 'auditableId', 'userId'] as const
   $columns = AuditSchema.$columns
@@ -3756,6 +3775,25 @@ export class ExamGradeSchema extends BaseModel {
   declare feedback: string | null
   @column.dateTime()
   declare gradedAt: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class ExamHistorySchema extends BaseModel {
+  static $columns = ['id', 'examId', 'actorUserId', 'changedAt', 'changes', 'createdAt', 'updatedAt'] as const
+  $columns = ExamHistorySchema.$columns
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare examId: string
+  @column()
+  declare actorUserId: string
+  @column.dateTime()
+  declare changedAt: DateTime
+  @column()
+  declare changes: any
   @column.dateTime()
   declare createdAt: DateTime
   @column.dateTime()

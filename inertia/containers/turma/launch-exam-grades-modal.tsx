@@ -182,7 +182,7 @@ function LaunchExamGradesModalContent({
       },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['exams'] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
           queryClient.invalidateQueries({ queryKey: ['exam-grades', examId] })
           toast.success('Notas salvas com sucesso!')
           onOpenChange(false)

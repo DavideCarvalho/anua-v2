@@ -10,6 +10,8 @@ export interface ApiDefinition {
   serverStats: {
     api: typeof routes['server-stats.api']
     debug: {
+      config: typeof routes['server-stats.debug.config']
+      diagnostics: typeof routes['server-stats.debug.diagnostics']
       queries: typeof routes['server-stats.debug.queries']
       events: typeof routes['server-stats.debug.events']
       routes: typeof routes['server-stats.debug.routes']
@@ -41,6 +43,7 @@ export interface ApiDefinition {
     }
     cache: typeof routes['server-stats.cache'] & {
       show: typeof routes['server-stats.cache.show']
+      delete: typeof routes['server-stats.cache.delete']
     }
     jobs: typeof routes['server-stats.jobs'] & {
       show: typeof routes['server-stats.jobs.show']
@@ -472,6 +475,7 @@ export interface ApiDefinition {
         index: typeof routes['api.v1.exams.index']
         store: typeof routes['api.v1.exams.store']
         show: typeof routes['api.v1.exams.show']
+        history: typeof routes['api.v1.exams.history']
         update: typeof routes['api.v1.exams.update']
         destroy: typeof routes['api.v1.exams.destroy']
         batchSaveGrades: typeof routes['api.v1.exams.batch_save_grades']
@@ -622,6 +626,7 @@ export interface ApiDefinition {
         index: typeof routes['api.v1.assignments.index']
         store: typeof routes['api.v1.assignments.store']
         show: typeof routes['api.v1.assignments.show']
+        history: typeof routes['api.v1.assignments.history']
         update: typeof routes['api.v1.assignments.update']
         destroy: typeof routes['api.v1.assignments.destroy']
         submissions: typeof routes['api.v1.assignments.submissions'] & {
@@ -964,6 +969,7 @@ export interface ApiDefinition {
       }
       pedagogicalCalendar: {
         index: typeof routes['api.v1.pedagogical_calendar.index']
+        creationContext: typeof routes['api.v1.pedagogical_calendar.creation_context']
       }
     }
   }

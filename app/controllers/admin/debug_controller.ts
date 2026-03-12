@@ -7,43 +7,17 @@ import DebugController from 'adonisjs-server-stats/debug/controller'
 export default class AdminDebugController {
   private async getController() {
     const store = (await app.container.make('debug.store')) as DebugStore
-    const logPath = app.makePath('logs', 'adonisjs.log')
-    return new DebugController(store, logPath)
+    return new DebugController(store)
   }
 
-  async queries(ctx: HttpContext) {
+  async config(ctx: HttpContext) {
     const controller = await this.getController()
-    return controller.queries(ctx)
+    return controller.config(ctx)
   }
 
-  async events(ctx: HttpContext) {
+  async diagnostics(ctx: HttpContext) {
     const controller = await this.getController()
-    return controller.events(ctx)
-  }
-
-  async routes(ctx: HttpContext) {
-    const controller = await this.getController()
-    return controller.routes(ctx)
-  }
-
-  async emails(ctx: HttpContext) {
-    const controller = await this.getController()
-    return controller.emails(ctx)
-  }
-
-  async emailPreview(ctx: HttpContext) {
-    const controller = await this.getController()
-    return controller.emailPreview(ctx)
-  }
-
-  async traces(ctx: HttpContext) {
-    const controller = await this.getController()
-    return controller.traces(ctx)
-  }
-
-  async traceDetail(ctx: HttpContext) {
-    const controller = await this.getController()
-    return controller.traceDetail(ctx)
+    return controller.diagnostics(ctx)
   }
 
   async logs({ response }: HttpContext) {

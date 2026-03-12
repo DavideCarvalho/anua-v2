@@ -1,6 +1,10 @@
 import { addDays, format, isSameDay, parseISO, startOfWeek } from 'date-fns'
 import { motion } from 'framer-motion'
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import { ScrollArea } from '~/components/ui/scroll-area'
+import { Button } from '~/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 import { fadeIn, transition } from '~/components/animations'
 import { useCalendar } from '~/components/calendar-context'
 import { AddEditEventDialog } from '~/components/add-edit-event-dialog'
@@ -14,10 +18,18 @@ import { WeekViewMultiDayEventsRow } from '~/components/week-view-multi-day-even
 interface IProps {
   singleDayEvents: IEvent[]
   multiDayEvents: IEvent[]
+  onEmptyDayAction?: (date: Date, action: 'assignment' | 'exam' | 'event') => void
 }
 
-export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
+function slotDate(day: Date, hour: number, minute: number) {
+  const nextDate = new Date(day)
+  nextDate.setHours(hour, minute, 0, 0)
+  return nextDate
+}
+
+export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEmptyDayAction }: IProps) {
   const { selectedDate, use24HourFormat } = useCalendar()
+  const [openSlotKey, setOpenSlotKey] = useState<string | null>(null)
 
   const weekStart = startOfWeek(selectedDate)
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -111,11 +123,68 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                             date={day}
                             hour={hour}
                             minute={0}
-                            className="absolute inset-x-0 top-0 h-[48px]"
+                            className="group/slot absolute inset-x-0 top-0 h-[48px]"
                           >
-                            <AddEditEventDialog startDate={day} startTime={{ hour, minute: 0 }}>
-                              <div className="absolute inset-0 cursor-pointer transition-colors hover:bg-secondary" />
-                            </AddEditEventDialog>
+                            {onEmptyDayAction ? (
+                              <div className="absolute inset-0">
+                                <Popover
+                                  open={openSlotKey === `${day.toISOString()}-${hour}-0`}
+                                  onOpenChange={(open) =>
+                                    setOpenSlotKey(open ? `${day.toISOString()}-${hour}-0` : null)
+                                  }
+                                >
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="absolute right-1 top-1 z-10 h-6 w-6 rounded-sm border bg-background/90 opacity-0 transition-opacity group-hover/slot:opacity-100"
+                                    >
+                                      <Plus className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent align="end" className="w-44 p-1.5">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-8 w-full justify-start"
+                                      onClick={() => {
+                                        setOpenSlotKey(null)
+                                        onEmptyDayAction(slotDate(day, hour, 0), 'assignment')
+                                      }}
+                                    >
+                                      Nova atividade
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-8 w-full justify-start"
+                                      onClick={() => {
+                                        setOpenSlotKey(null)
+                                        onEmptyDayAction(slotDate(day, hour, 0), 'exam')
+                                      }}
+                                    >
+                                      Nova prova
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-8 w-full justify-start"
+                                      onClick={() => {
+                                        setOpenSlotKey(null)
+                                        onEmptyDayAction(slotDate(day, hour, 0), 'event')
+                                      }}
+                                    >
+                                      Novo evento
+                                    </Button>
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                            ) : (
+                              <AddEditEventDialog startDate={day} startTime={{ hour, minute: 0 }}>
+                                <div className="absolute inset-0 cursor-pointer transition-colors hover:bg-secondary" />
+                              </AddEditEventDialog>
+                            )}
                           </DroppableArea>
 
                           <div className="pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed border-b-tertiary"></div>
@@ -124,11 +193,68 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                             date={day}
                             hour={hour}
                             minute={30}
-                            className="absolute inset-x-0 bottom-0 h-[48px]"
+                            className="group/slot absolute inset-x-0 bottom-0 h-[48px]"
                           >
-                            <AddEditEventDialog startDate={day} startTime={{ hour, minute: 30 }}>
-                              <div className="absolute inset-0 cursor-pointer transition-colors hover:bg-secondary" />
-                            </AddEditEventDialog>
+                            {onEmptyDayAction ? (
+                              <div className="absolute inset-0">
+                                <Popover
+                                  open={openSlotKey === `${day.toISOString()}-${hour}-30`}
+                                  onOpenChange={(open) =>
+                                    setOpenSlotKey(open ? `${day.toISOString()}-${hour}-30` : null)
+                                  }
+                                >
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="absolute right-1 top-1 z-10 h-6 w-6 rounded-sm border bg-background/90 opacity-0 transition-opacity group-hover/slot:opacity-100"
+                                    >
+                                      <Plus className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent align="end" className="w-44 p-1.5">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-8 w-full justify-start"
+                                      onClick={() => {
+                                        setOpenSlotKey(null)
+                                        onEmptyDayAction(slotDate(day, hour, 30), 'assignment')
+                                      }}
+                                    >
+                                      Nova atividade
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-8 w-full justify-start"
+                                      onClick={() => {
+                                        setOpenSlotKey(null)
+                                        onEmptyDayAction(slotDate(day, hour, 30), 'exam')
+                                      }}
+                                    >
+                                      Nova prova
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="h-8 w-full justify-start"
+                                      onClick={() => {
+                                        setOpenSlotKey(null)
+                                        onEmptyDayAction(slotDate(day, hour, 30), 'event')
+                                      }}
+                                    >
+                                      Novo evento
+                                    </Button>
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                            ) : (
+                              <AddEditEventDialog startDate={day} startTime={{ hour, minute: 30 }}>
+                                <div className="absolute inset-0 cursor-pointer transition-colors hover:bg-secondary" />
+                              </AddEditEventDialog>
+                            )}
                           </DroppableArea>
                         </div>
                       ))}
