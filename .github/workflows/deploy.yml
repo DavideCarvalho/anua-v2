@@ -127,8 +127,7 @@ jobs:
 
       - name: Migrate, verify schema, and run tests
         run: |
-          node ace migration:fresh --force
-          node ace migration:status
+          node ace migration:run --force --no-schema-generate
           psql "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}" -c "SELECT to_regclass('\"Role\"') AS role_table, to_regclass('rate_limits') AS rate_limits_table;"
           pnpm test
 
