@@ -294,12 +294,13 @@ export function PedagogicalCalendar() {
 
   const items = data?.data ?? []
 
-  const availableStatuses = useMemo(() => {
+  const availableStatuses = useMemo<string[]>(() => {
     return Array.from(
       new Set(
-        items
-          .map((item) => (typeof item.meta?.status === 'string' ? item.meta.status : null))
-          .filter((status): status is string => Boolean(status))
+        items.flatMap((item) => {
+          const status = (item.meta as Record<string, unknown> | undefined)?.status
+          return typeof status === 'string' ? [status] : []
+        })
       )
     )
   }, [items])
@@ -372,7 +373,7 @@ export function PedagogicalCalendar() {
             item.sourceType === 'ASSIGNMENT' || item.sourceType === 'EXAM'
               ? {
                   id: item.teacher?.id ?? 'pedagogical-calendar',
-                  name: item.teacherName ?? item.teacher?.user?.name ?? 'Professor não informado',
+                  name: item.teacherName ?? 'Professor não informado',
                   picturePath: null,
                 }
               : fullCalendarSystemUser,

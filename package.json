@@ -18,7 +18,8 @@
     "test:queue:pglite": "pglite-server --db=memory:// --host=127.0.0.1 --port=55432 --run \"sh scripts/run_queue_tests_with_pglite.sh\"",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typecheck:inertia": "tsc -p inertia/tsconfig.json --noEmit"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
