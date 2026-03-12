@@ -52,7 +52,7 @@ export default class ValidateTeacherScheduleConflictController {
     }
 
     // Check if teacher is occupied in another class at this time
-    const isOccupied = await this.isTeacherOccupiedInOtherClass(
+    const conflictResult = await this.isTeacherOccupiedInOtherClass(
       teacherId,
       startTime,
       endTime,
@@ -60,11 +60,16 @@ export default class ValidateTeacherScheduleConflictController {
       classId || ''
     )
 
-    if (isOccupied) {
+    if (conflictResult.occupied) {
+      const className = conflictResult.className
+      const reason = className
+        ? `O professor já está ocupado na turma ${className} neste horário`
+        : 'O professor já está ocupado em outra turma neste horário'
+
       return serialize(
         ScheduleConflictValidationTransformer.transform({
           hasConflict: true,
-          reason: 'O professor já está ocupado em outra turma neste horário',
+          reason,
           teacherName: teacherHasClass.teacher.user?.name || 'Professor',
         })
       )
@@ -95,7 +100,7 @@ export default class ValidateTeacherScheduleConflictController {
     endTime: string,
     academicPeriodId: string,
     excludeClassId: string
-  ): Promise<boolean> {
+  ): Promise<{ occupied: boolean; className?: string }> {
     const result = await db.rawQuery<{
       rows: Array<{
         classWeekDay: number
@@ -122,21 +127,23 @@ export default class ValidateTeacherScheduleConflictController {
       { academicPeriodId, teacherId, startTime, endTime }
     )
 
-    // Se não há excludeClassId, verificar todos os conflitos
+    // Se não há excludeClassId, verificar todos os conflitos (sem nome da turma, fallback para mensagem genérica)
     if (!excludeClassId) {
-      return result.rows.length > 0
+      return { occupied: result.rows.length > 0 }
     }
 
-    // Se há excludeClassId, verificar apenas conflitos de outras turmas
+    // Se há excludeClassId, verificar apenas conflitos de outras turmas e retornar o nome da turma
     const conflictingSlots = await db.rawQuery<{
       rows: Array<{
         classId: string
+        className: string
       }>
     }>(
       `
-      SELECT c."classId"
+      SELECT c."classId", cl."name" AS "className"
       FROM "CalendarSlot" cs
       JOIN "Calendar" c ON cs."calendarId" = c.id
+      JOIN "Class" cl ON c."classId" = cl.id
       JOIN "TeacherHasClass" thc ON cs."teacherHasClassId" = thc.id
       WHERE c."academicPeriodId" = :academicPeriodId
         AND c."isActive" = true
@@ -149,10 +156,14 @@ export default class ValidateTeacherScheduleConflictController {
           (cs."endTime" > :startTime AND cs."endTime" <= :endTime) OR
           (cs."startTime" <= :startTime AND cs."endTime" >= :endTime)
         )
+      LIMIT 1
     `,
       { academicPeriodId, teacherId, startTime, endTime, excludeClassId }
     )
 
-    return conflictingSlots.rows.length > 0
+    return {
+      occupied: conflictingSlots.rows.length > 0,
+      className: conflictingSlots.rows[0]?.className,
+    }
   }
 }
