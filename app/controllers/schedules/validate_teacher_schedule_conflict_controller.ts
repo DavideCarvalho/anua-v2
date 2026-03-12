@@ -61,9 +61,10 @@ export default class ValidateTeacherScheduleConflictController {
     )
 
     if (conflictResult.occupied) {
-      const className = conflictResult.className
-      const reason = className
-        ? `O professor já está ocupado na turma ${className} neste horário`
+      const { className, levelName } = conflictResult
+      const classLabel = className ? (levelName ? `${levelName} - ${className}` : className) : null
+      const reason = classLabel
+        ? `O professor já está ocupado na turma ${classLabel} neste horário`
         : 'O professor já está ocupado em outra turma neste horário'
 
       return serialize(
@@ -100,7 +101,7 @@ export default class ValidateTeacherScheduleConflictController {
     endTime: string,
     academicPeriodId: string,
     excludeClassId: string
-  ): Promise<{ occupied: boolean; className?: string }> {
+  ): Promise<{ occupied: boolean; className?: string; levelName?: string }> {
     const result = await db.rawQuery<{
       rows: Array<{
         classWeekDay: number
@@ -134,18 +135,20 @@ export default class ValidateTeacherScheduleConflictController {
       return { occupied: result.rows.length > 0 }
     }
 
-    // Se há excludeClassId, verificar apenas conflitos de outras turmas e retornar o nome da turma
+    // Se há excludeClassId, verificar apenas conflitos de outras turmas e retornar o nome da turma e o ano/level
     const conflictingSlots = await db.rawQuery<{
       rows: Array<{
         classId: string
         className: string
+        levelName: string | null
       }>
     }>(
       `
-      SELECT c."classId", cl."name" AS "className"
+      SELECT c."classId", cl."name" AS "className", lv."name" AS "levelName"
       FROM "CalendarSlot" cs
       JOIN "Calendar" c ON cs."calendarId" = c.id
       JOIN "Class" cl ON c."classId" = cl.id
+      LEFT JOIN "Level" lv ON cl."levelId" = lv.id
       JOIN "TeacherHasClass" thc ON cs."teacherHasClassId" = thc.id
       WHERE c."academicPeriodId" = :academicPeriodId
         AND c."isActive" = true
@@ -167,6 +170,7 @@ export default class ValidateTeacherScheduleConflictController {
     return {
       occupied: conflictingSlots.rows.length > 0,
       className: conflictingSlots.rows[0]?.className,
+      levelName: conflictingSlots.rows[0]?.levelName ?? undefined,
     }
   }
 }
