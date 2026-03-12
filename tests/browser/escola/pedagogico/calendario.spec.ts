@@ -420,8 +420,7 @@ test.group('Calendario pedagogico (browser)', (group) => {
     await calendarioPage.click(
       '[role="dialog"] [data-slot="select-trigger"]:has-text("Selecione a turma")'
     )
-    await calendarioPage.keyboard.press('ArrowDown')
-    await calendarioPage.keyboard.press('Enter')
+    await calendarioPage.click(`[role="option"]:has-text("${className}")`)
     await calendarioPage.assertExists(
       `[role="dialog"] [data-slot="select-trigger"]:has-text("${className}")`
     )
@@ -429,8 +428,8 @@ test.group('Calendario pedagogico (browser)', (group) => {
     await calendarioPage.click(
       '[role="dialog"] [data-slot="select-trigger"]:has-text("Selecione a materia")'
     )
-    await calendarioPage.keyboard.press('ArrowDown')
-    await calendarioPage.keyboard.press('Enter')
+    await calendarioPage.assertExists(`[role="option"]:has-text("${subjectName}")`)
+    await calendarioPage.click(`[role="option"]:has-text("${subjectName}")`)
     await calendarioPage.assertExists(
       `[role="dialog"] [data-slot="select-trigger"]:has-text("${subjectName}")`
     )
