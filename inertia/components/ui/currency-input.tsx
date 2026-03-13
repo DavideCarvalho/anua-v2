@@ -17,6 +17,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
 
     // Estado interno: string de dígitos (ex: "150" para R$ 1,50)
     const [digits, setDigits] = React.useState(() => (value > 0 ? String(value) : ''))
+    const [allSelected, setAllSelected] = React.useState(false)
 
     // Sync externa: quando value muda de fora (ex: abrir edit dialog)
     React.useEffect(() => {
@@ -37,9 +38,31 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         e.preventDefault()
         return
       }
+
+      // Ctrl+A: marca tudo selecionado, deixa o browser selecionar o texto
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        setAllSelected(true)
+        return
+      }
       if (e.ctrlKey || e.metaKey) return
 
       e.preventDefault()
+
+      // Se estava com tudo selecionado: qualquer dígito substitui, backspace/delete zera
+      if (allSelected) {
+        setAllSelected(false)
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          setDigits('')
+          onChange(0)
+          return
+        }
+        if (/^[0-9]$/.test(e.key)) {
+          setDigits(e.key)
+          onChange(Number(e.key))
+          return
+        }
+        return
+      }
 
       if (e.key === 'Delete') {
         setDigits('')
@@ -90,6 +113,8 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
           onChange={() => {}}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
+          onBlur={() => setAllSelected(false)}
+          onMouseDown={() => setAllSelected(false)}
           className={cn(
             'flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm tabular-nums',
             className
