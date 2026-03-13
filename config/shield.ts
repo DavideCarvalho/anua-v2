@@ -52,8 +52,11 @@ const shieldConfig = defineConfig({
 
       // Forms can only submit to same origin
       formAction: [`'self'`],
+
+      // Collect violations without blocking — disable once policy is verified
+      reportUri: ['/csp-report'],
     },
-    reportOnly: false,
+    reportOnly: true,
   },
 
   /**
