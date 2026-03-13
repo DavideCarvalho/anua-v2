@@ -5,7 +5,13 @@ export const createCanteenValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(2).maxLength(120),
     schoolId: vine.string().trim(),
-    responsibleUserId: vine.string().trim(),
+    responsibleUserId: vine.string().trim().optional(),
+    responsibleUser: vine
+      .object({
+        name: vine.string().trim().minLength(2).maxLength(255),
+        email: vine.string().email().trim(),
+      })
+      .optional(),
   })
 )
 
