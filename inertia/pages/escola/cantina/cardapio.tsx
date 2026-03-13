@@ -7,6 +7,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   Pencil,
   Plus,
   Trash2,
@@ -35,10 +36,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../../components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '../../../components/ui/command'
 import { formatCurrency } from '../../../lib/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import type { SharedProps } from '../../../lib/types'
+import { useDebounce } from '../../../hooks/use_debounce'
 
 interface PageProps extends SharedProps {
   canteenId?: string | null
@@ -393,7 +404,7 @@ export default function CardapioPage() {
             <DialogTitle>Nova Refeição</DialogTitle>
             <DialogDescription>Cadastre uma refeição para o cardápio.</DialogDescription>
           </DialogHeader>
-          <MealForm form={createForm} setForm={setCreateForm} />
+          <MealForm form={createForm} setForm={setCreateForm} canteenId={canteenId} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)}>
               Cancelar
@@ -411,7 +422,7 @@ export default function CardapioPage() {
             <DialogTitle>Editar Refeição</DialogTitle>
             <DialogDescription>Atualize os dados da refeição.</DialogDescription>
           </DialogHeader>
-          <MealForm form={editForm} setForm={setEditForm} />
+          <MealForm form={editForm} setForm={setEditForm} canteenId={canteenId} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingMeal(null)}>
               Cancelar
@@ -429,12 +440,95 @@ export default function CardapioPage() {
 function MealForm({
   form,
   setForm,
+  canteenId,
 }: {
   form: MealFormValues
   setForm: React.Dispatch<React.SetStateAction<MealFormValues>>
+  canteenId?: string | null
 }) {
+  const [importOpen, setImportOpen] = useState(false)
+  const [importSearch, setImportSearch] = useState('')
+  const debouncedSearch = useDebounce(importSearch, 300)
+
+  const { data: importData } = useQuery({
+    ...api.api.v1.canteenMeals.index.queryOptions({
+      query: {
+        canteenId: canteenId ?? undefined,
+        limit: 20,
+        isActive: true,
+      },
+    }),
+    enabled: !!canteenId && importOpen,
+  })
+
+  const importMeals = ((importData as PaginatorLike<CanteenMeal> | undefined)?.data ?? []).filter(
+    (m) =>
+      debouncedSearch.length < 2 || m.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+  )
+
+  const handleImport = (meal: CanteenMeal) => {
+    setForm((prev) => ({
+      ...prev,
+      name: meal.name,
+      description: meal.description ?? '',
+      priceReais: (meal.price / 100).toFixed(2),
+    }))
+    setImportOpen(false)
+    setImportSearch('')
+  }
+
   return (
     <div className="space-y-4">
+      {canteenId && (
+        <div className="space-y-1">
+          <Label>Importar de refeição anterior (opcional)</Label>
+          <Popover open={importOpen} onOpenChange={setImportOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-full justify-between font-normal"
+              >
+                <span className="text-muted-foreground">Buscar por nome...</span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command shouldFilter={false}>
+                <CommandInput
+                  placeholder="Buscar refeição..."
+                  value={importSearch}
+                  onValueChange={setImportSearch}
+                />
+                <CommandList>
+                  <CommandEmpty>
+                    {importSearch.length < 2
+                      ? 'Digite ao menos 2 caracteres'
+                      : 'Nenhuma refeição encontrada'}
+                  </CommandEmpty>
+                  {importMeals.length > 0 && (
+                    <CommandGroup>
+                      {importMeals.map((meal) => (
+                        <CommandItem
+                          key={meal.id}
+                          value={meal.id}
+                          onSelect={() => handleImport(meal)}
+                        >
+                          <span className="flex-1">{meal.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {formatCurrency(meal.price)}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+
       <div className="space-y-1">
         <Label htmlFor="meal-name">Nome</Label>
         <Input
