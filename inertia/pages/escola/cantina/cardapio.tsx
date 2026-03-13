@@ -7,7 +7,7 @@ import { Calendar, Pencil, Plus, Trash2, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EscolaLayout } from '../../../components/layouts'
-import { CanteenContextBar } from '../../../components/cantina/canteen-context-bar'
+import { CanteenGate } from '../../../components/cantina/canteen-gate'
 import {
   Card,
   CardContent,
@@ -253,89 +253,93 @@ export default function CardapioPage() {
             <h1 className="text-2xl font-bold tracking-tight">Cardápio</h1>
             <p className="text-muted-foreground">Configure o cardápio semanal da cantina</p>
           </div>
-          <Button disabled={!canteenId} onClick={() => openCreateForDate(new Date())}>
+          <Button onClick={() => openCreateForDate(new Date())}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Refeição
           </Button>
         </div>
 
-        <CanteenContextBar />
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle>Semana Atual</CardTitle>
-            </div>
-            <CardDescription>
-              {format(weekDays[0], 'dd/MM/yyyy')} - {format(weekDays[4], 'dd/MM/yyyy')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="py-8 text-center text-muted-foreground">Carregando cardápio...</div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-5">
-                {weekDays.map((day) => {
-                  const key = toDateInput(day)
-                  const dayMeals = mealsByDate.get(key) ?? []
-
-                  return (
-                    <Card key={key}>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">
-                          {format(day, 'EEEE', { locale: ptBR })}
-                        </CardTitle>
-                        <CardDescription>{format(day, 'dd/MM')}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        {dayMeals.length === 0 ? (
-                          <div className="text-center py-3 text-muted-foreground">
-                            <UtensilsCrossed className="h-5 w-5 mx-auto mb-1 opacity-50" />
-                            <p className="text-xs">Não definido</p>
-                          </div>
-                        ) : (
-                          dayMeals.map((meal) => (
-                            <div key={meal.id} className="rounded border p-2">
-                              <p className="text-sm font-medium line-clamp-1">{meal.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatCurrency(meal.price)}
-                              </p>
-                              <div className="mt-2 flex items-center gap-1">
-                                <Button variant="outline" size="sm" onClick={() => openEdit(meal)}>
-                                  <span className="sr-only">Editar refeição {meal.name}</span>
-                                  <Pencil className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleDelete(meal)}
-                                >
-                                  <span className="sr-only">Excluir refeição {meal.name}</span>
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        )}
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => openCreateForDate(day)}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Adicionar
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
+        <CanteenGate>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                <CardTitle>Semana Atual</CardTitle>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <CardDescription>
+                {format(weekDays[0], 'dd/MM/yyyy')} - {format(weekDays[4], 'dd/MM/yyyy')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="py-8 text-center text-muted-foreground">Carregando cardápio...</div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-5">
+                  {weekDays.map((day) => {
+                    const key = toDateInput(day)
+                    const dayMeals = mealsByDate.get(key) ?? []
+
+                    return (
+                      <Card key={key}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">
+                            {format(day, 'EEEE', { locale: ptBR })}
+                          </CardTitle>
+                          <CardDescription>{format(day, 'dd/MM')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {dayMeals.length === 0 ? (
+                            <div className="text-center py-3 text-muted-foreground">
+                              <UtensilsCrossed className="h-5 w-5 mx-auto mb-1 opacity-50" />
+                              <p className="text-xs">Não definido</p>
+                            </div>
+                          ) : (
+                            dayMeals.map((meal) => (
+                              <div key={meal.id} className="rounded border p-2">
+                                <p className="text-sm font-medium line-clamp-1">{meal.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatCurrency(meal.price)}
+                                </p>
+                                <div className="mt-2 flex items-center gap-1">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openEdit(meal)}
+                                  >
+                                    <span className="sr-only">Editar refeição {meal.name}</span>
+                                    <Pencil className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDelete(meal)}
+                                  >
+                                    <span className="sr-only">Excluir refeição {meal.name}</span>
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => openCreateForDate(day)}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Adicionar
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </CanteenGate>
       </div>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

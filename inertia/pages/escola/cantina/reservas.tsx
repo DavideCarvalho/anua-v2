@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { Calendar } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
-import { CanteenContextBar } from '../../../components/cantina/canteen-context-bar'
+import { CanteenGate } from '../../../components/cantina/canteen-gate'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { MealReservationsTable } from '../../../containers/cantina/meal-reservations-table'
 import type { SharedProps } from '../../../lib/types'
@@ -47,19 +47,11 @@ export default function CantinaReservasPage() {
           <p className="text-muted-foreground">Gerencie as reservas de refeições dos alunos</p>
         </div>
 
-        <CanteenContextBar />
-
-        {canteenId ? (
+        <CanteenGate>
           <Suspense fallback={<TableSkeleton />}>
-            <MealReservationsTable canteenId={canteenId} />
+            <MealReservationsTable canteenId={canteenId ?? undefined} />
           </Suspense>
-        ) : (
-          <Card>
-            <CardContent className="py-10 text-center text-muted-foreground">
-              Cantina não encontrada no contexto.
-            </CardContent>
-          </Card>
-        )}
+        </CanteenGate>
       </div>
     </EscolaLayout>
   )

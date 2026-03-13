@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { ShoppingCart, BarChart3 } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
-import { CanteenContextBar } from '../../../components/cantina/canteen-context-bar'
+import { CanteenGate } from '../../../components/cantina/canteen-gate'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { Card, CardContent, CardHeader } from '../../../components/ui/card'
 import { CanteenPurchasesContainer } from '../../../containers/canteen-purchases-container'
@@ -55,38 +55,30 @@ export default function VendasPage() {
           <p className="text-muted-foreground">Historico e relatorios de vendas da cantina</p>
         </div>
 
-        <CanteenContextBar />
+        <CanteenGate>
+          <Tabs defaultValue="historico" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="historico" className="gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                Historico
+              </TabsTrigger>
+              <TabsTrigger value="relatorios" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Relatorios
+              </TabsTrigger>
+            </TabsList>
 
-        <Tabs defaultValue="historico" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="historico" className="gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Historico
-            </TabsTrigger>
-            <TabsTrigger value="relatorios" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Relatorios
-            </TabsTrigger>
-          </TabsList>
+            <TabsContent value="historico">
+              <CanteenPurchasesContainer canteenId={canteenId ?? undefined} />
+            </TabsContent>
 
-          <TabsContent value="historico">
-            <CanteenPurchasesContainer canteenId={canteenId ?? undefined} />
-          </TabsContent>
-
-          <TabsContent value="relatorios">
-            {canteenId ? (
+            <TabsContent value="relatorios">
               <Suspense fallback={<ReportsSkeleton />}>
-                <CanteenReportsDashboard canteenId={canteenId} />
+                <CanteenReportsDashboard canteenId={canteenId ?? ''} />
               </Suspense>
-            ) : (
-              <Card>
-                <CardContent className="py-10 text-center text-muted-foreground">
-                  Cantina não encontrada no contexto.
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </CanteenGate>
       </div>
     </EscolaLayout>
   )

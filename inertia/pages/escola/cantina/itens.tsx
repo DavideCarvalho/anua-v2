@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react'
 import { EscolaLayout } from '../../../components/layouts'
-import { CanteenContextBar } from '../../../components/cantina/canteen-context-bar'
+import { CanteenGate } from '../../../components/cantina/canteen-gate'
 import { CanteenItemsContainer } from '../../../containers/canteen-items-container'
 import type { SharedProps } from '../../../lib/types'
 
@@ -21,9 +21,9 @@ export default function CantinaItensPage() {
           <p className="text-muted-foreground">Gerencie os produtos disponíveis na cantina</p>
         </div>
 
-        <CanteenContextBar />
-
-        <CanteenItemsContainer canteenId={props.canteenId ?? undefined} />
+        <CanteenGate>
+          <CanteenItemsContainer canteenId={props.canteenId ?? undefined} />
+        </CanteenGate>
       </div>
     </EscolaLayout>
   )
