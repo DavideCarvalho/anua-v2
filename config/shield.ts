@@ -54,7 +54,7 @@ const shieldConfig = defineConfig({
       formAction: [`'self'`],
 
       // Collect violations without blocking — disable once policy is verified
-      reportUri: ['/csp-report'],
+      reportUri: ['/api/v1/csp-report'],
     },
     reportOnly: true,
   },
@@ -65,8 +65,7 @@ const shieldConfig = defineConfig({
    */
   csrf: {
     enabled: true,
-    exceptRoutes: (ctx) =>
-      ctx.request.url().startsWith('/api/') || ctx.request.url() === '/csp-report',
+    exceptRoutes: (ctx) => ctx.request.url().startsWith('/api/'),
     enableXsrfCookie: true,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
   },
