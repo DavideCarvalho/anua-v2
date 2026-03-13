@@ -410,9 +410,11 @@ test.group('Calendario pedagogico (browser)', (group) => {
     await calendarioPage.assertExists('text=Materia')
     await calendarioPage.assertNotExists('text=Selecione uma turma para criar atividade')
 
-    await calendarioPage.click('[role="dialog"] [data-slot="select-trigger"]')
-    await calendarioPage.keyboard.press('ArrowDown')
-    await calendarioPage.keyboard.press('Enter')
+    // Open the "Periodo letivo" select (first trigger in the dialog) and pick the period by name
+    await calendarioPage.click(
+      '[role="dialog"] [data-slot="select-trigger"]:has-text("Selecione o periodo")'
+    )
+    await calendarioPage.click(`[role="option"]:has-text("${academicPeriodName}")`)
     await calendarioPage.assertExists(
       `[role="dialog"] [data-slot="select-trigger"]:has-text("${academicPeriodName}")`
     )
