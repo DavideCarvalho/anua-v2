@@ -167,7 +167,9 @@ export function CanteenGate({ children }: CanteenGateProps) {
       <div className="flex items-center gap-2">
         <Select value={canteenId ?? undefined} onValueChange={updateUrlCanteen}>
           <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Selecione a cantina" />
+            <SelectValue placeholder="Selecione a cantina">
+              {canteens.find((c) => c.id === canteenId)?.name ?? 'Selecione a cantina'}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {canteens.map((canteen, index) => (
