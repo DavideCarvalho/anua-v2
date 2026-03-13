@@ -1,10 +1,33 @@
-import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useState } from 'react'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryErrorResetBoundary,
+} from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog'
 import {
   AlertCircle,
   Search,
@@ -15,10 +38,13 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  CheckCircle2,
+  Trash2,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Route } from '@tuyau/core/types'
 import { formatCurrency } from '../lib/utils'
+import { toast } from 'sonner'
 
 // Loading Skeleton
 function CanteenPurchasesSkeleton() {
@@ -75,6 +101,111 @@ const statusConfig: Record<string, { label: string; className: string; icon: Luc
 
 interface CanteenPurchasesContainerProps {
   canteenId?: string
+}
+
+function PurchaseActionsMenu({ purchase }: { purchase: CanteenPurchase }) {
+  const queryClient = useQueryClient()
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+
+  const updateStatusMutation = useMutation(
+    api.api.v1.canteenPurchases.updateStatus.mutationOptions()
+  )
+
+  const cancelMutation = useMutation(api.api.v1.canteenPurchases.cancel.mutationOptions())
+
+  async function handleMarkPaid() {
+    try {
+      await updateStatusMutation.mutateAsync({
+        params: { id: purchase.id },
+        body: { status: 'PAID' },
+      })
+      queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+      toast.success('Pedido marcado como pago')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pedido')
+    }
+  }
+
+  async function handleMarkPending() {
+    try {
+      await updateStatusMutation.mutateAsync({
+        params: { id: purchase.id },
+        body: { status: 'PENDING' },
+      })
+      queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+      toast.success('Pedido marcado como pendente')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pedido')
+    }
+  }
+
+  async function handleCancel() {
+    try {
+      await cancelMutation.mutateAsync({
+        params: { id: purchase.id },
+      })
+      queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+      toast.success('Pedido cancelado')
+      setCancelDialogOpen(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pedido')
+    }
+  }
+
+  return (
+    <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {purchase.status !== 'PAID' && (
+            <DropdownMenuItem onClick={handleMarkPaid}>
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              Marcar como Pago
+            </DropdownMenuItem>
+          )}
+          {purchase.status !== 'PENDING' && (
+            <DropdownMenuItem onClick={handleMarkPending}>
+              <Clock className="h-4 w-4 text-yellow-600" />
+              Marcar como Pendente
+            </DropdownMenuItem>
+          )}
+          {purchase.status !== 'CANCELLED' && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => setCancelDialogOpen(true)}>
+                <Trash2 className="h-4 w-4" />
+                Cancelar pedido
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancelar pedido?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação irá cancelar o pedido #{purchase.id.slice(0, 8)}. Se o pagamento foi feito via
+            saldo, o valor será estornado automaticamente.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Voltar</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={cancelMutation.isPending}
+            onClick={handleCancel}
+          >
+            Cancelar pedido
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
 }
 
 export function CanteenPurchasesContainer({ canteenId }: CanteenPurchasesContainerProps) {
@@ -194,9 +325,7 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
                         </span>
                       </td>
                       <td className="p-4 text-right">
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                        <PurchaseActionsMenu purchase={purchase} />
                       </td>
                     </tr>
                   )
