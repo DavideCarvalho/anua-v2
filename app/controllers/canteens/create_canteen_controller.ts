@@ -28,8 +28,10 @@ export default class CreateCanteenController {
       let responsibleUserId: string
 
       if (data.responsibleUser) {
-        // Verifica email duplicado
-        const existing = await User.findBy('email', data.responsibleUser.email)
+        // Verifica email duplicado (dentro da transaction para evitar race condition)
+        const existing = await User.query({ client: trx })
+          .where('email', data.responsibleUser.email)
+          .first()
         if (existing) {
           throw AppException.badRequest('Já existe um usuário com esse email')
         }
@@ -37,13 +39,16 @@ export default class CreateCanteenController {
         // Busca role SCHOOL_CANTEEN
         const role = await Role.findByOrFail('name', 'SCHOOL_CANTEEN')
 
-        // Gera slug a partir do nome
-        const slug = data.responsibleUser.name
+        // Gera slug a partir do nome (com sufixo aleatório para evitar colisões)
+        const baseSlug = data.responsibleUser.name
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
           .replace(/\s+/g, '-')
           .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')
+        const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`
 
         // Cria o usuário
         const newUser = await User.create(
@@ -53,6 +58,7 @@ export default class CreateCanteenController {
             slug,
             active: true,
             roleId: role.id,
+            schoolId: data.schoolId,
           },
           { client: trx }
         )
@@ -69,6 +75,23 @@ export default class CreateCanteenController {
 
         responsibleUserId = newUser.id
       } else {
+        // Valida que o usuário existe e pertence à escola
+        const responsible = await User.query({ client: trx })
+          .where('id', data.responsibleUserId!)
+          .whereNull('deletedAt')
+          .first()
+        if (!responsible) {
+          throw AppException.notFound('Responsável não encontrado')
+        }
+
+        const hasSchool = await UserHasSchool.query({ client: trx })
+          .where('userId', data.responsibleUserId!)
+          .where('schoolId', data.schoolId)
+          .first()
+        if (!hasSchool) {
+          throw AppException.forbidden('Responsável não pertence a esta escola')
+        }
+
         responsibleUserId = data.responsibleUserId!
       }
 

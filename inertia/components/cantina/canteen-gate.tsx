@@ -69,9 +69,12 @@ export function CanteenGate({ children }: CanteenGateProps) {
 
   const debouncedSearch = useDebounce(responsibleSearch, 300)
 
-  const { data: employeesData } = useQuery(
-    api.api.v1.users.schoolEmployees.queryOptions({ query: { search: debouncedSearch, limit: 10 } })
-  )
+  const { data: employeesData } = useQuery({
+    ...api.api.v1.users.schoolEmployees.queryOptions({
+      query: { search: debouncedSearch, limit: 10 },
+    }),
+    enabled: isDialogOpen,
+  })
   const employees = employeesData?.data ?? []
 
   const canteens = props.canteens ?? []
@@ -205,8 +208,12 @@ export function CanteenGate({ children }: CanteenGateProps) {
                       onValueChange={setResponsibleSearch}
                     />
                     <CommandList>
-                      {employees.length === 0 && responsibleSearch && (
-                        <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+                      {employees.length === 0 && (
+                        <CommandEmpty>
+                          {responsibleSearch
+                            ? 'Nenhum resultado encontrado.'
+                            : 'Digite para buscar funcionários.'}
+                        </CommandEmpty>
                       )}
                       {employees.length > 0 && (
                         <CommandGroup heading="Funcionários da escola">
