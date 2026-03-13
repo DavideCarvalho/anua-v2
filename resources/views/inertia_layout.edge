@@ -46,7 +46,7 @@
     <meta name="language" content="Portuguese" />
 
     <!-- Theme Script (prevents flash) -->
-    <script>
+    <script nonce="{{ cspNonce }}">
       (function() {
         const theme = localStorage.getItem("anua-theme") || "system";
         const root = document.documentElement;

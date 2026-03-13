@@ -11,11 +11,21 @@ router
     registerApiRoutes()
 
     // CSP violation reports — browsers POST here when reportOnly detects a violation
+    // Browsers send Content-Type: application/csp-report with a raw JSON body.
+    // request.input() only works for form fields, so we read the raw body instead.
     // Remove this route (and set reportOnly: false in config/shield.ts) once the policy is verified
-    router.post('/csp-report', async ({ request, logger }) => {
-      const report = request.input('csp-report')
-      logger.warn({ report }, 'CSP violation detected')
-    })
+    router
+      .post('/csp-report', async ({ request, logger }) => {
+        const raw = request.raw()
+        let report: unknown = null
+        try {
+          report = raw ? JSON.parse(raw) : null
+        } catch {
+          report = raw
+        }
+        logger.warn({ report }, 'CSP violation detected')
+      })
+      .as('csp_report')
   })
   .prefix('/api/v1')
   .as('api.v1')

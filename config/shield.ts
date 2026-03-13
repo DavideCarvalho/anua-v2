@@ -11,25 +11,26 @@ const shieldConfig = defineConfig({
       // Only load resources from same origin by default
       defaultSrc: [`'self'`],
 
-      // Scripts: same origin + Vite assets + nonce for inline scripts (Inertia)
+      // Scripts: same origin + nonce for inline scripts (Inertia/theme toggle)
       // '@nonce' is resolved per-request by @adonisjs/shield to 'nonce-{random}'
-      // '@viteDevUrl' allows assets from the Vite dev server
-      scriptSrc: [`'self'`, '@viteDevUrl', '@nonce'],
+      // Note: @viteDevUrl / @viteHmrUrl are NOT supported by this shield version
+      scriptSrc: [`'self'`, '@nonce'],
 
-      // Styles: same origin + Vite dev server + nonce for inline styles + Fonts Bunny CDN
-      styleSrc: [`'self'`, '@viteDevUrl', '@nonce', 'https://fonts.bunny.net'],
+      // Styles: same origin + nonce for inline styles + Fonts Bunny CDN
+      // 'unsafe-inline' needed because @adonisjs/vite does not inject nonces into
+      // the <style> tags it generates (no nonce support in the installed version)
+      styleSrc: [`'self'`, `'unsafe-inline'`, 'https://fonts.bunny.net'],
 
-      // Fonts: same origin + Fonts Bunny CDN
-      fontSrc: [`'self'`, 'https://fonts.bunny.net'],
+      // Fonts: same origin + Fonts Bunny CDN + Gstatic (Fonts Bunny loads .ttf from there)
+      fontSrc: [`'self'`, 'https://fonts.bunny.net', 'https://fonts.gstatic.com'],
 
       // Images: same origin + data URIs + GCS bucket (school logos/uploads)
       imgSrc: [`'self'`, 'data:', 'https://storage.googleapis.com'],
 
-      // Connections: same origin + Vite HMR WebSocket + PostHog + BrasilAPI + ViaCEP
-      // '@viteHmrUrl' resolves to the Vite WebSocket URL for hot module replacement
+      // Connections: same origin + PostHog + BrasilAPI + ViaCEP
+      // '@viteHmrUrl' is NOT supported by this shield version — removed
       connectSrc: [
         `'self'`,
-        '@viteHmrUrl',
         'https://us.i.posthog.com',
         'https://brasilapi.com.br',
         'https://viacep.com.br',
