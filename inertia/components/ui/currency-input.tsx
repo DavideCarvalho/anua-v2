@@ -5,98 +5,93 @@ export interface CurrencyInputProps extends Omit<
   React.ComponentProps<'input'>,
   'onChange' | 'value'
 > {
-  value: string | number
-  onChange: (value: string) => void
+  /** Valor em centavos inteiros (ex: 150 = R$ 1,50) */
+  value: number
+  onChange: (cents: number) => void
 }
 
 const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
-  ({ className, value, onChange, placeholder, ...props }, ref) => {
+  ({ className, value, onChange, ...props }, ref) => {
     const inputRef = React.useRef<HTMLInputElement>(null)
-
     React.useImperativeHandle(ref, () => inputRef.current!)
 
-    // Valor em centavos
-    const cents = React.useMemo(() => {
-      const numValue = typeof value === 'number' ? value : parseFloat(value) || 0
-      return Math.round(numValue * 100)
+    // Estado interno: string de dígitos (ex: "150" para R$ 1,50)
+    const [digits, setDigits] = React.useState(() => (value > 0 ? String(value) : ''))
+
+    // Sync externa: quando value muda de fora (ex: abrir edit dialog)
+    React.useEffect(() => {
+      setDigits(value > 0 ? String(value) : '')
     }, [value])
 
-    // Formata centavos para exibição (120000 -> "1.200,00")
-    const formatDisplay = (c: number): string => {
-      if (c === 0) return ''
-      return (c / 100).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    }
+    const displayValue = React.useMemo(() => {
+      const cents = digits.length > 0 ? Number(digits) : 0
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(cents / 100)
+    }, [digits])
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // Permite: tab, escape
-      if (['Tab', 'Escape'].includes(e.key)) {
-        return
-      }
-
-      // Previne Enter de submeter o form
+      if (['Tab', 'Escape'].includes(e.key)) return
       if (e.key === 'Enter') {
         e.preventDefault()
         return
       }
-
-      // Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-      if (e.ctrlKey || e.metaKey) {
-        return
-      }
+      if (e.ctrlKey || e.metaKey) return
 
       e.preventDefault()
 
-      // Delete ou Backspace com seleção: zera o campo
-      if (e.key === 'Backspace' || e.key === 'Delete') {
-        const input = inputRef.current
-        if (input && input.selectionStart !== input.selectionEnd) {
-          onChange('0')
-          return
-        }
-        if (e.key === 'Backspace') {
-          const newCents = Math.floor(cents / 10)
-          onChange(String(newCents / 100))
-        }
+      if (e.key === 'Delete') {
+        setDigits('')
+        onChange(0)
+        return
+      }
+
+      if (e.key === 'Backspace') {
+        const next = digits.slice(0, -1)
+        setDigits(next)
+        onChange(next.length > 0 ? Number(next) : 0)
         return
       }
 
       if (/^[0-9]$/.test(e.key)) {
-        const digit = parseInt(e.key, 10)
-        const newCents = cents * 10 + digit
-        onChange(String(newCents / 100))
+        // Limita a 7 dígitos: max R$ 99.999,99
+        if (digits.length >= 7) return
+        const next = digits + e.key
+        setDigits(next)
+        onChange(Number(next))
       }
     }
 
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
       e.preventDefault()
-      const pastedText = e.clipboardData.getData('text')
-      // Tenta parsear como valor em reais (ex: "1.200,50" ou "1200.50" ou "1200")
-      const cleaned = pastedText.replace(/\./g, '').replace(',', '.')
+      const text = e.clipboardData.getData('text')
+      // Aceita tanto "12,50" quanto "12.50" quanto "1250"
+      const cleaned = text.replace(/\./g, '').replace(',', '.')
       const parsed = parseFloat(cleaned)
-      if (!isNaN(parsed)) {
-        onChange(String(parsed))
+      if (!isNaN(parsed) && parsed >= 0) {
+        const cents = Math.round(parsed * 100)
+        const next = String(cents).slice(0, 7)
+        setDigits(next)
+        onChange(Number(next))
       }
     }
 
     return (
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm select-none">
           R$
         </span>
         <input
           ref={inputRef}
           type="text"
           inputMode="numeric"
-          value={formatDisplay(cents)}
+          value={displayValue}
           onChange={() => {}}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
-          placeholder={placeholder}
           className={cn(
-            'flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+            'flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm tabular-nums',
             className
           )}
           {...props}

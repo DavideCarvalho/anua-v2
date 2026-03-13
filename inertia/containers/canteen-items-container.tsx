@@ -10,6 +10,8 @@ import {
   Pencil,
   Trash2,
   ImageIcon,
+  ChevronsUpDown,
+  Check,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -38,7 +40,16 @@ import {
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
 import { Switch } from '../components/ui/switch'
-import { formatCurrency } from '../lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+  CommandEmpty,
+} from '../components/ui/command'
+import { cn, formatCurrency } from '../lib/utils'
+import { CurrencyInput } from '../components/ui/currency-input'
 
 type CanteenItem = CanteenItemsResponseData[number]
 
@@ -50,7 +61,7 @@ interface ItemFormValues {
   name: string
   description: string
   category: string
-  priceReais: string
+  price: number
   isActive: boolean
   imagePreviewUrl: string | null
   removeImage: boolean
@@ -60,18 +71,10 @@ const defaultItemForm: ItemFormValues = {
   name: '',
   description: '',
   category: '',
-  priceReais: '',
+  price: 0,
   isActive: true,
   imagePreviewUrl: null,
   removeImage: false,
-}
-
-function parsePriceToCents(priceReais: string) {
-  const normalized = Number(priceReais.replace(',', '.'))
-  if (!Number.isFinite(normalized) || normalized < 0) {
-    return null
-  }
-  return Math.round(normalized * 100)
 }
 
 function getItemImageUrl(image: CanteenItem['image']): string | null {
@@ -92,6 +95,81 @@ function getItemImageUrl(image: CanteenItem['image']): string | null {
   }
 
   return null
+}
+
+interface CategoryComboboxProps {
+  value: string
+  onChange: (value: string) => void
+  categories: string[]
+}
+
+function CategoryCombobox({ value, onChange, categories }: CategoryComboboxProps) {
+  const [open, setOpen] = useState(false)
+  const [inputValue, setInputValue] = useState(value)
+
+  // Keep inputValue in sync when value prop changes externally
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setInputValue(value)
+    setOpen(nextOpen)
+  }
+
+  const filtered = categories.filter((c) => c.toLowerCase().includes(inputValue.toLowerCase()))
+
+  const showCreate =
+    inputValue.trim().length > 0 &&
+    !categories.some((c) => c.toLowerCase() === inputValue.trim().toLowerCase())
+
+  const handleSelect = (selected: string) => {
+    onChange(selected)
+    setOpen(false)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
+          <span className={cn('truncate', !value && 'text-muted-foreground')}>
+            {value || 'Selecionar categoria'}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Buscar ou criar..."
+            value={inputValue}
+            onValueChange={setInputValue}
+          />
+          <CommandList>
+            <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
+            {filtered.map((cat) => (
+              <CommandItem key={cat} value={cat} onSelect={() => handleSelect(cat)}>
+                <Check
+                  className={cn('mr-2 h-4 w-4', value === cat ? 'opacity-100' : 'opacity-0')}
+                />
+                {cat}
+              </CommandItem>
+            ))}
+            {showCreate && (
+              <CommandItem
+                value={`__create__${inputValue.trim()}`}
+                onSelect={() => handleSelect(inputValue.trim())}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Criar &ldquo;{inputValue.trim()}&rdquo;
+              </CommandItem>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
 }
 
 function CanteenItemsErrorFallback({
@@ -168,6 +246,14 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
     enabled: !!canteenId,
   })
 
+  const { data: categoriesData } = useQuery({
+    ...api.api.v1.canteenItems.categories.queryOptions({
+      query: { canteenId: canteenId ?? undefined },
+    }),
+    enabled: !!canteenId,
+  })
+  const existingCategories = categoriesData?.data ?? []
+
   const items = data?.data ?? []
   const meta = data?.metadata ?? null
 
@@ -177,7 +263,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       name: item.name,
       description: item.description ?? '',
       category: item.category ?? '',
-      priceReais: (item.price / 100).toFixed(2),
+      price: item.price,
       isActive: item.isActive,
       imagePreviewUrl: getItemImageUrl(item.image),
       removeImage: false,
@@ -185,26 +271,16 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
   }
 
   const canSaveCreate = useMemo(() => {
-    return (
-      !!createForm.name.trim() && parsePriceToCents(createForm.priceReais) !== null && !!canteenId
-    )
-  }, [createForm.name, createForm.priceReais, canteenId])
+    return !!createForm.name.trim() && createForm.price > 0 && !!canteenId
+  }, [createForm.name, createForm.price, canteenId])
 
   const canSaveEdit = useMemo(() => {
-    return (
-      !!editForm.name.trim() && parsePriceToCents(editForm.priceReais) !== null && !!editingItem
-    )
-  }, [editForm.name, editForm.priceReais, editingItem])
+    return !!editForm.name.trim() && editForm.price > 0 && !!editingItem
+  }, [editForm.name, editForm.price, editingItem])
 
   async function handleCreate() {
     if (!canteenId) {
       toast.error('Cantina não encontrada no contexto atual')
-      return
-    }
-
-    const price = parsePriceToCents(createForm.priceReais)
-    if (price === null) {
-      toast.error('Preço inválido')
       return
     }
 
@@ -215,18 +291,14 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
           name: createForm.name.trim(),
           description: createForm.description.trim() || undefined,
           category: createForm.category.trim() || undefined,
-          price,
+          price: createForm.price,
           isActive: createForm.isActive,
         },
       }),
       {
         loading: 'Criando item...',
         success: () => {
-          queryClient.invalidateQueries({
-            predicate: (query) =>
-              query.queryHash.includes('api.v1.canteenItems.index') ||
-              query.queryHash.includes('api.v1.canteen_items.index'),
-          })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
           setCreateOpen(false)
           setCreateForm(defaultItemForm)
           return 'Item criado com sucesso'
@@ -241,12 +313,6 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       return
     }
 
-    const price = parsePriceToCents(editForm.priceReais)
-    if (price === null) {
-      toast.error('Preço inválido')
-      return
-    }
-
     toast.promise(
       updateItem.mutateAsync({
         params: { id: editingItem.id },
@@ -254,7 +320,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
           name: editForm.name.trim(),
           description: editForm.description.trim() || undefined,
           category: editForm.category.trim() || undefined,
-          price,
+          price: editForm.price,
           isActive: editForm.isActive,
           removeImage: editForm.removeImage,
         },
@@ -262,11 +328,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
       {
         loading: 'Salvando item...',
         success: () => {
-          queryClient.invalidateQueries({
-            predicate: (query) =>
-              query.queryHash.includes('api.v1.canteenItems.index') ||
-              query.queryHash.includes('api.v1.canteen_items.index'),
-          })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
           setEditingItem(null)
           return 'Item atualizado com sucesso'
         },
@@ -283,11 +345,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
     await toast.promise(deleteItem.mutateAsync({ params: { id: item.id } }), {
       loading: 'Excluindo item...',
       success: () => {
-        queryClient.invalidateQueries({
-          predicate: (query) =>
-            query.queryHash.includes('api.v1.canteenItems.index') ||
-            query.queryHash.includes('api.v1.canteen_items.index'),
-        })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
         return 'Item excluído com sucesso'
       },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao excluir item'),
@@ -298,11 +356,7 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
     await toast.promise(toggleItem.mutateAsync({ params: { id: item.id } }), {
       loading: item.isActive ? 'Desativando item...' : 'Ativando item...',
       success: () => {
-        queryClient.invalidateQueries({
-          predicate: (query) =>
-            query.queryHash.includes('api.v1.canteenItems.index') ||
-            query.queryHash.includes('api.v1.canteen_items.index'),
-        })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
         return 'Status atualizado'
       },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao atualizar status'),
@@ -507,24 +561,19 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="create-item-category">Categoria</Label>
-                <Input
-                  id="create-item-category"
+                <Label>Categoria</Label>
+                <CategoryCombobox
                   value={createForm.category}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({ ...prev, category: event.target.value }))
-                  }
+                  onChange={(val) => setCreateForm((prev) => ({ ...prev, category: val }))}
+                  categories={existingCategories}
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="create-item-price">Preço (R$)</Label>
-                <Input
+                <Label htmlFor="create-item-price">Preço</Label>
+                <CurrencyInput
                   id="create-item-price"
-                  placeholder="0,00"
-                  value={createForm.priceReais}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({ ...prev, priceReais: event.target.value }))
-                  }
+                  value={createForm.price}
+                  onChange={(cents) => setCreateForm((prev) => ({ ...prev, price: cents }))}
                 />
               </div>
             </div>
@@ -578,23 +627,19 @@ function CanteenItemsContent({ canteenId }: CanteenItemsContainerProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label htmlFor="edit-item-category">Categoria</Label>
-                <Input
-                  id="edit-item-category"
+                <Label>Categoria</Label>
+                <CategoryCombobox
                   value={editForm.category}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, category: event.target.value }))
-                  }
+                  onChange={(val) => setEditForm((prev) => ({ ...prev, category: val }))}
+                  categories={existingCategories}
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="edit-item-price">Preço (R$)</Label>
-                <Input
+                <Label htmlFor="edit-item-price">Preço</Label>
+                <CurrencyInput
                   id="edit-item-price"
-                  value={editForm.priceReais}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, priceReais: event.target.value }))
-                  }
+                  value={editForm.price}
+                  onChange={(cents) => setEditForm((prev) => ({ ...prev, price: cents }))}
                 />
               </div>
             </div>
