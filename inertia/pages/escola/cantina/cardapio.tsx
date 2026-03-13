@@ -1,9 +1,17 @@
 import { Head, usePage } from '@inertiajs/react'
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { addDays, format, startOfWeek } from 'date-fns'
+import { addDays, addWeeks, format, startOfWeek } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Calendar, Pencil, Plus, Trash2, UtensilsCrossed } from 'lucide-react'
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  Plus,
+  Trash2,
+  UtensilsCrossed,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EscolaLayout } from '../../../components/layouts'
@@ -91,7 +99,13 @@ function toDateKey(value: string | Date) {
 export default function CardapioPage() {
   const { props } = usePage<PageProps>()
   const canteenId = props.canteenId
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
+  const [weekOffset, setWeekOffset] = useState(0)
+
+  const weekStart = useMemo(
+    () => addWeeks(startOfWeek(new Date(), { weekStartsOn: 1 }), weekOffset),
+    [weekOffset]
+  )
+
   const weekDays = useMemo(
     () => Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)),
     [weekStart]
@@ -262,12 +276,43 @@ export default function CardapioPage() {
         <CanteenGate>
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <CardTitle>Semana Atual</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <CardTitle>
+                    {weekOffset === 0
+                      ? 'Semana Atual'
+                      : weekOffset < 0
+                        ? `${Math.abs(weekOffset)} semana${Math.abs(weekOffset) > 1 ? 's' : ''} atrás`
+                        : `${weekOffset} semana${weekOffset > 1 ? 's' : ''} à frente`}
+                  </CardTitle>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setWeekOffset((w) => w - 1)}
+                    aria-label="Semana anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {weekOffset !== 0 && (
+                    <Button variant="outline" size="sm" onClick={() => setWeekOffset(0)}>
+                      Hoje
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setWeekOffset((w) => w + 1)}
+                    aria-label="Próxima semana"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <CardDescription>
-                {format(weekDays[0], 'dd/MM/yyyy')} - {format(weekDays[4], 'dd/MM/yyyy')}
+                {format(weekDays[0], 'dd/MM/yyyy')} – {format(weekDays[4], 'dd/MM/yyyy')}
               </CardDescription>
             </CardHeader>
             <CardContent>
