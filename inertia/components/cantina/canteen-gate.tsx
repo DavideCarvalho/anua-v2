@@ -144,7 +144,8 @@ export function CanteenGate({ children }: CanteenGateProps) {
       toast.success('Cantina criada com sucesso')
       setIsDialogOpen(false)
       resetForm()
-      updateUrlCanteen(canteen.id)
+      const newId = (canteen as any)?.json?.id ?? (canteen as any)?.id
+      updateUrlCanteen(newId)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao criar cantina')
     } finally {
