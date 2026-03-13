@@ -67,6 +67,12 @@ POSTHOG_OTEL_ENDPOINT_BASE=https://us.i.posthog.com/i
 
 Com `POSTHOG_PROJECT_TOKEN` definido, o app envia `traces` e `logs` para o PostHog automaticamente.
 
+## Alertas de erro
+
+Para configuracao de alertas proativos de erro (PostHog + GCP + Discord), veja:
+
+- `docs/observability-alerts.md`
+
 ## Stack local com Docker Compose
 
 Suba Jaeger + OpenTelemetry Collector:

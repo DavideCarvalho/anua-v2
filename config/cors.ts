@@ -9,14 +9,17 @@ import { defineConfig } from '@adonisjs/cors'
 const corsConfig = defineConfig({
   enabled: true,
   origin: (origin) => {
-    // Allow all localhost origins for testing
+    // Allow localhost in development/test
     if (origin?.startsWith('http://localhost:') || origin?.startsWith('https://localhost:')) {
       return true
     }
-    // In production, you might want to be more restrictive
+    // Production domain
+    if (origin === 'https://anuaapp.com.br' || origin === 'https://www.anuaapp.com.br') {
+      return true
+    }
     return false
   },
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'],
   headers: true,
   exposeHeaders: [],
   credentials: true,

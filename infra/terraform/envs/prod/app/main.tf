@@ -178,8 +178,10 @@ module "queue_worker" {
   service_name = "queue-worker"
   image        = var.api_image # Uses the same image as API
 
-  command = ["node"]
-  args    = ["ace", "queue:work", "--concurrency=2"]
+  command = ["/bin/sh", "-c"]
+  args = [
+    "node -e 'const http=require(\"node:http\");const { spawn }=require(\"node:child_process\");const port=Number(process.env.PORT||8080);const child=spawn(\"node\",[\"ace\",\"queue:work\",\"--concurrency=2\"],{stdio:\"inherit\"});const server=http.createServer((_,res)=>{res.statusCode=200;res.end(\"ok\")});server.listen(port);const shutdown=(signal)=>{if(!child.killed)child.kill(signal);server.close(()=>process.exit(0));};process.on(\"SIGTERM\",()=>shutdown(\"SIGTERM\"));process.on(\"SIGINT\",()=>shutdown(\"SIGINT\"));child.on(\"exit\",(code)=>{server.close(()=>process.exit(code??1));});'",
+  ]
 
   # Keep 1 instance always running to process jobs
   min_instances = 1

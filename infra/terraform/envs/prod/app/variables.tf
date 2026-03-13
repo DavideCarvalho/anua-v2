@@ -39,3 +39,9 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "alert_notification_channel_ids" {
+  description = "Notification channel IDs used by monitoring alert policies"
+  type        = list(string)
+  default     = []
+}

@@ -65,6 +65,11 @@ resource "google_sql_database_instance" "postgres" {
       value = "60000"
     }
 
+    database_flags {
+      name  = "log_statement"
+      value = "ddl"
+    }
+
     maintenance_window {
       day          = 7 # Sunday
       hour         = 3

@@ -7,6 +7,8 @@ resource "google_project_service" "required_apis" {
     "run.googleapis.com",
     "artifactregistry.googleapis.com",
     "secretmanager.googleapis.com",
+    "monitoring.googleapis.com",
+    "logging.googleapis.com",
     "iamcredentials.googleapis.com",
     "cloudscheduler.googleapis.com",
   ])

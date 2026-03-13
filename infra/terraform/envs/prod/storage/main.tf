@@ -102,6 +102,14 @@ resource "google_secret_manager_secret" "posthog_project_token" {
   }
 }
 
+resource "google_secret_manager_secret" "discord_alert_webhook" {
+  secret_id = "${var.environment}-${var.project_name}-discord-alert-webhook"
+
+  replication {
+    auto {}
+  }
+}
+
 # Grant Cloud Run access to secrets
 resource "google_secret_manager_secret_iam_member" "app_key_access" {
   secret_id = google_secret_manager_secret.app_key.id
@@ -141,6 +149,12 @@ resource "google_secret_manager_secret_iam_member" "asaas_webhook_token_access" 
 
 resource "google_secret_manager_secret_iam_member" "posthog_project_token_access" {
   secret_id = google_secret_manager_secret.posthog_project_token.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_secret_manager_secret_iam_member" "discord_alert_webhook_access" {
+  secret_id = google_secret_manager_secret.discord_alert_webhook.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
 }

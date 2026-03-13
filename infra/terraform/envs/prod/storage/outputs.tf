@@ -42,3 +42,8 @@ output "posthog_project_token_secret_id" {
   description = "Secret ID for POSTHOG_PROJECT_TOKEN"
   value       = google_secret_manager_secret.posthog_project_token.secret_id
 }
+
+output "discord_alert_webhook_secret_id" {
+  description = "Secret ID for Discord alert webhook"
+  value       = google_secret_manager_secret.discord_alert_webhook.secret_id
+}
