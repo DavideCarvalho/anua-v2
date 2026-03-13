@@ -107,11 +107,12 @@ function CanteenPurchasesContent({ canteenId }: CanteenPurchasesContainerProps) 
 
   const { search, page, limit } = filters
 
-  const { data, isLoading, error, refetch } = useQuery(
-    api.api.v1.canteenPurchases.index.queryOptions({
+  const { data, isLoading, error, refetch } = useQuery({
+    ...api.api.v1.canteenPurchases.index.queryOptions({
       query: { page, limit, canteenId, search: search || undefined },
-    })
-  )
+    }),
+    enabled: !!canteenId,
+  })
 
   const purchases: CanteenPurchase[] = data?.data ?? []
   const meta: CanteenPurchasesMeta | null = data?.metadata ?? null

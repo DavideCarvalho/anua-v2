@@ -17,6 +17,8 @@ export default class ListCanteenPurchasesController {
 
     if (canteenId) {
       query.where('canteenId', canteenId)
+    } else {
+      query.whereRaw('1 = 0')
     }
 
     if (userId) {
