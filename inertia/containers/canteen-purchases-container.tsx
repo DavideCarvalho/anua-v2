@@ -119,7 +119,7 @@ function PurchaseActionsMenu({ purchase }: { purchase: CanteenPurchase }) {
         params: { id: purchase.id },
         body: { status: 'PAID' },
       })
-      queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
       toast.success('Pedido marcado como pago')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pedido')
@@ -132,7 +132,7 @@ function PurchaseActionsMenu({ purchase }: { purchase: CanteenPurchase }) {
         params: { id: purchase.id },
         body: { status: 'PENDING' },
       })
-      queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
       toast.success('Pedido marcado como pendente')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao atualizar pedido')
@@ -144,7 +144,7 @@ function PurchaseActionsMenu({ purchase }: { purchase: CanteenPurchase }) {
       await cancelMutation.mutateAsync({
         params: { id: purchase.id },
       })
-      queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
       toast.success('Pedido cancelado')
       setCancelDialogOpen(false)
     } catch (error) {

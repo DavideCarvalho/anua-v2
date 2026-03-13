@@ -167,8 +167,8 @@ export default function PDVPage() {
     await toast.promise(createPurchaseMutation.mutateAsync({ body: payload }), {
       loading: 'Registrando venda...',
       success: () => {
-        queryClient.invalidateQueries({ queryKey: ['canteen-purchases'] })
-        queryClient.invalidateQueries({ queryKey: ['canteen-items'] })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
         setCart([])
         return 'Venda registrada com sucesso'
       },

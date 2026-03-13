@@ -78,7 +78,7 @@ export function CanteenGate({ children }: CanteenGateProps) {
       const canteen = await createCanteen.mutateAsync({
         body: { name, schoolId, responsibleUserId },
       })
-      queryClient.invalidateQueries({ queryKey: ['canteens'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteens.index.pathKey() })
       toast.success('Cantina criada com sucesso')
       setIsDialogOpen(false)
       setNewCanteenName('')

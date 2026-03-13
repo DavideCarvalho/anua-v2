@@ -180,7 +180,7 @@ export default function CardapioPage() {
       {
         loading: 'Criando refeição...',
         success: () => {
-          queryClient.invalidateQueries({ queryKey: ['canteen-meals'] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
           setCreateOpen(false)
           setCreateForm(emptyMealForm)
           return 'Refeição criada com sucesso'
@@ -219,7 +219,7 @@ export default function CardapioPage() {
       {
         loading: 'Atualizando refeição...',
         success: () => {
-          queryClient.invalidateQueries({ queryKey: ['canteen-meals'] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
           setEditingMeal(null)
           return 'Refeição atualizada'
         },
@@ -236,7 +236,7 @@ export default function CardapioPage() {
     await toast.promise(deleteMeal.mutateAsync({ params: { id: meal.id } }), {
       loading: 'Excluindo refeição...',
       success: () => {
-        queryClient.invalidateQueries({ queryKey: ['canteen-meals'] })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
         return 'Refeição excluída'
       },
       error: (err) => (err instanceof Error ? err.message : 'Erro ao excluir refeição'),
