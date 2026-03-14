@@ -73,6 +73,14 @@ export default function PDVPage() {
   })
   const enrollments = enrollmentsData ?? []
 
+  const { data: studentBalanceData } = useQuery({
+    ...api.api.v1.students.balance.queryOptions({
+      params: { studentId: selectedStudentId! },
+    }),
+    enabled: !!selectedStudentId,
+  })
+  const studentBalance: number = studentBalanceData?.balance ?? 0
+
   const { data: itemsData, isLoading: loadingItems } = useQuery({
     ...api.api.v1.canteenItems.index.queryOptions({
       query: { page: 1, limit: 40, canteenId: canteenId ?? undefined, isActive: true },
@@ -169,6 +177,11 @@ export default function PDVPage() {
       success: () => {
         queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
         queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
+        if (paymentMethod === 'BALANCE' && selectedStudentId) {
+          queryClient.invalidateQueries({
+            queryKey: api.api.v1.students.balance.pathKey(),
+          })
+        }
         setCart([])
         return 'Venda registrada com sucesso'
       },
@@ -232,12 +245,17 @@ export default function PDVPage() {
                   )}
 
                   {selectedStudent && (
-                    <p className="text-sm text-muted-foreground">
-                      Aluno selecionado:{' '}
-                      <span className="font-medium text-foreground">
-                        {selectedStudent.user?.name || 'Aluno'}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>
+                        Aluno selecionado:{' '}
+                        <span className="font-medium text-foreground">
+                          {selectedStudent.user?.name || 'Aluno'}
+                        </span>
                       </span>
-                    </p>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                        Saldo: {formatCurrency(studentBalance)}
+                      </span>
+                    </div>
                   )}
 
                   {paymentMethod === 'ON_ACCOUNT' && enrollments.length > 1 && (
