@@ -23,6 +23,8 @@ const ListItemsByCanteenController = () =>
   import('#controllers/canteen_items/list_items_by_canteen_controller')
 const ToggleCanteenItemActiveController = () =>
   import('#controllers/canteen_items/toggle_canteen_item_active_controller')
+const ListCanteenItemCategoriesController = () =>
+  import('#controllers/canteen_items/list_canteen_item_categories_controller')
 
 // Canteen Reports
 const GetCanteenReportController = () =>
@@ -62,6 +64,10 @@ const UpdateCanteenMealReservationStatusController = () =>
 const DeleteCanteenMealReservationController = () =>
   import('#controllers/canteen_meal_reservations/delete_canteen_meal_reservation_controller')
 
+// Canteen Financial Settings
+const ShowCanteenFinancialSettingsController = () =>
+  import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller')
+
 // Canteen Purchases
 const ListCanteenPurchasesController = () =>
   import('#controllers/canteen_purchases/list_canteen_purchases_controller')
@@ -83,6 +89,9 @@ export function registerCanteenApiRoutes() {
       router.put('/:id', [UpdateCanteenController]).as('canteens.update')
       router.delete('/:id', [DeleteCanteenController]).as('canteens.destroy')
       router.get('/:canteenId/items', [ListItemsByCanteenController]).as('canteens.items')
+      router
+        .get('/:canteenId/financial-settings', [ShowCanteenFinancialSettingsController])
+        .as('canteens.financial_settings.show')
     })
     .prefix('/canteens')
     .use([middleware.auth(), middleware.impersonation()])
@@ -120,6 +129,9 @@ export function registerCanteenItemApiRoutes() {
     .group(() => {
       router.get('/', [ListCanteenItemsController]).as('canteen_items.index')
       router.post('/', [CreateCanteenItemController]).as('canteen_items.store')
+      router
+        .get('/categories', [ListCanteenItemCategoriesController])
+        .as('canteen_items.categories')
       router.get('/:id', [ShowCanteenItemController]).as('canteen_items.show')
       router.put('/:id', [UpdateCanteenItemController]).as('canteen_items.update')
       router.delete('/:id', [DeleteCanteenItemController]).as('canteen_items.destroy')

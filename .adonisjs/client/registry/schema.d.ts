@@ -5635,6 +5635,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_items/list_items_by_canteen_controller').default['handle']>>>
     }
   }
+  'api.v1.canteens.financial_settings.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/canteens/:canteenId/financial-settings'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { canteenId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller').default['handle']>>>
+    }
+  }
   'api.v1.canteen_reports.summary': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/canteen-reports'
@@ -5717,6 +5729,18 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/canteen').createCanteenItemValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_items/create_canteen_item_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_items/create_canteen_item_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.canteen_items.categories': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/canteen-items/categories'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_items/list_canteen_item_categories_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_items/list_canteen_item_categories_controller').default['handle']>>>
     }
   }
   'api.v1.canteen_items.show': {
@@ -8009,6 +8033,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/pedagogical_calendar').getPedagogicalCreationContextValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pedagogical_calendar/get_creation_context_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pedagogical_calendar/get_creation_context_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.csp_report': {
+    methods: ["POST"]
+    pattern: '/api/v1/csp-report'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: unknown
+      errorResponse: unknown
     }
   }
 }

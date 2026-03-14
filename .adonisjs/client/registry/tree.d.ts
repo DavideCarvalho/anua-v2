@@ -676,6 +676,9 @@ export interface ApiDefinition {
         update: typeof routes['api.v1.canteens.update']
         destroy: typeof routes['api.v1.canteens.destroy']
         items: typeof routes['api.v1.canteens.items']
+        financialSettings: {
+          show: typeof routes['api.v1.canteens.financial_settings.show']
+        }
       }
       canteenReports: {
         summary: typeof routes['api.v1.canteen_reports.summary']
@@ -689,6 +692,7 @@ export interface ApiDefinition {
       canteenItems: {
         index: typeof routes['api.v1.canteen_items.index']
         store: typeof routes['api.v1.canteen_items.store']
+        categories: typeof routes['api.v1.canteen_items.categories']
         show: typeof routes['api.v1.canteen_items.show']
         update: typeof routes['api.v1.canteen_items.update']
         destroy: typeof routes['api.v1.canteen_items.destroy']
@@ -971,6 +975,7 @@ export interface ApiDefinition {
         index: typeof routes['api.v1.pedagogical_calendar.index']
         creationContext: typeof routes['api.v1.pedagogical_calendar.creation_context']
       }
+      cspReport: typeof routes['api.v1.csp_report']
     }
   }
 }

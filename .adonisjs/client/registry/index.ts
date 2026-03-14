@@ -2820,6 +2820,12 @@ const routes = {
     tokens: [{"old":"/api/v1/canteens/:canteenId/items","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/:canteenId/items","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/:canteenId/items","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/:canteenId/items","type":1,"val":"canteenId","end":""},{"old":"/api/v1/canteens/:canteenId/items","type":0,"val":"items","end":""}],
     types: placeholder as Registry['api.v1.canteens.items']['types'],
   },
+  'api.v1.canteens.financial_settings.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/canteens/:canteenId/financial-settings',
+    tokens: [{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":1,"val":"canteenId","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"financial-settings","end":""}],
+    types: placeholder as Registry['api.v1.canteens.financial_settings.show']['types'],
+  },
   'api.v1.canteen_reports.summary': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/canteen-reports',
@@ -2861,6 +2867,12 @@ const routes = {
     pattern: '/api/v1/canteen-items',
     tokens: [{"old":"/api/v1/canteen-items","type":0,"val":"api","end":""},{"old":"/api/v1/canteen-items","type":0,"val":"v1","end":""},{"old":"/api/v1/canteen-items","type":0,"val":"canteen-items","end":""}],
     types: placeholder as Registry['api.v1.canteen_items.store']['types'],
+  },
+  'api.v1.canteen_items.categories': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/canteen-items/categories',
+    tokens: [{"old":"/api/v1/canteen-items/categories","type":0,"val":"api","end":""},{"old":"/api/v1/canteen-items/categories","type":0,"val":"v1","end":""},{"old":"/api/v1/canteen-items/categories","type":0,"val":"canteen-items","end":""},{"old":"/api/v1/canteen-items/categories","type":0,"val":"categories","end":""}],
+    types: placeholder as Registry['api.v1.canteen_items.categories']['types'],
   },
   'api.v1.canteen_items.show': {
     methods: ["GET","HEAD"],
@@ -4007,6 +4019,12 @@ const routes = {
     pattern: '/api/v1/pedagogical-calendar/creation-context',
     tokens: [{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"api","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"v1","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"pedagogical-calendar","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"creation-context","end":""}],
     types: placeholder as Registry['api.v1.pedagogical_calendar.creation_context']['types'],
+  },
+  'api.v1.csp_report': {
+    methods: ["POST"],
+    pattern: '/api/v1/csp-report',
+    tokens: [{"old":"/api/v1/csp-report","type":0,"val":"api","end":""},{"old":"/api/v1/csp-report","type":0,"val":"v1","end":""},{"old":"/api/v1/csp-report","type":0,"val":"csp-report","end":""}],
+    types: placeholder as Registry['api.v1.csp_report']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 
