@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react'
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Search, ShoppingCart, CreditCard, Banknote, QrCode, ReceiptText } from 'lucide-react'
 
@@ -19,7 +19,6 @@ import { Label } from '../../../components/ui/label'
 import { formatCurrency } from '../../../lib/utils'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
 import type { Route } from '@tuyau/core/types'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
 type StudentsResponse = Route.Response<'api.v1.students.index'>
@@ -55,7 +54,8 @@ export default function PDVPage() {
 
   const [studentSearch, setStudentSearch] = useState('')
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
+  const [selectedStudentData, setSelectedStudentData] = useState<StudentListItem | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BALANCE')
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null)
   const [paymentTab, setPaymentTab] = useState<'app' | 'manual'>('app')
   const [cart, setCart] = useState<
@@ -71,8 +71,6 @@ export default function PDVPage() {
     })
   )
   const students = studentsData?.data ?? []
-  const selectedStudent =
-    students.find((student: StudentListItem) => student.id === selectedStudentId) ?? null
 
   const { data: enrollmentsData } = useQuery({
     ...api.api.v1.students.enrollments.list.queryOptions({
@@ -130,7 +128,7 @@ export default function PDVPage() {
     if (paymentTab === 'manual' && !manualMethods.includes(paymentMethod)) {
       setPaymentMethod('CASH')
     }
-  }, [paymentTab])
+  }, [paymentTab, paymentMethod])
 
   const totalAmount = useMemo(
     () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
@@ -206,7 +204,9 @@ export default function PDVPage() {
         queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
         if (paymentMethod === 'BALANCE' && selectedStudentId) {
           queryClient.invalidateQueries({
-            queryKey: api.api.v1.students.balance.pathKey(),
+            queryKey: api.api.v1.students.balance.queryOptions({
+              params: { studentId: selectedStudentId! },
+            }).queryKey,
           })
         }
         setCart([])
@@ -262,6 +262,7 @@ export default function PDVPage() {
                           className="w-full border-b px-3 py-2 text-left text-sm hover:bg-muted/60 last:border-0"
                           onClick={() => {
                             setSelectedStudentId(student.id)
+                            setSelectedStudentData(student)
                             setStudentSearch('')
                           }}
                         >
@@ -271,12 +272,12 @@ export default function PDVPage() {
                     </div>
                   )}
 
-                  {selectedStudent && (
+                  {selectedStudentData && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>
                         Aluno selecionado:{' '}
                         <span className="font-medium text-foreground">
-                          {selectedStudent.user?.name || 'Aluno'}
+                          {selectedStudentData.user?.name || 'Aluno'}
                         </span>
                       </span>
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
@@ -427,6 +428,8 @@ export default function PDVPage() {
                         </Button>
                       )}
 
+                      {/* CARD is shown only when a real CanteenFinancialSettings row exists.
+                          The endpoint returns an object without 'id' when no row is configured. */}
                       {financialSettings && 'id' in financialSettings && (
                         <Button
                           variant={paymentMethod === 'CARD' ? 'default' : 'outline'}
