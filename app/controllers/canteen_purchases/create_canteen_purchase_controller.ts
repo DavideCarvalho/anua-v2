@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import CanteenPurchase, { type CanteenPurchaseStatus } from '#models/canteen_purchase'
 import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
@@ -10,11 +11,62 @@ import StudentHasLevel from '#models/student_has_level'
 import ContractPaymentDay from '#models/contract_payment_day'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
-import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 import { createCanteenPurchaseValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
 
 export default class CreateCanteenPurchaseController {
+  private normalizeItemsSignature(items: Array<{ canteenItemId: string; quantity: number }>) {
+    const quantitiesByItemId = new Map<string, number>()
+
+    for (const item of items) {
+      quantitiesByItemId.set(
+        item.canteenItemId,
+        (quantitiesByItemId.get(item.canteenItemId) ?? 0) + item.quantity
+      )
+    }
+
+    return [...quantitiesByItemId.entries()]
+      .map(([canteenItemId, quantity]) => `${canteenItemId}:${quantity}`)
+      .sort()
+      .join('|')
+  }
+
+  private async ensureNotDuplicateRecentCheckout(payload: {
+    userId: string
+    canteenId: string
+    paymentMethod: string
+    totalAmount: number
+    items: Array<{ canteenItemId: string; quantity: number }>
+  }) {
+    const recentPurchases = await CanteenPurchase.query()
+      .where('userId', payload.userId)
+      .where('canteenId', payload.canteenId)
+      .where('paymentMethod', payload.paymentMethod)
+      .where('totalAmount', payload.totalAmount)
+      .whereNot('status', 'CANCELLED')
+      .where('createdAt', '>=', DateTime.now().minus({ seconds: 15 }).toSQL()!)
+      .preload('itemsPurchased')
+      .orderBy('createdAt', 'desc')
+      .limit(5)
+
+    const payloadSignature = this.normalizeItemsSignature(payload.items)
+
+    const duplicate = recentPurchases.find((purchase) => {
+      const purchaseSignature = this.normalizeItemsSignature(
+        purchase.itemsPurchased.map((item) => ({
+          canteenItemId: item.canteenItemId,
+          quantity: item.quantity,
+        }))
+      )
+
+      return purchaseSignature === payloadSignature
+    })
+
+    if (duplicate) {
+      throw AppException.operationFailedWithProvidedData(409)
+    }
+  }
+
   private async resolveStudentEnrollmentForFiado(payload: {
     userId: string
     studentHasLevelId?: string
@@ -103,6 +155,14 @@ export default class CreateCanteenPurchaseController {
       totalAmount += unitPrice * item.quantity
     }
 
+    await this.ensureNotDuplicateRecentCheckout({
+      userId: payload.userId,
+      canteenId: payload.canteenId,
+      paymentMethod: payload.paymentMethod,
+      totalAmount,
+      items: payload.items,
+    })
+
     let studentForBalance: Student | null = null
     let previousBalance: number | null = null
     let newBalance: number | null = null
@@ -133,89 +193,98 @@ export default class CreateCanteenPurchaseController {
     let paidAt = isOnAccount ? null : DateTime.now()
 
     let studentPaymentId: string | null = null
+    let purchaseId: string | null = null
 
     if (payload.paymentMethod === 'BALANCE') {
       status = 'PAID'
       paidAt = DateTime.now()
     }
 
-    if (isOnAccount) {
-      const enrollment = await this.resolveStudentEnrollmentForFiado(payload)
-      const { contractId, dueDate } = await this.resolveDueDateForFiado(enrollment)
+    await db.transaction(async (trx) => {
+      if (isOnAccount) {
+        const enrollment = await this.resolveStudentEnrollmentForFiado(payload)
+        const { contractId, dueDate } = await this.resolveDueDateForFiado(enrollment)
 
-      const studentPayment = await StudentPayment.create({
-        studentId: payload.userId,
-        amount: totalAmount,
-        month: dueDate.month,
-        year: dueDate.year,
-        type: 'CANTEEN',
-        status: 'NOT_PAID',
-        totalAmount,
-        dueDate,
-        installments: 1,
-        installmentNumber: 1,
-        discountPercentage: 0,
-        discountType: 'PERCENTAGE',
-        discountValue: 0,
-        contractId,
-        studentHasLevelId: enrollment.id,
-      })
+        const studentPayment = new StudentPayment()
+        studentPayment.useTransaction(trx)
+        studentPayment.fill({
+          studentId: payload.userId,
+          amount: totalAmount,
+          month: dueDate.month,
+          year: dueDate.year,
+          type: 'CANTEEN',
+          status: 'NOT_PAID',
+          totalAmount,
+          dueDate,
+          installments: 1,
+          installmentNumber: 1,
+          discountPercentage: 0,
+          discountType: 'PERCENTAGE',
+          discountValue: 0,
+          contractId,
+          studentHasLevelId: enrollment.id,
+        })
+        await studentPayment.save()
 
-      studentPaymentId = studentPayment.id
-    }
-
-    // Create CanteenPurchase
-    const purchase = await CanteenPurchase.create({
-      userId: payload.userId,
-      canteenId: payload.canteenId,
-      totalAmount,
-      paymentMethod: payload.paymentMethod,
-      studentPaymentId,
-      status,
-      paidAt,
-    })
-
-    // Create CanteenItemPurchased records for each item
-    for (const item of payload.items) {
-      const unitPrice = itemPriceMap.get(item.canteenItemId)!
-
-      await CanteenItemPurchased.create({
-        canteenPurchaseId: purchase.id,
-        canteenItemId: item.canteenItemId,
-        quantity: item.quantity,
-        price: unitPrice,
-      })
-    }
-
-    if (
-      payload.paymentMethod === 'BALANCE' &&
-      studentForBalance &&
-      previousBalance !== null &&
-      newBalance !== null
-    ) {
-      await StudentBalanceTransaction.create({
-        studentId: studentForBalance.id,
-        amount: totalAmount,
-        type: 'CANTEEN_PURCHASE',
-        status: 'COMPLETED',
-        description: 'Compra na cantina',
-        previousBalance,
-        newBalance,
-        canteenPurchaseId: purchase.id,
-        paymentMethod: 'BALANCE',
-      })
-
-      studentForBalance.balance = newBalance
-      await studentForBalance.save()
-    }
-
-    if (studentPaymentId) {
-      try {
-        await BillingReconciliationService.reconcileByPaymentId(studentPaymentId)
-      } catch (error) {
-        logger.error({ error }, '[CANTEEN_FIADO] Failed to reconcile invoice synchronously')
+        studentPaymentId = studentPayment.id
       }
 
+      const purchase = new CanteenPurchase()
+      purchase.useTransaction(trx)
+      purchase.fill({
+        userId: payload.userId,
+        canteenId: payload.canteenId,
+        totalAmount,
+        paymentMethod: payload.paymentMethod,
+        studentPaymentId,
+        status,
+        paidAt,
+      })
+      await purchase.save()
+
+      purchaseId = purchase.id
+
+      for (const item of payload.items) {
+        const unitPrice = itemPriceMap.get(item.canteenItemId)!
+        const itemPurchased = new CanteenItemPurchased()
+        itemPurchased.useTransaction(trx)
+        itemPurchased.fill({
+          canteenPurchaseId: purchase.id,
+          canteenItemId: item.canteenItemId,
+          quantity: item.quantity,
+          price: unitPrice,
+        })
+        await itemPurchased.save()
+      }
+
+      if (
+        payload.paymentMethod === 'BALANCE' &&
+        studentForBalance &&
+        previousBalance !== null &&
+        newBalance !== null
+      ) {
+        const balanceTransaction = new StudentBalanceTransaction()
+        balanceTransaction.useTransaction(trx)
+        balanceTransaction.fill({
+          studentId: studentForBalance.id,
+          amount: totalAmount,
+          type: 'CANTEEN_PURCHASE',
+          status: 'COMPLETED',
+          description: 'Compra na cantina',
+          previousBalance,
+          newBalance,
+          canteenPurchaseId: purchase.id,
+          paymentMethod: 'BALANCE',
+        })
+        await balanceTransaction.save()
+
+        studentForBalance.balance = newBalance
+        studentForBalance.useTransaction(trx)
+        await studentForBalance.save()
+      }
+    })
+
+    if (studentPaymentId) {
       try {
         await ReconcilePaymentInvoiceJob.dispatch({
           paymentId: studentPaymentId,
@@ -226,6 +295,8 @@ export default class CreateCanteenPurchaseController {
         logger.error({ error }, '[CANTEEN_FIADO] Failed to dispatch invoice reconcile job')
       }
     }
+
+    const purchase = await CanteenPurchase.findOrFail(purchaseId!)
 
     // Load relationships and return
     await purchase.load('user')
