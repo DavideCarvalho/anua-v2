@@ -202,3 +202,13 @@ export const updateCanteenMonthlyTransferStatusValidator = vine.compile(
     status: vine.enum(['PENDING', 'TRANSFERRED', 'CANCELLED']),
   })
 )
+
+export const upsertCanteenFinancialSettingsValidator = vine.compile(
+  vine.object({
+    platformFeePercentage: vine.number().min(0).max(100).optional(),
+    pixKey: vine.string().trim().maxLength(255).optional().nullable(),
+    pixKeyType: vine.enum(['CPF', 'CNPJ', 'EMAIL', 'PHONE', 'RANDOM']).optional().nullable(),
+    bankName: vine.string().trim().maxLength(120).optional().nullable(),
+    accountHolder: vine.string().trim().maxLength(255).optional().nullable(),
+  })
+)

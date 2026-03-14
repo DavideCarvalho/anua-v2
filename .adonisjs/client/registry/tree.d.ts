@@ -182,6 +182,7 @@ export interface ApiDefinition {
       autorizacoes: typeof routes['web.responsavel.autorizacoes']
       atividades: typeof routes['web.responsavel.atividades']
       horario: typeof routes['web.responsavel.horario']
+      calendario: typeof routes['web.responsavel.calendario']
       documentos: typeof routes['web.responsavel.documentos']
       ocorrencias: typeof routes['web.responsavel.ocorrencias']
       perfil: typeof routes['web.responsavel.perfil']
@@ -274,6 +275,7 @@ export interface ApiDefinition {
           acknowledgeOccurrence: typeof routes['api.v1.responsavel.api.acknowledge_occurrence']
           studentOverview: typeof routes['api.v1.responsavel.api.student_overview']
           studentGamification: typeof routes['api.v1.responsavel.api.student_gamification']
+          studentCalendar: typeof routes['api.v1.responsavel.api.student_calendar']
           notifications: typeof routes['api.v1.responsavel.api.notifications']
           comunicados: {
             list: typeof routes['api.v1.responsavel.api.comunicados.list']
@@ -678,6 +680,7 @@ export interface ApiDefinition {
         items: typeof routes['api.v1.canteens.items']
         financialSettings: {
           show: typeof routes['api.v1.canteens.financial_settings.show']
+          update: typeof routes['api.v1.canteens.financial_settings.update']
         }
       }
       canteenReports: {

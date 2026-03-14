@@ -792,6 +792,12 @@ const routes = {
     tokens: [{"old":"/responsavel/horario","type":0,"val":"responsavel","end":""},{"old":"/responsavel/horario","type":0,"val":"horario","end":""}],
     types: placeholder as Registry['web.responsavel.horario']['types'],
   },
+  'web.responsavel.calendario': {
+    methods: ["GET","HEAD"],
+    pattern: '/responsavel/calendario',
+    tokens: [{"old":"/responsavel/calendario","type":0,"val":"responsavel","end":""},{"old":"/responsavel/calendario","type":0,"val":"calendario","end":""}],
+    types: placeholder as Registry['web.responsavel.calendario']['types'],
+  },
   'web.responsavel.documentos': {
     methods: ["GET","HEAD"],
     pattern: '/responsavel/documentos',
@@ -1175,6 +1181,12 @@ const routes = {
     pattern: '/api/v1/responsavel/students/:studentId/gamification',
     tokens: [{"old":"/api/v1/responsavel/students/:studentId/gamification","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/gamification","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/gamification","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/gamification","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/gamification","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/gamification","type":0,"val":"gamification","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.student_gamification']['types'],
+  },
+  'api.v1.responsavel.api.student_calendar': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/students/:studentId/calendar',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"calendar","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.student_calendar']['types'],
   },
   'api.v1.responsavel.api.notifications': {
     methods: ["GET","HEAD"],
@@ -2825,6 +2837,12 @@ const routes = {
     pattern: '/api/v1/canteens/:canteenId/financial-settings',
     tokens: [{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":1,"val":"canteenId","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"financial-settings","end":""}],
     types: placeholder as Registry['api.v1.canteens.financial_settings.show']['types'],
+  },
+  'api.v1.canteens.financial_settings.update': {
+    methods: ["PUT"],
+    pattern: '/api/v1/canteens/:canteenId/financial-settings',
+    tokens: [{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":1,"val":"canteenId","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"financial-settings","end":""}],
+    types: placeholder as Registry['api.v1.canteens.financial_settings.update']['types'],
   },
   'api.v1.canteen_reports.summary': {
     methods: ["GET","HEAD"],

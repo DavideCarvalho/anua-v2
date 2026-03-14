@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenFinancialSettings from '#models/canteen_financial_settings'
-import CanteenFinancialSettingsDto from '#models/dto/canteen_financial_settings.dto'
+import CanteenFinancialSettingsTransformer from '#transformers/canteen_financial_settings_transformer'
 
 export default class ShowCanteenFinancialSettingsController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const settings = await CanteenFinancialSettings.query()
       .where('canteenId', params.canteenId)
       .first()
@@ -19,6 +19,6 @@ export default class ShowCanteenFinancialSettingsController {
       })
     }
 
-    return response.ok(new CanteenFinancialSettingsDto(settings))
+    return response.ok(await serialize(CanteenFinancialSettingsTransformer.transform(settings)))
   }
 }

@@ -1579,6 +1579,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_horario_page_controller').default['handle']>>>
     }
   }
+  'web.responsavel.calendario': {
+    methods: ["GET","HEAD"]
+    pattern: '/responsavel/calendario'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_calendario_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_calendario_page_controller').default['handle']>>>
+    }
+  }
   'web.responsavel.documentos': {
     methods: ["GET","HEAD"]
     pattern: '/responsavel/documentos'
@@ -2345,6 +2357,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_gamification_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_gamification_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.student_calendar': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/students/:studentId/calendar'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/responsavel_calendar').getStudentCalendarValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_calendar_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_calendar_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.responsavel.api.notifications': {
@@ -5645,6 +5669,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller').default['handle']>>>
+    }
+  }
+  'api.v1.canteens.financial_settings.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/canteens/:canteenId/financial-settings'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/canteen').upsertCanteenFinancialSettingsValidator)>>
+      paramsTuple: [ParamValue]
+      params: { canteenId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/canteen').upsertCanteenFinancialSettingsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/update_canteen_financial_settings_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/update_canteen_financial_settings_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.canteen_reports.summary': {

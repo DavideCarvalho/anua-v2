@@ -67,6 +67,8 @@ const DeleteCanteenMealReservationController = () =>
 // Canteen Financial Settings
 const ShowCanteenFinancialSettingsController = () =>
   import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller')
+const UpdateCanteenFinancialSettingsController = () =>
+  import('#controllers/canteen_financial_settings/update_canteen_financial_settings_controller')
 
 // Canteen Purchases
 const ListCanteenPurchasesController = () =>
@@ -92,6 +94,9 @@ export function registerCanteenApiRoutes() {
       router
         .get('/:canteenId/financial-settings', [ShowCanteenFinancialSettingsController])
         .as('canteens.financial_settings.show')
+      router
+        .put('/:canteenId/financial-settings', [UpdateCanteenFinancialSettingsController])
+        .as('canteens.financial_settings.update')
     })
     .prefix('/canteens')
     .use([middleware.auth(), middleware.impersonation()])

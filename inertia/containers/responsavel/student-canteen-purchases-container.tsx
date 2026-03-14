@@ -21,6 +21,8 @@ const paymentMethodLabels: Record<string, string> = {
   CARD: 'Cartão',
   PIX: 'PIX',
   ON_ACCOUNT: 'Fiado',
+  PIX_MACHINE: 'PIX (máquina)',
+  CARD_MACHINE: 'Cartão (máquina)',
 }
 
 function getStatusBadge(status: string) {
