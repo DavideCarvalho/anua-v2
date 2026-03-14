@@ -17,6 +17,7 @@ import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { Label } from '../../../components/ui/label'
 import { formatCurrency } from '../../../lib/utils'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
 import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
@@ -37,7 +38,14 @@ interface PageProps extends SharedProps {
   canteenId?: string | null
 }
 
-type PaymentMethod = 'BALANCE' | 'CASH' | 'CARD' | 'PIX' | 'ON_ACCOUNT'
+type PaymentMethod =
+  | 'BALANCE'
+  | 'CASH'
+  | 'CARD'
+  | 'PIX'
+  | 'ON_ACCOUNT'
+  | 'PIX_MACHINE'
+  | 'CARD_MACHINE'
 type StudentListItem = StudentsResponse['data'][number]
 type CanteenItemListItem = CanteenItemsResponse['data'][number]
 
@@ -49,6 +57,7 @@ export default function PDVPage() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null)
+  const [paymentTab, setPaymentTab] = useState<'app' | 'manual'>('app')
   const [cart, setCart] = useState<
     Array<{ id: string; name: string; price: number; quantity: number }>
   >([])
@@ -89,6 +98,13 @@ export default function PDVPage() {
   })
   const items = itemsData?.data ?? []
 
+  const { data: financialSettings } = useQuery({
+    ...api.api.v1.canteens.financialSettings.show.queryOptions({
+      params: { canteenId: canteenId! },
+    }),
+    enabled: !!canteenId,
+  })
+
   useEffect(() => {
     if (enrollments.length === 1) {
       setSelectedEnrollmentId(enrollments[0].id)
@@ -104,6 +120,17 @@ export default function PDVPage() {
       }
     }
   }, [enrollments, selectedEnrollmentId])
+
+  useEffect(() => {
+    const appMethods: PaymentMethod[] = ['BALANCE', 'PIX', 'CARD', 'ON_ACCOUNT']
+    const manualMethods: PaymentMethod[] = ['CASH', 'PIX_MACHINE', 'CARD_MACHINE']
+    if (paymentTab === 'app' && !appMethods.includes(paymentMethod)) {
+      setPaymentMethod('BALANCE')
+    }
+    if (paymentTab === 'manual' && !manualMethods.includes(paymentMethod)) {
+      setPaymentMethod('CASH')
+    }
+  }, [paymentTab])
 
   const totalAmount = useMemo(
     () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
@@ -364,47 +391,92 @@ export default function PDVPage() {
                 <CardHeader>
                   <CardTitle>Forma de Pagamento</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button
-                    variant={paymentMethod === 'BALANCE' ? 'default' : 'outline'}
-                    className="w-full justify-start gap-2"
-                    onClick={() => setPaymentMethod('BALANCE')}
+                <CardContent>
+                  <Tabs
+                    value={paymentTab}
+                    onValueChange={(v) => setPaymentTab(v as 'app' | 'manual')}
                   >
-                    <CreditCard className="h-4 w-4" />
-                    Saldo do Aluno
-                  </Button>
-                  <Button
-                    variant={paymentMethod === 'CASH' ? 'default' : 'outline'}
-                    className="w-full justify-start gap-2"
-                    onClick={() => setPaymentMethod('CASH')}
-                  >
-                    <Banknote className="h-4 w-4" />
-                    Dinheiro
-                  </Button>
-                  <Button
-                    variant={paymentMethod === 'PIX' ? 'default' : 'outline'}
-                    className="w-full justify-start gap-2"
-                    onClick={() => setPaymentMethod('PIX')}
-                  >
-                    <QrCode className="h-4 w-4" />
-                    PIX
-                  </Button>
-                  <Button
-                    variant={paymentMethod === 'CARD' ? 'default' : 'outline'}
-                    className="w-full justify-start gap-2"
-                    onClick={() => setPaymentMethod('CARD')}
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    Cartão
-                  </Button>
-                  <Button
-                    variant={paymentMethod === 'ON_ACCOUNT' ? 'default' : 'outline'}
-                    className="w-full justify-start gap-2"
-                    onClick={() => setPaymentMethod('ON_ACCOUNT')}
-                  >
-                    <ReceiptText className="h-4 w-4" />
-                    Fiado (fatura)
-                  </Button>
+                    <TabsList className="w-full mb-3">
+                      <TabsTrigger value="app" className="flex-1">
+                        Pelo App
+                      </TabsTrigger>
+                      <TabsTrigger value="manual" className="flex-1">
+                        Manual
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="app" className="space-y-2 mt-0">
+                      <Button
+                        variant={paymentMethod === 'BALANCE' ? 'default' : 'outline'}
+                        className="w-full justify-start gap-2"
+                        disabled={!!selectedStudentId && studentBalance < totalAmount}
+                        onClick={() => setPaymentMethod('BALANCE')}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Saldo do Aluno
+                      </Button>
+
+                      {financialSettings?.pixKey && (
+                        <Button
+                          variant={paymentMethod === 'PIX' ? 'default' : 'outline'}
+                          className="w-full justify-start gap-2"
+                          onClick={() => setPaymentMethod('PIX')}
+                        >
+                          <QrCode className="h-4 w-4" />
+                          PIX
+                        </Button>
+                      )}
+
+                      {financialSettings && 'id' in financialSettings && (
+                        <Button
+                          variant={paymentMethod === 'CARD' ? 'default' : 'outline'}
+                          className="w-full justify-start gap-2"
+                          onClick={() => setPaymentMethod('CARD')}
+                        >
+                          <CreditCard className="h-4 w-4" />
+                          Cartão
+                        </Button>
+                      )}
+
+                      <Button
+                        variant={paymentMethod === 'ON_ACCOUNT' ? 'default' : 'outline'}
+                        className="w-full justify-start gap-2"
+                        onClick={() => setPaymentMethod('ON_ACCOUNT')}
+                      >
+                        <ReceiptText className="h-4 w-4" />
+                        Fiado (fatura)
+                      </Button>
+                    </TabsContent>
+
+                    <TabsContent value="manual" className="space-y-2 mt-0">
+                      <Button
+                        variant={paymentMethod === 'CASH' ? 'default' : 'outline'}
+                        className="w-full justify-start gap-2"
+                        onClick={() => setPaymentMethod('CASH')}
+                      >
+                        <Banknote className="h-4 w-4" />
+                        Dinheiro
+                      </Button>
+
+                      <Button
+                        variant={paymentMethod === 'PIX_MACHINE' ? 'default' : 'outline'}
+                        className="w-full justify-start gap-2"
+                        onClick={() => setPaymentMethod('PIX_MACHINE')}
+                      >
+                        <QrCode className="h-4 w-4" />
+                        PIX (máquina)
+                      </Button>
+
+                      <Button
+                        variant={paymentMethod === 'CARD_MACHINE' ? 'default' : 'outline'}
+                        className="w-full justify-start gap-2"
+                        onClick={() => setPaymentMethod('CARD_MACHINE')}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Cartão (máquina)
+                      </Button>
+                    </TabsContent>
+                  </Tabs>
 
                   <Button
                     className="w-full mt-4"
