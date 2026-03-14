@@ -69,7 +69,15 @@ export const createCanteenPurchaseValidator = vine.compile(
   vine.object({
     userId: vine.string().trim(),
     canteenId: vine.string().trim(),
-    paymentMethod: vine.enum(['BALANCE', 'CASH', 'CARD', 'PIX', 'ON_ACCOUNT']),
+    paymentMethod: vine.enum([
+      'BALANCE',
+      'CASH',
+      'CARD',
+      'PIX',
+      'ON_ACCOUNT',
+      'PIX_MACHINE',
+      'CARD_MACHINE',
+    ]),
     studentHasLevelId: vine.string().trim().optional(),
     items: vine.array(
       vine.object({
@@ -86,7 +94,9 @@ export const listCanteenPurchasesValidator = vine.compile(
     search: vine.string().trim().optional(),
     userId: vine.string().trim().optional(),
     status: vine.enum(['PENDING', 'PAID', 'CANCELLED']).optional(),
-    paymentMethod: vine.enum(['BALANCE', 'CASH', 'CARD', 'PIX', 'ON_ACCOUNT']).optional(),
+    paymentMethod: vine
+      .enum(['BALANCE', 'CASH', 'CARD', 'PIX', 'ON_ACCOUNT', 'PIX_MACHINE', 'CARD_MACHINE'])
+      .optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
   })

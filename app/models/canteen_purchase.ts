@@ -8,7 +8,14 @@ import CanteenItemPurchased from './canteen_item_purchased.js'
 import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
 import StudentPayment from './student_payment.js'
 
-export type CanteenPaymentMethod = 'BALANCE' | 'CASH' | 'CARD' | 'PIX' | 'ON_ACCOUNT'
+export type CanteenPaymentMethod =
+  | 'BALANCE'
+  | 'CASH'
+  | 'CARD'
+  | 'PIX'
+  | 'ON_ACCOUNT'
+  | 'PIX_MACHINE'
+  | 'CARD_MACHINE'
 export type CanteenPurchaseStatus = 'PENDING' | 'PAID' | 'CANCELLED'
 
 export default class CanteenPurchase extends BaseModel {
