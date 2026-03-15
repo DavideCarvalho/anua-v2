@@ -9,6 +9,8 @@ import { api } from '~/lib/api'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
+type DashboardOverviewMode = 'pedagogical' | 'financial'
+
 function DashboardOverviewSkeleton() {
   return (
     <div className="space-y-6">
@@ -25,7 +27,13 @@ function DashboardOverviewSkeleton() {
   )
 }
 
-function DashboardOverviewContent({ studentId }: { studentId: string }) {
+function DashboardOverviewContent({
+  studentId,
+  mode,
+}: {
+  studentId: string
+  mode: DashboardOverviewMode
+}) {
   const {
     data: overview,
     isLoading,
@@ -51,6 +59,13 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
   if (!overview) {
     return null
   }
+
+  const canShowPedagogical =
+    mode === 'pedagogical' && overview.permissions.pedagogical && !!overview.pedagogical
+  const canShowFinancial =
+    mode === 'financial' && overview.permissions.financial && !!overview.financial
+  const pedagogical = overview.pedagogical
+  const financial = overview.financial
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -95,43 +110,40 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Frequência - Só se tiver permissão pedagógica */}
-        {overview.permissions.pedagogical && overview.pedagogical && (
+        {canShowPedagogical && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Frequência</CardTitle>
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {overview.pedagogical.attendance.percentage}%
-              </div>
-              <Progress value={overview.pedagogical.attendance.percentage} className="mt-2" />
+              <div className="text-2xl font-bold">{pedagogical!.attendance.percentage}%</div>
+              <Progress value={pedagogical!.attendance.percentage} className="mt-2" />
               <p className="mt-1 text-xs text-muted-foreground">
-                {overview.pedagogical.attendance.presentDays} de{' '}
-                {overview.pedagogical.attendance.totalDays} dias
+                {pedagogical!.attendance.presentDays} de {pedagogical!.attendance.totalDays} dias
               </p>
             </CardContent>
           </Card>
         )}
 
         {/* Próxima Tarefa */}
-        {overview.permissions.pedagogical && overview.pedagogical && (
+        {canShowPedagogical && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Próxima Tarefa</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {overview.pedagogical.upcomingAssignments.length > 0 ? (
+              {pedagogical!.upcomingAssignments.length > 0 ? (
                 <>
                   <div className="text-sm font-bold">
-                    {overview.pedagogical.upcomingAssignments[0]!.title}
+                    {pedagogical!.upcomingAssignments[0]!.title}
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {overview.pedagogical.upcomingAssignments[0]!.subject}
+                    {pedagogical!.upcomingAssignments[0]!.subject}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Entrega: {formatDate(overview.pedagogical.upcomingAssignments[0]!.dueDate)}
+                    Entrega: {formatDate(pedagogical!.upcomingAssignments[0]!.dueDate)}
                   </p>
                 </>
               ) : (
@@ -142,19 +154,17 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
         )}
 
         {/* Mensalidades Pendentes */}
-        {overview.permissions.financial && overview.financial && (
+        {canShowFinancial && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Mensalidades Pendentes</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {formatCurrency(overview.financial.totalPending)}
-              </div>
+              <div className="text-2xl font-bold">{formatCurrency(financial!.totalPending)}</div>
               <p className="text-xs text-muted-foreground">
                 {
-                  overview.financial.recentPayments.filter(
+                  financial!.recentPayments.filter(
                     (p) => p.status === 'PENDING' || p.status === 'OVERDUE'
                   ).length
                 }{' '}
@@ -165,43 +175,43 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
         )}
 
         {/* Saldo Cantina */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Cantina</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(overview.canteen.balance)}</div>
-            <p className="text-xs text-muted-foreground">Saldo disponível</p>
-          </CardContent>
-        </Card>
+        {canShowFinancial && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Saldo Cantina</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(overview.canteen.balance)}</div>
+              <p className="text-xs text-muted-foreground">Saldo disponível</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Tabs com conteúdo detalhado */}
-      <Tabs defaultValue="grades" className="w-full">
+      <Tabs defaultValue={mode === 'financial' ? 'payments' : 'grades'} className="w-full">
         <TabsList>
-          {overview.permissions.pedagogical && (
+          {canShowPedagogical && (
             <>
               <TabsTrigger value="grades">Notas Recentes</TabsTrigger>
               <TabsTrigger value="assignments">Tarefas</TabsTrigger>
             </>
           )}
-          {overview.permissions.financial && (
-            <TabsTrigger value="payments">Mensalidades</TabsTrigger>
-          )}
+          {canShowFinancial && <TabsTrigger value="payments">Mensalidades</TabsTrigger>}
         </TabsList>
 
         {/* Tab de Notas */}
-        {overview.permissions.pedagogical && overview.pedagogical && (
+        {canShowPedagogical && (
           <TabsContent value="grades">
             <Card>
               <CardHeader>
                 <CardTitle>Notas Recentes</CardTitle>
               </CardHeader>
               <CardContent>
-                {overview.pedagogical.recentGrades.length > 0 ? (
+                {pedagogical!.recentGrades.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.pedagogical.recentGrades.map(
+                    {pedagogical!.recentGrades.map(
                       (
                         grade: {
                           subject: string
@@ -245,16 +255,16 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
         )}
 
         {/* Tab de Tarefas */}
-        {overview.permissions.pedagogical && overview.pedagogical && (
+        {canShowPedagogical && (
           <TabsContent value="assignments">
             <Card>
               <CardHeader>
                 <CardTitle>Tarefas Pendentes</CardTitle>
               </CardHeader>
               <CardContent>
-                {overview.pedagogical.upcomingAssignments.length > 0 ? (
+                {pedagogical!.upcomingAssignments.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.pedagogical.upcomingAssignments.map(
+                    {pedagogical!.upcomingAssignments.map(
                       (assignment: {
                         id: string
                         title: string
@@ -289,16 +299,16 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
         )}
 
         {/* Tab de Mensalidades */}
-        {overview.permissions.financial && overview.financial && (
+        {canShowFinancial && (
           <TabsContent value="payments">
             <Card>
               <CardHeader>
                 <CardTitle>Mensalidades Recentes</CardTitle>
               </CardHeader>
               <CardContent>
-                {overview.financial.recentPayments.length > 0 ? (
+                {financial!.recentPayments.length > 0 ? (
                   <div className="space-y-3">
-                    {overview.financial.recentPayments.slice(0, 5).map((payment) => {
+                    {financial!.recentPayments.slice(0, 5).map((payment) => {
                       const statusConfig: Record<
                         string,
                         { label: string; variant: 'default' | 'destructive' | 'secondary' }
@@ -348,7 +358,13 @@ function DashboardOverviewContent({ studentId }: { studentId: string }) {
   )
 }
 
-export function DashboardOverviewContainer({ studentId }: { studentId: string }) {
+export function DashboardOverviewContainer({
+  studentId,
+  mode = 'pedagogical',
+}: {
+  studentId: string
+  mode?: DashboardOverviewMode
+}) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
@@ -366,7 +382,7 @@ export function DashboardOverviewContainer({ studentId }: { studentId: string })
             </Alert>
           )}
         >
-          <DashboardOverviewContent studentId={studentId} />
+          <DashboardOverviewContent studentId={studentId} mode={mode} />
         </ErrorBoundary>
       )}
     </QueryErrorResetBoundary>

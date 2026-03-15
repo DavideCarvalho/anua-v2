@@ -5,11 +5,12 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
 import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, BookOpen, DollarSign } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
 import { useAuthUser } from '../../stores/auth_store'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 
 function ResponsavelContent() {
   const { url } = usePage<SharedProps>()
@@ -63,8 +64,12 @@ function ResponsavelContent() {
   }
   alunoId = alunoId || data.students[0]?.id
 
-  // Buscar studentId
-  const studentId = data.students.find((s) => s.id === alunoId)?.id || data.students[0]?.id
+  // Buscar studentId e permissões
+  const selectedStudent = data.students.find((s) => s.id === alunoId) || data.students[0]
+  const studentId = selectedStudent?.id
+  const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
+  const hasFinancial = selectedStudent?.permissions?.financial || false
+  const defaultTab = hasPedagogical ? 'pedagogical' : 'financial'
 
   // Se não tiver studentId válido, mostrar aviso
   if (!studentId || !data.students.some((s) => s.id === studentId)) {
@@ -78,7 +83,49 @@ function ResponsavelContent() {
     )
   }
 
-  return <DashboardOverviewContainer studentId={studentId} />
+  if (!hasPedagogical && !hasFinancial) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Você não possui permissões pedagógicas nem financeiras para este aluno.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  return (
+    <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList
+        className={`grid w-full md:w-auto md:inline-grid ${hasFinancial ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}
+      >
+        {hasPedagogical && (
+          <TabsTrigger value="pedagogical" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Pedagógico
+          </TabsTrigger>
+        )}
+        {hasFinancial && (
+          <TabsTrigger value="financial" className="gap-2">
+            <DollarSign className="h-4 w-4" />
+            Financeiro
+          </TabsTrigger>
+        )}
+      </TabsList>
+
+      {hasPedagogical && (
+        <TabsContent value="pedagogical" className="mt-6">
+          <DashboardOverviewContainer studentId={studentId} mode="pedagogical" />
+        </TabsContent>
+      )}
+
+      {hasFinancial && (
+        <TabsContent value="financial" className="mt-6">
+          <DashboardOverviewContainer studentId={studentId} mode="financial" />
+        </TabsContent>
+      )}
+    </Tabs>
+  )
 }
 
 function PendingAcknowledgementBanner() {
