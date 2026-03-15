@@ -45,7 +45,7 @@ const CATEGORIES = [
 export function EditProductModal({ product, open, onOpenChange, onSuccess }: Props) {
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
-  const [price, setPrice] = useState(String(product.price / 100))
+  const [price, setPrice] = useState(product.price)
   const [category, setCategory] = useState(product.category)
   const [totalStock, setTotalStock] = useState(
     product.totalStock !== null ? String(product.totalStock) : ''
@@ -57,7 +57,7 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
   useEffect(() => {
     setName(product.name)
     setDescription(product.description ?? '')
-    setPrice(String(product.price / 100))
+    setPrice(product.price)
     setCategory(product.category)
     setTotalStock(product.totalStock !== null ? String(product.totalStock) : '')
   }, [product])
@@ -70,7 +70,7 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
         body: {
           name,
           description: description || undefined,
-          price: Math.round(Number(price) * 100),
+          price,
           category,
           totalStock: totalStock ? Number(totalStock) : undefined,
         },

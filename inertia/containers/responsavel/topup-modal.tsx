@@ -31,7 +31,7 @@ interface PaymentResult {
 }
 
 export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
-  const [amount, setAmount] = useState('0')
+  const [amount, setAmount] = useState(0)
   const [paymentMethod, setPaymentMethod] = useState<'PIX' | 'BOLETO'>('PIX')
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null)
   const [copied, setCopied] = useState(false)
@@ -39,11 +39,11 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
   const queryClient = useQueryClient()
   const createTopUp = useMutation(api.api.v1.responsavel.api.createWalletTopUp.mutationOptions())
 
-  const amountInCents = Math.round(parseFloat(amount) * 100)
+  const amountInCents = amount
   const isValidAmount = amountInCents >= 100
 
   function resetState() {
-    setAmount('0')
+    setAmount(0)
     setPaymentMethod('PIX')
     setPaymentResult(null)
     setCopied(false)
@@ -99,7 +99,7 @@ export function TopUpModal({ studentId, open, onOpenChange }: TopUpModalProps) {
             <div className="space-y-2">
               <Label>Valor da recarga</Label>
               <CurrencyInput value={amount} onChange={setAmount} placeholder="0,00" />
-              {parseFloat(amount) > 0 && !isValidAmount && (
+              {amount > 0 && !isValidAmount && (
                 <p className="text-xs text-destructive">Valor mínimo: R$ 1,00</p>
               )}
             </div>

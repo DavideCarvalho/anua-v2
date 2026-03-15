@@ -74,6 +74,7 @@ export interface SharedProps {
 export type RoleName =
   | 'SUPER_ADMIN'
   | 'ADMIN'
+  | 'SCHOOL_CHAIN_DIRECTOR'
   | 'SCHOOL_DIRECTOR'
   | 'SCHOOL_COORDINATOR'
   | 'SCHOOL_ADMIN'

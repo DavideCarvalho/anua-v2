@@ -497,8 +497,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                           <FormControl>
                             <CurrencyInput
                               placeholder="1.200,00"
-                              value={field.value}
-                              onChange={field.onChange}
+                              value={Math.round((Number(field.value) || 0) * 100)}
+                              onChange={(cents) => field.onChange(String(cents / 100))}
                             />
                           </FormControl>
                           <FormDescription>
@@ -520,8 +520,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                             <FormControl>
                               <CurrencyInput
                                 placeholder="12.000,00"
-                                value={field.value}
-                                onChange={field.onChange}
+                                value={Math.round((Number(field.value) || 0) * 100)}
+                                onChange={(cents) => field.onChange(String(cents / 100))}
                               />
                             </FormControl>
                             <FormDescription>
@@ -623,8 +623,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                             <FormControl>
                               <CurrencyInput
                                 placeholder="500,00"
-                                value={field.value || '0'}
-                                onChange={field.onChange}
+                                value={Math.round((Number(field.value) || 0) * 100)}
+                                onChange={(cents) => field.onChange(String(cents / 100))}
                               />
                             </FormControl>
                             <FormMessage />

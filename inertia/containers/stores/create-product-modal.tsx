@@ -48,7 +48,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
+  const [price, setPrice] = useState(0)
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]['value']>('OTHER')
   const [totalStock, setTotalStock] = useState('')
 
@@ -57,7 +57,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
   function resetForm() {
     setName('')
     setDescription('')
-    setPrice('')
+    setPrice(0)
     setCategory('OTHER')
     setTotalStock('')
   }
@@ -70,7 +70,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
           storeId,
           name,
           description: description || undefined,
-          price: Math.round(Number(price) * 100),
+          price,
           category,
           paymentMode: 'MONEY_ONLY',
           totalStock: totalStock ? Number(totalStock) : undefined,

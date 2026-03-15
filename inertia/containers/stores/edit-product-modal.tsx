@@ -46,7 +46,7 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
-  const [price, setPrice] = useState(String(product.price / 100))
+  const [price, setPrice] = useState(product.price)
   const [category, setCategory] = useState(product.category)
   const [totalStock, setTotalStock] = useState(
     product.totalStock !== null && product.totalStock !== undefined
@@ -57,7 +57,7 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
   useEffect(() => {
     setName(product.name)
     setDescription(product.description ?? '')
-    setPrice(String(product.price / 100))
+    setPrice(product.price)
     setCategory(product.category)
     setTotalStock(
       product.totalStock !== null && product.totalStock !== undefined
@@ -76,7 +76,7 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
         body: {
           name,
           description: description || undefined,
-          price: Math.round(Number(price) * 100),
+          price,
           category,
           totalStock: totalStock ? Number(totalStock) : undefined,
         },

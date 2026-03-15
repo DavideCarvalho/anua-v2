@@ -135,8 +135,8 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <CurrencyInput
-                      value={field.value}
-                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      value={Math.round((field.value || 0) * 100)}
+                      onChange={(cents) => field.onChange(String(cents / 100))}
                       onBlur={field.onBlur}
                       ref={field.ref}
                     />
@@ -214,8 +214,8 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
                     <div className="flex items-center gap-3">
                       <FormControl>
                         <CurrencyInput
-                          value={field.value}
-                          onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                          value={Math.round((field.value || 0) * 100)}
+                          onChange={(cents) => field.onChange(String(cents / 100))}
                           onBlur={field.onBlur}
                           ref={field.ref}
                         />

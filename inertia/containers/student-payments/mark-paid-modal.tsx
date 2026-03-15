@@ -179,8 +179,8 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
                   <FormLabel>Valor pago</FormLabel>
                   <FormControl>
                     <CurrencyInput
-                      value={field.value}
-                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      value={Math.round((field.value || 0) * 100)}
+                      onChange={(cents) => field.onChange(String(cents / 100))}
                       onBlur={field.onBlur}
                       ref={field.ref}
                     />
