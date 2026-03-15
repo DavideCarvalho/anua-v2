@@ -45,3 +45,32 @@ export async function createEscolaAuthUser() {
   })
   return { user, school, role: directorRole }
 }
+
+export async function createEscolaAuthUserByRole(roleName: string) {
+  await createTestRoles()
+
+  const role = await Role.findByOrFail({ name: roleName })
+
+  const school = await School.create({
+    name: 'Test School',
+    slug: `test-school-${Date.now()}`,
+  })
+
+  const user = await User.create({
+    name: `${roleName} User`,
+    slug: `${roleName.toLowerCase()}-${Date.now()}`,
+    email: `${roleName.toLowerCase()}-${Date.now()}@example.com`,
+    active: true,
+    whatsappContact: false,
+    grossSalary: 0,
+    roleId: role.id,
+  })
+
+  await UserHasSchool.create({
+    userId: user.id,
+    schoolId: school.id,
+    isDefault: true,
+  })
+
+  return { user, school, role }
+}

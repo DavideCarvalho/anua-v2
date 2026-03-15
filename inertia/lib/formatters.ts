@@ -33,6 +33,7 @@ export function brazilianDateTimeFormatter(date: Date | string): string {
 const roleTranslations: Record<string, string> = {
   SUPER_ADMIN: 'Super Administrador',
   ADMIN: 'Administrador',
+  SCHOOL_CHAIN_DIRECTOR: 'Diretor de Rede',
   SCHOOL_DIRECTOR: 'Diretor',
   SCHOOL_COORDINATOR: 'Coordenador',
   SCHOOL_ADMIN: 'Administrador Escolar',

@@ -497,7 +497,6 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                           <FormLabel>Valor da Mensalidade *</FormLabel>
                           <FormControl>
                             <CurrencyInput
-                              placeholder="1.200,00"
                               value={reaisStringToCents(field.value)}
                               onChange={(cents) => field.onChange(centsToReaisString(cents))}
                             />

@@ -166,7 +166,7 @@ function InsightDetailModal({
       case 'pending-enrollments':
         return '/escola/administrativo/alunos'
       case 'high-absence-rate':
-        return '/escola/pedagogico/frequencia'
+        return '/escola/pedagogico/presenca'
       case 'pending-delivery-orders':
         return '/escola/lojas'
       default:
@@ -274,7 +274,13 @@ function InsightsError({
 }
 
 // Content Component
-function InsightsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
+function InsightsContent({
+  hideFinancialValues = false,
+  allowedTypes,
+}: {
+  hideFinancialValues?: boolean
+  allowedTypes?: Insight['type'][]
+}) {
   const { data, isLoading, error } = useQuery(api.api.v1.dashboard.escolaInsights.queryOptions({}))
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null)
 
@@ -286,7 +292,10 @@ function InsightsContent({ hideFinancialValues = false }: { hideFinancialValues?
     return <InsightsError error={error as Error} resetErrorBoundary={() => {}} />
   }
 
-  const insights = data.insights as Insight[]
+  const allInsights = data.insights as Insight[]
+  const insights = allowedTypes?.length
+    ? allInsights.filter((insight) => allowedTypes.includes(insight.type))
+    : allInsights
   const displayedInsights = insights.slice(0, 5)
   const hasMore = insights.length > 5
 
@@ -349,8 +358,10 @@ function InsightsContent({ hideFinancialValues = false }: { hideFinancialValues?
 // Container Export
 export function EscolaInsightsContainer({
   hideFinancialValues = false,
+  allowedTypes,
 }: {
   hideFinancialValues?: boolean
+  allowedTypes?: Insight['type'][]
 }) {
-  return <InsightsContent hideFinancialValues={hideFinancialValues} />
+  return <InsightsContent hideFinancialValues={hideFinancialValues} allowedTypes={allowedTypes} />
 }
