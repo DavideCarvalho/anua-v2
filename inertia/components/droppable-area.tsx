@@ -10,7 +10,20 @@ interface DroppableAreaProps {
 }
 
 export function DroppableArea({ date, hour, minute, children, className }: DroppableAreaProps) {
-  const { handleEventDrop, isDragging } = useDragDrop()
+  const { handleEventDrop, isDragging, disableDragDrop } = useDragDrop()
+
+  if (disableDragDrop) {
+    return (
+      <div
+        role="gridcell"
+        aria-label="Droppable area"
+        tabIndex={-1}
+        className={className || ''}
+      >
+        {children}
+      </div>
+    )
+  }
 
   return (
     <div

@@ -11,12 +11,20 @@ interface DraggableEventProps {
 }
 
 export function DraggableEvent({ event, children, className }: DraggableEventProps) {
-  const { startDrag, endDrag, isDragging, draggedEvent } = useDragDrop()
+  const { startDrag, endDrag, isDragging, draggedEvent, disableDragDrop } = useDragDrop()
 
   const isCurrentlyDragged = isDragging && draggedEvent?.id === event.id
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
+  }
+
+  if (disableDragDrop) {
+    return (
+      <motion.div className={className || ''} onClick={(e) => handleClick(e)}>
+        {children}
+      </motion.div>
+    )
   }
 
   return (

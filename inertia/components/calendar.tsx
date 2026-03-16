@@ -19,6 +19,7 @@ interface CalendarProps {
   emptyDayActionLabel?: string
   onEmptyDayAction?: (date: Date, action: 'assignment' | 'exam' | 'event') => void
   selectedDate?: Date
+  disableDragDrop?: boolean
 }
 
 export function Calendar({
@@ -30,6 +31,7 @@ export function Calendar({
   emptyDayActionLabel,
   onEmptyDayAction,
   selectedDate,
+  disableDragDrop = false,
 }: CalendarProps) {
   const usesProvidedData = Array.isArray(providedEvents) && Array.isArray(providedUsers)
   const [events, setEvents] = useState<IEvent[]>(providedEvents ?? [])
@@ -74,7 +76,7 @@ export function Calendar({
 
   return (
     <CalendarProvider events={events} users={users} view={initialView} selectedDate={selectedDate}>
-      <DndProvider>
+      <DndProvider disableDragDrop={disableDragDrop}>
         <div className="w-full border rounded-xl">
           {showHeader ? <CalendarHeader /> : null}
           <CalendarBody

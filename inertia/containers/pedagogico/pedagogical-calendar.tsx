@@ -96,7 +96,7 @@ function getStatusLabel(status: string) {
     ARCHIVED: 'Arquivada',
     SCHEDULED: 'Agendada',
     IN_PROGRESS: 'Em andamento',
-    COMPLETED: 'Concluida',
+    COMPLETED: 'Concluída',
     CANCELLED: 'Cancelada',
     POSTPONED: 'Adiada',
   }
@@ -624,6 +624,7 @@ export function PedagogicalCalendar() {
               showHeader={false}
               emptyDayActionLabel="Novo item"
               onEmptyDayAction={handleEmptyDayAction}
+              disableDragDrop
             />
           </div>
         </div>
@@ -680,6 +681,7 @@ export function PedagogicalCalendar() {
               showHeader={false}
               emptyDayActionLabel="Novo item"
               onEmptyDayAction={handleEmptyDayAction}
+              disableDragDrop
             />
           </div>
         </div>

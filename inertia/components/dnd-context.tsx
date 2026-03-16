@@ -19,15 +19,17 @@ interface DragDropContextType {
   startDrag: (event: IEvent) => void
   endDrag: () => void
   handleEventDrop: (date: Date, hour?: number, minute?: number) => void
+  disableDragDrop: boolean
 }
 
 interface DndProviderProps {
   children: ReactNode
+  disableDragDrop?: boolean
 }
 
 const DragDropContext = createContext<DragDropContextType | undefined>(undefined)
 
-export function DndProvider({ children }: DndProviderProps) {
+export function DndProvider({ children, disableDragDrop = false }: DndProviderProps) {
   const { updateEvent } = useCalendar()
   const [dragState, setDragState] = useState<{
     draggedEvent: IEvent | null
@@ -125,8 +127,9 @@ export function DndProvider({ children }: DndProviderProps) {
       startDrag,
       endDrag,
       handleEventDrop,
+      disableDragDrop,
     }),
-    [dragState, startDrag, endDrag, handleEventDrop]
+    [dragState, startDrag, endDrag, handleEventDrop, disableDragDrop]
   )
 
   return <DragDropContext.Provider value={contextValue}>{children}</DragDropContext.Provider>
