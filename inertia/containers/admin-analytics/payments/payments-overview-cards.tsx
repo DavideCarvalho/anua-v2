@@ -7,12 +7,13 @@ import { OverviewCardsSkeleton } from '../shared/overview-cards-skeleton'
 
 export function PaymentsOverviewCards() {
   const { params } = useSearchParams()
+  const queryParams = {
+    ...(params.schoolId ? { schoolId: params.schoolId } : {}),
+    ...(params.schoolChainId ? { schoolChainId: params.schoolChainId } : {}),
+  }
   const { data, isLoading, error } = useQuery(
     api.api.v1.analytics.payments.overview.queryOptions({
-      query: {
-        schoolId: params.schoolId,
-        schoolChainId: params.schoolChainId,
-      },
+      query: queryParams,
     })
   )
 

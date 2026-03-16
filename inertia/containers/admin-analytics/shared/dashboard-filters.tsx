@@ -19,7 +19,7 @@ export function DashboardFilters({
   showSchoolFilter = true,
   showChainFilter = true,
 }: DashboardFiltersProps) {
-  const { params, setParam, deleteParam } = useSearchParams()
+  const { params, updateParams } = useSearchParams()
   const schoolId = params.schoolId ?? ''
   const schoolChainId = params.schoolChainId ?? ''
 
@@ -30,19 +30,17 @@ export function DashboardFilters({
 
   function handleSchoolChange(value: string | null) {
     if (value && value !== 'all') {
-      setParam('schoolId', value)
-      deleteParam('schoolChainId')
+      updateParams({ set: { schoolId: value }, delete: ['schoolChainId'] })
     } else {
-      deleteParam('schoolId')
+      updateParams({ delete: ['schoolId'] })
     }
   }
 
   function handleChainChange(value: string | null) {
     if (value && value !== 'all') {
-      setParam('schoolChainId', value)
-      deleteParam('schoolId')
+      updateParams({ set: { schoolChainId: value }, delete: ['schoolId'] })
     } else {
-      deleteParam('schoolChainId')
+      updateParams({ delete: ['schoolChainId'] })
     }
   }
 
@@ -53,7 +51,11 @@ export function DashboardFilters({
           <Network className="h-4 w-4 text-muted-foreground" />
           <Select value={schoolChainId || 'all'} onValueChange={handleChainChange}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Todas as redes" />
+              <SelectValue placeholder="Todas as redes">
+                {schoolChainId
+                  ? chains.find((c) => c.id === schoolChainId)?.name ?? 'Todas as redes'
+                  : 'Todas as redes'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as redes</SelectItem>
@@ -72,7 +74,11 @@ export function DashboardFilters({
           <Building2 className="h-4 w-4 text-muted-foreground" />
           <Select value={schoolId || 'all'} onValueChange={handleSchoolChange}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Todas as escolas" />
+              <SelectValue placeholder="Todas as escolas">
+                {schoolId
+                  ? schools.find((s) => s.id === schoolId)?.name ?? 'Todas as escolas'
+                  : 'Todas as escolas'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as escolas</SelectItem>

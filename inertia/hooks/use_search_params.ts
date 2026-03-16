@@ -32,5 +32,23 @@ export function useSearchParams() {
     router.visit(next ? `${base}?${next}` : base, { preserveScroll: true })
   }
 
-  return { params, setParam, deleteParam }
+  function updateParams(updates: { set?: Record<string, string>; delete?: string[] }) {
+    const qs = url.includes('?') ? url.split('?')[1] : ''
+    const sp = new URLSearchParams(qs)
+    if (updates.delete) {
+      for (const key of updates.delete) {
+        sp.delete(key)
+      }
+    }
+    if (updates.set) {
+      for (const [key, value] of Object.entries(updates.set)) {
+        sp.set(key, value)
+      }
+    }
+    const base = url.split('?')[0]
+    const next = sp.toString()
+    router.visit(next ? `${base}?${next}` : base, { preserveScroll: true })
+  }
+
+  return { params, setParam, deleteParam, updateParams }
 }
