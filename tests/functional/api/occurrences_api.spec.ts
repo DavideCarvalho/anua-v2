@@ -23,7 +23,7 @@ test.group('Occurrences list API', (group) => {
     const body = response.body()
     assert.property(body, 'data')
     assert.isArray(body.data)
-    assert.property(body, 'meta')
+    assert.property(body, 'metadata')
   })
 
   test('returns empty data when school has no occurrences', async ({ client, assert }) => {
