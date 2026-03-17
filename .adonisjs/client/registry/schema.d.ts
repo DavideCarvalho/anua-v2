@@ -955,18 +955,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_editar_comunicado_page_controller').default['handle']>>>
     }
   }
-  'web.escola.eventos': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/calendario'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_eventos_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_eventos_page_controller').default['handle']>>>
-    }
-  }
   'web.escola.eventos.novo': {
     methods: ["GET","HEAD"]
     pattern: '/escola/calendario/novo'

@@ -480,12 +480,6 @@ const routes = {
     tokens: [{"old":"/escola/comunicados/:id/editar","type":0,"val":"escola","end":""},{"old":"/escola/comunicados/:id/editar","type":0,"val":"comunicados","end":""},{"old":"/escola/comunicados/:id/editar","type":1,"val":"id","end":""},{"old":"/escola/comunicados/:id/editar","type":0,"val":"editar","end":""}],
     types: placeholder as Registry['web.escola.comunicados.editar']['types'],
   },
-  'web.escola.eventos': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/calendario',
-    tokens: [{"old":"/escola/calendario","type":0,"val":"escola","end":""},{"old":"/escola/calendario","type":0,"val":"calendario","end":""}],
-    types: placeholder as Registry['web.escola.eventos']['types'],
-  },
   'web.escola.eventos.novo': {
     methods: ["GET","HEAD"],
     pattern: '/escola/calendario/novo',

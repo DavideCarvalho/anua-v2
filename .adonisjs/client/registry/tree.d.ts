@@ -114,7 +114,7 @@ export interface ApiDefinition {
         novo: typeof routes['web.escola.comunicados.novo']
         editar: typeof routes['web.escola.comunicados.editar']
       }
-      eventos: typeof routes['web.escola.eventos'] & {
+      eventos: {
         novo: typeof routes['web.escola.eventos.novo']
         editar: typeof routes['web.escola.eventos.editar']
         autorizacoes: typeof routes['web.escola.eventos.autorizacoes']

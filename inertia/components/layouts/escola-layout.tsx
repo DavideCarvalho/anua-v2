@@ -92,7 +92,7 @@ const navigation: NavItem[] = [
       },
       {
         title: 'Calendário',
-        route: 'web.escola.eventos',
+        route: 'web.escola.pedagogico.calendario',
         href: '/escola/pedagogico/calendario',
       },
       {

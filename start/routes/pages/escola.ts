@@ -67,8 +67,6 @@ const ShowNovoComunicadoPageController = () =>
   import('#controllers/pages/escola/show_novo_comunicado_page_controller')
 const ShowEditarComunicadoPageController = () =>
   import('#controllers/pages/escola/show_editar_comunicado_page_controller')
-const ShowEventosPageController = () =>
-  import('#controllers/pages/escola/show_eventos_page_controller')
 const ShowNovoEventoPageController = () =>
   import('#controllers/pages/escola/show_novo_evento_page_controller')
 const ShowEditarEventoPageController = () =>
@@ -276,7 +274,6 @@ export function registerEscolaPageRoutes() {
         .as('comunicados.editar')
 
       // Eventos
-      router.get('/calendario', [ShowEventosPageController]).as('eventos')
       router.get('/calendario/novo', [ShowNovoEventoPageController]).as('eventos.novo')
       router
         .get('/calendario/:eventId/editar', [ShowEditarEventoPageController])
