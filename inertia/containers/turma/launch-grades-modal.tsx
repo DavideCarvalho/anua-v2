@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -90,6 +90,7 @@ function LaunchGradesModalContent({
   onOpenChange,
 }: Omit<LaunchGradesModalProps, 'open'>) {
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const initializedRef = useRef(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -113,7 +114,7 @@ function LaunchGradesModalContent({
     })
   )
 
-  const existingGrades = (() => {
+  const existingGrades = useMemo(() => {
     if (!submissionsResponse) return []
     const submissions: AssignmentSubmission[] = submissionsResponse?.data ?? []
     return submissions.map((s) => ({
@@ -121,13 +122,13 @@ function LaunchGradesModalContent({
       grade: s.grade,
       submittedAt: s.submittedAt ? s.submittedAt.split('T')[0] : null,
     }))
-  })()
+  }, [submissionsResponse])
 
-  // Initialize form when data is loaded
   useEffect(() => {
+    if (initializedRef.current) return
     if (!students || students.length === 0) return
 
-    const gradesMap = new Map((existingGrades || []).map((g) => [g.studentId, g]))
+    const gradesMap = new Map(existingGrades.map((g) => [g.studentId, g]))
 
     const formGrades: StudentGrade[] = students.map((student: Student) => {
       const existing = gradesMap.get(student.id)
@@ -140,6 +141,7 @@ function LaunchGradesModalContent({
     })
 
     form.setValue('grades', formGrades)
+    initializedRef.current = true
   }, [students, existingGrades, form, today])
 
   const saveMutation = useMutation(api.api.v1.grades.batchSave.mutationOptions())
@@ -281,7 +283,7 @@ export function LaunchGradesModal({
 }: LaunchGradesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>{assignmentName}</DialogTitle>
           <DialogDescription>
