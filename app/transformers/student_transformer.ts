@@ -28,7 +28,7 @@ export default class StudentTransformer extends BaseTransformer<Student> {
         'balance',
         'enrollmentStatus',
       ]),
-      user: UserTransformer.transform(this.whenLoaded(this.resource.user)),
+      user: UserTransformer.transform(this.whenLoaded(this.resource.user))?.depth(6),
       documents: StudentDocumentTransformer.transform(this.whenLoaded(this.resource.documents)),
       balanceTransactions: StudentBalanceTransactionTransformer.transform(
         this.whenLoaded(this.resource.balanceTransactions)
@@ -36,16 +36,18 @@ export default class StudentTransformer extends BaseTransformer<Student> {
       payments: StudentPaymentTransformer.transform(this.whenLoaded(this.resource.payments)),
       responsibles: StudentHasResponsibleTransformer.transform(
         this.whenLoaded(this.resource.responsibles)
-      ),
-      class: ClassTransformer.transform(this.whenLoaded(this.resource.class)),
+      )?.depth(6),
+      class: ClassTransformer.transform(this.whenLoaded(this.resource.class))?.depth(6),
       gamification: StudentGamificationTransformer.transform(
         this.whenLoaded(this.resource.gamification)
       ),
-      levels: StudentHasLevelTransformer.transform(this.whenLoaded(this.resource.levels)),
-      address: StudentAddressTransformer.transform(this.whenLoaded(this.resource.address)),
+      levels: StudentHasLevelTransformer.transform(this.whenLoaded(this.resource.levels))?.depth(6),
+      address: StudentAddressTransformer.transform(this.whenLoaded(this.resource.address))?.depth(
+        6
+      ),
       medicalInfo: StudentMedicalInfoTransformer.transform(
         this.whenLoaded(this.resource.medicalInfo)
-      ),
+      )?.depth(6),
       emergencyContacts: StudentEmergencyContactTransformer.transform(
         this.whenLoaded(this.resource.emergencyContacts)
       ),

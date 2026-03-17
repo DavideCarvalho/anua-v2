@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import StudentHasLevel from '#models/student_has_level'
-import StudentDto from '#models/dto/student.dto'
+import StudentTransformer from '#transformers/student_transformer'
 import AppException from '#exceptions/app_exception'
 import { listClassStudentsValidator } from '#validators/class'
 
 export default class ListClassStudentsController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const classId = params.id
     const query = await request.validateUsing(listClassStudentsValidator)
     const courseId = query.courseId
@@ -37,9 +37,8 @@ export default class ListClassStudentsController {
     // Extract students from studentLevels
     const students = studentLevels.all().map((sl) => sl.student)
 
-    return response.ok({
-      data: StudentDto.fromArray(students),
-      meta: studentLevels.getMeta(),
-    })
+    return response.ok(
+      await serialize(StudentTransformer.paginate(students, studentLevels.getMeta()))
+    )
   }
 }

@@ -3,10 +3,10 @@ import string from '@adonisjs/core/helpers/string'
 import Subject from '#models/subject'
 import { createSubjectValidator } from '#validators/subject'
 import AppException from '#exceptions/app_exception'
-import SubjectDto from '#models/dto/subject.dto'
+import SubjectTransformer from '#transformers/subject_transformer'
 
 export default class CreateSubjectController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createSubjectValidator)
 
     const slug = data.slug ?? string.slug(data.name)
@@ -25,6 +25,6 @@ export default class CreateSubjectController {
       slug,
     })
 
-    return response.created(new SubjectDto(subject))
+    return response.created(await serialize(SubjectTransformer.transform(subject)))
   }
 }

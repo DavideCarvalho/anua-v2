@@ -2,11 +2,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Challenge from '#models/challenge'
 import { updateChallengeValidator } from '#validators/gamification'
-import ChallengeDto from '#models/dto/challenge.dto'
 import AppException from '#exceptions/app_exception'
+import ChallengeTransformer from '#transformers/challenge_transformer'
 
 export default class UpdateChallengeController {
-  async handle({ request, params, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({ request, params, effectiveUser, selectedSchoolIds, serialize }: HttpContext) {
     const challenge = await Challenge.findOrFail(params.id)
 
     // Verificar ownership - desafios globais só podem ser modificados por admins
@@ -52,6 +52,6 @@ export default class UpdateChallengeController {
 
     await challenge.save()
 
-    return new ChallengeDto(challenge)
+    return serialize(ChallengeTransformer.transform(challenge))
   }
 }

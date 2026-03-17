@@ -6,10 +6,10 @@ import Contract from '#models/contract'
 import ContractPaymentDay from '#models/contract_payment_day'
 import ContractInterestConfig from '#models/contract_interest_config'
 import ContractEarlyDiscount from '#models/contract_early_discount'
-import { ContractDto } from '#models/dto/contract.dto'
+import ContractTransformer from '#transformers/contract_transformer'
 
 export default class CreateContractController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const { amount, paymentDays, interestConfig, earlyDiscounts, ...payload } =
       await request.validateUsing(createContractValidator)
 
@@ -79,7 +79,7 @@ export default class CreateContractController {
       await contract.load('interestConfig')
       await contract.load('earlyDiscounts')
 
-      return new ContractDto(contract)
+      return serialize(ContractTransformer.transform(contract))
     } catch (error) {
       await trx.rollback()
       throw error

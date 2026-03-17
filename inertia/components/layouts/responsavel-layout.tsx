@@ -78,6 +78,13 @@ const pedagogicalNavigation: NavItem[] = [
     requiresPedagogical: true,
   },
   {
+    title: 'Calendário',
+    route: 'web.responsavel.calendario',
+    href: '/responsavel/calendario',
+    icon: Calendar,
+    requiresPedagogical: true,
+  },
+  {
     title: 'Atividades',
     route: 'web.responsavel.atividades',
     href: '/responsavel/atividades',

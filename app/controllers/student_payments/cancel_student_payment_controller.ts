@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentPayment from '#models/student_payment'
-import StudentPaymentDto from '#models/dto/student_payment.dto'
 import { cancelStudentPaymentValidator } from '#validators/student_payment'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import AppException from '#exceptions/app_exception'
+import StudentPaymentTransformer from '#transformers/student_payment_transformer'
 
 export default class CancelStudentPaymentController {
   async handle(ctx: HttpContext) {
-    const { params, request, response, logger } = ctx
+    const { params, request, response, logger, serialize } = ctx
     const { id } = params
     const payload = await request.validateUsing(cancelStudentPaymentValidator)
     const user = ctx.auth?.user
@@ -38,6 +38,6 @@ export default class CancelStudentPaymentController {
 
     await payment.load('student')
 
-    return response.ok(new StudentPaymentDto(payment))
+    return response.ok(await serialize(StudentPaymentTransformer.transform(payment)))
   }
 }

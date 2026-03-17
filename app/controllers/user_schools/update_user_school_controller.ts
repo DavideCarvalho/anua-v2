@@ -1,11 +1,19 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import UserHasSchool from '#models/user_has_school'
-import UserHasSchoolDto from '#models/dto/user_has_school.dto'
 import { updateUserSchoolValidator } from '#validators/user_school'
 import AppException from '#exceptions/app_exception'
+import UserHasSchoolTransformer from '#transformers/user_has_school_transformer'
 
 export default class UpdateUserSchoolController {
-  async handle({ request, params, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({
+    request,
+    params,
+    response,
+    auth,
+    effectiveUser,
+    selectedSchoolIds,
+    serialize,
+  }: HttpContext) {
     const user = effectiveUser ?? auth.user
 
     if (!user) {
@@ -37,6 +45,6 @@ export default class UpdateUserSchoolController {
     await assignment.load('school')
     await assignment.load('user')
 
-    return response.ok(new UserHasSchoolDto(assignment))
+    return response.ok(await serialize(UserHasSchoolTransformer.transform(assignment)))
   }
 }

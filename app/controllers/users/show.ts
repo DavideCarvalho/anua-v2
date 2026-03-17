@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import UserDto from '#models/dto/user.dto'
 import AppException from '#exceptions/app_exception'
+import UserTransformer from '#transformers/user_transformer'
 
 export default class ShowUserController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const user = await User.query()
       .where('id', params.id)
       .whereNull('deletedAt')
@@ -17,6 +17,6 @@ export default class ShowUserController {
       throw AppException.notFound('Usuário não encontrado')
     }
 
-    return response.ok(new UserDto(user))
+    return response.ok(await serialize(UserTransformer.transform(user)))
   }
 }

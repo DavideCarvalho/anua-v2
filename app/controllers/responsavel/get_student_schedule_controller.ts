@@ -4,13 +4,6 @@ import Student from '#models/student'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import AcademicPeriod from '#models/academic_period'
-import {
-  StudentScheduleResponseDto,
-  ScheduleDayDto,
-  ScheduleSlotDto,
-  ScheduleSubjectDto,
-  SubjectWithTeacherDto,
-} from '#models/dto/student_schedule_response.dto'
 import StudentHasExtraClass from '#models/student_has_extra_class'
 import AppException from '#exceptions/app_exception'
 
@@ -50,12 +43,25 @@ export default class GetStudentScheduleController {
     }
 
     if (!student.classId) {
-      return new StudentScheduleResponseDto({
+      return {
         className: null,
-        scheduleByDay: {},
+        scheduleByDay: {} as Record<
+          string,
+          {
+            label: string
+            slots: Array<{
+              id: string
+              startTime: string
+              endTime: string
+              isBreak: boolean
+              subject: { id: string; name: string } | null
+              teacherName: string | null
+            }>
+          }
+        >,
         subjects: [],
         message: 'Aguardando a escola atribuir uma turma para o aluno',
-      })
+      }
     }
 
     // Find current active academic period for the student's school
@@ -65,12 +71,25 @@ export default class GetStudentScheduleController {
       .first()
 
     if (!activeAcademicPeriod) {
-      return new StudentScheduleResponseDto({
+      return {
         className: student.class.name,
-        scheduleByDay: {},
+        scheduleByDay: {} as Record<
+          string,
+          {
+            label: string
+            slots: Array<{
+              id: string
+              startTime: string
+              endTime: string
+              isBreak: boolean
+              subject: { id: string; name: string } | null
+              teacherName: string | null
+            }>
+          }
+        >,
         subjects: [],
         message: 'Nenhum período letivo ativo encontrado',
-      })
+      }
     }
 
     // Find active calendar for this class and period
@@ -82,12 +101,25 @@ export default class GetStudentScheduleController {
       .first()
 
     if (!calendar) {
-      return new StudentScheduleResponseDto({
+      return {
         className: student.class.name,
-        scheduleByDay: {},
+        scheduleByDay: {} as Record<
+          string,
+          {
+            label: string
+            slots: Array<{
+              id: string
+              startTime: string
+              endTime: string
+              isBreak: boolean
+              subject: { id: string; name: string } | null
+              teacherName: string | null
+            }>
+          }
+        >,
         subjects: [],
         message: 'Horário não definido para esta turma',
-      })
+      }
     }
 
     // Get slots with teacher and subject info
@@ -103,51 +135,61 @@ export default class GetStudentScheduleController {
       .orderBy('startTime')
 
     // Group schedule by day
-    const scheduleByDay: Record<string, ScheduleDayDto> = {}
-    const subjectsMap = new Map<string, SubjectWithTeacherDto>()
+    const scheduleByDay: Record<
+      string,
+      {
+        label: string
+        slots: Array<{
+          id: string
+          startTime: string
+          endTime: string
+          isBreak: boolean
+          subject: { id: string; name: string } | null
+          teacherName: string | null
+        }>
+      }
+    > = {}
+    const subjectsMap = new Map<string, { id: string; name: string; teacherName: string }>()
 
     for (const slot of slots) {
       const dayKey = slot.classWeekDay.toString()
       const dayLabel = DAY_LABELS[slot.classWeekDay] || `Dia ${slot.classWeekDay}`
 
       if (!scheduleByDay[dayKey]) {
-        scheduleByDay[dayKey] = new ScheduleDayDto({
+        scheduleByDay[dayKey] = {
           label: dayLabel,
           slots: [],
-        })
+        }
       }
 
-      let subjectDto: ScheduleSubjectDto | null = null
+      let subjectDto: { id: string; name: string } | null = null
       let teacherName: string | null = null
 
       if (slot.teacherHasClass && !slot.isBreak) {
-        subjectDto = new ScheduleSubjectDto({
+        subjectDto = {
           id: slot.teacherHasClass.subject.id,
           name: slot.teacherHasClass.subject.name,
-        })
+        }
         teacherName = slot.teacherHasClass.teacher.user.name
 
         // Add to subjects map
         if (!subjectsMap.has(slot.teacherHasClass.subject.id)) {
-          subjectsMap.set(
-            slot.teacherHasClass.subject.id,
-            new SubjectWithTeacherDto({
-              id: slot.teacherHasClass.subject.id,
-              name: slot.teacherHasClass.subject.name,
-              teacherName: slot.teacherHasClass.teacher.user.name,
-            })
-          )
+          subjectsMap.set(slot.teacherHasClass.subject.id, {
+            id: slot.teacherHasClass.subject.id,
+            name: slot.teacherHasClass.subject.name,
+            teacherName: slot.teacherHasClass.teacher.user.name,
+          })
         }
       }
 
-      const slotDto = new ScheduleSlotDto({
+      const slotDto = {
         id: slot.id,
         startTime: slot.startTime,
         endTime: slot.endTime,
         isBreak: slot.isBreak,
         subject: subjectDto,
         teacherName,
-      })
+      }
 
       scheduleByDay[dayKey].slots.push(slotDto)
     }

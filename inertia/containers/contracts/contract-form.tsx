@@ -33,6 +33,7 @@ import {
 } from '../../components/ui/select'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { centsToReaisString, reaisStringToCents } from '~/lib/currency_input_adapter'
 
 type ContractResponse = Route.Response<'api.v1.contracts.show'>
 
@@ -497,8 +498,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                           <FormControl>
                             <CurrencyInput
                               placeholder="1.200,00"
-                              value={field.value}
-                              onChange={field.onChange}
+                              value={reaisStringToCents(field.value)}
+                              onChange={(cents) => field.onChange(centsToReaisString(cents))}
                             />
                           </FormControl>
                           <FormDescription>
@@ -520,8 +521,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                             <FormControl>
                               <CurrencyInput
                                 placeholder="12.000,00"
-                                value={field.value}
-                                onChange={field.onChange}
+                                value={reaisStringToCents(field.value)}
+                                onChange={(cents) => field.onChange(centsToReaisString(cents))}
                               />
                             </FormControl>
                             <FormDescription>
@@ -623,8 +624,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                             <FormControl>
                               <CurrencyInput
                                 placeholder="500,00"
-                                value={field.value || '0'}
-                                onChange={field.onChange}
+                                value={reaisStringToCents(field.value)}
+                                onChange={(cents) => field.onChange(centsToReaisString(cents))}
                               />
                             </FormControl>
                             <FormMessage />

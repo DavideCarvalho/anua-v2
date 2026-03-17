@@ -1,15 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import BillingReconciliationService from '#services/payments/billing_reconciliation_service'
 import AppException from '#exceptions/app_exception'
+import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 
 export default class CancelCanteenPurchaseController {
-  async handle({ params, response, auth, logger }: HttpContext) {
+  async handle({ params, response, auth, logger, serialize }: HttpContext) {
     const { id } = params
 
     const purchase = await CanteenPurchase.find(id)
@@ -104,6 +104,6 @@ export default class CancelCanteenPurchaseController {
     await purchase.load('canteen')
     await purchase.load('itemsPurchased')
 
-    return response.ok(new CanteenPurchaseDto(purchase))
+    return response.ok(await serialize(CanteenPurchaseTransformer.transform(purchase)))
   }
 }

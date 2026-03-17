@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreFinancialSettings from '#models/store_financial_settings'
-import StoreFinancialSettingsDto from '#models/dto/store_financial_settings.dto'
+import StoreFinancialSettingsTransformer from '#transformers/store_financial_settings_transformer'
 
 export default class ShowStoreFinancialSettingsController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const settings = await StoreFinancialSettings.query().where('storeId', params.storeId).first()
 
     if (!settings) {
@@ -17,6 +17,6 @@ export default class ShowStoreFinancialSettingsController {
       })
     }
 
-    return response.ok(new StoreFinancialSettingsDto(settings))
+    return response.ok(await serialize(StoreFinancialSettingsTransformer.transform(settings)))
   }
 }

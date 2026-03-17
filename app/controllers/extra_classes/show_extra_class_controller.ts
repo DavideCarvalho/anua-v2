@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ExtraClass from '#models/extra_class'
-import ExtraClassDto from '#models/dto/extra_class.dto'
+import ExtraClassTransformer from '#transformers/extra_class_transformer'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowExtraClassController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const extraClass = await ExtraClass.query()
       .where('id', params.id)
       .preload('schedules')
@@ -18,6 +18,6 @@ export default class ShowExtraClassController {
       throw AppException.notFound('Aula avulsa não encontrada')
     }
 
-    return new ExtraClassDto(extraClass)
+    return await serialize(ExtraClassTransformer.transform(extraClass))
   }
 }

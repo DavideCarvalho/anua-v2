@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import StudentHasResponsible from '#models/student_has_responsible'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class ShowMyOrderController {
-  async handle({ params, request, response, effectiveUser }: HttpContext) {
+  async handle({ params, request, response, effectiveUser, serialize }: HttpContext) {
     const user = effectiveUser!
     const studentId = request.input('studentId')
 
@@ -23,7 +23,7 @@ export default class ShowMyOrderController {
 
     // Verify access: student owns order or responsible is linked
     if (order.studentId === user.id) {
-      return response.ok(new StoreOrderDto(order))
+      return response.ok(await serialize(StoreOrderTransformer.transform(order)))
     }
 
     if (studentId) {
@@ -33,7 +33,7 @@ export default class ShowMyOrderController {
         .first()
 
       if (relation) {
-        return response.ok(new StoreOrderDto(order))
+        return response.ok(await serialize(StoreOrderTransformer.transform(order)))
       }
     }
 

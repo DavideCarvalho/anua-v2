@@ -1,6 +1,34 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
-import { SidebarClassListDto } from '#dtos/sidebar_class_dto'
+
+interface CourseInfo {
+  id: string
+  name: string
+  slug: string
+}
+
+interface AcademicPeriodInfo {
+  id: string
+  name: string
+  slug: string
+  isActive: boolean
+}
+
+interface LevelInfo {
+  id: string
+  name: string
+  slug: string
+  order: number | null
+}
+
+interface SidebarClassData {
+  id: string
+  name: string
+  slug: string
+  course: CourseInfo
+  academicPeriod: AcademicPeriodInfo
+  level: LevelInfo
+}
 
 interface UserSchoolRow {
   schoolId: string
@@ -46,7 +74,7 @@ export default class GetClassesForSidebarController {
     const schoolIds = userSchoolsResult.rows.map((row) => row.schoolId).filter(Boolean)
 
     if (schoolIds.length === 0) {
-      return new SidebarClassListDto([])
+      return { data: [] }
     }
 
     // Query to get classes with their course and academic period info
@@ -93,7 +121,7 @@ export default class GetClassesForSidebarController {
       teacherId: isSchoolTeacher ? user.id : null,
     })
 
-    const classes = result.rows.map((row) => ({
+    const classes: SidebarClassData[] = result.rows.map((row) => ({
       id: row.classId,
       name: row.className,
       slug: row.classSlug,
@@ -116,6 +144,6 @@ export default class GetClassesForSidebarController {
       },
     }))
 
-    return new SidebarClassListDto(classes)
+    return { data: classes }
   }
 }

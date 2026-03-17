@@ -73,7 +73,7 @@ export function ImpersonationBanner() {
         </div>
         <div className="text-sm">
           <span className="font-semibold">Modo de Personificação Ativo</span>
-          <span className="mx-2">•</span>
+          <span className="mx-2"> {'•'} </span>
           <span>
             Visualizando como{' '}
             <strong>

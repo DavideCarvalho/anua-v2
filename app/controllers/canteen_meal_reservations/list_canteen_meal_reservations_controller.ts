@@ -4,6 +4,12 @@ import CanteenMealReservation from '#models/canteen_meal_reservation'
 import CanteenMealReservationTransformer from '#transformers/canteen_meal_reservation_transformer'
 import { listCanteenMealReservationsValidator } from '#validators/canteen'
 
+function mapStatus(status: string) {
+  if (status === 'SERVED') return 'SERVED'
+  if (status === 'CANCELLED') return 'CANCELLED'
+  return 'RESERVED'
+}
+
 export default class ListCanteenMealReservationsController {
   async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listCanteenMealReservationsValidator)
@@ -27,7 +33,7 @@ export default class ListCanteenMealReservationsController {
     }
 
     if (payload.status) {
-      query.where('status', payload.status)
+      query.where('status', mapStatus(payload.status))
     }
 
     if (payload.canteenId) {

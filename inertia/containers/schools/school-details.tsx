@@ -1,9 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner'
 import {
   Building2,
-  AlertCircle,
   ArrowLeft,
   Pencil,
   MapPin,
@@ -28,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
 const ROLE_TRANSLATIONS: Record<string, string> = {
@@ -44,60 +42,12 @@ function translateRole(roleName: string): string {
   return ROLE_TRANSLATIONS[roleName] || roleName
 }
 
-function DetailsSkeleton() {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="py-12 text-center">
-          <Building2 className="mx-auto h-12 w-12 animate-pulse text-muted-foreground" />
-          <p className="mt-4 text-sm text-muted-foreground">Carregando dados da escola...</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function DetailsError({
-  error,
-  resetErrorBoundary,
-}: {
-  error: Error
-  resetErrorBoundary: () => void
-}) {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="py-12 text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold text-destructive">Erro ao carregar escola</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {error.message || 'Não foi possível carregar os dados da escola.'}
-          </p>
-          <Button variant="outline" className="mt-4" onClick={resetErrorBoundary}>
-            Tentar novamente
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function DetailsContent({ schoolId }: { schoolId: string }) {
+export function SchoolDetails({ schoolId }: { schoolId: string }) {
   const queryClient = useQueryClient()
-  const {
-    data: school,
-    isLoading,
-    error,
-  } = useQuery(api.api.v1.schools.show.queryOptions({ params: { id: schoolId } }))
+  const { data: school, isLoading } = useQuery(
+    api.api.v1.schools.show.queryOptions({ params: { id: schoolId } })
+  )
   const setImpersonationMutation = useMutation(api.api.v1.impersonation.set.mutationOptions())
-
-  if (isLoading) {
-    return <DetailsSkeleton />
-  }
-
-  if (error) {
-    return <DetailsError error={error as Error} resetErrorBoundary={() => {}} />
-  }
 
   const handleImpersonate = async (userId: string, userName: string, userRole: string) => {
     try {
@@ -167,7 +117,9 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              {school?.logoUrl ? (
+              {isLoading ? (
+                <div className="h-16 w-16 rounded-lg bg-muted animate-pulse" />
+              ) : school?.logoUrl ? (
                 <img
                   src={school.logoUrl}
                   alt={school.name}
@@ -179,11 +131,20 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
                 </div>
               )}
               <div>
-                <CardTitle className="text-2xl">{school?.name}</CardTitle>
-                <CardDescription className="flex items-center gap-1 mt-1">
-                  <Globe className="h-3 w-3" />
-                  {school?.slug}
-                </CardDescription>
+                {isLoading ? (
+                  <>
+                    <div className="h-7 w-48 bg-muted animate-pulse rounded" />
+                    <div className="h-4 w-32 bg-muted animate-pulse rounded mt-1" />
+                  </>
+                ) : (
+                  <>
+                    <CardTitle className="text-2xl">{school?.name}</CardTitle>
+                    <CardDescription className="flex items-center gap-1 mt-1">
+                      <Globe className="h-3 w-3" />
+                      {school?.slug}
+                    </CardDescription>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex gap-2">
@@ -213,22 +174,35 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Slug</p>
-                <p className="font-medium">{school?.slug}</p>
+                {isLoading ? (
+                  <div className="h-5 w-24 bg-muted animate-pulse rounded mt-1" />
+                ) : (
+                  <p className="font-medium">{school?.slug}</p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Criado em</p>
-                <p className="font-medium flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {formatDate(school?.createdAt)}
-                </p>
+                {isLoading ? (
+                  <div className="h-5 w-28 bg-muted animate-pulse rounded mt-1" />
+                ) : (
+                  <p className="font-medium flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(school?.createdAt)}
+                  </p>
+                )}
               </div>
             </div>
-            {school?.schoolChain && (
+            {isLoading ? (
+              <div className="space-y-2">
+                <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+                <div className="h-5 w-32 bg-muted animate-pulse rounded" />
+              </div>
+            ) : school?.schoolChain ? (
               <div>
                 <p className="text-sm text-muted-foreground">Rede de Ensino</p>
                 <p className="font-medium">{school.schoolChain.name}</p>
               </div>
-            )}
+            ) : null}
           </CardContent>
         </Card>
 
@@ -241,7 +215,12 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {formatAddress() ? (
+            {isLoading ? (
+              <div className="space-y-2">
+                <div className="h-5 w-full bg-muted animate-pulse rounded" />
+                <div className="h-5 w-3/4 bg-muted animate-pulse rounded" />
+              </div>
+            ) : formatAddress() ? (
               <div className="space-y-3">
                 <p className="font-medium">{formatAddress()}</p>
                 {getGoogleMapsUrl() && (
@@ -274,19 +253,33 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Nota Mínima</p>
-                <p className="font-medium text-lg">{school?.minimumGrade ?? 7}</p>
+                {isLoading ? (
+                  <div className="h-7 w-12 bg-muted animate-pulse rounded mt-1" />
+                ) : (
+                  <p className="font-medium text-lg">{school?.minimumGrade ?? 7}</p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Frequência Mínima</p>
-                <p className="font-medium text-lg">{school?.minimumAttendancePercentage ?? 75}%</p>
+                {isLoading ? (
+                  <div className="h-7 w-16 bg-muted animate-pulse rounded mt-1" />
+                ) : (
+                  <p className="font-medium text-lg">
+                    {school?.minimumAttendancePercentage ?? 75}%
+                  </p>
+                )}
               </div>
             </div>
             <Separator />
             <div>
               <p className="text-sm text-muted-foreground">Algoritmo de Cálculo</p>
-              <p className="font-medium">
-                {school?.calculationAlgorithm === 'AVERAGE' ? 'Média' : 'Soma'}
-              </p>
+              {isLoading ? (
+                <div className="h-5 w-16 bg-muted animate-pulse rounded mt-1" />
+              ) : (
+                <p className="font-medium">
+                  {school?.calculationAlgorithm === 'AVERAGE' ? 'Média' : 'Soma'}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -300,7 +293,21 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {school?.hasInsurance ? (
+            {isLoading ? (
+              <div className="space-y-3">
+                <div className="h-5 w-16 bg-muted animate-pulse rounded" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+                    <div className="h-5 w-12 bg-muted animate-pulse rounded" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+                    <div className="h-5 w-12 bg-muted animate-pulse rounded" />
+                  </div>
+                </div>
+              </div>
+            ) : school?.hasInsurance ? (
               <div className="space-y-4">
                 <Badge variant="default">Ativo</Badge>
                 <div className="grid grid-cols-2 gap-4">
@@ -337,10 +344,25 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
             <Users className="h-5 w-5" />
             Usuários Vinculados
           </CardTitle>
-          <CardDescription>{users.length} usuário(s) vinculado(s) a esta escola</CardDescription>
+          {isLoading ? (
+            <div className="h-4 w-48 bg-muted animate-pulse rounded mt-1" />
+          ) : (
+            <CardDescription>{users.length} usuário(s) vinculado(s) a esta escola</CardDescription>
+          )}
         </CardHeader>
         <CardContent>
-          {users.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="h-10 flex-1 bg-muted animate-pulse rounded" />
+                  <div className="h-10 flex-1 bg-muted animate-pulse rounded" />
+                  <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+                  <div className="h-10 w-28 bg-muted animate-pulse rounded" />
+                </div>
+              ))}
+            </div>
+          ) : users.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
               <Users className="mx-auto h-8 w-8 mb-2" />
               <p>Nenhum usuário vinculado a esta escola</p>
@@ -399,8 +421,4 @@ function DetailsContent({ schoolId }: { schoolId: string }) {
       </Card>
     </div>
   )
-}
-
-export function SchoolDetails({ schoolId }: { schoolId: string }) {
-  return <DetailsContent schoolId={schoolId} />
 }

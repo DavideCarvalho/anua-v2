@@ -4,7 +4,7 @@ import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
 import Class_ from '#models/class'
 import AppException from '#exceptions/app_exception'
-import CourseActivityFeedItemDto from '#models/dto/course_activity_feed_item.dto'
+import CourseActivityFeedItemTransformer from '#transformers/course_activity_feed_item_transformer'
 
 interface ActivityItem {
   id: string
@@ -16,7 +16,7 @@ interface ActivityItem {
 }
 
 export default class GetCourseActivityFeedController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const { courseId, academicPeriodId } = params
     const limit = Number(request.input('limit', 10))
 
@@ -124,6 +124,8 @@ export default class GetCourseActivityFeedController {
     activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     const limitedActivities = activities.slice(0, limit)
 
-    return response.ok(CourseActivityFeedItemDto.fromArray(limitedActivities))
+    return response.ok(
+      await serialize(CourseActivityFeedItemTransformer.transform(limitedActivities))
+    )
   }
 }

@@ -3,12 +3,12 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import CanteenMonthlyTransfer from '#models/canteen_monthly_transfer'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenMonthlyTransferDto from '#models/dto/canteen_monthly_transfer.dto'
 import { updateCanteenMonthlyTransferStatusValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenMonthlyTransferTransformer from '#transformers/canteen_monthly_transfer_transformer'
 
 export default class UpdateCanteenMonthlyTransferStatusController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(updateCanteenMonthlyTransferStatusValidator)
 
     const transfer = await CanteenMonthlyTransfer.find(params.id)
@@ -34,7 +34,7 @@ export default class UpdateCanteenMonthlyTransferStatusController {
       await transfer.load('canteen')
       await transfer.load('purchases')
 
-      return response.ok(new CanteenMonthlyTransferDto(transfer))
+      return response.ok(await serialize(CanteenMonthlyTransferTransformer.transform(transfer)))
     } catch (error) {
       await trx.rollback()
       throw error

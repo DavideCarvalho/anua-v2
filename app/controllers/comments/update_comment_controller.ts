@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Comment from '#models/comment'
-import CommentDto from '#models/dto/comment.dto'
 import { updateCommentValidator } from '#validators/post'
 import AppException from '#exceptions/app_exception'
+import CommentTransformer from '#transformers/comment_transformer'
 
 export default class UpdateCommentController {
-  async handle({ params, request, response, auth }: HttpContext) {
+  async handle({ params, request, response, auth, serialize }: HttpContext) {
     const { id } = params
     const data = await request.validateUsing(updateCommentValidator)
 
@@ -25,6 +25,6 @@ export default class UpdateCommentController {
 
     await comment.load('user')
 
-    return response.ok(new CommentDto(comment))
+    return response.ok(await serialize(CommentTransformer.transform(comment)))
   }
 }

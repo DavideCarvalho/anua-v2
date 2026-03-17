@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import { deliverStoreOrderValidator } from '#validators/gamification'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class DeliverStoreOrderController {
-  async handle({ params, request, auth, response }: HttpContext) {
+  async handle({ params, request, auth, response, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(deliverStoreOrderValidator)
 
@@ -34,6 +34,6 @@ export default class DeliverStoreOrderController {
       query.preload('storeItem')
     })
 
-    return response.ok(new StoreOrderDto(order))
+    return response.ok(await serialize(StoreOrderTransformer.transform(order)))
   }
 }

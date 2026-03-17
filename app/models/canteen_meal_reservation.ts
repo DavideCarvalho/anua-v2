@@ -5,7 +5,7 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import CanteenMeal from './canteen_meal.js'
 import Student from './student.js'
 
-export type CanteenMealReservationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'SERVED'
+export type CanteenMealReservationStatus = 'RESERVED' | 'SERVED' | 'CANCELLED'
 
 export default class CanteenMealReservation extends BaseModel {
   static table = 'CanteenMealReservation'

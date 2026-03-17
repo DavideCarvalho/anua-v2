@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import UserDto from '#models/dto/user.dto'
 import School from '#models/school'
 import AppException from '#exceptions/app_exception'
+import UserTransformer from '#transformers/user_transformer'
 
 export default class MeController {
-  async handle({ response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({ response, auth, effectiveUser, selectedSchoolIds, serialize }: HttpContext) {
     const authenticatedUser = effectiveUser ?? auth.use('web').user
 
     if (!authenticatedUser) {
@@ -29,6 +29,6 @@ export default class MeController {
       await user.load('school')
     }
 
-    return response.ok(new UserDto(user))
+    return response.ok(await serialize(UserTransformer.transform(user)))
   }
 }

@@ -1,20 +1,20 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
-import CanteenMealReservationDto from '#models/dto/canteen_meal_reservation.dto'
 import type { CanteenMealReservationStatus } from '#models/canteen_meal_reservation'
 import { updateCanteenMealReservationStatusValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenMealReservationTransformer from '#transformers/canteen_meal_reservation_transformer'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): CanteenMealReservationStatus {
-  // Validator uses CONSUMED, model uses SERVED
-  if (validatorStatus === 'CONSUMED') return 'SERVED'
-  return validatorStatus as CanteenMealReservationStatus
+  if (validatorStatus === 'SERVED') return 'SERVED'
+  if (validatorStatus === 'CANCELLED') return 'CANCELLED'
+  return 'RESERVED'
 }
 
 export default class UpdateCanteenMealReservationStatusController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(updateCanteenMealReservationStatusValidator)
 
     const reservation = await CanteenMealReservation.find(params.id)
@@ -31,9 +31,9 @@ export default class UpdateCanteenMealReservationStatusController {
     }
 
     await reservation.save()
-    await reservation.load('meal')
+    await reservation.load('meal', (mealQuery) => mealQuery.preload('canteen'))
     await reservation.load('student')
 
-    return response.ok(new CanteenMealReservationDto(reservation))
+    return response.ok(await serialize(CanteenMealReservationTransformer.transform(reservation)))
   }
 }

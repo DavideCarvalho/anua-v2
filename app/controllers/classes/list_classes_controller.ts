@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
-import ListClassesResponseDto from './dtos/list_classes_response.dto.js'
+import ListClassesResponseTransformer from '#transformers/list_classes_response_transformer'
 import { listClassesValidator } from '#validators/class'
 
 export default class ListClassesController {
   async handle(ctx: HttpContext) {
-    const { auth, request, selectedSchoolIds } = ctx
+    const { auth, request, selectedSchoolIds, serialize } = ctx
     const user = ctx.effectiveUser ?? auth.user!
     const filters = await request.validateUsing(listClassesValidator)
     const page = filters.page ?? 1
@@ -66,6 +66,8 @@ export default class ListClassesController {
 
     const classes = await query.paginate(page, limit)
 
-    return ListClassesResponseDto.fromPaginator(classes)
+    const items = classes.all()
+    const metadata = classes.getMeta()
+    return await serialize(ListClassesResponseTransformer.paginate(items, metadata))
   }
 }

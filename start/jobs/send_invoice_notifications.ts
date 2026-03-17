@@ -135,8 +135,12 @@ export default class SendInvoiceNotifications {
           sent++
         } catch (error) {
           errors++
-          logger.error(`[INVOICE_NOTIFY] Error notifying for invoice ${invoice.id}:`, {
+          logger.error('[INVOICE_NOTIFY] Error notifying invoice', {
+            invoiceId: invoice.id,
+            studentId: invoice.studentId,
+            status: invoice.status,
             error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
           })
         }
       }

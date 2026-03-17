@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
-import StudentGamificationDto from '#models/dto/student_gamification.dto'
 import AppException from '#exceptions/app_exception'
+import StudentGamificationTransformer from '#transformers/student_gamification_transformer'
 
 export default class ShowStudentGamificationController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const { id } = params
 
     const gamification = await StudentGamification.query()
@@ -18,6 +18,6 @@ export default class ShowStudentGamificationController {
       throw AppException.notFound('Gamificação do aluno não encontrada')
     }
 
-    return response.ok(new StudentGamificationDto(gamification))
+    return response.ok(await serialize(StudentGamificationTransformer.transform(gamification)))
   }
 }

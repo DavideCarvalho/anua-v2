@@ -149,7 +149,7 @@ function TeachersListContent({
   )
 
   const teachers = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   if (teachers.length === 0) {
     return (
@@ -271,12 +271,12 @@ function TeachersListContent({
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm">
-              Página {page} de {meta.lastPage}
+              Página {page} de {Number(meta.lastPage)}
             </span>
             <Button
               variant="outline"
               size="sm"
-              disabled={page >= meta.lastPage}
+              disabled={page >= Number(meta.lastPage)}
               onClick={() => onPageChange(page + 1)}
             >
               <ChevronRight className="h-4 w-4" />

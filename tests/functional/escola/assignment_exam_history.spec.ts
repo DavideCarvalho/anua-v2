@@ -9,6 +9,7 @@ import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import Level from '#models/level'
 import Role from '#models/role'
+import Student from '#models/student'
 import Subject from '#models/subject'
 import Teacher from '#models/teacher'
 import TeacherHasClass from '#models/teacher_has_class'
@@ -100,6 +101,37 @@ async function createContext(schoolId: string) {
   }
 }
 
+async function createStudentContext(schoolId: string) {
+  const now = DateTime.now()
+
+  const studentRole = await Role.firstOrCreate({ name: 'STUDENT' }, { name: 'STUDENT' })
+
+  const studentUser = await User.create({
+    name: `Aluno ${now.toMillis()}`,
+    slug: `aluno-${now.toMillis()}`,
+    email: `aluno-${now.toMillis()}@example.com`,
+    active: true,
+    whatsappContact: false,
+    grossSalary: 0,
+    roleId: studentRole.id,
+  })
+
+  const student = await Student.create({
+    id: studentUser.id,
+    classId: null,
+    descountPercentage: 0,
+    monthlyPaymentAmount: 0,
+    isSelfResponsible: false,
+    paymentDate: null,
+    contractId: null,
+    canteenLimit: null,
+    balance: 0,
+    enrollmentStatus: 'REGISTERED',
+  })
+
+  return { student }
+}
+
 test.group('Assignment and exam history', (group) => {
   group.each.setup(async () => {
     await db.beginGlobalTransaction()
@@ -127,7 +159,14 @@ test.group('Assignment and exam history', (group) => {
     })
 
     createResponse.assertStatus(201)
-    const assignmentId = (createResponse.body() as { id: string }).id
+    const createdAssignment = createResponse.body() as {
+      id: string
+      teacherHasClass?: { classId: string; subjectId: string }
+    }
+    const assignmentId = createdAssignment.id
+    assert.exists(createdAssignment.teacherHasClass)
+    assert.equal(createdAssignment.teacherHasClass?.classId, classEntity.id)
+    assert.equal(createdAssignment.teacherHasClass?.subjectId, subject.id)
 
     const updateResponse = await client
       .put(`/api/v1/assignments/${assignmentId}`)
@@ -208,7 +247,13 @@ test.group('Assignment and exam history', (group) => {
     })
 
     createResponse.assertStatus(201)
-    const examId = (createResponse.body() as { id: string }).id
+    const createdExam = createResponse.body() as {
+      id: string
+      teacher?: { id: string; hourlyRate?: number }
+    }
+    const examId = createdExam.id
+    assert.equal(createdExam.teacher?.id, teacher.id)
+    assert.equal(createdExam.teacher?.hourlyRate, teacher.hourlyRate)
 
     const updateResponse = await client.put(`/api/v1/exams/${examId}`).loginAs(user).json({
       scheduledDate: updatedExamDate.toISODate(),
@@ -332,5 +377,130 @@ test.group('Assignment and exam history', (group) => {
     assert.isString(body.scheduledDate)
     assert.isString(body.examDate)
     assert.equal(body.examDate, body.scheduledDate)
+  })
+
+  test('returns assignment relation when submitting and grading assignment', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher } = await createContext(school.id)
+    const { student } = await createStudentContext(school.id)
+
+    const createAssignmentResponse = await client
+      .post('/api/v1/assignments')
+      .loginAs(user)
+      .json({
+        title: 'Atividade com submissao',
+        description: 'Descricao',
+        maxScore: 10,
+        dueDate: DateTime.now().plus({ days: 5 }).toISO(),
+        classId: classEntity.id,
+        subjectId: subject.id,
+        teacherId: teacher.id,
+      })
+
+    createAssignmentResponse.assertStatus(201)
+    const assignmentId = (createAssignmentResponse.body() as { id: string }).id
+
+    const submitResponse = await client
+      .post(`/api/v1/assignments/${assignmentId}/submissions`)
+      .loginAs(user)
+      .json({ studentId: student.id })
+
+    submitResponse.assertStatus(201)
+
+    const submitBody = submitResponse.body() as {
+      assignmentId: string
+      studentId: string
+      assignment?: { id: string }
+    }
+
+    assert.equal(submitBody.assignmentId, assignmentId)
+    assert.equal(submitBody.studentId, student.id)
+    assert.equal(submitBody.assignment?.id, assignmentId)
+
+    const submissionId = (submitResponse.body() as { id: string }).id
+
+    const gradeResponse = await client
+      .post(`/api/v1/assignments/${assignmentId}/submissions/${submissionId}`)
+      .loginAs(user)
+      .json({ grade: 8.5 })
+
+    gradeResponse.assertStatus(200)
+
+    const gradeBody = gradeResponse.body() as {
+      grade: number
+      assignment?: { id: string }
+    }
+
+    assert.equal(gradeBody.grade, 8.5)
+    assert.equal(gradeBody.assignment?.id, assignmentId)
+  })
+
+  test('returns exam relation when creating and updating exam grade', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher } = await createContext(school.id)
+    const { student } = await createStudentContext(school.id)
+
+    const createExamResponse = await client
+      .post('/api/v1/exams')
+      .loginAs(user)
+      .json({
+        title: 'Prova com notas',
+        description: 'Descricao',
+        maxScore: 10,
+        type: 'WRITTEN',
+        scheduledDate: DateTime.now().plus({ days: 3 }).toISO(),
+        classId: classEntity.id,
+        subjectId: subject.id,
+        teacherId: teacher.id,
+      })
+
+    createExamResponse.assertStatus(201)
+    const examId = (createExamResponse.body() as { id: string }).id
+
+    const createGradeResponse = await client
+      .post(`/api/v1/exams/${examId}/grades`)
+      .loginAs(user)
+      .json({
+        studentId: student.id,
+        score: 7.75,
+        feedback: 'Bom progresso',
+      })
+
+    createGradeResponse.assertStatus(201)
+
+    const createdGradeBody = createGradeResponse.body() as {
+      id: string
+      score: number
+      exam?: { id: string }
+    }
+
+    assert.equal(createdGradeBody.score, 7.75)
+    assert.equal(createdGradeBody.exam?.id, examId)
+
+    const updateGradeResponse = await client
+      .put(`/api/v1/exams/${examId}/grades/${createdGradeBody.id}`)
+      .loginAs(user)
+      .json({
+        studentId: student.id,
+        score: 9,
+        feedback: 'Excelente',
+        absent: false,
+      })
+
+    updateGradeResponse.assertStatus(200)
+
+    const updatedGradeBody = updateGradeResponse.body() as {
+      score: number
+      exam?: { id: string }
+    }
+
+    assert.equal(updatedGradeBody.score, 9)
+    assert.equal(updatedGradeBody.exam?.id, examId)
   })
 })

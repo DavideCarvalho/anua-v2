@@ -7,10 +7,10 @@ export default class LevelAssignedToCourseHasAcademicPeriodTransformer extends B
   toObject() {
     return {
       ...this.pick(this.resource, ['id', 'levelId', 'courseHasAcademicPeriodId', 'isActive']),
-      level: LevelTransformer.transform(this.whenLoaded(this.resource.level)),
+      level: LevelTransformer.transform(this.whenLoaded(this.resource.level))?.depth(6),
       courseHasAcademicPeriod: CourseHasAcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.courseHasAcademicPeriod)
-      ),
+      )?.depth(6),
     }
   }
 }

@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ExtraClassAttendance from '#models/extra_class_attendance'
-import ExtraClassAttendanceDto from '#models/dto/extra_class_attendance.dto'
+import ExtraClassAttendanceTransformer from '#transformers/extra_class_attendance_transformer'
 
 export default class ListExtraClassAttendancesController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
 
@@ -16,6 +16,8 @@ export default class ListExtraClassAttendancesController {
 
     const attendances = await query.paginate(page, limit)
 
-    return ExtraClassAttendanceDto.fromPaginator(attendances)
+    const items = attendances.all()
+    const metadata = attendances.getMeta()
+    return await serialize(ExtraClassAttendanceTransformer.paginate(items, metadata))
   }
 }

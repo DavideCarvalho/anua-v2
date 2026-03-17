@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Leaderboard from '#models/leaderboard'
 import LeaderboardEntry from '#models/leaderboard_entry'
-import LeaderboardEntryDto from '#models/dto/leaderboard_entry.dto'
 import AppException from '#exceptions/app_exception'
+import LeaderboardEntryTransformer from '#transformers/leaderboard_entry_transformer'
 
 export default class ListLeaderboardEntriesController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
 
@@ -24,6 +24,9 @@ export default class ListLeaderboardEntriesController {
       .orderBy('rank', 'asc')
       .paginate(page, limit)
 
-    return response.ok(LeaderboardEntryDto.fromPaginator(entries))
+    const items = entries.all()
+    const metadata = entries.getMeta()
+
+    return response.ok(await serialize(LeaderboardEntryTransformer.paginate(items, metadata)))
   }
 }

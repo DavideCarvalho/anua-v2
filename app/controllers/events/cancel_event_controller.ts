@@ -6,8 +6,8 @@ import EventParentalConsent from '#models/event_parental_consent'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import { DateTime } from 'luxon'
 import type StudentPayment from '#models/student_payment'
-import EventDto from '#models/dto/event.dto'
 import AppException from '#exceptions/app_exception'
+import EventTransformer from '#transformers/event_transformer'
 
 type CancelResult =
   | { type: 'not_found' }
@@ -16,7 +16,7 @@ type CancelResult =
   | { type: 'ok'; event: Event }
 
 export default class CancelEventController {
-  async handle({ params, response, auth, logger }: HttpContext) {
+  async handle({ params, response, auth, logger, serialize }: HttpContext) {
     const { id } = params
     const user = auth.user
 
@@ -105,7 +105,7 @@ export default class CancelEventController {
     await event.load('school')
     await event.load('eventAudiences')
 
-    return response.ok(new EventDto(event))
+    return response.ok(await serialize(EventTransformer.transform(event)))
   }
 
   private async markPaidPaymentForRefund(

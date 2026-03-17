@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Button } from '~/components/ui/button'
+import { centsToReaisNumber, reaisNumberToCents } from '~/lib/currency_input_adapter'
 import { formatCurrency } from '~/lib/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
@@ -135,8 +136,8 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
                     <CurrencyInput
-                      value={field.value}
-                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      value={reaisNumberToCents(field.value ?? 0)}
+                      onChange={(cents) => field.onChange(centsToReaisNumber(cents))}
                       onBlur={field.onBlur}
                       ref={field.ref}
                     />
@@ -214,8 +215,8 @@ export function EditPaymentModal({ payment, open, onOpenChange }: EditPaymentMod
                     <div className="flex items-center gap-3">
                       <FormControl>
                         <CurrencyInput
-                          value={field.value}
-                          onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                          value={reaisNumberToCents(field.value ?? 0)}
+                          onChange={(cents) => field.onChange(centsToReaisNumber(cents))}
                           onBlur={field.onBlur}
                           ref={field.ref}
                         />

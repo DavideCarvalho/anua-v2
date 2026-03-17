@@ -1,12 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentPayment from '#models/student_payment'
 import StudentHasResponsible from '#models/student_has_responsible'
-import {
-  StudentPaymentsResponseDto,
-  StudentPaymentDto,
-  PaymentsSummaryDto,
-  PaginationMetaDto,
-} from '#models/dto/student_payments_response.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class GetStudentPaymentsController {
@@ -57,30 +51,27 @@ export default class GetStudentPaymentsController {
       }
     })
 
-    const paymentsList = payments.all().map(
-      (p) =>
-        new StudentPaymentDto({
-          id: p.id,
-          type: p.type,
-          amount: Number(p.amount),
-          dueDate: p.dueDate,
-          paidAt: p.paidAt,
-          status: p.status,
-          paymentGateway: p.paymentGateway,
-          paymentGatewayId: p.paymentGatewayId,
-        })
-    )
+    const paymentsList = payments.all().map((p) => ({
+      id: p.id,
+      type: p.type,
+      amount: Number(p.amount),
+      dueDate: p.dueDate.toJSDate(),
+      paidAt: p.paidAt ? p.paidAt.toJSDate() : null,
+      status: p.status,
+      paymentGateway: p.paymentGateway,
+      paymentGatewayId: p.paymentGatewayId,
+    }))
 
     const paginationMeta = payments.getMeta()
-    const metaDto = new PaginationMetaDto({
+    const meta = {
       total: paginationMeta.total,
       perPage: paginationMeta.perPage,
       currentPage: paginationMeta.currentPage,
       lastPage: paginationMeta.lastPage,
       firstPage: paginationMeta.firstPage,
-    })
+    }
 
-    const summaryDto = new PaymentsSummaryDto({
+    const summary = {
       totalAmount,
       paidAmount,
       pendingAmount,
@@ -90,12 +81,12 @@ export default class GetStudentPaymentsController {
       overdueCount: allPayments.filter(
         (p) => p.status === 'PENDING' && new Date(p.dueDate.toString()) < today
       ).length,
-    })
+    }
 
-    return new StudentPaymentsResponseDto({
+    return {
       data: paymentsList,
-      meta: metaDto,
-      summary: summaryDto,
-    })
+      meta,
+      summary,
+    }
   }
 }

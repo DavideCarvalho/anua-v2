@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Leaderboard from '#models/leaderboard'
-import LeaderboardDto from '#models/dto/leaderboard.dto'
 import AppException from '#exceptions/app_exception'
+import LeaderboardTransformer from '#transformers/leaderboard_transformer'
 
 export default class ShowLeaderboardController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const leaderboard = await Leaderboard.query()
       .where('id', params.id)
       .preload('school')
@@ -19,6 +19,6 @@ export default class ShowLeaderboardController {
       throw AppException.notFound('Ranking não encontrado')
     }
 
-    return response.ok(new LeaderboardDto(leaderboard))
+    return response.ok(await serialize(LeaderboardTransformer.transform(leaderboard)))
   }
 }

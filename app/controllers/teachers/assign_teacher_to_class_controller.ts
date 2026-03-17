@@ -3,10 +3,10 @@ import Teacher from '#models/teacher'
 import TeacherHasClass from '#models/teacher_has_class'
 import { assignTeacherToClassValidator } from '#validators/teacher'
 import AppException from '#exceptions/app_exception'
-import TeacherHasClassDto from '#models/dto/teacher_has_class.dto'
+import TeacherHasClassTransformer from '#transformers/teacher_has_class_transformer'
 
 export default class AssignTeacherToClassController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const teacher = await Teacher.find(params.id)
 
     if (!teacher) {
@@ -25,6 +25,6 @@ export default class AssignTeacherToClassController {
 
     await teacherHasClass.load('class')
 
-    return response.created(new TeacherHasClassDto(teacherHasClass))
+    return response.created(await serialize(TeacherHasClassTransformer.transform(teacherHasClass)))
   }
 }

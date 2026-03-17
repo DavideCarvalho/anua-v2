@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import AppException from '#exceptions/app_exception'
+import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 
 export default class ShowCanteenPurchaseController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const { id } = params
 
     const purchase = await CanteenPurchase.query()
@@ -20,6 +20,6 @@ export default class ShowCanteenPurchaseController {
       throw AppException.notFound('Compra da cantina não encontrada')
     }
 
-    return response.ok(new CanteenPurchaseDto(purchase))
+    return response.ok(await serialize(CanteenPurchaseTransformer.transform(purchase)))
   }
 }

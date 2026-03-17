@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import TeacherHasClass from '#models/teacher_has_class'
-import OccurrenceTeacherClassDto from '#models/dto/occurrence_teacher_class.dto'
+import OccurrenceTeacherClassTransformer from '#transformers/occurrence_teacher_class_transformer'
 
 export default class ListOccurrenceTeacherClassesController {
-  async handle({ request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ request, response, selectedSchoolIds, serialize }: HttpContext) {
     const scopedSchoolIds = selectedSchoolIds ?? []
 
     const academicPeriodId = request.input('academicPeriodId') as string | undefined
@@ -35,7 +35,7 @@ export default class ListOccurrenceTeacherClassesController {
     const teacherClasses = await query
 
     return response.ok({
-      data: teacherClasses.map((teacherClass) => new OccurrenceTeacherClassDto(teacherClass)),
+      data: await serialize(OccurrenceTeacherClassTransformer.transform(teacherClasses)),
     })
   }
 }

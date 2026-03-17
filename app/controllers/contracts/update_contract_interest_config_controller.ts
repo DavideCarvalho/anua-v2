@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractInterestConfig from '#models/contract_interest_config'
 import { updateContractInterestConfigValidator } from '#validators/contract'
-import { ContractInterestConfigDto } from '#models/dto/contract_interest_config.dto'
+import ContractInterestConfigTransformer from '#transformers/contract_interest_config_transformer'
 
 export default class UpdateContractInterestConfigController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { contractId } = params
     const payload = await request.validateUsing(updateContractInterestConfigValidator)
 
@@ -15,7 +15,7 @@ export default class UpdateContractInterestConfigController {
     if (existingConfig) {
       existingConfig.merge(payload)
       await existingConfig.save()
-      return new ContractInterestConfigDto(existingConfig)
+      return serialize(ContractInterestConfigTransformer.transform(existingConfig))
     }
 
     const interestConfig = await ContractInterestConfig.create({
@@ -23,6 +23,6 @@ export default class UpdateContractInterestConfigController {
       ...payload,
     })
 
-    return new ContractInterestConfigDto(interestConfig)
+    return serialize(ContractInterestConfigTransformer.transform(interestConfig))
   }
 }

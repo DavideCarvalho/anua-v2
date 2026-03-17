@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Attendance from '#models/attendance'
-import AttendanceDto from '#models/dto/attendance.dto'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
 import { createAttendanceValidator } from '#validators/attendance'
 import { gamificationEventService } from '#services/gamification/gamification_event_service'
+import AttendanceTransformer from '#transformers/attendance_transformer'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
@@ -13,7 +13,7 @@ function mapStatus(validatorStatus: string): AttendanceStatus {
 }
 
 export default class CreateAttendanceController {
-  async handle({ request, response, logger }: HttpContext) {
+  async handle({ request, response, logger, serialize }: HttpContext) {
     const data = await request.validateUsing(createAttendanceValidator)
 
     // Create the attendance record for this calendar slot/date
@@ -48,6 +48,6 @@ export default class CreateAttendanceController {
         })
     }
 
-    return response.created(new AttendanceDto(attendance))
+    return response.created(await serialize(AttendanceTransformer.transform(attendance)))
   }
 }

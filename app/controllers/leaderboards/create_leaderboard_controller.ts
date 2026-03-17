@@ -1,8 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Leaderboard, { type LeaderboardType, type LeaderboardPeriod } from '#models/leaderboard'
-import LeaderboardDto from '#models/dto/leaderboard.dto'
 import { createLeaderboardValidator } from '#validators/gamification'
+import LeaderboardTransformer from '#transformers/leaderboard_transformer'
 
 // Map validator enum values to model enum values
 const typeMap: Record<string, LeaderboardType> = {
@@ -22,7 +22,7 @@ const periodMap: Record<string, LeaderboardPeriod> = {
 }
 
 export default class CreateLeaderboardController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createLeaderboardValidator)
 
     // Map validator fields to model fields
@@ -41,6 +41,6 @@ export default class CreateLeaderboardController {
 
     const leaderboard = await Leaderboard.create(leaderboardData)
 
-    return response.created(new LeaderboardDto(leaderboard))
+    return response.created(await serialize(LeaderboardTransformer.transform(leaderboard)))
   }
 }

@@ -1,16 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Subject from '#models/subject'
 import AppException from '#exceptions/app_exception'
-import SubjectDto from '#models/dto/subject.dto'
+import SubjectTransformer from '#transformers/subject_transformer'
 
 export default class ShowSubjectController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const subject = await Subject.query().where('id', params.id).preload('school').first()
 
     if (!subject) {
       throw AppException.notFound('Disciplina não encontrada')
     }
 
-    return response.ok(new SubjectDto(subject))
+    return response.ok(await serialize(SubjectTransformer.transform(subject)))
   }
 }

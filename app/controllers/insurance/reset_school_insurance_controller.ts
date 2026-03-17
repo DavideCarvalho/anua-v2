@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
-import InsuranceResetSchoolResponseDto from '#models/dto/insurance_reset_school_response.dto'
 import { resetSchoolInsuranceValidator } from '#validators/insurance'
 import AppException from '#exceptions/app_exception'
 
@@ -22,6 +21,6 @@ export default class ResetSchoolInsuranceController {
 
     await school.save()
 
-    return response.ok(new InsuranceResetSchoolResponseDto(school))
+    return response.ok({ id: school.id })
   }
 }

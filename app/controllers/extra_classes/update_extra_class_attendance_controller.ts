@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasExtraClassAttendance from '#models/student_has_extra_class_attendance'
-import StudentHasExtraClassAttendanceDto from '#models/dto/student_has_extra_class_attendance.dto'
+import StudentHasExtraClassAttendanceTransformer from '#transformers/student_has_extra_class_attendance_transformer'
 import { updateExtraClassAttendanceValidator } from '#validators/extra_class'
 import AppException from '#exceptions/app_exception'
 
 export default class UpdateExtraClassAttendanceController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(updateExtraClassAttendanceValidator)
 
     const studentAttendance = await StudentHasExtraClassAttendance.query()
@@ -25,6 +25,8 @@ export default class UpdateExtraClassAttendanceController {
     }
     await studentAttendance.save()
 
-    return response.ok(new StudentHasExtraClassAttendanceDto(studentAttendance))
+    return response.ok(
+      await serialize(StudentHasExtraClassAttendanceTransformer.transform(studentAttendance))
+    )
   }
 }

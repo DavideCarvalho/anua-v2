@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Teacher from '#models/teacher'
 import { updateTeacherValidator } from '#validators/teacher'
 import AppException from '#exceptions/app_exception'
-import TeacherDto from '#models/dto/teacher.dto'
+import TeacherTransformer from '#transformers/teacher_transformer'
 
 export default class UpdateTeacherController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const teacher = await Teacher.query()
       .where('id', params.id)
       .whereHas('teacherClasses', (teacherClassQuery) => {
@@ -40,6 +40,6 @@ export default class UpdateTeacherController {
 
     await teacher.load('user')
 
-    return response.ok(new TeacherDto(teacher))
+    return response.ok(await serialize(TeacherTransformer.transform(teacher)))
   }
 }

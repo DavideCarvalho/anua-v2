@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import PrintRequest from '#models/print_request'
-import PrintRequestDto from '#models/dto/print_request.dto'
 import { reviewPrintRequestValidator } from '#validators/print_request'
 import AppException from '#exceptions/app_exception'
+import PrintRequestTransformer from '#transformers/print_request_transformer'
 
 export default class ReviewPrintRequestController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(reviewPrintRequestValidator)
 
     const printRequest = await PrintRequest.find(params.id)
@@ -25,6 +25,6 @@ export default class ReviewPrintRequestController {
 
     await printRequest.save()
 
-    return response.ok(new PrintRequestDto(printRequest))
+    return response.ok(await serialize(PrintRequestTransformer.transform(printRequest)))
   }
 }

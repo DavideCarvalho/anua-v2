@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
-import StoreItemDto from '#models/dto/store_item.dto'
 import { updateStoreItemValidator } from '#validators/gamification'
 import AppException from '#exceptions/app_exception'
+import StoreItemTransformer from '#transformers/store_item_transformer'
 
 export default class UpdateProductController {
-  async handle({ storeOwnerStore, params, request, response }: HttpContext) {
+  async handle({ storeOwnerStore, params, request, response, serialize }: HttpContext) {
     const store = storeOwnerStore!
     const item = await StoreItem.query()
       .where('id', params.id)
@@ -43,6 +43,6 @@ export default class UpdateProductController {
 
     await item.save()
 
-    return response.ok(new StoreItemDto(item))
+    return response.ok(await serialize(StoreItemTransformer.transform(item)))
   }
 }

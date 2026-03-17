@@ -1,11 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance from '#models/student_has_attendance'
 import StudentHasResponsible from '#models/student_has_responsible'
-import {
-  StudentAttendanceResponseDto,
-  AttendanceRecordDto,
-  AttendanceSummaryDto,
-} from '#models/dto/student_attendance_response.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class GetStudentAttendanceController {
@@ -59,29 +54,26 @@ export default class GetStudentAttendanceController {
     const presentCount = (statsMap['PRESENT'] || 0) + (statsMap['LATE'] || 0)
     const attendanceRate = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0
 
-    const attendanceRecords = attendances.all().map(
-      (a) =>
-        new AttendanceRecordDto({
-          id: a.id,
-          date: a.attendance?.date?.toISO() || a.createdAt.toISO() || '',
-          status: a.status,
-          justification: a.justification,
-        })
-    )
+    const attendanceRecords = attendances.all().map((a) => ({
+      id: a.id,
+      date: a.attendance?.date?.toISO() || a.createdAt.toISO() || '',
+      status: a.status,
+      justification: a.justification,
+    }))
 
-    const summary = new AttendanceSummaryDto({
+    const summary = {
       totalClasses,
       presentCount: statsMap['PRESENT'] || 0,
       absentCount: statsMap['ABSENT'] || 0,
       lateCount: statsMap['LATE'] || 0,
       excusedCount: statsMap['EXCUSED'] || 0,
       attendanceRate,
-    })
+    }
 
-    return new StudentAttendanceResponseDto({
+    return {
       data: attendanceRecords,
       meta: attendances.getMeta(),
       summary,
-    })
+    }
   }
 }

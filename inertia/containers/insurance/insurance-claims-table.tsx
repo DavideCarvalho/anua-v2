@@ -143,7 +143,7 @@ function InsuranceClaimsTableContent() {
   const markPaidMutation = useMutation(api.api.v1.insurance.claims.markPaid.mutationOptions())
 
   const claims = data?.data || []
-  const meta = data?.meta
+  const meta = data?.metadata
 
   const handleApprove = (claimId: string) => {
     toast.promise(
@@ -351,16 +351,16 @@ function InsuranceClaimsTableContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage <= 1}
-                  onClick={() => setFilters({ page: meta.currentPage - 1 })}
+                  disabled={Number(meta.currentPage) <= 1}
+                  onClick={() => setFilters({ page: Number(meta.currentPage) - 1 })}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage >= meta.lastPage}
-                  onClick={() => setFilters({ page: meta.currentPage + 1 })}
+                  disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                  onClick={() => setFilters({ page: Number(meta.currentPage) + 1 })}
                 >
                   Próxima
                 </Button>

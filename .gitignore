@@ -23,6 +23,9 @@ logs/*
 # Dogfood artifacts
 dogfood-output/
 
+# Local data and cache
+data/
+
 # AdonisJS generated artifacts
 inertia/generated/
 

@@ -5,12 +5,12 @@ import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import SendEventInvitationsJob from '#jobs/events/send_event_invitations_job'
-import EventDto from '#models/dto/event.dto'
 import {
   EventAudienceValidationError,
   syncEventAudience,
 } from '#services/events/event_audience_service'
 import AppException from '#exceptions/app_exception'
+import EventTransformer from '#transformers/event_transformer'
 
 function hasExplicitTime(value: string) {
   return /[T\s]\d{2}:\d{2}/.test(value)
@@ -22,7 +22,7 @@ function combineDateAndTime(isoDate: string, time: string) {
 }
 
 export default class CreateEventController {
-  async handle({ request, response, auth, logger }: HttpContext) {
+  async handle({ request, response, auth, logger, serialize }: HttpContext) {
     const data = await request.validateUsing(createEventValidator)
     const user = auth.user!
     const hasAdditionalCosts = data.hasAdditionalCosts ?? false
@@ -137,7 +137,7 @@ export default class CreateEventController {
     await event.load('eventAudiences')
 
     if (!event.requiresParentalConsent) {
-      return response.created(new EventDto(event))
+      return response.created(await serialize(EventTransformer.transform(event)))
     }
 
     try {
@@ -150,6 +150,6 @@ export default class CreateEventController {
       logger.error({ error }, '[EVENT_CREATE] Failed to dispatch invitation job')
     }
 
-    return response.created(new EventDto(event))
+    return response.created(await serialize(EventTransformer.transform(event)))
   }
 }

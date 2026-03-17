@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
-import PurchaseRequestDto from '#models/dto/purchase_request.dto'
 import { createPurchaseRequestValidator } from '#validators/purchase_request'
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
+import PurchaseRequestTransformer from '#transformers/purchase_request_transformer'
 
 export default class CreatePurchaseRequestController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, serialize }: HttpContext) {
     const data = await request.validateUsing(createPurchaseRequestValidator)
 
     const purchaseRequest = await PurchaseRequest.create({
@@ -25,6 +25,6 @@ export default class CreatePurchaseRequestController {
 
     await purchaseRequest.load('requestingUser')
 
-    return response.created(new PurchaseRequestDto(purchaseRequest))
+    return response.created(await serialize(PurchaseRequestTransformer.transform(purchaseRequest)))
   }
 }

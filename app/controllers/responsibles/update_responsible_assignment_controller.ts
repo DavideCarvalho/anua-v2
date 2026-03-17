@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { updateResponsibleAssignmentValidator } from '#validators/responsible'
 import StudentHasResponsible from '#models/student_has_responsible'
-import { StudentHasResponsibleDto } from '#models/dto/student_has_responsible.dto'
+import StudentHasResponsibleTransformer from '#transformers/student_has_responsible_transformer'
 
 export default class UpdateResponsibleAssignmentController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(updateResponsibleAssignmentValidator)
 
@@ -20,6 +20,6 @@ export default class UpdateResponsibleAssignmentController {
       query.preload('user')
     })
 
-    return new StudentHasResponsibleDto(assignment)
+    return serialize(StudentHasResponsibleTransformer.transform(assignment))
   }
 }

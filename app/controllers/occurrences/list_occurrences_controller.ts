@@ -2,11 +2,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Occurrence from '#models/occurrence'
 import StudentHasResponsible from '#models/student_has_responsible'
-import OccurrenceSchoolListItemDto from '#models/dto/occurrence_school_list_item.dto'
 import { listOccurrencesValidator } from '#validators/occurrence'
+import OccurrenceSchoolListItemTransformer from '#transformers/occurrence_school_list_item_transformer'
 
 export default class ListOccurrencesController {
-  async handle({ request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ request, response, selectedSchoolIds, serialize }: HttpContext) {
     const scopedSchoolIds = selectedSchoolIds ?? []
 
     const payload = await request.validateUsing(listOccurrencesValidator)
@@ -109,20 +109,13 @@ export default class ListOccurrencesController {
       }
     }
 
-    return response.ok({
-      data: occurrences.all().map(
-        (occurrence) =>
-          new OccurrenceSchoolListItemDto({
-            occurrence,
-            studentName: occurrence.student?.user?.name || 'Aluno',
-            className: occurrence.teacherHasClass?.class?.name || '-',
-            teacherName: occurrence.teacherHasClass?.teacher?.user?.name || null,
-            subjectName: occurrence.teacherHasClass?.subject?.name || null,
-            acknowledgedCount: Number(occurrence.$extras.acknowledgements_count || 0),
-            totalResponsibles: responsiblesPerStudent.get(occurrence.studentId) || 0,
-          })
-      ),
-      meta: occurrences.getMeta(),
+    const items = occurrences.all().map((occurrence) => {
+      occurrence.$extras.total_responsibles = responsiblesPerStudent.get(occurrence.studentId) || 0
+      return occurrence
     })
+
+    return response.ok(
+      await serialize(OccurrenceSchoolListItemTransformer.paginate(items, occurrences.getMeta()))
+    )
   }
 }

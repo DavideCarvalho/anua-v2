@@ -11,7 +11,6 @@ import db from '@adonisjs/lucid/services/db'
 import { updateCoursesValidator } from '#validators/academic_period'
 import AppException from '#exceptions/app_exception'
 import { dispatchEnrollmentPaymentUpdatesForLevelContracts } from '#services/payments/dispatch_enrollment_payment_updates_service'
-import AcademicPeriodCourseDto from '#models/dto/academic_period_course.dto'
 
 export default class UpdateAcademicPeriodCoursesController {
   async handle({ params, request, response, auth, logger }: HttpContext) {
@@ -441,6 +440,6 @@ export default class UpdateAcademicPeriodCoursesController {
         .sort((a, b) => a.order - b.order),
     }))
 
-    return response.ok(AcademicPeriodCourseDto.fromArray(courses))
+    return response.ok(courses)
   }
 }

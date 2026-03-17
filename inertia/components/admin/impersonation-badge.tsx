@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Shield, Eye, RefreshCw, Check, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -7,10 +7,10 @@ import { Badge } from '../ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { Button } from '../ui/button'
 import { Label } from '../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Input } from '../ui/input'
 import { ScrollArea } from '../ui/scroll-area'
 import { SidebarMenu, SidebarMenuItem } from '../ui/sidebar'
+import { Combobox } from '../ui/combobox'
 import { cn } from '../../lib/utils'
 
 import { useMutation } from '@tanstack/react-query'
@@ -46,28 +46,46 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
 
   // State for user search and filters
   const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [roleFilter, setRoleFilter] = useState<string | undefined>()
   const [schoolFilter, setSchoolFilter] = useState<string | undefined>()
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>()
   const [page, setPage] = useState(1)
+
+  // Debounce search
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(searchInput)
+    }, 300)
+    return () => clearTimeout(timeout)
+  }, [searchInput])
 
   // Check if currently impersonating
   const { data: impersonationStatus } = useQuery(api.api.v1.impersonation.status.queryOptions({}))
 
   const hasActiveImpersonation = impersonationStatus?.isImpersonating ?? false
 
-  // Fetch users for impersonation
-  const { data: config, isLoading } = useQuery(
-    api.api.v1.impersonation.config.queryOptions({
+  // Fetch users for impersonation (school filter vai pro back; cargo filtra no front)
+  const { data: config, isLoading } = useQuery({
+    ...api.api.v1.impersonation.config.queryOptions({
       query: {
         search: search || undefined,
-        roleFilter: roleFilter === 'all' ? undefined : roleFilter,
         schoolFilter: schoolFilter === 'all' ? undefined : schoolFilter,
         page,
         limit: 200,
       },
-    })
-  )
+    }),
+    placeholderData: (prev) => prev,
+  })
+
+  // Filtro de cargo no frontend (não faz request)
+  const filteredUsers = (() => {
+    const users = config?.users ?? []
+    if (!roleFilter || roleFilter === 'all') return users
+    const roleName = config?.availableRoles?.find((r) => String(r.id) === String(roleFilter))?.name
+    if (!roleName) return users
+    return users.filter((u) => u.role === roleName)
+  })()
 
   // Mutations
   const setImpersonationMutation = useMutation(api.api.v1.impersonation.set.mutationOptions())
@@ -138,7 +156,7 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
     }
   }
 
-  const selectedUser = config?.users?.find((u) => u.id === selectedUserId)
+  const selectedUser = filteredUsers.find((u) => u.id === selectedUserId) ?? config?.users?.find((u) => u.id === selectedUserId)
 
   // Always show in admin context - this component is only used in admin layout
   // The user check is handled at the API level
@@ -205,9 +223,9 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
                   <Input
                     id="search"
                     placeholder="Nome ou email..."
-                    value={search}
+                    value={searchInput}
                     onChange={(e) => {
-                      setSearch(e.target.value)
+                      setSearchInput(e.target.value)
                       setPage(1)
                     }}
                     className="pl-9"
@@ -220,53 +238,42 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
                 {/* Filter by role */}
                 <div className="space-y-2">
                   <Label htmlFor="role-filter">Filtrar por cargo</Label>
-                  <Select
-                    value={roleFilter}
-                    onValueChange={(value, _event) => {
-                      if (value !== null) {
-                        setRoleFilter(value || undefined)
-                        setPage(1)
-                      }
+                  <Combobox
+                    options={[
+                      { value: 'all', label: 'Todos os cargos' },
+                      ...(config?.availableRoles?.map((role) => ({
+                        value: String(role.id),
+                        label: translateRole(role.name),
+                      })) || []),
+                    ]}
+                    value={roleFilter ? String(roleFilter) : 'all'}
+                    onValueChange={(value) => {
+                      setRoleFilter(value === 'all' ? undefined : value)
                     }}
-                  >
-                    <SelectTrigger id="role-filter">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os cargos</SelectItem>
-                      {config?.availableRoles?.map((role) => (
-                        <SelectItem key={role.id} value={role.id}>
-                          {translateRole(role.name)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Selecione..."
+                    searchPlaceholder="Buscar cargo..."
+                  />
                 </div>
 
                 {/* Filter by school */}
                 <div className="space-y-2">
                   <Label htmlFor="school-filter">Filtrar por escola</Label>
-                  <Select
-                    value={schoolFilter}
-                    onValueChange={(value, _event) => {
-                      if (value !== null) {
-                        setSchoolFilter(value || undefined)
-                        setPage(1)
-                      }
+                  <Combobox
+                    options={[
+                      { value: 'all', label: 'Todas as escolas' },
+                      ...(config?.availableSchools?.map((school) => ({
+                        value: String(school.id),
+                        label: school.name,
+                      })) || []),
+                    ]}
+                    value={schoolFilter ? String(schoolFilter) : 'all'}
+                    onValueChange={(value) => {
+                      setSchoolFilter(value === 'all' ? undefined : value)
+                      setPage(1)
                     }}
-                  >
-                    <SelectTrigger id="school-filter">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as escolas</SelectItem>
-                      {config?.availableSchools?.map((school) => (
-                        <SelectItem key={school.id} value={school.id}>
-                          {school.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Selecione..."
+                    searchPlaceholder="Buscar escola..."
+                  />
                 </div>
               </div>
 
@@ -278,13 +285,13 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
                     <div className="p-4 text-center text-sm text-muted-foreground">
                       Carregando...
                     </div>
-                  ) : !config?.users?.length ? (
+                  ) : !filteredUsers.length ? (
                     <div className="p-4 text-center text-sm text-muted-foreground">
                       Nenhum usuário encontrado
                     </div>
                   ) : (
                     <div className="p-2">
-                      {config.users.map((user) => (
+                      {filteredUsers.map((user) => (
                         <button
                           key={user.id}
                           type="button"

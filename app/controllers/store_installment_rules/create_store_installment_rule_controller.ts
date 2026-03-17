@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
 import StoreInstallmentRule from '#models/store_installment_rule'
 import { createStoreInstallmentRuleValidator } from '#validators/store'
-import StoreInstallmentRuleDto from '#models/dto/store_installment_rule.dto'
+import StoreInstallmentRuleTransformer from '#transformers/store_installment_rule_transformer'
 
 export default class CreateStoreInstallmentRuleController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createStoreInstallmentRuleValidator)
 
     await Store.query().where('id', data.storeId).whereNull('deletedAt').firstOrFail()
@@ -15,6 +15,6 @@ export default class CreateStoreInstallmentRuleController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(new StoreInstallmentRuleDto(rule))
+    return response.created(await serialize(StoreInstallmentRuleTransformer.transform(rule)))
   }
 }

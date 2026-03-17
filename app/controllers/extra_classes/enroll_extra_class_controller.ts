@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import ExtraClass from '#models/extra_class'
-import StudentHasExtraClassDto from '#models/dto/student_has_extra_class.dto'
+import StudentHasExtraClassTransformer from '#transformers/student_has_extra_class_transformer'
 import StudentHasExtraClass from '#models/student_has_extra_class'
 import StudentPayment from '#models/student_payment'
 import AcademicPeriod from '#models/academic_period'
@@ -14,7 +14,7 @@ import AppException from '#exceptions/app_exception'
 
 export default class EnrollExtraClassController {
   async handle(ctx: HttpContext) {
-    const { params, request, response, logger } = ctx
+    const { params, request, response, logger, serialize } = ctx
     const data = await request.validateUsing(enrollExtraClassValidator)
 
     const extraClass = await ExtraClass.find(params.id)
@@ -123,7 +123,9 @@ export default class EnrollExtraClassController {
       await enrollment.load('student', (q) => q.preload('user'))
       await enrollment.load('extraClass')
 
-      return response.created(new StudentHasExtraClassDto(enrollment))
+      return response.created(
+        await serialize(StudentHasExtraClassTransformer.transform(enrollment))
+      )
     } catch (error) {
       await trx.rollback()
       throw error

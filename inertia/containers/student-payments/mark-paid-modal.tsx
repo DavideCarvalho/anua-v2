@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
+import { centsToReaisNumber, reaisNumberToCents } from '~/lib/currency_input_adapter'
 import { formatCurrency } from '~/lib/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
@@ -179,8 +180,8 @@ export function MarkPaidModal({ payment, open, onOpenChange }: MarkPaidModalProp
                   <FormLabel>Valor pago</FormLabel>
                   <FormControl>
                     <CurrencyInput
-                      value={field.value}
-                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      value={reaisNumberToCents(field.value ?? 0)}
+                      onChange={(cents) => field.onChange(centsToReaisNumber(cents))}
                       onBlur={field.onBlur}
                       ref={field.ref}
                     />

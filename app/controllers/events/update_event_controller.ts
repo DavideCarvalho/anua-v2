@@ -7,7 +7,6 @@ import EventStudentPayment from '#models/event_student_payment'
 import { updateEventValidator } from '#validators/event'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
-import EventDto from '#models/dto/event.dto'
 import SendEventInvitationsJob from '#jobs/events/send_event_invitations_job'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import {
@@ -18,6 +17,7 @@ import {
 } from '#services/events/event_audience_service'
 import AppException from '#exceptions/app_exception'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import EventTransformer from '#transformers/event_transformer'
 
 function hasExplicitTime(value: string) {
   return /[T\s]\d{2}:\d{2}/.test(value)
@@ -29,7 +29,15 @@ function combineDateAndTime(isoDate: string, time: string) {
 }
 
 export default class UpdateEventController {
-  async handle({ params, request, response, selectedSchoolIds, auth, logger }: HttpContext) {
+  async handle({
+    params,
+    request,
+    response,
+    selectedSchoolIds,
+    auth,
+    logger,
+    serialize,
+  }: HttpContext) {
     const { id } = params
     const data = await request.validateUsing(updateEventValidator)
     const user = auth.user
@@ -375,7 +383,7 @@ export default class UpdateEventController {
     await event.load('school')
     await event.load('eventAudiences')
 
-    return response.ok(new EventDto(event))
+    return response.ok(await serialize(EventTransformer.transform(event)))
   }
 
   private async getAudienceStudentIds(

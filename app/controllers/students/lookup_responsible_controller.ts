@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Role from '#models/role'
-import UserDto from '#models/dto/user.dto'
+import UserTransformer from '#transformers/user_transformer'
 import AppException from '#exceptions/app_exception'
 import { lookupResponsibleValidator } from '#validators/student'
 
 export default class LookupResponsibleController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const { documentNumber, schoolId } = await request.validateUsing(lookupResponsibleValidator)
 
     const cleanedDocument = documentNumber.replace(/\D/g, '')
@@ -27,6 +27,6 @@ export default class LookupResponsibleController {
       throw AppException.notFound('Responsável não encontrado')
     }
 
-    return response.ok(new UserDto(user))
+    return response.ok(await serialize(UserTransformer.transform(user)))
   }
 }

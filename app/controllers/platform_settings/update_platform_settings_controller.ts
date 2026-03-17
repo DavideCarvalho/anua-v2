@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import PlatformSettings from '#models/platform_settings'
-import PlatformSettingsDto from '#models/dto/platform_settings.dto'
 import { updatePlatformSettingsValidator } from '#validators/subscription'
+import PlatformSettingsTransformer from '#transformers/platform_settings_transformer'
 
 export default class UpdatePlatformSettingsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const data = await request.validateUsing(updatePlatformSettingsValidator)
 
     let settings = await PlatformSettings.first()
@@ -22,7 +22,7 @@ export default class UpdatePlatformSettingsController {
         )
       })
 
-      return new PlatformSettingsDto(settings)
+      return serialize(PlatformSettingsTransformer.transform(settings))
     }
 
     settings = await db.transaction(async (trx) => {
@@ -42,6 +42,6 @@ export default class UpdatePlatformSettingsController {
       return settings!
     })
 
-    return new PlatformSettingsDto(settings)
+    return serialize(PlatformSettingsTransformer.transform(settings))
   }
 }

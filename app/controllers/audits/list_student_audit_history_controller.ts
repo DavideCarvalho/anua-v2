@@ -3,10 +3,10 @@ import db from '@adonisjs/lucid/services/db'
 import StudentPayment from '#models/student_payment'
 import StudentHasLevel from '#models/student_has_level'
 import Invoice from '#models/invoice'
-import AuditDto from '#models/dto/audit.dto'
+import AuditTransformer from '#transformers/audit_transformer'
 
 export default class ListStudentAuditHistoryController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const { studentId } = params
 
     // Get all entity IDs related to this student
@@ -58,6 +58,6 @@ export default class ListStudentAuditHistoryController {
 
     const audits = await query
 
-    return AuditDto.fromArray(audits)
+    return serialize(AuditTransformer.transform(audits))
   }
 }

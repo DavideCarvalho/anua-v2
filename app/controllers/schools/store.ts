@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import School from '#models/school'
-import SchoolDto from '#models/dto/school.dto'
 import { createSchoolValidator } from '#validators/school'
 import AppException from '#exceptions/app_exception'
+import SchoolTransformer from '#transformers/school_transformer'
 
 export default class StoreSchoolController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createSchoolValidator)
 
     // Verifica se slug já existe
@@ -43,6 +43,6 @@ export default class StoreSchoolController {
       return newSchool
     })
 
-    return response.created(new SchoolDto(school))
+    return response.created(await serialize(SchoolTransformer.transform(school)))
   }
 }

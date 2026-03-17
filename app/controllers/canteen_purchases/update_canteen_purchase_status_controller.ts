@@ -1,15 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import CanteenPurchase from '#models/canteen_purchase'
-import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { updateCanteenPurchaseStatusValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 
 export default class UpdateCanteenPurchaseStatusController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(updateCanteenPurchaseStatusValidator)
 
@@ -84,6 +84,6 @@ export default class UpdateCanteenPurchaseStatusController {
     await purchase.load('canteen')
     await purchase.load('itemsPurchased')
 
-    return response.ok(new CanteenPurchaseDto(purchase))
+    return response.ok(await serialize(CanteenPurchaseTransformer.transform(purchase)))
   }
 }

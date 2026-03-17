@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import { centsToReaisString, reaisStringToCents } from '~/lib/currency_input_adapter'
 
 type ProductsResponse = Awaited<Route.Response<'api.v1.store_owner.products.index'>>
 type Product = ProductsResponse['data'][number]
@@ -45,7 +46,7 @@ const CATEGORIES = [
 export function EditProductModal({ product, open, onOpenChange, onSuccess }: Props) {
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
-  const [price, setPrice] = useState(String(product.price / 100))
+  const [price, setPrice] = useState(centsToReaisString(product.price))
   const [category, setCategory] = useState(product.category)
   const [totalStock, setTotalStock] = useState(
     product.totalStock !== null ? String(product.totalStock) : ''
@@ -57,7 +58,7 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
   useEffect(() => {
     setName(product.name)
     setDescription(product.description ?? '')
-    setPrice(String(product.price / 100))
+    setPrice(centsToReaisString(product.price))
     setCategory(product.category)
     setTotalStock(product.totalStock !== null ? String(product.totalStock) : '')
   }, [product])
@@ -70,7 +71,7 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
         body: {
           name,
           description: description || undefined,
-          price: Math.round(Number(price) * 100),
+          price: reaisStringToCents(price),
           category,
           totalStock: totalStock ? Number(totalStock) : undefined,
         },
@@ -105,7 +106,11 @@ export function EditProductModal({ product, open, onOpenChange, onSuccess }: Pro
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-price">Preço</Label>
-              <CurrencyInput id="edit-price" value={price} onChange={setPrice} />
+              <CurrencyInput
+                id="edit-price"
+                value={reaisStringToCents(price)}
+                onChange={(cents) => setPrice(String(cents / 100))}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-category">Categoria</Label>

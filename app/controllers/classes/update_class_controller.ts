@@ -3,13 +3,13 @@ import db from '@adonisjs/lucid/services/db'
 import Class_ from '#models/class'
 import TeacherHasClass from '#models/teacher_has_class'
 import Calendar from '#models/calendar'
-import ClassDto from '#models/dto/class.dto'
+import ClassTransformer from '#transformers/class_transformer'
 import { updateClassValidator } from '#validators/class'
 import AppException from '#exceptions/app_exception'
 import { v7 as uuidv7 } from 'uuid'
 
 export default class UpdateClassController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const classEntity = await Class_.query()
       .where('id', params.id)
       .whereIn('schoolId', selectedSchoolIds ?? [])
@@ -125,6 +125,6 @@ export default class UpdateClassController {
       return classEntity
     })
 
-    return response.ok(new ClassDto(updatedClass))
+    return response.ok(await serialize(ClassTransformer.transform(updatedClass)))
   }
 }

@@ -4,13 +4,13 @@ import db from '@adonisjs/lucid/services/db'
 import ExtraClass from '#models/extra_class'
 import ExtraClassSchedule from '#models/extra_class_schedule'
 import ExtraClassAttendance from '#models/extra_class_attendance'
-import ExtraClassAttendanceDto from '#models/dto/extra_class_attendance.dto'
+import ExtraClassAttendanceTransformer from '#transformers/extra_class_attendance_transformer'
 import StudentHasExtraClassAttendance from '#models/student_has_extra_class_attendance'
 import { createExtraClassAttendanceValidator } from '#validators/extra_class'
 import AppException from '#exceptions/app_exception'
 
 export default class CreateExtraClassAttendanceController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createExtraClassAttendanceValidator)
 
     const extraClass = await ExtraClass.find(params.id)
@@ -62,7 +62,9 @@ export default class CreateExtraClassAttendanceController {
         q.preload('student', (sq) => sq.preload('user'))
       })
 
-      return response.created(new ExtraClassAttendanceDto(attendance))
+      return response.created(
+        await serialize(ExtraClassAttendanceTransformer.transform(attendance))
+      )
     } catch (error) {
       await trx.rollback()
       throw error

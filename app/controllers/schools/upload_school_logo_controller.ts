@@ -10,7 +10,6 @@ import {
   ALLOWED_IMAGE_EXTENSIONS,
   ALLOWED_IMAGE_TYPES,
 } from '#lib/file_security'
-import SchoolLogoUploadResponseDto from '#models/dto/school_logo_upload_response.dto'
 import AppException from '#exceptions/app_exception'
 
 export default class UploadSchoolLogoController {
@@ -89,6 +88,6 @@ export default class UploadSchoolLogoController {
     school.logoUrl = url
     await school.save()
 
-    return response.ok(new SchoolLogoUploadResponseDto(school.logoUrl))
+    return response.ok({ url: school.logoUrl })
   }
 }

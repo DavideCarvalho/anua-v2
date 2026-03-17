@@ -21,6 +21,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '~/lib/api'
+import { reaisStringToCents } from '~/lib/currency_input_adapter'
 
 interface Props {
   storeId: string
@@ -48,7 +49,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [price, setPrice] = useState('')
+  const [price, setPrice] = useState('0')
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]['value']>('OTHER')
   const [totalStock, setTotalStock] = useState('')
 
@@ -57,7 +58,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
   function resetForm() {
     setName('')
     setDescription('')
-    setPrice('')
+    setPrice('0')
     setCategory('OTHER')
     setTotalStock('')
   }
@@ -70,7 +71,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
           storeId,
           name,
           description: description || undefined,
-          price: Math.round(Number(price) * 100),
+          price: reaisStringToCents(price),
           category,
           paymentMode: 'MONEY_ONLY',
           totalStock: totalStock ? Number(totalStock) : undefined,
@@ -113,7 +114,11 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="create-price">Preço</Label>
-              <CurrencyInput id="create-price" value={price} onChange={setPrice} />
+              <CurrencyInput
+                id="create-price"
+                value={reaisStringToCents(price)}
+                onChange={(cents) => setPrice(String(cents / 100))}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-category">Categoria</Label>

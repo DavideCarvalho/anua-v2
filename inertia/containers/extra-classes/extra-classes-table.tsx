@@ -120,7 +120,7 @@ export function ExtraClassesTable({
   }
 
   const rows = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   return (
     <Card>
@@ -243,7 +243,7 @@ export function ExtraClassesTable({
               </Table>
             </div>
 
-            {meta && meta.lastPage > 1 && (
+            {meta && Number(meta.lastPage) > 1 && (
               <div className="flex items-center justify-between mt-4">
                 <p className="text-sm text-muted-foreground">
                   Pagina {meta.currentPage} de {meta.lastPage}
@@ -252,16 +252,16 @@ export function ExtraClassesTable({
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={meta.currentPage <= 1}
-                    onClick={() => setFilters({ page: meta.currentPage - 1 })}
+                    disabled={Number(meta.currentPage) <= 1}
+                    onClick={() => setFilters({ page: Number(meta.currentPage) - 1 })}
                   >
                     Anterior
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={meta.currentPage >= meta.lastPage}
-                    onClick={() => setFilters({ page: meta.currentPage + 1 })}
+                    disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                    onClick={() => setFilters({ page: Number(meta.currentPage) + 1 })}
                   >
                     Proxima
                   </Button>

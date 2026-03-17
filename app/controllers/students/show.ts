@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Student from '#models/student'
-import StudentDto from '#models/dto/student.dto'
+import StudentTransformer from '#transformers/student_transformer'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowStudentController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const student = await Student.query()
       .where('id', params.id)
       .preload('user', (userQuery) => {
@@ -38,6 +38,6 @@ export default class ShowStudentController {
       throw AppException.notFound('Aluno não encontrado')
     }
 
-    return response.ok(new StudentDto(student))
+    return response.ok(await serialize(StudentTransformer.transform(student)))
   }
 }

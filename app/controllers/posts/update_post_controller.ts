@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Post from '#models/post'
-import PostDto from '#models/dto/post.dto'
 import { updatePostValidator } from '#validators/post'
 import AppException from '#exceptions/app_exception'
+import PostTransformer from '#transformers/post_transformer'
 
 export default class UpdatePostController {
-  async handle({ params, request, response, auth }: HttpContext) {
+  async handle({ params, request, response, auth, serialize }: HttpContext) {
     const { id } = params
     const data = await request.validateUsing(updatePostValidator)
 
@@ -33,6 +33,6 @@ export default class UpdatePostController {
     await updatedPost.load('user')
     await updatedPost.load('school')
 
-    return response.ok(new PostDto(updatedPost))
+    return response.ok(await serialize(PostTransformer.transform(updatedPost)))
   }
 }

@@ -2,12 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Canteen from '#models/canteen'
 import CanteenMeal from '#models/canteen_meal'
-import CanteenMealDto from '#models/dto/canteen_meal.dto'
 import { createCanteenMealValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenMealTransformer from '#transformers/canteen_meal_transformer'
 
 export default class CreateCanteenMealController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createCanteenMealValidator)
 
     const canteen = await Canteen.find(payload.canteenId)
@@ -41,7 +41,7 @@ export default class CreateCanteenMealController {
       await existingMeal.save()
       await existingMeal.load('canteen')
 
-      return response.ok(new CanteenMealDto(existingMeal))
+      return response.ok(await serialize(CanteenMealTransformer.transform(existingMeal)))
     }
 
     const meal = await CanteenMeal.create({
@@ -57,6 +57,6 @@ export default class CreateCanteenMealController {
 
     await meal.load('canteen')
 
-    return response.created(new CanteenMealDto(meal))
+    return response.created(await serialize(CanteenMealTransformer.transform(meal)))
   }
 }

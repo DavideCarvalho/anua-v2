@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { loginValidator } from '#validators/auth'
-import UserDto from '#models/dto/user.dto'
 import AppException from '#exceptions/app_exception'
+import UserTransformer from '#transformers/user_transformer'
 
 export default class LoginController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const { email } = await request.validateUsing(loginValidator)
 
     const user = await User.findBy('email', email)
@@ -16,6 +16,6 @@ export default class LoginController {
 
     // await auth.use('web').login(user)
 
-    return response.ok(new UserDto(user))
+    return response.ok(await serialize(UserTransformer.transform(user)))
   }
 }

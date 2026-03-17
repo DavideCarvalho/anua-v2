@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import School from '#models/school'
-import SchoolDto from '#models/dto/school.dto'
 import { updateSchoolValidator } from '#validators/school'
 import AppException from '#exceptions/app_exception'
+import SchoolTransformer from '#transformers/school_transformer'
 
 export default class UpdateSchoolController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const school = await School.query()
       .where('id', params.id)
       .whereIn('id', selectedSchoolIds ?? [])
@@ -82,6 +82,6 @@ export default class UpdateSchoolController {
       return school
     })
 
-    return response.ok(new SchoolDto(updatedSchool))
+    return response.ok(await serialize(SchoolTransformer.transform(updatedSchool)))
   }
 }

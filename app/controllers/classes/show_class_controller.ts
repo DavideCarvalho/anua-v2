@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
-import ClassDetailDto from '#models/dto/class_detail.dto'
+import ClassTransformer from '#transformers/class_transformer'
 import AppException from '#exceptions/app_exception'
 
 export default class ShowClassController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const classEntity = await Class_.query()
       .where('id', params.id)
       .preload('level')
@@ -23,6 +23,6 @@ export default class ShowClassController {
       throw AppException.notFound('Turma não encontrada')
     }
 
-    return new ClassDetailDto(classEntity)
+    return await serialize(ClassTransformer.transform(classEntity))
   }
 }

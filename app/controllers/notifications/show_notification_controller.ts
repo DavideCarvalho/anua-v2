@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Notification from '#models/notification'
-import NotificationDto from '#models/dto/notification.dto'
 import AppException from '#exceptions/app_exception'
+import NotificationTransformer from '#transformers/notification_transformer'
 
 export default class ShowNotificationController {
-  async handle({ params, auth, effectiveUser }: HttpContext) {
+  async handle({ params, auth, effectiveUser, serialize }: HttpContext) {
     const { id } = params
 
     const user = effectiveUser ?? auth.user!
@@ -14,6 +14,6 @@ export default class ShowNotificationController {
       throw AppException.notFound('Notificação não encontrada')
     }
 
-    return new NotificationDto(notification)
+    return serialize(NotificationTransformer.transform(notification))
   }
 }

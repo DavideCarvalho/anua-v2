@@ -8,10 +8,10 @@ export default class CourseHasAcademicPeriodTransformer extends BaseTransformer<
   toObject() {
     return {
       ...this.pick(this.resource, ['id', 'courseId', 'academicPeriodId', 'createdAt', 'updatedAt']),
-      course: CourseTransformer.transform(this.whenLoaded(this.resource.course))?.depth(2),
+      course: CourseTransformer.transform(this.whenLoaded(this.resource.course))?.depth(6),
       academicPeriod: AcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.academicPeriod)
-      ),
+      )?.depth(6),
       levelAssignments: LevelAssignedToCourseHasAcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.levelAssignments)
       )?.depth(6),

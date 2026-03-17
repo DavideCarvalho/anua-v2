@@ -30,7 +30,7 @@ export default class ContractTransformer extends BaseTransformer<Contract> {
         'createdAt',
         'updatedAt',
       ]),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(6),
       contractDocuments: ContractDocumentTransformer.transform(
         this.whenLoaded(this.resource.contractDocuments)
       ),
@@ -46,6 +46,7 @@ export default class ContractTransformer extends BaseTransformer<Contract> {
       studentHasLevels: StudentHasLevelTransformer.transform(
         this.whenLoaded(this.resource.studentHasLevels)
       ),
+      amount: this.resource.ammount,
     }
   }
 }

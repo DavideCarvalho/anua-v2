@@ -1,13 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
-import {
-  StudentDocumentsResponseDto,
-  StudentDocumentDto,
-  DocumentTypeDto,
-  MissingDocumentDto,
-  DocumentsSummaryDto,
-} from '#models/dto/student_documents_response.dto'
 import AppException from '#exceptions/app_exception'
 
 interface DocumentRow {
@@ -125,51 +118,45 @@ export default class GetStudentDocumentsController {
     const missingRows = missingDocuments.rows as MissingDocumentRow[]
     const requiredMissing = missingRows.filter((d) => d.required).length
 
-    const documentsList = (documents.rows as DocumentRow[]).map(
-      (row) =>
-        new StudentDocumentDto({
-          id: row.id,
-          fileName: row.fileName,
-          fileUrl: row.fileUrl,
-          mimeType: row.mimeType,
-          size: Number(row.size),
-          status: row.status,
-          rejectionReason: row.rejectionReason,
-          reviewedAt: row.reviewedAt,
-          createdAt: row.createdAt,
-          documentType: new DocumentTypeDto({
-            id: row.contractDocumentId,
-            name: row.documentTypeName,
-            description: row.documentTypeDescription,
-            isRequired: row.required,
-          }),
-          reviewerName: row.reviewerName,
-        })
-    )
+    const documentsList = (documents.rows as DocumentRow[]).map((row) => ({
+      id: row.id,
+      fileName: row.fileName,
+      fileUrl: row.fileUrl,
+      mimeType: row.mimeType,
+      size: Number(row.size),
+      status: row.status,
+      rejectionReason: row.rejectionReason,
+      reviewedAt: row.reviewedAt ? new Date(row.reviewedAt) : null,
+      createdAt: new Date(row.createdAt),
+      documentType: {
+        id: row.contractDocumentId,
+        name: row.documentTypeName,
+        description: row.documentTypeDescription,
+        isRequired: row.required,
+      },
+      reviewerName: row.reviewerName,
+    }))
 
-    const missingDocumentsList = missingRows.map(
-      (row) =>
-        new MissingDocumentDto({
-          id: row.id,
-          name: row.name,
-          description: row.description,
-          isRequired: row.required,
-        })
-    )
+    const missingDocumentsList = missingRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      isRequired: row.required,
+    }))
 
     const summaryRow = summary.rows[0] as SummaryRow | undefined
-    const summaryData = new DocumentsSummaryDto({
+    const summaryData = {
       total: Number(summaryRow?.total || 0),
       pending: Number(summaryRow?.pending || 0),
       approved: Number(summaryRow?.approved || 0),
       rejected: Number(summaryRow?.rejected || 0),
       requiredMissing,
-    })
+    }
 
-    return new StudentDocumentsResponseDto({
+    return {
       documents: documentsList,
       missingDocuments: missingDocumentsList,
       summary: summaryData,
-    })
+    }
   }
 }

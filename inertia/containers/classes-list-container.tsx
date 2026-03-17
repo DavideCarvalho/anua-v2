@@ -194,7 +194,7 @@ function ClassesListContent() {
   }
 
   const classes = (data?.data ?? []) as ClassItem[]
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   return (
     <div className="space-y-4">
@@ -309,7 +309,7 @@ function ClassesListContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page >= meta.lastPage}
+                  disabled={page >= Number(meta.lastPage)}
                   onClick={() => setFilters({ page: page + 1 })}
                 >
                   <ChevronRight className="h-4 w-4" />

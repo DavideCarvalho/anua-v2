@@ -646,7 +646,7 @@ export default function OcorrenciasPage() {
 
   const rows = data?.data ?? []
 
-  const meta = data?.meta
+  const meta = data?.metadata
 
   const handleSort = (column: 'date' | 'student' | 'class' | 'type') => {
     if (orderBy === column) {
@@ -806,7 +806,9 @@ export default function OcorrenciasPage() {
           <CardHeader>
             <CardTitle>Lista de registros diarios</CardTitle>
             <CardDescription>
-              {meta ? `${meta.total} registro${meta.total > 1 ? 's' : ''}` : 'Carregando...'}
+              {meta
+                ? `${meta.total} registro${Number(meta.total) > 1 ? 's' : ''}`
+                : 'Carregando...'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -921,7 +923,7 @@ export default function OcorrenciasPage() {
                   </Table>
                 </div>
 
-                {meta && meta.lastPage > 1 && (
+                {meta && Number(meta.lastPage) > 1 && (
                   <div className="mt-4 flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
                       Pagina {meta.currentPage} de {meta.lastPage}
@@ -930,16 +932,18 @@ export default function OcorrenciasPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={meta.currentPage <= 1}
-                        onClick={() => void setFilters({ page: Math.max(1, meta.currentPage - 1) })}
+                        disabled={Number(meta.currentPage) <= 1}
+                        onClick={() =>
+                          void setFilters({ page: Math.max(1, Number(meta.currentPage) - 1) })
+                        }
                       >
                         Anterior
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={meta.currentPage >= meta.lastPage}
-                        onClick={() => void setFilters({ page: meta.currentPage + 1 })}
+                        disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                        onClick={() => void setFilters({ page: Number(meta.currentPage) + 1 })}
                       >
                         Proxima
                       </Button>

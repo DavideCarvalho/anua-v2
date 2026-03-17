@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Attendance from '#models/attendance'
-import AttendanceDto from '#models/dto/attendance.dto'
 import AppException from '#exceptions/app_exception'
+import AttendanceTransformer from '#transformers/attendance_transformer'
 
 export default class ShowAttendanceController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const attendance = await Attendance.query()
       .where('id', params.id)
       .preload('calendarSlot')
@@ -14,6 +14,6 @@ export default class ShowAttendanceController {
       throw AppException.notFound('Chamada não encontrada')
     }
 
-    return response.ok(new AttendanceDto(attendance))
+    return response.ok(await serialize(AttendanceTransformer.transform(attendance)))
   }
 }

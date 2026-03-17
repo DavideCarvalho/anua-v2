@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
-import StudentHasAssignmentDto from '#models/dto/student_has_assignment.dto'
 import { gradeSubmissionValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
 import { gamificationEventService } from '#services/gamification/gamification_event_service'
+import StudentHasAssignmentTransformer from '#transformers/student_has_assignment_transformer'
 
 export default class GradeSubmissionController {
-  async handle({ params, request, response, logger }: HttpContext) {
+  async handle({ params, request, response, logger, serialize }: HttpContext) {
     const { id, submissionId } = params
     const payload = await request.validateUsing(gradeSubmissionValidator)
 
@@ -48,6 +48,6 @@ export default class GradeSubmissionController {
         })
     }
 
-    return response.ok(new StudentHasAssignmentDto(submission))
+    return response.ok(await serialize(StudentHasAssignmentTransformer.transform(submission)))
   }
 }

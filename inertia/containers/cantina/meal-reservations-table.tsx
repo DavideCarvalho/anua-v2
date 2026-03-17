@@ -30,8 +30,7 @@ const statusConfig: Record<
   string,
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
-  PENDING: { label: 'Pendente', variant: 'secondary' },
-  CONFIRMED: { label: 'Confirmada', variant: 'default' },
+  RESERVED: { label: 'Reservada', variant: 'default' },
   SERVED: { label: 'Entregue', variant: 'outline' },
   CANCELLED: { label: 'Cancelada', variant: 'destructive' },
 }
@@ -108,7 +107,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
           </TableHeader>
           <TableBody>
             {reservations.map((reservation) => {
-              const config = statusConfig[reservation.status] || statusConfig.PENDING
+              const config = statusConfig[reservation.status] || statusConfig.RESERVED
 
               return (
                 <TableRow key={reservation.id}>
@@ -134,7 +133,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      {reservation.status === 'PENDING' && (
+                      {reservation.status === 'RESERVED' && (
                         <>
                           <Button
                             size="sm"
@@ -143,7 +142,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                               updateStatusMutation.mutate(
                                 {
                                   params: { id: reservation.id },
-                                  body: { status: 'CONFIRMED' },
+                                  body: { status: 'SERVED' },
                                 },
                                 {
                                   onSuccess: () =>
@@ -153,7 +152,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                                 }
                               )
                             }
-                            title="Confirmar"
+                            title="Entregar"
                           >
                             <Check className="h-4 w-4 text-green-600" />
                           </Button>
@@ -176,28 +175,6 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                             <X className="h-4 w-4 text-red-600" />
                           </Button>
                         </>
-                      )}
-                      {reservation.status === 'CONFIRMED' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            updateStatusMutation.mutate(
-                              {
-                                params: { id: reservation.id },
-                                body: { status: 'SERVED' },
-                              },
-                              {
-                                onSuccess: () =>
-                                  queryClient.invalidateQueries({
-                                    queryKey: ['canteen-meal-reservations'],
-                                  }),
-                              }
-                            )
-                          }
-                        >
-                          Entregar
-                        </Button>
                       )}
                     </div>
                   </TableCell>

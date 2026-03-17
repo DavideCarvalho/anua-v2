@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import { createStudentBalanceTransactionValidator } from '#validators/student_balance_transaction'
-import StudentBalanceTransactionDto from '#models/dto/student_balance_transaction.dto'
+import StudentBalanceTransactionTransformer from '#transformers/student_balance_transaction_transformer'
 
 export default class CreateStudentBalanceTransactionController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createStudentBalanceTransactionValidator)
 
     // Get the current balance from the latest transaction for this student
@@ -41,6 +41,8 @@ export default class CreateStudentBalanceTransactionController {
 
     await transaction.load('student')
 
-    return response.created(new StudentBalanceTransactionDto(transaction))
+    return response.created(
+      await serialize(StudentBalanceTransactionTransformer.transform(transaction))
+    )
   }
 }

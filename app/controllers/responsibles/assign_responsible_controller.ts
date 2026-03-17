@@ -3,11 +3,11 @@ import { assignResponsibleValidator } from '#validators/responsible'
 import StudentHasResponsible from '#models/student_has_responsible'
 import User from '#models/user'
 import Student from '#models/student'
-import { StudentHasResponsibleDto } from '#models/dto/student_has_responsible.dto'
 import AppException from '#exceptions/app_exception'
+import StudentHasResponsibleTransformer from '#transformers/student_has_responsible_transformer'
 
 export default class AssignResponsibleController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(assignResponsibleValidator)
 
     // Verificar se o estudante existe
@@ -40,6 +40,6 @@ export default class AssignResponsibleController {
       query.preload('user')
     })
 
-    return new StudentHasResponsibleDto(assignment)
+    return serialize(StudentHasResponsibleTransformer.transform(assignment))
   }
 }

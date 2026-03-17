@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Contract from '#models/contract'
-import { ContractDto } from '#models/dto/contract.dto'
 import AppException from '#exceptions/app_exception'
+import ContractTransformer from '#transformers/contract_transformer'
 
 export default class ShowContractController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const { id } = params
 
     const contract = await Contract.find(id)
@@ -19,6 +19,6 @@ export default class ShowContractController {
     await contract.load('earlyDiscounts')
     await contract.load('contractDocuments')
 
-    return new ContractDto(contract)
+    return serialize(ContractTransformer.transform(contract))
   }
 }

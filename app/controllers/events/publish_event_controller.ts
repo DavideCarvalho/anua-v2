@@ -2,8 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import db from '@adonisjs/lucid/services/db'
 import SendEventInvitationsJob from '#jobs/events/send_event_invitations_job'
-import EventDto from '#models/dto/event.dto'
 import AppException from '#exceptions/app_exception'
+import EventTransformer from '#transformers/event_transformer'
 
 type PublishResult =
   | { type: 'not_found' }
@@ -11,7 +11,7 @@ type PublishResult =
   | { type: 'ok'; event: Event }
 
 export default class PublishEventController {
-  async handle({ params, response, auth, logger }: HttpContext) {
+  async handle({ params, response, auth, logger, serialize }: HttpContext) {
     const { id } = params
     const user = auth.user
 
@@ -49,7 +49,7 @@ export default class PublishEventController {
     await event.load('eventAudiences')
 
     if (!event.requiresParentalConsent) {
-      return response.ok(new EventDto(event))
+      return response.ok(await serialize(EventTransformer.transform(event)))
     }
 
     try {
@@ -62,6 +62,6 @@ export default class PublishEventController {
       logger.error({ error }, '[EVENT_PUBLISH] Failed to dispatch invitation job')
     }
 
-    return response.ok(new EventDto(event))
+    return response.ok(await serialize(EventTransformer.transform(event)))
   }
 }

@@ -2,12 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
 import StudentHasAssignment from '#models/student_has_assignment'
-import StudentHasAssignmentDto from '#models/dto/student_has_assignment.dto'
 import { submitAssignmentValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
+import StudentHasAssignmentTransformer from '#transformers/student_has_assignment_transformer'
 
 export default class SubmitAssignmentController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(submitAssignmentValidator)
 
@@ -36,6 +36,6 @@ export default class SubmitAssignmentController {
     await submission.load('student')
     await submission.load('assignment')
 
-    return response.created(new StudentHasAssignmentDto(submission))
+    return response.created(await serialize(StudentHasAssignmentTransformer.transform(submission)))
   }
 }

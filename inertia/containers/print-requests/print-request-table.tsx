@@ -68,7 +68,7 @@ export function PrintRequestTable({
   )
 
   const rows = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   if (isLoading) {
     return (
@@ -183,22 +183,22 @@ export function PrintRequestTable({
           {meta && (
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-muted-foreground">
-                Página {meta.currentPage} de {meta.lastPage}
+                Página {Number(meta.currentPage)} de {Number(meta.lastPage)}
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage <= 1}
-                  onClick={() => setPage(meta.currentPage - 1)}
+                  disabled={Number(meta.currentPage) <= 1}
+                  onClick={() => setPage(Number(meta.currentPage) - 1)}
                 >
                   Anterior
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={meta.currentPage >= meta.lastPage}
-                  onClick={() => setPage(meta.currentPage + 1)}
+                  disabled={Number(meta.currentPage) >= Number(meta.lastPage)}
+                  onClick={() => setPage(Number(meta.currentPage) + 1)}
                 >
                   Próxima
                 </Button>

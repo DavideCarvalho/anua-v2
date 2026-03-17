@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
-import LevelDto from '#models/dto/level.dto'
 import { createLevelValidator } from '#validators/level'
+import LevelTransformer from '#transformers/level_transformer'
 
 export default class CreateLevelController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createLevelValidator)
 
     const level = await Level.create({
@@ -12,6 +12,6 @@ export default class CreateLevelController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(new LevelDto(level))
+    return response.created(await serialize(LevelTransformer.transform(level)))
   }
 }

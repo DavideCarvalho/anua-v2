@@ -31,6 +31,7 @@ export default class ExamTransformer extends BaseTransformer<Exam> {
         'createdAt',
         'updatedAt',
       ]),
+      scheduledDate: this.resource.examDate,
       gradesCount: Number(this.resource.$extras.gradesCount ?? 0),
       courseId:
         typeof this.resource.$extras.courseId === 'string' ? this.resource.$extras.courseId : null,

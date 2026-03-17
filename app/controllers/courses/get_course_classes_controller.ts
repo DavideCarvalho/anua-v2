@@ -4,7 +4,7 @@ import Class_ from '#models/class'
 import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
 import AppException from '#exceptions/app_exception'
-import CourseClassExpandedDto from '#models/dto/course_class_expanded.dto'
+import CourseClassExpandedTransformer from '#transformers/course_class_expanded_transformer'
 
 interface TeacherInfo {
   id: string
@@ -32,7 +32,7 @@ interface ClassExpanded {
 
 export default class GetCourseClassesController {
   async handle(ctx: HttpContext) {
-    const { auth, params, response } = ctx
+    const { auth, params, response, serialize } = ctx
     const user = ctx.effectiveUser ?? auth.user!
     const { courseId, academicPeriodId } = params
 
@@ -144,6 +144,6 @@ export default class GetCourseClassesController {
       })
     )
 
-    return response.ok(CourseClassExpandedDto.fromArray(classesExpanded))
+    return response.ok(await serialize(CourseClassExpandedTransformer.transform(classesExpanded)))
   }
 }

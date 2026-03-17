@@ -169,7 +169,7 @@ export default function CardapioPage() {
     setEditForm({
       name: meal.name,
       description: meal.description ?? '',
-      date: toDateInput(new Date(String(meal.date))),
+      date: toDateKey(meal.date),
       priceReais: (meal.price / 100).toFixed(2),
       maxReservations: meal.maxServings ? String(meal.maxServings) : '',
     })
@@ -448,6 +448,7 @@ function MealForm({
 }) {
   const [importOpen, setImportOpen] = useState(false)
   const [importSearch, setImportSearch] = useState('')
+  const [importSelected, setImportSelected] = useState<string | null>(null)
   const debouncedSearch = useDebounce(importSearch, 300)
 
   const { data: importData } = useQuery({
@@ -473,6 +474,7 @@ function MealForm({
       description: meal.description ?? '',
       priceReais: (meal.price / 100).toFixed(2),
     }))
+    setImportSelected(meal.name)
     setImportOpen(false)
     setImportSearch('')
   }
@@ -489,7 +491,11 @@ function MealForm({
                 role="combobox"
                 className="w-full justify-between font-normal"
               >
-                <span className="text-muted-foreground">Buscar por nome...</span>
+                {importSelected ? (
+                  <span>{importSelected}</span>
+                ) : (
+                  <span className="text-muted-foreground">Buscar por nome...</span>
+                )}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>

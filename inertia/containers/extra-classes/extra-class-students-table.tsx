@@ -48,7 +48,6 @@ export function ExtraClassStudentsTable({
   open,
   onOpenChange,
 }: ExtraClassStudentsTableProps) {
-  const [page, setPage] = useState(1)
   const [cancelTarget, setCancelTarget] = useState<ExtraClassStudent | null>(null)
 
   const queryClient = useQueryClient()
@@ -80,7 +79,6 @@ export function ExtraClassStudentsTable({
   }
 
   const students = data?.data ?? []
-  const meta = data?.meta ?? null
 
   return (
     <>
@@ -140,32 +138,6 @@ export function ExtraClassStudentsTable({
                   ))}
                 </TableBody>
               </Table>
-
-              {meta && meta.lastPage > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Pagina {meta.currentPage} de {meta.lastPage}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => p - 1)}
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page >= meta.lastPage}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      Proxima
-                    </Button>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </DialogContent>

@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasLevel from '#models/student_has_level'
-import StudentHasLevelDto from '#models/dto/student_has_level.dto'
+import StudentHasLevelTransformer from '#transformers/student_has_level_transformer'
 import { updateEnrollmentValidator } from '#validators/student_enrollment'
 import UpdateEnrollmentPaymentsJob from '#jobs/payments/update_enrollment_payments_job'
 import db from '@adonisjs/lucid/services/db'
@@ -8,7 +8,7 @@ import IndividualDiscount from '#models/individual_discount'
 
 export default class UpdateEnrollmentController {
   async handle(ctx: HttpContext) {
-    const { params, request, response, logger } = ctx
+    const { params, request, response, logger, serialize } = ctx
     const { id: studentId, enrollmentId } = params
     const payload = await request.validateUsing(updateEnrollmentValidator)
 
@@ -99,6 +99,6 @@ export default class UpdateEnrollmentController {
       logger.error({ error }, '[UPDATE_ENROLLMENT] Failed to dispatch job')
     }
 
-    return response.ok(new StudentHasLevelDto(enrollment))
+    return response.ok(await serialize(StudentHasLevelTransformer.transform(enrollment)))
   }
 }

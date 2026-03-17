@@ -4,13 +4,13 @@ import db from '@adonisjs/lucid/services/db'
 import Assignment from '#models/assignment'
 import AuditLog from '#models/audit_log'
 import AssignmentHistory from '#models/assignment_history'
-import AssignmentDto from '#models/dto/assignment.dto'
 import { updateAssignmentValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
 import { buildFieldDiff } from '#services/history/build_field_diff'
+import AssignmentTransformer from '#transformers/assignment_transformer'
 
 export default class UpdateAssignmentController {
-  async handle({ auth, params, request, response }: HttpContext) {
+  async handle({ auth, params, request, response, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(updateAssignmentValidator)
 
@@ -89,7 +89,7 @@ export default class UpdateAssignmentController {
         query.preload('teacher')
       })
 
-      return response.ok(new AssignmentDto(assignment))
+      return response.ok(await serialize(AssignmentTransformer.transform(assignment)))
     } catch (error) {
       await trx.rollback()
       throw error

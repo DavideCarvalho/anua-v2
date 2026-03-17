@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
-import { TeacherListDto } from '#dtos/teacher_dto'
 import { listTeachersValidator } from '#validators/teacher'
+import TeacherListItemTransformer from '#transformers/teacher_list_item_transformer'
 
 interface UserSchoolRow {
   schoolId: string
@@ -26,9 +26,25 @@ interface SubjectRow {
   subjectName: string
 }
 
+function buildPaginationMeta(total: number, perPage: number, currentPage: number) {
+  const lastPage = Math.ceil(total / perPage) || 1
+
+  return {
+    total,
+    perPage,
+    currentPage,
+    lastPage,
+    firstPage: 1,
+    firstPageUrl: '',
+    lastPageUrl: '',
+    nextPageUrl: '',
+    previousPageUrl: '',
+  }
+}
+
 export default class ListTeachersController {
   async handle(ctx: HttpContext) {
-    const { request, auth } = ctx
+    const { request, auth, serialize } = ctx
     const user = ctx.effectiveUser ?? auth.user!
     const filters = await request.validateUsing(listTeachersValidator)
     const page = filters.page ?? 1
@@ -45,13 +61,7 @@ export default class ListTeachersController {
     const schoolIds = userSchoolsResult.rows.map((row) => row.schoolId).filter(Boolean)
 
     if (schoolIds.length === 0) {
-      return new TeacherListDto([], {
-        total: 0,
-        perPage: limit,
-        currentPage: page,
-        lastPage: 1,
-        firstPage: 1,
-      })
+      return serialize(TeacherListItemTransformer.paginate([], buildPaginationMeta(0, limit, page)))
     }
 
     const params: Record<string, string | string[] | number | boolean> = {
@@ -151,12 +161,8 @@ export default class ListTeachersController {
       subjects: subjectsByTeacher[row.id] || [],
     }))
 
-    return new TeacherListDto(teachers, {
-      total,
-      perPage: limit,
-      currentPage: page,
-      lastPage: Math.ceil(total / limit) || 1,
-      firstPage: 1,
-    })
+    return serialize(
+      TeacherListItemTransformer.paginate(teachers, buildPaginationMeta(total, limit, page))
+    )
   }
 }

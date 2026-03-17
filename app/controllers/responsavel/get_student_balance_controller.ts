@@ -2,12 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import StudentHasResponsible from '#models/student_has_responsible'
 import db from '@adonisjs/lucid/services/db'
-import {
-  StudentBalanceResponseDto,
-  BalanceTransactionDto,
-  BalanceSummaryDto,
-  BalancePaginationMetaDto,
-} from '#models/dto/student_balance_response.dto'
 import AppException from '#exceptions/app_exception'
 import vine from '@vinejs/vine'
 
@@ -70,37 +64,42 @@ export default class GetStudentBalanceController {
     const totalDebits = Number(balanceRow?.total_debits || 0)
     const currentBalance = totalCredits - totalDebits
 
-    const transactionsList = transactions.all().map(
-      (t) =>
-        new BalanceTransactionDto({
-          id: t.id,
-          type: t.type,
-          amount: Number(t.amount),
-          description: t.description,
-          status: t.status,
-          createdAt: t.createdAt,
-        })
-    )
+    const transactionsList = transactions.all().map((t) => {
+      const amount = Number(t.amount)
+      const normalizedType =
+        t.type === 'TOP_UP' || t.type === 'REFUND' || (t.type === 'ADJUSTMENT' && amount > 0)
+          ? 'CREDIT'
+          : 'DEBIT'
+
+      return {
+        id: t.id,
+        type: normalizedType,
+        amount,
+        description: t.description,
+        status: t.status,
+        createdAt: t.createdAt.toJSDate(),
+      }
+    })
 
     const paginationMeta = transactions.getMeta()
-    const metaDto = new BalancePaginationMetaDto({
+    const meta = {
       total: paginationMeta.total,
       perPage: paginationMeta.perPage,
       currentPage: paginationMeta.currentPage,
       lastPage: paginationMeta.lastPage,
       firstPage: paginationMeta.firstPage,
-    })
+    }
 
-    const summaryDto = new BalanceSummaryDto({
+    const summary = {
       currentBalance,
       totalCredits,
       totalDebits,
-    })
+    }
 
-    return new StudentBalanceResponseDto({
+    return {
       data: transactionsList,
-      meta: metaDto,
-      summary: summaryDto,
-    })
+      meta,
+      summary,
+    }
   }
 }

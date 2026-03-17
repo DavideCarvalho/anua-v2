@@ -2,7 +2,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import CanteenPurchase, { type CanteenPurchaseStatus } from '#models/canteen_purchase'
-import CanteenPurchaseDto from '#models/dto/canteen_purchase.dto'
 import CanteenItem from '#models/canteen_item'
 import CanteenItemPurchased from '#models/canteen_item_purchased'
 import Student from '#models/student'
@@ -13,6 +12,7 @@ import StudentBalanceTransaction from '#models/student_balance_transaction'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import { createCanteenPurchaseValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 
 export default class CreateCanteenPurchaseController {
   private normalizeItemsSignature(items: Array<{ canteenItemId: string; quantity: number }>) {
@@ -127,7 +127,7 @@ export default class CreateCanteenPurchaseController {
   }
 
   async handle(ctx: HttpContext) {
-    const { request, response, auth, logger } = ctx
+    const { request, response, auth, logger, serialize } = ctx
     const payload = await request.validateUsing(createCanteenPurchaseValidator)
 
     // Validate that all items exist and are active
@@ -305,6 +305,6 @@ export default class CreateCanteenPurchaseController {
       query.preload('item')
     })
 
-    return response.created(new CanteenPurchaseDto(purchase))
+    return response.created(await serialize(CanteenPurchaseTransformer.transform(purchase)))
   }
 }

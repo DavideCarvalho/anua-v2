@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
-import SchoolChainDto from '#models/dto/school_chain.dto'
 import { updateSchoolChainValidator } from '#validators/school_chain'
 import AppException from '#exceptions/app_exception'
+import SchoolChainTransformer from '#transformers/school_chain_transformer'
 
 export default class UpdateSchoolChainController {
-  async handle({ request, params, response }: HttpContext) {
+  async handle({ request, params, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(updateSchoolChainValidator)
 
     const schoolChain = await SchoolChain.find(params.id)
@@ -74,6 +74,6 @@ export default class UpdateSchoolChainController {
 
     await schoolChain.save()
 
-    return response.ok(new SchoolChainDto(schoolChain))
+    return response.ok(await serialize(SchoolChainTransformer.transform(schoolChain)))
   }
 }

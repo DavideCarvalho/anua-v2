@@ -3,14 +3,14 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Student from '#models/student'
-import StudentDto from '#models/dto/student.dto'
+import StudentTransformer from '#transformers/student_transformer'
 import StudentHasLevel from '#models/student_has_level'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { updateStudentValidator } from '#validators/student'
 import AppException from '#exceptions/app_exception'
 
 export default class UpdateStudentController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const student = await Student.query()
       .where('id', params.id)
       .whereHas('levels', (levelQuery) => {
@@ -138,7 +138,7 @@ export default class UpdateStudentController {
         .preload('user')
         .firstOrFail()
 
-      return response.ok(new StudentDto(studentWithRelations))
+      return response.ok(await serialize(StudentTransformer.transform(studentWithRelations)))
     } catch (error) {
       await trx.rollback()
       throw error

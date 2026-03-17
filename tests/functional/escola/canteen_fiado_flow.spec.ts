@@ -136,6 +136,12 @@ test.group('Canteen fiado flow API', (group) => {
     assert.equal(purchasesBody.data[0].id, createdPurchase.id)
     assert.equal(purchasesBody.data[0].studentPaymentId, createdPurchase.studentPaymentId)
     assert.equal(purchasesBody.data[0].totalAmount, fixtures.totalAmount)
+    assert.isArray(purchasesBody.data[0].itemsPurchased)
+    assert.equal(purchasesBody.data[0].itemsPurchased.length, 1)
+    assert.equal(purchasesBody.data[0].itemsPurchased[0].canteenItemId, fixtures.item.id)
+    assert.equal(purchasesBody.data[0].itemsPurchased[0].quantity, 2)
+    assert.equal(purchasesBody.data[0].itemsPurchased[0].unitPrice, fixtures.item.price)
+    assert.equal(purchasesBody.data[0].itemsPurchased[0].totalPrice, fixtures.totalAmount)
 
     const paymentsResponse = await client
       .get(`/api/v1/students/${fixtures.student.id}/payments`)

@@ -1,15 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Assignment from '#models/assignment'
-import AssignmentDto from '#models/dto/assignment.dto'
 import TeacherHasClass from '#models/teacher_has_class'
 import AcademicPeriod from '#models/academic_period'
 import Class_ from '#models/class'
 import { createAssignmentValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
+import AssignmentTransformer from '#transformers/assignment_transformer'
 
 export default class CreateAssignmentController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createAssignmentValidator)
 
     // Find the TeacherHasClass record that links teacher, class, and subject
@@ -61,6 +61,6 @@ export default class CreateAssignmentController {
       query.preload('teacher')
     })
 
-    return response.created(new AssignmentDto(assignment))
+    return response.created(await serialize(AssignmentTransformer.transform(assignment)))
   }
 }

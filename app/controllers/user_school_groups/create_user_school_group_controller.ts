@@ -2,12 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import SchoolGroup from '#models/school_group'
 import UserHasSchoolGroup from '#models/user_has_school_group'
-import UserHasSchoolGroupDto from '#models/dto/user_has_school_group.dto'
 import { createUserSchoolGroupValidator } from '#validators/user_school_group'
 import AppException from '#exceptions/app_exception'
+import UserHasSchoolGroupTransformer from '#transformers/user_has_school_group_transformer'
 
 export default class CreateUserSchoolGroupController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createUserSchoolGroupValidator)
 
     const user = await User.find(payload.userId)
@@ -37,6 +37,6 @@ export default class CreateUserSchoolGroupController {
     await assignment.load('schoolGroup')
     await assignment.load('user')
 
-    return response.created(new UserHasSchoolGroupDto(assignment))
+    return response.created(await serialize(UserHasSchoolGroupTransformer.transform(assignment)))
   }
 }

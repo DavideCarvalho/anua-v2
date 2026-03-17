@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreSettlement from '#models/store_settlement'
-import StoreSettlementDto from '#models/dto/store_settlement.dto'
+import StoreSettlementTransformer from '#transformers/store_settlement_transformer'
 
 export default class ShowStoreSettlementController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const settlement = await StoreSettlement.query()
       .where('id', params.id)
       .preload('store')
@@ -11,6 +11,6 @@ export default class ShowStoreSettlementController {
       .preload('orders')
       .firstOrFail()
 
-    return response.ok(new StoreSettlementDto(settlement))
+    return response.ok(await serialize(StoreSettlementTransformer.transform(settlement)))
   }
 }

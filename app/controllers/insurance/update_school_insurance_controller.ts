@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
-import InsuranceSchoolSettingsResponseDto from '#models/dto/insurance_school_settings_response.dto'
 import { updateSchoolInsuranceValidator } from '#validators/insurance'
 import AppException from '#exceptions/app_exception'
 
@@ -35,6 +34,12 @@ export default class UpdateSchoolInsuranceController {
 
     await school.save()
 
-    return response.ok(new InsuranceSchoolSettingsResponseDto(school))
+    return response.ok({
+      id: school.id,
+      hasInsurance: school.hasInsurance,
+      insurancePercentage: school.insurancePercentage,
+      insuranceCoveragePercentage: school.insuranceCoveragePercentage,
+      insuranceClaimWaitingDays: school.insuranceClaimWaitingDays,
+    })
   }
 }

@@ -135,11 +135,11 @@ function GamificationEventsTableContent() {
   const normalizedEvents = events as
     | {
         data?: Array<Record<string, unknown>>
-        meta?: { total: number; lastPage: number }
+        metadata?: { total: number; lastPage: number }
       }
     | undefined
   const eventsList = normalizedEvents?.data ?? []
-  const meta = normalizedEvents?.meta
+  const meta = normalizedEvents?.metadata
 
   const handleRetry = async (id: string) => {
     await retryEvent.mutateAsync({ params: { id } })

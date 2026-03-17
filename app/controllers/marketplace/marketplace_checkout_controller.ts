@@ -16,7 +16,7 @@ import { marketplaceCheckoutValidator } from '#validators/marketplace'
 import CheckoutException from '#exceptions/checkout_exception'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
-import StoreOrderDto from '#models/dto/store_order.dto'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 interface CheckoutContext {
   user: User
@@ -40,7 +40,7 @@ interface ValidatedCart {
 }
 
 export default class MarketplaceCheckoutController {
-  async handle({ request, response, effectiveUser }: HttpContext) {
+  async handle({ request, response, effectiveUser, serialize }: HttpContext) {
     const payload = await request.validateUsing(marketplaceCheckoutValidator)
     const user = effectiveUser!
 
@@ -55,7 +55,7 @@ export default class MarketplaceCheckoutController {
       totalMoney: validation.totalMoney,
     })
 
-    return response.created(new StoreOrderDto(order))
+    return response.created(await serialize(StoreOrderTransformer.transform(order)))
   }
 
   private async resolveContext(

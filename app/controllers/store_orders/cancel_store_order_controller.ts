@@ -3,12 +3,12 @@ import StoreOrder from '#models/store_order'
 import StoreItem from '#models/store_item'
 import StudentPayment from '#models/student_payment'
 import { cancelStoreOrderValidator } from '#validators/gamification'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class CancelStoreOrderController {
-  async handle({ params, request, response, auth }: HttpContext) {
+  async handle({ params, request, response, auth, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(cancelStoreOrderValidator)
 
@@ -80,6 +80,6 @@ export default class CancelStoreOrderController {
       studentQuery.preload('user')
     })
 
-    return response.ok(new StoreOrderDto(order))
+    return response.ok(await serialize(StoreOrderTransformer.transform(order)))
   }
 }

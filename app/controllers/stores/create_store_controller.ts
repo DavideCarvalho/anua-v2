@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
 import { createStoreValidator } from '#validators/store'
-import StoreDto from '#models/dto/store.dto'
+import StoreTransformer from '#transformers/store_transformer'
 
 export default class CreateStoreController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createStoreValidator)
 
     const store = await Store.create({
@@ -17,6 +17,6 @@ export default class CreateStoreController {
       await store.load('owner')
     }
 
-    return response.created(new StoreDto(store))
+    return response.created(await serialize(StoreTransformer.transform(store)))
   }
 }

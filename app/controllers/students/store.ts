@@ -3,13 +3,13 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Student from '#models/student'
-import StudentDto from '#models/dto/student.dto'
+import StudentTransformer from '#transformers/student_transformer'
 import { createStudentValidator } from '#validators/student'
 import string from '@adonisjs/core/helpers/string'
 import AppException from '#exceptions/app_exception'
 
 export default class StoreStudentController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createStudentValidator)
 
     // Check if email already exists
@@ -65,7 +65,7 @@ export default class StoreStudentController {
         .preload('user')
         .firstOrFail()
 
-      return response.created(new StudentDto(studentWithRelations))
+      return response.created(await serialize(StudentTransformer.transform(studentWithRelations)))
     } catch (error) {
       await trx.rollback()
       throw error

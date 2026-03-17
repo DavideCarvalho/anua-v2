@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SubscriptionPlan from '#models/subscription_plan'
-import SubscriptionPlanDto from '#models/dto/subscription_plan.dto'
 import { listSubscriptionPlansValidator } from '#validators/subscription'
+import SubscriptionPlanTransformer from '#transformers/subscription_plan_transformer'
 
 export default class ListSubscriptionPlansController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const payload = await request.validateUsing(listSubscriptionPlansValidator)
 
     const { tier, isActive, page = 1, limit = 20 } = payload
@@ -21,6 +21,8 @@ export default class ListSubscriptionPlansController {
 
     const plans = await query.paginate(page, limit)
 
-    return SubscriptionPlanDto.fromPaginator(plans)
+    const items = plans.all()
+    const metadata = plans.getMeta()
+    return serialize(SubscriptionPlanTransformer.paginate(items, metadata))
   }
 }

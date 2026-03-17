@@ -2,14 +2,14 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { v7 as uuidv7 } from 'uuid'
 import db from '@adonisjs/lucid/services/db'
 import SchoolChain from '#models/school_chain'
-import SchoolChainDto from '#models/dto/school_chain.dto'
 import User from '#models/user'
 import Role from '#models/role'
 import { createSchoolChainValidator } from '#validators/school_chain'
 import AppException from '#exceptions/app_exception'
+import SchoolChainTransformer from '#transformers/school_chain_transformer'
 
 export default class CreateSchoolChainController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createSchoolChainValidator)
 
     const role = await Role.findBy('name', 'SCHOOL_CHAIN_DIRECTOR')
@@ -90,6 +90,6 @@ export default class CreateSchoolChainController {
       return chain
     })
 
-    return response.created(new SchoolChainDto(schoolChain))
+    return response.created(await serialize(SchoolChainTransformer.transform(schoolChain)))
   }
 }

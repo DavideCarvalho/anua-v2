@@ -28,6 +28,8 @@ const GetResponsavelStudentOccurrencesController = () =>
   import('#controllers/responsavel/get_student_occurrences_controller')
 const GetResponsavelStudentGamificationController = () =>
   import('#controllers/responsavel/get_student_gamification_controller')
+const GetResponsavelStudentCalendarController = () =>
+  import('#controllers/responsavel/get_student_calendar_controller')
 const AcknowledgeOccurrenceController = () =>
   import('#controllers/responsavel/acknowledge_occurrence_controller')
 const GetStudentOverviewController = () =>
@@ -103,6 +105,9 @@ export function registerResponsavelApiRoutes() {
       router
         .get('/students/:studentId/gamification', [GetResponsavelStudentGamificationController])
         .as('student_gamification')
+      router
+        .get('/students/:studentId/calendar', [GetResponsavelStudentCalendarController])
+        .as('student_calendar')
       router.get('/notifications', [GetResponsavelNotificationsController]).as('notifications')
       router.get('/comunicados', [ListComunicadosController]).as('comunicados.list')
       router

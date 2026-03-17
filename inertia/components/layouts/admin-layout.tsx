@@ -127,11 +127,15 @@ function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: stri
     <Collapsible defaultOpen={isActive} className="group/collapsible">
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton tooltip={item.title}>
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm text-foreground ring-sidebar-ring outline-hidden transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-2 [&>svg]:size-4 [&>svg]:shrink-0"
+            title={item.title}
+          >
             <item.icon className="h-4 w-4" />
-            <span>{item.title}</span>
-            <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-          </SidebarMenuButton>
+            <span className="truncate">{item.title}</span>
+            <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+          </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>

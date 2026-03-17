@@ -1,12 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
-import {
-  StudentGradesResponseDto,
-  SubjectGradeDto,
-  RecentAssignmentDto,
-  GradesSummaryDto,
-} from '#models/dto/student_grades_response.dto'
 import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
 
@@ -136,46 +130,40 @@ export default class GetStudentGradesController {
       return DateTime.fromISO(String(dateValue))
     }
 
-    const bySubject = (grades.rows as SubjectGradeRow[]).map(
-      (row) =>
-        new SubjectGradeDto({
-          subjectId: row.subject_id,
-          subjectName: row.subject_name,
-          totalScore: Number(row.total_score),
-          maxPossibleScore: Number(row.max_possible_score),
-          assignmentsCount: Number(row.assignments_count),
-          gradedCount: Number(row.graded_count),
-          pendingCount: Number(row.pending_count),
-          average: Number(row.average),
-        })
-    )
+    const bySubject = (grades.rows as SubjectGradeRow[]).map((row) => ({
+      subjectId: row.subject_id,
+      subjectName: row.subject_name,
+      totalScore: Number(row.total_score),
+      maxPossibleScore: Number(row.max_possible_score),
+      assignmentsCount: Number(row.assignments_count),
+      gradedCount: Number(row.graded_count),
+      pendingCount: Number(row.pending_count),
+      average: Number(row.average),
+    }))
 
-    const recentAssignmentsList = (recentAssignments.rows as RecentAssignmentRow[]).map(
-      (row) =>
-        new RecentAssignmentDto({
-          assignmentId: row.assignment_id,
-          title: row.assignment_title,
-          subjectName: row.subject_name,
-          maxScore: Number(row.max_score),
-          score: row.score ? Number(row.score) : null,
-          status: row.status,
-          dueDate: parseDate(row.due_date),
-          submittedAt: parseDate(row.submitted_at),
-          gradedAt: parseDate(row.graded_at),
-        })
-    )
+    const recentAssignmentsList = (recentAssignments.rows as RecentAssignmentRow[]).map((row) => ({
+      assignmentId: row.assignment_id,
+      title: row.assignment_title,
+      subjectName: row.subject_name,
+      maxScore: Number(row.max_score),
+      score: row.score ? Number(row.score) : null,
+      status: row.status,
+      dueDate: parseDate(row.due_date)?.toJSDate() ?? null,
+      submittedAt: parseDate(row.submitted_at)?.toJSDate() ?? null,
+      gradedAt: parseDate(row.graded_at)?.toJSDate() ?? null,
+    }))
 
     const summaryRow = overallResult.rows[0] as OverallSummaryRow | undefined
-    const summary = new GradesSummaryDto({
+    const summary = {
       overallAverage: summaryRow ? Number(summaryRow.overall_average) : 0,
       totalScore: summaryRow ? Number(summaryRow.total_score) : 0,
       maxPossibleScore: summaryRow ? Number(summaryRow.max_possible_score) : 0,
-    })
+    }
 
-    return new StudentGradesResponseDto({
+    return {
       bySubject,
       recentAssignments: recentAssignmentsList,
       summary,
-    })
+    }
   }
 }

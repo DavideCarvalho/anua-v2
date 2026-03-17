@@ -2,12 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { attachmentManager } from '@jrmc/adonis-attachment'
 import db from '@adonisjs/lucid/services/db'
 import CanteenItem from '#models/canteen_item'
-import CanteenItemDto from '#models/dto/canteen_item.dto'
 import { updateCanteenItemValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenItemTransformer from '#transformers/canteen_item_transformer'
 
 export default class UpdateCanteenItemController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const canteenItem = await CanteenItem.query()
       .where('id', params.id)
       .whereHas('canteen', (canteenQuery) => {
@@ -77,6 +77,6 @@ export default class UpdateCanteenItemController {
       return canteenItem
     })
 
-    return response.ok(new CanteenItemDto(updatedCanteenItem))
+    return response.ok(await serialize(CanteenItemTransformer.transform(updatedCanteenItem)))
   }
 }

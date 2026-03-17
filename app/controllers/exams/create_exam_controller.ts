@@ -5,10 +5,10 @@ import Exam from '#models/exam'
 import Class_ from '#models/class'
 import AcademicPeriod from '#models/academic_period'
 import AppException from '#exceptions/app_exception'
-import ExamDto from '#models/dto/exam.dto'
+import ExamTransformer from '#transformers/exam_transformer'
 
 export default class CreateExamController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createExamValidator)
 
     // Get the school from the class
@@ -56,6 +56,6 @@ export default class CreateExamController {
     await exam.load('subject')
     await exam.load('teacher')
 
-    return response.created(new ExamDto(exam))
+    return response.created(await serialize(ExamTransformer.transform(exam)))
   }
 }

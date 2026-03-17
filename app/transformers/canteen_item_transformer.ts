@@ -13,10 +13,11 @@ export default class CanteenItemTransformer extends BaseTransformer<CanteenItem>
         'price',
         'category',
         'isActive',
-        'image',
         'createdAt',
         'updatedAt',
       ]),
+      image: this.resource.image ?? null,
+      imageUrl: this.resource.image?.url ?? null,
       canteen: CanteenTransformer.transform(this.whenLoaded(this.resource.canteen)),
     }
   }

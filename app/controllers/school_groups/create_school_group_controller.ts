@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolChain from '#models/school_chain'
 import SchoolGroup from '#models/school_group'
-import SchoolGroupDto from '#models/dto/school_group.dto'
 import { createSchoolGroupValidator } from '#validators/school_group'
 import AppException from '#exceptions/app_exception'
+import SchoolGroupTransformer from '#transformers/school_group_transformer'
 
 export default class CreateSchoolGroupController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createSchoolGroupValidator)
 
     const schoolChain = await SchoolChain.find(payload.schoolChainId)
@@ -25,6 +25,6 @@ export default class CreateSchoolGroupController {
       insuranceClaimWaitingDays: payload.insuranceClaimWaitingDays ?? null,
     })
 
-    return response.created(new SchoolGroupDto(schoolGroup))
+    return response.created(await serialize(SchoolGroupTransformer.transform(schoolGroup)))
   }
 }

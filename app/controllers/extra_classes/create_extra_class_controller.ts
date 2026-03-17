@@ -2,13 +2,13 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import string from '@adonisjs/core/helpers/string'
 import ExtraClass from '#models/extra_class'
-import ExtraClassDto from '#models/dto/extra_class.dto'
+import ExtraClassTransformer from '#transformers/extra_class_transformer'
 import ExtraClassSchedule from '#models/extra_class_schedule'
 import AcademicPeriod from '#models/academic_period'
 import { createExtraClassValidator } from '#validators/extra_class'
 
 export default class CreateExtraClassController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createExtraClassValidator)
 
     const academicPeriod = await AcademicPeriod.findOrFail(data.academicPeriodId)
@@ -52,7 +52,7 @@ export default class CreateExtraClassController {
       await extraClass.load('contract')
       await extraClass.load('academicPeriod')
 
-      return response.created(new ExtraClassDto(extraClass))
+      return response.created(await serialize(ExtraClassTransformer.transform(extraClass)))
     } catch (error) {
       await trx.rollback()
       throw error

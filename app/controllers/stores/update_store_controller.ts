@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Store from '#models/store'
-import StoreDto from '#models/dto/store.dto'
 import { updateStoreValidator } from '#validators/store'
+import StoreTransformer from '#transformers/store_transformer'
 
 export default class UpdateStoreController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const store = await Store.query().where('id', params.id).whereNull('deletedAt').firstOrFail()
 
     const data = await request.validateUsing(updateStoreValidator)
@@ -33,6 +33,6 @@ export default class UpdateStoreController {
       await updatedStore.load('owner')
     }
 
-    return response.ok(new StoreDto(updatedStore))
+    return response.ok(await serialize(StoreTransformer.transform(updatedStore)))
   }
 }

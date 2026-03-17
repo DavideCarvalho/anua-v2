@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { attachmentManager } from '@jrmc/adonis-attachment'
 import CanteenItem from '#models/canteen_item'
-import CanteenItemDto from '#models/dto/canteen_item.dto'
 import { createCanteenItemValidator } from '#validators/canteen'
+import CanteenItemTransformer from '#transformers/canteen_item_transformer'
 
 export default class CreateCanteenItemController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const image = request.file('image', {
       size: '2mb',
       extnames: ['jpg', 'jpeg', 'png', 'webp'],
@@ -47,6 +47,6 @@ export default class CreateCanteenItemController {
       await canteenItem.save()
     }
 
-    return response.created(new CanteenItemDto(canteenItem))
+    return response.created(await serialize(CanteenItemTransformer.transform(canteenItem)))
   }
 }

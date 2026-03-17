@@ -1,8 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
-import StudentHasAttendanceDto from '#models/dto/student_has_attendance.dto'
 import { updateAttendanceValidator } from '#validators/attendance'
 import AppException from '#exceptions/app_exception'
+import StudentHasAttendanceTransformer from '#transformers/student_has_attendance_transformer'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
@@ -11,7 +11,7 @@ function mapStatus(validatorStatus: string): AttendanceStatus {
 }
 
 export default class UpdateAttendanceController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     // This controller updates the student's attendance record
     const studentAttendance = await StudentHasAttendance.query()
       .where('id', params.id)
@@ -35,6 +35,8 @@ export default class UpdateAttendanceController {
 
     await studentAttendance.save()
 
-    return response.ok(new StudentHasAttendanceDto(studentAttendance))
+    return response.ok(
+      await serialize(StudentHasAttendanceTransformer.transform(studentAttendance))
+    )
   }
 }

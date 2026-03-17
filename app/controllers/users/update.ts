@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
-import UserDto from '#models/dto/user.dto'
 import { updateUserValidator } from '#validators/user'
 import AppException from '#exceptions/app_exception'
+import UserTransformer from '#transformers/user_transformer'
 
 export default class UpdateUserController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const user = await User.query()
       .where('id', params.id)
       .whereNull('deletedAt')
@@ -41,6 +41,6 @@ export default class UpdateUserController {
       .preload('schoolChain')
       .firstOrFail()
 
-    return response.ok(new UserDto(userWithRelations))
+    return response.ok(await serialize(UserTransformer.transform(userWithRelations)))
   }
 }

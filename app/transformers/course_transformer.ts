@@ -21,8 +21,8 @@ export default class CourseTransformer extends BaseTransformer<Course> {
         'createdAt',
         'updatedAt',
       ]),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
-      coordinator: UserTransformer.transform(this.whenLoaded(this.resource.coordinator)),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(6),
+      coordinator: UserTransformer.transform(this.whenLoaded(this.resource.coordinator))?.depth(6),
       courseAcademicPeriods: CourseHasAcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.courseAcademicPeriods)
       ),

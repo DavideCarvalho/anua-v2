@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Store from '#models/store'
-import StoreDto from '#models/dto/store.dto'
+import StoreTransformer from '#transformers/store_transformer'
 
 export default class ShowStoreController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const store = await Store.query()
       .where('id', params.id)
       .whereNull('deletedAt')
@@ -12,6 +12,6 @@ export default class ShowStoreController {
       .preload('financialSettings')
       .firstOrFail()
 
-    return response.ok(new StoreDto(store))
+    return response.ok(await serialize(StoreTransformer.transform(store)))
   }
 }

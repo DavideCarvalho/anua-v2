@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreItem from '#models/store_item'
-import StoreItemDto from '#models/dto/store_item.dto'
 import Store from '#models/store'
 import { createStoreItemValidator } from '#validators/gamification'
 import AppException from '#exceptions/app_exception'
+import StoreItemTransformer from '#transformers/store_item_transformer'
 
 export default class CreateStoreItemController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createStoreItemValidator)
 
     let schoolId: string
@@ -52,6 +52,6 @@ export default class CreateStoreItemController {
       isActive: data.isActive ?? true,
     })
 
-    return response.created(new StoreItemDto(storeItem))
+    return response.created(await serialize(StoreItemTransformer.transform(storeItem)))
   }
 }

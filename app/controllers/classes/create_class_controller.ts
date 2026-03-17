@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Class_ from '#models/class'
-import ClassDto from '#models/dto/class.dto'
+import ClassTransformer from '#transformers/class_transformer'
 import { createClassValidator } from '#validators/class'
 import AppException from '#exceptions/app_exception'
 
 export default class CreateClassController {
-  async handle({ request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ request, response, selectedSchoolIds, serialize }: HttpContext) {
     const data = await request.validateUsing(createClassValidator)
 
     // Verifica se a escola está no contexto do usuário
@@ -31,6 +31,6 @@ export default class CreateClassController {
       return newClass
     })
 
-    return response.created(new ClassDto(classEntity))
+    return response.created(await serialize(ClassTransformer.transform(classEntity)))
   }
 }

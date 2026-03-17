@@ -24,7 +24,7 @@ export default class GetImpersonationConfigController {
       throw AppException.forbidden('Acesso negado')
     }
 
-    const { search, roleFilter, schoolFilter, page = 1, limit = 20 } = request.qs()
+    const { search, schoolFilter, page = 1, limit = 20 } = request.qs()
 
     const query = User.query()
       .whereNot('id', user.id) // Não incluir o próprio usuário
@@ -46,12 +46,7 @@ export default class GetImpersonationConfigController {
       })
     }
 
-    // Filtro por role (por ID)
-    if (roleFilter && roleFilter !== 'all') {
-      query.where('roleId', roleFilter)
-    }
-
-    // Filtro por escola (via UserHasSchool OU User.schoolId)
+    // Filtro por escola (via UserHasSchool OU User.schoolId) - cargo é filtrado no front
     if (schoolFilter && schoolFilter !== 'all') {
       query.where((q) => {
         q.whereHas('userHasSchools', (uhsQuery) => {

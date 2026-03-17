@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Challenge from '#models/challenge'
 import { createChallengeValidator } from '#validators/gamification'
-import ChallengeDto from '#models/dto/challenge.dto'
+import ChallengeTransformer from '#transformers/challenge_transformer'
 
 export default class CreateChallengeController {
-  async handle({ request, effectiveUser }: HttpContext) {
+  async handle({ request, effectiveUser, serialize }: HttpContext) {
     const payload = await request.validateUsing(createChallengeValidator)
 
     const schoolId = payload.schoolId ?? effectiveUser?.schoolId
@@ -25,6 +25,6 @@ export default class CreateChallengeController {
       isActive: payload.isActive ?? true,
     })
 
-    return new ChallengeDto(challenge)
+    return serialize(ChallengeTransformer.transform(challenge))
   }
 }

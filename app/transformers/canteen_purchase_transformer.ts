@@ -4,6 +4,7 @@ import CanteenTransformer from '#transformers/canteen_transformer'
 import UserTransformer from '#transformers/user_transformer'
 import StudentPaymentTransformer from '#transformers/student_payment_transformer'
 import CanteenMonthlyTransferTransformer from '#transformers/canteen_monthly_transfer_transformer'
+import CanteenItemPurchasedTransformer from '#transformers/canteen_item_purchased_transformer'
 
 export default class CanteenPurchaseTransformer extends BaseTransformer<CanteenPurchase> {
   toObject() {
@@ -21,6 +22,9 @@ export default class CanteenPurchaseTransformer extends BaseTransformer<CanteenP
         'createdAt',
         'updatedAt',
       ]),
+      itemsPurchased: CanteenItemPurchasedTransformer.transform(
+        this.whenLoaded(this.resource.itemsPurchased)
+      ),
       user: UserTransformer.transform(this.whenLoaded(this.resource.user)),
       canteen: CanteenTransformer.transform(this.whenLoaded(this.resource.canteen)),
       studentPayment: StudentPaymentTransformer.transform(

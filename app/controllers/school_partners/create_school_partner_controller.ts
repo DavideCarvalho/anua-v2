@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import SchoolPartner from '#models/school_partner'
-import SchoolPartnerDto from '#models/dto/school_partner.dto'
 import { createSchoolPartnerValidator } from '#validators/school_partner'
 import AppException from '#exceptions/app_exception'
+import SchoolPartnerTransformer from '#transformers/school_partner_transformer'
 
 export default class CreateSchoolPartnerController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, serialize }: HttpContext) {
     const payload = await request.validateUsing(createSchoolPartnerValidator)
 
     const schoolId = auth.user?.schoolId
@@ -29,6 +29,6 @@ export default class CreateSchoolPartnerController {
       isActive: true,
     })
 
-    return response.created(new SchoolPartnerDto(partner))
+    return response.created(await serialize(SchoolPartnerTransformer.transform(partner)))
   }
 }

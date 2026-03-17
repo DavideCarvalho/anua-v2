@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import StoreDto from '#models/dto/store.dto'
+import StoreTransformer from '#transformers/store_transformer'
 
 export default class ShowOwnStoreController {
-  async handle({ storeOwnerStore, response }: HttpContext) {
+  async handle({ storeOwnerStore, response, serialize }: HttpContext) {
     const store = storeOwnerStore!
     await store.load('financialSettings')
     await store.load('owner')
-    return response.ok(new StoreDto(store))
+    return response.ok(await serialize(StoreTransformer.transform(store)))
   }
 }

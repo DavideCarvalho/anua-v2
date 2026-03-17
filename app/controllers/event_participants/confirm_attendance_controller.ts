@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
-import EventParticipantDto from '#models/dto/event_participant.dto'
 import AppException from '#exceptions/app_exception'
+import EventParticipantTransformer from '#transformers/event_participant_transformer'
 
 export default class ConfirmAttendanceController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const { eventId, userId } = params
 
     const event = await Event.find(eventId)
@@ -34,6 +34,6 @@ export default class ConfirmAttendanceController {
     await participant.save()
     await participant.load('user')
 
-    return response.ok(new EventParticipantDto(participant))
+    return response.ok(await serialize(EventParticipantTransformer.transform(participant)))
   }
 }

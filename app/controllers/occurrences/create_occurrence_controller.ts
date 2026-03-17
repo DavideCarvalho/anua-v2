@@ -8,13 +8,13 @@ import User from '#models/user'
 import StudentHasResponsible from '#models/student_has_responsible'
 import Notification from '#models/notification'
 import TeacherHasClass from '#models/teacher_has_class'
-import OccurrenceDto from '#models/dto/occurrence.dto'
 import OccurrenceAckRequiredMail from '#mails/occurrence_ack_required_mail'
 import { createOccurrenceValidator } from '#validators/occurrence'
 import AppException from '#exceptions/app_exception'
+import OccurrenceTransformer from '#transformers/occurrence_transformer'
 
 export default class CreateOccurrenceController {
-  async handle({ request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ request, response, selectedSchoolIds, serialize }: HttpContext) {
     const scopedSchoolIds = selectedSchoolIds ?? []
 
     const payload = await request.validateUsing(createOccurrenceValidator)
@@ -157,6 +157,6 @@ export default class CreateOccurrenceController {
       )
     }
 
-    return response.created(new OccurrenceDto(occurrence))
+    return response.created(await serialize(OccurrenceTransformer.transform(occurrence)))
   }
 }

@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import SubscriptionPlan from '#models/subscription_plan'
 import { createSubscriptionPlanValidator } from '#validators/subscription'
-import SubscriptionPlanDto from '#models/dto/subscription_plan.dto'
+import SubscriptionPlanTransformer from '#transformers/subscription_plan_transformer'
 
 export default class CreateSubscriptionPlanController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createSubscriptionPlanValidator)
 
     // Usa transaction para garantir atomicidade
@@ -30,6 +30,6 @@ export default class CreateSubscriptionPlanController {
       return newPlan
     })
 
-    return response.created(new SubscriptionPlanDto(plan))
+    return response.created(await serialize(SubscriptionPlanTransformer.transform(plan)))
   }
 }

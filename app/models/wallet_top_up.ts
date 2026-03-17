@@ -17,37 +17,37 @@ export default class WalletTopUp extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'responsibleUserId' })
   declare responsibleUserId: string
 
-  @column()
+  @column({ columnName: 'amount' })
   declare amount: number
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: WalletTopUpStatus
 
-  @column()
+  @column({ columnName: 'paymentGateway' })
   declare paymentGateway: string
 
-  @column()
+  @column({ columnName: 'paymentGatewayId' })
   declare paymentGatewayId: string | null
 
-  @column()
+  @column({ columnName: 'paymentMethod' })
   declare paymentMethod: string | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'paidAt' })
   declare paidAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

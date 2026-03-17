@@ -4,17 +4,17 @@ import { v7 as uuidv7 } from 'uuid'
 import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasLevel from '#models/student_has_level'
 import WalletTopUp from '#models/wallet_top_up'
-import WalletTopUpDto from '#models/dto/wallet_top_up.dto'
 import AsaasService from '#services/asaas_service'
 import { createWalletTopUpValidator } from '#validators/wallet_top_up'
 import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
+import WalletTopUpTransformer from '#transformers/wallet_top_up_transformer'
 
 @inject()
 export default class CreateWalletTopUpController {
   constructor(private asaasService: AsaasService) {}
 
-  async handle({ request, response, effectiveUser }: HttpContext) {
+  async handle({ request, response, effectiveUser, serialize }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
@@ -80,6 +80,9 @@ export default class CreateWalletTopUpController {
     topUp.paymentGatewayId = charge.id
     await topUp.save()
 
+    await topUp.load('student')
+    await topUp.load('responsible')
+
     const paymentDetails: Record<string, string | null> = {
       invoiceUrl: charge.invoiceUrl ?? null,
       bankSlipUrl: charge.bankSlipUrl ?? null,
@@ -98,6 +101,9 @@ export default class CreateWalletTopUpController {
       }
     }
 
-    return response.created({ topUp: new WalletTopUpDto(topUp), paymentDetails })
+    return response.created({
+      topUp: await serialize(WalletTopUpTransformer.transform(topUp)),
+      paymentDetails,
+    })
   }
 }

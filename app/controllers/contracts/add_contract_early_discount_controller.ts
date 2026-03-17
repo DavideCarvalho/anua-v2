@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ContractEarlyDiscount from '#models/contract_early_discount'
 import { createContractEarlyDiscountValidator } from '#validators/contract'
-import { ContractEarlyDiscountDto } from '#models/dto/contract_early_discount.dto'
+import ContractEarlyDiscountTransformer from '#transformers/contract_early_discount_transformer'
 
 export default class AddContractEarlyDiscountController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const { contractId } = params
     const payload = await request.validateUsing(createContractEarlyDiscountValidator)
 
@@ -14,6 +14,6 @@ export default class AddContractEarlyDiscountController {
       daysBeforeDeadline: payload.daysBeforeDeadline,
     })
 
-    return new ContractEarlyDiscountDto(earlyDiscount)
+    return serialize(ContractEarlyDiscountTransformer.transform(earlyDiscount))
   }
 }

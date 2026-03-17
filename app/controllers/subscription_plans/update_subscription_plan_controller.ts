@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import SubscriptionPlan from '#models/subscription_plan'
-import SubscriptionPlanDto from '#models/dto/subscription_plan.dto'
 import { updateSubscriptionPlanValidator } from '#validators/subscription'
 import AppException from '#exceptions/app_exception'
+import SubscriptionPlanTransformer from '#transformers/subscription_plan_transformer'
 
 export default class UpdateSubscriptionPlanController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const plan = await SubscriptionPlan.find(params.id)
 
     if (!plan) {
@@ -33,6 +33,6 @@ export default class UpdateSubscriptionPlanController {
       return plan
     })
 
-    return response.ok(new SubscriptionPlanDto(updatedPlan))
+    return response.ok(await serialize(SubscriptionPlanTransformer.transform(updatedPlan)))
   }
 }

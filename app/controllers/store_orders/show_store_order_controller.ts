@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StoreOrder from '#models/store_order'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class ShowStoreOrderController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const { id } = params
 
     const order = await StoreOrder.query()
@@ -19,6 +19,6 @@ export default class ShowStoreOrderController {
       throw AppException.notFound('Pedido da loja não encontrado')
     }
 
-    return response.ok(new StoreOrderDto(order))
+    return response.ok(await serialize(StoreOrderTransformer.transform(order)))
   }
 }

@@ -128,7 +128,7 @@ export function NewAssignmentModal({
     const canSeeAllSubjects = !user || (user.role?.name && DIRECTOR_ROLES.includes(user.role.name))
     const result: Subject[] = []
     const seen = new Set<string>()
-    const teacherClasses = classData.teacherClasses
+    const teacherClasses = classData.teacherClasses || []
 
     for (const tc of teacherClasses) {
       if (!tc.subject || seen.has(tc.subject.id)) continue
@@ -187,7 +187,7 @@ export function NewAssignmentModal({
     }
 
     if (!isEditMode && !requiresContextStep && !selectedSubject) {
-      toast.error('Selecione uma materia')
+      toast.error('Selecione uma matéria')
       return
     }
 

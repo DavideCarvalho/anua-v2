@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class MarkReadyController {
-  async handle({ storeOwnerStore, params, response }: HttpContext) {
+  async handle({ storeOwnerStore, params, response, serialize }: HttpContext) {
     const store = storeOwnerStore!
     const order = await StoreOrder.query().where('id', params.id).where('storeId', store.id).first()
 
@@ -24,6 +24,6 @@ export default class MarkReadyController {
     await order.load('student')
     await order.load('items', (q) => q.preload('storeItem'))
 
-    return response.ok(new StoreOrderDto(order))
+    return response.ok(await serialize(StoreOrderTransformer.transform(order)))
   }
 }

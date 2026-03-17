@@ -10,12 +10,12 @@ import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_co
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import TeacherHasClass from '#models/teacher_has_class'
 import { createAcademicPeriodValidator } from '#validators/academic_period'
-import AcademicPeriodDto from '#models/dto/academic_period.dto'
 import AppException from '#exceptions/app_exception'
 import { dispatchEnrollmentPaymentUpdatesForLevelContracts } from '#services/payments/dispatch_enrollment_payment_updates_service'
+import AcademicPeriodTransformer from '#transformers/academic_period_transformer'
 
 export default class CreateAcademicPeriodController {
-  async handle({ request, auth, logger }: HttpContext) {
+  async handle({ request, auth, logger, serialize }: HttpContext) {
     const payload = await request.validateUsing(createAcademicPeriodValidator)
 
     const schoolId = payload.schoolId ?? auth.user?.schoolId
@@ -192,7 +192,7 @@ export default class CreateAcademicPeriodController {
 
       return {
         academicPeriodId: academicPeriod.id,
-        dto: new AcademicPeriodDto(academicPeriod),
+        transformer: AcademicPeriodTransformer.transform(academicPeriod),
       }
     })
 
@@ -206,6 +206,6 @@ export default class CreateAcademicPeriodController {
       logger.error({ error }, '[CREATE_ACADEMIC_PERIOD] Failed to dispatch payment updates')
     }
 
-    return result.dto
+    return serialize(result.transformer)
   }
 }

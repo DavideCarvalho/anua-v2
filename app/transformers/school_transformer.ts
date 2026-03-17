@@ -57,7 +57,9 @@ export default class SchoolTransformer extends BaseTransformer<School> {
         'createdAt',
         'updatedAt',
       ]),
-      schoolChain: SchoolChainTransformer.transform(this.whenLoaded(this.resource.schoolChain)),
+      schoolChain: SchoolChainTransformer.transform(
+        this.whenLoaded(this.resource.schoolChain)
+      )?.depth(6),
       userHasSchools: UserHasSchoolTransformer.transform(
         this.whenLoaded(this.resource.userHasSchools)
       ),

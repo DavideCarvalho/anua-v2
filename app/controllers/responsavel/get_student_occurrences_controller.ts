@@ -1,11 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
-import {
-  StudentOccurrencesResponseDto,
-  OccurrenceDto,
-  OccurrencesSummaryDto,
-} from '#models/dto/student_occurrences_response.dto'
 import AppException from '#exceptions/app_exception'
 
 interface OccurrenceRow {
@@ -124,7 +119,7 @@ export default class GetStudentOccurrencesController {
       const requiresAcknowledgement = row.type !== 'PRAISE'
       const isAcknowledged = requiresAcknowledgement ? !!row.acknowledged_at : true
 
-      return new OccurrenceDto({
+      return {
         id: row.id,
         type: row.type,
         severity: 'MEDIUM', // Default since table doesn't have severity
@@ -141,13 +136,13 @@ export default class GetStudentOccurrencesController {
         createdAt: row.created_at,
         reporterName: row.teacher_name || 'Professor',
         resolverName: null,
-      })
+      }
     })
 
     const summaryRow = summary.rows[0] as SummaryRow | undefined
     const unacknowledgedRow = unacknowledged.rows[0] as UnacknowledgedRow | undefined
 
-    const summaryData = new OccurrencesSummaryDto({
+    const summaryData = {
       total: Number(summaryRow?.total || 0),
       open: Number(unacknowledgedRow?.count || 0),
       inProgress: 0,
@@ -158,12 +153,12 @@ export default class GetStudentOccurrencesController {
       medium: Number(summaryRow?.total || 0),
       low: 0,
       unacknowledged: Number(unacknowledgedRow?.count || 0),
-    })
+    }
 
-    return new StudentOccurrencesResponseDto({
+    return {
       occurrences: occurrencesList,
       summary: summaryData,
-    })
+    }
   }
 }
 

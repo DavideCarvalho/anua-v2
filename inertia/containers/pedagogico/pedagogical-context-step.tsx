@@ -160,8 +160,8 @@ export function PedagogicalContextStep({
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Selecione o periodo">
-              {selectedPeriodName ?? 'Selecione o periodo'}
+            <SelectValue placeholder="Selecione o período">
+              {selectedPeriodName ?? 'Selecione o período'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -245,8 +245,8 @@ export function PedagogicalContextStep({
           disabled={!value.classId}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Selecione a materia">
-              {selectedSubjectName ?? 'Selecione a materia'}
+            <SelectValue placeholder="Selecione a matéria">
+              {selectedSubjectName ?? 'Selecione a matéria'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>

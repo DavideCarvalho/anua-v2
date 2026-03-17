@@ -91,7 +91,7 @@ function LeaderboardsListContent() {
   )
 
   const leaderboards = data?.data ?? []
-  const meta = data?.meta ?? null
+  const meta = data?.metadata ?? null
 
   if (isLoading) {
     return <LeaderboardsSkeleton />
@@ -169,7 +169,7 @@ function LeaderboardsListContent() {
             <Button
               variant="outline"
               size="sm"
-              disabled={page >= meta.lastPage}
+              disabled={page >= Number(meta.lastPage)}
               onClick={() => setFilters({ page: page + 1 })}
             >
               <ChevronRight className="h-4 w-4" />

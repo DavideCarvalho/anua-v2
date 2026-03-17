@@ -2,8 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
 import type { AchievementCategory } from '#models/achievement'
 import { updateAchievementValidator } from '#validators/gamification'
-import AchievementDto from '#models/dto/achievement.dto'
 import AppException from '#exceptions/app_exception'
+import AchievementTransformer from '#transformers/achievement_transformer'
 
 // Map validator category to model category
 const categoryMap: Record<string, AchievementCategory> = {
@@ -15,7 +15,7 @@ const categoryMap: Record<string, AchievementCategory> = {
 }
 
 export default class UpdateAchievementController {
-  async handle({ params, request, effectiveUser, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, effectiveUser, selectedSchoolIds, serialize }: HttpContext) {
     const achievement = await Achievement.find(params.id)
 
     if (!achievement) {
@@ -73,6 +73,6 @@ export default class UpdateAchievementController {
 
     await achievement.save()
 
-    return new AchievementDto(achievement)
+    return serialize(AchievementTransformer.transform(achievement))
   }
 }

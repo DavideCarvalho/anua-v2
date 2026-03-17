@@ -25,7 +25,7 @@ export default class AcademicPeriodTransformer extends BaseTransformer<AcademicP
         'updatedAt',
         'deletedAt',
       ]),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(6),
       courseAcademicPeriods: CourseHasAcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.courseAcademicPeriods)
       )?.depth(6),

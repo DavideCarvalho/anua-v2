@@ -6,11 +6,11 @@ import AuditLog from '#models/audit_log'
 import Exam from '#models/exam'
 import ExamHistory from '#models/exam_history'
 import AppException from '#exceptions/app_exception'
-import ExamDto from '#models/dto/exam.dto'
 import { buildFieldDiff } from '#services/history/build_field_diff'
+import ExamTransformer from '#transformers/exam_transformer'
 
 export default class UpdateExamController {
-  async handle({ auth, params, request, response }: HttpContext) {
+  async handle({ auth, params, request, response, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(updateExamValidator)
 
@@ -83,7 +83,7 @@ export default class UpdateExamController {
       await exam.load('subject')
       await exam.load('teacher')
 
-      return response.ok(new ExamDto(exam))
+      return response.ok(await serialize(ExamTransformer.transform(exam)))
     } catch (error) {
       await trx.rollback()
       throw error

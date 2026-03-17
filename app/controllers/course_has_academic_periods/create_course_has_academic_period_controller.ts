@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import { createCourseHasAcademicPeriodValidator } from '#validators/course_has_academic_period'
-import CourseHasAcademicPeriodDto from '#models/dto/course_has_academic_period.dto'
+import CourseHasAcademicPeriodTransformer from '#transformers/course_has_academic_period_transformer'
 
 export default class CreateCourseHasAcademicPeriodController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createCourseHasAcademicPeriodValidator)
 
     // Usa transaction para garantir atomicidade
@@ -22,6 +22,8 @@ export default class CreateCourseHasAcademicPeriodController {
       return newCourseHasAcademicPeriod
     })
 
-    return response.created(new CourseHasAcademicPeriodDto(courseHasAcademicPeriod))
+    return response.created(
+      await serialize(CourseHasAcademicPeriodTransformer.transform(courseHasAcademicPeriod))
+    )
   }
 }

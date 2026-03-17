@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Canteen from '#models/canteen'
-import CanteenDto from '#models/dto/canteen.dto'
 import { updateCanteenValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenTransformer from '#transformers/canteen_transformer'
 
 export default class UpdateCanteenController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const canteen = await Canteen.query()
       .where('id', params.id)
       .whereIn('schoolId', selectedSchoolIds ?? [])
@@ -28,6 +28,6 @@ export default class UpdateCanteenController {
       return canteen
     })
 
-    return response.ok(new CanteenDto(updatedCanteen))
+    return response.ok(await serialize(CanteenTransformer.transform(updatedCanteen)))
   }
 }

@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { api } from '~/lib/api'
+import { centsToReaisNumber, reaisNumberToCents } from '~/lib/currency_input_adapter'
 import { formatCurrency } from '~/lib/utils'
 
 const markPaidSchema = z.object({
@@ -56,7 +57,7 @@ interface MarkInvoicePaidModalProps {
   invoice: {
     id: string
     totalAmount: number
-    student?: { user?: { name?: string }; name?: string }
+    student?: { id?: string; user?: { name?: string }; name?: string }
     month: number | null
     year: number | null
   }
@@ -164,8 +165,8 @@ export function MarkInvoicePaidModal({ invoice, open, onOpenChange }: MarkInvoic
                   <FormLabel>Valor líquido recebido</FormLabel>
                   <FormControl>
                     <CurrencyInput
-                      value={field.value}
-                      onChange={(val) => field.onChange(parseFloat(val) || 0)}
+                      value={reaisNumberToCents(field.value ?? 0)}
+                      onChange={(cents) => field.onChange(centsToReaisNumber(cents))}
                       onBlur={field.onBlur}
                       ref={field.ref}
                     />

@@ -30,6 +30,8 @@ const ShowResponsavelAtividadesPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_atividades_page_controller')
 const ShowResponsavelHorarioPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_horario_page_controller')
+const ShowResponsavelCalendarioPageController = () =>
+  import('#controllers/pages/responsavel/show_responsavel_calendario_page_controller')
 const ShowResponsavelDocumentosPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_documentos_page_controller')
 const ShowResponsavelOcorrenciasPageController = () =>
@@ -55,6 +57,7 @@ export function registerResponsavelPageRoutes() {
       router.get('/autorizacoes', [ShowResponsavelAutorizacoesPageController]).as('autorizacoes')
       router.get('/atividades', [ShowResponsavelAtividadesPageController]).as('atividades')
       router.get('/horario', [ShowResponsavelHorarioPageController]).as('horario')
+      router.get('/calendario', [ShowResponsavelCalendarioPageController]).as('calendario')
       router.get('/documentos', [ShowResponsavelDocumentosPageController]).as('documentos')
       router.get('/registro-diario', [ShowResponsavelOcorrenciasPageController]).as('ocorrencias')
       router.get('/perfil', [ShowResponsavelPerfilPageController]).as('perfil')

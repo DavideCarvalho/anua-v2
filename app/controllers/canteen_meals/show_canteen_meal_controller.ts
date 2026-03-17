@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import CanteenMeal from '#models/canteen_meal'
-import CanteenMealDto from '#models/dto/canteen_meal.dto'
 import AppException from '#exceptions/app_exception'
+import CanteenMealTransformer from '#transformers/canteen_meal_transformer'
 
 export default class ShowCanteenMealController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const meal = await CanteenMeal.query()
       .where('id', params.id)
       .preload('canteen')
@@ -15,6 +15,6 @@ export default class ShowCanteenMealController {
       throw AppException.notFound('Refeição não encontrada')
     }
 
-    return response.ok(new CanteenMealDto(meal))
+    return response.ok(await serialize(CanteenMealTransformer.transform(meal)))
   }
 }

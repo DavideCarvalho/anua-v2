@@ -4,6 +4,12 @@ import StudentTransformer from '#transformers/student_transformer'
 
 export default class GamificationEventTransformer extends BaseTransformer<GamificationEvent> {
   toObject() {
+    const status = this.resource.error
+      ? 'FAILED'
+      : this.resource.processed
+        ? 'PROCESSED'
+        : 'PENDING'
+
     return {
       ...this.pick(this.resource, [
         'id',
@@ -17,6 +23,7 @@ export default class GamificationEventTransformer extends BaseTransformer<Gamifi
         'error',
         'createdAt',
       ]),
+      status,
       student: StudentTransformer.transform(this.whenLoaded(this.resource.student)),
     }
   }

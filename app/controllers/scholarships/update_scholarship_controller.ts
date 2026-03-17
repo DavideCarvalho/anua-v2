@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Scholarship from '#models/scholarship'
 import { updateScholarshipValidator } from '#validators/scholarship'
 import AppException from '#exceptions/app_exception'
-import ScholarshipDto from '#models/dto/scholarship.dto'
+import ScholarshipTransformer from '#transformers/scholarship_transformer'
 
 export default class UpdateScholarshipController {
-  async handle({ request, params, response, selectedSchoolIds }: HttpContext) {
+  async handle({ request, params, response, selectedSchoolIds, serialize }: HttpContext) {
     const payload = await request.validateUsing(updateScholarshipValidator)
 
     const scholarship = await Scholarship.query()
@@ -54,6 +54,6 @@ export default class UpdateScholarshipController {
     await scholarship.save()
     await scholarship.load('schoolPartner')
 
-    return response.ok(new ScholarshipDto(scholarship))
+    return response.ok(await serialize(ScholarshipTransformer.transform(scholarship)))
   }
 }

@@ -15,8 +15,8 @@ export default class StudentHasResponsibleTransformer extends BaseTransformer<St
         'createdAt',
         'updatedAt',
       ]),
-      student: StudentTransformer.transform(this.whenLoaded(this.resource.student)),
-      responsible: UserTransformer.transform(this.whenLoaded(this.resource.responsible)),
+      student: StudentTransformer.transform(this.whenLoaded(this.resource.student))?.depth(6),
+      responsible: UserTransformer.transform(this.whenLoaded(this.resource.responsible))?.depth(6),
     }
   }
 }

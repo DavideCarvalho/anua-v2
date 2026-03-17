@@ -8,8 +8,8 @@ import StudentPayment from '#models/student_payment'
 import EventStudentPayment from '#models/event_student_payment'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
-import EventParentalConsentDto from '#models/dto/event_parental_consent.dto'
 import AppException from '#exceptions/app_exception'
+import EventParentalConsentTransformer from '#transformers/event_parental_consent_transformer'
 
 type RespondResult =
   | { type: 'ok'; consent: EventParentalConsent }
@@ -18,7 +18,7 @@ type RespondResult =
   | { type: 'expired' }
 
 export default class RespondConsentController {
-  async handle({ auth, params, request, response, logger }: HttpContext) {
+  async handle({ auth, params, request, response, logger, serialize }: HttpContext) {
     const user = auth.user!
     const { id } = params
     const { approved, notes } = await request.validateUsing(respondConsentValidator)
@@ -101,7 +101,7 @@ export default class RespondConsentController {
 
     const consent = result.consent
 
-    return response.ok(new EventParentalConsentDto(consent))
+    return response.ok(await serialize(EventParentalConsentTransformer.transform(consent)))
   }
 
   private hasPaidAdditionalCosts(event: EventParentalConsent['event']) {

@@ -1,14 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
-import {
-  StudentAssignmentsResponseDto,
-  AssignmentDto,
-  SubjectFilterDto,
-  TeacherDto,
-  SubmissionDto,
-  AssignmentsSummaryDto,
-} from '#models/dto/student_assignments_response.dto'
 import AppException from '#exceptions/app_exception'
 
 interface AssignmentRow {
@@ -153,57 +145,51 @@ export default class GetStudentAssignmentsController {
       { studentId }
     )
 
-    const assignmentsList = (assignments.rows as AssignmentRow[]).map(
-      (row) =>
-        new AssignmentDto({
-          id: row.id,
-          title: row.name,
-          description: row.description,
-          instructions: null,
-          maxScore: Number(row.max_score),
-          dueDate: row.due_date,
-          subject: new SubjectFilterDto({
-            id: row.subject_id,
-            name: row.subject_name,
-          }),
-          teacher: new TeacherDto({
-            id: row.teacher_id,
-            name: row.teacher_name,
-          }),
-          submission: row.submission_id
-            ? new SubmissionDto({
-                id: row.submission_id,
-                score: row.score ? Number(row.score) : null,
-                feedback: null,
-                status: row.score ? 'GRADED' : 'SUBMITTED',
-                submittedAt: row.submitted_at,
-                gradedAt: row.score ? row.submitted_at : null,
-              })
-            : null,
-          computedStatus: row.computed_status,
-        })
-    )
+    const assignmentsList = (assignments.rows as AssignmentRow[]).map((row) => ({
+      id: row.id,
+      title: row.name,
+      description: row.description,
+      instructions: null,
+      maxScore: Number(row.max_score),
+      dueDate: new Date(row.due_date),
+      subject: {
+        id: row.subject_id,
+        name: row.subject_name,
+      },
+      teacher: {
+        id: row.teacher_id,
+        name: row.teacher_name,
+      },
+      submission: row.submission_id
+        ? {
+            id: row.submission_id,
+            score: row.score ? Number(row.score) : null,
+            feedback: null,
+            status: row.score ? 'GRADED' : 'SUBMITTED',
+            submittedAt: row.submitted_at ? new Date(row.submitted_at) : null,
+            gradedAt: row.score && row.submitted_at ? new Date(row.submitted_at) : null,
+          }
+        : null,
+      computedStatus: row.computed_status,
+    }))
 
-    const subjectsList = (subjects.rows as SubjectRow[]).map(
-      (row) =>
-        new SubjectFilterDto({
-          id: row.id,
-          name: row.name,
-        })
-    )
+    const subjectsList = (subjects.rows as SubjectRow[]).map((row) => ({
+      id: row.id,
+      name: row.name,
+    }))
 
     const summaryRow = summary.rows[0] as SummaryRow | undefined
-    const summaryData = new AssignmentsSummaryDto({
+    const summaryData = {
       total: Number(summaryRow?.total || 0),
       pending: Number(summaryRow?.pending || 0),
       completed: Number(summaryRow?.completed || 0),
       overdue: Number(summaryRow?.overdue || 0),
-    })
+    }
 
-    return new StudentAssignmentsResponseDto({
+    return {
       assignments: assignmentsList,
       subjects: subjectsList,
       summary: summaryData,
-    })
+    }
   }
 }

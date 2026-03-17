@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
-import InsuranceSchoolsWithoutInsuranceResponseDto from '#models/dto/insurance_schools_without_insurance_response.dto'
 import { getSchoolsWithoutInsuranceValidator } from '#validators/insurance'
 
 export default class GetSchoolsWithoutInsuranceController {
@@ -64,11 +63,9 @@ export default class GetSchoolsWithoutInsuranceController {
       }
     })
 
-    return response.ok(
-      new InsuranceSchoolsWithoutInsuranceResponseDto({
-        data: formattedSchools,
-        total: formattedSchools.length,
-      })
-    )
+    return response.ok({
+      data: formattedSchools,
+      total: formattedSchools.length,
+    })
   }
 }

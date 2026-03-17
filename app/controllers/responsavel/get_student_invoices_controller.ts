@@ -3,15 +3,15 @@ import { inject } from '@adonisjs/core'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
 import StudentHasResponsible from '#models/student_has_responsible'
-import InvoiceDto from '#models/dto/invoice.dto'
 import AppException from '#exceptions/app_exception'
 import AsaasService from '#services/asaas_service'
+import InvoiceTransformer from '#transformers/invoice_transformer'
 
 @inject()
 export default class GetStudentInvoicesController {
   constructor(private asaasService: AsaasService) {}
 
-  async handle({ params, request, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser, serialize }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
@@ -92,7 +92,7 @@ export default class GetStudentInvoicesController {
     }
 
     return {
-      ...InvoiceDto.fromPaginator(invoices),
+      ...(await serialize(InvoiceTransformer.paginate(invoices.all(), invoices.getMeta()))),
       summary,
       asaasEnabled,
     }

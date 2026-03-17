@@ -1,8 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { listAuditsValidator } from '#validators/audit'
-import AuditDto from '#models/dto/audit.dto'
 import AppException from '#exceptions/app_exception'
+import AuditTransformer from '#transformers/audit_transformer'
 
 const ENTITY_MAP: Record<string, string> = {
   'invoice': 'Invoice',
@@ -14,7 +14,7 @@ const ENTITY_MAP: Record<string, string> = {
 
 export default class ListAuditsController {
   async handle(ctx: HttpContext) {
-    const { params } = ctx
+    const { params, serialize } = ctx
     await ctx.request.validateUsing(listAuditsValidator)
 
     const { entityType, entityId } = params
@@ -30,6 +30,6 @@ export default class ListAuditsController {
       .where('auditable_id', entityId)
       .orderBy('created_at', 'desc')
 
-    return AuditDto.fromArray(audits)
+    return serialize(AuditTransformer.transform(audits))
   }
 }

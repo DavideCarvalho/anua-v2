@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Level from '#models/level'
-import LevelDto from '#models/dto/level.dto'
 import AppException from '#exceptions/app_exception'
+import LevelTransformer from '#transformers/level_transformer'
 
 export default class ShowLevelController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const level = await Level.query()
       .where('id', params.id)
       .preload('school')
@@ -15,6 +15,6 @@ export default class ShowLevelController {
       throw AppException.notFound('Nível não encontrado')
     }
 
-    return response.ok(new LevelDto(level))
+    return response.ok(await serialize(LevelTransformer.transform(level)))
   }
 }

@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasResponsible from '#models/student_has_responsible'
 import WalletTopUp from '#models/wallet_top_up'
-import WalletTopUpDto from '#models/dto/wallet_top_up.dto'
+import WalletTopUpTransformer from '#transformers/wallet_top_up_transformer'
 import { listWalletTopUpsValidator } from '#validators/wallet_top_up'
 import AppException from '#exceptions/app_exception'
 
 export default class ListWalletTopUpsController {
-  async handle({ params, request, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser, serialize }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
@@ -25,9 +25,16 @@ export default class ListWalletTopUpsController {
 
     const topUps = await WalletTopUp.query()
       .where('studentId', studentId)
+      .preload('student')
+      .preload('responsible')
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    return { data: topUps.all().map((t) => new WalletTopUpDto(t)), meta: topUps.getMeta() }
+    return {
+      data: await Promise.all(
+        topUps.all().map((topUp) => serialize(WalletTopUpTransformer.transform(topUp)))
+      ),
+      meta: topUps.getMeta(),
+    }
   }
 }

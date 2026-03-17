@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Subject from '#models/subject'
-import SubjectDto from '#models/dto/subject.dto'
 import { updateSubjectValidator } from '#validators/subject'
 import AppException from '#exceptions/app_exception'
+import SubjectTransformer from '#transformers/subject_transformer'
 
 export default class UpdateSubjectController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const subject = await Subject.find(params.id)
 
     if (!subject) {
@@ -40,6 +40,6 @@ export default class UpdateSubjectController {
       return subject
     })
 
-    return response.ok(new SubjectDto(updatedSubject))
+    return response.ok(await serialize(SubjectTransformer.transform(updatedSubject)))
   }
 }

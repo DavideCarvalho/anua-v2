@@ -284,6 +284,11 @@ const statusConfig: Record<InvoiceStatus, StatusConfig> = {
 
 function getPaymentDescription(payment: InvoicePaymentRecord): string {
   const contractName = payment.contract?.name
+  const extraClassName = (
+    payment as InvoicePaymentRecord & {
+      studentHasExtraClass?: { extraClass?: { name?: string } }
+    }
+  ).studentHasExtraClass?.extraClass?.name
   const installmentInfo =
     payment.installments > 0 ? ` (${payment.installmentNumber}/${payment.installments})` : ''
 
@@ -295,9 +300,7 @@ function getPaymentDescription(payment: InvoicePaymentRecord): string {
         ? `Matrícula - ${contractName}${installmentInfo}`
         : `Matrícula${installmentInfo}`
     case 'EXTRA_CLASS':
-      return payment.studentHasExtraClass?.extraClass?.name
-        ? `Aula Avulsa - ${payment.studentHasExtraClass.extraClass.name}`
-        : 'Aula Avulsa'
+      return extraClassName ? `Aula Avulsa - ${extraClassName}` : 'Aula Avulsa'
     case 'COURSE':
       return contractName ? `Curso - ${contractName}` : 'Curso'
     case 'STORE':
@@ -340,7 +343,7 @@ const monthLabels = [
 
 type Invoice = InvoicesResponse['data'][number]
 type InvoicePayment = NonNullable<Invoice['payments']>[number]
-type PaginationMeta = InvoicesResponse['meta']
+type PaginationMeta = InvoicesResponse['metadata']
 type StudentOption = { id: string; user?: { name?: string; email?: string } }
 type AcademicPeriodOption = { id: string; name: string }
 type CourseLevel = {
@@ -353,11 +356,14 @@ type AcademicPeriodCourse = { id: string; courseId: string; name: string; levels
 
 type InvoicePaymentRecord = InvoicePayment & {
   contract?: { name?: string }
+  studentHasExtraClass?: {
+    extraClass?: { name?: string }
+  }
 }
 
 type InvoiceRecord = Invoice & {
   studentId?: string
-  student?: { user?: { name?: string } }
+  student?: { name?: string; user?: { name?: string }; [key: string]: unknown }
   payments?: InvoicePaymentRecord[]
   baseAmount?: number | string | null
   discountAmount?: number | string | null
@@ -503,7 +509,7 @@ type SortableColumn =
   | 'year'
 
 function InvoicesContent() {
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceRecord | null>(null)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
   const [selectedStudents, setSelectedStudents] = useState<SelectedStudent[]>([])
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
@@ -513,7 +519,7 @@ function InvoicesContent() {
   } | null>(null)
   const [historyInvoiceId, setHistoryInvoiceId] = useState<string | null>(null)
 
-  function openModal(invoice: Invoice, modal: ModalType) {
+  function openModal(invoice: InvoiceRecord, modal: ModalType) {
     setSelectedInvoice(invoice)
     setActiveModal(modal)
   }
@@ -729,7 +735,7 @@ function InvoicesContent() {
   }
 
   const invoices: InvoiceRecord[] = (data?.data ?? []) as InvoiceRecord[]
-  const meta: PaginationMeta | undefined = data?.meta
+  const meta: PaginationMeta | undefined = data?.metadata
 
   return (
     <div className="space-y-4">
@@ -1444,7 +1450,7 @@ function InvoicesContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page >= meta.lastPage}
+                  disabled={page >= Number(meta.lastPage)}
                   onClick={() => setFilters({ page: page + 1 })}
                 >
                   <ChevronRight className="h-4 w-4" />

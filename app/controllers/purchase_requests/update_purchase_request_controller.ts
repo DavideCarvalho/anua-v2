@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PurchaseRequest from '#models/purchase_request'
-import PurchaseRequestDto from '#models/dto/purchase_request.dto'
 import { updatePurchaseRequestValidator } from '#validators/purchase_request'
 import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
+import PurchaseRequestTransformer from '#transformers/purchase_request_transformer'
 
 export default class UpdatePurchaseRequestController {
-  async handle({ params, request, response, auth }: HttpContext) {
+  async handle({ params, request, response, auth, serialize }: HttpContext) {
     const { id } = params
     const data = await request.validateUsing(updatePurchaseRequestValidator)
 
@@ -41,6 +41,6 @@ export default class UpdatePurchaseRequestController {
     await purchaseRequest.save()
     await purchaseRequest.load('requestingUser')
 
-    return response.ok(new PurchaseRequestDto(purchaseRequest))
+    return response.ok(await serialize(PurchaseRequestTransformer.transform(purchaseRequest)))
   }
 }

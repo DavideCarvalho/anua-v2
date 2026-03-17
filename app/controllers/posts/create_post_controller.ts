@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Post from '#models/post'
-import PostDto from '#models/dto/post.dto'
 import { createPostValidator } from '#validators/post'
 import { randomUUID } from 'node:crypto'
+import PostTransformer from '#transformers/post_transformer'
 
 export default class CreatePostController {
-  async handle({ request, response, auth }: HttpContext) {
+  async handle({ request, response, auth, serialize }: HttpContext) {
     const data = await request.validateUsing(createPostValidator)
 
     const post = await Post.create({
@@ -18,6 +18,6 @@ export default class CreatePostController {
     await post.load('user')
     await post.load('school')
 
-    return response.created(new PostDto(post))
+    return response.created(await serialize(PostTransformer.transform(post)))
   }
 }

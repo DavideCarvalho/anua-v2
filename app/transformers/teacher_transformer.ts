@@ -6,7 +6,7 @@ export default class TeacherTransformer extends BaseTransformer<Teacher> {
   toObject() {
     return {
       ...this.pick(this.resource, ['id', 'hourlyRate']),
-      user: UserTransformer.transform(this.whenLoaded(this.resource.user)),
+      user: UserTransformer.transform(this.whenLoaded(this.resource.user))?.depth(6),
     }
   }
 }

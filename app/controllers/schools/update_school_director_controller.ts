@@ -5,7 +5,6 @@ import School from '#models/school'
 import User from '#models/user'
 import Role from '#models/role'
 import UserHasSchool from '#models/user_has_school'
-import SchoolDirectorSummaryDto from '#models/dto/school_director_summary.dto'
 import { updateDirectorValidator } from '#validators/school'
 import AppException from '#exceptions/app_exception'
 
@@ -153,6 +152,10 @@ export default class UpdateSchoolDirectorController {
       throw AppException.badRequest('Dados inválidos')
     }
 
-    return response.ok(new SchoolDirectorSummaryDto(newDirectorUser))
+    return response.ok({
+      id: newDirectorUser.id,
+      name: newDirectorUser.name,
+      email: newDirectorUser.email,
+    })
   }
 }

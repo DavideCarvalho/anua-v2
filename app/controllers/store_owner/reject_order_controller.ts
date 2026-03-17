@@ -1,14 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StoreOrder from '#models/store_order'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import StoreItem from '#models/store_item'
 import StudentPayment from '#models/student_payment'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class RejectOrderController {
-  async handle({ storeOwnerStore, params, request, response, auth }: HttpContext) {
+  async handle({ storeOwnerStore, params, request, response, auth, serialize }: HttpContext) {
     const store = storeOwnerStore!
     const order = await StoreOrder.query()
       .where('id', params.id)
@@ -79,6 +79,6 @@ export default class RejectOrderController {
     await order.load('student')
     await order.load('items', (q) => q.preload('storeItem'))
 
-    return response.ok(new StoreOrderDto(order))
+    return response.ok(await serialize(StoreOrderTransformer.transform(order)))
   }
 }

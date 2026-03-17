@@ -16,6 +16,7 @@ import {
 import { Label } from '../../../components/ui/label'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
+import { Skeleton } from '../../../components/ui/skeleton'
 import { MonthlyTransfersTable } from '../../../containers/cantina/monthly-transfers-table'
 import type { SharedProps } from '../../../lib/types'
 import { api } from '~/lib/api'
@@ -38,6 +39,7 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
   )
 
   const { data: financialSettings, isLoading } = useQuery(queryOptions)
+  const isInitialLoading = isLoading && !financialSettings
 
   useEffect(() => {
     if (!financialSettings) return
@@ -90,6 +92,13 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isInitialLoading ? (
+          <div className="space-y-2 rounded-md border border-dashed p-3">
+            <p className="text-sm text-muted-foreground">Carregando configuração salva...</p>
+            <Skeleton className="h-3 w-2/3" />
+          </div>
+        ) : null}
+
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="canteen-pix-key">Chave PIX</Label>
@@ -97,8 +106,8 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
               id="canteen-pix-key"
               value={pixKey}
               onChange={(event) => setPixKey(event.target.value)}
-              placeholder="contato@cantina.com.br"
-              disabled={isLoading || saveMutation.isPending}
+              placeholder={isInitialLoading ? 'Carregando...' : 'contato@cantina.com.br'}
+              disabled={isInitialLoading || saveMutation.isPending}
             />
           </div>
 
@@ -109,7 +118,7 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               value={pixKeyType}
               onChange={(event) => setPixKeyType(event.target.value)}
-              disabled={isLoading || saveMutation.isPending}
+              disabled={isInitialLoading || saveMutation.isPending}
             >
               <option value="">Selecione</option>
               <option value="EMAIL">Email</option>
@@ -126,8 +135,10 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
               id="canteen-bank-name"
               value={bankName}
               onChange={(event) => setBankName(event.target.value)}
-              placeholder="Banco responsável pelo recebimento"
-              disabled={isLoading || saveMutation.isPending}
+              placeholder={
+                isInitialLoading ? 'Carregando...' : 'Banco responsável pelo recebimento'
+              }
+              disabled={isInitialLoading || saveMutation.isPending}
             />
           </div>
 
@@ -137,8 +148,8 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
               id="canteen-account-holder"
               value={accountHolder}
               onChange={(event) => setAccountHolder(event.target.value)}
-              placeholder="Nome do titular"
-              disabled={isLoading || saveMutation.isPending}
+              placeholder={isInitialLoading ? 'Carregando...' : 'Nome do titular'}
+              disabled={isInitialLoading || saveMutation.isPending}
             />
           </div>
 
@@ -152,7 +163,7 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
               step="0.01"
               value={platformFeePercentage}
               onChange={(event) => setPlatformFeePercentage(event.target.value)}
-              disabled={isLoading || saveMutation.isPending}
+              disabled={isInitialLoading || saveMutation.isPending}
             />
           </div>
         </div>
@@ -160,7 +171,7 @@ function FinancialSettingsCard({ canteenId }: { canteenId: string }) {
         <div className="flex justify-end">
           <Button
             onClick={() => saveMutation.mutate()}
-            disabled={isLoading || saveMutation.isPending}
+            disabled={isInitialLoading || saveMutation.isPending}
           >
             {saveMutation.isPending ? 'Salvando...' : 'Salvar configuração financeira'}
           </Button>

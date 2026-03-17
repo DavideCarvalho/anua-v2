@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PrintRequest from '#models/print_request'
-import PrintRequestDto from '#models/dto/print_request.dto'
 import AppException from '#exceptions/app_exception'
+import PrintRequestTransformer from '#transformers/print_request_transformer'
 
 export default class ApprovePrintRequestController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const printRequest = await PrintRequest.find(params.id)
     if (!printRequest) {
       throw AppException.notFound('Solicitação não encontrada')
@@ -13,6 +13,6 @@ export default class ApprovePrintRequestController {
     printRequest.status = 'APPROVED'
     await printRequest.save()
 
-    return response.ok(new PrintRequestDto(printRequest))
+    return response.ok(await serialize(PrintRequestTransformer.transform(printRequest)))
   }
 }

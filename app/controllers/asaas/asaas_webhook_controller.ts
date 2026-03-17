@@ -18,7 +18,7 @@ import Invoice from '#models/invoice'
 import SubscriptionInvoice from '#models/subscription_invoice'
 import Subscription from '#models/subscription'
 import SchoolChain from '#models/school_chain'
-import WebhookEventDto from '#models/dto/webhook_event.dto'
+import WebhookEventTransformer from '#transformers/webhook_event_transformer'
 
 type AsaasPaymentEvent =
   | 'PAYMENT_CONFIRMED'
@@ -119,7 +119,7 @@ const NFSE_EVENTS: AsaasNfseEvent[] = [
 ]
 
 export default class AsaasWebhookController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = request.body() as AsaasWebhookPayload
     const webhookToken = this.getWebhookToken(request)
 
@@ -133,12 +133,12 @@ export default class AsaasWebhookController {
 
     // Route account status events
     if (ACCOUNT_STATUS_EVENTS.includes(payload.event as AsaasAccountStatusEvent)) {
-      return this.enqueueAccountStatus(payload, webhookToken, response)
+      return this.enqueueAccountStatus(payload, webhookToken, response, serialize)
     }
 
     // Route NFS-e (invoice) events
     if (NFSE_EVENTS.includes(payload.event as AsaasNfseEvent)) {
-      return this.enqueueNfseEvent(payload, webhookToken, response)
+      return this.enqueueNfseEvent(payload, webhookToken, response, serialize)
     }
 
     // Payment events require payment data
@@ -155,19 +155,33 @@ export default class AsaasWebhookController {
 
     const existing = await WebhookEvent.query().where('eventId', eventId).first()
     if (existing) {
-      return response.ok(new WebhookEventDto(existing))
+      return response.ok(await serialize(WebhookEventTransformer.transform(existing)))
     }
 
     // Try StudentPayment first
     const payment = await StudentPayment.find(payload.payment.externalReference)
     if (payment) {
-      return this.enqueueStudentPayment(payment, payload, webhookToken, eventId, response)
+      return this.enqueueStudentPayment(
+        payment,
+        payload,
+        webhookToken,
+        eventId,
+        response,
+        serialize
+      )
     }
 
     // Try Invoice
     const invoice = await Invoice.find(payload.payment.externalReference)
     if (invoice) {
-      return this.enqueueInvoicePayment(invoice, payload, webhookToken, eventId, response)
+      return this.enqueueInvoicePayment(
+        invoice,
+        payload,
+        webhookToken,
+        eventId,
+        response,
+        serialize
+      )
     }
 
     // Try SubscriptionInvoice
@@ -178,14 +192,15 @@ export default class AsaasWebhookController {
         payload,
         webhookToken,
         eventId,
-        response
+        response,
+        serialize
       )
     }
 
     // Try WalletTopUp
     const topUp = await WalletTopUp.find(payload.payment.externalReference)
     if (topUp) {
-      return this.enqueueWalletTopUp(topUp, payload, webhookToken, eventId, response)
+      return this.enqueueWalletTopUp(topUp, payload, webhookToken, eventId, response, serialize)
     }
 
     throw AppException.notFound('Pagamento não encontrado')
@@ -194,7 +209,8 @@ export default class AsaasWebhookController {
   private async enqueueAccountStatus(
     payload: AsaasWebhookPayload,
     webhookToken: string,
-    response: HttpContext['response']
+    response: HttpContext['response'],
+    serialize: HttpContext['serialize']
   ) {
     // Validate against platform-level webhook token
     const platformToken = process.env.ASAAS_WEBHOOK_TOKEN
@@ -217,7 +233,7 @@ export default class AsaasWebhookController {
     const eventId = `asaas:${payload.event}:${accountId}`
     const existing = await WebhookEvent.query().where('eventId', eventId).first()
     if (existing) {
-      return response.ok(new WebhookEventDto(existing))
+      return response.ok(await serialize(WebhookEventTransformer.transform(existing)))
     }
 
     const webhookEvent = await WebhookEvent.create({
@@ -231,7 +247,7 @@ export default class AsaasWebhookController {
 
     await ProcessAsaasAccountStatusWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
-    return response.ok(new WebhookEventDto(webhookEvent))
+    return response.ok(await serialize(WebhookEventTransformer.transform(webhookEvent)))
   }
 
   private async enqueueStudentPayment(
@@ -239,7 +255,8 @@ export default class AsaasWebhookController {
     payload: AsaasWebhookPayload,
     webhookToken: string,
     eventId: string,
-    response: HttpContext['response']
+    response: HttpContext['response'],
+    serialize: HttpContext['serialize']
   ) {
     const contract = await Contract.query()
       .where('id', payment.contractId)
@@ -266,7 +283,7 @@ export default class AsaasWebhookController {
 
     await ProcessAsaasPaymentWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
-    return response.ok(new WebhookEventDto(webhookEvent))
+    return response.ok(await serialize(WebhookEventTransformer.transform(webhookEvent)))
   }
 
   private async enqueueInvoicePayment(
@@ -274,7 +291,8 @@ export default class AsaasWebhookController {
     payload: AsaasWebhookPayload,
     webhookToken: string,
     eventId: string,
-    response: HttpContext['response']
+    response: HttpContext['response'],
+    serialize: HttpContext['serialize']
   ) {
     // Resolve escola via Invoice → primeiro StudentPayment → Contract → School
     await invoice.load('payments', (q) => q.limit(1))
@@ -309,7 +327,7 @@ export default class AsaasWebhookController {
 
     await ProcessAsaasInvoiceWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
-    return response.ok(new WebhookEventDto(webhookEvent))
+    return response.ok(await serialize(WebhookEventTransformer.transform(webhookEvent)))
   }
 
   private async enqueueWalletTopUp(
@@ -317,7 +335,8 @@ export default class AsaasWebhookController {
     payload: AsaasWebhookPayload,
     webhookToken: string,
     eventId: string,
-    response: HttpContext['response']
+    response: HttpContext['response'],
+    serialize: HttpContext['serialize']
   ) {
     // Validate webhook token via student's school
     const studentHasLevel = await StudentHasLevel.query()
@@ -346,7 +365,7 @@ export default class AsaasWebhookController {
 
     await ProcessAsaasWalletTopUpWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
-    return response.ok(new WebhookEventDto(webhookEvent))
+    return response.ok(await serialize(WebhookEventTransformer.transform(webhookEvent)))
   }
 
   private async enqueueSubscriptionInvoicePayment(
@@ -354,7 +373,8 @@ export default class AsaasWebhookController {
     payload: AsaasWebhookPayload,
     webhookToken: string,
     eventId: string,
-    response: HttpContext['response']
+    response: HttpContext['response'],
+    serialize: HttpContext['serialize']
   ) {
     const subscription = await Subscription.query()
       .where('id', subscriptionInvoice.subscriptionId)
@@ -386,13 +406,14 @@ export default class AsaasWebhookController {
 
     await ProcessAsaasSubscriptionInvoiceWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
-    return response.ok(new WebhookEventDto(webhookEvent))
+    return response.ok(await serialize(WebhookEventTransformer.transform(webhookEvent)))
   }
 
   private async enqueueNfseEvent(
     payload: AsaasWebhookPayload,
     webhookToken: string,
-    response: HttpContext['response']
+    response: HttpContext['response'],
+    serialize: HttpContext['serialize']
   ) {
     if (!payload.invoice?.id) {
       throw AppException.invalidWebhookPayload()
@@ -438,7 +459,7 @@ export default class AsaasWebhookController {
     const eventId = `asaas:${payload.event}:${nfseId}`
     const existing = await WebhookEvent.query().where('eventId', eventId).first()
     if (existing) {
-      return response.ok(new WebhookEventDto(existing))
+      return response.ok(await serialize(WebhookEventTransformer.transform(existing)))
     }
 
     const webhookEvent = await WebhookEvent.create({
@@ -452,7 +473,7 @@ export default class AsaasWebhookController {
 
     await ProcessAsaasNfseWebhookJob.dispatch({ webhookEventId: webhookEvent.id })
 
-    return response.ok(new WebhookEventDto(webhookEvent))
+    return response.ok(await serialize(WebhookEventTransformer.transform(webhookEvent)))
   }
 
   private getWebhookToken(request: HttpRequest): string | null {

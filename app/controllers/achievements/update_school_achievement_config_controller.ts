@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import SchoolAchievementConfig from '#models/school_achievement_config'
-import SchoolAchievementConfigDto from '#models/dto/school_achievement_config.dto'
 import { updateSchoolAchievementConfigValidator } from '#validators/gamification'
+import SchoolAchievementConfigTransformer from '#transformers/school_achievement_config_transformer'
 
 export default class UpdateSchoolAchievementConfigController {
-  async handle({ request, params }: HttpContext) {
+  async handle({ request, params, serialize }: HttpContext) {
     const { achievementId, schoolId } = params
     const payload = await request.validateUsing(updateSchoolAchievementConfigValidator)
 
@@ -24,6 +24,6 @@ export default class UpdateSchoolAchievementConfigController {
       await config.save()
     }
 
-    return { data: new SchoolAchievementConfigDto(config) }
+    return { data: await serialize(SchoolAchievementConfigTransformer.transform(config)) }
   }
 }

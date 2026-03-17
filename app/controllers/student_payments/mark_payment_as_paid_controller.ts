@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
-import StudentPaymentDto from '#models/dto/student_payment.dto'
 import CanteenPurchase from '#models/canteen_purchase'
 import { markPaymentAsPaidValidator } from '#validators/student_payment'
 import AppException from '#exceptions/app_exception'
+import StudentPaymentTransformer from '#transformers/student_payment_transformer'
 
 export default class MarkPaymentAsPaidController {
-  async handle({ params, request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
     const { id } = params
     const payload = await request.validateUsing(markPaymentAsPaidValidator)
 
@@ -58,6 +58,6 @@ export default class MarkPaymentAsPaidController {
 
     await payment.load('student')
 
-    return response.ok(new StudentPaymentDto(payment))
+    return response.ok(await serialize(StudentPaymentTransformer.transform(payment)))
   }
 }

@@ -5,6 +5,7 @@ import AcademicPeriodTransformer from '#transformers/academic_period_transformer
 import ContractTransformer from '#transformers/contract_transformer'
 import ScholarshipTransformer from '#transformers/scholarship_transformer'
 import LevelTransformer from '#transformers/level_transformer'
+import LevelAssignedToCourseHasAcademicPeriodTransformer from '#transformers/level_assigned_to_course_has_academic_period_transformer'
 import ClassTransformer from '#transformers/class_transformer'
 import type IndividualDiscount from '#models/individual_discount'
 
@@ -38,12 +39,20 @@ export default class StudentHasLevelTransformer extends BaseTransformer<StudentH
         'createdAt',
         'updatedAt',
       ]),
-      student: StudentTransformer.transform(this.whenLoaded(this.resource.student)),
+      student: StudentTransformer.transform(this.whenLoaded(this.resource.student))?.depth(6),
       academicPeriod: AcademicPeriodTransformer.transform(
         this.whenLoaded(this.resource.academicPeriod)
-      ),
-      contract: ContractTransformer.transform(this.whenLoaded(this.resource.contract)),
-      scholarship: ScholarshipTransformer.transform(this.whenLoaded(this.resource.scholarship)),
+      )?.depth(6),
+      contract: ContractTransformer.transform(this.whenLoaded(this.resource.contract))?.depth(6),
+      scholarship: ScholarshipTransformer.transform(
+        this.whenLoaded(this.resource.scholarship)
+      )?.depth(6),
+      level: LevelTransformer.transform(this.whenLoaded(this.resource.level))?.depth(6),
+      levelAssignedToCourseAcademicPeriod:
+        LevelAssignedToCourseHasAcademicPeriodTransformer.transform(
+          this.whenLoaded(this.resource.levelAssignedToCourseAcademicPeriod)
+        )?.depth(6),
+      class: ClassTransformer.transform(this.whenLoaded(this.resource.class))?.depth(6),
       individualDiscounts: individualDiscounts.map((discount) => ({
         id: discount.id,
         name: discount.name,
@@ -53,8 +62,6 @@ export default class StudentHasLevelTransformer extends BaseTransformer<StudentH
         validUntil: discount.validUntil,
         isActive: discount.isActive,
       })),
-      level: LevelTransformer.transform(this.whenLoaded(this.resource.level)),
-      class: ClassTransformer.transform(this.whenLoaded(this.resource.class)),
     }
   }
 }

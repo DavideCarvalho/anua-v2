@@ -45,7 +45,7 @@ const schema = z.object({
   type: z.enum(['WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT', 'QUIZ'], {
     message: 'Qual o tipo da prova?',
   }),
-  subjectId: z.string().min(1, 'Qual materia?'),
+  subjectId: z.string().min(1, 'Qual matéria?'),
   description: z.string().optional(),
 })
 
@@ -130,7 +130,7 @@ export function NewExamModal({
     const canSeeAllSubjects = !user || (user.role?.name && DIRECTOR_ROLES.includes(user.role.name))
     const result: Subject[] = []
     const seen = new Set<string>()
-    const teacherClasses = classData.teacherClasses
+    const teacherClasses = classData.teacherClasses || []
 
     for (const tc of teacherClasses) {
       if (!tc.subject || seen.has(tc.subject.id)) continue
@@ -193,7 +193,7 @@ export function NewExamModal({
     }
 
     if (!isEditMode && !requiresContextStep && !selectedSubject) {
-      toast.error('Selecione uma materia')
+      toast.error('Selecione uma matéria')
       return
     }
 
@@ -279,11 +279,11 @@ export function NewExamModal({
 
               {!requiresContextStep && !isEditMode ? (
                 <div className="space-y-2">
-                  <Label>Pra qual materia? *</Label>
+                  <Label>Pra qual matéria? *</Label>
                   {isLoadingSubjects ? (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Carregando materias...
+                      Carregando matérias...
                     </div>
                   ) : (
                     <Select
@@ -293,9 +293,9 @@ export function NewExamModal({
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione a materia">
+                        <SelectValue placeholder="Selecione a matéria">
                           {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
-                            (form.watch('subjectId') ? 'Carregando...' : 'Selecione a materia')}
+                            (form.watch('subjectId') ? 'Carregando...' : 'Selecione a matéria')}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>

@@ -2,11 +2,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Achievement from '#models/achievement'
 import GamificationEvent from '#models/gamification_event'
 import StudentGamification from '#models/student_gamification'
-import GamificationEventDto from '#models/dto/gamification_event.dto'
 import AppException from '#exceptions/app_exception'
+import GamificationEventTransformer from '#transformers/gamification_event_transformer'
 
 export default class UnlockAchievementController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const { studentId, achievementId } = request.only(['studentId', 'achievementId'])
 
     if (!studentId || !achievementId) {
@@ -65,6 +65,6 @@ export default class UnlockAchievementController {
 
     await gamificationEvent.load('student')
 
-    return new GamificationEventDto(gamificationEvent)
+    return serialize(GamificationEventTransformer.transform(gamificationEvent))
   }
 }

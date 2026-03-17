@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasExtraClass from '#models/student_has_extra_class'
-import StudentHasExtraClassDto from '#models/dto/student_has_extra_class.dto'
+import StudentHasExtraClassTransformer from '#transformers/student_has_extra_class_transformer'
 
 export default class ListExtraClassStudentsController {
-  async handle({ params, request }: HttpContext) {
+  async handle({ params, request, serialize }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 50)
 
@@ -16,6 +16,8 @@ export default class ListExtraClassStudentsController {
 
     const students = await query.paginate(page, limit)
 
-    return StudentHasExtraClassDto.fromPaginator(students)
+    const items = students.all()
+    const metadata = students.getMeta()
+    return await serialize(StudentHasExtraClassTransformer.paginate(items, metadata))
   }
 }

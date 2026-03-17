@@ -6,8 +6,8 @@ import Role from '#models/role'
 import TeacherHasSubject from '#models/teacher_has_subject'
 import UserHasSchool from '#models/user_has_school'
 import { createTeacherValidator } from '#validators/teacher'
-import TeacherDto from '#models/dto/teacher.dto'
 import AppException from '#exceptions/app_exception'
+import TeacherTransformer from '#transformers/teacher_transformer'
 
 class InternalError extends Error {
   status = 500
@@ -18,7 +18,7 @@ class InternalError extends Error {
 }
 
 export default class CreateTeacherController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const data = await request.validateUsing(createTeacherValidator)
 
     // Check if user already exists
@@ -71,6 +71,6 @@ export default class CreateTeacherController {
     await teacher.load('user')
     await teacher.load('subjects')
 
-    return new TeacherDto(teacher)
+    return serialize(TeacherTransformer.transform(teacher))
   }
 }

@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Level from '#models/level'
-import LevelDto from '#models/dto/level.dto'
 import { updateLevelValidator } from '#validators/level'
 import AppException from '#exceptions/app_exception'
+import LevelTransformer from '#transformers/level_transformer'
 
 export default class UpdateLevelController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const level = await Level.find(params.id)
 
     if (!level) {
@@ -26,6 +26,6 @@ export default class UpdateLevelController {
       return level
     })
 
-    return response.ok(new LevelDto(updatedLevel))
+    return response.ok(await serialize(LevelTransformer.transform(updatedLevel)))
   }
 }

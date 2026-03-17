@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import InsuranceClaim from '#models/insurance_claim'
-import InsuranceClaimDto from '#models/dto/insurance_claim.dto'
 import { listInsuranceClaimsValidator } from '#validators/insurance'
+import InsuranceClaimTransformer from '#transformers/insurance_claim_transformer'
 
 export default class ListInsuranceClaimsController {
-  async handle({ request }: HttpContext) {
+  async handle({ request, serialize }: HttpContext) {
     const {
       schoolId,
       status,
@@ -50,6 +50,8 @@ export default class ListInsuranceClaimsController {
 
     const claims = await query.paginate(page, limit)
 
-    return InsuranceClaimDto.fromPaginator(claims)
+    const data = claims.all()
+    const metadata = claims.getMeta()
+    return serialize(InsuranceClaimTransformer.paginate(data, metadata))
   }
 }

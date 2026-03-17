@@ -32,12 +32,14 @@ export default class UserTransformer extends BaseTransformer<User> {
         'createdAt',
         'updatedAt',
       ]),
-      role: RoleTransformer.transform(this.whenLoaded(this.resource.role)),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
-      schoolChain: SchoolChainTransformer.transform(this.whenLoaded(this.resource.schoolChain)),
+      role: RoleTransformer.transform(this.whenLoaded(this.resource.role))?.depth(6),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(6),
+      schoolChain: SchoolChainTransformer.transform(
+        this.whenLoaded(this.resource.schoolChain)
+      )?.depth(6),
       responsibleAddress: ResponsibleAddressTransformer.transform(
         this.whenLoaded(this.resource.responsibleAddress)
-      ),
+      )?.depth(6),
     }
   }
 }

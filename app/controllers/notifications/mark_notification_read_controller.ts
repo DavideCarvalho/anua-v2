@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Notification from '#models/notification'
 import { DateTime } from 'luxon'
-import NotificationDto from '#models/dto/notification.dto'
 import AppException from '#exceptions/app_exception'
+import NotificationTransformer from '#transformers/notification_transformer'
 
 export default class MarkNotificationReadController {
-  async handle({ params, auth, effectiveUser }: HttpContext) {
+  async handle({ params, auth, effectiveUser, serialize }: HttpContext) {
     const { id } = params
 
     const user = effectiveUser ?? auth.user!
@@ -21,6 +21,6 @@ export default class MarkNotificationReadController {
       await notification.save()
     }
 
-    return new NotificationDto(notification)
+    return serialize(NotificationTransformer.transform(notification))
   }
 }

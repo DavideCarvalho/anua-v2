@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
-import GamificationEventDto from '#models/dto/gamification_event.dto'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
 import AppException from '#exceptions/app_exception'
+import GamificationEventTransformer from '#transformers/gamification_event_transformer'
 
 export default class RetryGamificationEventController {
-  async handle({ params, response, logger }: HttpContext) {
+  async handle({ params, response, logger, serialize }: HttpContext) {
     const event = await GamificationEvent.find(params.id)
 
     if (!event) {
@@ -35,6 +35,6 @@ export default class RetryGamificationEventController {
       query.preload('user')
     })
 
-    return response.ok(new GamificationEventDto(event))
+    return response.ok(await serialize(GamificationEventTransformer.transform(event)))
   }
 }

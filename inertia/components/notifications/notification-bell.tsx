@@ -67,7 +67,13 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notificacoes">
+        <Button
+          id="notification-bell-trigger"
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label="Notificações"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">

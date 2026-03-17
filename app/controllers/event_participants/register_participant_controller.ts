@@ -2,13 +2,13 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Event from '#models/event'
 import EventParticipant from '#models/event_participant'
-import EventParticipantDto from '#models/dto/event_participant.dto'
 import { registerParticipantValidator } from '#validators/event'
 import { randomUUID } from 'node:crypto'
 import AppException from '#exceptions/app_exception'
+import EventParticipantTransformer from '#transformers/event_participant_transformer'
 
 export default class RegisterParticipantController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const { eventId } = params
     const data = await request.validateUsing(registerParticipantValidator)
 
@@ -50,6 +50,6 @@ export default class RegisterParticipantController {
     await participant.load('user')
     await participant.load('event')
 
-    return response.created(new EventParticipantDto(participant))
+    return response.created(await serialize(EventParticipantTransformer.transform(participant)))
   }
 }

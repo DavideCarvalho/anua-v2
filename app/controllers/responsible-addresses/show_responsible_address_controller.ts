@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ResponsibleAddress from '#models/responsible_address'
-import { ResponsibleAddressDto } from '#models/dto/responsible_address.dto'
 import AppException from '#exceptions/app_exception'
+import ResponsibleAddressTransformer from '#transformers/responsible_address_transformer'
 
 export default class ShowResponsibleAddressController {
-  async handle({ params }: HttpContext) {
+  async handle({ params, serialize }: HttpContext) {
     const { responsibleId } = params
 
     const address = await ResponsibleAddress.query()
@@ -16,6 +16,6 @@ export default class ShowResponsibleAddressController {
       throw AppException.notFound('Endereço não encontrado')
     }
 
-    return new ResponsibleAddressDto(address)
+    return serialize(ResponsibleAddressTransformer.transform(address))
   }
 }

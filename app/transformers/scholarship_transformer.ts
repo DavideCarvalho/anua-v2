@@ -21,10 +21,10 @@ export default class ScholarshipTransformer extends BaseTransformer<Scholarship>
         'description',
         'code',
       ]),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(6),
       schoolPartner: SchoolPartnerTransformer.transform(
         this.whenLoaded(this.resource.schoolPartner)
-      ),
+      )?.depth(6),
     }
   }
 }

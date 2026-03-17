@@ -18,8 +18,8 @@ export default class LevelTransformer extends BaseTransformer<Level> {
         'createdAt',
         'updatedAt',
       ]),
-      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school)),
-      contract: ContractTransformer.transform(this.whenLoaded(this.resource.contract)),
+      school: SchoolTransformer.transform(this.whenLoaded(this.resource.school))?.depth(6),
+      contract: ContractTransformer.transform(this.whenLoaded(this.resource.contract))?.depth(6),
       classes: ClassTransformer.transform(this.whenLoaded(this.resource.classes)),
     }
   }

@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import PrintRequest from '#models/print_request'
-import PrintRequestDto from '#models/dto/print_request.dto'
 import { rejectPrintRequestValidator } from '#validators/print_request'
 import AppException from '#exceptions/app_exception'
+import PrintRequestTransformer from '#transformers/print_request_transformer'
 
 export default class RejectPrintRequestController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const { reason } = await request.validateUsing(rejectPrintRequestValidator)
 
     const printRequest = await PrintRequest.find(params.id)
@@ -17,6 +17,6 @@ export default class RejectPrintRequestController {
     printRequest.rejectedFeedback = reason
     await printRequest.save()
 
-    return response.ok(new PrintRequestDto(printRequest))
+    return response.ok(await serialize(PrintRequestTransformer.transform(printRequest)))
   }
 }

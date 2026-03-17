@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
-import { EmployeeListDto } from '#dtos/employee_dto'
+import EmployeeListItemTransformer from '#transformers/employee_list_item_transformer'
 
 interface UserSchoolRow {
   schoolId: string
@@ -20,9 +20,25 @@ interface EmployeeRow {
   roleName: string
 }
 
+function buildPaginationMeta(total: number, perPage: number, currentPage: number) {
+  const lastPage = Math.ceil(total / perPage) || 1
+
+  return {
+    total,
+    perPage,
+    currentPage,
+    lastPage,
+    firstPage: 1,
+    firstPageUrl: '',
+    lastPageUrl: '',
+    nextPageUrl: '',
+    previousPageUrl: '',
+  }
+}
+
 export default class SchoolEmployeesController {
   async handle(ctx: HttpContext) {
-    const { request, auth } = ctx
+    const { request, auth, serialize } = ctx
     const user = ctx.effectiveUser ?? auth.user!
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
@@ -39,13 +55,9 @@ export default class SchoolEmployeesController {
     const schoolIds = userSchoolsResult.rows.map((row) => row.schoolId).filter(Boolean)
 
     if (schoolIds.length === 0) {
-      return new EmployeeListDto([], {
-        total: 0,
-        perPage: limit,
-        currentPage: page,
-        lastPage: 1,
-        firstPage: 1,
-      })
+      return serialize(
+        EmployeeListItemTransformer.paginate([], buildPaginationMeta(0, limit, page))
+      )
     }
 
     // Roles to exclude - these are not "employees"
@@ -133,12 +145,8 @@ export default class SchoolEmployeesController {
       },
     }))
 
-    return new EmployeeListDto(employees, {
-      total,
-      perPage: limit,
-      currentPage: page,
-      lastPage: Math.ceil(total / limit) || 1,
-      firstPage: 1,
-    })
+    return serialize(
+      EmployeeListItemTransformer.paginate(employees, buildPaginationMeta(total, limit, page))
+    )
   }
 }

@@ -3,16 +3,16 @@ import { inject } from '@adonisjs/core'
 import Contract from '#models/contract'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
-import StudentPaymentDto from '#models/dto/student_payment.dto'
 import AsaasService from '#services/asaas_service'
 import { createAsaasChargeValidator } from '#validators/asaas'
 import AppException from '#exceptions/app_exception'
+import StudentPaymentTransformer from '#transformers/student_payment_transformer'
 
 @inject()
 export default class CreateStudentPaymentAsaasChargeController {
   constructor(private asaasService: AsaasService) {}
 
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createAsaasChargeValidator)
 
     const payment = await StudentPayment.find(params.id)
@@ -48,7 +48,7 @@ export default class CreateStudentPaymentAsaasChargeController {
         existingPayment.bankSlipUrl ?? existingPayment.invoiceUrl ?? payment.invoiceUrl
       await payment.save()
       await payment.load('student')
-      return response.ok(new StudentPaymentDto(payment))
+      return response.ok(await serialize(StudentPaymentTransformer.transform(payment)))
     }
 
     const customerId = await this.asaasService.getOrCreateAsaasCustomer(config.apiKey, student.user)
@@ -78,6 +78,6 @@ export default class CreateStudentPaymentAsaasChargeController {
     await payment.save()
     await payment.load('student')
 
-    return response.created(new StudentPaymentDto(payment))
+    return response.created(await serialize(StudentPaymentTransformer.transform(payment)))
   }
 }

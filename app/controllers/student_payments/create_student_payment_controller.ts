@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import StudentPayment from '#models/student_payment'
-import StudentPaymentDto from '#models/dto/student_payment.dto'
 import { createStudentPaymentValidator } from '#validators/student_payment'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
+import StudentPaymentTransformer from '#transformers/student_payment_transformer'
 
 export default class CreateStudentPaymentController {
   async handle(ctx: HttpContext) {
-    const { request, response, logger } = ctx
+    const { request, response, logger, serialize } = ctx
     const payload = await request.validateUsing(createStudentPaymentValidator)
     const user = ctx.auth?.user
 
@@ -42,6 +42,6 @@ export default class CreateStudentPaymentController {
 
     await payment.load('student')
 
-    return response.created(new StudentPaymentDto(payment))
+    return response.created(await serialize(StudentPaymentTransformer.transform(payment)))
   }
 }

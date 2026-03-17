@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Invoice from '#models/invoice'
-import InvoiceDto from '#models/dto/invoice.dto'
 import { listInvoicesValidator } from '#validators/invoice'
+import InvoiceTransformer from '#transformers/invoice_transformer'
 
 export default class ListInvoicesController {
   async handle(ctx: HttpContext) {
-    const { request, selectedSchoolIds } = ctx
+    const { request, selectedSchoolIds, serialize } = ctx
     const payload = await request.validateUsing(listInvoicesValidator)
 
     const {
@@ -173,6 +173,8 @@ export default class ListInvoicesController {
 
     const invoices = await query.paginate(page, limit)
 
-    return InvoiceDto.fromPaginator(invoices)
+    const items = invoices.all()
+    const metadata = invoices.getMeta()
+    return serialize(InvoiceTransformer.paginate(items, metadata))
   }
 }

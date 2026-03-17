@@ -4,12 +4,12 @@ import Canteen from '#models/canteen'
 import User from '#models/user'
 import Role from '#models/role'
 import UserHasSchool from '#models/user_has_school'
-import CanteenDto from '#models/dto/canteen.dto'
 import { createCanteenValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
+import CanteenTransformer from '#transformers/canteen_transformer'
 
 export default class CreateCanteenController {
-  async handle({ request, response, selectedSchoolIds }: HttpContext) {
+  async handle({ request, response, selectedSchoolIds, serialize }: HttpContext) {
     const data = await request.validateUsing(createCanteenValidator)
 
     // Garante que exatamente um dos dois foi fornecido
@@ -107,6 +107,6 @@ export default class CreateCanteenController {
       return newCanteen
     })
 
-    return response.created(new CanteenDto(canteen))
+    return response.created(await serialize(CanteenTransformer.transform(canteen)))
   }
 }

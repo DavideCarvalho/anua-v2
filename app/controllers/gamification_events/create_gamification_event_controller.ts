@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import GamificationEvent from '#models/gamification_event'
-import GamificationEventDto from '#models/dto/gamification_event.dto'
 import { createGamificationEventValidator } from '#validators/gamification'
 import ProcessGamificationEventJob from '#jobs/gamification/process_gamification_event_job'
+import GamificationEventTransformer from '#transformers/gamification_event_transformer'
 
 export default class CreateGamificationEventController {
-  async handle({ request, response, logger }: HttpContext) {
+  async handle({ request, response, logger, serialize }: HttpContext) {
     const payload = await request.validateUsing(createGamificationEventValidator)
 
     const event = await GamificationEvent.create({
@@ -28,6 +28,6 @@ export default class CreateGamificationEventController {
       query.preload('user')
     })
 
-    return response.created(new GamificationEventDto(event))
+    return response.created(await serialize(GamificationEventTransformer.transform(event)))
   }
 }

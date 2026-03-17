@@ -3,10 +3,10 @@ import { saveExamGradeValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import AppException from '#exceptions/app_exception'
-import ExamGradeDto from '#models/dto/exam_grade.dto'
+import ExamGradeTransformer from '#transformers/exam_grade_transformer'
 
 export default class UpdateExamGradeController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const { id, gradeId } = params
     const payload = await request.validateUsing(saveExamGradeValidator)
 
@@ -35,6 +35,6 @@ export default class UpdateExamGradeController {
     await grade.load('student')
     await grade.load('exam')
 
-    return response.ok(new ExamGradeDto(grade))
+    return response.ok(await serialize(ExamGradeTransformer.transform(grade)))
   }
 }

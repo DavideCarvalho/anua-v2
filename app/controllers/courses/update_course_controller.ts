@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Course from '#models/course'
-import CourseDto from '#models/dto/course.dto'
 import { updateCourseValidator } from '#validators/course'
 import AppException from '#exceptions/app_exception'
+import CourseTransformer from '#transformers/course_transformer'
 
 export default class UpdateCourseController {
-  async handle({ params, request, response }: HttpContext) {
+  async handle({ params, request, response, serialize }: HttpContext) {
     const course = await Course.find(params.id)
 
     if (!course) {
@@ -23,6 +23,6 @@ export default class UpdateCourseController {
       return course
     })
 
-    return response.ok(new CourseDto(updatedCourse))
+    return response.ok(await serialize(CourseTransformer.transform(updatedCourse)))
   }
 }

@@ -5,10 +5,10 @@ import StoreSettlement from '#models/store_settlement'
 import StoreFinancialSettings from '#models/store_financial_settings'
 import { createStoreSettlementValidator } from '#validators/store'
 import AppException from '#exceptions/app_exception'
-import StoreSettlementDto from '#models/dto/store_settlement.dto'
+import StoreSettlementTransformer from '#transformers/store_settlement_transformer'
 
 export default class CreateStoreSettlementController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const data = await request.validateUsing(createStoreSettlementValidator)
 
     // Verify store exists and is THIRD_PARTY
@@ -72,6 +72,6 @@ export default class CreateStoreSettlementController {
 
     await settlement.load('store')
 
-    return response.created(new StoreSettlementDto(settlement))
+    return response.created(await serialize(StoreSettlementTransformer.transform(settlement)))
   }
 }

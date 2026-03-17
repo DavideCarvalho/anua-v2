@@ -1,12 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentGamification from '#models/student_gamification'
 import Student from '#models/student'
-import StudentGamificationDto from '#models/dto/student_gamification.dto'
 import { createStudentGamificationValidator } from '#validators/student_gamification'
 import AppException from '#exceptions/app_exception'
+import StudentGamificationTransformer from '#transformers/student_gamification_transformer'
 
 export default class CreateStudentGamificationController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createStudentGamificationValidator)
 
     // Check if student exists
@@ -31,6 +31,6 @@ export default class CreateStudentGamificationController {
       studentQuery.preload('user')
     })
 
-    return response.created(new StudentGamificationDto(gamification))
+    return response.created(await serialize(StudentGamificationTransformer.transform(gamification)))
   }
 }

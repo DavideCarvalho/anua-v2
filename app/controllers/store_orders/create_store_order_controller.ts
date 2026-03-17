@@ -8,13 +8,13 @@ import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
 import StudentBalanceTransaction from '#models/student_balance_transaction'
 import StudentHasLevel from '#models/student_has_level'
-import StoreOrderDto from '#models/dto/store_order.dto'
 import { createStoreOrderValidator } from '#validators/gamification'
 import ReconcilePaymentInvoiceJob from '#jobs/payments/reconcile_payment_invoice_job'
 import AppException from '#exceptions/app_exception'
+import StoreOrderTransformer from '#transformers/store_order_transformer'
 
 export default class CreateStoreOrderController {
-  async handle({ request, response, auth, effectiveUser }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser, serialize }: HttpContext) {
     const payload = await request.validateUsing(createStoreOrderValidator)
 
     // 1. GUARD: Student has active StudentHasLevel (extract contractId)
@@ -165,7 +165,7 @@ export default class CreateStoreOrderController {
           await order.load('store')
         }
 
-        return response.created(new StoreOrderDto(order))
+        return response.created(await serialize(StoreOrderTransformer.transform(order)))
       }
 
       // PIX, CASH, CARD - direct payment
@@ -194,7 +194,7 @@ export default class CreateStoreOrderController {
         await order.load('store')
       }
 
-      return response.created(new StoreOrderDto(order))
+      return response.created(await serialize(StoreOrderTransformer.transform(order)))
     }
 
     // 6. DEFERRED payment - create StudentPayment(s)
@@ -271,7 +271,7 @@ export default class CreateStoreOrderController {
       await order.load('store')
     }
 
-    return response.created(new StoreOrderDto(order))
+    return response.created(await serialize(StoreOrderTransformer.transform(order)))
   }
 
   private async dispatchPostCheckoutJobs(

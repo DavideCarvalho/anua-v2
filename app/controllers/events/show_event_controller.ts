@@ -1,10 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
-import EventDto from '#models/dto/event.dto'
 import AppException from '#exceptions/app_exception'
+import EventTransformer from '#transformers/event_transformer'
 
 export default class ShowEventController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const { id } = params
 
     const event = await Event.query()
@@ -22,6 +22,6 @@ export default class ShowEventController {
       throw AppException.notFound('Evento não encontrado')
     }
 
-    return response.ok(new EventDto(event))
+    return response.ok(await serialize(EventTransformer.transform(event)))
   }
 }

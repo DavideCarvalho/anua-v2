@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Occurrence from '#models/occurrence'
 import StudentHasResponsible from '#models/student_has_responsible'
-import OccurrenceSchoolListItemDto from '#models/dto/occurrence_school_list_item.dto'
 import AppException from '#exceptions/app_exception'
+import OccurrenceSchoolListItemTransformer from '#transformers/occurrence_school_list_item_transformer'
 
 export default class ShowOccurrenceController {
-  async handle({ params, response, selectedSchoolIds }: HttpContext) {
+  async handle({ params, response, selectedSchoolIds, serialize }: HttpContext) {
     const scopedSchoolIds = selectedSchoolIds ?? []
 
     const occurrence = await Occurrence.query()
@@ -38,16 +38,10 @@ export default class ShowOccurrenceController {
       .where('isPedagogical', true)
       .count('* as total')
 
-    return response.ok(
-      new OccurrenceSchoolListItemDto({
-        occurrence,
-        studentName: occurrence.student?.user?.name || 'Aluno',
-        className: occurrence.teacherHasClass?.class?.name || '-',
-        teacherName: occurrence.teacherHasClass?.teacher?.user?.name || null,
-        subjectName: occurrence.teacherHasClass?.subject?.name || null,
-        acknowledgedCount: Number(occurrence.$extras.acknowledgements_count || 0),
-        totalResponsibles: Number(pedagogicalResponsibleCount[0]?.$extras.total || 0),
-      })
+    occurrence.$extras.total_responsibles = Number(
+      pedagogicalResponsibleCount[0]?.$extras.total || 0
     )
+
+    return response.ok(await serialize(OccurrenceSchoolListItemTransformer.transform(occurrence)))
   }
 }
