@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -89,7 +89,7 @@ function LaunchGradesModalContent({
   academicPeriodId,
   onOpenChange,
 }: Omit<LaunchGradesModalProps, 'open'>) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -228,12 +228,15 @@ function LaunchGradesModalContent({
                       className="w-16 sm:w-20 text-center"
                       value={student.grade ?? ''}
                       onChange={(e) => {
-                        const grade = e.target.valueAsNumber
-                        if (Number.isNaN(grade)) {
+                        const value = e.target.value
+                        if (value === '' || value === '-') {
                           form.setValue(`grades.${index}.grade`, null)
                           return
                         }
-                        form.setValue(`grades.${index}.grade`, grade)
+                        const grade = parseFloat(value)
+                        if (!Number.isNaN(grade)) {
+                          form.setValue(`grades.${index}.grade`, grade)
+                        }
                       }}
                     />
                     {maxGrade !== null && (
