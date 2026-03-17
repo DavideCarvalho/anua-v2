@@ -39,19 +39,16 @@ type RecurrenceSlot = {
   canteenMeal?: { id: string; name: string; mealType: string } | null
 }
 
-type MealRecurrenceResponse = Awaited<
-  ReturnType<import('#controllers/responsavel/list_student_meal_recurrence_controller').default['handle']>
->
-
 interface MealRecurrenceConfigProps {
   studentId: string
 }
 
 export function MealRecurrenceConfig({ studentId }: MealRecurrenceConfigProps) {
   const queryClient = useQueryClient()
-  const [openSlot, setOpenSlot] = useState<{ weekDay: number; mealType: 'LUNCH' | 'DINNER' } | null>(
-    null
-  )
+  const [openSlot, setOpenSlot] = useState<{
+    weekDay: number
+    mealType: 'LUNCH' | 'DINNER'
+  } | null>(null)
 
   const { data, isLoading, isError, error } = useQuery({
     ...api.api.v1.responsavel.api.studentMealRecurrence.queryOptions({
@@ -132,7 +129,8 @@ export function MealRecurrenceConfig({ studentId }: MealRecurrenceConfigProps) {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Erro ao carregar recorrência: {error instanceof Error ? error.message : 'Erro desconhecido'}
+          Erro ao carregar recorrência:{' '}
+          {error instanceof Error ? error.message : 'Erro desconhecido'}
         </AlertDescription>
       </Alert>
     )
@@ -172,8 +170,8 @@ export function MealRecurrenceConfig({ studentId }: MealRecurrenceConfigProps) {
           Recorrência de Refeições
         </CardTitle>
         <CardDescription>
-          Configure reservas automáticas por dia da semana. A reserva será criada com o que houver no
-          cardápio do dia (o cardápio muda toda semana).
+          Configure reservas automáticas por dia da semana. A reserva será criada com o que houver
+          no cardápio do dia (o cardápio muda toda semana).
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -189,46 +187,46 @@ export function MealRecurrenceConfig({ studentId }: MealRecurrenceConfigProps) {
                 return (
                   <Dialog
                     key={`${wd.value}-${mt.value}`}
-                    open={
-                      openSlot?.weekDay === wd.value && openSlot?.mealType === mt.value
-                    }
+                    open={openSlot?.weekDay === wd.value && openSlot?.mealType === mt.value}
                     onOpenChange={(open) =>
                       setOpenSlot(open ? { weekDay: wd.value, mealType: mt.value } : null)
                     }
                   >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="relative h-16 w-full flex-col gap-1 py-2 pl-3 pr-8 min-w-0"
-                      >
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {mt.label}
-                        </span>
-                        <span className="text-sm truncate w-full text-center">{label}</span>
-                        <Settings className="absolute right-2 top-1/2 size-3.5 -translate-y-1/2 shrink-0 text-muted-foreground" />
-                      </Button>
-                    </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        Configurar {wd.label} - {mt.label}
-                      </DialogTitle>
-                      <DialogDescription>
-                        A reserva será criada automaticamente com o que houver no cardápio do dia.
-                        O cardápio muda toda semana, então não é possível pré-selecionar uma refeição
-                        específica.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <SlotConfigForm
-                      weekDay={wd.value}
-                      mealType={mt.value}
-                      currentValue={config ? 'livre' : 'desativar'}
-                      onSave={(value) => handleSaveSlot(wd.value, mt.value, value)}
-                      onCancel={() => setOpenSlot(null)}
-                      isSaving={updateMutation.isPending}
+                    <DialogTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          className="relative h-16 w-full flex-col gap-1 py-2 pl-3 pr-8 min-w-0"
+                        >
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {mt.label}
+                          </span>
+                          <span className="text-sm truncate w-full text-center">{label}</span>
+                          <Settings className="absolute right-2 top-1/2 size-3.5 -translate-y-1/2 shrink-0 text-muted-foreground" />
+                        </Button>
+                      }
                     />
-                  </DialogContent>
-                </Dialog>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>
+                          Configurar {wd.label} - {mt.label}
+                        </DialogTitle>
+                        <DialogDescription>
+                          A reserva será criada automaticamente com o que houver no cardápio do dia.
+                          O cardápio muda toda semana, então não é possível pré-selecionar uma
+                          refeição específica.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <SlotConfigForm
+                        weekDay={wd.value}
+                        mealType={mt.value}
+                        currentValue={config ? 'livre' : 'desativar'}
+                        onSave={(value) => handleSaveSlot(wd.value, mt.value, value)}
+                        onCancel={() => setOpenSlot(null)}
+                        isSaving={updateMutation.isPending}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 )
               })}
             </div>

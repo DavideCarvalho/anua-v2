@@ -388,11 +388,11 @@ export default function CardapioPage() {
                           {(type === 'LUNCH' ? counts.lunch : counts.dinner) > 0 && (
                             <Link
                               route="web.escola.cantina.reservas"
-                              query={{ date: key }}
+                              data={{ date: key }}
                               className="flex items-center gap-1 text-xs text-primary hover:underline"
                             >
                               <Users className="h-3 w-3" />
-                              {type === 'LUNCH' ? counts.lunch : counts.dinner}
+                              <>{type === 'LUNCH' ? counts.lunch : counts.dinner}</>
                             </Link>
                           )}
                         </div>
@@ -493,10 +493,12 @@ export default function CardapioPage() {
                               {(counts.lunch > 0 || counts.dinner > 0) && (
                                 <Link
                                   route="web.escola.cantina.reservas"
-                                  query={{ date: key }}
+                                  data={{ date: key }}
                                   className="mt-2 block text-center text-xs text-primary hover:underline"
                                 >
-                                  Ver reservas ({counts.lunch} almoço, {counts.dinner} janta)
+                                  <>
+                                    Ver reservas ({counts.lunch} almoço, {counts.dinner} janta)
+                                  </>
                                 </Link>
                               )}
                             </>

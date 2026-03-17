@@ -35,7 +35,6 @@ type StudentsResponse = Route.Response<'api.v1.students.index'>
 type CanteenItemsResponse = Route.Response<'api.v1.canteen_items.index'>
 type CanteenMealsResponse = Route.Response<'api.v1.canteen_meals.index'>
 type StudentEnrollment = Route.Response<'api.v1.students.enrollments.list'>[number]
-type CanteenFinancialSettings = Route.Response<'api.v1.canteens.financial_settings.show'>
 type CanteenMealListItem = CanteenMealsResponse['data'][number]
 interface CreateCanteenPurchasePayload {
   userId: string
@@ -137,9 +136,10 @@ export default function PDVPage() {
   })
   const allMeals = mealsData?.data ?? []
   const meals = allMeals.filter((m) => {
-    const d = m.date
+    const d = m.date as string | Date | undefined
     if (!d) return false
-    const key = typeof d === 'string' ? d.slice(0, 10) : d.toISOString?.().slice(0, 10)
+    const dateStr = typeof d === 'string' ? d : new Date(d).toISOString()
+    const key = dateStr.slice(0, 10)
     return key === todayIso
   })
 
@@ -214,9 +214,9 @@ export default function PDVPage() {
   }
 
   const onAddMeal = (meal: CanteenMealListItem) => {
-    const mealType = (meal.mealType === 'LUNCH' || meal.mealType === 'DINNER'
-      ? meal.mealType
-      : 'LUNCH') as 'LUNCH' | 'DINNER'
+    const mealType = (
+      meal.mealType === 'LUNCH' || meal.mealType === 'DINNER' ? meal.mealType : 'LUNCH'
+    ) as 'LUNCH' | 'DINNER'
     setCart((prev) => {
       const existing = prev.find((c) => c.id === meal.id && c.type === 'meal')
       if (existing) {
@@ -307,7 +307,10 @@ export default function PDVPage() {
       ),
     }
 
-    const mealItems = cart.filter((c): c is typeof c & { mealType: 'LUNCH' | 'DINNER' } => c.type === 'meal' && c.mealType != null)
+    const mealItems = cart.filter(
+      (c): c is typeof c & { mealType: 'LUNCH' | 'DINNER' } =>
+        c.type === 'meal' && c.mealType != null
+    )
     const uniqueMealTypes = [...new Set(mealItems.map((m) => m.mealType))]
 
     let hasRecurrence = false
