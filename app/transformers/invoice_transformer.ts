@@ -41,7 +41,7 @@ export default class InvoiceTransformer extends BaseTransformer<Invoice> {
         'createdAt',
         'updatedAt',
       ]),
-      student: StudentTransformer.transform(this.whenLoaded(this.resource.student)),
+      student: StudentTransformer.transform(this.whenLoaded(this.resource.student))?.depth(6),
       payments: filteredPayments
         ? StudentPaymentTransformer.transform(filteredPayments)
         : undefined,
