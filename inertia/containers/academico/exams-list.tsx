@@ -43,6 +43,8 @@ type Exam = Route.Response<'api.v1.exams.index'>['data'][number]
 interface ExamsListProps {
   classId?: string
   subjectId?: string
+  courseId?: string
+  academicPeriodId?: string
 }
 
 function ExamsListSkeleton() {
@@ -63,7 +65,7 @@ function ExamsListEmpty() {
   )
 }
 
-export function ExamsList({ classId, subjectId }: ExamsListProps) {
+export function ExamsList({ classId, subjectId, courseId, academicPeriodId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
@@ -71,7 +73,9 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
 
   const queryClient = useQueryClient()
   const { data, isLoading, isError } = useQuery(
-    api.api.v1.exams.index.queryOptions({ query: { classId, subjectId } })
+    api.api.v1.exams.index.queryOptions({
+      query: { classId, subjectId, courseId },
+    })
   )
 
   const deleteMutation = useMutation(api.api.v1.exams.destroy.mutationOptions())
@@ -242,7 +246,7 @@ export function ExamsList({ classId, subjectId }: ExamsListProps) {
           maxScore={selectedExam.maxScore}
           classId={selectedExam.classId}
           courseId={selectedExam.courseId}
-          academicPeriodId={selectedExam.academicPeriodId}
+          academicPeriodId={academicPeriodId ?? selectedExam.academicPeriodId}
           open={!!selectedExam}
           onOpenChange={(open) => {
             if (!open) setSelectedExam(null)

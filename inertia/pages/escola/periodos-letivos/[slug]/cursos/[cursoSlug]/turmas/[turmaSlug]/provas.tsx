@@ -26,7 +26,7 @@ const TurmaProvasPage: FC<Props> = ({
   courseSlug,
   classSlug,
   classId,
-  courseId: _courseId,
+  courseId,
   className,
   courseName,
   academicPeriodId,
@@ -57,7 +57,7 @@ const TurmaProvasPage: FC<Props> = ({
             </div>
           </CardHeader>
           <CardContent>
-            <ExamsList classId={classId} />
+            <ExamsList classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
           </CardContent>
         </Card>
 

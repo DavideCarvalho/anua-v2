@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { addDays, addWeeks, format, startOfWeek } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Link } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
 import {
   Calendar,
   ChevronLeft,
@@ -378,7 +378,6 @@ export default function CardapioPage() {
                     const hasAny = lunchMeals.length > 0 || dinnerMeals.length > 0
 
                     const counts = countsByDate.get(key) ?? { lunch: 0, dinner: 0 }
-                    const reservasHref = `/escola/cantina/reservas?date=${key}${canteenId ? `&canteenId=${canteenId}` : ''}`
 
                     const renderMealSlot = (type: MealType, typeMeals: CanteenMeal[]) => (
                       <div key={type} className="space-y-1">
@@ -388,7 +387,8 @@ export default function CardapioPage() {
                           </p>
                           {(type === 'LUNCH' ? counts.lunch : counts.dinner) > 0 && (
                             <Link
-                              href={reservasHref}
+                              route="web.escola.cantina.reservas"
+                              query={{ date: key }}
                               className="flex items-center gap-1 text-xs text-primary hover:underline"
                             >
                               <Users className="h-3 w-3" />
@@ -492,7 +492,8 @@ export default function CardapioPage() {
                               {renderMealSlot('DINNER', dinnerMeals)}
                               {(counts.lunch > 0 || counts.dinner > 0) && (
                                 <Link
-                                  href={reservasHref}
+                                  route="web.escola.cantina.reservas"
+                                  query={{ date: key }}
                                   className="mt-2 block text-center text-xs text-primary hover:underline"
                                 >
                                   Ver reservas ({counts.lunch} almoço, {counts.dinner} janta)

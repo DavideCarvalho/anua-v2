@@ -72,7 +72,7 @@ const DIRECTOR_ROLES = ['SCHOOL_DIRECTOR', 'SCHOOL_COORDINATOR', 'ADMIN', 'SUPER
 
 export function NewExamModal({
   classId,
-  academicPeriodId: _academicPeriodId,
+  academicPeriodId,
   open,
   onOpenChange,
   user,
@@ -229,7 +229,7 @@ export function NewExamModal({
               : (selectedSubject?.teacherId ?? ''),
             academicPeriodId: requiresContextStep
               ? (resolvedContext?.academicPeriodId ?? undefined)
-              : undefined,
+              : academicPeriodId,
           },
         })
       }
