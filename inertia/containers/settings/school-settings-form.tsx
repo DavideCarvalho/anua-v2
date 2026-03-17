@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Building2, MapPin, GraduationCap, Save, Loader2 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -65,7 +65,6 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
 
   type SchoolSettingsFormState = {
     name: string
-    slug: string
     street: string
     number: string
     complement: string
@@ -80,20 +79,38 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
   }
 
   const [formData, setFormData] = useState<SchoolSettingsFormState>({
-    name: school?.name || '',
-    slug: school?.slug || '',
-    street: school?.street || '',
-    number: school?.number || '',
-    complement: school?.complement || '',
-    neighborhood: school?.neighborhood || '',
-    city: school?.city || '',
-    state: school?.state || '',
-    zipCode: school?.zipCode || '',
-    logoUrl: school?.logoUrl || '',
-    minimumGrade: school?.minimumGrade ?? 6,
-    calculationAlgorithm: school?.calculationAlgorithm === 'SUM' ? 'SUM' : 'AVERAGE',
-    minimumAttendancePercentage: school?.minimumAttendancePercentage ?? 75,
+    name: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    logoUrl: '',
+    minimumGrade: 6,
+    calculationAlgorithm: 'AVERAGE',
+    minimumAttendancePercentage: 75,
   })
+
+  useEffect(() => {
+    if (school) {
+      setFormData({
+        name: school.name || '',
+        street: school.street || '',
+        number: school.number || '',
+        complement: school.complement || '',
+        neighborhood: school.neighborhood || '',
+        city: school.city || '',
+        state: school.state || '',
+        zipCode: school.zipCode || '',
+        logoUrl: school.logoUrl || '',
+        minimumGrade: school.minimumGrade ?? 6,
+        calculationAlgorithm: school.calculationAlgorithm === 'SUM' ? 'SUM' : 'AVERAGE',
+        minimumAttendancePercentage: school.minimumAttendancePercentage ?? 75,
+      })
+    }
+  }, [school])
 
   const handleChange = <K extends keyof SchoolSettingsFormState>(
     field: K,
@@ -139,16 +156,6 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
               id="name"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="slug">Slug (URL)</Label>
-            <Input
-              id="slug"
-              value={formData.slug}
-              onChange={(e) => handleChange('slug', e.target.value)}
-              pattern="[a-z0-9-]+"
               required
             />
           </div>
@@ -269,8 +276,10 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
                 handleChange('calculationAlgorithm', value === 'SUM' ? 'SUM' : 'AVERAGE')
               }
             >
-              <SelectTrigger id="calculationAlgorithm">
-                <SelectValue />
+              <SelectTrigger id="calculationAlgorithm" className="w-full">
+                <SelectValue>
+                  {formData.calculationAlgorithm === 'AVERAGE' ? 'Média Aritmética' : 'Soma'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="AVERAGE">Média Aritmética</SelectItem>
