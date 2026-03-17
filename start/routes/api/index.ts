@@ -57,6 +57,7 @@ import {
   registerCanteenMealApiRoutes,
   registerCanteenMealReservationApiRoutes,
   registerCanteenPurchaseApiRoutes,
+  registerStudentMealRecurrenceCheckApiRoutes,
 } from './canteen.js'
 import {
   registerAchievementApiRoutes,
@@ -155,6 +156,7 @@ export function registerApiRoutes() {
   registerCanteenMealApiRoutes()
   registerCanteenMealReservationApiRoutes()
   registerCanteenPurchaseApiRoutes()
+  registerStudentMealRecurrenceCheckApiRoutes()
   registerAchievementApiRoutes()
   registerStoreApiRoutes()
   registerStoreSettlementApiRoutes()

@@ -101,6 +101,7 @@ test.group('Canteen fiado flow API', (group) => {
         studentHasLevelId: fixtures.studentHasLevel.id,
         items: [
           {
+            type: 'item',
             canteenItemId: fixtures.item.id,
             quantity: 2,
           },
@@ -205,6 +206,7 @@ test.group('Canteen fiado flow API', (group) => {
         paymentMethod: 'CASH',
         items: [
           {
+            type: 'item',
             canteenItemId: fixtures.item.id,
             quantity: 1,
           },
@@ -259,6 +261,7 @@ test.group('Canteen fiado flow API', (group) => {
           studentHasLevelId: fixtures.studentHasLevel.id,
           items: [
             {
+              type: 'item',
               canteenItemId: fixtures.item.id,
               quantity: 1,
             },
@@ -293,6 +296,7 @@ test.group('Canteen fiado flow API', (group) => {
       studentHasLevelId: fixtures.studentHasLevel.id,
       items: [
         {
+          type: 'item',
           canteenItemId: fixtures.item.id,
           quantity: 1,
         },

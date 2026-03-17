@@ -10,6 +10,7 @@ import GenerateSubscriptionInvoicesJob from '#jobs/payments/generate_subscriptio
 import RetrySubscriptionInvoiceChargesJob from '#jobs/payments/retry_subscription_invoice_charges_job'
 import RetryPendingEventsJob from '#jobs/gamification/retry_pending_events_job'
 import UpdateStreaksJob from '#jobs/gamification/update_streaks_job'
+import CreateMealRecurrenceReservationsJob from '#jobs/canteen/create_meal_recurrence_reservations_job'
 
 if (process.env.DISABLE_SCHEDULER) {
   console.log('[SCHEDULER] Scheduler disabled (DISABLE_SCHEDULER is set)')
@@ -37,6 +38,14 @@ if (process.env.DISABLE_SCHEDULER) {
     })
     .daily()
     .at('05:00')
+
+  // 05:30 - Criar reservas de refeições a partir da recorrência (almoço/janta)
+  scheduler
+    .call(async () => {
+      await CreateMealRecurrenceReservationsJob.dispatch({})
+    })
+    .daily()
+    .at('05:30')
 
   // 06:00 - Criar cobranças Asaas para invoices OPEN/OVERDUE sem charge
   scheduler

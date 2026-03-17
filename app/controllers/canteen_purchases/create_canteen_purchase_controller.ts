@@ -3,6 +3,7 @@ import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import CanteenPurchase, { type CanteenPurchaseStatus } from '#models/canteen_purchase'
 import CanteenItem from '#models/canteen_item'
+import CanteenMeal from '#models/canteen_meal'
 import CanteenItemPurchased from '#models/canteen_item_purchased'
 import Student from '#models/student'
 import StudentPayment from '#models/student_payment'
@@ -14,19 +15,22 @@ import { createCanteenPurchaseValidator } from '#validators/canteen'
 import AppException from '#exceptions/app_exception'
 import CanteenPurchaseTransformer from '#transformers/canteen_purchase_transformer'
 
+type PurchaseItem =
+  | { type: 'item'; canteenItemId: string; quantity: number }
+  | { type: 'meal'; canteenMealId: string; quantity: number }
+
 export default class CreateCanteenPurchaseController {
-  private normalizeItemsSignature(items: Array<{ canteenItemId: string; quantity: number }>) {
-    const quantitiesByItemId = new Map<string, number>()
+  private normalizeItemsSignature(items: PurchaseItem[]) {
+    const quantitiesByKey = new Map<string, number>()
 
     for (const item of items) {
-      quantitiesByItemId.set(
-        item.canteenItemId,
-        (quantitiesByItemId.get(item.canteenItemId) ?? 0) + item.quantity
-      )
+      const key =
+        item.type === 'item' ? `item:${item.canteenItemId}` : `meal:${item.canteenMealId}`
+      quantitiesByKey.set(key, (quantitiesByKey.get(key) ?? 0) + item.quantity)
     }
 
-    return [...quantitiesByItemId.entries()]
-      .map(([canteenItemId, quantity]) => `${canteenItemId}:${quantity}`)
+    return [...quantitiesByKey.entries()]
+      .map(([k, q]) => `${k}:${q}`)
       .sort()
       .join('|')
   }
@@ -36,7 +40,7 @@ export default class CreateCanteenPurchaseController {
     canteenId: string
     paymentMethod: string
     totalAmount: number
-    items: Array<{ canteenItemId: string; quantity: number }>
+    items: PurchaseItem[]
   }) {
     const recentPurchases = await CanteenPurchase.query()
       .where('userId', payload.userId)
@@ -52,13 +56,12 @@ export default class CreateCanteenPurchaseController {
     const payloadSignature = this.normalizeItemsSignature(payload.items)
 
     const duplicate = recentPurchases.find((purchase) => {
-      const purchaseSignature = this.normalizeItemsSignature(
-        purchase.itemsPurchased.map((item) => ({
-          canteenItemId: item.canteenItemId,
-          quantity: item.quantity,
-        }))
+      const purchaseItems: PurchaseItem[] = purchase.itemsPurchased.map((item) =>
+        item.canteenItemId
+          ? { type: 'item' as const, canteenItemId: item.canteenItemId, quantity: item.quantity }
+          : { type: 'meal' as const, canteenMealId: item.canteenMealId!, quantity: item.quantity }
       )
-
+      const purchaseSignature = this.normalizeItemsSignature(purchaseItems)
       return purchaseSignature === payloadSignature
     })
 
@@ -130,14 +133,20 @@ export default class CreateCanteenPurchaseController {
     const { request, response, auth, logger, serialize } = ctx
     const payload = await request.validateUsing(createCanteenPurchaseValidator)
 
-    // Validate that all items exist and are active
-    const itemIds = payload.items.map((item) => item.canteenItemId)
+    const itemIds = payload.items
+      .filter((i): i is { type: 'item'; canteenItemId: string; quantity: number } => i.type === 'item')
+      .map((i) => i.canteenItemId)
+    const mealIds = payload.items
+      .filter((i): i is { type: 'meal'; canteenMealId: string; quantity: number } => i.type === 'meal')
+      .map((i) => i.canteenMealId)
+    const todayIso = DateTime.now().toISODate()
+
     const canteenItems = await CanteenItem.query()
       .whereIn('id', itemIds)
       .where('isActive', true)
       .where('canteenId', payload.canteenId)
 
-    if (canteenItems.length !== itemIds.length) {
+    if (itemIds.length > 0 && canteenItems.length !== itemIds.length) {
       const foundIds = canteenItems.map((item) => item.id)
       const missingOrInactiveIds = itemIds.filter((id) => !foundIds.includes(id))
       throw AppException.badRequest(
@@ -145,13 +154,32 @@ export default class CreateCanteenPurchaseController {
       )
     }
 
-    // Create a map for quick price lookup
-    const itemPriceMap = new Map(canteenItems.map((item) => [item.id, item.price]))
+    const canteenMeals =
+      mealIds.length > 0
+        ? await CanteenMeal.query()
+            .whereIn('id', mealIds)
+            .where('isActive', true)
+            .where('canteenId', payload.canteenId)
+            .where('date', todayIso!)
+        : []
 
-    // Calculate total amount from items (sum of item.price * quantity)
+    if (mealIds.length > 0 && canteenMeals.length !== mealIds.length) {
+      const foundMealIds = canteenMeals.map((m) => m.id)
+      const missingMealIds = mealIds.filter((id) => !foundMealIds.includes(id))
+      throw AppException.badRequest(
+        `Refeições inválidas, inativas ou fora da data de hoje: ${missingMealIds.join(', ')}`
+      )
+    }
+
+    const itemPriceMap = new Map<string, number>([
+      ...canteenItems.map((item) => [item.id, item.price] as const),
+      ...canteenMeals.map((meal) => [meal.id, meal.price] as const),
+    ])
+
     let totalAmount = 0
     for (const item of payload.items) {
-      const unitPrice = itemPriceMap.get(item.canteenItemId)!
+      const id = item.type === 'item' ? item.canteenItemId : item.canteenMealId
+      const unitPrice = itemPriceMap.get(id)!
       totalAmount += unitPrice * item.quantity
     }
 
@@ -245,12 +273,14 @@ export default class CreateCanteenPurchaseController {
       purchaseId = purchase.id
 
       for (const item of payload.items) {
-        const unitPrice = itemPriceMap.get(item.canteenItemId)!
+        const id = item.type === 'item' ? item.canteenItemId : item.canteenMealId
+        const unitPrice = itemPriceMap.get(id)!
         const itemPurchased = new CanteenItemPurchased()
         itemPurchased.useTransaction(trx)
         itemPurchased.fill({
           canteenPurchaseId: purchase.id,
-          canteenItemId: item.canteenItemId,
+          canteenItemId: item.type === 'item' ? item.canteenItemId : null,
+          canteenMealId: item.type === 'meal' ? item.canteenMealId : null,
           quantity: item.quantity,
           price: unitPrice,
         })
@@ -302,7 +332,7 @@ export default class CreateCanteenPurchaseController {
     await purchase.load('user')
     await purchase.load('canteen')
     await purchase.load('itemsPurchased', (query) => {
-      query.preload('item')
+      query.preload('item').preload('meal')
     })
 
     return response.created(await serialize(CanteenPurchaseTransformer.transform(purchase)))

@@ -1,8 +1,9 @@
 import { Head, usePage } from '@inertiajs/react'
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueries } from '@tanstack/react-query'
 import { addDays, addWeeks, format, startOfWeek } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { Link } from '@inertiajs/react'
 import {
   Calendar,
   ChevronLeft,
@@ -12,6 +13,7 @@ import {
   Plus,
   Trash2,
   UtensilsCrossed,
+  Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -55,6 +57,8 @@ interface PageProps extends SharedProps {
   canteenId?: string | null
 }
 
+type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK'
+
 type CanteenMeal = {
   id: string
   name: string
@@ -62,11 +66,17 @@ type CanteenMeal = {
   date: string | Date
   price: number
   maxServings?: number | null
+  mealType?: MealType
 }
 
 interface PaginatorLike<T> {
   data: T[]
 }
+
+const MEAL_TYPE_OPTIONS: { value: MealType; label: string }[] = [
+  { value: 'LUNCH', label: 'Almoço' },
+  { value: 'DINNER', label: 'Janta' },
+]
 
 interface MealFormValues {
   name: string
@@ -74,6 +84,7 @@ interface MealFormValues {
   date: string
   priceReais: string
   maxReservations: string
+  mealType: MealType
 }
 
 const emptyMealForm: MealFormValues = {
@@ -82,6 +93,7 @@ const emptyMealForm: MealFormValues = {
   date: '',
   priceReais: '',
   maxReservations: '',
+  mealType: 'LUNCH',
 }
 
 function priceToCents(value: string) {
@@ -146,21 +158,43 @@ export default function CardapioPage() {
 
   const meals = (data as PaginatorLike<CanteenMeal> | undefined)?.data ?? []
 
-  const mealsByDate = useMemo(() => {
-    const map = new Map<string, CanteenMeal[]>()
+  const countsQueries = useQueries({
+    queries: weekDays.map((day) => ({
+      ...api.api.v1.canteenMealReservations.counts.queryOptions({
+        query: { canteenId: canteenId ?? '', date: toDateInput(day) },
+      }),
+      enabled: !!canteenId,
+    })),
+  })
+  const countsByDate = useMemo(() => {
+    const map = new Map<string, { lunch: number; dinner: number }>()
+    weekDays.forEach((day, i) => {
+      const res = countsQueries[i]?.data as { lunch: number; dinner: number } | undefined
+      map.set(toDateInput(day), res ?? { lunch: 0, dinner: 0 })
+    })
+    return map
+  }, [weekDays, countsQueries])
+
+  const mealsByDateAndType = useMemo(() => {
+    const map = new Map<string, Map<MealType, CanteenMeal[]>>()
 
     for (const meal of meals) {
-      const key = toDateKey(meal.date)
-      const existing = map.get(key) ?? []
+      const dateKey = toDateKey(meal.date)
+      const type = (meal.mealType as MealType) ?? 'LUNCH'
+      if (!map.has(dateKey)) {
+        map.set(dateKey, new Map())
+      }
+      const typeMap = map.get(dateKey)!
+      const existing = typeMap.get(type) ?? []
       existing.push(meal)
-      map.set(key, existing)
+      typeMap.set(type, existing)
     }
 
     return map
   }, [meals])
 
-  const openCreateForDate = (date: Date) => {
-    setCreateForm({ ...emptyMealForm, date: toDateInput(date) })
+  const openCreateForDate = (date: Date, mealType: MealType = 'LUNCH') => {
+    setCreateForm({ ...emptyMealForm, date: toDateInput(date), mealType })
     setCreateOpen(true)
   }
 
@@ -172,6 +206,7 @@ export default function CardapioPage() {
       date: toDateKey(meal.date),
       priceReais: (meal.price / 100).toFixed(2),
       maxReservations: meal.maxServings ? String(meal.maxServings) : '',
+      mealType: (meal.mealType as MealType) ?? 'LUNCH',
     })
   }
 
@@ -199,6 +234,7 @@ export default function CardapioPage() {
           description: createForm.description.trim() || undefined,
           price,
           servedAt: createForm.date,
+          mealType: createForm.mealType,
           maxReservations,
         },
       }),
@@ -238,6 +274,7 @@ export default function CardapioPage() {
           description: editForm.description.trim() || undefined,
           price,
           servedAt: editForm.date,
+          mealType: editForm.mealType,
           maxReservations,
         },
       }),
@@ -276,7 +313,9 @@ export default function CardapioPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Cardápio</h1>
-            <p className="text-muted-foreground">Configure o cardápio semanal da cantina</p>
+            <p className="text-muted-foreground">
+              Configure almoço e janta da cantina por dia da semana
+            </p>
           </div>
           <Button onClick={() => openCreateForDate(new Date())}>
             <Plus className="h-4 w-4 mr-2" />
@@ -333,24 +372,45 @@ export default function CardapioPage() {
                 <div className="grid gap-4 md:grid-cols-5">
                   {weekDays.map((day) => {
                     const key = toDateInput(day)
-                    const dayMeals = mealsByDate.get(key) ?? []
+                    const dayByType = mealsByDateAndType.get(key)
+                    const lunchMeals = dayByType?.get('LUNCH') ?? []
+                    const dinnerMeals = dayByType?.get('DINNER') ?? []
+                    const hasAny = lunchMeals.length > 0 || dinnerMeals.length > 0
 
-                    return (
-                      <Card key={key}>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm">
-                            {format(day, 'EEEE', { locale: ptBR })}
-                          </CardTitle>
-                          <CardDescription>{format(day, 'dd/MM')}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          {dayMeals.length === 0 ? (
-                            <div className="text-center py-3 text-muted-foreground">
-                              <UtensilsCrossed className="h-5 w-5 mx-auto mb-1 opacity-50" />
-                              <p className="text-xs">Não definido</p>
-                            </div>
-                          ) : (
-                            dayMeals.map((meal) => (
+                    const counts = countsByDate.get(key) ?? { lunch: 0, dinner: 0 }
+                    const reservasHref = `/escola/cantina/reservas?date=${key}${canteenId ? `&canteenId=${canteenId}` : ''}`
+
+                    const renderMealSlot = (type: MealType, typeMeals: CanteenMeal[]) => (
+                      <div key={type} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {MEAL_TYPE_OPTIONS.find((o) => o.value === type)?.label ?? type}
+                          </p>
+                          {(type === 'LUNCH' ? counts.lunch : counts.dinner) > 0 && (
+                            <Link
+                              href={reservasHref}
+                              className="flex items-center gap-1 text-xs text-primary hover:underline"
+                            >
+                              <Users className="h-3 w-3" />
+                              {type === 'LUNCH' ? counts.lunch : counts.dinner}
+                            </Link>
+                          )}
+                        </div>
+                        {typeMeals.length === 0 ? (
+                          <div className="rounded border border-dashed p-2 text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full h-8 text-xs"
+                              onClick={() => openCreateForDate(day, type)}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Adicionar
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            {typeMeals.map((meal) => (
                               <div key={meal.id} className="rounded border p-2">
                                 <p className="text-sm font-medium line-clamp-1">{meal.name}</p>
                                 <p className="text-xs text-muted-foreground">
@@ -362,7 +422,7 @@ export default function CardapioPage() {
                                     size="sm"
                                     onClick={() => openEdit(meal)}
                                   >
-                                    <span className="sr-only">Editar refeição {meal.name}</span>
+                                    <span className="sr-only">Editar {meal.name}</span>
                                     <Pencil className="h-3 w-3" />
                                   </Button>
                                   <Button
@@ -370,23 +430,76 @@ export default function CardapioPage() {
                                     size="sm"
                                     onClick={() => handleDelete(meal)}
                                   >
-                                    <span className="sr-only">Excluir refeição {meal.name}</span>
+                                    <span className="sr-only">Excluir {meal.name}</span>
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
                                 </div>
                               </div>
-                            ))
-                          )}
+                            ))}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full text-xs"
+                              onClick={() => openCreateForDate(day, type)}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Adicionar
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )
 
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => openCreateForDate(day)}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Adicionar
-                          </Button>
+                    return (
+                      <Card key={key}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">
+                            {format(day, 'EEEE', { locale: ptBR })}
+                          </CardTitle>
+                          <CardDescription>{format(day, 'dd/MM')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {!hasAny ? (
+                            <div className="space-y-3">
+                              <div className="text-center py-2 text-muted-foreground">
+                                <UtensilsCrossed className="h-5 w-5 mx-auto mb-1 opacity-50" />
+                                <p className="text-xs">Nenhuma refeição definida</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => openCreateForDate(day, 'LUNCH')}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Almoço
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => openCreateForDate(day, 'DINNER')}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Janta
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              {renderMealSlot('LUNCH', lunchMeals)}
+                              {renderMealSlot('DINNER', dinnerMeals)}
+                              {(counts.lunch > 0 || counts.dinner > 0) && (
+                                <Link
+                                  href={reservasHref}
+                                  className="mt-2 block text-center text-xs text-primary hover:underline"
+                                >
+                                  Ver reservas ({counts.lunch} almoço, {counts.dinner} janta)
+                                </Link>
+                              )}
+                            </>
+                          )}
                         </CardContent>
                       </Card>
                     )
@@ -455,8 +568,9 @@ function MealForm({
     ...api.api.v1.canteenMeals.index.queryOptions({
       query: {
         canteenId: canteenId ?? undefined,
-        limit: 20,
+        limit: 100,
         isActive: true,
+        uniqueForImport: true,
       },
     }),
     enabled: !!canteenId && importOpen,
@@ -481,6 +595,22 @@ function MealForm({
 
   return (
     <div className="space-y-4">
+      <div className="space-y-1">
+        <Label htmlFor="meal-type">Tipo de refeição</Label>
+        <select
+          id="meal-type"
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+          value={form.mealType}
+          onChange={(e) => setForm((prev) => ({ ...prev, mealType: e.target.value as MealType }))}
+        >
+          {MEAL_TYPE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {canteenId && (
         <div className="space-y-1">
           <Label>Importar de refeição anterior (opcional)</Label>
@@ -499,7 +629,10 @@ function MealForm({
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+            <PopoverContent
+              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)] p-0"
+              align="start"
+            >
               <Command shouldFilter={false}>
                 <CommandInput
                   placeholder="Buscar refeição..."

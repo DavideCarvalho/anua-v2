@@ -1,10 +1,20 @@
 import { Head, usePage } from '@inertiajs/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Search, ShoppingCart, CreditCard, Banknote, QrCode, ReceiptText } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../components/ui/alert-dialog'
 import { CanteenGate } from '../../../components/cantina/canteen-gate'
 import {
   Card,
@@ -23,13 +33,19 @@ import { api } from '~/lib/api'
 
 type StudentsResponse = Route.Response<'api.v1.students.index'>
 type CanteenItemsResponse = Route.Response<'api.v1.canteen_items.index'>
+type CanteenMealsResponse = Route.Response<'api.v1.canteen_meals.index'>
 type StudentEnrollment = Route.Response<'api.v1.students.enrollments.list'>[number]
+type CanteenFinancialSettings = Route.Response<'api.v1.canteens.financial_settings.show'>
+type CanteenMealListItem = CanteenMealsResponse['data'][number]
 interface CreateCanteenPurchasePayload {
   userId: string
   canteenId: string
   paymentMethod: PaymentMethod
   studentHasLevelId?: string | null
-  items: Array<{ canteenItemId: string; quantity: number }>
+  items: Array<
+    | { type: 'item'; canteenItemId: string; quantity: number }
+    | { type: 'meal'; canteenMealId: string; quantity: number }
+  >
 }
 import type { SharedProps } from '../../../lib/types'
 
@@ -58,8 +74,18 @@ export default function PDVPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BALANCE')
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<string | null>(null)
   const [paymentTab, setPaymentTab] = useState<'app' | 'manual'>('app')
+  const [recurrenceWarningOpen, setRecurrenceWarningOpen] = useState(false)
+  const [recurrenceWarningMessage, setRecurrenceWarningMessage] = useState<string>('')
+  const pendingPurchaseRef = useRef<CreateCanteenPurchasePayload | null>(null)
   const [cart, setCart] = useState<
-    Array<{ id: string; name: string; price: number; quantity: number }>
+    Array<{
+      id: string
+      name: string
+      price: number
+      quantity: number
+      type: 'item' | 'meal'
+      mealType?: 'LUNCH' | 'DINNER'
+    }>
   >([])
 
   const queryClient = useQueryClient()
@@ -95,6 +121,27 @@ export default function PDVPage() {
     enabled: !!canteenId,
   })
   const items = itemsData?.data ?? []
+
+  const now = new Date()
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  const { data: mealsData, isLoading: loadingMeals } = useQuery({
+    ...api.api.v1.canteenMeals.index.queryOptions({
+      query: {
+        canteenId: canteenId ?? undefined,
+        isActive: true,
+        page: 1,
+        limit: 100,
+      },
+    }),
+    enabled: !!canteenId,
+  })
+  const allMeals = mealsData?.data ?? []
+  const meals = allMeals.filter((m) => {
+    const d = m.date
+    if (!d) return false
+    const key = typeof d === 'string' ? d.slice(0, 10) : d.toISOString?.().slice(0, 10)
+    return key === todayIso
+  })
 
   const { data: financialSettings } = useQuery({
     ...api.api.v1.canteens.financialSettings.show.queryOptions({
@@ -134,35 +181,97 @@ export default function PDVPage() {
     () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
     [cart]
   )
+  const isBalanceDisabled =
+    !!selectedStudentId && (studentBalance <= 0 || studentBalance < totalAmount)
+  const hasPixConfigured = Boolean(financialSettings?.pixKey)
+  const hasCardConfigured = financialSettings != null && financialSettings.id != null
+
+  useEffect(() => {
+    if (paymentMethod === 'BALANCE' && isBalanceDisabled) {
+      setPaymentMethod(hasPixConfigured ? 'PIX' : hasCardConfigured ? 'CARD' : 'ON_ACCOUNT')
+    }
+  }, [isBalanceDisabled, paymentMethod, hasPixConfigured, hasCardConfigured])
 
   const onAddItem = (item: CanteenItemListItem) => {
     setCart((prev) => {
-      const existing = prev.find((cartItem) => cartItem.id === item.id)
+      const existing = prev.find((c) => c.id === item.id && c.type === 'item')
       if (existing) {
-        return prev.map((cartItem) =>
-          cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
+        return prev.map((c) =>
+          c.id === item.id && c.type === 'item' ? { ...c, quantity: c.quantity + 1 } : c
         )
       }
-
       return [
         ...prev,
-        { id: item.id, name: item.name, price: Number(item.price || 0), quantity: 1 },
+        {
+          id: item.id,
+          name: item.name,
+          price: Number(item.price || 0),
+          quantity: 1,
+          type: 'item' as const,
+        },
       ]
     })
   }
 
-  const onChangeQuantity = (itemId: string, nextQuantity: number) => {
+  const onAddMeal = (meal: CanteenMealListItem) => {
+    const mealType = (meal.mealType === 'LUNCH' || meal.mealType === 'DINNER'
+      ? meal.mealType
+      : 'LUNCH') as 'LUNCH' | 'DINNER'
+    setCart((prev) => {
+      const existing = prev.find((c) => c.id === meal.id && c.type === 'meal')
+      if (existing) {
+        return prev.map((c) =>
+          c.id === meal.id && c.type === 'meal' ? { ...c, quantity: c.quantity + 1 } : c
+        )
+      }
+      return [
+        ...prev,
+        {
+          id: meal.id,
+          name: meal.name,
+          price: Number(meal.price || 0),
+          quantity: 1,
+          type: 'meal' as const,
+          mealType,
+        },
+      ]
+    })
+  }
+
+  const cartKey = (item: (typeof cart)[number]) => `${item.type}-${item.id}`
+
+  const onChangeQuantity = (key: string, nextQuantity: number) => {
     if (nextQuantity <= 0) {
-      setCart((prev) => prev.filter((item) => item.id !== itemId))
+      setCart((prev) => prev.filter((item) => cartKey(item) !== key))
       return
     }
-
     setCart((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, quantity: nextQuantity } : item))
+      prev.map((item) => (cartKey(item) === key ? { ...item, quantity: nextQuantity } : item))
     )
   }
 
   const canFinish = !!selectedStudentId && cart.length > 0 && !!canteenId
+
+  const executePurchase = async (payload: CreateCanteenPurchasePayload) => {
+    await toast.promise(createPurchaseMutation.mutateAsync({ body: payload }), {
+      loading: 'Registrando venda...',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
+        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
+        if (payload.paymentMethod === 'BALANCE' && payload.userId) {
+          queryClient.invalidateQueries({
+            queryKey: api.api.v1.students.balance.queryOptions({
+              params: { studentId: payload.userId },
+            }).queryKey,
+          })
+        }
+        setCart([])
+        return 'Venda registrada com sucesso'
+      },
+      error: (error) => (error instanceof Error ? error.message : 'Erro ao registrar venda'),
+    })
+  }
 
   const onSubmit = async () => {
     if (!canteenId) {
@@ -191,29 +300,53 @@ export default function PDVPage() {
       paymentMethod,
       studentHasLevelId:
         paymentMethod === 'ON_ACCOUNT' ? (selectedEnrollmentId ?? undefined) : undefined,
-      items: cart.map((item) => ({
-        canteenItemId: item.id,
-        quantity: item.quantity,
-      })),
+      items: cart.map((item) =>
+        item.type === 'item'
+          ? { type: 'item' as const, canteenItemId: item.id, quantity: item.quantity }
+          : { type: 'meal' as const, canteenMealId: item.id, quantity: item.quantity }
+      ),
     }
 
-    await toast.promise(createPurchaseMutation.mutateAsync({ body: payload }), {
-      loading: 'Registrando venda...',
-      success: () => {
-        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenPurchases.index.pathKey() })
-        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenItems.index.pathKey() })
-        if (paymentMethod === 'BALANCE' && selectedStudentId) {
-          queryClient.invalidateQueries({
-            queryKey: api.api.v1.students.balance.queryOptions({
-              params: { studentId: selectedStudentId! },
-            }).queryKey,
+    const mealItems = cart.filter((c): c is typeof c & { mealType: 'LUNCH' | 'DINNER' } => c.type === 'meal' && c.mealType != null)
+    const uniqueMealTypes = [...new Set(mealItems.map((m) => m.mealType))]
+
+    let hasRecurrence = false
+    const messages: string[] = []
+
+    for (const mealType of uniqueMealTypes) {
+      try {
+        const result = await queryClient.fetchQuery(
+          api.api.v1.checkMealRecurrence.queryOptions({
+            params: { studentId: selectedStudentId },
+            query: { date: todayIso, mealType },
           })
+        )
+        if (result.hasRecurrence && result.message) {
+          hasRecurrence = true
+          messages.push(result.message)
         }
-        setCart([])
-        return 'Venda registrada com sucesso'
-      },
-      error: (error) => (error instanceof Error ? error.message : 'Erro ao registrar venda'),
-    })
+      } catch {
+        // Ignore check errors - proceed with sale
+      }
+    }
+
+    if (hasRecurrence && messages.length > 0) {
+      pendingPurchaseRef.current = payload
+      setRecurrenceWarningMessage(messages[0])
+      setRecurrenceWarningOpen(true)
+      return
+    }
+
+    await executePurchase(payload)
+  }
+
+  const onConfirmRecurrenceWarning = async () => {
+    const payload = pendingPurchaseRef.current
+    setRecurrenceWarningOpen(false)
+    pendingPurchaseRef.current = null
+    if (payload) {
+      await executePurchase(payload)
+    }
   }
 
   return (
@@ -310,28 +443,59 @@ export default function PDVPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Itens Disponíveis</CardTitle>
+                  <CardDescription>
+                    Itens da cantina e refeições do cardápio de hoje
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {loadingItems && (
-                    <p className="text-sm text-muted-foreground">Carregando itens...</p>
+                <CardContent className="space-y-4">
+                  {(loadingItems || loadingMeals) && (
+                    <p className="text-sm text-muted-foreground">Carregando...</p>
                   )}
 
-                  {!loadingItems && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {items.map((item: CanteenItemListItem) => (
-                        <Button
-                          key={item.id}
-                          variant="outline"
-                          className="h-20 flex flex-col gap-1"
-                          onClick={() => onAddItem(item)}
-                        >
-                          <span className="font-medium truncate max-w-full">{item.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatCurrency(item.price || 0)}
-                          </span>
-                        </Button>
-                      ))}
-                    </div>
+                  {!loadingItems && !loadingMeals && (
+                    <>
+                      {meals.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground mb-2">
+                            Refeições do dia
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {meals.map((meal: CanteenMealListItem) => (
+                              <Button
+                                key={meal.id}
+                                variant="outline"
+                                className="h-20 flex flex-col gap-1"
+                                onClick={() => onAddMeal(meal)}
+                              >
+                                <span className="font-medium truncate max-w-full">{meal.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatCurrency(Number(meal.price || 0))}
+                                </span>
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground mb-2">Itens</p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {items.map((item: CanteenItemListItem) => (
+                            <Button
+                              key={item.id}
+                              variant="outline"
+                              className="h-20 flex flex-col gap-1"
+                              onClick={() => onAddItem(item)}
+                            >
+                              <span className="font-medium truncate max-w-full">{item.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatCurrency(item.price || 0)}
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -354,7 +518,7 @@ export default function PDVPage() {
                   )}
 
                   {cart.map((item) => (
-                    <div key={item.id} className="rounded-md border p-2">
+                    <div key={cartKey(item)} className="rounded-md border p-2">
                       <p className="text-sm font-medium">{item.name}</p>
                       <p className="text-xs text-muted-foreground">{formatCurrency(item.price)}</p>
                       <div className="mt-2 flex items-center gap-2">
@@ -362,7 +526,7 @@ export default function PDVPage() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => onChangeQuantity(item.id, item.quantity - 1)}
+                          onClick={() => onChangeQuantity(cartKey(item), item.quantity - 1)}
                         >
                           -
                         </Button>
@@ -371,7 +535,7 @@ export default function PDVPage() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => onChangeQuantity(item.id, item.quantity + 1)}
+                          onClick={() => onChangeQuantity(cartKey(item), item.quantity + 1)}
                         >
                           +
                         </Button>
@@ -407,17 +571,30 @@ export default function PDVPage() {
                     </TabsList>
 
                     <TabsContent value="app" className="space-y-2 mt-0">
-                      <Button
-                        variant={paymentMethod === 'BALANCE' ? 'default' : 'outline'}
-                        className="w-full justify-start gap-2"
-                        disabled={!!selectedStudentId && studentBalance < totalAmount}
-                        onClick={() => setPaymentMethod('BALANCE')}
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        Saldo do Aluno
-                      </Button>
+                      <div className="space-y-1">
+                        <Button
+                          variant={paymentMethod === 'BALANCE' ? 'default' : 'outline'}
+                          className="w-full justify-start gap-2"
+                          disabled={
+                            !!selectedStudentId &&
+                            (studentBalance <= 0 || studentBalance < totalAmount)
+                          }
+                          onClick={() => setPaymentMethod('BALANCE')}
+                        >
+                          <CreditCard className="h-4 w-4" />
+                          Saldo do Aluno
+                        </Button>
+                        {selectedStudentId &&
+                          (studentBalance <= 0 || studentBalance < totalAmount) && (
+                            <p className="text-xs text-muted-foreground px-1">
+                              {studentBalance <= 0
+                                ? 'Saldo insuficiente — o aluno precisa recarregar o saldo'
+                                : `Saldo insuficiente — falta ${formatCurrency(totalAmount - studentBalance)} para cobrir o total`}
+                            </p>
+                          )}
+                      </div>
 
-                      {financialSettings?.pixKey && (
+                      {hasPixConfigured && (
                         <Button
                           variant={paymentMethod === 'PIX' ? 'default' : 'outline'}
                           className="w-full justify-start gap-2"
@@ -428,9 +605,7 @@ export default function PDVPage() {
                         </Button>
                       )}
 
-                      {/* CARD is shown only when a real CanteenFinancialSettings row exists.
-                          The endpoint returns an object without 'id' when no row is configured. */}
-                      {financialSettings && 'id' in financialSettings && (
+                      {hasCardConfigured && (
                         <Button
                           variant={paymentMethod === 'CARD' ? 'default' : 'outline'}
                           className="w-full justify-start gap-2"
@@ -493,6 +668,21 @@ export default function PDVPage() {
             </div>
           </div>
         </CanteenGate>
+
+        <AlertDialog open={recurrenceWarningOpen} onOpenChange={setRecurrenceWarningOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Recorrência configurada</AlertDialogTitle>
+              <AlertDialogDescription>{recurrenceWarningMessage}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={onConfirmRecurrenceWarning}>
+                Continuar mesmo assim
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </EscolaLayout>
   )

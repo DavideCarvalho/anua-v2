@@ -319,6 +319,25 @@ module "dispatch_refresh_overdue" {
   memory_limit = "512Mi"
 }
 
+module "dispatch_meal_recurrence_reservations" {
+  source = "../../../modules/cloud-run-job"
+
+  project_id = var.project_id
+  region     = var.region
+  job_name   = "${var.environment}-${var.project_name}-dispatch-meal-recurrence-reservations"
+  image      = var.api_image
+
+  command = ["node"]
+  args    = ["ace", "dispatch:meal-recurrence-reservations"]
+
+  env_vars     = local.dispatch_job_env
+  secrets      = local.dispatch_job_secrets
+  timeout      = "300s"
+  max_retries  = 0
+  cpu_limit    = "1000m"
+  memory_limit = "512Mi"
+}
+
 module "dispatch_occurrence_ack_reminders" {
   source = "../../../modules/cloud-run-job"
 
@@ -479,6 +498,17 @@ module "scheduler_refresh_overdue" {
   job_name              = "${var.environment}-${var.project_name}-dispatch-refresh-overdue"
   schedule              = "0 5 * * *"
   cloud_run_job_name    = module.dispatch_refresh_overdue.job_name
+  service_account_email = google_service_account.scheduler.email
+}
+
+module "scheduler_meal_recurrence_reservations" {
+  source = "../../../modules/cloud-scheduler"
+
+  project_id            = var.project_id
+  region                = var.region
+  job_name              = "${var.environment}-${var.project_name}-dispatch-meal-recurrence-reservations"
+  schedule              = "30 5 * * *"
+  cloud_run_job_name    = module.dispatch_meal_recurrence_reservations.job_name
   service_account_email = google_service_account.scheduler.email
 }
 

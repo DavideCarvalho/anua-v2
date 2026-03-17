@@ -8,6 +8,7 @@ import CanteenItem from './canteen_item.js'
 import CanteenPurchase from './canteen_purchase.js'
 import CanteenMeal from './canteen_meal.js'
 import CanteenMonthlyTransfer from './canteen_monthly_transfer.js'
+import StudentMealRecurrence from './student_meal_recurrence.js'
 
 export default class Canteen extends BaseModel {
   static table = 'Canteen'
@@ -55,4 +56,7 @@ export default class Canteen extends BaseModel {
 
   @hasMany(() => CanteenMonthlyTransfer, { foreignKey: 'canteenId' })
   declare monthlyTransfers: HasMany<typeof CanteenMonthlyTransfer>
+
+  @hasMany(() => StudentMealRecurrence, { foreignKey: 'canteenId' })
+  declare mealRecurrences: HasMany<typeof StudentMealRecurrence>
 }

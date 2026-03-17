@@ -11,6 +11,7 @@ export default class CanteenMealReservationTransformer extends BaseTransformer<C
         'mealId',
         'studentId',
         'status',
+        'source',
         'reservedAt',
         'servedAt',
         'cancelledAt',
@@ -18,7 +19,7 @@ export default class CanteenMealReservationTransformer extends BaseTransformer<C
         'updatedAt',
       ]),
       meal: CanteenMealTransformer.transform(this.whenLoaded(this.resource.meal)),
-      student: StudentTransformer.transform(this.whenLoaded(this.resource.student)),
+      student: StudentTransformer.transform(this.whenLoaded(this.resource.student))?.depth(6),
     }
   }
 }

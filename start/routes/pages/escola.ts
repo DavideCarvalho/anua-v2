@@ -130,6 +130,8 @@ const ShowCantinaVendasPageController = () =>
   import('#controllers/pages/escola/show_cantina_vendas_page_controller')
 const ShowCantinaReservasPageController = () =>
   import('#controllers/pages/escola/show_cantina_reservas_page_controller')
+const ShowCantinaRecorrenciasPageController = () =>
+  import('#controllers/pages/escola/show_cantina_recorrencias_page_controller')
 const ShowCantinaTransferenciasPageController = () =>
   import('#controllers/pages/escola/show_cantina_transferencias_page_controller')
 const ShowInadimplenciaPageController = () =>
@@ -331,6 +333,9 @@ export function registerEscolaPageRoutes() {
       router.get('/cantina/pedidos', [ShowCantinaPedidosPageController]).as('cantina.pedidos')
       router.get('/cantina/vendas', [ShowCantinaVendasPageController]).as('cantina.vendas')
       router.get('/cantina/reservas', [ShowCantinaReservasPageController]).as('cantina.reservas')
+      router
+        .get('/cantina/recorrencias', [ShowCantinaRecorrenciasPageController])
+        .as('cantina.recorrencias')
       router
         .get('/cantina/transferencias', [ShowCantinaTransferenciasPageController])
         .as('cantina.transferencias')

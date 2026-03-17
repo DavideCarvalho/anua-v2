@@ -127,6 +127,11 @@ const navigation: NavItem[] = [
       { title: 'Vendas', route: 'web.escola.cantina.vendas', href: '/escola/cantina/vendas' },
       { title: 'Reservas', route: 'web.escola.cantina.reservas', href: '/escola/cantina/reservas' },
       {
+        title: 'Recorrências',
+        route: 'web.escola.cantina.recorrencias',
+        href: '/escola/cantina/recorrencias',
+      },
+      {
         title: 'Transferências',
         route: 'web.escola.cantina.transferencias',
         href: '/escola/cantina/transferencias',

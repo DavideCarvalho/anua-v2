@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import CanteenPurchase from './canteen_purchase.js'
 import CanteenItem from './canteen_item.js'
+import CanteenMeal from './canteen_meal.js'
 
 export default class CanteenItemPurchased extends BaseModel {
   static table = 'CanteenItemPurchased'
@@ -22,7 +23,10 @@ export default class CanteenItemPurchased extends BaseModel {
   declare canteenPurchaseId: string
 
   @column({ columnName: 'canteenItemId' })
-  declare canteenItemId: string
+  declare canteenItemId: string | null
+
+  @column({ columnName: 'canteenMealId' })
+  declare canteenMealId: string | null
 
   @column({ columnName: 'quantity' })
   declare quantity: number
@@ -50,4 +54,7 @@ export default class CanteenItemPurchased extends BaseModel {
 
   @belongsTo(() => CanteenItem, { foreignKey: 'canteenItemId' })
   declare item: BelongsTo<typeof CanteenItem>
+
+  @belongsTo(() => CanteenMeal, { foreignKey: 'canteenMealId' })
+  declare meal: BelongsTo<typeof CanteenMeal>
 }

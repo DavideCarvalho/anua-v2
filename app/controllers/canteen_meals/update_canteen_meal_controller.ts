@@ -18,10 +18,9 @@ export default class UpdateCanteenMealController {
       name: payload.name ?? meal.name,
       description: payload.description ?? meal.description,
       price: payload.price ?? meal.price,
-      // Validator provides servedAt, model expects date
       date: payload.servedAt ? DateTime.fromJSDate(payload.servedAt) : meal.date,
+      mealType: payload.mealType ?? meal.mealType,
       isActive: payload.isActive ?? meal.isActive,
-      // Validator provides maxReservations, model expects maxServings
       maxServings: payload.maxReservations ?? meal.maxServings,
     })
 

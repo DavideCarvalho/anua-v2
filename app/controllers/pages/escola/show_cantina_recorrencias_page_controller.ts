@@ -1,15 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { resolveEscolaCanteenContext } from './cantina_context.js'
 
-export default class ShowCantinaReservasPageController {
+export default class ShowCantinaRecorrenciasPageController {
   async handle({ inertia, selectedSchoolIds, request }: HttpContext) {
     const context = await resolveEscolaCanteenContext({
       selectedSchoolIds,
       preferredCanteenId: request.input('canteenId'),
     })
 
-    const date = request.input('date') as string | undefined
-
-    return inertia.render('escola/cantina/reservas', { ...context, date })
+    return inertia.render('escola/cantina/recorrencias', context)
   }
 }

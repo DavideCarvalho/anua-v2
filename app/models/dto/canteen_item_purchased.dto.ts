@@ -4,7 +4,8 @@ import type CanteenItemPurchased from '#models/canteen_item_purchased'
 export default class CanteenItemPurchasedDto extends BaseModelDto {
   declare id: string
   declare canteenPurchaseId: string
-  declare canteenItemId: string
+  declare canteenItemId: string | null
+  declare canteenMealId: string | null
   declare quantity: number
   declare unitPrice: number
   declare totalPrice: number
@@ -18,7 +19,8 @@ export default class CanteenItemPurchasedDto extends BaseModelDto {
 
     this.id = canteenItemPurchased.id
     this.canteenPurchaseId = canteenItemPurchased.canteenPurchaseId
-    this.canteenItemId = canteenItemPurchased.canteenItemId
+    this.canteenItemId = canteenItemPurchased.canteenItemId ?? null
+    this.canteenMealId = canteenItemPurchased.canteenMealId ?? null
     this.quantity = canteenItemPurchased.quantity
     this.unitPrice = canteenItemPurchased.unitPrice
     this.totalPrice = canteenItemPurchased.totalPrice

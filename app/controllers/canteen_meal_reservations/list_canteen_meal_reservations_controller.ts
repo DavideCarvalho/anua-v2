@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
+import Canteen from '#models/canteen'
 import CanteenMealReservation from '#models/canteen_meal_reservation'
 import CanteenMealReservationTransformer from '#transformers/canteen_meal_reservation_transformer'
 import { listCanteenMealReservationsValidator } from '#validators/canteen'
@@ -11,7 +11,7 @@ function mapStatus(status: string) {
 }
 
 export default class ListCanteenMealReservationsController {
-  async handle({ request, serialize }: HttpContext) {
+  async handle({ request, serialize, selectedSchoolIds }: HttpContext) {
     const payload = await request.validateUsing(listCanteenMealReservationsValidator)
 
     const page = payload.page ?? 1
@@ -19,7 +19,7 @@ export default class ListCanteenMealReservationsController {
 
     const query = CanteenMealReservation.query()
       .preload('meal', (mealQuery) => mealQuery.preload('canteen'))
-      .preload('student')
+      .preload('student', (studentQuery) => studentQuery.preload('user'))
       .orderBy('createdAt', 'desc')
 
     // Validator provides canteenMealId, model expects mealId
@@ -40,12 +40,20 @@ export default class ListCanteenMealReservationsController {
       query.whereHas('meal', (mealQuery) => {
         mealQuery.where('canteenId', payload.canteenId!)
       })
+    } else if (selectedSchoolIds && selectedSchoolIds.length > 0) {
+      const canteenIds = (await Canteen.query().whereIn('schoolId', selectedSchoolIds).select('id'))
+        .map((c) => c.id)
+      if (canteenIds.length > 0) {
+        query.whereHas('meal', (mealQuery) => {
+          mealQuery.whereIn('canteenId', canteenIds)
+        })
+      }
     }
 
     if (payload.date) {
-      const filterDate = DateTime.fromJSDate(payload.date).toISODate()
+      const filterDate = String(payload.date)
       query.whereHas('meal', (mealQuery) => {
-        mealQuery.where('date', filterDate!)
+        mealQuery.where('date', filterDate)
       })
     }
 

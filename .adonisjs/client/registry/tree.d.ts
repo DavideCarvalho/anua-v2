@@ -148,6 +148,7 @@ export interface ApiDefinition {
         pedidos: typeof routes['web.escola.cantina.pedidos']
         vendas: typeof routes['web.escola.cantina.vendas']
         reservas: typeof routes['web.escola.cantina.reservas']
+        recorrencias: typeof routes['web.escola.cantina.recorrencias']
         transferencias: typeof routes['web.escola.cantina.transferencias']
       }
       financeiro: {
@@ -268,6 +269,8 @@ export interface ApiDefinition {
           studentInvoices: typeof routes['api.v1.responsavel.api.student_invoices']
           studentBalance: typeof routes['api.v1.responsavel.api.student_balance']
           studentCanteenPurchases: typeof routes['api.v1.responsavel.api.student_canteen_purchases']
+          studentMealRecurrence: typeof routes['api.v1.responsavel.api.student_meal_recurrence']
+          updateStudentMealRecurrence: typeof routes['api.v1.responsavel.api.update_student_meal_recurrence']
           studentAssignments: typeof routes['api.v1.responsavel.api.student_assignments']
           studentSchedule: typeof routes['api.v1.responsavel.api.student_schedule']
           studentDocuments: typeof routes['api.v1.responsavel.api.student_documents']
@@ -674,6 +677,8 @@ export interface ApiDefinition {
       canteens: {
         index: typeof routes['api.v1.canteens.index']
         store: typeof routes['api.v1.canteens.store']
+        mealRecurrencesBySchools: typeof routes['api.v1.canteens.meal_recurrences_by_schools']
+        generateRecurrenceReservations: typeof routes['api.v1.canteens.generate_recurrence_reservations']
         show: typeof routes['api.v1.canteens.show']
         update: typeof routes['api.v1.canteens.update']
         destroy: typeof routes['api.v1.canteens.destroy']
@@ -682,6 +687,7 @@ export interface ApiDefinition {
           show: typeof routes['api.v1.canteens.financial_settings.show']
           update: typeof routes['api.v1.canteens.financial_settings.update']
         }
+        mealRecurrences: typeof routes['api.v1.canteens.meal_recurrences']
       }
       canteenReports: {
         summary: typeof routes['api.v1.canteen_reports.summary']
@@ -709,6 +715,7 @@ export interface ApiDefinition {
         destroy: typeof routes['api.v1.canteen_meals.destroy']
       }
       canteenMealReservations: {
+        counts: typeof routes['api.v1.canteen_meal_reservations.counts']
         index: typeof routes['api.v1.canteen_meal_reservations.index']
         store: typeof routes['api.v1.canteen_meal_reservations.store']
         show: typeof routes['api.v1.canteen_meal_reservations.show']
@@ -722,6 +729,7 @@ export interface ApiDefinition {
         updateStatus: typeof routes['api.v1.canteen_purchases.update_status']
         cancel: typeof routes['api.v1.canteen_purchases.cancel']
       }
+      checkMealRecurrence: typeof routes['api.v1.check_meal_recurrence']
       achievements: {
         index: typeof routes['api.v1.achievements.index']
         store: typeof routes['api.v1.achievements.store']

@@ -6,6 +6,7 @@ import CanteenMeal from './canteen_meal.js'
 import Student from './student.js'
 
 export type CanteenMealReservationStatus = 'RESERVED' | 'SERVED' | 'CANCELLED'
+export type MealReservationSource = 'RECURRENCE' | 'SPOT'
 
 export default class CanteenMealReservation extends BaseModel {
   static table = 'CanteenMealReservation'
@@ -28,6 +29,9 @@ export default class CanteenMealReservation extends BaseModel {
 
   @column({ columnName: 'status' })
   declare status: CanteenMealReservationStatus
+
+  @column({ columnName: 'source' })
+  declare source: MealReservationSource
 
   @column.dateTime({ columnName: 'reservedAt' })
   declare reservedAt: DateTime

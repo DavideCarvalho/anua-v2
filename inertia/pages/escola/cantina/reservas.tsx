@@ -1,5 +1,7 @@
 import { Head, usePage } from '@inertiajs/react'
 import { Suspense } from 'react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { Calendar } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
@@ -10,6 +12,7 @@ import type { SharedProps } from '../../../lib/types'
 
 interface PageProps extends SharedProps {
   canteenId?: string | null
+  date?: string | null
 }
 
 function TableSkeleton() {
@@ -32,7 +35,7 @@ function TableSkeleton() {
 
 export default function CantinaReservasPage() {
   const { props } = usePage<PageProps>()
-  const canteenId = props.canteenId
+  const date = props.date
 
   return (
     <EscolaLayout>
@@ -44,12 +47,18 @@ export default function CantinaReservasPage() {
             <Calendar className="h-6 w-6" />
             Reservas de Refeições
           </h1>
-          <p className="text-muted-foreground">Gerencie as reservas de refeições dos alunos</p>
+          <p className="text-muted-foreground">
+            {date
+              ? `Reservas de ${format(new Date(date + 'T12:00:00'), "EEEE, dd/MM/yyyy", { locale: ptBR })}`
+              : 'Gerencie as reservas de refeições dos alunos'}
+          </p>
         </div>
 
         <CanteenGate>
           <Suspense fallback={<TableSkeleton />}>
-            <MealReservationsTable canteenId={canteenId ?? undefined} />
+            <MealReservationsTable
+              date={date ?? undefined}
+            />
           </Suspense>
         </CanteenGate>
       </div>

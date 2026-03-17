@@ -642,6 +642,12 @@ const routes = {
     tokens: [{"old":"/escola/cantina/reservas","type":0,"val":"escola","end":""},{"old":"/escola/cantina/reservas","type":0,"val":"cantina","end":""},{"old":"/escola/cantina/reservas","type":0,"val":"reservas","end":""}],
     types: placeholder as Registry['web.escola.cantina.reservas']['types'],
   },
+  'web.escola.cantina.recorrencias': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/cantina/recorrencias',
+    tokens: [{"old":"/escola/cantina/recorrencias","type":0,"val":"escola","end":""},{"old":"/escola/cantina/recorrencias","type":0,"val":"cantina","end":""},{"old":"/escola/cantina/recorrencias","type":0,"val":"recorrencias","end":""}],
+    types: placeholder as Registry['web.escola.cantina.recorrencias']['types'],
+  },
   'web.escola.cantina.transferencias': {
     methods: ["GET","HEAD"],
     pattern: '/escola/cantina/transferencias',
@@ -1133,6 +1139,18 @@ const routes = {
     pattern: '/api/v1/responsavel/students/:studentId/canteen-purchases',
     tokens: [{"old":"/api/v1/responsavel/students/:studentId/canteen-purchases","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/canteen-purchases","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/canteen-purchases","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/canteen-purchases","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/canteen-purchases","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/canteen-purchases","type":0,"val":"canteen-purchases","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.student_canteen_purchases']['types'],
+  },
+  'api.v1.responsavel.api.student_meal_recurrence': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/students/:studentId/meal-recurrence',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"meal-recurrence","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.student_meal_recurrence']['types'],
+  },
+  'api.v1.responsavel.api.update_student_meal_recurrence': {
+    methods: ["PUT"],
+    pattern: '/api/v1/responsavel/students/:studentId/meal-recurrence',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/meal-recurrence","type":0,"val":"meal-recurrence","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.update_student_meal_recurrence']['types'],
   },
   'api.v1.responsavel.api.student_assignments': {
     methods: ["GET","HEAD"],
@@ -2802,6 +2820,18 @@ const routes = {
     tokens: [{"old":"/api/v1/canteens","type":0,"val":"api","end":""},{"old":"/api/v1/canteens","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens","type":0,"val":"canteens","end":""}],
     types: placeholder as Registry['api.v1.canteens.store']['types'],
   },
+  'api.v1.canteens.meal_recurrences_by_schools': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/canteens/meal-recurrences-by-schools',
+    tokens: [{"old":"/api/v1/canteens/meal-recurrences-by-schools","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/meal-recurrences-by-schools","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/meal-recurrences-by-schools","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/meal-recurrences-by-schools","type":0,"val":"meal-recurrences-by-schools","end":""}],
+    types: placeholder as Registry['api.v1.canteens.meal_recurrences_by_schools']['types'],
+  },
+  'api.v1.canteens.generate_recurrence_reservations': {
+    methods: ["POST"],
+    pattern: '/api/v1/canteens/generate-recurrence-reservations',
+    tokens: [{"old":"/api/v1/canteens/generate-recurrence-reservations","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/generate-recurrence-reservations","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/generate-recurrence-reservations","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/generate-recurrence-reservations","type":0,"val":"generate-recurrence-reservations","end":""}],
+    types: placeholder as Registry['api.v1.canteens.generate_recurrence_reservations']['types'],
+  },
   'api.v1.canteens.show': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/canteens/:id',
@@ -2831,6 +2861,12 @@ const routes = {
     pattern: '/api/v1/canteens/:canteenId/financial-settings',
     tokens: [{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":1,"val":"canteenId","end":""},{"old":"/api/v1/canteens/:canteenId/financial-settings","type":0,"val":"financial-settings","end":""}],
     types: placeholder as Registry['api.v1.canteens.financial_settings.show']['types'],
+  },
+  'api.v1.canteens.meal_recurrences': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/canteens/:canteenId/meal-recurrences',
+    tokens: [{"old":"/api/v1/canteens/:canteenId/meal-recurrences","type":0,"val":"api","end":""},{"old":"/api/v1/canteens/:canteenId/meal-recurrences","type":0,"val":"v1","end":""},{"old":"/api/v1/canteens/:canteenId/meal-recurrences","type":0,"val":"canteens","end":""},{"old":"/api/v1/canteens/:canteenId/meal-recurrences","type":1,"val":"canteenId","end":""},{"old":"/api/v1/canteens/:canteenId/meal-recurrences","type":0,"val":"meal-recurrences","end":""}],
+    types: placeholder as Registry['api.v1.canteens.meal_recurrences']['types'],
   },
   'api.v1.canteens.financial_settings.update': {
     methods: ["PUT"],
@@ -2940,6 +2976,12 @@ const routes = {
     tokens: [{"old":"/api/v1/canteen-meals/:id","type":0,"val":"api","end":""},{"old":"/api/v1/canteen-meals/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/canteen-meals/:id","type":0,"val":"canteen-meals","end":""},{"old":"/api/v1/canteen-meals/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.canteen_meals.destroy']['types'],
   },
+  'api.v1.canteen_meal_reservations.counts': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/canteen-meal-reservations/counts',
+    tokens: [{"old":"/api/v1/canteen-meal-reservations/counts","type":0,"val":"api","end":""},{"old":"/api/v1/canteen-meal-reservations/counts","type":0,"val":"v1","end":""},{"old":"/api/v1/canteen-meal-reservations/counts","type":0,"val":"canteen-meal-reservations","end":""},{"old":"/api/v1/canteen-meal-reservations/counts","type":0,"val":"counts","end":""}],
+    types: placeholder as Registry['api.v1.canteen_meal_reservations.counts']['types'],
+  },
   'api.v1.canteen_meal_reservations.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/canteen-meal-reservations',
@@ -2999,6 +3041,12 @@ const routes = {
     pattern: '/api/v1/canteen-purchases/:id/cancel',
     tokens: [{"old":"/api/v1/canteen-purchases/:id/cancel","type":0,"val":"api","end":""},{"old":"/api/v1/canteen-purchases/:id/cancel","type":0,"val":"v1","end":""},{"old":"/api/v1/canteen-purchases/:id/cancel","type":0,"val":"canteen-purchases","end":""},{"old":"/api/v1/canteen-purchases/:id/cancel","type":1,"val":"id","end":""},{"old":"/api/v1/canteen-purchases/:id/cancel","type":0,"val":"cancel","end":""}],
     types: placeholder as Registry['api.v1.canteen_purchases.cancel']['types'],
+  },
+  'api.v1.check_meal_recurrence': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/students/:studentId/meal-recurrence-check',
+    tokens: [{"old":"/api/v1/students/:studentId/meal-recurrence-check","type":0,"val":"api","end":""},{"old":"/api/v1/students/:studentId/meal-recurrence-check","type":0,"val":"v1","end":""},{"old":"/api/v1/students/:studentId/meal-recurrence-check","type":0,"val":"students","end":""},{"old":"/api/v1/students/:studentId/meal-recurrence-check","type":1,"val":"studentId","end":""},{"old":"/api/v1/students/:studentId/meal-recurrence-check","type":0,"val":"meal-recurrence-check","end":""}],
+    types: placeholder as Registry['api.v1.check_meal_recurrence']['types'],
   },
   'api.v1.achievements.index': {
     methods: ["GET","HEAD"],

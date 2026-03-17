@@ -13,6 +13,7 @@ import {
   StudentBalanceContainerSkeleton,
 } from '../../containers/responsavel/student-balance-container'
 import { StudentCanteenPurchasesContainer } from '../../containers/responsavel/student-canteen-purchases-container'
+import { MealRecurrenceConfig } from '../../containers/responsavel/meal-recurrence-config'
 
 function CantinaContent() {
   const { student, studentId, students, isLoaded, setDefaultStudent } = useSelectedStudent()
@@ -71,6 +72,7 @@ function CantinaContent() {
       )}
 
       <StudentBalanceContainer studentId={student.id} studentName={student.name} />
+      {studentId && <MealRecurrenceConfig studentId={studentId} />}
       {studentId && <StudentCanteenPurchasesContainer studentId={studentId} />}
     </div>
   )

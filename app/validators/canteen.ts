@@ -80,10 +80,34 @@ export const createCanteenPurchaseValidator = vine.compile(
     ]),
     studentHasLevelId: vine.string().trim().optional(),
     items: vine.array(
-      vine.object({
-        canteenItemId: vine.string().trim(),
-        quantity: vine.number().min(1),
-      })
+      vine
+        .union([
+          vine.union.if(
+            (value) =>
+              typeof value === 'object' &&
+              value !== null &&
+              (value as { type?: string }).type === 'item',
+            vine.object({
+              type: vine.literal('item'),
+              canteenItemId: vine.string().trim(),
+              quantity: vine.number().min(1),
+            })
+          ),
+          vine.union.if(
+            (value) =>
+              typeof value === 'object' &&
+              value !== null &&
+              (value as { type?: string }).type === 'meal',
+            vine.object({
+              type: vine.literal('meal'),
+              canteenMealId: vine.string().trim(),
+              quantity: vine.number().min(1),
+            })
+          ),
+        ])
+        .otherwise((_, field) => {
+          field.report('Informe type: "item" com canteenItemId ou type: "meal" com canteenMealId', 'invalid_item', field)
+        })
     ),
   })
 )
@@ -109,6 +133,8 @@ export const updateCanteenPurchaseStatusValidator = vine.compile(
 )
 
 // Canteen Meal validators
+const mealTypeEnum = vine.enum(['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'])
+
 export const createCanteenMealValidator = vine.compile(
   vine.object({
     canteenId: vine.string().trim(),
@@ -116,6 +142,7 @@ export const createCanteenMealValidator = vine.compile(
     description: vine.string().trim().maxLength(1000).optional(),
     price: vine.number().min(0),
     servedAt: vine.date(),
+    mealType: mealTypeEnum.optional(),
     isActive: vine.boolean().optional(),
     maxReservations: vine.number().min(1).optional(),
   })
@@ -127,6 +154,7 @@ export const updateCanteenMealValidator = vine.compile(
     description: vine.string().trim().maxLength(1000).optional(),
     price: vine.number().min(0).optional(),
     servedAt: vine.date().optional(),
+    mealType: mealTypeEnum.optional(),
     isActive: vine.boolean().optional(),
     maxReservations: vine.number().min(1).optional(),
   })
@@ -137,8 +165,11 @@ export const listCanteenMealsValidator = vine.compile(
     canteenId: vine.string().trim().optional(),
     servedAt: vine.date().optional(),
     isActive: vine.boolean().optional(),
+    mealType: vine.enum(['BREAKFAST', 'LUNCH', 'DINNER']).optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
+    /** Quando true, deduplica por (nome, preço) — útil para importar de refeição anterior */
+    uniqueForImport: vine.boolean().optional(),
   })
 )
 
@@ -157,13 +188,20 @@ export const updateCanteenMealReservationStatusValidator = vine.compile(
   })
 )
 
+export const getMealReservationCountsValidator = vine.compile(
+  vine.object({
+    canteenId: vine.string().trim(),
+    date: vine.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
+  })
+)
+
 export const listCanteenMealReservationsValidator = vine.compile(
   vine.object({
     canteenId: vine.string().trim().optional(),
     canteenMealId: vine.string().trim().optional(),
     userId: vine.string().trim().optional(),
     status: vine.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'SERVED']).optional(),
-    date: vine.date().optional(),
+    date: vine.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
   })

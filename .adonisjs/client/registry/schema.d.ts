@@ -1279,6 +1279,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_cantina_reservas_page_controller').default['handle']>>>
     }
   }
+  'web.escola.cantina.recorrencias': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/cantina/recorrencias'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_cantina_recorrencias_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_cantina_recorrencias_page_controller').default['handle']>>>
+    }
+  }
   'web.escola.cantina.transferencias': {
     methods: ["GET","HEAD"]
     pattern: '/escola/cantina/transferencias'
@@ -2261,6 +2273,30 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_canteen_purchases_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_canteen_purchases_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.student_meal_recurrence': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/students/:studentId/meal-recurrence'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/list_student_meal_recurrence_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/list_student_meal_recurrence_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.update_student_meal_recurrence': {
+    methods: ["PUT"]
+    pattern: '/api/v1/responsavel/students/:studentId/meal-recurrence'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/student_meal_recurrence').updateStudentMealRecurrenceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/student_meal_recurrence').updateStudentMealRecurrenceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/update_student_meal_recurrence_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/update_student_meal_recurrence_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.responsavel.api.student_assignments': {
@@ -5599,6 +5635,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteens/create_canteen_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.canteens.meal_recurrences_by_schools': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/canteens/meal-recurrences-by-schools'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteens/list_meal_recurrences_by_schools_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteens/list_meal_recurrences_by_schools_controller').default['handle']>>>
+    }
+  }
+  'api.v1.canteens.generate_recurrence_reservations': {
+    methods: ["POST"]
+    pattern: '/api/v1/canteens/generate-recurrence-reservations'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteens/generate_recurrence_reservations_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteens/generate_recurrence_reservations_controller').default['handle']>>>
+    }
+  }
   'api.v1.canteens.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/canteens/:id'
@@ -5657,6 +5717,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller').default['handle']>>>
+    }
+  }
+  'api.v1.canteens.meal_recurrences': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/canteens/:canteenId/meal-recurrences'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { canteenId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteens/list_canteen_meal_recurrences_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteens/list_canteen_meal_recurrences_controller').default['handle']>>>
     }
   }
   'api.v1.canteens.financial_settings.update': {
@@ -5875,6 +5947,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_meals/delete_canteen_meal_controller').default['handle']>>>
     }
   }
+  'api.v1.canteen_meal_reservations.counts': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/canteen-meal-reservations/counts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/canteen').getMealReservationCountsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_meal_reservations/get_meal_reservation_counts_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_meal_reservations/get_meal_reservation_counts_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.canteen_meal_reservations.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/canteen-meal-reservations'
@@ -5993,6 +6077,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/canteen_purchases/cancel_canteen_purchase_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/canteen_purchases/cancel_canteen_purchase_controller').default['handle']>>>
+    }
+  }
+  'api.v1.check_meal_recurrence': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/students/:studentId/meal-recurrence-check'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/student_meal_recurrence').checkMealRecurrenceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/check_meal_recurrence_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/students/check_meal_recurrence_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.achievements.index': {

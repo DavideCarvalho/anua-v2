@@ -9,14 +9,12 @@ export default class ShowCanteenFinancialSettingsController {
       .first()
 
     if (!settings) {
-      return response.ok({
-        canteenId: params.canteenId,
-        platformFeePercentage: null,
-        pixKey: null,
-        pixKeyType: null,
-        bankName: null,
-        accountHolder: null,
-      })
+      const defaultSettings = new CanteenFinancialSettings()
+      defaultSettings.canteenId = params.canteenId
+
+      return response.ok(
+        await serialize(CanteenFinancialSettingsTransformer.transform(defaultSettings))
+      )
     }
 
     return response.ok(await serialize(CanteenFinancialSettingsTransformer.transform(settings)))

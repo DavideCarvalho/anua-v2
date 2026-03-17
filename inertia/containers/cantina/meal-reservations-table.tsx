@@ -23,7 +23,7 @@ import {
 
 interface MealReservationsTableProps {
   canteenId?: string
-  date?: string
+  date?: string // YYYY-MM-DD
 }
 
 const statusConfig: Record<
@@ -35,13 +35,27 @@ const statusConfig: Record<
   CANCELLED: { label: 'Cancelada', variant: 'destructive' },
 }
 
+const sourceConfig: Record<string, string> = {
+  RECURRENCE: 'Recorrência',
+  SPOT: 'Pontual',
+}
+
+const mealTypeLabel: Record<string, string> = {
+  LUNCH: 'Almoço',
+  DINNER: 'Janta',
+}
+
 type MealReservation = CanteenMealReservationsResponse['data'][number]
 
 export function MealReservationsTable({ canteenId, date }: MealReservationsTableProps) {
   const queryClient = useQueryClient()
   const { data, isLoading, isError, error } = useQuery(
     api.api.v1.canteenMealReservations.index.queryOptions({
-      query: { canteenId, date },
+      query: {
+        canteenId,
+        date: date ?? undefined,
+        limit: 100,
+      },
     })
   )
   const updateStatusMutation = useMutation(
@@ -101,6 +115,7 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
               <TableHead>Aluno</TableHead>
               <TableHead>Refeição</TableHead>
               <TableHead>Data</TableHead>
+              <TableHead>Origem</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -114,19 +129,29 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{reservation.studentId ?? '-'}</span>
+                      <span className="font-medium">
+                        {reservation.student?.user?.name ?? reservation.studentId ?? '-'}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Utensils className="h-4 w-4 text-muted-foreground" />
-                      {reservation.meal?.name || '-'}
+                      {(reservation as { source?: string }).source === 'RECURRENCE' && reservation.meal?.mealType
+                        ? mealTypeLabel[reservation.meal.mealType] ?? reservation.meal.mealType
+                        : reservation.meal?.name ?? '-'}
                     </div>
                   </TableCell>
                   <TableCell>
                     {reservation.meal?.date
                       ? format(new Date(reservation.meal.date), 'dd/MM/yyyy', { locale: ptBR })
                       : '-'}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs text-muted-foreground">
+                      {sourceConfig[(reservation as { source?: string }).source ?? 'SPOT'] ??
+                        'Pontual'}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <Badge variant={config.variant}>{config.label}</Badge>

@@ -22,10 +22,12 @@ export default class CreateCanteenMealController {
       throw AppException.badRequest('Data da refeição inválida')
     }
 
+    const mealType = payload.mealType ?? 'LUNCH'
+
     const existingMeal = await CanteenMeal.query()
       .where('canteenId', payload.canteenId)
       .where('date', servedAtDate)
-      .where('mealType', 'LUNCH')
+      .where('mealType', mealType)
       .first()
 
     if (existingMeal) {
@@ -34,6 +36,7 @@ export default class CreateCanteenMealController {
         description: payload.description ?? null,
         price: payload.price,
         date: servedAt,
+        mealType,
         isActive: payload.isActive ?? true,
         maxServings: payload.maxReservations ?? null,
       })
@@ -50,7 +53,7 @@ export default class CreateCanteenMealController {
       description: payload.description ?? null,
       price: payload.price,
       date: servedAt,
-      mealType: 'LUNCH',
+      mealType,
       isActive: payload.isActive ?? true,
       maxServings: payload.maxReservations ?? null,
     })

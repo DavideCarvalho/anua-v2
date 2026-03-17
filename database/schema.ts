@@ -401,10 +401,12 @@ export class CanteenItemSchema extends BaseModel {
 }
 
 export class CanteenItemPurchasedSchema extends BaseModel {
-  static $columns = ['canteenItemId', 'canteenPurchaseId', 'createdAt', 'id', 'price', 'quantity', 'updatedAt'] as const
+  static $columns = ['canteenItemId', 'canteenMealId', 'canteenPurchaseId', 'createdAt', 'id', 'price', 'quantity', 'updatedAt'] as const
   $columns = CanteenItemPurchasedSchema.$columns
   @column()
-  declare canteenItemId: string
+  declare canteenItemId: string | null
+  @column()
+  declare canteenMealId: string | null
   @column()
   declare canteenPurchaseId: string
   @column.dateTime()
@@ -449,7 +451,7 @@ export class CanteenMealSchema extends BaseModel {
 }
 
 export class CanteenMealReservationSchema extends BaseModel {
-  static $columns = ['cancelledAt', 'createdAt', 'id', 'mealId', 'reservedAt', 'servedAt', 'status', 'studentId', 'updatedAt'] as const
+  static $columns = ['cancelledAt', 'createdAt', 'id', 'mealId', 'reservedAt', 'servedAt', 'source', 'status', 'studentId', 'updatedAt'] as const
   $columns = CanteenMealReservationSchema.$columns
   @column.dateTime()
   declare cancelledAt: DateTime | null
@@ -463,6 +465,8 @@ export class CanteenMealReservationSchema extends BaseModel {
   declare reservedAt: DateTime
   @column.dateTime()
   declare servedAt: DateTime | null
+  @column()
+  declare source: any
   @column()
   declare status: any
   @column()
@@ -2993,6 +2997,27 @@ export class StudentHasSchoolPartnerSchema extends BaseModel {
   declare updatedAt: DateTime
   @column()
   declare userId: string | null
+}
+
+export class StudentMealRecurrenceSchema extends BaseModel {
+  static $columns = ['canteenId', 'canteenMealId', 'createdAt', 'id', 'mealType', 'studentId', 'updatedAt', 'weekDay'] as const
+  $columns = StudentMealRecurrenceSchema.$columns
+  @column()
+  declare canteenId: string
+  @column()
+  declare canteenMealId: string | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare mealType: any
+  @column()
+  declare studentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare weekDay: number
 }
 
 export class StudentMedicalInfoSchema extends BaseModel {

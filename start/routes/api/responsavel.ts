@@ -18,6 +18,10 @@ const GetResponsavelStudentBalanceController = () =>
   import('#controllers/responsavel/get_student_balance_controller')
 const GetResponsavelStudentCanteenPurchasesController = () =>
   import('#controllers/responsavel/get_student_canteen_purchases_controller')
+const ListStudentMealRecurrenceController = () =>
+  import('#controllers/responsavel/list_student_meal_recurrence_controller')
+const UpdateStudentMealRecurrenceController = () =>
+  import('#controllers/responsavel/update_student_meal_recurrence_controller')
 const GetResponsavelStudentAssignmentsController = () =>
   import('#controllers/responsavel/get_student_assignments_controller')
 const GetResponsavelStudentScheduleController = () =>
@@ -82,6 +86,12 @@ export function registerResponsavelApiRoutes() {
           GetResponsavelStudentCanteenPurchasesController,
         ])
         .as('student_canteen_purchases')
+      router
+        .get('/students/:studentId/meal-recurrence', [ListStudentMealRecurrenceController])
+        .as('student_meal_recurrence')
+      router
+        .put('/students/:studentId/meal-recurrence', [UpdateStudentMealRecurrenceController])
+        .as('update_student_meal_recurrence')
       router
         .get('/students/:studentId/assignments', [GetResponsavelStudentAssignmentsController])
         .as('student_assignments')

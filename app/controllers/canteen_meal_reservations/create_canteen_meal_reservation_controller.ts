@@ -46,6 +46,7 @@ export default class CreateCanteenMealReservationController {
       studentId: payload.userId, // Map userId to studentId
       status: 'RESERVED',
       reservedAt: DateTime.now(),
+      source: 'SPOT',
     })
 
     await reservation.load('meal', (mealQuery) => mealQuery.preload('canteen'))
