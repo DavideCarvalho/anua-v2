@@ -198,17 +198,17 @@ function LaunchGradesModalContent({
           {grades.map((student, index) => (
             <div
               key={student.studentId}
-              className="flex items-center justify-between gap-4 rounded-md border p-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3"
             >
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-[150px]">
                 <p className="font-medium truncate">{student.name}</p>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs text-muted-foreground">Data</label>
                   <Input
                     type="date"
-                    className="w-36"
+                    className="w-32 sm:w-36"
                     value={student.submittedAt || ''}
                     onChange={(e) => {
                       form.setValue(`grades.${index}.submittedAt`, e.target.value || null)
@@ -217,7 +217,7 @@ function LaunchGradesModalContent({
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs text-muted-foreground">Nota</label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Input
                       type="number"
                       min={0}
@@ -225,7 +225,7 @@ function LaunchGradesModalContent({
                       step="0.1"
                       inputMode="decimal"
                       placeholder="0"
-                      className="w-20 text-center"
+                      className="w-16 sm:w-20 text-center"
                       value={student.grade ?? ''}
                       onChange={(e) => {
                         const grade = e.target.valueAsNumber
@@ -237,7 +237,9 @@ function LaunchGradesModalContent({
                       }}
                     />
                     {maxGrade !== null && (
-                      <span className="text-sm text-muted-foreground">/ {maxGrade}</span>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        / {maxGrade}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -276,7 +278,7 @@ export function LaunchGradesModal({
 }: LaunchGradesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{assignmentName}</DialogTitle>
           <DialogDescription>
