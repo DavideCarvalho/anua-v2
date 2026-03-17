@@ -176,9 +176,9 @@ function LaunchGradesModalContent({
           })),
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['subject-grades'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.grades.students.pathKey() })
       queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
-      queryClient.invalidateQueries({ queryKey: ['assignment-grades', assignmentId] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.submissions.pathKey() })
       toast.success('Notas salvas com sucesso!')
       onOpenChange(false)
     } catch (error) {

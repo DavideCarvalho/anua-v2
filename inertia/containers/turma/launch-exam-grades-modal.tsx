@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -90,6 +90,7 @@ function LaunchExamGradesModalContent({
   onOpenChange,
 }: Omit<LaunchExamGradesModalProps, 'open'>) {
   const queryClient = useQueryClient()
+  const initializedRef = useRef(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -112,7 +113,7 @@ function LaunchExamGradesModalContent({
     })
   )
 
-  const existingGrades = (() => {
+  const existingGrades = useMemo(() => {
     if (!examGradesResponse) return []
     const grades: ExamGradeItem[] = examGradesResponse
     return grades.map((g) => ({
@@ -120,13 +121,13 @@ function LaunchExamGradesModalContent({
       score: g.score,
       attended: g.attended,
     }))
-  })()
+  }, [examGradesResponse])
 
-  // Initialize form when data is loaded
   useEffect(() => {
+    if (initializedRef.current) return
     if (!students || students.length === 0) return
 
-    const gradesMap = new Map((existingGrades || []).map((g) => [g.studentId, g]))
+    const gradesMap = new Map(existingGrades.map((g) => [g.studentId, g]))
 
     const formGrades: StudentGrade[] = students.map((student: Student) => {
       const existing = gradesMap.get(student.id)
@@ -139,6 +140,7 @@ function LaunchExamGradesModalContent({
     })
 
     form.setValue('grades', formGrades)
+    initializedRef.current = true
   }, [students, existingGrades, form])
 
   const saveMutation = useMutation(api.api.v1.exams.batchSaveGrades.mutationOptions())
@@ -183,7 +185,7 @@ function LaunchExamGradesModalContent({
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
-          queryClient.invalidateQueries({ queryKey: ['exam-grades', examId] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.exams.grades.pathKey() })
           toast.success('Notas salvas com sucesso!')
           onOpenChange(false)
         },
@@ -207,12 +209,12 @@ function LaunchExamGradesModalContent({
           {grades.map((student, index) => (
             <div
               key={student.studentId}
-              className="flex items-center justify-between gap-4 rounded-md border p-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3"
             >
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-[150px]">
                 <p className="font-medium truncate">{student.name}</p>
               </div>
-              <div className="flex items-center gap-4 flex-shrink-0">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id={`absent-${student.studentId}`}
@@ -231,7 +233,7 @@ function LaunchExamGradesModalContent({
                     Faltou
                   </label>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Input
                     type="number"
                     min={0}
@@ -239,19 +241,24 @@ function LaunchExamGradesModalContent({
                     step="0.1"
                     inputMode="decimal"
                     placeholder="0"
-                    className="w-20 text-center"
+                    className="w-16 sm:w-20 text-center"
                     disabled={student.absent}
                     value={student.score ?? ''}
                     onChange={(e) => {
-                      const score = e.target.valueAsNumber
-                      if (Number.isNaN(score)) {
+                      const value = e.target.value
+                      if (value === '' || value === '-') {
                         form.setValue(`grades.${index}.score`, null)
                         return
                       }
-                      form.setValue(`grades.${index}.score`, score)
+                      const score = parseFloat(value)
+                      if (!Number.isNaN(score)) {
+                        form.setValue(`grades.${index}.score`, score)
+                      }
                     }}
                   />
-                  <span className="text-sm text-muted-foreground">/ {maxScore}</span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    / {maxScore}
+                  </span>
                 </div>
               </div>
             </div>
@@ -288,11 +295,11 @@ export function LaunchExamGradesModal({
 }: LaunchExamGradesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>{examTitle}</DialogTitle>
           <DialogDescription>
-            Lancar notas para esta prova. Nota maxima: {maxScore}
+            Lançar notas para esta prova. Nota máxima: {maxScore}
           </DialogDescription>
         </DialogHeader>
 
