@@ -1,7 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Occurrence from '#models/occurrence'
 import StudentHasResponsible from '#models/student_has_responsible'
-import ResponsibleUserAcceptedOccurence from '#models/responsible_user_accepted_occurence'
 import AppException from '#exceptions/app_exception'
 import OccurrenceSchoolListItemTransformer from '#transformers/occurrence_school_list_item_transformer'
 

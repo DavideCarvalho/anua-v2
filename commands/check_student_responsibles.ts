@@ -16,7 +16,6 @@ export default class CheckStudentResponsibles extends BaseCommand {
   declare studentName: string
 
   async run() {
-
     const student = await Student.query()
       .whereHas('user', (q) => q.where('name', 'ilike', `%${this.studentName}%`))
       .preload('user')
@@ -44,10 +43,7 @@ export default class CheckStudentResponsibles extends BaseCommand {
     const pedagogicalCount = responsibles.filter((r) => r.isPedagogical).length
     this.logger.info(`\nResponsáveis pedagógicos (isPedagogical=true): ${pedagogicalCount}`)
 
-    const raw = await db
-      .from('StudentHasResponsible')
-      .where('studentId', student.id)
-      .select('*')
+    const raw = await db.from('StudentHasResponsible').where('studentId', student.id).select('*')
     this.logger.info('\nQuery raw (StudentHasResponsible):')
     this.logger.info(JSON.stringify(raw, null, 2))
   }
