@@ -72,11 +72,11 @@ export default class ListCanteenMealsController {
           ? await CanteenMeal.query().whereIn('id', ids).preload('canteen').orderBy('date', 'asc')
           : []
       metadata = {
-        total: data.length,
-        perPage: data.length,
-        currentPage: 1,
-        lastPage: 1,
-        firstPage: 1,
+        total: String(data.length),
+        perPage: String(data.length),
+        currentPage: '1',
+        lastPage: '1',
+        firstPage: '1',
         firstPageUrl: '',
         lastPageUrl: '',
         nextPageUrl: '',
