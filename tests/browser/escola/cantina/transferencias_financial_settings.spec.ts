@@ -35,15 +35,16 @@ test.group('Cantina transferencias financial settings (browser)', (group) => {
     await page.fill('#canteen-account-holder', 'Cantina Escola LTDA')
     await page.fill('#canteen-platform-fee', '4.2')
 
-    await page.click('button:has-text("Salvar configuração financeira")')
-
-    await page.waitForResponse((response) => {
-      return (
-        response.request().method() === 'PUT' &&
-        response.url().includes(`/api/v1/canteens/${canteen.id}/financial-settings`) &&
-        response.status() === 200
-      )
-    })
+    await Promise.all([
+      page.waitForResponse(
+        (res) =>
+          res.request().method() === 'PUT' &&
+          res.url().includes(`/api/v1/canteens/${canteen.id}/financial-settings`) &&
+          res.status() === 200,
+        { timeout: 30000 }
+      ),
+      page.click('button:has-text("Salvar configuração financeira")'),
+    ])
 
     await page.assertExists('text=Configuração financeira salva com sucesso')
 
