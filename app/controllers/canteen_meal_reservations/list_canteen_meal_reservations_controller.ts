@@ -41,8 +41,8 @@ export default class ListCanteenMealReservationsController {
         mealQuery.where('canteenId', payload.canteenId!)
       })
     } else if (selectedSchoolIds && selectedSchoolIds.length > 0) {
-      const canteenIds = (await Canteen.query().whereIn('schoolId', selectedSchoolIds).select('id'))
-        .map((c) => c.id)
+      const canteens = await Canteen.query().whereIn('schoolId', selectedSchoolIds).select('id')
+      const canteenIds = canteens.map((c) => c.id)
       if (canteenIds.length > 0) {
         query.whereHas('meal', (mealQuery) => {
           mealQuery.whereIn('canteenId', canteenIds)

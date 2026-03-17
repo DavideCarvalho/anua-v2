@@ -15,10 +15,7 @@ export default class CheckMealRecurrenceController {
     const { studentId } = params
     const { date, mealType } = await request.validateUsing(checkMealRecurrenceValidator)
 
-    const student = await Student.query()
-      .where('id', studentId)
-      .preload('class')
-      .first()
+    const student = await Student.query().where('id', studentId).preload('class').first()
 
     if (!student || !student.class) {
       return { hasRecurrence: false }

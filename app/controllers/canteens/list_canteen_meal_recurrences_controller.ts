@@ -35,7 +35,13 @@ export default class ListCanteenMealRecurrencesController {
       {
         studentId: string
         studentName: string
-        slots: Array<{ weekDay: number; weekDayLabel: string; mealType: string; mealTypeLabel: string; canteenMealName: string | null }>
+        slots: Array<{
+          weekDay: number
+          weekDayLabel: string
+          mealType: string
+          mealTypeLabel: string
+          canteenMealName: string | null
+        }>
       }
     >()
 

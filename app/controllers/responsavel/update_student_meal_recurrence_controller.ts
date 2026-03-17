@@ -23,13 +23,12 @@ export default class UpdateStudentMealRecurrenceController {
       .first()
 
     if (!relation) {
-      throw AppException.forbidden('Você não tem permissão para configurar as recorrências deste aluno')
+      throw AppException.forbidden(
+        'Você não tem permissão para configurar as recorrências deste aluno'
+      )
     }
 
-    const student = await Student.query()
-      .where('id', studentId)
-      .preload('class')
-      .first()
+    const student = await Student.query().where('id', studentId).preload('class').first()
 
     if (!student || !student.class) {
       throw AppException.badRequest('Aluno não possui turma vinculada')
@@ -45,7 +44,7 @@ export default class UpdateStudentMealRecurrenceController {
       throw AppException.badRequest('Escola do aluno não possui cantina')
     }
 
-      for (const slot of payload.slots) {
+    for (const slot of payload.slots) {
       const canteenMealId = slot.canteenMealId ?? null
       if (canteenMealId) {
         const meal = await CanteenMeal.query()
@@ -59,9 +58,7 @@ export default class UpdateStudentMealRecurrenceController {
           )
         }
         if (meal.mealType !== slot.mealType) {
-          throw AppException.badRequest(
-            `Refeição selecionada não é do tipo ${slot.mealType}`
-          )
+          throw AppException.badRequest(`Refeição selecionada não é do tipo ${slot.mealType}`)
         }
       }
     }
@@ -73,7 +70,10 @@ export default class UpdateStudentMealRecurrenceController {
         .useTransaction(trx)
         .delete()
 
-      const uniqueSlots = new Map<string, { weekDay: number; mealType: string; canteenMealId: string | null }>()
+      const uniqueSlots = new Map<
+        string,
+        { weekDay: number; mealType: string; canteenMealId: string | null }
+      >()
       for (const slot of payload.slots) {
         const key = `${slot.weekDay}-${slot.mealType}`
         if (!uniqueSlots.has(key)) {

@@ -106,7 +106,11 @@ export const createCanteenPurchaseValidator = vine.compile(
           ),
         ])
         .otherwise((_, field) => {
-          field.report('Informe type: "item" com canteenItemId ou type: "meal" com canteenMealId', 'invalid_item', field)
+          field.report(
+            'Informe type: "item" com canteenItemId ou type: "meal" com canteenMealId',
+            'invalid_item',
+            field
+          )
         })
     ),
   })
@@ -191,7 +195,10 @@ export const updateCanteenMealReservationStatusValidator = vine.compile(
 export const getMealReservationCountsValidator = vine.compile(
   vine.object({
     canteenId: vine.string().trim(),
-    date: vine.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
+    date: vine
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
   })
 )
 
@@ -201,7 +208,11 @@ export const listCanteenMealReservationsValidator = vine.compile(
     canteenMealId: vine.string().trim().optional(),
     userId: vine.string().trim().optional(),
     status: vine.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'SERVED']).optional(),
-    date: vine.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    date: vine
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
   })

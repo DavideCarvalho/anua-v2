@@ -12,10 +12,7 @@ export default class extends BaseSchema {
       END $$;
     `)
     this.schema.alterTable(this.tableName, (table) => {
-      table
-        .specificType('source', '"MealReservationSource"')
-        .notNullable()
-        .defaultTo('SPOT')
+      table.specificType('source', '"MealReservationSource"').notNullable().defaultTo('SPOT')
     })
   }
 

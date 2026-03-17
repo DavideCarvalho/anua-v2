@@ -14,7 +14,10 @@ export const updateStudentMealRecurrenceValidator = vine.compile(
 
 export const checkMealRecurrenceValidator = vine.compile(
   vine.object({
-    date: vine.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
+    date: vine
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/),
     mealType: vine.enum(['LUNCH', 'DINNER']),
   })
 )

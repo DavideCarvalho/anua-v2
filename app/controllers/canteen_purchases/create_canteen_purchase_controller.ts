@@ -24,8 +24,7 @@ export default class CreateCanteenPurchaseController {
     const quantitiesByKey = new Map<string, number>()
 
     for (const item of items) {
-      const key =
-        item.type === 'item' ? `item:${item.canteenItemId}` : `meal:${item.canteenMealId}`
+      const key = item.type === 'item' ? `item:${item.canteenItemId}` : `meal:${item.canteenMealId}`
       quantitiesByKey.set(key, (quantitiesByKey.get(key) ?? 0) + item.quantity)
     }
 
@@ -134,10 +133,14 @@ export default class CreateCanteenPurchaseController {
     const payload = await request.validateUsing(createCanteenPurchaseValidator)
 
     const itemIds = payload.items
-      .filter((i): i is { type: 'item'; canteenItemId: string; quantity: number } => i.type === 'item')
+      .filter(
+        (i): i is { type: 'item'; canteenItemId: string; quantity: number } => i.type === 'item'
+      )
       .map((i) => i.canteenItemId)
     const mealIds = payload.items
-      .filter((i): i is { type: 'meal'; canteenMealId: string; quantity: number } => i.type === 'meal')
+      .filter(
+        (i): i is { type: 'meal'; canteenMealId: string; quantity: number } => i.type === 'meal'
+      )
       .map((i) => i.canteenMealId)
     const todayIso = DateTime.now().toISODate()
 

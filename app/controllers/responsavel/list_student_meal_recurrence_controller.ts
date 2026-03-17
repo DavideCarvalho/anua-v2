@@ -22,10 +22,7 @@ export default class ListStudentMealRecurrenceController {
       throw AppException.forbidden('Você não tem permissão para ver as recorrências deste aluno')
     }
 
-    const student = await Student.query()
-      .where('id', studentId)
-      .preload('class')
-      .first()
+    const student = await Student.query().where('id', studentId).preload('class').first()
 
     if (!student || !student.class) {
       return { data: [], canteenId: null }
