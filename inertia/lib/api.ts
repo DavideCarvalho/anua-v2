@@ -13,6 +13,10 @@ export const tuyau = createTuyau({
   baseUrl: apiUrl,
   registry,
   plugins: [superjson()],
+  headers: {
+    Accept: 'application/json',
+  },
+  credentials: 'include',
 })
 
 export const api = createTuyauReactQueryClient({ client: tuyau })

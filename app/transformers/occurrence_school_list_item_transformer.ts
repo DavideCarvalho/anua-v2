@@ -32,6 +32,10 @@ export default class OccurrenceSchoolListItemTransformer extends BaseTransformer
         : null,
       acknowledgedCount: Number(this.resource.$extras.acknowledgements_count ?? 0),
       totalResponsibles: Number(this.resource.$extras.total_responsibles ?? 0),
+      responsibleAcknowledgements:
+        (this.resource.$extras.responsible_acknowledgements as
+          | { name: string; acknowledged: boolean }[]
+          | undefined) ?? [],
     }
   }
 }

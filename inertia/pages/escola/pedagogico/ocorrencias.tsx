@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, Plus, Search, Loader2, Eye } from 'lucide-react'
+import { AlertTriangle, Plus, Search, Loader2, Eye, CheckCircle, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { parseAsInteger, parseAsString, useQueryStates } from 'nuqs'
 
@@ -107,8 +107,15 @@ function NewOccurrenceModal({
   })
 
   const { data: studentsData } = useQuery({
-    ...api.api.v1.students.index.queryOptions({ query: { page: 1, limit: 200 } }),
-    enabled: open,
+    ...api.api.v1.students.index.queryOptions({
+      query: {
+        page: 1,
+        limit: 100,
+        ...(selectedClassId ? { classId: selectedClassId } : {}),
+        ...(selectedAcademicPeriodId ? { academicPeriodId: selectedAcademicPeriodId } : {}),
+      },
+    }),
+    enabled: open && !!selectedClassId,
   })
   const { data: academicPeriodsData } = useQuery({
     ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
@@ -183,10 +190,7 @@ function NewOccurrenceModal({
       description: item.class.name,
     }))
 
-  const filteredStudents = useMemo(() => {
-    if (!selectedClassId) return students
-    return students.filter((student: any) => student.classId === selectedClassId)
-  }, [students, selectedClassId])
+  const filteredStudents = students
 
   useEffect(() => {
     if (!selectedAcademicPeriodId) return
@@ -238,8 +242,8 @@ function NewOccurrenceModal({
       { body: values },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['occurrences'] })
-          queryClient.invalidateQueries({ queryKey: ['notifications'] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.occurrences.index.pathKey() })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.notifications.index.pathKey() })
           toast.success('Registro diario criado com sucesso')
           form.reset({
             studentId: '',
@@ -396,7 +400,10 @@ function NewOccurrenceModal({
                 onValueChange={(value) => form.setValue('type', value as FormValues['type'])}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Selecione o tipo">
+                    {TYPE_OPTIONS.find((t) => t.value === form.watch('type'))?.label ??
+                      form.watch('type')}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {TYPE_OPTIONS.map((type) => (
@@ -486,7 +493,7 @@ function SearchableSingleSelect({
           <span className="truncate">{selected?.label || placeholder}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent className="w-[var(--anchor-width)] min-w-[var(--anchor-width)] p-0" align="start">
         <div className="border-b p-2">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -1005,11 +1012,45 @@ export default function OcorrenciasPage() {
                   {occurrenceDetail.type === 'PRAISE' ? (
                     <p className="mt-2 text-sm">Elogio nao exige reconhecimento do responsavel.</p>
                   ) : (
-                    <p className="mt-2 text-sm">
-                      <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span> de{' '}
-                      <span className="font-semibold">{occurrenceDetail.totalResponsibles}</span>{' '}
-                      responsavel(is) reconheceram.
-                    </p>
+                    <div className="mt-2 space-y-2">
+                      <p className="text-sm">
+                        <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span> de{' '}
+                        <span className="font-semibold">{occurrenceDetail.totalResponsibles}</span>{' '}
+                        responsavel(is) reconheceram.
+                      </p>
+                      {(() => {
+                        const raList = (
+                          occurrenceDetail as {
+                            responsibleAcknowledgements?: {
+                              name: string
+                              acknowledged: boolean
+                            }[]
+                          }
+                        ).responsibleAcknowledgements
+                        if (!raList?.length) return null
+                        return (
+                          <ul className="space-y-1.5 text-sm">
+                            {raList.map((ra, i) => (
+                              <li key={i} className="flex items-center gap-2">
+                                {ra.acknowledged ? (
+                                  <CheckCircle className="h-4 w-4 shrink-0 text-green-600" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                )}
+                                <span
+                                  className={
+                                    ra.acknowledged ? 'text-foreground' : 'text-muted-foreground'
+                                  }
+                                >
+                                  {ra.name}
+                                  {ra.acknowledged ? ' — reconheceu' : ' — pendente'}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )
+                      })()}
+                    </div>
                   )}
                 </div>
               </>

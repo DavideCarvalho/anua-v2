@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Occurrence from '#models/occurrence'
 import StudentHasResponsible from '#models/student_has_responsible'
+import ResponsibleUserAcceptedOccurence from '#models/responsible_user_accepted_occurence'
 import AppException from '#exceptions/app_exception'
 import OccurrenceSchoolListItemTransformer from '#transformers/occurrence_school_list_item_transformer'
 
@@ -17,7 +18,7 @@ export default class ShowOccurrenceController {
           .preload('subject')
           .preload('teacher', (teacherQuery) => teacherQuery.preload('user'))
       })
-      .withCount('acknowledgements')
+      .preload('acknowledgements', (ackQuery) => ackQuery.preload('responsibleUser'))
       .whereHas('teacherHasClass', (teacherClassQuery) => {
         teacherClassQuery.whereHas('class', (classQuery) => {
           if (scopedSchoolIds.length > 0) {
@@ -33,14 +34,23 @@ export default class ShowOccurrenceController {
       throw AppException.notFound('Ocorrência não encontrada')
     }
 
-    const pedagogicalResponsibleCount = await StudentHasResponsible.query()
+    const pedagogicalResponsibles = await StudentHasResponsible.query()
       .where('studentId', occurrence.studentId)
       .where('isPedagogical', true)
-      .count('* as total')
+      .preload('responsible')
 
-    occurrence.$extras.total_responsibles = Number(
-      pedagogicalResponsibleCount[0]?.$extras.total || 0
+    const acknowledgedUserIds = new Set(
+      occurrence.acknowledgements?.map((a) => a.responsibleUserId) ?? []
     )
+
+    const responsibleAcknowledgements = pedagogicalResponsibles.map((shr) => ({
+      name: shr.responsible?.name ?? 'Responsável',
+      acknowledged: acknowledgedUserIds.has(shr.responsibleId),
+    }))
+
+    occurrence.$extras.total_responsibles = pedagogicalResponsibles.length
+    occurrence.$extras.acknowledgements_count = occurrence.acknowledgements?.length ?? 0
+    occurrence.$extras.responsible_acknowledgements = responsibleAcknowledgements
 
     return response.ok(await serialize(OccurrenceSchoolListItemTransformer.transform(occurrence)))
   }
