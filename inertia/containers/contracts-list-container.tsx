@@ -349,10 +349,10 @@ function ContractsListContent() {
               }
             >
               <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Período Letivo" />
+                <SelectValue placeholder="Academic Period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os períodos</SelectItem>
+                <SelectItem value="all">All periods</SelectItem>
                 {academicPeriods.map((period: any) => (
                   <SelectItem key={period.id} value={period.id}>
                     {period.name}
@@ -373,10 +373,10 @@ function ContractsListContent() {
               disabled={!academicPeriodId}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Curso" />
+                <SelectValue placeholder="Course" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os cursos</SelectItem>
+                <SelectItem value="all">All courses</SelectItem>
                 {courses.map((course) => (
                   <SelectItem key={course.courseId} value={course.courseId}>
                     {course.name}
@@ -396,10 +396,10 @@ function ContractsListContent() {
               disabled={!courseId}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Turma" />
+                <SelectValue placeholder="Class" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas as turmas</SelectItem>
+                <SelectItem value="all">All classes</SelectItem>
                 {classes.map((classItem) => (
                   <SelectItem key={classItem.id} value={classItem.id}>
                     {classItem.name} ({classItem.levelName})
@@ -421,9 +421,9 @@ function ContractsListContent() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Somente ativos</SelectItem>
-                <SelectItem value="inactive">Somente inativos</SelectItem>
-                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="active">Active only</SelectItem>
+                <SelectItem value="inactive">Inactive only</SelectItem>
+                <SelectItem value="all">All</SelectItem>
               </SelectContent>
             </Select>
 
