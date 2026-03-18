@@ -16,6 +16,7 @@ import Class_ from '#models/class'
 import ClassHasAcademicPeriod from '#models/class_has_academic_period'
 import CourseHasAcademicPeriod from '#models/course_has_academic_period'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
+import Invoice from '#models/invoice'
 
 async function createTestRoles() {
   const rolesToCreate = ['STUDENT']
@@ -292,7 +293,7 @@ test.group('BillingReconciliationService', (group) => {
     assert.equal(invoice2!.studentHasLevelId, enrollment2.id)
   })
 
-  test('cleanupOrphanPayments cancels unpaid payments from deleted period', async ({ assert }) => {
+  test('cleanupOrphanPayments deletes unpaid payments from deleted period', async ({ assert }) => {
     await createTestRoles()
     const studentRole = await Role.findByOrFail({ name: 'STUDENT' })
 
@@ -366,9 +367,255 @@ test.group('BillingReconciliationService', (group) => {
     await BillingReconciliationService['cleanupOrphanPayments'](student.id)
 
     await paidPayment.refresh()
-    await unpaidPayment.refresh()
+
+    const deletedUnpaid = await StudentPayment.find(unpaidPayment.id)
 
     assert.equal(paidPayment.status, 'PAID', 'Paid payment should remain PAID')
-    assert.equal(unpaidPayment.status, 'CANCELLED', 'Unpaid payment should be CANCELLED')
+    assert.isNull(deletedUnpaid, 'Unpaid payment should be deleted')
+  })
+
+  test('cleanupOrphanPayments keeps unpaid payments before period close when option enabled', async ({
+    assert,
+  }) => {
+    await createTestRoles()
+    const studentRole = await Role.findByOrFail({ name: 'STUDENT' })
+
+    const school = await School.create({
+      name: 'Test School 4',
+      slug: 'test-school-keep-unpaid',
+    })
+    const user = await User.create({
+      name: 'Test Student 4',
+      slug: 'test-student-keep-unpaid',
+      email: 'test4@test.com',
+      active: true,
+      whatsappContact: false,
+      grossSalary: 0,
+      schoolId: school.id,
+      roleId: studentRole.id,
+    })
+
+    const student = await Student.create({
+      id: user.id,
+      descountPercentage: 0,
+      monthlyPaymentAmount: 0,
+      isSelfResponsible: false,
+      balance: 0,
+    })
+
+    const periodClosedAt = DateTime.now().minus({ days: 15 })
+
+    const period = await AcademicPeriod.create({
+      name: 'Closed Period',
+      startDate: DateTime.now().minus({ months: 6 }),
+      endDate: DateTime.now().minus({ months: 1 }),
+      schoolId: school.id,
+      isActive: false,
+      deletedAt: periodClosedAt,
+      segment: 'ELEMENTARY',
+    })
+
+    const contract = await Contract.create({
+      schoolId: school.id,
+      academicPeriodId: period.id,
+      name: 'Test Contract Keep Unpaid',
+      ammount: 50000,
+      paymentType: 'MONTHLY',
+      installments: 12,
+      enrollmentValueInstallments: 1,
+      flexibleInstallments: true,
+      isActive: true,
+      hasInsurance: false,
+    })
+
+    const level = await Level.create({
+      schoolId: school.id,
+      contractId: contract.id,
+      name: 'Level Test Keep Unpaid',
+      order: 1,
+      isActive: true,
+    })
+
+    const course = await Course.create({
+      schoolId: school.id,
+      name: `Course Test Keep Unpaid ${Date.now()}`,
+      version: 1,
+    })
+
+    const courseHasAcademicPeriod = await CourseHasAcademicPeriod.create({
+      courseId: course.id,
+      academicPeriodId: period.id,
+    })
+
+    const levelAssignment = await LevelAssignedToCourseHasAcademicPeriod.create({
+      levelId: level.id,
+      courseHasAcademicPeriodId: courseHasAcademicPeriod.id,
+      isActive: true,
+    })
+
+    const enrollment = await StudentHasLevel.create({
+      studentId: student.id,
+      levelId: level.id,
+      academicPeriodId: period.id,
+      contractId: contract.id,
+      levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+    })
+
+    const paymentBeforeClose = await StudentPayment.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'TUITION',
+      amount: 10000,
+      totalAmount: 10000,
+      month: DateTime.now().minus({ months: 1 }).month,
+      year: DateTime.now().year,
+      dueDate: periodClosedAt.minus({ days: 5 }),
+      status: 'PENDING',
+    })
+
+    const paymentAfterClose = await StudentPayment.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'TUITION',
+      amount: 10000,
+      totalAmount: 10000,
+      month: DateTime.now().plus({ months: 1 }).month,
+      year: DateTime.now().year,
+      dueDate: periodClosedAt.plus({ days: 5 }),
+      status: 'PENDING',
+    })
+
+    await BillingReconciliationService['cleanupOrphanPayments'](student.id, {
+      keepUnpaidBeforePeriodClose: true,
+    })
+
+    await paymentBeforeClose.refresh()
+
+    const deletedPaymentAfterClose = await StudentPayment.find(paymentAfterClose.id)
+
+    assert.equal(paymentBeforeClose.status, 'PENDING', 'Payment before close should be kept')
+    assert.isNull(deletedPaymentAfterClose, 'Payment after close should be deleted')
+  })
+
+  test('cleanupOrphanPayments deletes orphan invoices', async ({ assert }) => {
+    await createTestRoles()
+    const studentRole = await Role.findByOrFail({ name: 'STUDENT' })
+
+    const school = await School.create({
+      name: 'Test School 5',
+      slug: 'test-school-orphan-invoice',
+    })
+    const user = await User.create({
+      name: 'Test Student 5',
+      slug: 'test-student-orphan-invoice',
+      email: 'test5@test.com',
+      active: true,
+      whatsappContact: false,
+      grossSalary: 0,
+      schoolId: school.id,
+      roleId: studentRole.id,
+    })
+
+    const student = await Student.create({
+      id: user.id,
+      descountPercentage: 0,
+      monthlyPaymentAmount: 0,
+      isSelfResponsible: false,
+      balance: 0,
+    })
+
+    const period = await AcademicPeriod.create({
+      name: 'Deleted Period',
+      startDate: DateTime.now().minus({ months: 6 }),
+      endDate: DateTime.now().minus({ months: 2 }),
+      schoolId: school.id,
+      isActive: false,
+      deletedAt: DateTime.now().minus({ months: 1 }),
+      segment: 'ELEMENTARY',
+    })
+
+    const contract = await Contract.create({
+      schoolId: school.id,
+      academicPeriodId: period.id,
+      name: 'Test Contract Orphan Invoice',
+      ammount: 50000,
+      paymentType: 'MONTHLY',
+      installments: 12,
+      enrollmentValueInstallments: 1,
+      flexibleInstallments: true,
+      isActive: true,
+      hasInsurance: false,
+    })
+
+    const level = await Level.create({
+      schoolId: school.id,
+      contractId: contract.id,
+      name: 'Level Test Orphan Invoice',
+      order: 1,
+      isActive: true,
+    })
+
+    const course = await Course.create({
+      schoolId: school.id,
+      name: `Course Test Orphan Invoice ${Date.now()}`,
+      version: 1,
+    })
+
+    const courseHasAcademicPeriod = await CourseHasAcademicPeriod.create({
+      courseId: course.id,
+      academicPeriodId: period.id,
+    })
+
+    const levelAssignment = await LevelAssignedToCourseHasAcademicPeriod.create({
+      levelId: level.id,
+      courseHasAcademicPeriodId: courseHasAcademicPeriod.id,
+      isActive: true,
+    })
+
+    const enrollment = await StudentHasLevel.create({
+      studentId: student.id,
+      levelId: level.id,
+      academicPeriodId: period.id,
+      contractId: contract.id,
+      levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+    })
+
+    const payment = await StudentPayment.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'TUITION',
+      amount: 10000,
+      totalAmount: 10000,
+      month: DateTime.now().plus({ months: 1 }).month,
+      year: DateTime.now().year,
+      dueDate: DateTime.now().plus({ months: 1 }),
+      status: 'PENDING',
+    })
+
+    const invoice = await Invoice.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      type: 'MONTHLY',
+      month: payment.month,
+      year: payment.year,
+      dueDate: payment.dueDate,
+      status: 'OPEN',
+      baseAmount: 10000,
+      totalAmount: 10000,
+      discountAmount: 0,
+      fineAmount: 0,
+      interestAmount: 0,
+    })
+
+    payment.invoiceId = invoice.id
+    await payment.save()
+
+    await BillingReconciliationService['cleanupOrphanPayments'](student.id)
+
+    const deletedInvoice = await Invoice.query().where('id', invoice.id).first()
+    assert.isNull(deletedInvoice, 'Orphan invoice should be deleted')
   })
 })

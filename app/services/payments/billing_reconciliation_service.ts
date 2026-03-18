@@ -311,6 +311,8 @@ export default class BillingReconciliationService {
         q.preload('academicPeriod')
       })
 
+    const paymentIdsToDelete: string[] = []
+
     for (const payment of orphanPayments) {
       const period = payment.studentHasLevel?.academicPeriod
 
@@ -328,13 +330,13 @@ export default class BillingReconciliationService {
         }
       }
 
-      payment.status = 'CANCELLED'
-      payment.invoiceId = null
-      payment.metadata = {
-        ...payment.metadata,
-        cancelReason: 'Matrícula desativada - período acadêmico encerrado',
-      }
-      await payment.save()
+      paymentIdsToDelete.push(payment.id)
+    }
+
+    if (paymentIdsToDelete.length > 0) {
+      await StudentPayment.query().whereIn('id', paymentIdsToDelete).update({ invoiceId: null })
+
+      await StudentPayment.query().whereIn('id', paymentIdsToDelete).delete()
     }
 
     await Invoice.query()
