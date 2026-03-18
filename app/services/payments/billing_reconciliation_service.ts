@@ -9,6 +9,10 @@ import ContractInterestConfig from '#models/contract_interest_config'
 const FINAL_INVOICE_STATUSES = ['PAID', 'CANCELLED', 'RENEGOTIATED'] as const
 const INACTIVE_PAYMENT_STATUSES = ['CANCELLED', 'RENEGOTIATED'] as const
 
+interface ReconcileOptions {
+  keepUnpaidBeforePeriodClose?: boolean
+}
+
 interface InvoiceReconciliationResult {
   updated: boolean
   valueChanged: boolean
@@ -206,7 +210,10 @@ export default class BillingReconciliationService {
     return result
   }
 
-  private static async resolveTargetInvoice(payment: StudentPayment): Promise<Invoice | null> {
+  private static async resolveTargetInvoice(
+    payment: StudentPayment,
+    options?: ReconcileOptions
+  ): Promise<Invoice | null> {
     const existingByPayment = payment.invoiceId
       ? await Invoice.query()
           .where('id', payment.invoiceId)
@@ -218,27 +225,48 @@ export default class BillingReconciliationService {
       return existingByPayment
     }
 
-    const existingByStudentPeriod = await Invoice.query()
-      .where('studentId', payment.studentId)
-      .where('month', payment.month)
-      .where('year', payment.year)
-      .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-      .first()
+    if (payment.studentHasLevelId) {
+      const enrollment = await StudentHasLevel.query()
+        .where('id', payment.studentHasLevelId)
+        .preload('academicPeriod', (q) => q.whereNull('deletedAt').where('isActive', true))
+        .first()
 
-    if (existingByStudentPeriod) {
-      return existingByStudentPeriod
+      if (!enrollment?.academicPeriod) {
+        return null
+      }
     }
 
-    if (
-      INACTIVE_PAYMENT_STATUSES.includes(
-        payment.status as (typeof INACTIVE_PAYMENT_STATUSES)[number]
-      )
-    ) {
-      return null
+    const existingByEnrollment = payment.studentHasLevelId
+      ? await Invoice.query()
+          .where('studentId', payment.studentId)
+          .where('studentHasLevelId', payment.studentHasLevelId)
+          .where('month', payment.month)
+          .where('year', payment.year)
+          .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+          .first()
+      : null
+
+    if (existingByEnrollment) {
+      return existingByEnrollment
+    }
+
+    if (!payment.studentHasLevelId) {
+      const existingByStudentPeriod = await Invoice.query()
+        .where('studentId', payment.studentId)
+        .where('month', payment.month)
+        .where('year', payment.year)
+        .whereNull('studentHasLevelId')
+        .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+        .first()
+
+      if (existingByStudentPeriod) {
+        return existingByStudentPeriod
+      }
     }
 
     return Invoice.create({
       studentId: payment.studentId,
+      studentHasLevelId: payment.studentHasLevelId,
       contractId: payment.contractId ?? null,
       type: 'MONTHLY',
       month: payment.month,
