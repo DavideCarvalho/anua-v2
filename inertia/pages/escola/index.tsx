@@ -4,9 +4,7 @@ import { EscolaLayout } from '../../components/layouts'
 import { EscolaStatsContainer } from '../../containers/escola-stats-container'
 import { EscolaInsightsContainer } from '../../containers/escola-insights-container'
 import { EscolaTeacherDashboardContainer } from '../../containers/escola-teacher-dashboard-container'
-import { AcademicOverviewCards } from '../../containers/grades/academic-overview-cards'
-import { GradeDistributionChart } from '../../containers/grades/grade-distribution-chart'
-import { AtRiskStudentsTable } from '../../containers/grades/at-risk-students-table'
+import { PedagogicalAlertsCards } from '../../containers/dashboard/pedagogical-alerts-cards'
 import { EnrollmentFunnelStats } from '../../containers/enrollment-analytics/enrollment-funnel-stats'
 import { EnrollmentTrendsChart } from '../../containers/enrollment-analytics/enrollment-trends-chart'
 import { EnrollmentByLevelTable } from '../../containers/enrollment-analytics/enrollment-by-level-table'
@@ -96,12 +94,7 @@ export default function EscolaDashboard() {
             </TabsList>
 
             <TabsContent value="pedagogical" className="mt-6 space-y-6">
-              <AcademicOverviewCards schoolId={schoolId} />
-
-              <div className="grid gap-6 xl:grid-cols-2">
-                <GradeDistributionChart schoolId={schoolId} />
-                <AtRiskStudentsTable schoolId={schoolId} />
-              </div>
+              <PedagogicalAlertsCards />
 
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>

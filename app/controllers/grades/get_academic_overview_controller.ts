@@ -26,22 +26,18 @@ export default class GetAcademicOverviewController {
       schoolsResult,
       totalSubjectsResult,
     ] = await Promise.all([
-      // Total de estudantes ativos
       db.rawQuery(
         `
         SELECT COUNT(*) as count
         FROM "Student" st
-        JOIN "User" u ON st.id = u.id
-        JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
-        JOIN "School" s ON uhs."schoolId" = s.id
+        JOIN "Class" c ON st."classId" = c.id
+        JOIN "School" s ON c."schoolId" = s.id
         WHERE st."enrollmentStatus" = 'REGISTERED'
-        AND u."deletedAt" IS NULL
         ${schoolFilter}
         `,
         params
       ),
 
-      // Total de atividades
       db.rawQuery(
         `
         SELECT COUNT(*) as count
@@ -54,7 +50,6 @@ export default class GetAcademicOverviewController {
         params
       ),
 
-      // Stats de submissoes
       db.rawQuery(
         `
         SELECT
@@ -66,15 +61,13 @@ export default class GetAcademicOverviewController {
         FROM "StudentHasAssignment" sha
         JOIN "Assignment" a ON sha."assignmentId" = a.id
         JOIN "Student" st ON sha."studentId" = st.id
-        JOIN "User" u ON st.id = u.id
-        JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
-        JOIN "School" s ON uhs."schoolId" = s.id
+        JOIN "Class" c ON st."classId" = c.id
+        JOIN "School" s ON c."schoolId" = s.id
         WHERE 1=1 ${schoolFilter}
         `,
         params
       ),
 
-      // Buscar nota minima das escolas
       db.rawQuery(
         `
         SELECT id, name, "minimumGrade"
@@ -84,7 +77,6 @@ export default class GetAcademicOverviewController {
         params
       ),
 
-      // Total de materias
       db.rawQuery(
         `
         SELECT COUNT(*) as count
@@ -117,13 +109,11 @@ export default class GetAcademicOverviewController {
       `
       SELECT COUNT(DISTINCT st.id) as count
       FROM "Student" st
-      JOIN "User" u ON st.id = u.id
-      JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
-      JOIN "School" s ON uhs."schoolId" = s.id
+      JOIN "Class" c ON st."classId" = c.id
+      JOIN "School" s ON c."schoolId" = s.id
       JOIN "StudentHasAssignment" sha ON st.id = sha."studentId"
       JOIN "Assignment" a ON sha."assignmentId" = a.id
       WHERE st."enrollmentStatus" = 'REGISTERED'
-      AND u."deletedAt" IS NULL
       AND sha.grade IS NOT NULL
       ${schoolFilter}
       GROUP BY st.id
