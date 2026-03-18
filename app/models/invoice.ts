@@ -7,6 +7,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import Contract from './contract.js'
 import StudentPayment from './student_payment.js'
+import StudentHasLevel from './student_has_level.js'
 
 export default class Invoice extends compose(BaseModel, Auditable) {
   static table = 'Invoice'
@@ -23,6 +24,9 @@ export default class Invoice extends compose(BaseModel, Auditable) {
 
   @column({ columnName: 'studentId' })
   declare studentId: string
+
+  @column({ columnName: 'studentHasLevelId' })
+  declare studentHasLevelId: string | null
 
   @column({ columnName: 'contractId' })
   declare contractId: string | null
@@ -128,6 +132,9 @@ export default class Invoice extends compose(BaseModel, Auditable) {
   // Relationships
   @belongsTo(() => Student, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof Student>
+
+  @belongsTo(() => StudentHasLevel, { foreignKey: 'studentHasLevelId' })
+  declare enrollment: BelongsTo<typeof StudentHasLevel>
 
   @belongsTo(() => Contract, { foreignKey: 'contractId' })
   declare contract: BelongsTo<typeof Contract>
