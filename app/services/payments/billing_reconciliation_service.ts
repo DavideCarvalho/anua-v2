@@ -21,18 +21,20 @@ interface InvoiceReconciliationResult {
 }
 
 export default class BillingReconciliationService {
-  static async reconcileByPaymentId(paymentId: string): Promise<void> {
+  static async reconcileByPaymentId(paymentId: string, options?: ReconcileOptions): Promise<void> {
     const payment = await StudentPayment.find(paymentId)
     if (!payment) return
 
     if (payment.type === 'AGREEMENT') return
 
     const runReconciliation = async () => {
+      await this.cleanupOrphanPayments(payment.studentId, options)
+
       await payment.refresh()
 
       if (payment.type === 'AGREEMENT') return
 
-      const invoice = await this.resolveTargetInvoice(payment)
+      const invoice = await this.resolveTargetInvoice(payment, options)
       if (!invoice) {
         return
       }
@@ -48,7 +50,7 @@ export default class BillingReconciliationService {
         }
       }
 
-      await this.reconcileByInvoiceId(invoice.id)
+      await this.reconcileByInvoiceId(invoice.id, options)
     }
 
     try {
@@ -68,7 +70,10 @@ export default class BillingReconciliationService {
     }
   }
 
-  static async reconcileByEnrollmentId(enrollmentId: string): Promise<void> {
+  static async reconcileByEnrollmentId(
+    enrollmentId: string,
+    options?: ReconcileOptions
+  ): Promise<void> {
     const enrollment = await StudentHasLevel.find(enrollmentId)
     if (!enrollment) return
 
@@ -84,11 +89,14 @@ export default class BillingReconciliationService {
       .orderBy('month', 'asc')
 
     for (const payment of payments) {
-      await this.reconcileByPaymentId(payment.id)
+      await this.reconcileByPaymentId(payment.id, options)
     }
   }
 
-  static async reconcileByInvoiceId(invoiceId: string): Promise<InvoiceReconciliationResult> {
+  static async reconcileByInvoiceId(
+    invoiceId: string,
+    options?: ReconcileOptions
+  ): Promise<InvoiceReconciliationResult> {
     let result: InvoiceReconciliationResult = {
       updated: false,
       valueChanged: false,
@@ -315,8 +323,7 @@ export default class BillingReconciliationService {
       }
 
       if (keepUnpaid && period?.deletedAt) {
-        const periodClosedAt = DateTime.fromJSDate(period.deletedAt as unknown as Date)
-        if (payment.dueDate < periodClosedAt) {
+        if (payment.dueDate < period.deletedAt) {
           continue
         }
       }
