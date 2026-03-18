@@ -291,4 +291,84 @@ test.group('BillingReconciliationService', (group) => {
     assert.equal(invoice1!.studentHasLevelId, enrollment1.id)
     assert.equal(invoice2!.studentHasLevelId, enrollment2.id)
   })
+
+  test('cleanupOrphanPayments cancels unpaid payments from deleted period', async ({ assert }) => {
+    await createTestRoles()
+    const studentRole = await Role.findByOrFail({ name: 'STUDENT' })
+
+    const school = await School.create({
+      name: 'Test School 3',
+      slug: 'test-school-orphan-payments',
+    })
+    const user = await User.create({
+      name: 'Test Student 3',
+      slug: 'test-student-orphan-payments',
+      email: 'test3@test.com',
+      active: true,
+      whatsappContact: false,
+      grossSalary: 0,
+      schoolId: school.id,
+      roleId: studentRole.id,
+    })
+
+    const student = await Student.create({
+      id: user.id,
+      descountPercentage: 0,
+      monthlyPaymentAmount: 0,
+      isSelfResponsible: false,
+      balance: 0,
+    })
+
+    const {
+      academicPeriod: period,
+      level,
+      contract,
+      levelAssignment,
+    } = await createBillingFixtures(school, {
+      isActive: false,
+      deletedAt: DateTime.now().minus({ months: 1 }),
+    })
+
+    const enrollment = await StudentHasLevel.create({
+      studentId: student.id,
+      levelId: level.id,
+      academicPeriodId: period.id,
+      contractId: contract.id,
+      levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+    })
+
+    const paidPayment = await StudentPayment.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'TUITION',
+      amount: 10000,
+      totalAmount: 10000,
+      month: DateTime.now().minus({ months: 3 }).month,
+      year: DateTime.now().year,
+      dueDate: DateTime.now().minus({ months: 3 }),
+      status: 'PAID',
+    })
+
+    const unpaidPayment = await StudentPayment.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'TUITION',
+      amount: 10000,
+      totalAmount: 10000,
+      month: DateTime.now().plus({ months: 1 }).month,
+      year: DateTime.now().year,
+      dueDate: DateTime.now().plus({ months: 1 }),
+      status: 'PENDING',
+    })
+
+    await BillingReconciliationService['cleanupOrphanPayments'](student.id)
+
+    await paidPayment.refresh()
+    await unpaidPayment.refresh()
+
+    assert.equal(paidPayment.status, 'PAID', 'Paid payment should remain PAID')
+    assert.equal(unpaidPayment.status, 'CANCELLED', 'Unpaid payment should be CANCELLED')
+  })
 })

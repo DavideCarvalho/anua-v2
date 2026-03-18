@@ -289,6 +289,56 @@ export default class BillingReconciliationService {
     })
   }
 
+  private static async cleanupOrphanPayments(
+    studentId: string,
+    options?: ReconcileOptions
+  ): Promise<void> {
+    const keepUnpaid = options?.keepUnpaidBeforePeriodClose ?? false
+
+    const orphanPayments = await StudentPayment.query()
+      .where('studentId', studentId)
+      .whereNotNull('studentHasLevelId')
+      .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+      .preload('studentHasLevel', (q) => {
+        q.preload('academicPeriod')
+      })
+
+    for (const payment of orphanPayments) {
+      const period = payment.studentHasLevel?.academicPeriod
+
+      if (period && !period.deletedAt && period.isActive) {
+        continue
+      }
+
+      if (payment.status === 'PAID') {
+        continue
+      }
+
+      if (keepUnpaid && period?.deletedAt) {
+        const periodClosedAt = DateTime.fromJSDate(period.deletedAt as unknown as Date)
+        if (payment.dueDate < periodClosedAt) {
+          continue
+        }
+      }
+
+      payment.status = 'CANCELLED'
+      payment.invoiceId = null
+      payment.metadata = {
+        ...payment.metadata,
+        cancelReason: 'Matrícula desativada - período acadêmico encerrado',
+      }
+      await payment.save()
+    }
+
+    await Invoice.query()
+      .where('studentId', studentId)
+      .whereNotIn('status', ['PAID', 'CANCELLED', 'RENEGOTIATED'])
+      .whereDoesntHave('payments', (q) => {
+        q.whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+      })
+      .delete()
+  }
+
   private static async resolveContractWithDiscounts(
     contractId: string | null
   ): Promise<Contract | null> {
