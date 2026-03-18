@@ -95,7 +95,7 @@ export default class BillingReconciliationService {
 
   static async reconcileByInvoiceId(
     invoiceId: string,
-    options?: ReconcileOptions
+    _options?: ReconcileOptions
   ): Promise<InvoiceReconciliationResult> {
     let result: InvoiceReconciliationResult = {
       updated: false,
@@ -220,7 +220,7 @@ export default class BillingReconciliationService {
 
   private static async resolveTargetInvoice(
     payment: StudentPayment,
-    options?: ReconcileOptions
+    _options?: ReconcileOptions
   ): Promise<Invoice | null> {
     if (
       INACTIVE_PAYMENT_STATUSES.includes(
