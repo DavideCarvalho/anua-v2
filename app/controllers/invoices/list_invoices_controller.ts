@@ -38,6 +38,7 @@ export default class ListInvoicesController {
           })
         })
       })
+      .whereHas('payments', () => {})
 
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
       query.where((scopedQuery) => {
