@@ -214,6 +214,14 @@ export default class BillingReconciliationService {
     payment: StudentPayment,
     options?: ReconcileOptions
   ): Promise<Invoice | null> {
+    if (
+      INACTIVE_PAYMENT_STATUSES.includes(
+        payment.status as (typeof INACTIVE_PAYMENT_STATUSES)[number]
+      )
+    ) {
+      return null
+    }
+
     const existingByPayment = payment.invoiceId
       ? await Invoice.query()
           .where('id', payment.invoiceId)
