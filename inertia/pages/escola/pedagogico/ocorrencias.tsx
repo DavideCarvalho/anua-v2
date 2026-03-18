@@ -60,12 +60,12 @@ import {
 } from '~/components/ui/sheet'
 
 const TYPE_OPTIONS = [
-  { value: 'BEHAVIOR', label: 'Comportamento' },
-  { value: 'PERFORMANCE', label: 'Desempenho' },
-  { value: 'ABSENCE', label: 'Falta' },
-  { value: 'LATE', label: 'Atraso' },
-  { value: 'PRAISE', label: 'Elogio ao aluno' },
-  { value: 'OTHER', label: 'Outro' },
+  { value: 'BEHAVIOR', label: 'Behavior' },
+  { value: 'PERFORMANCE', label: 'Performance' },
+  { value: 'ABSENCE', label: 'Absence' },
+  { value: 'LATE', label: 'Late' },
+  { value: 'PRAISE', label: 'Praise' },
+  { value: 'OTHER', label: 'Other' },
 ] as const
 
 type PeriodCourse = Route.Response<'api.v1.academic_periods.list_courses'>[number]
@@ -277,7 +277,7 @@ function NewOccurrenceModal({
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Período letivo</Label>
+            <Label>Academic Period</Label>
             <SearchableSingleSelect
               value={selectedAcademicPeriodId}
               onValueChange={(value) => {
@@ -289,9 +289,9 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={academicPeriodOptions}
-              placeholder="Selecione"
-              searchPlaceholder="Buscar período letivo..."
-              emptyMessage="Nenhum período encontrado"
+              placeholder="Select"
+              searchPlaceholder="Search academic period..."
+              emptyMessage="No period found"
             />
           </div>
 
@@ -308,9 +308,9 @@ function NewOccurrenceModal({
                   form.setValue('studentId', '')
                 }}
                 options={courseOptions}
-                placeholder="Selecione"
-                searchPlaceholder={`Buscar ${courseLabels.lowercase}...`}
-                emptyMessage={`Nenhum ${courseLabels.lowercase} encontrado`}
+                placeholder="Select"
+                searchPlaceholder={`Search ${courseLabels.lowercase}...`}
+                emptyMessage={`No ${courseLabels.lowercase} found`}
                 disabled={!selectedAcademicPeriodId}
               />
             </div>
@@ -327,15 +327,15 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={levelOptions}
-              placeholder="Selecione"
-              searchPlaceholder={`Buscar ${levelLabels.lowercase}...`}
-              emptyMessage={`Nenhum ${levelLabels.lowercase} encontrado`}
+              placeholder="Select"
+              searchPlaceholder={`Search ${levelLabels.lowercase}...`}
+              emptyMessage={`No ${levelLabels.lowercase} found`}
               disabled={!selectedCourseId}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Turma</Label>
+            <Label>Class</Label>
             <SearchableSingleSelect
               value={selectedClassId}
               onValueChange={(value) => {
@@ -344,15 +344,15 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={classOptions}
-              placeholder="Selecione"
-              searchPlaceholder="Buscar turma..."
-              emptyMessage="Nenhuma turma encontrada"
+              placeholder="Select"
+              searchPlaceholder="Search class..."
+              emptyMessage="No class found"
               disabled={!selectedLevelId}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Materia e professor</Label>
+            <Label>Subject and Teacher</Label>
             <SearchableSingleSelect
               value={form.watch('teacherHasClassId')}
               onValueChange={(value) => {
@@ -360,9 +360,9 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={teacherClassOptions}
-              placeholder="Selecione"
-              searchPlaceholder="Buscar materia ou professor..."
-              emptyMessage="Nenhuma combinacao encontrada"
+              placeholder="Select"
+              searchPlaceholder="Search subject or teacher..."
+              emptyMessage="No combination found"
               disabled={!selectedClassId}
             />
             {form.formState.errors.teacherHasClassId && (
@@ -373,7 +373,7 @@ function NewOccurrenceModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Aluno</Label>
+            <Label>Student</Label>
             <SearchableSingleSelect
               value={form.watch('studentId')}
               onValueChange={(value) => form.setValue('studentId', value)}
@@ -382,9 +382,9 @@ function NewOccurrenceModal({
                 label: student.user?.name || student.id,
                 description: student.user?.email,
               }))}
-              placeholder="Selecione"
-              searchPlaceholder="Buscar aluno..."
-              emptyMessage="Nenhum aluno encontrado"
+              placeholder="Select"
+              searchPlaceholder="Search student..."
+              emptyMessage="No student found"
               disabled={!selectedClassId || !form.watch('teacherHasClassId')}
             />
             {form.formState.errors.studentId && (
@@ -394,13 +394,13 @@ function NewOccurrenceModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Tipo</Label>
+              <Label>Type</Label>
               <Select
                 value={form.watch('type')}
                 onValueChange={(value) => form.setValue('type', value as FormValues['type'])}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo">
+                  <SelectValue placeholder="Select type">
                     {TYPE_OPTIONS.find((t) => t.value === form.watch('type'))?.label ??
                       form.watch('type')}
                   </SelectValue>
@@ -416,7 +416,7 @@ function NewOccurrenceModal({
             </div>
 
             <div className="space-y-2">
-              <Label>Data</Label>
+              <Label>Date</Label>
               <Input type="date" {...form.register('date')} />
               {form.formState.errors.date && (
                 <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
@@ -425,8 +425,8 @@ function NewOccurrenceModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Descricao</Label>
-            <Textarea rows={5} placeholder="Descreva o ocorrido..." {...form.register('text')} />
+            <Label>Description</Label>
+            <Textarea rows={5} placeholder="Describe what happened..." {...form.register('text')} />
             {form.formState.errors.text && (
               <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>
             )}
@@ -493,7 +493,10 @@ function SearchableSingleSelect({
           <span className="truncate">{selected?.label || placeholder}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--anchor-width)] min-w-[var(--anchor-width)] p-0" align="start">
+      <PopoverContent
+        className="w-[var(--anchor-width)] min-w-[var(--anchor-width)] p-0"
+        align="start"
+      >
         <div className="border-b p-2">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -713,7 +716,7 @@ export default function OcorrenciasPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os tipos</SelectItem>
+                  <SelectItem value="all">All types</SelectItem>
                   {TYPE_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -737,7 +740,7 @@ export default function OcorrenciasPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os periodos letivos</SelectItem>
+                  <SelectItem value="all">All academic periods</SelectItem>
                   {academicPeriodOptions.map((period: any) => (
                     <SelectItem key={period.id} value={period.id}>
                       {period.name}
@@ -760,7 +763,7 @@ export default function OcorrenciasPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas as turmas</SelectItem>
+                  <SelectItem value="all">All classes</SelectItem>
                   {classOptions.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       {item.name}
@@ -779,7 +782,7 @@ export default function OcorrenciasPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os alunos</SelectItem>
+                  <SelectItem value="all">All students</SelectItem>
                   {studentOptions.map((student: any) => (
                     <SelectItem key={student.id} value={student.id}>
                       {student.user?.name || student.id}
@@ -1014,7 +1017,8 @@ export default function OcorrenciasPage() {
                   ) : (
                     <div className="mt-2 space-y-2">
                       <p className="text-sm">
-                        <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span> de{' '}
+                        <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span>{' '}
+                        de{' '}
                         <span className="font-semibold">{occurrenceDetail.totalResponsibles}</span>{' '}
                         responsavel(is) reconheceram.
                       </p>
