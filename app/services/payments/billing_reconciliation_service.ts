@@ -230,15 +230,11 @@ export default class BillingReconciliationService {
       return null
     }
 
-    const existingByPayment = payment.invoiceId
-      ? await Invoice.query()
-          .where('id', payment.invoiceId)
-          .whereNotIn('status', [...FINAL_INVOICE_STATUSES])
-          .first()
-      : null
-
-    if (existingByPayment) {
-      return existingByPayment
+    if (payment.invoiceId) {
+      const existingInvoice = await Invoice.find(payment.invoiceId)
+      if (existingInvoice) {
+        return existingInvoice
+      }
     }
 
     if (payment.studentHasLevelId) {
