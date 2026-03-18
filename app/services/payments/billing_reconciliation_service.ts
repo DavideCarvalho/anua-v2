@@ -5,6 +5,7 @@ import StudentHasLevel from '#models/student_has_level'
 import StudentPayment from '#models/student_payment'
 import Contract from '#models/contract'
 import ContractInterestConfig from '#models/contract_interest_config'
+import MarkOverdueInvoicesJob from '#jobs/payments/mark_overdue_invoices_job'
 
 const FINAL_INVOICE_STATUSES = ['PAID', 'CANCELLED', 'RENEGOTIATED'] as const
 const INACTIVE_PAYMENT_STATUSES = ['CANCELLED', 'RENEGOTIATED'] as const
@@ -214,6 +215,8 @@ export default class BillingReconciliationService {
       console.warn('[BILLING_RECONCILE] Running invoice reconciliation without lock:', error)
       await runReconciliation()
     }
+
+    await MarkOverdueInvoicesJob.dispatch({})
 
     return result
   }
