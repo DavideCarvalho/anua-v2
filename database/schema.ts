@@ -1399,7 +1399,7 @@ export class InsuranceClaimSchema extends BaseModel {
 }
 
 export class InvoiceSchema extends BaseModel {
-  static $columns = ['baseAmount', 'chargedAmount', 'contractId', 'createdAt', 'discountAmount', 'dueDate', 'fineAmount', 'id', 'interestAmount', 'invoiceUrl', 'lastNotifiedAt', 'month', 'netAmountReceived', 'nfseErrorMessage', 'nfseId', 'nfseIssuedAt', 'nfseNumber', 'nfsePdfUrl', 'nfseRpsNumber', 'nfseStatus', 'nfseXmlUrl', 'observation', 'paidAt', 'paymentGateway', 'paymentGatewayId', 'paymentMethod', 'platformFeeAmount', 'status', 'studentId', 'totalAmount', 'type', 'updatedAt', 'year'] as const
+  static $columns = ['baseAmount', 'chargedAmount', 'contractId', 'createdAt', 'discountAmount', 'dueDate', 'fineAmount', 'id', 'interestAmount', 'invoiceUrl', 'lastNotifiedAt', 'month', 'netAmountReceived', 'nfseErrorMessage', 'nfseId', 'nfseIssuedAt', 'nfseNumber', 'nfsePdfUrl', 'nfseRpsNumber', 'nfseStatus', 'nfseXmlUrl', 'observation', 'paidAt', 'paymentGateway', 'paymentGatewayId', 'paymentMethod', 'platformFeeAmount', 'status', 'studentHasLevelId', 'studentId', 'totalAmount', 'type', 'updatedAt', 'year'] as const
   $columns = InvoiceSchema.$columns
   @column()
   declare baseAmount: number
@@ -1457,6 +1457,8 @@ export class InvoiceSchema extends BaseModel {
   declare platformFeeAmount: number
   @column()
   declare status: any
+  @column()
+  declare studentHasLevelId: string | null
   @column()
   declare studentId: string
   @column()
