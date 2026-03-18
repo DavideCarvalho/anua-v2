@@ -294,7 +294,9 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
       }
 
       if (anchorPayment) {
-        await BillingReconciliationService.reconcileByInvoiceId(invoice.id)
+        await BillingReconciliationService.reconcileByInvoiceId(invoice.id, {
+          keepUnpaidBeforePeriodClose: false,
+        })
         console.log(`[UPDATE_ENROLLMENT_PAYMENTS] Reconciled invoice ${invoiceId}`)
       }
     }
@@ -319,7 +321,9 @@ export default class UpdateEnrollmentPaymentsJob extends Job<UpdateEnrollmentPay
       }
 
       for (const payment of unlinkedPayments) {
-        await BillingReconciliationService.reconcileByPaymentId(payment.id)
+        await BillingReconciliationService.reconcileByPaymentId(payment.id, {
+          keepUnpaidBeforePeriodClose: false,
+        })
       }
     }
   }
