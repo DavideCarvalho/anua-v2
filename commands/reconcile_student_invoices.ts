@@ -70,7 +70,9 @@ export default class ReconcileStudentInvoicesCommand extends BaseCommand {
 
     for (const payment of payments) {
       try {
-        await BillingReconciliationService.reconcileByPaymentId(payment.id)
+        await BillingReconciliationService.reconcileByPaymentId(payment.id, {
+          keepUnpaidBeforePeriodClose: false,
+        })
         reconciled++
         this.logger.info(
           `  ✓ Payment ${payment.id} (${payment.month}/${payment.year} - ${payment.type})`
