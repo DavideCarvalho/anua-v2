@@ -51,7 +51,7 @@ async function createCanteenFiadoFixtures() {
     levelId: enrollment.level.id,
     classId: enrollment.classEntity.id,
     contractId: enrollment.contract.id,
-    paymentDay: 5,
+    paymentDay: 28,
   })
 
   const canteen = await Canteen.create({
@@ -155,7 +155,7 @@ test.group('Canteen fiado flow API', (group) => {
     assert.equal(paymentsBody.data.length, 1)
     assert.equal(paymentsBody.data[0].id, createdPurchase.studentPaymentId)
     assert.equal(paymentsBody.data[0].type, 'CANTEEN')
-    assert.equal(paymentsBody.data[0].status, 'OVERDUE')
+    assert.equal(paymentsBody.data[0].status, 'NOT_PAID')
     assert.equal(paymentsBody.data[0].totalAmount, fixtures.totalAmount)
 
     await ReconcilePaymentInvoiceJob.dispatch({
