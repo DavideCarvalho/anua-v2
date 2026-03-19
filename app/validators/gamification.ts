@@ -161,7 +161,7 @@ export const updateStoreItemValidator = vine.compile(
       ])
       .optional(),
     imageUrl: vine.string().trim().url().optional(),
-    totalStock: vine.number().min(0).optional(),
+    totalStock: vine.number().min(0).optional().nullable(),
     maxPerStudent: vine.number().min(1).optional(),
     maxPerStudentPeriod: vine.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'SEMESTER', 'ANNUAL']).optional(),
     preparationTimeMinutes: vine.number().min(0).optional(),

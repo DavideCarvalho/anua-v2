@@ -54,7 +54,9 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
           accountHolder: accountHolder || undefined,
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeFinancialSettings', storeId] })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.stores.financialSettings.show.pathKey(),
+      })
       toast.success('Configurações salvas com sucesso!')
     } catch {
       toast.error('Erro ao salvar configurações.')

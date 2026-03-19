@@ -11,6 +11,7 @@ import { CurrencyInput } from '../../components/ui/currency-input'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
+import { Checkbox } from '../../components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -49,17 +50,21 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
   const [description, setDescription] = useState(product.description ?? '')
   const [price, setPrice] = useState(centsToReaisString(product.price))
   const [category, setCategory] = useState(product.category)
+  const [isUnlimitedStock, setIsUnlimitedStock] = useState(product.totalStock === null)
   const [totalStock, setTotalStock] = useState(
     product.totalStock !== null && product.totalStock !== undefined
       ? String(product.totalStock)
       : ''
   )
 
+  const selectedCategoryLabel = CATEGORIES.find((c) => c.value === category)?.label ?? 'Categoria'
+
   useEffect(() => {
     setName(product.name)
     setDescription(product.description ?? '')
     setPrice(centsToReaisString(product.price))
     setCategory(product.category)
+    setIsUnlimitedStock(product.totalStock === null)
     setTotalStock(
       product.totalStock !== null && product.totalStock !== undefined
         ? String(product.totalStock)
@@ -71,6 +76,15 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    if (!isUnlimitedStock) {
+      const parsedStock = Number(totalStock)
+      if (!Number.isInteger(parsedStock) || parsedStock < 0) {
+        toast.error('Informe um estoque válido (0 ou maior).')
+        return
+      }
+    }
+
     try {
       await updateMutation.mutateAsync({
         params: { id: product.id },
@@ -79,10 +93,10 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
           description: description || undefined,
           price: reaisStringToCents(price),
           category,
-          totalStock: totalStock ? Number(totalStock) : undefined,
+          totalStock: isUnlimitedStock ? null : Number(totalStock),
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
       toast.success('Produto atualizado com sucesso!')
       onOpenChange(false)
     } catch {
@@ -122,7 +136,7 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
               <Label htmlFor="edit-category">Categoria</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as typeof category)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{selectedCategoryLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((c) => (
@@ -134,16 +148,31 @@ export function EditProductModal({ product, open, onOpenChange }: Props) {
               </Select>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="edit-totalStock">Estoque (deixe vazio para ilimitado)</Label>
-            <Input
-              id="edit-totalStock"
-              type="number"
-              min="0"
-              value={totalStock}
-              onChange={(e) => setTotalStock(e.target.value)}
-            />
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={isUnlimitedStock}
+                onCheckedChange={(checked) => setIsUnlimitedStock(checked === true)}
+              />
+              <Label>Estoque ilimitado</Label>
+            </div>
+
+            {!isUnlimitedStock ? (
+              <div className="space-y-2">
+                <Label htmlFor="edit-totalStock">Estoque</Label>
+                <Input
+                  id="edit-totalStock"
+                  type="number"
+                  min="0"
+                  value={totalStock}
+                  onChange={(e) => setTotalStock(e.target.value)}
+                  required
+                />
+              </div>
+            ) : null}
           </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar

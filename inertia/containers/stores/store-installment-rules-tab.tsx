@@ -70,7 +70,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
           maxInstallments: Number(maxInstallments),
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeInstallmentRules.index.pathKey() })
       toast.success('Regra criada com sucesso!')
       setCreateOpen(false)
       setMinAmount('')
@@ -97,7 +97,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
           maxInstallments: Number(maxInstallments),
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeInstallmentRules.index.pathKey() })
       toast.success('Regra atualizada com sucesso!')
       setEditingRule(null)
       setMinAmount('')
@@ -110,7 +110,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
   async function handleDelete(id: string) {
     try {
       await deleteMutation.mutateAsync({ params: { id } })
-      queryClient.invalidateQueries({ queryKey: ['storeInstallmentRules'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeInstallmentRules.index.pathKey() })
       toast.success('Regra excluída com sucesso!')
     } catch {
       toast.error('Erro ao excluir regra.')
