@@ -371,6 +371,7 @@ type InvoiceRecord = Invoice & {
   interestAmount?: number | string | null
   platformFeeAmount?: number | string | null
   chargedAmount?: number | string | null
+  netAmountReceived?: number | string | null
   nfseStatus?: string | null
   nfsePdfUrl?: string | null
   nfseXmlUrl?: string | null
@@ -938,7 +939,7 @@ function InvoicesContent() {
         <div className="space-y-4">
           <div className="border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[980px] md:min-w-0">
+              <table className="w-full min-w-[1080px] md:min-w-0">
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="w-10 p-4" />
@@ -984,6 +985,7 @@ function InvoicesContent() {
                       </button>
                     </th>
                     <th className="text-right p-4 font-medium hidden md:table-cell">Encargos</th>
+                    <th className="text-right p-4 font-medium">Valor Recebido</th>
                     <th className="text-right p-4 font-medium">
                       <button
                         type="button"
@@ -1021,6 +1023,7 @@ function InvoicesContent() {
                       Number(invoice.chargedAmount || 0) ||
                       Number(invoice.totalAmount || 0) + platformFeeAmount
                     const surchargeTotal = fineAmount + interestAmount
+                    const netAmountReceived = Number(invoice.netAmountReceived || 0)
                     const daysOverdue = getDaysOverdue(invoice.dueDate)
                     const { paymentDiscountsByLabel, earlyDiscount, totalDiscount } =
                       getInvoiceDiscountBreakdown(invoice)
@@ -1124,6 +1127,15 @@ function InvoicesContent() {
                                 )}
                               </div>
                             </div>
+                          </td>
+                          <td className="p-4 text-right">
+                            {invoice.status === 'PAID' && netAmountReceived > 0 ? (
+                              <span className="font-semibold text-green-700">
+                                {formatCurrency(netAmountReceived)}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
                           </td>
                           <td className="p-4">
                             <div className="flex flex-col gap-1">
@@ -1246,7 +1258,7 @@ function InvoicesContent() {
 
                         {isExpanded && (
                           <tr key={`${invoice.id}-expanded`} className="border-t">
-                            <td colSpan={10} className="p-0">
+                            <td colSpan={11} className="p-0">
                               <div className="bg-muted/20 px-6 py-3 animate-in fade-in slide-in-from-top-2 duration-200">
                                 {payments.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-2">
