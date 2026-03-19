@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, Minus, Plus, ShoppingCart } from 'lucide-react'
 import { toast } from 'sonner'
@@ -13,13 +13,6 @@ import {
 } from '../../components/ui/dialog'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select'
 import { Textarea } from '../../components/ui/textarea'
 import { Badge } from '../../components/ui/badge'
 import { formatCurrency } from '../../lib/utils'
@@ -47,8 +40,10 @@ export function CreateStoreSaleModal({
   const createOrder = useMutation(api.api.v1.storeOrders.store.mutationOptions())
 
   const [studentSearch, setStudentSearch] = useState('')
+  const [isStudentListOpen, setIsStudentListOpen] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(null)
   const [quantities, setQuantities] = useState<Record<string, number>>({})
+  const [itemSearch, setItemSearch] = useState('')
   const [paymentMode, setPaymentMode] = useState<'IMMEDIATE' | 'DEFERRED'>('IMMEDIATE')
   const [paymentMethod, setPaymentMethod] = useState<'BALANCE' | 'PIX' | 'CASH' | 'CARD'>('CASH')
   const [installments, setInstallments] = useState(1)
@@ -70,6 +65,7 @@ export function CreateStoreSaleModal({
 
   const students = studentsData?.data ?? []
   const items = storeItemsData?.data ?? []
+  const studentPickerRef = useRef<HTMLDivElement | null>(null)
 
   const selectedItems = useMemo(() => {
     return items
@@ -77,14 +73,30 @@ export function CreateStoreSaleModal({
       .filter((entry) => entry.quantity > 0)
   }, [items, quantities])
 
+  const filteredItems = useMemo(() => {
+    const search = itemSearch.trim().toLowerCase()
+
+    const base = search ? items.filter((item) => item.name.toLowerCase().includes(search)) : items
+
+    return [...base].sort((a, b) => {
+      const aq = quantities[a.id] ?? 0
+      const bq = quantities[b.id] ?? 0
+      if (aq > 0 && bq === 0) return -1
+      if (bq > 0 && aq === 0) return 1
+      return a.name.localeCompare(b.name)
+    })
+  }, [itemSearch, items, quantities])
+
   const totalMoney = useMemo(() => {
     return selectedItems.reduce((acc, entry) => acc + entry.item.price * entry.quantity, 0)
   }, [selectedItems])
 
   function resetForm() {
     setStudentSearch('')
+    setIsStudentListOpen(false)
     setSelectedStudent(null)
     setQuantities({})
+    setItemSearch('')
     setPaymentMode('IMMEDIATE')
     setPaymentMethod('CASH')
     setInstallments(1)
@@ -97,6 +109,18 @@ export function CreateStoreSaleModal({
       resetForm()
     }
   }
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!studentPickerRef.current) return
+      if (!studentPickerRef.current.contains(event.target as Node)) {
+        setIsStudentListOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   function updateQuantity(itemId: string, value: number, maxStock: number | null) {
     const nextQuantity = Math.max(0, value)
@@ -141,8 +165,8 @@ export function CreateStoreSaleModal({
       toast.success('Venda registrada com sucesso!')
 
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['storeOrders'] }),
-        queryClient.invalidateQueries({ queryKey: ['storeItems'] }),
+        queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() }),
+        queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() }),
       ])
 
       handleClose(false)
@@ -153,10 +177,10 @@ export function CreateStoreSaleModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-4 w-4" />
+      <DialogContent className="flex w-[min(50vw,980px)] !max-w-none sm:!max-w-none max-h-[94vh] flex-col overflow-hidden p-0">
+        <DialogHeader className="mb-0 border-b px-6 py-4 pr-14">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <ShoppingCart className="h-5 w-5" />
             Nova venda
           </DialogTitle>
           <DialogDescription>
@@ -164,49 +188,61 @@ export function CreateStoreSaleModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-6 md:grid-cols-2 overflow-y-auto pr-1">
-          <div className="space-y-4">
-            <div className="space-y-2">
+        <div className="grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[1fr_1.2fr]">
+          <div className="min-h-0 min-w-0 space-y-5 overflow-y-auto px-6 py-5">
+            <div ref={studentPickerRef} className="relative space-y-2">
               <Label>Aluno</Label>
               <Input
                 placeholder="Buscar aluno por nome ou email..."
                 value={studentSearch}
-                onChange={(e) => setStudentSearch(e.target.value)}
+                onFocus={() => setIsStudentListOpen(true)}
+                onChange={(e) => {
+                  setStudentSearch(e.target.value)
+                  setIsStudentListOpen(true)
+                }}
               />
 
-              <div className="rounded-md border max-h-44 overflow-y-auto">
-                {isLoadingStudents ? (
-                  <div className="p-4 text-sm text-muted-foreground flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Carregando alunos...
-                  </div>
-                ) : !students.length ? (
-                  <p className="p-4 text-sm text-muted-foreground">Nenhum aluno encontrado</p>
-                ) : (
-                  <div className="p-1">
-                    {students.map((student) => {
-                      const studentName = student.user?.name ?? 'Sem nome'
-                      const isSelected = selectedStudent?.id === student.id
+              {isStudentListOpen ? (
+                <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+                  {isLoadingStudents ? (
+                    <div className="p-4 text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Carregando alunos...
+                    </div>
+                  ) : !students.length ? (
+                    <p className="p-4 text-sm text-muted-foreground">Nenhum aluno encontrado</p>
+                  ) : (
+                    <div className="p-1">
+                      {students.map((student) => {
+                        const studentName = student.user?.name ?? 'Sem nome'
+                        const isSelected = selectedStudent?.id === student.id
 
-                      return (
-                        <button
-                          key={student.id}
-                          type="button"
-                          className={`w-full rounded-sm px-2 py-1.5 text-left text-sm transition-colors ${
-                            isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-                          }`}
-                          onClick={() => setSelectedStudent({ id: student.id, name: studentName })}
-                        >
-                          <p className="font-medium truncate">{studentName}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {student.user?.email ?? '-'}
-                          </p>
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
+                        return (
+                          <button
+                            key={student.id}
+                            type="button"
+                            className={`w-full rounded-sm px-2 py-1.5 text-left text-sm transition-colors ${
+                              isSelected ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+                            }`}
+                            onClick={() => {
+                              setSelectedStudent({ id: student.id, name: studentName })
+                              setStudentSearch(studentName)
+                              setIsStudentListOpen(false)
+                            }}
+                          >
+                            <p className="font-medium truncate">{studentName}</p>
+                            {student.user?.email ? (
+                              <p className="text-xs text-muted-foreground truncate">
+                                {student.user.email}
+                              </p>
+                            ) : null}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : null}
 
               {selectedStudent && (
                 <p className="text-xs text-muted-foreground">
@@ -217,36 +253,28 @@ export function CreateStoreSaleModal({
 
             <div className="space-y-2">
               <Label>Pagamento</Label>
-              <Select
+              <select
+                className="flex h-10 w-full appearance-none items-center rounded-lg border border-input bg-background px-3 pr-10 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 value={paymentMode}
-                onValueChange={(value) => setPaymentMode(value as 'IMMEDIATE' | 'DEFERRED')}
+                onChange={(e) => setPaymentMode(e.target.value as 'IMMEDIATE' | 'DEFERRED')}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o modo de pagamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IMMEDIATE">Pagamento imediato</SelectItem>
-                  <SelectItem value="DEFERRED">Na mensalidade (fatura)</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="IMMEDIATE">Pagamento imediato</option>
+                <option value="DEFERRED">Na mensalidade (fatura)</option>
+              </select>
 
               {paymentMode === 'IMMEDIATE' ? (
-                <Select
+                <select
+                  className="flex h-10 w-full appearance-none items-center rounded-lg border border-input bg-background px-3 pr-10 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                   value={paymentMethod}
-                  onValueChange={(value) =>
-                    setPaymentMethod(value as 'BALANCE' | 'PIX' | 'CASH' | 'CARD')
+                  onChange={(e) =>
+                    setPaymentMethod(e.target.value as 'BALANCE' | 'PIX' | 'CASH' | 'CARD')
                   }
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Forma de pagamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CASH">Dinheiro</SelectItem>
-                    <SelectItem value="PIX">PIX</SelectItem>
-                    <SelectItem value="CARD">Cartão</SelectItem>
-                    <SelectItem value="BALANCE">Saldo</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="CASH">Dinheiro</option>
+                  <option value="PIX">PIX</option>
+                  <option value="CARD">Cartão</option>
+                  <option value="BALANCE">Saldo</option>
+                </select>
               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="installments">Parcelas</Label>
@@ -267,7 +295,7 @@ export function CreateStoreSaleModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Observacoes</Label>
+              <Label htmlFor="notes">Observações</Label>
               <Textarea
                 id="notes"
                 placeholder="Opcional"
@@ -277,28 +305,34 @@ export function CreateStoreSaleModal({
             </div>
           </div>
 
-          <div className="space-y-3">
-            <Label>Itens da venda</Label>
-            <div className="rounded-md border max-h-[380px] overflow-y-auto">
+          <div className="min-h-0 min-w-0 space-y-4 overflow-y-auto border-t px-6 py-5 md:border-t-0 md:border-l">
+            <div className="space-y-2">
+              <Label>Itens da venda</Label>
+              <Input
+                placeholder="Buscar item por nome..."
+                value={itemSearch}
+                onChange={(e) => setItemSearch(e.target.value)}
+              />
+            </div>
+
+            <div className="rounded-md border max-h-[52vh] overflow-y-auto">
               {isLoadingItems ? (
                 <div className="p-4 text-sm text-muted-foreground flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Carregando itens...
                 </div>
-              ) : !items.length ? (
-                <p className="p-4 text-sm text-muted-foreground">
-                  Nenhum item disponivel nesta loja
-                </p>
+              ) : !filteredItems.length ? (
+                <p className="p-4 text-sm text-muted-foreground">Nenhum item encontrado</p>
               ) : (
                 <div className="divide-y">
-                  {items.map((item) => {
+                  {filteredItems.map((item) => {
                     const quantity = quantities[item.id] ?? 0
                     const maxStock = item.totalStock
                     const isOutOfStock = maxStock !== null && maxStock <= 0
                     const reachedStockLimit = maxStock !== null && quantity >= maxStock
 
                     return (
-                      <div key={item.id} className="p-3 flex items-center gap-3 justify-between">
+                      <div key={item.id} className="p-4 flex items-center gap-4 justify-between">
                         <div className="min-w-0">
                           <p className="font-medium truncate">{item.name}</p>
                           <div className="text-xs text-muted-foreground flex items-center gap-2">
@@ -337,7 +371,7 @@ export function CreateStoreSaleModal({
               )}
             </div>
 
-            <div className="rounded-md border p-3 space-y-1">
+            <div className="sticky bottom-0 z-10 rounded-md border bg-background p-4 shadow-sm space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>Itens selecionados</span>
                 <Badge variant="outline">{selectedItems.length}</Badge>
@@ -350,7 +384,7 @@ export function CreateStoreSaleModal({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-0 border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={() => handleClose(false)}

@@ -60,7 +60,7 @@ export function CreateStoreModal({ open, onOpenChange, onSuccess }: CreateStoreM
         },
       })
 
-      queryClient.invalidateQueries({ queryKey: ['stores'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.stores.index.pathKey() })
       toast.success('Loja criada com sucesso!')
       setName('')
       setDescription('')

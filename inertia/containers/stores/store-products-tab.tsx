@@ -16,6 +16,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -48,20 +57,61 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
   const [editingProduct, setEditingProduct] = useState<StoreItemsResponse['data'][number] | null>(
     null
   )
+  const [stockProduct, setStockProduct] = useState<StoreItemsResponse['data'][number] | null>(null)
+  const [stockOperation, setStockOperation] = useState<'ADD' | 'REMOVE'>('ADD')
+  const [stockAmount, setStockAmount] = useState('1')
 
   const { data: items, isLoading } = useQuery(
     api.api.v1.storeItems.index.queryOptions({ query: { storeId } })
   )
 
   const deleteMutation = useMutation(api.api.v1.storeItems.destroy.mutationOptions())
+  const updateMutation = useMutation(api.api.v1.storeItems.update.mutationOptions())
 
   async function handleDelete(id: string) {
     try {
       await deleteMutation.mutateAsync({ params: { id } })
-      queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
       toast.success('Produto excluído com sucesso!')
     } catch {
       toast.error('Erro ao excluir produto.')
+    }
+  }
+
+  async function handleAdjustStock() {
+    if (!stockProduct) return
+
+    const amount = Number(stockAmount)
+    if (!Number.isInteger(amount) || amount <= 0) {
+      toast.error('Informe uma quantidade válida')
+      return
+    }
+
+    if (stockProduct.totalStock === null) {
+      toast.error('Produto com estoque ilimitado. Edite o produto para definir estoque finito.')
+      return
+    }
+
+    const nextStock =
+      stockOperation === 'ADD'
+        ? stockProduct.totalStock + amount
+        : Math.max(0, stockProduct.totalStock - amount)
+
+    try {
+      await updateMutation.mutateAsync({
+        params: { id: stockProduct.id },
+        body: {
+          totalStock: nextStock,
+        },
+      })
+
+      await queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
+      toast.success('Estoque atualizado com sucesso!')
+      setStockProduct(null)
+      setStockAmount('1')
+      setStockOperation('ADD')
+    } catch {
+      toast.error('Erro ao atualizar estoque.')
     }
   }
 
@@ -123,6 +173,18 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
                             <Pencil className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
+                          {item.totalStock !== null ? (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setStockProduct(item)
+                                setStockOperation('ADD')
+                                setStockAmount('1')
+                              }}
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Alterar estoque
+                            </DropdownMenuItem>
+                          ) : null}
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
                             onClick={() => handleDelete(item.id)}
@@ -157,6 +219,75 @@ export function StoreProductsTab({ storeId }: StoreProductsTabProps) {
           }}
         />
       )}
+
+      <Dialog
+        open={!!stockProduct}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStockProduct(null)
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Alterar estoque</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Produto: <span className="font-medium text-foreground">{stockProduct?.name}</span>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Operação</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant={stockOperation === 'ADD' ? 'default' : 'outline'}
+                  onClick={() => setStockOperation('ADD')}
+                >
+                  Adicionar
+                </Button>
+                <Button
+                  type="button"
+                  variant={stockOperation === 'REMOVE' ? 'default' : 'outline'}
+                  onClick={() => setStockOperation('REMOVE')}
+                >
+                  Remover
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="stock-amount">Quantidade</Label>
+              <Input
+                id="stock-amount"
+                type="number"
+                min="1"
+                step="1"
+                value={stockAmount}
+                onChange={(e) => setStockAmount(e.target.value)}
+              />
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Estoque atual:{' '}
+              <span className="font-medium text-foreground">
+                {stockProduct?.totalStock === null ? '∞ (ilimitado)' : stockProduct?.totalStock}
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setStockProduct(null)}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={handleAdjustStock} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -77,7 +77,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
           totalStock: totalStock ? Number(totalStock) : undefined,
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeItems'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
       toast.success('Produto criado com sucesso!')
       resetForm()
       onOpenChange(false)

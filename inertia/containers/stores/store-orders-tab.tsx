@@ -127,7 +127,7 @@ function OrderActions({ order }: { order: Order }) {
   const handleApprove = async () => {
     try {
       await approveMutation.mutateAsync({ params: { id: order.id } })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido aprovado com sucesso!')
     } catch {
       toast.error('Erro ao aprovar pedido')
@@ -140,7 +140,7 @@ function OrderActions({ order }: { order: Order }) {
         params: { id: order.id },
         body: { reason: rejectReason },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido rejeitado')
       setRejectDialogOpen(false)
       setRejectReason('')
@@ -155,7 +155,7 @@ function OrderActions({ order }: { order: Order }) {
         params: { id: order.id },
         body: { deliveredAt },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido marcado como entregue!')
       setDeliverDialogOpen(false)
     } catch {
@@ -169,7 +169,7 @@ function OrderActions({ order }: { order: Order }) {
         params: { id: order.id },
         body: { reason: cancelReason },
       })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido cancelado')
       setCancelDialogOpen(false)
       setCancelReason('')

@@ -66,8 +66,7 @@ export default class BillingReconciliationService {
         throw new Error(`Lock not acquired for payment ${paymentId}`)
       }
     } catch (error) {
-      console.warn('[BILLING_RECONCILE] Running payment reconciliation without lock:', error)
-      await runReconciliation()
+      throw error
     }
   }
 
@@ -212,8 +211,7 @@ export default class BillingReconciliationService {
         throw new Error(`Lock not acquired for invoice ${invoiceId}`)
       }
     } catch (error) {
-      console.warn('[BILLING_RECONCILE] Running invoice reconciliation without lock:', error)
-      await runReconciliation()
+      throw error
     }
 
     await MarkOverdueInvoicesJob.dispatch({})
@@ -251,6 +249,18 @@ export default class BillingReconciliationService {
       }
     }
 
+    const existingByUniqueKey = await Invoice.query()
+      .where('studentId', payment.studentId)
+      .where('contractId', payment.contractId ?? null)
+      .where('month', payment.month)
+      .where('year', payment.year)
+      .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+      .first()
+
+    if (existingByUniqueKey) {
+      return existingByUniqueKey
+    }
+
     const existingByEnrollment = payment.studentHasLevelId
       ? await Invoice.query()
           .where('studentId', payment.studentId)
@@ -279,21 +289,42 @@ export default class BillingReconciliationService {
       }
     }
 
-    return Invoice.create({
-      studentId: payment.studentId,
-      studentHasLevelId: payment.studentHasLevelId,
-      contractId: payment.contractId ?? null,
-      type: 'MONTHLY',
-      month: payment.month,
-      year: payment.year,
-      dueDate: payment.dueDate,
-      status: 'OPEN',
-      baseAmount: 0,
-      discountAmount: 0,
-      fineAmount: 0,
-      interestAmount: 0,
-      totalAmount: 0,
-    })
+    try {
+      return await Invoice.create({
+        studentId: payment.studentId,
+        studentHasLevelId: payment.studentHasLevelId,
+        contractId: payment.contractId ?? null,
+        type: 'MONTHLY',
+        month: payment.month,
+        year: payment.year,
+        dueDate: payment.dueDate,
+        status: 'OPEN',
+        baseAmount: 0,
+        discountAmount: 0,
+        fineAmount: 0,
+        interestAmount: 0,
+        totalAmount: 0,
+      })
+    } catch (error) {
+      if (!this.isInvoiceUniqueConflict(error)) {
+        throw error
+      }
+
+      return Invoice.query()
+        .where('studentId', payment.studentId)
+        .where('contractId', payment.contractId ?? null)
+        .where('month', payment.month)
+        .where('year', payment.year)
+        .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
+        .first()
+    }
+  }
+
+  private static isInvoiceUniqueConflict(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false
+
+    const e = error as { code?: string; constraint?: string }
+    return e.code === '23505' && e.constraint === 'uq_invoice_per_student_contract_month'
   }
 
   private static async cleanupOrphanPayments(
