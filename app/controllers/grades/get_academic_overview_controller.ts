@@ -1,21 +1,40 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { getAcademicOverviewValidator } from '#validators/grades'
+import { getPedagogicalScope, buildScopeFilters } from '#services/pedagogical_scope'
 
 export default class GetAcademicOverviewController {
-  async handle({ request, response }: HttpContext) {
-    const { schoolId, schoolChainId } = await request.validateUsing(getAcademicOverviewValidator)
+  async handle({ request, response, ...ctx }: HttpContext) {
+    const { schoolId, schoolChainId, academicPeriodId, classId } = await request.validateUsing(
+      getAcademicOverviewValidator
+    )
+    const scope = await getPedagogicalScope(ctx as HttpContext)
+    const scopeFilters = buildScopeFilters(scope)
 
-    // Build school filter
+    // Build school filter from validator params
     let schoolFilter = ''
-    const params: Record<string, string> = {}
+    const schoolParams: Record<string, string> = {}
 
-    if (schoolId) {
+    if (schoolId && scope.type !== 'teacher') {
       schoolFilter = 'AND s.id = :schoolId'
-      params.schoolId = schoolId
-    } else if (schoolChainId) {
+      schoolParams.schoolId = schoolId
+    } else if (schoolChainId && scope.type !== 'teacher') {
       schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
-      params.schoolChainId = schoolChainId
+      schoolParams.schoolChainId = schoolChainId
+    }
+
+    const filterClause = schoolFilter || scopeFilters.schoolFilter || scopeFilters.classFilter
+    const allParams = { ...schoolParams, ...scopeFilters.params }
+
+    let extraFilters = ''
+    if (academicPeriodId) {
+      extraFilters +=
+        ' AND EXISTS (SELECT 1 FROM "ClassHasAcademicPeriod" chap WHERE chap."classId" = c.id AND chap."academicPeriodId" = :academicPeriodId)'
+      allParams.academicPeriodId = academicPeriodId
+    }
+    if (classId) {
+      extraFilters += ' AND c.id = :classId'
+      allParams.classId = classId
     }
 
     // Execute queries in parallel
@@ -33,9 +52,10 @@ export default class GetAcademicOverviewController {
         JOIN "Class" c ON st."classId" = c.id
         JOIN "School" s ON c."schoolId" = s.id
         WHERE st."enrollmentStatus" = 'REGISTERED'
-        ${schoolFilter}
+        ${filterClause}
+        ${extraFilters}
         `,
-        params
+        allParams
       ),
 
       db.rawQuery(
@@ -45,9 +65,9 @@ export default class GetAcademicOverviewController {
         JOIN "TeacherHasClass" thc ON a."teacherHasClassId" = thc.id
         JOIN "Class" c ON thc."classId" = c.id
         JOIN "School" s ON c."schoolId" = s.id
-        WHERE 1=1 ${schoolFilter}
+        WHERE 1=1 ${filterClause} ${extraFilters}
         `,
-        params
+        allParams
       ),
 
       db.rawQuery(
@@ -63,18 +83,18 @@ export default class GetAcademicOverviewController {
         JOIN "Student" st ON sha."studentId" = st.id
         JOIN "Class" c ON st."classId" = c.id
         JOIN "School" s ON c."schoolId" = s.id
-        WHERE 1=1 ${schoolFilter}
+        WHERE 1=1 ${filterClause} ${extraFilters}
         `,
-        params
+        allParams
       ),
 
       db.rawQuery(
         `
         SELECT id, name, "minimumGrade"
         FROM "School" s
-        WHERE 1=1 ${schoolFilter.replace('AND s.', 'AND ')}
+        WHERE 1=1 ${filterClause.replace(/AND s\./g, 'AND s.')}
         `,
-        params
+        allParams
       ),
 
       db.rawQuery(
@@ -82,9 +102,9 @@ export default class GetAcademicOverviewController {
         SELECT COUNT(*) as count
         FROM "Subject" sub
         JOIN "School" s ON sub."schoolId" = s.id
-        WHERE 1=1 ${schoolFilter}
+        WHERE 1=1 ${filterClause}
         `,
-        params
+        allParams
       ),
     ])
 
@@ -115,13 +135,14 @@ export default class GetAcademicOverviewController {
       JOIN "Assignment" a ON sha."assignmentId" = a.id
       WHERE st."enrollmentStatus" = 'REGISTERED'
       AND sha.grade IS NOT NULL
-      ${schoolFilter}
+      ${filterClause}
+      ${extraFilters}
       GROUP BY st.id
       HAVING AVG(CASE WHEN a.grade > 0
         THEN (sha.grade::float / a.grade::float) * 10
         ELSE 0 END) < :minGrade
       `,
-      { ...params, minGrade: minimumGrade }
+      { ...allParams, minGrade: minimumGrade }
     )
 
     const atRiskStudents = atRiskResult.rows.length

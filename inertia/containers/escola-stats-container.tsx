@@ -1,22 +1,50 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Users, GraduationCap, DollarSign, TrendingUp, CircleHelp } from 'lucide-react'
+import { DollarSign, Clock, AlertTriangle, CalendarClock, CircleHelp } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/tooltip'
 
 // Loading Skeleton
 function EscolaStatsSkeleton() {
+  const stats = [
+    {
+      title: 'Previsão de Receita',
+      description: 'Receita estimada no mês atual',
+    },
+    {
+      title: 'Pagamentos Pendentes',
+      description: 'Aguardando quitação',
+    },
+    {
+      title: 'Pagamentos Vencidos',
+      description: 'Boletos em atraso',
+    },
+    {
+      title: 'Vencimentos (7 dias)',
+      description: 'A vencer no curto prazo',
+    },
+    {
+      title: 'Custo de Manutenção',
+      description: 'Custo mensal estimado da folha',
+    },
+    {
+      title: 'Resultado Operacional',
+      description: 'Diferença entre recebido e custo',
+    },
+  ]
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i}>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {stats.map((stat) => (
+        <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+            <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
             <div className="h-4 w-4 bg-muted animate-pulse rounded" />
           </CardHeader>
           <CardContent>
             <div className="h-8 w-16 bg-muted animate-pulse rounded mb-2" />
-            <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+            <p className="text-xs text-muted-foreground">{stat.description}</p>
           </CardContent>
         </Card>
       ))}
@@ -24,13 +52,32 @@ function EscolaStatsSkeleton() {
   )
 }
 
+interface EscolaStatsFilters {
+  academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
+}
+
 // Content Component
-function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValues?: boolean }) {
+function EscolaStatsContent({
+  hideFinancialValues = false,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+}: { hideFinancialValues?: boolean } & EscolaStatsFilters) {
+  const query = {
+    academicPeriodId,
+    courseId,
+    levelId,
+    classId,
+  }
   const {
     data: stats,
     isLoading,
     error,
-  } = useQuery(api.api.v1.dashboard.escolaStats.queryOptions({}))
+  } = useQuery(api.api.v1.dashboard.escolaStats.queryOptions({ query } as any))
 
   if (isLoading || !stats) {
     return <EscolaStatsSkeleton />
@@ -46,38 +93,32 @@ function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValu
     )
   }
 
+  const statsData = stats as any
+
   const monthlyRevenue = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(stats.monthlyRevenue / 100)
+  }).format(statsData.monthlyRevenue / 100)
+
+  const breakEvenMonthly = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format((statsData.breakEvenMonthlyCents ?? 0) / 100)
+
+  const breakEvenGap = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(Math.abs((statsData.breakEvenGapCents ?? 0) / 100))
+
+  const breakEvenStatusLabel =
+    statsData.breakEvenStatus === 'above'
+      ? 'Superávit operacional'
+      : statsData.breakEvenStatus === 'below'
+        ? 'Déficit operacional'
+        : 'Empate operacional'
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Alunos Ativos</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.activeStudents}</div>
-          <p className="text-xs text-muted-foreground">
-            Em {stats.activeAcademicPeriods}{' '}
-            {stats.activeAcademicPeriods === 1 ? 'período letivo ativo' : 'períodos letivos ativos'}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Professores</CardTitle>
-          <GraduationCap className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalTeachers}</div>
-          <p className="text-xs text-muted-foreground">Cadastrados</p>
-        </CardContent>
-      </Card>
-
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-1.5">
@@ -107,20 +148,68 @@ function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValu
           <div className="text-2xl font-bold">
             {hideFinancialValues ? 'R$ ****' : monthlyRevenue}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Baseado em {stats.activeStudents} alunos ativos
-          </p>
+          <p className="text-xs text-muted-foreground">Receita estimada no mês atual</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Taxa de Presença</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">Pagamentos Pendentes</CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.attendanceRate}%</div>
-          <p className="text-xs text-muted-foreground">Este mês</p>
+          <div className="text-2xl font-bold">{statsData.pendingPayments}</div>
+          <p className="text-xs text-muted-foreground">Aguardando quitação</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Pagamentos Vencidos</CardTitle>
+          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{statsData.overduePayments}</div>
+          <p className="text-xs text-muted-foreground">Boletos em atraso</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Vencimentos (7 dias)</CardTitle>
+          <CalendarClock className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{statsData.upcomingPayments}</div>
+          <p className="text-xs text-muted-foreground">A vencer no curto prazo</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Custo de Manutenção</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {hideFinancialValues ? 'R$ ****' : breakEvenMonthly}
+          </div>
+          <p className="text-xs text-muted-foreground">Custo mensal estimado da folha</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Resultado Operacional</CardTitle>
+          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {hideFinancialValues
+              ? 'R$ ****'
+              : `${statsData.breakEvenGapCents >= 0 ? '+' : '-'}${breakEvenGap}`}
+          </div>
+          <p className="text-xs text-muted-foreground">{breakEvenStatusLabel}</p>
         </CardContent>
       </Card>
     </div>
@@ -130,8 +219,34 @@ function EscolaStatsContent({ hideFinancialValues = false }: { hideFinancialValu
 // Container Export
 export function EscolaStatsContainer({
   hideFinancialValues = false,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
 }: {
   hideFinancialValues?: boolean
-}) {
-  return <EscolaStatsContent hideFinancialValues={hideFinancialValues} />
+} & EscolaStatsFilters) {
+  return (
+    <DashboardCardBoundary
+      title="Resumo Financeiro"
+      queryKeys={[
+        api.api.v1.dashboard.escolaStats.queryOptions({
+          query: {
+            academicPeriodId,
+            courseId,
+            levelId,
+            classId,
+          },
+        } as any).queryKey,
+      ]}
+    >
+      <EscolaStatsContent
+        hideFinancialValues={hideFinancialValues}
+        academicPeriodId={academicPeriodId}
+        courseId={courseId}
+        levelId={levelId}
+        classId={classId}
+      />
+    </DashboardCardBoundary>
+  )
 }

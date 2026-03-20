@@ -4,14 +4,31 @@ import { Users, FileText, CheckCircle, TrendingUp, AlertTriangle, BookOpen } fro
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 
 interface AcademicOverviewCardsProps {
-  schoolId?: string
+  academicPeriodId?: string
+  classId?: string
 }
 
-export function AcademicOverviewCards({ schoolId }: AcademicOverviewCardsProps) {
+export function AcademicOverviewCards({ academicPeriodId, classId }: AcademicOverviewCardsProps) {
+  const query = { academicPeriodId, classId }
+
+  return (
+    <DashboardCardBoundary
+      title="Visão Acadêmica"
+      queryKeys={[api.api.v1.grades.academicOverview.queryOptions({ query } as any).queryKey]}
+    >
+      <AcademicOverviewCardsContent academicPeriodId={academicPeriodId} classId={classId} />
+    </DashboardCardBoundary>
+  )
+}
+
+function AcademicOverviewCardsContent({ academicPeriodId, classId }: AcademicOverviewCardsProps) {
   const { data, isLoading } = useQuery(
-    api.api.v1.grades.academicOverview.queryOptions({ query: { schoolId } })
+    api.api.v1.grades.academicOverview.queryOptions({
+      query: { academicPeriodId, classId },
+    } as any)
   )
 
   if (isLoading || !data) {

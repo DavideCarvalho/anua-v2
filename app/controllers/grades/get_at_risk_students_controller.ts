@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { getAtRiskStudentsValidator } from '#validators/grades'
+import { getPedagogicalScope, buildScopeFilters } from '#services/pedagogical_scope'
 
 interface AtRiskStudent {
   studentId: string
@@ -26,24 +27,42 @@ interface AtRiskStudentRow {
 }
 
 export default class GetAtRiskStudentsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, ...ctx }: HttpContext) {
     const {
       schoolId,
       schoolChainId,
+      academicPeriodId,
+      classId,
       minimumGrade = 6,
       limit = 50,
     } = await request.validateUsing(getAtRiskStudentsValidator)
+    const scope = await getPedagogicalScope(ctx as HttpContext)
+    const scopeFilters = buildScopeFilters(scope)
 
     // Build filters
     let schoolFilter = ''
-    const params: Record<string, string | number> = { minimumGrade, limit }
+    const params: Record<string, any> = { minimumGrade, limit, ...scopeFilters.params }
 
-    if (schoolId) {
-      schoolFilter = 'AND s.id = :schoolId'
-      params.schoolId = schoolId
-    } else if (schoolChainId) {
-      schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
-      params.schoolChainId = schoolChainId
+    if (scope.type !== 'teacher') {
+      if (schoolId) {
+        schoolFilter = 'AND s.id = :schoolId'
+        params.schoolId = schoolId
+      } else if (schoolChainId) {
+        schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
+        params.schoolChainId = schoolChainId
+      }
+    }
+
+    const filterClause = schoolFilter || scopeFilters.schoolFilter || scopeFilters.classFilter
+    let extraFilters = ''
+    if (academicPeriodId) {
+      extraFilters +=
+        ' AND EXISTS (SELECT 1 FROM "ClassHasAcademicPeriod" chap WHERE chap."classId" = c.id AND chap."academicPeriodId" = :academicPeriodId)'
+      params.academicPeriodId = academicPeriodId
+    }
+    if (classId) {
+      extraFilters += ' AND c.id = :classId'
+      params.classId = classId
     }
 
     // Get students with their average grades
@@ -72,7 +91,8 @@ export default class GetAtRiskStudentsController {
         LEFT JOIN "StudentHasAssignment" sha ON st.id = sha."studentId" AND sha.grade IS NOT NULL
         LEFT JOIN "Assignment" a ON sha."assignmentId" = a.id
         WHERE st."enrollmentStatus" = 'REGISTERED'
-        ${schoolFilter}
+        ${filterClause}
+        ${extraFilters}
         GROUP BY st.id, u.name, u.email, s.id, s.name, s."minimumGrade"
         HAVING COUNT(sha.id) > 0
       )
@@ -130,7 +150,8 @@ export default class GetAtRiskStudentsController {
       JOIN "Class" c ON st."classId" = c.id
       JOIN "School" s ON c."schoolId" = s.id
       WHERE st."enrollmentStatus" = 'REGISTERED'
-      ${schoolFilter}
+      ${filterClause}
+      ${extraFilters}
       `,
       params
     )
@@ -148,9 +169,9 @@ export default class GetAtRiskStudentsController {
           schoolId: item.schoolId,
           schoolName: item.schoolName,
           count: item.count,
-          students: item.students.slice(0, 10), // Top 10 per school
+          students: item.students.slice(0, 10),
         })),
-      topStudents: atRiskStudents.slice(0, 20), // Top 20 with lowest grades
+      topStudents: atRiskStudents.slice(0, 20),
     })
   }
 }

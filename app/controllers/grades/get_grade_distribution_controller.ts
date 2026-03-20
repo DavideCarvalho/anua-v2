@@ -1,28 +1,42 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { getGradeDistributionValidator } from '#validators/grades'
+import { getPedagogicalScope, buildScopeFilters } from '#services/pedagogical_scope'
 
 export default class GetGradeDistributionController {
-  async handle({ request, response }: HttpContext) {
-    const { schoolId, schoolChainId, classId, subjectId } = await request.validateUsing(
-      getGradeDistributionValidator
-    )
+  async handle({ request, response, ...ctx }: HttpContext) {
+    const { schoolId, schoolChainId, academicPeriodId, classId, subjectId } =
+      await request.validateUsing(getGradeDistributionValidator)
+    const scope = await getPedagogicalScope(ctx as HttpContext)
+    const scopeFilters = buildScopeFilters(scope)
 
     // Build filters
     let filters = ''
-    const params: Record<string, string> = {}
+    const params: Record<string, any> = { ...scopeFilters.params }
 
-    if (schoolId) {
-      filters += ' AND s.id = :schoolId'
-      params.schoolId = schoolId
+    if (scope.type !== 'teacher') {
+      if (schoolId) {
+        filters += ' AND s.id = :schoolId'
+        params.schoolId = schoolId
+      } else {
+        filters += ` ${scopeFilters.schoolFilter}`
+      }
+      if (schoolChainId) {
+        filters += ' AND s."schoolChainId" = :schoolChainId'
+        params.schoolChainId = schoolChainId
+      }
+    } else {
+      filters += ` ${scopeFilters.classFilter}`
     }
-    if (schoolChainId) {
-      filters += ' AND s."schoolChainId" = :schoolChainId'
-      params.schoolChainId = schoolChainId
-    }
+
     if (classId) {
       filters += ' AND c.id = :classId'
       params.classId = classId
+    }
+    if (academicPeriodId) {
+      filters +=
+        ' AND EXISTS (SELECT 1 FROM "ClassHasAcademicPeriod" chap WHERE chap."classId" = c.id AND chap."academicPeriodId" = :academicPeriodId)'
+      params.academicPeriodId = academicPeriodId
     }
     if (subjectId) {
       filters += ' AND thc."subjectId" = :subjectId'

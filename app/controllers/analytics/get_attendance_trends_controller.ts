@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import { getAttendanceTrendsValidator } from '#validators/analytics'
+import { getPedagogicalScope } from '#services/pedagogical_scope'
 
 interface AttendanceTrendRow {
   period: string
@@ -11,22 +12,57 @@ interface AttendanceTrendRow {
 }
 
 export default class GetAttendanceTrendsController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, ...ctx }: HttpContext) {
     const {
       schoolId,
       schoolChainId,
+      academicPeriodId,
+      courseId,
+      classId,
       period = 'month',
     } = await request.validateUsing(getAttendanceTrendsValidator)
 
-    let schoolFilter = ''
-    const params: Record<string, string> = {}
+    const scope = await getPedagogicalScope(ctx as HttpContext)
 
-    if (schoolId) {
-      schoolFilter = 'AND s.id = :schoolId'
-      params.schoolId = schoolId
-    } else if (schoolChainId) {
-      schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
-      params.schoolChainId = schoolChainId
+    let schoolFilter = ''
+    let classFilter = ''
+    let extraFilter = ''
+    const params: Record<string, any> = {}
+
+    if (scope.type === 'teacher') {
+      if (scope.classIds.length === 0) {
+        return response.ok({ trends: [] })
+      }
+      const placeholders = scope.classIds.map((_, i) => `:classId${i}`).join(', ')
+      scope.classIds.forEach((id, i) => {
+        params[`classId${i}`] = id
+      })
+      classFilter = `AND st."classId" IN (${placeholders})`
+    } else {
+      if (schoolId) {
+        schoolFilter = 'AND s.id = :schoolId'
+        params.schoolId = schoolId
+      } else if (schoolChainId) {
+        schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
+        params.schoolChainId = schoolChainId
+      } else if (scope.schoolIds.length > 0) {
+        schoolFilter = 'AND s.id = ANY(:scopeSchoolIds)'
+        params.scopeSchoolIds = scope.schoolIds
+      }
+    }
+
+    if (classId) {
+      extraFilter += ' AND c.id = :classId'
+      params.classId = classId
+    }
+    if (courseId) {
+      extraFilter += ' AND c."courseId" = :courseId'
+      params.courseId = courseId
+    }
+    if (academicPeriodId) {
+      extraFilter +=
+        ' AND EXISTS (SELECT 1 FROM "ClassHasAcademicPeriod" chap WHERE chap."classId" = c.id AND chap."academicPeriodId" = :academicPeriodId)'
+      params.academicPeriodId = academicPeriodId
     }
 
     let dateFormat: string
@@ -57,11 +93,12 @@ export default class GetAttendanceTrendsController {
       FROM "StudentHasAttendance" sha
       JOIN "Attendance" a ON sha."attendanceId" = a.id
       JOIN "Student" st ON sha."studentId" = st.id
-      JOIN "User" u ON st.id = u.id
-      JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
-      JOIN "School" s ON uhs."schoolId" = s.id
+      JOIN "Class" c ON st."classId" = c.id
+      JOIN "School" s ON c."schoolId" = s.id
       WHERE a.date >= NOW() - INTERVAL '${dateInterval}'
       ${schoolFilter}
+      ${classFilter}
+      ${extraFilter}
       GROUP BY TO_CHAR(a.date, '${dateFormat}')
       ORDER BY period ASC
       `,

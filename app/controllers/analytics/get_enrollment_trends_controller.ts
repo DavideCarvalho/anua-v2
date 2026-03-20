@@ -12,11 +12,17 @@ export default class GetEnrollmentTrendsController {
     const {
       schoolId,
       academicPeriodId,
+      courseId,
+      levelId,
+      classId,
       days = 30,
     } = await request.validateUsing(getTrendsValidator)
 
     let schoolFilter = ''
     let periodFilter = ''
+    let courseFilter = ''
+    let levelFilter = ''
+    let classFilter = ''
     const params: Record<string, string | number> = { days }
 
     if (schoolId) {
@@ -27,6 +33,21 @@ export default class GetEnrollmentTrendsController {
     if (academicPeriodId) {
       periodFilter = 'AND shl."academicPeriodId" = :academicPeriodId'
       params.academicPeriodId = academicPeriodId
+    }
+
+    if (courseId) {
+      courseFilter = 'AND c."courseId" = :courseId'
+      params.courseId = courseId
+    }
+
+    if (levelId) {
+      levelFilter = 'AND shl."levelId" = :levelId'
+      params.levelId = levelId
+    }
+
+    if (classId) {
+      classFilter = 'AND st."classId" = :classId'
+      params.classId = classId
     }
 
     const [trendsResult] = await Promise.all([
@@ -45,12 +66,16 @@ export default class GetEnrollmentTrendsController {
         FROM date_series ds
         LEFT JOIN "StudentHasLevel" shl ON DATE(shl."createdAt") = ds.date
         LEFT JOIN "Student" st ON shl."studentId" = st.id
+        LEFT JOIN "Class" c ON st."classId" = c.id
         LEFT JOIN "User" u ON st.id = u.id
         LEFT JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
         LEFT JOIN "School" s ON uhs."schoolId" = s.id
         WHERE (u."deletedAt" IS NULL OR shl.id IS NULL)
         ${schoolFilter}
         ${periodFilter}
+        ${courseFilter}
+        ${levelFilter}
+        ${classFilter}
         GROUP BY ds.date
         ORDER BY ds.date ASC
         `,

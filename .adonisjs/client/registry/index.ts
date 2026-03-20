@@ -1098,6 +1098,12 @@ const routes = {
     tokens: [{"old":"/api/v1/escola/teacher-dashboard","type":0,"val":"api","end":""},{"old":"/api/v1/escola/teacher-dashboard","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/teacher-dashboard","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/teacher-dashboard","type":0,"val":"teacher-dashboard","end":""}],
     types: placeholder as Registry['api.v1.dashboard.escola_teacher_dashboard']['types'],
   },
+  'api.v1.dashboard.escola_pedagogical_alerts': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/escola/pedagogical-alerts',
+    tokens: [{"old":"/api/v1/escola/pedagogical-alerts","type":0,"val":"api","end":""},{"old":"/api/v1/escola/pedagogical-alerts","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/pedagogical-alerts","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/pedagogical-alerts","type":0,"val":"pedagogical-alerts","end":""}],
+    types: placeholder as Registry['api.v1.dashboard.escola_pedagogical_alerts']['types'],
+  },
   'api.v1.dashboard.responsavel_stats': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/responsavel/stats',
@@ -2118,6 +2124,12 @@ const routes = {
     tokens: [{"old":"/api/v1/grades/at-risk","type":0,"val":"api","end":""},{"old":"/api/v1/grades/at-risk","type":0,"val":"v1","end":""},{"old":"/api/v1/grades/at-risk","type":0,"val":"grades","end":""},{"old":"/api/v1/grades/at-risk","type":0,"val":"at-risk","end":""}],
     types: placeholder as Registry['api.v1.grades.at_risk']['types'],
   },
+  'api.v1.grades.trends': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/grades/trends',
+    tokens: [{"old":"/api/v1/grades/trends","type":0,"val":"api","end":""},{"old":"/api/v1/grades/trends","type":0,"val":"v1","end":""},{"old":"/api/v1/grades/trends","type":0,"val":"grades","end":""},{"old":"/api/v1/grades/trends","type":0,"val":"trends","end":""}],
+    types: placeholder as Registry['api.v1.grades.trends']['types'],
+  },
   'api.v1.grades.class_subject': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/grades/class/:classId/subject/:subjectId',
@@ -2213,6 +2225,12 @@ const routes = {
     pattern: '/api/v1/analytics/hr/overview',
     tokens: [{"old":"/api/v1/analytics/hr/overview","type":0,"val":"api","end":""},{"old":"/api/v1/analytics/hr/overview","type":0,"val":"v1","end":""},{"old":"/api/v1/analytics/hr/overview","type":0,"val":"analytics","end":""},{"old":"/api/v1/analytics/hr/overview","type":0,"val":"hr","end":""},{"old":"/api/v1/analytics/hr/overview","type":0,"val":"overview","end":""}],
     types: placeholder as Registry['api.v1.analytics.hr.overview']['types'],
+  },
+  'api.v1.analytics.class_performance': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/analytics/class-performance',
+    tokens: [{"old":"/api/v1/analytics/class-performance","type":0,"val":"api","end":""},{"old":"/api/v1/analytics/class-performance","type":0,"val":"v1","end":""},{"old":"/api/v1/analytics/class-performance","type":0,"val":"analytics","end":""},{"old":"/api/v1/analytics/class-performance","type":0,"val":"class-performance","end":""}],
+    types: placeholder as Registry['api.v1.analytics.class_performance']['types'],
   },
   'api.v1.events.index': {
     methods: ["GET","HEAD"],

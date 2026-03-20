@@ -14,6 +14,9 @@ export const getAttendanceTrendsValidator = vine.compile(
   vine.object({
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
+    academicPeriodId: vine.string().uuid().optional(),
+    courseId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
     period: vine.enum(['week', 'month', 'quarter', 'year'] as const).optional(),
   })
 )
@@ -77,13 +80,19 @@ export const getFunnelStatsValidator = vine.compile(
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
     academicPeriodId: vine.string().uuid().optional(),
+    courseId: vine.string().uuid().optional(),
+    levelId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
   })
 )
 
 export const getTrendsValidator = vine.compile(
   vine.object({
-    schoolId: vine.string().optional(),
-    academicPeriodId: vine.string().optional(),
+    schoolId: vine.string().uuid().optional(),
+    academicPeriodId: vine.string().uuid().optional(),
+    courseId: vine.string().uuid().optional(),
+    levelId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
     days: vine.number().optional(),
   })
 )
@@ -93,6 +102,9 @@ export const getByLevelValidator = vine.compile(
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
     academicPeriodId: vine.string().uuid().optional(),
+    courseId: vine.string().uuid().optional(),
+    levelId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
   })
 )
 

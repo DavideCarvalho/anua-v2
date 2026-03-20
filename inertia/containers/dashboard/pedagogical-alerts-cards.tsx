@@ -6,8 +6,11 @@ import type { Route } from '@tuyau/core/types'
 
 import { api } from '~/lib/api'
 import { cn } from '~/lib/utils'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '~/components/ui/tooltip'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import {
   Sheet,
   SheetContent,
@@ -82,11 +85,50 @@ const alertConfigs: AlertCardConfig[] = [
   },
 ]
 
-export function PedagogicalAlertsCards() {
+interface PedagogicalAlertsCardsProps {
+  academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
+}
+
+export function PedagogicalAlertsCards({
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+}: PedagogicalAlertsCardsProps) {
+  const query = { academicPeriodId, courseId, levelId, classId }
+
+  return (
+    <DashboardCardBoundary
+      title="Alertas Pedagógicos"
+      queryKeys={[
+        api.api.v1.dashboard.escolaPedagogicalAlerts.queryOptions({ query } as any).queryKey,
+      ]}
+    >
+      <PedagogicalAlertsCardsContent
+        academicPeriodId={academicPeriodId}
+        courseId={courseId}
+        levelId={levelId}
+        classId={classId}
+      />
+    </DashboardCardBoundary>
+  )
+}
+
+function PedagogicalAlertsCardsContent({
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+}: PedagogicalAlertsCardsProps) {
   const [selectedAlert, setSelectedAlert] = useState<AlertKey | null>(null)
 
   const { data, isLoading } = useQuery(
-    api.api.v1.dashboard.escolaPedagogicalAlerts.queryOptions({})
+    api.api.v1.dashboard.escolaPedagogicalAlerts.queryOptions({
+      query: { academicPeriodId, courseId, levelId, classId },
+    } as any)
   )
 
   const alerts = data?.alerts
@@ -103,11 +145,11 @@ export function PedagogicalAlertsCards() {
   if (visibleAlerts.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12">
-          <div className="text-center">
-            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-            <h3 className="text-lg font-semibold text-green-700">Tudo em ordem!</h3>
-            <p className="text-sm text-muted-foreground mt-1">
+        <CardContent className="py-7">
+          <div className="min-h-[116px] text-center flex flex-col items-center justify-center">
+            <CheckCircle className="mx-auto mb-3 h-10 w-10 text-green-500" />
+            <h3 className="text-base font-semibold text-green-700">Tudo em ordem!</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               Não há alertas pedagógicos no momento
             </p>
           </div>
@@ -167,7 +209,7 @@ function getAlertDescription(
   data: NonNullable<PedagogicalAlerts[AlertKey]>
 ): string {
   if (key === 'studentsAtRiskByAttendance' && 'threshold' in data) {
-    return `Alunos com frequência abaixo de ${data.threshold}%`
+    return `Alunos com frequência abaixo de ${data.threshold}% de presença`
   }
   if (key === 'studentsAtRiskByGrade' && 'minimumGrade' in data) {
     return `Alunos com média abaixo de ${data.minimumGrade}`
@@ -201,7 +243,7 @@ function AlertDetailSheet({
 
   return (
     <Sheet open={!!alertKey} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-[600px] sm:max-w-[600px] overflow-y-auto">
+      <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{getSheetTitle(alertKey)}</SheetTitle>
           <SheetDescription>{getSheetDescription(alertKey, alertData)}</SheetDescription>
@@ -249,29 +291,97 @@ function StudentsAtRiskByAttendanceTable({
 }: {
   data: NonNullable<PedagogicalAlerts['studentsAtRiskByAttendance']>
 }) {
-  return (
+  const sorted = [...data.students].sort((a, b) => {
+    if (a.totalClasses === 0 && b.totalClasses !== 0) return -1
+    if (b.totalClasses === 0 && a.totalClasses !== 0) return 1
+    return a.absenceRate - b.absenceRate
+  })
+
+  // Group by course + level
+  const courseLevels = [...new Set(sorted.map((s) => `${s.courseName} - ${s.levelName}`))]
+
+  const renderTable = (students: typeof sorted) => (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Aluno</TableHead>
           <TableHead>Turma</TableHead>
-          <TableHead className="text-center">Faltas</TableHead>
-          <TableHead className="text-center">Taxa</TableHead>
+          <TableHead className="text-center">Faltas/Aulas</TableHead>
+          <TableHead className="text-center">Presença</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.students.map((student) => (
-          <TableRow key={student.studentId}>
-            <TableCell className="font-medium">{student.studentName}</TableCell>
-            <TableCell>{student.className}</TableCell>
-            <TableCell className="text-center">{student.absences}</TableCell>
-            <TableCell className="text-center">
-              <Badge variant="destructive">{student.absenceRate}%</Badge>
-            </TableCell>
-          </TableRow>
-        ))}
+        {students.map((student) => {
+          const hasNoDataAtAll = student.totalClasses === 0
+          const attendanceRate = hasNoDataAtAll ? 0 : 100 - student.absenceRate
+          const isNoRecords = hasNoDataAtAll || attendanceRate === 0
+          const isBelowThreshold = !isNoRecords && attendanceRate < 75
+
+          const displayRate = Math.round(attendanceRate)
+          let badgeClass = ''
+          let tooltipText = ''
+
+          if (hasNoDataAtAll) {
+            badgeClass = 'bg-red-500'
+            tooltipText = 'Aluno sem registros de presença. Necessário verificar situação.'
+          } else if (isNoRecords) {
+            badgeClass = 'bg-red-500'
+            tooltipText =
+              'Nenhuma presença registrada para este aluno. Verifique se está frequentando as aulas.'
+          } else if (isBelowThreshold) {
+            badgeClass = 'bg-red-500'
+            tooltipText = `Frequência de ${displayRate}%, abaixo do mínimo de 75%. Risco de reprovação por falta.`
+          } else {
+            badgeClass = 'bg-yellow-500 text-yellow-950'
+            tooltipText = `Frequência de ${displayRate}%. Padrão de faltas indica risco de reprovação se continuar.`
+          }
+
+          return (
+            <TableRow key={student.studentId}>
+              <TableCell className="font-medium">{student.studentName}</TableCell>
+              <TableCell>{student.className}</TableCell>
+              <TableCell className="text-center">
+                {student.totalClasses > 0 ? `${student.absences}/${student.totalClasses}` : '-'}
+              </TableCell>
+              <TableCell className="text-center">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge className={badgeClass}>
+                      {hasNoDataAtAll ? 'Sem registros' : `${displayRate}%`}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>{tooltipText}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TableCell>
+            </TableRow>
+          )
+        })}
       </TableBody>
     </Table>
+  )
+
+  return (
+    <TooltipProvider>
+      <Tabs defaultValue={courseLevels[0]}>
+        <TabsList>
+          {courseLevels.map((label) => (
+            <TabsTrigger key={label} value={label}>
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {courseLevels.map((label) => {
+          const courseStudents = sorted.filter((s) => `${s.courseName} - ${s.levelName}` === label)
+          return (
+            <TabsContent key={label} value={label}>
+              {renderTable(courseStudents)}
+            </TabsContent>
+          )
+        })}
+      </Tabs>
+    </TooltipProvider>
   )
 }
 
@@ -323,7 +433,16 @@ function ExamsWithoutGradesTable({
 }: {
   data: NonNullable<PedagogicalAlerts['examsWithoutGrades']>
 }) {
-  return (
+  const courseLevels = [...new Set(data.exams.map((e) => `${e.courseName} - ${e.levelName}`))]
+
+  const getDaysBadge = (days: number) => {
+    if (days >= 10) {
+      return <Badge className="bg-red-500">{days} dias</Badge>
+    }
+    return <Badge className="bg-yellow-500 text-yellow-950">{days} dias</Badge>
+  }
+
+  const renderTable = (exams: typeof data.exams) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -335,7 +454,7 @@ function ExamsWithoutGradesTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.exams.map((exam) => (
+        {exams.map((exam) => (
           <TableRow key={exam.examId}>
             <TableCell className="font-medium">{exam.examTitle}</TableCell>
             <TableCell>{exam.className}</TableCell>
@@ -343,13 +462,31 @@ function ExamsWithoutGradesTable({
             <TableCell className="text-center">
               {new Date(exam.examDate).toLocaleDateString('pt-BR')}
             </TableCell>
-            <TableCell className="text-center">
-              <Badge variant="secondary">{exam.daysPast} dias</Badge>
-            </TableCell>
+            <TableCell className="text-center">{getDaysBadge(exam.daysPast)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  )
+
+  return (
+    <Tabs defaultValue={courseLevels[0]}>
+      <TabsList>
+        {courseLevels.map((label) => (
+          <TabsTrigger key={label} value={label}>
+            {label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {courseLevels.map((label) => {
+        const courseExams = data.exams.filter((e) => `${e.courseName} - ${e.levelName}` === label)
+        return (
+          <TabsContent key={label} value={label}>
+            {renderTable(courseExams)}
+          </TabsContent>
+        )
+      })}
+    </Tabs>
   )
 }
 
@@ -358,7 +495,16 @@ function OverdueActivitiesTable({
 }: {
   data: NonNullable<PedagogicalAlerts['overdueActivities']>
 }) {
-  return (
+  const courseLevels = [...new Set(data.activities.map((a) => `${a.courseName} - ${a.levelName}`))]
+
+  const getDaysBadge = (days: number) => {
+    if (days >= 10) {
+      return <Badge className="bg-red-500">{days} dias</Badge>
+    }
+    return <Badge className="bg-yellow-500 text-yellow-950">{days} dias</Badge>
+  }
+
+  const renderTable = (activities: typeof data.activities) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -366,11 +512,11 @@ function OverdueActivitiesTable({
           <TableHead>Turma</TableHead>
           <TableHead>Professor</TableHead>
           <TableHead className="text-center">Notas</TableHead>
-          <TableHead className="text-center">Vencimento</TableHead>
+          <TableHead className="text-center">Atraso</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.activities.map((activity) => (
+        {activities.map((activity) => (
           <TableRow key={activity.assignmentId}>
             <TableCell className="font-medium">{activity.assignmentName}</TableCell>
             <TableCell>{activity.className}</TableCell>
@@ -380,13 +526,33 @@ function OverdueActivitiesTable({
                 {activity.gradedStudents}/{activity.totalStudents}
               </Badge>
             </TableCell>
-            <TableCell className="text-center">
-              {new Date(activity.dueDate).toLocaleDateString('pt-BR')}
-            </TableCell>
+            <TableCell className="text-center">{getDaysBadge(activity.daysPast)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  )
+
+  return (
+    <Tabs defaultValue={courseLevels[0]}>
+      <TabsList>
+        {courseLevels.map((label) => (
+          <TabsTrigger key={label} value={label}>
+            {label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {courseLevels.map((label) => {
+        const courseActivities = data.activities.filter(
+          (a) => `${a.courseName} - ${a.levelName}` === label
+        )
+        return (
+          <TabsContent key={label} value={label}>
+            {renderTable(courseActivities)}
+          </TabsContent>
+        )
+      })}
+    </Tabs>
   )
 }
 
@@ -484,7 +650,7 @@ function getSheetDescription(
   data: NonNullable<PedagogicalAlerts[AlertKey]>
 ): string {
   if (key === 'studentsAtRiskByAttendance' && 'threshold' in data) {
-    return `${data.count} aluno(s) com frequência abaixo de ${data.threshold}%`
+    return `${data.count} aluno(s) com taxa de falta elevada ou sem registros de presença (mínimo ${data.threshold}% de presença exigido)`
   }
   if (key === 'studentsAtRiskByGrade' && 'minimumGrade' in data) {
     return `${data.count} aluno(s) com média abaixo de ${data.minimumGrade}`

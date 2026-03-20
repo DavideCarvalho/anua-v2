@@ -257,6 +257,7 @@ export interface ApiDefinition {
         escolaStats: typeof routes['api.v1.dashboard.escola_stats']
         escolaInsights: typeof routes['api.v1.dashboard.escola_insights']
         escolaTeacherDashboard: typeof routes['api.v1.dashboard.escola_teacher_dashboard']
+        escolaPedagogicalAlerts: typeof routes['api.v1.dashboard.escola_pedagogical_alerts']
         responsavelStats: typeof routes['api.v1.dashboard.responsavel_stats']
         adminStats: typeof routes['api.v1.dashboard.admin_stats']
         serverStats: typeof routes['api.v1.dashboard.server_stats']
@@ -494,6 +495,7 @@ export interface ApiDefinition {
         students: typeof routes['api.v1.grades.students']
         distribution: typeof routes['api.v1.grades.distribution']
         atRisk: typeof routes['api.v1.grades.at_risk']
+        trends: typeof routes['api.v1.grades.trends']
         classSubject: typeof routes['api.v1.grades.class_subject']
         batchSave: typeof routes['api.v1.grades.batch_save']
       }
@@ -526,6 +528,7 @@ export interface ApiDefinition {
         hr: {
           overview: typeof routes['api.v1.analytics.hr.overview']
         }
+        classPerformance: typeof routes['api.v1.analytics.class_performance']
       }
       events: {
         index: typeof routes['api.v1.events.index']

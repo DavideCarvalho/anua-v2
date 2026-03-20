@@ -6,20 +6,12 @@ interface AtRiskByAttendanceStudent {
   studentId: string
   studentName: string
   className: string
+  courseName: string
+  levelName: string
   totalClasses: number
   absences: number
   absenceRate: number
   attendanceRate: number
-}
-
-interface AtRiskByAttendanceRow {
-  student_id: string
-  student_name: string
-  class_name: string
-  total_classes: string | number
-  absences: string | number
-  absence_rate: string | number
-  attendance_rate: string | number
 }
 
 interface AtRiskByGradeStudent {
@@ -46,17 +38,10 @@ interface ExamWithoutGrade {
   examTitle: string
   examDate: string
   className: string
+  courseName: string
+  levelName: string
   teacherName: string
   daysPast: number
-}
-
-interface ExamWithoutGradeRow {
-  exam_id: string
-  exam_title: string
-  examDate: string
-  class_name: string
-  teacher_name: string
-  days_past: string | number
 }
 
 interface OverdueActivity {
@@ -64,21 +49,12 @@ interface OverdueActivity {
   assignmentName: string
   dueDate: string
   className: string
+  courseName: string
+  levelName: string
   teacherName: string
   daysPast: number
   totalStudents: number
   gradedStudents: number
-}
-
-interface OverdueActivityRow {
-  assignment_id: string
-  assignment_name: string
-  dueDate: string
-  class_name: string
-  teacher_name: string
-  days_past: string | number
-  total_students: string | number
-  graded_students: string | number
 }
 
 interface UngradedSubmission {
@@ -146,8 +122,24 @@ interface PedagogicalAlerts {
   }
 }
 
+interface PedagogicalAlertFilters {
+  academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
+}
+
+function normalizeFilter(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  if (!value || value === 'all') return undefined
+  return value
+}
+
 export default class GetPedagogicalAlertsController {
-  async handle({ selectedSchoolIds }: HttpContext): Promise<{ alerts: PedagogicalAlerts }> {
+  async handle({
+    selectedSchoolIds,
+    request,
+  }: HttpContext): Promise<{ alerts: PedagogicalAlerts }> {
     const scopedSchoolIds = selectedSchoolIds ?? []
     if (scopedSchoolIds.length === 0) {
       return { alerts: {} }
@@ -164,6 +156,21 @@ export default class GetPedagogicalAlertsController {
     const calculationAlgorithm = school.calculationAlgorithm ?? 'AVERAGE'
     const alerts: PedagogicalAlerts = {}
 
+    const query = request.qs() as Record<string, unknown>
+    const filters: PedagogicalAlertFilters = {
+      academicPeriodId: normalizeFilter(query.academicPeriodId),
+      courseId: normalizeFilter(query.courseId),
+      levelId: normalizeFilter(query.levelId),
+      classId: normalizeFilter(query.classId),
+    }
+
+    const scopedClassIds = await this.resolveScopedClassIds(schoolId, filters)
+    const hasClassScope =
+      Boolean(filters.academicPeriodId) ||
+      Boolean(filters.courseId) ||
+      Boolean(filters.levelId) ||
+      Boolean(filters.classId)
+
     const [
       attendanceRiskStudents,
       gradeRiskStudents,
@@ -172,12 +179,23 @@ export default class GetPedagogicalAlertsController {
       ungradedSubmissions,
       teachersMissingAttendance,
     ] = await Promise.all([
-      this.getStudentsAtRiskByAttendance(schoolId, minimumAttendancePercentage),
-      this.getStudentsAtRiskByGrade(schoolId, minimumGrade, calculationAlgorithm),
-      this.getExamsWithoutGrades(schoolId),
-      this.getOverdueActivities(schoolId),
-      this.getUngradedSubmissions(schoolId),
-      this.getTeachersMissingAttendance(schoolId, 7),
+      this.getStudentsAtRiskByAttendance(
+        schoolId,
+        minimumAttendancePercentage,
+        hasClassScope,
+        scopedClassIds
+      ),
+      this.getStudentsAtRiskByGrade(
+        schoolId,
+        minimumGrade,
+        calculationAlgorithm,
+        hasClassScope,
+        scopedClassIds
+      ),
+      this.getExamsWithoutGrades(schoolId, hasClassScope, scopedClassIds),
+      this.getOverdueActivities(schoolId, hasClassScope, scopedClassIds),
+      this.getUngradedSubmissions(schoolId, hasClassScope, scopedClassIds),
+      this.getTeachersMissingAttendance(schoolId, 7, hasClassScope, scopedClassIds),
     ])
 
     if (attendanceRiskStudents.length > 0) {
@@ -231,48 +249,93 @@ export default class GetPedagogicalAlertsController {
 
   private async getStudentsAtRiskByAttendance(
     schoolId: string,
-    minimumAttendancePercentage: number
+    minimumAttendancePercentage: number,
+    hasClassScope: boolean,
+    scopedClassIds: string[]
   ): Promise<AtRiskByAttendanceStudent[]> {
     const result = await db.rawQuery(
       `
-      WITH student_attendance AS (
-        SELECT 
+      WITH class_attendance_count AS (
+        SELECT
+          c.id as class_id,
+          COUNT(DISTINCT a.id) as total_sessions
+        FROM "Class" c
+        LEFT JOIN "TeacherHasClass" thc ON thc."classId" = c.id
+        LEFT JOIN "CalendarSlot" cs ON cs."teacherHasClassId" = thc.id
+        LEFT JOIN "Attendance" a ON a."calendarSlotId" = cs.id
+        WHERE c."schoolId" = :schoolId
+        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
+        GROUP BY c.id
+      ),
+      student_attendance AS (
+        SELECT
           st.id as student_id,
           u.name as student_name,
           c.name as class_name,
-          COUNT(*) as total_classes,
-          SUM(CASE WHEN sha.status = 'ABSENT' THEN 1 ELSE 0 END) as absences,
-          SUM(CASE WHEN sha.status IN ('PRESENT', 'LATE') THEN 1 ELSE 0 END) as present
+          c.id as class_id,
+          COALESCE(co.name, 'Sem curso') as course_name,
+          COALESCE(l.name, 'Sem nível') as level_name,
+          COUNT(sha.id) as recorded_classes,
+          COALESCE(SUM(CASE WHEN sha.status = 'ABSENT' THEN 1 ELSE 0 END), 0) as absences,
+          COALESCE(SUM(CASE WHEN sha.status IN ('PRESENT', 'LATE') THEN 1 ELSE 0 END), 0) as present
         FROM "Student" st
         JOIN "User" u ON st.id = u.id
         JOIN "Class" c ON st."classId" = c.id
-        JOIN "StudentHasAttendance" sha ON sha."studentId" = st.id
+        JOIN "Level" l ON c."levelId" = l.id
+        LEFT JOIN "LevelAssignedToCourseHasAcademicPeriod" latcap ON latcap."levelId" = c."levelId" AND latcap."isActive" = true
+        LEFT JOIN "CourseHasAcademicPeriod" chap ON latcap."courseHasAcademicPeriodId" = chap.id
+        LEFT JOIN "Course" co ON chap."courseId" = co.id
+        LEFT JOIN "StudentHasAttendance" sha ON sha."studentId" = st.id
         WHERE c."schoolId" = :schoolId
+        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
         AND st."enrollmentStatus" = 'REGISTERED'
-        GROUP BY st.id, u.name, c.name
-        HAVING COUNT(*) >= 5
+        GROUP BY st.id, u.name, c.name, c.id, co.name, l.name
       )
-      SELECT 
-        student_id,
-        student_name,
-        class_name,
-        total_classes,
-        absences,
-        ROUND((absences::float / total_classes * 100)::numeric, 1) as absence_rate,
-        ROUND((present::float / total_classes * 100)::numeric, 1) as attendance_rate
-      FROM student_attendance
-      WHERE (absences::float / total_classes * 100) > :minAttendanceThreshold
-      ORDER BY absence_rate DESC
+      SELECT
+        sa.student_id,
+        sa.student_name,
+        sa.class_name,
+        sa.course_name,
+        sa.level_name,
+        sa.recorded_classes,
+        COALESCE(cac.total_sessions, 0) as total_sessions,
+        sa.absences,
+        sa.present,
+        CASE WHEN sa.recorded_classes > 0
+          THEN ROUND((sa.absences::float / sa.recorded_classes * 100)::numeric, 1)
+          ELSE 0
+        END as absence_rate,
+        CASE WHEN sa.recorded_classes > 0
+          THEN ROUND((sa.present::float / sa.recorded_classes * 100)::numeric, 1)
+          ELSE 0
+        END as attendance_rate
+      FROM student_attendance sa
+      LEFT JOIN class_attendance_count cac ON cac.class_id = sa.class_id
+      WHERE sa.recorded_classes = 0
+         OR (sa.recorded_classes >= 5 AND (sa.absences::float / sa.recorded_classes * 100) > :minAttendanceThreshold)
+      ORDER BY
+        CASE WHEN sa.recorded_classes = 0 THEN 0 ELSE 1 END,
+        absence_rate DESC
       LIMIT 50
       `,
-      { schoolId, minAttendanceThreshold: 100 - minimumAttendancePercentage }
+      {
+        schoolId,
+        minAttendanceThreshold: 100 - minimumAttendancePercentage,
+        hasClassScope,
+        scopedClassIds,
+      }
     )
 
-    return (result.rows as AtRiskByAttendanceRow[]).map((row) => ({
+    return (result.rows as any[]).map((row) => ({
       studentId: row.student_id,
       studentName: row.student_name,
       className: row.class_name,
-      totalClasses: Number(row.total_classes),
+      courseName: row.course_name,
+      levelName: row.level_name,
+      totalClasses:
+        Number(row.recorded_classes) > 0
+          ? Number(row.recorded_classes)
+          : Number(row.total_sessions),
       absences: Number(row.absences),
       absenceRate: Number(row.absence_rate),
       attendanceRate: Number(row.attendance_rate),
@@ -282,7 +345,9 @@ export default class GetPedagogicalAlertsController {
   private async getStudentsAtRiskByGrade(
     schoolId: string,
     minimumGrade: number,
-    calculationAlgorithm: string
+    calculationAlgorithm: string,
+    hasClassScope: boolean,
+    scopedClassIds: string[]
   ): Promise<AtRiskByGradeStudent[]> {
     const result = await db.rawQuery(
       `
@@ -302,6 +367,7 @@ export default class GetPedagogicalAlertsController {
         LEFT JOIN "Assignment" a ON sha."assignmentId" = a.id
         LEFT JOIN exam_grades eg ON eg."studentId" = st.id AND eg.score IS NOT NULL AND eg.attended = true
         WHERE c."schoolId" = :schoolId
+        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
         AND st."enrollmentStatus" = 'REGISTERED'
         GROUP BY st.id, u.name, c.name
         HAVING COUNT(sha.id) > 0 OR COUNT(eg.id) > 0
@@ -341,7 +407,13 @@ export default class GetPedagogicalAlertsController {
       ORDER BY final_grade ASC
       LIMIT 50
       `,
-      { schoolId, minimumGrade, algorithm: calculationAlgorithm }
+      {
+        schoolId,
+        minimumGrade,
+        algorithm: calculationAlgorithm,
+        hasClassScope,
+        scopedClassIds,
+      }
     )
 
     return (result.rows as AtRiskByGradeRow[]).map((row) => ({
@@ -355,50 +427,70 @@ export default class GetPedagogicalAlertsController {
     }))
   }
 
-  private async getExamsWithoutGrades(schoolId: string): Promise<ExamWithoutGrade[]> {
+  private async getExamsWithoutGrades(
+    schoolId: string,
+    hasClassScope: boolean,
+    scopedClassIds: string[]
+  ): Promise<ExamWithoutGrade[]> {
     const result = await db.rawQuery(
       `
-      SELECT 
+      SELECT
         e.id as exam_id,
         e.title as exam_title,
         e."examDate",
         c.name as class_name,
+        COALESCE(co.name, 'Sem curso') as course_name,
+        COALESCE(l.name, 'Sem nível') as level_name,
         u.name as teacher_name,
         EXTRACT(DAY FROM NOW() - e."examDate") as days_past
       FROM exams e
       JOIN "Class" c ON e."classId" = c.id
+      JOIN "Level" l ON c."levelId" = l.id
+      LEFT JOIN "LevelAssignedToCourseHasAcademicPeriod" latcap ON latcap."levelId" = c."levelId" AND latcap."isActive" = true
+      LEFT JOIN "CourseHasAcademicPeriod" chap ON latcap."courseHasAcademicPeriodId" = chap.id
+      LEFT JOIN "Course" co ON chap."courseId" = co.id
       JOIN "User" u ON e."teacherId" = u.id
-      WHERE e."schoolId" = :schoolId
-      AND e."examDate" < NOW()
+       WHERE e."schoolId" = :schoolId
+       AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
+       AND e."examDate" < NOW()
+      AND EXTRACT(DAY FROM NOW() - e."examDate") >= 5
       AND NOT EXISTS (
-        SELECT 1 FROM exam_grades eg 
-        WHERE eg."examId" = e.id 
+        SELECT 1 FROM exam_grades eg
+        WHERE eg."examId" = e.id
         AND eg.score IS NOT NULL
       )
       ORDER BY e."examDate" ASC
       LIMIT 50
       `,
-      { schoolId }
+      { schoolId, hasClassScope, scopedClassIds }
     )
 
-    return (result.rows as ExamWithoutGradeRow[]).map((row) => ({
+    return (result.rows as any[]).map((row) => ({
       examId: row.exam_id,
       examTitle: row.exam_title,
       examDate: row.examDate,
       className: row.class_name,
+      courseName: row.course_name,
+      levelName: row.level_name,
       teacherName: row.teacher_name,
       daysPast: Math.round(Number(row.days_past)),
     }))
   }
 
-  private async getOverdueActivities(schoolId: string): Promise<OverdueActivity[]> {
+  private async getOverdueActivities(
+    schoolId: string,
+    hasClassScope: boolean,
+    scopedClassIds: string[]
+  ): Promise<OverdueActivity[]> {
     const result = await db.rawQuery(
       `
-      SELECT 
+      SELECT
         a.id as assignment_id,
         a.name as assignment_name,
         a."dueDate",
         c.name as class_name,
+        COALESCE(co.name, 'Sem curso') as course_name,
+        COALESCE(l.name, 'Sem nível') as level_name,
         u.name as teacher_name,
         COUNT(sha.id) as total_students,
         COUNT(CASE WHEN sha.grade IS NOT NULL AND sha.grade > 0 THEN 1 END) as graded_students,
@@ -406,26 +498,34 @@ export default class GetPedagogicalAlertsController {
       FROM "Assignment" a
       JOIN "TeacherHasClass" thc ON a."teacherHasClassId" = thc.id
       JOIN "Class" c ON thc."classId" = c.id
+      JOIN "Level" l ON c."levelId" = l.id
+      LEFT JOIN "LevelAssignedToCourseHasAcademicPeriod" latcap ON latcap."levelId" = c."levelId" AND latcap."isActive" = true
+      LEFT JOIN "CourseHasAcademicPeriod" chap ON latcap."courseHasAcademicPeriodId" = chap.id
+      LEFT JOIN "Course" co ON chap."courseId" = co.id
       JOIN "User" u ON thc."teacherId" = u.id
       LEFT JOIN "StudentHasAssignment" sha ON sha."assignmentId" = a.id
-      WHERE c."schoolId" = :schoolId
-      AND a."dueDate" < NOW()
+       WHERE c."schoolId" = :schoolId
+       AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
+       AND a."dueDate" < NOW()
+      AND EXTRACT(DAY FROM NOW() - a."dueDate") >= 5
       AND a.grade IS NOT NULL
       AND a.grade > 0
-      GROUP BY a.id, a.name, a."dueDate", c.name, u.name
-      HAVING COUNT(sha.id) = 0 
+      GROUP BY a.id, a.name, a."dueDate", c.name, co.name, l.name, u.name
+      HAVING COUNT(sha.id) = 0
          OR COUNT(CASE WHEN sha.grade IS NOT NULL AND sha.grade > 0 THEN 1 END) < COUNT(sha.id)
       ORDER BY a."dueDate" ASC
       LIMIT 50
       `,
-      { schoolId }
+      { schoolId, hasClassScope, scopedClassIds }
     )
 
-    return (result.rows as OverdueActivityRow[]).map((row) => ({
+    return (result.rows as any[]).map((row) => ({
       assignmentId: row.assignment_id,
       assignmentName: row.assignment_name,
       dueDate: row.dueDate,
       className: row.class_name,
+      courseName: row.course_name,
+      levelName: row.level_name,
       teacherName: row.teacher_name,
       daysPast: Math.round(Number(row.days_past)),
       totalStudents: Number(row.total_students),
@@ -433,7 +533,11 @@ export default class GetPedagogicalAlertsController {
     }))
   }
 
-  private async getUngradedSubmissions(schoolId: string): Promise<UngradedSubmission[]> {
+  private async getUngradedSubmissions(
+    schoolId: string,
+    hasClassScope: boolean,
+    scopedClassIds: string[]
+  ): Promise<UngradedSubmission[]> {
     const result = await db.rawQuery(
       `
       SELECT 
@@ -448,14 +552,15 @@ export default class GetPedagogicalAlertsController {
       JOIN "User" u ON st.id = u.id
       JOIN "Class" c ON st."classId" = c.id
       JOIN "Assignment" a ON sha."assignmentId" = a.id
-      WHERE c."schoolId" = :schoolId
-      AND sha.grade IS NULL
+       WHERE c."schoolId" = :schoolId
+       AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
+       AND sha.grade IS NULL
       AND a.grade IS NOT NULL
       AND a.grade > 0
       ORDER BY sha."createdAt" ASC
       LIMIT 50
       `,
-      { schoolId }
+      { schoolId, hasClassScope, scopedClassIds }
     )
 
     return (result.rows as UngradedSubmissionRow[]).map((row) => ({
@@ -470,7 +575,9 @@ export default class GetPedagogicalAlertsController {
 
   private async getTeachersMissingAttendance(
     schoolId: string,
-    daysThreshold: number
+    daysThreshold: number,
+    hasClassScope: boolean,
+    scopedClassIds: string[]
   ): Promise<TeacherMissingAttendance[]> {
     const result = await db.rawQuery(
       `
@@ -494,6 +601,7 @@ export default class GetPedagogicalAlertsController {
         LEFT JOIN "CalendarSlot" cs ON cs."teacherHasClassId" = thc.id
         LEFT JOIN "Attendance" a ON a."calendarSlotId" = cs.id
         WHERE c."schoolId" = :schoolId
+        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
         AND thc."isActive" = true
         GROUP BY thc."teacherId", u.name
       )
@@ -515,7 +623,7 @@ export default class GetPedagogicalAlertsController {
       ORDER BY days_without_attendance DESC
       LIMIT 20
       `,
-      { schoolId, daysThreshold }
+      { schoolId, daysThreshold, hasClassScope, scopedClassIds }
     )
 
     return (result.rows as TeacherMissingAttendanceRow[]).map((row) => ({
@@ -525,5 +633,54 @@ export default class GetPedagogicalAlertsController {
       daysWithoutAttendance: Math.round(Number(row.days_without_attendance)),
       neverRegistered: row.never_registered,
     }))
+  }
+
+  private async resolveScopedClassIds(
+    schoolId: string,
+    filters: PedagogicalAlertFilters
+  ): Promise<string[]> {
+    const hasFilters =
+      Boolean(filters.academicPeriodId) ||
+      Boolean(filters.courseId) ||
+      Boolean(filters.levelId) ||
+      Boolean(filters.classId)
+
+    if (!hasFilters) {
+      return []
+    }
+
+    const classScopeQuery = db
+      .from('Class as c')
+      .join('Level as l', 'l.id', 'c.levelId')
+      .leftJoin('LevelAssignedToCourseHasAcademicPeriod as latcap', (join) => {
+        join.on('latcap.levelId', '=', 'l.id').andOnVal('latcap.isActive', '=', true)
+      })
+      .leftJoin('CourseHasAcademicPeriod as chap', 'chap.id', 'latcap.courseHasAcademicPeriodId')
+      .where('c.schoolId', schoolId)
+      .where('c.isArchived', false)
+      .select('c.id')
+      .distinct('c.id')
+
+    if (filters.classId) {
+      classScopeQuery.where('c.id', filters.classId)
+    }
+    if (filters.levelId) {
+      classScopeQuery.where('c.levelId', filters.levelId)
+    }
+    if (filters.courseId) {
+      classScopeQuery.where('chap.courseId', filters.courseId)
+    }
+    if (filters.academicPeriodId) {
+      classScopeQuery.whereExists((subquery) => {
+        subquery
+          .from('ClassHasAcademicPeriod as chap2')
+          .select(db.raw('1'))
+          .whereColumn('chap2.classId', 'c.id')
+          .where('chap2.academicPeriodId', filters.academicPeriodId!)
+      })
+    }
+
+    const rows = await classScopeQuery
+    return rows.map((row) => String(row.id))
   }
 }

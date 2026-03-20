@@ -22,7 +22,7 @@ import {
 import { useState } from 'react'
 import { buttonVariants } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
-import { cn } from '../../lib/utils'
+import { cn, ClientOnly } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
@@ -289,7 +289,7 @@ export function EscolaLayout({ children }: PropsWithChildren) {
   const user = useAuthUser()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = url.split('?')[0]
-  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER'
+  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER' || user?.role?.name === 'TEACHER'
   const visibleNavigation = isSchoolTeacher
     ? navigation.filter((item) => item.title === 'Pedagógico')
     : navigation
@@ -327,7 +327,15 @@ export function EscolaLayout({ children }: PropsWithChildren) {
               </div>
 
               {/* School switcher */}
-              <SchoolGroupSwitcher />
+              <ClientOnly
+                fallback={
+                  <div className="border-b px-4 py-3">
+                    <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
+                  </div>
+                }
+              >
+                <SchoolGroupSwitcher />
+              </ClientOnly>
 
               {/* Navigation */}
               <nav className="flex-1 overflow-y-auto px-3 py-4">

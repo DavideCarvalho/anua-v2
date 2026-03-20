@@ -15,21 +15,55 @@ import { Progress } from '../../components/ui/progress'
 
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 
 type EnrollmentByLevelResponse = Route.Response<'api.v1.analytics.enrollments.by_level'>
 
 interface EnrollmentByLevelTableProps {
   schoolId?: string
   academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
 }
 
 export function EnrollmentByLevelTable({
   schoolId,
   academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+}: EnrollmentByLevelTableProps) {
+  return (
+    <DashboardCardBoundary
+      title="Matrículas por Nível"
+      queryKeys={[
+        api.api.v1.analytics.enrollments.byLevel.queryOptions({
+          query: { schoolId, academicPeriodId, courseId, levelId, classId },
+        }).queryKey,
+      ]}
+    >
+      <EnrollmentByLevelTableContent
+        schoolId={schoolId}
+        academicPeriodId={academicPeriodId}
+        courseId={courseId}
+        levelId={levelId}
+        classId={classId}
+      />
+    </DashboardCardBoundary>
+  )
+}
+
+function EnrollmentByLevelTableContent({
+  schoolId,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
 }: EnrollmentByLevelTableProps) {
   const { data, isLoading } = useQuery(
     api.api.v1.analytics.enrollments.byLevel.queryOptions({
-      query: { schoolId, academicPeriodId },
+      query: { schoolId, academicPeriodId, courseId, levelId, classId },
     })
   )
 
@@ -120,8 +154,11 @@ export function EnrollmentByLevelTableSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <div className="h-5 w-40 bg-muted animate-pulse rounded" />
-        <div className="h-4 w-64 bg-muted animate-pulse rounded mt-2" />
+        <CardTitle className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5" />
+          Matrículas por Nível
+        </CardTitle>
+        <CardDescription>Distribuição de matrículas por nível</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

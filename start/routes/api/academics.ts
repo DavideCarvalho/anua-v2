@@ -113,6 +113,7 @@ const GetAtRiskStudentsController = () =>
 const GetClassGradesBySubjectController = () =>
   import('#controllers/grades/get_class_grades_by_subject_controller')
 const BatchSaveGradesController = () => import('#controllers/grades/batch_save_grades_controller')
+const GetGradeTrendsController = () => import('#controllers/grades/get_grade_trends_controller')
 
 // Academic Periods
 const ListAcademicPeriodsController = () =>
@@ -338,6 +339,7 @@ export function registerGradesApiRoutes() {
       router.get('/students', [GetStudentsGradesController]).as('grades.students')
       router.get('/distribution', [GetGradeDistributionController]).as('grades.distribution')
       router.get('/at-risk', [GetAtRiskStudentsController]).as('grades.at_risk')
+      router.get('/trends', [GetGradeTrendsController]).as('grades.trends')
       router
         .get('/class/:classId/subject/:subjectId', [GetClassGradesBySubjectController])
         .as('grades.class_subject')

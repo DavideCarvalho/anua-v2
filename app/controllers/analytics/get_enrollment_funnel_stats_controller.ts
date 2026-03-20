@@ -4,10 +4,14 @@ import { getFunnelStatsValidator } from '#validators/analytics'
 
 export default class GetEnrollmentFunnelStatsController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, academicPeriodId } = await request.validateUsing(getFunnelStatsValidator)
+    const { schoolId, academicPeriodId, courseId, levelId, classId } =
+      await request.validateUsing(getFunnelStatsValidator)
 
     let schoolFilter = ''
     let periodFilter = ''
+    let courseFilter = ''
+    let levelFilter = ''
+    let classFilter = ''
     const params: Record<string, string> = {}
 
     if (schoolId) {
@@ -18,6 +22,21 @@ export default class GetEnrollmentFunnelStatsController {
     if (academicPeriodId) {
       periodFilter = 'AND shl."academicPeriodId" = :academicPeriodId'
       params.academicPeriodId = academicPeriodId
+    }
+
+    if (courseId) {
+      courseFilter = 'AND c."courseId" = :courseId'
+      params.courseId = courseId
+    }
+
+    if (levelId) {
+      levelFilter = 'AND shl."levelId" = :levelId'
+      params.levelId = levelId
+    }
+
+    if (classId) {
+      classFilter = 'AND st."classId" = :classId'
+      params.classId = classId
     }
 
     const [funnelResult] = await Promise.all([
@@ -33,12 +52,16 @@ export default class GetEnrollmentFunnelStatsController {
           COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'EXPIRED' THEN shl.id END) as expired_signatures
         FROM "StudentHasLevel" shl
         JOIN "Student" st ON shl."studentId" = st.id
+        LEFT JOIN "Class" c ON st."classId" = c.id
         JOIN "User" u ON st.id = u.id
         JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
         JOIN "School" s ON uhs."schoolId" = s.id
         WHERE u."deletedAt" IS NULL
         ${schoolFilter}
         ${periodFilter}
+        ${courseFilter}
+        ${levelFilter}
+        ${classFilter}
         `,
         params
       ),

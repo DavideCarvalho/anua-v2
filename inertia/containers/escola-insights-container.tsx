@@ -8,7 +8,6 @@ import {
   Clock,
   UserX,
   AlertCircle,
-  Brain,
   CheckCircle2,
   Package,
 } from 'lucide-react'
@@ -16,9 +15,10 @@ import type { LucideIcon } from 'lucide-react'
 
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 
 type Insight = Route.Response<'api.v1.dashboard.escola_insights'>['insights'][number]
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
   Dialog,
@@ -73,67 +73,27 @@ function getMetadataNumber(
 }
 
 function formatInsightDescription(insight: Insight, hideFinancialValues = false): string {
-  if (hideFinancialValues && insight.type === 'financial') {
-    return 'Informacao financeira oculta'
-  }
-
   if (insight.id === 'overdue-payments') {
     const totalAmountInCents = getMetadataNumber(insight.metadata, 'totalAmount')
     const avgDaysOverdue = getMetadataNumber(insight.metadata, 'avgDaysOverdue')
 
     if (totalAmountInCents !== null && avgDaysOverdue !== null) {
-      return `${formatCurrency(totalAmountInCents)} em atraso (média ${avgDaysOverdue} dias)`
+      return `${hideFinancialValues ? 'R$ ****' : formatCurrency(totalAmountInCents)} em atraso (média ${avgDaysOverdue} dias)`
     }
   }
 
   if (insight.id === 'upcoming-payments') {
     const totalAmountInCents = getMetadataNumber(insight.metadata, 'totalAmount')
     if (totalAmountInCents !== null) {
-      return `${formatCurrency(totalAmountInCents)} vencem nos próximos 7 dias`
+      return `${hideFinancialValues ? 'R$ ****' : formatCurrency(totalAmountInCents)} vencem nos próximos 7 dias`
     }
   }
 
+  if (hideFinancialValues && insight.type === 'financial') {
+    return insight.description.replace(/R\$\s?\d[\d\.]*,\d{2}/g, 'R$ ****')
+  }
+
   return insight.description
-}
-
-// Individual Insight Item
-function InsightItem({
-  insight,
-  onClick,
-  hideFinancialValues = false,
-}: {
-  insight: Insight
-  onClick: () => void
-  hideFinancialValues?: boolean
-}) {
-  const Icon = iconMap[insight.icon] || AlertCircle
-  const config = priorityConfig[insight.priority]
-  const displayDescription = formatInsightDescription(insight, hideFinancialValues)
-  const displayValue = hideFinancialValues && insight.type === 'financial' ? '***' : insight.value
-
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'w-full text-left p-3 rounded-lg border-l-4 transition-colors hover:bg-muted/50',
-        config.border,
-        config.bg
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <div className={cn('mt-0.5', config.icon)}>
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-medium text-sm">{insight.title}</span>
-            <span className="text-lg font-bold">{displayValue}</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5 truncate">{displayDescription}</p>
-        </div>
-      </div>
-    </button>
-  )
 }
 
 // Insight Detail Modal
@@ -153,7 +113,7 @@ function InsightDetailModal({
   const Icon = iconMap[insight.icon] || AlertCircle
   const config = priorityConfig[insight.priority]
   const displayDescription = formatInsightDescription(insight, hideFinancialValues)
-  const displayValue = hideFinancialValues && insight.type === 'financial' ? '***' : insight.value
+  const displayValue = insight.value
 
   // Build action URL based on insight type
   const getActionUrl = () => {
@@ -220,36 +180,29 @@ function InsightDetailModal({
 // Loading Skeleton
 function InsightsSkeleton() {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-primary animate-pulse" />
-          <CardTitle>Avisos Recentes</CardTitle>
-        </div>
-        <CardDescription>Carregando...</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="p-3 rounded-lg border-l-4 border-l-muted bg-muted/20">
-            <div className="flex items-start gap-3">
-              <div className="h-5 w-5 bg-muted animate-pulse rounded" />
-              <div className="flex-1">
-                <div className="h-4 w-32 bg-muted animate-pulse rounded mb-2" />
-                <div className="h-3 w-48 bg-muted animate-pulse rounded" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i}>
+          <CardHeader className="pb-2">
+            <div className="h-4 w-36 animate-pulse rounded bg-muted" />
+          </CardHeader>
+          <CardContent>
+            <div className="h-8 w-12 animate-pulse rounded bg-muted" />
+            <div className="mt-2 h-3 w-48 animate-pulse rounded bg-muted" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   )
 }
 
 // Error Fallback
 function InsightsError({
+  title,
   error,
   resetErrorBoundary,
 }: {
+  title: string
   error: Error
   resetErrorBoundary: () => void
 }) {
@@ -258,7 +211,7 @@ function InsightsError({
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <AlertCircle className="h-5 w-5 text-destructive" />
-          <CardTitle>Avisos Recentes</CardTitle>
+          <CardTitle>{title}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -277,11 +230,30 @@ function InsightsError({
 function InsightsContent({
   hideFinancialValues = false,
   allowedTypes,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+  title = 'Avisos Recentes',
 }: {
   hideFinancialValues?: boolean
   allowedTypes?: Insight['type'][]
+  academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
+  title?: string
 }) {
-  const { data, isLoading, error } = useQuery(api.api.v1.dashboard.escolaInsights.queryOptions({}))
+  const { data, isLoading, error } = useQuery(
+    api.api.v1.dashboard.escolaInsights.queryOptions({
+      query: {
+        academicPeriodId,
+        courseId,
+        levelId,
+        classId,
+      },
+    } as any)
+  )
   const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null)
 
   if (isLoading || !data) {
@@ -289,61 +261,68 @@ function InsightsContent({
   }
 
   if (error) {
-    return <InsightsError error={error as Error} resetErrorBoundary={() => {}} />
+    return <InsightsError title={title} error={error as Error} resetErrorBoundary={() => {}} />
   }
 
   const allInsights = data.insights as Insight[]
   const insights = allowedTypes?.length
     ? allInsights.filter((insight) => allowedTypes.includes(insight.type))
     : allInsights
-  const displayedInsights = insights.slice(0, 5)
-  const hasMore = insights.length > 5
+
+  const emptyDescription =
+    allowedTypes?.length === 1 && allowedTypes[0] === 'financial'
+      ? 'Não há alertas financeiros no momento'
+      : allowedTypes?.length === 1 && allowedTypes[0] === 'enrollment'
+        ? 'Não há alertas administrativos no momento'
+        : allowedTypes?.length === 1 && allowedTypes[0] === 'academic'
+          ? 'Não há alertas pedagógicos no momento'
+          : 'Não há avisos pendentes no momento'
 
   return (
     <>
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              <CardTitle>Avisos Recentes</CardTitle>
+      {insights.length === 0 ? (
+        <Card>
+          <CardContent className="py-7">
+            <div className="min-h-[116px] text-center flex flex-col items-center justify-center">
+              <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-green-500" />
+              <p className="text-base font-semibold text-green-700">Tudo em ordem!</p>
+              <p className="mt-1 text-sm text-muted-foreground">{emptyDescription}</p>
             </div>
-            {insights.length > 0 && (
-              <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-full">
-                {insights.length}
-              </span>
-            )}
-          </div>
-          <CardDescription>Pontos de atenção da sua escola</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {insights.length === 0 ? (
-            <div className="text-center py-8">
-              <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-3" />
-              <p className="font-medium text-green-700">Tudo certo por aqui!</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Não há avisos pendentes no momento
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {displayedInsights.map((insight) => (
-                <InsightItem
-                  key={insight.id}
-                  insight={insight}
-                  onClick={() => setSelectedInsight(insight)}
-                  hideFinancialValues={hideFinancialValues}
-                />
-              ))}
-              {hasMore && (
-                <p className="text-xs text-center text-muted-foreground pt-2">
-                  +{insights.length - 5} aviso(s) adicionais
-                </p>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {insights.map((insight) => {
+            const Icon = iconMap[insight.icon] || AlertCircle
+            const config = priorityConfig[insight.priority]
+            const displayDescription = formatInsightDescription(insight, hideFinancialValues)
+            const displayValue = insight.value
+
+            return (
+              <Card
+                key={insight.id}
+                className={cn(
+                  'cursor-pointer border-l-4 border-l-transparent transition-colors',
+                  config.bg,
+                  config.border
+                )}
+                onClick={() => setSelectedInsight(insight)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                    <Icon className={cn('h-4 w-4', config.icon)} />
+                    {insight.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{displayValue}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">{displayDescription}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
 
       <InsightDetailModal
         insight={selectedInsight}
@@ -359,9 +338,58 @@ function InsightsContent({
 export function EscolaInsightsContainer({
   hideFinancialValues = false,
   allowedTypes,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
 }: {
   hideFinancialValues?: boolean
   allowedTypes?: Insight['type'][]
+  academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
 }) {
-  return <InsightsContent hideFinancialValues={hideFinancialValues} allowedTypes={allowedTypes} />
+  const title =
+    allowedTypes?.length === 1 && allowedTypes[0] === 'financial'
+      ? 'Alertas Financeiros'
+      : allowedTypes?.length === 1 && allowedTypes[0] === 'enrollment'
+        ? 'Alertas Administrativos'
+        : allowedTypes?.length === 1 && allowedTypes[0] === 'academic'
+          ? 'Alertas Pedagógicos'
+          : 'Alertas'
+  const description =
+    allowedTypes?.length === 1 && allowedTypes[0] === 'financial'
+      ? 'Prioridades de cobrança e inadimplência'
+      : allowedTypes?.length === 1 && allowedTypes[0] === 'enrollment'
+        ? 'Prioridades de matrícula e documentação'
+        : allowedTypes?.length === 1 && allowedTypes[0] === 'academic'
+          ? 'Pontos de atenção sobre aprendizagem e frequência'
+          : 'Pontos de atenção da sua escola'
+
+  return (
+    <DashboardCardBoundary
+      title={title}
+      queryKeys={[
+        api.api.v1.dashboard.escolaInsights.queryOptions({
+          query: {
+            academicPeriodId,
+            courseId,
+            levelId,
+            classId,
+          },
+        } as any).queryKey,
+      ]}
+    >
+      <InsightsContent
+        hideFinancialValues={hideFinancialValues}
+        allowedTypes={allowedTypes}
+        academicPeriodId={academicPeriodId}
+        courseId={courseId}
+        levelId={levelId}
+        classId={classId}
+        title={title}
+      />
+    </DashboardCardBoundary>
+  )
 }

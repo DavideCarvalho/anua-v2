@@ -6,15 +6,13 @@ const cacheConfig = defineConfig({
   stores: {
     memoryOnly: store().useL1Layer(drivers.memory()),
 
-    default: store()
-      .useL1Layer(drivers.memory())
-      .useL2Layer(
-        drivers.database({
-          connectionName: 'postgres',
-          autoCreateTable: true,
-          tableName: 'bentocache',
-        })
-      ),
+    default: store().useL2Layer(
+      drivers.database({
+        connectionName: 'postgres',
+        autoCreateTable: true,
+        tableName: 'bentocache',
+      })
+    ),
   },
 })
 

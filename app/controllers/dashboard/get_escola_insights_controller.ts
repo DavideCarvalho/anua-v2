@@ -21,7 +21,7 @@ interface Insight {
 }
 
 export default class GetEscolaInsightsController {
-  async handle({ selectedSchoolIds }: HttpContext) {
+  async handle({ selectedSchoolIds, request }: HttpContext) {
     const scopedSchoolIds = selectedSchoolIds ?? []
     if (scopedSchoolIds.length === 0) {
       return {
@@ -33,6 +33,41 @@ export default class GetEscolaInsightsController {
     const schoolId = scopedSchoolIds[0]
     const today = DateTime.now()
     const insights: Insight[] = []
+    const query = request.qs() as {
+      academicPeriodId?: string
+      courseId?: string
+      levelId?: string
+      classId?: string
+    }
+
+    let scopedStudentIds: string[] | null = null
+    if (query.academicPeriodId || query.courseId || query.levelId || query.classId) {
+      const studentScopeQuery = db
+        .from('Student as st')
+        .join('User as u', 'u.id', 'st.id')
+        .leftJoin('Class as c', 'c.id', 'st.classId')
+        .leftJoin('StudentHasLevel as shl', 'shl.studentId', 'st.id')
+        .where('u.schoolId', schoolId)
+        .whereNull('u.deletedAt')
+        .select('st.id')
+        .distinct('st.id')
+
+      if (query.classId) {
+        studentScopeQuery.where('st.classId', query.classId)
+      }
+      if (query.courseId) {
+        studentScopeQuery.where('c.courseId', query.courseId)
+      }
+      if (query.levelId) {
+        studentScopeQuery.where('shl.levelId', query.levelId)
+      }
+      if (query.academicPeriodId) {
+        studentScopeQuery.where('shl.academicPeriodId', query.academicPeriodId)
+      }
+
+      const rows = await studentScopeQuery
+      scopedStudentIds = rows.map((row) => String(row.id))
+    }
 
     // ============================================
     // FINANCIAL INSIGHTS
@@ -49,6 +84,13 @@ export default class GetEscolaInsightsController {
         q.where('status', 'OVERDUE').orWhere((subQ) => {
           subQ.where('status', 'PENDING').where('dueDate', '<', today.toSQLDate()!)
         })
+      })
+      .if(scopedStudentIds !== null, (q) => {
+        if (!scopedStudentIds || scopedStudentIds.length === 0) {
+          q.whereRaw('1 = 0')
+          return
+        }
+        q.whereIn('studentId', scopedStudentIds)
       })
       .preload('student', (q) => q.preload('user'))
 
@@ -97,6 +139,13 @@ export default class GetEscolaInsightsController {
       .where('status', 'PENDING')
       .where('dueDate', '>=', today.toSQLDate()!)
       .where('dueDate', '<=', sevenDaysFromNow.toSQLDate()!)
+      .if(scopedStudentIds !== null, (q) => {
+        if (!scopedStudentIds || scopedStudentIds.length === 0) {
+          q.whereRaw('1 = 0')
+          return
+        }
+        q.whereIn('studentId', scopedStudentIds)
+      })
 
     if (upcomingPayments.length > 0) {
       let totalUpcoming = 0
@@ -119,6 +168,108 @@ export default class GetEscolaInsightsController {
       })
     }
 
+    // 2.1 Chronic late payers (students with repeated late payment behavior)
+    const latePayersQuery = db
+      .from('StudentPayment as sp')
+      .join('Student as st', 'st.id', 'sp.studentId')
+      .join('User as u', 'u.id', 'st.id')
+      .where('u.schoolId', schoolId)
+      .whereNull('u.deletedAt')
+      .where((q) => {
+        q.where((paidLate) => {
+          paidLate
+            .where('sp.status', 'PAID')
+            .whereNotNull('sp.paidAt')
+            .whereRaw('DATE(sp."paidAt") > sp."dueDate"')
+        })
+          .orWhere('sp.status', 'OVERDUE')
+          .orWhere((pendingOverdue) => {
+            pendingOverdue
+              .where('sp.status', 'PENDING')
+              .where('sp.dueDate', '<', today.toSQLDate()!)
+          })
+      })
+      .groupBy('sp.studentId')
+      .havingRaw('COUNT(*) >= 2')
+      .count('* as invoices')
+
+    if (scopedStudentIds !== null) {
+      if (!scopedStudentIds || scopedStudentIds.length === 0) {
+        latePayersQuery.whereRaw('1 = 0')
+      } else {
+        latePayersQuery.whereIn('sp.studentId', scopedStudentIds)
+      }
+    }
+
+    const latePayersRows = await latePayersQuery
+    const chronicLatePayers = latePayersRows.length
+
+    if (chronicLatePayers > 0) {
+      insights.push({
+        id: 'chronic-late-payers',
+        type: 'financial',
+        priority: chronicLatePayers >= 5 ? 'high' : 'medium',
+        title: 'Recorrência de Atrasos',
+        value: chronicLatePayers,
+        description: `${chronicLatePayers} responsável(eis) com histórico de pagamento após vencimento. Priorize contato para renegociação preventiva.`,
+        icon: 'alert-triangle',
+      })
+    }
+
+    // 2.2 Upcoming due dates for historically late payers
+    const riskyUpcomingQuery = db
+      .from('StudentPayment as upcoming')
+      .join('Student as st', 'st.id', 'upcoming.studentId')
+      .join('User as u', 'u.id', 'st.id')
+      .where('u.schoolId', schoolId)
+      .whereNull('u.deletedAt')
+      .where('upcoming.status', 'PENDING')
+      .where('upcoming.dueDate', '>=', today.toSQLDate()!)
+      .where('upcoming.dueDate', '<=', sevenDaysFromNow.toSQLDate()!)
+      .whereExists((subQ) => {
+        subQ
+          .from('StudentPayment as history')
+          .whereRaw('history."studentId" = upcoming."studentId"')
+          .where((historyFilter) => {
+            historyFilter
+              .where((paidLate) => {
+                paidLate
+                  .where('history.status', 'PAID')
+                  .whereNotNull('history.paidAt')
+                  .whereRaw('DATE(history."paidAt") > history."dueDate"')
+              })
+              .orWhere('history.status', 'OVERDUE')
+              .orWhere((pendingOverdue) => {
+                pendingOverdue
+                  .where('history.status', 'PENDING')
+                  .where('history.dueDate', '<', today.toSQLDate()!)
+              })
+          })
+      })
+      .groupBy('upcoming.studentId')
+      .count('* as upcomingInvoices')
+
+    if (scopedStudentIds !== null) {
+      if (!scopedStudentIds || scopedStudentIds.length === 0) {
+        riskyUpcomingQuery.whereRaw('1 = 0')
+      } else {
+        riskyUpcomingQuery.whereIn('upcoming.studentId', scopedStudentIds)
+      }
+    }
+
+    const riskyUpcomingRows = await riskyUpcomingQuery
+    if (riskyUpcomingRows.length > 0) {
+      insights.push({
+        id: 'risky-upcoming-due-dates',
+        type: 'financial',
+        priority: riskyUpcomingRows.length >= 5 ? 'high' : 'medium',
+        title: 'Vencimentos Sensíveis',
+        value: riskyUpcomingRows.length,
+        description: `${riskyUpcomingRows.length} responsável(eis) com histórico de pagamento em atraso têm boletos vencendo em até 7 dias.`,
+        icon: 'calendar-clock',
+      })
+    }
+
     // ============================================
     // ENROLLMENT INSIGHTS
     // ============================================
@@ -130,6 +281,13 @@ export default class GetEscolaInsightsController {
         studentQ.whereHas('user', (userQ) => {
           userQ.where('schoolId', schoolId).whereNull('deletedAt')
         })
+      })
+      .if(scopedStudentIds !== null, (q) => {
+        if (!scopedStudentIds || scopedStudentIds.length === 0) {
+          q.whereRaw('1 = 0')
+          return
+        }
+        q.whereIn('studentId', scopedStudentIds)
       })
       .preload('student', (q) => q.preload('user'))
 
@@ -172,6 +330,13 @@ export default class GetEscolaInsightsController {
           userQ.where('schoolId', schoolId).whereNull('deletedAt')
         })
       })
+      .if(scopedStudentIds !== null, (q) => {
+        if (!scopedStudentIds || scopedStudentIds.length === 0) {
+          q.whereRaw('1 = 0')
+          return
+        }
+        q.whereIn('studentId', scopedStudentIds)
+      })
       .preload('student', (q) => q.preload('user'))
 
     if (pendingSignatures.length > 0) {
@@ -197,6 +362,13 @@ export default class GetEscolaInsightsController {
       .where('User.schoolId', schoolId)
       .whereNull('User.deletedAt')
       .where('Student.enrollmentStatus', 'PENDING_DOCUMENT_REVIEW')
+      .if(scopedStudentIds !== null, (q) => {
+        if (!scopedStudentIds || scopedStudentIds.length === 0) {
+          q.whereRaw('1 = 0')
+          return
+        }
+        q.whereIn('Student.id', scopedStudentIds)
+      })
       .count('* as total')
       .first()
 
@@ -217,42 +389,37 @@ export default class GetEscolaInsightsController {
     // ACADEMIC INSIGHTS
     // ============================================
 
-    // 6. Students with excessive absences (>20%)
-    // Get all students with attendance records and calculate absence rate
-    const attendanceStats = await db
-      .from('StudentHasAttendance')
-      .join('Attendance', 'StudentHasAttendance.attendanceId', 'Attendance.id')
-      .join('Student', 'StudentHasAttendance.studentId', 'Student.id')
-      .join('User', 'Student.id', 'User.id')
-      .where('User.schoolId', schoolId)
-      .whereNull('User.deletedAt')
-      .select('StudentHasAttendance.studentId')
-      .select(db.raw('COUNT(*) as total'))
-      .select(
-        db.raw(
-          `SUM(CASE WHEN "StudentHasAttendance"."status" = 'ABSENT' THEN 1 ELSE 0 END) as absences`
-        )
+    const lowAttendanceQuery = db
+      .from('StudentHasAttendance as sha')
+      .join('Attendance as a', 'a.id', 'sha.attendanceId')
+      .join('Student as st', 'st.id', 'sha.studentId')
+      .join('Class as c', 'c.id', 'st.classId')
+      .where('c.schoolId', schoolId)
+      .where('a.date', '>=', today.minus({ days: 30 }).toSQLDate()!)
+      .groupBy('sha.studentId')
+      .havingRaw(
+        "(COUNT(CASE WHEN sha.status = 'PRESENT' THEN 1 END)::float / NULLIF(COUNT(*),0)) < 0.75"
       )
-      .groupBy('StudentHasAttendance.studentId')
-      .having(db.raw('COUNT(*) >= 10')) // At least 10 attendance records
+      .count('* as records')
 
-    const studentsWithHighAbsence = attendanceStats.filter((stat) => {
-      const absenceRate = (Number(stat.absences) / Number(stat.total)) * 100
-      return absenceRate > 20
-    })
+    if (scopedStudentIds !== null) {
+      if (!scopedStudentIds || scopedStudentIds.length === 0) {
+        lowAttendanceQuery.whereRaw('1 = 0')
+      } else {
+        lowAttendanceQuery.whereIn('sha.studentId', scopedStudentIds)
+      }
+    }
 
-    if (studentsWithHighAbsence.length > 0) {
+    const lowAttendanceRows = await lowAttendanceQuery
+    if (lowAttendanceRows.length > 0) {
       insights.push({
-        id: 'high-absence-rate',
+        id: 'academic-low-attendance',
         type: 'academic',
-        priority: 'medium',
-        title: 'Alunos com Muitas Faltas',
-        value: studentsWithHighAbsence.length,
-        description: `${studentsWithHighAbsence.length} aluno(s) com taxa de falta superior a 20%`,
-        icon: 'user-x',
-        metadata: {
-          studentIds: studentsWithHighAbsence.map((s) => s.studentId),
-        },
+        priority: lowAttendanceRows.length >= 8 ? 'high' : 'medium',
+        title: 'Risco por Frequência',
+        value: lowAttendanceRows.length,
+        description: `${lowAttendanceRows.length} aluno(s) abaixo de 75% de frequência nos últimos 30 dias.`,
+        icon: 'alert-triangle',
       })
     }
 

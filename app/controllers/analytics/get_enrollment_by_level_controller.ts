@@ -12,9 +12,13 @@ interface LevelRow {
 
 export default class GetEnrollmentByLevelController {
   async handle({ request, response }: HttpContext) {
-    const { schoolId, academicPeriodId } = await request.validateUsing(getByLevelValidator)
+    const { schoolId, academicPeriodId, courseId, levelId, classId } =
+      await request.validateUsing(getByLevelValidator)
 
     let periodFilter = ''
+    let courseFilter = ''
+    let levelFilter = ''
+    let classFilter = ''
     const params: Record<string, string> = {}
 
     if (schoolId) {
@@ -24,6 +28,21 @@ export default class GetEnrollmentByLevelController {
     if (academicPeriodId) {
       periodFilter = 'AND shl."academicPeriodId" = :academicPeriodId'
       params.academicPeriodId = academicPeriodId
+    }
+
+    if (courseId) {
+      courseFilter = 'AND c."courseId" = :courseId'
+      params.courseId = courseId
+    }
+
+    if (levelId) {
+      levelFilter = 'AND shl."levelId" = :levelId'
+      params.levelId = levelId
+    }
+
+    if (classId) {
+      classFilter = 'AND st."classId" = :classId'
+      params.classId = classId
     }
 
     const [byLevelResult] = await Promise.all([
@@ -38,9 +57,13 @@ export default class GetEnrollmentByLevelController {
         FROM "Level" l
         LEFT JOIN "StudentHasLevel" shl ON shl."levelId" = l.id
         LEFT JOIN "Student" st ON shl."studentId" = st.id
+        LEFT JOIN "Class" c ON st."classId" = c.id
         WHERE l."schoolId" = :schoolId
         AND l."isActive" = true
         ${periodFilter}
+        ${courseFilter}
+        ${levelFilter}
+        ${classFilter}
         GROUP BY l.id, l.name, l."order"
         ORDER BY l."order", l.name
         `,

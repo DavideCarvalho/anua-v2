@@ -70,6 +70,15 @@ test.group('Escola dashboard tabs (browser)', (group) => {
     await page.assertExists('button:has-text("Mostrar valores")')
   })
 
+  test('shows financial tab for SCHOOL_DIRECTOR', async ({ visit, browserContext }) => {
+    const { user } = await createEscolaAuthUserByRole('SCHOOL_DIRECTOR')
+    await browserContext.loginAs(user)
+
+    const page = await visit('/escola')
+    await page.assertPath('/escola')
+    await page.assertExists('button:has-text("Financeiro")')
+  })
+
   test('shows financial tab for SCHOOL_CHAIN_DIRECTOR', async ({ visit, browserContext }) => {
     const { user } = await createEscolaAuthUserByRole('SCHOOL_CHAIN_DIRECTOR')
     await browserContext.loginAs(user)
@@ -77,5 +86,31 @@ test.group('Escola dashboard tabs (browser)', (group) => {
     const page = await visit('/escola')
     await page.assertPath('/escola')
     await page.assertExists('button:has-text("Financeiro")')
+  })
+
+  test('does not log React hydration mismatch on escola dashboard', async ({
+    visit,
+    browserContext,
+    assert,
+  }) => {
+    const { user } = await createEscolaAuthUserByRole('SCHOOL_DIRECTOR')
+    await browserContext.loginAs(user)
+
+    const page = await visit('/escola')
+    const consoleErrors: string[] = []
+
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        consoleErrors.push(message.text())
+      }
+    })
+
+    await page.assertPath('/escola')
+    await page.waitForTimeout(1000)
+
+    assert.notInclude(
+      consoleErrors.join('\n'),
+      "A tree hydrated but some attributes of the server rendered HTML didn't match the client properties"
+    )
   })
 })

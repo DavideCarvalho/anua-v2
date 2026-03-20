@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { Suspense } from 'react'
 
 import { EscolaLayout } from '../../components/layouts'
@@ -16,14 +16,7 @@ import {
   AtRiskStudentsTableSkeleton,
 } from '../../containers/grades/at-risk-students-table'
 
-interface PageProps {
-  schoolId: string
-  [key: string]: any
-}
-
 export default function DesempenhoPage() {
-  const { schoolId } = usePage<PageProps>().props
-
   return (
     <EscolaLayout>
       <Head title="Desempenho Academico" />
@@ -37,16 +30,16 @@ export default function DesempenhoPage() {
         </div>
 
         <Suspense fallback={<AcademicOverviewCardsSkeleton />}>
-          <AcademicOverviewCards schoolId={schoolId} />
+          <AcademicOverviewCards />
         </Suspense>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Suspense fallback={<GradeDistributionChartSkeleton />}>
-            <GradeDistributionChart schoolId={schoolId} />
+            <GradeDistributionChart />
           </Suspense>
 
           <Suspense fallback={<AtRiskStudentsTableSkeleton />}>
-            <AtRiskStudentsTable schoolId={schoolId} />
+            <AtRiskStudentsTable />
           </Suspense>
         </div>
       </div>

@@ -2191,6 +2191,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard/get_escola_teacher_dashboard_controller').default['handle']>>>
     }
   }
+  'api.v1.dashboard.escola_pedagogical_alerts': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/escola/pedagogical-alerts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard/get_pedagogical_alerts_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard/get_pedagogical_alerts_controller').default['handle']>>>
+    }
+  }
   'api.v1.dashboard.responsavel_stats': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/responsavel/stats'
@@ -4231,6 +4243,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/grades/get_at_risk_students_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.grades.trends': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/grades/trends'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/grades').getGradeTrendsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/grades/get_grade_trends_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/grades/get_grade_trends_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.grades.class_subject': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/grades/class/:classId/subject/:subjectId'
@@ -4421,6 +4445,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/analytics').getHrOverviewValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics/get_hr_overview_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/analytics/get_hr_overview_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.analytics.class_performance': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/analytics/class-performance'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics/get_class_performance_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/analytics/get_class_performance_controller').default['handle']>>>
     }
   }
   'api.v1.events.index': {

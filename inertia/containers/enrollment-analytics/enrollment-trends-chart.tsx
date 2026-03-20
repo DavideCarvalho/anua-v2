@@ -7,23 +7,59 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 
 type EnrollmentTrendsResponse = Route.Response<'api.v1.analytics.enrollments.trends'>
 
 interface EnrollmentTrendsChartProps {
   schoolId?: string
   academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
   days?: number
 }
 
 export function EnrollmentTrendsChart({
   schoolId,
   academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+  days = 30,
+}: EnrollmentTrendsChartProps) {
+  return (
+    <DashboardCardBoundary
+      title="Tendência de Matrículas"
+      queryKeys={[
+        api.api.v1.analytics.enrollments.trends.queryOptions({
+          query: { schoolId, academicPeriodId, courseId, levelId, classId, days },
+        }).queryKey,
+      ]}
+    >
+      <EnrollmentTrendsChartContent
+        schoolId={schoolId}
+        academicPeriodId={academicPeriodId}
+        courseId={courseId}
+        levelId={levelId}
+        classId={classId}
+        days={days}
+      />
+    </DashboardCardBoundary>
+  )
+}
+
+function EnrollmentTrendsChartContent({
+  schoolId,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
   days = 30,
 }: EnrollmentTrendsChartProps) {
   const { data, isLoading } = useQuery(
     api.api.v1.analytics.enrollments.trends.queryOptions({
-      query: { schoolId, academicPeriodId, days },
+      query: { schoolId, academicPeriodId, courseId, levelId, classId, days },
     })
   )
 
@@ -109,19 +145,24 @@ export function EnrollmentTrendsChart({
 }
 
 export function EnrollmentTrendsChartSkeleton() {
+  const skeletonBars = [
+    24, 52, 40, 63, 31, 58, 27, 69, 34, 55, 42, 61, 29, 47, 36, 64, 33, 50, 44, 60, 26, 48, 38, 57,
+    30, 62, 35, 46, 41, 53,
+  ]
+
   return (
     <Card>
       <CardHeader>
-        <div className="h-5 w-40 bg-muted animate-pulse rounded" />
-        <div className="h-4 w-24 bg-muted animate-pulse rounded mt-2" />
+        <CardTitle>Tendência de Matrículas</CardTitle>
+        <CardDescription>Últimos 30 dias</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-end gap-1 h-48">
-          {Array.from({ length: 30 }).map((_, i) => (
+          {skeletonBars.map((height, i) => (
             <div
               key={i}
               className="flex-1 bg-muted animate-pulse rounded-t"
-              style={{ height: `${Math.random() * 100}%` }}
+              style={{ height: `${height}%` }}
             />
           ))}
         </div>

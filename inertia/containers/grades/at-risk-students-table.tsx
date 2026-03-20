@@ -15,17 +15,34 @@ import {
 
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 
 type AtRiskStudentsResponse = Awaited<Route.Response<'api.v1.grades.at_risk'>>
 
 interface AtRiskStudentsTableProps {
-  schoolId?: string
+  academicPeriodId?: string
+  classId?: string
 }
 
-export function AtRiskStudentsTable({ schoolId }: AtRiskStudentsTableProps) {
-  const { data, isLoading } = useQuery(
-    api.api.v1.grades.atRisk.queryOptions({ query: { schoolId, limit: 20 } })
+export function AtRiskStudentsTable({ academicPeriodId, classId }: AtRiskStudentsTableProps) {
+  const query = { limit: 20, academicPeriodId, classId }
+
+  return (
+    <DashboardCardBoundary
+      title="Alunos em Risco"
+      queryKeys={[api.api.v1.grades.atRisk.queryOptions({ query } as any).queryKey]}
+    >
+      <AtRiskStudentsTableContent academicPeriodId={academicPeriodId} classId={classId} />
+    </DashboardCardBoundary>
   )
+}
+
+function AtRiskStudentsTableContent({ academicPeriodId, classId }: AtRiskStudentsTableProps) {
+  const { data, isLoading } = useQuery({
+    ...api.api.v1.grades.atRisk.queryOptions({
+      query: { limit: 20, academicPeriodId, classId },
+    } as any),
+  })
 
   const response = data as AtRiskStudentsResponse | undefined
 
@@ -121,11 +138,11 @@ export function AtRiskStudentsTableSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-          <div className="h-6 w-32 animate-pulse rounded bg-muted" />
-        </div>
-        <div className="h-4 w-48 animate-pulse rounded bg-muted" />
+        <CardTitle className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5" />
+          Alunos em Risco
+        </CardTitle>
+        <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

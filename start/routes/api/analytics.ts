@@ -29,6 +29,8 @@ const GetIncidentsOverviewController = () =>
 const GetGamificationOverviewController = () =>
   import('#controllers/analytics/get_gamification_overview_controller')
 const GetHrOverviewController = () => import('#controllers/analytics/get_hr_overview_controller')
+const GetClassPerformanceController = () =>
+  import('#controllers/analytics/get_class_performance_controller')
 
 export function registerAnalyticsApiRoutes() {
   router
@@ -71,6 +73,9 @@ export function registerAnalyticsApiRoutes() {
         .get('/gamification/overview', [GetGamificationOverviewController])
         .as('analytics.gamification.overview')
       router.get('/hr/overview', [GetHrOverviewController]).as('analytics.hr.overview')
+      router
+        .get('/class-performance', [GetClassPerformanceController])
+        .as('analytics.class_performance')
     })
     .prefix('/analytics')
     .use([middleware.auth(), middleware.impersonation()])

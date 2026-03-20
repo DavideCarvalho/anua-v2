@@ -5,6 +5,7 @@ export const getAcademicOverviewValidator = vine.compile(
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
     academicPeriodId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
   })
 )
 
@@ -21,6 +22,7 @@ export const getGradeDistributionValidator = vine.compile(
   vine.object({
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
+    academicPeriodId: vine.string().uuid().optional(),
     classId: vine.string().uuid().optional(),
     subjectId: vine.string().uuid().optional(),
   })
@@ -30,8 +32,17 @@ export const getAtRiskStudentsValidator = vine.compile(
   vine.object({
     schoolId: vine.string().optional(),
     schoolChainId: vine.string().optional(),
+    academicPeriodId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
     minimumGrade: vine.number().optional(),
     limit: vine.number().optional(),
+  })
+)
+
+export const getGradeTrendsValidator = vine.compile(
+  vine.object({
+    academicPeriodId: vine.string().uuid().optional(),
+    classId: vine.string().uuid().optional(),
   })
 )
 

@@ -5,16 +5,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Progress } from '../../components/ui/progress'
 
 import { api } from '~/lib/api'
+import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
 
 interface EnrollmentFunnelStatsProps {
   schoolId?: string
   academicPeriodId?: string
+  courseId?: string
+  levelId?: string
+  classId?: string
 }
 
-export function EnrollmentFunnelStats({ schoolId, academicPeriodId }: EnrollmentFunnelStatsProps) {
+export function EnrollmentFunnelStats({
+  schoolId,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+}: EnrollmentFunnelStatsProps) {
+  return (
+    <DashboardCardBoundary
+      title="Funil de Matrículas"
+      queryKeys={[
+        api.api.v1.analytics.enrollments.funnel.queryOptions({
+          query: { schoolId, academicPeriodId, courseId, levelId, classId },
+        }).queryKey,
+      ]}
+    >
+      <EnrollmentFunnelStatsContent
+        schoolId={schoolId}
+        academicPeriodId={academicPeriodId}
+        courseId={courseId}
+        levelId={levelId}
+        classId={classId}
+      />
+    </DashboardCardBoundary>
+  )
+}
+
+function EnrollmentFunnelStatsContent({
+  schoolId,
+  academicPeriodId,
+  courseId,
+  levelId,
+  classId,
+}: EnrollmentFunnelStatsProps) {
   const { data, isLoading } = useQuery(
     api.api.v1.analytics.enrollments.funnel.queryOptions({
-      query: { schoolId, academicPeriodId },
+      query: { schoolId, academicPeriodId, courseId, levelId, classId },
     })
   )
 
@@ -117,13 +154,22 @@ export function EnrollmentFunnelStats({ schoolId, academicPeriodId }: Enrollment
 }
 
 export function EnrollmentFunnelStatsSkeleton() {
+  const statLabels = [
+    'Total de Matrículas',
+    'Aguardando Documentos',
+    'Matrículas Concluídas',
+    'Aguardando Assinatura',
+    'Contratos Assinados',
+    'Assinaturas Recusadas',
+  ]
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={i}>
+        {statLabels.map((label) => (
+          <Card key={label}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+              <CardTitle className="text-sm font-medium">{label}</CardTitle>
               <div className="h-4 w-4 bg-muted animate-pulse rounded" />
             </CardHeader>
             <CardContent>
@@ -135,8 +181,8 @@ export function EnrollmentFunnelStatsSkeleton() {
 
       <Card>
         <CardHeader>
-          <div className="h-5 w-40 bg-muted animate-pulse rounded" />
-          <div className="h-4 w-56 bg-muted animate-pulse rounded mt-2" />
+          <CardTitle>Métricas de Conversão</CardTitle>
+          <CardDescription>Análise do funil de matrículas</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {[1, 2, 3].map((i) => (
