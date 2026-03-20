@@ -12,7 +12,7 @@ export const createUserValidator = vine.compile(
     documentNumber: vine.string().trim().optional(),
     imageUrl: vine.string().url().optional(),
     grossSalary: vine.number().min(0).optional(),
-    roleId: vine.string().uuid().optional(),
+    roleName: vine.string().trim(),
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
   })
@@ -31,7 +31,7 @@ export const updateUserValidator = vine.compile(
     imageUrl: vine.string().url().optional(),
     active: vine.boolean().optional(),
     grossSalary: vine.number().min(0).optional(),
-    roleId: vine.string().uuid().optional(),
+    roleName: vine.string().trim().optional(),
     schoolId: vine.string().uuid().optional(),
     schoolChainId: vine.string().uuid().optional(),
   })

@@ -67,6 +67,11 @@ type StoreOrderStatus =
 
 type StoreOrderPaymentMode = 'IMMEDIATE' | 'DEFERRED'
 
+const paymentModeLabels: Record<StoreOrderPaymentMode, string> = {
+  IMMEDIATE: 'Imediato',
+  DEFERRED: 'Na Fatura',
+}
+
 interface Order {
   id: string
   orderNumber: string
@@ -375,7 +380,11 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               }
             >
               <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Pagamento" />
+                <SelectValue>
+                  {paymentMode && paymentMode !== 'all'
+                    ? paymentModeLabels[paymentMode as StoreOrderPaymentMode]
+                    : 'Pagamento'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
@@ -390,7 +399,9 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               }
             >
               <SelectTrigger className="w-full md:w-[220px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue>
+                  {status && status !== 'all' ? (statusLabels[status] ?? status) : 'Status'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>

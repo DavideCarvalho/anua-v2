@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
+import Role from '#models/role'
 import { updateUserValidator } from '#validators/user'
 import AppException from '#exceptions/app_exception'
 import UserTransformer from '#transformers/user_transformer'
@@ -21,6 +22,16 @@ export default class UpdateUserController {
 
     const data = await request.validateUsing(updateUserValidator)
 
+    let normalizedRoleId = user.roleId
+    if (data.roleName) {
+      const role = await Role.findBy('name', data.roleName)
+      if (!role) {
+        throw AppException.badRequest('Cargo inválido')
+      }
+
+      normalizedRoleId = role.id
+    }
+
     if (data.email && data.email !== user.email) {
       const existingUser = await User.findBy('email', data.email)
       if (existingUser) {
@@ -28,8 +39,11 @@ export default class UpdateUserController {
       }
     }
 
+    const { roleName: _roleName, ...userData } = data
+
     user.merge({
-      ...data,
+      ...userData,
+      roleId: normalizedRoleId,
       birthDate: data.birthDate ? DateTime.fromJSDate(data.birthDate) : data.birthDate,
     })
     await user.save()

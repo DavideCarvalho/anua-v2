@@ -42,6 +42,14 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
 
   const mutation = useMutation(api.api.v1.stores.financialSettings.upsert.mutationOptions())
 
+  const pixKeyTypeLabels: Record<'CPF' | 'CNPJ' | 'EMAIL' | 'PHONE' | 'RANDOM', string> = {
+    CPF: 'CPF',
+    CNPJ: 'CNPJ',
+    EMAIL: 'E-mail',
+    PHONE: 'Telefone',
+    RANDOM: 'Aleatória',
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     try {
@@ -103,7 +111,7 @@ export function StoreFinancialSettingsTab({ storeId }: StoreFinancialSettingsTab
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
+                <SelectValue>{pixKeyType ? pixKeyTypeLabels[pixKeyType] : 'Selecione'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="CPF">CPF</SelectItem>

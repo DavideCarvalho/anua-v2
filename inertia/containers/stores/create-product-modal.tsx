@@ -54,6 +54,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
   const [totalStock, setTotalStock] = useState('')
 
   const createMutation = useMutation(api.api.v1.storeItems.store.mutationOptions())
+  const selectedCategoryLabel = CATEGORIES.find((item) => item.value === category)?.label ?? 'Outro'
 
   function resetForm() {
     setName('')
@@ -132,7 +133,7 @@ export function CreateProductModal({ storeId, open, onOpenChange, onSuccess }: P
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{selectedCategoryLabel}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((c) => (

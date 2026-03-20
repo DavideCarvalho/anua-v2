@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import User from '#models/user'
+import Role from '#models/role'
+import UserHasSchool from '#models/user_has_school'
 import { createUserValidator } from '#validators/user'
 import string from '@adonisjs/core/helpers/string'
 import AppException from '#exceptions/app_exception'
@@ -15,16 +17,33 @@ export default class StoreUserController {
       throw AppException.operationFailedWithProvidedData(409)
     }
 
+    const role = await Role.findBy('name', data.roleName)
+    if (!role) {
+      throw AppException.badRequest('Cargo inválido')
+    }
+
     const slug = string.slug(data.name, { lower: true })
-    const { password: passwordInput, ...userData } = data
-    void passwordInput
+    const { password: _password, roleName: _roleName, ...userData } = data
 
     const user = await User.create({
       ...userData,
+      roleId: role.id,
       birthDate: data.birthDate ? DateTime.fromJSDate(data.birthDate) : null,
       slug,
       active: true,
     })
+
+    if (data.schoolId) {
+      await UserHasSchool.firstOrCreate(
+        {
+          userId: user.id,
+          schoolId: data.schoolId,
+        },
+        {
+          isDefault: true,
+        }
+      )
+    }
 
     const userWithRelations = await User.query()
       .where('id', user.id)
