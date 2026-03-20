@@ -39,14 +39,26 @@ export default class UpdateUserController {
       }
     }
 
-    const { roleName: roleNameDiscarded, ...userData } = data
-    void roleNameDiscarded
+    const userData = {
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.email !== undefined ? { email: data.email } : {}),
+      ...(data.password !== undefined ? { password: data.password } : {}),
+      ...(data.phone !== undefined ? { phone: data.phone } : {}),
+      ...(data.whatsappContact !== undefined ? { whatsappContact: data.whatsappContact } : {}),
+      ...(data.birthDate !== undefined
+        ? { birthDate: data.birthDate ? DateTime.fromJSDate(data.birthDate) : data.birthDate }
+        : {}),
+      ...(data.documentType !== undefined ? { documentType: data.documentType } : {}),
+      ...(data.documentNumber !== undefined ? { documentNumber: data.documentNumber } : {}),
+      ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl } : {}),
+      ...(data.active !== undefined ? { active: data.active } : {}),
+      ...(data.grossSalary !== undefined ? { grossSalary: data.grossSalary } : {}),
+      ...(data.schoolId !== undefined ? { schoolId: data.schoolId } : {}),
+      ...(data.schoolChainId !== undefined ? { schoolChainId: data.schoolChainId } : {}),
+      ...(data.roleName !== undefined ? { roleId: normalizedRoleId } : {}),
+    }
 
-    user.merge({
-      ...userData,
-      roleId: normalizedRoleId,
-      birthDate: data.birthDate ? DateTime.fromJSDate(data.birthDate) : data.birthDate,
-    })
+    user.merge(userData)
     await user.save()
 
     const userWithRelations = await User.query()
