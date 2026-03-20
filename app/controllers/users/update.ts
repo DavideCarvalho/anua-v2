@@ -39,7 +39,8 @@ export default class UpdateUserController {
       }
     }
 
-    const { roleName: _roleName, ...userData } = data
+    const { roleName: roleNameDiscarded, ...userData } = data
+    void roleNameDiscarded
 
     user.merge({
       ...userData,

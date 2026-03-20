@@ -23,7 +23,9 @@ export default class StoreUserController {
     }
 
     const slug = string.slug(data.name, { lower: true })
-    const { password: _password, roleName: _roleName, ...userData } = data
+    const { password: passwordDiscarded, roleName: roleNameDiscarded, ...userData } = data
+    void passwordDiscarded
+    void roleNameDiscarded
 
     const user = await User.create({
       ...userData,
