@@ -27,9 +27,12 @@ import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { StudentSelectorWithData } from '../responsavel/student-selector'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '~/lib/api'
 import { registry } from '@generated/registry/index'
 import { useAuthUser } from '../../stores/auth_store'
+import { api } from '~/lib/api'
+import type { Route } from '@tuyau/core/types'
+
+type ResponsavelStatsResponse = Route.Response<'api.v1.dashboard.responsavel_stats'>
 
 interface NavItem {
   title: string
@@ -181,8 +184,9 @@ function NavigationContent() {
     selectedStudentId = match ? match[1] : null
   }
 
-  const studentId = selectedStudentId || data.students[0]?.id
-  const selectedStudent = data.students.find((s) => s.id === studentId) || data.students[0]
+  const stats = data as ResponsavelStatsResponse
+  const studentId = selectedStudentId || stats.students[0]?.id
+  const selectedStudent = stats.students.find((s) => s.id === studentId) || stats.students[0]
 
   const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
   const hasFinancial = selectedStudent?.permissions?.financial || false

@@ -1,5 +1,4 @@
-import { Suspense } from 'react'
-import { useSuspenseQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { api } from '~/lib/api'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
@@ -64,7 +63,11 @@ function ResponsavelStatsError({
 
 // Content Component
 function ResponsavelStatsContent() {
-  const { data } = useSuspenseQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
+  const { data, isLoading } = useQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
+
+  if (isLoading || !data) {
+    return <ResponsavelStatsSkeleton />
+  }
 
   return (
     <div className="space-y-4">
@@ -168,9 +171,7 @@ export function ResponsavelStatsContainer() {
             <ResponsavelStatsError error={error as Error} resetErrorBoundary={resetErrorBoundary} />
           )}
         >
-          <Suspense fallback={<ResponsavelStatsSkeleton />}>
-            <ResponsavelStatsContent />
-          </Suspense>
+          <ResponsavelStatsContent />
         </ErrorBoundary>
       )}
     </QueryErrorResetBoundary>

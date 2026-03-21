@@ -2,10 +2,13 @@ import { Link } from '@adonisjs/inertia/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, X, AlertTriangle, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
+import type { Route } from '@tuyau/core/types'
 
 import { Button } from '../ui/button'
 import { useMutation } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+
+type ImpersonationStatusResponse = Route.Response<'api.v1.impersonation.status'>
 
 function getRouteForRole(role: string): 'web.responsavel.dashboard' | 'web.escola.dashboard' {
   // Responsáveis vão para /responsavel
@@ -40,7 +43,9 @@ function translateRole(roleName: string): string {
 export function ImpersonationBanner() {
   const queryClient = useQueryClient()
 
-  const { data: status } = useQuery(api.api.v1.impersonation.status.queryOptions({}))
+  const { data: status }: { data: ImpersonationStatusResponse | undefined } = useQuery(
+    api.api.v1.impersonation.status.queryOptions({})
+  )
   const clearImpersonationMutation = useMutation(api.api.v1.impersonation.clear.mutationOptions())
 
   const handleExit = async () => {

@@ -25,11 +25,6 @@ type NotificationItem = {
   readAt?: Date | string | null
 }
 
-type NotificationsResponse = {
-  data: NotificationItem[]
-  unreadCount: number
-}
-
 export function NotificationBell({ allNotificationsRoute }: NotificationBellProps) {
   const { data, isLoading } = useQuery({
     ...api.api.v1.notifications.index.queryOptions({ query: { page: 1, limit: 8 } }),
@@ -39,7 +34,7 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
   const markReadMutation = useMutation(api.api.v1.notifications.markRead.mutationOptions())
   const markAllReadMutation = useMutation(api.api.v1.notifications.markAllRead.mutationOptions())
 
-  const notificationResponse = data as NotificationsResponse | undefined
+  const notificationResponse = data as { data: NotificationItem[]; unreadCount: number } | undefined
 
   const notifications = (notificationResponse?.data ?? []).map((notification: NotificationItem) => {
     const isRead = notification.isRead ?? Boolean(notification.readAt)

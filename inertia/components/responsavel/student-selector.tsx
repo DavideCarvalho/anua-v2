@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { useQueryState } from 'nuqs'
 import { Users } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select'
-import { api } from '~/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import type { Route } from '@tuyau/core/types'
 import { useResponsavelStore, type Student } from '../../stores/responsavel_store'
+import { api } from '~/lib/api'
 
 type ResponsavelStatsResponse = Route.Response<'api.v1.dashboard.responsavel_stats'>
 type ResponsavelStudent = ResponsavelStatsResponse['students'][number]
