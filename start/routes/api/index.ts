@@ -102,6 +102,7 @@ import {
 import { registerDashboardApiRoutes } from './dashboard.js'
 import { registerResponsavelApiRoutes as registerResponsavelDashboardApiRoutes } from './responsavel.js'
 import { registerPedagogicalCalendarApiRoutes } from './pedagogical_calendar.js'
+import { registerGameApiRoutes } from './game.js'
 
 export function registerApiRoutes() {
   registerAuthApiRoutes()
@@ -186,4 +187,5 @@ export function registerApiRoutes() {
   registerAdminOnboardingApiRoutes()
   registerAdminJobsApiRoutes()
   registerPedagogicalCalendarApiRoutes()
+  registerGameApiRoutes()
 }
