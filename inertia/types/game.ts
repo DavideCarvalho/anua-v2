@@ -1,4 +1,4 @@
-export type GameClass = 'mage' | 'warrior' | 'rogue' | 'paladin'
+export type GameClass = 'mage' | 'warrior' | 'barbarian'
 export type GameLocation =
   | 'tavern'
   | 'arena'
@@ -127,7 +127,7 @@ export interface GameIdleState {
 export const CLASS_INFO: Record<GameClass, { name: string; description: string; color: string }> = {
   mage: {
     name: 'Mago',
-    description: 'Alto poder de ataque, vida baixa. Especialista em magia destrutiva.',
+    description: 'Alto poder mágico, vida baixa. Especialista em magia destrutiva.',
     color: 'text-purple-500',
   },
   warrior: {
@@ -135,15 +135,10 @@ export const CLASS_INFO: Record<GameClass, { name: string; description: string; 
     description: 'Balanceado em ataque e defesa. Versátil em combate.',
     color: 'text-red-500',
   },
-  rogue: {
-    name: 'Ladino',
-    description: 'Mestres dos críticos e evasão. Ataques rápidos e letais.',
+  barbarian: {
+    name: 'Bárbaro',
+    description: 'Alta vida e ataque brutal. Devastador corpo a corpo.',
     color: 'text-green-500',
-  },
-  paladin: {
-    name: 'Paladino',
-    description: 'Alta vida e defesa. Protetor e curandeiro.',
-    color: 'text-yellow-500',
   },
 }
 

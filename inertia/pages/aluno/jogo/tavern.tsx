@@ -20,8 +20,7 @@ interface TavernPageProps {
 const CLASS_IMAGES: Record<string, string> = {
   mage: '/images/game/classes/mage.png',
   warrior: '/images/game/classes/warrior.png',
-  rogue: '/images/game/classes/rogue.png',
-  paladin: '/images/game/classes/paladin.png',
+  barbarian: '/images/game/classes/barbarian.png',
 }
 
 export default function TavernPage({ character }: TavernPageProps) {
