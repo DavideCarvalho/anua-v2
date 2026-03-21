@@ -15,12 +15,12 @@ interface CreateCharacterProps {
   studentName: string
 }
 
-const CLASSES: GameClass[] = ['mage', 'warrior', 'barbarian']
+const CLASSES: GameClass[] = ['mage', 'warrior', 'dwarf']
 
 const CLASS_IMAGES: Record<GameClass, string> = {
   mage: '/images/game/classes/mage.png',
   warrior: '/images/game/classes/warrior.png',
-  barbarian: '/images/game/classes/barbarian.png',
+  dwarf: '/images/game/classes/dwarf.png',
 }
 
 export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {

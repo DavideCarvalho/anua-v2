@@ -9,7 +9,7 @@ import GameCharacterUpgrade from '#models/game_character_upgrade'
 import GameIdleState from '#models/game_idle_state'
 import GameItem from '#models/game_item'
 
-export type GameClass = 'mage' | 'warrior' | 'barbarian'
+export type GameClass = 'mage' | 'warrior' | 'dwarf'
 
 export const CLASS_STATS: Record<
   GameClass,
@@ -17,7 +17,7 @@ export const CLASS_STATS: Record<
 > = {
   mage: { attack: 15, defense: 5, hp: 80, mana: 80 },
   warrior: { attack: 10, defense: 10, hp: 100, mana: 40 },
-  barbarian: { attack: 14, defense: 6, hp: 120, mana: 30 },
+  dwarf: { attack: 12, defense: 14, hp: 120, mana: 30 },
 }
 
 export default class GameCharacter extends BaseModel {

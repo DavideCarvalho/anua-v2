@@ -242,6 +242,7 @@ export interface ApiDefinition {
         store: typeof routes['web.aluno.loja.store']
       }
       idle: typeof routes['web.aluno.idle']
+      jogo: typeof routes['web.aluno.jogo']
     }
   }
   api: {
@@ -985,6 +986,9 @@ export interface ApiDefinition {
       pedagogicalCalendar: {
         index: typeof routes['api.v1.pedagogical_calendar.index']
         creationContext: typeof routes['api.v1.pedagogical_calendar.creation_context']
+      }
+      game: {
+        createCharacter: typeof routes['api.v1.game.createCharacter']
       }
       cspReport: typeof routes['api.v1.csp_report']
     }

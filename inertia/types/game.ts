@@ -1,4 +1,4 @@
-export type GameClass = 'mage' | 'warrior' | 'barbarian'
+export type GameClass = 'mage' | 'warrior' | 'dwarf'
 export type GameLocation =
   | 'tavern'
   | 'arena'
@@ -135,10 +135,10 @@ export const CLASS_INFO: Record<GameClass, { name: string; description: string; 
     description: 'Balanceado em ataque e defesa. Versátil em combate.',
     color: 'text-red-500',
   },
-  barbarian: {
-    name: 'Bárbaro',
-    description: 'Alta vida e ataque brutal. Devastador corpo a corpo.',
-    color: 'text-green-500',
+  dwarf: {
+    name: 'Anão',
+    description: 'Alta vida e defesa. Resistente e forte.',
+    color: 'text-amber-600',
   },
 }
 
