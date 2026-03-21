@@ -2,14 +2,7 @@ import { DateTime } from 'luxon'
 import { HttpContext } from '@adonisjs/core/http'
 import GameCharacter from '#models/game_character'
 import { CLASS_STATS, type GameClass } from '#models/game_character'
-import vine from '@vinejs/vine'
-
-const createGameCharacterValidator = vine.compile(
-  vine.object({
-    name: vine.string().minLength(2).maxLength(50),
-    class: vine.enum(['mage', 'warrior', 'dwarf']),
-  })
-)
+import { createGameCharacterValidator } from '#validators/game_character'
 
 export default class CreateGameCharacterController {
   async handle({ request, response, auth }: HttpContext) {
