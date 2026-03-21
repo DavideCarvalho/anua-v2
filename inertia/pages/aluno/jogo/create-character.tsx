@@ -37,7 +37,7 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
     setError(null)
 
     try {
-      await router.post('/api/game/characters', {
+      await router.post('/api/v1/game/characters', {
         name: name.trim(),
         class: selectedClass,
       })
