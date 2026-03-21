@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
 
-      table.uuid('student_id').references('id').inTable('students').notNullable()
+      table.text('student_id').references('id').inTable('Student').notNullable()
       table.integer('points_spent').notNullable()
       table.integer('gold_received').notNullable()
       table.integer('rate').notNullable()
