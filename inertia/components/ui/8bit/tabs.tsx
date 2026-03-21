@@ -1,16 +1,16 @@
 import type * as TabsPrimitive from "@radix-ui/react-tabs";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "inertia/lib/utils";
+import { cn } from "~/lib/utils";
 
 import {
   Tabs as ShadcnTabs,
   TabsContent as ShadcnTabsContent,
   TabsList as ShadcnTabsList,
   TabsTrigger as ShadcnTabsTrigger,
-} from "inertia/components/ui/tabs";
+} from "~/components/ui/tabs";
 
-import "inertia/components/ui/8bit/styles/retro.css";
+import "~/components/ui/8bit/styles/retro.css";
 
 export const tabsVariants = cva("", {
   variants: {

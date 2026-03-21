@@ -2,12 +2,27 @@ import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
 import { AlunoLayout } from '../../../components/layouts/aluno-layout'
 import { CLASS_INFO, type GameClass } from '../../../types/game'
+import { Button } from '../../../components/ui/8bit/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/8bit/card'
 
 interface CreateCharacterProps {
   studentName: string
 }
 
 const CLASSES: GameClass[] = ['mage', 'warrior', 'rogue', 'paladin']
+
+const CLASS_IMAGES: Record<GameClass, string> = {
+  mage: '/images/game/classes/mage.png',
+  warrior: '/images/game/classes/warrior.png',
+  rogue: '/images/game/classes/rogue.png',
+  paladin: '/images/game/classes/paladin.png',
+}
 
 export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {
   const [name, setName] = useState('')
@@ -36,68 +51,85 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
   return (
     <AlunoLayout>
       <Head title="Criar Personagem" />
-      <div className="mx-auto max-w-2xl p-6">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Bem-vindo ao Reino Mágico!</h1>
-          <p className="mt-2 text-muted-foreground">
-            Crie seu personagem para começar sua aventura
-          </p>
-        </div>
+      <div className="mx-auto max-w-4xl p-6">
+        <Card className="mb-8">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Bem-vindo ao Reino Mágico!</CardTitle>
+            <CardDescription>Crie seu personagem para começar sua aventura</CardDescription>
+          </CardHeader>
+        </Card>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="name" className="mb-2 block text-sm font-medium">
-              Nome do Personagem
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={50}
-              placeholder="Digite o nome..."
-              className="w-full rounded-lg border bg-background px-4 py-3 text-lg"
-            />
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Nome do Personagem</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={50}
+                placeholder="Digite o nome..."
+                className="retro w-full rounded-none border-2 border-foreground bg-background px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </CardContent>
+          </Card>
 
-          <div>
-            <label className="mb-3 block text-sm font-medium">Escolha sua Classe</label>
-            <div className="grid grid-cols-2 gap-4">
-              {CLASSES.map((cls) => (
-                <button
-                  key={cls}
-                  type="button"
-                  onClick={() => setSelectedClass(cls)}
-                  className={`rounded-lg border-2 p-4 text-left transition-all ${
-                    selectedClass === cls
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <h3 className={`text-lg font-bold ${CLASS_INFO[cls].color}`}>
-                    {CLASS_INFO[cls].name}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {CLASS_INFO[cls].description}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Escolha sua Classe</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                {CLASSES.map((cls) => (
+                  <div
+                    key={cls}
+                    onClick={() => setSelectedClass(cls)}
+                    className={`cursor-pointer transition-all ${
+                      selectedClass === cls ? 'ring-4 ring-primary' : 'opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <Card className="overflow-hidden">
+                      <div className="aspect-square bg-gradient-to-b from-primary/20 to-background p-4">
+                        <img
+                          src={CLASS_IMAGES[cls]}
+                          alt={CLASS_INFO[cls].name}
+                          className="h-full w-full object-contain pixelated"
+                        />
+                      </div>
+                      <CardHeader className="p-3">
+                        <CardTitle className={`text-center ${CLASS_INFO[cls].color}`}>
+                          {CLASS_INFO[cls].name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-3 pt-0">
+                        <p className="text-center text-xs text-muted-foreground">
+                          {CLASS_INFO[cls].description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {error && (
-            <div className="rounded-lg border border-red-500 bg-red-500/10 p-3 text-sm text-red-500">
-              {error}
-            </div>
+            <Card className="border-red-500 bg-red-500/10">
+              <CardContent className="p-4">
+                <p className="text-sm text-red-500">{error}</p>
+              </CardContent>
+            </Card>
           )}
 
-          <button
+          <Button
             type="submit"
             disabled={!name.trim() || isSubmitting}
-            className="w-full rounded-lg bg-primary px-6 py-3 text-lg font-bold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="w-full py-4 text-lg"
           >
             {isSubmitting ? 'Criando...' : 'Criar Personagem'}
-          </button>
+          </Button>
         </form>
       </div>
     </AlunoLayout>

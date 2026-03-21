@@ -17,28 +17,28 @@ export default class StudentAvatar extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'skinTone' })
   declare skinTone: string
 
-  @column()
+  @column({ columnName: 'hairStyle' })
   declare hairStyle: string
 
-  @column()
+  @column({ columnName: 'hairColor' })
   declare hairColor: string
 
-  @column()
+  @column({ columnName: 'outfit' })
   declare outfit: string
 
   @column()
   declare accessories: string[]
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

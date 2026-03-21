@@ -1,4 +1,4 @@
-import { type BitProgressProps, Progress } from "inertia/components/ui/8bit/progress";
+import { type BitProgressProps, Progress } from "~/components/ui/8bit/progress";
 
 interface ManaBarProps extends React.ComponentProps<"div"> {
   className?: string;

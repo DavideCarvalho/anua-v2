@@ -1,8 +1,8 @@
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "inertia/lib/utils";
+import { cn } from "~/lib/utils";
 
-import { Badge as ShadcnBadge } from "inertia/components/ui/badge";
+import { Badge as ShadcnBadge } from "~/components/ui/badge";
 
 export const badgeVariants = cva("", {
   variants: {

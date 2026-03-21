@@ -1,18 +1,13 @@
-import { type BitProgressProps, Progress } from "inertia/components/ui/8bit/progress";
+import { type BitProgressProps, Progress } from '~/components/ui/8bit/progress'
 
-interface ManaBarProps extends React.ComponentProps<"div"> {
-  className?: string;
-  props?: BitProgressProps;
-  variant?: "retro" | "default";
-  value?: number;
+interface ManaBarProps extends React.ComponentProps<'div'> {
+  className?: string
+  props?: BitProgressProps
+  variant?: 'retro' | 'default'
+  value?: number
 }
 
-export default function HealthBar({
-  className,
-  variant,
-  value,
-  ...props
-}: ManaBarProps) {
+export default function HealthBar({ className, variant, value, ...props }: ManaBarProps) {
   return (
     <Progress
       {...props}
@@ -21,5 +16,5 @@ export default function HealthBar({
       className={className}
       progressBg="bg-red-500"
     />
-  );
+  )
 }

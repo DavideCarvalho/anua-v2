@@ -3,10 +3,10 @@ import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "inertia/lib/utils";
+import { cn } from "~/lib/utils";
 
 import { Separator } from "./separator";
-import "inertia/components/ui/8bit/styles/retro.css";
+import "~/components/ui/8bit/styles/retro.css";
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (

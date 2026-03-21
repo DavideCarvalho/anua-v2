@@ -1,10 +1,10 @@
 import { type VariantProps, cva } from "class-variance-authority";
 
-import { cn } from "inertia/lib/utils";
+import { cn } from "~/lib/utils";
 
-import HealthBar from "inertia/components/ui/8bit/health-bar";
+import HealthBar from "~/components/ui/8bit/health-bar";
 
-import "inertia/components/ui/8bit/styles/retro.css";
+import "~/components/ui/8bit/styles/retro.css";
 
 export const enemyHealthDisplayVariants = cva("", {
   variants: {
