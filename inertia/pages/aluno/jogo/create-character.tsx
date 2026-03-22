@@ -28,25 +28,27 @@ const CLASS_IMAGES: Record<GameClass, string> = {
 export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {
   const [name, setName] = useState('')
   const [selectedClass, setSelectedClass] = useState<GameClass>('warrior')
+  const [error, setError] = useState<string | null>(null)
 
-  const createCharacter = useMutation(
-    api.api.v1.game.createCharacter.mutationOptions({
-      onSuccess: () => {
-        router.visit('/aluno/jogo')
-      },
-    })
-  )
+  const createCharacter = useMutation(api.api.v1.game.createCharacter.mutationOptions())
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim() || createCharacter.isPending) return
 
-    createCharacter.mutate({
-      body: {
-        name: name.trim(),
-        class: selectedClass,
-      },
-    })
+    setError(null)
+
+    try {
+      await createCharacter.mutateAsync({
+        body: {
+          name: name.trim(),
+          class: selectedClass,
+        },
+      })
+      router.visit('/aluno/jogo')
+    } catch (err: any) {
+      setError(err?.message || 'Erro ao criar personagem')
+    }
   }
 
   return (
@@ -116,12 +118,10 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
             </CardContent>
           </Card>
 
-          {createCharacter.isError && (
+          {error && (
             <Card className="border-red-500 bg-red-500/10">
               <CardContent className="p-4">
-                <p className="text-sm text-red-500">
-                  {createCharacter.error?.message || 'Erro ao criar personagem'}
-                </p>
+                <p className="text-sm text-red-500">{error}</p>
               </CardContent>
             </Card>
           )}
