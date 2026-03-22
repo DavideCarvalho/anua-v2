@@ -16,24 +16,36 @@ const shieldConfig = defineConfig({
       // Note: @viteDevUrl / @viteHmrUrl are NOT supported by this shield version
       scriptSrc: [`'self'`, '@nonce'],
 
-      // Styles: same origin + nonce for inline styles + Fonts Bunny CDN
+      // Styles: same origin + nonce for inline styles + Fonts Bunny CDN + Google Fonts
       // 'unsafe-inline' needed because @adonisjs/vite does not inject nonces into
       // the <style> tags it generates (no nonce support in the installed version)
-      styleSrc: [`'self'`, `'unsafe-inline'`, 'https://fonts.bunny.net'],
+      styleSrc: [
+        `'self'`,
+        `'unsafe-inline'`,
+        'https://fonts.bunny.net',
+        'https://fonts.googleapis.com',
+      ],
 
-      // Fonts: same origin + Fonts Bunny CDN + Gstatic (Fonts Bunny loads .ttf from there)
-      fontSrc: [`'self'`, 'https://fonts.bunny.net', 'https://fonts.gstatic.com'],
+      // Fonts: same origin + Fonts Bunny CDN + Google Fonts
+      fontSrc: [
+        `'self'`,
+        'https://fonts.bunny.net',
+        'https://fonts.gstatic.com',
+        'https://fonts.googleapis.com',
+      ],
 
       // Images: same origin + data URIs + GCS bucket (school logos/uploads)
       imgSrc: [`'self'`, 'data:', 'https://storage.googleapis.com'],
 
-      // Connections: same origin + PostHog + BrasilAPI + ViaCEP
+      // Connections: same origin + PostHog + BrasilAPI + ViaCEP + Vite HMR
       // '@viteHmrUrl' is NOT supported by this shield version — removed
       connectSrc: [
         `'self'`,
         'https://us.i.posthog.com',
         'https://brasilapi.com.br',
         'https://viacep.com.br',
+        'ws://localhost:*',
+        'http://localhost:*',
       ],
 
       // Frames: block all (DocuSeal opens in a new tab, not an iframe)
