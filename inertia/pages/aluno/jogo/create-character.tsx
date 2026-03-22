@@ -1,6 +1,5 @@
 import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import { AlunoLayout } from '../../../components/layouts/aluno-layout'
 import { CLASS_INFO, type GameClass } from '../../../types/game'
 import { Button } from '../../../components/ui/8bit/button'
@@ -11,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../components/ui/8bit/card'
-import { api } from '~/lib/api'
 
 interface CreateCharacterProps {
   studentName: string
@@ -28,25 +26,32 @@ const CLASS_IMAGES: Record<GameClass, string> = {
 export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {
   const [name, setName] = useState('')
   const [selectedClass, setSelectedClass] = useState<GameClass>('warrior')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const createCharacter = useMutation(
-    api.api.v1.game.createCharacter.mutationOptions({
-      onSuccess: () => {
-        router.visit('/aluno/jogo')
-      },
-    })
-  )
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) return
+    if (!name.trim() || isSubmitting) return
 
-    createCharacter.mutate({
-      body: {
+    setIsSubmitting(true)
+    setError(null)
+
+    router.post(
+      '/api/v1/game/characters',
+      {
         name: name.trim(),
         class: selectedClass,
       },
-    })
+      {
+        onSuccess: () => {
+          router.visit('/aluno/jogo')
+        },
+        onError: (errors) => {
+          setIsSubmitting(false)
+          setError(errors.message || 'Erro ao criar personagem')
+        },
+      }
+    )
   }
 
   return (
@@ -116,22 +121,20 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
             </CardContent>
           </Card>
 
-          {createCharacter.isError && (
+          {error && (
             <Card className="border-red-500 bg-red-500/10">
               <CardContent className="p-4">
-                <p className="text-sm text-red-500">
-                  {createCharacter.error?.message || 'Erro ao criar personagem'}
-                </p>
+                <p className="text-sm text-red-500">{error}</p>
               </CardContent>
             </Card>
           )}
 
           <Button
             type="submit"
-            disabled={!name.trim() || createCharacter.isPending}
+            disabled={!name.trim() || isSubmitting}
             className="w-full py-4 text-lg"
           >
-            {createCharacter.isPending ? 'Criando...' : 'Criar Personagem'}
+            {isSubmitting ? 'Criando...' : 'Criar Personagem'}
           </Button>
         </form>
       </div>
