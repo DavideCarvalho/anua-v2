@@ -1,5 +1,9 @@
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { useMutation } from '@tanstack/react-query'
 import { AlunoLayout } from '../../../components/layouts/aluno-layout'
 import { CLASS_INFO, type GameClass } from '../../../types/game'
@@ -13,10 +17,6 @@ import {
 } from '../../../components/ui/8bit/card'
 import { api } from '~/lib/api'
 
-interface CreateCharacterProps {
-  studentName: string
-}
-
 const CLASSES: GameClass[] = ['mage', 'warrior', 'dwarf']
 
 const CLASS_IMAGES: Record<GameClass, string> = {
@@ -25,29 +25,40 @@ const CLASS_IMAGES: Record<GameClass, string> = {
   dwarf: '/images/game/classes/dwarf.png',
 }
 
-export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {
-  const [name, setName] = useState('')
-  const [selectedClass, setSelectedClass] = useState<GameClass>('warrior')
-  const [error, setError] = useState<string | null>(null)
+const schema = z.object({
+  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(50),
+  class: z.enum(['mage', 'warrior', 'dwarf']),
+})
 
+type FormValues = z.infer<typeof schema>
+
+interface CreateCharacterProps {
+  studentName: string
+}
+
+export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {
   const createCharacter = useMutation(api.api.v1.game.createCharacter.mutationOptions())
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name.trim() || createCharacter.isPending) return
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema) as Resolver<FormValues>,
+    defaultValues: {
+      name: '',
+      class: 'warrior',
+    },
+  })
 
-    setError(null)
-
+  async function handleSubmit(values: FormValues) {
     try {
       await createCharacter.mutateAsync({
         body: {
-          name: name.trim(),
-          class: selectedClass,
+          name: values.name,
+          class: values.class,
         },
       })
+      toast.success('Personagem criado com sucesso!')
       router.visit('/aluno/jogo')
-    } catch (err: any) {
-      setError(err?.message || 'Erro ao criar personagem')
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao criar personagem')
     }
   }
 
@@ -62,7 +73,7 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
           </CardHeader>
         </Card>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Nome do Personagem</CardTitle>
@@ -70,12 +81,14 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
             <CardContent>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...form.register('name')}
                 maxLength={50}
                 placeholder="Digite o nome..."
                 className="retro w-full rounded-none border-2 border-foreground bg-background px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
+              {form.formState.errors.name && (
+                <p className="mt-2 text-sm text-red-500">{form.formState.errors.name.message}</p>
+              )}
             </CardContent>
           </Card>
 
@@ -88,9 +101,11 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
                 {CLASSES.map((cls) => (
                   <div
                     key={cls}
-                    onClick={() => setSelectedClass(cls)}
+                    onClick={() => form.setValue('class', cls)}
                     className={`cursor-pointer transition-all ${
-                      selectedClass === cls ? 'ring-4 ring-primary' : 'opacity-70 hover:opacity-100'
+                      form.watch('class') === cls
+                        ? 'ring-4 ring-primary'
+                        : 'opacity-70 hover:opacity-100'
                     }`}
                   >
                     <Card className="overflow-hidden">
@@ -118,17 +133,9 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
             </CardContent>
           </Card>
 
-          {error && (
-            <Card className="border-red-500 bg-red-500/10">
-              <CardContent className="p-4">
-                <p className="text-sm text-red-500">{error}</p>
-              </CardContent>
-            </Card>
-          )}
-
           <Button
             type="submit"
-            disabled={!name.trim() || createCharacter.isPending}
+            disabled={!form.formState.isValid || createCharacter.isPending}
             className="w-full py-4 text-lg"
           >
             {createCharacter.isPending ? 'Criando...' : 'Criar Personagem'}
