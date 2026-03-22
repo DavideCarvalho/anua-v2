@@ -40,6 +40,6 @@ export default class CreateGameCharacterController {
       lastSyncAt: DateTime.now(),
     })
 
-    return response.created(character.serialize())
+    return response.redirect('/aluno/jogo')
   }
 }
