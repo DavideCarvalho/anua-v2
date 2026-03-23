@@ -23,6 +23,6 @@
   },
   "registries": {
     "@kibo-ui": "https://www.kibo-ui.com/r/{name}.json",
-    "@8bitcn": "https://8bitcn.com/r/{name}.json"
+    "@8bitcn": "https://www.8bitcn.com/r/{name}.json"
   }
 }

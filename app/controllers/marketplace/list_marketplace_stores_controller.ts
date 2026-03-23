@@ -56,7 +56,7 @@ export default class ListMarketplaceStoresController {
       .preload('school')
       .orderBy('name', 'asc')
 
-    return response.ok(serialize(StoreTransformer.transform(stores)))
+    return response.ok(await serialize(StoreTransformer.transform(stores)))
   }
 
   /**
@@ -80,33 +80,54 @@ export default class ListMarketplaceStoresController {
   /**
    * Resolves the set of school IDs a student is enrolled in.
    *
-   * Chain: StudentHasLevel -> Level (has direct schoolId) -> School
-   * Fallback: Student -> User (has direct schoolId)
+   * Chain: StudentHasLevel -> Level (school), levelAssignedToCourseAcademicPeriod -> Level (school),
+   *        StudentHasLevel -> Class (school)
+   * Fallback: Student.class -> School, Student -> User.schoolId
    */
   private async getStudentSchoolIds(studentId: string): Promise<string[]> {
     const schoolIds = new Set<string>()
 
-    // Primary path: StudentHasLevel -> Level -> School
-    // Level has a direct `schoolId` column — no intermediate Course model.
     const enrollments = await StudentHasLevel.query()
       .where('studentId', studentId)
       .whereNull('deletedAt')
       .preload('level', (q) => q.preload('school'))
+      .preload('class', (q) => q.preload('school'))
+      .preload('levelAssignedToCourseAcademicPeriod', (q) =>
+        q.preload('level', (lq) => lq.preload('school'))
+      )
 
     for (const enrollment of enrollments) {
       if (enrollment.level?.school?.id) {
         schoolIds.add(enrollment.level.school.id)
       } else if (enrollment.level?.schoolId) {
-        // Level loaded but school relationship not hydrated — use FK directly
         schoolIds.add(enrollment.level.schoolId)
+      }
+
+      const lacap = enrollment.levelAssignedToCourseAcademicPeriod
+      if (lacap?.level?.school?.id) {
+        schoolIds.add(lacap.level.school.id)
+      } else if (lacap?.level?.schoolId) {
+        schoolIds.add(lacap.level.schoolId)
+      }
+
+      if (enrollment.class?.school?.id) {
+        schoolIds.add(enrollment.class.school.id)
+      } else if (enrollment.class?.schoolId) {
+        schoolIds.add(enrollment.class.schoolId)
       }
     }
 
-    // Fallback: check student's User record for a direct schoolId
-    const student = await Student.query().where('id', studentId).preload('user').first()
+    const student = await Student.query()
+      .where('id', studentId)
+      .preload('user')
+      .preload('class')
+      .first()
 
     if (student?.user?.schoolId) {
       schoolIds.add(student.user.schoolId)
+    }
+    if (student?.class?.schoolId) {
+      schoolIds.add(student.class.schoolId)
     }
 
     return Array.from(schoolIds)

@@ -2363,7 +2363,7 @@ export class StoreFinancialSettingSchema extends BaseModel {
 }
 
 export class StoreInstallmentRuleSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'isActive', 'maxInstallments', 'minAmount', 'storeId', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'isActive', 'maxInstallments', 'minInstallmentAmount', 'storeId', 'updatedAt'] as const
   $columns = StoreInstallmentRuleSchema.$columns
   @column.dateTime()
   declare createdAt: DateTime
@@ -2374,7 +2374,7 @@ export class StoreInstallmentRuleSchema extends BaseModel {
   @column()
   declare maxInstallments: number
   @column()
-  declare minAmount: number
+  declare minInstallmentAmount: number
   @column()
   declare storeId: string
   @column.dateTime()
@@ -3868,6 +3868,280 @@ export class ExamSchema extends BaseModel {
   declare updatedAt: DateTime
   @column()
   declare weight: number
+}
+
+export class GameCharacterItemSchema extends BaseModel {
+  static $columns = ['characterId', 'createdAt', 'id', 'itemId', 'quantity'] as const
+  $columns = GameCharacterItemSchema.$columns
+  @column()
+  declare characterId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare itemId: string
+  @column()
+  declare quantity: number | null
+}
+
+export class GameCharacterMissionSchema extends BaseModel {
+  static $columns = ['characterId', 'completesAt', 'createdAt', 'experienceEarned', 'goldEarned', 'id', 'itemsEarned', 'missionId', 'startedAt', 'status'] as const
+  $columns = GameCharacterMissionSchema.$columns
+  @column()
+  declare characterId: string
+  @column.dateTime()
+  declare completesAt: DateTime
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare experienceEarned: number | null
+  @column()
+  declare goldEarned: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare itemsEarned: any | null
+  @column()
+  declare missionId: string
+  @column.dateTime()
+  declare startedAt: DateTime
+  @column()
+  declare status: string | null
+}
+
+export class GameCharacterUpgradeSchema extends BaseModel {
+  static $columns = ['characterId', 'createdAt', 'id', 'level', 'updatedAt', 'upgradeId'] as const
+  $columns = GameCharacterUpgradeSchema.$columns
+  @column()
+  declare characterId: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare level: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare upgradeId: string
+}
+
+export class GameCharacterSchema extends BaseModel {
+  static $columns = ['allyCount', 'attack', 'class', 'clickDamage', 'createdAt', 'currentWave', 'defense', 'dps', 'energy', 'energyRegenAt', 'equippedAccessoryId', 'equippedArmorId', 'equippedWeaponId', 'experience', 'gold', 'id', 'idleGoldPerSecond', 'level', 'maxEnergy', 'maxHp', 'maxMana', 'name', 'studentId', 'unlockedSkills', 'updatedAt'] as const
+  $columns = GameCharacterSchema.$columns
+  @column()
+  declare allyCount: number | null
+  @column()
+  declare attack: number | null
+  @column()
+  declare class: string
+  @column()
+  declare clickDamage: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare currentWave: number | null
+  @column()
+  declare defense: number | null
+  @column()
+  declare dps: string | null
+  @column()
+  declare energy: number | null
+  @column.dateTime()
+  declare energyRegenAt: DateTime | null
+  @column()
+  declare equippedAccessoryId: string | null
+  @column()
+  declare equippedArmorId: string | null
+  @column()
+  declare equippedWeaponId: string | null
+  @column()
+  declare experience: number | null
+  @column()
+  declare gold: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare idleGoldPerSecond: string | null
+  @column()
+  declare level: number | null
+  @column()
+  declare maxEnergy: number | null
+  @column()
+  declare maxHp: number | null
+  @column()
+  declare maxMana: number | null
+  @column()
+  declare name: string
+  @column()
+  declare studentId: string
+  @column()
+  declare unlockedSkills: any | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class GameIdleStateSchema extends BaseModel {
+  static $columns = ['characterId', 'currentMonsterHp', 'currentMonsterMaxHp', 'currentMonsterWave', 'id', 'lastSyncAt', 'offlineGoldEarned', 'updatedAt'] as const
+  $columns = GameIdleStateSchema.$columns
+  @column()
+  declare characterId: string
+  @column()
+  declare currentMonsterHp: number | null
+  @column()
+  declare currentMonsterMaxHp: number | null
+  @column()
+  declare currentMonsterWave: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare lastSyncAt: DateTime
+  @column()
+  declare offlineGoldEarned: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class GameItemSchema extends BaseModel {
+  static $columns = ['attackBonus', 'createdAt', 'defenseBonus', 'description', 'goldPrice', 'hpBonus', 'icon', 'id', 'manaBonus', 'name', 'rarity', 'specialEffect', 'type'] as const
+  $columns = GameItemSchema.$columns
+  @column()
+  declare attackBonus: number | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare defenseBonus: number | null
+  @column()
+  declare description: string | null
+  @column()
+  declare goldPrice: number | null
+  @column()
+  declare hpBonus: number | null
+  @column()
+  declare icon: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare manaBonus: number | null
+  @column()
+  declare name: string
+  @column()
+  declare rarity: string | null
+  @column()
+  declare specialEffect: any | null
+  @column()
+  declare type: string
+}
+
+export class GameMissionSchema extends BaseModel {
+  static $columns = ['availableFrom', 'availableUntil', 'createdAt', 'description', 'difficulty', 'durationMinutes', 'energyCost', 'experienceReward', 'goldRewardMax', 'goldRewardMin', 'id', 'isActive', 'itemDropChance', 'location', 'name', 'requiredClass', 'requiredLevel', 'updatedAt'] as const
+  $columns = GameMissionSchema.$columns
+  @column()
+  declare availableFrom: string | null
+  @column()
+  declare availableUntil: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare description: string | null
+  @column()
+  declare difficulty: string | null
+  @column()
+  declare durationMinutes: number
+  @column()
+  declare energyCost: number
+  @column()
+  declare experienceReward: number | null
+  @column()
+  declare goldRewardMax: number | null
+  @column()
+  declare goldRewardMin: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare isActive: boolean | null
+  @column()
+  declare itemDropChance: any | null
+  @column()
+  declare location: string
+  @column()
+  declare name: string
+  @column()
+  declare requiredClass: any | null
+  @column()
+  declare requiredLevel: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class GamePointsConversionSchema extends BaseModel {
+  static $columns = ['createdAt', 'goldReceived', 'id', 'pointsSpent', 'rate', 'studentId'] as const
+  $columns = GamePointsConversionSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare goldReceived: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare pointsSpent: number
+  @column()
+  declare rate: number
+  @column()
+  declare studentId: string
+}
+
+export class GameSkillSchema extends BaseModel {
+  static $columns = ['branch', 'class', 'createdAt', 'description', 'effectType', 'effectValue', 'icon', 'id', 'name', 'requiredLevel', 'requiredSkillId'] as const
+  $columns = GameSkillSchema.$columns
+  @column()
+  declare branch: string
+  @column()
+  declare class: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare description: string | null
+  @column()
+  declare effectType: string
+  @column()
+  declare effectValue: string | null
+  @column()
+  declare icon: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare requiredLevel: number | null
+  @column()
+  declare requiredSkillId: string | null
+}
+
+export class GameUpgradeSchema extends BaseModel {
+  static $columns = ['baseCost', 'costMultiplier', 'createdAt', 'description', 'effectType', 'effectValue', 'id', 'maxLevel', 'name', 'type'] as const
+  $columns = GameUpgradeSchema.$columns
+  @column()
+  declare baseCost: number
+  @column()
+  declare costMultiplier: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare description: string | null
+  @column()
+  declare effectType: string
+  @column()
+  declare effectValue: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare maxLevel: number | null
+  @column()
+  declare name: string
+  @column()
+  declare type: string
 }
 
 export class LockSchema extends BaseModel {

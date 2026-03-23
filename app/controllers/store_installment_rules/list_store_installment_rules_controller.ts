@@ -9,8 +9,10 @@ export default class ListStoreInstallmentRulesController {
 
     const rules = await StoreInstallmentRule.query()
       .where('storeId', data.storeId)
-      .orderBy('minAmount', 'asc')
+      .orderBy('minInstallmentAmount', 'asc')
 
-    return response.ok(serialize(StoreInstallmentRuleTransformer.transform(rules)))
+    console.log('rules', rules)
+
+    return response.ok(await serialize(StoreInstallmentRuleTransformer.transform(rules)))
   }
 }

@@ -2083,6 +2083,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_idle_page_controller').default['handle']>>>
     }
   }
+  'web.aluno.jogo': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/jogo'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_jogo_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_jogo_page_controller').default['handle']>>>
+    }
+  }
   'web.aluno.loja.store': {
     methods: ["GET","HEAD"]
     pattern: '/aluno/loja/:id'
@@ -8189,6 +8201,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/pedagogical_calendar').getPedagogicalCreationContextValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pedagogical_calendar/get_creation_context_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pedagogical_calendar/get_creation_context_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.game.create_character': {
+    methods: ["POST"]
+    pattern: '/api/v1/game/characters'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/game_character').createGameCharacterValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/game_character').createGameCharacterValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.csp_report': {

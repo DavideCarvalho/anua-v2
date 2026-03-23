@@ -36,12 +36,15 @@ interface MarketplaceStoreDetailContainerProps {
   storeId: string
   backHref?: string
   studentId?: string
+  /** Carrinho no fluxo responsável: só mensalidade (sem pagar agora no gateway); parcelas na fatura seguem regras da loja */
+  restrictCartPayment?: boolean
 }
 
 export function MarketplaceStoreDetailContainer({
   storeId,
   backHref = '/aluno/loja',
   studentId,
+  restrictCartPayment = false,
 }: MarketplaceStoreDetailContainerProps) {
   const { data, isLoading } = useQuery(
     api.api.v1.marketplace.stores.items.queryOptions({
@@ -108,6 +111,7 @@ export function MarketplaceStoreDetailContainer({
                 backHref={backHref}
                 hasOnlinePayment={hasOnlinePayment}
                 studentId={studentId}
+                restrictCartPayment={restrictCartPayment}
               />
             </SheetContent>
           </Sheet>

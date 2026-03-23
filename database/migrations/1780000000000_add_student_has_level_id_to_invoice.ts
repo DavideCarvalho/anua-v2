@@ -4,6 +4,9 @@ export default class extends BaseSchema {
   protected tableName = 'Invoice'
 
   async up() {
+    const hasColumn = await this.schema.hasColumn(this.tableName, 'studentHasLevelId')
+    if (hasColumn) return
+
     this.schema.alterTable(this.tableName, (table) => {
       table
         .text('studentHasLevelId')

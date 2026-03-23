@@ -71,6 +71,8 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
 
   const createEmployeeMutation = useMutation(api.api.v1.users.store.mutationOptions())
   const isPending = createEmployeeMutation.isPending
+  const selectedRoleLabel =
+    EMPLOYEE_ROLES.find((role) => role.value === form.watch('role'))?.label ?? 'Selecione um cargo'
 
   const createEmployee = async (values: FormValues) => {
     const result = await createEmployeeMutation.mutateAsync({
@@ -79,7 +81,7 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
         email: values.email,
         password: Math.random().toString(36).slice(-8) + 'A1!',
         schoolId,
-        roleId: values.role,
+        roleName: values.role,
       },
     })
 
@@ -204,7 +206,7 @@ export function NewEmployeeModal({ schoolId, open, onOpenChange }: NewEmployeeMo
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione um cargo" />
+                        <SelectValue>{selectedRoleLabel}</SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

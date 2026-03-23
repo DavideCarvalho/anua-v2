@@ -18,6 +18,7 @@ import {
   ClipboardCheck,
   AlertTriangle,
   Clock,
+  ShoppingBag,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { SharedProps } from '../../lib/types'
@@ -147,12 +148,12 @@ const commonNavigation: NavItem[] = [
     href: '/responsavel/cantina',
     icon: UtensilsCrossed,
   },
-  // {
-  //   title: 'Loja',
-  //   route: 'web.responsavel.loja',
-  //   href: '/responsavel/loja',
-  //   icon: ShoppingBag,
-  // },
+  {
+    title: 'Loja',
+    route: 'web.responsavel.loja',
+    href: '/responsavel/loja',
+    icon: ShoppingBag,
+  },
   { title: 'Perfil', route: 'web.responsavel.perfil', href: '/responsavel/perfil', icon: User },
 ]
 

@@ -6,7 +6,7 @@ export default class StoreInstallmentRuleTransformer extends BaseTransformer<Sto
     return this.pick(this.resource, [
       'id',
       'storeId',
-      'minAmount',
+      'minInstallmentAmount',
       'maxInstallments',
       'isActive',
       'createdAt',

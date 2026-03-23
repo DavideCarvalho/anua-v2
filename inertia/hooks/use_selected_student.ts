@@ -3,9 +3,9 @@ import { useResponsavelStore } from '../stores/responsavel_store'
 
 export function useSelectedStudent() {
   const [alunoSlug, setAlunoSlug] = useQueryState('aluno')
-  const { students, isLoaded, getStudentBySlug } = useResponsavelStore()
+  const { students, isLoaded, getSelectedStudent } = useResponsavelStore()
 
-  const selectedStudent = getStudentBySlug(alunoSlug)
+  const selectedStudent = getSelectedStudent()
 
   // Se não tem aluno na URL mas tem students, seta o primeiro
   const setDefaultStudent = () => {

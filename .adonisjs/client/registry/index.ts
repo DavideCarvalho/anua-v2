@@ -1044,6 +1044,12 @@ const routes = {
     tokens: [{"old":"/aluno/idle","type":0,"val":"aluno","end":""},{"old":"/aluno/idle","type":0,"val":"idle","end":""}],
     types: placeholder as Registry['web.aluno.idle']['types'],
   },
+  'web.aluno.jogo': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/jogo',
+    tokens: [{"old":"/aluno/jogo","type":0,"val":"aluno","end":""},{"old":"/aluno/jogo","type":0,"val":"jogo","end":""}],
+    types: placeholder as Registry['web.aluno.jogo']['types'],
+  },
   'web.aluno.loja.store': {
     methods: ["GET","HEAD"],
     pattern: '/aluno/loja/:id',
@@ -4097,6 +4103,12 @@ const routes = {
     pattern: '/api/v1/pedagogical-calendar/creation-context',
     tokens: [{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"api","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"v1","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"pedagogical-calendar","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"creation-context","end":""}],
     types: placeholder as Registry['api.v1.pedagogical_calendar.creation_context']['types'],
+  },
+  'api.v1.game.create_character': {
+    methods: ["POST"],
+    pattern: '/api/v1/game/characters',
+    tokens: [{"old":"/api/v1/game/characters","type":0,"val":"api","end":""},{"old":"/api/v1/game/characters","type":0,"val":"v1","end":""},{"old":"/api/v1/game/characters","type":0,"val":"game","end":""},{"old":"/api/v1/game/characters","type":0,"val":"characters","end":""}],
+    types: placeholder as Registry['api.v1.game.create_character']['types'],
   },
   'api.v1.csp_report': {
     methods: ["POST"],

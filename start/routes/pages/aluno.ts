@@ -16,6 +16,8 @@ const ShowAlunoLojaPontosPageController = () =>
   import('#controllers/pages/aluno/show_aluno_loja_pontos_page_controller')
 const ShowAlunoIdlePageController = () =>
   import('#controllers/pages/aluno/show_aluno_idle_page_controller')
+const ShowAlunoJogoPageController = () =>
+  import('#controllers/pages/aluno/show_aluno_jogo_page_controller')
 
 export function registerAlunoPageRoutes() {
   router
@@ -26,6 +28,7 @@ export function registerAlunoPageRoutes() {
       router.get('/loja/pedidos', [ShowAlunoPedidosPageController]).as('loja.pedidos')
       router.get('/loja/pontos', [ShowAlunoLojaPontosPageController]).as('loja.pontos')
       router.get('/idle', [ShowAlunoIdlePageController]).as('idle')
+      router.get('/jogo', [ShowAlunoJogoPageController]).as('jogo')
       router.get('/loja/:id', [ShowAlunoLojaStorePageController]).as('loja.store')
     })
     .prefix('/aluno')

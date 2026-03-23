@@ -4,7 +4,7 @@ import type StoreInstallmentRule from '#models/store_installment_rule'
 export default class StoreInstallmentRuleDto extends BaseModelDto {
   declare id: string
   declare storeId: string
-  declare minAmount: number
+  declare minInstallmentAmount: number
   declare maxInstallments: number
   declare isActive: boolean
   declare createdAt: Date
@@ -17,7 +17,7 @@ export default class StoreInstallmentRuleDto extends BaseModelDto {
 
     this.id = model.id
     this.storeId = model.storeId
-    this.minAmount = model.minAmount
+    this.minInstallmentAmount = model.minInstallmentAmount
     this.maxInstallments = model.maxInstallments
     this.isActive = model.isActive
     this.createdAt = model.createdAt.toJSDate()
