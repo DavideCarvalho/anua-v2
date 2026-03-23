@@ -1,12 +1,14 @@
 import { defineConfig, stores } from '@adonisjs/lock'
+import env from '#start/env'
 
 const lockConfig = defineConfig({
-  default: 'database',
+  default: env.get('NODE_ENV') === 'test' ? 'memory' : 'database',
   stores: {
     database: stores.database({
       connectionName: 'postgres',
       tableName: 'locks',
     }),
+    memory: stores.memory(),
   },
 })
 
