@@ -298,116 +298,143 @@ export default function EscolaDashboard() {
         </div>
 
         {isSchoolTeacher ? (
-          <Tabs
-            value={activeTab}
-            onValueChange={(value: string) => setActiveTab(value as DashboardTab)}
-          >
-            <TabsList className="grid w-full md:w-auto md:inline-grid md:grid-cols-1">
-              <TabsTrigger value="pedagogical" className="gap-2">
-                <GraduationCap className="h-4 w-4" />
-                Pedagógico
-              </TabsTrigger>
-            </TabsList>
+          <>
+            <div className="flex flex-wrap items-center justify-start gap-2">
+              <Select
+                value={pedagogicalFilters.academicPeriodId}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setPedagogicalFilters({
+                    academicPeriodId: value,
+                    courseId: 'all',
+                    levelId: 'all',
+                    classId: 'all',
+                  })
+                }}
+              >
+                <SelectTrigger className="w-[240px]">
+                  <SelectValue placeholder="Período letivo">
+                    {selectedPedagogicalPeriodLabel}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os períodos letivos</SelectItem>
+                  {academicPeriods.map((period) => (
+                    <SelectItem key={period.id} value={period.id}>
+                      {period.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <TabsContent value="pedagogical" className="mt-6 space-y-6">
-              <div className="flex flex-wrap items-center justify-start gap-2">
-                <Select
-                  value={pedagogicalFilters.academicPeriodId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters({
-                      academicPeriodId: value,
-                      courseId: 'all',
-                      levelId: 'all',
-                      classId: 'all',
-                    })
-                  }}
-                >
-                  <SelectTrigger className="w-[240px]">
-                    <SelectValue placeholder="Período letivo">
-                      {selectedPedagogicalPeriodLabel}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os períodos letivos</SelectItem>
-                    {academicPeriods.map((period) => (
-                      <SelectItem key={period.id} value={period.id}>
-                        {period.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Select
+                value={pedagogicalFilters.courseId}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setPedagogicalFilters((prev) => ({
+                    ...prev,
+                    courseId: value,
+                    levelId: 'all',
+                    classId: 'all',
+                  }))
+                }}
+                disabled={pedagogicalFilters.academicPeriodId === 'all'}
+              >
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Curso">{selectedPedagogicalCourseLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os cursos</SelectItem>
+                  {pedagogicalCourses.map((course) => (
+                    <SelectItem key={course.courseId} value={course.courseId}>
+                      {course.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <Select
-                  value={pedagogicalFilters.courseId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters((prev) => ({
-                      ...prev,
-                      courseId: value,
-                      levelId: 'all',
-                      classId: 'all',
-                    }))
-                  }}
-                  disabled={pedagogicalFilters.academicPeriodId === 'all'}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Curso">{selectedPedagogicalCourseLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os cursos</SelectItem>
-                    {pedagogicalCourses.map((course) => (
-                      <SelectItem key={course.courseId} value={course.courseId}>
-                        {course.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Select
+                value={pedagogicalFilters.levelId}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setPedagogicalFilters((prev) => ({ ...prev, levelId: value, classId: 'all' }))
+                }}
+                disabled={pedagogicalFilters.courseId === 'all'}
+              >
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Nível">{selectedPedagogicalLevelLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os níveis</SelectItem>
+                  {pedagogicalLevels.map((level) => (
+                    <SelectItem key={level.id} value={level.id}>
+                      {level.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <Select
-                  value={pedagogicalFilters.levelId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters((prev) => ({ ...prev, levelId: value, classId: 'all' }))
-                  }}
-                  disabled={pedagogicalFilters.courseId === 'all'}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Nível">{selectedPedagogicalLevelLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os níveis</SelectItem>
-                    {pedagogicalLevels.map((level) => (
-                      <SelectItem key={level.id} value={level.id}>
-                        {level.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Select
+                value={pedagogicalFilters.classId}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setPedagogicalFilters((prev) => ({ ...prev, classId: value }))
+                }}
+                disabled={pedagogicalFilters.courseId === 'all'}
+              >
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Turma">{selectedPedagogicalClassLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as turmas</SelectItem>
+                  {pedagogicalClasses.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.levelName} - {cls.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                <Select
-                  value={pedagogicalFilters.classId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters((prev) => ({ ...prev, classId: value }))
-                  }}
-                  disabled={pedagogicalFilters.courseId === 'all'}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Turma">{selectedPedagogicalClassLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as turmas</SelectItem>
-                    {pedagogicalClasses.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id}>
-                        {cls.levelName} - {cls.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <PedagogicalAlertsCards
+              academicPeriodId={
+                pedagogicalFilters.academicPeriodId === 'all'
+                  ? undefined
+                  : pedagogicalFilters.academicPeriodId
+              }
+              courseId={
+                pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
+              }
+              levelId={
+                pedagogicalFilters.levelId === 'all' ? undefined : pedagogicalFilters.levelId
+              }
+              classId={
+                pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
+              }
+            />
+            <AcademicOverviewCards
+              academicPeriodId={
+                pedagogicalFilters.academicPeriodId === 'all'
+                  ? undefined
+                  : pedagogicalFilters.academicPeriodId
+              }
+              classId={
+                pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
+              }
+            />
 
-              <PedagogicalAlertsCards
+            <div className="grid gap-4 md:grid-cols-2">
+              <GradeDistributionChart
+                academicPeriodId={
+                  pedagogicalFilters.academicPeriodId === 'all'
+                    ? undefined
+                    : pedagogicalFilters.academicPeriodId
+                }
+                classId={
+                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
+                }
+              />
+              <PedagogicalAttendanceTrendsChartWithFilters
                 academicPeriodId={
                   pedagogicalFilters.academicPeriodId === 'all'
                     ? undefined
@@ -416,14 +443,11 @@ export default function EscolaDashboard() {
                 courseId={
                   pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
                 }
-                levelId={
-                  pedagogicalFilters.levelId === 'all' ? undefined : pedagogicalFilters.levelId
-                }
                 classId={
                   pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
                 }
               />
-              <AcademicOverviewCards
+              <GradeTrendsChartWithFilters
                 academicPeriodId={
                   pedagogicalFilters.academicPeriodId === 'all'
                     ? undefined
@@ -433,63 +457,27 @@ export default function EscolaDashboard() {
                   pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
                 }
               />
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <GradeDistributionChart
-                  academicPeriodId={
-                    pedagogicalFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : pedagogicalFilters.academicPeriodId
-                  }
-                  classId={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-                <PedagogicalAttendanceTrendsChartWithFilters
-                  academicPeriodId={
-                    pedagogicalFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : pedagogicalFilters.academicPeriodId
-                  }
-                  courseId={
-                    pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
-                  }
-                  classId={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-                <GradeTrendsChartWithFilters
-                  academicPeriodId={
-                    pedagogicalFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : pedagogicalFilters.academicPeriodId
-                  }
-                  classId={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-                <ClassPerformanceChart
-                  defaultAcademicPeriodFilter={selectedPedagogicalPeriodName}
-                  defaultClassFilter={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-              </div>
-
-              <AtRiskStudentsTable
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                classId={
+              <ClassPerformanceChart
+                defaultAcademicPeriodFilter={selectedPedagogicalPeriodName}
+                defaultClassFilter={
                   pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
                 }
               />
+            </div>
 
-              <EscolaInsightsContainer allowedTypes={['academic']} />
-            </TabsContent>
-          </Tabs>
+            <AtRiskStudentsTable
+              academicPeriodId={
+                pedagogicalFilters.academicPeriodId === 'all'
+                  ? undefined
+                  : pedagogicalFilters.academicPeriodId
+              }
+              classId={
+                pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
+              }
+            />
+
+            <EscolaInsightsContainer allowedTypes={['academic']} />
+          </>
         ) : (
           <Tabs
             value={activeTab}
