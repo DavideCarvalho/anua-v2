@@ -1,13 +1,15 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-cursor-oauth"],
+  "provider": {
+    "cursor": {
+      "name": "Cursor"
+    }
+  },
   "mcp": {
     "shadcn": {
       "type": "local",
-      "command": [
-        "npx",
-        "shadcn@latest",
-        "mcp"
-      ],
+      "command": ["npx", "shadcn@latest", "mcp"],
       "enabled": true
     }
   }

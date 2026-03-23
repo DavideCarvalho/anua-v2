@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { router } from '@inertiajs/react'
 import { Trash2, Plus, Minus } from 'lucide-react'
@@ -26,12 +26,15 @@ interface CartSheetContentProps {
   backHref?: string
   hasOnlinePayment?: boolean
   studentId?: string
+  /** Responsável: só mensalidade (sem pagar agora / sem parcelar no gateway); parcelas na fatura respeitam regras da loja + período letivo */
+  restrictCartPayment?: boolean
 }
 
 export function CartSheetContent({
   backHref = '/aluno/loja',
   hasOnlinePayment = false,
   studentId,
+  restrictCartPayment = false,
 }: CartSheetContentProps) {
   const cart = useCart()
   const [paymentOption, setPaymentOption] = useState<'IMMEDIATE' | 'BILL' | 'INSTALLMENTS'>('BILL')
@@ -42,15 +45,23 @@ export function CartSheetContent({
   const queryClient = useQueryClient()
   const checkout = useMutation(api.api.v1.marketplace.checkout.mutationOptions())
 
+  useEffect(() => {
+    if (restrictCartPayment) {
+      setPaymentOption('BILL')
+    }
+  }, [restrictCartPayment])
+
   const { data: installmentData } = useQuery({
     ...api.api.v1.marketplace.installmentOptions.queryOptions({
       query: { storeId: cart.storeId ?? '', amount: cart.totalPrice },
     }),
-    enabled: paymentOption === 'INSTALLMENTS' && !!cart.storeId && cart.totalPrice > 0,
+    enabled:
+      !!cart.storeId &&
+      cart.totalPrice > 0 &&
+      (paymentOption === 'INSTALLMENTS' || paymentOption === 'BILL'),
   })
   const installmentOptions = installmentData?.options ?? []
 
-  // Fetch active academic period to calculate max installments for BILL
   const { data: academicPeriodsData } = useQuery({
     ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
       query: { limit: 1 },
@@ -58,25 +69,33 @@ export function CartSheetContent({
     enabled: paymentOption === 'BILL',
   })
 
-  // Calculate max installments based on months until end of academic period
   const maxBillInstallments = useMemo(() => {
     const activePeriod = academicPeriodsData?.data?.[0]
-    if (!activePeriod?.endDate) return 12 // fallback
+    let monthCap = 12
+    if (activePeriod?.endDate) {
+      const endDate = new Date(String(activePeriod.endDate))
+      const now = new Date()
+      monthCap = Math.max(1, differenceInMonths(endDate, now))
+    }
 
-    const endDate = new Date(String(activePeriod.endDate))
-    const now = new Date()
-    const months = differenceInMonths(endDate, now)
-    return Math.max(1, months)
-  }, [academicPeriodsData])
+    const rulesMax = installmentData?.maxInstallments ?? 1
+    if (rulesMax > 1) {
+      return Math.min(monthCap, rulesMax)
+    }
+    return monthCap
+  }, [academicPeriodsData, installmentData])
 
-  // Reset billInstallments if it exceeds max
-  if (billInstallments > maxBillInstallments) {
-    setBillInstallments(maxBillInstallments)
-  }
+  useEffect(() => {
+    if (paymentOption !== 'BILL') return
+    if (billInstallments > maxBillInstallments) {
+      setBillInstallments(maxBillInstallments)
+    }
+  }, [paymentOption, billInstallments, maxBillInstallments])
 
   async function handleCheckout() {
     if (!cart.storeId) return
     const isDeferred = paymentOption === 'BILL' || paymentOption === 'INSTALLMENTS'
+    const billParts = paymentOption === 'BILL' ? billInstallments : undefined
     try {
       await checkout.mutateAsync({
         body: {
@@ -88,7 +107,7 @@ export function CartSheetContent({
             paymentOption === 'INSTALLMENTS'
               ? installments
               : paymentOption === 'BILL'
-                ? billInstallments
+                ? billParts
                 : undefined,
           spreadAcrossPeriod: paymentOption === 'BILL' ? true : undefined,
           notes: notes || undefined,
@@ -106,7 +125,6 @@ export function CartSheetContent({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Cart items - scrollable */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
         <div className="space-y-0">
           {cart.items.map((item, index) => (
@@ -154,43 +172,57 @@ export function CartSheetContent({
 
         <Separator className="my-4" />
 
-        {/* Payment options */}
         <div className="space-y-4">
           <div className="space-y-3">
             <Label className="text-sm font-medium">Modo de pagamento</Label>
-            <RadioGroup
-              value={paymentOption}
-              onValueChange={(v) => setPaymentOption(v as 'IMMEDIATE' | 'BILL' | 'INSTALLMENTS')}
-            >
-              {hasOnlinePayment && (
+            {restrictCartPayment ? (
+              <>
+                {/* Pagar agora — desativado no fluxo responsável
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="IMMEDIATE" id="sheet-mode-immediate" />
                   <Label htmlFor="sheet-mode-immediate">Pagar agora</Label>
                 </div>
-              )}
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="BILL" id="sheet-mode-bill" />
-                <Label htmlFor="sheet-mode-bill" className="flex flex-col">
-                  <span>Adicionar na mensalidade</span>
-                  <span className="text-xs text-muted-foreground font-normal">
-                    Dividido nas próximas mensalidades
-                  </span>
-                </Label>
-              </div>
-              {hasOnlinePayment && (
+                */}
+                <p className="text-sm text-muted-foreground">
+                  O valor será lançado na mensalidade do aluno (uma parcela por fatura). O limite de
+                  parcelas é definido pela escola.
+                </p>
+              </>
+            ) : (
+              <RadioGroup
+                value={paymentOption}
+                onValueChange={(v) => setPaymentOption(v as 'IMMEDIATE' | 'BILL' | 'INSTALLMENTS')}
+              >
+                {hasOnlinePayment && (
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="IMMEDIATE" id="sheet-mode-immediate" />
+                    <Label htmlFor="sheet-mode-immediate">Pagar agora</Label>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="INSTALLMENTS" id="sheet-mode-installments" />
-                  <Label htmlFor="sheet-mode-installments">Parcelar</Label>
+                  <RadioGroupItem value="BILL" id="sheet-mode-bill" />
+                  <Label htmlFor="sheet-mode-bill" className="flex flex-col">
+                    <span>Adicionar na mensalidade</span>
+                    <span className="text-xs text-muted-foreground font-normal">
+                      Dividido nas próximas mensalidades
+                    </span>
+                  </Label>
                 </div>
-              )}
-            </RadioGroup>
+                {hasOnlinePayment && (
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="INSTALLMENTS" id="sheet-mode-installments" />
+                    <Label htmlFor="sheet-mode-installments">Parcelar</Label>
+                  </div>
+                )}
+              </RadioGroup>
+            )}
           </div>
 
           {paymentOption === 'BILL' && (
             <>
               <Separator />
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Parcelas</Label>
+                <Label className="text-sm font-medium">Parcelas na mensalidade</Label>
                 <Select
                   value={String(billInstallments)}
                   onValueChange={(v) => setBillInstallments(Number(v))}
@@ -210,7 +242,7 @@ export function CartSheetContent({
             </>
           )}
 
-          {paymentOption === 'IMMEDIATE' && (
+          {!restrictCartPayment && paymentOption === 'IMMEDIATE' && (
             <>
               <Separator />
               <div className="space-y-3">
@@ -232,7 +264,7 @@ export function CartSheetContent({
             </>
           )}
 
-          {paymentOption === 'INSTALLMENTS' && (
+          {!restrictCartPayment && paymentOption === 'INSTALLMENTS' && (
             <>
               <Separator />
               <div className="space-y-3">
@@ -280,7 +312,6 @@ export function CartSheetContent({
         </div>
       </div>
 
-      {/* Footer - fixed at bottom */}
       <div className="border-t px-6 py-4 space-y-3">
         <div className="flex justify-between text-lg font-bold">
           <span>Total</span>

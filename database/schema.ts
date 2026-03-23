@@ -2363,7 +2363,7 @@ export class StoreFinancialSettingSchema extends BaseModel {
 }
 
 export class StoreInstallmentRuleSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'isActive', 'maxInstallments', 'minAmount', 'storeId', 'updatedAt'] as const
+  static $columns = ['createdAt', 'id', 'isActive', 'maxInstallments', 'minInstallmentAmount', 'storeId', 'updatedAt'] as const
   $columns = StoreInstallmentRuleSchema.$columns
   @column.dateTime()
   declare createdAt: DateTime
@@ -2374,7 +2374,7 @@ export class StoreInstallmentRuleSchema extends BaseModel {
   @column()
   declare maxInstallments: number
   @column()
-  declare minAmount: number
+  declare minInstallmentAmount: number
   @column()
   declare storeId: string
   @column.dateTime()

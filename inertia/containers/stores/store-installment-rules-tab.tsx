@@ -18,6 +18,7 @@ import {
 } from '../../components/ui/dropdown-menu'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
+import { CurrencyInput } from '../../components/ui/currency-input'
 import {
   Dialog,
   DialogContent,
@@ -28,33 +29,29 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { formatCurrency } from '../../lib/utils'
+import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 
 interface StoreInstallmentRulesTabProps {
   storeId: string
 }
 
-type InstallmentRule = {
-  id: string
-  minAmount: number
-  maxInstallments: number
-}
+type StoreInstallmentRulesIndex = Awaited<Route.Response<'api.v1.store_installment_rules.index'>>
+type StoreInstallmentRuleRow = StoreInstallmentRulesIndex[number]
 
 export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabProps) {
   const [createOpen, setCreateOpen] = useState(false)
-  const [editingRule, setEditingRule] = useState<InstallmentRule | null>(null)
-  const [minAmount, setMinAmount] = useState('')
+  const [editingRule, setEditingRule] = useState<StoreInstallmentRuleRow | null>(null)
+  const [minInstallmentAmount, setMinInstallmentAmount] = useState('')
   const [maxInstallments, setMaxInstallments] = useState('')
 
   const queryClient = useQueryClient()
 
-  const { data: rulesData, isLoading } = useQuery(
+  const { data: rulesResponse, isLoading } = useQuery(
     api.api.v1.storeInstallmentRules.index.queryOptions({ query: { storeId } })
   )
 
-  const rulesList: InstallmentRule[] = Array.isArray(rulesData)
-    ? (rulesData as InstallmentRule[])
-    : []
+  const rulesList: StoreInstallmentRulesIndex = rulesResponse ?? []
 
   const createMutation = useMutation(api.api.v1.storeInstallmentRules.store.mutationOptions())
   const updateMutation = useMutation(api.api.v1.storeInstallmentRules.update.mutationOptions())
@@ -66,24 +63,24 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
       await createMutation.mutateAsync({
         body: {
           storeId,
-          minAmount: Math.round(Number(minAmount) * 100),
-          maxInstallments: Number(maxInstallments),
+          minInstallmentAmount: Math.round(Number(minInstallmentAmount) * 100),
+          maxInstallments: maxInstallments ? Number(maxInstallments) : undefined,
         },
       })
       queryClient.invalidateQueries({ queryKey: api.api.v1.storeInstallmentRules.index.pathKey() })
       toast.success('Regra criada com sucesso!')
       setCreateOpen(false)
-      setMinAmount('')
+      setMinInstallmentAmount('')
       setMaxInstallments('')
     } catch {
       toast.error('Erro ao criar regra.')
     }
   }
 
-  const handleEdit = (rule: InstallmentRule) => {
+  const handleEdit = (rule: StoreInstallmentRuleRow) => {
     setEditingRule(rule)
-    setMinAmount(String(rule.minAmount / 100))
-    setMaxInstallments(String(rule.maxInstallments))
+    setMinInstallmentAmount(String(rule.minInstallmentAmount / 100))
+    setMaxInstallments(rule.maxInstallments ? String(rule.maxInstallments) : '')
   }
 
   async function handleUpdate(e: React.FormEvent) {
@@ -93,14 +90,14 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
       await updateMutation.mutateAsync({
         params: { id: editingRule.id },
         body: {
-          minAmount: Math.round(Number(minAmount) * 100),
-          maxInstallments: Number(maxInstallments),
+          minInstallmentAmount: Math.round(Number(minInstallmentAmount) * 100),
+          maxInstallments: maxInstallments ? Number(maxInstallments) : undefined,
         },
       })
       queryClient.invalidateQueries({ queryKey: api.api.v1.storeInstallmentRules.index.pathKey() })
       toast.success('Regra atualizada com sucesso!')
       setEditingRule(null)
-      setMinAmount('')
+      setMinInstallmentAmount('')
       setMaxInstallments('')
     } catch {
       toast.error('Erro ao atualizar regra.')
@@ -122,37 +119,43 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Regras de Parcelamento</CardTitle>
+            <CardTitle>Parcelamento</CardTitle>
             <CardDescription>
-              Defina faixas de valor e o número máximo de parcelas para cada faixa
+              Configure o valor mínimo de cada parcela e o limite máximo de parcelas
             </CardDescription>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Regra
-          </Button>
+          {!rulesList.length && (
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Configurar
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : !rulesList.length ? (
             <div className="text-center py-8 text-muted-foreground">
-              Nenhuma regra cadastrada. Sem regras, parcelamento não fica disponível.
+              Nenhuma configuração de parcelamento. Configure para permitir parcelas nas vendas.
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Valor mínimo</TableHead>
+                  <TableHead>Parcela mínima</TableHead>
                   <TableHead>Parcelas máximas</TableHead>
                   <TableHead className="w-[50px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rulesList.map((rule: InstallmentRule) => (
+                {rulesList.map((rule) => (
                   <TableRow key={rule.id}>
-                    <TableCell>{formatCurrency(rule.minAmount)}</TableCell>
-                    <TableCell>{rule.maxInstallments}x</TableCell>
+                    <TableCell>
+                      {rule.minInstallmentAmount > 0
+                        ? formatCurrency(rule.minInstallmentAmount)
+                        : 'Sem limite'}
+                    </TableCell>
+                    <TableCell>{rule.maxInstallments ?? 12}x</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -188,24 +191,20 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
         <DialogContent>
           <form onSubmit={handleCreate}>
             <DialogHeader>
-              <DialogTitle>Nova Regra de Parcelamento</DialogTitle>
+              <DialogTitle>Configurar Parcelamento</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="minAmount">Valor mínimo (R$)</Label>
-                <Input
-                  id="minAmount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={minAmount}
-                  onChange={(e) => setMinAmount(e.target.value)}
-                  placeholder="Ex: 50.00"
-                  required
+                <Label htmlFor="minInstallmentAmount">Valor mínimo da parcela (R$)</Label>
+                <CurrencyInput
+                  id="minInstallmentAmount"
+                  value={Math.round(Number(minInstallmentAmount) * 100)}
+                  onChange={(cents) => setMinInstallmentAmount(String(cents / 100))}
+                  placeholder="R$ 30,00 (0 = sem limite)"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="maxInstallments">Parcelas máximas</Label>
+                <Label htmlFor="maxInstallments">Parcelas máximas (opcional, padrão: 12)</Label>
                 <Input
                   id="maxInstallments"
                   type="number"
@@ -213,8 +212,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
                   max="24"
                   value={maxInstallments}
                   onChange={(e) => setMaxInstallments(e.target.value)}
-                  placeholder="Ex: 3"
-                  required
+                  placeholder="Ex: 12"
                 />
               </div>
             </div>
@@ -235,7 +233,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
         onOpenChange={(open) => {
           if (!open) {
             setEditingRule(null)
-            setMinAmount('')
+            setMinInstallmentAmount('')
             setMaxInstallments('')
           }
         }}
@@ -247,20 +245,18 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-minAmount">Valor mínimo (R$)</Label>
-                <Input
-                  id="edit-minAmount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={minAmount}
-                  onChange={(e) => setMinAmount(e.target.value)}
-                  placeholder="Ex: 50.00"
-                  required
+                <Label htmlFor="edit-minInstallmentAmount">Valor mínimo da parcela (R$)</Label>
+                <CurrencyInput
+                  id="edit-minInstallmentAmount"
+                  value={Math.round(Number(minInstallmentAmount) * 100)}
+                  onChange={(cents) => setMinInstallmentAmount(String(cents / 100))}
+                  placeholder="R$ 30,00 (0 = sem limite)"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-maxInstallments">Parcelas máximas</Label>
+                <Label htmlFor="edit-maxInstallments">
+                  Parcelas máximas (opcional, padrão: 12)
+                </Label>
                 <Input
                   id="edit-maxInstallments"
                   type="number"
@@ -268,8 +264,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
                   max="24"
                   value={maxInstallments}
                   onChange={(e) => setMaxInstallments(e.target.value)}
-                  placeholder="Ex: 3"
-                  required
+                  placeholder="Ex: 12"
                 />
               </div>
             </div>
@@ -279,7 +274,7 @@ export function StoreInstallmentRulesTab({ storeId }: StoreInstallmentRulesTabPr
                 variant="outline"
                 onClick={() => {
                   setEditingRule(null)
-                  setMinAmount('')
+                  setMinInstallmentAmount('')
                   setMaxInstallments('')
                 }}
               >

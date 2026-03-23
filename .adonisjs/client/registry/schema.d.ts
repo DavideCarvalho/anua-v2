@@ -8167,16 +8167,16 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pedagogical_calendar/get_creation_context_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'api.v1.game.createCharacter': {
+  'api.v1.game.create_character': {
     methods: ["POST"]
     pattern: '/api/v1/game/characters'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/game_character').createGameCharacterValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/game_character').createGameCharacterValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.csp_report': {

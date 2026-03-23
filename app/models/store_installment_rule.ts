@@ -21,7 +21,7 @@ export default class StoreInstallmentRule extends BaseModel {
   declare storeId: string
 
   @column()
-  declare minAmount: number
+  declare minInstallmentAmount: number
 
   @column()
   declare maxInstallments: number

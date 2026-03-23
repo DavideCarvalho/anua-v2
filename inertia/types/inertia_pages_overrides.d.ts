@@ -1,9 +1,18 @@
 import '@adonisjs/inertia/types'
+import type { JSONDataTypes } from '@adonisjs/core/types/transformers'
 
 type JsonPrimitive = string | number | boolean | null
 
 declare module '@adonisjs/inertia/types' {
   interface InertiaPages {
+    'aluno/jogo/create-character': {
+      studentName: string
+    }
+
+    'aluno/jogo/tavern': {
+      character: JSONDataTypes
+    }
+
     'aluno/dashboard': {
       student: { id: string; name: string }
       avatar: {

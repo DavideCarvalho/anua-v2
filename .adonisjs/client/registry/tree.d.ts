@@ -988,7 +988,7 @@ export interface ApiDefinition {
         creationContext: typeof routes['api.v1.pedagogical_calendar.creation_context']
       }
       game: {
-        createCharacter: typeof routes['api.v1.game.createCharacter']
+        createCharacter: typeof routes['api.v1.game.create_character']
       }
       cspReport: typeof routes['api.v1.csp_report']
     }

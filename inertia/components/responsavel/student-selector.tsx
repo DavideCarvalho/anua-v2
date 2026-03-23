@@ -10,6 +10,11 @@ import { useResponsavelStore, type Student } from '../../stores/responsavel_stor
 type ResponsavelStatsResponse = Route.Response<'api.v1.dashboard.responsavel_stats'>
 type ResponsavelStudent = ResponsavelStatsResponse['students'][number]
 
+function parseAlunoFromWindowSearch(): string | null {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('aluno')
+}
+
 function toStoreStudent(student: ResponsavelStudent): Student {
   return {
     id: student.id,
@@ -28,7 +33,7 @@ function toStoreStudent(student: ResponsavelStudent): Student {
 // Componente que carrega os dados e popula o store
 export function StudentSelectorWithData() {
   const { data, isLoading } = useQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
-  const { setStudents, students, isLoaded } = useResponsavelStore()
+  const { setStudents, students, isLoaded, setSelectedStudentId } = useResponsavelStore()
   const [alunoSlug, setAlunoSlug] = useQueryState('aluno')
 
   // Popula o store quando os dados carregam
@@ -44,6 +49,18 @@ export function StudentSelectorWithData() {
       setAlunoSlug(students[0].slug, { shallow: true })
     }
   }, [isLoaded, students, alunoSlug, setAlunoSlug])
+
+  // Mantém selectedStudentId na store alinhado ao ?aluno= (mesma regra do select / fallback)
+  useEffect(() => {
+    if (!isLoaded || students.length === 0) return
+    const alunoKey = alunoSlug ?? parseAlunoFromWindowSearch()
+    const selected = alunoKey
+      ? (students.find((s) => s.slug === alunoKey) ?? students[0])
+      : students[0]
+    if (selected) {
+      setSelectedStudentId(selected.id)
+    }
+  }, [isLoaded, students, alunoSlug, setSelectedStudentId])
 
   if (isLoading || !isLoaded) {
     return <div className="h-9 w-[200px] animate-pulse rounded bg-muted" />

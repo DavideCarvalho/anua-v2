@@ -7,9 +7,9 @@ const CreateGameCharacterController = () =>
 export function registerGameApiRoutes() {
   router
     .group(() => {
-      router.post('/characters', [CreateGameCharacterController]).as('createCharacter')
+      router.post('/characters', [CreateGameCharacterController]).as('create_character')
     })
     .prefix('/game')
-    .use([middleware.auth()])
+    .use([middleware.auth(), middleware.impersonation()])
     .as('game')
 }

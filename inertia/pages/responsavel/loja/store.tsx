@@ -16,6 +16,7 @@ export default function ResponsavelLojaStorePage() {
           storeId={props.storeId}
           backHref="/responsavel/loja"
           studentId={studentId}
+          restrictCartPayment
         />
       </CartProvider>
     </ResponsavelLayout>

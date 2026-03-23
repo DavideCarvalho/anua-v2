@@ -4086,11 +4086,11 @@ const routes = {
     tokens: [{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"api","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"v1","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"pedagogical-calendar","end":""},{"old":"/api/v1/pedagogical-calendar/creation-context","type":0,"val":"creation-context","end":""}],
     types: placeholder as Registry['api.v1.pedagogical_calendar.creation_context']['types'],
   },
-  'api.v1.game.createCharacter': {
+  'api.v1.game.create_character': {
     methods: ["POST"],
     pattern: '/api/v1/game/characters',
     tokens: [{"old":"/api/v1/game/characters","type":0,"val":"api","end":""},{"old":"/api/v1/game/characters","type":0,"val":"v1","end":""},{"old":"/api/v1/game/characters","type":0,"val":"game","end":""},{"old":"/api/v1/game/characters","type":0,"val":"characters","end":""}],
-    types: placeholder as Registry['api.v1.game.createCharacter']['types'],
+    types: placeholder as Registry['api.v1.game.create_character']['types'],
   },
   'api.v1.csp_report': {
     methods: ["POST"],

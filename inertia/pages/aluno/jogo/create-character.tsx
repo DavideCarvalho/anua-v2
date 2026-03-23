@@ -37,7 +37,12 @@ interface CreateCharacterProps {
 }
 
 export default function CreateCharacterPage({ studentName: _studentName }: CreateCharacterProps) {
-  const createCharacter = useMutation(api.api.v1.game.createCharacter.mutationOptions())
+  console.log('=== DEBUG MUTATION OPTIONS ===')
+  const mutationOptions = api.api.v1.game.createCharacter.mutationOptions()
+  console.log('mutationOptions:', mutationOptions)
+  console.log('mutationOptions.mutationFn:', mutationOptions?.mutationFn)
+
+  const createCharacter = useMutation(mutationOptions)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as Resolver<FormValues>,
@@ -48,16 +53,26 @@ export default function CreateCharacterPage({ studentName: _studentName }: Creat
   })
 
   async function handleSubmit(values: FormValues) {
+    console.log('=== handleSubmit called ===')
+    console.log('values:', values)
+    console.log('createCharacter:', createCharacter)
+
     try {
-      await createCharacter.mutateAsync({
+      console.log('Calling mutateAsync...')
+      const result = await createCharacter.mutateAsync({
         body: {
           name: values.name,
           class: values.class,
         },
       })
+      console.log('mutateAsync result:', result)
       toast.success('Personagem criado com sucesso!')
       router.visit('/aluno/jogo')
     } catch (error: any) {
+      console.error('=== ERROR in handleSubmit ===')
+      console.error('error:', error)
+      console.error('error.message:', error?.message)
+      console.error('error.stack:', error?.stack)
       toast.error(error?.message || 'Erro ao criar personagem')
     }
   }

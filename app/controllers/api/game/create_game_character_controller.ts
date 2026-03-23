@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon'
-import { HttpContext } from '@adonisjs/core/http'
+import type { HttpContext } from '@adonisjs/core/http'
 import GameCharacter from '#models/game_character'
 import { CLASS_STATS, type GameClass } from '#models/game_character'
 import { createGameCharacterValidator } from '#validators/game_character'
 
 export default class CreateGameCharacterController {
-  async handle({ request, response, auth }: HttpContext) {
-    const user = auth.user!
+  async handle({ request, response, effectiveUser, auth }: HttpContext) {
+    const user = effectiveUser || auth.user!
     const student = await user.related('student').query().first()
 
     if (!student) {

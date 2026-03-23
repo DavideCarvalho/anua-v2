@@ -98,15 +98,15 @@ export const updateStoreSettlementStatusValidator = vine.compile(
 export const createStoreInstallmentRuleValidator = vine.compile(
   vine.object({
     storeId: vine.string().trim(),
-    minAmount: vine.number().min(0),
-    maxInstallments: vine.number().min(2).max(24),
+    minInstallmentAmount: vine.number().min(0),
+    maxInstallments: vine.number().min(2).max(24).optional(),
     isActive: vine.boolean().optional(),
   })
 )
 
 export const updateStoreInstallmentRuleValidator = vine.compile(
   vine.object({
-    minAmount: vine.number().min(0).optional(),
+    minInstallmentAmount: vine.number().min(0).optional(),
     maxInstallments: vine.number().min(2).max(24).optional(),
     isActive: vine.boolean().optional(),
   })

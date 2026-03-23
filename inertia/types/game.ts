@@ -14,6 +14,15 @@ export type MissionStatus = 'in_progress' | 'completed' | 'claimed'
 export type ItemType = 'weapon' | 'armor' | 'accessory' | 'consumable' | 'material'
 export type ItemRarity = 'common' | 'rare' | 'epic' | 'legendary'
 
+/** JSON-serializable value (compatible with Inertia `ComponentProps`) */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue }
+
 export interface GameCharacter {
   id: string
   studentId: string
@@ -83,7 +92,7 @@ export interface GameItem {
   defenseBonus: number
   hpBonus: number
   manaBonus: number
-  specialEffect: Record<string, unknown> | null
+  specialEffect: Record<string, JsonValue> | null
   icon: string | null
   goldPrice: number | null
 }

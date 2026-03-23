@@ -11,15 +11,29 @@ export default class GetInstallmentOptionsController {
       throw AppException.badRequest('storeId e amount são obrigatórios')
     }
 
-    const rules = await StoreInstallmentRule.query()
+    const rule = await StoreInstallmentRule.query()
       .where('storeId', storeId)
       .where('isActive', true)
-      .where('minAmount', '<=', Number(amount))
-      .orderBy('maxInstallments', 'desc')
+      .first()
 
-    const maxInstallments = rules.length > 0 ? rules[0].maxInstallments : 1
+    if (!rule) {
+      return response.ok({
+        maxInstallments: 1,
+        options: [{ installments: 1, installmentAmount: Number(amount) }],
+      })
+    }
 
-    // Build options array: [1, 2, ..., maxInstallments]
+    const minInstallmentAmount = rule.minInstallmentAmount
+    const maxAllowedInstallments = rule.maxInstallments ?? 12
+
+    let maxInstallments: number
+    if (minInstallmentAmount > 0) {
+      const calculatedMax = Math.floor(Number(amount) / minInstallmentAmount)
+      maxInstallments = Math.min(calculatedMax, maxAllowedInstallments)
+    } else {
+      maxInstallments = maxAllowedInstallments
+    }
+
     const options = Array.from({ length: maxInstallments }, (_, i) => ({
       installments: i + 1,
       installmentAmount: Math.ceil(Number(amount) / (i + 1)),
