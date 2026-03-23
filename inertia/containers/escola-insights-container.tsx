@@ -358,14 +358,6 @@ export function EscolaInsightsContainer({
         : allowedTypes?.length === 1 && allowedTypes[0] === 'academic'
           ? 'Alertas Pedagógicos'
           : 'Alertas'
-  const description =
-    allowedTypes?.length === 1 && allowedTypes[0] === 'financial'
-      ? 'Prioridades de cobrança e inadimplência'
-      : allowedTypes?.length === 1 && allowedTypes[0] === 'enrollment'
-        ? 'Prioridades de matrícula e documentação'
-        : allowedTypes?.length === 1 && allowedTypes[0] === 'academic'
-          ? 'Pontos de atenção sobre aprendizagem e frequência'
-          : 'Pontos de atenção da sua escola'
 
   return (
     <DashboardCardBoundary
