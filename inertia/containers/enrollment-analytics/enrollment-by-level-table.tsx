@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { GraduationCap } from 'lucide-react'
+import { GraduationCap, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import {
@@ -12,10 +13,13 @@ import {
 } from '../../components/ui/table'
 import { Badge } from '../../components/ui/badge'
 import { Progress } from '../../components/ui/progress'
+import { Button } from '../../components/ui/button'
 
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
 import { DashboardCardBoundary } from '~/components/dashboard-card-boundary'
+
+const ITEMS_PER_PAGE = 5
 
 type EnrollmentByLevelResponse = Route.Response<'api.v1.analytics.enrollments.by_level'>
 
@@ -61,6 +65,7 @@ function EnrollmentByLevelTableContent({
   levelId,
   classId,
 }: EnrollmentByLevelTableProps) {
+  const [page, setPage] = useState(1)
   const { data, isLoading } = useQuery(
     api.api.v1.analytics.enrollments.byLevel.queryOptions({
       query: { schoolId, academicPeriodId, courseId, levelId, classId },
@@ -74,6 +79,8 @@ function EnrollmentByLevelTableContent({
   type EnrollmentByLevelItem = EnrollmentByLevelResponse['byLevel'][number]
 
   const levels = data.byLevel || []
+  const totalPages = Math.ceil(levels.length / ITEMS_PER_PAGE)
+  const paginatedLevels = levels.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
   if (levels.length === 0) {
     return (
@@ -110,7 +117,7 @@ function EnrollmentByLevelTableContent({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {levels.map((level: EnrollmentByLevelItem) => {
+            {paginatedLevels.map((level: EnrollmentByLevelItem) => {
               const completionRate =
                 level.totalEnrollments > 0
                   ? Math.round((level.completed / level.totalEnrollments) * 100)
@@ -145,6 +152,31 @@ function EnrollmentByLevelTableContent({
             })}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t mt-4">
+            <span className="text-sm text-muted-foreground">
+              {page} de {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

@@ -17,7 +17,6 @@ import { EnrollmentTrendsChart } from '../../containers/enrollment-analytics/enr
 import { EnrollmentByLevelTable } from '../../containers/enrollment-analytics/enrollment-by-level-table'
 import { FinancialRevenueTrendsChart } from '../../containers/financial/financial-revenue-trends-chart'
 import { FinancialOverdueAgingChart } from '../../containers/financial/financial-overdue-aging-chart'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import { Button } from '../../components/ui/button'
 import {
@@ -488,30 +487,7 @@ export default function EscolaDashboard() {
                 }
               />
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Pedagógicas</CardTitle>
-                    <CardDescription>Intervenções prioritárias de aprendizagem</CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-2">
-                    <a
-                      href="/escola/pedagogico/notas"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Lançamento de notas
-                    </a>
-                    <a
-                      href="/escola/pedagogico/presenca"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Frequência e acompanhamento
-                    </a>
-                  </CardContent>
-                </Card>
-
-                <EscolaInsightsContainer allowedTypes={['academic']} />
-              </div>
+              <EscolaInsightsContainer allowedTypes={['academic']} />
             </TabsContent>
           </Tabs>
         ) : (
@@ -718,30 +694,7 @@ export default function EscolaDashboard() {
                 }
               />
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Pedagógicas</CardTitle>
-                    <CardDescription>Intervenções prioritárias de aprendizagem</CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-2">
-                    <a
-                      href="/escola/pedagogico/notas"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Lançamento de notas
-                    </a>
-                    <a
-                      href="/escola/pedagogico/presenca"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Frequência e acompanhamento
-                    </a>
-                  </CardContent>
-                </Card>
-
-                <EscolaInsightsContainer allowedTypes={['academic']} />
-              </div>
+              <EscolaInsightsContainer allowedTypes={['academic']} />
             </TabsContent>
 
             {canViewAdministrativeTab && (
@@ -950,29 +903,6 @@ export default function EscolaDashboard() {
                     }
                   />
                 </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Administrativas</CardTitle>
-                    <CardDescription>
-                      Fluxos prioritários de matrícula e documentação
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-2">
-                    <a
-                      href="/escola/administrativo/matriculas"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Gestão de matrículas
-                    </a>
-                    <a
-                      href="/escola/administrativo/alunos"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Alunos e pendências
-                    </a>
-                  </CardContent>
-                </Card>
               </TabsContent>
             )}
 
@@ -1164,29 +1094,6 @@ export default function EscolaDashboard() {
                     }
                   />
                 </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Financeiras</CardTitle>
-                    <CardDescription>
-                      Fluxos prioritários de cobrança e recebimentos
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-2">
-                    <a
-                      href="/escola/financeiro/faturas"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Faturas
-                    </a>
-                    <a
-                      href="/escola/financeiro/inadimplencia"
-                      className="rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      Inadimplência
-                    </a>
-                  </CardContent>
-                </Card>
               </TabsContent>
             )}
           </Tabs>
