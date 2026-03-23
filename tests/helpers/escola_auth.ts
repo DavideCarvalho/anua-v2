@@ -7,6 +7,7 @@ export async function createTestRoles() {
   const rolesToCreate = [
     'SUPER_ADMIN',
     'ADMIN',
+    'SCHOOL_ADMIN',
     'SCHOOL_DIRECTOR',
     'SCHOOL_ADMINISTRATIVE',
     'SCHOOL_TEACHER',

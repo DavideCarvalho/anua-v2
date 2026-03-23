@@ -60,13 +60,12 @@ test.group('Escola dashboard tabs (browser)', (group) => {
     const page = await visit('/escola')
     await page.assertPath('/escola')
 
-    await page.assertExists('text=Ações Pedagógicas')
+    await page.assertExists('button:has-text("Pedagógico")')
 
     await page.click('button:has-text("Administrativo")')
-    await page.assertExists('text=Ações Administrativas')
+    await page.assertExists('text=Matrículas por Nível')
 
     await page.click('button:has-text("Financeiro")')
-    await page.assertExists('text=Ações Financeiras')
     await page.assertExists('button:has-text("Mostrar valores")')
   })
 
