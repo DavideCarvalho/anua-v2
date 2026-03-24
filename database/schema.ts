@@ -1659,6 +1659,84 @@ export class OrderStatusHistorySchema extends BaseModel {
   declare toStatus: any
 }
 
+export class ParentInquirySchema extends BaseModel {
+  static $columns = ['createdAt', 'createdByResponsibleId', 'id', 'resolvedAt', 'resolvedBy', 'schoolId', 'status', 'studentId', 'subject', 'updatedAt'] as const
+  $columns = ParentInquirySchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare createdByResponsibleId: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare resolvedAt: DateTime | null
+  @column()
+  declare resolvedBy: string | null
+  @column()
+  declare schoolId: string
+  @column()
+  declare status: string
+  @column()
+  declare studentId: string
+  @column()
+  declare subject: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class ParentInquiryAttachmentSchema extends BaseModel {
+  static $columns = ['createdAt', 'fileName', 'filePath', 'fileSize', 'id', 'messageId', 'mimeType'] as const
+  $columns = ParentInquiryAttachmentSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare fileName: string
+  @column()
+  declare filePath: string
+  @column()
+  declare fileSize: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare messageId: string
+  @column()
+  declare mimeType: string
+}
+
+export class ParentInquiryMessageSchema extends BaseModel {
+  static $columns = ['authorId', 'authorType', 'body', 'createdAt', 'id', 'inquiryId', 'updatedAt'] as const
+  $columns = ParentInquiryMessageSchema.$columns
+  @column()
+  declare authorId: string
+  @column()
+  declare authorType: string
+  @column()
+  declare body: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare inquiryId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class ParentInquiryRecipientSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'inquiryId', 'userId', 'userType'] as const
+  $columns = ParentInquiryRecipientSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare inquiryId: string
+  @column()
+  declare userId: string
+  @column()
+  declare userType: string
+}
+
 export class PaymentSettingSchema extends BaseModel {
   static $columns = ['billingModel', 'createdAt', 'discount', 'id', 'isActive', 'monthlyFixedPrice', 'platformFeeFixedAmount', 'platformFeeMode', 'platformFeePercentage', 'pricePerStudent', 'schoolChainId', 'schoolId', 'trialDays', 'updatedAt'] as const
   $columns = PaymentSettingSchema.$columns
