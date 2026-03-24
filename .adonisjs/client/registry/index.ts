@@ -480,6 +480,18 @@ const routes = {
     tokens: [{"old":"/escola/comunicados/:id/editar","type":0,"val":"escola","end":""},{"old":"/escola/comunicados/:id/editar","type":0,"val":"comunicados","end":""},{"old":"/escola/comunicados/:id/editar","type":1,"val":"id","end":""},{"old":"/escola/comunicados/:id/editar","type":0,"val":"editar","end":""}],
     types: placeholder as Registry['web.escola.comunicados.editar']['types'],
   },
+  'web.escola.perguntas': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/perguntas',
+    tokens: [{"old":"/escola/perguntas","type":0,"val":"escola","end":""},{"old":"/escola/perguntas","type":0,"val":"perguntas","end":""}],
+    types: placeholder as Registry['web.escola.perguntas']['types'],
+  },
+  'web.escola.perguntas.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/perguntas/:inquiryId',
+    tokens: [{"old":"/escola/perguntas/:inquiryId","type":0,"val":"escola","end":""},{"old":"/escola/perguntas/:inquiryId","type":0,"val":"perguntas","end":""},{"old":"/escola/perguntas/:inquiryId","type":1,"val":"inquiryId","end":""}],
+    types: placeholder as Registry['web.escola.perguntas.show']['types'],
+  },
   'web.escola.eventos.novo': {
     methods: ["GET","HEAD"],
     pattern: '/escola/calendario/novo',
@@ -839,6 +851,18 @@ const routes = {
     pattern: '/responsavel/loja/:id',
     tokens: [{"old":"/responsavel/loja/:id","type":0,"val":"responsavel","end":""},{"old":"/responsavel/loja/:id","type":0,"val":"loja","end":""},{"old":"/responsavel/loja/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['web.responsavel.loja.store']['types'],
+  },
+  'web.responsavel.perguntas': {
+    methods: ["GET","HEAD"],
+    pattern: '/responsavel/perguntas',
+    tokens: [{"old":"/responsavel/perguntas","type":0,"val":"responsavel","end":""},{"old":"/responsavel/perguntas","type":0,"val":"perguntas","end":""}],
+    types: placeholder as Registry['web.responsavel.perguntas']['types'],
+  },
+  'web.responsavel.perguntas.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/responsavel/perguntas/:inquiryId',
+    tokens: [{"old":"/responsavel/perguntas/:inquiryId","type":0,"val":"responsavel","end":""},{"old":"/responsavel/perguntas/:inquiryId","type":0,"val":"perguntas","end":""},{"old":"/responsavel/perguntas/:inquiryId","type":1,"val":"inquiryId","end":""}],
+    types: placeholder as Registry['web.responsavel.perguntas.show']['types'],
   },
   'web.admin.dashboard': {
     methods: ["GET","HEAD"],
@@ -1271,6 +1295,36 @@ const routes = {
     pattern: '/api/v1/responsavel/wallet-top-ups/:id',
     tokens: [{"old":"/api/v1/responsavel/wallet-top-ups/:id","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/wallet-top-ups/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/wallet-top-ups/:id","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/wallet-top-ups/:id","type":0,"val":"wallet-top-ups","end":""},{"old":"/api/v1/responsavel/wallet-top-ups/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.show_wallet_top_up']['types'],
+  },
+  'api.v1.responsavel.api.inquiries.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/students/:studentId/inquiries',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"inquiries","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.inquiries.list']['types'],
+  },
+  'api.v1.responsavel.api.inquiries.create': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/students/:studentId/inquiries',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/inquiries","type":0,"val":"inquiries","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.inquiries.create']['types'],
+  },
+  'api.v1.responsavel.api.inquiries.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId',
+    tokens: [{"old":"/api/v1/responsavel/inquiries/:inquiryId","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId","type":0,"val":"inquiries","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId","type":1,"val":"inquiryId","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.inquiries.show']['types'],
+  },
+  'api.v1.responsavel.api.inquiries.messages.create': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId/messages',
+    tokens: [{"old":"/api/v1/responsavel/inquiries/:inquiryId/messages","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/messages","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/messages","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/messages","type":0,"val":"inquiries","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/messages","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/messages","type":0,"val":"messages","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.inquiries.messages.create']['types'],
+  },
+  'api.v1.responsavel.api.inquiries.resolve': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId/resolve',
+    tokens: [{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"inquiries","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"resolve","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.inquiries.resolve']['types'],
   },
   'api.v1.dashboard.admin_stats': {
     methods: ["GET","HEAD"],
@@ -4109,6 +4163,30 @@ const routes = {
     pattern: '/api/v1/game/characters',
     tokens: [{"old":"/api/v1/game/characters","type":0,"val":"api","end":""},{"old":"/api/v1/game/characters","type":0,"val":"v1","end":""},{"old":"/api/v1/game/characters","type":0,"val":"game","end":""},{"old":"/api/v1/game/characters","type":0,"val":"characters","end":""}],
     types: placeholder as Registry['api.v1.game.create_character']['types'],
+  },
+  'api.v1.escola.inquiries.inquiries.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/escola/inquiries',
+    tokens: [{"old":"/api/v1/escola/inquiries","type":0,"val":"api","end":""},{"old":"/api/v1/escola/inquiries","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/inquiries","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/inquiries","type":0,"val":"inquiries","end":""}],
+    types: placeholder as Registry['api.v1.escola.inquiries.inquiries.list']['types'],
+  },
+  'api.v1.escola.inquiries.inquiries.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/escola/inquiries/:inquiryId',
+    tokens: [{"old":"/api/v1/escola/inquiries/:inquiryId","type":0,"val":"api","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId","type":0,"val":"inquiries","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId","type":1,"val":"inquiryId","end":""}],
+    types: placeholder as Registry['api.v1.escola.inquiries.inquiries.show']['types'],
+  },
+  'api.v1.escola.inquiries.inquiries.messages.create': {
+    methods: ["POST"],
+    pattern: '/api/v1/escola/inquiries/:inquiryId/messages',
+    tokens: [{"old":"/api/v1/escola/inquiries/:inquiryId/messages","type":0,"val":"api","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/messages","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/messages","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/messages","type":0,"val":"inquiries","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/messages","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/messages","type":0,"val":"messages","end":""}],
+    types: placeholder as Registry['api.v1.escola.inquiries.inquiries.messages.create']['types'],
+  },
+  'api.v1.escola.inquiries.inquiries.resolve': {
+    methods: ["POST"],
+    pattern: '/api/v1/escola/inquiries/:inquiryId/resolve',
+    tokens: [{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"api","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"inquiries","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"resolve","end":""}],
+    types: placeholder as Registry['api.v1.escola.inquiries.inquiries.resolve']['types'],
   },
   'api.v1.csp_report': {
     methods: ["POST"],

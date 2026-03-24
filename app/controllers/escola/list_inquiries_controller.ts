@@ -32,20 +32,9 @@ export default class ListInquiriesController {
     const inquiryIds = recipientInquiries.map((r) => r.inquiryId)
 
     if (inquiryIds.length === 0) {
+      const emptyResult = await ParentInquiry.query().whereRaw('1 = 0').paginate(page, limit)
       return response.ok(
-        await serialize(
-          ParentInquiryTransformer.paginate([], {
-            total: 0,
-            per_page: limit,
-            current_page: page,
-            last_page: 1,
-            first_page: 1,
-            first_page_url: null,
-            last_page_url: null,
-            next_page_url: null,
-            previous_page_url: null,
-          })
-        )
+        await serialize(ParentInquiryTransformer.paginate(emptyResult.all(), emptyResult.getMeta()))
       )
     }
 
@@ -63,9 +52,9 @@ export default class ListInquiriesController {
     }
 
     const result = await query.orderBy('createdAt', 'desc').paginate(page, limit)
-    const data = result.all()
-    const metadata = result.getMeta()
 
-    return response.ok(await serialize(ParentInquiryTransformer.paginate(data, metadata)))
+    return response.ok(
+      await serialize(ParentInquiryTransformer.paginate(result.all(), result.getMeta()))
+    )
   }
 }

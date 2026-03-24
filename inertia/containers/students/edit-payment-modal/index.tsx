@@ -134,6 +134,13 @@ const PaymentMethodLabels = {
   PIX: 'PIX',
 }
 
+const BenefitModeLabels = {
+  NONE: 'Sem benefício',
+  SCHOLARSHIP: 'Bolsa',
+  INDIVIDUAL: 'Desconto individual',
+}
+
+const LEVEL_DEFAULT_CONTRACT_LABEL = 'Contrato da turma'
 const LEVEL_DEFAULT_CONTRACT_OPTION = '__LEVEL_DEFAULT_CONTRACT__'
 
 interface EditPaymentModalProps {
@@ -565,16 +572,24 @@ export function EnrollmentTabContent({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione um contrato" />
+                        {field.value === LEVEL_DEFAULT_CONTRACT_OPTION ? (
+                          <span className="flex flex-1 text-left">
+                            {LEVEL_DEFAULT_CONTRACT_LABEL}{' '}
+                            {levelContractId ? '(padrão)' : '(não configurado)'}
+                          </span>
+                        ) : (
+                          <SelectValue placeholder="Selecione um contrato" />
+                        )}
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value={LEVEL_DEFAULT_CONTRACT_OPTION}>
-                        Usar contrato da turma {levelContractId ? '(padrão)' : '(não configurado)'}
+                        {LEVEL_DEFAULT_CONTRACT_LABEL}{' '}
+                        {levelContractId ? '(padrão)' : '(não configurado)'}
                       </SelectItem>
                       {contracts.map((contract: { id: string; name: string }) => (
                         <SelectItem key={contract.id} value={contract.id}>
-                          {contract.name}
+                          {contract.name || contract.id}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -639,13 +654,15 @@ export function EnrollmentTabContent({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue />
+                        <span className="flex flex-1 text-left">
+                          {BenefitModeLabels[field.value]}
+                        </span>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="NONE">Sem benefício</SelectItem>
-                      <SelectItem value="SCHOLARSHIP">Bolsa</SelectItem>
-                      <SelectItem value="INDIVIDUAL">Desconto individual</SelectItem>
+                      <SelectItem value="NONE">{BenefitModeLabels.NONE}</SelectItem>
+                      <SelectItem value="SCHOLARSHIP">{BenefitModeLabels.SCHOLARSHIP}</SelectItem>
+                      <SelectItem value="INDIVIDUAL">{BenefitModeLabels.INDIVIDUAL}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

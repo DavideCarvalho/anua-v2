@@ -11,15 +11,11 @@ import {
 } from '~/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Skeleton } from '~/components/ui/skeleton'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 import { api } from '~/lib/api'
 import { getCourseLabel, getLevelLabel } from '~/lib/formatters'
-import {
-  ContractDetailsCard,
-  ScholarshipSelector,
-  DiscountComparison,
-  RequiredDocumentsList,
-} from '~/components/enrollment'
-import { IndividualDiscountsSection } from '../components/individual-discounts-section'
+import { ContractDetailsCard, RequiredDocumentsList } from '~/components/enrollment'
 import type { AcademicPeriodSegment } from '~/lib/formatters'
 import type { EnrollmentFormData, PaymentMethod } from '../schema'
 
@@ -27,6 +23,12 @@ const PaymentMethodLabels: Record<PaymentMethod, string> = {
   BOLETO: 'Boleto',
   CREDIT_CARD: 'Cartão de Crédito',
   PIX: 'PIX',
+}
+
+const BenefitModeLabels = {
+  NONE: 'Sem benefício',
+  SCHOLARSHIP: 'Bolsa',
+  INDIVIDUAL: 'Desconto individual',
 }
 
 export function BillingStep() {
@@ -61,21 +63,19 @@ export function BillingStep() {
   const selectedCourse = courses.find((c) => c.courseId === courseId)
   const levels = selectedCourse?.levels ?? []
   const classes = classesData?.data ?? []
+  const selectedLevel = levels.find((l) => l.levelId === levelId)
+  const selectedClass = classes.find((c) => c.id === form.watch('billing.classId'))
 
   const courseLabel = getCourseLabel(segment)
   const levelLabel = getLevelLabel(segment)
 
-  // Get contractId from selected level
-  const selectedLevel = levels.find((l) => l.levelId === levelId)
   const contractId = selectedLevel?.contractId
 
-  // Fetch contract details
   const { data: contractData, isLoading: isLoadingContract } = useQuery({
     ...api.api.v1.contracts.show.queryOptions({ params: { id: contractId! } }),
     enabled: !!contractId,
   })
 
-  // Fetch scholarships
   const { data: scholarshipsData, isLoading: isLoadingScholarships } = useQuery({
     ...api.api.v1.scholarships.listScholarships.queryOptions({
       query: { active: true, limit: 100 },
@@ -84,7 +84,6 @@ export function BillingStep() {
 
   const scholarships = useMemo(() => scholarshipsData?.data ?? [], [scholarshipsData?.data])
 
-  // Calculate months remaining until academic period ends
   const maxInstallments = useMemo(() => {
     if (!selectedPeriod?.endDate || !contractData) return 12
     const endDate = new Date(String(selectedPeriod.endDate))
@@ -94,7 +93,6 @@ export function BillingStep() {
     return Math.min(Math.max(monthsDiff, 1), contractData.installments)
   }, [selectedPeriod?.endDate, contractData])
 
-  // Auto-select course if there's only one
   const hasOnlyOneCourse = courses.length === 1
   useEffect(() => {
     if (hasOnlyOneCourse && !courseId) {
@@ -102,7 +100,6 @@ export function BillingStep() {
     }
   }, [hasOnlyOneCourse, courseId, courses])
 
-  // Auto-fill form when contract is loaded
   useEffect(() => {
     if (contractData) {
       form.setValue('billing.contractId', contractData.id)
@@ -115,22 +112,42 @@ export function BillingStep() {
       form.setValue('billing.enrollmentInstallments', contractData.enrollmentValueInstallments)
       form.setValue('billing.flexibleInstallments', contractData.flexibleInstallments)
     } else if (levelId && !contractId) {
-      // Level selected but no contract - clear contract fields
       form.setValue('billing.contractId', null)
       form.setValue('billing.monthlyFee', 0)
       form.setValue('billing.enrollmentFee', 0)
     }
   }, [contractData?.id, contractId, levelId])
 
-  // Handle scholarship selection
+  const benefitMode = form.watch('billing.benefitMode') ?? 'NONE'
+  const selectedScholarshipId = form.watch('billing.scholarshipId')
+  const discountPercentage = form.watch('billing.discountPercentage') ?? 0
+  const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
+  const individualDiscounts = form.watch('billing.individualDiscounts') ?? []
+  const individualDiscount = individualDiscounts[0]
+  const individualDiscountType = individualDiscount?.discountType ?? 'PERCENTAGE'
+  const individualDiscountPercentage = individualDiscount?.discountPercentage ?? 0
+  const individualDiscountValueReais = individualDiscount?.discountValue
+    ? Number(individualDiscount.discountValue) / 100
+    : 0
+
+  const handleBenefitModeChange = (mode: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL') => {
+    form.setValue('billing.benefitMode', mode)
+
+    if (mode !== 'SCHOLARSHIP') {
+      form.setValue('billing.scholarshipId', null)
+      form.setValue('billing.discountPercentage', 0)
+      form.setValue('billing.enrollmentDiscountPercentage', 0)
+    }
+
+    if (mode !== 'INDIVIDUAL') {
+      form.setValue('billing.individualDiscounts', [])
+    }
+  }
+
   const handleScholarshipChange = (
     scholarshipId: string | null,
     scholarship: { discountPercentage: number; enrollmentDiscountPercentage: number } | null
   ) => {
-    if (scholarshipId) {
-      form.setValue('billing.individualDiscounts', [])
-    }
-
     form.setValue('billing.scholarshipId', scholarshipId)
     form.setValue('billing.discountPercentage', scholarship?.discountPercentage ?? 0)
     form.setValue(
@@ -139,11 +156,63 @@ export function BillingStep() {
     )
   }
 
-  const selectedScholarshipId = form.watch('billing.scholarshipId')
-  const discountPercentage = form.watch('billing.discountPercentage') ?? 0
-  const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
-  const individualDiscounts = form.watch('billing.individualDiscounts') ?? []
-  const hasIndividualDiscounts = individualDiscounts.length > 0
+  const updateIndividualDiscount = (
+    updates: Partial<{
+      name: string
+      discountType: 'PERCENTAGE' | 'FLAT'
+      discountPercentage: number
+      discountValue: number
+    }>
+  ) => {
+    const current = individualDiscounts[0] ?? {
+      name: 'Desconto personalizado',
+      discountType: 'PERCENTAGE' as const,
+      discountPercentage: 0,
+      discountValue: 0,
+    }
+
+    const updated = { ...current, ...updates }
+    form.setValue('billing.individualDiscounts', [updated])
+  }
+
+  const benefitImpact = useMemo(() => {
+    if (!contractData || benefitMode === 'NONE') return null
+
+    const baseAmount = contractData.amount
+    let discountAmount = 0
+    let discountDescription = ''
+
+    if (benefitMode === 'SCHOLARSHIP') {
+      discountAmount = Math.round(baseAmount * (discountPercentage / 100))
+      discountDescription = `${discountPercentage}% (bolsa)`
+    }
+
+    if (benefitMode === 'INDIVIDUAL' && individualDiscountType === 'PERCENTAGE') {
+      discountAmount = Math.round(baseAmount * (individualDiscountPercentage / 100))
+      discountDescription = `${individualDiscountPercentage}% (desconto individual)`
+    }
+
+    if (benefitMode === 'INDIVIDUAL' && individualDiscountType === 'FLAT') {
+      discountAmount = Math.round(individualDiscountValueReais * 100)
+      discountDescription = `R$ ${individualDiscountValueReais.toFixed(2)} (desconto individual)`
+    }
+
+    const discountedAmount = Math.max(0, baseAmount - discountAmount)
+
+    return {
+      baseAmount,
+      discountAmount,
+      discountDescription,
+      discountedAmount,
+    }
+  }, [
+    contractData,
+    benefitMode,
+    discountPercentage,
+    individualDiscountType,
+    individualDiscountPercentage,
+    individualDiscountValueReais,
+  ])
 
   return (
     <div className="space-y-6 py-4">
@@ -152,7 +221,6 @@ export function BillingStep() {
           <CardTitle className="text-base">Informações Acadêmicas</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Only show course selector if there's more than one course */}
           {!hasOnlyOneCourse && (
             <FormField
               control={form.control}
@@ -167,6 +235,7 @@ export function BillingStep() {
                       form.setValue('billing.classId', '')
                       form.setValue('billing.contractId', null)
                       form.setValue('billing.scholarshipId', null)
+                      handleBenefitModeChange('NONE')
                     }}
                     value={field.value}
                     disabled={!academicPeriodId || isLoadingCourses}
@@ -181,7 +250,9 @@ export function BillingStep() {
                                 ? 'Carregando...'
                                 : `Selecione o ${courseLabel.toLowerCase()}`
                           }
-                        />
+                        >
+                          {selectedCourse?.name}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -208,9 +279,7 @@ export function BillingStep() {
                   onValueChange={(value) => {
                     field.onChange(value)
                     form.setValue('billing.classId', '')
-                    form.setValue('billing.scholarshipId', null)
-                    form.setValue('billing.discountPercentage', 0)
-                    form.setValue('billing.enrollmentDiscountPercentage', 0)
+                    handleBenefitModeChange('NONE')
                   }}
                   value={field.value}
                   disabled={!courseId || isLoadingCourses}
@@ -225,7 +294,9 @@ export function BillingStep() {
                               ? 'Carregando...'
                               : `Selecione o ${levelLabel.toLowerCase()}`
                         }
-                      />
+                      >
+                        {selectedLevel?.name}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -262,7 +333,9 @@ export function BillingStep() {
                               ? 'Carregando...'
                               : 'Selecione a turma (opcional)'
                         }
-                      />
+                      >
+                        {selectedClass?.name}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -280,7 +353,6 @@ export function BillingStep() {
         </CardContent>
       </Card>
 
-      {/* Contract Loading State */}
       {levelId && isLoadingContract && (
         <Card>
           <CardHeader className="pb-3">
@@ -297,7 +369,6 @@ export function BillingStep() {
         </Card>
       )}
 
-      {/* Contract Details */}
       {contractData && (
         <ContractDetailsCard
           name={contractData.name}
@@ -309,43 +380,171 @@ export function BillingStep() {
         />
       )}
 
-      {/* Scholarship Selection */}
       {contractData && (
         <Card>
           <CardContent className="pt-6 space-y-4">
-            <ScholarshipSelector
-              scholarships={scholarships}
-              value={selectedScholarshipId ?? null}
-              onChange={handleScholarshipChange}
-              disabled={hasIndividualDiscounts}
-              isLoading={isLoadingScholarships}
+            <FormField
+              control={form.control}
+              name="billing.benefitMode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Benefício</FormLabel>
+                  <Select
+                    value={field.value ?? 'NONE'}
+                    onValueChange={(value: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL') =>
+                      handleBenefitModeChange(value)
+                    }
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <span className="flex flex-1 text-left">
+                          {BenefitModeLabels[field.value ?? 'NONE']}
+                        </span>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="NONE">{BenefitModeLabels.NONE}</SelectItem>
+                      <SelectItem value="SCHOLARSHIP">{BenefitModeLabels.SCHOLARSHIP}</SelectItem>
+                      <SelectItem value="INDIVIDUAL">{BenefitModeLabels.INDIVIDUAL}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            {hasIndividualDiscounts && (
+            {benefitMode === 'NONE' && (
               <p className="text-xs text-muted-foreground">
-                Bolsa desativada: existe desconto individual aplicado para este aluno.
+                Nenhum benefício aplicado. Mensalidades seguem o valor original do contrato.
               </p>
             )}
 
-            {(discountPercentage > 0 || enrollmentDiscountPercentage > 0) && (
-              <DiscountComparison
-                originalEnrollmentFee={contractData.enrollmentValue ?? 0}
-                originalMonthlyFee={contractData.amount}
-                enrollmentDiscountPercentage={enrollmentDiscountPercentage}
-                monthlyDiscountPercentage={discountPercentage}
-                installments={
-                  contractData.paymentType === 'MONTHLY' ? 12 : form.watch('billing.installments')
-                }
-              />
+            {benefitMode === 'SCHOLARSHIP' && (
+              <>
+                <Label>Bolsa</Label>
+                <Select
+                  value={selectedScholarshipId ?? ''}
+                  onValueChange={(value) => {
+                    const scholarship = scholarships.find((s) => s.id === value)
+                    handleScholarshipChange(value || null, scholarship ?? null)
+                  }}
+                  disabled={isLoadingScholarships}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma bolsa">
+                        {scholarships.find((s) => s.id === selectedScholarshipId)?.name}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {scholarships.map((scholarship) => (
+                      <SelectItem key={scholarship.id} value={scholarship.id}>
+                        {scholarship.name} ({scholarship.discountPercentage}%)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
+
+            {benefitMode === 'INDIVIDUAL' && (
+              <div className="grid grid-cols-3 gap-3 items-end">
+                <div>
+                  <Label>Tipo de Desconto</Label>
+                  <Select
+                    value={individualDiscountType}
+                    onValueChange={(value: 'PERCENTAGE' | 'FLAT') => {
+                      updateIndividualDiscount({
+                        discountType: value,
+                        discountPercentage: value === 'PERCENTAGE' ? 0 : undefined,
+                        discountValue: value === 'FLAT' ? 0 : undefined,
+                      })
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="PERCENTAGE">Percentual (%)</SelectItem>
+                      <SelectItem value="FLAT">Valor fixo (R$)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {individualDiscountType === 'PERCENTAGE' && (
+                  <div className="col-span-2">
+                    <Label>Desconto na Mensalidade (%)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={individualDiscountPercentage}
+                      onChange={(e) =>
+                        updateIndividualDiscount({
+                          discountPercentage: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                )}
+
+                {individualDiscountType === 'FLAT' && (
+                  <div className="col-span-2">
+                    <Label>Desconto na Mensalidade (R$)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={individualDiscountValueReais}
+                      onChange={(e) =>
+                        updateIndividualDiscount({
+                          discountValue: Math.round(Number(e.target.value) * 100),
+                        })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {benefitImpact && (
+              <div className="rounded-md border bg-muted/40 p-3 text-xs space-y-1">
+                <p>
+                  Valor base da mensalidade:{' '}
+                  <span className="font-medium text-foreground">
+                    R$ {(benefitImpact.baseAmount / 100).toFixed(2)}
+                  </span>
+                </p>
+                <p>
+                  Desconto aplicado:{' '}
+                  <span className="font-medium text-foreground">
+                    -R$ {(benefitImpact.discountAmount / 100).toFixed(2)}
+                  </span>{' '}
+                  <span className="text-muted-foreground">
+                    ({benefitImpact.discountDescription})
+                  </span>
+                </p>
+                <p>
+                  Valor final:{' '}
+                  <span className="font-medium text-foreground">
+                    R$ {(benefitImpact.discountedAmount / 100).toFixed(2)}
+                  </span>
+                </p>
+              </div>
+            )}
+
+            {contractData && (
+              <p className="text-xs text-muted-foreground">
+                Escolha apenas uma opção de benefício por matrícula: bolsa ou desconto individual.
+              </p>
             )}
           </CardContent>
         </Card>
       )}
 
-      {/* Individual Discounts */}
-      {contractData && <IndividualDiscountsSection />}
-
-      {/* Payment Info - Only show if contract exists */}
       {contractData && (
         <Card>
           <CardHeader>
@@ -361,7 +560,9 @@ export function BillingStep() {
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
+                        <SelectValue placeholder="Selecione">
+                          {PaymentMethodLabels[field.value as PaymentMethod]}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -455,7 +656,6 @@ export function BillingStep() {
         </Card>
       )}
 
-      {/* Required Documents */}
       {contractData?.contractDocuments && contractData.contractDocuments.length > 0 && (
         <RequiredDocumentsList documents={contractData.contractDocuments} />
       )}

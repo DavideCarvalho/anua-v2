@@ -166,6 +166,9 @@ export const enrollmentSchema = z.object({
       .max(31, 'O dia deve ser menor ou igual a 31'),
     paymentMethod: z.enum(PaymentMethod),
 
+    // Benefit mode (mutually exclusive: scholarship OR individual discount)
+    benefitMode: z.enum(['NONE', 'SCHOLARSHIP', 'INDIVIDUAL']).default('NONE'),
+
     // Scholarship
     scholarshipId: z.string().nullable().optional(),
     discountPercentage: z.number().min(0).max(100).optional().default(0),

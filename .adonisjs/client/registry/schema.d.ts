@@ -955,6 +955,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_editar_comunicado_page_controller').default['handle']>>>
     }
   }
+  'web.escola.perguntas': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/perguntas'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_perguntas_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_perguntas_page_controller').default['handle']>>>
+    }
+  }
+  'web.escola.perguntas.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/perguntas/:inquiryId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_pergunta_detail_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_pergunta_detail_page_controller').default['handle']>>>
+    }
+  }
   'web.escola.eventos.novo': {
     methods: ["GET","HEAD"]
     pattern: '/escola/calendario/novo'
@@ -1673,6 +1697,30 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller').default['handle']>>>
+    }
+  }
+  'web.responsavel.perguntas': {
+    methods: ["GET","HEAD"]
+    pattern: '/responsavel/perguntas'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_perguntas_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_perguntas_page_controller').default['handle']>>>
+    }
+  }
+  'web.responsavel.perguntas.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/responsavel/perguntas/:inquiryId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_pergunta_detail_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_pergunta_detail_page_controller').default['handle']>>>
     }
   }
   'web.admin.dashboard': {
@@ -2537,6 +2585,66 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/wallet_top_ups/show_wallet_top_up_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/wallet_top_ups/show_wallet_top_up_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.inquiries.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/students/:studentId/inquiries'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/parent_inquiry').listInquiriesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/list_student_inquiries_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/list_student_inquiries_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.responsavel.api.inquiries.create': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/students/:studentId/inquiries'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/parent_inquiry').createInquiryValidator)>>
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/parent_inquiry').createInquiryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/create_student_inquiry_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/create_student_inquiry_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.responsavel.api.inquiries.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/show_inquiry_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/show_inquiry_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.inquiries.messages.create': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId/messages'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/parent_inquiry').createMessageValidator)>>
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/parent_inquiry').createMessageValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/create_inquiry_message_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/create_inquiry_message_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.responsavel.api.inquiries.resolve': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId/resolve'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/resolve_inquiry_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/resolve_inquiry_controller').default['handle']>>>
     }
   }
   'api.v1.dashboard.admin_stats': {
@@ -8213,6 +8321,54 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/game_character').createGameCharacterValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.escola.inquiries.inquiries.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/escola/inquiries'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/parent_inquiry').listInquiriesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/escola/list_inquiries_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/list_inquiries_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.escola.inquiries.inquiries.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/escola/inquiries/:inquiryId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/escola/show_inquiry_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/show_inquiry_controller').default['handle']>>>
+    }
+  }
+  'api.v1.escola.inquiries.inquiries.messages.create': {
+    methods: ["POST"]
+    pattern: '/api/v1/escola/inquiries/:inquiryId/messages'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/parent_inquiry').createMessageValidator)>>
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/parent_inquiry').createMessageValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/escola/create_inquiry_message_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/create_inquiry_message_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.escola.inquiries.inquiries.resolve': {
+    methods: ["POST"]
+    pattern: '/api/v1/escola/inquiries/:inquiryId/resolve'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/escola/resolve_inquiry_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/resolve_inquiry_controller').default['handle']>>>
     }
   }
   'api.v1.csp_report': {

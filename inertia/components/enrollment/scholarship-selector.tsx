@@ -45,6 +45,9 @@ export function ScholarshipSelector({
     }
   }
 
+  const selectedScholarship = value ? scholarships.find((s) => s.id === value) : null
+  const displayValue = value === null || !value ? 'Sem bolsa' : selectedScholarship?.name || value
+
   return (
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
@@ -53,7 +56,9 @@ export function ScholarshipSelector({
       </Label>
       <Select value={value || 'none'} onValueChange={handleChange} disabled={disabled || isLoading}>
         <SelectTrigger>
-          <SelectValue placeholder={isLoading ? 'Carregando bolsas...' : 'Selecione uma bolsa'} />
+          <SelectValue placeholder={isLoading ? 'Carregando bolsas...' : 'Selecione uma bolsa'}>
+            {displayValue}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">Sem bolsa</SelectItem>

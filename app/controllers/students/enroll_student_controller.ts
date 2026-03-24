@@ -16,7 +16,6 @@ import StudentHasLevel from '#models/student_has_level'
 import IndividualDiscount from '#models/individual_discount'
 import AcademicPeriod from '#models/academic_period'
 import Class_ from '#models/class'
-import Level from '#models/level'
 import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_course_has_academic_period'
 import { enrollStudentValidator } from '#validators/student'
 import GenerateStudentPaymentsJob from '#jobs/payments/generate_student_payments_job'
@@ -357,9 +356,7 @@ export default class EnrollStudentController {
             .first()
 
           if (levelAssignment) {
-            // Get the Level's default contractId as fallback
-            const level = await Level.find(classRecord.levelId)
-            const contractId = data.billing.contractId || level?.contractId || null
+            const contractId = data.billing.contractId || null
             const hasIndividualDiscounts =
               !!data.billing.individualDiscounts && data.billing.individualDiscounts.length > 0
 

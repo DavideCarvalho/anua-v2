@@ -114,6 +114,9 @@ export interface ApiDefinition {
         novo: typeof routes['web.escola.comunicados.novo']
         editar: typeof routes['web.escola.comunicados.editar']
       }
+      perguntas: typeof routes['web.escola.perguntas'] & {
+        show: typeof routes['web.escola.perguntas.show']
+      }
       eventos: {
         novo: typeof routes['web.escola.eventos.novo']
         editar: typeof routes['web.escola.eventos.editar']
@@ -191,6 +194,9 @@ export interface ApiDefinition {
       credito: typeof routes['web.responsavel.credito']
       loja: typeof routes['web.responsavel.loja'] & {
         store: typeof routes['web.responsavel.loja.store']
+      }
+      perguntas: typeof routes['web.responsavel.perguntas'] & {
+        show: typeof routes['web.responsavel.perguntas.show']
       }
     }
     admin: {
@@ -293,6 +299,15 @@ export interface ApiDefinition {
           createWalletTopUp: typeof routes['api.v1.responsavel.api.create_wallet_top_up']
           listWalletTopUps: typeof routes['api.v1.responsavel.api.list_wallet_top_ups']
           showWalletTopUp: typeof routes['api.v1.responsavel.api.show_wallet_top_up']
+          inquiries: {
+            list: typeof routes['api.v1.responsavel.api.inquiries.list']
+            create: typeof routes['api.v1.responsavel.api.inquiries.create']
+            show: typeof routes['api.v1.responsavel.api.inquiries.show']
+            messages: {
+              create: typeof routes['api.v1.responsavel.api.inquiries.messages.create']
+            }
+            resolve: typeof routes['api.v1.responsavel.api.inquiries.resolve']
+          }
         }
       }
       asaas: {
@@ -992,6 +1007,18 @@ export interface ApiDefinition {
       }
       game: {
         createCharacter: typeof routes['api.v1.game.create_character']
+      }
+      escola: {
+        inquiries: {
+          inquiries: {
+            list: typeof routes['api.v1.escola.inquiries.inquiries.list']
+            show: typeof routes['api.v1.escola.inquiries.inquiries.show']
+            messages: {
+              create: typeof routes['api.v1.escola.inquiries.inquiries.messages.create']
+            }
+            resolve: typeof routes['api.v1.escola.inquiries.inquiries.resolve']
+          }
+        }
       }
       cspReport: typeof routes['api.v1.csp_report']
     }
