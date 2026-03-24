@@ -10,6 +10,7 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasLevel from '#models/student_has_level'
 import { createInquiryValidator } from '#validators/parent_inquiry'
 import { resolveInquiryRecipients } from '#services/inquiries/inquiry_recipient_service'
+import { notifyInquiryCreated } from '#services/inquiries/inquiry_notification_service'
 
 export default class CreateStudentInquiryController {
   async handle({ request, response, auth, effectiveUser, params, serialize }: HttpContext) {
@@ -108,6 +109,12 @@ export default class CreateStudentInquiryController {
       mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
     })
     await inquiry.load('recipients', (rq) => rq.preload('user'))
+
+    // Send notifications to recipients (school staff)
+    const recipientIds = recipients.map((r) => r.userId)
+    if (recipientIds.length > 0) {
+      await notifyInquiryCreated({ inquiry, recipientIds })
+    }
 
     return response.created(await serialize(ParentInquiryTransformer.transform(inquiry)))
   }

@@ -28,6 +28,9 @@ export type NotificationType =
   | 'SCHEDULE_CHANGED'
   | 'SYSTEM_ANNOUNCEMENT'
   | 'MAINTENANCE_SCHEDULED'
+  | 'INQUIRY_CREATED'
+  | 'INQUIRY_MESSAGE'
+  | 'INQUIRY_RESOLVED'
 
 export default class Notification extends BaseModel {
   static table = 'Notification'

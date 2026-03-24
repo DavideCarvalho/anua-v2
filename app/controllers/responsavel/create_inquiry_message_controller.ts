@@ -7,6 +7,7 @@ import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
 import StudentHasResponsible from '#models/student_has_responsible'
 import { createMessageValidator } from '#validators/parent_inquiry'
+import { notifyInquiryMessage } from '#services/inquiries/inquiry_notification_service'
 
 export default class CreateInquiryMessageController {
   async handle({ request, response, auth, effectiveUser, params, serialize }: HttpContext) {
@@ -72,6 +73,18 @@ export default class CreateInquiryMessageController {
       mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
     })
     await inquiry.load('recipients', (rq) => rq.preload('user'))
+
+    // Notify school staff (recipients) about the new message from responsible
+    const recipientUserIds = inquiry.recipients.map((r) => r.userId)
+    if (recipientUserIds.length > 0) {
+      await notifyInquiryMessage({
+        inquiry,
+        messageAuthorId: user.id,
+        messageAuthorName: user.name,
+        messageBody: payload.body,
+        notifyUserIds: recipientUserIds,
+      })
+    }
 
     return response.ok(await serialize(ParentInquiryTransformer.transform(inquiry)))
   }

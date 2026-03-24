@@ -7,6 +7,7 @@ import ParentInquiryAttachment from '#models/parent_inquiry_attachment'
 import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
 import { createMessageValidator } from '#validators/parent_inquiry'
+import { notifyInquiryMessage } from '#services/inquiries/inquiry_notification_service'
 
 export default class CreateInquiryMessageController {
   async handle({
@@ -85,6 +86,17 @@ export default class CreateInquiryMessageController {
       mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
     })
     await inquiry.load('recipients', (rq) => rq.preload('user'))
+
+    // Notify the responsible who created the inquiry
+    if (inquiry.createdByResponsibleId) {
+      await notifyInquiryMessage({
+        inquiry,
+        messageAuthorId: user.id,
+        messageAuthorName: user.name,
+        messageBody: payload.body,
+        notifyUserIds: [inquiry.createdByResponsibleId],
+      })
+    }
 
     return response.ok(await serialize(ParentInquiryTransformer.transform(inquiry)))
   }

@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import ParentInquiry from '#models/parent_inquiry'
 import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
+import { notifyInquiryResolved } from '#services/inquiries/inquiry_notification_service'
 
 export default class ResolveInquiryController {
   async handle({
@@ -47,6 +48,15 @@ export default class ResolveInquiryController {
       mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
     })
     await inquiry.load('recipients', (rq) => rq.preload('user'))
+
+    // Notify the responsible who created the inquiry
+    if (inquiry.createdByResponsibleId) {
+      await notifyInquiryResolved({
+        inquiry,
+        resolvedByName: user.name,
+        notifyUserIds: [inquiry.createdByResponsibleId],
+      })
+    }
 
     return response.ok(await serialize(ParentInquiryTransformer.transform(inquiry)))
   }

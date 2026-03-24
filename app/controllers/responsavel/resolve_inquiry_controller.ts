@@ -4,6 +4,7 @@ import ParentInquiry from '#models/parent_inquiry'
 import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
 import StudentHasResponsible from '#models/student_has_responsible'
+import { notifyInquiryResolved } from '#services/inquiries/inquiry_notification_service'
 
 export default class ResolveInquiryController {
   async handle({ response, auth, effectiveUser, params, serialize }: HttpContext) {
@@ -45,6 +46,16 @@ export default class ResolveInquiryController {
       mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
     })
     await inquiry.load('recipients', (rq) => rq.preload('user'))
+
+    // Notify school staff (recipients) that the inquiry was resolved
+    const recipientUserIds = inquiry.recipients.map((r) => r.userId)
+    if (recipientUserIds.length > 0) {
+      await notifyInquiryResolved({
+        inquiry,
+        resolvedByName: user.name,
+        notifyUserIds: recipientUserIds,
+      })
+    }
 
     return response.ok(await serialize(ParentInquiryTransformer.transform(inquiry)))
   }
