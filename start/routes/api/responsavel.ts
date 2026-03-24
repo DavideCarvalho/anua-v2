@@ -58,6 +58,16 @@ const ListWalletTopUpsController = () =>
 const ShowWalletTopUpController = () =>
   import('#controllers/wallet_top_ups/show_wallet_top_up_controller')
 
+// Inquiry Controllers
+const ListStudentInquiriesController = () =>
+  import('#controllers/responsavel/list_student_inquiries_controller')
+const CreateStudentInquiryController = () =>
+  import('#controllers/responsavel/create_student_inquiry_controller')
+const ShowInquiryController = () => import('#controllers/responsavel/show_inquiry_controller')
+const CreateInquiryMessageController = () =>
+  import('#controllers/responsavel/create_inquiry_message_controller')
+const ResolveInquiryController = () => import('#controllers/responsavel/resolve_inquiry_controller')
+
 export function registerResponsavelApiRoutes() {
   router
     .get('/responsavel/stats', [GetResponsavelStatsController])
@@ -142,6 +152,21 @@ export function registerResponsavelApiRoutes() {
         .get('/students/:studentId/wallet-top-ups', [ListWalletTopUpsController])
         .as('list_wallet_top_ups')
       router.get('/wallet-top-ups/:id', [ShowWalletTopUpController]).as('show_wallet_top_up')
+
+      // Inquiries
+      router
+        .get('/students/:studentId/inquiries', [ListStudentInquiriesController])
+        .as('inquiries.list')
+      router
+        .post('/students/:studentId/inquiries', [CreateStudentInquiryController])
+        .as('inquiries.create')
+      router.get('/inquiries/:inquiryId', [ShowInquiryController]).as('inquiries.show')
+      router
+        .post('/inquiries/:inquiryId/messages', [CreateInquiryMessageController])
+        .as('inquiries.messages.create')
+      router
+        .post('/inquiries/:inquiryId/resolve', [ResolveInquiryController])
+        .as('inquiries.resolve')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])
