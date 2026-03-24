@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Clock,
   ShoppingBag,
+  MessageCircleQuestion,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { SharedProps } from '../../lib/types'
@@ -63,6 +64,12 @@ const baseNavigation: NavItem[] = [
     route: 'web.responsavel.autorizacoes',
     href: '/responsavel/autorizacoes',
     icon: ClipboardCheck,
+  },
+  {
+    title: 'Perguntas',
+    route: 'web.responsavel.perguntas',
+    href: '/responsavel/perguntas',
+    icon: MessageCircleQuestion,
   },
 ]
 
