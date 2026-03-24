@@ -150,6 +150,10 @@ const ShowConfiguracaoPagamentosPageController = () =>
   import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller')
 const ShowConfiguracoesPageController = () =>
   import('#controllers/pages/escola/show_configuracoes_page_controller')
+const ShowPerguntasPageController = () =>
+  import('#controllers/pages/escola/show_perguntas_page_controller')
+const ShowPerguntaDetailPageController = () =>
+  import('#controllers/pages/escola/show_pergunta_detail_page_controller')
 
 export function registerEscolaPageRoutes() {
   router
@@ -274,6 +278,10 @@ export function registerEscolaPageRoutes() {
       router
         .get('/comunicados/:id/editar', [ShowEditarComunicadoPageController])
         .as('comunicados.editar')
+
+      // Perguntas
+      router.get('/perguntas', [ShowPerguntasPageController]).as('perguntas')
+      router.get('/perguntas/:inquiryId', [ShowPerguntaDetailPageController]).as('perguntas.show')
 
       // Eventos
       router.get('/calendario/novo', [ShowNovoEventoPageController]).as('eventos.novo')
