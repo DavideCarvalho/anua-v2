@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -29,6 +29,60 @@ interface ScheduleData {
   }>
 }
 
+const DEFAULT_SCHEDULE_CONFIG: ScheduleConfig = {
+  startTime: '07:30',
+  classesPerDay: 6,
+  classDuration: 50,
+  breakAfterClass: 3,
+  breakDuration: 20,
+}
+
+function toMinutes(time: string): number {
+  const [hour, minute] = time.split(':').map(Number)
+  return hour * 60 + minute
+}
+
+function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | null {
+  if (!slots.length) return null
+
+  const byDay = new Map<number, ScheduleData['slots']>()
+  for (const slot of slots) {
+    const current = byDay.get(slot.classWeekDay) ?? []
+    current.push(slot)
+    byDay.set(slot.classWeekDay, current)
+  }
+
+  const dayWithMostSlots = Array.from(byDay.values())
+    .sort((a, b) => b.length - a.length)
+    .at(0)
+
+  if (!dayWithMostSlots?.length) return null
+
+  const orderedSlots = [...dayWithMostSlots].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
+  const firstClass = orderedSlots.find((slot) => !slot.isBreak)
+  const firstBreakIndex = orderedSlots.findIndex((slot) => slot.isBreak)
+  const firstBreak = firstBreakIndex >= 0 ? orderedSlots[firstBreakIndex] : null
+
+  const classesPerDay = orderedSlots.filter((slot) => !slot.isBreak).length
+  const classDuration = firstClass ? toMinutes(firstClass.endTime) - toMinutes(firstClass.startTime) : 50
+  const inferredBreakAfterClass =
+    firstBreakIndex >= 0
+      ? orderedSlots.slice(0, firstBreakIndex).filter((slot) => !slot.isBreak).length
+      : DEFAULT_SCHEDULE_CONFIG.breakAfterClass
+  const inferredBreakDuration = firstBreak
+    ? toMinutes(firstBreak.endTime) - toMinutes(firstBreak.startTime)
+    : DEFAULT_SCHEDULE_CONFIG.breakDuration
+
+  return {
+    startTime: firstClass?.startTime ?? DEFAULT_SCHEDULE_CONFIG.startTime,
+    classesPerDay: classesPerDay || DEFAULT_SCHEDULE_CONFIG.classesPerDay,
+    classDuration: classDuration || DEFAULT_SCHEDULE_CONFIG.classDuration,
+    breakAfterClass: inferredBreakAfterClass || DEFAULT_SCHEDULE_CONFIG.breakAfterClass,
+    breakDuration:
+      inferredBreakDuration >= 0 ? inferredBreakDuration : DEFAULT_SCHEDULE_CONFIG.breakDuration,
+  }
+}
+
 async function fetchSchedule(classId: string, academicPeriodId: string): Promise<ScheduleData> {
   const response = await fetch(
     `/api/v1/schedules/class/${classId}?academicPeriodId=${academicPeriodId}`
@@ -41,13 +95,9 @@ export default function HorariosPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
-  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>({
-    startTime: '07:30',
-    classesPerDay: 6,
-    classDuration: 50,
-    breakAfterClass: 3,
-    breakDuration: 20,
-  })
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>(DEFAULT_SCHEDULE_CONFIG)
+  const [hasEditedConfigInSession, setHasEditedConfigInSession] = useState(false)
+  const [hydratedSelectionKey, setHydratedSelectionKey] = useState<string | null>(null)
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
@@ -69,9 +119,38 @@ export default function HorariosPage() {
   const classes = classesData?.data ?? []
   const academicPeriods = periodsData?.data ?? []
   const selectedClass = classes.find((c) => c.id === selectedClassId)
+  const selectionKey = useMemo(() => {
+    if (!selectedClassId || !selectedAcademicPeriodId) return null
+    return `${selectedClassId}:${selectedAcademicPeriodId}`
+  }, [selectedClassId, selectedAcademicPeriodId])
 
   const hasSchedule = scheduleData?.slots && scheduleData.slots.length > 0
   const shouldShowConfigForm = !loadingSchedule && (!hasSchedule || showConfigForm)
+
+  useEffect(() => {
+    if (!selectionKey || hydratedSelectionKey === selectionKey || hasEditedConfigInSession) return
+    if (!scheduleData?.slots?.length) {
+      setHydratedSelectionKey(selectionKey)
+      return
+    }
+
+    const inferredConfig = inferConfigFromSlots(scheduleData.slots)
+    if (inferredConfig) {
+      setScheduleConfig(inferredConfig)
+    }
+    setHydratedSelectionKey(selectionKey)
+  }, [
+    hasEditedConfigInSession,
+    hydratedSelectionKey,
+    scheduleData?.slots,
+    selectionKey,
+    setScheduleConfig,
+  ])
+
+  const handleScheduleConfigChange = (next: ScheduleConfig) => {
+    setScheduleConfig(next)
+    setHasEditedConfigInSession(true)
+  }
 
   const handleApplyConfig = () => {
     setShowConfigForm(false)
@@ -116,6 +195,9 @@ export default function HorariosPage() {
                     setSelectedAcademicPeriodId(value)
                     setSelectedClassId('')
                     setShowConfigForm(false)
+                    setHydratedSelectionKey(null)
+                    setHasEditedConfigInSession(false)
+                    setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
                   }}
                   disabled={loadingPeriods}
                 >
@@ -145,6 +227,9 @@ export default function HorariosPage() {
                     if (value === null) return
                     setSelectedClassId(value)
                     setShowConfigForm(false)
+                    setHydratedSelectionKey(null)
+                    setHasEditedConfigInSession(false)
+                    setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
                   }}
                   disabled={!selectedAcademicPeriodId || loadingClasses}
                 >
@@ -209,7 +294,7 @@ export default function HorariosPage() {
             {shouldShowConfigForm && (
               <ScheduleConfigForm
                 value={scheduleConfig}
-                onChange={setScheduleConfig}
+                onChange={handleScheduleConfigChange}
                 onApply={handleApplyConfig}
               />
             )}

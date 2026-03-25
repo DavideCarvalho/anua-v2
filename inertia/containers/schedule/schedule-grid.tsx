@@ -97,6 +97,44 @@ interface ScheduleData {
   teacherClasses: TeacherHasClass[]
 }
 
+function toMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+function toTime(minutes: number): string {
+  const normalizedMinutes = ((minutes % 1440) + 1440) % 1440
+  const hours = Math.floor(normalizedMinutes / 60)
+  const remainder = normalizedMinutes % 60
+  return `${hours.toString().padStart(2, '0')}:${remainder.toString().padStart(2, '0')}`
+}
+
+function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
+  const slots: string[] = []
+  let cursor = toMinutes(config.startTime)
+
+  for (let classIndex = 1; classIndex <= config.classesPerDay; classIndex += 1) {
+    const classStart = cursor
+    const classEnd = classStart + config.classDuration
+    slots.push(`${toTime(classStart)}-${toTime(classEnd)}`)
+    cursor = classEnd
+
+    const shouldInsertBreak =
+      config.breakDuration > 0 &&
+      classIndex === config.breakAfterClass &&
+      classIndex < config.classesPerDay
+
+    if (shouldInsertBreak) {
+      const breakStart = cursor
+      const breakEnd = breakStart + config.breakDuration
+      slots.push(`${toTime(breakStart)}-${toTime(breakEnd)}`)
+      cursor = breakEnd
+    }
+  }
+
+  return slots
+}
+
 type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY'
 
 const DAYS_OF_WEEK: { key: DayOfWeek; label: string; number: number }[] = [
@@ -197,6 +235,15 @@ export function ScheduleGrid({
     })
     return Array.from(times).sort()
   }, [localSlots])
+
+  const configuredTimeSlotSet = useMemo(
+    () => new Set(getConfiguredTimeSlots(scheduleConfig)),
+    [scheduleConfig]
+  )
+  const hasOutOfTemplateSlots = useMemo(
+    () => timeSlots.some((timeSlot) => !configuredTimeSlotSet.has(timeSlot)),
+    [configuredTimeSlotSet, timeSlots]
+  )
 
   // Get pending classes (not yet scheduled enough times)
   const pendingClasses = useMemo(() => {
@@ -539,6 +586,11 @@ export function ScheduleGrid({
               <CardTitle>Grade de Horários - {className}</CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto">
+              {hasOutOfTemplateSlots && (
+                <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  Configuração da grade não contempla todos os horários
+                </div>
+              )}
               {timeSlots.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <p>Nenhum horário configurado para esta turma.</p>
@@ -560,9 +612,12 @@ export function ScheduleGrid({
                   <TableBody>
                     {timeSlots.map((timeSlot) => {
                       const [startTime, endTime] = timeSlot.split('-')
+                      const isOutOfTemplate = !configuredTimeSlotSet.has(timeSlot)
                       return (
-                        <TableRow key={timeSlot}>
-                          <TableCell className="font-medium">
+                        <TableRow key={timeSlot} className={cn(isOutOfTemplate && 'bg-muted/30')}>
+                          <TableCell
+                            className={cn('font-medium', isOutOfTemplate && 'text-muted-foreground')}
+                          >
                             {startTime} - {endTime}
                           </TableCell>
                           {DAYS_OF_WEEK.map((day) => {
@@ -573,13 +628,23 @@ export function ScheduleGrid({
                                 s.endTime === endTime
                             )
                             if (!slot) {
-                              return <TableCell key={day.key}>-</TableCell>
+                              return (
+                                <TableCell
+                                  key={day.key}
+                                  className={cn(isOutOfTemplate && 'bg-muted/40 text-muted-foreground')}
+                                >
+                                  -
+                                </TableCell>
+                              )
                             }
                             if (slot.isBreak) {
                               return (
                                 <TableCell
                                   key={day.key}
-                                  className="bg-muted text-center text-muted-foreground"
+                                  className={cn(
+                                    'bg-muted text-center text-muted-foreground',
+                                    isOutOfTemplate && 'bg-muted/60'
+                                  )}
                                 >
                                   INTERVALO
                                 </TableCell>
@@ -590,6 +655,7 @@ export function ScheduleGrid({
                                 key={day.key}
                                 slotId={`${day.number}_${startTime}-${endTime}`}
                                 teacherHasClass={slot.teacherHasClass}
+                                isDisabled={isOutOfTemplate}
                               />
                             )
                           })}
@@ -642,6 +708,7 @@ function DraggablePendingClass({ id, teacher, subject }: DraggablePendingClassPr
 
 interface ScheduleSlotCellProps {
   slotId: string
+  isDisabled?: boolean
   teacherHasClass?: {
     id: string
     teacher: { id: string; user: { name: string } }
@@ -649,7 +716,22 @@ interface ScheduleSlotCellProps {
   } | null
 }
 
-function ScheduleSlotCell({ slotId, teacherHasClass }: ScheduleSlotCellProps) {
+function ScheduleSlotCell({ slotId, teacherHasClass, isDisabled = false }: ScheduleSlotCellProps) {
+  if (isDisabled) {
+    return (
+      <TableCell className={cn('bg-muted/40 text-muted-foreground', !teacherHasClass && 'bg-muted/50')}>
+        {teacherHasClass ? (
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">{teacherHasClass.subject.name}</p>
+            <p className="text-xs text-muted-foreground">{teacherHasClass.teacher.user.name}</p>
+          </div>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )}
+      </TableCell>
+    )
+  }
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slotId,
   })

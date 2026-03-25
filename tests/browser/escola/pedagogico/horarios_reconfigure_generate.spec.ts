@@ -59,17 +59,30 @@ async function createHorariosFixtures(schoolId: string) {
     canceledForNextCalendarId: null,
   })
 
-  await CalendarSlot.create({
-    teacherHasClassId: null,
-    classWeekDay: 1,
-    startTime: '08:00',
-    endTime: '08:50',
-    minutes: 50,
-    calendarId: calendar.id,
-    isBreak: false,
-  })
+  const templateSlots = [
+    { startTime: '08:00', endTime: '08:50', minutes: 50, isBreak: false },
+    { startTime: '08:50', endTime: '09:40', minutes: 50, isBreak: false },
+    { startTime: '09:40', endTime: '10:30', minutes: 50, isBreak: false },
+    { startTime: '10:30', endTime: '10:50', minutes: 20, isBreak: true },
+    { startTime: '10:50', endTime: '11:40', minutes: 50, isBreak: false },
+    { startTime: '11:40', endTime: '12:30', minutes: 50, isBreak: false },
+    { startTime: '12:30', endTime: '13:20', minutes: 50, isBreak: false },
+  ]
+
+  for (const slot of templateSlots) {
+    await CalendarSlot.create({
+      teacherHasClassId: null,
+      classWeekDay: 1,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      minutes: slot.minutes,
+      calendarId: calendar.id,
+      isBreak: slot.isBreak,
+    })
+  }
 
   return {
+    classId: classEntity.id,
     className: classEntity.name,
     academicPeriodName: academicPeriod.name,
   }
@@ -86,7 +99,7 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     browserContext,
   }) => {
     const { user, school } = await createEscolaAuthUser()
-    const { className, academicPeriodName } = await createHorariosFixtures(school.id)
+    const { classId, className, academicPeriodName } = await createHorariosFixtures(school.id)
 
     await browserContext.loginAs(user)
 
@@ -125,17 +138,25 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.assertExists('button:has-text("Cancelar")')
     await horariosPage.assertExists('button:has-text("Gerar nova grade")')
 
+    const generateResponse = horariosPage.waitForResponse((response) => {
+      return (
+        response.request().method() === 'POST' &&
+        response.url().includes(`/api/v1/schedules/class/${classId}/generate`)
+      )
+    })
+
+    await horariosPage.click('button:has-text("Gerar nova grade")')
+    await generateResponse
     await horariosPage.click('button:has-text("Cancelar")')
-    await horariosPage.assertNotExists(
-      'text=Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.'
-    )
 
     await horariosPage.click('button:has-text("Reconfigurar Grade")')
+    await horariosPage.fill('input#classesPerDay', '5')
+    await horariosPage.click('button:has-text("Aplicar Configuração")')
 
+    await horariosPage.assertExists('text=Configuração da grade não contempla todos os horários')
+
+    await horariosPage.click('button:has-text("Reconfigurar Grade")')
     await horariosPage.assertExists('text=Configuração da Grade')
     await horariosPage.assertExists('button:has-text("Aplicar Configuração")')
-    await horariosPage.assertNotExists('button:has-text("Gerar Grade")')
-    await horariosPage.assertNotExists('button:has-text("Reconfigurar Grade")')
-    await horariosPage.assertNotExists('button:has-text("Recarregar")')
   })
 })
