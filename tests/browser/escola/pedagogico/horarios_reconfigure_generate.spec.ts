@@ -97,6 +97,7 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
   test('shows reconfigure action separately from generate action when schedule exists', async ({
     visit,
     browserContext,
+    assert,
   }) => {
     const { user, school } = await createEscolaAuthUser()
     const { classId, className, academicPeriodName } = await createHorariosFixtures(school.id)
@@ -131,12 +132,34 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.assertExists('button:has-text("Gerar Grade")')
     await horariosPage.assertNotExists('button:has-text("Recarregar")')
 
+    await horariosPage.click('button:has-text("Reconfigurar Grade")')
+    await horariosPage.fill('input#startTime', '08:00')
+    await horariosPage.fill('input#classesPerDay', '5')
+    await horariosPage.click('button:has-text("Aplicar Configuração")')
+
+    await horariosPage.assertExists('text=Configuração da grade não contempla todos os horários')
+    const mondayExtraSlotCell = horariosPage
+      .locator('tbody tr[class*="bg-muted/30"]')
+      .last()
+      .locator('td')
+      .nth(1)
+    const mondayExtraSlotCellClass = (await mondayExtraSlotCell.getAttribute('class')) || ''
+
+    assert.include(mondayExtraSlotCellClass, 'cursor-move')
+
     await horariosPage.click('button:has-text("Gerar Grade")')
     await horariosPage.assertExists(
       'text=Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.'
     )
     await horariosPage.assertExists('button:has-text("Cancelar")')
     await horariosPage.assertExists('button:has-text("Gerar nova grade")')
+
+    const generateRoute = `**/api/v1/schedules/class/${classId}/generate`
+    let generatedRequestPayload: string | null = null
+    await horariosPage.route(generateRoute, async (route) => {
+      generatedRequestPayload = route.request().postData()
+      await route.continue()
+    })
 
     const generateResponse = horariosPage.waitForResponse((response) => {
       return (
@@ -147,15 +170,46 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
 
     await horariosPage.click('button:has-text("Gerar nova grade")')
     await generateResponse
+    await horariosPage.unroute(generateRoute)
+
+    const generatePayload = ((): {
+      json?: {
+        config?: { classesPerDay?: number; startTime?: string }
+        classesPerDay?: number
+        startTime?: string
+      }
+      config?: { classesPerDay?: number; startTime?: string }
+      classesPerDay?: number
+      startTime?: string
+    } | null => {
+      if (!generatedRequestPayload) {
+        return null
+      }
+
+      try {
+        return JSON.parse(generatedRequestPayload)
+      } catch {
+        return null
+        }
+    })()
+    assert.equal(
+      generatePayload?.json?.config?.classesPerDay ??
+        generatePayload?.config?.classesPerDay ??
+        generatePayload?.json?.classesPerDay ??
+        generatePayload?.classesPerDay,
+      5
+    )
+    assert.equal(
+      generatePayload?.json?.config?.startTime ??
+        generatePayload?.config?.startTime ??
+        generatePayload?.json?.startTime ??
+        generatePayload?.startTime,
+      '08:00'
+    )
+
     await horariosPage.assertNotExists(
       'text=Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.'
     )
-
-    await horariosPage.click('button:has-text("Reconfigurar Grade")')
-    await horariosPage.fill('input#classesPerDay', '5')
-    await horariosPage.click('button:has-text("Aplicar Configuração")')
-
-    await horariosPage.assertExists('text=Configuração da grade não contempla todos os horários')
 
     await horariosPage.click('button:has-text("Reconfigurar Grade")')
     await horariosPage.assertExists('text=Configuração da Grade')
