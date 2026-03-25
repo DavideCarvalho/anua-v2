@@ -33,6 +33,6 @@ export default class LevelAssignedToCourseHasAcademicPeriod extends BaseModel {
   @belongsTo(() => CourseHasAcademicPeriod, { foreignKey: 'courseHasAcademicPeriodId' })
   declare courseHasAcademicPeriod: BelongsTo<typeof CourseHasAcademicPeriod>
 
-  @hasMany(() => StudentHasLevel, { foreignKey: 'levelAssignedToCourseHasAcademicPeriodId' })
+  @hasMany(() => StudentHasLevel, { foreignKey: 'levelAssignedToCourseAcademicPeriodId' })
   declare studentLevels: HasMany<typeof StudentHasLevel>
 }

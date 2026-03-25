@@ -52,7 +52,9 @@ export function CalendarForm() {
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione o segmento" />
+                      <SelectValue placeholder="Selecione o segmento">
+                        {field.value ? SEGMENT_LABELS[field.value] : undefined}
+                      </SelectValue>
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
