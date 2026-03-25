@@ -11,6 +11,9 @@ import StudentMedicalInfo from '#models/student_medical_info'
 import StudentMedication from '#models/student_medication'
 import StudentEmergencyContact from '#models/student_emergency_contact'
 import StudentHasResponsible from '#models/student_has_responsible'
+import StudentHasLevel from '#models/student_has_level'
+import IndividualDiscount from '#models/individual_discount'
+import UpdateEnrollmentPaymentsJob from '#jobs/payments/update_enrollment_payments_job'
 import { fullUpdateStudentValidator } from '#validators/student'
 import AppException from '#exceptions/app_exception'
 import type { EmergencyContactRelationship } from '#models/student_emergency_contact'
@@ -95,6 +98,7 @@ export default class FullUpdateStudentController {
     }
 
     const trx = await db.transaction()
+    let updatedEnrollmentId: string | null = null
 
     try {
       // 1. Update User
@@ -317,7 +321,97 @@ export default class FullUpdateStudentController {
         )
       }
 
+      // 8. Update billing/enrollment data when provided
+      if (data.billingUpdate) {
+        const { enrollmentId, individualDiscount, ...enrollmentPayload } = data.billingUpdate
+
+        const enrollment = await StudentHasLevel.query({ client: trx })
+          .where('id', enrollmentId)
+          .where('studentId', student.id)
+          .first()
+
+        if (!enrollment) {
+          throw AppException.badRequest('Matrícula não encontrada para atualização de cobrança')
+        }
+
+        enrollment.merge(enrollmentPayload)
+        await enrollment.useTransaction(trx).save()
+
+        // Business rule: scholarship and individual discounts are mutually exclusive
+        if (data.billingUpdate.scholarshipId) {
+          await IndividualDiscount.query({ client: trx })
+            .where('studentHasLevelId', enrollment.id)
+            .where('isActive', true)
+            .whereNull('deletedAt')
+            .update({ isActive: false })
+        }
+
+        if (individualDiscount !== undefined) {
+          const schoolId = student.user.schoolId
+          if (!schoolId) {
+            throw AppException.badRequest(
+              'Não foi possível identificar a escola para aplicar o desconto individual'
+            )
+          }
+
+          await IndividualDiscount.query({ client: trx })
+            .where('studentHasLevelId', enrollment.id)
+            .where('isActive', true)
+            .whereNull('deletedAt')
+            .update({ isActive: false })
+
+          if (individualDiscount) {
+            await IndividualDiscount.create(
+              {
+                name: individualDiscount.name || 'Desconto personalizado',
+                description: 'Configurado na edição de aluno',
+                discountType: individualDiscount.discountType,
+                discountPercentage:
+                  individualDiscount.discountType === 'PERCENTAGE'
+                    ? (individualDiscount.discountPercentage ?? 0)
+                    : null,
+                enrollmentDiscountPercentage: 0,
+                discountValue:
+                  individualDiscount.discountType === 'FLAT'
+                    ? (individualDiscount.discountValue ?? 0)
+                    : null,
+                enrollmentDiscountValue: null,
+                isActive: true,
+                schoolId,
+                studentId: enrollment.studentId,
+                studentHasLevelId: enrollment.id,
+                createdById: ctx.auth.user?.id ?? student.id,
+              },
+              { client: trx }
+            )
+
+            enrollment.scholarshipId = null
+            await enrollment.useTransaction(trx).save()
+          }
+        }
+
+        updatedEnrollmentId = enrollment.id
+      }
+
       await trx.commit()
+
+      if (updatedEnrollmentId) {
+        try {
+          const dispatcher = UpdateEnrollmentPaymentsJob.dispatch({
+            enrollmentId: updatedEnrollmentId,
+            triggeredBy: ctx.auth.user
+              ? { id: ctx.auth.user.id, name: ctx.auth.user.name ?? 'Unknown' }
+              : null,
+          })
+
+          await dispatcher.run()
+        } catch (error) {
+          logger.error(
+            { error },
+            '[FULL_UPDATE_STUDENT] Failed to dispatch enrollment payments update'
+          )
+        }
+      }
 
       // Load student with relationships
       const updatedStudent = await Student.query()

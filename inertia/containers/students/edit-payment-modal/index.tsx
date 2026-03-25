@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { differenceInMonths } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -62,6 +62,15 @@ type UpdateEnrollmentPayload = {
       }
     | null
 }
+
+export type GlobalBillingUpdatePayload = UpdateEnrollmentPayload & {
+  enrollmentId: string
+}
+
+type RegisteredEmbeddedSubmit = () => Promise<{
+  valid: boolean
+  payload?: GlobalBillingUpdatePayload
+}>
 import { formatCurrency } from '~/lib/utils'
 
 const schema = z
@@ -134,6 +143,11 @@ const PaymentMethodLabels = {
   PIX: 'PIX',
 }
 
+const IndividualDiscountTypeLabels = {
+  PERCENTAGE: 'Percentual (%)',
+  FLAT: 'Valor fixo (R$)',
+}
+
 const BenefitModeLabels = {
   NONE: 'Sem benefício',
   SCHOLARSHIP: 'Bolsa',
@@ -157,12 +171,14 @@ export function EnrollmentTabContent({
   onSuccess,
   onClose,
   embedded = false,
+  onRegisterSubmit,
 }: {
   enrollment: StudentEnrollment
   studentId: string
   onSuccess?: () => void
   onClose?: () => void
   embedded?: boolean
+  onRegisterSubmit?: (submit: RegisteredEmbeddedSubmit) => void
 }) {
   const queryClient = useQueryClient()
   const updateEnrollmentMutation = useMutation(
@@ -467,61 +483,67 @@ export function EnrollmentTabContent({
     form.setValue('enrollmentDiscountPercentage', scholarship?.enrollmentDiscountPercentage ?? 0)
   }
 
-  async function handleSubmit(data: FormData) {
-    try {
-      const updateData: UpdateEnrollmentPayload = {}
+  function buildUpdateData(data: FormData): UpdateEnrollmentPayload {
+    const updateData: UpdateEnrollmentPayload = {}
 
-      const desiredContractId =
-        data.contractId === LEVEL_DEFAULT_CONTRACT_OPTION ? null : data.contractId
+    const desiredContractId =
+      data.contractId === LEVEL_DEFAULT_CONTRACT_OPTION ? null : data.contractId
 
-      if (desiredContractId !== (enrollment.contractId ?? null)) {
-        updateData.contractId = desiredContractId
-      }
+    if (desiredContractId !== (enrollment.contractId ?? null)) {
+      updateData.contractId = desiredContractId
+    }
 
-      const desiredScholarshipId = data.benefitMode === 'SCHOLARSHIP' ? data.scholarshipId : null
-      if (desiredScholarshipId !== (enrollment.scholarshipId ?? null)) {
-        updateData.scholarshipId = desiredScholarshipId
-      }
+    const desiredScholarshipId = data.benefitMode === 'SCHOLARSHIP' ? data.scholarshipId : null
+    if (desiredScholarshipId !== (enrollment.scholarshipId ?? null)) {
+      updateData.scholarshipId = desiredScholarshipId
+    }
 
-      const currentPaymentMethod = enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO'
-      if (data.paymentMethod !== currentPaymentMethod) {
-        updateData.paymentMethod = data.paymentMethod
-      }
+    const currentPaymentMethod = enrollment.paymentMethod === 'PIX' ? 'PIX' : 'BOLETO'
+    if (data.paymentMethod !== currentPaymentMethod) {
+      updateData.paymentMethod = data.paymentMethod
+    }
 
-      if (data.paymentDay !== (enrollment.paymentDay ?? 5)) {
-        updateData.paymentDay = data.paymentDay
-      }
+    if (data.paymentDay !== (enrollment.paymentDay ?? 5)) {
+      updateData.paymentDay = data.paymentDay
+    }
 
-      const currentInstallments = enrollment.installments ?? 12
-      if (data.installments !== currentInstallments) {
-        updateData.installments = data.installments
-      }
+    const currentInstallments = enrollment.installments ?? 12
+    if (data.installments !== currentInstallments) {
+      updateData.installments = data.installments
+    }
 
-      const individualDiscountChanged =
-        data.benefitMode !== initialBenefitMode ||
-        data.individualDiscountType !== initialIndividualDiscountType ||
-        (data.individualDiscountType === 'PERCENTAGE' &&
-          (data.individualDiscountPercentage ?? 0) !== initialIndividualDiscountPercentage) ||
-        (data.individualDiscountType === 'FLAT' &&
-          (data.individualDiscountValueReais ?? 0) !== initialIndividualDiscountValueReais)
+    const individualDiscountChanged =
+      data.benefitMode !== initialBenefitMode ||
+      data.individualDiscountType !== initialIndividualDiscountType ||
+      (data.individualDiscountType === 'PERCENTAGE' &&
+        (data.individualDiscountPercentage ?? 0) !== initialIndividualDiscountPercentage) ||
+      (data.individualDiscountType === 'FLAT' &&
+        (data.individualDiscountValueReais ?? 0) !== initialIndividualDiscountValueReais)
 
-      if (individualDiscountChanged) {
-        if (data.benefitMode !== 'INDIVIDUAL') {
-          updateData.individualDiscount = null
-        } else if (data.individualDiscountType === 'PERCENTAGE') {
-          updateData.individualDiscount = {
-            name: 'Desconto personalizado',
-            discountType: 'PERCENTAGE',
-            discountPercentage: data.individualDiscountPercentage ?? 0,
-          }
-        } else {
-          updateData.individualDiscount = {
-            name: 'Desconto personalizado',
-            discountType: 'FLAT',
-            discountValue: Math.round((data.individualDiscountValueReais ?? 0) * 100),
-          }
+    if (individualDiscountChanged) {
+      if (data.benefitMode !== 'INDIVIDUAL') {
+        updateData.individualDiscount = null
+      } else if (data.individualDiscountType === 'PERCENTAGE') {
+        updateData.individualDiscount = {
+          name: 'Desconto personalizado',
+          discountType: 'PERCENTAGE',
+          discountPercentage: data.individualDiscountPercentage ?? 0,
+        }
+      } else {
+        updateData.individualDiscount = {
+          name: 'Desconto personalizado',
+          discountType: 'FLAT',
+          discountValue: Math.round((data.individualDiscountValueReais ?? 0) * 100),
         }
       }
+    }
+
+    return updateData
+  }
+
+  async function handleSubmit(data: FormData) {
+    try {
+      const updateData = buildUpdateData(data)
 
       await updateEnrollment({
         params: { id: studentId, enrollmentId: enrollment.id },
@@ -548,13 +570,43 @@ export function EnrollmentTabContent({
     toast.error('Revise os campos obrigatórios antes de salvar')
   }
 
+  useEffect(() => {
+    if (!onRegisterSubmit) return
+
+    onRegisterSubmit(() => {
+      return new Promise((resolve) => {
+        void form.handleSubmit(
+          (validData) => {
+            resolve({
+              valid: true,
+              payload: {
+                enrollmentId: enrollment.id,
+                ...buildUpdateData(validData),
+              },
+            })
+          },
+          () => {
+            handleInvalidSubmit()
+            resolve({ valid: false })
+          }
+        )()
+      })
+    })
+  }, [form, onRegisterSubmit, enrollment.id])
+
   const formId = `enrollment-form-${enrollment.id}`
 
   return (
     <Form {...form}>
       <form
         id={formId}
-        onSubmit={form.handleSubmit(handleSubmit, handleInvalidSubmit)}
+        onSubmit={
+          embedded
+            ? (event) => {
+                event.preventDefault()
+              }
+            : form.handleSubmit(handleSubmit, handleInvalidSubmit)
+        }
         noValidate
         className="space-y-4"
       >
@@ -578,7 +630,12 @@ export function EnrollmentTabContent({
                             {levelContractId ? '(padrão)' : '(não configurado)'}
                           </span>
                         ) : (
-                          <SelectValue placeholder="Selecione um contrato" />
+                          <span className="flex flex-1 text-left">
+                            {contracts.find(
+                              (contract: { id: string; name: string }) =>
+                                contract.id === field.value
+                            )?.name || 'Contrato sem nome'}
+                          </span>
                         )}
                       </SelectTrigger>
                     </FormControl>
@@ -589,7 +646,7 @@ export function EnrollmentTabContent({
                       </SelectItem>
                       {contracts.map((contract: { id: string; name: string }) => (
                         <SelectItem key={contract.id} value={contract.id}>
-                          {contract.name || contract.id}
+                          {contract.name || 'Contrato sem nome'}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -709,7 +766,9 @@ export function EnrollmentTabContent({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue />
+                            <span className="flex flex-1 text-left">
+                              {IndividualDiscountTypeLabels[field.value]}
+                            </span>
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -822,7 +881,9 @@ export function EnrollmentTabContent({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <span className="flex flex-1 text-left">
+                            {PaymentMethodLabels[field.value]}
+                          </span>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -959,21 +1020,6 @@ export function EnrollmentTabContent({
         )}
 
         {!embedded && <div className="h-16" />}
-
-        {embedded && (
-          <DialogFooter>
-            <Button type="submit" form={formId} disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                'Salvar Alterações'
-              )}
-            </Button>
-          </DialogFooter>
-        )}
       </form>
 
       {!embedded && (
@@ -999,72 +1045,122 @@ export function EnrollmentTabContent({
   )
 }
 
-export function EditPaymentSection({
-  studentId,
-  studentName: _studentName,
-  onSuccess,
-}: Omit<EditPaymentModalProps, 'open' | 'onOpenChange'>) {
-  const { data: enrollments, isLoading } = useQuery({
-    ...api.api.v1.students.enrollments.list.queryOptions({
-      params: { id: studentId },
-    }),
-    enabled: !!studentId,
-  })
-
-  const enrollmentsByPeriod = useMemo(() => {
-    if (!enrollments) return []
-    return enrollments
-      .filter((e: StudentEnrollment) => e.academicPeriod)
-      .sort((a: StudentEnrollment, b: StudentEnrollment) => {
-        const dateA = new Date(String(a.academicPeriod?.startDate ?? 0))
-        const dateB = new Date(String(b.academicPeriod?.startDate ?? 0))
-        return dateB.getTime() - dateA.getTime()
-      })
-  }, [enrollments])
-
-  const defaultTab = enrollmentsByPeriod[0]?.academicPeriodId ?? ''
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
-  if (enrollmentsByPeriod.length === 0) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        Este aluno não possui matrículas ativas.
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6 py-4">
-      <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="w-full justify-start">
-          {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
-            <TabsTrigger key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
-              {enrollment.academicPeriod?.name ?? 'Período'}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
-          <TabsContent key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
-            <EnrollmentTabContent
-              enrollment={enrollment}
-              studentId={studentId}
-              onSuccess={onSuccess}
-              embedded
-            />
-          </TabsContent>
-        ))}
-      </Tabs>
-    </div>
-  )
+export interface EditPaymentSectionRef {
+  collectActiveEnrollmentUpdate: () => Promise<{
+    valid: boolean
+    payload?: GlobalBillingUpdatePayload
+  }>
 }
+
+type EditPaymentSectionProps = {
+  studentId: string
+  studentName: string
+  onSuccess?: () => void
+}
+
+export const EditPaymentSection = forwardRef<EditPaymentSectionRef, EditPaymentSectionProps>(
+  function EditPaymentSection(
+    { studentId, studentName: _studentName, onSuccess }: EditPaymentSectionProps,
+    ref
+  ) {
+    const { data: enrollments, isLoading } = useQuery({
+      ...api.api.v1.students.enrollments.list.queryOptions({
+        params: { id: studentId },
+      }),
+      enabled: !!studentId,
+    })
+
+    const enrollmentsByPeriod = useMemo(() => {
+      if (!enrollments) return []
+      return enrollments
+        .filter((e: StudentEnrollment) => e.academicPeriod)
+        .sort((a: StudentEnrollment, b: StudentEnrollment) => {
+          const dateA = new Date(String(a.academicPeriod?.startDate ?? 0))
+          const dateB = new Date(String(b.academicPeriod?.startDate ?? 0))
+          return dateB.getTime() - dateA.getTime()
+        })
+    }, [enrollments])
+
+    const defaultTab = enrollmentsByPeriod[0]?.academicPeriodId ?? ''
+    const [activeTab, setActiveTab] = useState(defaultTab)
+    const submitHandlersRef = useRef<Record<string, RegisteredEmbeddedSubmit>>({})
+
+    useEffect(() => {
+      if (!defaultTab) return
+
+      setActiveTab((current) => current || defaultTab)
+    }, [defaultTab])
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        collectActiveEnrollmentUpdate: async () => {
+          const activeEnrollment = enrollmentsByPeriod.find(
+            (enrollment) => enrollment.academicPeriodId === activeTab
+          )
+
+          if (!activeEnrollment) {
+            toast.error('Nenhuma matrícula ativa selecionada para salvar')
+            return { valid: false }
+          }
+
+          const submit = submitHandlersRef.current[activeEnrollment.id]
+          if (!submit) {
+            toast.error('Formulário de cobrança não está pronto para salvar')
+            return { valid: false }
+          }
+
+          return submit()
+        },
+      }),
+      [activeTab, enrollmentsByPeriod]
+    )
+
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )
+    }
+
+    if (enrollmentsByPeriod.length === 0) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          Este aluno não possui matrículas ativas.
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-6 py-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full justify-start">
+            {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
+              <TabsTrigger key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
+                {enrollment.academicPeriod?.name ?? 'Período'}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {enrollmentsByPeriod.map((enrollment: StudentEnrollment) => (
+            <TabsContent key={enrollment.id} value={enrollment.academicPeriodId ?? ''}>
+              <EnrollmentTabContent
+                enrollment={enrollment}
+                studentId={studentId}
+                onSuccess={onSuccess}
+                embedded
+                onRegisterSubmit={(submit) => {
+                  submitHandlersRef.current[enrollment.id] = submit
+                }}
+              />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    )
+  }
+)
 
 export function EditPaymentModal({
   studentId,

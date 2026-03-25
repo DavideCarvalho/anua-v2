@@ -17,7 +17,11 @@ import { ResponsiblesStep } from '../enrollment/steps/responsibles-step'
 import { AddressStep } from '../enrollment/steps/address-step'
 import { MedicalInfoStep } from '../enrollment/steps/medical-step'
 import { ReviewStep } from './steps/review-step'
-import { EditPaymentSection } from '../students/edit-payment-modal'
+import {
+  EditPaymentSection,
+  type EditPaymentSectionRef,
+  type GlobalBillingUpdatePayload,
+} from '../students/edit-payment-modal'
 import { editStudentSchema, type EditStudentFormData } from '../students/edit-student-modal/schema'
 import { EmergencyContactRelationship } from '../enrollment/schema'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -47,6 +51,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
   const [changedSteps, setChangedSteps] = useState<boolean[]>(STEPS_CONFIG.map(() => false))
   const [isInitialized, setIsInitialized] = useState(false)
   const skipUnsavedWarningRef = useRef(false)
+  const editPaymentRef = useRef<EditPaymentSectionRef | null>(null)
 
   const queryClient = useQueryClient()
   const fullUpdateStudent = useMutation(api.api.v1.students.fullUpdate.mutationOptions())
@@ -483,7 +488,10 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
   }
 
   // ── Submit ────────────────────────────────────────────────────────────
-  async function handleSubmit(data: EditStudentFormData) {
+  async function saveStudent(
+    data: EditStudentFormData,
+    billingUpdate?: GlobalBillingUpdatePayload
+  ) {
     // Merge guardian emergency contacts with manual ones
     const guardianContacts = data.responsibles
       .filter((r) => r.isEmergencyContact)
@@ -515,6 +523,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
             ...data.medicalInfo,
             emergencyContacts: [...guardianContacts, ...manualContacts],
           },
+          ...(billingUpdate ? { billingUpdate } : {}),
         },
       })
 
@@ -576,7 +585,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
       </div>
 
       <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-1 flex-col min-h-0">
+        <div className="flex flex-1 flex-col min-h-0">
           {/* Sidebar + Content */}
           <div className="flex flex-1 min-h-0 relative">
             <EnrollmentSidebar
@@ -592,12 +601,13 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
               {currentStep === 1 && <ResponsiblesStep academicPeriodId={academicPeriodId} />}
               {currentStep === 2 && <AddressStep />}
               {currentStep === 3 && <MedicalInfoStep />}
-              {currentStep === 4 && (
+              <div className={currentStep === 4 ? '' : 'hidden'}>
                 <EditPaymentSection
+                  ref={editPaymentRef}
                   studentId={studentId}
                   studentName={form.watch('basicInfo.name') || 'Aluno'}
                 />
-              )}
+              </div>
               {currentStep === 5 && <ReviewStep onGoToStep={(step) => setCurrentStep(step)} />}
             </div>
           </div>
@@ -631,7 +641,16 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
               <Button
                 type="button"
                 disabled={fullUpdateStudent.isPending}
-                onClick={() => form.handleSubmit(handleSubmit)()}
+                onClick={async () => {
+                  const billingResult =
+                    await editPaymentRef.current?.collectActiveEnrollmentUpdate()
+
+                  if (billingResult && !billingResult.valid) {
+                    return
+                  }
+
+                  form.handleSubmit((data) => saveStudent(data, billingResult?.payload))()
+                }}
               >
                 {fullUpdateStudent.isPending ? 'Salvando...' : 'Salvar'}
               </Button>
@@ -642,7 +661,7 @@ export function EditStudentPage({ studentId }: EditStudentPageProps) {
               )}
             </div>
           </div>
-        </form>
+        </div>
       </FormProvider>
     </div>
   )
