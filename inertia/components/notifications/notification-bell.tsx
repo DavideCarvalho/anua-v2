@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, Check, CheckCheck } from 'lucide-react'
 import type { MouseEvent } from 'react'
 
@@ -26,9 +26,11 @@ type NotificationItem = {
 }
 
 export function NotificationBell({ allNotificationsRoute }: NotificationBellProps) {
+  const queryClient = useQueryClient()
+
   const { data, isLoading } = useQuery({
     ...api.api.v1.notifications.index.queryOptions({ query: { page: 1, limit: 8 } }),
-    refetchInterval: 60_000,
+    refetchInterval: 10_000,
   })
 
   const markReadMutation = useMutation(api.api.v1.notifications.markRead.mutationOptions())
@@ -53,10 +55,16 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
     event?.stopPropagation()
 
     await markReadMutation.mutateAsync({ params: { id: notificationId } })
+    await queryClient.invalidateQueries({
+      queryKey: api.api.v1.notifications.index.pathKey(),
+    })
   }
 
   const handleMarkAllRead = async () => {
     await markAllReadMutation.mutateAsync({})
+    await queryClient.invalidateQueries({
+      queryKey: api.api.v1.notifications.index.pathKey(),
+    })
   }
 
   return (

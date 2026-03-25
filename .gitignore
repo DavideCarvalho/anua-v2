@@ -51,3 +51,6 @@ infra/terraform/**/*.auto.tfvars
 infra/terraform/**/*.tfplan
 node_modules
 node_modules/.vite
+
+# Local git worktrees
+.worktrees/
