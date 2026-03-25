@@ -156,7 +156,9 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
     }
   }
 
-  const selectedUser = filteredUsers.find((u) => u.id === selectedUserId) ?? config?.users?.find((u) => u.id === selectedUserId)
+  const selectedUser =
+    filteredUsers.find((u) => u.id === selectedUserId) ??
+    config?.users?.find((u) => u.id === selectedUserId)
 
   // Always show in admin context - this component is only used in admin layout
   // The user check is handled at the API level
@@ -195,7 +197,12 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
                 </span>
               </div>
               {hasActiveImpersonation && (
-                <span className="ml-auto flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                <Badge
+                  variant="secondary"
+                  className="ml-auto border border-amber-500/30 bg-amber-500/10 text-amber-700"
+                >
+                  Ativa
+                </Badge>
               )}
             </button>
           </DropdownMenuTrigger>
@@ -227,6 +234,9 @@ export function ImpersonationBadge({ roleName: _roleName }: ImpersonationBadgePr
                     onChange={(e) => {
                       setSearchInput(e.target.value)
                       setPage(1)
+                    }}
+                    onKeyDown={(e) => {
+                      e.stopPropagation()
                     }}
                     className="pl-9"
                   />
