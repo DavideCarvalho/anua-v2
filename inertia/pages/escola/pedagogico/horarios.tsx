@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/select'
 import { ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { ScheduleGrid } from '~/containers/schedule/schedule-grid'
-import { ScheduleConfigForm } from '~/containers/schedule/schedule-config-form'
+import { ScheduleConfigForm, type ScheduleConfig } from '~/containers/schedule/schedule-config-form'
 import { api } from '~/lib/api'
 
 interface ScheduleData {
@@ -29,6 +29,60 @@ interface ScheduleData {
   }>
 }
 
+const DEFAULT_SCHEDULE_CONFIG: ScheduleConfig = {
+  startTime: '07:30',
+  classesPerDay: 6,
+  classDuration: 50,
+  breakAfterClass: 3,
+  breakDuration: 20,
+}
+
+function toMinutes(time: string): number {
+  const [hour, minute] = time.split(':').map(Number)
+  return hour * 60 + minute
+}
+
+function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | null {
+  if (!slots.length) return null
+
+  const byDay = new Map<number, ScheduleData['slots']>()
+  for (const slot of slots) {
+    const current = byDay.get(slot.classWeekDay) ?? []
+    current.push(slot)
+    byDay.set(slot.classWeekDay, current)
+  }
+
+  const dayWithMostSlots = Array.from(byDay.values())
+    .sort((a, b) => b.length - a.length)
+    .at(0)
+
+  if (!dayWithMostSlots?.length) return null
+
+  const orderedSlots = [...dayWithMostSlots].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
+  const firstClass = orderedSlots.find((slot) => !slot.isBreak)
+  const firstBreakIndex = orderedSlots.findIndex((slot) => slot.isBreak)
+  const firstBreak = firstBreakIndex >= 0 ? orderedSlots[firstBreakIndex] : null
+
+  const classesPerDay = orderedSlots.filter((slot) => !slot.isBreak).length
+  const classDuration = firstClass ? toMinutes(firstClass.endTime) - toMinutes(firstClass.startTime) : 50
+  const inferredBreakAfterClass =
+    firstBreakIndex >= 0
+      ? orderedSlots.slice(0, firstBreakIndex).filter((slot) => !slot.isBreak).length
+      : DEFAULT_SCHEDULE_CONFIG.breakAfterClass
+  const inferredBreakDuration = firstBreak
+    ? toMinutes(firstBreak.endTime) - toMinutes(firstBreak.startTime)
+    : 0
+
+  return {
+    startTime: firstClass?.startTime ?? DEFAULT_SCHEDULE_CONFIG.startTime,
+    classesPerDay: classesPerDay || DEFAULT_SCHEDULE_CONFIG.classesPerDay,
+    classDuration: classDuration || DEFAULT_SCHEDULE_CONFIG.classDuration,
+    breakAfterClass: inferredBreakAfterClass || DEFAULT_SCHEDULE_CONFIG.breakAfterClass,
+    breakDuration:
+      inferredBreakDuration >= 0 ? inferredBreakDuration : DEFAULT_SCHEDULE_CONFIG.breakDuration,
+  }
+}
+
 async function fetchSchedule(classId: string, academicPeriodId: string): Promise<ScheduleData> {
   const response = await fetch(
     `/api/v1/schedules/class/${classId}?academicPeriodId=${academicPeriodId}`
@@ -38,10 +92,12 @@ async function fetchSchedule(classId: string, academicPeriodId: string): Promise
 }
 
 export default function HorariosPage() {
-  const queryClient = useQueryClient()
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>(DEFAULT_SCHEDULE_CONFIG)
+  const [hasEditedConfigInSession, setHasEditedConfigInSession] = useState(false)
+  const [hydratedSelectionKey, setHydratedSelectionKey] = useState<string | null>(null)
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
@@ -63,15 +119,40 @@ export default function HorariosPage() {
   const classes = classesData?.data ?? []
   const academicPeriods = periodsData?.data ?? []
   const selectedClass = classes.find((c) => c.id === selectedClassId)
+  const selectionKey = useMemo(() => {
+    if (!selectedClassId || !selectedAcademicPeriodId) return null
+    return `${selectedClassId}:${selectedAcademicPeriodId}`
+  }, [selectedClassId, selectedAcademicPeriodId])
 
   const hasSchedule = scheduleData?.slots && scheduleData.slots.length > 0
   const shouldShowConfigForm = !loadingSchedule && (!hasSchedule || showConfigForm)
 
-  const handleGenerate = () => {
-    // Invalidate the schedule query to refetch with new data
-    queryClient.invalidateQueries({
-      queryKey: ['schedule', selectedClassId, selectedAcademicPeriodId],
-    })
+  useEffect(() => {
+    if (!selectionKey || hydratedSelectionKey === selectionKey || hasEditedConfigInSession) return
+    if (loadingSchedule || !scheduleData) {
+      return
+    }
+
+    const inferredConfig = inferConfigFromSlots(scheduleData.slots ?? [])
+    if (inferredConfig) {
+      setScheduleConfig(inferredConfig)
+    }
+    setHydratedSelectionKey(selectionKey)
+  }, [
+    hasEditedConfigInSession,
+    hydratedSelectionKey,
+    loadingSchedule,
+    scheduleData,
+    selectionKey,
+    setScheduleConfig,
+  ])
+
+  const handleScheduleConfigChange = (next: ScheduleConfig) => {
+    setScheduleConfig(next)
+    setHasEditedConfigInSession(true)
+  }
+
+  const handleApplyConfig = () => {
     setShowConfigForm(false)
   }
 
@@ -114,6 +195,9 @@ export default function HorariosPage() {
                     setSelectedAcademicPeriodId(value)
                     setSelectedClassId('')
                     setShowConfigForm(false)
+                    setHydratedSelectionKey(null)
+                    setHasEditedConfigInSession(false)
+                    setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
                   }}
                   disabled={loadingPeriods}
                 >
@@ -143,6 +227,9 @@ export default function HorariosPage() {
                     if (value === null) return
                     setSelectedClassId(value)
                     setShowConfigForm(false)
+                    setHydratedSelectionKey(null)
+                    setHasEditedConfigInSession(false)
+                    setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
                   }}
                   disabled={!selectedAcademicPeriodId || loadingClasses}
                 >
@@ -206,9 +293,9 @@ export default function HorariosPage() {
             {/* Config Form */}
             {shouldShowConfigForm && (
               <ScheduleConfigForm
-                classId={selectedClassId}
-                academicPeriodId={selectedAcademicPeriodId}
-                onGenerate={handleGenerate}
+                value={scheduleConfig}
+                onChange={handleScheduleConfigChange}
+                onApply={handleApplyConfig}
               />
             )}
 
@@ -217,6 +304,7 @@ export default function HorariosPage() {
               <ScheduleGrid
                 classId={selectedClassId}
                 academicPeriodId={selectedAcademicPeriodId}
+                scheduleConfig={scheduleConfig}
                 className={selectedClass?.name}
               />
             )}
