@@ -71,7 +71,7 @@ function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | nu
       : DEFAULT_SCHEDULE_CONFIG.breakAfterClass
   const inferredBreakDuration = firstBreak
     ? toMinutes(firstBreak.endTime) - toMinutes(firstBreak.startTime)
-    : DEFAULT_SCHEDULE_CONFIG.breakDuration
+    : 0
 
   return {
     startTime: firstClass?.startTime ?? DEFAULT_SCHEDULE_CONFIG.startTime,
