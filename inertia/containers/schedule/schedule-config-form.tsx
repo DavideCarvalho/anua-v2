@@ -1,16 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Settings, Wand2 } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '~/lib/api'
+import { Settings } from 'lucide-react'
 
-interface ScheduleConfig {
+export interface ScheduleConfig {
   startTime: string
   classesPerDay: number
   classDuration: number
@@ -18,85 +14,15 @@ interface ScheduleConfig {
   breakDuration: number
 }
 
-interface GeneratedSlot {
-  classWeekDay: number
-  startTime: string
-  endTime: string
-  minutes: number
-  isBreak: boolean
-  teacherHasClassId: string | null
-  teacherHasClass: {
-    id: string
-    teacher: { id: string; user: { name: string } }
-    subject: { id: string; name: string }
-  } | null
-}
-
-interface UnscheduledClass {
-  id: string
-  subjectQuantity: number
-  remainingLessons: number
-  teacher: { id: string; user: { name: string } }
-  subject: { id: string; name: string }
-}
-
-interface GenerateResult {
-  calendar: { id: string; name: string; isActive: boolean }
-  slots: GeneratedSlot[]
-  unscheduled: UnscheduledClass[]
-}
-
 interface ScheduleConfigFormProps {
-  classId: string
-  academicPeriodId: string
-  onGenerate: (result: GenerateResult) => void
+  value: ScheduleConfig
+  onChange: (next: ScheduleConfig) => void
+  onApply?: () => void
 }
 
-export function ScheduleConfigForm({
-  classId,
-  academicPeriodId,
-  onGenerate,
-}: ScheduleConfigFormProps) {
-  const [config, setConfig] = useState<ScheduleConfig>({
-    startTime: '07:30',
-    classesPerDay: 6,
-    classDuration: 50,
-    breakAfterClass: 3,
-    breakDuration: 20,
-  })
-
-  const queryClient = useQueryClient()
-  const generateMutation = useMutation(api.api.v1.schedules.generateClassSchedule.mutationOptions())
-
-  const handleChange = (field: keyof ScheduleConfig, value: string | number) => {
-    setConfig((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleGenerate = async () => {
-    try {
-      const result = await generateMutation.mutateAsync({
-        params: { classId },
-        body: {
-          academicPeriodId,
-          config,
-        },
-      } as any)
-
-      queryClient.invalidateQueries({ queryKey: ['classSchedule'] })
-
-      if (result.unscheduled?.length > 0) {
-        toast.warning(
-          `Grade gerada com ${result.unscheduled.length} aula(s) não alocada(s). Arraste-as para os horários disponíveis.`
-        )
-      } else {
-        toast.success('Grade gerada com sucesso!')
-      }
-
-      onGenerate(result)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro ao gerar grade'
-      toast.error(message)
-    }
+export function ScheduleConfigForm({ value, onChange, onApply }: ScheduleConfigFormProps) {
+  const handleChange = (field: keyof ScheduleConfig, nextValue: string | number) => {
+    onChange({ ...value, [field]: nextValue })
   }
 
   return (
@@ -107,8 +33,7 @@ export function ScheduleConfigForm({
           Configuração da Grade
         </CardTitle>
         <CardDescription>
-          Configure o template de horários e clique em "Gerar Grade" para distribuir automaticamente
-          as aulas
+          Configure o template de horários e aplique as alterações para continuar.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -120,7 +45,7 @@ export function ScheduleConfigForm({
               <Input
                 id="startTime"
                 type="time"
-                value={config.startTime}
+                value={value.startTime}
                 onChange={(e) => handleChange('startTime', e.target.value)}
               />
             </div>
@@ -131,7 +56,7 @@ export function ScheduleConfigForm({
                 type="number"
                 min={1}
                 max={10}
-                value={config.classesPerDay}
+                value={value.classesPerDay}
                 onChange={(e) => handleChange('classesPerDay', parseInt(e.target.value) || 1)}
               />
             </div>
@@ -142,7 +67,7 @@ export function ScheduleConfigForm({
                 type="number"
                 min={30}
                 max={60}
-                value={config.classDuration}
+                value={value.classDuration}
                 onChange={(e) => handleChange('classDuration', parseInt(e.target.value) || 50)}
               />
             </div>
@@ -156,8 +81,8 @@ export function ScheduleConfigForm({
                 id="breakAfterClass"
                 type="number"
                 min={1}
-                max={config.classesPerDay}
-                value={config.breakAfterClass}
+                max={value.classesPerDay}
+                value={value.breakAfterClass}
                 onChange={(e) => handleChange('breakAfterClass', parseInt(e.target.value) || 1)}
               />
             </div>
@@ -168,17 +93,16 @@ export function ScheduleConfigForm({
                 type="number"
                 min={0}
                 max={60}
-                value={config.breakDuration}
+                value={value.breakDuration}
                 onChange={(e) => handleChange('breakDuration', parseInt(e.target.value) || 0)}
               />
             </div>
           </div>
 
-          {/* Generate button */}
+          {/* Apply button */}
           <div className="flex justify-end">
-            <Button onClick={handleGenerate} disabled={generateMutation.isPending} size="lg">
-              <Wand2 className="mr-2 h-4 w-4" />
-              {generateMutation.isPending ? 'Gerando...' : 'Gerar Grade'}
+            <Button onClick={onApply} size="lg">
+              Aplicar Configuração
             </Button>
           </div>
         </div>

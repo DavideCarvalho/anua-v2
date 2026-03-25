@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/select'
 import { ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { ScheduleGrid } from '~/containers/schedule/schedule-grid'
-import { ScheduleConfigForm } from '~/containers/schedule/schedule-config-form'
+import { ScheduleConfigForm, type ScheduleConfig } from '~/containers/schedule/schedule-config-form'
 import { api } from '~/lib/api'
 
 interface ScheduleData {
@@ -38,10 +38,16 @@ async function fetchSchedule(classId: string, academicPeriodId: string): Promise
 }
 
 export default function HorariosPage() {
-  const queryClient = useQueryClient()
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>({
+    startTime: '07:30',
+    classesPerDay: 6,
+    classDuration: 50,
+    breakAfterClass: 3,
+    breakDuration: 20,
+  })
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
@@ -67,11 +73,7 @@ export default function HorariosPage() {
   const hasSchedule = scheduleData?.slots && scheduleData.slots.length > 0
   const shouldShowConfigForm = !loadingSchedule && (!hasSchedule || showConfigForm)
 
-  const handleGenerate = () => {
-    // Invalidate the schedule query to refetch with new data
-    queryClient.invalidateQueries({
-      queryKey: ['schedule', selectedClassId, selectedAcademicPeriodId],
-    })
+  const handleApplyConfig = () => {
     setShowConfigForm(false)
   }
 
@@ -206,9 +208,9 @@ export default function HorariosPage() {
             {/* Config Form */}
             {shouldShowConfigForm && (
               <ScheduleConfigForm
-                classId={selectedClassId}
-                academicPeriodId={selectedAcademicPeriodId}
-                onGenerate={handleGenerate}
+                value={scheduleConfig}
+                onChange={setScheduleConfig}
+                onApply={handleApplyConfig}
               />
             )}
 
