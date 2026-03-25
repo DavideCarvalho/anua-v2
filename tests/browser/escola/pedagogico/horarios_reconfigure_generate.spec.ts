@@ -138,6 +138,10 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.click('button:has-text("Aplicar Configuração")')
 
     await horariosPage.assertExists('text=Configuração da grade não contempla todos os horários')
+    const warningText = await horariosPage.locator('div.border-amber-200').first().innerText()
+    assert.include(warningText, 'Grade atual:')
+    assert.include(warningText, 'Configuração atual:')
+    assert.include(warningText, 'Horários fora da configuração:')
     const mondayExtraSlotCell = horariosPage
       .locator('tbody tr[class*="bg-muted/30"]')
       .last()
@@ -190,7 +194,7 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
         return JSON.parse(generatedRequestPayload)
       } catch {
         return null
-        }
+      }
     })()
     assert.equal(
       generatePayload?.json?.config?.classesPerDay ??

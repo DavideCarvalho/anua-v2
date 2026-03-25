@@ -135,6 +135,16 @@ function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
   return slots
 }
 
+function formatScheduleWindowLabel(
+  startTime: string,
+  endTime: string,
+  classesCount: number,
+  hasBreak: boolean
+) {
+  const classesLabel = `${classesCount} aula${classesCount === 1 ? '' : 's'}`
+  return `${startTime} às ${endTime} (${classesLabel}${hasBreak ? ' + intervalo' : ''})`
+}
+
 type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY'
 
 const DAYS_OF_WEEK: { key: DayOfWeek; label: string; number: number }[] = [
@@ -201,7 +211,9 @@ export function ScheduleGrid({
         },
       } as any)
 
-      await queryClient.invalidateQueries({ queryKey: ['classSchedule', classId, academicPeriodId] })
+      await queryClient.invalidateQueries({
+        queryKey: ['classSchedule', classId, academicPeriodId],
+      })
       await refetch()
       toast.success('Grade gerada com sucesso!')
       setIsGenerateDialogOpen(false)
@@ -211,14 +223,7 @@ export function ScheduleGrid({
     } finally {
       setIsGenerateDialogOpen(false)
     }
-  }, [
-    academicPeriodId,
-    classId,
-    generateMutation,
-    queryClient,
-    refetch,
-    scheduleConfig,
-  ])
+  }, [academicPeriodId, classId, generateMutation, queryClient, refetch, scheduleConfig])
 
   // Initialize local slots when data changes
   useMemo(() => {
@@ -242,10 +247,48 @@ export function ScheduleGrid({
     () => new Set(getConfiguredTimeSlots(scheduleConfig)),
     [scheduleConfig]
   )
+  const configuredTimeSlots = useMemo(
+    () => getConfiguredTimeSlots(scheduleConfig),
+    [scheduleConfig]
+  )
   const hasOutOfTemplateSlots = useMemo(
     () => timeSlots.some((timeSlot) => !configuredTimeSlotSet.has(timeSlot)),
     [configuredTimeSlotSet, timeSlots]
   )
+  const outOfTemplateSlots = useMemo(
+    () => timeSlots.filter((timeSlot) => !configuredTimeSlotSet.has(timeSlot)),
+    [configuredTimeSlotSet, timeSlots]
+  )
+
+  const currentScheduleSummary = useMemo(() => {
+    if (!timeSlots.length) return null
+
+    const sortedSlots = [...timeSlots].sort()
+    const firstRange = sortedSlots[0]
+    const lastRange = sortedSlots[sortedSlots.length - 1]
+    const firstStart = firstRange.split('-')[0]
+    const lastEnd = lastRange.split('-')[1]
+
+    const breakSlotKeys = new Set(
+      localSlots.filter((slot) => slot.isBreak).map((slot) => `${slot.startTime}-${slot.endTime}`)
+    )
+    const classesCount = sortedSlots.length - breakSlotKeys.size
+    const hasBreak = breakSlotKeys.size > 0
+
+    return formatScheduleWindowLabel(firstStart, lastEnd, classesCount, hasBreak)
+  }, [localSlots, timeSlots])
+
+  const configuredScheduleSummary = useMemo(() => {
+    if (!configuredTimeSlots.length) return null
+
+    const firstStart = configuredTimeSlots[0].split('-')[0]
+    const lastEnd = configuredTimeSlots[configuredTimeSlots.length - 1].split('-')[1]
+    const hasBreak =
+      scheduleConfig.breakDuration > 0 &&
+      scheduleConfig.breakAfterClass < scheduleConfig.classesPerDay
+
+    return formatScheduleWindowLabel(firstStart, lastEnd, scheduleConfig.classesPerDay, hasBreak)
+  }, [configuredTimeSlots, scheduleConfig])
 
   // Get pending classes (not yet scheduled enough times)
   const pendingClasses = useMemo(() => {
@@ -542,7 +585,10 @@ export function ScheduleGrid({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={generateMutation.isPending}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleGenerateSchedule} disabled={generateMutation.isPending}>
+              <AlertDialogAction
+                onClick={handleGenerateSchedule}
+                disabled={generateMutation.isPending}
+              >
                 {generateMutation.isPending ? 'Gerando...' : 'Gerar nova grade'}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -590,7 +636,20 @@ export function ScheduleGrid({
             <CardContent className="overflow-x-auto">
               {hasOutOfTemplateSlots && (
                 <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  Configuração da grade não contempla todos os horários
+                  <p className="font-medium">
+                    Configuração da grade não contempla todos os horários
+                  </p>
+                  <p className="mt-1">Grade atual: {currentScheduleSummary ?? 'não disponível'}</p>
+                  <p className="mt-1">
+                    Configuração atual: {configuredScheduleSummary ?? 'não disponível'}
+                  </p>
+                  {outOfTemplateSlots.length > 0 && (
+                    <p className="mt-1">
+                      Horários fora da configuração:{' '}
+                      {outOfTemplateSlots.map((slot) => slot.replace('-', ' - ')).join(', ')}
+                    </p>
+                  )}
+                  <p className="mt-1">Esses horários aparecem em cinza para revisão.</p>
                 </div>
               )}
               {timeSlots.length === 0 ? (
@@ -618,7 +677,10 @@ export function ScheduleGrid({
                       return (
                         <TableRow key={timeSlot} className={cn(isOutOfTemplate && 'bg-muted/30')}>
                           <TableCell
-                            className={cn('font-medium', isOutOfTemplate && 'text-muted-foreground')}
+                            className={cn(
+                              'font-medium',
+                              isOutOfTemplate && 'text-muted-foreground'
+                            )}
                           >
                             {startTime} - {endTime}
                           </TableCell>
@@ -633,7 +695,9 @@ export function ScheduleGrid({
                               return (
                                 <TableCell
                                   key={day.key}
-                                  className={cn(isOutOfTemplate && 'bg-muted/40 text-muted-foreground')}
+                                  className={cn(
+                                    isOutOfTemplate && 'bg-muted/40 text-muted-foreground'
+                                  )}
                                 >
                                   -
                                 </TableCell>
@@ -718,7 +782,11 @@ interface ScheduleSlotCellProps {
   } | null
 }
 
-function ScheduleSlotCell({ slotId, teacherHasClass, isOutOfTemplate = false }: ScheduleSlotCellProps) {
+function ScheduleSlotCell({
+  slotId,
+  teacherHasClass,
+  isOutOfTemplate = false,
+}: ScheduleSlotCellProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slotId,
   })
