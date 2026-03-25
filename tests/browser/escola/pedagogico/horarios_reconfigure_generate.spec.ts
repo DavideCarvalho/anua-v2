@@ -106,11 +106,13 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
 
     await horariosPage.assertExists('button:has-text("Reconfigurar Grade")')
     await horariosPage.assertNotExists('button:has-text("Gerar Grade")')
+    await horariosPage.assertNotExists('button:has-text("Recarregar")')
 
     await horariosPage.click('button:has-text("Reconfigurar Grade")')
 
     await horariosPage.assertExists('text=Configuração da Grade')
     await horariosPage.assertExists('button:has-text("Gerar Grade")')
     await horariosPage.assertNotExists('button:has-text("Reconfigurar Grade")')
+    await horariosPage.assertNotExists('button:has-text("Recarregar")')
   })
 })
