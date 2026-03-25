@@ -1,9 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ParentInquiry from '#models/parent_inquiry'
-import ParentInquiryRecipient from '#models/parent_inquiry_recipient'
 import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
 import { listInquiriesValidator } from '#validators/parent_inquiry'
+import { listAccessibleInquiryIdsForUser } from '#services/inquiries/inquiry_school_access_service'
 
 export default class ListInquiriesController {
   async handle({
@@ -25,11 +25,7 @@ export default class ListInquiriesController {
     const page = payload.page || 1
     const limit = Math.min(payload.limit || 20, 100)
 
-    const recipientInquiries = await ParentInquiryRecipient.query()
-      .where('userId', user.id)
-      .select('inquiryId')
-
-    const inquiryIds = recipientInquiries.map((r) => r.inquiryId)
+    const inquiryIds = await listAccessibleInquiryIdsForUser(user.id, scopedSchoolIds)
 
     if (inquiryIds.length === 0) {
       const emptyResult = await ParentInquiry.query().whereRaw('1 = 0').paginate(page, limit)

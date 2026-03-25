@@ -20,7 +20,12 @@ export default class EscolaTeacherScopeMiddleware {
 
     const pathname = request.url().split('?')[0]
 
-    const allowedPrefixes = ['/escola/pedagogico', '/escola/calendario', '/escola/notificacoes']
+    const allowedPrefixes = [
+      '/escola/pedagogico',
+      '/escola/calendario',
+      '/escola/notificacoes',
+      '/escola/duvidas-responsaveis',
+    ]
     const isPrefixAllowed = allowedPrefixes.some(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
     )

@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react'
+import { Head, usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -26,6 +26,7 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Textarea } from '../../components/ui/textarea'
 import { Skeleton } from '../../components/ui/skeleton'
+import type { SharedProps } from '../../lib/types'
 
 type InquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
 
@@ -291,7 +292,8 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link
-          href="/escola/perguntas"
+          route="web.escola.perguntas"
+          routeParams={undefined}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -430,7 +432,8 @@ function InquiryDetailSkeleton() {
 }
 
 export default function PerguntaDetailPage() {
-  const inquiryId = window.location.pathname.split('/').pop()
+  const page = usePage<SharedProps & { params?: { inquiryId?: string } }>()
+  const inquiryId = page.props.params?.inquiryId ?? page.url.split('/').pop()?.split('?')[0]
 
   if (!inquiryId) {
     return (
@@ -448,7 +451,7 @@ export default function PerguntaDetailPage() {
 
   return (
     <EscolaLayout>
-      <Head title="Detalhe da pergunta" />
+      <Head title="Detalhe da dúvida" />
 
       <ErrorBoundary
         fallback={

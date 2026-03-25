@@ -957,7 +957,7 @@ export interface Registry {
   }
   'web.escola.perguntas': {
     methods: ["GET","HEAD"]
-    pattern: '/escola/perguntas'
+    pattern: '/escola/duvidas-responsaveis'
     types: {
       body: {}
       paramsTuple: []
@@ -969,7 +969,7 @@ export interface Registry {
   }
   'web.escola.perguntas.show': {
     methods: ["GET","HEAD"]
-    pattern: '/escola/perguntas/:inquiryId'
+    pattern: '/escola/duvidas-responsaveis/:inquiryId'
     types: {
       body: {}
       paramsTuple: [ParamValue]

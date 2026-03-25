@@ -26,6 +26,8 @@ import {
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
+import { useSelectedStudent } from '../../hooks/use_selected_student'
+import { api } from '~/lib/api'
 
 type InquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
 
@@ -60,41 +62,6 @@ const createSchema = z.object({
 
 type CreateFormValues = z.infer<typeof createSchema>
 
-function getSelectedStudentId(): string | null {
-  const url = new URL(window.location.href)
-  return url.searchParams.get('aluno')
-}
-
-async function listInquiries(studentId: string): Promise<InquiryListResponse> {
-  const response = await fetch(`/api/v1/responsavel/students/${studentId}/inquiries`, {
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    throw new Error('Falha ao carregar perguntas')
-  }
-
-  return response.json()
-}
-
-async function createInquiry(studentId: string, data: CreateFormValues): Promise<InquiryItem> {
-  const response = await fetch(`/api/v1/responsavel/students/${studentId}/inquiries`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Falha ao criar pergunta')
-  }
-
-  return response.json()
-}
-
 function StatusBadge({ status }: { status: InquiryStatus }) {
   const variants: Record<
     InquiryStatus,
@@ -128,21 +95,18 @@ function NewInquiryDialog({
     },
   })
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateFormValues) => createInquiry(studentId, data),
-    onSuccess: () => {
+  const createMutation = useMutation(api.api.v1.responsavel.api.inquiries.create.mutationOptions())
+
+  const onSubmit = async (data: CreateFormValues) => {
+    try {
+      await createMutation.mutateAsync({ params: { studentId }, body: data })
       queryClient.invalidateQueries({ queryKey: ['responsavel-inquiries', studentId] })
       toast.success('Pergunta criada com sucesso')
       form.reset()
       onOpenChange(false)
-    },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    },
-  })
-
-  const onSubmit = (data: CreateFormValues) => {
-    createMutation.mutate(data)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Falha ao criar pergunta')
+    }
   }
 
   return (
@@ -197,7 +161,17 @@ function NewInquiryDialog({
 function InquiriesListContent({ studentId }: { studentId: string }) {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['responsavel-inquiries', studentId],
-    queryFn: () => listInquiries(studentId),
+    queryFn: async (): Promise<InquiryListResponse> => {
+      const response = await fetch(`/api/v1/responsavel/students/${studentId}/inquiries`, {
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Falha ao carregar perguntas')
+      }
+
+      return response.json()
+    },
     enabled: !!studentId,
   })
 
@@ -253,6 +227,7 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
             </Button>
           </CardContent>
         </Card>
+
         <NewInquiryDialog
           open={newDialogOpen}
           onOpenChange={setNewDialogOpen}
@@ -264,8 +239,11 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button onClick={() => setNewDialogOpen(true)}>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {inquiries.length} pergunta{inquiries.length !== 1 ? 's' : ''}
+        </p>
+        <Button size="sm" onClick={() => setNewDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nova pergunta
         </Button>
@@ -273,11 +251,7 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
 
       <div className="space-y-4">
         {inquiries.map((inquiry) => (
-          <Link
-            key={inquiry.id}
-            href={`/responsavel/perguntas/${inquiry.id}?aluno=${studentId}`}
-            className="block"
-          >
+          <Link key={inquiry.id} href={`/responsavel/perguntas/${inquiry.id}`} className="block">
             <Card className="border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
@@ -336,7 +310,7 @@ function InquiriesSkeleton() {
 }
 
 export default function PerguntasPage() {
-  const studentId = getSelectedStudentId()
+  const { studentId } = useSelectedStudent()
 
   return (
     <ResponsavelLayout>

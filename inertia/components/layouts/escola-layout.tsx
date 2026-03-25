@@ -18,7 +18,6 @@ import {
   ChevronDown,
   School,
   Megaphone,
-  MessageCircleQuestion,
 } from 'lucide-react'
 import { useState } from 'react'
 import { buttonVariants } from '../ui/button'
@@ -101,6 +100,11 @@ const navigation: NavItem[] = [
         route: 'web.escola.pedagogico.ocorrencias',
         href: '/escola/pedagogico/registro-diario',
       },
+      {
+        title: 'Dúvidas dos responsáveis',
+        route: 'web.escola.perguntas',
+        href: '/escola/duvidas-responsaveis',
+      },
     ],
   },
   {
@@ -114,12 +118,6 @@ const navigation: NavItem[] = [
     route: 'web.escola.comunicados',
     href: '/escola/comunicados',
     icon: Megaphone,
-  },
-  {
-    title: 'Perguntas',
-    route: 'web.escola.perguntas',
-    href: '/escola/perguntas',
-    icon: MessageCircleQuestion,
   },
   {
     title: 'Cantina',

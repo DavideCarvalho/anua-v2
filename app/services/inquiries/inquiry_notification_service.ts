@@ -50,7 +50,7 @@ export async function notifyInquiryCreated(params: NotifyInquiryCreatedParams) {
         sentViaPush: false,
         sentViaSms: false,
         sentViaWhatsApp: false,
-        actionUrl: `/escola/perguntas/${inquiry.id}`,
+        actionUrl: `/escola/duvidas-responsaveis/${inquiry.id}`,
       })
 
       if (recipient.email) {

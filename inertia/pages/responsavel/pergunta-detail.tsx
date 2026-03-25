@@ -409,8 +409,8 @@ function InquiryDetailSkeleton() {
 }
 
 export default function PerguntaDetailPage() {
-  const { params } = usePage<SharedProps & { params: { inquiryId: string } }>().props as any
-  const inquiryId = params?.inquiryId || window.location.pathname.split('/').pop()
+  const page = usePage<SharedProps & { params?: { inquiryId?: string } }>()
+  const inquiryId = page.props.params?.inquiryId ?? page.url.split('/').pop()?.split('?')[0]
 
   return (
     <ResponsavelLayout>

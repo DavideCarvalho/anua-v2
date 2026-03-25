@@ -2,13 +2,14 @@ import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { MessageCircleQuestion, XCircle, Calendar, Clock, User } from 'lucide-react'
+import { MessageCircleQuestion, XCircle, Calendar, Clock, User, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { EscolaLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import { Button } from '../../components/ui/button'
 
 type InquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
 
@@ -72,7 +73,7 @@ function StatusBadge({ status }: { status: InquiryStatus }) {
 }
 
 function InquiriesListContent() {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ['escola-inquiries'],
     queryFn: listInquiries,
   })
@@ -99,22 +100,41 @@ function InquiriesListContent() {
 
   if (inquiries.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <MessageCircleQuestion className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">Nenhuma pergunta</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Não há perguntas direcionadas a você no momento.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MessageCircleQuestion className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">Nenhuma pergunta</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              As perguntas sao criadas pelos responsaveis e aparecem aqui para voce responder.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+          Atualizar
+        </Button>
+      </div>
       {inquiries.map((inquiry) => (
-        <Link key={inquiry.id} href={`/escola/perguntas/${inquiry.id}`} className="block">
+        <Link
+          key={inquiry.id}
+          route="web.escola.perguntas.show"
+          routeParams={{ inquiryId: inquiry.id }}
+          className="block"
+        >
           <Card className="border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
@@ -183,15 +203,17 @@ function InquiriesSkeleton() {
 export default function PerguntasPage() {
   return (
     <EscolaLayout>
-      <Head title="Perguntas" />
+      <Head title="Dúvidas dos responsáveis" />
 
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <MessageCircleQuestion className="h-6 w-6" />
-            Perguntas
+            Dúvidas dos responsáveis
           </h1>
-          <p className="text-muted-foreground">Perguntas enviadas pelos responsáveis</p>
+          <p className="text-muted-foreground">
+            Perguntas enviadas pelos responsáveis sobre os alunos
+          </p>
         </div>
 
         <ErrorBoundary

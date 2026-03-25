@@ -27,10 +27,12 @@ export default class ParentInquiryTransformer extends BaseTransformer<ParentInqu
       resolvedByUser: UserTransformer.transform(
         this.whenLoaded(this.resource.resolvedByUser)
       )?.depth(6),
-      messages: ParentInquiryMessageTransformer.transform(this.whenLoaded(this.resource.messages)),
+      messages: ParentInquiryMessageTransformer.transform(
+        this.whenLoaded(this.resource.messages)
+      )?.depth(6),
       recipients: ParentInquiryRecipientTransformer.transform(
         this.whenLoaded(this.resource.recipients)
-      ),
+      )?.depth(6),
     }
   }
 }

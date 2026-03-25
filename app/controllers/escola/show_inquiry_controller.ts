@@ -1,8 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import ParentInquiry from '#models/parent_inquiry'
-import ParentInquiryRecipient from '#models/parent_inquiry_recipient'
 import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
+import { getInquiryActorTypeForUser } from '#services/inquiries/inquiry_school_access_service'
 
 export default class ShowInquiryController {
   async handle({
@@ -37,12 +37,8 @@ export default class ShowInquiryController {
       throw AppException.notFound('Pergunta não encontrada')
     }
 
-    const recipient = await ParentInquiryRecipient.query()
-      .where('inquiryId', inquiry.id)
-      .where('userId', user.id)
-      .first()
-
-    if (!recipient) {
+    const actorType = await getInquiryActorTypeForUser(inquiry, user.id)
+    if (!actorType) {
       throw AppException.forbidden('Você não tem permissão para visualizar esta pergunta')
     }
 

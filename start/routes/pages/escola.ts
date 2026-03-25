@@ -279,9 +279,11 @@ export function registerEscolaPageRoutes() {
         .get('/comunicados/:id/editar', [ShowEditarComunicadoPageController])
         .as('comunicados.editar')
 
-      // Perguntas
-      router.get('/perguntas', [ShowPerguntasPageController]).as('perguntas')
-      router.get('/perguntas/:inquiryId', [ShowPerguntaDetailPageController]).as('perguntas.show')
+      // Duvidas dos responsaveis
+      router.get('/duvidas-responsaveis', [ShowPerguntasPageController]).as('perguntas')
+      router
+        .get('/duvidas-responsaveis/:inquiryId', [ShowPerguntaDetailPageController])
+        .as('perguntas.show')
 
       // Eventos
       router.get('/calendario/novo', [ShowNovoEventoPageController]).as('eventos.novo')

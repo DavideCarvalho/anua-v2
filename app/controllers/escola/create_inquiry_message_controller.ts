@@ -8,6 +8,7 @@ import ParentInquiryTransformer from '#transformers/parent_inquiry_transformer'
 import AppException from '#exceptions/app_exception'
 import { createMessageValidator } from '#validators/parent_inquiry'
 import { notifyInquiryMessage } from '#services/inquiries/inquiry_notification_service'
+import { getInquiryActorTypeForUser } from '#services/inquiries/inquiry_school_access_service'
 
 export default class CreateInquiryMessageController {
   async handle({
@@ -36,12 +37,8 @@ export default class CreateInquiryMessageController {
       throw AppException.notFound('Pergunta não encontrada')
     }
 
-    const recipient = await ParentInquiryRecipient.query()
-      .where('inquiryId', inquiry.id)
-      .where('userId', user.id)
-      .first()
-
-    if (!recipient) {
+    const actorType = await getInquiryActorTypeForUser(inquiry, user.id)
+    if (!actorType) {
       throw AppException.forbidden('Você não tem permissão para responder esta pergunta')
     }
 
@@ -56,11 +53,27 @@ export default class CreateInquiryMessageController {
         {
           inquiryId: inquiry.id,
           authorId: user.id,
-          authorType: recipient.userType,
+          authorType: actorType,
           body: payload.body,
         },
         { client: trx }
       )
+
+      const existingRecipient = await ParentInquiryRecipient.query({ client: trx })
+        .where('inquiryId', inquiry.id)
+        .where('userId', user.id)
+        .first()
+
+      if (!existingRecipient) {
+        await ParentInquiryRecipient.create(
+          {
+            inquiryId: inquiry.id,
+            userId: user.id,
+            userType: actorType,
+          },
+          { client: trx }
+        )
+      }
 
       if (payload.attachments && payload.attachments.length > 0) {
         await Promise.all(
