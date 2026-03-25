@@ -129,12 +129,11 @@ export default function HorariosPage() {
 
   useEffect(() => {
     if (!selectionKey || hydratedSelectionKey === selectionKey || hasEditedConfigInSession) return
-    if (!scheduleData?.slots?.length) {
-      setHydratedSelectionKey(selectionKey)
+    if (loadingSchedule || !scheduleData) {
       return
     }
 
-    const inferredConfig = inferConfigFromSlots(scheduleData.slots)
+    const inferredConfig = inferConfigFromSlots(scheduleData.slots ?? [])
     if (inferredConfig) {
       setScheduleConfig(inferredConfig)
     }
@@ -142,7 +141,8 @@ export default function HorariosPage() {
   }, [
     hasEditedConfigInSession,
     hydratedSelectionKey,
-    scheduleData?.slots,
+    loadingSchedule,
+    scheduleData,
     selectionKey,
     setScheduleConfig,
   ])

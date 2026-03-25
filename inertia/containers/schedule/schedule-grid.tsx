@@ -208,6 +208,8 @@ export function ScheduleGrid({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao gerar grade'
       toast.error(errorMessage)
+    } finally {
+      setIsGenerateDialogOpen(false)
     }
   }, [
     academicPeriodId,
@@ -655,7 +657,7 @@ export function ScheduleGrid({
                                 key={day.key}
                                 slotId={`${day.number}_${startTime}-${endTime}`}
                                 teacherHasClass={slot.teacherHasClass}
-                                isDisabled={isOutOfTemplate}
+                                isOutOfTemplate={isOutOfTemplate}
                               />
                             )
                           })}
@@ -708,7 +710,7 @@ function DraggablePendingClass({ id, teacher, subject }: DraggablePendingClassPr
 
 interface ScheduleSlotCellProps {
   slotId: string
-  isDisabled?: boolean
+  isOutOfTemplate?: boolean
   teacherHasClass?: {
     id: string
     teacher: { id: string; user: { name: string } }
@@ -716,22 +718,7 @@ interface ScheduleSlotCellProps {
   } | null
 }
 
-function ScheduleSlotCell({ slotId, teacherHasClass, isDisabled = false }: ScheduleSlotCellProps) {
-  if (isDisabled) {
-    return (
-      <TableCell className={cn('bg-muted/40 text-muted-foreground', !teacherHasClass && 'bg-muted/50')}>
-        {teacherHasClass ? (
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">{teacherHasClass.subject.name}</p>
-            <p className="text-xs text-muted-foreground">{teacherHasClass.teacher.user.name}</p>
-          </div>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        )}
-      </TableCell>
-    )
-  }
-
+function ScheduleSlotCell({ slotId, teacherHasClass, isOutOfTemplate = false }: ScheduleSlotCellProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slotId,
   })
@@ -749,13 +736,21 @@ function ScheduleSlotCell({ slotId, teacherHasClass, isDisabled = false }: Sched
       {...listeners}
       className={cn(
         'cursor-move transition-colors',
+        isOutOfTemplate && 'bg-muted/40',
         isDragging && 'bg-primary/10',
         !teacherHasClass && 'bg-muted/30'
       )}
     >
       {teacherHasClass ? (
         <div className="space-y-1">
-          <p className="text-sm font-medium text-primary">{teacherHasClass.subject.name}</p>
+          <p
+            className={cn(
+              'text-sm font-medium text-primary',
+              isOutOfTemplate && 'text-muted-foreground'
+            )}
+          >
+            {teacherHasClass.subject.name}
+          </p>
           <p className="text-xs text-muted-foreground">{teacherHasClass.teacher.user.name}</p>
         </div>
       ) : (

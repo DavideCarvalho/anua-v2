@@ -147,8 +147,6 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
 
     await horariosPage.click('button:has-text("Gerar nova grade")')
     await generateResponse
-    await horariosPage.assertExists('button:has-text("Gerar nova grade")')
-    await horariosPage.keyboard.press('Escape')
     await horariosPage.assertNotExists(
       'text=Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.'
     )
