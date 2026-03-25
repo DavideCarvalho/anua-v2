@@ -98,8 +98,12 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.assertExists('text=Período Letivo')
     await horariosPage.assertExists('text=Turma')
 
-    await horariosPage.assertExists('[data-slot="select-trigger"]:not([data-disabled])')
-    await horariosPage.click('[data-slot="select-trigger"]:not([data-disabled])')
+    await horariosPage.assertExists(
+      'div.space-y-2:has-text("Período Letivo") [data-slot="select-trigger"]:not([data-disabled])'
+    )
+    await horariosPage.click(
+      'div.space-y-2:has-text("Período Letivo") [data-slot="select-trigger"]:not([data-disabled])'
+    )
     await horariosPage.click(`[role="option"]:has-text("${academicPeriodName}")`)
 
     await horariosPage.assertExists(
