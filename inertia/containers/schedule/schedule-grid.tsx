@@ -255,14 +255,22 @@ export function ScheduleGrid({
     () => getConfiguredTimeSlots(scheduleConfig),
     [scheduleConfig]
   )
-  const hasOutOfTemplateSlots = useMemo(
-    () => timeSlots.some((timeSlot) => !configuredTimeSlotSet.has(timeSlot)),
-    [configuredTimeSlotSet, timeSlots]
-  )
+
+  const allTimeSlots = useMemo(() => {
+    const allSlots = new Set([...configuredTimeSlots, ...timeSlots])
+    return Array.from(allSlots).sort()
+  }, [configuredTimeSlots, timeSlots])
+
   const outOfTemplateSlots = useMemo(
     () => timeSlots.filter((timeSlot) => !configuredTimeSlotSet.has(timeSlot)),
     [configuredTimeSlotSet, timeSlots]
   )
+  const slotsOnlyInConfig = useMemo(
+    () => configuredTimeSlots.filter((ts) => !timeSlots.includes(ts)),
+    [configuredTimeSlots, timeSlots]
+  )
+  const hasOutOfTemplateSlots = outOfTemplateSlots.length > 0
+  const hasSlotsOnlyInConfig = slotsOnlyInConfig.length > 0
 
   const currentScheduleSummary = useMemo(() => {
     if (!timeSlots.length) return null
@@ -640,7 +648,7 @@ export function ScheduleGrid({
               <CardTitle>Grade de Horários - {className}</CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto">
-              {hasOutOfTemplateSlots && (
+              {(hasOutOfTemplateSlots || hasSlotsOnlyInConfig) && (
                 <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                   <p className="font-medium">
                     Configuração da grade não contempla todos os horários
@@ -649,6 +657,12 @@ export function ScheduleGrid({
                   <p className="mt-1">
                     Configuração atual: {configuredScheduleSummary ?? 'não disponível'}
                   </p>
+                  {slotsOnlyInConfig.length > 0 && (
+                    <p className="mt-1">
+                      Horários configurados sem aulas:{' '}
+                      {slotsOnlyInConfig.map((slot) => slot.replace('-', ' - ')).join(', ')}
+                    </p>
+                  )}
                   {outOfTemplateSlots.length > 0 && (
                     <p className="mt-1">
                       Horários fora da configuração:{' '}
@@ -658,7 +672,7 @@ export function ScheduleGrid({
                   <p className="mt-1">Esses horários aparecem em cinza para revisão.</p>
                 </div>
               )}
-              {timeSlots.length === 0 ? (
+              {allTimeSlots.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <p>Nenhum horário configurado para esta turma.</p>
                   <p className="mt-2 text-sm">
@@ -677,9 +691,10 @@ export function ScheduleGrid({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {timeSlots.map((timeSlot) => {
+                    {allTimeSlots.map((timeSlot) => {
                       const [startTime, endTime] = timeSlot.split('-')
                       const isOutOfTemplate = !configuredTimeSlotSet.has(timeSlot)
+                      const isInConfigOnly = !timeSlots.includes(timeSlot)
                       return (
                         <TableRow key={timeSlot} className={cn(isOutOfTemplate && 'bg-muted/30')}>
                           <TableCell
@@ -696,6 +711,16 @@ export function ScheduleGrid({
                                 s.classWeekDay === day.number &&
                                 normalizeTimeSlot(`${s.startTime}-${s.endTime}`) === timeSlot
                             )
+                            if (isInConfigOnly) {
+                              return (
+                                <TableCell
+                                  key={day.key}
+                                  className="bg-muted/20 text-muted-foreground italic"
+                                >
+                                  -
+                                </TableCell>
+                              )
+                            }
                             if (!slot) {
                               return (
                                 <TableCell
