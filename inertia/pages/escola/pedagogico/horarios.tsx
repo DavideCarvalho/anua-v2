@@ -219,6 +219,7 @@ export default function HorariosPage() {
               <ScheduleGrid
                 classId={selectedClassId}
                 academicPeriodId={selectedAcademicPeriodId}
+                scheduleConfig={scheduleConfig}
                 className={selectedClass?.name}
               />
             )}

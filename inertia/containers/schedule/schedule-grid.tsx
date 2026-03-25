@@ -22,6 +22,17 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
+import {
   Table,
   TableBody,
   TableCell,
@@ -33,10 +44,12 @@ import { Save, RefreshCw, AlertCircle } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import type { ScheduleConfig } from './schedule-config-form'
 
 interface ScheduleGridProps {
   classId: string
   academicPeriodId: string
+  scheduleConfig: ScheduleConfig
   className?: string
 }
 
@@ -94,9 +107,15 @@ const DAYS_OF_WEEK: { key: DayOfWeek; label: string; number: number }[] = [
   { key: 'FRIDAY', label: 'Sexta', number: 5 },
 ]
 
-export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleGridProps) {
+export function ScheduleGrid({
+  classId,
+  academicPeriodId,
+  scheduleConfig,
+  className,
+}: ScheduleGridProps) {
   const [localSlots, setLocalSlots] = useState<CalendarSlot[]>([])
   const [_isDirty, setIsDirty] = useState(false)
+  const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
 
   const queryClient = useQueryClient()
   const {
@@ -129,9 +148,37 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
   }
 
   const saveMutation = useMutation(api.api.v1.schedules.saveClassSchedule.mutationOptions())
+  const generateMutation = useMutation(api.api.v1.schedules.generateClassSchedule.mutationOptions())
   const validateConflictMutation = useMutation(
     api.api.v1.schedules.validateConflict.mutationOptions()
   )
+
+  const handleGenerateSchedule = useCallback(async () => {
+    try {
+      await generateMutation.mutateAsync({
+        params: { classId },
+        body: {
+          academicPeriodId,
+          config: scheduleConfig,
+        },
+      } as any)
+
+      await queryClient.invalidateQueries({ queryKey: ['classSchedule', classId, academicPeriodId] })
+      await refetch()
+      toast.success('Grade gerada com sucesso!')
+      setIsGenerateDialogOpen(false)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao gerar grade'
+      toast.error(errorMessage)
+    }
+  }, [
+    academicPeriodId,
+    classId,
+    generateMutation,
+    queryClient,
+    refetch,
+    scheduleConfig,
+  ])
 
   // Initialize local slots when data changes
   useMemo(() => {
@@ -427,10 +474,31 @@ export function ScheduleGrid({ classId, academicPeriodId, className }: ScheduleG
     <div className="space-y-4">
       {/* Actions */}
       <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => refetch()} disabled={saveMutation.isPending}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Recarregar
-        </Button>
+        <AlertDialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              disabled={saveMutation.isPending || generateMutation.isPending}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Gerar Grade
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Gerar nova grade?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={generateMutation.isPending}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleGenerateSchedule} disabled={generateMutation.isPending}>
+                {generateMutation.isPending ? 'Gerando...' : 'Gerar nova grade'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button onClick={handleSave} disabled={saveMutation.isPending}>
           <Save className="mr-2 h-4 w-4" />
           {saveMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}

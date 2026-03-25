@@ -115,8 +115,20 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.click(`[role="option"]:has-text("${className}")`)
 
     await horariosPage.assertExists('button:has-text("Reconfigurar Grade")')
-    await horariosPage.assertNotExists('button:has-text("Gerar Grade")')
+    await horariosPage.assertExists('button:has-text("Gerar Grade")')
     await horariosPage.assertNotExists('button:has-text("Recarregar")')
+
+    await horariosPage.click('button:has-text("Gerar Grade")')
+    await horariosPage.assertExists(
+      'text=Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.'
+    )
+    await horariosPage.assertExists('button:has-text("Cancelar")')
+    await horariosPage.assertExists('button:has-text("Gerar nova grade")')
+
+    await horariosPage.click('button:has-text("Cancelar")')
+    await horariosPage.assertNotExists(
+      'text=Esta ação vai substituir a grade atual e redistribuir as aulas automaticamente.'
+    )
 
     await horariosPage.click('button:has-text("Reconfigurar Grade")')
 
