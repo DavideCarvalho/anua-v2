@@ -109,6 +109,10 @@ function toTime(minutes: number): string {
   return `${hours.toString().padStart(2, '0')}:${remainder.toString().padStart(2, '0')}`
 }
 
+function normalizeTimeSlot(slot: string): string {
+  return slot.replace(/(\d{2}:\d{2}):\d{2}/g, '$1')
+}
+
 function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
   const slots: string[] = []
   let cursor = toMinutes(config.startTime)
@@ -121,7 +125,7 @@ function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
 
     const shouldInsertBreak =
       config.breakDuration > 0 &&
-      classIndex === config.breakAfterClass &&
+      config.breakAfterClass === classIndex &&
       classIndex < config.classesPerDay
 
     if (shouldInsertBreak) {
@@ -238,7 +242,7 @@ export function ScheduleGrid({
     if (!localSlots.length) return []
     const times = new Set<string>()
     localSlots.forEach((slot) => {
-      times.add(`${slot.startTime}-${slot.endTime}`)
+      times.add(normalizeTimeSlot(`${slot.startTime}-${slot.endTime}`))
     })
     return Array.from(times).sort()
   }, [localSlots])
@@ -270,7 +274,9 @@ export function ScheduleGrid({
     const lastEnd = lastRange.split('-')[1]
 
     const breakSlotKeys = new Set(
-      localSlots.filter((slot) => slot.isBreak).map((slot) => `${slot.startTime}-${slot.endTime}`)
+      localSlots
+        .filter((slot) => slot.isBreak)
+        .map((slot) => normalizeTimeSlot(`${slot.startTime}-${slot.endTime}`))
     )
     const classesCount = sortedSlots.length - breakSlotKeys.size
     const hasBreak = breakSlotKeys.size > 0
@@ -688,8 +694,7 @@ export function ScheduleGrid({
                             const slot = localSlots.find(
                               (s) =>
                                 s.classWeekDay === day.number &&
-                                s.startTime === startTime &&
-                                s.endTime === endTime
+                                normalizeTimeSlot(`${s.startTime}-${s.endTime}`) === timeSlot
                             )
                             if (!slot) {
                               return (
