@@ -98,10 +98,16 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.assertExists('text=Período Letivo')
     await horariosPage.assertExists('text=Turma')
 
-    await horariosPage.click('[data-slot="select-trigger"]:has-text("Selecione um período")')
+    await horariosPage.assertExists('[data-slot="select-trigger"]:not([data-disabled])')
+    await horariosPage.click('[data-slot="select-trigger"]:not([data-disabled])')
     await horariosPage.click(`[role="option"]:has-text("${academicPeriodName}")`)
 
-    await horariosPage.click('[data-slot="select-trigger"]:has-text("Selecione uma turma")')
+    await horariosPage.assertExists(
+      '[data-slot="select-trigger"]:has-text("Selecione uma turma"):not([data-disabled])'
+    )
+    await horariosPage.click(
+      '[data-slot="select-trigger"]:has-text("Selecione uma turma"):not([data-disabled])'
+    )
     await horariosPage.click(`[role="option"]:has-text("${className}")`)
 
     await horariosPage.assertExists('button:has-text("Reconfigurar Grade")')
