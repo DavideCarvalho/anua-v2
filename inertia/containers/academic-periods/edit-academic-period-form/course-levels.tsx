@@ -27,6 +27,7 @@ import {
   Check,
   Trash2,
   Undo2,
+  AlertTriangle,
 } from 'lucide-react'
 
 import { Badge } from '~/components/ui/badge'
@@ -49,6 +50,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
+import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { api } from '~/lib/api'
 import type {
   EditAcademicPeriodFormValues,
@@ -90,7 +93,7 @@ interface SortableLevelItemProps {
   level: LevelFormValues
   courseIndex: number
   levelIndex: number
-  contracts: Array<{ id: string; name: string }>
+  contracts: Array<{ id: string; name: string; isActive: boolean }>
   teachers: Array<{ id: string; user: { name: string } }>
   subjects: Array<{ id: string; name: string }>
 }
@@ -123,6 +126,10 @@ function SortableLevelItem({
   const contractId = form.watch(`courses.${courseIndex}.levels.${levelIndex}.contractId`)
   const classes = form.watch(`courses.${courseIndex}.levels.${levelIndex}.classes`) || []
   const selectedContract = contracts.find((c) => c.id === contractId)
+  const hasInactiveSelectedContract = Boolean(selectedContract && !selectedContract.isActive)
+  const visibleContracts = contracts.filter(
+    (contract) => contract.isActive || contract.id === contractId
+  )
 
   const { append: appendClass, remove: removeClass } = useFieldArray({
     control: form.control,
@@ -187,11 +194,23 @@ function SortableLevelItem({
                 <span className="max-w-[120px] truncate">
                   {selectedContract?.name || 'Contrato'}
                 </span>
+                {hasInactiveSelectedContract && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <AlertTriangle className="ml-2 h-4 w-4 text-chart-4" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Esta turma esta usando um contrato cancelado/inativo
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              {contracts.map((contract) => (
+              {visibleContracts.map((contract) => (
                 <DropdownMenuItem
                   key={contract.id}
                   onClick={() => {
@@ -202,8 +221,21 @@ function SortableLevelItem({
                   }}
                 >
                   <div className="flex w-full items-center justify-between">
-                    <span>{contract.name}</span>
-                    {contractId === contract.id && <Check className="h-4 w-4" />}
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="truncate">{contract.name}</span>
+                      {!contract.isActive && (
+                        <Badge
+                          variant="outline"
+                          className="h-4 border-chart-4/40 bg-chart-4/10 px-1.5 text-[10px] text-chart-4"
+                        >
+                          Inativo
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {!contract.isActive && <AlertTriangle className="h-3.5 w-3.5 text-chart-4" />}
+                      {contractId === contract.id && <Check className="h-4 w-4" />}
+                    </div>
                   </div>
                 </DropdownMenuItem>
               ))}
@@ -268,6 +300,16 @@ function SortableLevelItem({
           )}
         </div>
       </div>
+
+      {hasInactiveSelectedContract && (
+        <Alert className="mt-2 border-chart-4/30 bg-chart-4/10 lg:ml-12">
+          <AlertTriangle className="h-4 w-4 text-chart-4" />
+          <AlertTitle className="text-xs text-foreground">Contrato inativo</AlertTitle>
+          <AlertDescription className="text-xs text-muted-foreground">
+            Esta turma esta vinculada a contrato cancelado/inativo.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {classes.length > 0 && (
         <div className="mt-2 space-y-2 lg:ml-12">
@@ -344,7 +386,7 @@ export function CourseLevels({ courseIndex }: CourseLevelsProps) {
   const levelLabel = getLevelLabel(segment)
 
   const { data: contractsData } = useQuery(
-    api.api.v1.contracts.index.queryOptions({ query: { limit: 100 } })
+    api.api.v1.contracts.index.queryOptions({ query: { limit: 100, status: 'all' } })
   )
   const { data: teachersData } = useQuery(
     api.api.v1.teachers.listTeachers.queryOptions({ query: { limit: 100 } })
