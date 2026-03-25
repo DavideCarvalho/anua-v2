@@ -209,7 +209,7 @@ function getAlertDescription(
   data: NonNullable<PedagogicalAlerts[AlertKey]>
 ): string {
   if (key === 'studentsAtRiskByAttendance' && 'threshold' in data) {
-    return `Alunos com frequência abaixo de ${data.threshold}% de presença`
+    return `Alunos com frequência abaixo de ${data.threshold}% ou sem presença lançada em turmas com chamada`
   }
   if (key === 'studentsAtRiskByGrade' && 'minimumGrade' in data) {
     return `Alunos com média abaixo de ${data.minimumGrade}`
@@ -323,11 +323,12 @@ function StudentsAtRiskByAttendanceTable({
 
           if (hasNoDataAtAll) {
             badgeClass = 'bg-red-500'
-            tooltipText = 'Aluno sem registros de presença. Necessário verificar situação.'
+            tooltipText =
+              'Sem presença lançada para este aluno. Verifique a situação da frequência.'
           } else if (isNoRecords) {
             badgeClass = 'bg-red-500'
             tooltipText =
-              'Nenhuma presença registrada para este aluno. Verifique se está frequentando as aulas.'
+              'Nenhuma presença foi lançada para este aluno, apesar de já existir chamada na turma.'
           } else if (isBelowThreshold) {
             badgeClass = 'bg-red-500'
             tooltipText = `Frequência de ${displayRate}%, abaixo do mínimo de 75%. Risco de reprovação por falta.`
@@ -347,7 +348,7 @@ function StudentsAtRiskByAttendanceTable({
                 <Tooltip>
                   <TooltipTrigger>
                     <Badge className={badgeClass}>
-                      {hasNoDataAtAll ? 'Sem registros' : `${displayRate}%`}
+                      {isNoRecords ? 'Sem presença lançada' : `${displayRate}%`}
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
@@ -650,7 +651,7 @@ function getSheetDescription(
   data: NonNullable<PedagogicalAlerts[AlertKey]>
 ): string {
   if (key === 'studentsAtRiskByAttendance' && 'threshold' in data) {
-    return `${data.count} aluno(s) com taxa de falta elevada ou sem registros de presença (mínimo ${data.threshold}% de presença exigido)`
+    return `${data.count} aluno(s) com frequência abaixo do mínimo ou sem presença lançada em turmas com chamada (mínimo ${data.threshold}% de presença exigido)`
   }
   if (key === 'studentsAtRiskByGrade' && 'minimumGrade' in data) {
     return `${data.count} aluno(s) com média abaixo de ${data.minimumGrade}`

@@ -311,7 +311,7 @@ export default class GetPedagogicalAlertsController {
         END as attendance_rate
       FROM student_attendance sa
       LEFT JOIN class_attendance_count cac ON cac.class_id = sa.class_id
-      WHERE sa.recorded_classes = 0
+      WHERE (sa.recorded_classes = 0 AND COALESCE(cac.total_sessions, 0) > 0)
          OR (sa.recorded_classes >= 5 AND (sa.absences::float / sa.recorded_classes * 100) > :minAttendanceThreshold)
       ORDER BY
         CASE WHEN sa.recorded_classes = 0 THEN 0 ELSE 1 END,

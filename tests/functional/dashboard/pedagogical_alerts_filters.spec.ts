@@ -104,4 +104,27 @@ test.group('Pedagogical alerts filters', (group) => {
     assert.equal(filteredBody.alerts.examsWithoutGrades?.count, 1)
     assert.equal(filteredBody.alerts.overdueActivities?.count, 1)
   })
+
+  test('does not flag attendance risk when class has no attendance sessions yet', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    await db
+      .from('Student')
+      .whereIn(
+        'id',
+        fixtures.students.map((student) => student.id)
+      )
+      .update({ classId: fixtures.classEntity.id })
+
+    const response = await client.get('/api/v1/escola/pedagogical-alerts').loginAs(user)
+
+    response.assertStatus(200)
+    const body = response.body() as any
+
+    assert.isUndefined(body.alerts.studentsAtRiskByAttendance)
+  })
 })
