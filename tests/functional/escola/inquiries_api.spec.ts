@@ -121,7 +121,11 @@ test.group('Escola inquiries API', (group) => {
       levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
     })
 
-    const subject = await Subject.create({ schoolId: school.id, name: `Subject ${seed}` })
+    const subject = await Subject.create({
+      schoolId: school.id,
+      name: `Subject ${seed}`,
+      slug: `subject-${seed}`,
+    })
     await TeacherHasClass.create({
       teacherId: teacherUser.id,
       classId: classEntity.id,
