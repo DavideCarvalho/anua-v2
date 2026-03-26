@@ -137,19 +137,10 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.fill('input#classesPerDay', '5')
     await horariosPage.click('button:has-text("Aplicar Configuração")')
 
-    await horariosPage.assertExists('text=Configuração da grade não contempla todos os horários')
-    const warningText = await horariosPage.locator('div.border-amber-200').first().innerText()
-    assert.include(warningText, 'Grade atual:')
-    assert.include(warningText, 'Configuração atual:')
-    assert.include(warningText, 'Horários fora da configuração:')
-    const mondayExtraSlotCell = horariosPage
-      .locator('tbody tr[class*="bg-muted/30"]')
-      .last()
-      .locator('td')
-      .nth(1)
-    const mondayExtraSlotCellClass = (await mondayExtraSlotCell.getAttribute('class')) || ''
-
-    assert.include(mondayExtraSlotCellClass, 'cursor-move')
+    // After reconfiguring, slots that don't fit the new config are marked as "orphaned"
+    // These appear in the pending classes section
+    await horariosPage.assertExists('text=Aulas Pendentes')
+    await horariosPage.assertExists('text=1 aula(s) removida(s) da grade')
 
     await horariosPage.click('button:has-text("Gerar Grade")')
     await horariosPage.assertExists(
