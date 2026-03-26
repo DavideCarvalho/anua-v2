@@ -17,10 +17,16 @@ export interface ScheduleConfig {
 interface ScheduleConfigFormProps {
   value: ScheduleConfig
   onChange: (next: ScheduleConfig) => void
-  onApply?: () => void
+  onApply: () => void
+  onCancel?: () => void
 }
 
-export function ScheduleConfigForm({ value, onChange, onApply }: ScheduleConfigFormProps) {
+export function ScheduleConfigForm({
+  value,
+  onChange,
+  onApply,
+  onCancel,
+}: ScheduleConfigFormProps) {
   const handleChange = (field: keyof ScheduleConfig, nextValue: string | number) => {
     onChange({ ...value, [field]: nextValue })
   }
@@ -100,7 +106,12 @@ export function ScheduleConfigForm({ value, onChange, onApply }: ScheduleConfigF
           </div>
 
           {/* Apply button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            {onCancel && (
+              <Button variant="outline" onClick={onCancel}>
+                Cancelar
+              </Button>
+            )}
             <Button onClick={onApply} size="lg">
               Aplicar Configuração
             </Button>

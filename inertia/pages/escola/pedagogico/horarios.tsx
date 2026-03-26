@@ -58,28 +58,47 @@ function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | nu
 
   if (!dayWithMostSlots?.length) return null
 
-  const orderedSlots = [...dayWithMostSlots].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
-  const firstClass = orderedSlots.find((slot) => !slot.isBreak)
-  const firstBreakIndex = orderedSlots.findIndex((slot) => slot.isBreak)
+  const orderedSlots = [...dayWithMostSlots].sort(
+    (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)
+  )
+
+  // Detect break by duration (short slot between longer ones)
+  const slotDurations = orderedSlots.map(
+    (slot) => toMinutes(slot.endTime) - toMinutes(slot.startTime)
+  )
+  const maxDuration = Math.max(...slotDurations)
+  const minDuration = Math.min(...slotDurations)
+  const isBreakByDuration = orderedSlots.map((slot) => {
+    const duration = toMinutes(slot.endTime) - toMinutes(slot.startTime)
+    // If there's a significant duration difference, short slots are breaks
+    if (maxDuration - minDuration > 15) {
+      return duration < maxDuration * 0.6
+    }
+    return slot.isBreak
+  })
+
+  const firstClass = orderedSlots.find((_slot, i) => !isBreakByDuration[i])
+  const firstBreakIndex = orderedSlots.findIndex((_slot, i) => isBreakByDuration[i])
   const firstBreak = firstBreakIndex >= 0 ? orderedSlots[firstBreakIndex] : null
 
-  const classesPerDay = orderedSlots.filter((slot) => !slot.isBreak).length
-  const classDuration = firstClass ? toMinutes(firstClass.endTime) - toMinutes(firstClass.startTime) : 50
+  const classesPerDay = orderedSlots.filter((_, i) => !isBreakByDuration[i]).length
+  const classDuration = firstClass
+    ? toMinutes(firstClass.endTime) - toMinutes(firstClass.startTime)
+    : 50
   const inferredBreakAfterClass =
     firstBreakIndex >= 0
-      ? orderedSlots.slice(0, firstBreakIndex).filter((slot) => !slot.isBreak).length
+      ? orderedSlots.slice(0, firstBreakIndex).filter((_, i) => !isBreakByDuration[i]).length
       : DEFAULT_SCHEDULE_CONFIG.breakAfterClass
   const inferredBreakDuration = firstBreak
     ? toMinutes(firstBreak.endTime) - toMinutes(firstBreak.startTime)
-    : 0
+    : DEFAULT_SCHEDULE_CONFIG.breakDuration
 
   return {
     startTime: firstClass?.startTime ?? DEFAULT_SCHEDULE_CONFIG.startTime,
     classesPerDay: classesPerDay || DEFAULT_SCHEDULE_CONFIG.classesPerDay,
     classDuration: classDuration || DEFAULT_SCHEDULE_CONFIG.classDuration,
     breakAfterClass: inferredBreakAfterClass || DEFAULT_SCHEDULE_CONFIG.breakAfterClass,
-    breakDuration:
-      inferredBreakDuration >= 0 ? inferredBreakDuration : DEFAULT_SCHEDULE_CONFIG.breakDuration,
+    breakDuration: inferredBreakDuration,
   }
 }
 
@@ -98,6 +117,7 @@ export default function HorariosPage() {
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>(DEFAULT_SCHEDULE_CONFIG)
   const [hasEditedConfigInSession, setHasEditedConfigInSession] = useState(false)
   const [hydratedSelectionKey, setHydratedSelectionKey] = useState<string | null>(null)
+  const [reorganizeTrigger, setReorganizeTrigger] = useState(0)
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
@@ -134,6 +154,7 @@ export default function HorariosPage() {
     }
 
     const inferredConfig = inferConfigFromSlots(scheduleData.slots ?? [])
+    console.log('[DEBUG horarios] Inferred config:', inferredConfig)
     if (inferredConfig) {
       setScheduleConfig(inferredConfig)
     }
@@ -154,6 +175,7 @@ export default function HorariosPage() {
 
   const handleApplyConfig = () => {
     setShowConfigForm(false)
+    setReorganizeTrigger((prev) => prev + 1)
   }
 
   return (
@@ -283,7 +305,17 @@ export default function HorariosPage() {
             {/* Botão para reconfigurar se já tem schedule */}
             {hasSchedule && !showConfigForm && (
               <div className="flex justify-end">
-                <Button variant="outline" onClick={() => setShowConfigForm(true)}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const inferredConfig = inferConfigFromSlots(scheduleData?.slots ?? [])
+                    if (inferredConfig) {
+                      setScheduleConfig(inferredConfig)
+                    }
+                    setHasEditedConfigInSession(false)
+                    setShowConfigForm(true)
+                  }}
+                >
                   <Settings className="mr-2 h-4 w-4" />
                   Reconfigurar Grade
                 </Button>
@@ -296,6 +328,7 @@ export default function HorariosPage() {
                 value={scheduleConfig}
                 onChange={handleScheduleConfigChange}
                 onApply={handleApplyConfig}
+                onCancel={() => setShowConfigForm(false)}
               />
             )}
 
@@ -306,6 +339,7 @@ export default function HorariosPage() {
                 academicPeriodId={selectedAcademicPeriodId}
                 scheduleConfig={scheduleConfig}
                 className={selectedClass?.name}
+                reorganizeTrigger={reorganizeTrigger}
               />
             )}
           </>

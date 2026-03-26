@@ -11,6 +11,7 @@ interface SlotInput {
   classWeekDay: number
   startTime: string
   endTime: string
+  isBreak?: boolean
 }
 
 export default class SaveClassScheduleController {
@@ -67,7 +68,7 @@ export default class SaveClassScheduleController {
               startTime: slot.startTime,
               endTime: slot.endTime,
               minutes: calculateMinutes(slot.startTime, slot.endTime),
-              isBreak: false,
+              isBreak: slot.isBreak ?? false,
             },
             { client: trx }
           )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -9,7 +9,9 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragOverlay,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -51,6 +53,8 @@ interface ScheduleGridProps {
   academicPeriodId: string
   scheduleConfig: ScheduleConfig
   className?: string
+  reorganizeTrigger?: number
+  onDirtyChange?: (isDirty: boolean) => void
 }
 
 interface CalendarSlot {
@@ -109,8 +113,9 @@ function toTime(minutes: number): string {
   return `${hours.toString().padStart(2, '0')}:${remainder.toString().padStart(2, '0')}`
 }
 
-function normalizeTimeSlot(slot: string): string {
-  return slot.replace(/(\d{2}:\d{2}):\d{2}/g, '$1')
+function normalizeTime(time: string): string {
+  // Remove seconds from time string (e.g., '09:10:00' -> '09:10')
+  return time.split(':').slice(0, 2).join(':')
 }
 
 function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
@@ -139,14 +144,221 @@ function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
   return slots
 }
 
-function formatScheduleWindowLabel(
-  startTime: string,
-  endTime: string,
-  classesCount: number,
-  hasBreak: boolean
-) {
-  const classesLabel = `${classesCount} aula${classesCount === 1 ? '' : 's'}`
-  return `${startTime} às ${endTime} (${classesLabel}${hasBreak ? ' + intervalo' : ''})`
+function getConfiguredBreakSlots(config: ScheduleConfig): Set<string> {
+  const breakSlots = new Set<string>()
+  let cursor = toMinutes(config.startTime)
+
+  for (let classIndex = 1; classIndex <= config.classesPerDay; classIndex += 1) {
+    const classStart = cursor
+    const classEnd = classStart + config.classDuration
+    cursor = classEnd
+
+    const shouldInsertBreak =
+      config.breakDuration > 0 &&
+      config.breakAfterClass === classIndex &&
+      classIndex < config.classesPerDay
+
+    if (shouldInsertBreak) {
+      const breakStart = cursor
+      const breakEnd = breakStart + config.breakDuration
+      breakSlots.add(`${toTime(breakStart)}-${toTime(breakEnd)}`)
+      cursor = breakEnd
+    }
+  }
+
+  return breakSlots
+}
+
+function reorganizeSlotsLocally(
+  currentSlots: CalendarSlot[],
+  config: ScheduleConfig,
+  daysOfWeek: number[]
+): {
+  slots: CalendarSlot[]
+  removedClasses: Array<{ teacherHasClass: CalendarSlot['teacherHasClass']; day: number }>
+} {
+  const newSlots: CalendarSlot[] = []
+  const removedClasses: Array<{ teacherHasClass: CalendarSlot['teacherHasClass']; day: number }> =
+    []
+
+  console.log('[DEBUG reorganizeSlotsLocally] Input:', {
+    currentSlotsCount: currentSlots.length,
+    configClassesPerDay: config.classesPerDay,
+    daysOfWeek,
+  })
+
+  for (const dayNumber of daysOfWeek) {
+    // Get slots for this day, sorted by start time, excluding breaks
+    const daySlots = currentSlots
+      .filter((s) => s.classWeekDay === dayNumber && !s.isBreak)
+      .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
+
+    console.log(`[DEBUG reorganizeSlotsLocally] Day ${dayNumber}:`, {
+      daySlotsCount: daySlots.length,
+      configClassesPerDay: config.classesPerDay,
+      willRemove:
+        daySlots.length > config.classesPerDay ? daySlots.length - config.classesPerDay : 0,
+    })
+
+    // Generate new slots for this day
+    let cursor = toMinutes(config.startTime)
+    const dayNewSlots: CalendarSlot[] = []
+
+    for (let classIndex = 1; classIndex <= config.classesPerDay; classIndex += 1) {
+      const classStart = cursor
+      const classEnd = classStart + config.classDuration
+
+      const existingClass = daySlots[classIndex - 1]
+
+      dayNewSlots.push({
+        id: `new-${dayNumber}-${classIndex}`,
+        teacherHasClassId: existingClass?.teacherHasClassId ?? null,
+        classWeekDay: dayNumber,
+        startTime: toTime(classStart),
+        endTime: toTime(classEnd),
+        minutes: config.classDuration,
+        isBreak: false,
+        teacherHasClass: existingClass?.teacherHasClass ?? null,
+      })
+
+      cursor = classEnd
+
+      // Insert break if configured
+      if (
+        config.breakDuration > 0 &&
+        config.breakAfterClass === classIndex &&
+        classIndex < config.classesPerDay
+      ) {
+        const breakStart = cursor
+        const breakEnd = breakStart + config.breakDuration
+        dayNewSlots.push({
+          id: `break-${dayNumber}-${classIndex}`,
+          teacherHasClassId: null,
+          classWeekDay: dayNumber,
+          startTime: toTime(breakStart),
+          endTime: toTime(breakEnd),
+          minutes: config.breakDuration,
+          isBreak: true,
+          teacherHasClass: null,
+        })
+        cursor = breakEnd
+      }
+    }
+
+    // Track removed classes (if new config has fewer slots)
+    console.log(`[DEBUG reorganizeSlotsLocally] Checking removed for day ${dayNumber}:`, {
+      daySlotsLength: daySlots.length,
+      configClassesPerDay: config.classesPerDay,
+      removedRange: { start: config.classesPerDay, end: daySlots.length },
+    })
+    for (let i = config.classesPerDay; i < daySlots.length; i += 1) {
+      const removedSlot = daySlots[i]
+      console.log(`[DEBUG reorganizeSlotsLocally] Removed slot ${i}:`, {
+        hasTeacherHasClass: !!removedSlot.teacherHasClass,
+        subject: removedSlot.teacherHasClass?.subject?.name,
+      })
+      if (removedSlot.teacherHasClass) {
+        removedClasses.push({
+          teacherHasClass: removedSlot.teacherHasClass,
+          day: dayNumber,
+        })
+      }
+    }
+
+    newSlots.push(...dayNewSlots)
+  }
+
+  console.log('[DEBUG reorganizeSlotsLocally] Result:', {
+    newSlotsCount: newSlots.length,
+    removedClassesCount: removedClasses.length,
+  })
+
+  return { slots: newSlots, removedClasses }
+}
+
+function ensureConfiguredSlots(
+  existingSlots: CalendarSlot[],
+  config: ScheduleConfig
+): CalendarSlot[] {
+  const slots: CalendarSlot[] = []
+  const dayNumbers = [1, 2, 3, 4, 5] // Monday to Friday
+
+  for (const dayNumber of dayNumbers) {
+    let cursor = toMinutes(config.startTime)
+
+    for (let classIndex = 1; classIndex <= config.classesPerDay; classIndex += 1) {
+      const classStart = cursor
+      const classEnd = classStart + config.classDuration
+      const startTime = toTime(classStart)
+      const endTime = toTime(classEnd)
+
+      // Check if there's an existing slot for this time
+      const existingSlot = existingSlots.find(
+        (s) =>
+          s.classWeekDay === dayNumber &&
+          normalizeTime(s.startTime) === startTime &&
+          normalizeTime(s.endTime) === endTime
+      )
+
+      if (existingSlot) {
+        slots.push(existingSlot)
+      } else {
+        // Create empty slot
+        slots.push({
+          id: `empty-${dayNumber}-${classIndex}`,
+          teacherHasClassId: null,
+          classWeekDay: dayNumber,
+          startTime: `${startTime}:00`,
+          endTime: `${endTime}:00`,
+          minutes: config.classDuration,
+          isBreak: false,
+          teacherHasClass: null,
+        })
+      }
+
+      cursor = classEnd
+
+      // Insert break if configured
+      if (
+        config.breakDuration > 0 &&
+        config.breakAfterClass === classIndex &&
+        classIndex < config.classesPerDay
+      ) {
+        const breakStart = cursor
+        const breakEnd = breakStart + config.breakDuration
+        const breakStartTime = toTime(breakStart)
+        const breakEndTime = toTime(breakEnd)
+
+        // Check if break slot exists
+        const existingBreakSlot = existingSlots.find(
+          (s) =>
+            s.classWeekDay === dayNumber &&
+            normalizeTime(s.startTime) === breakStartTime &&
+            normalizeTime(s.endTime) === breakEndTime &&
+            s.isBreak
+        )
+
+        if (existingBreakSlot) {
+          slots.push(existingBreakSlot)
+        } else {
+          slots.push({
+            id: `break-${dayNumber}-${classIndex}`,
+            teacherHasClassId: null,
+            classWeekDay: dayNumber,
+            startTime: `${breakStartTime}:00`,
+            endTime: `${breakEndTime}:00`,
+            minutes: config.breakDuration,
+            isBreak: true,
+            teacherHasClass: null,
+          })
+        }
+
+        cursor = breakEnd
+      }
+    }
+  }
+
+  return slots
 }
 
 type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY'
@@ -164,10 +376,68 @@ export function ScheduleGrid({
   academicPeriodId,
   scheduleConfig,
   className,
+  reorganizeTrigger,
+  onDirtyChange,
 }: ScheduleGridProps) {
   const [localSlots, setLocalSlots] = useState<CalendarSlot[]>([])
-  const [_isDirty, setIsDirty] = useState(false)
+  const [originalSlots, setOriginalSlots] = useState<CalendarSlot[]>([])
+  const localSlotsRef = useRef<CalendarSlot[]>([])
+  const [removedClasses, setRemovedClasses] = useState<
+    Array<{ teacherHasClassId: string; day: number }>
+  >([])
+  const [isDirty, setIsDirty] = useState(false)
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
+  const [activeDragItem, setActiveDragItem] = useState<string | null>(null)
+  const prevReorganizeTrigger = useRef(reorganizeTrigger)
+
+  // Function to compare if slots are different
+  const areSlotsDifferent = useCallback((slotsA: CalendarSlot[], slotsB: CalendarSlot[]) => {
+    if (slotsA.length !== slotsB.length) return true
+
+    // Sort both arrays by id for consistent comparison
+    const sortedA = [...slotsA].sort((a, b) => a.id.localeCompare(b.id))
+    const sortedB = [...slotsB].sort((a, b) => a.id.localeCompare(b.id))
+
+    return sortedA.some((slotA, index) => {
+      const slotB = sortedB[index]
+      return (
+        slotA.teacherHasClassId !== slotB.teacherHasClassId ||
+        slotA.classWeekDay !== slotB.classWeekDay ||
+        normalizeTime(slotA.startTime) !== normalizeTime(slotB.startTime) ||
+        normalizeTime(slotA.endTime) !== normalizeTime(slotB.endTime) ||
+        slotA.isBreak !== slotB.isBreak
+      )
+    })
+  }, [])
+
+  // Check if slots are dirty by comparing with original
+  useEffect(() => {
+    const hasChanges = areSlotsDifferent(localSlots, originalSlots)
+    setIsDirty(hasChanges)
+  }, [localSlots, originalSlots, areSlotsDifferent])
+
+  // Notify parent when dirty state changes
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
+
+  // Warn before leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isDirty])
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    localSlotsRef.current = localSlots
+  }, [localSlots])
 
   const queryClient = useQueryClient()
   const {
@@ -205,122 +475,234 @@ export function ScheduleGrid({
     api.api.v1.schedules.validateConflict.mutationOptions()
   )
 
-  const handleGenerateSchedule = useCallback(async () => {
-    try {
-      await generateMutation.mutateAsync({
-        params: { classId },
-        body: {
-          academicPeriodId,
-          config: scheduleConfig,
-        },
-      } as any)
+  const handleReorganizeSchedule = useCallback(
+    async (preserveAssignments: boolean) => {
+      if (preserveAssignments) {
+        // Local reorganization - no API call needed
+        const dayNumbers = DAYS_OF_WEEK.map((d) => d.number)
+        const currentSlots = localSlotsRef.current
+        const { slots: newSlots, removedClasses: newRemovedClasses } = reorganizeSlotsLocally(
+          currentSlots,
+          scheduleConfig,
+          dayNumbers
+        )
 
-      await queryClient.invalidateQueries({
-        queryKey: ['classSchedule', classId, academicPeriodId],
-      })
-      await refetch()
-      toast.success('Grade gerada com sucesso!')
-      setIsGenerateDialogOpen(false)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao gerar grade'
-      toast.error(errorMessage)
-    } finally {
-      setIsGenerateDialogOpen(false)
+        setLocalSlots(newSlots)
+        setRemovedClasses(
+          newRemovedClasses.map((r) => ({
+            teacherHasClassId: r.teacherHasClass?.id ?? '',
+            day: r.day,
+          }))
+        )
+        setIsDirty(true)
+
+        if (newRemovedClasses.length > 0) {
+          const removedList = newRemovedClasses
+            .map(
+              (r) =>
+                `${r.teacherHasClass?.subject?.name ?? 'Aula'} (${DAYS_OF_WEEK.find((d) => d.number === r.day)?.label ?? ''})`
+            )
+            .join(', ')
+          toast.warning(`${newRemovedClasses.length} aula(s) removida(s) da grade: ${removedList}`)
+        } else {
+          toast.success('Grade reorganizada com sucesso!')
+        }
+      } else {
+        // Generate from scratch - needs API call
+        try {
+          const result = await generateMutation.mutateAsync({
+            params: { classId },
+            body: {
+              academicPeriodId,
+              config: scheduleConfig,
+              preserveAssignments: false,
+            },
+          } as any)
+
+          const generatedSlots = (result as any).slots.map((slot: any) => ({
+            ...slot,
+            teacherHasClass: slot.teacherHasClass,
+          }))
+
+          setLocalSlots(generatedSlots)
+          setIsDirty(true)
+          setIsGenerateDialogOpen(false)
+          toast.success('Grade gerada com sucesso!')
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Erro ao gerar grade'
+          toast.error(errorMessage)
+        }
+      }
+    },
+    [academicPeriodId, classId, generateMutation, scheduleConfig]
+  )
+
+  const handleGenerateSchedule = useCallback(async () => {
+    await handleReorganizeSchedule(false)
+  }, [handleReorganizeSchedule])
+
+  // Reorganize when trigger changes
+  useEffect(() => {
+    if (
+      reorganizeTrigger !== undefined &&
+      prevReorganizeTrigger.current !== reorganizeTrigger &&
+      localSlots.length > 0
+    ) {
+      prevReorganizeTrigger.current = reorganizeTrigger
+      handleReorganizeSchedule(true)
     }
-  }, [academicPeriodId, classId, generateMutation, queryClient, refetch, scheduleConfig])
+  }, [reorganizeTrigger, localSlots.length, handleReorganizeSchedule])
 
   // Initialize local slots when data changes
-  useMemo(() => {
-    if (scheduleData?.slots) {
-      setLocalSlots(scheduleData.slots)
-      setIsDirty(false)
+  const isInitializedRef = useRef(false)
+  const currentSelectionRef = useRef(`${classId}:${academicPeriodId}`)
+
+  useEffect(() => {
+    const selectionKey = `${classId}:${academicPeriodId}`
+    // Reset initialization when selection changes
+    if (currentSelectionRef.current !== selectionKey) {
+      currentSelectionRef.current = selectionKey
+      isInitializedRef.current = false
+      // Reset prevReorganizeTrigger for new selection
+      prevReorganizeTrigger.current = reorganizeTrigger
     }
-  }, [scheduleData?.slots])
+
+    if (scheduleData?.slots && !isInitializedRef.current) {
+      // Ensure we have slots for all configured time slots
+      const slots = ensureConfiguredSlots(scheduleData.slots, scheduleConfig)
+      setLocalSlots(slots)
+      // Save original slots for comparison
+      setOriginalSlots(slots.map((s) => ({ ...s })))
+      isInitializedRef.current = true
+    }
+  }, [scheduleData?.slots, classId, academicPeriodId, reorganizeTrigger, scheduleConfig])
 
   // Get unique time slots
-  const timeSlots = useMemo(() => {
-    if (!localSlots.length) return []
-    const times = new Set<string>()
-    localSlots.forEach((slot) => {
-      times.add(normalizeTimeSlot(`${slot.startTime}-${slot.endTime}`))
-    })
-    return Array.from(times).sort()
-  }, [localSlots])
-
-  const configuredTimeSlotSet = useMemo(
-    () => new Set(getConfiguredTimeSlots(scheduleConfig)),
-    [scheduleConfig]
-  )
   const configuredTimeSlots = useMemo(
     () => getConfiguredTimeSlots(scheduleConfig),
     [scheduleConfig]
   )
-
-  const allTimeSlots = useMemo(() => {
-    const allSlots = new Set([...configuredTimeSlots, ...timeSlots])
-    return Array.from(allSlots).sort()
-  }, [configuredTimeSlots, timeSlots])
-
-  const outOfTemplateSlots = useMemo(
-    () => timeSlots.filter((timeSlot) => !configuredTimeSlotSet.has(timeSlot)),
-    [configuredTimeSlotSet, timeSlots]
+  const configuredBreakSlots = useMemo(
+    () => getConfiguredBreakSlots(scheduleConfig),
+    [scheduleConfig]
   )
-  const slotsOnlyInConfig = useMemo(
-    () => configuredTimeSlots.filter((ts) => !timeSlots.includes(ts)),
-    [configuredTimeSlots, timeSlots]
-  )
-  const hasOutOfTemplateSlots = outOfTemplateSlots.length > 0
-  const hasSlotsOnlyInConfig = slotsOnlyInConfig.length > 0
 
-  const currentScheduleSummary = useMemo(() => {
-    if (!timeSlots.length) return null
+  // Map each existing class to the best matching configured slot
+  // A class belongs to the slot with the most overlap
+  const { slotAssignments, orphanedSlots } = useMemo(() => {
+    const assignments = new Map<string, (typeof localSlots)[number]>()
+    const orphaned: typeof localSlots = []
+    const MIN_OVERLAP_RATIO = 0.5
 
-    const sortedSlots = [...timeSlots].sort()
-    const firstRange = sortedSlots[0]
-    const lastRange = sortedSlots[sortedSlots.length - 1]
-    const firstStart = firstRange.split('-')[0]
-    const lastEnd = lastRange.split('-')[1]
+    for (const existingSlot of localSlots) {
+      if (existingSlot.isBreak) continue
 
-    const breakSlotKeys = new Set(
-      localSlots
-        .filter((slot) => slot.isBreak)
-        .map((slot) => normalizeTimeSlot(`${slot.startTime}-${slot.endTime}`))
+      const slotStart = toMinutes(existingSlot.startTime.split(':').slice(0, 2).join(':'))
+      const slotEnd = toMinutes(existingSlot.endTime.split(':').slice(0, 2).join(':'))
+      const slotDuration = slotEnd - slotStart
+
+      let bestOverlap = 0
+      let bestConfigSlot: string | null = null
+
+      for (const configSlot of configuredTimeSlots) {
+        const [cStart, cEnd] = configSlot.split('-')
+        const cStartMin = toMinutes(cStart)
+        const cEndMin = toMinutes(cEnd)
+
+        const overlapStart = Math.max(slotStart, cStartMin)
+        const overlapEnd = Math.min(slotEnd, cEndMin)
+        const overlapDuration = Math.max(0, overlapEnd - overlapStart)
+        const overlapRatio = overlapDuration / slotDuration
+
+        if (overlapDuration > bestOverlap) {
+          bestOverlap = overlapDuration
+          if (overlapRatio >= MIN_OVERLAP_RATIO) {
+            bestConfigSlot = `${existingSlot.classWeekDay}_${configSlot}`
+          }
+        }
+      }
+
+      if (bestConfigSlot) {
+        if (!assignments.has(bestConfigSlot)) {
+          assignments.set(bestConfigSlot, existingSlot)
+        }
+      } else {
+        orphaned.push(existingSlot)
+      }
+    }
+
+    console.log(
+      '[DEBUG slotAssignments] Orphaned slots:',
+      orphaned.length,
+      orphaned.map((s) => ({
+        day: s.classWeekDay,
+        time: `${s.startTime}-${s.endTime}`,
+        hasTeacher: !!s.teacherHasClass,
+        teacherHasClassId: s.teacherHasClassId,
+        subject: s.teacherHasClass?.subject?.name,
+      }))
     )
-    const classesCount = sortedSlots.length - breakSlotKeys.size
-    const hasBreak = breakSlotKeys.size > 0
 
-    return formatScheduleWindowLabel(firstStart, lastEnd, classesCount, hasBreak)
-  }, [localSlots, timeSlots])
-
-  const configuredScheduleSummary = useMemo(() => {
-    if (!configuredTimeSlots.length) return null
-
-    const firstStart = configuredTimeSlots[0].split('-')[0]
-    const lastEnd = configuredTimeSlots[configuredTimeSlots.length - 1].split('-')[1]
-    const hasBreak =
-      scheduleConfig.breakDuration > 0 &&
-      scheduleConfig.breakAfterClass < scheduleConfig.classesPerDay
-
-    return formatScheduleWindowLabel(firstStart, lastEnd, scheduleConfig.classesPerDay, hasBreak)
-  }, [configuredTimeSlots, scheduleConfig])
+    return { slotAssignments: assignments, orphanedSlots: orphaned }
+  }, [localSlots, configuredTimeSlots])
 
   // Get pending classes (not yet scheduled enough times)
   const pendingClasses = useMemo(() => {
-    if (!scheduleData?.teacherClasses) return []
-    return scheduleData.teacherClasses
+    if (!scheduleData?.teacherClasses) {
+      return []
+    }
+
+    const scheduledByTeacherHasClassId = new Map<string, number>()
+    for (const slot of localSlots) {
+      if (
+        !slot.isBreak &&
+        slot.teacherHasClassId &&
+        !orphanedSlots.some((os) => os.id === slot.id)
+      ) {
+        const count = scheduledByTeacherHasClassId.get(slot.teacherHasClassId) ?? 0
+        scheduledByTeacherHasClassId.set(slot.teacherHasClassId, count + 1)
+      }
+    }
+
+    // Add removed classes from reorganization
+    const removedByTeacherHasClassId = new Map<string, number>()
+    for (const removed of removedClasses) {
+      if (removed.teacherHasClassId) {
+        const count = removedByTeacherHasClassId.get(removed.teacherHasClassId) ?? 0
+        removedByTeacherHasClassId.set(removed.teacherHasClassId, count + 1)
+      }
+    }
+
+    const result = scheduleData.teacherClasses
       .map((tc) => {
-        // Contar apenas slots que não são intervalos e têm o teacherHasClassId correspondente
-        const scheduledCount = localSlots.filter(
-          (s) => !s.isBreak && s.teacherHasClassId === tc.id
-        ).length
-        const missing = tc.subjectQuantity - scheduledCount
+        const scheduledCount = scheduledByTeacherHasClassId.get(tc.id) ?? 0
+        const removedCount = removedByTeacherHasClassId.get(tc.id) ?? 0
+        const totalScheduled = scheduledCount + removedCount
+        const missing = tc.subjectQuantity - totalScheduled
         if (missing <= 0) return null
         return { ...tc, missing }
       })
       .filter(Boolean) as Array<TeacherHasClass & { missing: number }>
-  }, [scheduleData?.teacherClasses, localSlots])
+
+    console.log(
+      '[DEBUG pendingClasses] Result:',
+      result.length,
+      result.map((r) => ({
+        subject: r.subject.name,
+        missing: r.missing,
+      }))
+    )
+
+    return result
+  }, [scheduleData?.teacherClasses, localSlots, removedClasses, orphanedSlots])
 
   const handleSave = useCallback(async () => {
+    // Verificar se há alterações para salvar
+    if (!isDirty) {
+      toast.success('Nenhuma alteração para salvar')
+      return
+    }
+
     // Validar se há aulas pendentes
     if (pendingClasses.length > 0) {
       const totalMissing = pendingClasses.reduce((sum, pc) => sum + pc.missing, 0)
@@ -343,12 +725,19 @@ export function ScheduleGrid({
       )
     }
 
-    const saveInput = localSlots.map((s) => ({
-      teacherHasClassId: s.teacherHasClassId,
-      classWeekDay: s.classWeekDay,
-      startTime: s.startTime,
-      endTime: s.endTime,
-    }))
+    const saveInput = localSlots
+      .filter((s) => {
+        // Only save slots within configured time slots
+        const slotTimeRange = `${normalizeTime(s.startTime)}-${normalizeTime(s.endTime)}`
+        return configuredTimeSlots.includes(slotTimeRange)
+      })
+      .map((s) => ({
+        teacherHasClassId: s.teacherHasClassId,
+        classWeekDay: s.classWeekDay,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        isBreak: s.isBreak,
+      }))
 
     try {
       await saveMutation.mutateAsync({
@@ -372,30 +761,59 @@ export function ScheduleGrid({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    console.log('[DEBUG handleDragStart] Started dragging:', event.active.id.toString())
+    setActiveDragItem(event.active.id.toString())
+  }, [])
+
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
+      console.log('[DEBUG handleDragEnd] Drag ended:', {
+        active: event.active.id.toString(),
+        over: event.over?.id.toString(),
+      })
+      setActiveDragItem(null)
       const { active, over } = event
-      if (!active || !over || active.id === over.id) return
+      if (!active || !over || active.id === over.id) {
+        console.log('[DEBUG handleDragEnd] Early return - no over or same item')
+        return
+      }
 
       // Parse slot keys
       const activeId = active.id.toString()
       const overId = over.id.toString()
 
+      console.log('[DEBUG handleDragEnd] Processing drag:', { activeId, overId })
+
       // Handle pending class being dragged to a slot
       if (activeId.startsWith('pending_')) {
+        console.log('[DEBUG handleDragEnd] Processing pending class drag')
         const teacherHasClassId = activeId.replace('pending_', '').split('_')[0]
         const [dayStr, timeRange] = overId.split('_')
-        if (!dayStr || !timeRange) return
+        if (!dayStr || !timeRange) {
+          console.log('[DEBUG handleDragEnd] Early return - invalid overId format')
+          return
+        }
 
         const [startTime, endTime] = timeRange.split('-')
         const dayNumber = parseInt(dayStr)
 
+        console.log('[DEBUG handleDragEnd] Target slot:', { dayNumber, startTime, endTime })
+
         // Find the target slot
         const slotIndex = localSlots.findIndex(
-          (s) => s.classWeekDay === dayNumber && s.startTime === startTime && s.endTime === endTime
+          (s) =>
+            s.classWeekDay === dayNumber &&
+            normalizeTime(s.startTime) === startTime &&
+            normalizeTime(s.endTime) === endTime
         )
 
-        if (slotIndex === -1) return
+        if (slotIndex === -1) {
+          console.log('[DEBUG handleDragEnd] Slot not found in localSlots')
+          return
+        }
+
+        console.log('[DEBUG handleDragEnd] Found slot at index:', slotIndex)
 
         // Não permitir arrastar para slots de intervalo
         if (localSlots[slotIndex].isBreak) {
@@ -440,28 +858,56 @@ export function ScheduleGrid({
         }
         setLocalSlots(newSlots)
         setIsDirty(true)
+        console.log('[DEBUG handleDragEnd] Slot updated successfully')
         return
       }
 
       // Swap two slots
+      console.log('[DEBUG handleDragEnd] Processing slot swap')
       const [activeDay, activeTime] = activeId.split('_')
       const [overDay, overTime] = overId.split('_')
-      if (!activeDay || !activeTime || !overDay || !overTime) return
+      if (!activeDay || !activeTime || !overDay || !overTime) {
+        console.log('[DEBUG handleDragEnd] Early return - invalid slot key format')
+        return
+      }
 
       const [activeStart, activeEnd] = activeTime.split('-')
       const [overStart, overEnd] = overTime.split('-')
       const activeDayNum = parseInt(activeDay)
       const overDayNum = parseInt(overDay)
 
+      console.log('[DEBUG handleDragEnd] Swap details:', {
+        active: { day: activeDayNum, start: activeStart, end: activeEnd },
+        over: { day: overDayNum, start: overStart, end: overEnd },
+        localSlotsCount: localSlots.length,
+        localSlotsSample: localSlots.slice(0, 5).map((s) => ({
+          day: s.classWeekDay,
+          start: s.startTime,
+          end: s.endTime,
+          normStart: normalizeTime(s.startTime),
+          normEnd: normalizeTime(s.endTime),
+        })),
+      })
+
       const activeSlotIndex = localSlots.findIndex(
         (s) =>
-          s.classWeekDay === activeDayNum && s.startTime === activeStart && s.endTime === activeEnd
+          s.classWeekDay === activeDayNum &&
+          normalizeTime(s.startTime) === activeStart &&
+          normalizeTime(s.endTime) === activeEnd
       )
       const overSlotIndex = localSlots.findIndex(
-        (s) => s.classWeekDay === overDayNum && s.startTime === overStart && s.endTime === overEnd
+        (s) =>
+          s.classWeekDay === overDayNum &&
+          normalizeTime(s.startTime) === overStart &&
+          normalizeTime(s.endTime) === overEnd
       )
 
-      if (activeSlotIndex === -1 || overSlotIndex === -1) return
+      console.log('[DEBUG handleDragEnd] Slot indices:', { activeSlotIndex, overSlotIndex })
+
+      if (activeSlotIndex === -1 || overSlotIndex === -1) {
+        console.log('[DEBUG handleDragEnd] Early return - slot not found')
+        return
+      }
 
       // Não permitir swap com slots de intervalo
       if (localSlots[activeSlotIndex].isBreak || localSlots[overSlotIndex].isBreak) {
@@ -581,7 +1027,7 @@ export function ScheduleGrid({
       {/* Actions */}
       <div className="flex justify-end gap-2">
         <AlertDialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
-          <AlertDialogTrigger asChild>
+          <AlertDialogTrigger>
             <Button
               variant="outline"
               disabled={saveMutation.isPending || generateMutation.isPending}
@@ -608,13 +1054,29 @@ export function ScheduleGrid({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        <Button onClick={handleSave} disabled={saveMutation.isPending}>
+        <Button
+          onClick={handleSave}
+          disabled={saveMutation.isPending}
+          variant="default"
+          className="relative"
+        >
           <Save className="mr-2 h-4 w-4" />
           {saveMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
+          {isDirty && (
+            <span className="absolute -right-1 -top-1 flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-orange-500" />
+            </span>
+          )}
         </Button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <SortableContext items={[...allSlotKeys, ...pendingKeys]} strategy={rectSwappingStrategy}>
           {/* Pending classes */}
           {pendingClasses.length > 0 && (
@@ -642,37 +1104,73 @@ export function ScheduleGrid({
             </Card>
           )}
 
+          <DragOverlay>
+            {activeDragItem?.startsWith('pending_')
+              ? (() => {
+                  const teacherHasClassId = activeDragItem.replace('pending_', '').split('_')[0]
+                  const teacherClass = scheduleData?.teacherClasses.find(
+                    (tc) => tc.id === teacherHasClassId
+                  )
+                  if (teacherClass) {
+                    return (
+                      <Card className="cursor-move shadow-lg">
+                        <CardContent className="p-4">
+                          <p className="text-sm font-medium">{teacherClass.subject.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {teacherClass.teacher.user.name}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )
+                  }
+                  return null
+                })()
+              : activeDragItem &&
+                  activeDragItem.includes('_') &&
+                  !activeDragItem.startsWith('pending_')
+                ? (() => {
+                    // Grid slot being dragged
+                    const [dayStr, timeRange] = activeDragItem.split('_')
+                    const [startTime, endTime] = timeRange.split('-')
+                    const dayNumber = parseInt(dayStr)
+
+                    const slot = localSlots.find(
+                      (s) =>
+                        s.classWeekDay === dayNumber &&
+                        normalizeTime(s.startTime) === startTime &&
+                        normalizeTime(s.endTime) === endTime
+                    )
+
+                    if (slot?.teacherHasClass) {
+                      return (
+                        <TableCell className="cursor-move shadow-lg bg-primary/10 min-w-[120px]">
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-primary">
+                              {slot.teacherHasClass.subject.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {slot.teacherHasClass.teacher.user.name}
+                            </p>
+                          </div>
+                        </TableCell>
+                      )
+                    }
+                    return (
+                      <TableCell className="cursor-move shadow-lg bg-muted/30 min-w-[120px]">
+                        <span className="text-muted-foreground">-</span>
+                      </TableCell>
+                    )
+                  })()
+                : null}
+          </DragOverlay>
+
           {/* Schedule table */}
           <Card>
             <CardHeader>
               <CardTitle>Grade de Horários - {className}</CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto">
-              {(hasOutOfTemplateSlots || hasSlotsOnlyInConfig) && (
-                <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  <p className="font-medium">
-                    Configuração da grade não contempla todos os horários
-                  </p>
-                  <p className="mt-1">Grade atual: {currentScheduleSummary ?? 'não disponível'}</p>
-                  <p className="mt-1">
-                    Configuração atual: {configuredScheduleSummary ?? 'não disponível'}
-                  </p>
-                  {slotsOnlyInConfig.length > 0 && (
-                    <p className="mt-1">
-                      Horários configurados sem aulas:{' '}
-                      {slotsOnlyInConfig.map((slot) => slot.replace('-', ' - ')).join(', ')}
-                    </p>
-                  )}
-                  {outOfTemplateSlots.length > 0 && (
-                    <p className="mt-1">
-                      Horários fora da configuração:{' '}
-                      {outOfTemplateSlots.map((slot) => slot.replace('-', ' - ')).join(', ')}
-                    </p>
-                  )}
-                  <p className="mt-1">Esses horários aparecem em cinza para revisão.</p>
-                </div>
-              )}
-              {allTimeSlots.length === 0 ? (
+              {configuredTimeSlots.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <p>Nenhum horário configurado para esta turma.</p>
                   <p className="mt-2 text-sm">
@@ -691,67 +1189,32 @@ export function ScheduleGrid({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {allTimeSlots.map((timeSlot) => {
+                    {configuredTimeSlots.map((timeSlot) => {
                       const [startTime, endTime] = timeSlot.split('-')
-                      const isOutOfTemplate = !configuredTimeSlotSet.has(timeSlot)
-                      const isInConfigOnly = !timeSlots.includes(timeSlot)
+                      const isBreak = configuredBreakSlots.has(timeSlot)
                       return (
-                        <TableRow key={timeSlot} className={cn(isOutOfTemplate && 'bg-muted/30')}>
-                          <TableCell
-                            className={cn(
-                              'font-medium',
-                              isOutOfTemplate && 'text-muted-foreground'
-                            )}
-                          >
+                        <TableRow key={timeSlot}>
+                          <TableCell className="font-medium">
                             {startTime} - {endTime}
                           </TableCell>
                           {DAYS_OF_WEEK.map((day) => {
-                            const slot = localSlots.find(
-                              (s) =>
-                                s.classWeekDay === day.number &&
-                                normalizeTimeSlot(`${s.startTime}-${s.endTime}`) === timeSlot
-                            )
-                            if (isInConfigOnly) {
+                            if (isBreak) {
                               return (
                                 <TableCell
                                   key={day.key}
-                                  className="bg-muted/20 text-muted-foreground italic"
-                                >
-                                  -
-                                </TableCell>
-                              )
-                            }
-                            if (!slot) {
-                              return (
-                                <TableCell
-                                  key={day.key}
-                                  className={cn(
-                                    isOutOfTemplate && 'bg-muted/40 text-muted-foreground'
-                                  )}
-                                >
-                                  -
-                                </TableCell>
-                              )
-                            }
-                            if (slot.isBreak) {
-                              return (
-                                <TableCell
-                                  key={day.key}
-                                  className={cn(
-                                    'bg-muted text-center text-muted-foreground',
-                                    isOutOfTemplate && 'bg-muted/60'
-                                  )}
+                                  className="bg-muted text-center text-muted-foreground"
                                 >
                                   INTERVALO
                                 </TableCell>
                               )
                             }
+                            const slotKey = `${day.number}_${timeSlot}`
+                            const slot = slotAssignments.get(slotKey)
                             return (
                               <ScheduleSlotCell
                                 key={day.key}
-                                slotId={`${day.number}_${startTime}-${endTime}`}
-                                teacherHasClass={slot.teacherHasClass}
-                                isOutOfTemplate={isOutOfTemplate}
+                                slotId={slotKey}
+                                teacherHasClass={slot?.teacherHasClass}
                               />
                             )
                           })}
@@ -782,8 +1245,8 @@ function DraggablePendingClass({ id, teacher, subject }: DraggablePendingClassPr
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    transition: transition || 'transform 200ms ease',
+    opacity: isDragging ? 0.8 : 1,
   }
 
   return (
@@ -822,8 +1285,13 @@ function ScheduleSlotCell({
   })
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Transform.toString(
+      transform
+        ? { ...transform, scaleX: isDragging ? 1.05 : 1, scaleY: isDragging ? 1.05 : 1 }
+        : transform
+    ),
+    transition: transition || 'transform 200ms ease, opacity 200ms ease',
+    zIndex: isDragging ? 50 : undefined,
   }
 
   return (

@@ -4007,12 +4007,12 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/schedules/class/:classId/generate'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/schedules').generateClassScheduleValidator)>>
       paramsTuple: [ParamValue]
       params: { classId: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/schedules').generateClassScheduleValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/schedules/generate_class_schedule_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules/generate_class_schedule_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules/generate_class_schedule_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.schedules.validate_conflict': {

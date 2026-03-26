@@ -1,11 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { v7 as uuidv7 } from 'uuid'
 import db from '@adonisjs/lucid/services/db'
 import Calendar from '#models/calendar'
 import CalendarSlot from '#models/calendar_slot'
 import TeacherHasClass from '#models/teacher_has_class'
 import TeacherAvailability from '#models/teacher_availability'
 import AppException from '#exceptions/app_exception'
+import { generateClassScheduleValidator } from '#validators/schedules'
 
 interface ScheduleConfig {
   startTime: string // "07:30"
@@ -52,9 +52,13 @@ const DAYS_OF_WEEK = [
   { name: 'FRIDAY', number: 5 },
 ]
 
-function addMinutesToTime(time: string, minutes: number): string {
+function toMinutes(time: string): number {
   const [hours, mins] = time.split(':').map(Number)
-  const totalMinutes = hours * 60 + mins + minutes
+  return hours * 60 + mins
+}
+
+function addMinutesToTime(time: string, minutes: number): string {
+  const totalMinutes = toMinutes(time) + minutes
   const newHours = Math.floor(totalMinutes / 60)
   const newMins = totalMinutes % 60
   return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`
@@ -111,13 +115,16 @@ function isTeacherAvailableForSlot(
 export default class GenerateClassScheduleController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.classId
-    const { academicPeriodId, config } = request.only(['academicPeriodId', 'config']) as {
-      academicPeriodId: string
-      config: ScheduleConfig
-    }
+    const {
+      academicPeriodId,
+      config: rawConfig,
+      preserveAssignments = false,
+    } = await request.validateUsing(generateClassScheduleValidator)
 
-    if (!academicPeriodId || !config) {
-      throw AppException.badRequest('academicPeriodId e config são obrigatórios')
+    // Normalize startTime to remove seconds if present
+    const config = {
+      ...rawConfig,
+      startTime: rawConfig.startTime.split(':').slice(0, 2).join(':'),
     }
 
     // Get all teacher-class assignments for this class
@@ -168,6 +175,68 @@ export default class GenerateClassScheduleController {
       classId
     )
 
+    // Get current calendar slots if preserving assignments
+    let preservedAssignments: Map<string, { teacherHasClassId: string; day: number }> = new Map()
+    if (preserveAssignments) {
+      const currentCalendar = await Calendar.query()
+        .where('classId', classId)
+        .where('academicPeriodId', academicPeriodId)
+        .where('isActive', true)
+        .first()
+
+      if (currentCalendar) {
+        const currentSlots = await CalendarSlot.query()
+          .where('calendarId', currentCalendar.id)
+          .where('isBreak', false)
+          .whereNotNull('teacherHasClassId')
+
+        // For each current slot, find the best matching new slot
+        for (const slot of currentSlots) {
+          if (!slot.teacherHasClassId) continue
+
+          const slotStart = slot.startTime.split(':').slice(0, 2).join(':')
+          const slotEnd = slot.endTime.split(':').slice(0, 2).join(':')
+          const slotStartMin = toMinutes(slotStart)
+          const slotEndMin = toMinutes(slotEnd)
+          const slotDuration = slotEndMin - slotStartMin
+
+          let bestOverlap = 0
+          let bestNewSlotKey: string | null = null
+
+          // Generate all new slots to compare
+          const newSlots = generateTimeSlotsForDay(config)
+          for (const newSlot of newSlots) {
+            if (newSlot.isBreak) continue
+
+            const newStartMin = toMinutes(newSlot.startTime)
+            const newEndMin = toMinutes(newSlot.endTime)
+
+            // Calculate overlap
+            const overlapStart = Math.max(slotStartMin, newStartMin)
+            const overlapEnd = Math.min(slotEndMin, newEndMin)
+            const overlapDuration = Math.max(0, overlapEnd - overlapStart)
+            const overlapRatio = overlapDuration / slotDuration
+
+            // Require at least 50% overlap
+            if (overlapRatio >= 0.5 && overlapDuration > bestOverlap) {
+              bestOverlap = overlapDuration
+              bestNewSlotKey = `${slot.classWeekDay}_${newSlot.startTime}-${newSlot.endTime}`
+            }
+          }
+
+          if (bestNewSlotKey) {
+            // Check if this slot was already assigned
+            if (!preservedAssignments.has(bestNewSlotKey)) {
+              preservedAssignments.set(bestNewSlotKey, {
+                teacherHasClassId: slot.teacherHasClassId,
+                day: slot.classWeekDay,
+              })
+            }
+          }
+        }
+      }
+    }
+
     // Track remaining lessons per teacher-class
     const lessonsTracker = teacherClasses.map((tc) => ({
       id: tc.id,
@@ -206,6 +275,42 @@ export default class GenerateClassScheduleController {
             teacherHasClass: null,
           })
           continue
+        }
+
+        const slotKey = `${day.number}_${slot.startTime}-${slot.endTime}`
+        const preservedAssignment = preservedAssignments.get(slotKey)
+
+        // Check if this slot has a preserved assignment
+        if (preservedAssignment) {
+          const teacherClass = teacherClasses.find(
+            (tc) => tc.id === preservedAssignment.teacherHasClassId
+          )
+          if (teacherClass) {
+            const tracker = lessonsTracker.find((t) => t.id === teacherClass.id)
+            if (tracker && tracker.remainingLessons > 0) {
+              generatedSlots.push({
+                classWeekDay: day.number,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                minutes: config.classDuration,
+                isBreak: false,
+                teacherHasClassId: teacherClass.id,
+                teacherHasClass: {
+                  id: teacherClass.id,
+                  teacher: {
+                    id: teacherClass.teacher.id,
+                    user: { name: teacherClass.teacher.user.name },
+                  },
+                  subject: {
+                    id: teacherClass.subject.id,
+                    name: teacherClass.subject.name,
+                  },
+                },
+              })
+              tracker.remainingLessons--
+              continue
+            }
+          }
         }
 
         // Try to find a suitable teacher-class for this slot
@@ -290,46 +395,9 @@ export default class GenerateClassScheduleController {
         subject: t.subject,
       }))
 
-    // Create or update calendar
-    const calendarName = `Grade ${new Date().toLocaleDateString('pt-BR')}`
-
-    // Deactivate old calendars
-    await Calendar.query()
-      .where('classId', classId)
-      .where('academicPeriodId', academicPeriodId)
-      .update({ isActive: false })
-
-    // Create new calendar
-    const calendar = await Calendar.create({
-      id: uuidv7(),
-      classId,
-      academicPeriodId,
-      name: calendarName,
-      isActive: true,
-      isCanceled: false,
-      isApproved: false,
-    })
-
-    // Create slots
-    for (const slot of generatedSlots) {
-      await CalendarSlot.create({
-        id: uuidv7(),
-        calendarId: calendar.id,
-        teacherHasClassId: slot.teacherHasClassId,
-        classWeekDay: slot.classWeekDay,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        minutes: slot.minutes,
-        isBreak: slot.isBreak,
-      })
-    }
-
+    // Return generated slots without persisting
+    // Frontend will handle persistence via save API
     return response.ok({
-      calendar: {
-        id: calendar.id,
-        name: calendar.name,
-        isActive: calendar.isActive,
-      },
       slots: generatedSlots,
       unscheduled,
     })
