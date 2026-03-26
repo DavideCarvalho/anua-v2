@@ -429,7 +429,7 @@ export default function PerguntaDetailPage() {
           </Card>
         }
       >
-        <InquiryDetailContent inquiryId={inquiryId} />
+        <InquiryDetailContent inquiryId={inquiryId!} />
       </ErrorBoundary>
     </ResponsavelLayout>
   )

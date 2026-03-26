@@ -121,7 +121,7 @@ export function BillingStep() {
   const benefitMode = form.watch('billing.benefitMode') ?? 'NONE'
   const selectedScholarshipId = form.watch('billing.scholarshipId')
   const discountPercentage = form.watch('billing.discountPercentage') ?? 0
-  const enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
+  const _enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
   const individualDiscounts = form.watch('billing.individualDiscounts') ?? []
   const individualDiscount = individualDiscounts[0]
   const individualDiscountType = individualDiscount?.discountType ?? 'PERCENTAGE'
@@ -391,8 +391,8 @@ export function BillingStep() {
                   <FormLabel>Benefício</FormLabel>
                   <Select
                     value={field.value ?? 'NONE'}
-                    onValueChange={(value: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL') =>
-                      handleBenefitModeChange(value)
+                    onValueChange={(value: 'NONE' | 'SCHOLARSHIP' | 'INDIVIDUAL' | null) =>
+                      handleBenefitModeChange(value!)
                     }
                   >
                     <FormControl>
@@ -454,9 +454,9 @@ export function BillingStep() {
                   <Label>Tipo de Desconto</Label>
                   <Select
                     value={individualDiscountType}
-                    onValueChange={(value: 'PERCENTAGE' | 'FLAT') => {
+                    onValueChange={(value: 'PERCENTAGE' | 'FLAT' | null) => {
                       updateIndividualDiscount({
-                        discountType: value,
+                        discountType: value!,
                         discountPercentage: value === 'PERCENTAGE' ? 0 : undefined,
                         discountValue: value === 'FLAT' ? 0 : undefined,
                       })
