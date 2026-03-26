@@ -64,7 +64,7 @@ test.group('Escola inquiries API', (group) => {
   }) => {
     const seed = `teacher-list-${Date.now()}`
 
-    const school = await School.create({ name: `School ${seed}` })
+    const school = await School.create({ name: `School ${seed}`, slug: `school-${seed}` })
 
     const teacherUser = await createUserWithRole('SCHOOL_TEACHER', `${seed}-teacher`, school.id)
     await Teacher.create({ id: teacherUser.id, hourlyRate: 0 })
