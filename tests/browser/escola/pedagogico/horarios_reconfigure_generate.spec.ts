@@ -204,7 +204,9 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     )
 
     // Close the generate dialog by clicking Cancel
+    await horariosPage.waitForTimeout(500)
     await horariosPage.click('button:has-text("Cancelar")')
+    await horariosPage.waitForTimeout(500)
 
     await horariosPage.click('button:has-text("Reconfigurar Grade")')
     await horariosPage.assertExists('text=Configuração da Grade')
