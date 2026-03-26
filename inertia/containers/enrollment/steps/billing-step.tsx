@@ -121,7 +121,6 @@ export function BillingStep() {
   const benefitMode = form.watch('billing.benefitMode') ?? 'NONE'
   const selectedScholarshipId = form.watch('billing.scholarshipId')
   const discountPercentage = form.watch('billing.discountPercentage') ?? 0
-  const _enrollmentDiscountPercentage = form.watch('billing.enrollmentDiscountPercentage') ?? 0
   const individualDiscounts = form.watch('billing.individualDiscounts') ?? []
   const individualDiscount = individualDiscounts[0]
   const individualDiscountType = individualDiscount?.discountType ?? 'PERCENTAGE'
