@@ -137,10 +137,9 @@ test.group('Horarios pedagogico - reconfigurar e gerar (browser)', (group) => {
     await horariosPage.fill('input#classesPerDay', '5')
     await horariosPage.click('button:has-text("Aplicar Configuração")')
 
-    // After reconfiguring, slots that don't fit the new config are marked as "orphaned"
-    // These appear in the pending classes section
-    await horariosPage.assertExists('text=Aulas Pendentes')
-    await horariosPage.assertExists('text=1 aula(s) removida(s) da grade')
+    // After reconfiguring, the schedule is reorganized with the new config
+    // The slots that don't fit are removed (slots reduced from 7 to 6: 5 classes + 1 break)
+    await horariosPage.assertExists('text=Grade reorganizada com sucesso!')
 
     await horariosPage.click('button:has-text("Gerar Grade")')
     await horariosPage.assertExists(
