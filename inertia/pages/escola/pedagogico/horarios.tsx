@@ -115,6 +115,7 @@ export default function HorariosPage() {
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig>(DEFAULT_SCHEDULE_CONFIG)
+  const [originalConfig, setOriginalConfig] = useState<ScheduleConfig>(DEFAULT_SCHEDULE_CONFIG)
   const [hasEditedConfigInSession, setHasEditedConfigInSession] = useState(false)
   const [hydratedSelectionKey, setHydratedSelectionKey] = useState<string | null>(null)
   const [reorganizeTrigger, setReorganizeTrigger] = useState(0)
@@ -311,6 +312,9 @@ export default function HorariosPage() {
                     const inferredConfig = inferConfigFromSlots(scheduleData?.slots ?? [])
                     if (inferredConfig) {
                       setScheduleConfig(inferredConfig)
+                      setOriginalConfig(inferredConfig)
+                    } else {
+                      setOriginalConfig(scheduleConfig)
                     }
                     setHasEditedConfigInSession(false)
                     setShowConfigForm(true)
@@ -328,7 +332,10 @@ export default function HorariosPage() {
                 value={scheduleConfig}
                 onChange={handleScheduleConfigChange}
                 onApply={handleApplyConfig}
-                onCancel={() => setShowConfigForm(false)}
+                onCancel={() => {
+                  setScheduleConfig(originalConfig)
+                  setShowConfigForm(false)
+                }}
               />
             )}
 
