@@ -45,6 +45,8 @@ function toMinutes(time: string): number {
 function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | null {
   if (!slots.length) return null
 
+  console.log('[DEBUG inferConfig] Input slots count:', slots.length)
+
   const byDay = new Map<number, ScheduleData['slots']>()
   for (const slot of slots) {
     const current = byDay.get(slot.classWeekDay) ?? []
@@ -62,6 +64,15 @@ function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | nu
     (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)
   )
 
+  console.log(
+    '[DEBUG inferConfig] Ordered slots:',
+    orderedSlots.map((s) => ({
+      time: `${s.startTime}-${s.endTime}`,
+      duration: toMinutes(s.endTime) - toMinutes(s.startTime),
+      isBreak: s.isBreak,
+    }))
+  )
+
   // Detect break by duration (short slot between longer ones)
   const slotDurations = orderedSlots.map(
     (slot) => toMinutes(slot.endTime) - toMinutes(slot.startTime)
@@ -75,6 +86,13 @@ function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | nu
       return duration < maxDuration * 0.6
     }
     return slot.isBreak
+  })
+
+  console.log('[DEBUG inferConfig] Detection:', {
+    maxDuration,
+    minDuration,
+    isBreakByDuration,
+    classesCount: orderedSlots.filter((_, i) => !isBreakByDuration[i]).length,
   })
 
   const firstClass = orderedSlots.find((_slot, i) => !isBreakByDuration[i])

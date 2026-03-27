@@ -118,6 +118,65 @@ function normalizeTime(time: string): string {
   return time.split(':').slice(0, 2).join(':')
 }
 
+function inferConfigFromSlots(slots: CalendarSlot[]): ScheduleConfig | null {
+  if (!slots.length) return null
+
+  const byDay = new Map<number, CalendarSlot[]>()
+  for (const slot of slots) {
+    const current = byDay.get(slot.classWeekDay) ?? []
+    current.push(slot)
+    byDay.set(slot.classWeekDay, current)
+  }
+
+  const dayWithMostSlots = Array.from(byDay.values())
+    .sort((a, b) => b.length - a.length)
+    .at(0)
+
+  if (!dayWithMostSlots?.length) return null
+
+  const orderedSlots = [...dayWithMostSlots].sort(
+    (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)
+  )
+
+  const slotDurations = orderedSlots.map(
+    (slot) => toMinutes(slot.endTime) - toMinutes(slot.startTime)
+  )
+  const maxDuration = Math.max(...slotDurations)
+  const minDuration = Math.min(...slotDurations)
+
+  const isBreakByDuration = orderedSlots.map((slot) => {
+    const duration = toMinutes(slot.endTime) - toMinutes(slot.startTime)
+    if (maxDuration - minDuration > 15) {
+      return duration < maxDuration * 0.6
+    }
+    return slot.isBreak
+  })
+
+  const firstClass = orderedSlots.find((_slot, i) => !isBreakByDuration[i])
+  const firstBreakIndex = orderedSlots.findIndex((_slot, i) => isBreakByDuration[i])
+  const firstBreak = firstBreakIndex >= 0 ? orderedSlots[firstBreakIndex] : null
+
+  const classesPerDay = orderedSlots.filter((_, i) => !isBreakByDuration[i]).length
+  const classDuration = firstClass
+    ? toMinutes(firstClass.endTime) - toMinutes(firstClass.startTime)
+    : 50
+  const breakAfterClass =
+    firstBreakIndex >= 0
+      ? orderedSlots.slice(0, firstBreakIndex).filter((_, i) => !isBreakByDuration[i]).length
+      : 3
+  const breakDuration = firstBreak
+    ? toMinutes(firstBreak.endTime) - toMinutes(firstBreak.startTime)
+    : 20
+
+  return {
+    startTime: firstClass?.startTime.split(':').slice(0, 2).join(':') ?? '07:30',
+    classesPerDay: classesPerDay || 6,
+    classDuration: classDuration || 50,
+    breakAfterClass: breakAfterClass || 3,
+    breakDuration: breakDuration || 20,
+  }
+}
+
 function getConfiguredTimeSlots(config: ScheduleConfig): string[] {
   const slots: string[] = []
   let cursor = toMinutes(config.startTime)
@@ -389,6 +448,7 @@ export function ScheduleGrid({
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
   const [activeDragItem, setActiveDragItem] = useState<string | null>(null)
   const prevReorganizeTrigger = useRef(reorganizeTrigger)
+  const [originalConfig, setOriginalConfig] = useState<ScheduleConfig | null>(null)
 
   // Function to compare if slots are different
   const areSlotsDifferent = useCallback((slotsA: CalendarSlot[], slotsB: CalendarSlot[]) => {
@@ -410,11 +470,19 @@ export function ScheduleGrid({
     })
   }, [])
 
-  // Check if slots are dirty by comparing with original
+  // Check if slots or config are dirty by comparing with original
   useEffect(() => {
-    const hasChanges = areSlotsDifferent(localSlots, originalSlots)
-    setIsDirty(hasChanges)
-  }, [localSlots, originalSlots, areSlotsDifferent])
+    const slotsChanged = areSlotsDifferent(localSlots, originalSlots)
+    const configChanged =
+      originalConfig && scheduleConfig
+        ? normalizeTime(originalConfig.startTime) !== normalizeTime(scheduleConfig.startTime) ||
+          originalConfig.classesPerDay !== scheduleConfig.classesPerDay ||
+          originalConfig.classDuration !== scheduleConfig.classDuration ||
+          originalConfig.breakAfterClass !== scheduleConfig.breakAfterClass ||
+          originalConfig.breakDuration !== scheduleConfig.breakDuration
+        : false
+    setIsDirty(slotsChanged || configChanged)
+  }, [localSlots, originalSlots, areSlotsDifferent, originalConfig, scheduleConfig])
 
   // Notify parent when dirty state changes
   useEffect(() => {
@@ -569,14 +637,22 @@ export function ScheduleGrid({
       setIsDirty(false)
       setLocalSlots([])
       setOriginalSlots([])
+      setOriginalConfig(null)
     }
 
     if (scheduleData?.slots && !isInitializedRef.current) {
+      // Infer config from API slots instead of using prop (which may be stale)
+      const inferredConfig = inferConfigFromSlots(scheduleData.slots)
+      const configToUse = inferredConfig || scheduleConfig
+
+      console.log('[DEBUG init] Using config:', configToUse, 'inferred:', !!inferredConfig)
+
       // Ensure we have slots for all configured time slots
-      const slots = ensureConfiguredSlots(scheduleData.slots, scheduleConfig)
+      const slots = ensureConfiguredSlots(scheduleData.slots, configToUse)
       setLocalSlots(slots)
-      // Save original slots for comparison
+      // Save original slots and config for comparison
       setOriginalSlots(slots.map((s) => ({ ...s })))
+      setOriginalConfig(configToUse)
       isInitializedRef.current = true
     }
   }, [scheduleData?.slots, classId, academicPeriodId, reorganizeTrigger, scheduleConfig])
