@@ -454,12 +454,14 @@ export function ScheduleGrid({
   const areSlotsDifferent = useCallback((slotsA: CalendarSlot[], slotsB: CalendarSlot[]) => {
     if (slotsA.length !== slotsB.length) return true
 
-    // Sort both arrays by id for consistent comparison
-    const sortedA = [...slotsA].sort((a, b) => a.id.localeCompare(b.id))
-    const sortedB = [...slotsB].sort((a, b) => a.id.localeCompare(b.id))
+    // Sort both arrays by composite key (day + startTime) instead of id
+    const getSlotKey = (slot: CalendarSlot) => `${slot.classWeekDay}-${slot.startTime}`
+    const sortedA = [...slotsA].sort((a, b) => getSlotKey(a).localeCompare(getSlotKey(b)))
+    const sortedB = [...slotsB].sort((a, b) => getSlotKey(b).localeCompare(getSlotKey(b)))
 
     return sortedA.some((slotA, index) => {
       const slotB = sortedB[index]
+      if (!slotB) return true
       return (
         slotA.teacherHasClassId !== slotB.teacherHasClassId ||
         slotA.classWeekDay !== slotB.classWeekDay ||
