@@ -457,7 +457,7 @@ export function ScheduleGrid({
     // Sort both arrays by composite key (day + startTime) instead of id
     const getSlotKey = (slot: CalendarSlot) => `${slot.classWeekDay}-${slot.startTime}`
     const sortedA = [...slotsA].sort((a, b) => getSlotKey(a).localeCompare(getSlotKey(b)))
-    const sortedB = [...slotsB].sort((a, b) => getSlotKey(b).localeCompare(getSlotKey(b)))
+    const sortedB = [...slotsB].sort((a, b) => getSlotKey(a).localeCompare(getSlotKey(b)))
 
     return sortedA.some((slotA, index) => {
       const slotB = sortedB[index]
