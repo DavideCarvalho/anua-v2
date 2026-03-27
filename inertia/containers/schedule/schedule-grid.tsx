@@ -563,8 +563,10 @@ export function ScheduleGrid({
     if (currentSelectionRef.current !== selectionKey) {
       currentSelectionRef.current = selectionKey
       isInitializedRef.current = false
-      // Reset prevReorganizeTrigger for new selection
+      // Reset states for new selection
       prevReorganizeTrigger.current = reorganizeTrigger
+      setRemovedClasses([])
+      setIsDirty(false)
     }
 
     if (scheduleData?.slots && !isInitializedRef.current) {
