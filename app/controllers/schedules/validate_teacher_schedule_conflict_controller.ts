@@ -13,8 +13,13 @@ const DAYS_OF_WEEK = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'F
 export default class ValidateTeacherScheduleConflictController {
   async handle({ request, serialize }: HttpContext): Promise<ScheduleConflictValidation> {
     const payload = await request.validateUsing(validateTeacherScheduleConflictValidator)
-    const { teacherHasClassId, classWeekDay, startTime, endTime, academicPeriodId, classId } =
-      payload
+    let { teacherHasClassId, classWeekDay, startTime, endTime, academicPeriodId, classId } = payload
+
+    // Normalize time strings to ensure they have seconds
+    startTime = startTime.includes(':')
+      ? startTime.split(':').slice(0, 2).join(':') + ':00'
+      : startTime
+    endTime = endTime.includes(':') ? endTime.split(':').slice(0, 2).join(':') + ':00' : endTime
 
     if (!teacherHasClassId || !classWeekDay || !startTime || !endTime || !academicPeriodId) {
       throw AppException.badRequest(
