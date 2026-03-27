@@ -339,6 +339,18 @@ function ensureConfiguredSlots(
   existingSlots: CalendarSlot[],
   config: ScheduleConfig
 ): CalendarSlot[] {
+  console.log('[DEBUG ensureConfiguredSlots] Called with config:', {
+    startTime: config.startTime,
+    classesPerDay: config.classesPerDay,
+    classDuration: config.classDuration,
+    existingSlotsCount: existingSlots.length,
+    existingSlotsSample: existingSlots.slice(0, 3).map((s) => ({
+      day: s.classWeekDay,
+      start: s.startTime,
+      end: s.endTime,
+    })),
+  })
+
   const slots: CalendarSlot[] = []
   const dayNumbers = [1, 2, 3, 4, 5] // Monday to Friday
 
@@ -352,12 +364,27 @@ function ensureConfiguredSlots(
       const endTime = toTime(classEnd)
 
       // Check if there's an existing slot for this time
-      const existingSlot = existingSlots.find(
-        (s) =>
+      const existingSlot = existingSlots.find((s) => {
+        const matches =
           s.classWeekDay === dayNumber &&
           normalizeTime(s.startTime) === startTime &&
           normalizeTime(s.endTime) === endTime
-      )
+        if (dayNumber === 1 && classIndex <= 2) {
+          console.log('[DEBUG ensureConfiguredSlots] Checking slot:', {
+            dayNumber,
+            classIndex,
+            targetStart: startTime,
+            targetEnd: endTime,
+            slotStart: s.startTime,
+            slotEnd: s.endTime,
+            normalizedStart: normalizeTime(s.startTime),
+            normalizedEnd: normalizeTime(s.endTime),
+            matches,
+            hasTeacher: !!s.teacherHasClass,
+          })
+        }
+        return matches
+      })
 
       if (existingSlot) {
         slots.push(existingSlot)
@@ -367,8 +394,8 @@ function ensureConfiguredSlots(
           id: `empty-${dayNumber}-${classIndex}`,
           teacherHasClassId: null,
           classWeekDay: dayNumber,
-          startTime: `${startTime}:00`,
-          endTime: `${endTime}:00`,
+          startTime,
+          endTime,
           minutes: config.classDuration,
           isBreak: false,
           teacherHasClass: null,
@@ -389,13 +416,14 @@ function ensureConfiguredSlots(
         const breakEndTime = toTime(breakEnd)
 
         // Check if break slot exists
-        const existingBreakSlot = existingSlots.find(
-          (s) =>
+        const existingBreakSlot = existingSlots.find((s) => {
+          const matches =
             s.classWeekDay === dayNumber &&
             normalizeTime(s.startTime) === breakStartTime &&
             normalizeTime(s.endTime) === breakEndTime &&
             s.isBreak
-        )
+          return matches
+        })
 
         if (existingBreakSlot) {
           slots.push(existingBreakSlot)
@@ -404,8 +432,8 @@ function ensureConfiguredSlots(
             id: `break-${dayNumber}-${classIndex}`,
             teacherHasClassId: null,
             classWeekDay: dayNumber,
-            startTime: `${breakStartTime}:00`,
-            endTime: `${breakEndTime}:00`,
+            startTime: breakStartTime,
+            endTime: breakEndTime,
             minutes: config.breakDuration,
             isBreak: true,
             teacherHasClass: null,
@@ -449,6 +477,7 @@ export function ScheduleGrid({
   const [activeDragItem, setActiveDragItem] = useState<string | null>(null)
   const prevReorganizeTrigger = useRef(reorganizeTrigger)
   const [originalConfig, setOriginalConfig] = useState<ScheduleConfig | null>(null)
+  const needsReorganizationAfterInitRef = useRef(false)
 
   // Function to compare if slots are different
   const areSlotsDifferent = useCallback((slotsA: CalendarSlot[], slotsB: CalendarSlot[]) => {
@@ -611,21 +640,49 @@ export function ScheduleGrid({
     await handleReorganizeSchedule(false)
   }, [handleReorganizeSchedule])
 
-  // Reorganize when trigger changes
+  // Reorganize when config changes (after initial load)
   useEffect(() => {
-    if (
-      reorganizeTrigger !== undefined &&
-      prevReorganizeTrigger.current !== reorganizeTrigger &&
-      localSlots.length > 0
-    ) {
-      prevReorganizeTrigger.current = reorganizeTrigger
+    if (!isInitializedRef.current || localSlots.length === 0) return
+
+    // Check if config has changed from what was used to create current slots
+    // Use normalizeTime to handle both HH:MM and HH:MM:SS formats
+    const currentSlotsStartTime = localSlots.find(
+      (s) => s.classWeekDay === 1 && !s.isBreak
+    )?.startTime
+    const configStartTime = normalizeTime(scheduleConfig.startTime)
+
+    console.log('[DEBUG configChange effect] Checking:', {
+      currentSlotsStartTime,
+      configStartTime,
+      slotsMatch: currentSlotsStartTime === configStartTime,
+    })
+
+    // If the slots don't match the current config, reorganize
+    if (currentSlotsStartTime && currentSlotsStartTime !== configStartTime) {
+      console.log('[DEBUG configChange effect] Config changed, reorganizing slots')
       handleReorganizeSchedule(true)
     }
-  }, [reorganizeTrigger, localSlots.length, handleReorganizeSchedule])
+  }, [scheduleConfig.startTime, localSlots.length, handleReorganizeSchedule])
 
   // Initialize local slots when data changes
   const isInitializedRef = useRef(false)
   const currentSelectionRef = useRef(`${classId}:${academicPeriodId}`)
+  const lastConfigStartTimeRef = useRef<string | null>(null)
+
+  // Reset initialization when scheduleConfig changes significantly
+  useEffect(() => {
+    if (
+      isInitializedRef.current &&
+      lastConfigStartTimeRef.current !== null &&
+      lastConfigStartTimeRef.current !== scheduleConfig.startTime
+    ) {
+      console.log('[DEBUG configChange] Resetting initialization due to config change:', {
+        from: lastConfigStartTimeRef.current,
+        to: scheduleConfig.startTime,
+      })
+      isInitializedRef.current = false
+    }
+  }, [scheduleConfig.startTime])
 
   useEffect(() => {
     const selectionKey = `${classId}:${academicPeriodId}`
@@ -649,21 +706,64 @@ export function ScheduleGrid({
 
       console.log('[DEBUG init] Using config:', configToUse, 'inferred:', !!inferredConfig)
 
+      // Normalize all times to HH:MM format (remove seconds)
+      const normalizedApiSlots = scheduleData.slots.map((slot) => ({
+        ...slot,
+        startTime: normalizeTime(slot.startTime),
+        endTime: normalizeTime(slot.endTime),
+      }))
+
       // Ensure we have slots for all configured time slots
-      const slots = ensureConfiguredSlots(scheduleData.slots, configToUse)
+      const slots = ensureConfiguredSlots(normalizedApiSlots, configToUse)
       setLocalSlots(slots)
       // Save original slots and config for comparison
       setOriginalSlots(slots.map((s) => ({ ...s })))
       setOriginalConfig(configToUse)
+      lastConfigStartTimeRef.current = configToUse.startTime
       isInitializedRef.current = true
+
+      // Check if we need to reorganize after init (because trigger fired before slots were ready)
+      if (needsReorganizationAfterInitRef.current) {
+        console.log('[DEBUG init] Triggering delayed reorganization')
+        needsReorganizationAfterInitRef.current = false
+        // Use setTimeout to ensure state updates have completed
+        setTimeout(() => handleReorganizeSchedule(true), 0)
+      }
     }
-  }, [scheduleData?.slots, classId, academicPeriodId, reorganizeTrigger, scheduleConfig])
+  }, [
+    scheduleData?.slots,
+    classId,
+    academicPeriodId,
+    reorganizeTrigger,
+    scheduleConfig,
+    handleReorganizeSchedule,
+  ])
 
   // Get unique time slots
   const configuredTimeSlots = useMemo(
     () => getConfiguredTimeSlots(scheduleConfig),
     [scheduleConfig]
   )
+
+  // Recreate slots when scheduleConfig changes significantly (e.g., startTime)
+  useEffect(() => {
+    if (!isInitializedRef.current || localSlots.length === 0) return
+
+    // Check if current slots match the configured time slots
+    const currentStartTimes = new Set(localSlots.map((s) => s.startTime))
+    const expectedStartTimes = new Set(configuredTimeSlots.map((ts) => ts.split('-')[0]))
+
+    // If they don't match, we need to reorganize
+    const needsReorganization = ![...expectedStartTimes].every((t) => currentStartTimes.has(t))
+
+    if (needsReorganization) {
+      console.log('[DEBUG configChange] Config changed, reorganizing slots:', {
+        currentSlots: [...currentStartTimes].slice(0, 5),
+        expectedSlots: [...expectedStartTimes],
+      })
+      handleReorganizeSchedule(true)
+    }
+  }, [scheduleConfig.startTime, scheduleConfig.classesPerDay])
   const configuredBreakSlots = useMemo(
     () => getConfiguredBreakSlots(scheduleConfig),
     [scheduleConfig]
@@ -679,8 +779,8 @@ export function ScheduleGrid({
     for (const existingSlot of localSlots) {
       if (existingSlot.isBreak) continue
 
-      const slotStart = toMinutes(existingSlot.startTime.split(':').slice(0, 2).join(':'))
-      const slotEnd = toMinutes(existingSlot.endTime.split(':').slice(0, 2).join(':'))
+      const slotStart = toMinutes(existingSlot.startTime)
+      const slotEnd = toMinutes(existingSlot.endTime)
       const slotDuration = slotEnd - slotStart
 
       let bestOverlap = 0
@@ -882,16 +982,28 @@ export function ScheduleGrid({
 
         console.log('[DEBUG handleDragEnd] Target slot:', { dayNumber, startTime, endTime })
 
-        // Find the target slot
+        // Find the target slot - times are now normalized to HH:MM format
         const slotIndex = localSlots.findIndex(
-          (s) =>
-            s.classWeekDay === dayNumber &&
-            normalizeTime(s.startTime) === startTime &&
-            normalizeTime(s.endTime) === endTime
+          (s) => s.classWeekDay === dayNumber && s.startTime === startTime && s.endTime === endTime
         )
 
         if (slotIndex === -1) {
-          console.log('[DEBUG handleDragEnd] Slot not found in localSlots')
+          console.log('[DEBUG handleDragEnd] Slot not found in localSlots', {
+            dayNumber,
+            startTime,
+            endTime,
+            localSlotsCount: localSlots.length,
+            allSlots: localSlots.map((s) => ({
+              day: s.classWeekDay,
+              start: s.startTime,
+              end: s.endTime,
+              isBreak: s.isBreak,
+              hasTeacher: !!s.teacherHasClass,
+            })),
+            matchingDaySlots: localSlots
+              .filter((s) => s.classWeekDay === dayNumber)
+              .map((s) => ({ start: s.startTime, end: s.endTime, isBreak: s.isBreak })),
+          })
           return
         }
 
@@ -966,22 +1078,16 @@ export function ScheduleGrid({
           day: s.classWeekDay,
           start: s.startTime,
           end: s.endTime,
-          normStart: normalizeTime(s.startTime),
-          normEnd: normalizeTime(s.endTime),
         })),
       })
 
+      // Find slots by exact time match (times are normalized to HH:MM format)
       const activeSlotIndex = localSlots.findIndex(
         (s) =>
-          s.classWeekDay === activeDayNum &&
-          normalizeTime(s.startTime) === activeStart &&
-          normalizeTime(s.endTime) === activeEnd
+          s.classWeekDay === activeDayNum && s.startTime === activeStart && s.endTime === activeEnd
       )
       const overSlotIndex = localSlots.findIndex(
-        (s) =>
-          s.classWeekDay === overDayNum &&
-          normalizeTime(s.startTime) === overStart &&
-          normalizeTime(s.endTime) === overEnd
+        (s) => s.classWeekDay === overDayNum && s.startTime === overStart && s.endTime === overEnd
       )
 
       console.log('[DEBUG handleDragEnd] Slot indices:', { activeSlotIndex, overSlotIndex })
@@ -1216,11 +1322,12 @@ export function ScheduleGrid({
                     const [startTime, endTime] = timeRange.split('-')
                     const dayNumber = parseInt(dayStr)
 
+                    // Find slot by exact time match (times are normalized to HH:MM format)
                     const slot = localSlots.find(
                       (s) =>
                         s.classWeekDay === dayNumber &&
-                        normalizeTime(s.startTime) === startTime &&
-                        normalizeTime(s.endTime) === endTime
+                        s.startTime === startTime &&
+                        s.endTime === endTime
                     )
 
                     if (slot?.teacherHasClass) {
