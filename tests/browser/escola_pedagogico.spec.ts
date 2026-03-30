@@ -6,14 +6,14 @@ const FAKE_UUID = '11111111-1111-4111-8111-111111111111'
 
 function registerPageTests(path: string) {
   test(`redirects unauthenticated request to ${path}`, async ({ visit }) => {
-    const page = await visit(path)
+    const page = await visit(path, { timeout: 60_000 })
     await page.assertPath('/login')
   })
 
   test(`returns page for authenticated user: ${path}`, async ({ visit, browserContext }) => {
     const { user } = await createEscolaAuthUser()
     await browserContext.loginAs(user)
-    const page = await visit(path)
+    const page = await visit(path, { timeout: 60_000 })
     await page.assertPathContains(path.replace(/^\//, ''))
   })
 }

@@ -208,20 +208,22 @@ test.group('Calendario pedagogico (browser)', (group) => {
 
     const atividadesPage = await visit('/escola/pedagogico/atividades', { timeout: 60_000 })
     await atividadesPage.click('[data-slot="select-trigger"]')
-    await atividadesPage.click(`[role="option"]:has-text("${className}")`)
-    await atividadesPage.waitForResponse(
+    const assignmentsResponsePromise = atividadesPage.waitForResponse(
       (response) => response.url().includes('/api/v1/assignments') && response.status() === 200,
       { timeout: 30_000 }
     )
+    await atividadesPage.click(`[role="option"]:has-text("${className}")`)
+    await assignmentsResponsePromise
     await atividadesPage.waitForSelector(`text=${seededAssignmentTitle}`, { timeout: 20_000 })
 
     const provasPage = await visit('/escola/pedagogico/provas', { timeout: 60_000 })
     await provasPage.click('[data-slot="select-trigger"]')
-    await provasPage.click(`[role="option"]:has-text("${className}")`)
-    await provasPage.waitForResponse(
+    const examsResponsePromise = provasPage.waitForResponse(
       (response) => response.url().includes('/api/v1/exams') && response.status() === 200,
       { timeout: 30_000 }
     )
+    await provasPage.click(`[role="option"]:has-text("${className}")`)
+    await examsResponsePromise
     await provasPage.waitForSelector(`text=${seededExamTitle}`, { timeout: 20_000 })
   })
 
