@@ -64,6 +64,7 @@ const TurmaSituacaoPage: React.FC<Props> = ({
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     filteredSubjects.length > 0 ? (filteredSubjects[0]?.id ?? null) : null
   )
+  const selectedSubject = filteredSubjects.find((subject) => subject.id === selectedSubjectId)
 
   return (
     <EscolaLayout>
@@ -90,7 +91,9 @@ const TurmaSituacaoPage: React.FC<Props> = ({
                     onValueChange={(value) => setSelectedSubjectId(value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione a matéria" />
+                      <SelectValue placeholder="Selecione a matéria">
+                        {selectedSubject?.name}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {filteredSubjects.map((subject) => (

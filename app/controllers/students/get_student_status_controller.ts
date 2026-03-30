@@ -17,6 +17,7 @@ interface StudentStatusResult {
   id: string
   name: string
   status: StudentStatus
+  failureReason: 'GRADE' | 'ATTENDANCE' | 'BOTH' | null
   finalGrade: number
   maxPossibleGrade: number
   attendancePercentage: number
@@ -137,9 +138,13 @@ export default class GetStudentStatusController {
     const totalClasses = attendanceRecords.length
 
     // Calculate max possible grade based on algorithm (assignments + exams)
-    const totalAssignmentPoints = assignments.reduce((sum, a) => sum + (a.grade ?? 0), 0)
-    const totalExamPoints = exams.reduce((sum, e) => sum + e.maxScore, 0)
-    const totalItems = assignments.length + exams.length
+    const gradableAssignments = assignments.filter((a) => (a.grade ?? 0) > 0)
+    const gradableAssignmentIds = new Set(gradableAssignments.map((a) => a.id))
+    const gradableExams = exams.filter((e) => e.maxScore > 0)
+    const gradableExamIds = new Set(gradableExams.map((e) => e.id))
+    const totalAssignmentPoints = gradableAssignments.reduce((sum, a) => sum + (a.grade ?? 0), 0)
+    const totalExamPoints = gradableExams.reduce((sum, e) => sum + e.maxScore, 0)
+    const totalItems = gradableAssignments.length + gradableExams.length
 
     const maxPossibleGrade =
       calculationAlgorithm === 'SUM'
@@ -152,11 +157,15 @@ export default class GetStudentStatusController {
     const results: StudentStatusResult[] = students.map((student) => {
       // Get student's assignment grades
       const studentAssignmentList = studentAssignments.filter((sa) => sa.studentId === student.id)
-      const gradedAssignments = studentAssignmentList.filter((sa) => sa.grade !== null)
+      const gradedAssignments = studentAssignmentList.filter(
+        (sa) => sa.grade !== null && gradableAssignmentIds.has(sa.assignmentId)
+      )
 
       // Get student's exam grades
       const studentExamList = studentExamGrades.filter((eg) => eg.studentId === student.id)
-      const gradedExams = studentExamList.filter((eg) => eg.score !== null && eg.attended)
+      const gradedExams = studentExamList.filter(
+        (eg) => eg.score !== null && eg.attended && gradableExamIds.has(eg.examId)
+      )
 
       // Calculate final grade (assignments + exams)
       let finalGrade = 0
@@ -218,31 +227,49 @@ export default class GetStudentStatusController {
             )
           : null
 
+      const hasGradeCriteria = totalItems > 0
+
       // Calculate points until pass
-      const pointsUntilPass = Math.max(0, minimumGrade - finalGrade)
+      const pointsUntilPass = hasGradeCriteria ? Math.max(0, minimumGrade - finalGrade) : null
 
       // Determine status
       let status: StudentStatus
 
       // If no assignments, no exams AND no classes, we can't evaluate yet
-      const hasNoData = totalItems === 0 && totalClasses === 0
+      const hasNoData = !hasGradeCriteria && totalClasses === 0
 
       // Check if close to attendance fail (5 or fewer classes margin)
       const isCloseToAttendanceFail =
         classesUntilFail !== null && classesUntilFail <= 5 && classesUntilFail > 0
 
+      let failureReason: StudentStatusResult['failureReason'] = null
+
       if (hasNoData) {
         status = 'IN_PROGRESS'
       } else {
-        const hasPassingGrade = totalItems === 0 || finalGrade >= minimumGrade
-        const hasPassingAttendance =
-          totalClasses === 0 || attendancePercentage >= minimumAttendancePercentage
+        const isFailingGrade = hasGradeCriteria && finalGrade < minimumGrade
+        const isFailingAttendance =
+          totalClasses > 0 && attendancePercentage < minimumAttendancePercentage
+
+        const hasPassingGrade = !isFailingGrade
+        const hasPassingAttendance = !isFailingAttendance
 
         if (!hasPassingGrade || !hasPassingAttendance) {
           status = 'FAILED'
+          if (isFailingGrade && isFailingAttendance) {
+            failureReason = 'BOTH'
+          } else if (isFailingGrade) {
+            failureReason = 'GRADE'
+          } else {
+            failureReason = 'ATTENDANCE'
+          }
         } else if (isCloseToAttendanceFail) {
           status = 'AT_RISK_ATTENDANCE'
-        } else if (pointsUntilPass > 0 && pointsUntilPass <= maxPossibleGrade * 0.2) {
+        } else if (
+          pointsUntilPass !== null &&
+          pointsUntilPass > 0 &&
+          pointsUntilPass <= maxPossibleGrade * 0.2
+        ) {
           status = 'AT_RISK_GRADE'
         } else {
           status = 'APPROVED'
@@ -253,10 +280,14 @@ export default class GetStudentStatusController {
         id: student.id,
         name: student.name,
         status,
+        failureReason,
         finalGrade: Number.parseFloat(finalGrade.toFixed(1)),
         maxPossibleGrade: Number.parseFloat(maxPossibleGrade.toFixed(1)),
         attendancePercentage: Number.parseFloat(attendancePercentage.toFixed(1)),
-        pointsUntilPass: pointsUntilPass > 0 ? Number.parseFloat(pointsUntilPass.toFixed(1)) : null,
+        pointsUntilPass:
+          pointsUntilPass !== null && pointsUntilPass > 0
+            ? Number.parseFloat(pointsUntilPass.toFixed(1))
+            : null,
         classesUntilFail: isCloseToAttendanceFail ? classesUntilFail : null,
         missedAssignments: missedItems,
       }

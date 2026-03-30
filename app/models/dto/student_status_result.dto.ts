@@ -9,6 +9,7 @@ export default class StudentStatusResultDto {
   declare id: string
   declare name: string
   declare status: StudentStatusType
+  declare failureReason: 'GRADE' | 'ATTENDANCE' | 'BOTH' | null
   declare finalGrade: number
   declare maxPossibleGrade: number
   declare attendancePercentage: number
@@ -25,6 +26,7 @@ export default class StudentStatusResultDto {
     this.id = data.id
     this.name = data.name
     this.status = data.status
+    this.failureReason = data.failureReason
     this.finalGrade = data.finalGrade
     this.maxPossibleGrade = data.maxPossibleGrade
     this.attendancePercentage = data.attendancePercentage

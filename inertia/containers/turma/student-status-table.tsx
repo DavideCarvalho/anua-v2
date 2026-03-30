@@ -20,6 +20,7 @@ import { api } from '~/lib/api'
 
 type StudentStatusData = Route.Response<'api.v1.classes.student_status'>[number]
 type StudentStatus = StudentStatusData['status']
+type FailureReason = 'GRADE' | 'ATTENDANCE' | 'BOTH' | null | undefined
 
 interface StudentStatusTableProps {
   classId: string
@@ -103,6 +104,19 @@ interface StudentRowProps {
 function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
   const config = STATUS_CONFIG[student.status]
   const hasMissedAssignments = student.missedAssignments.length > 0
+  const failureReason = (student as StudentStatusData & { failureReason?: FailureReason })
+    .failureReason
+
+  const statusLabel =
+    student.status === 'FAILED'
+      ? failureReason === 'GRADE'
+        ? 'Reprovado - Nota'
+        : failureReason === 'ATTENDANCE'
+          ? 'Reprovado - Falta'
+          : failureReason === 'BOTH'
+            ? 'Reprovado - Nota e Falta'
+            : config.label
+      : config.label
 
   return (
     <Fragment>
@@ -128,7 +142,7 @@ function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
               student.status === 'IN_PROGRESS' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''
             }
           >
-            {config.label}
+            {statusLabel}
           </Badge>
         </TableCell>
         <TableCell className="text-center">
