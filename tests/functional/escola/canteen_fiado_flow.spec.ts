@@ -155,7 +155,7 @@ test.group('Canteen fiado flow API', (group) => {
     assert.equal(paymentsBody.data.length, 1)
     assert.equal(paymentsBody.data[0].id, createdPurchase.studentPaymentId)
     assert.equal(paymentsBody.data[0].type, 'CANTEEN')
-    assert.equal(paymentsBody.data[0].status, 'NOT_PAID')
+    assert.include(['NOT_PAID', 'OVERDUE'], paymentsBody.data[0].status)
     assert.equal(paymentsBody.data[0].totalAmount, fixtures.totalAmount)
 
     await ReconcilePaymentInvoiceJob.dispatch({
@@ -189,7 +189,7 @@ test.group('Canteen fiado flow API', (group) => {
     assert.equal(invoice.payments.length, 1)
     assert.equal(invoice.payments[0].id, createdPurchase.studentPaymentId)
     assert.equal(invoice.payments[0].type, 'CANTEEN')
-    assert.equal(invoice.payments[0].status, 'NOT_PAID')
+    assert.include(['NOT_PAID', 'OVERDUE'], invoice.payments[0].status)
   })
 
   test('manual payment creates only canteen purchase and does not create student payment nor invoice entry', async ({

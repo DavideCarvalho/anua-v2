@@ -172,8 +172,8 @@ test.group('Pedagogical calendar flow', (group) => {
 
     examResponse.assertStatus(201)
 
-    const rangeStart = DateTime.now().startOf('month')
-    const rangeEnd = DateTime.now().endOf('month')
+    const rangeStart = DateTime.now().startOf('day')
+    const rangeEnd = DateTime.now().plus({ days: 7 }).endOf('day')
 
     const listResponse = await client.get('/api/v1/pedagogical-calendar').loginAs(user).qs({
       classId: classEntity.id,
