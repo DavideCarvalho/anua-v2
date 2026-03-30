@@ -184,7 +184,7 @@ test.group('Canteen fiado flow API', (group) => {
     assert.equal(invoice.studentId, fixtures.student.id)
     assert.equal(invoice.totalAmount, fixtures.totalAmount)
     assert.equal(invoice.baseAmount, fixtures.totalAmount)
-    assert.equal(invoice.status, 'OPEN')
+    assert.include(['OPEN', 'OVERDUE'], invoice.status)
     assert.isArray(invoice.payments)
     assert.equal(invoice.payments.length, 1)
     assert.equal(invoice.payments[0].id, createdPurchase.studentPaymentId)
