@@ -135,8 +135,6 @@ export default class GetStudentStatusController {
       )
       .select('studentId', 'attendanceId', 'status')
 
-    const totalClasses = attendanceRecords.length
-
     // Calculate max possible grade based on algorithm (assignments + exams)
     const gradableAssignments = assignments.filter((a) => (a.grade ?? 0) > 0)
     const gradableAssignmentIds = new Set(gradableAssignments.map((a) => a.id))
@@ -212,18 +210,22 @@ export default class GetStudentStatusController {
 
       // Calculate attendance
       const studentAttendanceList = studentAttendance.filter((sa) => sa.studentId === student.id)
+      const totalClassesWithRecords = studentAttendanceList.length
       const attendedClasses = studentAttendanceList.filter(
         (sa) => sa.status === 'PRESENT' || sa.status === 'LATE'
       ).length
 
-      const attendancePercentage = totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 100
+      const attendancePercentage =
+        totalClassesWithRecords > 0 ? (attendedClasses / totalClassesWithRecords) * 100 : 100
 
       // Calculate classes until fail (margin of 5 classes)
       const classesUntilFail =
-        totalClasses > 0
+        totalClassesWithRecords > 0
           ? Math.max(
               0,
-              Math.floor(attendedClasses - (totalClasses * minimumAttendancePercentage) / 100) + 5
+              Math.floor(
+                attendedClasses - (totalClassesWithRecords * minimumAttendancePercentage) / 100
+              ) + 5
             )
           : null
 
@@ -236,11 +238,12 @@ export default class GetStudentStatusController {
       let status: StudentStatus
 
       // If no assignments, no exams AND no classes, we can't evaluate yet
-      const hasNoData = !hasGradeCriteria && totalClasses === 0
+      const hasNoData = !hasGradeCriteria && totalClassesWithRecords === 0
 
       // Check if close to attendance fail (5 or fewer classes margin)
+      const hasAnyAbsence = attendedClasses < totalClassesWithRecords
       const isCloseToAttendanceFail =
-        classesUntilFail !== null && classesUntilFail <= 5 && classesUntilFail > 0
+        hasAnyAbsence && classesUntilFail !== null && classesUntilFail <= 5 && classesUntilFail > 0
 
       let failureReason: StudentStatusResult['failureReason'] = null
 
@@ -249,7 +252,7 @@ export default class GetStudentStatusController {
       } else {
         const isFailingGrade = hasGradeCriteria && finalGrade < minimumGrade
         const isFailingAttendance =
-          totalClasses > 0 && attendancePercentage < minimumAttendancePercentage
+          totalClassesWithRecords > 0 && attendancePercentage < minimumAttendancePercentage
 
         const hasPassingGrade = !isFailingGrade
         const hasPassingAttendance = !isFailingAttendance

@@ -200,15 +200,29 @@ test.group('Calendario pedagogico (browser)', (group) => {
 
   test('shows saved items in atividades and provas screens', async ({ visit, browserContext }) => {
     const { user, school } = await createEscolaAuthUser()
-    await createCalendarPageFixtures(school.id)
+    const { className, seededAssignmentTitle, seededExamTitle } = await createCalendarPageFixtures(
+      school.id
+    )
 
     await browserContext.loginAs(user)
 
     const atividadesPage = await visit('/escola/pedagogico/atividades', { timeout: 60_000 })
-    await atividadesPage.assertExists('text=Atividade Calendario')
+    await atividadesPage.click('[data-slot="select-trigger"]')
+    await atividadesPage.click(`[role="option"]:has-text("${className}")`)
+    await atividadesPage.waitForResponse(
+      (response) => response.url().includes('/api/v1/assignments') && response.status() === 200,
+      { timeout: 30_000 }
+    )
+    await atividadesPage.waitForSelector(`text=${seededAssignmentTitle}`, { timeout: 20_000 })
 
     const provasPage = await visit('/escola/pedagogico/provas', { timeout: 60_000 })
-    await provasPage.assertExists('text=Prova Bimestral')
+    await provasPage.click('[data-slot="select-trigger"]')
+    await provasPage.click(`[role="option"]:has-text("${className}")`)
+    await provasPage.waitForResponse(
+      (response) => response.url().includes('/api/v1/exams') && response.status() === 200,
+      { timeout: 30_000 }
+    )
+    await provasPage.waitForSelector(`text=${seededExamTitle}`, { timeout: 20_000 })
   })
 
   test('opens assignment modal from semanario menu', async ({ visit, browserContext }) => {
