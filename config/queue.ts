@@ -16,5 +16,5 @@ export default defineConfig({
     idleDelay: '1s',
   },
 
-  locations: ['./app/jobs/**/*.ts'],
+  locations: ['./app/jobs/**/*.{js,ts}'],
 })
