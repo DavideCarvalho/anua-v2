@@ -23,6 +23,9 @@ export default class ShowAlunoDashboardPageController {
       throw AppException.notFound('Aluno não encontrado')
     }
 
+    const birthDate = user.birthDate
+    const isKids = birthDate ? Math.floor(Math.abs(birthDate.diffNow('years').years)) <= 14 : true
+
     let avatar = await StudentAvatar.query().where('studentId', student.id).first()
     if (!avatar) {
       avatar = await StudentAvatar.create({
@@ -51,7 +54,8 @@ export default class ShowAlunoDashboardPageController {
     const levelProgress = gamification?.levelProgress ?? 0
     const streak = gamification?.streak ?? 0
 
-    return inertia.render('aluno/dashboard', {
+    return inertia.render((isKids ? 'aluno/kids_dashboard' : 'aluno/dashboard') as any, {
+      isKids,
       student: {
         id: student.id,
         name: student.user?.name ?? 'Aluno',
