@@ -1,15 +1,40 @@
+import { useEffect } from 'react'
+import confetti from 'canvas-confetti'
 import { Head } from '@inertiajs/react'
 import { AlunoLayout } from '../../components/layouts/aluno-layout'
 import { KidsStatusBar } from '../../components/aluno/kids/status-bar'
 import { KidsModeCard } from '../../components/aluno/kids/mode-card'
 import { Utensils, ShoppingBag, Gift } from 'lucide-react'
 
-export default function KidsDashboard({ student, gamification }: any) {
+interface DashboardProps {
+  student: {
+    id: string
+    name: string
+    avatar_url?: string
+  }
+  gamification?: {
+    totalPoints: number
+    currentLevel?: number
+  }
+}
+
+export default function KidsDashboard({ student, gamification }: DashboardProps) {
+  useEffect(() => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+    })
+  }, [])
+
+  const firstName = student.name.split(' ')[0]
+  const displayStudent = { ...student, name: firstName }
+
   return (
     <AlunoLayout>
       <Head title="Meu Hub de Prêmios" />
-      <div className="flex flex-col items-center py-12 px-4 bg-sky-100 dark:bg-slate-950 min-h-screen">
-        <KidsStatusBar student={student} points={gamification.totalPoints} />
+      <div className="flex min-h-screen flex-col items-center bg-sky-100 px-4 py-12 dark:bg-slate-950">
+        <KidsStatusBar student={displayStudent as any} points={gamification?.totalPoints ?? 0} />
 
         <div className="flex flex-wrap justify-center gap-8 mt-8">
           <KidsModeCard
