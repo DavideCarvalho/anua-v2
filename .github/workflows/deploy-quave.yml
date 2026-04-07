@@ -1,0 +1,215 @@
+name: Deploy Quave
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  GHCR_REGISTRY: ghcr.io
+  QUAVE_API_BASE: https://api.quave.cloud/api/public/v1
+  QUAVE_API_ENV_ID: kKSQiEeRfAt5jT5nW
+  QUAVE_QUEUE_ENV_ID: gYpRRRcBrmGm2b5t4
+  QUAVE_SCHEDULER_ENV_ID: NZ3FxdppFQ5JT2pme
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@10 --activate
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Typecheck (backend)
+        run: pnpm run typecheck
+
+      - name: Typecheck (inertia)
+        run: pnpm run typecheck:inertia
+
+      - name: Typecheck (tests)
+        run: pnpm exec tsc --noEmit -p tests/tsconfig.json
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: quality
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: anua_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d anua_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      PORT: 3333
+      HOST: localhost
+      APP_KEY: 0123456789abcdef0123456789abcdef
+      LOG_LEVEL: error
+      SESSION_DRIVER: cookie
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: anua_test
+      DB_POOL_MAX: 5
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      SMTP_USER: test
+      SMTP_PASSWORD: test
+      SMTP_FROM_EMAIL: test@example.com
+      DRIVE_DISK: fs
+      VITE_API_URL: http://localhost:3333
+      ASAAS_API_KEY: test
+      ASAAS_WEBHOOK_URL: https://example.com/webhook
+      ASAAS_WEBHOOK_TOKEN: test
+      QUEUE_DRIVER: sync
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@10 --activate
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Clear Vite cache
+        run: rm -rf node_modules/.vite
+
+      - name: Build frontend
+        run: pnpm run build
+
+      - name: Migrate, verify schema, and run tests
+        run: |
+          node ace migration:run --force --no-schema-generate
+          psql "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}" -c "SELECT to_regclass('\"Role\"') AS role_table, to_regclass('rate_limits') AS rate_limits_table;"
+          pnpm test
+
+  build_images:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image_name: api
+            dockerfile: Dockerfile
+          - image_name: queue
+            dockerfile: QueuesDockerfile
+          - image_name: scheduler
+            dockerfile: SchedulerDockerfile
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tags
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_SHA=${{ env.GHCR_REGISTRY }}/${OWNER_LOWER}/anua-v2-${{ matrix.image_name }}:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "IMAGE_LATEST=${{ env.GHCR_REGISTRY }}/${OWNER_LOWER}/anua-v2-${{ matrix.image_name }}:latest" >> "$GITHUB_ENV"
+
+      - name: Build image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL="/" \
+            -f "${{ matrix.dockerfile }}" \
+            -t "$IMAGE_SHA" \
+            -t "$IMAGE_LATEST" \
+            .
+
+      - name: Push image
+        run: |
+          docker push "$IMAGE_SHA"
+          docker push "$IMAGE_LATEST"
+
+  deploy_quave:
+    name: Deploy to Quave
+    runs-on: ubuntu-latest
+    needs: build_images
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Set image references
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "API_IMAGE=${{ env.GHCR_REGISTRY }}/${OWNER_LOWER}/anua-v2-api:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "QUEUE_IMAGE=${{ env.GHCR_REGISTRY }}/${OWNER_LOWER}/anua-v2-queue:${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "SCHEDULER_IMAGE=${{ env.GHCR_REGISTRY }}/${OWNER_LOWER}/anua-v2-scheduler:${{ github.sha }}" >> "$GITHUB_ENV"
+
+      - name: Deploy API image on Quave
+        run: |
+          curl --fail --show-error --silent \
+            -X POST "${{ env.QUAVE_API_BASE }}/app-env/deploy-image" \
+            -H "Authorization: ${{ secrets.QUAVE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"appEnvId\":\"${{ env.QUAVE_API_ENV_ID }}\",\"image\":\"${API_IMAGE}\"}"
+
+      - name: Deploy Queue image on Quave
+        run: |
+          curl --fail --show-error --silent \
+            -X POST "${{ env.QUAVE_API_BASE }}/app-env/deploy-image" \
+            -H "Authorization: ${{ secrets.QUAVE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"appEnvId\":\"${{ env.QUAVE_QUEUE_ENV_ID }}\",\"image\":\"${QUEUE_IMAGE}\"}"
+
+      - name: Deploy Scheduler image on Quave
+        run: |
+          curl --fail --show-error --silent \
+            -X POST "${{ env.QUAVE_API_BASE }}/app-env/deploy-image" \
+            -H "Authorization: ${{ secrets.QUAVE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"appEnvId\":\"${{ env.QUAVE_SCHEDULER_ENV_ID }}\",\"image\":\"${SCHEDULER_IMAGE}\"}"
