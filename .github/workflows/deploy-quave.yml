@@ -9,9 +9,9 @@ on:
 env:
   GHCR_REGISTRY: ghcr.io
   QUAVE_API_BASE: https://api.quave.cloud/api/public/v1
-  QUAVE_API_ENV_ID: kKSQiEeRfAt5jT5nW
-  QUAVE_QUEUE_ENV_ID: gYpRRRcBrmGm2b5t4
-  QUAVE_SCHEDULER_ENV_ID: NZ3FxdppFQ5JT2pme
+  QUAVE_API_ENV_ID: fD8p8X2aLF9Q7y2Sd
+  QUAVE_QUEUE_ENV_ID: 3vpmYgTZDyBDSouXX
+  QUAVE_SCHEDULER_ENV_ID: 3D4oT3d2D2mrnFcHG
 
 jobs:
   quality:
