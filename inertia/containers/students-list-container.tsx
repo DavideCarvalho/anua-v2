@@ -39,6 +39,7 @@ import { router } from '@inertiajs/react'
 import { DeleteStudentModal } from './students/delete-student-modal'
 import { ChangeStudentCourseModal } from './students/change-course-modal'
 import { EditPaymentModal } from './students/edit-payment-modal'
+import { CancelEnrollmentModal } from './students/cancel-enrollment-modal'
 import { CreditCard } from 'lucide-react'
 
 interface StudentAction {
@@ -332,6 +333,7 @@ export function StudentsListContainer() {
 
   const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
   const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
+  const [cancelEnrollmentStudent, setCancelEnrollmentStudent] = useState<StudentAction | null>(null)
   const [editPaymentStudent, setEditPaymentStudent] = useState<StudentAction | null>(null)
 
   // Fetch academic periods
@@ -517,6 +519,18 @@ export function StudentsListContainer() {
         />
       )}
 
+      {cancelEnrollmentStudent && (
+        <CancelEnrollmentModal
+          studentId={cancelEnrollmentStudent.id}
+          studentName={cancelEnrollmentStudent.name}
+          open={!!cancelEnrollmentStudent}
+          onOpenChange={(open) => {
+            if (!open) setCancelEnrollmentStudent(null)
+          }}
+          onSuccess={() => setCancelEnrollmentStudent(null)}
+        />
+      )}
+
       {editPaymentStudent && (
         <EditPaymentModal
           studentId={editPaymentStudent.id}
@@ -551,7 +565,7 @@ export function StudentsListContainer() {
                   router.visit(`/escola/administrativo/alunos/${student.id}/editar`)
                 }
                 onChangeCourse={setChangeCourseStudent}
-                onCancelEnrollment={setChangeCourseStudent}
+                onCancelEnrollment={setCancelEnrollmentStudent}
                 onEditPayment={setEditPaymentStudent}
                 onDeleteStudent={setDeleteStudent}
               />
