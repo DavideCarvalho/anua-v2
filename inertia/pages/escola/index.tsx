@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { GraduationCap, LineChart, DollarSign, Eye, EyeOff } from 'lucide-react'
@@ -30,8 +31,10 @@ import { useAuthUser } from '../../stores/auth_store'
 import { api } from '~/lib/api'
 
 const HIDE_FINANCIAL_INFO_STORAGE_KEY = 'escola:hide-financial-info'
+const DASHBOARD_VIEW_MODE_STORAGE_KEY_PREFIX = 'escola:dashboard:view-mode'
 
 type DashboardTab = 'pedagogical' | 'administrative' | 'financial'
+type DashboardViewMode = 'full' | 'simple'
 type TabFilterState = {
   academicPeriodId: string
   courseId: string
@@ -62,6 +65,8 @@ export default function EscolaDashboard() {
   const canViewAdministrativeTab = !isSchoolTeacher
   const tabColumnClass = canViewFinancialTab ? 'md:grid-cols-3' : 'md:grid-cols-2'
   const [hideFinancialInfo, setHideFinancialInfo] = useState(true)
+  const [viewMode, setViewMode] = useState<DashboardViewMode>('full')
+  const [isViewModeHydrated, setIsViewModeHydrated] = useState(false)
   const [activeTab, setActiveTab] = useState<DashboardTab>('pedagogical')
   const [pedagogicalFilters, setPedagogicalFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
@@ -284,20 +289,86 @@ export default function EscolaDashboard() {
     window.localStorage.setItem(HIDE_FINANCIAL_INFO_STORAGE_KEY, String(nextState))
   }
 
+  const viewModeStorageKey = user?.id
+    ? `${DASHBOARD_VIEW_MODE_STORAGE_KEY_PREFIX}:${user.id}`
+    : null
+
+  useEffect(() => {
+    if (!viewModeStorageKey) return
+
+    const storedMode = window.localStorage.getItem(viewModeStorageKey)
+    if (storedMode === 'simple' || storedMode === 'full') {
+      setViewMode(storedMode)
+    }
+
+    setIsViewModeHydrated(true)
+  }, [viewModeStorageKey])
+
+  useEffect(() => {
+    if (!viewModeStorageKey || !isViewModeHydrated) return
+    window.localStorage.setItem(viewModeStorageKey, viewMode)
+  }, [isViewModeHydrated, viewMode, viewModeStorageKey])
+
+  const quickActions = [
+    { label: 'Alunos', href: '/escola/administrativo/alunos', visible: true },
+    { label: 'Turmas', href: '/escola/pedagogico/turmas', visible: true },
+    { label: 'Calendário', href: '/escola/pedagogico/calendario', visible: true },
+    { label: 'Financeiro', href: '/escola/financeiro/faturas', visible: canViewFinancialTab },
+    { label: 'Cantina', href: '/escola/cantina/pdv', visible: true },
+    { label: 'Comunicados', href: '/escola/comunicados', visible: true },
+  ].filter((action) => action.visible)
+
   return (
     <EscolaLayout>
       <Head title="Dashboard" />
 
       <div className="space-y-6">
         {/* Welcome section */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Olá, {user?.name?.split(' ')[0]}!</h1>
-          <p className="text-muted-foreground">
-            Bem-vindo ao painel da {user?.school?.name || 'escola'}
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Olá, {user?.name?.split(' ')[0]}!</h1>
+            <p className="text-muted-foreground">
+              Bem-vindo ao painel da {user?.school?.name || 'escola'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={viewMode === 'full' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('full')}
+            >
+              Visão completa
+            </Button>
+            <Button
+              type="button"
+              variant={viewMode === 'simple' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('simple')}
+            >
+              Visão simplificada
+            </Button>
+          </div>
         </div>
 
-        {isSchoolTeacher ? (
+        {viewMode === 'simple' ? (
+          <section className="mx-auto flex max-w-4xl flex-col items-center gap-6 py-2 sm:py-6">
+            <h1 className="text-center text-2xl font-semibold">O que você quer fazer agora?</h1>
+
+            <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+              {quickActions.map((action) => (
+                <Link
+                  key={action.label}
+                  href={action.href}
+                  className="rounded-xl border bg-card px-6 py-5 text-lg font-medium transition-colors hover:bg-muted"
+                >
+                  {action.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : isSchoolTeacher ? (
           <>
             <div className="flex flex-wrap items-center justify-start gap-2">
               <Select

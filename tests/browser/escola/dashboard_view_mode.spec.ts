@@ -26,4 +26,44 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     await page.assertExists('a:has-text("Cantina")')
     await page.assertExists('a:has-text("Comunicados")')
   })
+
+  test('persists selected view mode after reload', async ({ visit, browserContext }) => {
+    const { user } = await createEscolaAuthUser()
+    await browserContext.loginAs(user)
+
+    const page = await visit('/escola')
+    await page.assertPath('/escola')
+
+    await page.click('button:has-text("Visão simplificada")')
+    await page.reload()
+
+    await page.assertExists('h1:has-text("O que você quer fazer agora?")')
+  })
+
+  test('navigates to alunos from quick actions hub', async ({ visit, browserContext }) => {
+    const { user } = await createEscolaAuthUser()
+    await browserContext.loginAs(user)
+
+    const page = await visit('/escola')
+    await page.assertPath('/escola')
+
+    await page.click('button:has-text("Visão simplificada")')
+    await page.click('a:has-text("Alunos")')
+
+    await page.assertPathContains('/escola/administrativo/alunos')
+  })
+
+  test('returns to full mode and shows dashboard tabs', async ({ visit, browserContext }) => {
+    const { user } = await createEscolaAuthUser()
+    await browserContext.loginAs(user)
+
+    const page = await visit('/escola')
+    await page.assertPath('/escola')
+
+    await page.click('button:has-text("Visão simplificada")')
+    await page.click('button:has-text("Visão completa")')
+
+    await page.assertExists('button:has-text("Pedagógico")')
+    await page.assertExists('button:has-text("Administrativo")')
+  })
 })
