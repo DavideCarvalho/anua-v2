@@ -380,27 +380,31 @@ export default class GetPedagogicalAlertsController {
         graded_exams,
         assignment_avg,
         exam_avg,
-        CASE 
-          WHEN :algorithm = 'AVERAGE' THEN 
-            ROUND(((COALESCE(assignment_avg, 0) + COALESCE(exam_avg, 0)) / 
-                   NULLIF(graded_assignments + graded_exams, 0))::numeric, 1)
+          CASE 
+            WHEN :algorithm = 'AVERAGE' THEN 
+              ROUND(((COALESCE(assignment_avg, 0) * graded_assignments + 
+                     COALESCE(exam_avg, 0) * graded_exams) /
+                     NULLIF(graded_assignments + graded_exams, 0))::numeric, 1)
           WHEN :algorithm = 'SUM' THEN
             ROUND((COALESCE(assignment_avg, 0) * graded_assignments + 
                    COALESCE(exam_avg, 0) * graded_exams)::numeric, 1)
-          ELSE ROUND(((COALESCE(assignment_avg, 0) + COALESCE(exam_avg, 0)) / 
+          ELSE ROUND(((COALESCE(assignment_avg, 0) * graded_assignments + 
+                      COALESCE(exam_avg, 0) * graded_exams) /
                       NULLIF(graded_assignments + graded_exams, 0))::numeric, 1)
         END as final_grade
       FROM student_grades
       WHERE (
         CASE 
           WHEN :algorithm = 'AVERAGE' THEN 
-            ((COALESCE(assignment_avg, 0) + COALESCE(exam_avg, 0)) / 
+            ((COALESCE(assignment_avg, 0) * graded_assignments + 
+             COALESCE(exam_avg, 0) * graded_exams) /
              NULLIF(graded_assignments + graded_exams, 0))
           WHEN :algorithm = 'SUM' THEN
             (COALESCE(assignment_avg, 0) * graded_assignments + 
              COALESCE(exam_avg, 0) * graded_exams)
           ELSE 
-            ((COALESCE(assignment_avg, 0) + COALESCE(exam_avg, 0)) / 
+            ((COALESCE(assignment_avg, 0) * graded_assignments + 
+             COALESCE(exam_avg, 0) * graded_exams) /
              NULLIF(graded_assignments + graded_exams, 0))
         END
       ) < :minimumGrade

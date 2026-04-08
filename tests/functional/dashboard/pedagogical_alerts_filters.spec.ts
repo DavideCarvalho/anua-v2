@@ -6,6 +6,7 @@ import { DateTime } from 'luxon'
 
 import Assignment from '#models/assignment'
 import Exam from '#models/exam'
+import StudentHasAssignment from '#models/student_has_assignment'
 import TeacherHasClass from '#models/teacher_has_class'
 import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
 import {
@@ -126,5 +127,61 @@ test.group('Pedagogical alerts filters', (group) => {
     const body = response.body() as any
 
     assert.isUndefined(body.alerts.studentsAtRiskByAttendance)
+  })
+
+  test('does not flag grade risk for students above minimum grade', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    await db
+      .from('Student')
+      .whereIn(
+        'id',
+        fixtures.students.map((student) => student.id)
+      )
+      .update({ classId: fixtures.classEntity.id })
+
+    const tenDaysAgo = DateTime.now().minus({ days: 10 })
+    const assignmentA = await Assignment.create({
+      name: 'Atividade Nota 1',
+      description: null,
+      dueDate: tenDaysAgo,
+      grade: 10,
+      teacherHasClassId: fixtures.teacherHasClass.id,
+      academicPeriodId: fixtures.academicPeriod.id,
+    })
+
+    const assignmentB = await Assignment.create({
+      name: 'Atividade Nota 2',
+      description: null,
+      dueDate: tenDaysAgo,
+      grade: 10,
+      teacherHasClassId: fixtures.teacherHasClass.id,
+      academicPeriodId: fixtures.academicPeriod.id,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[0].id,
+      assignmentId: assignmentA.id,
+      grade: 7,
+      submittedAt: tenDaysAgo,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[0].id,
+      assignmentId: assignmentB.id,
+      grade: 8,
+      submittedAt: tenDaysAgo,
+    })
+
+    const response = await client
+      .get('/api/v1/escola/pedagogical-alerts')
+      .qs({ classId: fixtures.classEntity.id })
+      .loginAs(user)
+
+    response.assertStatus(200)
+    const body = response.body() as any
+
+    assert.isUndefined(body.alerts.studentsAtRiskByGrade)
   })
 })
