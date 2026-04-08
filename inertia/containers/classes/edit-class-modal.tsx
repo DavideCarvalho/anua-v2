@@ -304,7 +304,7 @@ export function EditClassModal({ open, onOpenChange, classData }: EditClassModal
       },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['classes'] })
+          queryClient.invalidateQueries({ queryKey: api.api.v1.classes.index.pathKey() })
           toast.success('Turma atualizada com sucesso')
           onOpenChange(false)
         },

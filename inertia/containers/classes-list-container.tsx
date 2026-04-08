@@ -185,7 +185,7 @@ function ClassesListContent() {
     try {
       await deleteClass({ params: { id: classToDelete.id } })
       toast.success('Turma excluída com sucesso')
-      queryClient.invalidateQueries({ queryKey: ['classes'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.classes.index.pathKey() })
       setDeleteDialogOpen(false)
       setClassToDelete(null)
     } catch (error) {
