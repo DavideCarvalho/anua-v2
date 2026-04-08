@@ -212,7 +212,7 @@ function getAlertDescription(
     return `Alunos com frequência abaixo de ${data.threshold}% ou sem presença lançada em turmas com chamada`
   }
   if (key === 'studentsAtRiskByGrade' && 'minimumGrade' in data) {
-    return `Alunos com média abaixo de ${data.minimumGrade}`
+    return `Alunos com pelo menos uma matéria abaixo de ${data.minimumGrade}`
   }
   if (key === 'examsWithoutGrades') {
     return 'Provas realizadas sem notas lançadas'
@@ -404,25 +404,51 @@ function StudentsAtRiskByGradeTable({
           <TableRow>
             <TableHead>Aluno</TableHead>
             <TableHead>Turma</TableHead>
-            <TableHead className="text-center">Média</TableHead>
+            <TableHead>Nível</TableHead>
+            <TableHead>Matérias em Risco</TableHead>
+            <TableHead className="text-center">Pior Nota</TableHead>
             <TableHead className="text-center">Mínimo</TableHead>
-            <TableHead className="text-center">Déficit</TableHead>
+            <TableHead className="text-center">Maior Déficit</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.students.map((student) => (
-            <TableRow key={student.studentId}>
-              <TableCell className="font-medium">{student.studentName}</TableCell>
-              <TableCell>{student.className}</TableCell>
-              <TableCell className="text-center">
-                <Badge variant="destructive">{student.averageGrade.toFixed(1)}</Badge>
-              </TableCell>
-              <TableCell className="text-center">{student.minimumRequired}</TableCell>
-              <TableCell className="text-center text-red-600 font-medium">
-                -{student.deficit.toFixed(1)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {data.students.map((student) => {
+            const sortedSubjects = [...student.subjectsAtRisk].sort(
+              (a, b) => a.finalGrade - b.finalGrade
+            )
+            const worst = sortedSubjects[0]
+            const maxDeficit = sortedSubjects.reduce(
+              (max, subject) => Math.max(max, subject.deficit),
+              0
+            )
+
+            return (
+              <TableRow key={student.studentId}>
+                <TableCell className="font-medium">{student.studentName}</TableCell>
+                <TableCell>{student.className}</TableCell>
+                <TableCell>{student.levelName}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {sortedSubjects.map((subject) => (
+                      <Badge
+                        key={`${student.studentId}-${subject.subjectName}`}
+                        variant="secondary"
+                      >
+                        {subject.subjectName}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant="destructive">{worst?.finalGrade.toFixed(1) ?? '-'}</Badge>
+                </TableCell>
+                <TableCell className="text-center">{student.minimumRequired}</TableCell>
+                <TableCell className="text-center text-red-600 font-medium">
+                  -{maxDeficit.toFixed(1)}
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </>
@@ -654,7 +680,7 @@ function getSheetDescription(
     return `${data.count} aluno(s) com frequência abaixo do mínimo ou sem presença lançada em turmas com chamada (mínimo ${data.threshold}% de presença exigido)`
   }
   if (key === 'studentsAtRiskByGrade' && 'minimumGrade' in data) {
-    return `${data.count} aluno(s) com média abaixo de ${data.minimumGrade}`
+    return `${data.count} aluno(s) com pelo menos uma matéria abaixo de ${data.minimumGrade}`
   }
   if (key === 'teachersMissingAttendance' && 'daysThreshold' in data) {
     return `${data.count} professor(es) sem registro de presença há ${data.daysThreshold}+ dias`

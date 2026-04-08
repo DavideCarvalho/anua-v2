@@ -18,19 +18,27 @@ interface AtRiskByGradeStudent {
   studentId: string
   studentName: string
   className: string
-  averageGrade: number
+  courseName: string
+  levelName: string
   minimumRequired: number
-  deficit: number
-  gradedItems: number
+  subjectsAtRisk: Array<{
+    subjectName: string
+    finalGrade: number
+    deficit: number
+  }>
 }
 
 interface AtRiskByGradeRow {
   student_id: string
   student_name: string
   class_name: string
-  final_grade: string | number
-  graded_assignments: string | number
-  graded_exams: string | number
+  course_name: string
+  level_name: string
+  subjects_at_risk: Array<{
+    subjectName: string
+    finalGrade: number
+    deficit: number
+  }>
 }
 
 interface ExamWithoutGrade {
@@ -190,7 +198,8 @@ export default class GetPedagogicalAlertsController {
         minimumGrade,
         calculationAlgorithm,
         hasClassScope,
-        scopedClassIds
+        scopedClassIds,
+        filters.academicPeriodId
       ),
       this.getExamsWithoutGrades(schoolId, hasClassScope, scopedClassIds),
       this.getOverdueActivities(schoolId, hasClassScope, scopedClassIds),
@@ -347,68 +356,148 @@ export default class GetPedagogicalAlertsController {
     minimumGrade: number,
     calculationAlgorithm: string,
     hasClassScope: boolean,
-    scopedClassIds: string[]
+    scopedClassIds: string[],
+    academicPeriodId?: string
   ): Promise<AtRiskByGradeStudent[]> {
     const result = await db.rawQuery(
       `
-      WITH student_grades AS (
+      WITH subject_scope AS (
+        SELECT DISTINCT
+          c.id as class_id,
+          c.name as class_name,
+          COALESCE(co.name, 'Sem curso') as course_name,
+          COALESCE(l.name, 'Sem nível') as level_name,
+          thc."subjectId" as subject_id,
+          sb.name as subject_name
+        FROM "TeacherHasClass" thc
+        JOIN "Class" c ON c.id = thc."classId"
+        JOIN "Subject" sb ON sb.id = thc."subjectId"
+        JOIN "Level" l ON c."levelId" = l.id
+        LEFT JOIN "LevelAssignedToCourseHasAcademicPeriod" latcap ON latcap."levelId" = c."levelId" AND latcap."isActive" = true
+        LEFT JOIN "CourseHasAcademicPeriod" chap ON chap.id = latcap."courseHasAcademicPeriodId"
+        LEFT JOIN "Course" co ON co.id = chap."courseId"
+        WHERE c."schoolId" = :schoolId
+          AND c."isArchived" = false
+          AND thc."isActive" = true
+          AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
+      ),
+      students_scope AS (
         SELECT 
           st.id as student_id,
           u.name as student_name,
-          c.name as class_name,
-          COUNT(DISTINCT sha.id) as graded_assignments,
-          AVG(CASE WHEN a.grade > 0 THEN (sha.grade::float / a.grade::float) * 10 END) as assignment_avg,
-          COUNT(DISTINCT eg.id) as graded_exams,
-          AVG(eg.score) as exam_avg
+          c.id as class_id
         FROM "Student" st
         JOIN "User" u ON st.id = u.id
         JOIN "Class" c ON st."classId" = c.id
-        LEFT JOIN "StudentHasAssignment" sha ON sha."studentId" = st.id AND sha.grade IS NOT NULL
-        LEFT JOIN "Assignment" a ON sha."assignmentId" = a.id
-        LEFT JOIN exam_grades eg ON eg."studentId" = st.id AND eg.score IS NOT NULL AND eg.attended = true
         WHERE c."schoolId" = :schoolId
-        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
-        AND st."enrollmentStatus" = 'REGISTERED'
-        GROUP BY st.id, u.name, c.name
-        HAVING COUNT(sha.id) > 0 OR COUNT(eg.id) > 0
+          AND c."isArchived" = false
+          AND st."enrollmentStatus" = 'REGISTERED'
+          AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
+      ),
+      assignment_totals AS (
+        SELECT
+          thc."classId" as class_id,
+          thc."subjectId" as subject_id,
+          COUNT(*) FILTER (WHERE a.grade > 0) as total_gradable_assignments
+        FROM "TeacherHasClass" thc
+        LEFT JOIN "Assignment" a ON a."teacherHasClassId" = thc.id
+          AND (:academicPeriodId::text IS NULL OR a."academicPeriodId" = :academicPeriodId)
+        GROUP BY thc."classId", thc."subjectId"
+      ),
+      exam_totals AS (
+        SELECT
+          e."classId" as class_id,
+          e."subjectId" as subject_id,
+          COUNT(*) FILTER (WHERE e."maxScore" > 0) as total_gradable_exams
+        FROM exams e
+        WHERE (:academicPeriodId::text IS NULL OR e."academicPeriodId" = :academicPeriodId)
+        GROUP BY e."classId", e."subjectId"
+      ),
+      student_assignment_scores AS (
+        SELECT
+          sha."studentId" as student_id,
+          thc."classId" as class_id,
+          thc."subjectId" as subject_id,
+          COUNT(*) FILTER (WHERE a.grade > 0 AND sha.grade IS NOT NULL) as graded_assignments,
+          COALESCE(SUM(sha.grade) FILTER (WHERE a.grade > 0 AND sha.grade IS NOT NULL), 0) as assignment_sum
+        FROM "StudentHasAssignment" sha
+        JOIN "Assignment" a ON a.id = sha."assignmentId"
+          AND (:academicPeriodId::text IS NULL OR a."academicPeriodId" = :academicPeriodId)
+        JOIN "TeacherHasClass" thc ON thc.id = a."teacherHasClassId"
+        GROUP BY sha."studentId", thc."classId", thc."subjectId"
+      ),
+      student_exam_scores AS (
+        SELECT
+          eg."studentId" as student_id,
+          e."classId" as class_id,
+          e."subjectId" as subject_id,
+          COUNT(*) FILTER (WHERE e."maxScore" > 0 AND eg.score IS NOT NULL AND eg.attended = true) as graded_exams,
+          COALESCE(SUM(eg.score) FILTER (WHERE e."maxScore" > 0 AND eg.score IS NOT NULL AND eg.attended = true), 0) as exam_sum
+        FROM exam_grades eg
+        JOIN exams e ON e.id = eg."examId"
+        WHERE (:academicPeriodId::text IS NULL OR e."academicPeriodId" = :academicPeriodId)
+        GROUP BY eg."studentId", e."classId", e."subjectId"
+      ),
+      student_subject_performance AS (
+        SELECT
+          st.student_id,
+          st.student_name,
+          ss.class_name,
+          ss.course_name,
+          ss.level_name,
+          ss.subject_name,
+          COALESCE(at.total_gradable_assignments, 0) as total_gradable_assignments,
+          COALESCE(et.total_gradable_exams, 0) as total_gradable_exams,
+          COALESCE(sas.graded_assignments, 0) as graded_assignments,
+          COALESCE(ses.graded_exams, 0) as graded_exams,
+          COALESCE(sas.assignment_sum, 0) as assignment_sum,
+          COALESCE(ses.exam_sum, 0) as exam_sum,
+          CASE
+            WHEN :algorithm = 'SUM' THEN (COALESCE(sas.assignment_sum, 0) + COALESCE(ses.exam_sum, 0))::float
+            ELSE CASE
+              WHEN (COALESCE(sas.graded_assignments, 0) + COALESCE(ses.graded_exams, 0)) > 0
+                THEN ((COALESCE(sas.assignment_sum, 0) + COALESCE(ses.exam_sum, 0)) /
+                  NULLIF(COALESCE(sas.graded_assignments, 0) + COALESCE(ses.graded_exams, 0), 0))::float
+              ELSE 0
+            END
+          END as final_grade
+        FROM students_scope st
+        JOIN subject_scope ss ON ss.class_id = st.class_id
+        LEFT JOIN assignment_totals at ON at.class_id = ss.class_id AND at.subject_id = ss.subject_id
+        LEFT JOIN exam_totals et ON et.class_id = ss.class_id AND et.subject_id = ss.subject_id
+        LEFT JOIN student_assignment_scores sas ON sas.student_id = st.student_id AND sas.class_id = ss.class_id AND sas.subject_id = ss.subject_id
+        LEFT JOIN student_exam_scores ses ON ses.student_id = st.student_id AND ses.class_id = ss.class_id AND ses.subject_id = ss.subject_id
+      ),
+      at_risk_subjects AS (
+        SELECT
+          student_id,
+          student_name,
+          class_name,
+          course_name,
+          level_name,
+          subject_name,
+          ROUND(final_grade::numeric, 1) as final_grade,
+          ROUND((:minimumGrade - final_grade)::numeric, 1) as deficit
+        FROM student_subject_performance
+        WHERE (total_gradable_assignments + total_gradable_exams) > 0
+          AND final_grade < :minimumGrade
       )
-      SELECT 
+      SELECT
         student_id,
         student_name,
         class_name,
-        graded_assignments,
-        graded_exams,
-        assignment_avg,
-        exam_avg,
-          CASE 
-            WHEN :algorithm = 'AVERAGE' THEN 
-              ROUND(((COALESCE(assignment_avg, 0) * graded_assignments + 
-                     COALESCE(exam_avg, 0) * graded_exams) /
-                     NULLIF(graded_assignments + graded_exams, 0))::numeric, 1)
-          WHEN :algorithm = 'SUM' THEN
-            ROUND((COALESCE(assignment_avg, 0) * graded_assignments + 
-                   COALESCE(exam_avg, 0) * graded_exams)::numeric, 1)
-          ELSE ROUND(((COALESCE(assignment_avg, 0) * graded_assignments + 
-                      COALESCE(exam_avg, 0) * graded_exams) /
-                      NULLIF(graded_assignments + graded_exams, 0))::numeric, 1)
-        END as final_grade
-      FROM student_grades
-      WHERE (
-        CASE 
-          WHEN :algorithm = 'AVERAGE' THEN 
-            ((COALESCE(assignment_avg, 0) * graded_assignments + 
-             COALESCE(exam_avg, 0) * graded_exams) /
-             NULLIF(graded_assignments + graded_exams, 0))
-          WHEN :algorithm = 'SUM' THEN
-            (COALESCE(assignment_avg, 0) * graded_assignments + 
-             COALESCE(exam_avg, 0) * graded_exams)
-          ELSE 
-            ((COALESCE(assignment_avg, 0) * graded_assignments + 
-             COALESCE(exam_avg, 0) * graded_exams) /
-             NULLIF(graded_assignments + graded_exams, 0))
-        END
-      ) < :minimumGrade
-      ORDER BY final_grade ASC
+        course_name,
+        level_name,
+        json_agg(
+          json_build_object(
+            'subjectName', subject_name,
+            'finalGrade', final_grade,
+            'deficit', deficit
+          ) ORDER BY final_grade ASC, subject_name ASC
+        ) as subjects_at_risk
+      FROM at_risk_subjects
+      GROUP BY student_id, student_name, class_name, course_name, level_name
+      ORDER BY student_name ASC
       LIMIT 50
       `,
       {
@@ -417,6 +506,7 @@ export default class GetPedagogicalAlertsController {
         algorithm: calculationAlgorithm,
         hasClassScope,
         scopedClassIds,
+        academicPeriodId: academicPeriodId ?? null,
       }
     )
 
@@ -424,10 +514,14 @@ export default class GetPedagogicalAlertsController {
       studentId: row.student_id,
       studentName: row.student_name,
       className: row.class_name,
-      averageGrade: Number(row.final_grade),
+      courseName: row.course_name,
+      levelName: row.level_name,
       minimumRequired: minimumGrade,
-      deficit: Math.round((minimumGrade - Number(row.final_grade)) * 10) / 10,
-      gradedItems: Number(row.graded_assignments) + Number(row.graded_exams),
+      subjectsAtRisk: (row.subjects_at_risk || []).map((subject) => ({
+        subjectName: subject.subjectName,
+        finalGrade: Number(subject.finalGrade),
+        deficit: Number(subject.deficit),
+      })),
     }))
   }
 

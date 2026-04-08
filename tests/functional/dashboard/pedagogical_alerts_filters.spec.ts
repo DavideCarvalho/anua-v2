@@ -5,6 +5,7 @@ import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 
 import Assignment from '#models/assignment'
+import AcademicPeriod from '#models/academic_period'
 import Exam from '#models/exam'
 import StudentHasAssignment from '#models/student_has_assignment'
 import TeacherHasClass from '#models/teacher_has_class'
@@ -174,6 +175,20 @@ test.group('Pedagogical alerts filters', (group) => {
       submittedAt: tenDaysAgo,
     })
 
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[1].id,
+      assignmentId: assignmentA.id,
+      grade: 7,
+      submittedAt: tenDaysAgo,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[1].id,
+      assignmentId: assignmentB.id,
+      grade: 8,
+      submittedAt: tenDaysAgo,
+    })
+
     const response = await client
       .get('/api/v1/escola/pedagogical-alerts')
       .qs({ classId: fixtures.classEntity.id })
@@ -183,5 +198,149 @@ test.group('Pedagogical alerts filters', (group) => {
     const body = response.body() as any
 
     assert.isUndefined(body.alerts.studentsAtRiskByGrade)
+  })
+
+  test('ignores grades from other academic periods in grade risk alert', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    await db
+      .from('Student')
+      .whereIn(
+        'id',
+        fixtures.students.map((student) => student.id)
+      )
+      .update({ classId: fixtures.classEntity.id })
+
+    const tenDaysAgo = DateTime.now().minus({ days: 10 })
+
+    const currentPeriodAssignmentA = await Assignment.create({
+      name: 'Atividade Período Atual 1',
+      description: null,
+      dueDate: tenDaysAgo,
+      grade: 10,
+      teacherHasClassId: fixtures.teacherHasClass.id,
+      academicPeriodId: fixtures.academicPeriod.id,
+    })
+
+    const currentPeriodAssignmentB = await Assignment.create({
+      name: 'Atividade Período Atual 2',
+      description: null,
+      dueDate: tenDaysAgo,
+      grade: 10,
+      teacherHasClassId: fixtures.teacherHasClass.id,
+      academicPeriodId: fixtures.academicPeriod.id,
+    })
+
+    const oldAcademicPeriod = await AcademicPeriod.create({
+      schoolId: school.id,
+      name: `Período Antigo ${Date.now()}`,
+      startDate: DateTime.now().minus({ years: 1 }),
+      endDate: DateTime.now().minus({ months: 10 }),
+      enrollmentStartDate: DateTime.now().minus({ years: 1 }),
+      enrollmentEndDate: DateTime.now().minus({ months: 10 }),
+      isActive: false,
+      segment: 'ELEMENTARY',
+      isClosed: true,
+    })
+
+    const oldPeriodAssignment = await Assignment.create({
+      name: 'Atividade Período Antigo',
+      description: null,
+      dueDate: DateTime.now().minus({ months: 11 }),
+      grade: 10,
+      teacherHasClassId: fixtures.teacherHasClass.id,
+      academicPeriodId: oldAcademicPeriod.id,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[0].id,
+      assignmentId: currentPeriodAssignmentA.id,
+      grade: 7,
+      submittedAt: tenDaysAgo,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[0].id,
+      assignmentId: currentPeriodAssignmentB.id,
+      grade: 8,
+      submittedAt: tenDaysAgo,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[0].id,
+      assignmentId: oldPeriodAssignment.id,
+      grade: 2,
+      submittedAt: DateTime.now().minus({ months: 11 }),
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[1].id,
+      assignmentId: currentPeriodAssignmentA.id,
+      grade: 7,
+      submittedAt: tenDaysAgo,
+    })
+
+    await StudentHasAssignment.create({
+      studentId: fixtures.students[1].id,
+      assignmentId: currentPeriodAssignmentB.id,
+      grade: 8,
+      submittedAt: tenDaysAgo,
+    })
+
+    const response = await client
+      .get('/api/v1/escola/pedagogical-alerts')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+      })
+      .loginAs(user)
+
+    response.assertStatus(200)
+    const body = response.body() as any
+
+    assert.isUndefined(body.alerts.studentsAtRiskByGrade)
+  })
+
+  test('flags grade risk when subject has gradable items but student has no grade yet', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const fixtures = await createAttendanceAuthFixtures(school)
+
+    await db
+      .from('Student')
+      .whereIn(
+        'id',
+        fixtures.students.map((student) => student.id)
+      )
+      .update({ classId: fixtures.classEntity.id })
+
+    await Assignment.create({
+      name: 'Atividade Sem Nota',
+      description: null,
+      dueDate: DateTime.now().minus({ days: 7 }),
+      grade: 10,
+      teacherHasClassId: fixtures.teacherHasClass.id,
+      academicPeriodId: fixtures.academicPeriod.id,
+    })
+
+    const response = await client
+      .get('/api/v1/escola/pedagogical-alerts')
+      .qs({
+        classId: fixtures.classEntity.id,
+        academicPeriodId: fixtures.academicPeriod.id,
+      })
+      .loginAs(user)
+
+    response.assertStatus(200)
+    const body = response.body() as any
+
+    assert.equal(body.alerts.studentsAtRiskByGrade?.count, fixtures.students.length)
+    assert.exists(body.alerts.studentsAtRiskByGrade?.students?.[0]?.subjectsAtRisk)
   })
 })
