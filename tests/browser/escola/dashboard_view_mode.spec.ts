@@ -9,7 +9,10 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('switches to simple mode and shows the 6 quick actions', async ({ visit, browserContext }) => {
+  test('switches to simple mode and shows the 6 quick actions', async ({
+    visit,
+    browserContext,
+  }) => {
     const { user } = await createEscolaAuthUser()
     await browserContext.loginAs(user)
 
