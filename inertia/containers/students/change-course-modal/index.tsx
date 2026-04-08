@@ -34,6 +34,7 @@ import { Badge } from '~/components/ui/badge'
 import type { Route } from '@tuyau/core/types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
+import { resolveSelectValueLabel } from '~/lib/select_value_label'
 
 type StudentResponse = Route.Response<'api.v1.students.show'>
 import { getCourseLabels, getLevelLabels, type AcademicPeriodSegment } from '~/lib/formatters'
@@ -153,6 +154,7 @@ export function ChangeStudentCourseModal({
   const academicPeriodId = form.watch('academicPeriodId')
   const courseId = form.watch('courseId')
   const levelId = form.watch('levelId')
+  const classId = form.watch('classId')
 
   const { data: academicPeriodsData, isLoading: isLoadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({
@@ -186,6 +188,22 @@ export function ChangeStudentCourseModal({
   const segment = (selectedPeriod?.segment as AcademicPeriodSegment) || 'ELEMENTARY'
   const courseLabels = getCourseLabels(segment)
   const levelLabels = getLevelLabels(segment)
+  const academicPeriodDisplayName = resolveSelectValueLabel(
+    academicPeriodId,
+    academicPeriods.map((period) => ({ value: period.id, label: period.name }))
+  )
+  const courseDisplayName = resolveSelectValueLabel(
+    courseId,
+    courses.map((course) => ({ value: course.courseId, label: course.name }))
+  )
+  const levelDisplayName = resolveSelectValueLabel(
+    levelId,
+    levels.map((level) => ({ value: level.levelId, label: level.name }))
+  )
+  const classDisplayName = resolveSelectValueLabel(
+    classId,
+    classes.map((cls) => ({ value: cls.id, label: cls.name }))
+  )
 
   const studentData = student as StudentData | undefined
 
@@ -518,7 +536,9 @@ export function ChangeStudentCourseModal({
                           placeholder={
                             isLoadingPeriods ? 'Carregando...' : 'Selecione o período letivo'
                           }
-                        />
+                        >
+                          {academicPeriodDisplayName}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -560,7 +580,9 @@ export function ChangeStudentCourseModal({
                                 ? 'Carregando...'
                                 : `Selecione ${courseLabels.definite.toLowerCase()}`
                           }
-                        />
+                        >
+                          {courseDisplayName}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -599,7 +621,9 @@ export function ChangeStudentCourseModal({
                               ? `Selecione ${courseLabels.definite.toLowerCase()} primeiro`
                               : `Selecione ${levelLabels.definite.toLowerCase()}`
                           }
-                        />
+                        >
+                          {levelDisplayName}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -637,7 +661,9 @@ export function ChangeStudentCourseModal({
                                 ? 'Carregando...'
                                 : 'Selecione a turma'
                           }
-                        />
+                        >
+                          {classDisplayName}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
