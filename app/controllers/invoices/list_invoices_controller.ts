@@ -16,6 +16,8 @@ export default class ListInvoicesController {
       academicPeriodId,
       courseId,
       classId,
+      dueDateFrom,
+      dueDateTo,
       status,
       type,
       sortBy = 'dueDate',
@@ -106,6 +108,14 @@ export default class ListInvoicesController {
           enrollmentQuery.where('classId', classId)
         })
       })
+    }
+
+    if (dueDateFrom) {
+      query.where('dueDate', '>=', dueDateFrom)
+    }
+
+    if (dueDateTo) {
+      query.where('dueDate', '<=', dueDateTo)
     }
 
     if (status) {

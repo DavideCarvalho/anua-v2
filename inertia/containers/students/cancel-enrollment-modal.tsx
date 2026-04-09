@@ -61,7 +61,7 @@ export function CancelEnrollmentModal({
       await cancelEnrollment.mutateAsync({
         params: { id: studentId, enrollmentId: enrollment.id },
       })
-      queryClient.invalidateQueries({ queryKey: ['students'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.students.index.pathKey() })
       toast.success('Matrícula cancelada com sucesso!')
       onOpenChange(false)
       onSuccess?.()

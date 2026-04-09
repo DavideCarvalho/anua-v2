@@ -20,6 +20,12 @@ interface Insight {
   metadata?: Record<string, unknown>
 }
 
+interface LatePayerRow {
+  studentId: string
+  latePaidInvoices: number | string
+  totalPaidInvoices: number | string
+}
+
 export default class GetEscolaInsightsController {
   async handle({ selectedSchoolIds, request }: HttpContext) {
     const scopedSchoolIds = selectedSchoolIds ?? []
@@ -175,23 +181,21 @@ export default class GetEscolaInsightsController {
       .join('User as u', 'u.id', 'st.id')
       .where('u.schoolId', schoolId)
       .whereNull('u.deletedAt')
-      .where((q) => {
-        q.where((paidLate) => {
-          paidLate
-            .where('sp.status', 'PAID')
-            .whereNotNull('sp.paidAt')
-            .whereRaw('DATE(sp."paidAt") > sp."dueDate"')
-        })
-          .orWhere('sp.status', 'OVERDUE')
-          .orWhere((pendingOverdue) => {
-            pendingOverdue
-              .where('sp.status', 'PENDING')
-              .where('sp.dueDate', '<', today.toSQLDate()!)
-          })
-      })
       .groupBy('sp.studentId')
-      .havingRaw('COUNT(*) >= 2')
-      .count('* as invoices')
+      .select('sp.studentId')
+      .select(
+        db.raw(
+          `COALESCE(SUM(CASE WHEN sp.status = 'PAID' AND sp."paidAt" IS NOT NULL AND DATE(sp."paidAt") > sp."dueDate" THEN 1 ELSE 0 END), 0) as "latePaidInvoices"`
+        )
+      )
+      .select(
+        db.raw(
+          `COALESCE(SUM(CASE WHEN sp.status = 'PAID' AND sp."paidAt" IS NOT NULL THEN 1 ELSE 0 END), 0) as "totalPaidInvoices"`
+        )
+      )
+      .havingRaw(
+        `COALESCE(SUM(CASE WHEN sp.status = 'PAID' AND sp."paidAt" IS NOT NULL AND DATE(sp."paidAt") > sp."dueDate" THEN 1 ELSE 0 END), 0) >= 2`
+      )
 
     if (scopedStudentIds !== null) {
       if (!scopedStudentIds || scopedStudentIds.length === 0) {
@@ -201,7 +205,7 @@ export default class GetEscolaInsightsController {
       }
     }
 
-    const latePayersRows = await latePayersQuery
+    const latePayersRows = (await latePayersQuery) as LatePayerRow[]
     const chronicLatePayers = latePayersRows.length
 
     if (chronicLatePayers > 0) {
@@ -211,8 +215,16 @@ export default class GetEscolaInsightsController {
         priority: chronicLatePayers >= 5 ? 'high' : 'medium',
         title: 'Recorrência de Atrasos',
         value: chronicLatePayers,
-        description: `${chronicLatePayers} responsável(eis) com histórico de pagamento após vencimento. Priorize contato para renegociação preventiva.`,
+        description: `${chronicLatePayers} aluno(s) com histórico de pagamento após vencimento. Priorize contato para renegociação preventiva.`,
         icon: 'alert-triangle',
+        metadata: {
+          studentIds: latePayersRows.map((row) => String(row.studentId)),
+          latePaymentStats: latePayersRows.map((row) => ({
+            studentId: String(row.studentId),
+            latePaidInvoices: Number(row.latePaidInvoices || 0),
+            totalPaidInvoices: Number(row.totalPaidInvoices || 0),
+          })),
+        },
       })
     }
 
@@ -230,23 +242,15 @@ export default class GetEscolaInsightsController {
         subQ
           .from('StudentPayment as history')
           .whereRaw('history."studentId" = upcoming."studentId"')
-          .where((historyFilter) => {
-            historyFilter
-              .where((paidLate) => {
-                paidLate
-                  .where('history.status', 'PAID')
-                  .whereNotNull('history.paidAt')
-                  .whereRaw('DATE(history."paidAt") > history."dueDate"')
-              })
-              .orWhere('history.status', 'OVERDUE')
-              .orWhere((pendingOverdue) => {
-                pendingOverdue
-                  .where('history.status', 'PENDING')
-                  .where('history.dueDate', '<', today.toSQLDate()!)
-              })
+          .where((paidLate) => {
+            paidLate
+              .where('history.status', 'PAID')
+              .whereNotNull('history.paidAt')
+              .whereRaw('DATE(history."paidAt") > history."dueDate"')
           })
       })
       .groupBy('upcoming.studentId')
+      .select('upcoming.studentId')
       .count('* as upcomingInvoices')
 
     if (scopedStudentIds !== null) {
@@ -265,8 +269,11 @@ export default class GetEscolaInsightsController {
         priority: riskyUpcomingRows.length >= 5 ? 'high' : 'medium',
         title: 'Vencimentos Sensíveis',
         value: riskyUpcomingRows.length,
-        description: `${riskyUpcomingRows.length} responsável(eis) com histórico de pagamento em atraso têm boletos vencendo em até 7 dias.`,
+        description: `${riskyUpcomingRows.length} aluno(s) com histórico de pagamento em atraso têm boletos vencendo em até 7 dias.`,
         icon: 'calendar-clock',
+        metadata: {
+          studentIds: riskyUpcomingRows.map((row) => String(row.studentId)),
+        },
       })
     }
 
