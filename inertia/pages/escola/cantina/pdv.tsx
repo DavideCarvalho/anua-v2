@@ -1,10 +1,14 @@
+import { Link } from '@adonisjs/inertia/react'
 import { Head, usePage } from '@inertiajs/react'
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, type ReactNode } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Search, ShoppingCart, CreditCard, Banknote, QrCode, ReceiptText } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
+import { EscolaLayoutSimplificado } from '../../../components/layouts/escola-layout-simplificado'
+import { SimplifiedPageShell } from '../../../components/escola/simplified-page-shell'
+import { SimplifiedBasicList } from '../../../components/escola/simplified-basic-list'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +34,12 @@ import { formatCurrency } from '../../../lib/utils'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import {
+  readEscolaDashboardViewMode,
+  type EscolaDashboardViewMode,
+  writeEscolaDashboardViewMode,
+} from '../../../lib/escola-dashboard-view-mode'
+import { useAuthUser } from '../../../stores/auth_store'
 
 type StudentsResponse = Route.Response<'api.v1.students.index'>
 type CanteenItemsResponse = Route.Response<'api.v1.canteen_items.index'>
@@ -64,6 +74,98 @@ type StudentListItem = StudentsResponse['data'][number]
 type CanteenItemListItem = CanteenItemsResponse['data'][number]
 
 export default function PDVPage() {
+  const user = useAuthUser()
+  const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
+
+  useEffect(() => {
+    setViewMode(readEscolaDashboardViewMode(user?.id))
+  }, [user?.id])
+
+  const onViewModeChange = (mode: EscolaDashboardViewMode) => {
+    setViewMode(mode)
+    writeEscolaDashboardViewMode(user?.id, mode)
+  }
+
+  const viewModeToggle = (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant={viewMode === 'full' ? 'default' : 'outline'}
+        onClick={() => onViewModeChange('full')}
+      >
+        Visão completa
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant={viewMode === 'simple' ? 'default' : 'outline'}
+        onClick={() => onViewModeChange('simple')}
+      >
+        Visão simplificada
+      </Button>
+    </>
+  )
+
+  if (viewMode === 'simple') {
+    return (
+      <EscolaLayoutSimplificado title="Cantina PDV" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+        <Head title="Cantina - PDV" />
+
+        <SimplifiedPageShell
+          title="Cantina - PDV"
+          description="Registre vendas de forma direta e acesse os atalhos principais da cantina."
+          actions={
+            <>
+              <Link href="/escola/cantina/pdv">
+                <Button size="sm">Nova venda</Button>
+              </Link>
+              <Link href="/escola/cantina/pedidos">
+                <Button size="sm" variant="outline">
+                  Ver pedidos
+                </Button>
+              </Link>
+            </>
+          }
+        >
+          <SimplifiedBasicList>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Use os atalhos para operar a cantina com foco em atendimento rapido.
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Link href="/escola/cantina/itens">
+                  <Button variant="outline" className="w-full justify-start">
+                    Gerenciar itens
+                  </Button>
+                </Link>
+                <Link href="/escola/cantina/cardapio">
+                  <Button variant="outline" className="w-full justify-start">
+                    Ver cardápio
+                  </Button>
+                </Link>
+                <Link href="/escola/cantina/vendas">
+                  <Button variant="outline" className="w-full justify-start">
+                    Histórico de vendas
+                  </Button>
+                </Link>
+                <Link href="/escola/cantina/transferencias">
+                  <Button variant="outline" className="w-full justify-start">
+                    Transferências
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </SimplifiedBasicList>
+        </SimplifiedPageShell>
+      </EscolaLayoutSimplificado>
+    )
+  }
+
+  return <PDVFullPage topbarActions={viewModeToggle} />
+}
+
+function PDVFullPage({ topbarActions }: { topbarActions: ReactNode }) {
   const { props } = usePage<PageProps>()
   const canteenId = props.canteenId
 
@@ -353,7 +455,7 @@ export default function PDVPage() {
   }
 
   return (
-    <EscolaLayout>
+    <EscolaLayout topbarActions={topbarActions}>
       <Head title="PDV - Ponto de Venda" />
 
       <div className="space-y-6">

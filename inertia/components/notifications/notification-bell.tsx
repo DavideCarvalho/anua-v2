@@ -71,6 +71,7 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          data-testid="notification-bell"
           id="notification-bell-trigger"
           variant="ghost"
           size="icon"

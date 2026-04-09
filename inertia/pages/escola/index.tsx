@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { GraduationCap, LineChart, DollarSign, Eye, EyeOff } from 'lucide-react'
 import { EscolaLayout } from '../../components/layouts'
+import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout-simplificado'
 import { EscolaStatsContainer } from '../../containers/escola-stats-container'
 import { EscolaInsightsContainer } from '../../containers/escola-insights-container'
 import { PedagogicalAlertsCards } from '../../containers/dashboard/pedagogical-alerts-cards'
@@ -28,13 +29,16 @@ import {
   SelectValue,
 } from '../../components/ui/select'
 import { useAuthUser } from '../../stores/auth_store'
+import {
+  readEscolaDashboardViewMode,
+  type EscolaDashboardViewMode,
+  writeEscolaDashboardViewMode,
+} from '../../lib/escola-dashboard-view-mode'
 import { api } from '~/lib/api'
 
 const HIDE_FINANCIAL_INFO_STORAGE_KEY = 'escola:hide-financial-info'
-const DASHBOARD_VIEW_MODE_STORAGE_KEY_PREFIX = 'escola:dashboard:view-mode'
 
 type DashboardTab = 'pedagogical' | 'administrative' | 'financial'
-type DashboardViewMode = 'full' | 'simple'
 type TabFilterState = {
   academicPeriodId: string
   courseId: string
@@ -65,7 +69,7 @@ export default function EscolaDashboard() {
   const canViewAdministrativeTab = !isSchoolTeacher
   const tabColumnClass = canViewFinancialTab ? 'md:grid-cols-3' : 'md:grid-cols-2'
   const [hideFinancialInfo, setHideFinancialInfo] = useState(true)
-  const [viewMode, setViewMode] = useState<DashboardViewMode>('full')
+  const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
   const [isViewModeHydrated, setIsViewModeHydrated] = useState(false)
   const [activeTab, setActiveTab] = useState<DashboardTab>('pedagogical')
   const [pedagogicalFilters, setPedagogicalFilters] = useState<TabFilterState>({
@@ -289,25 +293,15 @@ export default function EscolaDashboard() {
     window.localStorage.setItem(HIDE_FINANCIAL_INFO_STORAGE_KEY, String(nextState))
   }
 
-  const viewModeStorageKey = user?.id
-    ? `${DASHBOARD_VIEW_MODE_STORAGE_KEY_PREFIX}:${user.id}`
-    : null
-
   useEffect(() => {
-    if (!viewModeStorageKey) return
-
-    const storedMode = window.localStorage.getItem(viewModeStorageKey)
-    if (storedMode === 'simple' || storedMode === 'full') {
-      setViewMode(storedMode)
-    }
-
+    setViewMode(readEscolaDashboardViewMode(user?.id))
     setIsViewModeHydrated(true)
-  }, [viewModeStorageKey])
+  }, [user?.id])
 
   useEffect(() => {
-    if (!viewModeStorageKey || !isViewModeHydrated) return
-    window.localStorage.setItem(viewModeStorageKey, viewMode)
-  }, [isViewModeHydrated, viewMode, viewModeStorageKey])
+    if (!isViewModeHydrated) return
+    writeEscolaDashboardViewMode(user?.id, viewMode)
+  }, [isViewModeHydrated, user?.id, viewMode])
 
   const quickActions = [
     { label: 'Alunos', href: '/escola/administrativo/alunos', visible: true },
@@ -318,8 +312,57 @@ export default function EscolaDashboard() {
     { label: 'Comunicados', href: '/escola/comunicados', visible: true },
   ].filter((action) => action.visible)
 
+  const viewModeToggle = (
+    <>
+      <Button
+        type="button"
+        variant={viewMode === 'full' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setViewMode('full')}
+      >
+        Visão completa
+      </Button>
+      <Button
+        type="button"
+        variant={viewMode === 'simple' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setViewMode('simple')}
+      >
+        Visão simplificada
+      </Button>
+    </>
+  )
+
+  if (viewMode === 'simple') {
+    return (
+      <EscolaLayoutSimplificado
+        title="Dashboard"
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      >
+        <Head title="Dashboard" />
+
+        <section className="mx-auto flex max-w-4xl flex-col items-center gap-6 py-2 sm:py-6">
+          <h1 className="text-center text-2xl font-semibold">O que você quer fazer agora?</h1>
+
+          <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+            {quickActions.map((action) => (
+              <Link
+                key={action.label}
+                href={action.href}
+                className="rounded-xl border bg-card px-6 py-5 text-lg font-medium transition-colors hover:bg-muted"
+              >
+                {action.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      </EscolaLayoutSimplificado>
+    )
+  }
+
   return (
-    <EscolaLayout>
+    <EscolaLayout topbarActions={viewModeToggle}>
       <Head title="Dashboard" />
 
       <div className="space-y-6">
@@ -332,43 +375,9 @@ export default function EscolaDashboard() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={viewMode === 'full' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('full')}
-            >
-              Visão completa
-            </Button>
-            <Button
-              type="button"
-              variant={viewMode === 'simple' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('simple')}
-            >
-              Visão simplificada
-            </Button>
-          </div>
         </div>
 
-        {viewMode === 'simple' ? (
-          <section className="mx-auto flex max-w-4xl flex-col items-center gap-6 py-2 sm:py-6">
-            <h1 className="text-center text-2xl font-semibold">O que você quer fazer agora?</h1>
-
-            <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-              {quickActions.map((action) => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  className="rounded-xl border bg-card px-6 py-5 text-lg font-medium transition-colors hover:bg-muted"
-                >
-                  {action.label}
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : isSchoolTeacher ? (
+        {isSchoolTeacher ? (
           <>
             <div className="flex flex-wrap items-center justify-start gap-2">
               <Select

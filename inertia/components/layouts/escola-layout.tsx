@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import type { PropsWithChildren } from 'react'
+import type { PropsWithChildren, ReactNode } from 'react'
 import { PostHogProvider } from '../posthog-provider'
 import {
   LayoutDashboard,
@@ -289,7 +289,11 @@ function NavItemComponent({
   )
 }
 
-export function EscolaLayout({ children }: PropsWithChildren) {
+type EscolaLayoutProps = PropsWithChildren<{
+  topbarActions?: ReactNode
+}>
+
+export function EscolaLayout({ children, topbarActions }: EscolaLayoutProps) {
   const { url } = usePage<SharedProps>()
   const user = useAuthUser()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -398,7 +402,8 @@ export function EscolaLayout({ children }: PropsWithChildren) {
                 <Menu className="h-5 w-5" />
               </button>
 
-              <div className="ml-auto">
+              <div data-testid="escola-layout-topbar-actions" className="ml-auto flex items-center gap-2">
+                {topbarActions}
                 <NotificationBell allNotificationsRoute="web.escola.notificacoes" />
               </div>
             </header>
