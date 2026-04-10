@@ -19,8 +19,7 @@
     "test:coldreach": "node --test scripts/coldreach/__tests__/*.test.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "typecheck:inertia": "tsc -p inertia/tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit --project inertia/tsconfig.json"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",

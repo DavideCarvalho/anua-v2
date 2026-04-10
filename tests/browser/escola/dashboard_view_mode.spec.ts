@@ -100,10 +100,16 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     await page.assertPath('/escola')
 
     await page.assertExists('[data-testid="escola-layout-topbar-actions"]')
-    await page.assertExists('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")')
-    await page.assertExists('[data-testid="escola-layout-topbar-actions"] [data-testid="notification-bell"]')
+    await page.assertExists(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")'
+    )
+    await page.assertExists(
+      '[data-testid="escola-layout-topbar-actions"] [data-testid="notification-bell"]'
+    )
 
-    await page.click('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")')
+    await page.click(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")'
+    )
 
     await page.assertExists('[data-testid="escola-simplified-layout"]')
     await page.assertNotExists('[data-testid="notification-bell"]')
@@ -117,7 +123,9 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     await browserContext.loginAs(user)
 
     const page = await visit('/escola')
-    await page.click('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")')
+    await page.click(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")'
+    )
 
     const newAnnouncementPage = await visit('/escola/comunicados/novo')
 
@@ -142,8 +150,12 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     const page = await visit('/escola/comunicados/novo')
     await page.assertPath('/escola/comunicados/novo')
 
-    await page.assertExists('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão completa")')
-    await page.assertExists('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")')
+    await page.assertExists(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão completa")'
+    )
+    await page.assertExists(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")'
+    )
   })
 
   test('shows objective simplified invoices table in financeiro/faturas', async ({
@@ -156,7 +168,9 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     const page = await visit('/escola/financeiro/faturas')
     await page.assertPath('/escola/financeiro/faturas')
 
-    await page.click('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")')
+    await page.click(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")'
+    )
 
     await page.assertExists('[data-testid="escola-simplified-layout"]')
     await page.assertExists('[data-testid="simplified-invoices-table"]')
@@ -223,7 +237,9 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     await browserContext.loginAs(user)
 
     const page = await visit('/escola')
-    await page.click('[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")')
+    await page.click(
+      '[data-testid="escola-layout-topbar-actions"] button:has-text("Visão simplificada")'
+    )
 
     const newAnnouncementPage = await visit('/escola/comunicados/novo')
     await newAnnouncementPage.assertExists('[data-testid="escola-simplified-layout"]')

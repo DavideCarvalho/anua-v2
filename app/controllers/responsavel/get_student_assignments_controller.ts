@@ -68,7 +68,7 @@ export default class GetStudentAssignmentsController {
       queryParams.subjectId = subjectId
     }
 
-    // Get assignments for the student's class
+    // Get assignments for the student's class, filtered by the class's academic periods
     const assignments = await db.rawQuery(
       `
       SELECT
@@ -99,6 +99,11 @@ export default class GetStudentAssignmentsController {
       JOIN "Student" st ON st."classId" = c.id
       LEFT JOIN "StudentHasAssignment" sha ON sha."assignmentId" = a.id AND sha."studentId" = st.id
       WHERE st.id = :studentId
+        AND a."academicPeriodId" IN (
+          SELECT chap."academicPeriodId"
+          FROM "ClassHasAcademicPeriod" chap
+          WHERE chap."classId" = c.id
+        )
         ${statusFilter}
         ${subjectFilter}
       ORDER BY a."dueDate" DESC
@@ -106,7 +111,7 @@ export default class GetStudentAssignmentsController {
       queryParams
     )
 
-    // Get subjects for filtering
+    // Get subjects for filtering (filtered by class's academic periods)
     const subjects = await db.rawQuery(
       `
       SELECT DISTINCT s.id, s.name
@@ -116,12 +121,17 @@ export default class GetStudentAssignmentsController {
       JOIN "Subject" s ON thc."subjectId" = s.id
       JOIN "Student" st ON st."classId" = c.id
       WHERE st.id = :studentId
+        AND a."academicPeriodId" IN (
+          SELECT chap."academicPeriodId"
+          FROM "ClassHasAcademicPeriod" chap
+          WHERE chap."classId" = c.id
+        )
       ORDER BY s.name
       `,
       { studentId }
     )
 
-    // Get summary stats
+    // Get summary stats (filtered by class's academic periods)
     const summary = await db.rawQuery(
       `
       SELECT
@@ -141,6 +151,11 @@ export default class GetStudentAssignmentsController {
       JOIN "Student" st ON st."classId" = c.id
       LEFT JOIN "StudentHasAssignment" sha ON sha."assignmentId" = a.id AND sha."studentId" = st.id
       WHERE st.id = :studentId
+        AND a."academicPeriodId" IN (
+          SELECT chap."academicPeriodId"
+          FROM "ClassHasAcademicPeriod" chap
+          WHERE chap."classId" = c.id
+        )
       `,
       { studentId }
     )
