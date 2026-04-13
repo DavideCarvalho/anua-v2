@@ -42,6 +42,7 @@ const schema = z.object({
     .optional(),
   subjectId: z.string().optional(),
   description: z.string().optional(),
+  subPeriodId: z.string().nullable().optional(),
 })
 
 interface NewAssignmentModalProps {
@@ -123,6 +124,46 @@ export function NewAssignmentModal({
     enabled: open && !!effectiveClassId && !requiresContextStep,
   })
 
+  const { data: schoolData } = useQuery({
+    ...api.api.v1.schools.show.queryOptions({
+      params: { id: user?.schoolId ?? '' },
+    }),
+    enabled: open && !!user?.schoolId,
+  })
+
+  const usesSubPeriods =
+    schoolData && (schoolData as any).periodStructure && (schoolData as any).periodStructure !== ''
+
+  const effectiveAcademicPeriodId = _academicPeriodId || resolvedContext?.academicPeriodId || ''
+
+  const { data: subPeriodsData } = useQuery({
+    ...api.api.v1.academicSubPeriods.index.queryOptions({
+      query: { academicPeriodId: effectiveAcademicPeriodId },
+    }),
+    enabled: open && !!effectiveAcademicPeriodId && !!usesSubPeriods,
+  })
+
+  const subPeriods = (subPeriodsData?.data ?? []) as Array<{
+    id: string
+    name: string
+    order: number
+    startDate: string
+    endDate: string
+  }>
+
+  const getCurrentSubPeriodId = (): string | null => {
+    if (!usesSubPeriods || subPeriods.length === 0) return null
+    const today = new Date()
+    for (const sp of subPeriods) {
+      const start = new Date(sp.startDate)
+      const end = new Date(sp.endDate)
+      if (today >= start && today <= end) {
+        return sp.id
+      }
+    }
+    return null
+  }
+
   const subjects = useMemo(() => {
     if (!classData) return []
     const canSeeAllSubjects = !user || (user.role?.name && DIRECTOR_ROLES.includes(user.role.name))
@@ -169,6 +210,7 @@ export function NewAssignmentModal({
         subjectId:
           assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
         description: assignmentData?.description ?? '',
+        subPeriodId: assignmentData?.subPeriod?.id ?? getCurrentSubPeriodId(),
       })
     }
   }, [open, form, defaultDate, requiresContextStep, assignmentData])
@@ -224,6 +266,7 @@ export function NewAssignmentModal({
             academicPeriodId: requiresContextStep
               ? (resolvedContext?.academicPeriodId ?? undefined)
               : undefined,
+            subPeriodId: data.subPeriodId || undefined,
           },
         })
       }
@@ -304,6 +347,33 @@ export function NewAssignmentModal({
                       {form.formState.errors.subjectId.message}
                     </p>
                   )}
+                </div>
+              ) : null}
+
+              {usesSubPeriods && subPeriods.length > 0 ? (
+                <div className="space-y-2">
+                  <Label>Sub-Periodo (opcional)</Label>
+                  <Select
+                    value={form.watch('subPeriodId') ?? ''}
+                    onValueChange={(value, _event) => form.setValue('subPeriodId', value || null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o sub-periodo">
+                        {subPeriods?.find((sp) => sp.id === form.watch('subPeriodId'))?.name ??
+                          (form.watch('subPeriodId') ? 'Carregando...' : 'Selecione o sub-periodo')}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nenhum</SelectItem>
+                      {subPeriods
+                        .sort((a, b) => a.order - b.order)
+                        .map((sp) => (
+                          <SelectItem key={sp.id} value={sp.id}>
+                            {sp.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               ) : null}
 
