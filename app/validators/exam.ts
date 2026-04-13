@@ -14,6 +14,7 @@ export const createExamValidator = vine.compile(
     subjectId: vine.string().trim(),
     teacherId: vine.string().trim(),
     academicPeriodId: vine.string().trim().optional(),
+    subPeriodId: vine.string().uuid().optional().nullable(),
   })
 )
 
@@ -27,6 +28,7 @@ export const updateExamValidator = vine.compile(
     status: vine.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
     scheduledDate: vine.date({ formats: ['iso8601'] }).optional(),
     durationMinutes: vine.number().min(1).optional().nullable(),
+    subPeriodId: vine.string().uuid().optional().nullable(),
   })
 )
 

@@ -12,6 +12,7 @@ export const createAssignmentValidator = vine.compile(
     subjectId: vine.string().trim(),
     teacherId: vine.string().trim(),
     academicPeriodId: vine.string().trim().optional(),
+    subPeriodId: vine.string().uuid().optional().nullable(),
   })
 )
 
@@ -23,6 +24,7 @@ export const updateAssignmentValidator = vine.compile(
     maxScore: vine.number().min(0).optional().nullable(),
     status: vine.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
     dueDate: vine.date({ formats: ['iso8601'] }).optional(),
+    subPeriodId: vine.string().uuid().optional().nullable(),
   })
 )
 
