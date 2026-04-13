@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { GraduationCap, LineChart, DollarSign, Eye, EyeOff } from 'lucide-react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout-simplificado'
+import { DashboardClassesNav } from '../../components/dashboard/dashboard-classes-nav'
 import { EscolaStatsContainer } from '../../containers/escola-stats-container'
 import { EscolaInsightsContainer } from '../../containers/escola-insights-container'
 import { PedagogicalAlertsCards } from '../../containers/dashboard/pedagogical-alerts-cards'
@@ -356,6 +357,8 @@ export default function EscolaDashboard() {
               </Link>
             ))}
           </div>
+
+          <DashboardClassesNav />
         </section>
       </EscolaLayoutSimplificado>
     )
@@ -374,7 +377,6 @@ export default function EscolaDashboard() {
               Bem-vindo ao painel da {user?.school?.name || 'escola'}
             </p>
           </div>
-
         </div>
 
         {isSchoolTeacher ? (

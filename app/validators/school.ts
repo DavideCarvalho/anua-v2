@@ -33,6 +33,14 @@ export const createSchoolValidator = vine.compile(
     minimumGrade: vine.number().min(0).max(10).optional(),
     calculationAlgorithm: vine.enum(['AVERAGE', 'SUM']).optional(),
     minimumAttendancePercentage: vine.number().min(0).max(100).optional(),
+    periodStructure: vine
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL'] as const)
+      .optional()
+      .nullable(),
+    recoveryGradeMethod: vine
+      .enum(['AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE'] as const)
+      .optional()
+      .nullable(),
   })
 )
 
@@ -60,6 +68,14 @@ export const updateSchoolValidator = vine.compile(
     minimumGrade: vine.number().min(0).max(10).optional(),
     calculationAlgorithm: vine.enum(['AVERAGE', 'SUM']).optional(),
     minimumAttendancePercentage: vine.number().min(0).max(100).optional(),
+    periodStructure: vine
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL'] as const)
+      .optional()
+      .nullable(),
+    recoveryGradeMethod: vine
+      .enum(['AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE'] as const)
+      .optional()
+      .nullable(),
     active: vine.boolean().optional(),
     // Insurance fields
     hasInsurance: vine.boolean().optional().nullable(),

@@ -15,6 +15,9 @@ import SchoolGroup from './school_group.js'
 import UserHasSchool from './user_has_school.js'
 import InsuranceBilling from './insurance_billing.js'
 
+export type PeriodStructure = 'BIMESTRAL' | 'TRIMESTRAL' | 'SEMESTRAL'
+export type RecoveryGradeMethod = 'AVERAGE' | 'REPLACE_IF_HIGHER' | 'REPLACE'
+
 export type PaymentConfigStatus =
   | 'NOT_CONFIGURED'
   | 'PENDING_DOCUMENTS'
@@ -163,6 +166,12 @@ export default class School extends BaseModel {
 
   @column({ columnName: 'minimumAttendancePercentage' })
   declare minimumAttendancePercentage: number
+
+  @column({ columnName: 'periodStructure' })
+  declare periodStructure: PeriodStructure | null
+
+  @column({ columnName: 'recoveryGradeMethod' })
+  declare recoveryGradeMethod: RecoveryGradeMethod | null
 
   // Insurance config
   @column({ columnName: 'hasInsurance' })
