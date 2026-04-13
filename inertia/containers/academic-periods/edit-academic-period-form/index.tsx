@@ -12,6 +12,7 @@ import { api } from '~/lib/api'
 import { Stepper } from './stepper'
 import { CalendarForm } from './calendar-form'
 import { CoursesForm } from './courses-form'
+import { SubPeriodsForm } from './sub-periods-form'
 import {
   editAcademicPeriodSchema,
   type EditAcademicPeriodFormValues,
@@ -26,6 +27,7 @@ function getSteps(segment: string) {
       title: isCourseBased ? 'Cursos' : 'Séries',
       description: isCourseBased ? 'Cursos e semestres' : 'Séries e turmas',
     },
+    { title: 'Sub-Periodos', description: 'Bimestres, trimestres ou semestres' },
   ]
 }
 
@@ -203,6 +205,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
         <div className="min-h-[400px] overflow-x-hidden">
           {currentStep === 0 && <CalendarForm />}
           {currentStep === 1 && <CoursesForm />}
+          {currentStep === 2 && <SubPeriodsForm academicPeriodId={academicPeriod.id} />}
         </div>
 
         <div className="flex items-center justify-between border-t pt-6">
