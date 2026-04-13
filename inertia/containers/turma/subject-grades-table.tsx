@@ -12,6 +12,7 @@ import {
 } from '~/components/ui/table'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { ErrorBoundary } from '~/components/error-boundary'
 import { LaunchGradesModal } from './launch-grades-modal'
 import { api } from '~/lib/api'
@@ -64,6 +65,7 @@ function SubjectGradesTableContent({
 }: SubjectGradesTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedAssignment, setSelectedAssignment] = useState<SelectedAssignment | null>(null)
+  const [activeSubPeriod, setActiveSubPeriod] = useState<string>('all')
 
   const {
     data: response,
@@ -75,6 +77,21 @@ function SubjectGradesTableContent({
       query: { courseId, academicPeriodId },
     })
   )
+
+  const { data: subPeriodsData } = useQuery(
+    api.api.v1.academicSubPeriods.index.queryOptions({
+      query: { academicPeriodId },
+    }),
+    { enabled: !!academicPeriodId }
+  )
+
+  const subPeriods = (subPeriodsData?.data ?? []) as Array<{
+    id: string
+    name: string
+    order: number
+  }>
+
+  const hasSubPeriods = subPeriods.length > 0
 
   const toggleRow = (studentId: string) => {
     const newExpanded = new Set(expandedRows)
@@ -100,124 +117,170 @@ function SubjectGradesTableContent({
     return <GradesTableEmpty />
   }
 
+  const getSubPeriodStatusBadge = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return <Badge variant="default">Aprovado</Badge>
+      case 'IN_RECOVERY':
+        return <Badge variant="secondary">Em Recuperacao</Badge>
+      case 'RECOVERED':
+        return <Badge variant="outline">Recuperado</Badge>
+      case 'FAILED':
+        return <Badge variant="destructive">Reprovado</Badge>
+      default:
+        return <Badge variant="secondary">Sem nota</Badge>
+    }
+  }
+
+  const renderStudentTable = (studentList: typeof students, subPeriodId?: string) => (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12"></TableHead>
+            <TableHead>Aluno</TableHead>
+            <TableHead className="text-center">Nota Final</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-center">Atividades</TableHead>
+            <TableHead className="text-center">Nota Máxima</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {studentList.map((student) => {
+            const isExpanded = expandedRows.has(student.id)
+            const passingGrade = student.maxPossibleGrade * 0.6
+            const isPassing = student.finalGrade >= passingGrade
+            const hasActivities = student.totalCount > 0
+
+            const filteredGrades = subPeriodId
+              ? student.grades.filter((g: any) => g.assignment?.subPeriodId === subPeriodId)
+              : student.grades
+
+            return (
+              <Fragment key={student.id}>
+                <TableRow className="hover:bg-muted/50">
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleRow(student.id)}
+                      className="h-8 w-8 p-0"
+                      disabled={filteredGrades.length === 0}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TableCell>
+                  <TableCell className="font-medium">{student.name}</TableCell>
+                  <TableCell className="text-center">
+                    {hasActivities ? (
+                      <span className="font-semibold">{student.finalGrade.toFixed(1)}</span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {hasActivities ? (
+                      <Badge variant={isPassing ? 'default' : 'destructive'}>
+                        {isPassing ? 'Aprovado' : 'Reprovado'}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">Sem atividades</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center text-sm">
+                    {student.gradedCount}/{student.totalCount} avaliadas
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {hasActivities ? (
+                      <span>{student.maxPossibleGrade.toFixed(1)}</span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+                {isExpanded && filteredGrades.length > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="bg-muted/30 p-4">
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold">Notas Individuais</h4>
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                          {filteredGrades.map((gradeItem: any) => (
+                            <div
+                              key={gradeItem.assignment.id}
+                              className="flex items-center justify-between rounded-md border bg-background p-2"
+                            >
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">{gradeItem.assignment.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  Máx: {gradeItem.assignment.maxGrade}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold">
+                                  {gradeItem.grade !== null ? gradeItem.grade.toFixed(1) : '-'}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 px-2"
+                                  onClick={() =>
+                                    setSelectedAssignment({
+                                      id: gradeItem.assignment.id,
+                                      name: gradeItem.assignment.name,
+                                      maxGrade: gradeItem.assignment.maxGrade,
+                                    })
+                                  }
+                                >
+                                  <ClipboardList className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  )
+
+  const content = hasSubPeriods ? (
+    <Tabs value={activeSubPeriod} onValueChange={setActiveSubPeriod}>
+      <TabsList className="mb-4">
+        <TabsTrigger value="all">Todos</TabsTrigger>
+        {subPeriods
+          .sort((a, b) => a.order - b.order)
+          .map((sp) => (
+            <TabsTrigger key={sp.id} value={sp.id}>
+              {sp.name}
+            </TabsTrigger>
+          ))}
+      </TabsList>
+      <TabsContent value="all">{renderStudentTable(students)}</TabsContent>
+      {subPeriods.map((sp) => (
+        <TabsContent key={sp.id} value={sp.id}>
+          {renderStudentTable(students, sp.id)}
+        </TabsContent>
+      ))}
+    </Tabs>
+  ) : (
+    renderStudentTable(students)
+  )
+
   return (
     <div className="space-y-2">
       <p className="text-sm text-muted-foreground">{students.length} aluno(s)</p>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12"></TableHead>
-              <TableHead>Aluno</TableHead>
-              <TableHead className="text-center">Nota Final</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-center">Atividades</TableHead>
-              <TableHead className="text-center">Nota Máxima</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {students.map((student) => {
-              const isExpanded = expandedRows.has(student.id)
-              const passingGrade = student.maxPossibleGrade * 0.6
-              const isPassing = student.finalGrade >= passingGrade
-              const hasActivities = student.totalCount > 0
-
-              return (
-                <Fragment key={student.id}>
-                  <TableRow className="hover:bg-muted/50">
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleRow(student.id)}
-                        className="h-8 w-8 p-0"
-                        disabled={student.totalCount === 0}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium">{student.name}</TableCell>
-                    <TableCell className="text-center">
-                      {hasActivities ? (
-                        <span className="font-semibold">{student.finalGrade.toFixed(1)}</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {hasActivities ? (
-                        <Badge variant={isPassing ? 'default' : 'destructive'}>
-                          {isPassing ? 'Aprovado' : 'Reprovado'}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">Sem atividades</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center text-sm">
-                      {student.gradedCount}/{student.totalCount} avaliadas
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {hasActivities ? (
-                        <span>{student.maxPossibleGrade.toFixed(1)}</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  {isExpanded && student.grades.length > 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="bg-muted/30 p-4">
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-semibold">Notas Individuais</h4>
-                          <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-                            {student.grades.map((gradeItem) => (
-                              <div
-                                key={gradeItem.assignment.id}
-                                className="flex items-center justify-between rounded-md border bg-background p-2"
-                              >
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium">{gradeItem.assignment.name}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Máx: {gradeItem.assignment.maxGrade}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-semibold">
-                                    {gradeItem.grade !== null ? gradeItem.grade.toFixed(1) : '-'}
-                                  </p>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-7 px-2"
-                                    onClick={() =>
-                                      setSelectedAssignment({
-                                        id: gradeItem.assignment.id,
-                                        name: gradeItem.assignment.name,
-                                        maxGrade: gradeItem.assignment.maxGrade,
-                                      })
-                                    }
-                                  >
-                                    <ClipboardList className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </Fragment>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      {content}
 
       {selectedAssignment && (
         <LaunchGradesModal

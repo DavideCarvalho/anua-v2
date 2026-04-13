@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '../../components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
@@ -72,6 +73,147 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
     }
   }
 
+  const getSubPeriodStatusBadge = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return <Badge variant="default">Aprovado</Badge>
+      case 'IN_RECOVERY':
+        return <Badge variant="secondary">Em Recuperacao</Badge>
+      case 'RECOVERED':
+        return <Badge variant="outline">Recuperado</Badge>
+      case 'FAILED':
+        return <Badge variant="destructive">Reprovado</Badge>
+      default:
+        return <Badge variant="secondary">Sem nota</Badge>
+    }
+  }
+
+  const hasSubPeriodGrades = data.bySubject.some(
+    (subject: SubjectGrade) => (subject as any).subPeriodGrades?.length > 0
+  )
+
+  const renderSubjectGrades = (subjects: SubjectGrade[]) => (
+    <div className="space-y-4">
+      {subjects.map((subject: SubjectGrade) => {
+        const subPeriodGrades = (subject as any).subPeriodGrades as
+          | Array<{
+              subPeriodId: string
+              subPeriodName: string
+              order: number
+              grade: number | null
+              recoveryGrade: number | null
+              finalGrade: number | null
+              weight: number
+              minimumGrade: number
+              hasRecovery: boolean
+              status: string
+            }>
+          | undefined
+
+        if (subPeriodGrades && subPeriodGrades.length > 0) {
+          return (
+            <div key={subject.subjectId} className="border rounded-lg overflow-hidden">
+              <div className="p-4 bg-muted/50">
+                <p className="font-medium">{subject.subjectName}</p>
+                <p className="text-sm text-muted-foreground">
+                  {subject.gradedCount} de {subject.assignmentsCount} atividades avaliadas
+                </p>
+              </div>
+              <Tabs defaultValue="summary">
+                <div className="px-4 pt-2">
+                  <TabsList>
+                    <TabsTrigger value="summary">Resumo</TabsTrigger>
+                    {subPeriodGrades
+                      .sort((a, b) => a.order - b.order)
+                      .map((sp) => (
+                        <TabsTrigger key={sp.subPeriodId} value={sp.subPeriodId}>
+                          {sp.subPeriodName}
+                        </TabsTrigger>
+                      ))}
+                  </TabsList>
+                </div>
+                <TabsContent value="summary" className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Media Ponderada Final</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={cn('text-2xl font-bold', getGradeColor(subject.average))}>
+                        {subject.average.toFixed(1)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {subject.totalScore}/{subject.maxPossibleScore} pts
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+                {subPeriodGrades.map((sp) => (
+                  <TabsContent key={sp.subPeriodId} value={sp.subPeriodId} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Nota do Periodo</p>
+                          {sp.recoveryGrade !== null && (
+                            <p className="text-xs text-muted-foreground">
+                              Recuperacao: {sp.recoveryGrade.toFixed(1)}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={cn(
+                              'text-xl font-bold',
+                              sp.finalGrade !== null
+                                ? getGradeColor(sp.finalGrade)
+                                : 'text-muted-foreground'
+                            )}
+                          >
+                            {sp.finalGrade !== null ? sp.finalGrade.toFixed(1) : '-'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">
+                          Nota minima: {sp.minimumGrade}
+                        </span>
+                        {getSubPeriodStatusBadge(sp.status)}
+                      </div>
+                      {sp.hasRecovery && sp.status === 'IN_RECOVERY' && (
+                        <p className="text-sm text-yellow-600">Aguardando nota de recuperacao</p>
+                      )}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>
+          )
+        }
+
+        return (
+          <div
+            key={subject.subjectId}
+            className="flex items-center justify-between p-4 border rounded-lg"
+          >
+            <div>
+              <p className="font-medium">{subject.subjectName}</p>
+              <p className="text-sm text-muted-foreground">
+                {subject.gradedCount} de {subject.assignmentsCount} atividades avaliadas
+              </p>
+            </div>
+            <div className="text-right">
+              <p className={cn('text-2xl font-bold', getGradeColor(subject.average))}>
+                {subject.average.toFixed(1)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {subject.totalScore}/{subject.maxPossibleScore} pts
+              </p>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+
   return (
     <div className="space-y-6">
       {/* Summary Card */}
@@ -117,29 +259,7 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
               Nenhuma nota registrada ainda
             </div>
           ) : (
-            <div className="space-y-4">
-              {data.bySubject.map((subject: SubjectGrade) => (
-                <div
-                  key={subject.subjectId}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium">{subject.subjectName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {subject.gradedCount} de {subject.assignmentsCount} atividades avaliadas
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className={cn('text-2xl font-bold', getGradeColor(subject.average))}>
-                      {subject.average.toFixed(1)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {subject.totalScore}/{subject.maxPossibleScore} pts
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            renderSubjectGrades(data.bySubject)
           )}
         </CardContent>
       </Card>
