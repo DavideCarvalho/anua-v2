@@ -8,6 +8,7 @@ import Teacher from './teacher.js'
 import School from './school.js'
 import AcademicPeriod from './academic_period.js'
 import ExamGrade from './exam_grade.js'
+import AcademicSubPeriod from './academic_sub_period.js'
 
 export type ExamStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 export type ExamType = 'WRITTEN' | 'ORAL' | 'PRACTICAL' | 'PROJECT' | 'QUIZ'
@@ -74,6 +75,9 @@ export default class Exam extends BaseModel {
   @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string
 
+  @column({ columnName: 'subPeriodId' })
+  declare subPeriodId: string | null
+
   @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
@@ -95,6 +99,9 @@ export default class Exam extends BaseModel {
 
   @belongsTo(() => AcademicPeriod, { foreignKey: 'academicPeriodId' })
   declare academicPeriod: BelongsTo<typeof AcademicPeriod>
+
+  @belongsTo(() => AcademicSubPeriod, { foreignKey: 'subPeriodId' })
+  declare subPeriod: BelongsTo<typeof AcademicSubPeriod> | null
 
   @hasMany(() => ExamGrade, { foreignKey: 'examId' })
   declare grades: HasMany<typeof ExamGrade>

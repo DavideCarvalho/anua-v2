@@ -5,6 +5,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import TeacherHasClass from './teacher_has_class.js'
 import AcademicPeriod from './academic_period.js'
 import StudentHasAssignment from './student_has_assignment.js'
+import AcademicSubPeriod from './academic_sub_period.js'
 
 export default class Assignment extends BaseModel {
   static table = 'Assignment'
@@ -37,6 +38,9 @@ export default class Assignment extends BaseModel {
   @column()
   declare academicPeriodId: string
 
+  @column()
+  declare subPeriodId: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -49,6 +53,9 @@ export default class Assignment extends BaseModel {
 
   @belongsTo(() => AcademicPeriod, { foreignKey: 'academicPeriodId' })
   declare academicPeriod: BelongsTo<typeof AcademicPeriod>
+
+  @belongsTo(() => AcademicSubPeriod, { foreignKey: 'subPeriodId' })
+  declare subPeriod: BelongsTo<typeof AcademicSubPeriod> | null
 
   @hasMany(() => StudentHasAssignment, { foreignKey: 'assignmentId' })
   declare submissions: HasMany<typeof StudentHasAssignment>
