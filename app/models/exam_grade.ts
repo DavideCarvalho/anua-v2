@@ -33,6 +33,12 @@ export default class ExamGrade extends BaseModel {
   @column({ columnName: 'feedback' })
   declare feedback: string | null
 
+  @column({ columnName: 'recoveryGrade' })
+  declare recoveryGrade: number | null
+
+  @column.dateTime({ columnName: 'recoveryGradeDate' })
+  declare recoveryGradeDate: DateTime | null
+
   @column.dateTime({ columnName: 'gradedAt' })
   declare gradedAt: DateTime | null
 

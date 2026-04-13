@@ -27,6 +27,12 @@ export default class StudentHasAssignment extends BaseModel {
   @column()
   declare grade: number | null
 
+  @column()
+  declare recoveryGrade: number | null
+
+  @column.dateTime()
+  declare recoveryGradeDate: DateTime | null
+
   @column.dateTime()
   declare submittedAt: DateTime | null
 
