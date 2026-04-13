@@ -81,6 +81,7 @@ export default class GenerateSubPeriodsController {
       subPeriods.push(subPeriod)
     }
 
-    return serialize(AcademicSubPeriodTransformer.transform(subPeriods))
+    const serialized = AcademicSubPeriodTransformer.transform(subPeriods)
+    return serialize({ data: serialized })
   }
 }

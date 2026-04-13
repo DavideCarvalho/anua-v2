@@ -103,6 +103,43 @@ export class AcademicPeriodWeekendClassSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class AcademicSubPeriodSchema extends BaseModel {
+  static $columns = ['academicPeriodId', 'createdAt', 'deletedAt', 'endDate', 'hasRecovery', 'id', 'minimumGrade', 'name', 'order', 'recoveryEndDate', 'recoveryStartDate', 'schoolId', 'slug', 'startDate', 'updatedAt', 'weight'] as const
+  $columns = AcademicSubPeriodSchema.$columns
+  @column()
+  declare academicPeriodId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column.date()
+  declare endDate: DateTime
+  @column()
+  declare hasRecovery: boolean
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare minimumGrade: number | null
+  @column()
+  declare name: string
+  @column()
+  declare order: number
+  @column.date()
+  declare recoveryEndDate: DateTime | null
+  @column.date()
+  declare recoveryStartDate: DateTime | null
+  @column()
+  declare schoolId: string
+  @column()
+  declare slug: string
+  @column.date()
+  declare startDate: DateTime
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare weight: number
+}
+
 export class AchievementSchema extends BaseModel {
   static $columns = ['category', 'createdAt', 'criteria', 'deletedAt', 'description', 'icon', 'id', 'isActive', 'isSecret', 'maxUnlocks', 'name', 'points', 'rarity', 'recurrencePeriod', 'schoolChainId', 'schoolId', 'slug', 'updatedAt'] as const
   $columns = AchievementSchema.$columns
@@ -195,7 +232,7 @@ export class AgreementEarlyDiscountSchema extends BaseModel {
 }
 
 export class AssignmentSchema extends BaseModel {
-  static $columns = ['academicPeriodId', 'createdAt', 'description', 'dueDate', 'grade', 'id', 'name', 'teacherHasClassId', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'createdAt', 'description', 'dueDate', 'grade', 'id', 'name', 'subPeriodId', 'teacherHasClassId', 'updatedAt'] as const
   $columns = AssignmentSchema.$columns
   @column()
   declare academicPeriodId: string
@@ -211,6 +248,8 @@ export class AssignmentSchema extends BaseModel {
   declare id: string
   @column()
   declare name: string
+  @column()
+  declare subPeriodId: string | null
   @column()
   declare teacherHasClassId: string
   @column.dateTime()
@@ -2013,7 +2052,7 @@ export class ScholarshipSchema extends BaseModel {
 }
 
 export class SchoolSchema extends BaseModel {
-  static $columns = ['asaasAccountId', 'asaasApiKey', 'asaasCommercialInfoIsExpired', 'asaasCommercialInfoScheduledDate', 'asaasDocumentUrl', 'asaasWalletId', 'asaasWebhookToken', 'calculationAlgorithm', 'city', 'complement', 'createdAt', 'enablePaymentNotifications', 'hasInsurance', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'latitude', 'location', 'logoUrl', 'longitude', 'minimumAttendancePercentage', 'minimumGrade', 'name', 'neighborhood', 'nfseCofinsPercentage', 'nfseCsllPercentage', 'nfseDeductions', 'nfseEnabled', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseIssPercentage', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfsePisPercentage', 'number', 'paymentConfigStatus', 'paymentConfigStatusUpdatedAt', 'pixKey', 'pixKeyType', 'schoolChainId', 'slug', 'state', 'street', 'updatedAt', 'usePlatformManagedPayments', 'zipCode'] as const
+  static $columns = ['asaasAccountId', 'asaasApiKey', 'asaasCommercialInfoIsExpired', 'asaasCommercialInfoScheduledDate', 'asaasDocumentUrl', 'asaasWalletId', 'asaasWebhookToken', 'calculationAlgorithm', 'city', 'complement', 'createdAt', 'enablePaymentNotifications', 'hasInsurance', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'latitude', 'location', 'logoUrl', 'longitude', 'minimumAttendancePercentage', 'minimumGrade', 'name', 'neighborhood', 'nfseCofinsPercentage', 'nfseCsllPercentage', 'nfseDeductions', 'nfseEnabled', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseIssPercentage', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfsePisPercentage', 'number', 'paymentConfigStatus', 'paymentConfigStatusUpdatedAt', 'periodStructure', 'pixKey', 'pixKeyType', 'recoveryGradeMethod', 'schoolChainId', 'slug', 'state', 'street', 'updatedAt', 'usePlatformManagedPayments', 'zipCode'] as const
   $columns = SchoolSchema.$columns
   @column()
   declare asaasAccountId: string | null
@@ -2092,9 +2131,13 @@ export class SchoolSchema extends BaseModel {
   @column.dateTime()
   declare paymentConfigStatusUpdatedAt: DateTime | null
   @column()
+  declare periodStructure: any | null
+  @column()
   declare pixKey: string | null
   @column()
   declare pixKeyType: any | null
+  @column()
+  declare recoveryGradeMethod: any | null
   @column()
   declare schoolChainId: string | null
   @column()
@@ -2905,7 +2948,7 @@ export class StudentHasAcademicPeriodSchema extends BaseModel {
 }
 
 export class StudentHasAssignmentSchema extends BaseModel {
-  static $columns = ['assignmentId', 'createdAt', 'grade', 'id', 'studentId', 'submittedAt', 'updatedAt'] as const
+  static $columns = ['assignmentId', 'createdAt', 'grade', 'id', 'recoveryGrade', 'recoveryGradeDate', 'studentId', 'submittedAt', 'updatedAt'] as const
   $columns = StudentHasAssignmentSchema.$columns
   @column()
   declare assignmentId: string
@@ -2915,6 +2958,10 @@ export class StudentHasAssignmentSchema extends BaseModel {
   declare grade: number | null
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare recoveryGrade: number | null
+  @column.dateTime()
+  declare recoveryGradeDate: DateTime | null
   @column()
   declare studentId: string
   @column.dateTime()
@@ -3864,7 +3911,7 @@ export class ExamAttachmentSchema extends BaseModel {
 }
 
 export class ExamGradeSchema extends BaseModel {
-  static $columns = ['attended', 'createdAt', 'examId', 'feedback', 'gradedAt', 'id', 'score', 'studentId', 'updatedAt'] as const
+  static $columns = ['attended', 'createdAt', 'examId', 'feedback', 'gradedAt', 'id', 'recoveryGrade', 'recoveryGradeDate', 'score', 'studentId', 'updatedAt'] as const
   $columns = ExamGradeSchema.$columns
   @column()
   declare attended: boolean
@@ -3878,6 +3925,10 @@ export class ExamGradeSchema extends BaseModel {
   declare gradedAt: DateTime | null
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare recoveryGrade: number | null
+  @column.dateTime()
+  declare recoveryGradeDate: DateTime | null
   @column()
   declare score: number | null
   @column()
@@ -3906,7 +3957,7 @@ export class ExamHistorySchema extends BaseModel {
 }
 
 export class ExamSchema extends BaseModel {
-  static $columns = ['academicPeriodId', 'classId', 'createdAt', 'description', 'endTime', 'examDate', 'id', 'instructions', 'location', 'maxScore', 'schoolId', 'startTime', 'status', 'subjectId', 'teacherId', 'title', 'type', 'updatedAt', 'weight'] as const
+  static $columns = ['academicPeriodId', 'classId', 'createdAt', 'description', 'endTime', 'examDate', 'id', 'instructions', 'location', 'maxScore', 'schoolId', 'startTime', 'status', 'subjectId', 'subPeriodId', 'teacherId', 'title', 'type', 'updatedAt', 'weight'] as const
   $columns = ExamSchema.$columns
   @column()
   declare academicPeriodId: string
@@ -3936,6 +3987,8 @@ export class ExamSchema extends BaseModel {
   declare status: any
   @column()
   declare subjectId: string | null
+  @column()
+  declare subPeriodId: string | null
   @column()
   declare teacherId: string
   @column()
