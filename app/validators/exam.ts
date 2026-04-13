@@ -38,6 +38,11 @@ export const saveExamGradeValidator = vine.compile(
     score: vine.number().min(0),
     feedback: vine.string().trim().maxLength(1000).optional(),
     absent: vine.boolean().optional(),
+    recoveryGrade: vine.number().min(0).max(10).optional().nullable(),
+    recoveryGradeDate: vine
+      .date({ formats: ['iso8601'] })
+      .optional()
+      .nullable(),
   })
 )
 
@@ -49,6 +54,11 @@ export const batchSaveExamGradesValidator = vine.compile(
         score: vine.number().min(0),
         feedback: vine.string().trim().maxLength(1000).optional(),
         absent: vine.boolean().optional(),
+        recoveryGrade: vine.number().min(0).max(10).optional().nullable(),
+        recoveryGradeDate: vine
+          .date({ formats: ['iso8601'] })
+          .optional()
+          .nullable(),
       })
     ),
   })

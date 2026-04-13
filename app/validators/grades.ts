@@ -54,6 +54,11 @@ export const batchSaveGradesValidator = vine.compile(
         studentId: vine.string().trim(),
         grade: vine.number().min(0).nullable(),
         submittedAt: vine.string().trim().nullable().optional(),
+        recoveryGrade: vine.number().min(0).max(10).optional().nullable(),
+        recoveryGradeDate: vine
+          .date({ formats: ['iso8601'] })
+          .optional()
+          .nullable(),
       })
     ),
   })

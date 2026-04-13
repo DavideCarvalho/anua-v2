@@ -37,5 +37,10 @@ export const submitAssignmentValidator = vine.compile(
 export const gradeSubmissionValidator = vine.compile(
   vine.object({
     grade: vine.number().min(0),
+    recoveryGrade: vine.number().min(0).max(10).optional().nullable(),
+    recoveryGradeDate: vine
+      .date({ formats: ['iso8601'] })
+      .optional()
+      .nullable(),
   })
 )
