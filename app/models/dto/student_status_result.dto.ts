@@ -22,6 +22,19 @@ export default class StudentStatusResultDto {
     dueDate: string
   }[]
 
+  declare subPeriodGrades?: {
+    subPeriodId: string
+    subPeriodName: string
+    order: number
+    grade: number | null
+    recoveryGrade: number | null
+    finalGrade: number | null
+    weight: number
+    minimumGrade: number
+    hasRecovery: boolean
+    status: string
+  }[]
+
   constructor(data: StudentStatusResultDto) {
     this.id = data.id
     this.name = data.name
@@ -33,6 +46,7 @@ export default class StudentStatusResultDto {
     this.pointsUntilPass = data.pointsUntilPass
     this.classesUntilFail = data.classesUntilFail
     this.missedAssignments = data.missedAssignments
+    this.subPeriodGrades = data.subPeriodGrades
   }
 
   static fromArray(data: StudentStatusResultDto[]): StudentStatusResultDto[] {

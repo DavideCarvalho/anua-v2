@@ -8,6 +8,7 @@ import Attendance from '#models/attendance'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import { getStudents } from '#services/class_students_service'
+import { SubPeriodGradeCalculator } from '#services/sub_period_grade_calculator'
 import AppException from '#exceptions/app_exception'
 import { getStudentStatusValidator } from '#validators/student_status'
 
@@ -151,150 +152,176 @@ export default class GetStudentStatusController {
           ? (totalAssignmentPoints + totalExamPoints) / totalItems
           : 0
 
+    const usesSubPeriods = !!school.periodStructure
+
     // Build result for each student
-    const results: StudentStatusResult[] = students.map((student) => {
-      // Get student's assignment grades
-      const studentAssignmentList = studentAssignments.filter((sa) => sa.studentId === student.id)
-      const gradedAssignments = studentAssignmentList.filter(
-        (sa) => sa.grade !== null && gradableAssignmentIds.has(sa.assignmentId)
-      )
-
-      // Get student's exam grades
-      const studentExamList = studentExamGrades.filter((eg) => eg.studentId === student.id)
-      const gradedExams = studentExamList.filter(
-        (eg) => eg.score !== null && eg.attended && gradableExamIds.has(eg.examId)
-      )
-
-      // Calculate final grade (assignments + exams)
-      let finalGrade = 0
-      const totalGradedItems = gradedAssignments.length + gradedExams.length
-
-      if (totalGradedItems > 0) {
-        const assignmentSum = gradedAssignments.reduce((sum, sa) => sum + (sa.grade ?? 0), 0)
-        const examSum = gradedExams.reduce((sum, eg) => sum + (eg.score ?? 0), 0)
-
-        if (calculationAlgorithm === 'SUM') {
-          finalGrade = assignmentSum + examSum
-        } else {
-          finalGrade = (assignmentSum + examSum) / totalGradedItems
+    const results: (StudentStatusResult & { subPeriodGrades?: unknown[] })[] = await Promise.all(
+      students.map(async (student) => {
+        // Check if school uses sub-periods
+        let subPeriodResult = null
+        if (usesSubPeriods) {
+          subPeriodResult = await SubPeriodGradeCalculator.calculateForStudent(
+            school,
+            academicPeriodId,
+            student.id,
+            subjectId,
+            classId,
+            calculationAlgorithm
+          )
         }
-      }
 
-      // Find missed assignments (not submitted or no grade)
-      const missedAssignmentsList = assignments.filter((assignment) => {
-        const studentAssignment = studentAssignmentList.find(
-          (sa) => sa.assignmentId === assignment.id
+        // Get student's assignment grades
+        const studentAssignmentList = studentAssignments.filter((sa) => sa.studentId === student.id)
+        const gradedAssignments = studentAssignmentList.filter(
+          (sa) => sa.grade !== null && gradableAssignmentIds.has(sa.assignmentId)
         )
-        return !studentAssignment || studentAssignment.grade === null
-      })
 
-      // Find missed exams (not attended or no score)
-      const missedExamsList = exams.filter((exam) => {
-        const studentExam = studentExamList.find((eg) => eg.examId === exam.id)
-        return !studentExam || !studentExam.attended || studentExam.score === null
-      })
+        // Get student's exam grades
+        const studentExamList = studentExamGrades.filter((eg) => eg.studentId === student.id)
+        const gradedExams = studentExamList.filter(
+          (eg) => eg.score !== null && eg.attended && gradableExamIds.has(eg.examId)
+        )
 
-      // Combine missed items
-      const missedItems = [
-        ...missedAssignmentsList.map((a) => ({
-          id: a.id,
-          name: a.name,
-          dueDate: a.dueDate.toISO() ?? '',
-        })),
-        ...missedExamsList.map((e) => ({
-          id: e.id,
-          name: e.title,
-          dueDate: e.examDate.toISO() ?? '',
-        })),
-      ]
+        // Calculate final grade (assignments + exams)
+        let finalGrade = 0
 
-      // Calculate attendance
-      const studentAttendanceList = studentAttendance.filter((sa) => sa.studentId === student.id)
-      const totalClassesWithRecords = studentAttendanceList.length
-      const attendedClasses = studentAttendanceList.filter(
-        (sa) => sa.status === 'PRESENT' || sa.status === 'LATE'
-      ).length
-
-      const attendancePercentage =
-        totalClassesWithRecords > 0 ? (attendedClasses / totalClassesWithRecords) * 100 : 100
-
-      // Calculate classes until fail (margin of 5 classes)
-      const classesUntilFail =
-        totalClassesWithRecords > 0
-          ? Math.max(
-              0,
-              Math.floor(
-                attendedClasses - (totalClassesWithRecords * minimumAttendancePercentage) / 100
-              ) + 5
-            )
-          : null
-
-      const hasGradeCriteria = totalItems > 0
-
-      // Calculate points until pass
-      const pointsUntilPass = hasGradeCriteria ? Math.max(0, minimumGrade - finalGrade) : null
-
-      // Determine status
-      let status: StudentStatus
-
-      // If no assignments, no exams AND no classes, we can't evaluate yet
-      const hasNoData = !hasGradeCriteria && totalClassesWithRecords === 0
-
-      // Check if close to attendance fail (5 or fewer classes margin)
-      const hasAnyAbsence = attendedClasses < totalClassesWithRecords
-      const isCloseToAttendanceFail =
-        hasAnyAbsence && classesUntilFail !== null && classesUntilFail <= 5 && classesUntilFail > 0
-
-      let failureReason: StudentStatusResult['failureReason'] = null
-
-      if (hasNoData) {
-        status = 'IN_PROGRESS'
-      } else {
-        const isFailingGrade = hasGradeCriteria && finalGrade < minimumGrade
-        const isFailingAttendance =
-          totalClassesWithRecords > 0 && attendancePercentage < minimumAttendancePercentage
-
-        const hasPassingGrade = !isFailingGrade
-        const hasPassingAttendance = !isFailingAttendance
-
-        if (!hasPassingGrade || !hasPassingAttendance) {
-          status = 'FAILED'
-          if (isFailingGrade && isFailingAttendance) {
-            failureReason = 'BOTH'
-          } else if (isFailingGrade) {
-            failureReason = 'GRADE'
-          } else {
-            failureReason = 'ATTENDANCE'
-          }
-        } else if (isCloseToAttendanceFail) {
-          status = 'AT_RISK_ATTENDANCE'
-        } else if (
-          pointsUntilPass !== null &&
-          pointsUntilPass > 0 &&
-          pointsUntilPass <= maxPossibleGrade * 0.2
-        ) {
-          status = 'AT_RISK_GRADE'
+        if (subPeriodResult !== null && subPeriodResult.finalGrade !== null) {
+          finalGrade = subPeriodResult.finalGrade
         } else {
-          status = 'APPROVED'
-        }
-      }
+          const totalGradedItems = gradedAssignments.length + gradedExams.length
 
-      return {
-        id: student.id,
-        name: student.name,
-        status,
-        failureReason,
-        finalGrade: Number.parseFloat(finalGrade.toFixed(1)),
-        maxPossibleGrade: Number.parseFloat(maxPossibleGrade.toFixed(1)),
-        attendancePercentage: Number.parseFloat(attendancePercentage.toFixed(1)),
-        pointsUntilPass:
-          pointsUntilPass !== null && pointsUntilPass > 0
-            ? Number.parseFloat(pointsUntilPass.toFixed(1))
-            : null,
-        classesUntilFail: isCloseToAttendanceFail ? classesUntilFail : null,
-        missedAssignments: missedItems,
-      }
-    })
+          if (totalGradedItems > 0) {
+            const assignmentSum = gradedAssignments.reduce((sum, sa) => sum + (sa.grade ?? 0), 0)
+            const examSum = gradedExams.reduce((sum, eg) => sum + (eg.score ?? 0), 0)
+
+            if (calculationAlgorithm === 'SUM') {
+              finalGrade = assignmentSum + examSum
+            } else {
+              finalGrade = (assignmentSum + examSum) / totalGradedItems
+            }
+          }
+        }
+
+        // Find missed assignments (not submitted or no grade)
+        const missedAssignmentsList = assignments.filter((assignment) => {
+          const studentAssignment = studentAssignmentList.find(
+            (sa) => sa.assignmentId === assignment.id
+          )
+          return !studentAssignment || studentAssignment.grade === null
+        })
+
+        // Find missed exams (not attended or no score)
+        const missedExamsList = exams.filter((exam) => {
+          const studentExam = studentExamList.find((eg) => eg.examId === exam.id)
+          return !studentExam || !studentExam.attended || studentExam.score === null
+        })
+
+        // Combine missed items
+        const missedItems = [
+          ...missedAssignmentsList.map((a) => ({
+            id: a.id,
+            name: a.name,
+            dueDate: a.dueDate.toISO() ?? '',
+          })),
+          ...missedExamsList.map((e) => ({
+            id: e.id,
+            name: e.title,
+            dueDate: e.examDate.toISO() ?? '',
+          })),
+        ]
+
+        // Calculate attendance
+        const studentAttendanceList = studentAttendance.filter((sa) => sa.studentId === student.id)
+        const totalClassesWithRecords = studentAttendanceList.length
+        const attendedClasses = studentAttendanceList.filter(
+          (sa) => sa.status === 'PRESENT' || sa.status === 'LATE'
+        ).length
+
+        const attendancePercentage =
+          totalClassesWithRecords > 0 ? (attendedClasses / totalClassesWithRecords) * 100 : 100
+
+        // Calculate classes until fail (margin of 5 classes)
+        const classesUntilFail =
+          totalClassesWithRecords > 0
+            ? Math.max(
+                0,
+                Math.floor(
+                  attendedClasses - (totalClassesWithRecords * minimumAttendancePercentage) / 100
+                ) + 5
+              )
+            : null
+
+        const hasGradeCriteria = totalItems > 0
+
+        // Calculate points until pass
+        const pointsUntilPass = hasGradeCriteria ? Math.max(0, minimumGrade - finalGrade) : null
+
+        // Determine status
+        let status: StudentStatus
+
+        // If no assignments, no exams AND no classes, we can't evaluate yet
+        const hasNoData = !hasGradeCriteria && totalClassesWithRecords === 0
+
+        // Check if close to attendance fail (5 or fewer classes margin)
+        const hasAnyAbsence = attendedClasses < totalClassesWithRecords
+        const isCloseToAttendanceFail =
+          hasAnyAbsence &&
+          classesUntilFail !== null &&
+          classesUntilFail <= 5 &&
+          classesUntilFail > 0
+
+        let failureReason: StudentStatusResult['failureReason'] = null
+
+        if (hasNoData) {
+          status = 'IN_PROGRESS'
+        } else {
+          const isFailingGrade = hasGradeCriteria && finalGrade < minimumGrade
+          const isFailingAttendance =
+            totalClassesWithRecords > 0 && attendancePercentage < minimumAttendancePercentage
+
+          const hasPassingGrade = !isFailingGrade
+          const hasPassingAttendance = !isFailingAttendance
+
+          if (!hasPassingGrade || !hasPassingAttendance) {
+            status = 'FAILED'
+            if (isFailingGrade && isFailingAttendance) {
+              failureReason = 'BOTH'
+            } else if (isFailingGrade) {
+              failureReason = 'GRADE'
+            } else {
+              failureReason = 'ATTENDANCE'
+            }
+          } else if (isCloseToAttendanceFail) {
+            status = 'AT_RISK_ATTENDANCE'
+          } else if (
+            pointsUntilPass !== null &&
+            pointsUntilPass > 0 &&
+            pointsUntilPass <= maxPossibleGrade * 0.2
+          ) {
+            status = 'AT_RISK_GRADE'
+          } else {
+            status = 'APPROVED'
+          }
+        }
+
+        return {
+          id: student.id,
+          name: student.name,
+          status,
+          failureReason,
+          finalGrade: Number.parseFloat(finalGrade.toFixed(1)),
+          maxPossibleGrade: Number.parseFloat(maxPossibleGrade.toFixed(1)),
+          attendancePercentage: Number.parseFloat(attendancePercentage.toFixed(1)),
+          pointsUntilPass:
+            pointsUntilPass !== null && pointsUntilPass > 0
+              ? Number.parseFloat(pointsUntilPass.toFixed(1))
+              : null,
+          classesUntilFail: isCloseToAttendanceFail ? classesUntilFail : null,
+          missedAssignments: missedItems,
+          ...(subPeriodResult ? { subPeriodGrades: subPeriodResult.subPeriodGrades } : {}),
+        }
+      })
+    )
 
     return response.ok(results)
   }
