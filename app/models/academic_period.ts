@@ -5,6 +5,7 @@ import { slugify } from '@adonisjs/lucid-slugify'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import CourseHasAcademicPeriod from './course_has_academic_period.js'
+import AcademicSubPeriod from './academic_sub_period.js'
 
 export type AcademicPeriodSegment =
   | 'KINDERGARTEN'
@@ -97,4 +98,7 @@ export default class AcademicPeriod extends BaseModel {
   // - Calendar
   // - StudentHasAcademicPeriod
   // - Exam
+
+  @hasMany(() => AcademicSubPeriod, { foreignKey: 'academicPeriodId' })
+  declare subPeriods: HasMany<typeof AcademicSubPeriod>
 }
