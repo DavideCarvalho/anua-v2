@@ -1020,6 +1020,14 @@ export interface ApiDefinition {
           }
         }
       }
+      academicSubPeriods: {
+        index: typeof routes['api.v1.academic_sub_periods.index']
+        show: typeof routes['api.v1.academic_sub_periods.show']
+        store: typeof routes['api.v1.academic_sub_periods.store']
+        generate: typeof routes['api.v1.academic_sub_periods.generate']
+        update: typeof routes['api.v1.academic_sub_periods.update']
+        destroy: typeof routes['api.v1.academic_sub_periods.destroy']
+      }
       cspReport: typeof routes['api.v1.csp_report']
     }
   }

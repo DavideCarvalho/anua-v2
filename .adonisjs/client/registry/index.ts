@@ -4188,6 +4188,42 @@ const routes = {
     tokens: [{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"api","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"v1","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"escola","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"inquiries","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/escola/inquiries/:inquiryId/resolve","type":0,"val":"resolve","end":""}],
     types: placeholder as Registry['api.v1.escola.inquiries.inquiries.resolve']['types'],
   },
+  'api.v1.academic_sub_periods.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/academic-sub-periods',
+    tokens: [{"old":"/api/v1/academic-sub-periods","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods","type":0,"val":"academic-sub-periods","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.index']['types'],
+  },
+  'api.v1.academic_sub_periods.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/academic-sub-periods/:id',
+    tokens: [{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.show']['types'],
+  },
+  'api.v1.academic_sub_periods.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/academic-sub-periods',
+    tokens: [{"old":"/api/v1/academic-sub-periods","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods","type":0,"val":"academic-sub-periods","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.store']['types'],
+  },
+  'api.v1.academic_sub_periods.generate': {
+    methods: ["POST"],
+    pattern: '/api/v1/academic-sub-periods/generate',
+    tokens: [{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"generate","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.generate']['types'],
+  },
+  'api.v1.academic_sub_periods.update': {
+    methods: ["PUT"],
+    pattern: '/api/v1/academic-sub-periods/:id',
+    tokens: [{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.update']['types'],
+  },
+  'api.v1.academic_sub_periods.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/academic-sub-periods/:id',
+    tokens: [{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.destroy']['types'],
+  },
   'api.v1.csp_report': {
     methods: ["POST"],
     pattern: '/api/v1/csp-report',

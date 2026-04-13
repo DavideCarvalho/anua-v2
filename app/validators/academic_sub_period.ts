@@ -14,7 +14,7 @@ export const createAcademicSubPeriodValidator = vine.compile(
     name: vine.string().trim().minLength(2).maxLength(255),
     order: vine.number().min(1).max(12),
     startDate: vine.date({ formats: ['iso8601'] }),
-    endDate: vine.date({ formats: ['iso8601'] }).afterOrEqualTo('startDate'),
+    endDate: vine.date({ formats: ['iso8601'] }).afterOrSameAs('startDate'),
     weight: vine.number().min(0).max(10).optional(),
     minimumGrade: vine.number().min(0).max(10).optional().nullable(),
     hasRecovery: vine.boolean().optional(),

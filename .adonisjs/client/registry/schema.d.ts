@@ -8371,6 +8371,78 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/resolve_inquiry_controller').default['handle']>>>
     }
   }
+  'api.v1.academic_sub_periods.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/academic-sub-periods'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/academic_sub_period').listAcademicSubPeriodsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/index').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/index').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.academic_sub_periods.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/academic-sub-periods/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/show').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/show').default['handle']>>>
+    }
+  }
+  'api.v1.academic_sub_periods.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/academic-sub-periods'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/academic_sub_period').createAcademicSubPeriodValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/academic_sub_period').createAcademicSubPeriodValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/store').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/store').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.academic_sub_periods.generate': {
+    methods: ["POST"]
+    pattern: '/api/v1/academic-sub-periods/generate'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/academic_sub_period').generateSubPeriodsValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/academic_sub_period').generateSubPeriodsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/generate_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/generate_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.academic_sub_periods.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/academic-sub-periods/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/academic_sub_period').updateAcademicSubPeriodValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/academic_sub_period').updateAcademicSubPeriodValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/update').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/update').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.academic_sub_periods.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/academic-sub-periods/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/destroy').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/destroy').default['handle']>>>
+    }
+  }
   'api.v1.csp_report': {
     methods: ["POST"]
     pattern: '/api/v1/csp-report'

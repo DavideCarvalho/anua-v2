@@ -1,5 +1,4 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import AcademicPeriod from '#models/academic_period'
 import AcademicSubPeriod from '#models/academic_sub_period'
 import School from '#models/school'
@@ -82,6 +81,6 @@ export default class GenerateSubPeriodsController {
       subPeriods.push(subPeriod)
     }
 
-    return serialize(AcademicSubPeriodTransformer.collection(subPeriods))
+    return serialize(AcademicSubPeriodTransformer.transform(subPeriods))
   }
 }

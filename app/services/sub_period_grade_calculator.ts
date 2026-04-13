@@ -72,8 +72,6 @@ export class SubPeriodGradeCalculator {
             .select('examId', 'score', 'attended', 'recoveryGrade')
         : []
 
-    const assignmentMap = new Map(assignments.map((a) => [a.id, a]))
-    const examMap = new Map(exams.map((e) => [e.id, e]))
     const assignmentGradeMap = new Map(studentAssignments.map((sa) => [sa.assignmentId, sa]))
     const examGradeMap = new Map(studentExamGrades.map((eg) => [eg.examId, eg]))
 
@@ -137,8 +135,8 @@ export class SubPeriodGradeCalculator {
   }
 
   private static calculateGrade(
-    assignments: (typeof Assignment)[],
-    exams: (typeof Exam)[],
+    assignments: Assignment[],
+    exams: Exam[],
     assignmentGradeMap: Map<string, any>,
     examGradeMap: Map<string, any>,
     calculationAlgorithm: string
@@ -179,8 +177,8 @@ export class SubPeriodGradeCalculator {
   }
 
   private static calculateRecoveryGrade(
-    assignments: (typeof Assignment)[],
-    exams: (typeof Exam)[],
+    assignments: Assignment[],
+    exams: Exam[],
     assignmentGradeMap: Map<string, any>,
     examGradeMap: Map<string, any>
   ): number | null {
