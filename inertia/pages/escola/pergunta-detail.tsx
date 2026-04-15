@@ -5,6 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useEffect } from 'react'
 import {
   MessageCircleQuestion,
   XCircle,
@@ -122,35 +123,6 @@ async function createMessage(inquiryId: string, data: MessageFormValues): Promis
   return response.json()
 }
 
-async function resolveInquiry(inquiryId: string): Promise<InquiryDetail> {
-  const response = await fetch(`/api/v1/escola/inquiries/${inquiryId}/resolve`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Falha ao resolver pergunta')
-  }
-
-  return response.json()
-}
-
-function StatusBadge({ status }: { status: InquiryStatus }) {
-  const variants: Record<
-    InquiryStatus,
-    { label: string; variant: 'default' | 'secondary' | 'outline' }
-  > = {
-    OPEN: { label: 'Aberta', variant: 'default' },
-    RESOLVED: { label: 'Resolvida', variant: 'secondary' },
-    CLOSED: { label: 'Fechada', variant: 'outline' },
-  }
-
-  const { label, variant } = variants[status] || { label: status, variant: 'outline' }
-
-  return <Badge variant={variant}>{label}</Badge>
-}
-
 function AuthorBadge({ authorType }: { authorType: Message['authorType'] }) {
   const labels: Record<Message['authorType'], string> = {
     RESPONSIBLE: 'Responsável',
@@ -248,27 +220,20 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
     },
   })
 
-  const resolveMutation = useMutation({
-    mutationFn: () => resolveInquiry(inquiryId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['escola-inquiry', inquiryId] })
-      queryClient.invalidateQueries({ queryKey: ['escola-inquiries'] })
-      toast.success('Pergunta marcada como resolvida')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    },
-  })
+  useEffect(() => {
+    if (inquiry) {
+      fetch(`/api/v1/escola/inquiries/${inquiryId}/mark-read`, {
+        method: 'POST',
+        credentials: 'include',
+      }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ['escola-inquiries'] })
+      })
+    }
+  }, [inquiry?.id])
 
   const onSendMessage = (data: MessageFormValues) => {
     messageMutation.mutate(data)
   }
-
-  const handleResolve = () => {
-    resolveMutation.mutate()
-  }
-
-  const isOpen = inquiry?.status === 'OPEN'
 
   if (isLoading) {
     return <InquiryDetailSkeleton />
@@ -329,7 +294,6 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
                 )}
               </CardDescription>
             </div>
-            <StatusBadge status={inquiry.status} />
           </div>
         </CardHeader>
         <CardContent>
@@ -365,43 +329,24 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
             ))}
           </div>
 
-          {isOpen && (
-            <div className="border-t pt-4 space-y-4">
-              <form onSubmit={form.handleSubmit(onSendMessage)} className="space-y-3">
-                <Textarea
-                  placeholder="Digite sua resposta..."
-                  rows={3}
-                  {...form.register('body')}
-                />
-                {form.formState.errors.body && (
-                  <p className="text-sm text-destructive">{form.formState.errors.body.message}</p>
-                )}
-                <div className="flex items-center gap-2">
-                  <Button type="submit" disabled={messageMutation.isPending}>
-                    {messageMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" />
-                    )}
-                    Enviar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleResolve}
-                    disabled={resolveMutation.isPending}
-                  >
-                    {resolveMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                    )}
-                    Marcar como resolvida
-                  </Button>
-                </div>
-              </form>
-            </div>
-          )}
+          <div className="border-t pt-4 space-y-4">
+            <form onSubmit={form.handleSubmit(onSendMessage)} className="space-y-3">
+              <Textarea placeholder="Digite sua resposta..." rows={3} {...form.register('body')} />
+              {form.formState.errors.body && (
+                <p className="text-sm text-destructive">{form.formState.errors.body.message}</p>
+              )}
+              <div className="flex items-center gap-2">
+                <Button type="submit" disabled={messageMutation.isPending}>
+                  {messageMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="mr-2 h-4 w-4" />
+                  )}
+                  Enviar
+                </Button>
+              </div>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -451,7 +396,7 @@ export default function PerguntaDetailPage() {
 
   return (
     <EscolaLayout>
-      <Head title="Detalhe da dúvida" />
+      <Head title="Mensagem" />
 
       <ErrorBoundary
         fallback={
