@@ -7,6 +7,7 @@ import User from './user.js'
 import School from './school.js'
 import ParentInquiryMessage from './parent_inquiry_message.js'
 import ParentInquiryRecipient from './parent_inquiry_recipient.js'
+import ParentInquiryReadStatus from './parent_inquiry_read_status.js'
 
 export type ParentInquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
 
@@ -67,4 +68,7 @@ export default class ParentInquiry extends BaseModel {
 
   @hasMany(() => ParentInquiryRecipient, { foreignKey: 'inquiryId' })
   declare recipients: HasMany<typeof ParentInquiryRecipient>
+
+  @hasMany(() => ParentInquiryReadStatus, { foreignKey: 'inquiryId' })
+  declare readStatuses: HasMany<typeof ParentInquiryReadStatus>
 }
