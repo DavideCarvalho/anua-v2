@@ -6,6 +6,7 @@ const ShowInquiryController = () => import('#controllers/escola/show_inquiry_con
 const CreateInquiryMessageController = () =>
   import('#controllers/escola/create_inquiry_message_controller')
 const ResolveInquiryController = () => import('#controllers/escola/resolve_inquiry_controller')
+const MarkInquiryReadController = () => import('#controllers/escola/mark_inquiry_read_controller')
 
 export function registerEscolaInquiriesApiRoutes() {
   router
@@ -18,6 +19,9 @@ export function registerEscolaInquiriesApiRoutes() {
       router
         .post('/inquiries/:inquiryId/resolve', [ResolveInquiryController])
         .as('inquiries.resolve')
+      router
+        .post('/inquiries/:inquiryId/mark-read', [MarkInquiryReadController])
+        .as('inquiries.mark-read')
     })
     .prefix('/escola')
     .use([middleware.auth(), middleware.impersonation(), middleware.requireSchool()])
