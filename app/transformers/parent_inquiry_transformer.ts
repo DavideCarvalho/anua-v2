@@ -33,6 +33,18 @@ export default class ParentInquiryTransformer extends BaseTransformer<ParentInqu
       recipients: ParentInquiryRecipientTransformer.transform(
         this.whenLoaded(this.resource.recipients)
       )?.depth(6),
+      hasUnread: this.computeHasUnread(this.resource),
     }
+  }
+
+  private computeHasUnread(inquiry: ParentInquiry): boolean {
+    if (!inquiry.readStatuses || inquiry.readStatuses.length === 0) {
+      return true
+    }
+
+    const lastReadAt = inquiry.readStatuses[0].lastReadAt
+    const messages = inquiry.messages || []
+
+    return messages.some((msg) => msg.createdAt > lastReadAt)
   }
 }

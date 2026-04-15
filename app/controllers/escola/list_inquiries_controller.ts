@@ -39,6 +39,7 @@ export default class ListInquiriesController {
       .whereIn('schoolId', scopedSchoolIds)
       .preload('student')
       .preload('createdByResponsible')
+      .preload('readStatuses', (rq) => rq.where('userId', user.id))
       .preload('messages', (mq) => {
         mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
       })
@@ -47,7 +48,7 @@ export default class ListInquiriesController {
       query.where('status', payload.status)
     }
 
-    const result = await query.orderBy('createdAt', 'desc').paginate(page, limit)
+    const result = await query.orderBy('updatedAt', 'desc').paginate(page, limit)
 
     return response.ok(
       await serialize(ParentInquiryTransformer.paginate(result.all(), result.getMeta()))
