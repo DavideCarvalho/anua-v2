@@ -225,11 +225,15 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
       fetch(`/api/v1/escola/inquiries/${inquiryId}/mark-read`, {
         method: 'POST',
         credentials: 'include',
-      }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['escola-inquiries'] })
       })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ['escola-inquiries'] })
+        })
+        .catch(() => {
+          // Silently fail - not critical
+        })
     }
-  }, [inquiry?.id])
+  }, [inquiry?.id, inquiryId, queryClient])
 
   const onSendMessage = (data: MessageFormValues) => {
     messageMutation.mutate(data)
