@@ -19,7 +19,7 @@ import {
   School,
   Megaphone,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { buttonVariants } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn, ClientOnly } from '../../lib/utils'
@@ -36,7 +36,12 @@ interface NavItem {
   route: keyof typeof registry.routes
   href: string
   icon: React.ElementType
-  children?: { title: string; route: keyof typeof registry.routes; href: string }[]
+  children?: {
+    title: string
+    route: keyof typeof registry.routes
+    href: string
+    badge?: ReactNode
+  }[]
 }
 
 const navigation: NavItem[] = [
@@ -101,9 +106,10 @@ const navigation: NavItem[] = [
         href: '/escola/pedagogico/registro-diario',
       },
       {
-        title: 'Dúvidas dos responsáveis',
+        title: 'Mensagens',
         route: 'web.escola.perguntas',
         href: '/escola/duvidas-responsaveis',
+        badge: <UnreadMessagesBadge />,
       },
     ],
   },
@@ -257,13 +263,14 @@ function NavItemComponent({
                 route={child.route}
                 routeParams={undefined}
                 className={cn(
-                  'block rounded-lg px-3 py-2 text-sm transition-colors',
+                  'flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
                   pathname === child.href
                     ? 'bg-primary/10 text-primary font-medium'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
-                {child.title}
+                <span>{child.title}</span>
+                {child.badge}
               </Link>
             ))}
           </div>
@@ -286,6 +293,30 @@ function NavItemComponent({
       <Icon className="h-4 w-4" />
       {item.title}
     </Link>
+  )
+}
+
+function UnreadMessagesBadge() {
+  const [count, setCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/v1/escola/inquiries', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        const openCount = (data.data ?? []).filter(
+          (i: { status: string }) => i.status === 'OPEN'
+        ).length
+        setCount(openCount)
+      })
+      .catch(() => setCount(0))
+  }, [])
+
+  if (!count || count === 0) return null
+
+  return (
+    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">
+      {count > 99 ? '99+' : count}
+    </span>
   )
 }
 
@@ -402,7 +433,10 @@ export function EscolaLayout({ children, topbarActions }: EscolaLayoutProps) {
                 <Menu className="h-5 w-5" />
               </button>
 
-              <div data-testid="escola-layout-topbar-actions" className="ml-auto flex items-center gap-2">
+              <div
+                data-testid="escola-layout-topbar-actions"
+                className="ml-auto flex items-center gap-2"
+              >
                 {topbarActions}
                 <NotificationBell allNotificationsRoute="web.escola.notificacoes" />
               </div>

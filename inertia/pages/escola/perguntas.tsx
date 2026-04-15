@@ -203,16 +203,16 @@ function InquiriesSkeleton() {
 export default function PerguntasPage() {
   return (
     <EscolaLayout>
-      <Head title="Dúvidas dos responsáveis" />
+      <Head title="Mensagens" />
 
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <MessageCircleQuestion className="h-6 w-6" />
-            Dúvidas dos responsáveis
+            Mensagens
           </h1>
           <p className="text-muted-foreground">
-            Perguntas enviadas pelos responsáveis sobre os alunos
+            Mensagens enviadas pelos responsáveis sobre os alunos
           </p>
         </div>
 
