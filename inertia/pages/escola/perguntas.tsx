@@ -2,14 +2,14 @@ import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { MessageCircleQuestion, XCircle, Calendar, Clock, User, RefreshCw } from 'lucide-react'
+import { MessageCircleQuestion, XCircle, Clock, User, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { EscolaLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
+import { cn } from '../../lib/utils'
 
 type InquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
 
@@ -34,6 +34,7 @@ type InquiryItem = {
     authorType: string
     createdAt: string
   }>
+  hasUnread: boolean
 }
 
 type InquiryListResponse = {
@@ -55,21 +56,6 @@ async function listInquiries(): Promise<InquiryListResponse> {
   }
 
   return response.json()
-}
-
-function StatusBadge({ status }: { status: InquiryStatus }) {
-  const variants: Record<
-    InquiryStatus,
-    { label: string; variant: 'default' | 'secondary' | 'outline' }
-  > = {
-    OPEN: { label: 'Aberta', variant: 'default' },
-    RESOLVED: { label: 'Resolvida', variant: 'secondary' },
-    CLOSED: { label: 'Fechada', variant: 'outline' },
-  }
-
-  const { label, variant } = variants[status] || { label: status, variant: 'outline' }
-
-  return <Badge variant={variant}>{label}</Badge>
 }
 
 function InquiriesListContent() {
@@ -135,22 +121,25 @@ function InquiriesListContent() {
           routeParams={{ inquiryId: inquiry.id }}
           className="block"
         >
-          <Card className="border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+          <Card
+            className={cn(
+              'border-primary/20 hover:border-primary/40 transition-colors cursor-pointer',
+              inquiry.hasUnread && 'bg-muted/50 border-primary/40'
+            )}
+          >
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <MessageCircleQuestion className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-base">{inquiry.subject}</CardTitle>
+                  {inquiry.hasUnread && <div className="h-2 w-2 rounded-full bg-primary" />}
+                  <CardTitle className="text-base">
+                    Chat com {inquiry.createdByResponsible?.name || 'Responsável'}
+                  </CardTitle>
                 </div>
-                <StatusBadge status={inquiry.status} />
+                <span className="text-xs text-muted-foreground">
+                  {format(new Date(inquiry.updatedAt), 'HH:mm', { locale: ptBR })}
+                </span>
               </div>
               <CardDescription className="flex items-center gap-4 mt-2">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {format(new Date(inquiry.createdAt), "dd 'de' MMMM 'de' yyyy, HH:mm", {
-                    locale: ptBR,
-                  })}
-                </span>
                 {inquiry.student && (
                   <span className="flex items-center gap-1">
                     <User className="h-3 w-3" />
@@ -161,18 +150,13 @@ function InquiriesListContent() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {inquiry.messages[0]?.body || 'Sem mensagem'}
+                {inquiry.messages[inquiry.messages.length - 1]?.body || 'Sem mensagem'}
               </p>
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {inquiry.messages.length} mensagem{inquiry.messages.length !== 1 ? 's' : ''}
                 </div>
-                {inquiry.createdByResponsible && (
-                  <div className="text-xs text-muted-foreground">
-                    Por: {inquiry.createdByResponsible.name}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -211,9 +195,7 @@ export default function PerguntasPage() {
             <MessageCircleQuestion className="h-6 w-6" />
             Mensagens
           </h1>
-          <p className="text-muted-foreground">
-            Mensagens enviadas pelos responsáveis sobre os alunos
-          </p>
+          <p className="text-muted-foreground">Conversas com os responsáveis sobre os alunos</p>
         </div>
 
         <ErrorBoundary
