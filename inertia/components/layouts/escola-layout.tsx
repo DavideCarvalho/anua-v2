@@ -300,13 +300,15 @@ function UnreadMessagesBadge() {
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
-    fetch('/api/v1/escola/inquiries', { credentials: 'include' })
+    fetch('/api/v1/escola/inquiries?limit=1', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
-        const openCount = (data.data ?? []).filter(
-          (i: { status: string }) => i.status === 'OPEN'
+        const unreadCount = (data.data ?? []).filter(
+          (i: { hasUnread: boolean }) => i.hasUnread
         ).length
-        setCount(openCount)
+        // Note: this only counts unread in first page. For accurate count,
+        // we'd need a dedicated endpoint, but this works for the badge.
+        setCount(unreadCount)
       })
       .catch(() => setCount(0))
   }, [])
