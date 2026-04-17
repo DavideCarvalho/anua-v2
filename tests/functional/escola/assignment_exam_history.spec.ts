@@ -228,6 +228,36 @@ test.group('Assignment and exam history', (group) => {
     assert.equal(historyBody.data[0]?.changes[0]?.field, 'maxScore')
   })
 
+  test('creates assignment audit log on create', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher } = await createContext(school.id)
+
+    const dueDate = DateTime.now().plus({ days: 2 }).startOf('day')
+
+    const createResponse = await client.post('/api/v1/assignments').loginAs(user).json({
+      title: 'Atividade com auditoria de criacao',
+      description: 'Descricao para auditoria',
+      maxScore: 8,
+      dueDate: dueDate.toISO(),
+      classId: classEntity.id,
+      subjectId: subject.id,
+      teacherId: teacher.id,
+    })
+
+    createResponse.assertStatus(201)
+    const assignmentId = (createResponse.body() as { id: string }).id
+
+    const auditRow = await db
+      .from('AuditLog')
+      .where('entity', 'ASSIGNMENT')
+      .where('action', 'CREATE')
+      .where('entityId', assignmentId)
+      .first()
+
+    assert.exists(auditRow)
+    assert.equal(auditRow.userId, user.id)
+  })
+
   test('creates exam history with field-level diff on update', async ({ client, assert }) => {
     const { user, school } = await createEscolaAuthUser()
     const { classEntity, subject, teacher } = await createContext(school.id)
@@ -308,6 +338,37 @@ test.group('Assignment and exam history', (group) => {
     assert.equal(historyBody.data[0]?.actorUser?.id, user.id)
     assert.isString(historyBody.data[0]?.changedAt)
     assert.equal(historyBody.data[0]?.changes[0]?.field, 'status')
+  })
+
+  test('creates exam audit log on create', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher } = await createContext(school.id)
+
+    const scheduledDate = DateTime.now().plus({ days: 3 }).startOf('day')
+
+    const createResponse = await client.post('/api/v1/exams').loginAs(user).json({
+      title: 'Prova com auditoria de criacao',
+      description: 'Descricao para auditoria',
+      maxScore: 10,
+      type: 'WRITTEN',
+      scheduledDate: scheduledDate.toISO(),
+      classId: classEntity.id,
+      subjectId: subject.id,
+      teacherId: teacher.id,
+    })
+
+    createResponse.assertStatus(201)
+    const examId = (createResponse.body() as { id: string }).id
+
+    const auditRow = await db
+      .from('AuditLog')
+      .where('entity', 'EXAM')
+      .where('action', 'CREATE')
+      .where('entityId', examId)
+      .first()
+
+    assert.exists(auditRow)
+    assert.equal(auditRow.userId, user.id)
   })
 
   test('updates exam when scheduledDate is ISO datetime string', async ({ client }) => {

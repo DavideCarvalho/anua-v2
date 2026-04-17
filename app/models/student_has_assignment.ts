@@ -15,31 +15,31 @@ export default class StudentHasAssignment extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'studentId' })
   declare studentId: string
 
-  @column()
+  @column({ columnName: 'assignmentId' })
   declare assignmentId: string
 
-  @column()
+  @column({ columnName: 'grade' })
   declare grade: number | null
 
-  @column()
+  @column({ columnName: 'recoveryGrade' })
   declare recoveryGrade: number | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'recoveryGradeDate' })
   declare recoveryGradeDate: DateTime | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'submittedAt' })
   declare submittedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @belongsTo(() => Student, { foreignKey: 'studentId' })

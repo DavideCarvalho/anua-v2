@@ -1,14 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { createExamValidator } from '#validators/exam'
+import AuditLog from '#models/audit_log'
 import Exam from '#models/exam'
 import Class_ from '#models/class'
-import AcademicPeriod from '#models/academic_period'
 import AppException from '#exceptions/app_exception'
 import ExamTransformer from '#transformers/exam_transformer'
+import { resolveActiveClassAcademicPeriodId } from '#services/academic_periods/resolve_active_class_academic_period_service'
 
 export default class CreateExamController {
-  async handle({ request, response, serialize }: HttpContext) {
+  async handle({ auth, request, response, serialize }: HttpContext) {
     const payload = await request.validateUsing(createExamValidator)
 
     // Get the school from the class
@@ -17,21 +18,10 @@ export default class CreateExamController {
       throw AppException.notFound('Turma não encontrada')
     }
 
-    // Use provided academicPeriodId or fall back to active period
-    let academicPeriodId = payload.academicPeriodId
+    const activeClassAcademicPeriodId = await resolveActiveClassAcademicPeriodId(payload.classId)
 
-    if (!academicPeriodId) {
-      // Find active academic period for this school
-      const academicPeriod = await AcademicPeriod.query()
-        .where('schoolId', classRecord.schoolId)
-        .where('isActive', true)
-        .first()
-
-      if (!academicPeriod) {
-        throw AppException.notFound('Nenhum período letivo ativo encontrado')
-      }
-
-      academicPeriodId = academicPeriod.id
+    if (payload.academicPeriodId && payload.academicPeriodId !== activeClassAcademicPeriodId) {
+      throw AppException.badRequest('A turma não está vinculada ao período letivo informado')
     }
 
     const exam = await Exam.create({
@@ -48,13 +38,29 @@ export default class CreateExamController {
       teacherId: payload.teacherId,
       // Use derived values for fields not in validator
       schoolId: classRecord.schoolId,
-      academicPeriodId,
+      academicPeriodId: activeClassAcademicPeriodId,
       weight: 1,
     })
 
     await exam.load('class')
     await exam.load('subject')
     await exam.load('teacher')
+
+    if (auth.user) {
+      await AuditLog.create({
+        userId: auth.user.id,
+        action: 'CREATE',
+        entity: 'EXAM',
+        entityId: exam.id,
+        details: {
+          title: exam.title,
+          classId: exam.classId,
+          subjectId: exam.subjectId,
+          academicPeriodId: exam.academicPeriodId,
+          status: exam.status,
+        },
+      })
+    }
 
     return response.created(await serialize(ExamTransformer.transform(exam)))
   }

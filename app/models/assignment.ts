@@ -17,34 +17,34 @@ export default class Assignment extends BaseModel {
     }
   }
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, columnName: 'id' })
   declare id: string
 
-  @column()
+  @column({ columnName: 'name' })
   declare name: string
 
-  @column()
+  @column({ columnName: 'description' })
   declare description: string | null
 
-  @column.dateTime()
+  @column.dateTime({ columnName: 'dueDate' })
   declare dueDate: DateTime
 
-  @column()
+  @column({ columnName: 'grade' })
   declare grade: number | null
 
-  @column()
+  @column({ columnName: 'teacherHasClassId' })
   declare teacherHasClassId: string
 
-  @column()
+  @column({ columnName: 'academicPeriodId' })
   declare academicPeriodId: string
 
-  @column()
+  @column({ columnName: 'subPeriodId' })
   declare subPeriodId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   // Relationships

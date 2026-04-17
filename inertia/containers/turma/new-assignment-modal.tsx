@@ -265,7 +265,7 @@ export function NewAssignmentModal({
               : (selectedSubject?.teacherId ?? ''),
             academicPeriodId: requiresContextStep
               ? (resolvedContext?.academicPeriodId ?? undefined)
-              : undefined,
+              : _academicPeriodId,
             subPeriodId: data.subPeriodId || undefined,
           },
         })

@@ -251,6 +251,101 @@ test.group('Pedagogical calendar flow', (group) => {
     )
   })
 
+  test('requires active class-linked academic period when creating assignment without academicPeriodId', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher, academicPeriod } = await createPedagogicalFlowContext(
+      school.id
+    )
+
+    await academicPeriod.merge({ isActive: false }).save()
+
+    await AcademicPeriod.create({
+      name: `Periodo Desvinculado ${DateTime.now().toMillis()}`,
+      startDate: DateTime.now().startOf('month'),
+      endDate: DateTime.now().endOf('month'),
+      enrollmentStartDate: null,
+      enrollmentEndDate: null,
+      isActive: true,
+      segment: 'ELEMENTARY',
+      isClosed: false,
+      minimumGradeOverride: null,
+      minimumAttendanceOverride: null,
+      schoolId: school.id,
+      previousAcademicPeriodId: null,
+      deletedAt: null,
+    })
+
+    const response = await client
+      .post('/api/v1/assignments')
+      .loginAs(user)
+      .json({
+        title: 'Atividade sem periodo ativo vinculado',
+        description: 'Teste de validacao de contexto da turma',
+        maxScore: 10,
+        dueDate: DateTime.now().plus({ days: 1 }).toISO(),
+        classId: classEntity.id,
+        subjectId: subject.id,
+        teacherId: teacher.id,
+      })
+
+    response.assertStatus(404)
+
+    const created = await Assignment.query()
+      .where('name', 'Atividade sem periodo ativo vinculado')
+      .first()
+    assert.isNull(created)
+  })
+
+  test('requires active class-linked academic period when creating exam without academicPeriodId', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const { classEntity, subject, teacher, academicPeriod } = await createPedagogicalFlowContext(
+      school.id
+    )
+
+    await academicPeriod.merge({ isActive: false }).save()
+
+    await AcademicPeriod.create({
+      name: `Periodo Desvinculado Prova ${DateTime.now().toMillis()}`,
+      startDate: DateTime.now().startOf('month'),
+      endDate: DateTime.now().endOf('month'),
+      enrollmentStartDate: null,
+      enrollmentEndDate: null,
+      isActive: true,
+      segment: 'ELEMENTARY',
+      isClosed: false,
+      minimumGradeOverride: null,
+      minimumAttendanceOverride: null,
+      schoolId: school.id,
+      previousAcademicPeriodId: null,
+      deletedAt: null,
+    })
+
+    const response = await client
+      .post('/api/v1/exams')
+      .loginAs(user)
+      .json({
+        title: 'Prova sem periodo ativo vinculado',
+        description: 'Teste de validacao de contexto da turma',
+        maxScore: 10,
+        type: 'WRITTEN',
+        scheduledDate: DateTime.now().plus({ days: 1 }).toISO(),
+        classId: classEntity.id,
+        subjectId: subject.id,
+        teacherId: teacher.id,
+      })
+
+    response.assertStatus(404)
+
+    const created = await Exam.query().where('title', 'Prova sem periodo ativo vinculado').first()
+    assert.isNull(created)
+  })
+
   test('keeps class context isolation for semanario flow', async ({ client, assert }) => {
     const { user, school } = await createEscolaAuthUser()
 
