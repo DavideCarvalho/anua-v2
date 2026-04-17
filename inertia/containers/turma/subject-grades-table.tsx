@@ -81,8 +81,7 @@ function SubjectGradesTableContent({
   const { data: subPeriodsData } = useQuery(
     api.api.v1.academicSubPeriods.index.queryOptions({
       query: { academicPeriodId },
-    }),
-    { enabled: !!academicPeriodId }
+    })
   )
 
   const subPeriods = (subPeriodsData?.data ?? []) as Array<{
@@ -115,21 +114,6 @@ function SubjectGradesTableContent({
 
   if (students.length === 0) {
     return <GradesTableEmpty />
-  }
-
-  const getSubPeriodStatusBadge = (status: string) => {
-    switch (status) {
-      case 'APPROVED':
-        return <Badge variant="default">Aprovado</Badge>
-      case 'IN_RECOVERY':
-        return <Badge variant="secondary">Em Recuperacao</Badge>
-      case 'RECOVERED':
-        return <Badge variant="outline">Recuperado</Badge>
-      case 'FAILED':
-        return <Badge variant="destructive">Reprovado</Badge>
-      default:
-        return <Badge variant="secondary">Sem nota</Badge>
-    }
   }
 
   const renderStudentTable = (studentList: typeof students, subPeriodId?: string) => (

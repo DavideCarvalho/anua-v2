@@ -618,4 +618,102 @@ test.group('BillingReconciliationService', (group) => {
     const deletedInvoice = await Invoice.query().where('id', invoice.id).first()
     assert.isNull(deletedInvoice, 'Orphan invoice should be deleted')
   })
+
+  test('reconcileByInvoiceId resets stale chargedAmount when value changes and charge is invalidated', async ({
+    assert,
+  }) => {
+    await createTestRoles()
+    const studentRole = await Role.findByOrFail({ name: 'STUDENT' })
+
+    const school = await School.create({
+      name: 'Test School Stale Charged',
+      slug: 'test-school-stale-charged',
+    })
+
+    const user = await User.create({
+      name: 'Test Student Stale Charged',
+      slug: 'test-student-stale-charged',
+      email: 'stale-charged@test.com',
+      active: true,
+      whatsappContact: false,
+      grossSalary: 0,
+      schoolId: school.id,
+      roleId: studentRole.id,
+    })
+
+    const student = await Student.create({
+      id: user.id,
+      descountPercentage: 0,
+      monthlyPaymentAmount: 0,
+      isSelfResponsible: false,
+      balance: 0,
+    })
+
+    const {
+      academicPeriod: period,
+      level,
+      contract,
+      levelAssignment,
+    } = await createBillingFixtures(school, {
+      isActive: true,
+    })
+
+    const enrollment = await StudentHasLevel.create({
+      studentId: student.id,
+      levelId: level.id,
+      academicPeriodId: period.id,
+      contractId: contract.id,
+      levelAssignedToCourseAcademicPeriodId: levelAssignment.id,
+    })
+
+    const dueDate = DateTime.now().minus({ days: 8 }).startOf('day')
+    const payment = await StudentPayment.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'TUITION',
+      amount: 82500,
+      totalAmount: 130000,
+      month: dueDate.month,
+      year: dueDate.year,
+      dueDate,
+      status: 'OVERDUE',
+    })
+
+    const invoice = await Invoice.create({
+      studentId: student.id,
+      studentHasLevelId: enrollment.id,
+      contractId: contract.id,
+      type: 'MONTHLY',
+      month: payment.month,
+      year: payment.year,
+      dueDate,
+      status: 'OVERDUE',
+      baseAmount: 130000,
+      discountAmount: 0,
+      fineAmount: 2475,
+      interestAmount: 17325,
+      totalAmount: 123500,
+      platformFeeAmount: 0,
+      chargedAmount: 123500,
+      paymentGateway: 'ASAAS',
+      paymentGatewayId: 'pay_stale_123',
+      paymentMethod: 'BOLETO',
+    })
+
+    payment.invoiceId = invoice.id
+    await payment.save()
+
+    await BillingReconciliationService.reconcileByInvoiceId(invoice.id)
+
+    await invoice.refresh()
+
+    assert.equal(
+      invoice.totalAmount,
+      82500,
+      'Invoice total should be recalculated from payment base'
+    )
+    assert.isNull(invoice.paymentGatewayId, 'Stale gateway charge should be cleared')
+    assert.equal(invoice.chargedAmount, 0, 'Stale charged amount should be reset')
+  })
 })

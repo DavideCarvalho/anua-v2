@@ -1019,9 +1019,11 @@ function InvoicesContent() {
                     const fineAmount = Number(invoice.fineAmount || 0)
                     const interestAmount = Number(invoice.interestAmount || 0)
                     const platformFeeAmount = Number(invoice.platformFeeAmount || 0)
+                    const chargedAmountFromGateway = Number(invoice.chargedAmount || 0)
                     const chargedAmount =
-                      Number(invoice.chargedAmount || 0) ||
-                      Number(invoice.totalAmount || 0) + platformFeeAmount
+                      invoice.paymentGatewayId && chargedAmountFromGateway > 0
+                        ? chargedAmountFromGateway
+                        : Number(invoice.totalAmount || 0) + platformFeeAmount
                     const surchargeTotal = fineAmount + interestAmount
                     const netAmountReceived = Number(invoice.netAmountReceived || 0)
                     const daysOverdue = getDaysOverdue(invoice.dueDate)

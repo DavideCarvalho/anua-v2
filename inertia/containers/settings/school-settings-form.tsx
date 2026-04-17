@@ -113,9 +113,9 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
         calculationAlgorithm: school.calculationAlgorithm === 'SUM' ? 'SUM' : 'AVERAGE',
         minimumAttendancePercentage: school.minimumAttendancePercentage ?? 75,
         periodStructure:
-          (school.periodStructure as SchoolSettingsFormState['periodStructure']) || '',
+          ((school as any).periodStructure as SchoolSettingsFormState['periodStructure']) || '',
         recoveryGradeMethod:
-          (school.recoveryGradeMethod as SchoolSettingsFormState['recoveryGradeMethod']) ||
+          ((school as any).recoveryGradeMethod as SchoolSettingsFormState['recoveryGradeMethod']) ||
           'AVERAGE',
       })
     }

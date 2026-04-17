@@ -2,7 +2,7 @@ import AcademicSubPeriod from '#models/academic_sub_period'
 import Exam from '#models/exam'
 import Assignment from '#models/assignment'
 import ExamGrade from '#models/exam_grade'
-import School from '#models/school'
+import type School from '#models/school'
 import db from '@adonisjs/lucid/services/db'
 
 export type SubPeriodGrade = {

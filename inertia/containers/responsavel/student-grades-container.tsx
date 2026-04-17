@@ -88,10 +88,6 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
     }
   }
 
-  const hasSubPeriodGrades = data.bySubject.some(
-    (subject: SubjectGrade) => (subject as any).subPeriodGrades?.length > 0
-  )
-
   const renderSubjectGrades = (subjects: SubjectGrade[]) => (
     <div className="space-y-4">
       {subjects.map((subject: SubjectGrade) => {

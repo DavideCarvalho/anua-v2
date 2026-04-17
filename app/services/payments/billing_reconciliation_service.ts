@@ -122,6 +122,7 @@ export default class BillingReconciliationService {
       const previousDiscount = Number(invoice.discountAmount || 0)
       const previousFine = Number(invoice.fineAmount || 0)
       const previousInterest = Number(invoice.interestAmount || 0)
+      const previousCharged = Number(invoice.chargedAmount || 0)
       const hadCharge = invoice.paymentGatewayId
 
       const activePayments = [...invoice.payments].sort((a, b) => {
@@ -163,6 +164,7 @@ export default class BillingReconciliationService {
         previousFine !== fineAmount ||
         previousInterest !== interestAmount ||
         previousTotal !== totalAmount ||
+        (!invoice.paymentGatewayId && previousCharged > 0) ||
         invoice.contractId !== contractId ||
         invoice.dueDate.toISODate() !== earliestDueDate.toISODate()
 
@@ -191,6 +193,10 @@ export default class BillingReconciliationService {
         invoice.invoiceUrl = null
         invoice.paymentGateway = null
         invoice.paymentMethod = null
+        invoice.chargedAmount = 0
+        invoice.platformFeeAmount = 0
+      } else if (!invoice.paymentGatewayId && previousCharged > 0) {
+        invoice.chargedAmount = 0
       }
 
       await invoice.save()

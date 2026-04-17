@@ -55,42 +55,53 @@ function formatDate(dateStr: string | null): string {
 
 function SubPeriodEditDialog({
   subPeriod,
-  academicPeriodId,
   open,
   onOpenChange,
 }: {
   subPeriod: SubPeriod | null
-  academicPeriodId: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
   const queryClient = useQueryClient()
   const updateMutation = useMutation(api.api.v1.academicSubPeriods.update.mutationOptions())
 
-  const [formData, setFormData] = useState({
+  type SubPeriodFormData = {
+    name: string
+    startDate: Date | undefined
+    endDate: Date | undefined
+    weight: number
+    minimumGrade: number | null
+    hasRecovery: boolean
+    recoveryStartDate: Date | undefined
+    recoveryEndDate: Date | undefined
+  }
+
+  const [formData, setFormData] = useState<SubPeriodFormData>({
     name: '',
-    startDate: null as Date | null,
-    endDate: null as Date | null,
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
     weight: 1,
     minimumGrade: null as number | null,
     hasRecovery: false,
-    recoveryStartDate: null as Date | null,
-    recoveryEndDate: null as Date | null,
+    recoveryStartDate: undefined as Date | undefined,
+    recoveryEndDate: undefined as Date | undefined,
   })
 
   useEffect(() => {
     if (subPeriod) {
       setFormData({
         name: subPeriod.name,
-        startDate: subPeriod.startDate ? new Date(subPeriod.startDate) : null,
-        endDate: subPeriod.endDate ? new Date(subPeriod.endDate) : null,
+        startDate: subPeriod.startDate ? new Date(subPeriod.startDate) : undefined,
+        endDate: subPeriod.endDate ? new Date(subPeriod.endDate) : undefined,
         weight: subPeriod.weight,
         minimumGrade: subPeriod.minimumGrade,
         hasRecovery: subPeriod.hasRecovery,
         recoveryStartDate: subPeriod.recoveryStartDate
           ? new Date(subPeriod.recoveryStartDate)
-          : null,
-        recoveryEndDate: subPeriod.recoveryEndDate ? new Date(subPeriod.recoveryEndDate) : null,
+          : undefined,
+        recoveryEndDate: subPeriod.recoveryEndDate
+          ? new Date(subPeriod.recoveryEndDate)
+          : undefined,
       })
     }
   }, [subPeriod])
@@ -248,21 +259,19 @@ export function SubPeriodsForm({ academicPeriodId }: SubPeriodsFormProps) {
   const schoolId = user?.schoolId
   const queryClient = useQueryClient()
 
-  const { data: schoolData } = useQuery(
-    api.api.v1.schools.show.queryOptions({ params: { id: schoolId ?? '' } }),
-    { enabled: !!schoolId }
-  )
+  const { data: schoolData } = useQuery({
+    ...api.api.v1.schools.show.queryOptions({ params: { id: schoolId ?? '' } }),
+  })
 
   const {
     data: subPeriodsData,
     isLoading: isLoadingSubPeriods,
     refetch: refetchSubPeriods,
-  } = useQuery(
-    api.api.v1.academicSubPeriods.index.queryOptions({
+  } = useQuery({
+    ...api.api.v1.academicSubPeriods.index.queryOptions({
       query: { academicPeriodId },
     }),
-    { enabled: !!academicPeriodId }
-  )
+  })
 
   const generateMutation = useMutation(api.api.v1.academicSubPeriods.generate.mutationOptions())
 
@@ -449,7 +458,6 @@ export function SubPeriodsForm({ academicPeriodId }: SubPeriodsFormProps) {
 
       <SubPeriodEditDialog
         subPeriod={editingSubPeriod}
-        academicPeriodId={academicPeriodId}
         open={!!editingSubPeriod}
         onOpenChange={(open) => {
           if (!open) setEditingSubPeriod(null)
