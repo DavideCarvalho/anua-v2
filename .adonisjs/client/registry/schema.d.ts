@@ -8371,6 +8371,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/resolve_inquiry_controller').default['handle']>>>
     }
   }
+  'api.v1.escola.inquiries.inquiries.mark-read': {
+    methods: ["POST"]
+    pattern: '/api/v1/escola/inquiries/:inquiryId/mark-read'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/escola/mark_inquiry_read_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/escola/mark_inquiry_read_controller').default['handle']>>>
+    }
+  }
   'api.v1.academic_sub_periods.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/academic-sub-periods'

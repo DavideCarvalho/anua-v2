@@ -1017,6 +1017,7 @@ export interface ApiDefinition {
               create: typeof routes['api.v1.escola.inquiries.inquiries.messages.create']
             }
             resolve: typeof routes['api.v1.escola.inquiries.inquiries.resolve']
+            markRead: typeof routes['api.v1.escola.inquiries.inquiries.mark-read']
           }
         }
       }

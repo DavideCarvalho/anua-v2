@@ -1761,6 +1761,23 @@ export class ParentInquiryMessageSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class ParentInquiryReadStatusSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'inquiryId', 'lastReadAt', 'updatedAt', 'userId'] as const
+  $columns = ParentInquiryReadStatusSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare inquiryId: string
+  @column.dateTime()
+  declare lastReadAt: DateTime
+  @column.dateTime()
+  declare updatedAt: DateTime
+  @column()
+  declare userId: string
+}
+
 export class ParentInquiryRecipientSchema extends BaseModel {
   static $columns = ['createdAt', 'id', 'inquiryId', 'userId', 'userType'] as const
   $columns = ParentInquiryRecipientSchema.$columns
