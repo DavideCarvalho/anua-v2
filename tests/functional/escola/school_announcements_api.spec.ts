@@ -390,8 +390,12 @@ test.group('School announcements API', (group) => {
 
     const body = response.body()
     assert.isArray(body.data)
-    assert.isTrue(body.data.some((item: { id: string }) => item.id === schoolStudent.studentUser.id))
-    assert.isFalse(body.data.some((item: { id: string }) => item.id === outsideStudent.studentUser.id))
+    assert.isTrue(
+      body.data.some((item: { id: string }) => item.id === schoolStudent.studentUser.id)
+    )
+    assert.isFalse(
+      body.data.some((item: { id: string }) => item.id === outsideStudent.studentUser.id)
+    )
   })
 
   test('updates draft audience to specific students', async ({ client, assert }) => {
@@ -432,7 +436,9 @@ test.group('School announcements API', (group) => {
     const audiences = updated.audiences as Array<{ scopeType: string; scopeId: string }>
 
     assert.isTrue(
-      audiences.some((audience) => audience.scopeType === 'STUDENT' && audience.scopeId === studentUser.id)
+      audiences.some(
+        (audience) => audience.scopeType === 'STUDENT' && audience.scopeId === studentUser.id
+      )
     )
     assert.isFalse(audiences.some((audience) => audience.scopeType === 'CLASS'))
   })
