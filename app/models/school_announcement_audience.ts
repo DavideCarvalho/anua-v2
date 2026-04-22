@@ -4,7 +4,12 @@ import { BaseModel, beforeCreate, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import SchoolAnnouncement from './school_announcement.js'
 
-export type SchoolAnnouncementAudienceScopeType = 'ACADEMIC_PERIOD' | 'COURSE' | 'LEVEL' | 'CLASS'
+export type SchoolAnnouncementAudienceScopeType =
+  | 'ACADEMIC_PERIOD'
+  | 'COURSE'
+  | 'LEVEL'
+  | 'CLASS'
+  | 'STUDENT'
 
 export default class SchoolAnnouncementAudience extends BaseModel {
   static table = 'SchoolAnnouncementAudience'

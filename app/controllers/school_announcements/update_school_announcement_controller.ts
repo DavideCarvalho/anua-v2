@@ -49,7 +49,8 @@ export default class UpdateSchoolAnnouncementController {
       payload.audienceAcademicPeriodIds !== undefined ||
       payload.audienceCourseIds !== undefined ||
       payload.audienceLevelIds !== undefined ||
-      payload.audienceClassIds !== undefined
+      payload.audienceClassIds !== undefined ||
+      payload.audienceStudentIds !== undefined
     const requiresAcknowledgement =
       payload.requiresAcknowledgement ?? announcement.requiresAcknowledgement
     const hasAckDueAtUpdate = payload.acknowledgementDueAt !== undefined
@@ -80,6 +81,8 @@ export default class UpdateSchoolAnnouncementController {
             audienceCourseIds: payload.audienceCourseIds ?? announcementAudience.audienceCourseIds,
             audienceLevelIds: payload.audienceLevelIds ?? announcementAudience.audienceLevelIds,
             audienceClassIds: payload.audienceClassIds ?? announcementAudience.audienceClassIds,
+            audienceStudentIds:
+              payload.audienceStudentIds ?? announcementAudience.audienceStudentIds,
           })
         }
       })

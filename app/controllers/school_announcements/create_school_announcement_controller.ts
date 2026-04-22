@@ -58,6 +58,7 @@ export default class CreateSchoolAnnouncementController {
           audienceCourseIds: payload.audienceCourseIds,
           audienceLevelIds: payload.audienceLevelIds,
           audienceClassIds: payload.audienceClassIds,
+          audienceStudentIds: payload.audienceStudentIds,
         })
 
         return created

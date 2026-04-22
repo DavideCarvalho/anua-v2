@@ -21,6 +21,7 @@ export const createSchoolAnnouncementValidator = vine.compile(
     audienceCourseIds: vine.array(vine.string().trim()).optional(),
     audienceLevelIds: vine.array(vine.string().trim()).optional(),
     audienceClassIds: vine.array(vine.string().trim()).optional(),
+    audienceStudentIds: vine.array(vine.string().trim()).optional(),
   })
 )
 
@@ -37,5 +38,6 @@ export const updateSchoolAnnouncementValidator = vine.compile(
     audienceCourseIds: vine.array(vine.string().trim()).optional(),
     audienceLevelIds: vine.array(vine.string().trim()).optional(),
     audienceClassIds: vine.array(vine.string().trim()).optional(),
+    audienceStudentIds: vine.array(vine.string().trim()).optional(),
   })
 )

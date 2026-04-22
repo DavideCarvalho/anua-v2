@@ -11,6 +11,8 @@ const UpdateSchoolAnnouncementController = () =>
   import('#controllers/school_announcements/update_school_announcement_controller')
 const PublishSchoolAnnouncementController = () =>
   import('#controllers/school_announcements/publish_school_announcement_controller')
+const ListSchoolAnnouncementStudentsController = () =>
+  import('#controllers/school_announcements/list_school_announcement_students_controller')
 
 export function registerSchoolAnnouncementApiRoutes() {
   router
@@ -22,6 +24,9 @@ export function registerSchoolAnnouncementApiRoutes() {
       router
         .post('/:id/publish', [PublishSchoolAnnouncementController])
         .as('school_announcements.publish_draft')
+      router
+        .get('/audience/students', [ListSchoolAnnouncementStudentsController])
+        .as('school_announcements.audience_students')
     })
     .prefix('/school-announcements')
     .use([middleware.auth(), middleware.impersonation()])

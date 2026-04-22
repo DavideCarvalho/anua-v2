@@ -21,24 +21,28 @@ type Option = {
   isActive?: boolean
 }
 
-type ApiListResponse = {
-  data: Option[]
+type StudentOption = Option & {
+  className?: string | null
 }
 
-type AudiencePreset = 'all' | 'course' | 'level' | 'class'
+type ApiListResponse<TOption extends Option = Option> = {
+  data: TOption[]
+}
+
+type AudiencePreset = 'all' | 'course' | 'level' | 'class' | 'student'
 
 type AudienceOptionGroup = {
   label: string
   ids: string[]
 }
 
-async function fetchOptions(url: string): Promise<Option[]> {
+async function fetchOptions<TOption extends Option = Option>(url: string): Promise<TOption[]> {
   const response = await fetch(url, { credentials: 'include' })
   if (!response.ok) {
     return []
   }
 
-  const payload = (await response.json()) as ApiListResponse
+  const payload = (await response.json()) as ApiListResponse<TOption>
   return payload.data ?? []
 }
 
@@ -97,11 +101,13 @@ export default function NovoComunicadoPage() {
   const [courses, setCourses] = useState<Option[]>([])
   const [levels, setLevels] = useState<Option[]>([])
   const [classes, setClasses] = useState<Option[]>([])
+  const [students, setStudents] = useState<StudentOption[]>([])
   const [audiencePreset, setAudiencePreset] = useState<AudiencePreset>('all')
   const [audienceAcademicPeriodIds, setAudienceAcademicPeriodIds] = useState<string[]>([])
   const [audienceCourseIds, setAudienceCourseIds] = useState<string[]>([])
   const [audienceLevelIds, setAudienceLevelIds] = useState<string[]>([])
   const [audienceClassIds, setAudienceClassIds] = useState<string[]>([])
+  const [audienceStudentIds, setAudienceStudentIds] = useState<string[]>([])
   const [requiresAcknowledgement, setRequiresAcknowledgement] = useState(false)
   const [acknowledgementDueAt, setAcknowledgementDueAt] = useState('')
 
@@ -139,10 +145,11 @@ export default function NovoComunicadoPage() {
     let cancelled = false
 
     async function loadAudienceOptions() {
-      const [courseOptions, levelOptions, classOptions] = await Promise.all([
+      const [courseOptions, levelOptions, classOptions, studentOptions] = await Promise.all([
         fetchOptions('/api/v1/courses'),
         fetchOptions('/api/v1/levels'),
         fetchOptions('/api/v1/classes'),
+        fetchOptions<StudentOption>('/api/v1/school-announcements/audience/students'),
       ])
 
       if (cancelled) {
@@ -152,6 +159,7 @@ export default function NovoComunicadoPage() {
       setCourses(courseOptions)
       setLevels(levelOptions)
       setClasses(classOptions)
+      setStudents(studentOptions)
     }
 
     void loadAudienceOptions()
@@ -168,11 +176,25 @@ export default function NovoComunicadoPage() {
         ? audienceCourseIds.length > 0
         : audiencePreset === 'level'
           ? audienceLevelIds.length > 0
-        : audienceClassIds.length > 0
+          : audiencePreset === 'class'
+            ? audienceClassIds.length > 0
+            : audienceStudentIds.length > 0
 
   const courseGroups = groupOptionsByLabel(courses)
   const activeLevels = levels.filter((item) => item.isActive !== false)
   const levelGroups = groupOptionsByLabel(activeLevels)
+
+  const duplicatedStudentNameSet = new Set(
+    students
+      .reduce((accumulator, item) => {
+        const currentCount = accumulator.get(item.name) ?? 0
+        accumulator.set(item.name, currentCount + 1)
+        return accumulator
+      }, new Map<string, number>())
+      .entries()
+      .filter(([, count]) => count > 1)
+      .map(([name]) => name)
+  )
 
   function selectAudiencePreset(preset: AudiencePreset) {
     setAudiencePreset(preset)
@@ -180,6 +202,7 @@ export default function NovoComunicadoPage() {
     setAudienceCourseIds([])
     setAudienceLevelIds([])
     setAudienceClassIds([])
+    setAudienceStudentIds([])
   }
 
   function getAudienceSummary() {
@@ -197,7 +220,11 @@ export default function NovoComunicadoPage() {
       return `${countSelectedGroups(levelGroups, audienceLevelIds)} ano(s) selecionado(s)`
     }
 
-    return `${audienceClassIds.length} turma(s) selecionada(s)`
+    if (audiencePreset === 'class') {
+      return `${audienceClassIds.length} turma(s) selecionada(s)`
+    }
+
+    return `${audienceStudentIds.length} aluno(s) selecionado(s)`
   }
 
   function buildAudiencePayload() {
@@ -207,6 +234,7 @@ export default function NovoComunicadoPage() {
         audienceCourseIds: [] as string[],
         audienceLevelIds: [] as string[],
         audienceClassIds: classes.map((item) => item.id),
+        audienceStudentIds: [] as string[],
       }
     }
 
@@ -215,7 +243,20 @@ export default function NovoComunicadoPage() {
       audienceCourseIds,
       audienceLevelIds,
       audienceClassIds,
+      audienceStudentIds,
     }
+  }
+
+  function formatStudentLabel(student: StudentOption) {
+    if (!duplicatedStudentNameSet.has(student.name)) {
+      return student.name
+    }
+
+    if (student.className) {
+      return `${student.name} - ${student.className}`
+    }
+
+    return student.name
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -239,6 +280,7 @@ export default function NovoComunicadoPage() {
           audienceCourseIds: audiencePayload.audienceCourseIds,
           audienceLevelIds: audiencePayload.audienceLevelIds,
           audienceClassIds: audiencePayload.audienceClassIds,
+          audienceStudentIds: audiencePayload.audienceStudentIds,
           requiresAcknowledgement,
           acknowledgementDueAt:
             requiresAcknowledgement && acknowledgementDueAt
@@ -340,6 +382,14 @@ export default function NovoComunicadoPage() {
                 >
                   Por turma
                 </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={audiencePreset === 'student' ? 'default' : 'outline'}
+                  onClick={() => selectAudiencePreset('student')}
+                >
+                  Alunos especificos
+                </Button>
               </div>
 
               {audiencePreset === 'course' && (
@@ -430,6 +480,36 @@ export default function NovoComunicadoPage() {
                           }
                         />
                         {item.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {audiencePreset === 'student' && (
+                <div className="space-y-2" data-testid="announcement-audience-student-options">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-medium">Selecione os alunos</p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setAudienceStudentIds([])}
+                    >
+                      Limpar selecao
+                    </Button>
+                  </div>
+                  <div className="grid gap-1">
+                    {students.map((item) => (
+                      <label key={item.id} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={audienceStudentIds.includes(item.id)}
+                          onChange={() =>
+                            setAudienceStudentIds((previous) => toggleArrayValue(previous, item.id))
+                          }
+                        />
+                        {formatStudentLabel(item)}
                       </label>
                     ))}
                   </div>

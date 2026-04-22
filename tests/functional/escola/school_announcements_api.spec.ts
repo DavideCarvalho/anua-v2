@@ -290,4 +290,196 @@ test.group('School announcements API', (group) => {
     const count = await SchoolAnnouncement.query().where('schoolId', school.id).count('* as total')
     assert.equal(Number(count[0].$extras.total), 0)
   })
+
+  test('creates a draft announcement with student audience ids', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-student-audience`
+    const responsible = await createResponsibleUser(seed)
+    const { studentUser } = await createStudentWithClassAndResponsible({
+      schoolId: school.id,
+      seed,
+      responsibleId: responsible.id,
+    })
+
+    const createResponse = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .json({
+        title: `Comunicado ${seed}`,
+        body: 'Publico por aluno',
+        audienceStudentIds: [studentUser.id],
+      })
+
+    createResponse.assertStatus(201)
+    const createBody = createResponse.body()
+    assert.equal(createBody.status, 'DRAFT')
+    assert.isArray(createBody.audiences)
+    assert.isTrue(
+      createBody.audiences.some(
+        (audience: { scopeType: string; scopeId: string }) =>
+          audience.scopeType === 'STUDENT' && audience.scopeId === studentUser.id
+      )
+    )
+  })
+
+  test('rejects creating announcement with student audience from another school', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-invalid-student`
+    const otherSchool = await School.create({
+      name: `Outra escola ${seed}`,
+      slug: `outra-escola-student-${seed}`,
+    })
+    const responsible = await createResponsibleUser(`${seed}-responsible`)
+    const { studentUser } = await createStudentWithClassAndResponsible({
+      schoolId: otherSchool.id,
+      seed: `${seed}-student`,
+      responsibleId: responsible.id,
+    })
+
+    const createResponse = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .json({
+        title: `Comunicado ${seed}`,
+        body: 'Aluno de outra escola',
+        audienceStudentIds: [studentUser.id],
+      })
+
+    createResponse.assertStatus(400)
+    assert.include(createResponse.text(), 'Aluno inválido para a escola selecionada')
+
+    const count = await SchoolAnnouncement.query().where('schoolId', school.id).count('* as total')
+    assert.equal(Number(count[0].$extras.total), 0)
+  })
+
+  test('lists students for announcement audience only from selected school', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-list-students`
+
+    const schoolResponsible = await createResponsibleUser(`${seed}-school`)
+    const outsideResponsible = await createResponsibleUser(`${seed}-outside`)
+
+    const schoolStudent = await createStudentWithClassAndResponsible({
+      schoolId: school.id,
+      seed: `${seed}-in-school`,
+      responsibleId: schoolResponsible.id,
+    })
+
+    const otherSchool = await School.create({
+      name: `Outra escola ${seed}`,
+      slug: `outra-escola-list-${seed}`,
+    })
+
+    const outsideStudent = await createStudentWithClassAndResponsible({
+      schoolId: otherSchool.id,
+      seed: `${seed}-outside-school`,
+      responsibleId: outsideResponsible.id,
+    })
+
+    const response = await client
+      .get('/api/v1/school-announcements/audience/students')
+      .loginAs(user)
+
+    response.assertStatus(200)
+
+    const body = response.body()
+    assert.isArray(body.data)
+    assert.isTrue(body.data.some((item: { id: string }) => item.id === schoolStudent.studentUser.id))
+    assert.isFalse(body.data.some((item: { id: string }) => item.id === outsideStudent.studentUser.id))
+  })
+
+  test('updates draft audience to specific students', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-update-student-audience`
+    const responsible = await createResponsibleUser(seed)
+    const { classEntity, studentUser } = await createStudentWithClassAndResponsible({
+      schoolId: school.id,
+      seed,
+      responsibleId: responsible.id,
+    })
+
+    const createResponse = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .json({
+        title: `Comunicado ${seed}`,
+        body: 'Rascunho inicial',
+        audienceClassIds: [classEntity.id],
+      })
+
+    createResponse.assertStatus(201)
+    const created = createResponse.body()
+
+    const updateResponse = await client
+      .put(`/api/v1/school-announcements/${created.id}`)
+      .loginAs(user)
+      .json({
+        audienceAcademicPeriodIds: [],
+        audienceCourseIds: [],
+        audienceLevelIds: [],
+        audienceClassIds: [],
+        audienceStudentIds: [studentUser.id],
+      })
+
+    updateResponse.assertStatus(200)
+    const updated = updateResponse.body()
+    const audiences = updated.audiences as Array<{ scopeType: string; scopeId: string }>
+
+    assert.isTrue(
+      audiences.some((audience) => audience.scopeType === 'STUDENT' && audience.scopeId === studentUser.id)
+    )
+    assert.isFalse(audiences.some((audience) => audience.scopeType === 'CLASS'))
+  })
+
+  test('publishes with specific student audience and creates recipient notification', async ({
+    client,
+    assert,
+  }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-publish-student-audience`
+    const responsible = await createResponsibleUser(seed)
+    const { studentUser } = await createStudentWithClassAndResponsible({
+      schoolId: school.id,
+      seed,
+      responsibleId: responsible.id,
+    })
+
+    const createResponse = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .json({
+        title: `Comunicado ${seed}`,
+        body: 'Publicar para aluno especifico',
+        audienceStudentIds: [studentUser.id],
+      })
+
+    createResponse.assertStatus(201)
+    const created = createResponse.body()
+
+    const publishResponse = await client
+      .post(`/api/v1/school-announcements/${created.id}/publish`)
+      .loginAs(user)
+
+    publishResponse.assertStatus(200)
+    const published = publishResponse.body()
+    assert.equal(published.status, 'PUBLISHED')
+
+    const recipient = await SchoolAnnouncementRecipient.query()
+      .where('announcementId', created.id)
+      .where('responsibleId', responsible.id)
+      .first()
+
+    assert.isNotNull(recipient)
+    assert.isNotNull(recipient?.notificationId)
+
+    const notification = await Notification.find(recipient!.notificationId!)
+    assert.isNotNull(notification)
+    assert.equal(notification?.type, 'SYSTEM_ANNOUNCEMENT')
+  })
 })

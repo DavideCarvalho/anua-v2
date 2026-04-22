@@ -8,6 +8,7 @@ export interface AnnouncementAudienceInput {
   audienceCourseIds?: string[]
   audienceLevelIds?: string[]
   audienceClassIds?: string[]
+  audienceStudentIds?: string[]
 }
 
 export interface AnnouncementAudienceResolved {
@@ -15,6 +16,7 @@ export interface AnnouncementAudienceResolved {
   audienceCourseIds: string[]
   audienceLevelIds: string[]
   audienceClassIds: string[]
+  audienceStudentIds: string[]
 }
 
 export class AnnouncementAudienceValidationError extends Error {
@@ -32,6 +34,7 @@ export function normalizeAnnouncementAudienceInput(
     audienceCourseIds: normalizeIds(input.audienceCourseIds),
     audienceLevelIds: normalizeIds(input.audienceLevelIds),
     audienceClassIds: normalizeIds(input.audienceClassIds),
+    audienceStudentIds: normalizeIds(input.audienceStudentIds),
   }
 }
 
@@ -41,7 +44,8 @@ export function ensureAnnouncementAudienceIsSelected(input: AnnouncementAudience
     normalized.audienceAcademicPeriodIds.length > 0 ||
     normalized.audienceCourseIds.length > 0 ||
     normalized.audienceLevelIds.length > 0 ||
-    normalized.audienceClassIds.length > 0
+    normalized.audienceClassIds.length > 0 ||
+    normalized.audienceStudentIds.length > 0
 
   if (!hasAudience) {
     throw new AnnouncementAudienceValidationError(
@@ -61,6 +65,7 @@ export function resolveAnnouncementAudienceConfig(
       audienceCourseIds: [],
       audienceLevelIds: [],
       audienceClassIds: [],
+      audienceStudentIds: [],
     }
   }
 
@@ -76,6 +81,9 @@ export function resolveAnnouncementAudienceConfig(
       .map((audience) => audience.scopeId),
     audienceClassIds: audiences
       .filter((audience) => audience.scopeType === 'CLASS')
+      .map((audience) => audience.scopeId),
+    audienceStudentIds: audiences
+      .filter((audience) => audience.scopeType === 'STUDENT')
       .map((audience) => audience.scopeId),
   }
 }
@@ -96,7 +104,7 @@ export async function syncSchoolAnnouncementAudience(
 
   const rows: Array<{
     announcementId: string
-    scopeType: 'ACADEMIC_PERIOD' | 'COURSE' | 'LEVEL' | 'CLASS'
+    scopeType: 'ACADEMIC_PERIOD' | 'COURSE' | 'LEVEL' | 'CLASS' | 'STUDENT'
     scopeId: string
   }> = []
 
@@ -114,6 +122,10 @@ export async function syncSchoolAnnouncementAudience(
 
   for (const scopeId of normalized.audienceClassIds) {
     rows.push({ announcementId, scopeType: 'CLASS', scopeId })
+  }
+
+  for (const scopeId of normalized.audienceStudentIds) {
+    rows.push({ announcementId, scopeType: 'STUDENT', scopeId })
   }
 
   if (rows.length > 0) {
@@ -190,6 +202,19 @@ export async function resolveAudienceStudentIds(
     }
   }
 
+  if (normalized.audienceStudentIds.length > 0) {
+    const directStudents = await Student.query()
+      .whereIn('id', normalized.audienceStudentIds)
+      .whereHas('class', (classQuery) => {
+        classQuery.where('schoolId', schoolId)
+      })
+      .select('id')
+
+    for (const student of directStudents) {
+      studentIds.add(student.id)
+    }
+  }
+
   return Array.from(studentIds)
 }
 
@@ -246,6 +271,19 @@ async function validateAudienceIds(
 
     if (rows.length !== input.audienceClassIds.length) {
       throw new AnnouncementAudienceValidationError('Turma inválida para a escola selecionada')
+    }
+  }
+
+  if (input.audienceStudentIds.length > 0) {
+    const rows = await trx
+      .from('Student')
+      .innerJoin('Class', 'Class.id', 'Student.classId')
+      .whereIn('Student.id', input.audienceStudentIds)
+      .where('Class.schoolId', schoolId)
+      .select('Student.id')
+
+    if (rows.length !== input.audienceStudentIds.length) {
+      throw new AnnouncementAudienceValidationError('Aluno inválido para a escola selecionada')
     }
   }
 }

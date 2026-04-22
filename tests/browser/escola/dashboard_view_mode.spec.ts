@@ -135,9 +135,13 @@ test.group('Escola dashboard view mode (browser)', (group) => {
     await newAnnouncementPage.assertExists('button:has-text("Por curso")')
     await newAnnouncementPage.assertExists('button:has-text("Por ano")')
     await newAnnouncementPage.assertExists('button:has-text("Por turma")')
+    await newAnnouncementPage.assertExists('button:has-text("Alunos especificos")')
 
     await newAnnouncementPage.click('button:has-text("Por turma")')
     await newAnnouncementPage.assertExists('[data-testid="announcement-audience-class-options"]')
+
+    await newAnnouncementPage.click('button:has-text("Alunos especificos")')
+    await newAnnouncementPage.assertExists('[data-testid="announcement-audience-student-options"]')
   })
 
   test('shows view mode buttons on novo comunicado in full mode topbar', async ({
