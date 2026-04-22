@@ -2508,6 +2508,12 @@ const routes = {
     tokens: [{"old":"/api/v1/school-announcements/:id/publish","type":0,"val":"api","end":""},{"old":"/api/v1/school-announcements/:id/publish","type":0,"val":"v1","end":""},{"old":"/api/v1/school-announcements/:id/publish","type":0,"val":"school-announcements","end":""},{"old":"/api/v1/school-announcements/:id/publish","type":1,"val":"id","end":""},{"old":"/api/v1/school-announcements/:id/publish","type":0,"val":"publish","end":""}],
     types: placeholder as Registry['api.v1.school_announcements.publish_draft']['types'],
   },
+  'api.v1.school_announcements.audience_students': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/school-announcements/audience/students',
+    tokens: [{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"api","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"v1","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"school-announcements","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"audience","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"students","end":""}],
+    types: placeholder as Registry['api.v1.school_announcements.audience_students']['types'],
+  },
   'api.v1.posts.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/posts',

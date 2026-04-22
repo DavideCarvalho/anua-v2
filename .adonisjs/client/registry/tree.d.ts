@@ -601,6 +601,7 @@ export interface ApiDefinition {
         details: typeof routes['api.v1.school_announcements.details']
         editDraft: typeof routes['api.v1.school_announcements.edit_draft']
         publishDraft: typeof routes['api.v1.school_announcements.publish_draft']
+        audienceStudents: typeof routes['api.v1.school_announcements.audience_students']
       }
       posts: {
         index: typeof routes['api.v1.posts.index']

@@ -5011,6 +5011,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/school_announcements/publish_school_announcement_controller').default['handle']>>>
     }
   }
+  'api.v1.school_announcements.audience_students': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/school-announcements/audience/students'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/school_announcements/list_school_announcement_students_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/school_announcements/list_school_announcement_students_controller').default['handle']>>>
+    }
+  }
   'api.v1.posts.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/posts'
