@@ -1,7 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import type { MultipartFile } from '@adonisjs/core/bodyparser'
+import { attachmentManager } from '@jrmc/adonis-attachment'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import SchoolAnnouncement from '#models/school_announcement'
+import SchoolAnnouncementAttachment from '#models/school_announcement_attachment'
 import SchoolAnnouncementTransformer from '#transformers/school_announcement_transformer'
 import { createSchoolAnnouncementValidator } from '#validators/school_announcement'
 import {
@@ -29,6 +32,8 @@ export default class CreateSchoolAnnouncementController {
     }
 
     const payload = await request.validateUsing(createSchoolAnnouncementValidator)
+    const attachments = (payload.attachments ?? []) as MultipartFile[]
+
     const requiresAcknowledgement = payload.requiresAcknowledgement ?? false
     const acknowledgementDueAt =
       requiresAcknowledgement && payload.acknowledgementDueAt
@@ -61,6 +66,25 @@ export default class CreateSchoolAnnouncementController {
           audienceStudentIds: payload.audienceStudentIds,
         })
 
+        for (const [index, file] of attachments.entries()) {
+          const attachment = await SchoolAnnouncementAttachment.create(
+            {
+              announcementId: created.id,
+              fileName: file.clientName,
+              filePath: '',
+              mimeType: file.type ?? 'application/octet-stream',
+              fileSizeBytes: file.size,
+              position: index,
+            },
+            { client: trx }
+          )
+
+          attachment.file = await attachmentManager.createFromFile(file)
+          attachment.filePath = attachment.file?.name ?? ''
+          attachment.useTransaction(trx)
+          await attachment.save()
+        }
+
         return created
       })
     } catch (error) {
@@ -73,6 +97,7 @@ export default class CreateSchoolAnnouncementController {
 
     await announcement.load('creator')
     await announcement.load('audiences')
+    await announcement.load('attachments')
 
     return response.created(await serialize(SchoolAnnouncementTransformer.transform(announcement)))
   }

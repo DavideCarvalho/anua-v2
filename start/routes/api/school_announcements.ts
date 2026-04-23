@@ -9,6 +9,8 @@ const CreateSchoolAnnouncementController = () =>
   import('#controllers/school_announcements/create_school_announcement_controller')
 const UpdateSchoolAnnouncementController = () =>
   import('#controllers/school_announcements/update_school_announcement_controller')
+const DeleteSchoolAnnouncementController = () =>
+  import('#controllers/school_announcements/delete_school_announcement_controller')
 const PublishSchoolAnnouncementController = () =>
   import('#controllers/school_announcements/publish_school_announcement_controller')
 const ListSchoolAnnouncementStudentsController = () =>
@@ -21,6 +23,9 @@ export function registerSchoolAnnouncementApiRoutes() {
       router.post('/', [CreateSchoolAnnouncementController]).as('school_announcements.create')
       router.get('/:id', [ShowSchoolAnnouncementController]).as('school_announcements.details')
       router.put('/:id', [UpdateSchoolAnnouncementController]).as('school_announcements.edit_draft')
+      router
+        .delete('/:id', [DeleteSchoolAnnouncementController])
+        .as('school_announcements.delete_draft')
       router
         .post('/:id/publish', [PublishSchoolAnnouncementController])
         .as('school_announcements.publish_draft')

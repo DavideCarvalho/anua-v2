@@ -6,6 +6,7 @@ import School from './school.js'
 import User from './user.js'
 import SchoolAnnouncementRecipient from './school_announcement_recipient.js'
 import SchoolAnnouncementAudience from './school_announcement_audience.js'
+import SchoolAnnouncementAttachment from './school_announcement_attachment.js'
 
 export type SchoolAnnouncementStatus = 'DRAFT' | 'PUBLISHED'
 
@@ -63,4 +64,7 @@ export default class SchoolAnnouncement extends BaseModel {
 
   @hasMany(() => SchoolAnnouncementAudience, { foreignKey: 'announcementId' })
   declare audiences: HasMany<typeof SchoolAnnouncementAudience>
+
+  @hasMany(() => SchoolAnnouncementAttachment, { foreignKey: 'announcementId' })
+  declare attachments: HasMany<typeof SchoolAnnouncementAttachment>
 }

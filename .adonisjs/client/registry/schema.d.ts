@@ -4999,6 +4999,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/school_announcements/update_school_announcement_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.school_announcements.delete_draft': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/school-announcements/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/school_announcements/delete_school_announcement_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/school_announcements/delete_school_announcement_controller').default['handle']>>>
+    }
+  }
   'api.v1.school_announcements.publish_draft': {
     methods: ["POST"]
     pattern: '/api/v1/school-announcements/:id/publish'

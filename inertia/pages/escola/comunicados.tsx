@@ -1,8 +1,9 @@
 import { Head } from '@inertiajs/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Bell, Megaphone, Plus, Send } from 'lucide-react'
+import { Bell, Megaphone, Plus, Send, Trash2 } from 'lucide-react'
 import { Link } from '@adonisjs/inertia/react'
+import { toast } from 'sonner'
 
 import { SimplifiedBasicList } from '../../components/escola/simplified-basic-list'
 import { SimplifiedPageShell } from '../../components/escola/simplified-page-shell'
@@ -11,6 +12,16 @@ import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog'
 import {
   readEscolaDashboardViewMode,
   type EscolaDashboardViewMode,
@@ -50,6 +61,7 @@ async function listAnnouncements(): Promise<AnnouncementsResponse> {
 export default function EscolaComunicadosPage() {
   const user = useAuthUser()
   const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
+  const [draftToDelete, setDraftToDelete] = useState<Announcement | null>(null)
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -104,6 +116,41 @@ export default function EscolaComunicadosPage() {
       await queryClient.invalidateQueries({ queryKey: ['school-announcements'] })
     },
   })
+
+  const deleteDraftMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/v1/school-announcements/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error('Falha ao excluir comunicado')
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['school-announcements'] })
+    },
+  })
+
+  const handleDeleteDraft = async (announcementId: string) => {
+    try {
+      await deleteDraftMutation.mutateAsync(announcementId)
+      setDraftToDelete(null)
+      toast.success('Rascunho excluído com sucesso')
+    } catch {
+      toast.error('Não foi possível excluir o rascunho')
+    }
+  }
+
+  const handlePublishDraft = async (announcementId: string) => {
+    try {
+      await publishMutation.mutateAsync(announcementId)
+      toast.success('Comunicado publicado com sucesso')
+    } catch {
+      toast.error('Não foi possível publicar o comunicado')
+    }
+  }
 
   const announcements = data?.data ?? []
 
@@ -180,7 +227,9 @@ export default function EscolaComunicadosPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="line-clamp-3 text-sm text-muted-foreground">{announcement.body}</p>
+                    <p className="line-clamp-3 text-sm text-muted-foreground">
+                      {announcement.body}
+                    </p>
 
                     {announcement.status === 'DRAFT' && (
                       <div className="flex items-center gap-2">
@@ -190,10 +239,21 @@ export default function EscolaComunicadosPage() {
                           </Button>
                         </Link>
                         <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => publishMutation.mutate(announcement.id)}
+                          onClick={() => setDraftToDelete(announcement)}
+                          disabled={deleteDraftMutation.isPending}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Excluir
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => void handlePublishDraft(announcement.id)}
                           disabled={
-                            publishMutation.isPending || (announcement.audiences ?? []).length === 0
+                            publishMutation.isPending ||
+                            deleteDraftMutation.isPending ||
+                            (announcement.audiences ?? []).length === 0
                           }
                         >
                           <Send className="mr-2 h-4 w-4" />
@@ -282,10 +342,21 @@ export default function EscolaComunicadosPage() {
                         </Button>
                       </Link>
                       <Button
+                        variant="outline"
                         size="sm"
-                        onClick={() => publishMutation.mutate(announcement.id)}
+                        onClick={() => setDraftToDelete(announcement)}
+                        disabled={deleteDraftMutation.isPending}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Excluir
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => void handlePublishDraft(announcement.id)}
                         disabled={
-                          publishMutation.isPending || (announcement.audiences ?? []).length === 0
+                          publishMutation.isPending ||
+                          deleteDraftMutation.isPending ||
+                          (announcement.audiences ?? []).length === 0
                         }
                       >
                         <Send className="mr-2 h-4 w-4" />
@@ -304,6 +375,29 @@ export default function EscolaComunicadosPage() {
           ))}
         </div>
       </div>
+
+      <AlertDialog
+        open={Boolean(draftToDelete)}
+        onOpenChange={(open) => !open && setDraftToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir rascunho?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação remove o comunicado "{draftToDelete?.title}" permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteDraftMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteDraftMutation.isPending || !draftToDelete}
+              onClick={() => draftToDelete && void handleDeleteDraft(draftToDelete.id)}
+            >
+              {deleteDraftMutation.isPending ? 'Excluindo...' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </EscolaLayout>
   )
 }

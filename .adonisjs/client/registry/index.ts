@@ -2502,6 +2502,12 @@ const routes = {
     tokens: [{"old":"/api/v1/school-announcements/:id","type":0,"val":"api","end":""},{"old":"/api/v1/school-announcements/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/school-announcements/:id","type":0,"val":"school-announcements","end":""},{"old":"/api/v1/school-announcements/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.school_announcements.edit_draft']['types'],
   },
+  'api.v1.school_announcements.delete_draft': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/school-announcements/:id',
+    tokens: [{"old":"/api/v1/school-announcements/:id","type":0,"val":"api","end":""},{"old":"/api/v1/school-announcements/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/school-announcements/:id","type":0,"val":"school-announcements","end":""},{"old":"/api/v1/school-announcements/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.school_announcements.delete_draft']['types'],
+  },
   'api.v1.school_announcements.publish_draft': {
     methods: ["POST"],
     pattern: '/api/v1/school-announcements/:id/publish',

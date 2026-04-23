@@ -10,6 +10,7 @@ import Student from '#models/student'
 import Class_ from '#models/class'
 import StudentHasResponsible from '#models/student_has_responsible'
 import SchoolAnnouncement from '#models/school_announcement'
+import SchoolAnnouncementAttachment from '#models/school_announcement_attachment'
 import SchoolAnnouncementRecipient from '#models/school_announcement_recipient'
 import Notification from '#models/notification'
 import { createEscolaAuthUser } from '#tests/helpers/escola_auth'
@@ -441,6 +442,126 @@ test.group('School announcements API', (group) => {
       )
     )
     assert.isFalse(audiences.some((audience) => audience.scopeType === 'CLASS'))
+  })
+
+  test('returns attachments in school announcement list payload', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-attachments-list`
+
+    const announcement = await SchoolAnnouncement.create({
+      schoolId: school.id,
+      title: `Comunicado ${seed}`,
+      body: 'Com anexo',
+      status: 'DRAFT',
+      publishedAt: null,
+      requiresAcknowledgement: false,
+      acknowledgementDueAt: null,
+      createdByUserId: user.id,
+    })
+
+    await SchoolAnnouncementAttachment.create({
+      announcementId: announcement.id,
+      fileName: 'arquivo.pdf',
+      filePath: `school-announcements/${announcement.id}/arquivo.pdf`,
+      mimeType: 'application/pdf',
+      fileSizeBytes: 1024,
+      position: 0,
+    })
+
+    const response = await client.get('/api/v1/school-announcements').loginAs(user)
+
+    response.assertStatus(200)
+    const body = response.body()
+    assert.isArray(body.data)
+    assert.equal(body.data[0].id, announcement.id)
+    assert.isArray(body.data[0].attachments)
+    assert.equal(body.data[0].attachments[0].fileName, 'arquivo.pdf')
+  })
+
+  test('creates announcement with multipart attachments', async ({ client, assert }) => {
+    const { user } = await createEscolaAuthUser()
+
+    const response = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .field('title', 'Comunicado com anexo')
+      .field('body', 'Mensagem com arquivo')
+      .field('audienceClassIds[]', 'class-test-id')
+      .file('attachments[]', Buffer.from('%PDF-1.4 test file'), {
+        filename: 'teste.pdf',
+        contentType: 'application/pdf',
+      })
+
+    response.assertStatus(400)
+    assert.include(response.text(), 'Turma inválida')
+  })
+
+  test('deletes draft announcement', async ({ client, assert }) => {
+    const { user } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-delete-draft`
+
+    const createResponse = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .json({
+        title: `Comunicado ${seed}`,
+        body: 'Rascunho para exclusao',
+        audienceClassIds: [],
+        audienceCourseIds: [],
+        audienceLevelIds: [],
+        audienceAcademicPeriodIds: [],
+      })
+
+    createResponse.assertStatus(201)
+    const created = createResponse.body()
+
+    const deleteResponse = await client
+      .delete(`/api/v1/school-announcements/${created.id}`)
+      .loginAs(user)
+
+    deleteResponse.assertStatus(204)
+
+    const persisted = await SchoolAnnouncement.find(created.id)
+    assert.isNull(persisted)
+  })
+
+  test('rejects deleting published announcement', async ({ client, assert }) => {
+    const { user, school } = await createEscolaAuthUser()
+    const seed = `${Date.now()}-delete-published`
+    const responsible = await createResponsibleUser(seed)
+    const { classEntity } = await createStudentWithClassAndResponsible({
+      schoolId: school.id,
+      seed,
+      responsibleId: responsible.id,
+    })
+
+    const createResponse = await client
+      .post('/api/v1/school-announcements')
+      .loginAs(user)
+      .json({
+        title: `Comunicado ${seed}`,
+        body: 'Publicar antes de excluir',
+        audienceClassIds: [classEntity.id],
+        audienceCourseIds: [],
+        audienceLevelIds: [],
+        audienceAcademicPeriodIds: [],
+      })
+
+    createResponse.assertStatus(201)
+    const created = createResponse.body()
+
+    const publishResponse = await client
+      .post(`/api/v1/school-announcements/${created.id}/publish`)
+      .loginAs(user)
+
+    publishResponse.assertStatus(200)
+
+    const deleteResponse = await client
+      .delete(`/api/v1/school-announcements/${created.id}`)
+      .loginAs(user)
+
+    deleteResponse.assertStatus(400)
+    assert.include(deleteResponse.text(), 'Somente comunicados em rascunho podem ser excluídos')
   })
 
   test('publishes with specific student audience and creates recipient notification', async ({

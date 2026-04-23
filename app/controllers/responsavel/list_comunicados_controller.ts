@@ -20,6 +20,9 @@ export default class ListComunicadosController {
         recipientQuery.where('responsibleId', user.id)
       })
       .preload('creator')
+      .preload('attachments', (attachmentQuery) => {
+        attachmentQuery.orderBy('position', 'asc').orderBy('createdAt', 'asc')
+      })
       .preload('recipients', (recipientQuery) => {
         recipientQuery.where('responsibleId', user.id)
       })

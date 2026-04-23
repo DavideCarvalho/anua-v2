@@ -37,6 +37,9 @@ export default class ListSchoolAnnouncementsController {
     const list = await query
       .preload('creator')
       .preload('audiences')
+      .preload('attachments', (attachmentQuery) => {
+        attachmentQuery.orderBy('position', 'asc').orderBy('createdAt', 'asc')
+      })
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
     const data = list.all()

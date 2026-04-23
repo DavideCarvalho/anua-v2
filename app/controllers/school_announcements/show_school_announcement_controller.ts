@@ -21,6 +21,9 @@ export default class ShowSchoolAnnouncementController {
       .where('id', params.id)
       .preload('creator')
       .preload('audiences')
+      .preload('attachments', (attachmentQuery) => {
+        attachmentQuery.orderBy('position', 'asc').orderBy('createdAt', 'asc')
+      })
       .preload('recipients')
       .first()
     if (!announcement) {

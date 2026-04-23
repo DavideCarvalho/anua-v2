@@ -2215,6 +2215,29 @@ export class SchoolAnnouncementSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class SchoolAnnouncementAttachmentSchema extends BaseModel {
+  static $columns = ['announcementId', 'createdAt', 'fileName', 'filePath', 'fileSizeBytes', 'id', 'mimeType', 'position', 'updatedAt'] as const
+  $columns = SchoolAnnouncementAttachmentSchema.$columns
+  @column()
+  declare announcementId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare fileName: string
+  @column()
+  declare filePath: string
+  @column()
+  declare fileSizeBytes: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare mimeType: string
+  @column()
+  declare position: number
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
 export class SchoolAnnouncementAudienceSchema extends BaseModel {
   static $columns = ['announcementId', 'createdAt', 'id', 'scopeId', 'scopeType'] as const
   $columns = SchoolAnnouncementAudienceSchema.$columns

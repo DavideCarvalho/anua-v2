@@ -1,6 +1,9 @@
 import { Head, router } from '@inertiajs/react'
-import { FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { Link } from '@adonisjs/inertia/react'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { api } from '~/lib/api'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../../components/layouts/escola-layout-simplificado'
@@ -122,6 +125,24 @@ export default function NovoComunicadoPage() {
   const [audienceStudentIds, setAudienceStudentIds] = useState<string[]>([])
   const [requiresAcknowledgement, setRequiresAcknowledgement] = useState(false)
   const [acknowledgementDueAt, setAcknowledgementDueAt] = useState('')
+  const [attachments, setAttachments] = useState<File[]>([])
+  const createAnnouncementMutation = useMutation({
+    ...api.api.v1.schoolAnnouncements.create.mutationOptions(),
+    mutationFn: async (variables) => {
+      const body = variables.body as Record<string, unknown>
+      const response = await fetch('/api/v1/school-announcements', {
+        method: 'POST',
+        credentials: 'include',
+        body: body as BodyInit,
+      })
+
+      if (!response.ok) {
+        throw new Error('Falha ao criar comunicado')
+      }
+
+      return response.json()
+    },
+  })
 
   useEffect(() => {
     setViewMode(readEscolaDashboardViewMode(user?.id))
@@ -217,6 +238,29 @@ export default function NovoComunicadoPage() {
     setAudienceStudentIds([])
   }
 
+  const hasValidAttachments = attachments.length <= 5
+
+  const onAttachmentsChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length === 0) {
+      return
+    }
+
+    const next = [...attachments, ...files]
+    if (next.length > 5) {
+      toast.error('Máximo de 5 anexos por comunicado')
+      event.target.value = ''
+      return
+    }
+
+    setAttachments(next)
+    event.target.value = ''
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachments((previous) => previous.filter((_, itemIndex) => itemIndex !== index))
+  }
+
   function getAudienceSummary() {
     if (audiencePreset === 'all') {
       return classes.length > 0
@@ -289,32 +333,42 @@ export default function NovoComunicadoPage() {
 
     try {
       const audiencePayload = buildAudiencePayload()
+      const formData = new FormData()
+      formData.append('title', title)
+      formData.append('body', body)
+      formData.append('requiresAcknowledgement', requiresAcknowledgement ? 'true' : 'false')
 
-      const response = await fetch('/api/v1/school-announcements', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          body,
-          audienceAcademicPeriodIds: audiencePayload.audienceAcademicPeriodIds,
-          audienceCourseIds: audiencePayload.audienceCourseIds,
-          audienceLevelIds: audiencePayload.audienceLevelIds,
-          audienceClassIds: audiencePayload.audienceClassIds,
-          audienceStudentIds: audiencePayload.audienceStudentIds,
-          requiresAcknowledgement,
-          acknowledgementDueAt:
-            requiresAcknowledgement && acknowledgementDueAt
-              ? new Date(acknowledgementDueAt).toISOString()
-              : null,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Falha ao criar comunicado')
+      if (requiresAcknowledgement && acknowledgementDueAt) {
+        formData.append('acknowledgementDueAt', new Date(acknowledgementDueAt).toISOString())
       }
+
+      for (const id of audiencePayload.audienceAcademicPeriodIds) {
+        formData.append('audienceAcademicPeriodIds[]', id)
+      }
+
+      for (const id of audiencePayload.audienceCourseIds) {
+        formData.append('audienceCourseIds[]', id)
+      }
+
+      for (const id of audiencePayload.audienceLevelIds) {
+        formData.append('audienceLevelIds[]', id)
+      }
+
+      for (const id of audiencePayload.audienceClassIds) {
+        formData.append('audienceClassIds[]', id)
+      }
+
+      for (const id of audiencePayload.audienceStudentIds) {
+        formData.append('audienceStudentIds[]', id)
+      }
+
+      for (const file of attachments) {
+        formData.append('attachments', file)
+      }
+
+      await createAnnouncementMutation.mutateAsync({
+        body: formData,
+      })
 
       router.visit('/escola/comunicados')
     } catch (submitError) {
@@ -364,6 +418,39 @@ export default function NovoComunicadoPage() {
                 rows={8}
                 required
               />
+            </div>
+
+            <div className="space-y-2 rounded-md border p-4">
+              <p className="text-sm font-semibold">Anexos</p>
+              <Input
+                type="file"
+                multiple
+                accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
+                onChange={onAttachmentsChange}
+              />
+              <p className="text-xs text-muted-foreground">
+                Tipos: PDF, DOCX, JPG, PNG, WEBP. Maximo 10MB por arquivo e 5 anexos.
+              </p>
+              {attachments.length > 0 && (
+                <div className="space-y-2">
+                  {attachments.map((attachment, index) => (
+                    <div
+                      key={`${attachment.name}-${index}`}
+                      className="flex items-center justify-between rounded border px-3 py-2 text-xs"
+                    >
+                      <span className="truncate">{attachment.name}</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeAttachment(index)}
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-4 rounded-md border p-4">
@@ -647,7 +734,10 @@ export default function NovoComunicadoPage() {
             {error && <p className="text-sm text-destructive">{error}</p>}
 
             <div className="flex items-center gap-2">
-              <Button type="submit" disabled={isSubmitting || !hasAudienceSelection}>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !hasAudienceSelection || !hasValidAttachments}
+              >
                 Salvar rascunho
               </Button>
               <Link href="/escola/comunicados">
