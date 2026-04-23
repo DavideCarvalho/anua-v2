@@ -6,7 +6,16 @@ import { EscolaLayout } from '../../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../../components/layouts/escola-layout-simplificado'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '../../../components/ui/command'
 import { Input } from '../../../components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import { Textarea } from '../../../components/ui/textarea'
 import {
   readEscolaDashboardViewMode,
@@ -14,6 +23,7 @@ import {
   writeEscolaDashboardViewMode,
 } from '../../../lib/escola-dashboard-view-mode'
 import { useAuthUser } from '../../../stores/auth_store'
+import { Check, ChevronsUpDown, X } from 'lucide-react'
 
 type Option = {
   id: string
@@ -102,6 +112,8 @@ export default function NovoComunicadoPage() {
   const [levels, setLevels] = useState<Option[]>([])
   const [classes, setClasses] = useState<Option[]>([])
   const [students, setStudents] = useState<StudentOption[]>([])
+  const [studentPickerOpen, setStudentPickerOpen] = useState(false)
+  const [studentSearch, setStudentSearch] = useState('')
   const [audiencePreset, setAudiencePreset] = useState<AudiencePreset>('all')
   const [audienceAcademicPeriodIds, setAudienceAcademicPeriodIds] = useState<string[]>([])
   const [audienceCourseIds, setAudienceCourseIds] = useState<string[]>([])
@@ -259,6 +271,17 @@ export default function NovoComunicadoPage() {
     return student.name
   }
 
+  const filteredStudents = students.filter((student) => {
+    if (!studentSearch.trim()) {
+      return true
+    }
+
+    const normalizedSearch = studentSearch.toLowerCase()
+    const label = formatStudentLabel(student).toLowerCase()
+
+    return label.includes(normalizedSearch)
+  })
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
@@ -388,7 +411,7 @@ export default function NovoComunicadoPage() {
                   variant={audiencePreset === 'student' ? 'default' : 'outline'}
                   onClick={() => selectAudiencePreset('student')}
                 >
-                  Alunos especificos
+                  Por aluno
                 </Button>
               </div>
 
@@ -489,29 +512,99 @@ export default function NovoComunicadoPage() {
               {audiencePreset === 'student' && (
                 <div className="space-y-2" data-testid="announcement-audience-student-options">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium">Selecione os alunos</p>
+                    <p className="text-xs font-medium">Selecione por aluno</p>
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
-                      onClick={() => setAudienceStudentIds([])}
+                      onClick={() => {
+                        setAudienceStudentIds([])
+                        setStudentSearch('')
+                      }}
                     >
                       Limpar selecao
                     </Button>
                   </div>
-                  <div className="grid gap-1">
-                    {students.map((item) => (
-                      <label key={item.id} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={audienceStudentIds.includes(item.id)}
-                          onChange={() =>
-                            setAudienceStudentIds((previous) => toggleArrayValue(previous, item.id))
-                          }
-                        />
-                        {formatStudentLabel(item)}
-                      </label>
-                    ))}
+                  <div className="space-y-2 rounded-md border border-border/70 p-2">
+                    <Popover open={studentPickerOpen} onOpenChange={setStudentPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          role="combobox"
+                          className="w-full justify-between font-normal"
+                        >
+                          {audienceStudentIds.length > 0
+                            ? `${audienceStudentIds.length} aluno(s) selecionado(s)`
+                            : 'Buscar aluno...'}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-[var(--anchor-width)] min-w-[var(--anchor-width)] p-0"
+                        align="start"
+                      >
+                        <Command shouldFilter={false}>
+                          <CommandInput
+                            placeholder="Buscar aluno..."
+                            value={studentSearch}
+                            onValueChange={setStudentSearch}
+                          />
+                          <CommandList>
+                            <CommandEmpty>Nenhum aluno encontrado</CommandEmpty>
+                            {filteredStudents.length > 0 && (
+                              <CommandGroup>
+                                {filteredStudents.map((item) => {
+                                  const isSelected = audienceStudentIds.includes(item.id)
+
+                                  return (
+                                    <CommandItem
+                                      key={item.id}
+                                      value={item.id}
+                                      onSelect={() =>
+                                        setAudienceStudentIds((previous) =>
+                                          toggleArrayValue(previous, item.id)
+                                        )
+                                      }
+                                    >
+                                      <Check
+                                        className={`mr-2 h-4 w-4 ${isSelected ? 'opacity-100' : 'opacity-0'}`}
+                                      />
+                                      <span className="truncate">{formatStudentLabel(item)}</span>
+                                    </CommandItem>
+                                  )
+                                })}
+                              </CommandGroup>
+                            )}
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {audienceStudentIds.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {audienceStudentIds
+                          .map((studentId) => students.find((student) => student.id === studentId))
+                          .filter((student): student is StudentOption => Boolean(student))
+                          .map((student) => (
+                            <button
+                              key={student.id}
+                              type="button"
+                              onClick={() =>
+                                setAudienceStudentIds((previous) =>
+                                  previous.filter((id) => id !== student.id)
+                                )
+                              }
+                              className="inline-flex items-center gap-1 rounded-full border bg-muted px-2 py-1 text-xs transition-colors hover:bg-muted/70"
+                            >
+                              <span className="max-w-[16rem] truncate">
+                                {formatStudentLabel(student)}
+                              </span>
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -547,7 +640,9 @@ export default function NovoComunicadoPage() {
               )}
             </div>
 
-            {!hasAudienceSelection && <p className="text-sm text-amber-600">{audienceSelectionWarning}</p>}
+            {!hasAudienceSelection && (
+              <p className="text-sm text-amber-600">{audienceSelectionWarning}</p>
+            )}
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
