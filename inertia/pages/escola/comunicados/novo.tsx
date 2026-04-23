@@ -3,7 +3,6 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { Link } from '@adonisjs/inertia/react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { api } from '~/lib/api'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../../components/layouts/escola-layout-simplificado'
@@ -126,14 +125,13 @@ export default function NovoComunicadoPage() {
   const [requiresAcknowledgement, setRequiresAcknowledgement] = useState(false)
   const [acknowledgementDueAt, setAcknowledgementDueAt] = useState('')
   const [attachments, setAttachments] = useState<File[]>([])
-  const createAnnouncementMutation = useMutation({
-    ...api.api.v1.schoolAnnouncements.create.mutationOptions(),
-    mutationFn: async (variables) => {
-      const body = variables.body as Record<string, unknown>
+  const createAnnouncementMutation = useMutation<unknown, Error, { body: FormData }>({
+    mutationKey: ['school-announcements', 'create'],
+    mutationFn: async ({ body }) => {
       const response = await fetch('/api/v1/school-announcements', {
         method: 'POST',
         credentials: 'include',
-        body: body as BodyInit,
+        body,
       })
 
       if (!response.ok) {

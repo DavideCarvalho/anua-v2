@@ -4,7 +4,6 @@ import { Link } from '@adonisjs/inertia/react'
 import { useMutation } from '@tanstack/react-query'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { api } from '~/lib/api'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../../components/layouts/escola-layout-simplificado'
@@ -148,15 +147,20 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
   >([])
   const [newAttachments, setNewAttachments] = useState<File[]>([])
   const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>([])
-  const updateAnnouncementMutation = useMutation({
-    ...api.api.v1.schoolAnnouncements.editDraft.mutationOptions(),
-    mutationFn: async (variables) => {
-      const params = variables.params as { id: string }
-      const body = variables.body as Record<string, unknown>
+  const updateAnnouncementMutation = useMutation<
+    unknown,
+    Error,
+    {
+      params: { id: string }
+      body: FormData
+    }
+  >({
+    mutationKey: ['school-announcements', 'edit'],
+    mutationFn: async ({ params, body }) => {
       const response = await fetch(`/api/v1/school-announcements/${params.id}`, {
         method: 'PUT',
         credentials: 'include',
-        body: body as BodyInit,
+        body,
       })
 
       if (!response.ok) {
@@ -499,7 +503,10 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
         formData.append('attachments', file)
       }
 
-      await updateAnnouncementMutation.mutateAsync({ params: { id: comunicadoId }, body: formData })
+      await updateAnnouncementMutation.mutateAsync({
+        params: { id: comunicadoId },
+        body: formData,
+      })
 
       router.visit('/escola/comunicados')
     } catch (submitError) {
