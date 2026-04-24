@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { Link } from '@adonisjs/inertia/react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -125,6 +125,7 @@ export default function NovoComunicadoPage() {
   const [requiresAcknowledgement, setRequiresAcknowledgement] = useState(false)
   const [acknowledgementDueAt, setAcknowledgementDueAt] = useState('')
   const [attachments, setAttachments] = useState<File[]>([])
+  const attachmentsInputRef = useRef<HTMLInputElement>(null)
   const createAnnouncementMutation = useMutation<unknown, Error, { body: FormData }>({
     mutationKey: ['school-announcements', 'create'],
     mutationFn: async ({ body }) => {
@@ -445,11 +446,24 @@ export default function NovoComunicadoPage() {
                 Voce pode selecionar varios arquivos de uma vez e repetir a selecao para adicionar mais.
               </p>
               <Input
+                ref={attachmentsInputRef}
                 type="file"
                 multiple
                 accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
+                className="hidden"
                 onChange={onAttachmentsChange}
               />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => attachmentsInputRef.current?.click()}
+                  disabled={attachments.length >= 5}
+                >
+                  Adicionar arquivo(s)
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
                 Tipos: PDF, DOCX, JPG, PNG, WEBP. Maximo 10MB por arquivo e 5 anexos.
               </p>
