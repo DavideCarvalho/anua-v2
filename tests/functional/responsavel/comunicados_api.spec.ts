@@ -7,6 +7,7 @@ import Role from '#models/role'
 import School from '#models/school'
 import User from '#models/user'
 import SchoolAnnouncement from '#models/school_announcement'
+import SchoolAnnouncementAttachment from '#models/school_announcement_attachment'
 import SchoolAnnouncementRecipient from '#models/school_announcement_recipient'
 
 async function createUserWithRole(roleName: string, seed: string) {
@@ -93,6 +94,16 @@ test.group('Responsavel comunicados API', (group) => {
       titleSeed: `${seed}-included`,
     })
 
+    await SchoolAnnouncementAttachment.create({
+      announcementId: included.announcement.id,
+      fileName: 'boletim.pdf',
+      filePath: `school-announcements/${included.announcement.id}/boletim.pdf`,
+      file: `school-announcements/${included.announcement.id}/boletim.pdf`,
+      mimeType: 'application/pdf',
+      fileSizeBytes: 12345,
+      position: 0,
+    })
+
     await createAnnouncementForResponsible({
       schoolId: school.id,
       creatorId: creator.id,
@@ -116,6 +127,10 @@ test.group('Responsavel comunicados API', (group) => {
     assert.equal(body.data.length, 1)
     assert.equal(body.data[0].id, included.announcement.id)
     assert.equal(body.data[0].acknowledgementStatus, 'PENDING_ACK')
+    assert.isArray(body.data[0].attachments)
+    assert.equal(body.data[0].attachments.length, 1)
+    assert.equal(body.data[0].attachments[0].fileName, 'boletim.pdf')
+    assert.isString(body.data[0].attachments[0].fileUrl)
   })
 
   test('returns comunicado details with acknowledgement status', async ({ client, assert }) => {

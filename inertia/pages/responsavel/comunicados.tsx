@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Bell, MessageSquare, Calendar, XCircle } from 'lucide-react'
+import { Bell, MessageSquare, Calendar, Paperclip, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -15,6 +15,7 @@ type AnnouncementItem = {
   body: string
   createdAt: string
   publishedAt: string | null
+  attachments?: Array<{ id: string; fileName: string; fileUrl?: string | null }>
   requiresAcknowledgement?: boolean
   acknowledgementDueAt?: string | null
   acknowledgementStatus?: 'NOT_REQUIRED' | 'PENDING_ACK' | 'ACKNOWLEDGED' | 'EXPIRED_UNACKNOWLEDGED'
@@ -128,6 +129,43 @@ function ComunicadosContent() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">{announcement.body}</p>
+
+            {announcement.attachments && announcement.attachments.length > 0 && (
+              <div className="mt-3 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Anexos</p>
+                <div className="space-y-1.5">
+                  {announcement.attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between gap-3 rounded-md border bg-muted/30 px-3 py-2"
+                    >
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Paperclip className="h-4 w-4 text-muted-foreground" />
+                        <span className="truncate text-sm" title={attachment.fileName}>
+                          {attachment.fileName}
+                        </span>
+                      </div>
+
+                      {attachment.fileUrl ? (
+                        <a
+                          href={attachment.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 text-xs font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                          Abrir
+                        </a>
+                      ) : (
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          Arquivo indisponivel
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-3 flex items-center justify-between gap-2">
               <Badge variant="secondary" className="text-xs">
                 {announcement.acknowledgementStatus === 'ACKNOWLEDGED' && 'Ciente confirmado'}
