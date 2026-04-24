@@ -132,6 +132,9 @@ export default function NovoComunicadoPage() {
         method: 'POST',
         credentials: 'include',
         redirect: 'manual',
+        headers: {
+          Accept: 'application/json',
+        },
         body,
       })
       
@@ -140,6 +143,19 @@ export default function NovoComunicadoPage() {
       }
 
       if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        const validationErrors = payload?.errors as Record<string, string[] | undefined> | undefined
+        if (validationErrors) {
+          const message = Object.values(validationErrors)
+            .flat()
+            .filter(Boolean)
+            .join(' ')
+
+          if (message) {
+            throw new Error(message)
+          }
+        }
+
         throw new Error('Falha ao criar comunicado')
       }
       
@@ -425,6 +441,9 @@ export default function NovoComunicadoPage() {
 
             <div className="space-y-2 rounded-md border p-4">
               <p className="text-sm font-semibold">Anexos</p>
+              <p className="text-xs text-muted-foreground">
+                Voce pode selecionar varios arquivos de uma vez e repetir a selecao para adicionar mais.
+              </p>
               <Input
                 type="file"
                 multiple
@@ -434,6 +453,7 @@ export default function NovoComunicadoPage() {
               <p className="text-xs text-muted-foreground">
                 Tipos: PDF, DOCX, JPG, PNG, WEBP. Maximo 10MB por arquivo e 5 anexos.
               </p>
+              <p className="text-xs text-muted-foreground">{attachments.length}/5 anexos selecionados.</p>
               {attachments.length > 0 && (
                 <div className="space-y-2">
                   {attachments.map((attachment, index) => (
