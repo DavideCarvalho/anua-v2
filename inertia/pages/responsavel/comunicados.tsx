@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Bell, MessageSquare, Calendar, Paperclip, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -91,7 +91,7 @@ function ComunicadosContent() {
   }
 
   const announcements = data?.data ?? []
-  const hasPreview = useMemo(() => previewFiles.length > 0, [previewFiles.length])
+  const hasPreview = previewFiles.length > 0
 
   const openPreview = (attachments: PreviewFile[], index: number) => {
     setPreviewFiles(attachments)
