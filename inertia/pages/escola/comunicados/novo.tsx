@@ -131,13 +131,18 @@ export default function NovoComunicadoPage() {
       const response = await fetch('/api/v1/school-announcements', {
         method: 'POST',
         credentials: 'include',
+        redirect: 'manual',
         body,
       })
+      
+      if (response.status === 302) {
+        throw new Error('Sessão expirada. Atualize a página e tente novamente.')
+      }
 
       if (!response.ok) {
         throw new Error('Falha ao criar comunicado')
       }
-
+      
       return response.json()
     },
   })
