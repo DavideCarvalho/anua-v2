@@ -128,7 +128,7 @@ export function FilePreviewLightbox({ files, initialIndex, open, onOpenChange }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="h-screen w-screen max-w-none translate-x-0 translate-y-0 top-0 left-0 rounded-none border-none bg-black/95 p-0 text-white"
+        className="top-0 left-0 h-screen w-screen max-w-none translate-x-0 translate-y-0 rounded-none border-none bg-black/95 p-0 text-white sm:max-w-none"
       >
         <div className="flex h-full flex-col">
           <header className="flex items-center justify-between border-b border-white/10 px-4 py-3">
