@@ -2216,12 +2216,14 @@ export class SchoolAnnouncementSchema extends BaseModel {
 }
 
 export class SchoolAnnouncementAttachmentSchema extends BaseModel {
-  static $columns = ['announcementId', 'createdAt', 'fileName', 'filePath', 'fileSizeBytes', 'id', 'mimeType', 'position', 'updatedAt'] as const
+  static $columns = ['announcementId', 'createdAt', 'file', 'fileName', 'filePath', 'fileSizeBytes', 'id', 'mimeType', 'position', 'updatedAt'] as const
   $columns = SchoolAnnouncementAttachmentSchema.$columns
   @column()
   declare announcementId: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare file: string | null
   @column()
   declare fileName: string
   @column()
