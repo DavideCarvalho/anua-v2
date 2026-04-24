@@ -4,10 +4,12 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Bell, MessageSquare, Calendar, Paperclip, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { useMemo, useState } from 'react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import { FilePreviewLightbox, type PreviewFile } from '../../components/ui/file-preview-lightbox'
 
 type AnnouncementItem = {
   id: string
@@ -15,7 +17,7 @@ type AnnouncementItem = {
   body: string
   createdAt: string
   publishedAt: string | null
-  attachments?: Array<{ id: string; fileName: string; fileUrl?: string | null }>
+  attachments?: Array<{ id: string; fileName: string; fileUrl?: string | null; mimeType?: string | null }>
   requiresAcknowledgement?: boolean
   acknowledgementDueAt?: string | null
   acknowledgementStatus?: 'NOT_REQUIRED' | 'PENDING_ACK' | 'ACKNOWLEDGED' | 'EXPIRED_UNACKNOWLEDGED'
@@ -38,6 +40,10 @@ async function listComunicados(): Promise<AnnouncementResponse> {
 }
 
 function ComunicadosContent() {
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewFiles, setPreviewFiles] = useState<PreviewFile[]>([])
+  const [previewIndex, setPreviewIndex] = useState(0)
+
   const queryClient = useQueryClient()
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['responsavel-comunicados'],
@@ -85,6 +91,13 @@ function ComunicadosContent() {
   }
 
   const announcements = data?.data ?? []
+  const hasPreview = useMemo(() => previewFiles.length > 0, [previewFiles.length])
+
+  const openPreview = (attachments: PreviewFile[], index: number) => {
+    setPreviewFiles(attachments)
+    setPreviewIndex(index < 0 ? 0 : index)
+    setPreviewOpen(true)
+  }
 
   if (announcements.length === 0) {
     return (
@@ -147,14 +160,22 @@ function ComunicadosContent() {
                       </div>
 
                       {attachment.fileUrl ? (
-                        <a
-                          href={attachment.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const files = (announcement.attachments ?? []).map((item) => ({
+                              id: item.id,
+                              fileName: item.fileName,
+                              fileUrl: item.fileUrl,
+                              mimeType: item.mimeType,
+                            }))
+                            const selectedIndex = files.findIndex((item) => item.id === attachment.id)
+                            openPreview(files, selectedIndex)
+                          }}
                           className="shrink-0 text-xs font-medium text-primary underline-offset-4 hover:underline"
                         >
                           Abrir
-                        </a>
+                        </button>
                       ) : (
                         <span className="shrink-0 text-xs text-muted-foreground">
                           Arquivo indisponivel
@@ -190,6 +211,15 @@ function ComunicadosContent() {
           </CardContent>
         </Card>
       ))}
+
+      {hasPreview && (
+        <FilePreviewLightbox
+          files={previewFiles}
+          initialIndex={previewIndex}
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+        />
+      )}
     </div>
   )
 }
