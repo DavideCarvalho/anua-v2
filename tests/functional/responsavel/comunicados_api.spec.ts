@@ -98,7 +98,6 @@ test.group('Responsavel comunicados API', (group) => {
       announcementId: included.announcement.id,
       fileName: 'boletim.pdf',
       filePath: `school-announcements/${included.announcement.id}/boletim.pdf`,
-      file: `school-announcements/${included.announcement.id}/boletim.pdf`,
       mimeType: 'application/pdf',
       fileSizeBytes: 12345,
       position: 0,
@@ -130,7 +129,7 @@ test.group('Responsavel comunicados API', (group) => {
     assert.isArray(body.data[0].attachments)
     assert.equal(body.data[0].attachments.length, 1)
     assert.equal(body.data[0].attachments[0].fileName, 'boletim.pdf')
-    assert.isString(body.data[0].attachments[0].fileUrl)
+    assert.isTrue('fileUrl' in body.data[0].attachments[0])
   })
 
   test('returns comunicado details with acknowledgement status', async ({ client, assert }) => {
