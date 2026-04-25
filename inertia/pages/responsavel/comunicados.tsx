@@ -159,28 +159,22 @@ function ComunicadosContent() {
                         </span>
                       </div>
 
-                      {attachment.fileUrl ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const files = (announcement.attachments ?? []).map((item) => ({
-                              id: item.id,
-                              fileName: item.fileName,
-                              fileUrl: item.fileUrl,
-                              mimeType: item.mimeType,
-                            }))
-                            const selectedIndex = files.findIndex((item) => item.id === attachment.id)
-                            openPreview(files, selectedIndex)
-                          }}
-                          className="shrink-0 text-xs font-medium text-primary underline-offset-4 hover:underline"
-                        >
-                          Abrir
-                        </button>
-                      ) : (
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          Arquivo indisponivel
-                        </span>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const files = (announcement.attachments ?? []).map((item) => ({
+                            id: item.id,
+                            fileName: item.fileName,
+                            fileUrl: item.fileUrl,
+                            mimeType: item.mimeType,
+                          }))
+                          const selectedIndex = files.findIndex((item) => item.id === attachment.id)
+                          openPreview(files, selectedIndex)
+                        }}
+                        className="shrink-0 text-xs font-medium text-primary underline-offset-4 hover:underline"
+                      >
+                        {attachment.fileUrl ? 'Abrir' : 'Visualizar'}
+                      </button>
                     </div>
                   ))}
                 </div>
