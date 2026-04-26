@@ -19,7 +19,7 @@ import {
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { toast } from 'sonner'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -109,20 +109,6 @@ async function createMessage(inquiryId: string, data: MessageFormValues): Promis
   if (!response.ok) {
     const error = await response.json()
     throw new Error(error.message || 'Falha ao enviar mensagem')
-  }
-
-  return response.json()
-}
-
-async function resolveInquiry(inquiryId: string): Promise<InquiryDetail> {
-  const response = await fetch(`/api/v1/responsavel/inquiries/${inquiryId}/resolve`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Falha ao resolver pergunta')
   }
 
   return response.json()
@@ -244,24 +230,23 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
     },
   })
 
-  const resolveMutation = useMutation({
-    mutationFn: () => resolveInquiry(inquiryId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['responsavel-inquiry', inquiryId] })
-      queryClient.invalidateQueries({ queryKey: ['responsavel-inquiries'] })
-      toast.success('Pergunta marcada como resolvida')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message)
-    },
-  })
+  useEffect(() => {
+    if (!inquiry) return
+
+    fetch(`/api/v1/responsavel/inquiries/${inquiryId}/mark-read`, {
+      method: 'POST',
+      credentials: 'include',
+    })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['responsavel-inquiries'] })
+      })
+      .catch(() => {
+        // Silently fail - non critical side effect
+      })
+  }, [inquiry?.id, inquiryId, queryClient])
 
   const onSendMessage = (data: MessageFormValues) => {
     messageMutation.mutate(data)
-  }
-
-  const handleResolve = () => {
-    resolveMutation.mutate()
   }
 
   const isOpen = inquiry?.status === 'OPEN'
@@ -275,7 +260,7 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
       <Card>
         <CardContent className="py-12 text-center">
           <XCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar pergunta</h3>
+          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar conversa</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
           </p>
@@ -362,19 +347,6 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
                     )}
                     Enviar
                   </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleResolve}
-                    disabled={resolveMutation.isPending}
-                  >
-                    {resolveMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                    )}
-                    Marcar como resolvida
-                  </Button>
                 </div>
               </form>
             </div>
@@ -414,14 +386,14 @@ export default function PerguntaDetailPage() {
 
   return (
     <ResponsavelLayout>
-      <Head title="Detalhe da pergunta" />
+      <Head title="Chat" />
 
       <ErrorBoundary
         fallback={
           <Card>
             <CardContent className="py-12 text-center">
               <XCircle className="mx-auto h-12 w-12 text-destructive" />
-              <h3 className="mt-4 text-lg font-semibold">Erro ao carregar pergunta</h3>
+              <h3 className="mt-4 text-lg font-semibold">Erro ao carregar conversa</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 Ocorreu um erro ao renderizar o componente.
               </p>

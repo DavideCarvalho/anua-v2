@@ -11,6 +11,7 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasLevel from '#models/student_has_level'
 import ParentInquiry from '#models/parent_inquiry'
 import ParentInquiryMessage from '#models/parent_inquiry_message'
+import ParentInquiryReadStatus from '#models/parent_inquiry_read_status'
 import ParentInquiryRecipient from '#models/parent_inquiry_recipient'
 import Level from '#models/level'
 import Course from '#models/course'
@@ -209,6 +210,17 @@ test.group('Responsavel inquiries API', (group) => {
   }) => {
     const response = await client
       .post('/api/v1/responsavel/inquiries/some-inquiry-id/resolve')
+      .redirects(0)
+
+    response.assertStatus(302)
+    response.assertHeader('location', '/login')
+  })
+
+  test('keeps inquiry mark-read endpoint protected for unauthenticated requests', async ({
+    client,
+  }) => {
+    const response = await client
+      .post('/api/v1/responsavel/inquiries/some-inquiry-id/mark-read')
       .redirects(0)
 
     response.assertStatus(302)
@@ -658,5 +670,69 @@ test.group('Responsavel inquiries API', (group) => {
       .loginAs(otherResponsible)
 
     response.assertStatus(403)
+  })
+
+  test('marks inquiry as read and updates hasUnread for responsible', async ({
+    client,
+    assert,
+  }) => {
+    const seed = `${Date.now()}-mark-read`
+    const school = await School.create({ name: `School ${seed}`, slug: `school-${seed}` })
+    const responsible = await createUserWithRole('STUDENT_RESPONSIBLE', `${seed}-resp`)
+    const director = await createUserWithRole('SCHOOL_DIRECTOR', `${seed}-director`, school.id)
+
+    const student = await createStudentWithResponsible({
+      schoolId: school.id,
+      responsibleId: responsible.id,
+      seed: `${seed}-student`,
+    })
+
+    const inquiry = await createInquiryForStudent({
+      studentId: student.id,
+      responsibleId: responsible.id,
+      schoolId: school.id,
+      seed: `${seed}-inquiry`,
+    })
+
+    const showBeforeMarkRead = await client
+      .get(`/api/v1/responsavel/inquiries/${inquiry.id}`)
+      .loginAs(responsible)
+
+    showBeforeMarkRead.assertStatus(200)
+    assert.equal(showBeforeMarkRead.body().hasUnread, true)
+
+    const markReadResponse = await client
+      .post(`/api/v1/responsavel/inquiries/${inquiry.id}/mark-read`)
+      .loginAs(responsible)
+
+    markReadResponse.assertStatus(204)
+
+    const readStatus = await ParentInquiryReadStatus.query()
+      .where('inquiryId', inquiry.id)
+      .where('userId', responsible.id)
+      .first()
+
+    assert.isNotNull(readStatus)
+
+    const showAfterMarkRead = await client
+      .get(`/api/v1/responsavel/inquiries/${inquiry.id}`)
+      .loginAs(responsible)
+
+    showAfterMarkRead.assertStatus(200)
+    assert.equal(showAfterMarkRead.body().hasUnread, false)
+
+    await ParentInquiryMessage.create({
+      inquiryId: inquiry.id,
+      authorId: director.id,
+      authorType: 'DIRECTOR',
+      body: 'Nova resposta da escola',
+    })
+
+    const showAfterNewMessage = await client
+      .get(`/api/v1/responsavel/inquiries/${inquiry.id}`)
+      .loginAs(responsible)
+
+    showAfterNewMessage.assertStatus(200)
+    assert.equal(showAfterNewMessage.body().hasUnread, true)
   })
 })

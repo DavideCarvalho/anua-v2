@@ -13,7 +13,6 @@ import { useState } from 'react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import {
   Dialog,
@@ -38,6 +37,7 @@ type InquiryItem = {
   status: InquiryStatus
   createdAt: string
   updatedAt: string
+  hasUnread?: boolean
   messages: Array<{
     id: string
     body: string
@@ -61,21 +61,6 @@ const createSchema = z.object({
 })
 
 type CreateFormValues = z.infer<typeof createSchema>
-
-function StatusBadge({ status }: { status: InquiryStatus }) {
-  const variants: Record<
-    InquiryStatus,
-    { label: string; variant: 'default' | 'secondary' | 'outline' }
-  > = {
-    OPEN: { label: 'Aberta', variant: 'default' },
-    RESOLVED: { label: 'Resolvida', variant: 'secondary' },
-    CLOSED: { label: 'Fechada', variant: 'outline' },
-  }
-
-  const { label, variant } = variants[status] || { label: status, variant: 'outline' }
-
-  return <Badge variant={variant}>{label}</Badge>
-}
 
 function NewInquiryDialog({
   open,
@@ -214,19 +199,35 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
   if (inquiries.length === 0) {
     return (
       <>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <MessageCircleQuestion className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">Nenhuma pergunta</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Você ainda não enviou nenhuma pergunta para este aluno.
-            </p>
-            <Button className="mt-4" onClick={() => setNewDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nova pergunta
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Conversas</CardTitle>
+              <CardDescription>Nenhuma conversa iniciada</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => setNewDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Iniciar conversa
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="flex min-h-[360px] flex-col items-center justify-center text-center">
+              <MessageCircleQuestion className="h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-4 text-lg font-semibold">Nenhum chat ainda</h3>
+              <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                Quando você iniciar a primeira conversa com a escola, as mensagens aparecerão aqui
+                neste painel.
+              </p>
+              <Button className="mt-4" onClick={() => setNewDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Iniciar conversa
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
         <NewInquiryDialog
           open={newDialogOpen}
@@ -241,7 +242,7 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
     <>
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {inquiries.length} pergunta{inquiries.length !== 1 ? 's' : ''}
+          {inquiries.length} conversa{inquiries.length !== 1 ? 's' : ''}
         </p>
         <Button size="sm" onClick={() => setNewDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -252,14 +253,21 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
       <div className="space-y-4">
         {inquiries.map((inquiry) => (
           <Link key={inquiry.id} href={`/responsavel/perguntas/${inquiry.id}`} className="block">
-            <Card className="border-primary/20 hover:border-primary/40 transition-colors cursor-pointer">
+            <Card
+              className={`border-primary/20 hover:border-primary/40 transition-colors cursor-pointer ${
+                inquiry.hasUnread ? 'bg-muted/50 border-primary/40' : ''
+              }`}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
+                    {inquiry.hasUnread && <div className="h-2 w-2 rounded-full bg-primary" />}
                     <MessageCircleQuestion className="h-5 w-5 text-primary" />
                     <CardTitle className="text-base">{inquiry.subject}</CardTitle>
                   </div>
-                  <StatusBadge status={inquiry.status} />
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(inquiry.updatedAt), 'HH:mm', { locale: ptBR })}
+                  </span>
                 </div>
                 <CardDescription className="flex items-center gap-2">
                   <Calendar className="h-3 w-3" />
@@ -270,7 +278,7 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground line-clamp-2">
-                  {inquiry.messages[0]?.body || 'Sem mensagem'}
+                  {inquiry.messages[inquiry.messages.length - 1]?.body || 'Sem mensagem'}
                 </p>
                 <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
@@ -314,16 +322,16 @@ export default function PerguntasPage() {
 
   return (
     <ResponsavelLayout>
-      <Head title="Perguntas" />
+      <Head title="Chat" />
 
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <MessageCircleQuestion className="h-6 w-6" />
-            Perguntas
+            Chat
           </h1>
           <p className="text-muted-foreground">
-            Envie perguntas e acompanhe as respostas da escola
+            Converse com a escola e acompanhe as respostas
           </p>
         </div>
 

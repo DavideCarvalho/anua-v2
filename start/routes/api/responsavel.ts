@@ -67,6 +67,8 @@ const ShowInquiryController = () => import('#controllers/responsavel/show_inquir
 const CreateInquiryMessageController = () =>
   import('#controllers/responsavel/create_inquiry_message_controller')
 const ResolveInquiryController = () => import('#controllers/responsavel/resolve_inquiry_controller')
+const MarkInquiryReadController = () =>
+  import('#controllers/responsavel/mark_inquiry_read_controller')
 
 export function registerResponsavelApiRoutes() {
   router
@@ -167,6 +169,9 @@ export function registerResponsavelApiRoutes() {
       router
         .post('/inquiries/:inquiryId/resolve', [ResolveInquiryController])
         .as('inquiries.resolve')
+      router
+        .post('/inquiries/:inquiryId/mark-read', [MarkInquiryReadController])
+        .as('inquiries.mark-read')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])

@@ -66,7 +66,7 @@ const baseNavigation: NavItem[] = [
     icon: ClipboardCheck,
   },
   {
-    title: 'Perguntas',
+    title: 'Chat',
     route: 'web.responsavel.perguntas',
     href: '/responsavel/perguntas',
     icon: MessageCircleQuestion,

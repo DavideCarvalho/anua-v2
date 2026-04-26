@@ -18,6 +18,7 @@ export default class ShowInquiryController {
       .preload('student')
       .preload('createdByResponsible')
       .preload('resolvedByUser')
+      .preload('readStatuses', (rq) => rq.where('userId', user.id))
       .preload('messages', (mq) => {
         mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
       })

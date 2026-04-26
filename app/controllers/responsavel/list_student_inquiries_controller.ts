@@ -30,6 +30,7 @@ export default class ListStudentInquiriesController {
     const query = ParentInquiry.query()
       .where('studentId', studentId)
       .preload('createdByResponsible')
+      .preload('readStatuses', (rq) => rq.where('userId', user.id))
       .preload('messages', (mq) => {
         mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
       })
