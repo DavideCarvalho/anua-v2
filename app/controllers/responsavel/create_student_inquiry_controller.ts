@@ -10,7 +10,10 @@ import StudentHasResponsible from '#models/student_has_responsible'
 import StudentHasLevel from '#models/student_has_level'
 import { createInquiryValidator } from '#validators/parent_inquiry'
 import { resolveInquiryRecipients } from '#services/inquiries/inquiry_recipient_service'
-import { notifyInquiryCreated } from '#services/inquiries/inquiry_notification_service'
+import {
+  notifyInquiryCreated,
+  notifyInquiryMessage,
+} from '#services/inquiries/inquiry_notification_service'
 
 export default class CreateStudentInquiryController {
   async handle({ request, response, auth, effectiveUser, params, serialize }: HttpContext) {
@@ -48,6 +51,91 @@ export default class CreateStudentInquiryController {
     }
 
     const recipients = await resolveInquiryRecipients(studentId, schoolId)
+
+    const existingInquiry = await ParentInquiry.query()
+      .where('studentId', studentId)
+      .where('createdByResponsibleId', user.id)
+      .orderBy('createdAt', 'asc')
+      .first()
+
+    if (existingInquiry) {
+      await db.transaction(async (trx) => {
+        if (existingInquiry.status === 'RESOLVED' || existingInquiry.status === 'CLOSED') {
+          existingInquiry.status = 'OPEN'
+          existingInquiry.resolvedAt = null
+          existingInquiry.resolvedBy = null
+          await existingInquiry.useTransaction(trx).save()
+        }
+
+        const message = await ParentInquiryMessage.create(
+          {
+            inquiryId: existingInquiry.id,
+            authorId: user.id,
+            authorType: 'RESPONSIBLE',
+            body: payload.body,
+          },
+          { client: trx }
+        )
+
+        if (payload.attachments && payload.attachments.length > 0) {
+          await Promise.all(
+            payload.attachments.map((att) =>
+              ParentInquiryAttachment.create(
+                {
+                  messageId: message.id,
+                  fileName: att.fileName,
+                  filePath: att.filePath,
+                  fileSize: att.fileSize,
+                  mimeType: att.mimeType,
+                },
+                { client: trx }
+              )
+            )
+          )
+        }
+
+        const existingRecipients = await ParentInquiryRecipient.query({ client: trx })
+          .where('inquiryId', existingInquiry.id)
+          .select('userId')
+        const existingRecipientIds = new Set(
+          existingRecipients.map((recipient) => recipient.userId)
+        )
+
+        await Promise.all(
+          recipients
+            .filter((recipient) => !existingRecipientIds.has(recipient.userId))
+            .map((recipient) =>
+              ParentInquiryRecipient.create(
+                {
+                  inquiryId: existingInquiry.id,
+                  userId: recipient.userId,
+                  userType: recipient.userType,
+                },
+                { client: trx }
+              )
+            )
+        )
+      })
+
+      await existingInquiry.load('createdByResponsible')
+      await existingInquiry.load('messages', (mq) => {
+        mq.preload('author').preload('attachments').orderBy('createdAt', 'asc')
+      })
+      await existingInquiry.load('recipients', (rq) => rq.preload('user'))
+
+      const recipientIds = existingInquiry.recipients.map((recipient) => recipient.userId)
+      if (recipientIds.length > 0) {
+        await notifyInquiryMessage({
+          inquiry: existingInquiry,
+          messageAuthorId: user.id,
+          messageAuthorName: user.name,
+          messageBody: payload.body,
+          notifyUserIds: recipientIds,
+        })
+      }
+
+      return response.ok(await serialize(ParentInquiryTransformer.transform(existingInquiry)))
+    }
 
     const inquiry = await db.transaction(async (trx) => {
       const created = await ParentInquiry.create(

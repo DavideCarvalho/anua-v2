@@ -75,7 +75,7 @@ export async function notifyInquiryMessage(params: NotifyInquiryMessageParams) {
     .where('active', true)
     .select(['id', 'name', 'email'])
 
-  const actionUrl = `/responsavel/perguntas/${inquiry.id}`
+  const actionUrl = '/responsavel/chat'
 
   await Promise.all(
     users.map(async (user) => {
@@ -123,7 +123,7 @@ export async function notifyInquiryResolved(params: NotifyInquiryResolvedParams)
     .where('active', true)
     .select(['id', 'name', 'email'])
 
-  const actionUrl = `/responsavel/perguntas/${inquiry.id}`
+  const actionUrl = '/responsavel/chat'
 
   await Promise.all(
     users.map(async (user) => {

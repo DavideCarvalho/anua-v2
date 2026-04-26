@@ -371,6 +371,58 @@ test.group('Responsavel inquiries API', (group) => {
     assert.equal(savedInquiry.messages[0].body, 'This is the initial message body')
   })
 
+  test('reuses existing inquiry and reopens it when creating a new message', async ({
+    client,
+    assert,
+  }) => {
+    const seed = `${Date.now()}-reuse-create`
+    const school = await School.create({ name: `School ${seed}`, slug: `school-${seed}` })
+    const responsible = await createUserWithRole('STUDENT_RESPONSIBLE', `${seed}-resp`)
+    const { levelAssignment } = await createEnrollmentFixtures(school.id, seed)
+
+    const student = await createStudentWithResponsible({
+      schoolId: school.id,
+      responsibleId: responsible.id,
+      seed: `${seed}-student`,
+      levelAssignmentId: levelAssignment.id,
+    })
+
+    const existingInquiry = await createInquiryForStudent({
+      studentId: student.id,
+      responsibleId: responsible.id,
+      schoolId: school.id,
+      seed: `${seed}-inquiry`,
+      status: 'RESOLVED',
+      resolvedBy: responsible.id,
+    })
+
+    const response = await client
+      .post(`/api/v1/responsavel/students/${student.id}/inquiries`)
+      .json({
+        subject: 'Novo assunto ignorado',
+        body: 'Nova mensagem reaproveitando conversa',
+      })
+      .loginAs(responsible)
+
+    response.assertStatus(200)
+    const body = response.body()
+    assert.equal(body.id, existingInquiry.id)
+    assert.equal(body.status, 'OPEN')
+    assert.equal(body.messages.length, 2)
+    assert.equal(body.messages[1].body, 'Nova mensagem reaproveitando conversa')
+
+    const inquiries = await ParentInquiry.query()
+      .where('studentId', student.id)
+      .where('createdByResponsibleId', responsible.id)
+
+    assert.equal(inquiries.length, 1)
+
+    const reloadedInquiry = await ParentInquiry.findOrFail(existingInquiry.id)
+    assert.equal(reloadedInquiry.status, 'OPEN')
+    assert.isNull(reloadedInquiry.resolvedAt)
+    assert.isNull(reloadedInquiry.resolvedBy)
+  })
+
   test('creates inquiry recipients for school staff', async ({ client, assert }) => {
     const seed = `${Date.now()}-recipients`
     const school = await School.create({ name: `School ${seed}`, slug: `school-${seed}` })
@@ -500,7 +552,7 @@ test.group('Responsavel inquiries API', (group) => {
     response.assertStatus(403)
   })
 
-  test('denies adding message to resolved inquiry', async ({ client }) => {
+  test('reopens resolved inquiry when adding a message', async ({ client, assert }) => {
     const seed = `${Date.now()}-resolved-message`
     const school = await School.create({ name: `School ${seed}`, slug: `school-${seed}` })
     const responsible = await createUserWithRole('STUDENT_RESPONSIBLE', `${seed}-resp`)
@@ -522,11 +574,20 @@ test.group('Responsavel inquiries API', (group) => {
     const response = await client
       .post(`/api/v1/responsavel/inquiries/${inquiry.id}/messages`)
       .json({
-        body: 'Should fail',
+        body: 'Reopening message',
       })
       .loginAs(responsible)
 
-    response.assertStatus(400)
+    response.assertStatus(200)
+    const body = response.body()
+    assert.equal(body.status, 'OPEN')
+    assert.equal(body.messages.length, 2)
+    assert.equal(body.messages[1].body, 'Reopening message')
+
+    const savedInquiry = await ParentInquiry.findOrFail(inquiry.id)
+    assert.equal(savedInquiry.status, 'OPEN')
+    assert.isNull(savedInquiry.resolvedAt)
+    assert.isNull(savedInquiry.resolvedBy)
   })
 
   test('resolves inquiry and sets resolvedAt and resolvedBy', async ({ client, assert }) => {

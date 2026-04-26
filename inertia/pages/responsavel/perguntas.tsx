@@ -1,13 +1,10 @@
 import { Head } from '@inertiajs/react'
-import { Link } from '@adonisjs/inertia/react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { MessageCircleQuestion, Plus, XCircle, Loader2, Calendar, Clock } from 'lucide-react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { MessageCircleQuestion, Plus, XCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
@@ -27,33 +24,6 @@ import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
 import { useSelectedStudent } from '../../hooks/use_selected_student'
 import { api } from '~/lib/api'
-
-type InquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
-
-type InquiryItem = {
-  id: string
-  studentId: string
-  subject: string
-  status: InquiryStatus
-  createdAt: string
-  updatedAt: string
-  hasUnread?: boolean
-  messages: Array<{
-    id: string
-    body: string
-    authorType: string
-    createdAt: string
-  }>
-}
-
-type InquiryListResponse = {
-  data: InquiryItem[]
-  metadata?: {
-    total: number
-    currentPage: number
-    lastPage: number
-  }
-}
 
 const createSchema = z.object({
   subject: z.string().min(3, 'Assunto deve ter pelo menos 3 caracteres').max(255),
@@ -143,23 +113,7 @@ function NewInquiryDialog({
   )
 }
 
-function InquiriesListContent({ studentId }: { studentId: string }) {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['responsavel-inquiries', studentId],
-    queryFn: async (): Promise<InquiryListResponse> => {
-      const response = await fetch(`/api/v1/responsavel/students/${studentId}/inquiries`, {
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        throw new Error('Falha ao carregar perguntas')
-      }
-
-      return response.json()
-    },
-    enabled: !!studentId,
-  })
-
+function StartChatContent({ studentId }: { studentId: string }) {
   const [newDialogOpen, setNewDialogOpen] = useState(false)
 
   if (!studentId) {
@@ -176,144 +130,39 @@ function InquiriesListContent({ studentId }: { studentId: string }) {
     )
   }
 
-  if (isLoading) {
-    return <InquiriesSkeleton />
-  }
-
-  if (isError) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <XCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h3 className="mt-4 text-lg font-semibold">Erro ao carregar perguntas</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : 'Ocorreu um erro desconhecido'}
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const inquiries = data?.data ?? []
-
-  if (inquiries.length === 0) {
-    return (
-      <>
-        <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Conversas</CardTitle>
-              <CardDescription>Nenhuma conversa iniciada</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" onClick={() => setNewDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Iniciar conversa
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="flex min-h-[360px] flex-col items-center justify-center text-center">
-              <MessageCircleQuestion className="h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">Nenhum chat ainda</h3>
-              <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Quando você iniciar a primeira conversa com a escola, as mensagens aparecerão aqui
-                neste painel.
-              </p>
-              <Button className="mt-4" onClick={() => setNewDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Iniciar conversa
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <NewInquiryDialog
-          open={newDialogOpen}
-          onOpenChange={setNewDialogOpen}
-          studentId={studentId}
-        />
-      </>
-    )
-  }
-
   return (
     <>
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {inquiries.length} conversa{inquiries.length !== 1 ? 's' : ''}
-        </p>
-        <Button size="sm" onClick={() => setNewDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova pergunta
-        </Button>
-      </div>
-
-      <div className="space-y-4">
-        {inquiries.map((inquiry) => (
-          <Link key={inquiry.id} href={`/responsavel/perguntas/${inquiry.id}`} className="block">
-            <Card
-              className={`border-primary/20 hover:border-primary/40 transition-colors cursor-pointer ${
-                inquiry.hasUnread ? 'bg-muted/50 border-primary/40' : ''
-              }`}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    {inquiry.hasUnread && <div className="h-2 w-2 rounded-full bg-primary" />}
-                    <MessageCircleQuestion className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-base">{inquiry.subject}</CardTitle>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(inquiry.updatedAt), 'HH:mm', { locale: ptBR })}
-                  </span>
-                </div>
-                <CardDescription className="flex items-center gap-2">
-                  <Calendar className="h-3 w-3" />
-                  {format(new Date(inquiry.createdAt), "dd 'de' MMMM 'de' yyyy, HH:mm", {
-                    locale: ptBR,
-                  })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {inquiry.messages[inquiry.messages.length - 1]?.body || 'Sem mensagem'}
-                </p>
-                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {inquiry.messages.length} mensagem{inquiry.messages.length !== 1 ? 's' : ''}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-
-      <NewInquiryDialog
-        open={newDialogOpen}
-        onOpenChange={setNewDialogOpen}
-        studentId={studentId}
-      />
-    </>
-  )
-}
-
-function InquiriesSkeleton() {
-  return (
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-        <Card key={i}>
-          <CardHeader className="pb-2">
-            <div className="h-5 w-48 bg-muted animate-pulse rounded" />
-            <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+      <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Conversa</CardTitle>
+            <CardDescription>Nenhum chat iniciado</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-12 bg-muted animate-pulse rounded" />
+            <Button className="w-full" onClick={() => setNewDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Iniciar conversa
+            </Button>
           </CardContent>
         </Card>
-      ))}
-    </div>
+
+        <Card>
+          <CardContent className="flex min-h-[360px] flex-col items-center justify-center text-center">
+            <MessageCircleQuestion className="h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">Nenhum chat ainda</h3>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              Envie sua primeira mensagem para iniciar a conversa com a escola.
+            </p>
+            <Button className="mt-4" onClick={() => setNewDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Iniciar conversa
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <NewInquiryDialog open={newDialogOpen} onOpenChange={setNewDialogOpen} studentId={studentId} />
+    </>
   )
 }
 
@@ -348,7 +197,7 @@ export default function PerguntasPage() {
             </Card>
           }
         >
-          <InquiriesListContent studentId={studentId || ''} />
+          <StartChatContent studentId={studentId || ''} />
         </ErrorBoundary>
       </div>
     </ResponsavelLayout>

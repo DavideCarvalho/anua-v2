@@ -42,8 +42,6 @@ const ShowResponsavelLojaStorePageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller')
 const ShowResponsavelPerguntasPageController = () =>
   import('#controllers/pages/responsavel/show_responsavel_perguntas_page_controller')
-const ShowResponsavelPerguntaDetailPageController = () =>
-  import('#controllers/pages/responsavel/show_responsavel_pergunta_detail_page_controller')
 
 export function registerResponsavelPageRoutes() {
   router
@@ -69,10 +67,7 @@ export function registerResponsavelPageRoutes() {
       router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')
       router.get('/loja', [ShowResponsavelLojaPageController]).as('loja')
       router.get('/loja/:id', [ShowResponsavelLojaStorePageController]).as('loja.store')
-      router.get('/perguntas', [ShowResponsavelPerguntasPageController]).as('perguntas')
-      router
-        .get('/perguntas/:inquiryId', [ShowResponsavelPerguntaDetailPageController])
-        .as('perguntas.show')
+      router.get('/chat', [ShowResponsavelPerguntasPageController]).as('perguntas')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])

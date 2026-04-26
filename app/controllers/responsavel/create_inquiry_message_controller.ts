@@ -33,13 +33,16 @@ export default class CreateInquiryMessageController {
       throw AppException.forbidden('Você não tem permissão para responder esta pergunta')
     }
 
-    if (inquiry.status === 'RESOLVED' || inquiry.status === 'CLOSED') {
-      throw AppException.badRequest('Esta pergunta já foi encerrada')
-    }
-
     const payload = await request.validateUsing(createMessageValidator)
 
     await db.transaction(async (trx) => {
+      if (inquiry.status === 'RESOLVED' || inquiry.status === 'CLOSED') {
+        inquiry.status = 'OPEN'
+        inquiry.resolvedAt = null
+        inquiry.resolvedBy = null
+        await inquiry.useTransaction(trx).save()
+      }
+
       const created = await ParentInquiryMessage.create(
         {
           inquiryId: inquiry.id,
