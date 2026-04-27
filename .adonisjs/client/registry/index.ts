@@ -482,14 +482,14 @@ const routes = {
   },
   'web.escola.perguntas': {
     methods: ["GET","HEAD"],
-    pattern: '/escola/duvidas-responsaveis',
-    tokens: [{"old":"/escola/duvidas-responsaveis","type":0,"val":"escola","end":""},{"old":"/escola/duvidas-responsaveis","type":0,"val":"duvidas-responsaveis","end":""}],
+    pattern: '/escola/chat',
+    tokens: [{"old":"/escola/chat","type":0,"val":"escola","end":""},{"old":"/escola/chat","type":0,"val":"chat","end":""}],
     types: placeholder as Registry['web.escola.perguntas']['types'],
   },
   'web.escola.perguntas.show': {
     methods: ["GET","HEAD"],
-    pattern: '/escola/duvidas-responsaveis/:inquiryId',
-    tokens: [{"old":"/escola/duvidas-responsaveis/:inquiryId","type":0,"val":"escola","end":""},{"old":"/escola/duvidas-responsaveis/:inquiryId","type":0,"val":"duvidas-responsaveis","end":""},{"old":"/escola/duvidas-responsaveis/:inquiryId","type":1,"val":"inquiryId","end":""}],
+    pattern: '/escola/chat/:inquiryId',
+    tokens: [{"old":"/escola/chat/:inquiryId","type":0,"val":"escola","end":""},{"old":"/escola/chat/:inquiryId","type":0,"val":"chat","end":""},{"old":"/escola/chat/:inquiryId","type":1,"val":"inquiryId","end":""}],
     types: placeholder as Registry['web.escola.perguntas.show']['types'],
   },
   'web.escola.eventos.novo': {

@@ -280,10 +280,8 @@ export function registerEscolaPageRoutes() {
         .as('comunicados.editar')
 
       // Duvidas dos responsaveis
-      router.get('/duvidas-responsaveis', [ShowPerguntasPageController]).as('perguntas')
-      router
-        .get('/duvidas-responsaveis/:inquiryId', [ShowPerguntaDetailPageController])
-        .as('perguntas.show')
+      router.get('/chat', [ShowPerguntasPageController]).as('perguntas')
+      router.get('/chat/:inquiryId', [ShowPerguntaDetailPageController]).as('perguntas.show')
 
       // Eventos
       router.get('/calendario/novo', [ShowNovoEventoPageController]).as('eventos.novo')

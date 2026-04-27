@@ -1,5 +1,4 @@
 import { Head, usePage } from '@inertiajs/react'
-import { Link } from '@adonisjs/inertia/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useForm } from 'react-hook-form'
@@ -13,7 +12,6 @@ import {
   Calendar,
   CheckCircle,
   Send,
-  ArrowLeft,
   Paperclip,
   User,
 } from 'lucide-react'
@@ -259,17 +257,6 @@ function InquiryDetailContent({ inquiryId }: { inquiryId: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link
-          route="web.escola.perguntas"
-          routeParams={undefined}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar
-        </Link>
-      </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-start justify-between">

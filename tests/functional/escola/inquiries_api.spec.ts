@@ -59,6 +59,15 @@ test.group('Escola inquiries API', (group) => {
     }
   })
 
+  test('keeps escola chat detail page protected for unauthenticated requests', async ({
+    client,
+  }) => {
+    const response = await client.get('/escola/chat/some-inquiry-id').redirects(0)
+
+    response.assertStatus(302)
+    response.assertHeader('location', '/login')
+  })
+
   test('teacher can list inquiries for students in their class even without explicit recipient row', async ({
     client,
     assert,
