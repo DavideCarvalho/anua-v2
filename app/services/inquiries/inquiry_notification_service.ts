@@ -73,7 +73,10 @@ export async function notifyInquiryMessage(params: NotifyInquiryMessageParams) {
   const users = await User.query()
     .whereIn('id', notifyUserIds)
     .where('active', true)
+    .whereNot('id', messageAuthorId)
     .select(['id', 'name', 'email'])
+
+  if (users.length === 0) return
 
   const actionUrl = '/responsavel/chat'
 

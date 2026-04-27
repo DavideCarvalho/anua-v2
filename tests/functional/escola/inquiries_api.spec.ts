@@ -19,6 +19,7 @@ import StudentHasLevel from '#models/student_has_level'
 import TeacherHasClass from '#models/teacher_has_class'
 import ParentInquiry from '#models/parent_inquiry'
 import ParentInquiryMessage from '#models/parent_inquiry_message'
+import Notification from '#models/notification'
 
 async function createUserWithRole(roleName: string, seed: string, schoolId?: string) {
   const role = await Role.firstOrCreate({ name: roleName }, { name: roleName })
@@ -157,5 +158,50 @@ test.group('Escola inquiries API', (group) => {
     const body = response.body()
     assert.isArray(body.data)
     assert.equal(body.data[0].id, inquiry.id)
+  })
+
+  test('does not notify the same school user who authored the message', async ({
+    client,
+    assert,
+  }) => {
+    const seed = `self-notify-${Date.now()}`
+
+    const school = await School.create({ name: `School ${seed}`, slug: `school-${seed}` })
+    const director = await createUserWithRole('SCHOOL_DIRECTOR', `${seed}-director`, school.id)
+
+    const studentUser = await createUserWithRole('STUDENT', `${seed}-student`, school.id)
+    const student = await Student.create({
+      id: studentUser.id,
+      balance: 0,
+      enrollmentStatus: 'REGISTERED',
+    })
+
+    const inquiry = await ParentInquiry.create({
+      studentId: student.id,
+      createdByResponsibleId: director.id,
+      schoolId: school.id,
+      subject: `Inquiry ${seed}`,
+      status: 'OPEN',
+    })
+
+    await ParentInquiryMessage.create({
+      inquiryId: inquiry.id,
+      authorId: director.id,
+      authorType: 'DIRECTOR',
+      body: 'Mensagem inicial do diretor',
+    })
+
+    const response = await client
+      .post(`/api/v1/escola/inquiries/${inquiry.id}/messages`)
+      .loginAs(director)
+      .json({ body: 'Resposta do diretor' })
+
+    response.assertStatus(200)
+
+    const notifications = await Notification.query()
+      .where('userId', director.id)
+      .where('type', 'INQUIRY_MESSAGE')
+
+    assert.equal(notifications.length, 0)
   })
 })
