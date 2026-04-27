@@ -195,9 +195,7 @@ export interface ApiDefinition {
       loja: typeof routes['web.responsavel.loja'] & {
         store: typeof routes['web.responsavel.loja.store']
       }
-      perguntas: typeof routes['web.responsavel.perguntas'] & {
-        show: typeof routes['web.responsavel.perguntas.show']
-      }
+      perguntas: typeof routes['web.responsavel.perguntas']
     }
     admin: {
       dashboard: typeof routes['web.admin.dashboard']

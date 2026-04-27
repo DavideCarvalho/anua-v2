@@ -854,15 +854,9 @@ const routes = {
   },
   'web.responsavel.perguntas': {
     methods: ["GET","HEAD"],
-    pattern: '/responsavel/perguntas',
-    tokens: [{"old":"/responsavel/perguntas","type":0,"val":"responsavel","end":""},{"old":"/responsavel/perguntas","type":0,"val":"perguntas","end":""}],
+    pattern: '/responsavel/chat',
+    tokens: [{"old":"/responsavel/chat","type":0,"val":"responsavel","end":""},{"old":"/responsavel/chat","type":0,"val":"chat","end":""}],
     types: placeholder as Registry['web.responsavel.perguntas']['types'],
-  },
-  'web.responsavel.perguntas.show': {
-    methods: ["GET","HEAD"],
-    pattern: '/responsavel/perguntas/:inquiryId',
-    tokens: [{"old":"/responsavel/perguntas/:inquiryId","type":0,"val":"responsavel","end":""},{"old":"/responsavel/perguntas/:inquiryId","type":0,"val":"perguntas","end":""},{"old":"/responsavel/perguntas/:inquiryId","type":1,"val":"inquiryId","end":""}],
-    types: placeholder as Registry['web.responsavel.perguntas.show']['types'],
   },
   'web.admin.dashboard': {
     methods: ["GET","HEAD"],

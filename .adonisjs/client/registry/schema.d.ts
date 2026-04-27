@@ -1701,7 +1701,7 @@ export interface Registry {
   }
   'web.responsavel.perguntas': {
     methods: ["GET","HEAD"]
-    pattern: '/responsavel/perguntas'
+    pattern: '/responsavel/chat'
     types: {
       body: {}
       paramsTuple: []
@@ -1709,18 +1709,6 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_perguntas_page_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_perguntas_page_controller').default['handle']>>>
-    }
-  }
-  'web.responsavel.perguntas.show': {
-    methods: ["GET","HEAD"]
-    pattern: '/responsavel/perguntas/:inquiryId'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { inquiryId: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_pergunta_detail_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_pergunta_detail_page_controller').default['handle']>>>
     }
   }
   'web.admin.dashboard': {
