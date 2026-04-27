@@ -106,9 +106,9 @@ const navigation: NavItem[] = [
         href: '/escola/pedagogico/registro-diario',
       },
       {
-        title: 'Mensagens',
+        title: 'Chat',
         route: 'web.escola.perguntas',
-        href: '/escola/duvidas-responsaveis',
+        href: '/escola/chat',
         badge: <UnreadMessagesBadge />,
       },
     ],
