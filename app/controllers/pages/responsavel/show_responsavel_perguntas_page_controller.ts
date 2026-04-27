@@ -16,6 +16,9 @@ export default class ShowResponsavelPerguntasPageController {
     if (studentSlug) {
       const responsibleLink = await StudentHasResponsible.query()
         .where('responsibleId', user.id)
+        .preload('student', (studentQuery) => {
+          studentQuery.preload('user')
+        })
         .whereHas('student', (studentQuery) => {
           studentQuery.whereHas('user', (userQuery) => {
             userQuery.where('slug', studentSlug)
@@ -30,7 +33,23 @@ export default class ShowResponsavelPerguntasPageController {
           .orderBy('updatedAt', 'desc')
           .first()
 
-        latestInquiryId = latestInquiry?.id ?? null
+        if (latestInquiry) {
+          latestInquiryId = latestInquiry.id
+        } else {
+          const schoolId = responsibleLink.student?.user?.schoolId
+
+          if (schoolId) {
+            const createdInquiry = await ParentInquiry.create({
+              studentId: responsibleLink.studentId,
+              createdByResponsibleId: user.id,
+              schoolId,
+              subject: 'Conversa',
+              status: 'OPEN',
+            })
+
+            latestInquiryId = createdInquiry.id
+          }
+        }
       }
     } else {
       const latestInquiry = await ParentInquiry.query()

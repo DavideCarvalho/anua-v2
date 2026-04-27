@@ -1,24 +1,15 @@
-import { Head } from '@inertiajs/react'
+import { Head, router } from '@inertiajs/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { MessageCircleQuestion, Plus, XCircle, Loader2 } from 'lucide-react'
+import { MessageCircleQuestion, XCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useState } from 'react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../components/ui/dialog'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
@@ -32,15 +23,7 @@ const createSchema = z.object({
 
 type CreateFormValues = z.infer<typeof createSchema>
 
-function NewInquiryDialog({
-  open,
-  onOpenChange,
-  studentId,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  studentId: string
-}) {
+function StartChatForm({ studentId }: { studentId: string }) {
   const queryClient = useQueryClient()
   const form = useForm<CreateFormValues>({
     resolver: zodResolver(createSchema),
@@ -56,66 +39,54 @@ function NewInquiryDialog({
     try {
       await createMutation.mutateAsync({ params: { studentId }, body: data })
       queryClient.invalidateQueries({ queryKey: ['responsavel-inquiries', studentId] })
-      toast.success('Pergunta criada com sucesso')
+      toast.success('Conversa iniciada com sucesso')
       form.reset()
-      onOpenChange(false)
+      const currentUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}`
+          : '/responsavel/chat'
+      router.visit(currentUrl)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Falha ao criar pergunta')
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Nova pergunta</DialogTitle>
-          <DialogDescription>Envie uma pergunta ou dúvida para a escola</DialogDescription>
-        </DialogHeader>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="subject">Assunto</Label>
+        <Input
+          id="subject"
+          placeholder="Ex: Dúvida sobre mensalidade"
+          {...form.register('subject')}
+        />
+        {form.formState.errors.subject && (
+          <p className="text-sm text-destructive">{form.formState.errors.subject.message}</p>
+        )}
+      </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="subject">Assunto</Label>
-            <Input
-              id="subject"
-              placeholder="Ex: Dúvida sobre mensalidade"
-              {...form.register('subject')}
-            />
-            {form.formState.errors.subject && (
-              <p className="text-sm text-destructive">{form.formState.errors.subject.message}</p>
-            )}
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="body">Mensagem</Label>
+        <Textarea
+          id="body"
+          rows={6}
+          placeholder="Descreva sua dúvida ou pergunta..."
+          {...form.register('body')}
+        />
+        {form.formState.errors.body && (
+          <p className="text-sm text-destructive">{form.formState.errors.body.message}</p>
+        )}
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="body">Mensagem</Label>
-            <Textarea
-              id="body"
-              rows={5}
-              placeholder="Descreva sua dúvida ou pergunta..."
-              {...form.register('body')}
-            />
-            {form.formState.errors.body && (
-              <p className="text-sm text-destructive">{form.formState.errors.body.message}</p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enviar
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <Button type="submit" disabled={createMutation.isPending}>
+        {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Enviar primeira mensagem
+      </Button>
+    </form>
   )
 }
 
 function StartChatContent({ studentId }: { studentId: string }) {
-  const [newDialogOpen, setNewDialogOpen] = useState(false)
-
   if (!studentId) {
     return (
       <Card>
@@ -131,38 +102,15 @@ function StartChatContent({ studentId }: { studentId: string }) {
   }
 
   return (
-    <>
-      <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Conversa</CardTitle>
-            <CardDescription>Nenhum chat iniciado</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full" onClick={() => setNewDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Iniciar conversa
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex min-h-[360px] flex-col items-center justify-center text-center">
-            <MessageCircleQuestion className="h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">Nenhum chat ainda</h3>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Envie sua primeira mensagem para iniciar a conversa com a escola.
-            </p>
-            <Button className="mt-4" onClick={() => setNewDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Iniciar conversa
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <NewInquiryDialog open={newDialogOpen} onOpenChange={setNewDialogOpen} studentId={studentId} />
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>Iniciar conversa</CardTitle>
+        <CardDescription>Envie sua primeira mensagem para abrir o chat com a escola.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <StartChatForm studentId={studentId} />
+      </CardContent>
+    </Card>
   )
 }
 

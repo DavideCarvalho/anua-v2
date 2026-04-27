@@ -227,6 +227,41 @@ test.group('Responsavel inquiries API', (group) => {
     response.assertHeader('location', '/login')
   })
 
+  test('creates an inquiry and opens chat page when responsible has no existing thread', async ({
+    client,
+  }) => {
+    const school = await School.create({
+      name: 'Chat School',
+      slug: 'chat-school',
+    })
+
+    const responsible = await createUserWithRole('RESPONSIBLE', 'chat-page-open', school.id)
+    const student = await createStudentWithResponsible({
+      schoolId: school.id,
+      responsibleId: responsible.id,
+      seed: 'chat-page-open',
+    })
+
+    const studentUser = await User.findOrFail(student.id)
+
+    const response = await client
+      .get(`/responsavel/chat?aluno=${studentUser.slug}`)
+      .loginAs(responsible)
+
+    response.assertStatus(200)
+
+    const inquiry = await ParentInquiry.query()
+      .where('studentId', student.id)
+      .where('createdByResponsibleId', responsible.id)
+      .first()
+
+    if (!inquiry) {
+      throw new Error('Expected inquiry to be auto-created for chat page')
+    }
+
+    response.assertStatus(200)
+  })
+
   test('lists only inquiries for authenticated responsible students', async ({
     client,
     assert,
