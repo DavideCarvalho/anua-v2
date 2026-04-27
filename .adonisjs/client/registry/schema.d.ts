@@ -2635,6 +2635,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/resolve_inquiry_controller').default['handle']>>>
     }
   }
+  'api.v1.responsavel.api.inquiries.mark-read': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId/mark-read'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { inquiryId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/mark_inquiry_read_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/mark_inquiry_read_controller').default['handle']>>>
+    }
+  }
   'api.v1.dashboard.admin_stats': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/admin/stats'

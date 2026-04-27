@@ -305,6 +305,7 @@ export interface ApiDefinition {
               create: typeof routes['api.v1.responsavel.api.inquiries.messages.create']
             }
             resolve: typeof routes['api.v1.responsavel.api.inquiries.resolve']
+            markRead: typeof routes['api.v1.responsavel.api.inquiries.mark-read']
           }
         }
       }

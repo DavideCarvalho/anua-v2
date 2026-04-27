@@ -1320,6 +1320,12 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"inquiries","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/resolve","type":0,"val":"resolve","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.inquiries.resolve']['types'],
   },
+  'api.v1.responsavel.api.inquiries.mark-read': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/inquiries/:inquiryId/mark-read',
+    tokens: [{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"inquiries","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"mark-read","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.inquiries.mark-read']['types'],
+  },
   'api.v1.dashboard.admin_stats': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/admin/stats',
