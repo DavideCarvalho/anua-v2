@@ -17,19 +17,22 @@ interface CreateInvoiceAsaasChargesOptions {
 }
 
 /**
- * Cria cobranças automáticas no Asaas para Invoices elegíveis.
+ * Cria cobranças automáticas no Asaas para Invoices elegíveis
+ * e atualiza vencimento de charges existentes com due date no passado.
  *
  * Roda diariamente às 06:00 (após ApplyInvoiceInterest às 05:30).
  * Apenas para escolas com Asaas configurado e ativo (paymentConfigStatus === 'ACTIVE').
  *
- * Processa invoices OPEN e OVERDUE sem charge existente.
- * Idempotente: usa lock por invoice e re-verifica paymentGatewayId antes de criar charge.
+ * 1. Cria charges para invoices OPEN/OVERDUE sem paymentGatewayId
+ * 2. Atualiza due date no Asaas para invoices com paymentGatewayId e vencimento no passado
+ * Idempotente: usa lock por invoice.
  */
 export default class CreateInvoiceAsaasCharges {
   static async handle(options: CreateInvoiceAsaasChargesOptions = {}) {
     const asaasService = await app.container.make(AsaasService)
     const startTime = Date.now()
     const now = DateTime.now()
+    const today = now.startOf('day')
     const month = options.month ?? now.month
     const year = options.year ?? now.year
 
@@ -40,17 +43,22 @@ export default class CreateInvoiceAsaasCharges {
     })
 
     let created = 0
+    let updatedDueDates = 0
     let skipped = 0
     let errors = 0
 
     try {
-      // 1) Buscar Invoices elegíveis: OPEN ou OVERDUE, sem cobrança, com valor > 0
+      // 1) Buscar Invoices elegíveis: OPEN ou OVERDUE, com valor > 0
+      //    Inclui tanto invoices sem paymentGatewayId (criar charge)
+      //    quanto com paymentGatewayId e dueDate no passado (atualizar vencimento)
       const invoiceQuery = Invoice.query()
-        .whereIn('status', ['OPEN', 'OVERDUE'])
+        .whereIn('status', ['OPEN', 'OVERDUE', 'PENDING'])
         .where('month', month)
         .where('year', year)
-        .whereNull('paymentGatewayId')
         .where('totalAmount', '>', 0)
+        .where((q) => {
+          q.whereNull('paymentGatewayId').orWhere('dueDate', '<', today.toJSDate())
+        })
         .preload('payments', (q) => {
           q.whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
           q.preload('contract')
@@ -70,7 +78,7 @@ export default class CreateInvoiceAsaasCharges {
 
       if (invoices.length === 0) {
         logger.info('[ASAAS_CHARGES] No eligible invoices found')
-        return { created, skipped, errors }
+        return { created, updatedDueDates, skipped, errors }
       }
 
       logger.info(`[ASAAS_CHARGES] Found ${invoices.length} eligible invoices`)
@@ -83,9 +91,9 @@ export default class CreateInvoiceAsaasCharges {
         const lock = locks.createLock(`asaas-charge:${invoice.id}`, '30s')
         const [executed] = await lock.run(async () => {
           try {
-            // Re-read fresh invoice inside lock to prevent duplicate charges
+            // Re-read fresh invoice inside lock
             const freshInvoice = await Invoice.find(invoice.id)
-            if (!freshInvoice || freshInvoice.paymentGatewayId) {
+            if (!freshInvoice) {
               skipped++
               return
             }
@@ -147,18 +155,67 @@ export default class CreateInvoiceAsaasCharges {
               return
             }
 
-            // 4) Resolver paymentMethod a partir dos StudentHasLevel vinculados
+            // 4) Se já tem paymentGatewayId e dueDate no passado, atualizar vencimento no Asaas
+            if (freshInvoice.paymentGatewayId && freshInvoice.dueDate < today) {
+              const newDueDate = today.toISODate()!
+              try {
+                await asaasService.updateAsaasPayment(config.apiKey, freshInvoice.paymentGatewayId, {
+                  dueDate: newDueDate,
+                })
+
+                const trx = await db.transaction()
+                try {
+                  freshInvoice.useTransaction(trx)
+                  freshInvoice.dueDate = today
+                  await freshInvoice.save()
+                  await trx.commit()
+                } catch (trxError) {
+                  await trx.rollback()
+                  throw trxError
+                }
+
+                updatedDueDates++
+                logger.info(
+                  `[ASAAS_CHARGES] Updated due date for charge ${freshInvoice.paymentGatewayId} (invoice ${invoice.id}) to ${newDueDate}`
+                )
+              } catch (updateError) {
+                errors++
+                const errorMsg =
+                  updateError instanceof Error ? updateError.message : String(updateError)
+                logger.error(
+                  `[ASAAS_CHARGES] Error updating due date for invoice ${invoice.id}: ${errorMsg}`
+                )
+              }
+              return
+            }
+
+            // Skip if already has paymentGatewayId (and dueDate is not in the past)
+            if (freshInvoice.paymentGatewayId) {
+              skipped++
+              return
+            }
+
+            // 5) Resolver paymentMethod a partir dos StudentHasLevel vinculados
             const billingType = await this.resolveBillingType(invoice)
 
-            // 5) Criar/buscar customer no Asaas
+            // 6) Criar/buscar customer no Asaas
             const customerId = await asaasService.getOrCreateAsaasCustomer(config.apiKey, user)
 
-            // 6) Criar cobrança no Asaas
+            // 7) Criar cobrança no Asaas
             const dueDate = freshInvoice.dueDate?.toISODate()
             if (!dueDate) {
               logger.warn(`[ASAAS_CHARGES] Invoice ${invoice.id} has no dueDate - skipping`)
               skipped++
               return
+            }
+
+            // Asaas rejects charges with past due dates — use today instead
+            let adjustedDueDate = dueDate
+            if (freshInvoice.dueDate < today) {
+              adjustedDueDate = today.toISODate()!
+              logger.info(
+                `[ASAAS_CHARGES] Invoice ${invoice.id} has past dueDate (${dueDate}), using today (${adjustedDueDate})`
+              )
             }
 
             // Build rich description
@@ -172,12 +229,12 @@ export default class CreateInvoiceAsaasCharges {
               customer: customerId,
               billingType,
               value: freshInvoice.totalAmount / 100, // cents → BRL
-              dueDate,
+              dueDate: adjustedDueDate,
               description: chargeDescription,
               externalReference: freshInvoice.id,
             })
 
-            // 7) Salvar na Invoice dentro de uma transaction
+            // 8) Salvar na Invoice dentro de uma transaction
             const trx = await db.transaction()
             try {
               freshInvoice.useTransaction(trx)
@@ -216,12 +273,13 @@ export default class CreateInvoiceAsaasCharges {
       const duration = Date.now() - startTime
       logger.info('[ASAAS_CHARGES] Invoice charge creation completed', {
         created,
+        updatedDueDates,
         skipped,
         errors,
         duration: `${duration}ms`,
       })
 
-      return { created, skipped, errors }
+      return { created, updatedDueDates, skipped, errors }
     } catch (error) {
       logger.error('[ASAAS_CHARGES] Fatal error in invoice charge creation:', {
         error: error instanceof Error ? error.message : String(error),

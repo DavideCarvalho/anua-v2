@@ -277,6 +277,17 @@ export default class AsaasService {
     })
   }
 
+  async updateAsaasPayment(
+    apiKey: string,
+    paymentId: string,
+    payload: { dueDate?: string; value?: number; description?: string }
+  ) {
+    return this.asaasRequest<AsaasPaymentResponse>(apiKey, `/payments/${paymentId}`, {
+      method: 'PUT',
+      body: payload,
+    })
+  }
+
   async deleteAsaasPayment(apiKey: string, paymentId: string) {
     return this.asaasRequest<{ deleted: boolean }>(apiKey, `/payments/${paymentId}`, {
       method: 'DELETE',
