@@ -107,7 +107,7 @@ const navigation: NavItem[] = [
       },
       {
         title: 'Chat',
-        route: 'web.escola.perguntas',
+        route: 'web.escola.chat',
         href: '/escola/chat',
         badge: <UnreadMessagesBadge />,
       },

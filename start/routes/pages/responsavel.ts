@@ -67,7 +67,7 @@ export function registerResponsavelPageRoutes() {
       router.get('/credito', [ShowResponsavelCreditoPageController]).as('credito')
       router.get('/loja', [ShowResponsavelLojaPageController]).as('loja')
       router.get('/loja/:id', [ShowResponsavelLojaStorePageController]).as('loja.store')
-      router.get('/chat', [ShowResponsavelPerguntasPageController]).as('perguntas')
+      router.get('/chat', [ShowResponsavelPerguntasPageController]).as('chat')
     })
     .prefix('/responsavel')
     .use([middleware.auth(), middleware.impersonation()])

@@ -480,17 +480,17 @@ const routes = {
     tokens: [{"old":"/escola/comunicados/:id/editar","type":0,"val":"escola","end":""},{"old":"/escola/comunicados/:id/editar","type":0,"val":"comunicados","end":""},{"old":"/escola/comunicados/:id/editar","type":1,"val":"id","end":""},{"old":"/escola/comunicados/:id/editar","type":0,"val":"editar","end":""}],
     types: placeholder as Registry['web.escola.comunicados.editar']['types'],
   },
-  'web.escola.perguntas': {
+  'web.escola.chat': {
     methods: ["GET","HEAD"],
     pattern: '/escola/chat',
     tokens: [{"old":"/escola/chat","type":0,"val":"escola","end":""},{"old":"/escola/chat","type":0,"val":"chat","end":""}],
-    types: placeholder as Registry['web.escola.perguntas']['types'],
+    types: placeholder as Registry['web.escola.chat']['types'],
   },
-  'web.escola.perguntas.show': {
+  'web.escola.chat.show': {
     methods: ["GET","HEAD"],
     pattern: '/escola/chat/:inquiryId',
     tokens: [{"old":"/escola/chat/:inquiryId","type":0,"val":"escola","end":""},{"old":"/escola/chat/:inquiryId","type":0,"val":"chat","end":""},{"old":"/escola/chat/:inquiryId","type":1,"val":"inquiryId","end":""}],
-    types: placeholder as Registry['web.escola.perguntas.show']['types'],
+    types: placeholder as Registry['web.escola.chat.show']['types'],
   },
   'web.escola.eventos.novo': {
     methods: ["GET","HEAD"],
@@ -852,11 +852,11 @@ const routes = {
     tokens: [{"old":"/responsavel/loja/:id","type":0,"val":"responsavel","end":""},{"old":"/responsavel/loja/:id","type":0,"val":"loja","end":""},{"old":"/responsavel/loja/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['web.responsavel.loja.store']['types'],
   },
-  'web.responsavel.perguntas': {
+  'web.responsavel.chat': {
     methods: ["GET","HEAD"],
     pattern: '/responsavel/chat',
     tokens: [{"old":"/responsavel/chat","type":0,"val":"responsavel","end":""},{"old":"/responsavel/chat","type":0,"val":"chat","end":""}],
-    types: placeholder as Registry['web.responsavel.perguntas']['types'],
+    types: placeholder as Registry['web.responsavel.chat']['types'],
   },
   'web.admin.dashboard': {
     methods: ["GET","HEAD"],

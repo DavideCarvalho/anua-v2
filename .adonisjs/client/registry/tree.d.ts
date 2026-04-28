@@ -114,8 +114,8 @@ export interface ApiDefinition {
         novo: typeof routes['web.escola.comunicados.novo']
         editar: typeof routes['web.escola.comunicados.editar']
       }
-      perguntas: typeof routes['web.escola.perguntas'] & {
-        show: typeof routes['web.escola.perguntas.show']
+      chat: typeof routes['web.escola.chat'] & {
+        show: typeof routes['web.escola.chat.show']
       }
       eventos: {
         novo: typeof routes['web.escola.eventos.novo']
@@ -195,7 +195,7 @@ export interface ApiDefinition {
       loja: typeof routes['web.responsavel.loja'] & {
         store: typeof routes['web.responsavel.loja.store']
       }
-      perguntas: typeof routes['web.responsavel.perguntas']
+      chat: typeof routes['web.responsavel.chat']
     }
     admin: {
       dashboard: typeof routes['web.admin.dashboard']

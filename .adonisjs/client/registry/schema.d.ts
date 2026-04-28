@@ -955,7 +955,7 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_editar_comunicado_page_controller').default['handle']>>>
     }
   }
-  'web.escola.perguntas': {
+  'web.escola.chat': {
     methods: ["GET","HEAD"]
     pattern: '/escola/chat'
     types: {
@@ -967,7 +967,7 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_perguntas_page_controller').default['handle']>>>
     }
   }
-  'web.escola.perguntas.show': {
+  'web.escola.chat.show': {
     methods: ["GET","HEAD"]
     pattern: '/escola/chat/:inquiryId'
     types: {
@@ -1699,7 +1699,7 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller').default['handle']>>>
     }
   }
-  'web.responsavel.perguntas': {
+  'web.responsavel.chat': {
     methods: ["GET","HEAD"]
     pattern: '/responsavel/chat'
     types: {

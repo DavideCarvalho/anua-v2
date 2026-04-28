@@ -67,7 +67,7 @@ const baseNavigation: NavItem[] = [
   },
   {
     title: 'Chat',
-    route: 'web.responsavel.perguntas',
+    route: 'web.responsavel.chat',
     href: '/responsavel/chat',
     icon: MessageCircleQuestion,
   },

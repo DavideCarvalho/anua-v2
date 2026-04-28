@@ -117,7 +117,7 @@ function InquiriesListContent() {
       {inquiries.map((inquiry) => (
         <Link
           key={inquiry.id}
-          route="web.escola.perguntas.show"
+          route="web.escola.chat.show"
           routeParams={{ inquiryId: inquiry.id }}
           className="block"
         >
