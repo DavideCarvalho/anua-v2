@@ -311,6 +311,7 @@ export default function EscolaDashboard() {
     { label: 'Financeiro', href: '/escola/financeiro/faturas', visible: canViewFinancialTab },
     { label: 'Cantina', href: '/escola/cantina/pdv', visible: true },
     { label: 'Comunicados', href: '/escola/comunicados', visible: true },
+    { label: 'Chat', href: '/escola/chat', visible: true },
   ].filter((action) => action.visible)
 
   const viewModeToggle = (
