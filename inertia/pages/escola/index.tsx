@@ -37,6 +37,30 @@ import {
 } from '../../lib/escola-dashboard-view-mode'
 import { api } from '~/lib/api'
 
+function UnreadMessagesBadge() {
+  const [count, setCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/v1/escola/inquiries?limit=50', { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => {
+        const unreadCount = (data.data ?? []).filter(
+          (i: { hasUnread: boolean }) => i.hasUnread
+        ).length
+        setCount(unreadCount)
+      })
+      .catch(() => setCount(0))
+  }, [])
+
+  if (!count || count === 0) return null
+
+  return (
+    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">
+      {count > 99 ? '99+' : count}
+    </span>
+  )
+}
+
 const HIDE_FINANCIAL_INFO_STORAGE_KEY = 'escola:hide-financial-info'
 
 type DashboardTab = 'pedagogical' | 'administrative' | 'financial'
@@ -311,7 +335,7 @@ export default function EscolaDashboard() {
     { label: 'Financeiro', href: '/escola/financeiro/faturas', visible: canViewFinancialTab },
     { label: 'Cantina', href: '/escola/cantina/pdv', visible: true },
     { label: 'Comunicados', href: '/escola/comunicados', visible: true },
-    { label: 'Chat', href: '/escola/chat', visible: true },
+    { label: 'Chat', href: '/escola/chat', visible: true, badge: true },
   ].filter((action) => action.visible)
 
   const viewModeToggle = (
@@ -352,9 +376,10 @@ export default function EscolaDashboard() {
               <Link
                 key={action.label}
                 href={action.href}
-                className="rounded-xl border bg-card px-6 py-5 text-lg font-medium transition-colors hover:bg-muted"
+                className="relative flex items-center justify-between rounded-xl border bg-card px-6 py-5 text-lg font-medium transition-colors hover:bg-muted"
               >
                 {action.label}
+                {action.badge && <UnreadMessagesBadge />}
               </Link>
             ))}
           </div>

@@ -1,15 +1,24 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import { useEffect, useState } from 'react'
 import { MessageCircleQuestion, XCircle, Clock, User, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { EscolaLayout } from '../../components/layouts'
+import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout-simplificado'
+import { SimplifiedPageShell } from '../../components/escola/simplified-page-shell'
+import { SimplifiedBasicList } from '../../components/escola/simplified-basic-list'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { cn } from '../../lib/utils'
+import {
+  readEscolaDashboardViewMode,
+  type EscolaDashboardViewMode,
+  writeEscolaDashboardViewMode,
+} from '../../lib/escola-dashboard-view-mode'
+import { useAuthUser } from '../../stores/auth_store'
 
 type InquiryStatus = 'OPEN' | 'RESOLVED' | 'CLOSED'
 
@@ -185,8 +194,64 @@ function InquiriesSkeleton() {
 }
 
 export default function PerguntasPage() {
+  const user = useAuthUser()
+  const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
+
+  useEffect(() => {
+    setViewMode(readEscolaDashboardViewMode(user?.id))
+  }, [user?.id])
+
+  const onViewModeChange = (mode: EscolaDashboardViewMode) => {
+    setViewMode(mode)
+    writeEscolaDashboardViewMode(user?.id, mode)
+  }
+
+  const viewModeToggle = (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant={viewMode === 'full' ? 'default' : 'outline'}
+        onClick={() => onViewModeChange('full')}
+      >
+        Visão completa
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant={viewMode === 'simple' ? 'default' : 'outline'}
+        onClick={() => onViewModeChange('simple')}
+      >
+        Visão simplificada
+      </Button>
+    </>
+  )
+
+  if (viewMode === 'simple') {
+    return (
+      <EscolaLayoutSimplificado title="Mensagens" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+        <Head title="Mensagens" />
+
+        <SimplifiedPageShell
+          title="Mensagens"
+          description="Conversas com os responsáveis sobre os alunos"
+          actions={
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Atualizar
+            </Button>
+          }
+        >
+          <SimplifiedBasicList>
+            <InquiriesListContent />
+          </SimplifiedBasicList>
+        </SimplifiedPageShell>
+      </EscolaLayoutSimplificado>
+    )
+  }
+
   return (
-    <EscolaLayout>
+    <EscolaLayout topbarActions={viewModeToggle}>
       <Head title="Mensagens" />
 
       <div className="space-y-6">
@@ -198,21 +263,7 @@ export default function PerguntasPage() {
           <p className="text-muted-foreground">Conversas com os responsáveis sobre os alunos</p>
         </div>
 
-        <ErrorBoundary
-          fallback={
-            <Card>
-              <CardContent className="py-12 text-center">
-                <XCircle className="mx-auto h-12 w-12 text-destructive" />
-                <h3 className="mt-4 text-lg font-semibold">Erro ao carregar perguntas</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Ocorreu um erro ao renderizar o componente.
-                </p>
-              </CardContent>
-            </Card>
-          }
-        >
-          <InquiriesListContent />
-        </ErrorBoundary>
+        <InquiriesListContent />
       </div>
     </EscolaLayout>
   )
