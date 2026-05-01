@@ -1,11 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
+import mail from '@adonisjs/mail/services/main'
 import SchoolAnnouncement from '#models/school_announcement'
 import SchoolAnnouncementRecipient from '#models/school_announcement_recipient'
 import StudentHasResponsible from '#models/student_has_responsible'
 import Notification from '#models/notification'
+import User from '#models/user'
+import School from '#models/school'
+import Student from '#models/student'
 import SchoolAnnouncementTransformer from '#transformers/school_announcement_transformer'
+import SchoolAnnouncementMail from '#mails/school_announcement_mail'
 import AppException from '#exceptions/app_exception'
 import {
   AnnouncementAudienceValidationError,
@@ -64,60 +69,103 @@ export default class PublishSchoolAnnouncementController {
       throw AppException.badRequest('Nenhum aluno encontrado para o público selecionado')
     }
 
+    const school = await School.findOrFail(announcement.schoolId)
+
+    // Responsible users from StudentHasResponsible (parents/guardians)
     const responsibleLinks = await StudentHasResponsible.query()
       .whereIn('studentId', audienceStudentIds)
       .select(['responsibleId'])
 
-    const responsibleIds = [...new Set(responsibleLinks.map((link) => link.responsibleId))]
+    const responsibleIds = new Set(responsibleLinks.map((link) => link.responsibleId))
 
-    const recipientRows = await db.transaction(async (trx) => {
-      announcement.useTransaction(trx)
+    // Self-responsible students (isSelfResponsible = true) are their own responsible
+    const selfResponsibleStudents = await Student.query()
+      .whereIn('id', audienceStudentIds)
+      .where('isSelfResponsible', true)
+      .select('id')
+
+    for (const student of selfResponsibleStudents) {
+      responsibleIds.add(student.id)
+    }
+
+    const responsibleIdList = [...responsibleIds]
+    const hasRecipients = responsibleIdList.length > 0
+
+    if (hasRecipients) {
+      const responsibleUsers = await User.query()
+        .whereIn('id', responsibleIdList)
+        .select(['id', 'name', 'email'])
+
+      const responsibleUserMap = new Map(responsibleUsers.map((u) => [u.id, u]))
+
+      await db.transaction(async (trx) => {
+        announcement.useTransaction(trx)
+        announcement.status = 'PUBLISHED'
+        announcement.publishedAt = DateTime.now()
+        await announcement.save()
+
+        const rows = await Promise.all(
+          responsibleIdList.map((responsibleId) =>
+            SchoolAnnouncementRecipient.create(
+              {
+                announcementId: announcement.id,
+                responsibleId,
+                studentId: null,
+                notificationId: null,
+                acknowledgedAt: null,
+              },
+              { client: trx }
+            )
+          )
+        )
+
+        for (const recipient of rows) {
+          const actionUrl = `/responsavel/comunicados?anuncio=${announcement.id}`
+          const notification = await Notification.create({
+            userId: recipient.responsibleId,
+            type: 'SYSTEM_ANNOUNCEMENT',
+            title: announcement.title,
+            message: announcement.body,
+            data: {
+              kind: 'school_announcement',
+              announcementId: announcement.id,
+            },
+            isRead: false,
+            sentViaInApp: true,
+            sentViaEmail: true,
+            sentViaPush: false,
+            sentViaSms: false,
+            sentViaWhatsApp: false,
+            actionUrl,
+          })
+
+          recipient.notificationId = notification.id
+          await recipient.save()
+
+          const user = responsibleUserMap.get(recipient.responsibleId)
+          if (user?.email) {
+            try {
+              await mail.sendLater(
+                new SchoolAnnouncementMail(
+                  user,
+                  school.name,
+                  announcement.title,
+                  announcement.body,
+                  actionUrl
+                )
+              )
+            } catch (error) {
+              notification.emailError = error instanceof Error ? error.message : 'Erro ao enviar email'
+              await notification.save()
+            }
+          }
+        }
+      })
+    } else {
       announcement.status = 'PUBLISHED'
       announcement.publishedAt = DateTime.now()
       await announcement.save()
-
-      const rows = await Promise.all(
-        responsibleIds.map((responsibleId) =>
-          SchoolAnnouncementRecipient.create(
-            {
-              announcementId: announcement.id,
-              responsibleId,
-              studentId: null,
-              notificationId: null,
-              acknowledgedAt: null,
-            },
-            { client: trx }
-          )
-        )
-      )
-
-      return rows
-    })
-
-    await Promise.all(
-      recipientRows.map(async (recipient) => {
-        const notification = await Notification.create({
-          userId: recipient.responsibleId,
-          type: 'SYSTEM_ANNOUNCEMENT',
-          title: announcement.title,
-          message: announcement.body,
-          data: {
-            kind: 'school_announcement',
-            announcementId: announcement.id,
-          },
-          isRead: false,
-          sentViaInApp: true,
-          sentViaEmail: false,
-          sentViaPush: false,
-          sentViaSms: false,
-          sentViaWhatsApp: false,
-          actionUrl: `/responsavel/comunicados?anuncio=${announcement.id}`,
-        })
-
-        recipient.notificationId = notification.id
-        await recipient.save()
-      })
-    )
+    }
 
     await announcement.load('creator')
     await announcement.load('audiences')

@@ -19,31 +19,19 @@ export default class GetNotificationsController {
 
     const studentIds = studentRelations.map((r) => r.studentId)
 
-    if (studentIds.length === 0) {
-      return response.ok({
-        data: [],
-        meta: {
-          total: 0,
-          perPage: limit,
-          currentPage: page,
-          lastPage: 1,
-          firstPage: 1,
-          hasMorePages: false,
-        },
-        unreadCount: 0,
-      })
-    }
+    const userIds = studentIds.length > 0 ? [...studentIds, effectiveUser.id] : [effectiveUser.id]
 
-    // Get notifications for these students
+    // Get notifications for the responsible user AND their linked students
+    // Notifications can have userId = studentId (student-based) or userId = responsibleId (direct)
     // Note: Notification model uses 'message' field, not 'body'
     const notifications = await Notification.query()
-      .whereIn('userId', studentIds)
+      .whereIn('userId', userIds)
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
     // Count unread notifications
     const unreadCount = await Notification.query()
-      .whereIn('userId', studentIds)
+      .whereIn('userId', userIds)
       .where('isRead', false)
       .count('* as total')
 
