@@ -69,9 +69,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring the drive package
   |----------------------------------------------------------
   */
-  DRIVE_DISK: Env.schema.enum(['fs', 'gcs'] as const),
+  DRIVE_DISK: Env.schema.enum(['fs', 'gcs', 's3'] as const),
   GCS_BUCKET: Env.schema.string.optional(),
   GCS_KEY_FILENAME: Env.schema.string.optional(),
+  S3_KEY: Env.schema.string.optional(),
+  S3_SECRET: Env.schema.string.optional(),
+  S3_BUCKET: Env.schema.string.optional(),
+  S3_ENDPOINT: Env.schema.string.optional(),
+  S3_REGION: Env.schema.string.optional(),
 
   /*
   |----------------------------------------------------------
