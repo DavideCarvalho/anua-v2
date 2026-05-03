@@ -1,20 +1,36 @@
 import env from '#start/env'
 import { defineConfig, transports } from '@adonisjs/mail'
 
+const smtpHost = env.get('SMTP_HOST')
+const resendKey = env.get('RESEND_API_KEY')
+
 const mailConfig = defineConfig({
-  default: 'smtp',
+  default: resendKey ? 'resend' : 'smtp',
 
   mailers: {
-    smtp: transports.smtp({
-      host: env.get('SMTP_HOST'),
-      port: env.get('SMTP_PORT'),
-      secure: true,
-      auth: {
-        type: 'login',
-        user: env.get('SMTP_USER'),
-        pass: env.get('SMTP_PASSWORD'),
-      },
-    }),
+    ...(smtpHost
+      ? {
+          smtp: transports.smtp({
+            host: smtpHost,
+            port: env.get('SMTP_PORT'),
+            secure: true,
+            auth: {
+              type: 'login',
+              user: env.get('SMTP_USER'),
+              pass: env.get('SMTP_PASSWORD'),
+            },
+          }),
+        }
+      : {}),
+
+    ...(resendKey
+      ? {
+          resend: transports.resend({
+            key: resendKey,
+            baseUrl: 'https://api.resend.com',
+          }),
+        }
+      : {}),
   },
 })
 
