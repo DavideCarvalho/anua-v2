@@ -155,6 +155,7 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_API_URL="/" \
+            --build-arg VITE_PUBLIC_POSTHOG_KEY="${{ vars.VITE_PUBLIC_POSTHOG_KEY }}" \
             -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             -t ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest \
             .
