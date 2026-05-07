@@ -6,6 +6,7 @@ export const getAcademicOverviewValidator = vine.compile(
     schoolChainId: vine.string().uuid().optional(),
     academicPeriodId: vine.string().uuid().optional(),
     classId: vine.string().uuid().optional(),
+    subPeriodId: vine.string().uuid().optional(),
   })
 )
 

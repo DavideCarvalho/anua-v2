@@ -5,9 +5,8 @@ import { getPedagogicalScope, buildScopeFilters } from '#services/pedagogical_sc
 
 export default class GetAcademicOverviewController {
   async handle({ request, response, ...ctx }: HttpContext) {
-    const { schoolId, schoolChainId, academicPeriodId, classId } = await request.validateUsing(
-      getAcademicOverviewValidator
-    )
+    const { schoolId, schoolChainId, academicPeriodId, classId, subPeriodId } =
+      await request.validateUsing(getAcademicOverviewValidator)
     const scope = await getPedagogicalScope(ctx as HttpContext)
     const scopeFilters = buildScopeFilters(scope)
 
@@ -35,6 +34,10 @@ export default class GetAcademicOverviewController {
     if (classId) {
       extraFilters += ' AND c.id = :classId'
       allParams.classId = classId
+    }
+    if (subPeriodId) {
+      extraFilters += ' AND a."subPeriodId" = :subPeriodId'
+      allParams.subPeriodId = subPeriodId
     }
 
     // Execute queries in parallel
