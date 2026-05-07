@@ -56,11 +56,15 @@ export default class UpdateAcademicPeriodController {
           : academicPeriod.recoveryGradeMethod,
       breakStartDate:
         payload.breakStartDate !== undefined
-          ? (payload.breakStartDate ? DateTime.fromJSDate(payload.breakStartDate) : null)
+          ? payload.breakStartDate
+            ? DateTime.fromJSDate(payload.breakStartDate)
+            : null
           : academicPeriod.breakStartDate,
       breakEndDate:
         payload.breakEndDate !== undefined
-          ? (payload.breakEndDate ? DateTime.fromJSDate(payload.breakEndDate) : null)
+          ? payload.breakEndDate
+            ? DateTime.fromJSDate(payload.breakEndDate)
+            : null
           : academicPeriod.breakEndDate,
       isActive: payload.isActive !== undefined ? payload.isActive : academicPeriod.isActive,
       isClosed: payload.isClosed !== undefined ? payload.isClosed : academicPeriod.isClosed,

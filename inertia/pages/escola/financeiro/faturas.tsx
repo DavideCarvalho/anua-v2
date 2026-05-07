@@ -52,7 +52,11 @@ export default function FaturasPage() {
 
   if (viewMode === 'simple') {
     return (
-      <EscolaLayoutSimplificado title="Faturas" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+      <EscolaLayoutSimplificado
+        title="Faturas"
+        viewMode={viewMode}
+        onViewModeChange={onViewModeChange}
+      >
         <Head title="Faturas" />
 
         <SimplifiedPageShell
@@ -70,12 +74,12 @@ export default function FaturasPage() {
               </Link>
             </>
           }
-          >
-            <SimplifiedBasicList>
-              <InvoicesSimplifiedTable />
-            </SimplifiedBasicList>
-          </SimplifiedPageShell>
-        </EscolaLayoutSimplificado>
+        >
+          <SimplifiedBasicList>
+            <InvoicesSimplifiedTable />
+          </SimplifiedBasicList>
+        </SimplifiedPageShell>
+      </EscolaLayoutSimplificado>
     )
   }
 

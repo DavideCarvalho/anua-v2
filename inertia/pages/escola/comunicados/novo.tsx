@@ -138,7 +138,7 @@ export default function NovoComunicadoPage() {
         },
         body,
       })
-      
+
       if (response.status === 302) {
         throw new Error('Sessão expirada. Atualize a página e tente novamente.')
       }
@@ -147,10 +147,7 @@ export default function NovoComunicadoPage() {
         const payload = await response.json().catch(() => null)
         const validationErrors = payload?.errors as Record<string, string[] | undefined> | undefined
         if (validationErrors) {
-          const message = Object.values(validationErrors)
-            .flat()
-            .filter(Boolean)
-            .join(' ')
+          const message = Object.values(validationErrors).flat().filter(Boolean).join(' ')
 
           if (message) {
             throw new Error(message)
@@ -159,7 +156,7 @@ export default function NovoComunicadoPage() {
 
         throw new Error('Falha ao criar comunicado')
       }
-      
+
       return response.json()
     },
   })
@@ -448,9 +445,7 @@ export default function NovoComunicadoPage() {
                 </p>
               </div>
 
-              <div 
-                className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 px-6 py-8 text-center transition-colors hover:bg-muted/50"
-              >
+              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 px-6 py-8 text-center transition-colors hover:bg-muted/50">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background shadow-sm">
                   <UploadCloud className="h-6 w-6 text-muted-foreground" />
                 </div>
@@ -480,7 +475,7 @@ export default function NovoComunicadoPage() {
                   Adicionar arquivos
                 </Button>
               </div>
-              
+
               <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-medium text-muted-foreground">
                   {attachments.length}/5 arquivos selecionados

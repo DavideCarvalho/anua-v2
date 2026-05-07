@@ -32,7 +32,9 @@ export function SubPeriodFilter({ academicPeriodId, value, onChange }: SubPeriod
       <CalendarRange className="h-4 w-4 text-muted-foreground shrink-0" />
       <Tabs value={value} onValueChange={onChange} className="min-w-0">
         <TabsList className="h-8">
-          <TabsTrigger value="" className="h-7 text-xs px-3">Todas</TabsTrigger>
+          <TabsTrigger value="" className="h-7 text-xs px-3">
+            Todas
+          </TabsTrigger>
           {subPeriods
             .sort((a, b) => a.order - b.order)
             .map((sp) => (

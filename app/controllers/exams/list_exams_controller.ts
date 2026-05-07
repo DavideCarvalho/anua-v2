@@ -4,7 +4,16 @@ import ExamTransformer from '#transformers/exam_transformer'
 
 export default class ListExamsController {
   async handle({ request, serialize }: HttpContext) {
-    const { classId, subjectId, teacherId, status, page = 1, limit = 20, courseId, subPeriodId } = request.qs()
+    const {
+      classId,
+      subjectId,
+      teacherId,
+      status,
+      page = 1,
+      limit = 20,
+      courseId,
+      subPeriodId,
+    } = request.qs()
 
     const query = Exam.query()
       .preload('class', (classQuery) => {

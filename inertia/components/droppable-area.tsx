@@ -14,12 +14,7 @@ export function DroppableArea({ date, hour, minute, children, className }: Dropp
 
   if (disableDragDrop) {
     return (
-      <div
-        role="gridcell"
-        aria-label="Droppable area"
-        tabIndex={-1}
-        className={className || ''}
-      >
+      <div role="gridcell" aria-label="Droppable area" tabIndex={-1} className={className || ''}>
         {children}
       </div>
     )

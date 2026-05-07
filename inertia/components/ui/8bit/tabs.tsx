@@ -1,60 +1,49 @@
-import type * as TabsPrimitive from "@radix-ui/react-tabs";
-import { type VariantProps, cva } from "class-variance-authority";
+import type * as TabsPrimitive from '@radix-ui/react-tabs'
+import { type VariantProps, cva } from 'class-variance-authority'
 
-import { cn } from "~/lib/utils";
+import { cn } from '~/lib/utils'
 
 import {
   Tabs as ShadcnTabs,
   TabsContent as ShadcnTabsContent,
   TabsList as ShadcnTabsList,
   TabsTrigger as ShadcnTabsTrigger,
-} from "~/components/ui/tabs";
+} from '~/components/ui/tabs'
 
-import "~/components/ui/8bit/styles/retro.css";
+import '~/components/ui/8bit/styles/retro.css'
 
-export const tabsVariants = cva("", {
+export const tabsVariants = cva('', {
   variants: {
     variant: {
-      default: "bg-primary",
-      retro: "retro",
+      default: 'bg-primary',
+      retro: 'retro',
     },
     font: {
-      normal: "",
-      retro: "retro",
+      normal: '',
+      retro: 'retro',
     },
   },
   defaultVariants: {
-    font: "retro",
+    font: 'retro',
   },
-});
+})
 
 export interface BitTabsProps
-  extends React.ComponentProps<typeof TabsPrimitive.Root>,
-    VariantProps<typeof tabsVariants> {
-  asChild?: boolean;
+  extends React.ComponentProps<typeof TabsPrimitive.Root>, VariantProps<typeof tabsVariants> {
+  asChild?: boolean
 }
 
 function Tabs({ className, ...props }: BitTabsProps) {
-  const { font } = props;
+  const { font } = props
 
   return (
-    <ShadcnTabs
-      {...props}
-      className={cn("relative", font !== "normal" && "retro", className)}
-    />
-  );
+    <ShadcnTabs {...props} className={cn('relative', font !== 'normal' && 'retro', className)} />
+  )
 }
 
-function TabsList({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<typeof ShadcnTabsList>) {
+function TabsList({ className, children, ...props }: React.ComponentProps<typeof ShadcnTabsList>) {
   return (
-    <ShadcnTabsList
-      {...props}
-      className={cn("relative bg-card rounded-none", className)}
-    >
+    <ShadcnTabsList {...props} className={cn('relative bg-card rounded-none', className)}>
       <div
         className="absolute inset-0 border-y-6 -my-1.5 border-foreground dark:border-ring pointer-events-none"
         aria-hidden="true"
@@ -66,7 +55,7 @@ function TabsList({
       />
       {children}
     </ShadcnTabsList>
-  );
+  )
 }
 
 function TabsTrigger({
@@ -77,21 +66,18 @@ function TabsTrigger({
   return (
     <ShadcnTabsTrigger
       className={cn(
-        "border-none data-[state=active]:bg-accent data-[state=active]:text-foreground text-muted-foreground rounded-none",
+        'border-none data-[state=active]:bg-accent data-[state=active]:text-foreground text-muted-foreground rounded-none',
         className
       )}
       {...props}
     >
       {children}
     </ShadcnTabsTrigger>
-  );
+  )
 }
 
-function TabsContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof ShadcnTabsContent>) {
-  return <ShadcnTabsContent className={cn("", className)} {...props} />;
+function TabsContent({ className, ...props }: React.ComponentProps<typeof ShadcnTabsContent>) {
+  return <ShadcnTabsContent className={cn('', className)} {...props} />
 }
 
-export { Tabs, TabsList, TabsContent, TabsTrigger };
+export { Tabs, TabsList, TabsContent, TabsTrigger }

@@ -26,7 +26,10 @@ function getRendererType(file: PreviewFile): 'image' | 'pdf' | 'unsupported' | '
   const mime = file.mimeType?.toLowerCase() ?? ''
   const extension = file.fileName.split('.').pop()?.toLowerCase() ?? ''
 
-  if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(extension)) {
+  if (
+    mime.startsWith('image/') ||
+    ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(extension)
+  ) {
     return 'image'
   }
 
@@ -52,7 +55,12 @@ function downloadFile(file: PreviewFile) {
   document.body.removeChild(link)
 }
 
-export function FilePreviewLightbox({ files, initialIndex, open, onOpenChange }: FilePreviewLightboxProps) {
+export function FilePreviewLightbox({
+  files,
+  initialIndex,
+  open,
+  onOpenChange,
+}: FilePreviewLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const hasFiles = files.length > 0
 
@@ -202,7 +210,9 @@ export function FilePreviewLightbox({ files, initialIndex, open, onOpenChange }:
             {(renderer === 'unsupported' || renderer === 'unavailable') && (
               <div className="flex max-w-md flex-col items-center gap-3 rounded-lg border border-white/10 bg-white/5 p-6 text-center">
                 <FileText className="h-8 w-8 text-white/80" />
-                <p className="text-sm font-medium">Pré-visualização indisponível para este arquivo</p>
+                <p className="text-sm font-medium">
+                  Pré-visualização indisponível para este arquivo
+                </p>
                 <p className="text-xs text-white/70">
                   {renderer === 'unavailable'
                     ? 'Este anexo não possui URL disponível no momento.'

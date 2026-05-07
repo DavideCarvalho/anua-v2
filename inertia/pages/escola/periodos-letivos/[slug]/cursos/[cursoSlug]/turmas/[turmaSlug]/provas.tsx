@@ -64,7 +64,12 @@ const TurmaProvasPage: FC<Props> = ({
               value={subPeriodId}
               onChange={setSubPeriodId}
             />
-            <ExamsList classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} subPeriodId={subPeriodId} />
+            <ExamsList
+              classId={classId}
+              courseId={courseId}
+              academicPeriodId={academicPeriodId}
+              subPeriodId={subPeriodId}
+            />
           </CardContent>
         </Card>
 

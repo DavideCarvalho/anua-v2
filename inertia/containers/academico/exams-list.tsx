@@ -66,7 +66,13 @@ function ExamsListEmpty() {
   )
 }
 
-export function ExamsList({ classId, subjectId, courseId, academicPeriodId, subPeriodId }: ExamsListProps) {
+export function ExamsList({
+  classId,
+  subjectId,
+  courseId,
+  academicPeriodId,
+  subPeriodId,
+}: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)

@@ -51,12 +51,16 @@ export default function AlunosPage() {
 
   if (viewMode === 'simple') {
     return (
-      <EscolaLayoutSimplificado title="Alunos" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+      <EscolaLayoutSimplificado
+        title="Alunos"
+        viewMode={viewMode}
+        onViewModeChange={onViewModeChange}
+      >
         <Head title="Alunos" />
 
         <SimplifiedPageShell
           title="Alunos"
-          description="Acesse rapidamente os alunos matriculados e as principais ações." 
+          description="Acesse rapidamente os alunos matriculados e as principais ações."
           actions={
             <>
               <Link href="/escola/administrativo/matriculas/nova">

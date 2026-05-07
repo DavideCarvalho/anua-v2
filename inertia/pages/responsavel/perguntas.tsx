@@ -105,7 +105,9 @@ function StartChatContent({ studentId }: { studentId: string }) {
     <Card>
       <CardHeader>
         <CardTitle>Iniciar conversa</CardTitle>
-        <CardDescription>Envie sua primeira mensagem para abrir o chat com a escola.</CardDescription>
+        <CardDescription>
+          Envie sua primeira mensagem para abrir o chat com a escola.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <StartChatForm studentId={studentId} />
@@ -127,9 +129,7 @@ export default function PerguntasPage() {
             <MessageCircleQuestion className="h-6 w-6" />
             Chat
           </h1>
-          <p className="text-muted-foreground">
-            Converse com a escola e acompanhe as respostas
-          </p>
+          <p className="text-muted-foreground">Converse com a escola e acompanhe as respostas</p>
         </div>
 
         <ErrorBoundary

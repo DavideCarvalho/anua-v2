@@ -137,9 +137,10 @@ export function MealReservationsTable({ canteenId, date }: MealReservationsTable
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Utensils className="h-4 w-4 text-muted-foreground" />
-                      {(reservation as { source?: string }).source === 'RECURRENCE' && reservation.meal?.mealType
-                        ? mealTypeLabel[reservation.meal.mealType] ?? reservation.meal.mealType
-                        : reservation.meal?.name ?? '-'}
+                      {(reservation as { source?: string }).source === 'RECURRENCE' &&
+                      reservation.meal?.mealType
+                        ? (mealTypeLabel[reservation.meal.mealType] ?? reservation.meal.mealType)
+                        : (reservation.meal?.name ?? '-')}
                     </div>
                   </TableCell>
                   <TableCell>

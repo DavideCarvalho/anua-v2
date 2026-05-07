@@ -28,7 +28,10 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { DatePicker } from '~/components/ui/date-picker'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '~/components/ui/form'
-import { PERIOD_STRUCTURE_OPTIONS, RECOVERY_METHOD_OPTIONS } from '../schemas/edit_academic_period.schema'
+import {
+  PERIOD_STRUCTURE_OPTIONS,
+  RECOVERY_METHOD_OPTIONS,
+} from '../schemas/edit_academic_period.schema'
 import { api } from '~/lib/api'
 import { useAuthUser } from '~/stores/auth_store'
 
@@ -214,37 +217,37 @@ function SubPeriodEditDialog({
               />
             </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="hasRecovery"
-          checked={formData.hasRecovery}
-          onChange={(e) => setFormData({ ...formData, hasRecovery: e.target.checked })}
-          className="h-4 w-4 rounded border-gray-300"
-        />
-        <Label htmlFor="hasRecovery" className="text-sm font-normal cursor-pointer">
-          Possui Recuperação
-        </Label>
-      </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="hasRecovery"
+                checked={formData.hasRecovery}
+                onChange={(e) => setFormData({ ...formData, hasRecovery: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <Label htmlFor="hasRecovery" className="text-sm font-normal cursor-pointer">
+                Possui Recuperação
+              </Label>
+            </div>
 
-      {formData.hasRecovery && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Início Recuperação</Label>
-            <DatePicker
-              date={formData.recoveryStartDate}
-              onChange={(date) => setFormData({ ...formData, recoveryStartDate: date })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Término Recuperação</Label>
-            <DatePicker
-              date={formData.recoveryEndDate}
-              onChange={(date) => setFormData({ ...formData, recoveryEndDate: date })}
-            />
-          </div>
-        </div>
-      )}
+            {formData.hasRecovery && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Início Recuperação</Label>
+                  <DatePicker
+                    date={formData.recoveryStartDate}
+                    onChange={(date) => setFormData({ ...formData, recoveryStartDate: date })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Término Recuperação</Label>
+                  <DatePicker
+                    date={formData.recoveryEndDate}
+                    onChange={(date) => setFormData({ ...formData, recoveryEndDate: date })}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -314,7 +317,9 @@ export function SubPeriodsForm({
           periodStructure: resolvedPeriodStructure || undefined,
         },
       })
-      toast.success(overwrite ? 'Sub-períodos regenerados com sucesso' : 'Sub-períodos gerados com sucesso')
+      toast.success(
+        overwrite ? 'Sub-períodos regenerados com sucesso' : 'Sub-períodos gerados com sucesso'
+      )
       queryClient.invalidateQueries({
         queryKey: api.api.v1.academicSubPeriods.index.pathKey(),
       })
@@ -356,7 +361,7 @@ export function SubPeriodsForm({
 
   const school = schoolData as SchoolData | undefined
   const resolvedPeriodStructure =
-    (propPeriodStructure && propPeriodStructure !== '')
+    propPeriodStructure && propPeriodStructure !== ''
       ? propPeriodStructure
       : school?.periodStructure
 
@@ -365,13 +370,16 @@ export function SubPeriodsForm({
 
   const subPeriods = (subPeriodsData?.data ?? []) as SubPeriod[]
 
-  const expectedCount = resolvedPeriodStructure ? STRUCTURE_COUNT[resolvedPeriodStructure] ?? 0 : 0
+  const expectedCount = resolvedPeriodStructure
+    ? (STRUCTURE_COUNT[resolvedPeriodStructure] ?? 0)
+    : 0
   const countMismatch = subPeriods.length > 0 && subPeriods.length !== expectedCount
 
   useEffect(() => {
     if (countMismatch) {
       form.setError('root.subPeriodMismatch', {
-        message: 'Existem sub-períodos que não correspondem à estrutura selecionada. Regere ou reverta antes de salvar.',
+        message:
+          'Existem sub-períodos que não correspondem à estrutura selecionada. Regere ou reverta antes de salvar.',
       })
     } else {
       form.clearErrors('root.subPeriodMismatch')
@@ -389,7 +397,7 @@ export function SubPeriodsForm({
   }
 
   const structureLabel = resolvedPeriodStructure
-    ? STRUCTURE_LABELS[resolvedPeriodStructure] ?? ''
+    ? (STRUCTURE_LABELS[resolvedPeriodStructure] ?? '')
     : ''
 
   const generateLabel = resolvedPeriodStructure
@@ -489,14 +497,17 @@ export function SubPeriodsForm({
                 </div>
                 <h3 className="text-lg font-semibold">Nenhuma estrutura definida</h3>
                 <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                  Selecione uma estrutura (como Bimestral ou Trimestral) acima para poder gerar sub-períodos.
+                  Selecione uma estrutura (como Bimestral ou Trimestral) acima para poder gerar
+                  sub-períodos.
                 </p>
               </div>
             ) : (
               <>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg border bg-muted/50 p-4">
                   <div className="flex items-center gap-2 text-sm">
-                    <Badge variant="outline" className="bg-background">{structureLabel}</Badge>
+                    <Badge variant="outline" className="bg-background">
+                      {structureLabel}
+                    </Badge>
                     {isFromPeriod ? (
                       <span className="text-muted-foreground">definido neste período</span>
                     ) : (
@@ -512,8 +523,14 @@ export function SubPeriodsForm({
                       </div>
                     ) : (
                       <Button
-                        onClick={() => subPeriods.length > 0 && countMismatch ? setShowDiffDialog(true) : handleGenerate(false)}
-                        disabled={generateMutation.isPending || (subPeriods.length > 0 && !countMismatch)}
+                        onClick={() =>
+                          subPeriods.length > 0 && countMismatch
+                            ? setShowDiffDialog(true)
+                            : handleGenerate(false)
+                        }
+                        disabled={
+                          generateMutation.isPending || (subPeriods.length > 0 && !countMismatch)
+                        }
                       >
                         {generateMutation.isPending ? (
                           <>
@@ -535,7 +552,9 @@ export function SubPeriodsForm({
 
                 {countMismatch && (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                    <span className="font-semibold">Atenção:</span> A estrutura selecionada ({structureLabel}) prevê {expectedCount} sub-períodos, mas atualmente existem {subPeriods.length}. Clique em "Regenerar" acima para substituir.
+                    <span className="font-semibold">Atenção:</span> A estrutura selecionada (
+                    {structureLabel}) prevê {expectedCount} sub-períodos, mas atualmente existem{' '}
+                    {subPeriods.length}. Clique em "Regenerar" acima para substituir.
                   </div>
                 )}
 
@@ -568,12 +587,24 @@ export function SubPeriodsForm({
                               <TableCell>{formatDate(sp.startDate)}</TableCell>
                               <TableCell>{formatDate(sp.endDate)}</TableCell>
                               <TableCell className="text-center">{sp.weight}</TableCell>
-                              <TableCell className="text-center">{sp.minimumGrade !== null ? sp.minimumGrade : '-'}</TableCell>
+                              <TableCell className="text-center">
+                                {sp.minimumGrade !== null ? sp.minimumGrade : '-'}
+                              </TableCell>
                               <TableCell className="text-center">
                                 {sp.hasRecovery ? (
-                                  <Badge variant="default" className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-none">Sim</Badge>
+                                  <Badge
+                                    variant="default"
+                                    className="bg-blue-100 text-blue-800 hover:bg-blue-100 border-none"
+                                  >
+                                    Sim
+                                  </Badge>
                                 ) : (
-                                  <Badge variant="secondary" className="bg-muted text-muted-foreground border-none">Não</Badge>
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-muted text-muted-foreground border-none"
+                                  >
+                                    Não
+                                  </Badge>
                                 )}
                               </TableCell>
                               <TableCell>
@@ -609,7 +640,8 @@ export function SubPeriodsForm({
                     </div>
                     <h3 className="text-lg font-semibold">Nenhum sub-período gerado</h3>
                     <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-4">
-                      Clique no botão acima para criar os sub-períodos automaticamente com base na sua configuração de calendário.
+                      Clique no botão acima para criar os sub-períodos automaticamente com base na
+                      sua configuração de calendário.
                     </p>
                   </div>
                 )}
@@ -632,37 +664,54 @@ export function SubPeriodsForm({
           <DialogHeader>
             <DialogTitle>Atenção! Substituição de Sub-períodos</DialogTitle>
             <DialogDescription>
-              Você está alterando a estrutura deste período letivo. Os sub-períodos atuais serão substituídos.
+              Você está alterando a estrutura deste período letivo. Os sub-períodos atuais serão
+              substituídos.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="rounded-md border p-3 bg-red-50/50">
-              <p className="font-semibold mb-2 text-sm text-red-600">Serão Excluídos ({subPeriods.length}):</p>
+              <p className="font-semibold mb-2 text-sm text-red-600">
+                Serão Excluídos ({subPeriods.length}):
+              </p>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                {subPeriods.map(sp => <li key={sp.id}>- {sp.name}</li>)}
+                {subPeriods.map((sp) => (
+                  <li key={sp.id}>- {sp.name}</li>
+                ))}
               </ul>
             </div>
             <div className="rounded-md border p-3 bg-green-50/50">
-              <p className="font-semibold mb-2 text-sm text-green-600">Serão Criados ({expectedCount}):</p>
+              <p className="font-semibold mb-2 text-sm text-green-600">
+                Serão Criados ({expectedCount}):
+              </p>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 {Array.from({ length: expectedCount }).map((_, i) => (
-                  <li key={i}>- {i + 1}º {resolvedPeriodStructure === 'BIMESTRAL' ? 'Bimestre' : resolvedPeriodStructure === 'TRIMESTRAL' ? 'Trimestre' : resolvedPeriodStructure === 'SEMESTRAL' ? 'Semestre' : 'Período'}</li>
+                  <li key={i}>
+                    - {i + 1}º{' '}
+                    {resolvedPeriodStructure === 'BIMESTRAL'
+                      ? 'Bimestre'
+                      : resolvedPeriodStructure === 'TRIMESTRAL'
+                        ? 'Trimestre'
+                        : resolvedPeriodStructure === 'SEMESTRAL'
+                          ? 'Semestre'
+                          : 'Período'}
+                  </li>
                 ))}
               </ul>
             </div>
           </div>
-          
+
           <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-            As notas e avaliações vinculadas aos sub-períodos antigos serão mantidas e redistribuídas automaticamente de acordo com as novas datas.
+            As notas e avaliações vinculadas aos sub-períodos antigos serão mantidas e
+            redistribuídas automaticamente de acordo com as novas datas.
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setShowDiffDialog(false)}>
               Cancelar
             </Button>
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               variant="destructive"
               disabled={generateMutation.isPending}
               onClick={() => handleGenerate(true)}

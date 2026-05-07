@@ -53,7 +53,7 @@ export function DashboardFilters({
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Todas as redes">
                 {schoolChainId
-                  ? chains.find((c) => c.id === schoolChainId)?.name ?? 'Todas as redes'
+                  ? (chains.find((c) => c.id === schoolChainId)?.name ?? 'Todas as redes')
                   : 'Todas as redes'}
               </SelectValue>
             </SelectTrigger>
@@ -76,7 +76,7 @@ export function DashboardFilters({
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Todas as escolas">
                 {schoolId
-                  ? schools.find((s) => s.id === schoolId)?.name ?? 'Todas as escolas'
+                  ? (schools.find((s) => s.id === schoolId)?.name ?? 'Todas as escolas')
                   : 'Todas as escolas'}
               </SelectValue>
             </SelectTrigger>

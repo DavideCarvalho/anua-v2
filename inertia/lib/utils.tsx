@@ -8,7 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 
 export function ClientOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   if (!mounted) return <>{fallback}</>
   return <>{children}</>
 }

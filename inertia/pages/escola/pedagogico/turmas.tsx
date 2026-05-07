@@ -51,7 +51,11 @@ export default function TurmasPage() {
 
   if (viewMode === 'simple') {
     return (
-      <EscolaLayoutSimplificado title="Turmas" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+      <EscolaLayoutSimplificado
+        title="Turmas"
+        viewMode={viewMode}
+        onViewModeChange={onViewModeChange}
+      >
         <Head title="Turmas" />
 
         <SimplifiedPageShell

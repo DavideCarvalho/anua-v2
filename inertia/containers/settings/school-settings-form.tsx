@@ -59,9 +59,9 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
       return data.url as string
     },
     onSuccess: () => {
-    queryClient.invalidateQueries({
-      queryKey: api.api.v1.schools.show.pathKey(),
-    })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.schools.show.pathKey(),
+      })
     },
   })
 
@@ -114,8 +114,9 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
         minimumGrade: school.minimumGrade ?? 6,
         calculationAlgorithm: school.calculationAlgorithm === 'SUM' ? 'SUM' : 'AVERAGE',
         minimumAttendancePercentage: school.minimumAttendancePercentage ?? 75,
-        periodStructure: (school as { periodStructure?: SchoolSettingsFormState['periodStructure'] })
-          .periodStructure || '',
+        periodStructure:
+          (school as { periodStructure?: SchoolSettingsFormState['periodStructure'] })
+            .periodStructure || '',
         recoveryGradeMethod:
           (school as { recoveryGradeMethod?: SchoolSettingsFormState['recoveryGradeMethod'] })
             .recoveryGradeMethod || 'AVERAGE',

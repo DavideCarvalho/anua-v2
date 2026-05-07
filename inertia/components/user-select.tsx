@@ -13,7 +13,10 @@ export function UserSelect() {
   const { users, selectedUserId, filterEventsBySelectedUser } = useCalendar()
 
   return (
-    <Select value={selectedUserId!} onValueChange={(value) => filterEventsBySelectedUser(value ?? selectedUserId!)}>
+    <Select
+      value={selectedUserId!}
+      onValueChange={(value) => filterEventsBySelectedUser(value ?? selectedUserId!)}
+    >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Select a user" />
       </SelectTrigger>

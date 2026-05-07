@@ -176,10 +176,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
         const payload = await response.json().catch(() => null)
         const validationErrors = payload?.errors as Record<string, string[] | undefined> | undefined
         if (validationErrors) {
-          const message = Object.values(validationErrors)
-            .flat()
-            .filter(Boolean)
-            .join(' ')
+          const message = Object.values(validationErrors).flat().filter(Boolean).join(' ')
 
           if (message) {
             throw new Error(message)
@@ -581,115 +578,113 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                 />
               </div>
 
-            <div className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
-              <div>
-                <p className="text-base font-semibold tracking-tight">Anexos</p>
-                <p className="text-sm text-muted-foreground">
-                  Selecione até 5 arquivos para enviar junto ao comunicado.
-                </p>
-              </div>
-
-              <div 
-                className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 px-6 py-8 text-center transition-colors hover:bg-muted/50"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background shadow-sm">
-                  <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">
-                    Clique no botão abaixo para escolher seus arquivos
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PDF, DOCX, JPG, PNG ou WEBP (Max. 10MB por arquivo)
+              <div className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+                <div>
+                  <p className="text-base font-semibold tracking-tight">Anexos</p>
+                  <p className="text-sm text-muted-foreground">
+                    Selecione até 5 arquivos para enviar junto ao comunicado.
                   </p>
                 </div>
-                <Input
-                  ref={attachmentsInputRef}
-                  type="file"
-                  multiple
-                  accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
-                  className="hidden"
-                  onChange={onAttachmentsChange}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => attachmentsInputRef.current?.click()}
-                  disabled={attachments.length + newAttachments.length >= 5}
-                  className="mt-2"
-                >
-                  Adicionar arquivos
-                </Button>
-              </div>
-              
-              <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {attachments.length + newAttachments.length}/5 arquivos selecionados
-                </span>
-              </div>
 
-              {attachments.length > 0 && (
-                <div className="space-y-2 mt-4">
-                  {attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className="flex items-center justify-between rounded-lg border border-border/50 bg-background px-4 py-3 text-sm transition-colors hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                          <Paperclip className="h-4 w-4" />
+                <div className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 px-6 py-8 text-center transition-colors hover:bg-muted/50">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background shadow-sm">
+                    <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">
+                      Clique no botão abaixo para escolher seus arquivos
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PDF, DOCX, JPG, PNG ou WEBP (Max. 10MB por arquivo)
+                    </p>
+                  </div>
+                  <Input
+                    ref={attachmentsInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.docx,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    onChange={onAttachmentsChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => attachmentsInputRef.current?.click()}
+                    disabled={attachments.length + newAttachments.length >= 5}
+                    className="mt-2"
+                  >
+                    Adicionar arquivos
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {attachments.length + newAttachments.length}/5 arquivos selecionados
+                  </span>
+                </div>
+
+                {attachments.length > 0 && (
+                  <div className="space-y-2 mt-4">
+                    {attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between rounded-lg border border-border/50 bg-background px-4 py-3 text-sm transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <Paperclip className="h-4 w-4" />
+                          </div>
+                          <a
+                            className="truncate font-medium hover:underline"
+                            href={attachment.fileUrl ?? '#'}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {attachment.fileName}
+                          </a>
                         </div>
-                        <a
-                          className="truncate font-medium hover:underline"
-                          href={attachment.fileUrl ?? '#'}
-                          target="_blank"
-                          rel="noreferrer"
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeExistingAttachment(attachment.id)}
                         >
-                          {attachment.fileName}
-                        </a>
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">Remover</span>
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeExistingAttachment(attachment.id)}
+                    ))}
+                  </div>
+                )}
+                {newAttachments.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {newAttachments.map((attachment, index) => (
+                      <div
+                        key={`${attachment.name}-${index}`}
+                        className="flex items-center justify-between rounded-lg border border-border/50 bg-background px-4 py-3 text-sm transition-colors hover:bg-muted/50"
                       >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remover</span>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {newAttachments.length > 0 && (
-                <div className="space-y-2 mt-2">
-                  {newAttachments.map((attachment, index) => (
-                    <div
-                      key={`${attachment.name}-${index}`}
-                      className="flex items-center justify-between rounded-lg border border-border/50 bg-background px-4 py-3 text-sm transition-colors hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                          <Paperclip className="h-4 w-4" />
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <Paperclip className="h-4 w-4" />
+                          </div>
+                          <span className="truncate font-medium">{attachment.name}</span>
                         </div>
-                        <span className="truncate font-medium">{attachment.name}</span>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeNewAttachment(index)}
+                        >
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">Remover</span>
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeNewAttachment(index)}
-                      >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remover</span>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-4 rounded-md border p-4">
                 <p className="text-sm font-semibold">Publico-alvo do comunicado</p>

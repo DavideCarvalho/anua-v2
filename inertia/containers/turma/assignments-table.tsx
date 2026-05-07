@@ -53,7 +53,12 @@ function AssignmentsTableEmpty() {
   )
 }
 
-export function AssignmentsTable({ classId, courseId, academicPeriodId, subPeriodId }: AssignmentsTableProps) {
+export function AssignmentsTable({
+  classId,
+  courseId,
+  academicPeriodId,
+  subPeriodId,
+}: AssignmentsTableProps) {
   const [page, setPage] = useState(1)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null)

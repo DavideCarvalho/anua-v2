@@ -109,7 +109,11 @@ export default function PDVPage() {
 
   if (viewMode === 'simple') {
     return (
-      <EscolaLayoutSimplificado title="Cantina PDV" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+      <EscolaLayoutSimplificado
+        title="Cantina PDV"
+        viewMode={viewMode}
+        onViewModeChange={onViewModeChange}
+      >
         <Head title="Cantina - PDV" />
 
         <SimplifiedPageShell

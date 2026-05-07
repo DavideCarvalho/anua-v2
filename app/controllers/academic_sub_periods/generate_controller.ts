@@ -114,27 +114,27 @@ export default class GenerateSubPeriodsController {
     }
 
     for (const subPeriod of subPeriods) {
-        const subStart = subPeriod.startDate.toISO()
-        const subEnd = subPeriod.endDate.toISO()
-        if (!subStart || !subEnd) continue
+      const subStart = subPeriod.startDate.toISO()
+      const subEnd = subPeriod.endDate.toISO()
+      if (!subStart || !subEnd) continue
 
-        let assignmentQuery = Assignment.query()
-          .where('academicPeriodId', academicPeriod.id)
-          .where('dueDate', '>=', subStart)
-          .where('dueDate', '<=', subEnd)
+      let assignmentQuery = Assignment.query()
+        .where('academicPeriodId', academicPeriod.id)
+        .where('dueDate', '>=', subStart)
+        .where('dueDate', '<=', subEnd)
 
-        let examQuery = Exam.query()
-          .where('academicPeriodId', academicPeriod.id)
-          .where('examDate', '>=', subStart)
-          .where('examDate', '<=', subEnd)
+      let examQuery = Exam.query()
+        .where('academicPeriodId', academicPeriod.id)
+        .where('examDate', '>=', subStart)
+        .where('examDate', '<=', subEnd)
 
-        if (payload.overwrite) {
-          await assignmentQuery.update({ subPeriodId: subPeriod.id })
-          await examQuery.update({ subPeriodId: subPeriod.id })
-        } else {
-          await assignmentQuery.whereNull('subPeriodId').update({ subPeriodId: subPeriod.id })
-          await examQuery.whereNull('subPeriodId').update({ subPeriodId: subPeriod.id })
-        }
+      if (payload.overwrite) {
+        await assignmentQuery.update({ subPeriodId: subPeriod.id })
+        await examQuery.update({ subPeriodId: subPeriod.id })
+      } else {
+        await assignmentQuery.whereNull('subPeriodId').update({ subPeriodId: subPeriod.id })
+        await examQuery.whereNull('subPeriodId').update({ subPeriodId: subPeriod.id })
+      }
     }
 
     const serialized = AcademicSubPeriodTransformer.transform(subPeriods)

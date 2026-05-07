@@ -120,9 +120,7 @@ export function CalendarForm() {
       <Card>
         <CardHeader>
           <CardTitle>Férias de Meio de Ano</CardTitle>
-          <CardDescription>
-            Período de recesso no meio do ano letivo (opcional)
-          </CardDescription>
+          <CardDescription>Período de recesso no meio do ano letivo (opcional)</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <FormField

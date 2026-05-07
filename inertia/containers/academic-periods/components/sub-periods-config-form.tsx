@@ -2,7 +2,10 @@ import { useFormContext } from 'react-hook-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '~/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '~/components/ui/radio-group'
-import { PERIOD_STRUCTURE_OPTIONS, RECOVERY_METHOD_OPTIONS } from '../schemas/edit_academic_period.schema'
+import {
+  PERIOD_STRUCTURE_OPTIONS,
+  RECOVERY_METHOD_OPTIONS,
+} from '../schemas/edit_academic_period.schema'
 import { AcademicPeriodFormValues } from '../new-academic-period-form'
 
 export function SubPeriodsConfigForm() {
@@ -91,9 +94,10 @@ export function SubPeriodsConfigForm() {
           />
         </CardContent>
       </Card>
-      
+
       <div className="rounded-lg border bg-muted/50 p-4 text-sm text-muted-foreground">
-        Nota: Os sub-períodos específicos (datas, pesos) poderão ser gerados e editados após a criação do período letivo.
+        Nota: Os sub-períodos específicos (datas, pesos) poderão ser gerados e editados após a
+        criação do período letivo.
       </div>
     </div>
   )

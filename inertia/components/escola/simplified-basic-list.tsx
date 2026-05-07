@@ -6,7 +6,10 @@ type SimplifiedBasicListProps = PropsWithChildren<{
 
 export function SimplifiedBasicList({ children, className }: SimplifiedBasicListProps) {
   return (
-    <div data-testid="simplified-basic-list" className={`rounded-xl border bg-card ${className ?? ''}`}>
+    <div
+      data-testid="simplified-basic-list"
+      className={`rounded-xl border bg-card ${className ?? ''}`}
+    >
       <div className="p-4">{children}</div>
     </div>
   )

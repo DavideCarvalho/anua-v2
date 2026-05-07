@@ -591,6 +591,7 @@ export const controllers = {
     ShowInquiry: () => import('#controllers/responsavel/show_inquiry_controller'),
     UpdateProfile: () => import('#controllers/responsavel/update_profile_controller'),
     UpdateStudentMealRecurrence: () => import('#controllers/responsavel/update_student_meal_recurrence_controller'),
+    GetStudentAcademicPeriods: () => import('#controllers/responsavel/get_student_academic_periods_controller'),
   },
   responsibleAddresses: {
     CreateResponsibleAddress: () => import('#controllers/responsible-addresses/create_responsible_address_controller'),

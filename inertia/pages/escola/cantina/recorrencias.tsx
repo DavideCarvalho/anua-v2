@@ -4,7 +4,13 @@ import { Repeat, User } from 'lucide-react'
 
 import { EscolaLayout } from '../../../components/layouts'
 import { CanteenGate } from '../../../components/cantina/canteen-gate'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
 import { Badge } from '../../../components/ui/badge'
 import { api } from '~/lib/api'
 import type { SharedProps } from '../../../lib/types'
@@ -86,10 +92,7 @@ export default function CantinaRecorrenciasPage() {
               <CardContent>
                 <div className="space-y-4">
                   {entries.map((entry) => (
-                    <div
-                      key={entry.studentId}
-                      className="rounded-lg border p-4 space-y-2"
-                    >
+                    <div key={entry.studentId} className="rounded-lg border p-4 space-y-2">
                       <div className="flex items-center gap-2 font-medium">
                         <User className="h-4 w-4 text-muted-foreground" />
                         {entry.studentName}

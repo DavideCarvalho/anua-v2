@@ -17,7 +17,12 @@ type AnnouncementItem = {
   body: string
   createdAt: string
   publishedAt: string | null
-  attachments?: Array<{ id: string; fileName: string; fileUrl?: string | null; mimeType?: string | null }>
+  attachments?: Array<{
+    id: string
+    fileName: string
+    fileUrl?: string | null
+    mimeType?: string | null
+  }>
   requiresAcknowledgement?: boolean
   acknowledgementDueAt?: string | null
   acknowledgementStatus?: 'NOT_REQUIRED' | 'PENDING_ACK' | 'ACKNOWLEDGED' | 'EXPIRED_UNACKNOWLEDGED'

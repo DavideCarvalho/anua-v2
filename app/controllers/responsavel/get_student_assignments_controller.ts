@@ -39,7 +39,9 @@ export default class GetStudentAssignmentsController {
     }
 
     const { studentId } = params
-    const { status, subjectId, subPeriodId } = await request.validateUsing(getStudentAssignmentsValidator)
+    const { status, subjectId, subPeriodId } = await request.validateUsing(
+      getStudentAssignmentsValidator
+    )
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()

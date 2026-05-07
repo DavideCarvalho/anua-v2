@@ -61,16 +61,10 @@ export default class GetClassStudentsAttendanceController {
               .select(
                 db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count")
               )
+              .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
+              .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
               .select(
-                db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count")
-              )
-              .select(
-                db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count")
-              )
-              .select(
-                db.raw(
-                  "SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count"
-                )
+                db.raw("SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count")
               )
               .whereIn('studentId', studentIds)
               .where('Attendance.date', '>=', dateStart)
@@ -80,7 +74,9 @@ export default class GetClassStudentsAttendanceController {
               .from('StudentHasAttendance')
               .select('studentId')
               .select(db.raw('COUNT(*) as total_classes'))
-              .select(db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count"))
+              .select(
+                db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count")
+              )
               .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
               .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
               .select(

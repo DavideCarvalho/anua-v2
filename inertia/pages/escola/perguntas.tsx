@@ -229,7 +229,11 @@ export default function PerguntasPage() {
 
   if (viewMode === 'simple') {
     return (
-      <EscolaLayoutSimplificado title="Mensagens" viewMode={viewMode} onViewModeChange={onViewModeChange}>
+      <EscolaLayoutSimplificado
+        title="Mensagens"
+        viewMode={viewMode}
+        onViewModeChange={onViewModeChange}
+      >
         <Head title="Mensagens" />
 
         <SimplifiedPageShell

@@ -34,13 +34,11 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
   const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.readAt) {
       toast.promise(
-        markReadMutation
-          .mutateAsync({ params: { id: notification.id } })
-          .then(() =>
-            queryClient.invalidateQueries({
-              queryKey: api.api.v1.notifications.index.pathKey(),
-            })
-          ),
+        markReadMutation.mutateAsync({ params: { id: notification.id } }).then(() =>
+          queryClient.invalidateQueries({
+            queryKey: api.api.v1.notifications.index.pathKey(),
+          })
+        ),
         {
           loading: 'Marcando como lida...',
           success: 'Notificação marcada como lida',
@@ -54,13 +52,11 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
 
   const handleMarkAllAsRead = () => {
     toast.promise(
-      markAllReadMutation
-        .mutateAsync({})
-        .then(() =>
-          queryClient.invalidateQueries({
-            queryKey: api.api.v1.notifications.index.pathKey(),
-          })
-        ),
+      markAllReadMutation.mutateAsync({}).then(() =>
+        queryClient.invalidateQueries({
+          queryKey: api.api.v1.notifications.index.pathKey(),
+        })
+      ),
       {
         loading: 'Marcando todas como lidas...',
         success: 'Todas as notificações foram marcadas como lidas!',

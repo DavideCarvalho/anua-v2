@@ -142,12 +142,12 @@ export default class PublishSchoolAnnouncementController {
           recipient.notificationId = notification.id
           await recipient.save()
 
-          const user = responsibleUserMap.get(recipient.responsibleId)
-          if (user?.email) {
+          const recipientUser = responsibleUserMap.get(recipient.responsibleId)
+          if (recipientUser?.email) {
             try {
               await mail.sendLater(
                 new SchoolAnnouncementMail(
-                  user,
+                  recipientUser,
                   school.name,
                   announcement.title,
                   announcement.body,
@@ -155,7 +155,8 @@ export default class PublishSchoolAnnouncementController {
                 )
               )
             } catch (error) {
-              notification.emailError = error instanceof Error ? error.message : 'Erro ao enviar email'
+              notification.emailError =
+                error instanceof Error ? error.message : 'Erro ao enviar email'
               await notification.save()
             }
           }

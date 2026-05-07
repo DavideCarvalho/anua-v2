@@ -46,7 +46,8 @@ export function InvoicesSimplifiedTable() {
     const rows = (data?.data ?? []) as InvoiceItem[]
     return rows.filter(
       (invoice): invoice is InvoiceItem =>
-        !!invoice.status && ACTIONABLE_STATUSES.includes(invoice.status as (typeof ACTIONABLE_STATUSES)[number])
+        !!invoice.status &&
+        ACTIONABLE_STATUSES.includes(invoice.status as (typeof ACTIONABLE_STATUSES)[number])
     )
   }, [data])
 
@@ -131,7 +132,9 @@ export function InvoicesSimplifiedTable() {
               return (
                 <tr key={invoice.id} className="border-t">
                   <td className="px-4 py-3">{invoice.student?.user?.name || '-'}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatDueDate(invoice.dueDate)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatDueDate(invoice.dueDate)}
+                  </td>
                   <td className="px-4 py-3 text-right font-medium">
                     {formatCurrency(Number(invoice.chargedAmount || invoice.totalAmount || 0))}
                   </td>

@@ -49,16 +49,14 @@ export default function CantinaReservasPage() {
           </h1>
           <p className="text-muted-foreground">
             {date
-              ? `Reservas de ${format(new Date(date + 'T12:00:00'), "EEEE, dd/MM/yyyy", { locale: ptBR })}`
+              ? `Reservas de ${format(new Date(date + 'T12:00:00'), 'EEEE, dd/MM/yyyy', { locale: ptBR })}`
               : 'Gerencie as reservas de refeições dos alunos'}
           </p>
         </div>
 
         <CanteenGate>
           <Suspense fallback={<TableSkeleton />}>
-            <MealReservationsTable
-              date={date ?? undefined}
-            />
+            <MealReservationsTable date={date ?? undefined} />
           </Suspense>
         </CanteenGate>
       </div>

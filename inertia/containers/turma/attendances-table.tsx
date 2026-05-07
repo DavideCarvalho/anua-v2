@@ -60,7 +60,12 @@ function getAttendanceBadgeVariant(percentage: number) {
   return 'destructive'
 }
 
-function AttendancesTableContent({ classId, academicPeriodId, courseId, subPeriodId }: AttendancesTableProps) {
+function AttendancesTableContent({
+  classId,
+  academicPeriodId,
+  courseId,
+  subPeriodId,
+}: AttendancesTableProps) {
   const [page, setPage] = useState(1)
 
   const {

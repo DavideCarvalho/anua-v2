@@ -105,9 +105,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
         breakStartDate: academicPeriod.breakStartDate
           ? new Date(academicPeriod.breakStartDate)
           : null,
-        breakEndDate: academicPeriod.breakEndDate
-          ? new Date(academicPeriod.breakEndDate)
-          : null,
+        breakEndDate: academicPeriod.breakEndDate ? new Date(academicPeriod.breakEndDate) : null,
       },
       courses: academicPeriod.courses ?? [],
     },
