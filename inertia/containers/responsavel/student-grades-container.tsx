@@ -78,7 +78,7 @@ export function StudentGradesContainer({ studentId, studentName }: StudentGrades
       case 'APPROVED':
         return <Badge variant="default">Aprovado</Badge>
       case 'IN_RECOVERY':
-        return <Badge variant="secondary">Em Recuperacao</Badge>
+        return <Badge variant="secondary">Em Recuperação</Badge>
       case 'RECOVERED':
         return <Badge variant="outline">Recuperado</Badge>
       case 'FAILED':

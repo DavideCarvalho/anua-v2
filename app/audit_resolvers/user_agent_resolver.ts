@@ -1,5 +1,5 @@
 import { type HttpContext } from '@adonisjs/core/http'
-import { type Resolver } from '@stouder-io/adonis-auditing'
+import { type Resolver } from '@adogrove/adonis-auditing'
 
 export default class UserAgentResolver implements Resolver {
   async resolve(ctx: HttpContext) {

@@ -247,6 +247,7 @@ export function NewAssignmentModal({
             description: data.description,
             maxScore: data.noGrade ? null : (data.grade ?? null),
             dueDate: data.dueDate.toISOString(),
+            subPeriodId: data.subPeriodId || null,
           },
         })
       } else {

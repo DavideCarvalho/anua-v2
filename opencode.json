@@ -14,13 +14,6 @@
       "type": "local",
       "command": ["npx", "shadcn@latest", "mcp"],
       "enabled": true
-    },
-    "quaveone": {
-      "type": "remote",
-      "url": "https://mcp.quave.cloud/",
-      "headers": {
-        "authorization": "desktop-q7gtckxhhvjdnc8va-4crezdmyrwnhnbcpw"
-      }
     }
   }
 }

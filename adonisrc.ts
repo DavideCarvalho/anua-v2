@@ -69,7 +69,7 @@ export default defineConfig({
     () => import('@adonisjs/drive/drive_provider'),
     () => import('@adonisjs/queue/queue_provider'),
     () => import('@jrmc/adonis-attachment/attachment_provider'),
-    () => import('@stouder-io/adonis-auditing/auditing_provider'),
+    () => import('@adogrove/adonis-auditing/auditing_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),
     {
       file: () => import('adonisjs-server-stats/provider'),

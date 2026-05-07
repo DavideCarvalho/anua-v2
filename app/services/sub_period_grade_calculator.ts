@@ -127,6 +127,35 @@ export class SubPeriodGradeCalculator {
       })
     }
 
+    // Include items without subPeriodId as an additional group (backward compatibility)
+    const unassignedAssignments = assignments.filter((a) => !a.subPeriodId)
+    const unassignedExams = exams.filter((e) => !e.subPeriodId)
+
+    if (unassignedAssignments.length > 0 || unassignedExams.length > 0) {
+      const unassignedGrade = this.calculateGrade(
+        unassignedAssignments,
+        unassignedExams,
+        assignmentGradeMap,
+        examGradeMap,
+        calculationAlgorithm
+      )
+
+      if (unassignedGrade !== null) {
+        subPeriodGrades.push({
+          subPeriodId: '',
+          subPeriodName: 'Geral',
+          order: subPeriods.length + 1,
+          grade: unassignedGrade,
+          recoveryGrade: null,
+          finalGrade: this.applyRecovery(unassignedGrade, null, recoveryMethod),
+          weight: 0,
+          minimumGrade: school.minimumGrade ?? 6,
+          hasRecovery: false,
+          status: unassignedGrade !== null ? 'APPROVED' : 'NO_GRADE',
+        })
+      }
+    }
+
     const finalGrade = this.calculateFinalGrade(subPeriodGrades)
     const minimumGrade = school.minimumGrade ?? 6
     const isApproved = finalGrade !== null ? finalGrade >= minimumGrade : null

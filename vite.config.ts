@@ -25,4 +25,13 @@ export default defineConfig({
       '@generated': path.resolve(__dirname, '.adonisjs/client'),
     },
   },
+
+  server: {
+    watch: {
+      ignored: [
+        '**/.adonisjs/server-stats/**',
+        '**/logs/**',
+      ],
+    },
+  },
 })

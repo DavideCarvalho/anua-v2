@@ -1,4 +1,4 @@
-import { defineConfig } from '@stouder-io/adonis-auditing'
+import { defineConfig } from '@adogrove/adonis-auditing'
 
 export default defineConfig({
   userResolver: () => import('#audit_resolvers/user_resolver'),

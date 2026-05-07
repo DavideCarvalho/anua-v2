@@ -54,3 +54,4 @@ node_modules/.vite
 
 # Local git worktrees
 .worktrees/
+.adonisjs/server-stats/

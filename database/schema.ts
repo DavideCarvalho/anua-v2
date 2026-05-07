@@ -1981,20 +1981,18 @@ export class PurchaseRequestSchema extends BaseModel {
 }
 
 export class ResponsibleAddressSchema extends BaseModel {
-  static $columns = ['city', 'complement', 'createdAt', 'id', 'latitude', 'location', 'longitude', 'neighborhood', 'number', 'responsibleId', 'state', 'street', 'updatedAt', 'zipCode'] as const
+  static $columns = ['city', 'complement', 'id', 'latitude', 'location', 'longitude', 'neighborhood', 'number', 'responsibleId', 'state', 'street', 'zipCode'] as const
   $columns = ResponsibleAddressSchema.$columns
   @column()
   declare city: string
   @column()
   declare complement: string | null
-  @column.dateTime()
-  declare createdAt: DateTime
   @column({ isPrimary: true })
   declare id: string
   @column()
   declare latitude: number | null
   @column()
-  declare location: any | null
+  declare location: string | null
   @column()
   declare longitude: number | null
   @column()
@@ -2007,8 +2005,6 @@ export class ResponsibleAddressSchema extends BaseModel {
   declare state: string
   @column()
   declare street: string
-  @column.dateTime()
-  declare updatedAt: DateTime
   @column()
   declare zipCode: string
 }
@@ -2069,7 +2065,7 @@ export class ScholarshipSchema extends BaseModel {
 }
 
 export class SchoolSchema extends BaseModel {
-  static $columns = ['asaasAccountId', 'asaasApiKey', 'asaasCommercialInfoIsExpired', 'asaasCommercialInfoScheduledDate', 'asaasDocumentUrl', 'asaasWalletId', 'asaasWebhookToken', 'calculationAlgorithm', 'city', 'complement', 'createdAt', 'enablePaymentNotifications', 'hasInsurance', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'latitude', 'location', 'logoUrl', 'longitude', 'minimumAttendancePercentage', 'minimumGrade', 'name', 'neighborhood', 'nfseCofinsPercentage', 'nfseCsllPercentage', 'nfseDeductions', 'nfseEnabled', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseIssPercentage', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfsePisPercentage', 'number', 'paymentConfigStatus', 'paymentConfigStatusUpdatedAt', 'periodStructure', 'pixKey', 'pixKeyType', 'recoveryGradeMethod', 'schoolChainId', 'slug', 'state', 'street', 'updatedAt', 'usePlatformManagedPayments', 'zipCode'] as const
+  static $columns = ['asaasAccountId', 'asaasApiKey', 'asaasCommercialInfoIsExpired', 'asaasCommercialInfoScheduledDate', 'asaasDocumentUrl', 'asaasWalletId', 'asaasWebhookToken', 'calculationAlgorithm', 'city', 'complement', 'createdAt', 'enablePaymentNotifications', 'hasInsurance', 'id', 'insuranceClaimWaitingDays', 'insuranceCoveragePercentage', 'insurancePercentage', 'latitude', 'logoUrl', 'longitude', 'minimumAttendancePercentage', 'minimumGrade', 'name', 'neighborhood', 'nfseCofinsPercentage', 'nfseCsllPercentage', 'nfseDeductions', 'nfseEnabled', 'nfseInssPercentage', 'nfseIrPercentage', 'nfseIssPercentage', 'nfseMunicipalServiceCode', 'nfseMunicipalServiceName', 'nfsePisPercentage', 'number', 'paymentConfigStatus', 'paymentConfigStatusUpdatedAt', 'pixKey', 'pixKeyType', 'schoolChainId', 'slug', 'state', 'street', 'updatedAt', 'usePlatformManagedPayments', 'zipCode'] as const
   $columns = SchoolSchema.$columns
   @column()
   declare asaasAccountId: string | null
@@ -2108,8 +2104,6 @@ export class SchoolSchema extends BaseModel {
   @column()
   declare latitude: number | null
   @column()
-  declare location: any | null
-  @column()
   declare logoUrl: string | null
   @column()
   declare longitude: number | null
@@ -2144,17 +2138,13 @@ export class SchoolSchema extends BaseModel {
   @column()
   declare number: string | null
   @column()
-  declare paymentConfigStatus: any
+  declare paymentConfigStatus: string
   @column.dateTime()
   declare paymentConfigStatusUpdatedAt: DateTime | null
   @column()
-  declare periodStructure: any | null
-  @column()
   declare pixKey: string | null
   @column()
-  declare pixKeyType: any | null
-  @column()
-  declare recoveryGradeMethod: any | null
+  declare pixKeyType: string | null
   @column()
   declare schoolChainId: string | null
   @column()
@@ -2786,7 +2776,7 @@ export class StudentAddressSchema extends BaseModel {
   @column()
   declare latitude: number | null
   @column()
-  declare location: any | null
+  declare location: string | null
   @column()
   declare longitude: number | null
   @column()
@@ -4018,7 +4008,7 @@ export class ExamSchema extends BaseModel {
   @column()
   declare instructions: string | null
   @column()
-  declare location: any | null
+  declare location: string | null
   @column()
   declare maxScore: number
   @column()
@@ -4026,7 +4016,7 @@ export class ExamSchema extends BaseModel {
   @column.dateTime()
   declare startTime: DateTime | null
   @column()
-  declare status: any
+  declare status: string
   @column()
   declare subjectId: string | null
   @column()
@@ -4036,7 +4026,7 @@ export class ExamSchema extends BaseModel {
   @column()
   declare title: string
   @column()
-  declare type: any
+  declare type: string
   @column.dateTime()
   declare updatedAt: DateTime
   @column()
@@ -4485,19 +4475,4 @@ export class SidequestQueueSchema extends BaseModel {
   declare priority: number
   @column()
   declare state: string
-}
-
-export class SpatialRefSySchema extends BaseModel {
-  static $columns = ['authName', 'authSrid', 'proj4Text', 'srid', 'srtext'] as const
-  $columns = SpatialRefSySchema.$columns
-  @column()
-  declare authName: string | null
-  @column()
-  declare authSrid: number | null
-  @column()
-  declare proj4Text: string | null
-  @column({ isPrimary: true })
-  declare srid: number
-  @column()
-  declare srtext: string | null
 }
