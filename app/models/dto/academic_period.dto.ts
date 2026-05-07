@@ -53,9 +53,7 @@ export default class AcademicPeriodDto extends BaseModelDto {
     this.breakStartDate = academicPeriod.breakStartDate
       ? academicPeriod.breakStartDate.toJSDate()
       : null
-    this.breakEndDate = academicPeriod.breakEndDate
-      ? academicPeriod.breakEndDate.toJSDate()
-      : null
+    this.breakEndDate = academicPeriod.breakEndDate ? academicPeriod.breakEndDate.toJSDate() : null
     this.schoolId = academicPeriod.schoolId
     this.previousAcademicPeriodId = academicPeriod.previousAcademicPeriodId
     this.createdAt = academicPeriod.createdAt.toJSDate()

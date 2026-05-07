@@ -100,7 +100,8 @@ export default class ResendAnnouncementNotifications extends BaseCommand {
             await notification.save()
             sentCount++
           } catch (error) {
-            notification.emailError = error instanceof Error ? error.message : 'Erro ao enviar email'
+            notification.emailError =
+              error instanceof Error ? error.message : 'Erro ao enviar email'
             await notification.save()
             this.logger.error(`Erro ao enviar email para ${user.name}: ${notification.emailError}`)
           }

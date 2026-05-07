@@ -12,7 +12,7 @@ export default class extends BaseSchema {
       ALTER TABLE "AcademicPeriod" 
       DROP CONSTRAINT IF EXISTS "AcademicPeriod_periodStructure_check";
     `)
-    
+
     await this.db.rawQuery(`
       ALTER TABLE "AcademicPeriod" 
       ADD CONSTRAINT "AcademicPeriod_periodStructure_check" 
@@ -27,7 +27,7 @@ export default class extends BaseSchema {
       ALTER TABLE "AcademicPeriod" 
       DROP CONSTRAINT IF EXISTS "AcademicPeriod_periodStructure_check";
     `)
-    
+
     await this.db.rawQuery(`
       ALTER TABLE "AcademicPeriod" 
       ADD CONSTRAINT "AcademicPeriod_periodStructure_check" 

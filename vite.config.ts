@@ -28,10 +28,7 @@ export default defineConfig({
 
   server: {
     watch: {
-      ignored: [
-        '**/.adonisjs/server-stats/**',
-        '**/logs/**',
-      ],
+      ignored: ['**/.adonisjs/server-stats/**', '**/logs/**'],
     },
   },
 })

@@ -44,9 +44,13 @@ await SweepPendingAsaasDocumentsJob.schedule({}).cron('0 8 * * *').timezone(tz)
 await SendOccurrenceAckRemindersJob.schedule({}).cron('0 9 * * 1-5').timezone(tz)
 
 // Gamificação: a cada 15 minutos - Retry de eventos que falharam
-await RetryPendingEventsJob.schedule({} as never).cron('*/15 * * * *').timezone(tz)
+await RetryPendingEventsJob.schedule({} as never)
+  .cron('*/15 * * * *')
+  .timezone(tz)
 
 // Gamificação: 00:00 - Atualizar sequências (streaks) de alunos
-await UpdateStreaksJob.schedule({} as never).cron('0 0 * * *').timezone(tz)
+await UpdateStreaksJob.schedule({} as never)
+  .cron('0 0 * * *')
+  .timezone(tz)
 
 console.log('[SCHEDULER] Schedules configured via @adonisjs/queue')

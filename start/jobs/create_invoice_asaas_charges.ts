@@ -159,9 +159,13 @@ export default class CreateInvoiceAsaasCharges {
             if (freshInvoice.paymentGatewayId && freshInvoice.dueDate < today) {
               const newDueDate = today.toISODate()!
               try {
-                await asaasService.updateAsaasPayment(config.apiKey, freshInvoice.paymentGatewayId, {
-                  dueDate: newDueDate,
-                })
+                await asaasService.updateAsaasPayment(
+                  config.apiKey,
+                  freshInvoice.paymentGatewayId,
+                  {
+                    dueDate: newDueDate,
+                  }
+                )
 
                 const trx = await db.transaction()
                 try {

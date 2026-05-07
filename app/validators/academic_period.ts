@@ -38,8 +38,14 @@ export const createAcademicPeriodValidator = vine.compile(
       .enum(['AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE'] as const)
       .optional()
       .nullable(),
-    breakStartDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
-    breakEndDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
+    breakStartDate: vine
+      .date({ formats: ['iso8601'] })
+      .optional()
+      .nullable(),
+    breakEndDate: vine
+      .date({ formats: ['iso8601'] })
+      .optional()
+      .nullable(),
     courses: vine
       .array(
         vine.object({
@@ -95,8 +101,14 @@ export const updateAcademicPeriodValidator = vine.compile(
       .enum(['AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE'] as const)
       .optional()
       .nullable(),
-    breakStartDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
-    breakEndDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
+    breakStartDate: vine
+      .date({ formats: ['iso8601'] })
+      .optional()
+      .nullable(),
+    breakEndDate: vine
+      .date({ formats: ['iso8601'] })
+      .optional()
+      .nullable(),
     isActive: vine.boolean().optional(),
     isClosed: vine.boolean().optional(),
     courses: vine
