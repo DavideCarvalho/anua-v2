@@ -151,11 +151,14 @@ export default class GetStudentStatusController {
 
     if (subPeriodId && filteredSubPeriods.length > 0) {
       const sp = filteredSubPeriods[0]
-      const start = sp.startDate.toISO()
-      const end = sp.endDate.toISO()
-      attendanceRecords = attendanceRecords.filter(
-        (a) => a.date.toISO() >= start && a.date.toISO() <= end
-      )
+      if (!sp.startDate || !sp.endDate) return
+      const start = sp.startDate.toISO()!
+      const end = sp.endDate.toISO()!
+      attendanceRecords = attendanceRecords.filter((a) => {
+        if (!a.date) return false
+        const dateIso = a.date.toISO()!
+        return dateIso >= start && dateIso <= end
+      })
     }
 
     // Get student attendance
