@@ -1134,6 +1134,12 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/stats","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/stats","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/stats","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/stats","type":0,"val":"stats","end":""}],
     types: placeholder as Registry['api.v1.dashboard.responsavel_stats']['types'],
   },
+  'api.v1.responsavel.api.student_academic_periods': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/students/:studentId/academic-periods',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/academic-periods","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/academic-periods","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/academic-periods","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/academic-periods","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/academic-periods","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/academic-periods","type":0,"val":"academic-periods","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.student_academic_periods']['types'],
+  },
   'api.v1.responsavel.api.student_grades': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/responsavel/students/:studentId/grades',

@@ -269,6 +269,7 @@ export interface ApiDefinition {
       }
       responsavel: {
         api: {
+          studentAcademicPeriods: typeof routes['api.v1.responsavel.api.student_academic_periods']
           studentGrades: typeof routes['api.v1.responsavel.api.student_grades']
           studentAttendance: typeof routes['api.v1.responsavel.api.student_attendance']
           studentPayments: typeof routes['api.v1.responsavel.api.student_payments']

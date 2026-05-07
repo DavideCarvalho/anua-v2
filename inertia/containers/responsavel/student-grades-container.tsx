@@ -25,11 +25,19 @@ type RecentAssignment = StudentGradesResponse['recentAssignments'][number]
 interface StudentGradesContainerProps {
   studentId: string
   studentName: string
+  academicPeriodId?: string | null
 }
 
-export function StudentGradesContainer({ studentId, studentName }: StudentGradesContainerProps) {
+export function StudentGradesContainer({
+  studentId,
+  studentName,
+  academicPeriodId,
+}: StudentGradesContainerProps) {
   const { data, isLoading, isError, error } = useQuery(
-    api.api.v1.responsavel.api.studentGrades.queryOptions({ params: { studentId } })
+    api.api.v1.responsavel.api.studentGrades.queryOptions({
+      params: { studentId },
+      query: academicPeriodId ? { academicPeriodId } : undefined,
+    })
   )
 
   if (isLoading) {

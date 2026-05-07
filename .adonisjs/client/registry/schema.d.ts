@@ -2263,6 +2263,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard/get_responsavel_stats_controller').default['handle']>>>
     }
   }
+  'api.v1.responsavel.api.student_academic_periods': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/students/:studentId/academic-periods'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_academic_periods_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_academic_periods_controller').default['handle']>>>
+    }
+  }
   'api.v1.responsavel.api.student_grades': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/responsavel/students/:studentId/grades'
@@ -2270,9 +2282,9 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { studentId: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/responsavel').getStudentGradesValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_grades_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_grades_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_grades_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.responsavel.api.student_attendance': {
@@ -2282,9 +2294,9 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { studentId: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/responsavel').getStudentAttendanceValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_attendance_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_attendance_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_attendance_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.responsavel.api.student_payments': {
@@ -2366,9 +2378,9 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { studentId: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/responsavel').getStudentAssignmentsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_assignments_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_assignments_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_assignments_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.responsavel.api.student_schedule': {

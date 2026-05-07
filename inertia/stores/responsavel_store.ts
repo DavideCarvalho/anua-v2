@@ -2,6 +2,7 @@ import { create } from 'zustand'
 
 export interface Student {
   id: string
+  classId: string | null
   slug: string
   name: string
   className: string

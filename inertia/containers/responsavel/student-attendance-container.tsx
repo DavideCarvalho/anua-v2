@@ -19,14 +19,19 @@ import { api } from '~/lib/api'
 interface StudentAttendanceContainerProps {
   studentId: string
   studentName: string
+  subPeriodId?: string
 }
 
 export function StudentAttendanceContainer({
   studentId,
   studentName,
+  subPeriodId,
 }: StudentAttendanceContainerProps) {
   const { data, isLoading, error, isError } = useQuery(
-    api.api.v1.responsavel.api.studentAttendance.queryOptions({ params: { studentId } })
+    api.api.v1.responsavel.api.studentAttendance.queryOptions({
+      params: { studentId },
+      query: subPeriodId ? { subPeriodId } : undefined,
+    })
   )
 
   if (isLoading) {

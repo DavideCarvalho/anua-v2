@@ -192,6 +192,7 @@ export type ScannedRoutes = {
     'api.v1.dashboard.escola_teacher_dashboard': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_pedagogical_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.responsavel_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.responsavel.api.student_academic_periods': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_grades': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_attendance': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_payments': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -893,6 +894,7 @@ export type ScannedRoutes = {
     'api.v1.dashboard.escola_teacher_dashboard': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_pedagogical_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.responsavel_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.responsavel.api.student_academic_periods': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_grades': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_attendance': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_payments': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1326,6 +1328,7 @@ export type ScannedRoutes = {
     'api.v1.dashboard.escola_teacher_dashboard': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_pedagogical_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.responsavel_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.responsavel.api.student_academic_periods': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_grades': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_attendance': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_payments': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }

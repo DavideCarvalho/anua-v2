@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import { getStudentAssignmentsValidator } from '#validators/responsavel'
 import AppException from '#exceptions/app_exception'
 
 interface AssignmentRow {
@@ -38,7 +39,7 @@ export default class GetStudentAssignmentsController {
     }
 
     const { studentId } = params
-    const { status, subjectId } = request.qs()
+    const { status, subjectId, subPeriodId } = await request.validateUsing(getStudentAssignmentsValidator)
 
     // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
@@ -66,6 +67,12 @@ export default class GetStudentAssignmentsController {
     if (subjectId) {
       subjectFilter = `AND thc."subjectId" = :subjectId`
       queryParams.subjectId = subjectId
+    }
+
+    let subPeriodFilter = ''
+    if (subPeriodId) {
+      subPeriodFilter = `AND a."subPeriodId" = :subPeriodId`
+      queryParams.subPeriodId = subPeriodId
     }
 
     // Get assignments for the student's class, filtered by the class's academic periods
@@ -106,6 +113,7 @@ export default class GetStudentAssignmentsController {
         )
         ${statusFilter}
         ${subjectFilter}
+        ${subPeriodFilter}
       ORDER BY a."dueDate" DESC
       `,
       queryParams
@@ -126,9 +134,10 @@ export default class GetStudentAssignmentsController {
           FROM "ClassHasAcademicPeriod" chap
           WHERE chap."classId" = c.id
         )
+        ${subPeriodFilter}
       ORDER BY s.name
       `,
-      { studentId }
+      { studentId, ...(subPeriodId ? { subPeriodId } : {}) }
     )
 
     // Get summary stats (filtered by class's academic periods)
@@ -156,8 +165,9 @@ export default class GetStudentAssignmentsController {
           FROM "ClassHasAcademicPeriod" chap
           WHERE chap."classId" = c.id
         )
+        ${subPeriodFilter}
       `,
-      { studentId }
+      { studentId, ...(subPeriodId ? { subPeriodId } : {}) }
     )
 
     const assignmentsList = (assignments.rows as AssignmentRow[]).map((row) => ({

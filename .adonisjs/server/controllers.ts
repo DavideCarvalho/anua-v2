@@ -568,6 +568,7 @@ export const controllers = {
     CreateInquiryMessage: () => import('#controllers/responsavel/create_inquiry_message_controller'),
     CreateStudentInquiry: () => import('#controllers/responsavel/create_student_inquiry_controller'),
     GetNotifications: () => import('#controllers/responsavel/get_notifications_controller'),
+    GetStudentAcademicPeriods: () => import('#controllers/responsavel/get_student_academic_periods_controller'),
     GetStudentAssignments: () => import('#controllers/responsavel/get_student_assignments_controller'),
     GetStudentAttendance: () => import('#controllers/responsavel/get_student_attendance_controller'),
     GetStudentBalance: () => import('#controllers/responsavel/get_student_balance_controller'),

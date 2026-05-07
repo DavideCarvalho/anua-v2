@@ -1,6 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import StudentHasAttendance from '#models/student_has_attendance'
 import StudentHasResponsible from '#models/student_has_responsible'
+import AcademicSubPeriod from '#models/academic_sub_period'
+import { getStudentAttendanceValidator } from '#validators/responsavel'
 import AppException from '#exceptions/app_exception'
 
 export default class GetStudentAttendanceController {
@@ -10,10 +12,11 @@ export default class GetStudentAttendanceController {
     }
 
     const { studentId } = params
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const validated = await request.validateUsing(getStudentAttendanceValidator)
+    const page = validated.page ?? 1
+    const limit = validated.limit ?? 20
+    const subPeriodId = validated.subPeriodId
 
-    // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
       .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
@@ -23,28 +26,51 @@ export default class GetStudentAttendanceController {
       throw AppException.forbidden('Você não tem permissão para ver a frequência deste aluno')
     }
 
-    // Get attendance records from StudentHasAttendance which links to Attendance and CalendarSlot
-    const attendances = await StudentHasAttendance.query()
-      .where('studentId', studentId)
+    let dateFrom: string | undefined
+    let dateTo: string | undefined
+
+    if (subPeriodId) {
+      const subPeriod = await AcademicSubPeriod.query()
+        .where('id', subPeriodId)
+        .whereNull('deletedAt')
+        .first()
+
+      if (subPeriod) {
+        dateFrom = subPeriod.startDate.toISO()!
+        dateTo = subPeriod.endDate.toISO()!
+      }
+    }
+
+    const attendancesQuery = StudentHasAttendance.query().where('studentId', studentId)
+
+    if (dateFrom && dateTo) {
+      attendancesQuery.whereHas('attendance', (q) => {
+        q.where('date', '>=', dateFrom).where('date', '<=', dateTo)
+      })
+    }
+
+    const attendances = await attendancesQuery
       .preload('attendance', (query) => {
         query.preload('calendarSlot')
       })
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
 
-    // Calculate attendance stats
-    const stats = await StudentHasAttendance.query()
-      .where('studentId', studentId)
-      .select('status')
-      .count('* as count')
-      .groupBy('status')
+    const statsQuery = StudentHasAttendance.query().where('studentId', studentId)
+
+    if (dateFrom && dateTo) {
+      statsQuery.whereHas('attendance', (q) => {
+        q.where('date', '>=', dateFrom).where('date', '<=', dateTo)
+      })
+    }
+
+    const stats = await statsQuery.select('status').count('* as count').groupBy('status')
 
     const statsMap: Record<string, number> = {}
     stats.forEach((row: StudentHasAttendance) => {
       statsMap[row.status] = Number(row.$extras.count)
     })
 
-    // Map model status values (PRESENT, ABSENT, LATE, EXCUSED)
     const totalClasses =
       (statsMap['PRESENT'] || 0) +
       (statsMap['ABSENT'] || 0) +

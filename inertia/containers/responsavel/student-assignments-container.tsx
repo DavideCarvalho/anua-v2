@@ -42,6 +42,7 @@ type Assignment = StudentAssignmentsResponse['assignments'][number]
 interface StudentAssignmentsContainerProps {
   studentId: string
   studentName: string
+  subPeriodId?: string
 }
 
 const STATUS_FILTERS = [
@@ -54,6 +55,7 @@ const STATUS_FILTERS = [
 export function StudentAssignmentsContainer({
   studentId,
   studentName,
+  subPeriodId,
 }: StudentAssignmentsContainerProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
@@ -61,6 +63,7 @@ export function StudentAssignmentsContainer({
   const { data, isLoading, isError, error } = useQuery(
     api.api.v1.responsavel.api.studentAssignments.queryOptions({
       params: { studentId },
+      query: subPeriodId ? { subPeriodId } : undefined,
     })
   )
 

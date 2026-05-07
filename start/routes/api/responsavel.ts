@@ -6,6 +6,8 @@ const GetResponsavelStatsController = () =>
   import('#controllers/dashboard/get_responsavel_stats_controller')
 
 // Responsavel API Controllers
+const GetStudentAcademicPeriodsController = () =>
+  import('#controllers/responsavel/get_student_academic_periods_controller')
 const GetResponsavelStudentGradesController = () =>
   import('#controllers/responsavel/get_student_grades_controller')
 const GetResponsavelStudentAttendanceController = () =>
@@ -78,6 +80,9 @@ export function registerResponsavelApiRoutes() {
 
   router
     .group(() => {
+      router
+        .get('/students/:studentId/academic-periods', [GetStudentAcademicPeriodsController])
+        .as('student_academic_periods')
       router
         .get('/students/:studentId/grades', [GetResponsavelStudentGradesController])
         .as('student_grades')

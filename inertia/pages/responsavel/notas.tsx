@@ -5,6 +5,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
 
 import { useSelectedStudent } from '../../hooks/use_selected_student'
+import { useStudentSubPeriods } from '../../hooks/use_student_sub_periods'
 import {
   StudentGradesContainer,
   StudentGradesContainerSkeleton,
@@ -12,6 +13,7 @@ import {
 
 function NotasContent() {
   const { student, isLoaded } = useSelectedStudent()
+  const { academicPeriodId, subPeriodFilter } = useStudentSubPeriods(student?.id)
 
   if (!isLoaded) {
     return <StudentGradesContainerSkeleton />
@@ -31,7 +33,16 @@ function NotasContent() {
     )
   }
 
-  return <StudentGradesContainer studentId={student.id} studentName={student.name} />
+  return (
+    <div className="space-y-4">
+      {subPeriodFilter}
+      <StudentGradesContainer
+        studentId={student.id}
+        studentName={student.name}
+        academicPeriodId={academicPeriodId}
+      />
+    </div>
+  )
 }
 
 export default function NotasPage() {

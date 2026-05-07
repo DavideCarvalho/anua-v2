@@ -5,6 +5,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
 
 import { useSelectedStudent } from '../../hooks/use_selected_student'
+import { useStudentSubPeriods } from '../../hooks/use_student_sub_periods'
 import {
   StudentAttendanceContainer,
   StudentAttendanceContainerSkeleton,
@@ -12,6 +13,7 @@ import {
 
 function FrequenciaContent() {
   const { student, isLoaded } = useSelectedStudent()
+  const { subPeriodId, subPeriodFilter } = useStudentSubPeriods(student?.id)
 
   if (!isLoaded) {
     return <StudentAttendanceContainerSkeleton />
@@ -31,7 +33,16 @@ function FrequenciaContent() {
     )
   }
 
-  return <StudentAttendanceContainer studentId={student.id} studentName={student.name} />
+  return (
+    <div className="space-y-4">
+      {subPeriodFilter}
+      <StudentAttendanceContainer
+        studentId={student.id}
+        studentName={student.name}
+        subPeriodId={subPeriodId || undefined}
+      />
+    </div>
+  )
 }
 
 export default function FrequenciaPage() {

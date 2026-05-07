@@ -1,6 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import School from '#models/school'
+import Class_ from '#models/class'
+import { SubPeriodGradeCalculator } from '#services/sub_period_grade_calculator'
+import { getStudentGradesValidator } from '#validators/responsavel'
 import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
 
@@ -36,14 +40,14 @@ interface OverallSummaryRow {
 type DateValue = string | Date | DateTime | null
 
 export default class GetStudentGradesController {
-  async handle({ params, effectiveUser }: HttpContext) {
+  async handle({ params, request, effectiveUser }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
+    const { academicPeriodId } = await request.validateUsing(getStudentGradesValidator)
 
-    // Verify that the user is a responsible for this student
     const relation = await StudentHasResponsible.query()
       .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
@@ -53,7 +57,6 @@ export default class GetStudentGradesController {
       throw AppException.forbidden('Você não tem permissão para ver as notas deste aluno')
     }
 
-    // Get student's grades grouped by subject
     const grades = await db.rawQuery(
       `
       SELECT
@@ -80,7 +83,6 @@ export default class GetStudentGradesController {
       { studentId }
     )
 
-    // Get recent assignments with grades
     const recentAssignments = await db.rawQuery(
       `
       SELECT
@@ -104,7 +106,6 @@ export default class GetStudentGradesController {
       { studentId }
     )
 
-    // Calculate overall average
     const overallResult = await db.rawQuery(
       `
       SELECT
@@ -130,6 +131,35 @@ export default class GetStudentGradesController {
       return DateTime.fromISO(String(dateValue))
     }
 
+    let subPeriodGradesMap: Record<string, unknown[]> = {}
+
+    if (academicPeriodId) {
+      const student = await relation.related('student').query().first()
+      if (student?.classId) {
+        const classEntity = await Class_.query().where('id', student.classId).first()
+        if (classEntity) {
+          const school = await School.find(classEntity.schoolId)
+          if (school?.periodStructure) {
+            const calculationAlgorithm = school.calculationAlgorithm ?? 'AVERAGE'
+
+            for (const row of grades.rows as SubjectGradeRow[]) {
+              const result = await SubPeriodGradeCalculator.calculateForStudent(
+                school,
+                academicPeriodId,
+                studentId,
+                row.subject_id,
+                student.classId,
+                calculationAlgorithm
+              )
+              if (result) {
+                subPeriodGradesMap[row.subject_id] = result.subPeriodGrades
+              }
+            }
+          }
+        }
+      }
+    }
+
     const bySubject = (grades.rows as SubjectGradeRow[]).map((row) => ({
       subjectId: row.subject_id,
       subjectName: row.subject_name,
@@ -139,6 +169,9 @@ export default class GetStudentGradesController {
       gradedCount: Number(row.graded_count),
       pendingCount: Number(row.pending_count),
       average: Number(row.average),
+      ...(subPeriodGradesMap[row.subject_id]
+        ? { subPeriodGrades: subPeriodGradesMap[row.subject_id] }
+        : {}),
     }))
 
     const recentAssignmentsList = (recentAssignments.rows as RecentAssignmentRow[]).map((row) => ({

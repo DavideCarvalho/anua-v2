@@ -18,6 +18,7 @@ function parseAlunoFromWindowSearch(): string | null {
 function toStoreStudent(student: ResponsavelStudent): Student {
   return {
     id: student.id,
+    classId: student.classId ?? null,
     slug: student.slug,
     name: student.name,
     className: student.className,

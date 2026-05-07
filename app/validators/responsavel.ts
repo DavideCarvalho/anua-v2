@@ -13,3 +13,25 @@ export const getStudentBalanceValidator = vine.compile(
     limit: vine.number().min(1).max(100).optional(),
   })
 )
+
+export const getStudentGradesValidator = vine.compile(
+  vine.object({
+    academicPeriodId: vine.string().uuid().optional(),
+  })
+)
+
+export const getStudentAssignmentsValidator = vine.compile(
+  vine.object({
+    subPeriodId: vine.string().uuid().optional(),
+    status: vine.string().optional(),
+    subjectId: vine.string().uuid().optional(),
+  })
+)
+
+export const getStudentAttendanceValidator = vine.compile(
+  vine.object({
+    subPeriodId: vine.string().uuid().optional(),
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)
