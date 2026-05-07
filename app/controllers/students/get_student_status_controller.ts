@@ -153,7 +153,9 @@ export default class GetStudentStatusController {
       const sp = filteredSubPeriods[0]
       const start = sp.startDate.toISO()
       const end = sp.endDate.toISO()
-      attendanceRecords = attendanceRecords.filter((a) => a.date >= start && a.date <= end)
+      attendanceRecords = attendanceRecords.filter(
+        (a) => a.date.toISO() >= start && a.date.toISO() <= end
+      )
     }
 
     // Get student attendance
