@@ -100,8 +100,19 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
         enrollmentEndDate: academicPeriod.enrollmentEndDate
           ? new Date(academicPeriod.enrollmentEndDate)
           : null,
-        periodStructure: academicPeriod.periodStructure ?? '',
-        recoveryGradeMethod: academicPeriod.recoveryGradeMethod ?? '',
+        periodStructure: (academicPeriod.periodStructure ?? '') as
+          | ''
+          | 'BIMESTRAL'
+          | 'TRIMESTRAL'
+          | 'SEMESTRAL'
+          | 'ANUAL'
+          | undefined,
+        recoveryGradeMethod: (academicPeriod.recoveryGradeMethod ?? '') as
+          | ''
+          | 'AVERAGE'
+          | 'REPLACE_IF_HIGHER'
+          | 'REPLACE'
+          | undefined,
         breakStartDate: academicPeriod.breakStartDate
           ? new Date(academicPeriod.breakStartDate)
           : null,

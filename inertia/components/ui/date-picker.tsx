@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useState, useEffect } from 'react'
 import { format, parse, isValid } from 'date-fns'
 import { ptBR } from 'date-fns/locale'

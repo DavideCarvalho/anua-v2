@@ -274,7 +274,7 @@ function SubPeriodEditDialog({
 export function SubPeriodsForm({
   academicPeriodId,
   periodStructure: propPeriodStructure,
-  recoveryGradeMethod: propRecoveryGradeMethod,
+  recoveryGradeMethod: _propRecoveryGradeMethod,
 }: SubPeriodsFormProps) {
   const form = useFormContext()
   const user = useAuthUser()
@@ -314,7 +314,13 @@ export function SubPeriodsForm({
           academicPeriodId,
           schoolId,
           overwrite,
-          periodStructure: resolvedPeriodStructure || undefined,
+          periodStructure: (resolvedPeriodStructure as
+            | 'BIMESTRAL'
+            | 'TRIMESTRAL'
+            | 'SEMESTRAL'
+            | 'ANUAL'
+            | undefined
+            | null) || undefined,
         },
       })
       toast.success(

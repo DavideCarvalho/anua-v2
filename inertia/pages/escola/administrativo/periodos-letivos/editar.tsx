@@ -7,7 +7,6 @@ import { EscolaLayout } from '~/components/layouts'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { EditAcademicPeriodForm } from '~/containers/academic-periods/edit-academic-period-form'
-import type { AcademicPeriodData } from '~/containers/academic-periods/edit-academic-period-form'
 import { api } from '~/lib/api'
 
 interface Props {

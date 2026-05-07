@@ -18,7 +18,9 @@ import type { Route } from '@tuyau/core/types'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
-type StudentStatusData = Route.Response<'api.v1.classes.student_status'>[number]
+type StudentStatusData = NonNullable<
+  Route.Response<'api.v1.classes.student_status'>
+>[number]
 type StudentStatus = StudentStatusData['status']
 type FailureReason = 'GRADE' | 'ATTENDANCE' | 'BOTH' | null | undefined
 
