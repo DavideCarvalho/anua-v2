@@ -76,6 +76,12 @@ export default class UpdateSchoolController {
           data.nfseIrPercentage !== undefined ? data.nfseIrPercentage : school.nfseIrPercentage,
         nfseDeductions:
           data.nfseDeductions !== undefined ? data.nfseDeductions : school.nfseDeductions,
+        periodStructure:
+          data.periodStructure !== undefined ? data.periodStructure : school.periodStructure,
+        recoveryGradeMethod:
+          data.recoveryGradeMethod !== undefined
+            ? data.recoveryGradeMethod
+            : school.recoveryGradeMethod,
       })
 
       await school.useTransaction(trx).save()

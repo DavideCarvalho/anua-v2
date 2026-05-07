@@ -63,6 +63,8 @@ export default class ShowSchoolController {
       minimumGrade: school.minimumGrade,
       minimumAttendancePercentage: school.minimumAttendancePercentage,
       calculationAlgorithm: school.calculationAlgorithm,
+      periodStructure: school.periodStructure,
+      recoveryGradeMethod: school.recoveryGradeMethod,
       hasInsurance: school.hasInsurance,
       insurancePercentage: school.insurancePercentage,
       insuranceCoveragePercentage: school.insuranceCoveragePercentage,

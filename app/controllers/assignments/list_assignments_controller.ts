@@ -10,6 +10,7 @@ export default class ListAssignmentsController {
     const subjectId = request.input('subjectId')
     const teacherId = request.input('teacherId')
     const academicPeriodId = request.input('academicPeriodId')
+    const subPeriodId = request.input('subPeriodId')
 
     const query = Assignment.query()
       .preload('teacherHasClass', (thcQuery) => {
@@ -34,6 +35,10 @@ export default class ListAssignmentsController {
 
     if (academicPeriodId) {
       query.where('academicPeriodId', academicPeriodId)
+    }
+
+    if (subPeriodId) {
+      query.where('subPeriodId', subPeriodId)
     }
 
     const assignments = await query.paginate(page, limit)

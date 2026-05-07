@@ -34,7 +34,7 @@ export const createSchoolValidator = vine.compile(
     calculationAlgorithm: vine.enum(['AVERAGE', 'SUM']).optional(),
     minimumAttendancePercentage: vine.number().min(0).max(100).optional(),
     periodStructure: vine
-      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL'] as const)
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL'] as const)
       .optional()
       .nullable(),
     recoveryGradeMethod: vine
@@ -63,13 +63,13 @@ export const updateSchoolValidator = vine.compile(
     zipCode: vine.string().trim().maxLength(10).optional().nullable(),
     latitude: vine.number().optional().nullable(),
     longitude: vine.number().optional().nullable(),
-    logoUrl: vine.string().trim().url().optional().nullable(),
+    logoUrl: vine.string().trim().optional().nullable(),
     schoolChainId: vine.string().uuid().optional().nullable(),
     minimumGrade: vine.number().min(0).max(10).optional(),
     calculationAlgorithm: vine.enum(['AVERAGE', 'SUM']).optional(),
     minimumAttendancePercentage: vine.number().min(0).max(100).optional(),
     periodStructure: vine
-      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL'] as const)
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL'] as const)
       .optional()
       .nullable(),
     recoveryGradeMethod: vine

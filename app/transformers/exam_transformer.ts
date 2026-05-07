@@ -27,6 +27,7 @@ export default class ExamTransformer extends BaseTransformer<Exam> {
         'classId',
         'subjectId',
         'teacherId',
+        'subPeriodId',
         'academicPeriodId',
         'createdAt',
         'updatedAt',

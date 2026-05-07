@@ -1,6 +1,7 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type AcademicPeriod from '#models/academic_period'
 import type { AcademicPeriodSegment } from '#models/academic_period'
+import type { PeriodStructure, RecoveryGradeMethod } from '#models/school'
 import CourseHasAcademicPeriodDto from './course_has_academic_period.dto.js'
 
 export default class AcademicPeriodDto extends BaseModelDto {
@@ -16,6 +17,10 @@ export default class AcademicPeriodDto extends BaseModelDto {
   declare isClosed: boolean
   declare minimumGradeOverride: number | null
   declare minimumAttendanceOverride: number | null
+  declare periodStructure: PeriodStructure | null
+  declare recoveryGradeMethod: RecoveryGradeMethod | null
+  declare breakStartDate: Date | null
+  declare breakEndDate: Date | null
   declare schoolId: string
   declare previousAcademicPeriodId: string | null
   declare createdAt: Date
@@ -43,6 +48,14 @@ export default class AcademicPeriodDto extends BaseModelDto {
     this.isClosed = academicPeriod.isClosed
     this.minimumGradeOverride = academicPeriod.minimumGradeOverride
     this.minimumAttendanceOverride = academicPeriod.minimumAttendanceOverride
+    this.periodStructure = academicPeriod.periodStructure
+    this.recoveryGradeMethod = academicPeriod.recoveryGradeMethod
+    this.breakStartDate = academicPeriod.breakStartDate
+      ? academicPeriod.breakStartDate.toJSDate()
+      : null
+    this.breakEndDate = academicPeriod.breakEndDate
+      ? academicPeriod.breakEndDate.toJSDate()
+      : null
     this.schoolId = academicPeriod.schoolId
     this.previousAcademicPeriodId = academicPeriod.previousAcademicPeriodId
     this.createdAt = academicPeriod.createdAt.toJSDate()

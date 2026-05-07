@@ -3,6 +3,7 @@ import db from '@adonisjs/lucid/services/db'
 import Class_ from '#models/class'
 import School from '#models/school'
 import AcademicPeriod from '#models/academic_period'
+import AcademicSubPeriod from '#models/academic_sub_period'
 import Assignment from '#models/assignment'
 import Attendance from '#models/attendance'
 import Exam from '#models/exam'
@@ -34,6 +35,7 @@ export default class GetStudentStatusController {
     const subjectId = filters.subjectId
     const courseId = filters.courseId
     const academicPeriodId = filters.academicPeriodId
+    const subPeriodId = filters.subPeriodId
 
     // Find the class
     const classEntity = await Class_.query().where('id', classId).preload('school').first()
@@ -59,6 +61,18 @@ export default class GetStudentStatusController {
     const minimumAttendancePercentage =
       academicPeriod.minimumAttendanceOverride ?? school.minimumAttendancePercentage ?? 75
     const calculationAlgorithm = school.calculationAlgorithm ?? 'AVERAGE'
+    const usesSubPeriods = !!school.periodStructure
+
+    const subPeriodsList = usesSubPeriods
+      ? await AcademicSubPeriod.query()
+          .where('academicPeriodId', academicPeriodId)
+          .whereNull('deletedAt')
+          .orderBy('order', 'asc')
+      : []
+
+    const filteredSubPeriods = subPeriodId
+      ? subPeriodsList.filter((sp) => sp.id === subPeriodId)
+      : subPeriodsList
 
     // Get students in the class using StudentHasLevel with course+period context
     const studentsInClass = await getStudents({ classId, courseId, academicPeriodId })
@@ -86,11 +100,15 @@ export default class GetStudentStatusController {
     }
 
     // Get all assignments for this subject/class
-    const assignments = await Assignment.query()
+    let assignments = await Assignment.query()
       .whereHas('teacherHasClass', (q) => {
         q.where('classId', classId).where('subjectId', subjectId)
       })
       .orderBy('dueDate', 'asc')
+
+    if (subPeriodId) {
+      assignments = assignments.filter((a) => a.subPeriodId === subPeriodId)
+    }
 
     // Get student assignments
     const studentAssignments = await db
@@ -102,10 +120,14 @@ export default class GetStudentStatusController {
       .select('studentId', 'assignmentId', 'grade')
 
     // Get all exams for this subject/class
-    const exams = await Exam.query()
+    let exams = await Exam.query()
       .where('classId', classId)
       .where('subjectId', subjectId)
       .orderBy('examDate', 'asc')
+
+    if (subPeriodId) {
+      exams = exams.filter((e) => e.subPeriodId === subPeriodId)
+    }
 
     // Get student exam grades
     const studentExamGrades =
@@ -119,13 +141,22 @@ export default class GetStudentStatusController {
         : []
 
     // Get attendance records for this class/subject/academic period
-    const attendanceRecords = await Attendance.query()
+    let attendanceRecords = await Attendance.query()
       .whereHas('calendarSlot', (csQuery) => {
         csQuery.where('teacherHasClassId', teacherHasClass.id).whereHas('calendar', (calQuery) => {
           calQuery.where('academicPeriodId', academicPeriod.id)
         })
       })
       .preload('calendarSlot')
+
+    if (subPeriodId && filteredSubPeriods.length > 0) {
+      const sp = filteredSubPeriods[0]
+      const start = sp.startDate.toISO()
+      const end = sp.endDate.toISO()
+      attendanceRecords = attendanceRecords.filter(
+        (a) => a.date >= start && a.date <= end
+      )
+    }
 
     // Get student attendance
     const studentAttendance = await db
@@ -136,23 +167,46 @@ export default class GetStudentStatusController {
       )
       .select('studentId', 'attendanceId', 'status')
 
-    // Calculate max possible grade based on algorithm (assignments + exams)
+    // Calculate max possible grade
     const gradableAssignments = assignments.filter((a) => (a.grade ?? 0) > 0)
     const gradableAssignmentIds = new Set(gradableAssignments.map((a) => a.id))
     const gradableExams = exams.filter((e) => e.maxScore > 0)
     const gradableExamIds = new Set(gradableExams.map((e) => e.id))
+
     const totalAssignmentPoints = gradableAssignments.reduce((sum, a) => sum + (a.grade ?? 0), 0)
     const totalExamPoints = gradableExams.reduce((sum, e) => sum + e.maxScore, 0)
     const totalItems = gradableAssignments.length + gradableExams.length
 
-    const maxPossibleGrade =
-      calculationAlgorithm === 'SUM'
-        ? totalAssignmentPoints + totalExamPoints
-        : totalItems > 0
-          ? (totalAssignmentPoints + totalExamPoints) / totalItems
-          : 0
+    let maxPossibleGrade = 0
 
-    const usesSubPeriods = !!school.periodStructure
+    if (usesSubPeriods && filteredSubPeriods.length > 0) {
+      const subPeriodMaxes = filteredSubPeriods.map((sp) => {
+        const spAssignments = gradableAssignments.filter((a) => a.subPeriodId === sp.id)
+        const spExams = gradableExams.filter((e) => e.subPeriodId === sp.id)
+        const spTotalItems = spAssignments.length + spExams.length
+
+        if (spTotalItems === 0) return { weight: sp.weight, maxPossible: 0 }
+
+        const spMaxScore =
+          spAssignments.reduce((s, a) => s + (a.grade ?? 0), 0) +
+          spExams.reduce((s, e) => s + e.maxScore, 0)
+
+        return { weight: sp.weight, maxPossible: spMaxScore / spTotalItems }
+      })
+
+      const totalWeight = subPeriodMaxes.reduce((s, m) => s + m.weight, 0)
+      maxPossibleGrade =
+        totalWeight > 0
+          ? subPeriodMaxes.reduce((s, m) => s + m.maxPossible * m.weight, 0) / totalWeight
+          : 0
+    } else {
+      maxPossibleGrade =
+        calculationAlgorithm === 'SUM'
+          ? totalAssignmentPoints + totalExamPoints
+          : totalItems > 0
+            ? (totalAssignmentPoints + totalExamPoints) / totalItems
+            : 0
+    }
 
     // Build result for each student
     const results: (StudentStatusResult & { subPeriodGrades?: unknown[] })[] = await Promise.all(

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Button } from '~/components/ui/button'
 import { ExamsList } from '../../../../../../../../containers/academico/exams-list'
 import { NewExamModal } from '../../../../../../../../containers/turma'
+import { SubPeriodFilter } from '../../../../../../../../containers/academic-periods/components/sub-period-filter'
 import { useAuthUser } from '~/stores/auth_store'
 
 interface Props {
@@ -33,6 +34,7 @@ const TurmaProvasPage: FC<Props> = ({
 }) => {
   const user = useAuthUser()
   const [modalOpen, setModalOpen] = useState(false)
+  const [subPeriodId, setSubPeriodId] = useState('')
 
   return (
     <EscolaLayout>
@@ -56,8 +58,13 @@ const TurmaProvasPage: FC<Props> = ({
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <ExamsList classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} />
+          <CardContent className="space-y-4">
+            <SubPeriodFilter
+              academicPeriodId={academicPeriodId}
+              value={subPeriodId}
+              onChange={setSubPeriodId}
+            />
+            <ExamsList classId={classId} courseId={courseId} academicPeriodId={academicPeriodId} subPeriodId={subPeriodId} />
           </CardContent>
         </Card>
 

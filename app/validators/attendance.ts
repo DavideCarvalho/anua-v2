@@ -50,5 +50,6 @@ export const getClassStudentsAttendanceValidator = vine.compile(
     academicPeriodId: vine.string().trim(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
+    subPeriodId: vine.string().trim().optional(),
   })
 )

@@ -7,6 +7,7 @@ import { EscolaLayout } from '~/components/layouts'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent } from '~/components/ui/card'
 import { EditAcademicPeriodForm } from '~/containers/academic-periods/edit-academic-period-form'
+import type { AcademicPeriodData } from '~/containers/academic-periods/edit-academic-period-form'
 import { api } from '~/lib/api'
 
 interface Props {
@@ -71,19 +72,14 @@ export default function EditarPeriodoLetivoPage({ academicPeriodId }: Props) {
         {data && (
           <EditAcademicPeriodForm
             academicPeriod={{
-              id: data.id,
-              name: data.name,
-              slug: data.slug,
+              ...data,
               startDate: String(data.startDate),
               endDate: String(data.endDate),
               enrollmentStartDate: data.enrollmentStartDate
                 ? String(data.enrollmentStartDate)
                 : null,
               enrollmentEndDate: data.enrollmentEndDate ? String(data.enrollmentEndDate) : null,
-              isActive: data.isActive,
-              isClosed: data.isClosed,
-              segment: data.segment,
-              courses: data.courses,
+              courses: data.courses ?? [],
             }}
           />
         )}

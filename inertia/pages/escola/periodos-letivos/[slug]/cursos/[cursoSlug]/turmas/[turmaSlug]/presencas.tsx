@@ -6,6 +6,7 @@ import { TurmaLayout } from '../../../../../../../../components/layouts/turma-la
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { AttendancesTable, NewAttendanceModal } from '../../../../../../../../containers/turma'
+import { SubPeriodFilter } from '../../../../../../../../containers/academic-periods/components/sub-period-filter'
 
 interface Props {
   academicPeriodSlug: string
@@ -30,6 +31,7 @@ export default function TurmaPresencasPage({
   courseName,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
+  const [subPeriodId, setSubPeriodId] = useState('')
 
   return (
     <EscolaLayout>
@@ -53,11 +55,17 @@ export default function TurmaPresencasPage({
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <SubPeriodFilter
+              academicPeriodId={academicPeriodId}
+              value={subPeriodId}
+              onChange={setSubPeriodId}
+            />
             <AttendancesTable
               classId={classId}
               academicPeriodId={academicPeriodId}
               courseId={courseId}
+              subPeriodId={subPeriodId}
             />
           </CardContent>
         </Card>

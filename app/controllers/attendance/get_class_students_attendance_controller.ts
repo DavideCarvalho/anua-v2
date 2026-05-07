@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Class_ from '#models/class'
 import StudentHasLevel from '#models/student_has_level'
+import AcademicSubPeriod from '#models/academic_sub_period'
 import db from '@adonisjs/lucid/services/db'
 import GetClassStudentsAttendanceResponseDto from './dtos/get_class_students_attendance_response.dto.js'
 import AppException from '#exceptions/app_exception'
@@ -12,6 +13,18 @@ export default class GetClassStudentsAttendanceController {
     const filters = await request.validateUsing(getClassStudentsAttendanceValidator)
     const courseId = filters.courseId
     const academicPeriodId = filters.academicPeriodId
+    const subPeriodId = filters.subPeriodId
+
+    // Resolve sub-period date range for filtering
+    let dateStart: string | undefined
+    let dateEnd: string | undefined
+    if (subPeriodId) {
+      const subPeriod = await AcademicSubPeriod.find(subPeriodId)
+      if (subPeriod) {
+        dateStart = subPeriod.startDate.toISO() ?? undefined
+        dateEnd = subPeriod.endDate.toISO() ?? undefined
+      }
+    }
 
     const classEntity = await Class_.find(classId)
     if (!classEntity) {
@@ -39,18 +52,42 @@ export default class GetClassStudentsAttendanceController {
     // Get attendance summary per student
     const attendanceSummary =
       studentIds.length > 0
-        ? await db
-            .from('StudentHasAttendance')
-            .select('studentId')
-            .select(db.raw('COUNT(*) as total_classes'))
-            .select(db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count"))
-            .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
-            .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
-            .select(
-              db.raw("SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count")
-            )
-            .whereIn('studentId', studentIds)
-            .groupBy('studentId')
+        ? dateStart && dateEnd
+          ? await db
+              .from('StudentHasAttendance')
+              .join('Attendance', 'StudentHasAttendance.attendanceId', '=', 'Attendance.id')
+              .select('studentId')
+              .select(db.raw('COUNT(*) as total_classes'))
+              .select(
+                db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count")
+              )
+              .select(
+                db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count")
+              )
+              .select(
+                db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count")
+              )
+              .select(
+                db.raw(
+                  "SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count"
+                )
+              )
+              .whereIn('studentId', studentIds)
+              .where('Attendance.date', '>=', dateStart)
+              .where('Attendance.date', '<=', dateEnd)
+              .groupBy('studentId')
+          : await db
+              .from('StudentHasAttendance')
+              .select('studentId')
+              .select(db.raw('COUNT(*) as total_classes'))
+              .select(db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count"))
+              .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
+              .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
+              .select(
+                db.raw("SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count")
+              )
+              .whereIn('studentId', studentIds)
+              .groupBy('studentId')
         : []
 
     // Create a map for quick lookup

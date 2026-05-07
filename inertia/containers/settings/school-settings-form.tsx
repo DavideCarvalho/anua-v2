@@ -59,7 +59,9 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
       return data.url as string
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['school', schoolId] })
+    queryClient.invalidateQueries({
+      queryKey: api.api.v1.schools.show.pathKey(),
+    })
     },
   })
 
@@ -112,11 +114,11 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
         minimumGrade: school.minimumGrade ?? 6,
         calculationAlgorithm: school.calculationAlgorithm === 'SUM' ? 'SUM' : 'AVERAGE',
         minimumAttendancePercentage: school.minimumAttendancePercentage ?? 75,
-        periodStructure:
-          ((school as any).periodStructure as SchoolSettingsFormState['periodStructure']) || '',
+        periodStructure: (school as { periodStructure?: SchoolSettingsFormState['periodStructure'] })
+          .periodStructure || '',
         recoveryGradeMethod:
-          ((school as any).recoveryGradeMethod as SchoolSettingsFormState['recoveryGradeMethod']) ||
-          'AVERAGE',
+          (school as { recoveryGradeMethod?: SchoolSettingsFormState['recoveryGradeMethod'] })
+            .recoveryGradeMethod || 'AVERAGE',
       })
     }
   }, [school])
@@ -312,7 +314,7 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="periodStructure">Estrutura de Periodos</Label>
+            <Label htmlFor="periodStructure">Estrutura de Períodos</Label>
             <Select
               value={formData.periodStructure}
               onValueChange={(value) =>
@@ -322,24 +324,27 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
               <SelectTrigger id="periodStructure" className="w-full">
                 <SelectValue>
                   {formData.periodStructure === ''
-                    ? 'Nao usar sub-periodos'
+                    ? 'Não usar sub-períodos'
                     : formData.periodStructure === 'BIMESTRAL'
-                      ? 'Bimestral (4 periodos)'
+                      ? 'Bimestral (4 períodos)'
                       : formData.periodStructure === 'TRIMESTRAL'
-                        ? 'Trimestral (3 periodos)'
-                        : 'Semestral (2 periodos)'}
+                        ? 'Trimestral (3 períodos)'
+                        : formData.periodStructure === 'SEMESTRAL'
+                          ? 'Semestral (2 períodos)'
+                          : 'Anual (1 período)'}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nao usar sub-periodos</SelectItem>
-                <SelectItem value="BIMESTRAL">Bimestral (4 periodos)</SelectItem>
-                <SelectItem value="TRIMESTRAL">Trimestral (3 periodos)</SelectItem>
-                <SelectItem value="SEMESTRAL">Semestral (2 periodos)</SelectItem>
+                <SelectItem value="">Não usar sub-períodos</SelectItem>
+                <SelectItem value="BIMESTRAL">Bimestral (4 períodos)</SelectItem>
+                <SelectItem value="TRIMESTRAL">Trimestral (3 períodos)</SelectItem>
+                <SelectItem value="SEMESTRAL">Semestral (2 períodos)</SelectItem>
+                <SelectItem value="ANUAL">Anual (1 período)</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="recoveryGradeMethod">Metodo de Recuperacao</Label>
+            <Label htmlFor="recoveryGradeMethod">Método de Recuperação</Label>
             <Select
               value={formData.recoveryGradeMethod}
               onValueChange={(value) =>
@@ -352,16 +357,16 @@ function SchoolSettingsFormContent({ schoolId }: { schoolId: string }) {
               <SelectTrigger id="recoveryGradeMethod" className="w-full">
                 <SelectValue>
                   {formData.recoveryGradeMethod === 'AVERAGE'
-                    ? 'Media (original + recuperacao) / 2'
+                    ? 'Média (Nota + Rec) / 2'
                     : formData.recoveryGradeMethod === 'REPLACE_IF_HIGHER'
                       ? 'Substituir se maior'
-                      : 'Substituir pela recuperacao'}
+                      : 'Substituir pela rec.'}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="AVERAGE">Media (original + recuperacao) / 2</SelectItem>
+                <SelectItem value="AVERAGE">Média (Nota + Rec) / 2</SelectItem>
                 <SelectItem value="REPLACE_IF_HIGHER">Substituir se maior</SelectItem>
-                <SelectItem value="REPLACE">Substituir pela recuperacao</SelectItem>
+                <SelectItem value="REPLACE">Substituir pela rec.</SelectItem>
               </SelectContent>
             </Select>
           </div>

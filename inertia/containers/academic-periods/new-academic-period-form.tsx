@@ -16,6 +16,8 @@ import { api } from '~/lib/api'
 import { CalendarForm } from './components/calendar-form'
 import { CoursesForm } from './components/courses-form'
 
+import { SubPeriodsConfigForm } from './components/sub-periods-config-form'
+
 const segmentEnum = z.enum([
   'KINDERGARTEN',
   'ELEMENTARY',
@@ -37,6 +39,10 @@ const schema = z.object({
     weekendDaysWithClasses: z.array(z.date()).optional().default([]),
     enrollmentStartDate: z.date().nullable().optional(),
     enrollmentEndDate: z.date().nullable().optional(),
+    periodStructure: z.enum(['', 'BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
+    recoveryGradeMethod: z.enum(['', 'AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE']).optional(),
+    breakStartDate: z.date().nullable().optional(),
+    breakEndDate: z.date().nullable().optional(),
   }),
   courses: z.array(
     z.object({
@@ -83,6 +89,10 @@ const steps = [
     description: 'Defina o período letivo',
   },
   {
+    title: 'Sub-Períodos',
+    description: 'Estrutura de bimestres/trimestres',
+  },
+  {
     title: 'Cursos e Séries',
     description: 'Configure a estrutura acadêmica',
   },
@@ -115,6 +125,10 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
         weekendDaysWithClasses: [],
         enrollmentStartDate: null,
         enrollmentEndDate: null,
+        periodStructure: '',
+        recoveryGradeMethod: '',
+        breakStartDate: null,
+        breakEndDate: null,
       },
       courses: [],
     },
@@ -149,6 +163,10 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
           startDate: values.calendar.startDate.toISOString(),
           endDate: values.calendar.endDate.toISOString(),
           segment: values.calendar.segment,
+          periodStructure: values.calendar.periodStructure || null,
+          recoveryGradeMethod: values.calendar.recoveryGradeMethod || null,
+          breakStartDate: values.calendar.breakStartDate?.toISOString() ?? null,
+          breakEndDate: values.calendar.breakEndDate?.toISOString() ?? null,
           enrollmentStartDate: values.calendar.enrollmentStartDate?.toISOString(),
           enrollmentEndDate: values.calendar.enrollmentEndDate?.toISOString(),
           courses: values.courses.map((course) => ({
@@ -186,7 +204,8 @@ export function NewAcademicPeriodForm({ schoolId, onSuccess }: NewAcademicPeriod
           <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)}>
               {currentStep === 0 && <CalendarForm />}
-              {currentStep === 1 && <CoursesForm />}
+              {currentStep === 1 && <SubPeriodsConfigForm />}
+              {currentStep === 2 && <CoursesForm />}
 
               <div className="mt-8 flex justify-between">
                 {currentStep > 0 && (

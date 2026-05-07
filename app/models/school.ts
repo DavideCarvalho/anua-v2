@@ -15,7 +15,7 @@ import SchoolGroup from './school_group.js'
 import UserHasSchool from './user_has_school.js'
 import InsuranceBilling from './insurance_billing.js'
 
-export type PeriodStructure = 'BIMESTRAL' | 'TRIMESTRAL' | 'SEMESTRAL'
+export type PeriodStructure = 'BIMESTRAL' | 'TRIMESTRAL' | 'SEMESTRAL' | 'ANUAL'
 export type RecoveryGradeMethod = 'AVERAGE' | 'REPLACE_IF_HIGHER' | 'REPLACE'
 
 export type PaymentConfigStatus =

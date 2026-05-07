@@ -3,6 +3,7 @@ import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
 import { slugify } from '@adonisjs/lucid-slugify'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import type { PeriodStructure, RecoveryGradeMethod } from './school.js'
 import School from './school.js'
 import CourseHasAcademicPeriod from './course_has_academic_period.js'
 import AcademicSubPeriod from './academic_sub_period.js'
@@ -64,6 +65,18 @@ export default class AcademicPeriod extends BaseModel {
 
   @column({ columnName: 'minimumAttendanceOverride' })
   declare minimumAttendanceOverride: number | null
+
+  @column({ columnName: 'periodStructure' })
+  declare periodStructure: PeriodStructure | null
+
+  @column({ columnName: 'recoveryGradeMethod' })
+  declare recoveryGradeMethod: RecoveryGradeMethod | null
+
+  @column.date({ columnName: 'breakStartDate' })
+  declare breakStartDate: DateTime | null
+
+  @column.date({ columnName: 'breakEndDate' })
+  declare breakEndDate: DateTime | null
 
   @column({ columnName: 'schoolId' })
   declare schoolId: string

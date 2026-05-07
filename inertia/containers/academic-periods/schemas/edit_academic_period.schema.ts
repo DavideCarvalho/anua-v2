@@ -20,6 +20,21 @@ export const SEGMENT_LABELS: Record<Segment, string> = {
   OTHER: 'Outro',
 }
 
+export const PERIOD_STRUCTURE_OPTIONS = [
+  { value: '', label: 'Usar config da escola', description: 'Usa o padrão definido nas configurações' },
+  { value: 'BIMESTRAL', label: 'Bimestral (4 períodos)', description: 'O ano é dividido em 4 bimestres' },
+  { value: 'TRIMESTRAL', label: 'Trimestral (3 períodos)', description: 'O ano é dividido em 3 trimestres' },
+  { value: 'SEMESTRAL', label: 'Semestral (2 períodos)', description: 'O ano é dividido em 2 semestres' },
+  { value: 'ANUAL', label: 'Anual (1 período)', description: 'O ano inteiro conta como um único período' },
+] as const
+
+export const RECOVERY_METHOD_OPTIONS = [
+  { value: '', label: 'Usar config da escola', description: 'Usa o padrão definido' },
+  { value: 'AVERAGE', label: 'Média (Nota + Rec) / 2', description: 'Soma a nota original com a de recuperação e divide por dois' },
+  { value: 'REPLACE_IF_HIGHER', label: 'Substituir se maior', description: 'A nota de recuperação só substitui a original se for maior' },
+  { value: 'REPLACE', label: 'Substituir pela rec.', description: 'A nota de recuperação sempre substitui a original, independentemente do valor' },
+] as const
+
 export const calendarFormSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   segment: z.enum(SEGMENTS, { error: 'Segmento é obrigatório' }),
@@ -27,6 +42,10 @@ export const calendarFormSchema = z.object({
   endDate: z.date({ error: 'Data de término é obrigatória' }),
   enrollmentStartDate: z.date().nullable().optional(),
   enrollmentEndDate: z.date().nullable().optional(),
+  periodStructure: z.enum(['', 'BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
+  recoveryGradeMethod: z.enum(['', 'AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE']).optional(),
+  breakStartDate: z.date().nullable().optional(),
+  breakEndDate: z.date().nullable().optional(),
 })
 
 export const teacherSchema = z.object({

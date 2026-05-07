@@ -30,6 +30,16 @@ export const createAcademicPeriodValidator = vine.compile(
     previousAcademicPeriodId: vine.string().trim().optional(),
     minimumGradeOverride: vine.number().optional(),
     minimumAttendanceOverride: vine.number().optional(),
+    periodStructure: vine
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL'] as const)
+      .optional()
+      .nullable(),
+    recoveryGradeMethod: vine
+      .enum(['AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE'] as const)
+      .optional()
+      .nullable(),
+    breakStartDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
+    breakEndDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
     courses: vine
       .array(
         vine.object({
@@ -77,6 +87,16 @@ export const updateAcademicPeriodValidator = vine.compile(
     previousAcademicPeriodId: vine.string().trim().optional(),
     minimumGradeOverride: vine.number().optional(),
     minimumAttendanceOverride: vine.number().optional(),
+    periodStructure: vine
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL'] as const)
+      .optional()
+      .nullable(),
+    recoveryGradeMethod: vine
+      .enum(['AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE'] as const)
+      .optional()
+      .nullable(),
+    breakStartDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
+    breakEndDate: vine.date({ formats: ['iso8601'] }).optional().nullable(),
     isActive: vine.boolean().optional(),
     isClosed: vine.boolean().optional(),
     courses: vine

@@ -22,6 +22,7 @@ export default class AssignmentTransformer extends BaseTransformer<Assignment> {
         'grade',
         'teacherHasClassId',
         'academicPeriodId',
+        'subPeriodId',
         'createdAt',
         'updatedAt',
       ]),

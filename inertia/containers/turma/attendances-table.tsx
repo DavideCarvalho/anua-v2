@@ -20,6 +20,7 @@ interface AttendancesTableProps {
   classId: string
   academicPeriodId: string
   courseId: string
+  subPeriodId?: string
 }
 
 interface StudentAttendance {
@@ -59,7 +60,7 @@ function getAttendanceBadgeVariant(percentage: number) {
   return 'destructive'
 }
 
-function AttendancesTableContent({ classId, academicPeriodId, courseId }: AttendancesTableProps) {
+function AttendancesTableContent({ classId, academicPeriodId, courseId, subPeriodId }: AttendancesTableProps) {
   const [page, setPage] = useState(1)
 
   const {
@@ -69,7 +70,7 @@ function AttendancesTableContent({ classId, academicPeriodId, courseId }: Attend
   } = useQuery(
     api.api.v1.attendance.classStudents.queryOptions({
       params: { classId },
-      query: { academicPeriodId, courseId, page, limit: 20 },
+      query: { academicPeriodId, courseId, page, limit: 20, subPeriodId: subPeriodId || undefined },
     })
   )
 

@@ -6,6 +6,7 @@ import { useFormContext } from 'react-hook-form'
 import { CalendarDays } from 'lucide-react'
 
 import { cn } from '~/lib/utils'
+import { DatePicker } from '~/components/ui/date-picker'
 import { Button } from '~/components/ui/button'
 import { Calendar } from '~/components/ui/calendar'
 import { Input } from '~/components/ui/input'
@@ -82,32 +83,13 @@ export function CalendarForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Início do Período</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ?? undefined}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data de início"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -119,32 +101,59 @@ export function CalendarForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Término do Período</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ?? undefined}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data de término"
+                    fromDate={form.watch('calendar.startDate') ?? undefined}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <Label className="text-base font-medium">Férias de Meio de Ano</Label>
+        <p className="text-sm text-muted-foreground">
+          Período de recesso no meio do ano letivo (opcional)
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="calendar.breakStartDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Início das Férias</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="calendar.breakEndDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Término das Férias</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data"
+                    fromDate={form.watch('calendar.breakStartDate') ?? undefined}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -238,32 +247,13 @@ export function CalendarForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Início das Matrículas</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ?? undefined}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -275,32 +265,14 @@ export function CalendarForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Término das Matrículas</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full pl-3 text-left font-normal',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ?? undefined}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data"
+                    fromDate={form.watch('calendar.enrollmentStartDate') ?? undefined}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

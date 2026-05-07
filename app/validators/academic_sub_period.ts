@@ -55,5 +55,10 @@ export const generateSubPeriodsValidator = vine.compile(
   vine.object({
     academicPeriodId: vine.string().uuid(),
     schoolId: vine.string().uuid(),
+    overwrite: vine.boolean().optional(),
+    periodStructure: vine
+      .enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL'] as const)
+      .optional()
+      .nullable(),
   })
 )

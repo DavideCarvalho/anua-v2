@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { StudentStatusTable } from '~/containers/turma'
+import { SubPeriodFilter } from '~/containers/academic-periods/components/sub-period-filter'
 
 const DIRECTOR_ROLES = ['SCHOOL_DIRECTOR', 'SCHOOL_COORDINATOR', 'ADMIN', 'SUPER_ADMIN']
 
@@ -64,6 +65,7 @@ const TurmaSituacaoPage: React.FC<Props> = ({
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     filteredSubjects.length > 0 ? (filteredSubjects[0]?.id ?? null) : null
   )
+  const [subPeriodId, setSubPeriodId] = useState('')
   const selectedSubject = filteredSubjects.find((subject) => subject.id === selectedSubjectId)
 
   return (
@@ -107,12 +109,18 @@ const TurmaSituacaoPage: React.FC<Props> = ({
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <SubPeriodFilter
+              academicPeriodId={academicPeriodId}
+              value={subPeriodId}
+              onChange={setSubPeriodId}
+            />
             <StudentStatusTable
               classId={classId}
               courseId={courseId}
               academicPeriodId={academicPeriodId}
               subjectId={selectedSubjectId}
+              subPeriodId={subPeriodId}
             />
           </CardContent>
         </Card>

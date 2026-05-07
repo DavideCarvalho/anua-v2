@@ -54,6 +54,8 @@ export default class SchoolTransformer extends BaseTransformer<School> {
         'insuranceCoveragePercentage',
         'insuranceClaimWaitingDays',
         'schoolChainId',
+        'periodStructure',
+        'recoveryGradeMethod',
         'createdAt',
         'updatedAt',
       ]),

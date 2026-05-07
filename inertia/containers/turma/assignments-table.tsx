@@ -17,6 +17,7 @@ import { Badge } from '~/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { LaunchGradesModal } from './launch-grades-modal'
 import { NewAssignmentModal } from './new-assignment-modal'
+import { SubPeriodFilter } from '../academic-periods/components/sub-period-filter'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import type { Route } from '@tuyau/core/types'
@@ -26,6 +27,7 @@ interface AssignmentsTableProps {
   classId: string
   courseId: string
   academicPeriodId: string
+  subPeriodId?: string
 }
 
 type AssignmentsResponse = Route.Response<'api.v1.assignments.index'>
@@ -51,7 +53,7 @@ function AssignmentsTableEmpty() {
   )
 }
 
-export function AssignmentsTable({ classId, courseId, academicPeriodId }: AssignmentsTableProps) {
+export function AssignmentsTable({ classId, courseId, academicPeriodId, subPeriodId }: AssignmentsTableProps) {
   const [page, setPage] = useState(1)
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
   const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null)
@@ -63,10 +65,9 @@ export function AssignmentsTable({ classId, courseId, academicPeriodId }: Assign
     isError,
   } = useQuery(
     api.api.v1.assignments.index.queryOptions({
-      query: { classId, academicPeriodId, page, limit: 10 },
+      query: { classId, academicPeriodId, page, limit: 10, subPeriodId: subPeriodId || undefined },
     })
   )
-
   const queryClient = useQueryClient()
   const deleteMutation = useMutation(
     api.api.v1.assignments.destroy.mutationOptions({

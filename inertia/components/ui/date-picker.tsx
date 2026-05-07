@@ -1,10 +1,14 @@
-import { format } from 'date-fns'
+import * as React from 'react'
+import { useState, useEffect } from 'react'
+import { format, parse, isValid } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { DayPicker, type Matcher } from 'react-day-picker'
+import { useIMask } from 'react-imask'
+import IMask from 'imask'
 
 import { cn } from '~/lib/utils'
-import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
 
 export interface DatePickerProps {
@@ -17,17 +21,62 @@ export interface DatePickerProps {
   className?: string
 }
 
+const DATE_FORMAT = 'dd/MM/yyyy'
+
+function formatDate(date: Date | undefined): string {
+  if (!date) return ''
+  return format(date, DATE_FORMAT)
+}
+
+function parseDate(value: string): Date | undefined {
+  if (!value) return undefined
+  if (value.includes('_')) return undefined
+  const parsed = parse(value, DATE_FORMAT, new Date())
+  if (isValid(parsed)) return parsed
+  return undefined
+}
+
 export function DatePicker({
   date,
   onChange,
-  placeholder = 'Selecione uma data',
+  placeholder = 'dd/mm/aaaa',
   disabled = false,
   fromDate,
   toDate,
   className,
 }: DatePickerProps) {
-  let disabledMatcher: Matcher | Matcher[] | undefined
+  const [open, setOpen] = useState(false)
 
+  const { ref, value, setValue } = useIMask(
+    {
+      mask: 'd/m/Y',
+      blocks: {
+        d: { mask: IMask.MaskedRange, from: 1, to: 31, maxLength: 2, autofix: 'pad' },
+        m: { mask: IMask.MaskedRange, from: 1, to: 12, maxLength: 2, autofix: 'pad' },
+        Y: { mask: IMask.MaskedRange, from: 1900, to: 2100 },
+      },
+      overwrite: true,
+      lazy: false,
+      placeholderChar: '_',
+    },
+    {
+      onComplete: (v) => {
+        const parsed = parseDate(v)
+        if (parsed) {
+          if (fromDate && parsed < fromDate) return
+          if (toDate && parsed > toDate) return
+          onChange?.(parsed)
+        }
+      },
+    }
+  )
+
+  useEffect(() => {
+    // If date changes from outside (e.g. initial load), update the mask value
+    setValue(formatDate(date))
+  }, [date, setValue])
+
+  let disabledMatcher: Matcher | Matcher[] | undefined
   if (fromDate && toDate) {
     disabledMatcher = { before: fromDate, after: toDate }
   } else if (fromDate) {
@@ -36,28 +85,45 @@ export function DatePicker({
     disabledMatcher = { after: toDate }
   }
 
+  function handleInputBlur() {
+    const parsed = parseDate(value)
+    if (!parsed) {
+      // Revert to original date if left incomplete
+      setValue(formatDate(date))
+    } else if (fromDate && parsed < fromDate) {
+      setValue(formatDate(date))
+    } else if (toDate && parsed > toDate) {
+      setValue(formatDate(date))
+    }
+  }
+
+  function handleCalendarSelect(selected: Date | undefined) {
+    onChange?.(selected)
+    setValue(formatDate(selected))
+    setOpen(false)
+  }
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          className={cn(
-            'w-full justify-start text-left font-normal',
-            !date && 'text-muted-foreground',
-            className
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, 'PPP', { locale: ptBR }) : <span>{placeholder}</span>}
-        </Button>
+        <div className="relative">
+          <Input
+            ref={ref as any}
+            type="text"
+            onBlur={handleInputBlur}
+            onFocus={() => setOpen(true)}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={cn('pr-10', className)}
+          />
+          <CalendarIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        </div>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="start" side="top">
         <DayPicker
           mode="single"
           selected={date}
-          onSelect={onChange}
+          onSelect={handleCalendarSelect}
           locale={ptBR}
           disabled={disabledMatcher}
           components={{

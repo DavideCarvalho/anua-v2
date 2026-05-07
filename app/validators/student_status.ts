@@ -5,5 +5,6 @@ export const getStudentStatusValidator = vine.compile(
     subjectId: vine.string().trim(),
     courseId: vine.string().trim(),
     academicPeriodId: vine.string().trim(),
+    subPeriodId: vine.string().trim().optional(),
   })
 )

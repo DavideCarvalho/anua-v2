@@ -27,6 +27,7 @@ interface StudentStatusTableProps {
   courseId: string
   academicPeriodId: string
   subjectId: string | null
+  subPeriodId?: string
 }
 
 const STATUS_CONFIG: Record<
@@ -222,6 +223,7 @@ export function StudentStatusTable({
   courseId,
   academicPeriodId,
   subjectId,
+  subPeriodId,
 }: StudentStatusTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [showOnlyAtRisk, setShowOnlyAtRisk] = useState(false)
@@ -237,6 +239,7 @@ export function StudentStatusTable({
         subjectId: subjectId!,
         courseId,
         academicPeriodId,
+        subPeriodId: subPeriodId || undefined,
       },
     }),
     enabled: !!subjectId && !!classId && !!courseId && !!academicPeriodId,

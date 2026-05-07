@@ -4,7 +4,7 @@ import ExamTransformer from '#transformers/exam_transformer'
 
 export default class ListExamsController {
   async handle({ request, serialize }: HttpContext) {
-    const { classId, subjectId, teacherId, status, page = 1, limit = 20, courseId } = request.qs()
+    const { classId, subjectId, teacherId, status, page = 1, limit = 20, courseId, subPeriodId } = request.qs()
 
     const query = Exam.query()
       .preload('class', (classQuery) => {
@@ -29,6 +29,10 @@ export default class ListExamsController {
 
     if (status) {
       query.where('status', status)
+    }
+
+    if (subPeriodId) {
+      query.where('subPeriodId', subPeriodId)
     }
 
     const exams = await query.paginate(page, limit)

@@ -119,6 +119,53 @@ export function CalendarForm() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Férias de Meio de Ano</CardTitle>
+          <CardDescription>
+            Período de recesso no meio do ano letivo (opcional)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="calendar.breakStartDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Início das Férias</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="calendar.breakEndDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Término das Férias</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    date={field.value ?? undefined}
+                    onChange={field.onChange}
+                    placeholder="Selecione a data"
+                    fromDate={form.watch('calendar.breakStartDate') ?? undefined}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Período de Matrículas</CardTitle>
           <CardDescription>
             Defina as datas de abertura e encerramento das matrículas (opcional)

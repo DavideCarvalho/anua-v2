@@ -6,6 +6,7 @@ import { TurmaLayout } from '../../../../../../../../components/layouts/turma-la
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { AssignmentsTable, NewAssignmentModal } from '../../../../../../../../containers/turma'
+import { SubPeriodFilter } from '../../../../../../../../containers/academic-periods/components/sub-period-filter'
 import { useAuthUser } from '~/stores/auth_store'
 
 interface Props {
@@ -32,6 +33,7 @@ export default function TurmaAtividadesPage({
 }: Props) {
   const user = useAuthUser()
   const [modalOpen, setModalOpen] = useState(false)
+  const [subPeriodId, setSubPeriodId] = useState('')
 
   return (
     <EscolaLayout>
@@ -55,11 +57,17 @@ export default function TurmaAtividadesPage({
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <SubPeriodFilter
+              academicPeriodId={academicPeriodId}
+              value={subPeriodId}
+              onChange={setSubPeriodId}
+            />
             <AssignmentsTable
               classId={classId}
               courseId={courseId}
               academicPeriodId={academicPeriodId}
+              subPeriodId={subPeriodId}
             />
           </CardContent>
         </Card>

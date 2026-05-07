@@ -45,6 +45,7 @@ interface ExamsListProps {
   subjectId?: string
   courseId?: string
   academicPeriodId?: string
+  subPeriodId?: string
 }
 
 function ExamsListSkeleton() {
@@ -65,7 +66,7 @@ function ExamsListEmpty() {
   )
 }
 
-export function ExamsList({ classId, subjectId, courseId, academicPeriodId }: ExamsListProps) {
+export function ExamsList({ classId, subjectId, courseId, academicPeriodId, subPeriodId }: ExamsListProps) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
@@ -74,7 +75,7 @@ export function ExamsList({ classId, subjectId, courseId, academicPeriodId }: Ex
   const queryClient = useQueryClient()
   const { data, isLoading, isError } = useQuery(
     api.api.v1.exams.index.queryOptions({
-      query: { classId, subjectId, courseId },
+      query: { classId, subjectId, courseId, subPeriodId: subPeriodId || undefined },
     })
   )
 

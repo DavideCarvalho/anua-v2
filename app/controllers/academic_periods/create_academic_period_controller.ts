@@ -43,6 +43,14 @@ export default class CreateAcademicPeriodController {
       academicPeriod.previousAcademicPeriodId = payload.previousAcademicPeriodId ?? null
       academicPeriod.minimumGradeOverride = payload.minimumGradeOverride ?? null
       academicPeriod.minimumAttendanceOverride = payload.minimumAttendanceOverride ?? null
+      academicPeriod.periodStructure = payload.periodStructure ?? null
+      academicPeriod.recoveryGradeMethod = payload.recoveryGradeMethod ?? null
+      academicPeriod.breakStartDate = payload.breakStartDate
+        ? DateTime.fromJSDate(payload.breakStartDate)
+        : null
+      academicPeriod.breakEndDate = payload.breakEndDate
+        ? DateTime.fromJSDate(payload.breakEndDate)
+        : null
       academicPeriod.isActive = true
       academicPeriod.isClosed = false
       await academicPeriod.save()

@@ -23,15 +23,15 @@ function getSteps(segment: string) {
   const isCourseBased = segment === 'TECHNICAL' || segment === 'UNIVERSITY'
   return [
     { title: 'Calendário', description: 'Datas e informações' },
+    { title: 'Sub-Períodos', description: 'Bimestres, trimestres ou semestres' },
     {
       title: isCourseBased ? 'Cursos' : 'Séries',
       description: isCourseBased ? 'Cursos e semestres' : 'Séries e turmas',
     },
-    { title: 'Sub-Periodos', description: 'Bimestres, trimestres ou semestres' },
   ]
 }
 
-interface AcademicPeriodData {
+export interface AcademicPeriodData {
   id: string
   name: string
   slug: string
@@ -42,6 +42,10 @@ interface AcademicPeriodData {
   isActive: boolean
   isClosed: boolean
   segment: string
+  periodStructure?: string | null
+  recoveryGradeMethod?: string | null
+  breakStartDate?: string | null
+  breakEndDate?: string | null
   courses?: Array<{
     id: string
     courseId: string
@@ -96,6 +100,14 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
         enrollmentEndDate: academicPeriod.enrollmentEndDate
           ? new Date(academicPeriod.enrollmentEndDate)
           : null,
+        periodStructure: academicPeriod.periodStructure ?? '',
+        recoveryGradeMethod: academicPeriod.recoveryGradeMethod ?? '',
+        breakStartDate: academicPeriod.breakStartDate
+          ? new Date(academicPeriod.breakStartDate)
+          : null,
+        breakEndDate: academicPeriod.breakEndDate
+          ? new Date(academicPeriod.breakEndDate)
+          : null,
       },
       courses: academicPeriod.courses ?? [],
     },
@@ -115,6 +127,10 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
           endDate: data.calendar.endDate.toISOString(),
           enrollmentStartDate: data.calendar.enrollmentStartDate?.toISOString(),
           enrollmentEndDate: data.calendar.enrollmentEndDate?.toISOString(),
+          periodStructure: data.calendar.periodStructure || null,
+          recoveryGradeMethod: data.calendar.recoveryGradeMethod || null,
+          breakStartDate: data.calendar.breakStartDate?.toISOString() ?? null,
+          breakEndDate: data.calendar.breakEndDate?.toISOString() ?? null,
           courses: data.courses.map((course) => ({
             id: course.id,
             courseId: course.courseId,
@@ -194,6 +210,11 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
   }
 
   const handleSubmit = form.handleSubmit((data) => {
+    const mismatch = form.formState.errors.root?.subPeriodMismatch
+    if (mismatch) {
+      toast.error(mismatch.message as string)
+      return
+    }
     updatePeriodMutation.mutate(data)
   })
 
@@ -204,8 +225,14 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
 
         <div className="min-h-[400px] overflow-x-hidden">
           {currentStep === 0 && <CalendarForm />}
-          {currentStep === 1 && <CoursesForm />}
-          {currentStep === 2 && <SubPeriodsForm academicPeriodId={academicPeriod.id} />}
+          {currentStep === 1 && (
+            <SubPeriodsForm
+              academicPeriodId={academicPeriod.id}
+              periodStructure={form.watch('calendar.periodStructure')}
+              recoveryGradeMethod={form.watch('calendar.recoveryGradeMethod')}
+            />
+          )}
+          {currentStep === 2 && <CoursesForm />}
         </div>
 
         <div className="flex items-center justify-between border-t pt-6">
@@ -226,7 +253,12 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             )}
-            {currentStep === steps.length - 1 && (
+            <div className="flex flex-col items-end gap-1">
+              {form.formState.errors.root?.subPeriodMismatch && (
+                <p className="text-xs text-amber-600 max-w-[250px] text-right leading-tight">
+                  {form.formState.errors.root.subPeriodMismatch.message}
+                </p>
+              )}
               <Button type="submit" disabled={updatePeriodMutation.isPending}>
                 {updatePeriodMutation.isPending ? (
                   <>
@@ -236,11 +268,11 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Salvar Alterações
+                    Salvar
                   </>
                 )}
               </Button>
-            )}
+            </div>
           </div>
         </div>
       </form>
