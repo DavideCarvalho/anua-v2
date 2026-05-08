@@ -68,7 +68,7 @@ RUN npm i -g pnpm
 COPY --from=builder /app/build ./
 
 # Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Expose the port
 EXPOSE 3333
