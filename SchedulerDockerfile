@@ -37,7 +37,7 @@ RUN npm i -g pnpm
 COPY package.json pnpm-lock.yaml* ./
 
 # Install ALL dependencies (including devDependencies for build)
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy source code
 COPY . .
