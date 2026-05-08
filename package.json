@@ -194,7 +194,12 @@
     "onlyBuiltDependencies": [
       "@swc/core",
       "better-sqlite3",
+      "core-js-pure",
+      "core-js",
       "esbuild",
+      "exifreader",
+      "msw",
+      "protobufjs",
       "sharp"
     ]
   }
