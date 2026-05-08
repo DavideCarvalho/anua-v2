@@ -568,6 +568,7 @@ export const controllers = {
     CreateInquiryMessage: () => import('#controllers/responsavel/create_inquiry_message_controller'),
     CreateStudentInquiry: () => import('#controllers/responsavel/create_student_inquiry_controller'),
     GetNotifications: () => import('#controllers/responsavel/get_notifications_controller'),
+    GetStudentAcademicPeriods: () => import('#controllers/responsavel/get_student_academic_periods_controller'),
     GetStudentAssignments: () => import('#controllers/responsavel/get_student_assignments_controller'),
     GetStudentAttendance: () => import('#controllers/responsavel/get_student_attendance_controller'),
     GetStudentBalance: () => import('#controllers/responsavel/get_student_balance_controller'),
@@ -591,7 +592,6 @@ export const controllers = {
     ShowInquiry: () => import('#controllers/responsavel/show_inquiry_controller'),
     UpdateProfile: () => import('#controllers/responsavel/update_profile_controller'),
     UpdateStudentMealRecurrence: () => import('#controllers/responsavel/update_student_meal_recurrence_controller'),
-    GetStudentAcademicPeriods: () => import('#controllers/responsavel/get_student_academic_periods_controller'),
   },
   responsibleAddresses: {
     CreateResponsibleAddress: () => import('#controllers/responsible-addresses/create_responsible_address_controller'),

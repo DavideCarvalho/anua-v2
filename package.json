@@ -192,7 +192,10 @@
   "prettier": "@adonisjs/prettier-config",
   "pnpm": {
     "onlyBuiltDependencies": [
-      "better-sqlite3"
+      "@swc/core",
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
     ]
   }
 }
