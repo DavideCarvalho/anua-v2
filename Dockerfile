@@ -51,6 +51,9 @@ COPY . .
 # Build the application
 RUN node ace build
 
+# Prune dev dependencies from node_modules after build
+RUN pnpm prune --prod
+
 # Production stage
 FROM node:22-alpine AS production
 
@@ -61,16 +64,10 @@ ENV TZ=UTC
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm i -g pnpm
-
-# Copy built application
+# Copy built application and production node_modules from builder
 COPY --from=builder /app/build ./
+COPY --from=builder /app/node_modules ./node_modules
 
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
-
-# Expose the port
 EXPOSE 3333
 
 CMD ["node", "bin/server.js"]
