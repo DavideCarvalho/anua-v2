@@ -339,7 +339,6 @@ export function SubPeriodsForm({
       const data = (result as any)?.data ?? result ?? []
       const items = Array.isArray(data) ? data : []
       setLocalSubPeriods(items)
-      toast.success('Sub-períodos gerados! Clique em "Salvar alterações" para confirmar.')
       setShowDiffDialog(false)
     } catch (error: any) {
       toast.error(error?.message || 'Erro ao gerar sub-períodos')
@@ -676,34 +675,56 @@ export function SubPeriodsForm({
       />
 
       <Dialog open={showDiffDialog} onOpenChange={setShowDiffDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Atenção! Substituição de Sub-períodos</DialogTitle>
+            <DialogTitle>Alterar estrutura de períodos</DialogTitle>
             <DialogDescription>
-              Você está alterando a estrutura deste período letivo. Os sub-períodos atuais serão
-              substituídos.
+              A estrutura será alterada de{' '}
+              <span className="font-medium text-foreground">
+                {subPeriods.length}{' '}
+                {subPeriods.length === 4
+                  ? 'Bimestres'
+                  : subPeriods.length === 3
+                    ? 'Trimestres'
+                    : subPeriods.length === 2
+                      ? 'Semestres'
+                      : 'período'}
+              </span>{' '}
+              para{' '}
+              <span className="font-medium text-foreground">
+                {expectedCount}{' '}
+                {resolvedPeriodStructure === 'BIMESTRAL'
+                  ? 'Bimestres'
+                  : resolvedPeriodStructure === 'TRIMESTRAL'
+                    ? 'Trimestres'
+                    : resolvedPeriodStructure === 'SEMESTRAL'
+                      ? 'Semestres'
+                      : 'período'}
+              </span>
+              . As datas serão redistribuídas proporcionalmente dentro do período letivo.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="rounded-md border p-3 bg-red-50/50">
-              <p className="font-semibold mb-2 text-sm text-red-600">
-                Serão Excluídos ({subPeriods.length}):
+          <div className="space-y-3 py-2">
+            <div className="rounded-md border p-3 bg-destructive/5 dark:bg-destructive/10">
+              <p className="font-medium mb-1 text-sm">
+                Atual ({subPeriods.length})
               </p>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                {subPeriods.map((sp) => (
-                  <li key={sp.id}>- {sp.name}</li>
-                ))}
-              </ul>
+              <p className="text-xs text-muted-foreground">
+                {subPeriods.map((sp) => sp.name).join(', ')}
+              </p>
             </div>
-            <div className="rounded-md border p-3 bg-green-50/50">
-              <p className="font-semibold mb-2 text-sm text-green-600">
-                Serão Criados ({expectedCount}):
+            <div className="flex justify-center text-muted-foreground">
+              <span className="text-lg">↓</span>
+            </div>
+            <div className="rounded-md border p-3 bg-primary/5 dark:bg-primary/10">
+              <p className="font-medium mb-1 text-sm">
+                Novo ({expectedCount})
               </p>
-              <ul className="text-sm space-y-1 text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {Array.from({ length: expectedCount }).map((_, i) => (
-                  <li key={i}>
-                    - {i + 1}º{' '}
+                  <span key={i}>
+                    {i + 1}º{' '}
                     {resolvedPeriodStructure === 'BIMESTRAL'
                       ? 'Bimestre'
                       : resolvedPeriodStructure === 'TRIMESTRAL'
@@ -711,15 +732,15 @@ export function SubPeriodsForm({
                         : resolvedPeriodStructure === 'SEMESTRAL'
                           ? 'Semestre'
                           : 'Período'}
-                  </li>
+                    {i < expectedCount - 1 ? ', ' : ''}
+                  </span>
                 ))}
-              </ul>
+              </p>
             </div>
           </div>
 
           <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-            As notas e avaliações vinculadas aos sub-períodos antigos serão mantidas e
-            redistribuídas automaticamente de acordo com as novas datas.
+            As atividades e provas já vinculadas manterão seus vínculos após a migração.
           </div>
 
           <DialogFooter>
@@ -728,7 +749,6 @@ export function SubPeriodsForm({
             </Button>
             <Button
               type="button"
-              variant="destructive"
               disabled={generateMutation.isPending}
               onClick={() => handleGenerate(true)}
             >

@@ -141,7 +141,7 @@ export function NewAssignmentModal({
   const usesSubPeriods =
     schoolData && (schoolData as any).periodStructure && (schoolData as any).periodStructure !== ''
 
-  const effectiveAcademicPeriodId = _academicPeriodId || resolvedContext?.academicPeriodId || ''
+  const effectiveAcademicPeriodId = _academicPeriodId || resolvedContext?.academicPeriodId || assignmentData?.academicPeriodId || ''
 
   const { data: subPeriodsData } = useQuery({
     ...api.api.v1.academicSubPeriods.index.queryOptions({
