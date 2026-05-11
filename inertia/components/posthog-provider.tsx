@@ -3,10 +3,13 @@ import { useEffect, useRef } from 'react'
 import { router } from '@inertiajs/react'
 import { posthog, initPostHog } from '~/lib/posthog'
 import { useAuthUser } from '~/stores/auth_store'
+import { readEscolaDashboardViewMode } from '~/lib/escola-dashboard-view-mode'
 
 export function PostHogProvider({ children }: PropsWithChildren) {
   const user = useAuthUser()
   const initialized = useRef(false)
+  const userRef = useRef(user)
+  userRef.current = user
 
   // Initialize PostHog once
   useEffect(() => {
@@ -42,11 +45,21 @@ export function PostHogProvider({ children }: PropsWithChildren) {
 
   // Track pageviews on Inertia navigation
   useEffect(() => {
+    const capturePageview = () => {
+      const currentUser = userRef.current
+      const isEscolaPage = window.location.pathname.startsWith('/escola')
+      const properties = isEscolaPage
+        ? { simplifiedView: readEscolaDashboardViewMode(currentUser?.id) === 'simple' }
+        : {}
+
+      posthog.capture('$pageview', properties)
+    }
+
     // Capture initial pageview
-    posthog.capture('$pageview')
+    capturePageview()
 
     const removeListener = router.on('navigate', () => {
-      posthog.capture('$pageview')
+      capturePageview()
     })
 
     return () => {
