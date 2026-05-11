@@ -221,7 +221,7 @@ export function NewAssignmentModal({
       subjectId:
         assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
       description: assignmentData?.description ?? '',
-      subPeriodId: assignmentData?.subPeriodId ?? getCurrentSubPeriodId(),
+      subPeriodId: assignmentData && 'subPeriodId' in assignmentData ? assignmentData.subPeriodId : getCurrentSubPeriodId(),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, assignmentData])
@@ -283,6 +283,7 @@ export function NewAssignmentModal({
         })
       }
       queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.show.pathKey() })
       queryClient.invalidateQueries({ queryKey: api.api.v1.pedagogicalCalendar.index.pathKey() })
       toast.success(
         isEditMode ? 'Atividade atualizada com sucesso!' : 'Atividade criada com sucesso!'

@@ -221,7 +221,7 @@ export function NewExamModal({
       type: examData?.type ?? 'WRITTEN',
       description: examData?.description ?? '',
       subjectId: examData?.subject?.id ?? '',
-      subPeriodId: examData?.subPeriodId ?? getCurrentSubPeriodId(),
+      subPeriodId: examData && 'subPeriodId' in examData ? examData.subPeriodId : getCurrentSubPeriodId(),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, examData])
@@ -283,6 +283,7 @@ export function NewExamModal({
         })
       }
       queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.exams.show.pathKey() })
       queryClient.invalidateQueries({ queryKey: api.api.v1.pedagogicalCalendar.index.pathKey() })
       toast.success(isEditMode ? 'Prova atualizada com sucesso!' : 'Prova criada com sucesso!')
       onOpenChange(false)
