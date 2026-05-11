@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -127,21 +127,22 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     api.api.v1.academicPeriods.updateAcademicPeriod.mutationOptions()
   )
   const updatePeriodMutation = useMutation({
-    mutationFn: async (data: EditAcademicPeriodFormValues) => {
+    mutationFn: async (payload: { data: EditAcademicPeriodFormValues; subPeriods?: Record<string, unknown>[] }) => {
       await updateAcademicPeriodMutation.mutateAsync({
         params: { id: academicPeriod.id },
         body: {
-          name: data.calendar.name,
-          segment: data.calendar.segment,
-          startDate: data.calendar.startDate.toISOString(),
-          endDate: data.calendar.endDate.toISOString(),
-          enrollmentStartDate: data.calendar.enrollmentStartDate?.toISOString(),
-          enrollmentEndDate: data.calendar.enrollmentEndDate?.toISOString(),
-          periodStructure: data.calendar.periodStructure || null,
-          recoveryGradeMethod: data.calendar.recoveryGradeMethod || null,
-          breakStartDate: data.calendar.breakStartDate?.toISOString() ?? null,
-          breakEndDate: data.calendar.breakEndDate?.toISOString() ?? null,
-          courses: data.courses.map((course) => ({
+          name: payload.data.calendar.name,
+          segment: payload.data.calendar.segment,
+          startDate: payload.data.calendar.startDate.toISOString(),
+          endDate: payload.data.calendar.endDate.toISOString(),
+          enrollmentStartDate: payload.data.calendar.enrollmentStartDate?.toISOString(),
+          enrollmentEndDate: payload.data.calendar.enrollmentEndDate?.toISOString(),
+          periodStructure: payload.data.calendar.periodStructure || null,
+          recoveryGradeMethod: payload.data.calendar.recoveryGradeMethod || null,
+          breakStartDate: payload.data.calendar.breakStartDate?.toISOString() ?? null,
+          breakEndDate: payload.data.calendar.breakEndDate?.toISOString() ?? null,
+          subPeriods: payload.subPeriods,
+          courses: payload.data.courses.map((course) => ({
             id: course.id,
             courseId: course.courseId,
             levels: course.levels.map((level) => ({
@@ -219,13 +220,16 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     setCurrentStep(stepIndex)
   }
 
-  const handleSubmit = form.handleSubmit((data) => {
+  const saveSubPeriodsRef = useRef<(() => Record<string, unknown>[] | null) | null>(null)
+
+  const handleSubmit = form.handleSubmit(async (data) => {
     const mismatch = form.formState.errors.root?.subPeriodMismatch
     if (mismatch) {
       toast.error(mismatch.message as string)
       return
     }
-    updatePeriodMutation.mutate(data)
+    const subPeriods = saveSubPeriodsRef.current?.()
+    updatePeriodMutation.mutate({ data, subPeriods: subPeriods ?? undefined })
   })
 
   return (
@@ -240,6 +244,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
               academicPeriodId={academicPeriod.id}
               periodStructure={form.watch('calendar.periodStructure')}
               recoveryGradeMethod={form.watch('calendar.recoveryGradeMethod')}
+              saveRef={saveSubPeriodsRef}
             />
           )}
           {currentStep === 2 && <CoursesForm />}

@@ -62,6 +62,7 @@ interface SubPeriodsFormProps {
   academicPeriodId: string
   periodStructure?: string | null
   recoveryGradeMethod?: string | null
+  saveRef?: React.MutableRefObject<(() => Record<string, unknown>[] | null) | null>
 }
 
 function formatDate(dateStr: string | null): string {
@@ -275,6 +276,7 @@ export function SubPeriodsForm({
   academicPeriodId,
   periodStructure: propPeriodStructure,
   recoveryGradeMethod: _propRecoveryGradeMethod,
+  saveRef,
 }: SubPeriodsFormProps) {
   const form = useFormContext()
   const user = useAuthUser()
@@ -301,6 +303,17 @@ export function SubPeriodsForm({
 
   const [editingSubPeriod, setEditingSubPeriod] = useState<SubPeriod | null>(null)
   const [showDiffDialog, setShowDiffDialog] = useState(false)
+  const [localSubPeriods, setLocalSubPeriods] = useState<Record<string, unknown>[] | null>(null)
+
+  // Register save callback: returns generated sub-periods if user generated them
+  useEffect(() => {
+    if (saveRef) {
+      saveRef.current = () => localSubPeriods
+    }
+    return () => {
+      if (saveRef) saveRef.current = null
+    }
+  }, [saveRef, localSubPeriods])
 
   const handleGenerate = async (overwrite: boolean = false) => {
     if (!schoolId) {
@@ -309,7 +322,7 @@ export function SubPeriodsForm({
     }
 
     try {
-      await generateMutation.mutateAsync({
+      const result = await generateMutation.mutateAsync({
         body: {
           academicPeriodId,
           schoolId,
@@ -323,13 +336,10 @@ export function SubPeriodsForm({
             | null) || undefined,
         },
       })
-      toast.success(
-        overwrite ? 'Sub-períodos regenerados com sucesso' : 'Sub-períodos gerados com sucesso'
-      )
-      queryClient.invalidateQueries({
-        queryKey: api.api.v1.academicSubPeriods.index.pathKey(),
-      })
-      refetchSubPeriods()
+      const data = (result as any)?.data ?? result ?? []
+      const items = Array.isArray(data) ? data : []
+      setLocalSubPeriods(items)
+      toast.success('Sub-períodos gerados! Clique em "Salvar alterações" para confirmar.')
       setShowDiffDialog(false)
     } catch (error: any) {
       toast.error(error?.message || 'Erro ao gerar sub-períodos')
@@ -374,7 +384,7 @@ export function SubPeriodsForm({
   const usesSubPeriods = resolvedPeriodStructure && resolvedPeriodStructure !== ''
   const isFromPeriod = propPeriodStructure && propPeriodStructure !== ''
 
-  const subPeriods = (subPeriodsData?.data ?? []) as SubPeriod[]
+  const subPeriods = (localSubPeriods ?? (subPeriodsData?.data ?? [])) as SubPeriod[]
 
   const expectedCount = resolvedPeriodStructure
     ? (STRUCTURE_COUNT[resolvedPeriodStructure] ?? 0)

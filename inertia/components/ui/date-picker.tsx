@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover
 export interface DatePickerProps {
   date?: Date
   onChange?: (date: Date | undefined) => void
+  onBlur?: () => void
   placeholder?: string
   disabled?: boolean
   fromDate?: Date
@@ -38,6 +39,7 @@ function parseDate(value: string): Date | undefined {
 export function DatePicker({
   date,
   onChange,
+  onBlur,
   placeholder = 'dd/mm/aaaa',
   disabled = false,
   fromDate,
@@ -87,13 +89,13 @@ export function DatePicker({
   function handleInputBlur() {
     const parsed = parseDate(value)
     if (!parsed) {
-      // Revert to original date if left incomplete
       setValue(formatDate(date))
     } else if (fromDate && parsed < fromDate) {
       setValue(formatDate(date))
     } else if (toDate && parsed > toDate) {
       setValue(formatDate(date))
     }
+    onBlur?.()
   }
 
   function handleCalendarSelect(selected: Date | undefined) {

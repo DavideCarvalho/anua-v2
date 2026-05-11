@@ -147,6 +147,19 @@ export const updateAcademicPeriodValidator = vine.compile(
         })
       )
       .optional(),
+    subPeriods: vine
+      .array(
+        vine.object({
+          name: vine.string(),
+          order: vine.number(),
+          startDate: vine.date({ formats: ['iso8601'] }),
+          endDate: vine.date({ formats: ['iso8601'] }),
+          weight: vine.number().optional(),
+          minimumGrade: vine.number().optional().nullable(),
+          hasRecovery: vine.boolean().optional(),
+        })
+      )
+      .optional(),
   })
 )
 

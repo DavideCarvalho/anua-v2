@@ -88,6 +88,7 @@ export function CalendarForm() {
                   <DatePicker
                     date={field.value}
                     onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="Selecione a data de início"
                   />
                 </FormControl>
@@ -106,6 +107,7 @@ export function CalendarForm() {
                   <DatePicker
                     date={field.value}
                     onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="Selecione a data de término"
                     fromDate={form.watch('calendar.startDate')}
                   />
@@ -133,6 +135,7 @@ export function CalendarForm() {
                   <DatePicker
                     date={field.value ?? undefined}
                     onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="Selecione a data"
                   />
                 </FormControl>
@@ -151,6 +154,7 @@ export function CalendarForm() {
                   <DatePicker
                     date={field.value ?? undefined}
                     onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="Selecione a data"
                     fromDate={form.watch('calendar.breakStartDate') ?? undefined}
                   />
@@ -180,6 +184,7 @@ export function CalendarForm() {
                   <DatePicker
                     date={field.value ?? undefined}
                     onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="Selecione a data"
                   />
                 </FormControl>
@@ -198,6 +203,7 @@ export function CalendarForm() {
                   <DatePicker
                     date={field.value ?? undefined}
                     onChange={field.onChange}
+                    onBlur={field.onBlur}
                     placeholder="Selecione a data"
                     fromDate={form.watch('calendar.enrollmentStartDate') ?? undefined}
                   />
