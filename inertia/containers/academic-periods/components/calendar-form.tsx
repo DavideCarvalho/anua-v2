@@ -19,6 +19,7 @@ import {
 } from '~/components/ui/select'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 
+import { SEGMENT_LABELS, type Segment } from '../schemas/edit_academic_period.schema'
 import type { AcademicPeriodFormValues } from '../new-academic-period-form'
 
 export function CalendarForm() {
@@ -52,7 +53,11 @@ export function CalendarForm() {
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um segmento" />
+                  <SelectValue placeholder="Selecione um segmento">
+                    {field.value
+                      ? SEGMENT_LABELS[field.value as Segment] ?? field.value
+                      : undefined}
+                  </SelectValue>
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

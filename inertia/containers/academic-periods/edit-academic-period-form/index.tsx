@@ -88,6 +88,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     EditAcademicPeriodFormValues
   >({
     resolver: zodResolver(editAcademicPeriodSchema),
+    mode: 'onBlur',
     defaultValues: {
       calendar: {
         name: academicPeriod.name,

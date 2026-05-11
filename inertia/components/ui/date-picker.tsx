@@ -102,22 +102,26 @@ export function DatePicker({
     setOpen(false)
   }
 
-  return (
+      return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div className="relative">
-          <Input
-            ref={ref as any}
-            type="text"
-            onBlur={handleInputBlur}
-            onFocus={() => setOpen(true)}
-            placeholder={placeholder}
-            disabled={disabled}
-            className={cn('pr-10', className)}
-          />
-          <CalendarIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        </div>
-      </PopoverTrigger>
+      <div className="relative">
+        <Input
+          ref={ref as any}
+          type="text"
+          onBlur={handleInputBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn('pr-10', className)}
+        />
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 hover:bg-accent rounded-md"
+          >
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </PopoverTrigger>
+      </div>
       <PopoverContent className="w-auto p-0" align="start" side="top">
         <DayPicker
           mode="single"

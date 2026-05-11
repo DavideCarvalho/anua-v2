@@ -67,18 +67,50 @@ export const RECOVERY_METHOD_OPTIONS = [
   },
 ] as const
 
-export const calendarFormSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  segment: z.enum(SEGMENTS, { error: 'Segmento é obrigatório' }),
-  startDate: z.date({ error: 'Data de início é obrigatória' }),
-  endDate: z.date({ error: 'Data de término é obrigatória' }),
-  enrollmentStartDate: z.date().nullable().optional(),
-  enrollmentEndDate: z.date().nullable().optional(),
-  periodStructure: z.enum(['', 'BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
-  recoveryGradeMethod: z.enum(['', 'AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE']).optional(),
-  breakStartDate: z.date().nullable().optional(),
-  breakEndDate: z.date().nullable().optional(),
-})
+export const calendarFormSchema = z
+  .object({
+    name: z.string().min(1, 'Nome é obrigatório'),
+    segment: z.enum(SEGMENTS, { error: 'Segmento é obrigatório' }),
+    startDate: z.date({ error: 'Data de início é obrigatória' }),
+    endDate: z.date({ error: 'Data de término é obrigatória' }),
+    enrollmentStartDate: z.date().nullable().optional(),
+    enrollmentEndDate: z.date().nullable().optional(),
+    periodStructure: z.enum(['', 'BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
+    recoveryGradeMethod: z.enum(['', 'AVERAGE', 'REPLACE_IF_HIGHER', 'REPLACE']).optional(),
+    breakStartDate: z.date().nullable().optional(),
+    breakEndDate: z.date().nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const { startDate, endDate, breakStartDate, breakEndDate } = data
+
+    if (breakStartDate) {
+      if (breakStartDate < startDate || breakStartDate > endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Deve estar entre o início e o término do período letivo',
+          path: ['breakStartDate'],
+        })
+      }
+    }
+
+    if (breakEndDate) {
+      if (breakEndDate < startDate || breakEndDate > endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Deve estar entre o início e o término do período letivo',
+          path: ['breakEndDate'],
+        })
+      }
+
+      if (breakStartDate && breakEndDate <= breakStartDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'O término das férias deve ser após o início',
+          path: ['breakEndDate'],
+        })
+      }
+    }
+  })
 
 export const teacherSchema = z.object({
   id: z.string().optional(),
