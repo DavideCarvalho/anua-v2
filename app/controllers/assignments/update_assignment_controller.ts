@@ -37,12 +37,16 @@ export default class UpdateAssignmentController {
       if (payload.dueDate !== undefined) {
         updateData.dueDate = DateTime.fromJSDate(payload.dueDate)
       }
+      if (payload.subPeriodId !== undefined) {
+        updateData.subPeriodId = payload.subPeriodId ?? null
+      }
 
       const beforeSnapshot = {
         title: assignment.name,
         description: assignment.description,
         maxScore: assignment.grade,
         dueDate: assignment.dueDate?.toISO() ?? null,
+        subPeriodId: assignment.subPeriodId ?? null,
       }
 
       assignment.useTransaction(trx)
@@ -54,6 +58,7 @@ export default class UpdateAssignmentController {
         description: assignment.description,
         maxScore: assignment.grade,
         dueDate: assignment.dueDate?.toISO() ?? null,
+        subPeriodId: assignment.subPeriodId ?? null,
       }
 
       const changes = buildFieldDiff(beforeSnapshot, afterSnapshot, Object.keys(afterSnapshot))
