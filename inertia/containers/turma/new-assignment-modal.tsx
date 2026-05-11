@@ -191,30 +191,33 @@ export function NewAssignmentModal({
 
   // Reset form when modal opens (only on initial open, not on data refetch)
   useEffect(() => {
-    if (open) {
-      if (requiresContextStep) {
-        setWizardStep('context')
-        setResolvedContext(null)
-        setContextValue({ academicPeriodId: '', levelId: '', classId: '', subjectId: '' })
-      } else {
-        setWizardStep('form')
-      }
+    if (!open) return
 
-      form.reset({
-        name: assignmentData?.name ?? '',
-        dueDate: assignmentData?.dueDate
-          ? new Date(assignmentData.dueDate)
-          : (defaultDate ?? new Date()),
-        noGrade: false,
-        grade: assignmentData?.grade ?? undefined,
-        subjectId:
-          assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
-        description: assignmentData?.description ?? '',
-        subPeriodId: assignmentData?.subPeriod?.id ?? getCurrentSubPeriodId(),
-      })
+    // In edit mode, wait for assignment data to be available
+    if (isEditMode && !assignmentData) return
+
+    if (requiresContextStep) {
+      setWizardStep('context')
+      setResolvedContext(null)
+      setContextValue({ academicPeriodId: '', levelId: '', classId: '', subjectId: '' })
+    } else {
+      setWizardStep('form')
     }
+
+    form.reset({
+      name: assignmentData?.name ?? '',
+      dueDate: assignmentData?.dueDate
+        ? new Date(assignmentData.dueDate)
+        : (defaultDate ?? new Date()),
+      noGrade: false,
+      grade: assignmentData?.grade ?? undefined,
+      subjectId:
+        assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
+      description: assignmentData?.description ?? '',
+      subPeriodId: assignmentData?.subPeriod?.id ?? getCurrentSubPeriodId(),
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [open, assignmentData])
 
   const createMutation = useMutation(api.api.v1.assignments.store.mutationOptions())
   const updateMutation = useMutation(api.api.v1.assignments.update.mutationOptions())
