@@ -283,7 +283,11 @@ export function NewExamModal({
         })
       }
       queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
-      queryClient.invalidateQueries({ queryKey: api.api.v1.exams.show.pathKey() })
+      if (examId) {
+        queryClient.invalidateQueries({
+          queryKey: api.api.v1.exams.show.pathKey({ id: examId }),
+        })
+      }
       queryClient.invalidateQueries({ queryKey: api.api.v1.pedagogicalCalendar.index.pathKey() })
       toast.success(isEditMode ? 'Prova atualizada com sucesso!' : 'Prova criada com sucesso!')
       onOpenChange(false)
