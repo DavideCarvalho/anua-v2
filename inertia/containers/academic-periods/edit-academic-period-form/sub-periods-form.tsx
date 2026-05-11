@@ -675,72 +675,66 @@ export function SubPeriodsForm({
       />
 
       <Dialog open={showDiffDialog} onOpenChange={setShowDiffDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[520px]">
           <DialogHeader>
             <DialogTitle>Alterar estrutura de períodos</DialogTitle>
             <DialogDescription>
-              A estrutura será alterada de{' '}
-              <span className="font-medium text-foreground">
+              De{' '}
+              <span className="font-medium">
                 {subPeriods.length}{' '}
-                {subPeriods.length === 4
-                  ? 'Bimestres'
-                  : subPeriods.length === 3
-                    ? 'Trimestres'
-                    : subPeriods.length === 2
-                      ? 'Semestres'
-                      : 'período'}
+                {subPeriods.length === 4 ? 'Bimestres' : subPeriods.length === 3 ? 'Trimestres' : subPeriods.length === 2 ? 'Semestres' : 'período'}
               </span>{' '}
               para{' '}
-              <span className="font-medium text-foreground">
+              <span className="font-medium">
                 {expectedCount}{' '}
-                {resolvedPeriodStructure === 'BIMESTRAL'
-                  ? 'Bimestres'
-                  : resolvedPeriodStructure === 'TRIMESTRAL'
-                    ? 'Trimestres'
-                    : resolvedPeriodStructure === 'SEMESTRAL'
-                      ? 'Semestres'
-                      : 'período'}
+                {resolvedPeriodStructure === 'BIMESTRAL' ? 'Bimestres' : resolvedPeriodStructure === 'TRIMESTRAL' ? 'Trimestres' : resolvedPeriodStructure === 'SEMESTRAL' ? 'Semestres' : 'período'}
               </span>
-              . As datas serão redistribuídas proporcionalmente dentro do período letivo.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-2">
-            <div className="rounded-md border p-3 bg-destructive/5 dark:bg-destructive/10">
-              <p className="font-medium mb-1 text-sm">
-                Atual ({subPeriods.length})
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {subPeriods.map((sp) => sp.name).join(', ')}
-              </p>
+          <div className="space-y-2 py-2 max-h-[300px] overflow-y-auto">
+            {subPeriods.map((sp) => (
+              <div
+                key={sp.id}
+                className="flex items-center gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm"
+              >
+                <span className="text-destructive font-medium shrink-0 w-3">-</span>
+                <span className="font-medium line-through text-destructive/80">{sp.name}</span>
+                <span className="text-muted-foreground text-xs ml-auto tabular-nums">
+                  {formatDate(sp.startDate)} → {formatDate(sp.endDate)}
+                </span>
+              </div>
+            ))}
+            {!subPeriods.length && (
+              <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-muted-foreground text-center">
+                Nenhum sub-período existente
+              </div>
+            )}
+            <div className="flex justify-center py-1">
+              <span className="text-muted-foreground text-xs">↓ serão substituídos por ↓</span>
             </div>
-            <div className="flex justify-center text-muted-foreground">
-              <span className="text-lg">↓</span>
-            </div>
-            <div className="rounded-md border p-3 bg-primary/5 dark:bg-primary/10">
-              <p className="font-medium mb-1 text-sm">
-                Novo ({expectedCount})
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {Array.from({ length: expectedCount }).map((_, i) => (
-                  <span key={i}>
-                    {i + 1}º{' '}
-                    {resolvedPeriodStructure === 'BIMESTRAL'
-                      ? 'Bimestre'
-                      : resolvedPeriodStructure === 'TRIMESTRAL'
-                        ? 'Trimestre'
-                        : resolvedPeriodStructure === 'SEMESTRAL'
-                          ? 'Semestre'
-                          : 'Período'}
-                    {i < expectedCount - 1 ? ', ' : ''}
-                  </span>
-                ))}
-              </p>
-            </div>
+            {Array.from({ length: expectedCount }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-sm"
+              >
+                <span className="text-emerald-500 font-medium shrink-0 w-3">+</span>
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                  {i + 1}º{' '}
+                  {resolvedPeriodStructure === 'BIMESTRAL'
+                    ? 'Bimestre'
+                    : resolvedPeriodStructure === 'TRIMESTRAL'
+                      ? 'Trimestre'
+                      : resolvedPeriodStructure === 'SEMESTRAL'
+                        ? 'Semestre'
+                        : 'Período'}
+                </span>
+              </div>
+            ))}
           </div>
 
-          <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-            As atividades e provas já vinculadas manterão seus vínculos após a migração.
+          <div className="text-xs text-muted-foreground bg-muted p-2 rounded-md">
+            As datas serão distribuídas proporcionalmente. Atividades e provas já vinculadas serão reconciliadas em background.
           </div>
 
           <DialogFooter>
@@ -752,7 +746,7 @@ export function SubPeriodsForm({
               disabled={generateMutation.isPending}
               onClick={() => handleGenerate(true)}
             >
-              {generateMutation.isPending ? 'Regenerando...' : 'Confirmar Substituição'}
+              {generateMutation.isPending ? 'Aplicando...' : 'Confirmar'}
             </Button>
           </DialogFooter>
         </DialogContent>
