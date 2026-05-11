@@ -221,7 +221,7 @@ export function NewAssignmentModal({
       subjectId:
         assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
       description: assignmentData?.description ?? '',
-      subPeriodId: assignmentData?.subPeriod?.id ?? getCurrentSubPeriodId(),
+      subPeriodId: assignmentData?.subPeriodId ?? getCurrentSubPeriodId(),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, assignmentData])

@@ -221,7 +221,7 @@ export function NewExamModal({
       type: examData?.type ?? 'WRITTEN',
       description: examData?.description ?? '',
       subjectId: examData?.subject?.id ?? '',
-      subPeriodId: examData?.subPeriod?.id ?? getCurrentSubPeriodId(),
+      subPeriodId: examData?.subPeriodId ?? getCurrentSubPeriodId(),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, examData])
