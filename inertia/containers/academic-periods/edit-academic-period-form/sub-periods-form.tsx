@@ -692,45 +692,64 @@ export function SubPeriodsForm({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2 py-2 max-h-[300px] overflow-y-auto">
+          <div className="space-y-0.5 py-2 max-h-[350px] overflow-y-auto font-mono text-sm">
             {subPeriods.map((sp) => (
               <div
                 key={sp.id}
-                className="flex items-center gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm"
+                className="flex items-center gap-2 rounded px-2 py-1.5 bg-destructive/5 dark:bg-destructive/10"
               >
-                <span className="text-destructive font-medium shrink-0 w-3">-</span>
-                <span className="font-medium line-through text-destructive/80">{sp.name}</span>
-                <span className="text-muted-foreground text-xs ml-auto tabular-nums">
-                  {formatDate(sp.startDate)} → {formatDate(sp.endDate)}
+                <span className="text-destructive font-bold w-4 shrink-0">-</span>
+                <span className="text-destructive/80 line-through">{sp.name}</span>
+                <span className="text-muted-foreground/60 text-xs ml-auto">
+                  {formatDate(sp.startDate)} – {formatDate(sp.endDate)}
                 </span>
               </div>
             ))}
-            {!subPeriods.length && (
-              <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-muted-foreground text-center">
-                Nenhum sub-período existente
-              </div>
-            )}
-            <div className="flex justify-center py-1">
-              <span className="text-muted-foreground text-xs">↓ serão substituídos por ↓</span>
-            </div>
-            {Array.from({ length: expectedCount }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-sm"
-              >
-                <span className="text-emerald-500 font-medium shrink-0 w-3">+</span>
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                  {i + 1}º{' '}
-                  {resolvedPeriodStructure === 'BIMESTRAL'
+            {Array.from({ length: expectedCount }).map((_, i) => {
+              const existing = subPeriods[i]
+              const newName =
+                `${i + 1}º ${
+                  resolvedPeriodStructure === 'BIMESTRAL'
                     ? 'Bimestre'
                     : resolvedPeriodStructure === 'TRIMESTRAL'
                       ? 'Trimestre'
                       : resolvedPeriodStructure === 'SEMESTRAL'
                         ? 'Semestre'
-                        : 'Período'}
-                </span>
-              </div>
-            ))}
+                        : 'Período'
+                }`
+              return (
+                <div
+                  key={`new-${i}`}
+                  className={`flex items-center gap-2 rounded px-2 py-1.5 ${
+                    existing
+                      ? 'bg-amber-500/5 dark:bg-amber-500/10'
+                      : 'bg-emerald-500/5 dark:bg-emerald-500/10'
+                  }`}
+                >
+                  <span
+                    className={`font-bold w-4 shrink-0 ${
+                      existing ? 'text-amber-500' : 'text-emerald-500'
+                    }`}
+                  >
+                    {existing ? '~' : '+'}
+                  </span>
+                  <span
+                    className={
+                      existing
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-emerald-600 dark:text-emerald-400'
+                    }
+                  >
+                    {newName}
+                  </span>
+                  {existing && (
+                    <span className="text-muted-foreground/60 text-xs ml-auto">
+                      {formatDate(existing.startDate)} – {formatDate(existing.endDate)}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <div className="text-xs text-muted-foreground bg-muted p-2 rounded-md">
