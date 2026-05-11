@@ -7,7 +7,7 @@ import { updateAcademicPeriodValidator } from '#validators/academic_period'
 import AppException from '#exceptions/app_exception'
 import { syncAcademicPeriodCourses } from '#services/academic_periods/sync_academic_period_courses_service'
 import AcademicPeriodTransformer from '#transformers/academic_period_transformer'
-import ReconcileSubPeriodAssignmentsJob from '#jobs/reconcile_sub_period_assignments'
+import ReconcileSubPeriodAssignmentsJob from '#jobs/academic/reconcile_sub_period_assignments'
 
 export default class UpdateAcademicPeriodController {
   async handle({ request, params, auth, serialize }: HttpContext) {
