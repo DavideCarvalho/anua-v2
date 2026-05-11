@@ -1,8 +1,11 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { EscolaLayout } from '~/components/layouts'
+import { EscolaLayoutSimplificado } from '~/components/layouts/escola-layout-simplificado'
+import { SimplifiedPageShell } from '~/components/escola/simplified-page-shell'
+import { SimplifiedBasicList } from '~/components/escola/simplified-basic-list'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Label } from '~/components/ui/label'
@@ -17,6 +20,12 @@ import { ArrowLeft, Calendar, Settings } from 'lucide-react'
 import { ScheduleGrid } from '~/containers/schedule/schedule-grid'
 import { ScheduleConfigForm, type ScheduleConfig } from '~/containers/schedule/schedule-config-form'
 import { api } from '~/lib/api'
+import {
+  readEscolaDashboardViewMode,
+  type EscolaDashboardViewMode,
+  writeEscolaDashboardViewMode,
+} from '~/lib/escola-dashboard-view-mode'
+import { useAuthUser } from '~/stores/auth_store'
 
 interface ScheduleData {
   calendar: { id: string; name: string; isActive: boolean } | null
@@ -45,8 +54,6 @@ function toMinutes(time: string): number {
 function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | null {
   if (!slots.length) return null
 
-  console.log('[DEBUG inferConfig] Input slots count:', slots.length)
-
   const byDay = new Map<number, ScheduleData['slots']>()
   for (const slot of slots) {
     const current = byDay.get(slot.classWeekDay) ?? []
@@ -64,16 +71,6 @@ function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | nu
     (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)
   )
 
-  console.log(
-    '[DEBUG inferConfig] Ordered slots:',
-    orderedSlots.map((s) => ({
-      time: `${s.startTime}-${s.endTime}`,
-      duration: toMinutes(s.endTime) - toMinutes(s.startTime),
-      isBreak: s.isBreak,
-    }))
-  )
-
-  // Detect break by duration (short slot between longer ones)
   const slotDurations = orderedSlots.map(
     (slot) => toMinutes(slot.endTime) - toMinutes(slot.startTime)
   )
@@ -81,18 +78,10 @@ function inferConfigFromSlots(slots: ScheduleData['slots']): ScheduleConfig | nu
   const minDuration = Math.min(...slotDurations)
   const isBreakByDuration = orderedSlots.map((slot) => {
     const duration = toMinutes(slot.endTime) - toMinutes(slot.startTime)
-    // If there's a significant duration difference, short slots are breaks
     if (maxDuration - minDuration > 15) {
       return duration < maxDuration * 0.6
     }
     return slot.isBreak
-  })
-
-  console.log('[DEBUG inferConfig] Detection:', {
-    maxDuration,
-    minDuration,
-    isBreakByDuration,
-    classesCount: orderedSlots.filter((_, i) => !isBreakByDuration[i]).length,
   })
 
   const firstClass = orderedSlots.find((_slot, i) => !isBreakByDuration[i])
@@ -129,6 +118,8 @@ async function fetchSchedule(classId: string, academicPeriodId: string): Promise
 }
 
 export default function HorariosPage() {
+  const user = useAuthUser()
+  const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
   const [selectedClassId, setSelectedClassId] = useState<string>('')
   const [selectedAcademicPeriodId, setSelectedAcademicPeriodId] = useState<string>('')
   const [showConfigForm, setShowConfigForm] = useState(false)
@@ -137,6 +128,36 @@ export default function HorariosPage() {
   const [hasEditedConfigInSession, setHasEditedConfigInSession] = useState(false)
   const [hydratedSelectionKey, setHydratedSelectionKey] = useState<string | null>(null)
   const [reorganizeTrigger, setReorganizeTrigger] = useState(0)
+
+  useEffect(() => {
+    setViewMode(readEscolaDashboardViewMode(user?.id))
+  }, [user?.id])
+
+  const onViewModeChange = (mode: EscolaDashboardViewMode) => {
+    setViewMode(mode)
+    writeEscolaDashboardViewMode(user?.id, mode)
+  }
+
+  const viewModeToggle = (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant={viewMode === 'full' ? 'default' : 'outline'}
+        onClick={() => onViewModeChange('full')}
+      >
+        Visão completa
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant={viewMode === 'simple' ? 'default' : 'outline'}
+        onClick={() => onViewModeChange('simple')}
+      >
+        Visão simplificada
+      </Button>
+    </>
+  )
 
   const { data: periodsData, isLoading: loadingPeriods } = useQuery(
     api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } })
@@ -158,6 +179,24 @@ export default function HorariosPage() {
   const classes = classesData?.data ?? []
   const academicPeriods = periodsData?.data ?? []
   const selectedClass = classes.find((c) => c.id === selectedClassId)
+
+  const autoSelectedRef = useRef(false)
+
+  useEffect(() => {
+    if (autoSelectedRef.current) return
+    if (academicPeriods.length === 0 || loadingPeriods) return
+    const firstPeriod = academicPeriods[0]
+    setSelectedAcademicPeriodId(firstPeriod.id)
+  }, [academicPeriods, loadingPeriods])
+
+  useEffect(() => {
+    if (autoSelectedRef.current) return
+    if (classes.length === 0 || loadingClasses || !selectedAcademicPeriodId) return
+    const firstClass = classes[0]
+    setSelectedClassId(firstClass.id)
+    autoSelectedRef.current = true
+  }, [classes, loadingClasses, selectedAcademicPeriodId])
+
   const selectionKey = useMemo(() => {
     if (!selectedClassId || !selectedAcademicPeriodId) return null
     return `${selectedClassId}:${selectedAcademicPeriodId}`
@@ -168,12 +207,9 @@ export default function HorariosPage() {
 
   useEffect(() => {
     if (!selectionKey || hydratedSelectionKey === selectionKey || hasEditedConfigInSession) return
-    if (loadingSchedule || !scheduleData) {
-      return
-    }
+    if (loadingSchedule || !scheduleData) return
 
     const inferredConfig = inferConfigFromSlots(scheduleData.slots ?? [])
-    console.log('[DEBUG horarios] Inferred config:', inferredConfig)
     if (inferredConfig) {
       setScheduleConfig(inferredConfig)
     }
@@ -197,8 +233,131 @@ export default function HorariosPage() {
     setReorganizeTrigger((prev) => prev + 1)
   }
 
+  const selectors = (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="space-y-2">
+        <Label>Período Letivo</Label>
+        <Select
+          value={selectedAcademicPeriodId}
+          onValueChange={(value, _event) => {
+            if (value === null) return
+            setSelectedAcademicPeriodId(value)
+            setSelectedClassId('')
+            setShowConfigForm(false)
+            setHydratedSelectionKey(null)
+            setHasEditedConfigInSession(false)
+            setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
+          }}
+          disabled={loadingPeriods}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={loadingPeriods ? 'Carregando...' : 'Selecione um período'}
+            >
+              {academicPeriods.find((ap) => ap.id === selectedAcademicPeriodId)?.name ||
+                (loadingPeriods ? 'Carregando...' : 'Selecione um período')}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {academicPeriods.map((ap) => (
+              <SelectItem key={ap.id} value={ap.id}>
+                {ap.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Turma</Label>
+        <Select
+          value={selectedClassId}
+          onValueChange={(value, _event) => {
+            if (value === null) return
+            setSelectedClassId(value)
+            setShowConfigForm(false)
+            setHydratedSelectionKey(null)
+            setHasEditedConfigInSession(false)
+            setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
+          }}
+          disabled={!selectedAcademicPeriodId || loadingClasses}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                !selectedAcademicPeriodId
+                  ? 'Selecione um período primeiro'
+                  : loadingClasses
+                    ? 'Carregando...'
+                    : 'Selecione uma turma'
+              }
+            >
+              {selectedClass
+                ? `${selectedClass.name}${selectedClass.level?.name ? ` - ${selectedClass.level.name}` : ''}`
+                : !selectedAcademicPeriodId
+                  ? 'Selecione um período primeiro'
+                  : loadingClasses
+                    ? 'Carregando...'
+                    : 'Selecione uma turma'}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {classes.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+                {c.level?.name && ` - ${c.level.name}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+
+  if (viewMode === 'simple') {
+    return (
+      <EscolaLayoutSimplificado
+        title="Horários"
+        viewMode={viewMode}
+        onViewModeChange={onViewModeChange}
+      >
+        <Head title="Horários" />
+
+        <SimplifiedPageShell
+          title="Horários"
+          description="Visualize os horários de cada turma de forma rápida."
+          actions={null}
+        >
+          {/* Seletores simplificados */}
+          <div className="mb-4">{selectors}</div>
+
+          {(!selectedClassId || !selectedAcademicPeriodId) && (
+            <div className="rounded border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Selecione uma turma e um período letivo para visualizar os horários.
+              </p>
+            </div>
+          )}
+
+          {selectedClassId && selectedAcademicPeriodId && (
+            <SimplifiedBasicList>
+              <ScheduleGrid
+                classId={selectedClassId}
+                academicPeriodId={selectedAcademicPeriodId}
+                scheduleConfig={scheduleConfig}
+                className={selectedClass?.name}
+                reorganizeTrigger={reorganizeTrigger}
+                readOnly
+              />
+            </SimplifiedBasicList>
+          )}
+        </SimplifiedPageShell>
+      </EscolaLayoutSimplificado>
+    )
+  }
+
   return (
-    <EscolaLayout>
+    <EscolaLayout topbarActions={viewModeToggle}>
       <Head title="Gerenciar Horários" />
 
       <div className="space-y-6">
@@ -214,7 +373,6 @@ export default function HorariosPage() {
           </div>
         </div>
 
-        {/* Seletores */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -225,89 +383,9 @@ export default function HorariosPage() {
               Selecione a turma e o período letivo para configurar os horários
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Período Letivo</Label>
-                <Select
-                  value={selectedAcademicPeriodId}
-                  onValueChange={(value, _event) => {
-                    if (value === null) return
-                    setSelectedAcademicPeriodId(value)
-                    setSelectedClassId('')
-                    setShowConfigForm(false)
-                    setHydratedSelectionKey(null)
-                    setHasEditedConfigInSession(false)
-                    setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
-                  }}
-                  disabled={loadingPeriods}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={loadingPeriods ? 'Carregando...' : 'Selecione um período'}
-                    >
-                      {academicPeriods.find((ap) => ap.id === selectedAcademicPeriodId)?.name ||
-                        (loadingPeriods ? 'Carregando...' : 'Selecione um período')}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {academicPeriods.map((ap) => (
-                      <SelectItem key={ap.id} value={ap.id}>
-                        {ap.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Turma</Label>
-                <Select
-                  value={selectedClassId}
-                  onValueChange={(value, _event) => {
-                    if (value === null) return
-                    setSelectedClassId(value)
-                    setShowConfigForm(false)
-                    setHydratedSelectionKey(null)
-                    setHasEditedConfigInSession(false)
-                    setScheduleConfig({ ...DEFAULT_SCHEDULE_CONFIG })
-                  }}
-                  disabled={!selectedAcademicPeriodId || loadingClasses}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        !selectedAcademicPeriodId
-                          ? 'Selecione um período primeiro'
-                          : loadingClasses
-                            ? 'Carregando...'
-                            : 'Selecione uma turma'
-                      }
-                    >
-                      {selectedClass
-                        ? `${selectedClass.name}${selectedClass.level?.name ? ` - ${selectedClass.level.name}` : ''}`
-                        : !selectedAcademicPeriodId
-                          ? 'Selecione um período primeiro'
-                          : loadingClasses
-                            ? 'Carregando...'
-                            : 'Selecione uma turma'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {classes.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                        {c.level?.name && ` - ${c.level.name}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
+          <CardContent>{selectors}</CardContent>
         </Card>
 
-        {/* Aviso se não selecionou */}
         {(!selectedClassId || !selectedAcademicPeriodId) && (
           <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950">
             <CardContent className="pt-6">
@@ -318,10 +396,8 @@ export default function HorariosPage() {
           </Card>
         )}
 
-        {/* Conteúdo principal */}
         {selectedClassId && selectedAcademicPeriodId && (
           <>
-            {/* Botão para reconfigurar se já tem schedule */}
             {hasSchedule && !showConfigForm && (
               <div className="flex justify-end">
                 <Button
@@ -344,7 +420,6 @@ export default function HorariosPage() {
               </div>
             )}
 
-            {/* Config Form */}
             {shouldShowConfigForm && (
               <ScheduleConfigForm
                 value={scheduleConfig}
@@ -357,7 +432,6 @@ export default function HorariosPage() {
               />
             )}
 
-            {/* Grade de horários */}
             {hasSchedule && !showConfigForm && (
               <ScheduleGrid
                 classId={selectedClassId}

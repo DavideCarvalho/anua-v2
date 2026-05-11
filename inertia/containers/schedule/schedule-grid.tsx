@@ -55,6 +55,7 @@ interface ScheduleGridProps {
   className?: string
   reorganizeTrigger?: number
   onDirtyChange?: (isDirty: boolean) => void
+  readOnly?: boolean
 }
 
 interface CalendarSlot {
@@ -465,6 +466,7 @@ export function ScheduleGrid({
   className,
   reorganizeTrigger,
   onDirtyChange,
+  readOnly = false,
 }: ScheduleGridProps) {
   const [localSlots, setLocalSlots] = useState<CalendarSlot[]>([])
   const [originalSlots, setOriginalSlots] = useState<CalendarSlot[]>([])
@@ -1210,9 +1212,72 @@ export function ScheduleGrid({
     Array.from({ length: pc.missing }, (_, i) => `pending_${pc.id}_${i}`)
   )
 
+  if (readOnly) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Grade de Horários - {className}</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          {configuredTimeSlots.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground">
+              <p>Nenhum horário configurado para esta turma.</p>
+              <p className="mt-2 text-sm">
+                Configure os horários na visão completa para esta turma.
+              </p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-32">Horário</TableHead>
+                  {DAYS_OF_WEEK.map((day) => (
+                    <TableHead key={day.key}>{day.label}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {configuredTimeSlots.map((timeSlot) => {
+                  const [startTime, endTime] = timeSlot.split('-')
+                  const isBreak = configuredBreakSlots.has(timeSlot)
+                  return (
+                    <TableRow key={timeSlot}>
+                      <TableCell className="font-medium">
+                        {startTime} - {endTime}
+                      </TableCell>
+                      {DAYS_OF_WEEK.map((day) => {
+                        if (isBreak) {
+                          return (
+                            <TableCell
+                              key={day.key}
+                              className="bg-muted text-center text-muted-foreground"
+                            >
+                              INTERVALO
+                            </TableCell>
+                          )
+                        }
+                        const slotKey = `${day.number}_${timeSlot}`
+                        const slot = slotAssignments.get(slotKey)
+                        return (
+                          <ReadOnlySlotCell
+                            key={day.key}
+                            teacherHasClass={slot?.teacherHasClass}
+                          />
+                        )
+                      })}
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-4">
-      {/* Actions */}
       <div className="flex justify-end gap-2">
         <AlertDialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
           <AlertDialogTrigger>
@@ -1266,7 +1331,6 @@ export function ScheduleGrid({
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={[...allSlotKeys, ...pendingKeys]} strategy={rectSwappingStrategy}>
-          {/* Pending classes */}
           {pendingClasses.length > 0 && (
             <Card>
               <CardHeader>
@@ -1317,12 +1381,10 @@ export function ScheduleGrid({
                   activeDragItem.includes('_') &&
                   !activeDragItem.startsWith('pending_')
                 ? (() => {
-                    // Grid slot being dragged
                     const [dayStr, timeRange] = activeDragItem.split('_')
                     const [startTime, endTime] = timeRange.split('-')
                     const dayNumber = parseInt(dayStr)
 
-                    // Find slot by exact time match (times are normalized to HH:MM format)
                     const slot = localSlots.find(
                       (s) =>
                         s.classWeekDay === dayNumber &&
@@ -1353,7 +1415,6 @@ export function ScheduleGrid({
                 : null}
           </DragOverlay>
 
-          {/* Schedule table */}
           <Card>
             <CardHeader>
               <CardTitle>Grade de Horários - {className}</CardTitle>
@@ -1506,6 +1567,29 @@ function ScheduleSlotCell({
           >
             {teacherHasClass.subject.name}
           </p>
+          <p className="text-xs text-muted-foreground">{teacherHasClass.teacher.user.name}</p>
+        </div>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )}
+    </TableCell>
+  )
+}
+
+function ReadOnlySlotCell({
+  teacherHasClass,
+}: {
+  teacherHasClass?: {
+    id: string
+    teacher: { id: string; user: { name: string } }
+    subject: { id: string; name: string }
+  } | null
+}) {
+  return (
+    <TableCell className="bg-muted/30">
+      {teacherHasClass ? (
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-primary">{teacherHasClass.subject.name}</p>
           <p className="text-xs text-muted-foreground">{teacherHasClass.teacher.user.name}</p>
         </div>
       ) : (

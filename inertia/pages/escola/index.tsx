@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { GraduationCap, LineChart, DollarSign, Eye, EyeOff } from 'lucide-react'
+import { GraduationCap, LineChart, DollarSign, Eye, EyeOff, Users, BookOpen, Clock, Calendar, CreditCard, AlertTriangle, Tag, ShoppingBag, Megaphone, MessageCircle } from 'lucide-react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout-simplificado'
 import { DashboardClassesNav } from '../../components/dashboard/dashboard-classes-nav'
@@ -329,13 +329,77 @@ export default function EscolaDashboard() {
   }, [isViewModeHydrated, user?.id, viewMode])
 
   const quickActions = [
-    { label: 'Alunos', href: '/escola/administrativo/alunos', visible: true },
-    { label: 'Turmas', href: '/escola/pedagogico/turmas', visible: true },
-    { label: 'Calendário', href: '/escola/pedagogico/calendario', visible: true },
-    { label: 'Financeiro', href: '/escola/financeiro/faturas', visible: canViewFinancialTab },
-    { label: 'Cantina', href: '/escola/cantina/pdv', visible: true },
-    { label: 'Comunicados', href: '/escola/comunicados', visible: true },
-    { label: 'Chat', href: '/escola/chat', visible: true, badge: true },
+    {
+      label: 'Alunos',
+      description: 'Matrículas e cadastros',
+      route: 'web.escola.administrativo.alunos',
+      icon: Users,
+      visible: true,
+    },
+    {
+      label: 'Turmas',
+      description: 'Turmas e atividades',
+      route: 'web.escola.pedagogico.turmas',
+      icon: BookOpen,
+      visible: true,
+    },
+    {
+      label: 'Horários',
+      description: 'Grade de aulas',
+      route: 'web.escola.pedagogico.horarios',
+      icon: Clock,
+      visible: true,
+    },
+    {
+      label: 'Calendário',
+      description: 'Eventos e provas',
+      route: 'web.escola.pedagogico.calendario',
+      icon: Calendar,
+      visible: true,
+    },
+    {
+      label: 'Financeiro',
+      description: 'Faturas e cobranças',
+      route: 'web.escola.financeiro.faturas',
+      icon: CreditCard,
+      visible: canViewFinancialTab,
+    },
+    {
+      label: 'Inadimplência',
+      description: 'Pagamentos em atraso',
+      route: 'web.escola.financeiro.inadimplencia',
+      icon: AlertTriangle,
+      visible: canViewFinancialTab,
+    },
+    {
+      label: 'Bolsas',
+      description: 'Descontos e bolsas',
+      route: 'web.escola.administrativo.bolsas',
+      icon: Tag,
+      visible: canViewFinancialTab,
+    },
+    {
+      label: 'Cantina',
+      description: 'PDV e cardápio',
+      route: 'web.escola.cantina.pdv',
+      icon: ShoppingBag,
+      visible: true,
+    },
+    {
+      label: 'Comunicados',
+      description: 'Enviar avisos',
+      route: 'web.escola.comunicados',
+      icon: Megaphone,
+      visible: true,
+    },
+    {
+      label: 'Chat',
+      description: 'Mensagens e dúvidas',
+      route: 'web.escola.chat',
+      icon: MessageCircle,
+      visible: true,
+      badge: true,
+    },
   ].filter((action) => action.visible)
 
   const viewModeToggle = (
@@ -368,18 +432,33 @@ export default function EscolaDashboard() {
       >
         <Head title="Dashboard" />
 
-        <section className="mx-auto flex max-w-4xl flex-col items-center gap-6 py-2 sm:py-6">
-          <h1 className="text-center text-2xl font-semibold">O que você quer fazer agora?</h1>
+        <section className="mx-auto max-w-3xl space-y-8 py-4 sm:py-8">
+          <div className="text-center">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              Olá{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">O que voce precisa fazer agora?</p>
+          </div>
 
-          <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
             {quickActions.map((action) => (
               <Link
                 key={action.label}
-                href={action.href}
-                className="relative flex items-center justify-between rounded-xl border bg-card px-6 py-5 text-lg font-medium transition-colors hover:bg-muted"
+                route={action.route}
+                className="group relative flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center transition-all hover:border-primary/30 hover:bg-muted/50 hover:shadow-sm sm:p-5"
               >
-                {action.label}
-                {action.badge && <UnreadMessagesBadge />}
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                  <action.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{action.label}</p>
+                  <p className="text-xs text-muted-foreground">{action.description}</p>
+                </div>
+                {action.badge && (
+                  <span className="absolute -right-1 -top-1">
+                    <UnreadMessagesBadge />
+                  </span>
+                )}
               </Link>
             ))}
           </div>

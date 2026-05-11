@@ -62,16 +62,9 @@ export default function PedagogicoCalendarioPage() {
           title="Calendário Pedagógico"
           description="Visualize compromissos e eventos sem distrações."
           actions={
-            <>
-              <Link href="/escola/pedagogico/calendario">
-                <Button size="sm">Atualizar calendário</Button>
-              </Link>
-              <Link href="/escola/eventos/novo">
-                <Button size="sm" variant="outline">
-                  Novo evento
-                </Button>
-              </Link>
-            </>
+            <Link route="web.escola.eventos.novo">
+              <Button size="sm">Novo evento</Button>
+            </Link>
           }
         >
           <SimplifiedBasicList>
