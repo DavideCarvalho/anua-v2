@@ -3,6 +3,8 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import AcademicPeriod from '#models/academic_period'
 import AcademicSubPeriod from '#models/academic_sub_period'
+import Assignment from '#models/assignment'
+import Exam from '#models/exam'
 import { updateAcademicPeriodValidator } from '#validators/academic_period'
 import AppException from '#exceptions/app_exception'
 import { syncAcademicPeriodCourses } from '#services/academic_periods/sync_academic_period_courses_service'
@@ -149,23 +151,19 @@ export default class UpdateAcademicPeriodController {
               const subEnd = subPeriod.endDate.toISO()
               if (!subStart || !subEnd) continue
 
-              await db
-                .from('Assignment')
-                .useTransaction(trx)
-                .whereNull('subPeriodId')
-                .where('academicPeriodId', academicPeriod.id)
-                .where('dueDate', '>=', subStart)
-                .where('dueDate', '<=', subEnd)
-                .update({ subPeriodId: subPeriod.id })
+            await Assignment.query({ client: trx })
+              .whereNull('subPeriodId')
+              .where('academicPeriodId', academicPeriod.id)
+              .where('dueDate', '>=', subStart)
+              .where('dueDate', '<=', subEnd)
+              .update({ subPeriodId: subPeriod.id })
 
-              await db
-                .from('Exam')
-                .useTransaction(trx)
-                .whereNull('subPeriodId')
-                .where('academicPeriodId', academicPeriod.id)
-                .where('examDate', '>=', subStart)
-                .where('examDate', '<=', subEnd)
-                .update({ subPeriodId: subPeriod.id })
+            await Exam.query({ client: trx })
+              .whereNull('subPeriodId')
+              .where('academicPeriodId', academicPeriod.id)
+              .where('examDate', '>=', subStart)
+              .where('examDate', '<=', subEnd)
+              .update({ subPeriodId: subPeriod.id })
             }
 
             await trx.commit()
