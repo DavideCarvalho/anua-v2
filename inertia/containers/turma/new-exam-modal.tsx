@@ -196,7 +196,7 @@ export function NewExamModal({
     }
   }, [subjects, form])
 
-  // Reset form when modal opens
+  // Reset form when modal opens (only on initial open, not on data refetch)
   useEffect(() => {
     if (open) {
       if (requiresContextStep) {
@@ -220,7 +220,8 @@ export function NewExamModal({
         subPeriodId: examData?.subPeriod?.id ?? getCurrentSubPeriodId(),
       })
     }
-  }, [open, form, defaultDate, requiresContextStep, examData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const createMutation = useMutation(api.api.v1.exams.store.mutationOptions())
   const updateMutation = useMutation(api.api.v1.exams.update.mutationOptions())
