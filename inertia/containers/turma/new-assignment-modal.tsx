@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
@@ -299,6 +299,7 @@ export function NewAssignmentModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
+        <FormProvider {...form}>
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle>{isEditMode ? 'Editar atividade' : 'Criar nova atividade'}</DialogTitle>
@@ -481,6 +482,7 @@ export function NewAssignmentModal({
             </Button>
           </DialogFooter>
         </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   )
