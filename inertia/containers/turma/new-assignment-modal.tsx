@@ -5,6 +5,13 @@ import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '~/components/ui/form'
 
 import {
   Dialog,
@@ -416,21 +423,24 @@ export function NewAssignmentModal({
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Quando é a entrega? *</Label>
-                <DatePicker
-                  date={form.watch('dueDate')}
-                  onChange={(date) => {
-                    if (date) form.setValue('dueDate', date)
-                  }}
-                  fromDate={new Date()}
-                />
-                {form.formState.errors.dueDate && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.dueDate.message}
-                  </p>
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quando é a entrega? *</FormLabel>
+                    <FormControl>
+                      <DatePicker
+                        date={field.value}
+                        onChange={field.onChange}
+                        placeholder="dd/mm/aaaa"
+                        fromDate={isEditMode ? undefined : new Date()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição (opcional)</Label>
