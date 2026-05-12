@@ -139,7 +139,7 @@ export function NewExamModal({
   const usesSubPeriods =
     schoolData && (schoolData as any).periodStructure && (schoolData as any).periodStructure !== ''
 
-  const { data: subPeriodsData } = useQuery({
+  const { data: subPeriodsData, isLoading: isLoadingSubPeriods } = useQuery({
     ...api.api.v1.academicSubPeriods.index.queryOptions({
       query: { academicPeriodId: effectiveAcademicPeriodId },
     }),
@@ -369,30 +369,41 @@ export function NewExamModal({
                 </div>
               ) : null}
 
-              {usesSubPeriods && subPeriods.length > 0 ? (
+              {usesSubPeriods ? (
                 <div className="space-y-2">
                   <Label>Sub-Periodo (opcional)</Label>
-                  <Select
-                    value={form.watch('subPeriodId') ?? ''}
-                    onValueChange={(value, _event) => form.setValue('subPeriodId', value || null)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o sub-periodo">
-                        {subPeriods?.find((sp) => sp.id === form.watch('subPeriodId'))?.name ??
-                          (form.watch('subPeriodId') ? 'Carregando...' : 'Selecione o sub-periodo')}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
-                      {subPeriods
-                        .sort((a, b) => a.order - b.order)
-                        .map((sp) => (
-                          <SelectItem key={sp.id} value={sp.id}>
-                            {sp.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                  {isLoadingSubPeriods ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Carregando sub-períodos...
+                    </div>
+                  ) : subPeriods.length > 0 ? (
+                    <Select
+                      value={form.watch('subPeriodId') ?? ''}
+                      onValueChange={(value, _event) => form.setValue('subPeriodId', value || null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o sub-periodo">
+                          {subPeriods.find((sp) => sp.id === form.watch('subPeriodId'))?.name ??
+                            'Selecione o sub-periodo'}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum</SelectItem>
+                        {subPeriods
+                          .sort((a, b) => a.order - b.order)
+                          .map((sp) => (
+                            <SelectItem key={sp.id} value={sp.id}>
+                              {sp.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      Nenhum sub-período disponível
+                    </div>
+                  )}
                 </div>
               ) : null}
 
