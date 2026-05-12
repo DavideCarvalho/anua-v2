@@ -709,6 +709,7 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.academic_sub_periods.store': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.generate': { paramsTuple?: []; params?: {} }
+    'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.academic_sub_periods.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
@@ -1784,6 +1785,7 @@ export type ScannedRoutes = {
     'api.v1.escola.inquiries.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.academic_sub_periods.store': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.generate': { paramsTuple?: []; params?: {} }
+    'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }
   PUT: {

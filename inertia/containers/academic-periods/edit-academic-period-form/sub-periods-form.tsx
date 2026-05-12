@@ -35,6 +35,23 @@ import {
 import { api } from '~/lib/api'
 import { useAuthUser } from '~/stores/auth_store'
 
+interface DiffItem {
+  type: 'added' | 'removed' | 'modified'
+  old?: {
+    id: string
+    name: string
+    order: number
+    startDate: string
+    endDate: string
+  }
+  new?: {
+    name: string
+    order: number
+    startDate: string
+    endDate: string
+  }
+}
+
 interface SchoolData {
   id: string
   name: string
@@ -304,6 +321,8 @@ export function SubPeriodsForm({
   const [editingSubPeriod, setEditingSubPeriod] = useState<SubPeriod | null>(null)
   const [showDiffDialog, setShowDiffDialog] = useState(false)
   const [localSubPeriods, setLocalSubPeriods] = useState<Record<string, unknown>[] | null>(null)
+  const [diffData, setDiffData] = useState<DiffItem[] | null>(null)
+  const [isLoadingDiff, setIsLoadingDiff] = useState(false)
 
   // Register save callback: returns generated sub-periods if user generated them
   useEffect(() => {
@@ -314,6 +333,34 @@ export function SubPeriodsForm({
       if (saveRef) saveRef.current = null
     }
   }, [saveRef, localSubPeriods])
+
+  const diffMutation = useMutation(api.api.v1.academicSubPeriods.diff.mutationOptions())
+
+  const fetchDiff = async () => {
+    if (!schoolId) return
+
+    setIsLoadingDiff(true)
+    try {
+      const result = await diffMutation.mutateAsync({
+        body: {
+          academicPeriodId,
+          schoolId,
+          periodStructure: (resolvedPeriodStructure as
+            | 'BIMESTRAL'
+            | 'TRIMESTRAL'
+            | 'SEMESTRAL'
+            | 'ANUAL'
+            | undefined
+            | null) || undefined,
+        },
+      })
+      setDiffData(result.data as unknown as DiffItem[])
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao calcular diferenças')
+    } finally {
+      setIsLoadingDiff(false)
+    }
+  }
 
   const handleGenerate = async (overwrite: boolean = false) => {
     if (!schoolId) {
@@ -336,8 +383,7 @@ export function SubPeriodsForm({
             | null) || undefined,
         },
       })
-      const data = (result as any)?.data ?? result ?? []
-      const items = Array.isArray(data) ? data : []
+      const items = Array.isArray(result.data) ? result.data : []
       setLocalSubPeriods(items)
       setShowDiffDialog(false)
     } catch (error: any) {
@@ -674,8 +720,11 @@ export function SubPeriodsForm({
         }}
       />
 
-      <Dialog open={showDiffDialog} onOpenChange={setShowDiffDialog}>
-        <DialogContent className="sm:max-w-[520px]">
+      <Dialog open={showDiffDialog} onOpenChange={(open) => {
+        setShowDiffDialog(open)
+        if (open) fetchDiff()
+      }}>
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>Alterar estrutura de períodos</DialogTitle>
             <DialogDescription>
@@ -692,65 +741,130 @@ export function SubPeriodsForm({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-0.5 py-2 max-h-[350px] overflow-y-auto font-mono text-sm">
-            {subPeriods.map((sp) => (
-              <div
-                key={sp.id}
-                className="flex items-center gap-2 rounded px-2 py-1.5 bg-destructive/5 dark:bg-destructive/10"
-              >
-                <span className="text-destructive font-bold w-4 shrink-0">-</span>
-                <span className="text-destructive/80 line-through">{sp.name}</span>
-                <span className="text-muted-foreground/60 text-xs ml-auto">
-                  {formatDate(sp.startDate)} – {formatDate(sp.endDate)}
-                </span>
-              </div>
-            ))}
-            {Array.from({ length: expectedCount }).map((_, i) => {
-              const existing = subPeriods[i]
-              const newName =
-                `${i + 1}º ${
-                  resolvedPeriodStructure === 'BIMESTRAL'
-                    ? 'Bimestre'
-                    : resolvedPeriodStructure === 'TRIMESTRAL'
-                      ? 'Trimestre'
-                      : resolvedPeriodStructure === 'SEMESTRAL'
-                        ? 'Semestre'
-                        : 'Período'
-                }`
-              return (
-                <div
-                  key={`new-${i}`}
-                  className={`flex items-center gap-2 rounded px-2 py-1.5 ${
-                    existing
-                      ? 'bg-amber-500/5 dark:bg-amber-500/10'
-                      : 'bg-emerald-500/5 dark:bg-emerald-500/10'
-                  }`}
-                >
-                  <span
-                    className={`font-bold w-4 shrink-0 ${
-                      existing ? 'text-amber-500' : 'text-emerald-500'
-                    }`}
-                  >
-                    {existing ? '~' : '+'}
-                  </span>
-                  <span
-                    className={
-                      existing
-                        ? 'text-amber-600 dark:text-amber-400'
-                        : 'text-emerald-600 dark:text-emerald-400'
-                    }
-                  >
-                    {newName}
-                  </span>
-                  {existing && (
-                    <span className="text-muted-foreground/60 text-xs ml-auto">
-                      {formatDate(existing.startDate)} – {formatDate(existing.endDate)}
-                    </span>
-                  )}
+          {isLoadingDiff ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : diffData && diffData.length > 0 ? (
+            <>
+              <div className="py-2 max-h-[400px] overflow-y-auto">
+                <div className="rounded-md border overflow-hidden">
+                  <table className="w-full text-sm font-mono">
+                    <thead className="bg-muted/50 sticky top-0">
+                      <tr>
+                        <th className="w-10 px-2 py-2 text-left text-xs font-medium text-muted-foreground"></th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Nome</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Data Início</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Data Fim</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {diffData.map((item, index) => {
+                        if (item.type === 'removed' && item.old) {
+                          return (
+                            <tr key={`removed-${index}`} className="bg-red-50 dark:bg-red-950/20">
+                              <td className="px-2 py-2">
+                                <span className="text-red-600 dark:text-red-400 font-bold">-</span>
+                              </td>
+                              <td className="px-3 py-2 text-red-700 dark:text-red-400 line-through">
+                                {item.old.name}
+                              </td>
+                              <td className="px-3 py-2 text-red-600/70 dark:text-red-400/70">
+                                {formatDate(item.old.startDate)}
+                              </td>
+                              <td className="px-3 py-2 text-red-600/70 dark:text-red-400/70">
+                                {formatDate(item.old.endDate)}
+                              </td>
+                            </tr>
+                          )
+                        }
+
+                        if (item.type === 'added' && item.new) {
+                          return (
+                            <tr key={`added-${index}`} className="bg-emerald-50 dark:bg-emerald-950/20">
+                              <td className="px-2 py-2">
+                                <span className="text-emerald-600 dark:text-emerald-400 font-bold">+</span>
+                              </td>
+                              <td className="px-3 py-2 text-emerald-700 dark:text-emerald-400">
+                                {item.new.name}
+                              </td>
+                              <td className="px-3 py-2 text-emerald-600/70 dark:text-emerald-400/70">
+                                {formatDate(item.new.startDate)}
+                              </td>
+                              <td className="px-3 py-2 text-emerald-600/70 dark:text-emerald-400/70">
+                                {formatDate(item.new.endDate)}
+                              </td>
+                            </tr>
+                          )
+                        }
+
+                        if (item.type === 'modified' && item.old && item.new) {
+                          return (
+                            <tr key={`modified-${index}`} className="bg-yellow-50 dark:bg-yellow-950/20">
+                              <td className="px-2 py-2">
+                                <span className="text-yellow-600 dark:text-yellow-400 font-bold">~</span>
+                              </td>
+                              <td className="px-3 py-2">
+                                <div className="space-y-0.5">
+                                  <div className="text-yellow-600/70 dark:text-yellow-400/70 line-through text-xs">
+                                    {item.old.name}
+                                  </div>
+                                  <div className="text-yellow-700 dark:text-yellow-400">
+                                    {item.new.name}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-3 py-2">
+                                <div className="space-y-0.5">
+                                  <div className="text-yellow-600/70 dark:text-yellow-400/70 line-through text-xs">
+                                    {formatDate(item.old.startDate)}
+                                  </div>
+                                  <div className="text-yellow-700 dark:text-yellow-400 text-xs">
+                                    → {formatDate(item.new.startDate)}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-3 py-2">
+                                <div className="space-y-0.5">
+                                  <div className="text-yellow-600/70 dark:text-yellow-400/70 line-through text-xs">
+                                    {formatDate(item.old.endDate)}
+                                  </div>
+                                  <div className="text-yellow-700 dark:text-yellow-400 text-xs">
+                                    → {formatDate(item.new.endDate)}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        }
+
+                        return null
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-              )
-            })}
-          </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground bg-muted p-2 rounded-md">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-red-600 dark:text-red-400 font-bold">-</span>
+                  <span>Removido</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">+</span>
+                  <span>Adicionado</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-yellow-600 dark:text-yellow-400 font-bold">~</span>
+                  <span>Modificado</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma alteração detectada
+            </div>
+          )}
 
           <div className="text-xs text-muted-foreground bg-muted p-2 rounded-md">
             As datas serão distribuídas proporcionalmente. Atividades e provas já vinculadas serão reconciliadas em background.
@@ -762,7 +876,7 @@ export function SubPeriodsForm({
             </Button>
             <Button
               type="button"
-              disabled={generateMutation.isPending}
+              disabled={generateMutation.isPending || isLoadingDiff}
               onClick={() => handleGenerate(true)}
             >
               {generateMutation.isPending ? 'Aplicando...' : 'Confirmar'}

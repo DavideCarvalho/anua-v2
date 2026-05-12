@@ -1028,6 +1028,7 @@ export interface ApiDefinition {
         show: typeof routes['api.v1.academic_sub_periods.show']
         store: typeof routes['api.v1.academic_sub_periods.store']
         generate: typeof routes['api.v1.academic_sub_periods.generate']
+        diff: typeof routes['api.v1.academic_sub_periods.diff']
         update: typeof routes['api.v1.academic_sub_periods.update']
         destroy: typeof routes['api.v1.academic_sub_periods.destroy']
       }

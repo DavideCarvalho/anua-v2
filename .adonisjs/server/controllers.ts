@@ -18,6 +18,7 @@ export const controllers = {
   },
   academicSubPeriods: {
     Destroy: () => import('#controllers/academic_sub_periods/destroy'),
+    Diff: () => import('#controllers/academic_sub_periods/diff_controller'),
     Generate: () => import('#controllers/academic_sub_periods/generate_controller'),
     Index: () => import('#controllers/academic_sub_periods/index'),
     Show: () => import('#controllers/academic_sub_periods/show'),

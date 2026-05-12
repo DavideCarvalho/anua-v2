@@ -4236,6 +4236,12 @@ const routes = {
     tokens: [{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/generate","type":0,"val":"generate","end":""}],
     types: placeholder as Registry['api.v1.academic_sub_periods.generate']['types'],
   },
+  'api.v1.academic_sub_periods.diff': {
+    methods: ["POST"],
+    pattern: '/api/v1/academic-sub-periods/diff',
+    tokens: [{"old":"/api/v1/academic-sub-periods/diff","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/diff","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/diff","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/diff","type":0,"val":"diff","end":""}],
+    types: placeholder as Registry['api.v1.academic_sub_periods.diff']['types'],
+  },
   'api.v1.academic_sub_periods.update': {
     methods: ["PUT"],
     pattern: '/api/v1/academic-sub-periods/:id',

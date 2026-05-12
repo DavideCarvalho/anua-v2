@@ -8467,6 +8467,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/generate_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.academic_sub_periods.diff': {
+    methods: ["POST"]
+    pattern: '/api/v1/academic-sub-periods/diff'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/diff_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/diff_controller').default['handle']>>>
+    }
+  }
   'api.v1.academic_sub_periods.update': {
     methods: ["PUT"]
     pattern: '/api/v1/academic-sub-periods/:id'
