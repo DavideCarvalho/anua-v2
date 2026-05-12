@@ -26,7 +26,7 @@ const diffSubPeriodsValidator = vine.compile(
     schoolId: vine.string().optional(),
     periodStructure: vine.enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
     currentSubPeriods: vine.array(vine.object({
-      id: vine.string(),
+      id: vine.string().nullable(),
       name: vine.string(),
       order: vine.number(),
       startDate: vine.string(),
