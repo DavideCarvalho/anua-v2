@@ -25,6 +25,13 @@ const diffSubPeriodsValidator = vine.compile(
     academicPeriodId: vine.string(),
     schoolId: vine.string().optional(),
     periodStructure: vine.enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
+    currentSubPeriods: vine.array(vine.object({
+      id: vine.string(),
+      name: vine.string(),
+      order: vine.number(),
+      startDate: vine.string(),
+      endDate: vine.string(),
+    })).optional(),
   })
 )
 
@@ -84,10 +91,13 @@ export default class DiffSubPeriodsController {
       )
     }
 
-    const existingSubPeriods = await AcademicSubPeriod.query()
-      .where('academicPeriodId', academicPeriod.id)
-      .whereNull('deletedAt')
-      .orderBy('order', 'asc')
+    const existingSubPeriods: SubPeriodInfo[] = payload.currentSubPeriods
+      ? payload.currentSubPeriods.sort((a, b) => a.order - b.order)
+      : (await AcademicSubPeriod.query()
+          .where('academicPeriodId', academicPeriod.id)
+          .whereNull('deletedAt')
+          .orderBy('order', 'asc'))
+          .map(subPeriodToObject)
 
     const count = PERIOD_COUNT[periodStructure]
     const names = PERIOD_NAMES[periodStructure]
@@ -121,7 +131,7 @@ export default class DiffSubPeriodsController {
       } else if (existing && !newName) {
         diff.push({
           type: 'removed',
-          old: subPeriodToObject(existing),
+          old: existing,
         })
       } else if (existing && newName) {
         const totalDays = endDate.diff(startDate, 'days').days
@@ -132,19 +142,22 @@ export default class DiffSubPeriodsController {
             ? endDate
             : startDate.plus({ days: Math.round(subPeriodDuration * (i + 1)) - 1 })
 
+        const newStartStr = subStartDate.toISODate()!
+        const newEndStr = subEndDate.toISODate()!
+
         const nameChanged = existing.name !== newName
-        const startDateChanged = !existing.startDate.equals(subStartDate)
-        const endDateChanged = !existing.endDate.equals(subEndDate)
+        const startDateChanged = existing.startDate !== newStartStr
+        const endDateChanged = existing.endDate !== newEndStr
 
         if (nameChanged || startDateChanged || endDateChanged) {
           diff.push({
             type: 'modified',
-            old: subPeriodToObject(existing),
+            old: existing,
             new: {
               name: newName,
               order: i + 1,
-              startDate: subStartDate.toISODate()!,
-              endDate: subEndDate.toISODate()!,
+              startDate: newStartStr,
+              endDate: newEndStr,
             },
           })
         }

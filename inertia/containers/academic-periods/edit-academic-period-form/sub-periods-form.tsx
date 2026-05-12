@@ -311,6 +311,14 @@ export function SubPeriodsForm({
     setShowDiffDialog(true)
     if (!schoolId) return
 
+    const currentSubPeriods = subPeriods.map((sp) => ({
+      id: sp.id,
+      name: sp.name,
+      order: sp.order,
+      startDate: sp.startDate,
+      endDate: sp.endDate,
+    }))
+
     try {
       await diffMutation.mutateAsync({
         body: {
@@ -323,6 +331,7 @@ export function SubPeriodsForm({
             | 'ANUAL'
             | undefined
             | null) || undefined,
+          currentSubPeriods,
         },
       })
     } catch (error: any) {
