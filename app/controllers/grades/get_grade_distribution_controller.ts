@@ -5,7 +5,7 @@ import { getPedagogicalScope, buildScopeFilters } from '#services/pedagogical_sc
 
 export default class GetGradeDistributionController {
   async handle({ request, response, ...ctx }: HttpContext) {
-    const { schoolId, schoolChainId, academicPeriodId, classId, subjectId } =
+    const { schoolId, schoolChainId, academicPeriodId, classId, subjectId, subPeriodId } =
       await request.validateUsing(getGradeDistributionValidator)
     const scope = await getPedagogicalScope(ctx as HttpContext)
     const scopeFilters = buildScopeFilters(scope)
@@ -41,6 +41,10 @@ export default class GetGradeDistributionController {
     if (subjectId) {
       filters += ' AND thc."subjectId" = :subjectId'
       params.subjectId = subjectId
+    }
+    if (subPeriodId) {
+      filters += ' AND a."subPeriodId" = :subPeriodId'
+      params.subPeriodId = subPeriodId
     }
 
     // Get all graded submissions with percentages

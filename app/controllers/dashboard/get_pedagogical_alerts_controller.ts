@@ -135,6 +135,7 @@ interface PedagogicalAlertFilters {
   courseId?: string
   levelId?: string
   classId?: string
+  subPeriodId?: string
 }
 
 function normalizeFilter(value: unknown): string | undefined {
@@ -170,6 +171,7 @@ export default class GetPedagogicalAlertsController {
       courseId: normalizeFilter(query.courseId),
       levelId: normalizeFilter(query.levelId),
       classId: normalizeFilter(query.classId),
+      subPeriodId: normalizeFilter(query.subPeriodId),
     }
 
     const scopedClassIds = await this.resolveScopedClassIds(schoolId, filters)
@@ -199,7 +201,8 @@ export default class GetPedagogicalAlertsController {
         calculationAlgorithm,
         hasClassScope,
         scopedClassIds,
-        filters.academicPeriodId
+        filters.academicPeriodId,
+        filters.subPeriodId
       ),
       this.getExamsWithoutGrades(schoolId, hasClassScope, scopedClassIds),
       this.getOverdueActivities(schoolId, hasClassScope, scopedClassIds),
@@ -357,7 +360,8 @@ export default class GetPedagogicalAlertsController {
     calculationAlgorithm: string,
     hasClassScope: boolean,
     scopedClassIds: string[],
-    academicPeriodId?: string
+    academicPeriodId?: string,
+    subPeriodId?: string
   ): Promise<AtRiskByGradeStudent[]> {
     const result = await db.rawQuery(
       `
@@ -402,6 +406,7 @@ export default class GetPedagogicalAlertsController {
         FROM "TeacherHasClass" thc
         LEFT JOIN "Assignment" a ON a."teacherHasClassId" = thc.id
           AND (:academicPeriodId::text IS NULL OR a."academicPeriodId" = :academicPeriodId)
+          AND (:subPeriodId::text IS NULL OR a."subPeriodId" = :subPeriodId)
         GROUP BY thc."classId", thc."subjectId"
       ),
       exam_totals AS (
@@ -411,6 +416,7 @@ export default class GetPedagogicalAlertsController {
           COUNT(*) FILTER (WHERE e."maxScore" > 0) as total_gradable_exams
         FROM exams e
         WHERE (:academicPeriodId::text IS NULL OR e."academicPeriodId" = :academicPeriodId)
+          AND (:subPeriodId::text IS NULL OR e."subPeriodId" = :subPeriodId)
         GROUP BY e."classId", e."subjectId"
       ),
       student_assignment_scores AS (
@@ -423,6 +429,7 @@ export default class GetPedagogicalAlertsController {
         FROM "StudentHasAssignment" sha
         JOIN "Assignment" a ON a.id = sha."assignmentId"
           AND (:academicPeriodId::text IS NULL OR a."academicPeriodId" = :academicPeriodId)
+          AND (:subPeriodId::text IS NULL OR a."subPeriodId" = :subPeriodId)
         JOIN "TeacherHasClass" thc ON thc.id = a."teacherHasClassId"
         GROUP BY sha."studentId", thc."classId", thc."subjectId"
       ),
@@ -436,6 +443,7 @@ export default class GetPedagogicalAlertsController {
         FROM exam_grades eg
         JOIN exams e ON e.id = eg."examId"
         WHERE (:academicPeriodId::text IS NULL OR e."academicPeriodId" = :academicPeriodId)
+          AND (:subPeriodId::text IS NULL OR e."subPeriodId" = :subPeriodId)
         GROUP BY eg."studentId", e."classId", e."subjectId"
       ),
       student_subject_performance AS (
@@ -507,6 +515,7 @@ export default class GetPedagogicalAlertsController {
         hasClassScope,
         scopedClassIds,
         academicPeriodId: academicPeriodId ?? null,
+        subPeriodId: subPeriodId ?? null,
       }
     )
 

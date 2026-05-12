@@ -26,6 +26,7 @@ export const getGradeDistributionValidator = vine.compile(
     academicPeriodId: vine.string().uuid().optional(),
     classId: vine.string().uuid().optional(),
     subjectId: vine.string().uuid().optional(),
+    subPeriodId: vine.string().uuid().optional(),
   })
 )
 
@@ -37,6 +38,7 @@ export const getAtRiskStudentsValidator = vine.compile(
     classId: vine.string().uuid().optional(),
     minimumGrade: vine.number().optional(),
     limit: vine.number().optional(),
+    subPeriodId: vine.string().uuid().optional(),
   })
 )
 

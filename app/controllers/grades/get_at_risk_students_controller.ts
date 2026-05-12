@@ -35,6 +35,7 @@ export default class GetAtRiskStudentsController {
       classId,
       minimumGrade = 6,
       limit = 50,
+      subPeriodId,
     } = await request.validateUsing(getAtRiskStudentsValidator)
     const scope = await getPedagogicalScope(ctx as HttpContext)
     const scopeFilters = buildScopeFilters(scope)
@@ -63,6 +64,10 @@ export default class GetAtRiskStudentsController {
     if (classId) {
       extraFilters += ' AND c.id = :classId'
       params.classId = classId
+    }
+    if (subPeriodId) {
+      extraFilters += ' AND a."subPeriodId" = :subPeriodId'
+      params.subPeriodId = subPeriodId
     }
 
     // Get students with their average grades
