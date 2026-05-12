@@ -36,7 +36,7 @@ const diffSubPeriodsValidator = vine.compile(
 )
 
 type SubPeriodInfo = {
-  id: string
+  id: string | null
   name: string
   order: number
   startDate: string
