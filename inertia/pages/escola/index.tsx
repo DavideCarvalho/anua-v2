@@ -69,6 +69,7 @@ type TabFilterState = {
   courseId: string
   levelId: string
   classId: string
+  subPeriodId: string
 }
 
 type AcademicPeriodOption = { id: string; name: string }
@@ -102,6 +103,7 @@ export default function EscolaDashboard() {
     courseId: 'all',
     levelId: 'all',
     classId: 'all',
+    subPeriodId: 'all',
   })
   const [administrativeFilters, setAdministrativeFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
@@ -598,6 +600,11 @@ export default function EscolaDashboard() {
               classId={
                 pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
               }
+              subPeriodId={
+                pedagogicalFilters.subPeriodId === 'all'
+                  ? undefined
+                  : pedagogicalFilters.subPeriodId
+              }
             />
             <AcademicOverviewCards
               academicPeriodId={
@@ -619,6 +626,11 @@ export default function EscolaDashboard() {
                 }
                 classId={
                   pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
+                }
+                subPeriodId={
+                  pedagogicalFilters.subPeriodId === 'all'
+                    ? undefined
+                    : pedagogicalFilters.subPeriodId
                 }
               />
               <PedagogicalAttendanceTrendsChartWithFilters
@@ -660,6 +672,11 @@ export default function EscolaDashboard() {
               }
               classId={
                 pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
+              }
+              subPeriodId={
+                pedagogicalFilters.subPeriodId === 'all'
+                  ? undefined
+                  : pedagogicalFilters.subPeriodId
               }
             />
 

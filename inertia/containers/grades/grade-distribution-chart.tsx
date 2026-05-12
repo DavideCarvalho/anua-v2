@@ -24,24 +24,25 @@ const gradeDistributionConfig = {
 interface GradeDistributionChartProps {
   academicPeriodId?: string
   classId?: string
+  subPeriodId?: string
 }
 
-export function GradeDistributionChart({ academicPeriodId, classId }: GradeDistributionChartProps) {
-  const query = { academicPeriodId, classId }
+export function GradeDistributionChart({ academicPeriodId, classId, subPeriodId }: GradeDistributionChartProps) {
+  const query = { academicPeriodId, classId, subPeriodId }
 
   return (
     <DashboardCardBoundary
       title="Distribuição de Notas"
       queryKeys={[api.api.v1.grades.distribution.queryOptions({ query } as any).queryKey]}
     >
-      <GradeDistributionChartContent academicPeriodId={academicPeriodId} classId={classId} />
+      <GradeDistributionChartContent academicPeriodId={academicPeriodId} classId={classId} subPeriodId={subPeriodId} />
     </DashboardCardBoundary>
   )
 }
 
-function GradeDistributionChartContent({ academicPeriodId, classId }: GradeDistributionChartProps) {
+function GradeDistributionChartContent({ academicPeriodId, classId, subPeriodId }: GradeDistributionChartProps) {
   const { data, isLoading } = useQuery(
-    api.api.v1.grades.distribution.queryOptions({ query: { academicPeriodId, classId } } as any)
+    api.api.v1.grades.distribution.queryOptions({ query: { academicPeriodId, classId, subPeriodId } } as any)
   )
 
   if (isLoading) {

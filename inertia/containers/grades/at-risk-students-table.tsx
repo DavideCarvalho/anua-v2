@@ -22,25 +22,26 @@ type AtRiskStudentsResponse = Awaited<Route.Response<'api.v1.grades.at_risk'>>
 interface AtRiskStudentsTableProps {
   academicPeriodId?: string
   classId?: string
+  subPeriodId?: string
 }
 
-export function AtRiskStudentsTable({ academicPeriodId, classId }: AtRiskStudentsTableProps) {
-  const query = { limit: 20, academicPeriodId, classId }
+export function AtRiskStudentsTable({ academicPeriodId, classId, subPeriodId }: AtRiskStudentsTableProps) {
+  const query = { limit: 20, academicPeriodId, classId, subPeriodId }
 
   return (
     <DashboardCardBoundary
       title="Alunos em Risco"
       queryKeys={[api.api.v1.grades.atRisk.queryOptions({ query } as any).queryKey]}
     >
-      <AtRiskStudentsTableContent academicPeriodId={academicPeriodId} classId={classId} />
+      <AtRiskStudentsTableContent academicPeriodId={academicPeriodId} classId={classId} subPeriodId={subPeriodId} />
     </DashboardCardBoundary>
   )
 }
 
-function AtRiskStudentsTableContent({ academicPeriodId, classId }: AtRiskStudentsTableProps) {
+function AtRiskStudentsTableContent({ academicPeriodId, classId, subPeriodId }: AtRiskStudentsTableProps) {
   const { data, isLoading } = useQuery({
     ...api.api.v1.grades.atRisk.queryOptions({
-      query: { limit: 20, academicPeriodId, classId },
+      query: { limit: 20, academicPeriodId, classId, subPeriodId },
     } as any),
   })
 

@@ -90,6 +90,7 @@ interface PedagogicalAlertsCardsProps {
   courseId?: string
   levelId?: string
   classId?: string
+  subPeriodId?: string
 }
 
 export function PedagogicalAlertsCards({
@@ -97,8 +98,9 @@ export function PedagogicalAlertsCards({
   courseId,
   levelId,
   classId,
+  subPeriodId,
 }: PedagogicalAlertsCardsProps) {
-  const query = { academicPeriodId, courseId, levelId, classId }
+  const query = { academicPeriodId, courseId, levelId, classId, subPeriodId }
 
   return (
     <DashboardCardBoundary
@@ -112,6 +114,7 @@ export function PedagogicalAlertsCards({
         courseId={courseId}
         levelId={levelId}
         classId={classId}
+        subPeriodId={subPeriodId}
       />
     </DashboardCardBoundary>
   )
@@ -122,12 +125,13 @@ function PedagogicalAlertsCardsContent({
   courseId,
   levelId,
   classId,
+  subPeriodId,
 }: PedagogicalAlertsCardsProps) {
   const [selectedAlert, setSelectedAlert] = useState<AlertKey | null>(null)
 
   const { data, isLoading } = useQuery(
     api.api.v1.dashboard.escolaPedagogicalAlerts.queryOptions({
-      query: { academicPeriodId, courseId, levelId, classId },
+      query: { academicPeriodId, courseId, levelId, classId, subPeriodId },
     } as any)
   )
 
