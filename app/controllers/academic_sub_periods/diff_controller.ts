@@ -28,13 +28,26 @@ const diffSubPeriodsValidator = vine.compile(
   })
 )
 
-function subPeriodToObject(subPeriod: AcademicSubPeriod) {
+type SubPeriodInfo = {
+  id: string
+  name: string
+  order: number
+  startDate: string
+  endDate: string
+}
+
+type DiffItem =
+  | { type: 'added'; new: Omit<SubPeriodInfo, 'id'> }
+  | { type: 'removed'; old: SubPeriodInfo }
+  | { type: 'modified'; old: SubPeriodInfo; new: Omit<SubPeriodInfo, 'id'> }
+
+function subPeriodToObject(subPeriod: AcademicSubPeriod): SubPeriodInfo {
   return {
     id: subPeriod.id,
     name: subPeriod.name,
     order: subPeriod.order,
-    startDate: subPeriod.startDate.toISODate(),
-    endDate: subPeriod.endDate.toISODate(),
+    startDate: subPeriod.startDate.toISODate()!,
+    endDate: subPeriod.endDate.toISODate()!,
   }
 }
 
@@ -81,7 +94,7 @@ export default class DiffSubPeriodsController {
     const startDate = academicPeriod.startDate
     const endDate = academicPeriod.endDate
 
-    const diff: Record<string, unknown>[] = []
+    const diff: DiffItem[] = []
 
     for (let i = 0; i < Math.max(existingSubPeriods.length, count); i++) {
       const existing = existingSubPeriods[i]
@@ -101,8 +114,8 @@ export default class DiffSubPeriodsController {
           new: {
             name: newName,
             order: i + 1,
-            startDate: subStartDate.toISODate(),
-            endDate: subEndDate.toISODate(),
+            startDate: subStartDate.toISODate()!,
+            endDate: subEndDate.toISODate()!,
           },
         })
       } else if (existing && !newName) {
@@ -130,8 +143,8 @@ export default class DiffSubPeriodsController {
             new: {
               name: newName,
               order: i + 1,
-              startDate: subStartDate.toISODate(),
-              endDate: subEndDate.toISODate(),
+              startDate: subStartDate.toISODate()!,
+              endDate: subEndDate.toISODate()!,
             },
           })
         }

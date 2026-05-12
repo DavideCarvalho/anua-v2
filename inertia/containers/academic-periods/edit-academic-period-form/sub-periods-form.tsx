@@ -35,23 +35,6 @@ import {
 import { api } from '~/lib/api'
 import { useAuthUser } from '~/stores/auth_store'
 
-interface DiffItem {
-  type: 'added' | 'removed' | 'modified'
-  old?: {
-    id: string
-    name: string
-    order: number
-    startDate: string
-    endDate: string
-  }
-  new?: {
-    name: string
-    order: number
-    startDate: string
-    endDate: string
-  }
-}
-
 interface SchoolData {
   id: string
   name: string
@@ -321,10 +304,32 @@ export function SubPeriodsForm({
   const [editingSubPeriod, setEditingSubPeriod] = useState<SubPeriod | null>(null)
   const [showDiffDialog, setShowDiffDialog] = useState(false)
   const [localSubPeriods, setLocalSubPeriods] = useState<Record<string, unknown>[] | null>(null)
-  const [diffData, setDiffData] = useState<DiffItem[] | null>(null)
-  const [isLoadingDiff, setIsLoadingDiff] = useState(false)
 
-  // Register save callback: returns generated sub-periods if user generated them
+  const diffMutation = useMutation(api.api.v1.academicSubPeriods.diff.mutationOptions())
+
+  async function handleOpenDiffDialog(open: boolean) {
+    setShowDiffDialog(open)
+    if (open && schoolId) {
+      try {
+        await diffMutation.mutateAsync({
+          body: {
+            academicPeriodId,
+            schoolId,
+            periodStructure: (resolvedPeriodStructure as
+              | 'BIMESTRAL'
+              | 'TRIMESTRAL'
+              | 'SEMESTRAL'
+              | 'ANUAL'
+              | undefined
+              | null) || undefined,
+          },
+        })
+      } catch (error: any) {
+        toast.error(error?.message || 'Erro ao calcular diferenças')
+      }
+    }
+  }
+
   useEffect(() => {
     if (saveRef) {
       saveRef.current = () => localSubPeriods
@@ -333,34 +338,6 @@ export function SubPeriodsForm({
       if (saveRef) saveRef.current = null
     }
   }, [saveRef, localSubPeriods])
-
-  const diffMutation = useMutation(api.api.v1.academicSubPeriods.diff.mutationOptions())
-
-  const fetchDiff = async () => {
-    if (!schoolId) return
-
-    setIsLoadingDiff(true)
-    try {
-      const result = await diffMutation.mutateAsync({
-        body: {
-          academicPeriodId,
-          schoolId,
-          periodStructure: (resolvedPeriodStructure as
-            | 'BIMESTRAL'
-            | 'TRIMESTRAL'
-            | 'SEMESTRAL'
-            | 'ANUAL'
-            | undefined
-            | null) || undefined,
-        },
-      })
-      setDiffData(result.data as unknown as DiffItem[])
-    } catch (error: any) {
-      toast.error(error?.message || 'Erro ao calcular diferenças')
-    } finally {
-      setIsLoadingDiff(false)
-    }
-  }
 
   const handleGenerate = async (overwrite: boolean = false) => {
     if (!schoolId) {
@@ -720,10 +697,7 @@ export function SubPeriodsForm({
         }}
       />
 
-      <Dialog open={showDiffDialog} onOpenChange={(open) => {
-        setShowDiffDialog(open)
-        if (open) fetchDiff()
-      }}>
+      <Dialog open={showDiffDialog} onOpenChange={handleOpenDiffDialog}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>Alterar estrutura de períodos</DialogTitle>
@@ -741,11 +715,11 @@ export function SubPeriodsForm({
             </DialogDescription>
           </DialogHeader>
 
-          {isLoadingDiff ? (
+          {diffMutation.isPending ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ) : diffData && diffData.length > 0 ? (
+          ) : diffMutation.data?.data && diffMutation.data.data.length > 0 ? (
             <>
               <div className="py-2 max-h-[400px] overflow-y-auto">
                 <div className="rounded-md border overflow-hidden">
@@ -759,7 +733,7 @@ export function SubPeriodsForm({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {diffData.map((item, index) => {
+                      {diffMutation.data.data.map((item, index) => {
                         if (item.type === 'removed' && item.old) {
                           return (
                             <tr key={`removed-${index}`} className="bg-red-50 dark:bg-red-950/20">
@@ -876,7 +850,7 @@ export function SubPeriodsForm({
             </Button>
             <Button
               type="button"
-              disabled={generateMutation.isPending || isLoadingDiff}
+              disabled={generateMutation.isPending || diffMutation.isPending}
               onClick={() => handleGenerate(true)}
             >
               {generateMutation.isPending ? 'Aplicando...' : 'Confirmar'}
