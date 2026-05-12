@@ -33,14 +33,12 @@ export default class ReconcileSubPeriodAssignmentsJob extends Job<ReconcileSubPe
       if (!subStart || !subEnd) continue
 
       await Assignment.query()
-        .whereNull('subPeriodId')
         .where('academicPeriodId', academicPeriodId)
         .where('dueDate', '>=', subStart)
         .where('dueDate', '<=', subEnd)
         .update({ subPeriodId: subPeriod.id })
 
       await Exam.query()
-        .whereNull('subPeriodId')
         .where('academicPeriodId', academicPeriodId)
         .where('examDate', '>=', subStart)
         .where('examDate', '<=', subEnd)
