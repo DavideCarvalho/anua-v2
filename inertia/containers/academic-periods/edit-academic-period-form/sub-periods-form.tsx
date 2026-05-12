@@ -307,26 +307,26 @@ export function SubPeriodsForm({
 
   const diffMutation = useMutation(api.api.v1.academicSubPeriods.diff.mutationOptions())
 
-  async function handleOpenDiffDialog(open: boolean) {
-    setShowDiffDialog(open)
-    if (open && schoolId) {
-      try {
-        await diffMutation.mutateAsync({
-          body: {
-            academicPeriodId,
-            schoolId,
-            periodStructure: (resolvedPeriodStructure as
-              | 'BIMESTRAL'
-              | 'TRIMESTRAL'
-              | 'SEMESTRAL'
-              | 'ANUAL'
-              | undefined
-              | null) || undefined,
-          },
-        })
-      } catch (error: any) {
-        toast.error(error?.message || 'Erro ao calcular diferenças')
-      }
+  async function handleOpenDiffDialog() {
+    setShowDiffDialog(true)
+    if (!schoolId) return
+
+    try {
+      await diffMutation.mutateAsync({
+        body: {
+          academicPeriodId,
+          schoolId,
+          periodStructure: (resolvedPeriodStructure as
+            | 'BIMESTRAL'
+            | 'TRIMESTRAL'
+            | 'SEMESTRAL'
+            | 'ANUAL'
+            | undefined
+            | null) || undefined,
+        },
+      })
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao calcular diferenças')
     }
   }
 
@@ -563,7 +563,7 @@ export function SubPeriodsForm({
                       <Button
                         onClick={() =>
                           subPeriods.length > 0 && countMismatch
-                            ? setShowDiffDialog(true)
+                            ? handleOpenDiffDialog()
                             : handleGenerate(false)
                         }
                         disabled={
@@ -697,7 +697,7 @@ export function SubPeriodsForm({
         }}
       />
 
-      <Dialog open={showDiffDialog} onOpenChange={handleOpenDiffDialog}>
+      <Dialog open={showDiffDialog} onOpenChange={setShowDiffDialog}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>Alterar estrutura de períodos</DialogTitle>
