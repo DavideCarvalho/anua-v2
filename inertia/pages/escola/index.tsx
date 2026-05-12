@@ -35,6 +35,7 @@ import {
   type EscolaDashboardViewMode,
   writeEscolaDashboardViewMode,
 } from '../../lib/escola-dashboard-view-mode'
+import { SubPeriodFilter } from '../../containers/academic-periods/components/sub-period-filter'
 import { api } from '~/lib/api'
 
 function UnreadMessagesBadge() {
@@ -498,6 +499,7 @@ export default function EscolaDashboard() {
                     courseId: 'all',
                     levelId: 'all',
                     classId: 'all',
+                    subPeriodId: 'all',
                   })
                 }}
               >
@@ -515,6 +517,16 @@ export default function EscolaDashboard() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {pedagogicalFilters.academicPeriodId !== 'all' && (
+                <SubPeriodFilter
+                  academicPeriodId={pedagogicalFilters.academicPeriodId}
+                  value={pedagogicalFilters.subPeriodId}
+                  onChange={(value) =>
+                    setPedagogicalFilters((prev) => ({ ...prev, subPeriodId: value }))
+                  }
+                />
+              )}
 
               <Select
                 value={pedagogicalFilters.courseId}
@@ -719,6 +731,7 @@ export default function EscolaDashboard() {
                       courseId: 'all',
                       levelId: 'all',
                       classId: 'all',
+                      subPeriodId: 'all',
                     })
                   }}
                 >
@@ -736,6 +749,16 @@ export default function EscolaDashboard() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                {pedagogicalFilters.academicPeriodId !== 'all' && (
+                  <SubPeriodFilter
+                    academicPeriodId={pedagogicalFilters.academicPeriodId}
+                    value={pedagogicalFilters.subPeriodId}
+                    onChange={(value) =>
+                      setPedagogicalFilters((prev) => ({ ...prev, subPeriodId: value }))
+                    }
+                  />
+                )}
 
                 <Select
                   value={pedagogicalFilters.courseId}
