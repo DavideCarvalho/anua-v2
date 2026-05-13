@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bot, Send, User, AlertCircle, Loader2, BrainCircuit } from 'lucide-react'
+import { componentRegistry } from './ai-components'
 import { Transmit } from '@adonisjs/transmit-client'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
@@ -29,6 +30,7 @@ export function AiChat() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const toolResultsRef = useRef<Record<string, any>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -64,7 +66,7 @@ export function AiChat() {
       const subscription = getTransmit()!.subscription(channel)
       await subscription.create()
 
-      subscription.onMessage((data: { type: string; text?: string }) => {
+      subscription.onMessage((data: { type: string; text?: string; name?: string; data?: any }) => {
         if (data.type === 'chunk' && data.text) {
           assistantContent += data.text
           setMessages((prev) => {
@@ -72,6 +74,23 @@ export function AiChat() {
             updated[updated.length - 1] = { role: 'assistant', content: assistantContent }
             return updated
           })
+        }
+        if (data.type === 'component' && data.name) {
+          toolResultsRef.current[data.name] = data.data
+          const Component = componentRegistry[data.name]
+          if (Component) {
+            setMessages((prev) => {
+              const updated = [...prev]
+              const lastIdx = updated.length - 1
+              const prevContent = updated[lastIdx]?.content || ''
+              updated[lastIdx] = {
+                role: 'assistant',
+                content: prevContent + '
+[COMPONENT:' + data.name + ']',
+              }
+              return updated
+            })
+          }
         }
       })
 
@@ -146,6 +165,24 @@ export function AiChat() {
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-muted-foreground">Pensando...</span>
+                  </div>
+                ) : message.content?.includes('[COMPONENT:') ? (
+                  <div>
+                    {message.content.split('[COMPONENT:').map((part, i) => {
+                      if (i === 0) return <p key={i} className="whitespace-pre-wrap">{part}</p>
+                      const endIdx = part.indexOf(']')
+                      if (endIdx === -1) return <p key={i} className="whitespace-pre-wrap">{part}</p>
+                      const compName = part.substring(0, endIdx)
+                      const rest = part.substring(endIdx + 1)
+                      const Component = componentRegistry[compName]
+                      const compData = toolResultsRef.current[compName]
+                      return (
+                        <div key={i}>
+                          {Component && compData ? <Component {...compData} /> : null}
+                          {rest ? <p className="whitespace-pre-wrap pt-2">{rest}</p> : null}
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : (
                   <p className="whitespace-pre-wrap">{message.content}</p>

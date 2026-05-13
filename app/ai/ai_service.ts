@@ -10,7 +10,7 @@ export class AiService {
     threadId: string | undefined,
     message: string,
     personaId: string,
-    ctx: { schoolId: string; userId: string; onChunk?: (text: string) => void; onDone?: () => void }
+    ctx: { schoolId: string; userId: string; onChunk?: (text: string) => void; onDone?: () => void; onComponent?: (name: string, data: any) => void }
   ) {
     const persona = getPersona(personaId)
     const thread = await this.loadOrCreateThread(threadId, personaId, ctx)
@@ -36,8 +36,13 @@ export class AiService {
             }
           }
         : undefined,
-      onFinish: async ({ text }) => {
+      onFinish: async ({ text, toolResults }) => {
         ctx.onDone?.()
+        if (toolResults && toolResults.length > 0 && ctx.onComponent) {
+          for (const tr of toolResults) {
+            ctx.onComponent(tr.toolName, (tr as any).result)
+          }
+        }
         if (text) {
           await AiThreadMessage.create({
             threadId: thread.id,
