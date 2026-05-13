@@ -86,4 +86,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   ASAAS_API_KEY: Env.schema.string(),
   ASAAS_WEBHOOK_URL: Env.schema.string(),
   ASAAS_WEBHOOK_TOKEN: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring Arara WhatsApp gateway
+  |----------------------------------------------------------
+  */
+  ARARA_API_KEY: Env.schema.string.optional(),
+  ARARA_WEBHOOK_SECRET: Env.schema.string.optional(),
 })

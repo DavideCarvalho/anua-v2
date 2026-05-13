@@ -102,6 +102,7 @@
     "@adonisjs/shield": "9.0.0",
     "@adonisjs/static": "2.0.0",
     "@adonisjs/vite": "5.1.1",
+    "@ararahq/sdk": "^1.8.0",
     "@aws-sdk/client-s3": "^3.1041.0",
     "@aws-sdk/s3-request-presigner": "^3.1041.0",
     "@base-ui/react": "^1.2.0",
