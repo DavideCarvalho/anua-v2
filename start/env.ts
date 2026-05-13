@@ -87,6 +87,15 @@ export default await Env.create(new URL('../', import.meta.url), {
   ASAAS_WEBHOOK_URL: Env.schema.string(),
   ASAAS_WEBHOOK_TOKEN: Env.schema.string(),
 
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring CroF AI provider
+  |----------------------------------------------------------
+  */
+  CROF_API_URL: Env.schema.string({ format: 'url' }),
+  CROF_API_KEY: Env.schema.string(),
+  CROF_MODEL: Env.schema.string(),
+
   REDIS_HOST: Env.schema.string({ format: 'host' }),
   REDIS_PORT: Env.schema.number(),
   REDIS_PASSWORD: Env.schema.secret.optional()
