@@ -128,7 +128,6 @@ const navigation: NavItem[] = [
   },
   {
     title: 'Assistente IA',
-    route: 'web.escola.ia.index',
     href: '/escola/ia',
     icon: Bot,
   },
@@ -264,32 +263,65 @@ function NavItemComponent({
         </button>
         {isOpen && (
           <div className="ml-6 mt-1 space-y-1">
-            {item.children!.map((child) => (
-              <Link
-                key={child.route}
-                route={child.route}
-                routeParams={undefined}
-                className={cn(
-                  'flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
-                  pathname === child.href
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                )}
-              >
-                <span>{child.title}</span>
-                {child.badge}
-              </Link>
-            ))}
+            {item.children!.map((child) =>
+              child.route ? (
+                <Link
+                  key={child.route}
+                  route={child.route}
+                  routeParams={undefined}
+                  className={cn(
+                    'flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
+                    pathname === child.href
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <span>{child.title}</span>
+                  {child.badge}
+                </Link>
+              ) : (
+                <a
+                  key={child.href}
+                  href={child.href}
+                  className={cn(
+                    'flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
+                    pathname === child.href
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <span>{child.title}</span>
+                  {child.badge}
+                </a>
+              )
+            )}
           </div>
         )}
       </div>
     )
   }
 
+  if (item.route) {
+    return (
+      <Link
+        route={item.route}
+        routeParams={undefined}
+        className={cn(
+          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          pathname === item.href
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+        )}
+      >
+        <Icon className="h-4 w-4" />
+        {item.title}
+      </Link>
+    )
+  }
+
   return (
-    <Link
-      route={item.route}
-      routeParams={undefined}
+    <a
+      href={item.href}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         pathname === item.href
@@ -299,7 +331,7 @@ function NavItemComponent({
     >
       <Icon className="h-4 w-4" />
       {item.title}
-    </Link>
+    </a>
   )
 }
 
