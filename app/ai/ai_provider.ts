@@ -1,16 +1,16 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import env from '#start/env'
 
-let _provider: ReturnType<typeof createOpenAI> | null = null
+let providerInstance: ReturnType<typeof createOpenAI> | null = null
 
 export function getProvider() {
-  if (!_provider) {
-    _provider = createOpenAI({
+  if (!providerInstance) {
+    providerInstance = createOpenAI({
       baseURL: env.get('CROF_API_URL', 'https://crof.ai/v1'),
       apiKey: env.get('CROF_API_KEY'),
     })
   }
-  return _provider
+  return providerInstance
 }
 
 export function getModel(model?: string) {

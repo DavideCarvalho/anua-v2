@@ -21,12 +21,8 @@ export default class ChatController {
     const streamResult = await aiService.chat(threadId, message, persona ?? 'gestor', {
       schoolId,
       userId: user.id,
-      onChunk: channel
-        ? (text) => transmit.broadcast(channel, { type: 'chunk', text })
-        : undefined,
-      onDone: channel
-        ? () => transmit.broadcast(channel, { type: 'done' })
-        : undefined,
+      onChunk: channel ? (text) => transmit.broadcast(channel, { type: 'chunk', text }) : undefined,
+      onDone: channel ? () => transmit.broadcast(channel, { type: 'done' }) : undefined,
     })
 
     if (!channel && streamResult) {
@@ -36,7 +32,10 @@ export default class ChatController {
       try {
         while (true) {
           const { done, value } = await reader.read()
-          if (done) { response.response.end(); break }
+          if (done) {
+            response.response.end()
+            break
+          }
           response.response.write(value)
         }
       } catch {

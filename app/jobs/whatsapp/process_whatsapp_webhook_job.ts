@@ -1,5 +1,8 @@
 import { Job } from '@adonisjs/queue'
-import { processWhatsAppWebhook, WhatsAppWebhookPayload } from '#start/jobs/process_whatsapp_webhook'
+import {
+  processWhatsAppWebhook,
+  type WhatsAppWebhookPayload,
+} from '#start/jobs/process_whatsapp_webhook'
 
 export default class ProcessWhatsAppWebhookJob extends Job<WhatsAppWebhookPayload> {
   static readonly jobName = 'ProcessWhatsAppWebhookJob'

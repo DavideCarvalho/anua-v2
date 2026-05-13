@@ -1,5 +1,5 @@
 import { tool as aiTool } from 'ai'
-import { z } from 'zod'
+import { type z } from 'zod'
 
 export type ToolConfig = {
   name: string

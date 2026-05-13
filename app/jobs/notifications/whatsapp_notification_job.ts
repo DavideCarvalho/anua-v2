@@ -1,5 +1,8 @@
 import { Job } from '@adonisjs/queue'
-import { sendWhatsAppNotification, WhatsAppNotificationPayload } from '#start/jobs/send_whatsapp_notification'
+import {
+  sendWhatsAppNotification,
+  type WhatsAppNotificationPayload,
+} from '#start/jobs/send_whatsapp_notification'
 
 export default class WhatsAppNotificationJob extends Job<WhatsAppNotificationPayload> {
   static readonly jobName = 'WhatsAppNotificationJob'

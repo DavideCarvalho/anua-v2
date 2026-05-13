@@ -29,11 +29,13 @@ export class AiService {
       system: persona.systemPrompt,
       messages: [...history, { role: 'user' as const, content: message }],
       tools: Object.keys(tools).length > 0 ? tools : undefined,
-      onChunk: ctx.onChunk ? ({ chunk }) => {
-        if (chunk.type === 'text-delta' && chunk.text) {
-          ctx.onChunk!(chunk.text)
-        }
-      } : undefined,
+      onChunk: ctx.onChunk
+        ? ({ chunk }) => {
+            if (chunk.type === 'text-delta' && chunk.text) {
+              ctx.onChunk!(chunk.text)
+            }
+          }
+        : undefined,
       onFinish: async ({ text }) => {
         ctx.onDone?.()
         if (text) {
@@ -91,7 +93,8 @@ export class AiService {
   private async generateThreadTitle(threadId: string, firstMessage: string) {
     const { text } = await generateText({
       model: getModel('gpt-4o-mini'),
-      system: 'Gere um título curto (máximo 6 palavras) para esta conversa. Responda apenas o título, sem aspas.',
+      system:
+        'Gere um título curto (máximo 6 palavras) para esta conversa. Responda apenas o título, sem aspas.',
       messages: [{ role: 'user' as const, content: firstMessage }],
     })
     await AiThread.query().where('id', threadId).update({ title: text.trim() })

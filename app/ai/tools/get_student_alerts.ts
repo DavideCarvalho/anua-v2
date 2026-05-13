@@ -5,7 +5,8 @@ import db from '@adonisjs/lucid/services/db'
 
 export const getStudentAlerts = defineTool({
   name: 'getStudentAlerts',
-  description: 'Obtém alertas pedagógicos atuais: alunos com risco por nota, frequência baixa, inadimplência. Retorna lista com nome, tipo de risco e descrição.',
+  description:
+    'Obtém alertas pedagógicos atuais: alunos com risco por nota, frequência baixa, inadimplência. Retorna lista com nome, tipo de risco e descrição.',
   parameters: z.object({
     schoolId: z.string().describe('ID da escola'),
     limit: z.number().default(10).describe('Máximo de alertas'),

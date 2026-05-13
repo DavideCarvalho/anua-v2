@@ -59,16 +59,24 @@ export class NotificationService {
     const dispatches: Promise<unknown>[] = []
 
     if (enableEmail && user.email) {
-      const { default: EmailNotificationJob } = await import('#jobs/notifications/email_notification_job')
+      const { default: EmailNotificationJob } =
+        await import('#jobs/notifications/email_notification_job')
       dispatches.push(
-        safeDispatch(EmailNotificationJob.dispatch({ notificationId: notification.id, userId }), notification.id)
+        safeDispatch(
+          EmailNotificationJob.dispatch({ notificationId: notification.id, userId }),
+          notification.id
+        )
       )
     }
 
     if (enableWhatsApp && user.phone) {
-      const { default: WhatsAppNotificationJob } = await import('#jobs/notifications/whatsapp_notification_job')
+      const { default: WhatsAppNotificationJob } =
+        await import('#jobs/notifications/whatsapp_notification_job')
       dispatches.push(
-        safeDispatch(WhatsAppNotificationJob.dispatch({ notificationId: notification.id, userId }), notification.id)
+        safeDispatch(
+          WhatsAppNotificationJob.dispatch({ notificationId: notification.id, userId }),
+          notification.id
+        )
       )
     }
 

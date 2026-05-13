@@ -1,5 +1,8 @@
 import { Job } from '@adonisjs/queue'
-import { sendEmailNotification, EmailNotificationPayload } from '#start/jobs/send_email_notification'
+import {
+  sendEmailNotification,
+  type EmailNotificationPayload,
+} from '#start/jobs/send_email_notification'
 
 export default class EmailNotificationJob extends Job<EmailNotificationPayload> {
   static readonly jobName = 'EmailNotificationJob'

@@ -10,14 +10,16 @@ export const getSchoolStats = defineTool({
     schoolId: z.string().describe('ID da escola'),
   }),
   execute: async ({ schoolId }) => {
-    const studentCount = await db.from('Student')
+    const studentCount = await db
+      .from('Student')
       .join('User', 'User.id', 'Student.id')
       .where('User.schoolId', schoolId)
       .whereNull('User.deletedAt')
       .count('* as total')
       .first()
 
-    const overdueTotal = await db.from('StudentPayment')
+    const overdueTotal = await db
+      .from('StudentPayment')
       .join('Student', 'Student.id', 'StudentPayment.studentId')
       .join('User', 'User.id', 'Student.id')
       .where('User.schoolId', schoolId)
