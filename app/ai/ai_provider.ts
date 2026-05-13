@@ -15,5 +15,5 @@ export function getProvider() {
 
 export function getModel(model?: string) {
   const provider = getProvider()
-  return provider(model ?? env.get('CROF_MODEL', 'gpt-4o'))
+  return provider.chat(model ?? env.get('CROF_MODEL', 'gpt-4o'))
 }
