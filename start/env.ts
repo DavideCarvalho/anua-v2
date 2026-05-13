@@ -100,11 +100,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring CroF AI provider
   |----------------------------------------------------------
   */
-  CROF_API_URL: Env.schema.string({ format: 'url' }),
-  CROF_API_KEY: Env.schema.string(),
-  CROF_MODEL: Env.schema.string(),
+  CROF_API_URL: Env.schema.string.optional(),
+  CROF_API_KEY: Env.schema.string.optional(),
+  CROF_MODEL: Env.schema.string.optional(),
 
-  REDIS_HOST: Env.schema.string({ format: 'host' }),
-  REDIS_PORT: Env.schema.number(),
+  REDIS_HOST: Env.schema.string.optional(),
+  REDIS_PORT: Env.schema.number.optional(),
   REDIS_PASSWORD: Env.schema.secret.optional()
 })
