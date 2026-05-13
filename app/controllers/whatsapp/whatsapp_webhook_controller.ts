@@ -1,21 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { getAraraService } from '#services/arara_service'
+import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
 
 export default class WhatsAppWebhookController {
   async handle({ request, response }: HttpContext) {
-    const signature = request.header('X-Arara-Signature') || ''
-    const rawBody = request.raw()
+    const expectedToken = env.get('ARARA_WEBHOOK_TOKEN')
+    const receivedToken = request.header('x-webhook-token') || request.input('token', '')
 
-    if (!rawBody) {
-      return response.status(400).json({ error: 'Empty body' })
-    }
-
-    if (signature) {
-      const araraService = getAraraService()
-      if (!araraService.verifyWebhook(rawBody, signature)) {
-        return response.status(401).json({ error: 'Invalid signature' })
-      }
+    if (expectedToken && receivedToken !== expectedToken) {
+      logger.warn({ receivedToken }, 'Invalid webhook token')
+      return response.status(401).json({ error: 'Invalid webhook token' })
     }
 
     const event = request.input('event')

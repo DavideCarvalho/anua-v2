@@ -93,5 +93,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   ARARA_API_KEY: Env.schema.string.optional(),
-  ARARA_WEBHOOK_SECRET: Env.schema.string.optional(),
+  ARARA_WEBHOOK_TOKEN: Env.schema.string.optional(),
 })
