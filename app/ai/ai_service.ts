@@ -22,7 +22,7 @@ export class AiService {
       content: message,
     })
 
-    const tools = toolRegistry.forPersona(personaId)
+    const tools = toolRegistry.forPersona(personaId, { schoolId: ctx.schoolId, userId: ctx.userId })
 
     const result = streamText({
       model: getModel(),
