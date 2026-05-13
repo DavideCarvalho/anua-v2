@@ -99,6 +99,7 @@ declare module '@adonisjs/inertia/types' {
     'escola/gamificacao/index': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/index.tsx'))['default']>
     'escola/gamificacao/rankings': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/rankings.tsx'))['default']>
     'escola/gamificacao/recompensas': ExtractProps<(typeof import('../../inertia/pages/escola/gamificacao/recompensas.tsx'))['default']>
+    'escola/ia': ExtractProps<(typeof import('../../inertia/pages/escola/ia.tsx'))['default']>
     'escola/index': ExtractProps<(typeof import('../../inertia/pages/escola/index.tsx'))['default']>
     'escola/lojas/index': ExtractProps<(typeof import('../../inertia/pages/escola/lojas/index.tsx'))['default']>
     'escola/lojas/show': ExtractProps<(typeof import('../../inertia/pages/escola/lojas/show.tsx'))['default']>

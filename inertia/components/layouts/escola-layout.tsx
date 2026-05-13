@@ -18,6 +18,7 @@ import {
   ChevronDown,
   School,
   Megaphone,
+  Bot,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { buttonVariants } from '../ui/button'
@@ -124,6 +125,12 @@ const navigation: NavItem[] = [
     route: 'web.escola.comunicados',
     href: '/escola/comunicados',
     icon: Megaphone,
+  },
+  {
+    title: 'Assistente IA',
+    route: 'web.escola.ia.index',
+    href: '/escola/ia',
+    icon: Bot,
   },
   {
     title: 'Cantina',

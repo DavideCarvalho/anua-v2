@@ -105,6 +105,7 @@ import { registerPedagogicalCalendarApiRoutes } from './pedagogical_calendar.js'
 import { registerGameApiRoutes } from './game.js'
 import { registerEscolaInquiriesApiRoutes } from './escola_inquiries.js'
 import { registerAcademicSubPeriodApiRoutes } from './academic_sub_periods.js'
+import { registerAiApiRoutes } from './ai.js'
 import { registerWhatsappApiRoutes } from './whatsapp.js'
 
 export function registerApiRoutes() {
@@ -193,5 +194,6 @@ export function registerApiRoutes() {
   registerGameApiRoutes()
   registerEscolaInquiriesApiRoutes()
   registerAcademicSubPeriodApiRoutes()
+  registerAiApiRoutes()
   registerWhatsappApiRoutes()
 }

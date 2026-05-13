@@ -94,4 +94,18 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   ARARA_API_KEY: Env.schema.string.optional(),
   ARARA_WEBHOOK_TOKEN: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring CroF AI provider
+  |----------------------------------------------------------
+  */
+  CROF_API_URL: Env.schema.string({ format: 'url' }),
+  CROF_API_KEY: Env.schema.string(),
+  CROF_MODEL: Env.schema.string(),
+
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+  REDIS_PASSWORD: Env.schema.secret.optional()
+>>>>>>> origin/main
 })
