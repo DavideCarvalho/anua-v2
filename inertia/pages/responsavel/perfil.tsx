@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react'
 import React, { useState } from 'react'
-import { User, Mail, Phone, MapPin, Shield, Pencil } from 'lucide-react'
+import { User, Mail, MapPin, Shield, Pencil, MessageCircle } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
@@ -17,9 +17,11 @@ import {
 } from '../../components/ui/dialog'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
+import { Switch } from '../../components/ui/switch'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import { useAuthUser } from '../../stores/auth_store'
+import { toast } from 'sonner'
 
 export default function PerfilPage() {
   const user = useAuthUser()
@@ -27,6 +29,7 @@ export default function PerfilPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [name, setName] = useState(user?.name || '')
   const [phone, setPhone] = useState(user?.phone || '')
+  const [whatsappEnabled, setWhatsappEnabled] = useState(user?.whatsappContact ?? false)
 
   const queryClient = useQueryClient()
   const updateProfile = useMutation(api.api.v1.responsavel.api.updateProfile.mutationOptions())
@@ -91,8 +94,13 @@ export default function PerfilPage() {
               </div>
               {user?.phone && (
                 <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <MessageCircle className="h-4 w-4 text-green-500" />
                   <span>{user.phone}</span>
+                  {user.whatsappContact && (
+                    <Badge variant="outline" className="text-green-600 border-green-300">
+                      WhatsApp
+                    </Badge>
+                  )}
                 </div>
               )}
               {user && 'address' in user && typeof user.address === 'string' && user.address && (
@@ -126,6 +134,37 @@ export default function PerfilPage() {
                   <p className="text-sm text-muted-foreground">Receba notificacoes no navegador</p>
                 </div>
                 <Badge variant="outline">Ativo</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="h-4 w-4 text-green-500" />
+                  <div>
+                    <p className="font-medium">Notificacoes por WhatsApp</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.phone ? `Receba no ${user.phone}` : 'Adicione um telefone no perfil'}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={whatsappEnabled}
+                  onCheckedChange={async (checked) => {
+                    if (!user?.phone) {
+                      toast.error('Adicione um telefone no perfil primeiro')
+                      return
+                    }
+                    try {
+                      await updateProfile.mutateAsync({
+                        body: { name: user.name, phone: user.phone, whatsappContact: checked },
+                      })
+                      queryClient.invalidateQueries({ queryKey: ['user'] })
+                      setWhatsappEnabled(checked)
+                      toast.success(checked ? 'WhatsApp ativado' : 'WhatsApp desativado')
+                    } catch {
+                      toast.error('Erro ao atualizar')
+                    }
+                  }}
+                  disabled={!user?.phone || updateProfile.isPending}
+                />
               </div>
 
               <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
