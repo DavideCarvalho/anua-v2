@@ -19,3 +19,4 @@
 /// <reference path="../../config/queue.ts" />
 /// <reference path="../../config/redis.ts" />
 /// <reference path="../../config/server_stats.ts" />
+/// <reference path="../../config/transmit.ts" />

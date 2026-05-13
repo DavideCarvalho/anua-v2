@@ -41,6 +41,9 @@ export type ScannedRoutes = {
     'server-stats.filters': { paramsTuple?: []; params?: {} }
     'server-stats.filters.create': { paramsTuple?: []; params?: {} }
     'server-stats.filters.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'event_stream': { paramsTuple?: []; params?: {} }
+    'subscribe': { paramsTuple?: []; params?: {} }
+    'unsubscribe': { paramsTuple?: []; params?: {} }
     'web.home': { paramsTuple?: []; params?: {} }
     'web.matriculaOnline': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'schoolSlug': ParamValue,'academicPeriodSlug': ParamValue,'courseSlug': ParamValue} }
     'web.agendar': { paramsTuple?: []; params?: {} }
@@ -754,6 +757,7 @@ export type ScannedRoutes = {
     'server-stats.jobs.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'server-stats.config': { paramsTuple?: []; params?: {} }
     'server-stats.filters': { paramsTuple?: []; params?: {} }
+    'event_stream': { paramsTuple?: []; params?: {} }
     'web.home': { paramsTuple?: []; params?: {} }
     'web.matriculaOnline': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'schoolSlug': ParamValue,'academicPeriodSlug': ParamValue,'courseSlug': ParamValue} }
     'web.agendar': { paramsTuple?: []; params?: {} }
@@ -1191,6 +1195,7 @@ export type ScannedRoutes = {
     'server-stats.jobs.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'server-stats.config': { paramsTuple?: []; params?: {} }
     'server-stats.filters': { paramsTuple?: []; params?: {} }
+    'event_stream': { paramsTuple?: []; params?: {} }
     'web.home': { paramsTuple?: []; params?: {} }
     'web.matriculaOnline': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'schoolSlug': ParamValue,'academicPeriodSlug': ParamValue,'courseSlug': ParamValue} }
     'web.agendar': { paramsTuple?: []; params?: {} }
@@ -1646,6 +1651,8 @@ export type ScannedRoutes = {
   POST: {
     'server-stats.jobs.retry': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'server-stats.filters.create': { paramsTuple?: []; params?: {} }
+    'subscribe': { paramsTuple?: []; params?: {} }
+    'unsubscribe': { paramsTuple?: []; params?: {} }
     'api.v1.auth.login': { paramsTuple?: []; params?: {} }
     'api.v1.auth.send_code': { paramsTuple?: []; params?: {} }
     'api.v1.auth.verify_code': { paramsTuple?: []; params?: {} }

@@ -10,11 +10,12 @@ type Message = {
   content: string
 }
 
+let transmitInstance: Transmit | null = null
 function getTransmit() {
-  if (typeof window !== 'undefined') {
-    return new Transmit({ baseUrl: window.location.origin })
+  if (typeof window !== 'undefined' && !transmitInstance) {
+    transmitInstance = new Transmit({ baseUrl: window.location.origin })
   }
-  return null
+  return transmitInstance
 }
 
 export function AiChat() {

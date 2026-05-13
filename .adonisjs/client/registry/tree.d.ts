@@ -55,6 +55,9 @@ export interface ApiDefinition {
       delete: typeof routes['server-stats.filters.delete']
     }
   }
+  eventStream: typeof routes['event_stream']
+  subscribe: typeof routes['subscribe']
+  unsubscribe: typeof routes['unsubscribe']
   web: {
     home: typeof routes['web.home']
     matriculaOnline: typeof routes['web.matriculaOnline']
