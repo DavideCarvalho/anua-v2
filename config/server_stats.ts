@@ -4,7 +4,6 @@ import {
   appCollector,
   dbPoolCollector,
   httpCollector,
-  logCollector,
   processCollector,
   systemCollector,
 } from 'adonisjs-server-stats/collectors'
@@ -18,7 +17,6 @@ export default defineConfig({
     systemCollector(),
     httpCollector({ maxRecords: 10_000 }),
     dbPoolCollector({ connectionName: 'postgres' }),
-    logCollector({ logPath: 'logs/adonisjs.log' }),
     appCollector(),
   ],
   toolbar: {
