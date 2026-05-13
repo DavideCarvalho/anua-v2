@@ -10,7 +10,12 @@ type Message = {
   content: string
 }
 
-const transmit = new Transmit({ baseUrl: window.location.origin })
+function getTransmit() {
+  if (typeof window !== 'undefined') {
+    return new Transmit({ baseUrl: window.location.origin })
+  }
+  return null
+}
 
 export function AiChat() {
   const [messages, setMessages] = useState<Message[]>([
@@ -55,7 +60,7 @@ export function AiChat() {
     let assistantContent = ''
 
     try {
-      const subscription = transmit.subscription(channel)
+      const subscription = getTransmit()!.subscription(channel)
       await subscription.create()
 
       subscription.onMessage((data: { type: string; text?: string }) => {
