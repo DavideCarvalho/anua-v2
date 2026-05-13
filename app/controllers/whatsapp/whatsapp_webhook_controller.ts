@@ -18,6 +18,6 @@ export default class WhatsAppWebhookController {
 
     await ProcessWhatsAppWebhookJob.dispatch({ event, data })
 
-    return response.ok({ received: true })
+    return response.noContent()
   }
 }
