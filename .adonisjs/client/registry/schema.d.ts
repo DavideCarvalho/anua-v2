@@ -1459,6 +1459,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_gamificacao_desafios_page_controller').default['handle']>>>
     }
   }
+  'web.escola.ia.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/ia'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_ia_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_ia_page_controller').default['handle']>>>
+    }
+  }
   'web.escola.configuracoes': {
     methods: ["GET","HEAD"]
     pattern: '/escola/configuracoes'
@@ -8501,6 +8513,66 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/destroy').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/academic_sub_periods/destroy').default['handle']>>>
+    }
+  }
+  'api.v1.ai.chat': {
+    methods: ["POST"]
+    pattern: '/api/v1/ai/chat'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/ai').chatValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/ai').chatValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/chat_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/chat_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.ai.threads.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/ai/threads'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/list_threads_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/list_threads_controller').default['handle']>>>
+    }
+  }
+  'api.v1.ai.threads.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/ai/threads/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/show_thread_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/show_thread_controller').default['handle']>>>
+    }
+  }
+  'api.v1.ai.threads.delete': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/ai/threads/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/delete_thread_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/delete_thread_controller').default['handle']>>>
+    }
+  }
+  'api.v1.whatsapp.webhook': {
+    methods: ["POST"]
+    pattern: '/api/v1/whatsapp/webhook'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/whatsapp/whatsapp_webhook_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/whatsapp/whatsapp_webhook_controller').default['handle']>>>
     }
   }
   'api.v1.csp_report': {

@@ -47,6 +47,12 @@ export const controllers = {
   agreements: {
     CreateAgreement: () => import('#controllers/agreements/create_agreement_controller'),
   },
+  ai: {
+    Chat: () => import('#controllers/ai/chat_controller'),
+    DeleteThread: () => import('#controllers/ai/delete_thread_controller'),
+    ListThreads: () => import('#controllers/ai/list_threads_controller'),
+    ShowThread: () => import('#controllers/ai/show_thread_controller'),
+  },
   analytics: {
     GetAttendanceOverview: () => import('#controllers/analytics/get_attendance_overview_controller'),
     GetAttendanceTrends: () => import('#controllers/analytics/get_attendance_trends_controller'),
@@ -453,6 +459,7 @@ export const controllers = {
       ShowGradePage: () => import('#controllers/pages/escola/show_grade_page_controller'),
       ShowHistoricoFinanceiroPage: () => import('#controllers/pages/escola/show_historico_financeiro_page_controller'),
       ShowHorariosPage: () => import('#controllers/pages/escola/show_horarios_page_controller'),
+      ShowIaPage: () => import('#controllers/pages/escola/show_ia_page_controller'),
       ShowImpressaoPage: () => import('#controllers/pages/escola/show_impressao_page_controller'),
       ShowInadimplenciaPage: () => import('#controllers/pages/escola/show_inadimplencia_page_controller'),
       ShowLojaDetailPage: () => import('#controllers/pages/escola/show_loja_detail_page_controller'),
@@ -847,5 +854,8 @@ export const controllers = {
     CreateWalletTopUp: () => import('#controllers/wallet_top_ups/create_wallet_top_up_controller'),
     ListWalletTopUps: () => import('#controllers/wallet_top_ups/list_wallet_top_ups_controller'),
     ShowWalletTopUp: () => import('#controllers/wallet_top_ups/show_wallet_top_up_controller'),
+  },
+  whatsapp: {
+    WhatsappWebhook: () => import('#controllers/whatsapp/whatsapp_webhook_controller'),
   },
 }

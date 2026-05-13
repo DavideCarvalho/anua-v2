@@ -4,6 +4,7 @@
  */
 
 /// <reference path="../../adonisrc.ts" />
+/// <reference path="../../config/arara.ts" />
 /// <reference path="../../config/attachment.ts" />
 /// <reference path="../../config/auditing.ts" />
 /// <reference path="../../config/auth.ts" />
@@ -16,5 +17,5 @@
 /// <reference path="../../config/mail.ts" />
 /// <reference path="../../config/otel.ts" />
 /// <reference path="../../config/queue.ts" />
+/// <reference path="../../config/redis.ts" />
 /// <reference path="../../config/server_stats.ts" />
-/// <reference path="../../config/arara.ts" />

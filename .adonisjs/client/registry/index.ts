@@ -732,6 +732,12 @@ const routes = {
     tokens: [{"old":"/escola/gamificacao/desafios","type":0,"val":"escola","end":""},{"old":"/escola/gamificacao/desafios","type":0,"val":"gamificacao","end":""},{"old":"/escola/gamificacao/desafios","type":0,"val":"desafios","end":""}],
     types: placeholder as Registry['web.escola.gamificacao.desafios']['types'],
   },
+  'web.escola.ia.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/ia',
+    tokens: [{"old":"/escola/ia","type":0,"val":"escola","end":""},{"old":"/escola/ia","type":0,"val":"ia","end":""}],
+    types: placeholder as Registry['web.escola.ia.index']['types'],
+  },
   'web.escola.configuracoes': {
     methods: ["GET","HEAD"],
     pattern: '/escola/configuracoes',
@@ -4253,6 +4259,36 @@ const routes = {
     pattern: '/api/v1/academic-sub-periods/:id',
     tokens: [{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"api","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":0,"val":"academic-sub-periods","end":""},{"old":"/api/v1/academic-sub-periods/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.academic_sub_periods.destroy']['types'],
+  },
+  'api.v1.ai.chat': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/chat',
+    tokens: [{"old":"/api/v1/ai/chat","type":0,"val":"api","end":""},{"old":"/api/v1/ai/chat","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/chat","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/chat","type":0,"val":"chat","end":""}],
+    types: placeholder as Registry['api.v1.ai.chat']['types'],
+  },
+  'api.v1.ai.threads.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/ai/threads',
+    tokens: [{"old":"/api/v1/ai/threads","type":0,"val":"api","end":""},{"old":"/api/v1/ai/threads","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/threads","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/threads","type":0,"val":"threads","end":""}],
+    types: placeholder as Registry['api.v1.ai.threads.list']['types'],
+  },
+  'api.v1.ai.threads.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/ai/threads/:id',
+    tokens: [{"old":"/api/v1/ai/threads/:id","type":0,"val":"api","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"threads","end":""},{"old":"/api/v1/ai/threads/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.ai.threads.show']['types'],
+  },
+  'api.v1.ai.threads.delete': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/ai/threads/:id',
+    tokens: [{"old":"/api/v1/ai/threads/:id","type":0,"val":"api","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"threads","end":""},{"old":"/api/v1/ai/threads/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.ai.threads.delete']['types'],
+  },
+  'api.v1.whatsapp.webhook': {
+    methods: ["POST"],
+    pattern: '/api/v1/whatsapp/webhook',
+    tokens: [{"old":"/api/v1/whatsapp/webhook","type":0,"val":"api","end":""},{"old":"/api/v1/whatsapp/webhook","type":0,"val":"v1","end":""},{"old":"/api/v1/whatsapp/webhook","type":0,"val":"whatsapp","end":""},{"old":"/api/v1/whatsapp/webhook","type":0,"val":"webhook","end":""}],
+    types: placeholder as Registry['api.v1.whatsapp.webhook']['types'],
   },
   'api.v1.csp_report': {
     methods: ["POST"],

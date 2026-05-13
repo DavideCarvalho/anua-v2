@@ -171,6 +171,9 @@ export interface ApiDefinition {
         recompensas: typeof routes['web.escola.gamificacao.recompensas']
         desafios: typeof routes['web.escola.gamificacao.desafios']
       }
+      ia: {
+        index: typeof routes['web.escola.ia.index']
+      }
       configuracoes: typeof routes['web.escola.configuracoes']
     }
     responsavel: {
@@ -1031,6 +1034,17 @@ export interface ApiDefinition {
         diff: typeof routes['api.v1.academic_sub_periods.diff']
         update: typeof routes['api.v1.academic_sub_periods.update']
         destroy: typeof routes['api.v1.academic_sub_periods.destroy']
+      }
+      ai: {
+        chat: typeof routes['api.v1.ai.chat']
+        threads: {
+          list: typeof routes['api.v1.ai.threads.list']
+          show: typeof routes['api.v1.ai.threads.show']
+          delete: typeof routes['api.v1.ai.threads.delete']
+        }
+      }
+      whatsapp: {
+        webhook: typeof routes['api.v1.whatsapp.webhook']
       }
       cspReport: typeof routes['api.v1.csp_report']
     }

@@ -125,6 +125,7 @@ export type ScannedRoutes = {
     'web.escola.gamificacao.conquistas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.recompensas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.desafios': { paramsTuple?: []; params?: {} }
+    'web.escola.ia.index': { paramsTuple?: []; params?: {} }
     'web.escola.configuracoes': { paramsTuple?: []; params?: {} }
     'web.responsavel.dashboard': { paramsTuple?: []; params?: {} }
     'web.responsavel.notas': { paramsTuple?: []; params?: {} }
@@ -712,6 +713,11 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.academic_sub_periods.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.chat': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.threads.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }
   GET: {
@@ -832,6 +838,7 @@ export type ScannedRoutes = {
     'web.escola.gamificacao.conquistas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.recompensas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.desafios': { paramsTuple?: []; params?: {} }
+    'web.escola.ia.index': { paramsTuple?: []; params?: {} }
     'web.escola.configuracoes': { paramsTuple?: []; params?: {} }
     'web.responsavel.dashboard': { paramsTuple?: []; params?: {} }
     'web.responsavel.notas': { paramsTuple?: []; params?: {} }
@@ -1147,6 +1154,8 @@ export type ScannedRoutes = {
     'api.v1.escola.inquiries.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.academic_sub_periods.index': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   HEAD: {
     'drive.fs.serve': { paramsTuple: [...ParamValue[]]; params: {'*': ParamValue[]} }
@@ -1266,6 +1275,7 @@ export type ScannedRoutes = {
     'web.escola.gamificacao.conquistas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.recompensas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.desafios': { paramsTuple?: []; params?: {} }
+    'web.escola.ia.index': { paramsTuple?: []; params?: {} }
     'web.escola.configuracoes': { paramsTuple?: []; params?: {} }
     'web.responsavel.dashboard': { paramsTuple?: []; params?: {} }
     'web.responsavel.notas': { paramsTuple?: []; params?: {} }
@@ -1581,6 +1591,8 @@ export type ScannedRoutes = {
     'api.v1.escola.inquiries.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.academic_sub_periods.index': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
     'server-stats.cache.delete': { paramsTuple: [ParamValue]; params: {'key': ParamValue} }
@@ -1629,6 +1641,7 @@ export type ScannedRoutes = {
     'api.v1.purchase_requests.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.impersonation.clear': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.threads.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   POST: {
     'server-stats.jobs.retry': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1786,6 +1799,8 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.store': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.generate': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.chat': { paramsTuple?: []; params?: {} }
+    'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }
   PUT: {
