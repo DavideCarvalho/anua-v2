@@ -1,4 +1,3 @@
-import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import { defineConfig } from 'adonisjs-server-stats'
 import {
