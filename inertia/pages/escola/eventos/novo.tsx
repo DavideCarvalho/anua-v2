@@ -35,6 +35,8 @@ import { Checkbox } from '~/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Label } from '~/components/ui/label'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { DatePicker } from '~/components/ui/date-picker'
 import { api } from '~/lib/api'
 import { getEducationType, type AcademicPeriodSegment } from '~/lib/formatters'
 import type { SharedProps } from '~/lib/types'
@@ -87,12 +89,14 @@ function areStringArraysEqual(a: string[], b: string[]) {
   return true
 }
 
-function buildIsoDateTime(date: string, time?: string) {
+function buildIsoDateTime(date: Date, time?: string) {
   if (!time) {
-    return new Date(date).toISOString()
+    return date.toISOString()
   }
 
-  return new Date(`${date}T${time}:00`).toISOString()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const dateStr = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+  return new Date(`${dateStr}T${time}:00`).toISOString()
 }
 
 const formSchema = z
@@ -109,8 +113,8 @@ const formSchema = z
       EventType.SPORTS_EVENT,
       EventType.OTHER,
     ]),
-    startsAt: z.string().min(1, 'Data de início é obrigatória'),
-    endsAt: z.string().optional(),
+    startsAt: z.date().optional(),
+    endsAt: z.date().optional(),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
     isAllDay: z.boolean().default(false),
@@ -129,6 +133,14 @@ const formSchema = z
     audienceClassIds: z.array(z.string()).default([]),
   })
   .superRefine((values, ctx) => {
+    if (!values.startsAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Data de início é obrigatória',
+        path: ['startsAt'],
+      })
+    }
+
     if (values.audienceWholeSchool) {
       return
     }
@@ -168,12 +180,13 @@ export default function NovoEventoPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as Resolver<FormValues>,
+    mode: 'onBlur',
     defaultValues: {
       title: '',
       description: '',
       type: EventType.ACADEMIC_EVENT,
-      startsAt: '',
-      endsAt: '',
+      startsAt: undefined,
+      endsAt: undefined,
       startTime: '',
       endTime: '',
       isAllDay: false,
@@ -382,14 +395,18 @@ export default function NovoEventoPage() {
       return
     }
 
+    if (!formValues.startsAt) {
+      toast.error('Data de início é obrigatória')
+      return
+    }
+
     const startsAtIso = buildIsoDateTime(
       formValues.startsAt,
       formValues.isAllDay ? undefined : formValues.startTime
     )
 
-    const endsAtBaseDate = formValues.endsAt || formValues.startsAt
     const endsAtIso = formValues.endsAt
-      ? buildIsoDateTime(endsAtBaseDate, formValues.isAllDay ? undefined : formValues.endTime)
+      ? buildIsoDateTime(formValues.endsAt, formValues.isAllDay ? undefined : formValues.endTime)
       : undefined
 
     const eventPayload: CreateEventBody = {
@@ -583,7 +600,12 @@ export default function NovoEventoPage() {
                         <FormItem>
                           <FormLabel>Data de início *</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <DatePicker
+                              date={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              placeholder="Selecione a data de início"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -596,7 +618,13 @@ export default function NovoEventoPage() {
                         <FormItem>
                           <FormLabel>Data de término</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <DatePicker
+                              date={field.value}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              placeholder="Selecione a data de término"
+                              fromDate={form.watch('startsAt') ?? undefined}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -923,10 +951,10 @@ export default function NovoEventoPage() {
                     <strong>Titulo:</strong> {values.title || '-'}
                   </p>
                   <p>
-                    <strong>Inicio:</strong> {values.startsAt || '-'}
+                    <strong>Inicio:</strong> {values.startsAt ? format(values.startsAt, 'dd/MM/yyyy') : '-'}
                   </p>
                   <p>
-                    <strong>Termino:</strong> {values.endsAt || '-'}
+                    <strong>Termino:</strong> {values.endsAt ? format(values.endsAt, 'dd/MM/yyyy') : '-'}
                   </p>
                   <p>
                     <strong>Horário:</strong>{' '}

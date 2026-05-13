@@ -17,6 +17,7 @@ export function registerPublicPageRoutes() {
   // Public home
   router.on('/').renderInertia('home', {}).as('home')
 
+
   // Public enrollment page
   router
     .get('/:schoolSlug/matricula-online/:academicPeriodSlug/:courseSlug', [

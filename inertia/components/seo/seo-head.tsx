@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react'
-import { useEffect } from 'react'
 
 interface SeoHeadProps {
   title: string
@@ -13,7 +12,7 @@ interface SeoHeadProps {
 }
 
 const BASE_URL = 'https://anuaapp.com.br'
-const DEFAULT_IMAGE = `${BASE_URL}/og-image.png` // PNG for social media compatibility
+const DEFAULT_IMAGE = `${BASE_URL}/og-image.png`
 
 export function SeoHead({
   title,
@@ -28,45 +27,18 @@ export function SeoHead({
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL
   const fullTitle = `${title} | Anuá - Sistema de Gestão Escolar`
 
-  // Handle structured data via useEffect to avoid SSR issues
-  useEffect(() => {
-    if (!structuredData) return
-
-    const schemas = Array.isArray(structuredData) ? structuredData : [structuredData]
-    const scriptIds: string[] = []
-
-    schemas.forEach((schema, index) => {
-      const scriptId = `structured-data-${index}`
-      scriptIds.push(scriptId)
-
-      // Remove existing script if present
-      const existing = document.getElementById(scriptId)
-      if (existing) existing.remove()
-
-      // Create new script
-      const script = document.createElement('script')
-      script.id = scriptId
-      script.type = 'application/ld+json'
-      script.textContent = JSON.stringify(schema)
-      document.head.appendChild(script)
-    })
-
-    return () => {
-      scriptIds.forEach((id) => {
-        const script = document.getElementById(id)
-        if (script) script.remove()
-      })
-    }
-  }, [structuredData])
+  const schemas = structuredData
+    ? Array.isArray(structuredData)
+      ? structuredData
+      : [structuredData]
+    : []
 
   return (
     <Head title={title}>
-      {/* Basic Meta Tags */}
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={fullUrl} />
 
-      {/* Robots */}
       {noIndex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
@@ -76,7 +48,6 @@ export function SeoHead({
         />
       )}
 
-      {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:title" content={fullTitle} />
@@ -87,18 +58,24 @@ export function SeoHead({
       <meta property="og:site_name" content="Anuá" />
       <meta property="og:locale" content="pt_BR" />
 
-      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={fullUrl} />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
 
-      {/* Additional Meta */}
       <meta name="author" content="Anuá" />
       <meta name="application-name" content="Anuá" />
       <meta name="apple-mobile-web-app-title" content="Anuá" />
       <meta name="theme-color" content="#9333ea" />
+
+      {schemas.map((schema, index) => (
+        <script
+          key={`structured-data-${index}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
     </Head>
   )
 }
