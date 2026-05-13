@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Settings, Bell, Mail, Smartphone } from 'lucide-react'
+import { Settings, Bell, Mail, Smartphone, MessageCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Switch } from '../../components/ui/switch'
@@ -235,12 +235,16 @@ function PreferenceSection({
                   />
                 </div>
 
-                <div className="flex items-center justify-between opacity-50">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Smartphone className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-sm">Push (Em breve)</Label>
+                    <MessageCircle className="h-4 w-4 text-green-500" />
+                    <Label className="text-sm">WhatsApp</Label>
                   </div>
-                  <Switch checked={false} disabled={true} />
+                  <Switch
+                    checked={grouped[type]?.whatsApp ?? false}
+                    onCheckedChange={() => onToggle(type, 'whatsapp', grouped[type]?.whatsApp ?? false)}
+                    disabled={isUpdating}
+                  />
                 </div>
               </div>
             </div>

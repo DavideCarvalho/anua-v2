@@ -89,6 +89,14 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   /*
   |----------------------------------------------------------
+  | Variables for configuring Arara WhatsApp gateway
+  |----------------------------------------------------------
+  */
+  ARARA_API_KEY: Env.schema.string.optional(),
+  ARARA_WEBHOOK_TOKEN: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
   | Variables for configuring CroF AI provider
   |----------------------------------------------------------
   */
@@ -99,4 +107,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   REDIS_HOST: Env.schema.string({ format: 'host' }),
   REDIS_PORT: Env.schema.number(),
   REDIS_PASSWORD: Env.schema.secret.optional()
+>>>>>>> origin/main
 })

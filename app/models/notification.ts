@@ -87,6 +87,12 @@ export default class Notification extends BaseModel {
   @column({ columnName: 'emailError' })
   declare emailError: string | null
 
+  @column.dateTime({ columnName: 'whatsappSentAt' })
+  declare whatsappSentAt: DateTime | null
+
+  @column({ columnName: 'whatsappError' })
+  declare whatsappError: string | null
+
   @column({ columnName: 'actionUrl' })
   declare actionUrl: string | null
 

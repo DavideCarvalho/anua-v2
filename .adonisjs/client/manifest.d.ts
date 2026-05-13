@@ -17,3 +17,4 @@
 /// <reference path="../../config/otel.ts" />
 /// <reference path="../../config/queue.ts" />
 /// <reference path="../../config/server_stats.ts" />
+/// <reference path="../../config/arara.ts" />

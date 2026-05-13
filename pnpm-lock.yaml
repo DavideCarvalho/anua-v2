@@ -71,6 +71,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.63
         version: 3.0.63(zod@4.3.6)
+      '@ararahq/sdk':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@aws-sdk/client-s3':
         specifier: ^3.1041.0
         version: 3.1041.0
@@ -929,6 +932,9 @@ packages:
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
+
+  '@ararahq/sdk@1.8.0':
+    resolution: {integrity: sha512-X6V5QWAFYvzJt/wnd8an/NwcHCElQyQz7ovr84d6C03CFlqIIpsPKghpyumLowV3IONig2sNMwncnnqptwm6EA==}
 
   '@arr/every@1.0.1':
     resolution: {integrity: sha512-UQFQ6SgyJ6LX42W8rHCs8KVc0JS0tzVL9ct4XYedJukskYVWTo49tNiMEK9C2HTyarbNiT/RVIRSY82vH+6sTg==}
@@ -8343,6 +8349,12 @@ snapshots:
     dependencies:
       package-manager-detector: 1.6.0
       tinyexec: 1.0.2
+
+  '@ararahq/sdk@1.8.0':
+    dependencies:
+      axios: 1.13.6
+    transitivePeerDependencies:
+      - debug
 
   '@arr/every@1.0.1': {}
 
