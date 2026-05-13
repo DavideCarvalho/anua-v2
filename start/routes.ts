@@ -1,6 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import { registerApiRoutes } from '#start/routes/api/index'
 import { registerPageRoutes } from '#start/routes/pages/index'
+import '#start/routes/transmit'
 
 // Page Routes (Inertia)
 registerPageRoutes()
