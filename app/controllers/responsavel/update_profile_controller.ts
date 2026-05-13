@@ -19,6 +19,7 @@ export default class UpdateProfileController {
     user.merge({
       name: data.name,
       phone: data.phone || null,
+      whatsappContact: data.whatsappContact ?? user.whatsappContact,
     })
     await user.save()
 
@@ -29,6 +30,7 @@ export default class UpdateProfileController {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        whatsappContact: user.whatsappContact,
       },
     })
   }
