@@ -85,8 +85,7 @@ export function AiChat() {
               const prevContent = updated[lastIdx]?.content || ''
               updated[lastIdx] = {
                 role: 'assistant',
-                content: prevContent + '
-[COMPONENT:' + data.name + ']',
+                content: prevContent + '\n[COMPONENT:' + data.name + ']',
               }
               return updated
             })

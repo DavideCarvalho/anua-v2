@@ -6,29 +6,60 @@ import db from '@adonisjs/lucid/services/db'
 type ToolCtx = { schoolId: string; userId: string }
 
 const ALLOWED_TABLES = [
-  'Student', 'User', 'Class', 'Course', 'Level', 'Subject', 'Teacher',
-  'Attendance', 'Assignment', 'StudentPayment', 'Invoice', 'Contract',
-  'StudentGamification', 'Achievement', 'PointTransaction', 'Leaderboard',
-  'CanteenPurchase', 'CanteenMeal', 'CanteenMealReservation',
-  'Event', 'Notification', 'Occurence', 'SchoolAnnouncement',
+  'Student',
+  'User',
+  'Class',
+  'Course',
+  'Level',
+  'Subject',
+  'Teacher',
+  'Attendance',
+  'Assignment',
+  'StudentPayment',
+  'Invoice',
+  'Contract',
+  'StudentGamification',
+  'Achievement',
+  'PointTransaction',
+  'Leaderboard',
+  'CanteenPurchase',
+  'CanteenMeal',
+  'CanteenMealReservation',
+  'Event',
+  'Notification',
+  'Occurence',
+  'SchoolAnnouncement',
 ]
 
 const FORBIDDEN_KEYWORDS = [
-  'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'TRUNCATE',
-  'GRANT', 'REVOKE', 'EXECUTE', 'COPY', '--', '/*', '$$',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'DROP',
+  'ALTER',
+  'CREATE',
+  'TRUNCATE',
+  'GRANT',
+  'REVOKE',
+  'EXECUTE',
+  'COPY',
+  '--',
+  '/*',
+  '$$',
 ]
 
 export function createGetSchema(_ctx: ToolCtx) {
   return defineTool({
     name: 'getSchema',
-    description: 'Retorna a estrutura das tabelas do banco de dados da escola (nome da tabela, colunas, tipos). Use antes de queryDatabase para saber quais colunas existem.',
+    description:
+      'Retorna a estrutura das tabelas do banco de dados da escola (nome da tabela, colunas, tipos). Use antes de queryDatabase para saber quais colunas existem.',
     parameters: z.object({}),
     execute: async () => {
       const tables = await db.rawQuery(`
         SELECT table_name, column_name, data_type, is_nullable
         FROM information_schema.columns
         WHERE table_schema = 'public'
-          AND table_name IN (${ALLOWED_TABLES.map(t => `'${t}'`).join(',')})
+          AND table_name IN (${ALLOWED_TABLES.map((t) => `'${t}'`).join(',')})
         ORDER BY table_name, ordinal_position
       `)
 
@@ -49,9 +80,14 @@ export function createGetSchema(_ctx: ToolCtx) {
 export function createQueryDatabase(ctx: ToolCtx) {
   return defineTool({
     name: 'queryDatabase',
-    description: 'Executa uma consulta SQL SELECT no banco da escola. Máximo 100 resultados. Use getSchema primeiro para descobrir as colunas.',
+    description:
+      'Executa uma consulta SQL SELECT no banco da escola. Máximo 100 resultados. Use getSchema primeiro para descobrir as colunas.',
     parameters: z.object({
-      sql: z.string().describe('Consulta SQL SELECT para executar. Use "schoolId" como placeholder para o ID da escola atual. Ex: SELECT * FROM "Student" WHERE "schoolId" = schoolId'),
+      sql: z
+        .string()
+        .describe(
+          'Consulta SQL SELECT para executar. Use "schoolId" como placeholder para o ID da escola atual. Ex: SELECT * FROM "Student" WHERE "schoolId" = schoolId'
+        ),
       limit: z.number().default(20).describe('Máximo de resultados (max 100)'),
     }),
     execute: async ({ sql, limit }) => {
