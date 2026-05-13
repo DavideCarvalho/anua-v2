@@ -1,4 +1,5 @@
 import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 import { defineConfig } from 'adonisjs-server-stats'
 import {
   appCollector,
@@ -17,7 +18,7 @@ const collectors = [
   appCollector(),
 ]
 
-if (!app.inProduction) {
+if (env.get('NODE_ENV') === 'development') {
   collectors.push(logCollector({ logPath: 'logs/adonisjs.log' }))
 }
 
@@ -26,10 +27,10 @@ export default defineConfig({
   statsEndpoint: '/admin/api/server-stats',
   realtime: true,
   collectors,
-  toolbar: !app.inProduction,
-  dashboard: !app.inProduction,
+  toolbar: env.get('NODE_ENV') === 'development',
+  dashboard: env.get('NODE_ENV') === 'development',
   advanced: {
     channelName: 'admin/server-stats',
   },
-  authorize: (_ctx) => !app.inProduction,
+  authorize: (_ctx) => env.get('NODE_ENV') === 'development',
 })
