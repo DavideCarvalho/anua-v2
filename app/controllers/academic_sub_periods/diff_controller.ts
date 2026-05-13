@@ -25,13 +25,17 @@ const diffSubPeriodsValidator = vine.compile(
     academicPeriodId: vine.string(),
     schoolId: vine.string().optional(),
     periodStructure: vine.enum(['BIMESTRAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL']).optional(),
-    currentSubPeriods: vine.array(vine.object({
-      id: vine.string().optional(),
-      name: vine.string(),
-      order: vine.number(),
-      startDate: vine.string(),
-      endDate: vine.string(),
-    })).optional(),
+    currentSubPeriods: vine
+      .array(
+        vine.object({
+          id: vine.string().optional(),
+          name: vine.string(),
+          order: vine.number(),
+          startDate: vine.string(),
+          endDate: vine.string(),
+        })
+      )
+      .optional(),
   })
 )
 
@@ -93,11 +97,11 @@ export default class DiffSubPeriodsController {
 
     const existingSubPeriods: SubPeriodInfo[] = payload.currentSubPeriods
       ? payload.currentSubPeriods.sort((a, b) => a.order - b.order)
-      : (await AcademicSubPeriod.query()
+      : await AcademicSubPeriod.query()
           .where('academicPeriodId', academicPeriod.id)
           .whereNull('deletedAt')
-          .orderBy('order', 'asc'))
-          .map(subPeriodToObject)
+          .orderBy('order', 'asc')
+          .then((rows) => rows.map(subPeriodToObject))
 
     const count = PERIOD_COUNT[periodStructure]
     const names = PERIOD_NAMES[periodStructure]
