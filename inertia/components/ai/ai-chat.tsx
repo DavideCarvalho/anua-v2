@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bot, Send, User, AlertCircle, Loader2, BrainCircuit } from 'lucide-react'
+import { Transmit } from '@adonisjs/transmit-client'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { cn } from '../../lib/utils'
@@ -9,20 +10,7 @@ type Message = {
   content: string
 }
 
-function parseSseChunk(chunk: string): string | null {
-  for (const line of chunk.split('\n')) {
-    const trimmed = line.trim()
-    if (trimmed.startsWith('0:')) {
-      try {
-        const parsed = JSON.parse(trimmed.slice(2))
-        if (typeof parsed === 'string') return parsed
-      } catch {
-        return null
-      }
-    }
-  }
-  return null
-}
+const transmit = new Transmit({ baseUrl: window.location.origin })
 
 export function AiChat() {
   const [messages, setMessages] = useState<Message[]>([
@@ -62,14 +50,32 @@ export function AiChat() {
     setIsLoading(true)
     setMessages((prev) => [...prev, { role: 'assistant', content: '' }])
 
+    const clientId = crypto.randomUUID()
+    const channel = `ai:${clientId}`
+    let assistantContent = ''
+
     try {
+      const subscription = transmit.subscription(channel)
+      await subscription.create()
+
+      subscription.onMessage((data: { type: string; text?: string }) => {
+        if (data.type === 'chunk' && data.text) {
+          assistantContent += data.text
+          setMessages((prev) => {
+            const updated = [...prev]
+            updated[updated.length - 1] = { role: 'assistant', content: assistantContent }
+            return updated
+          })
+        }
+      })
+
       const response = await fetch('/api/v1/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           message: trimmedInput,
-          history: messages.map((m) => ({ role: m.role, content: m.content })),
+          clientId,
         }),
       })
 
@@ -77,27 +83,17 @@ export function AiChat() {
         throw new Error(`Erro na resposta do servidor (${response.status})`)
       }
 
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error('Stream nao disponivel')
+      await new Promise<void>((resolve) => {
+        const unsub = subscription.onMessage((data: { type: string }) => {
+          if (data.type === 'done') {
+            unsub()
+            resolve()
+          }
+        })
+        setTimeout(() => resolve(), 30000)
+      })
 
-      const decoder = new TextDecoder()
-      let assistantContent = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const text = decoder.decode(value, { stream: true })
-        const parsed = parseSseChunk(text)
-        if (parsed !== null) {
-          assistantContent += parsed
-          setMessages((prev) => {
-            const updated = [...prev]
-            updated[updated.length - 1] = { role: 'assistant', content: assistantContent }
-            return updated
-          })
-        }
-      }
+      await subscription.delete()
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Ocorreu um erro inesperado'
       setError(message)

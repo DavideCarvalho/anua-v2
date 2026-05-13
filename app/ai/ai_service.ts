@@ -10,7 +10,7 @@ export class AiService {
     threadId: string | undefined,
     message: string,
     personaId: string,
-    ctx: { schoolId: string; userId: string }
+    ctx: { schoolId: string; userId: string; onChunk?: (text: string) => void; onDone?: () => void }
   ) {
     const persona = getPersona(personaId)
     const thread = await this.loadOrCreateThread(threadId, personaId, ctx)
@@ -29,7 +29,13 @@ export class AiService {
       system: persona.systemPrompt,
       messages: [...history, { role: 'user' as const, content: message }],
       tools: Object.keys(tools).length > 0 ? tools : undefined,
+      onChunk: ctx.onChunk ? ({ chunk }) => {
+        if (chunk.type === 'text-delta' && chunk.text) {
+          ctx.onChunk!(chunk.text)
+        }
+      } : undefined,
       onFinish: async ({ text }) => {
+        ctx.onDone?.()
         if (text) {
           await AiThreadMessage.create({
             threadId: thread.id,
