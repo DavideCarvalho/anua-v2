@@ -1,0 +1,24 @@
+diff --git a/build/src/dialects/pg.js b/build/src/dialects/pg.js
+index 6ed468dd3cfafca9a1556e4b850d45d066b2321b..dc09ff92468fd3ee784e719d5b3ef9072f72f44b 100644
+--- a/build/src/dialects/pg.js
++++ b/build/src/dialects/pg.js
+@@ -65,10 +65,18 @@ export class PgDialect {
+      * Returns the primary key column names for a given table
+      */
+     async getPrimaryKeys(tableName) {
++        // Quote cada parte do identificador antes do cast ::regclass. Sem
++        // isso, 'public.Absence'::regclass faz case-fold pra 'public.absence'
++        // e tabelas PascalCase (naming strategy do Prisma) não são achadas.
++        // (anua-v2 patch — bug em @adonisjs/lucid 22.1.1)
++        const quotedName = tableName
++            .split('.')
++            .map((part) => `"${part.replace(/"/g, '""')}"`)
++            .join('.');
+         const result = await this.client.rawQuery(`SELECT a.attname
+        FROM pg_index i
+        JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+-       WHERE i.indrelid = '${tableName}'::regclass AND i.indisprimary
++       WHERE i.indrelid = '${quotedName}'::regclass AND i.indisprimary
+        ORDER BY a.attnum`);
+         return result.rows.map((row) => row.attname);
+     }

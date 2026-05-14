@@ -1,1 +1,3 @@
 packages: []
+patchedDependencies:
+  '@adonisjs/lucid@22.1.1': patches/@adonisjs__lucid@22.1.1.patch
