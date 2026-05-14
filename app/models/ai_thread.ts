@@ -29,6 +29,9 @@ export default class AiThread extends BaseModel {
   @column({ columnName: 'schoolId' })
   declare schoolId: string | null
 
+  @column()
+  declare channel: 'web' | 'whatsapp'
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
