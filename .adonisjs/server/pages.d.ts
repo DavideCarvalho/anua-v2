@@ -161,5 +161,7 @@ declare module '@adonisjs/inertia/types' {
     'responsavel/ocorrencias': ExtractProps<(typeof import('../../inertia/pages/responsavel/ocorrencias.tsx'))['default']>
     'responsavel/perfil': ExtractProps<(typeof import('../../inertia/pages/responsavel/perfil.tsx'))['default']>
     'responsavel/perguntas': ExtractProps<(typeof import('../../inertia/pages/responsavel/perguntas.tsx'))['default']>
+    'admin/ai/audit': ExtractProps<(typeof import('../../inertia/pages/admin/ai/audit.tsx'))['default']>
+    'admin/ai/tokens': ExtractProps<(typeof import('../../inertia/pages/admin/ai/tokens.tsx'))['default']>
   }
 }

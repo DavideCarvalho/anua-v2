@@ -26,6 +26,8 @@ const ShowSchoolDetailsPageController = () =>
   import('#controllers/pages/admin/show_school_details_page_controller')
 const ShowEditSchoolPageController = () =>
   import('#controllers/pages/admin/show_edit_school_page_controller')
+const ShowAdminAiAuditPageController = () =>
+  import('#controllers/pages/admin/show_admin_ai_audit_page_controller')
 
 export function registerAdminPageRoutes() {
   router
@@ -44,6 +46,10 @@ export function registerAdminPageRoutes() {
         .as('billing.subscriptions')
       router.get('/redes', [ShowAdminRedesPageController]).as('redes')
       router.get('/configuracoes', [ShowAdminConfiguracoesPageController]).as('configuracoes')
+
+      // AI observability
+      router.get('/ai/auditoria', [ShowAdminAiAuditPageController, 'audit']).as('ai.auditoria')
+      router.get('/ai/tokens', [ShowAdminAiAuditPageController, 'tokens']).as('ai.tokens')
 
       // Seguros pages
       router.get('/seguros', [ShowAdminSegurosPageController]).as('seguros.index')

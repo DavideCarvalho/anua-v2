@@ -43,17 +43,19 @@ export const controllers = {
     GetServerStats: () => import('#controllers/admin/get_server_stats_controller'),
     SetImpersonation: () => import('#controllers/admin/set_impersonation_controller'),
     TriggerMissingPayments: () => import('#controllers/admin/trigger_missing_payments_controller'),
+    ListAiToolCalls: () => import('#controllers/admin/list_ai_tool_calls_controller'),
+    GetAiTokenUsageSummary: () => import('#controllers/admin/get_ai_token_usage_summary_controller'),
   },
   agreements: {
     CreateAgreement: () => import('#controllers/agreements/create_agreement_controller'),
   },
   ai: {
-    CancelChatStream: () => import('#controllers/ai/cancel_chat_stream_controller'),
     Chat: () => import('#controllers/ai/chat_controller'),
     DeleteThread: () => import('#controllers/ai/delete_thread_controller'),
     ListThreads: () => import('#controllers/ai/list_threads_controller'),
-    ResumeChatStream: () => import('#controllers/ai/resume_chat_stream_controller'),
     ShowThread: () => import('#controllers/ai/show_thread_controller'),
+    CancelChatStream: () => import('#controllers/ai/cancel_chat_stream_controller'),
+    ResumeChatStream: () => import('#controllers/ai/resume_chat_stream_controller'),
   },
   analytics: {
     GetAttendanceOverview: () => import('#controllers/analytics/get_attendance_overview_controller'),
@@ -401,6 +403,7 @@ export const controllers = {
       ShowEditSchoolPage: () => import('#controllers/pages/admin/show_edit_school_page_controller'),
       ShowSchoolDetailsPage: () => import('#controllers/pages/admin/show_school_details_page_controller'),
       ShowSchoolOnboardingPage: () => import('#controllers/pages/admin/show_school_onboarding_page_controller'),
+      ShowAdminAiAuditPage: () => import('#controllers/pages/admin/show_admin_ai_audit_page_controller'),
     },
     aluno: {
       ShowAlunoCarrinhoPage: () => import('#controllers/pages/aluno/show_aluno_carrinho_page_controller'),

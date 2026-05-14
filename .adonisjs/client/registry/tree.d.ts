@@ -218,6 +218,10 @@ export interface ApiDefinition {
       }
       redes: typeof routes['web.admin.redes']
       configuracoes: typeof routes['web.admin.configuracoes']
+      ai: {
+        auditoria: typeof routes['web.admin.ai.auditoria']
+        tokens: typeof routes['web.admin.ai.tokens']
+      }
       seguros: {
         index: typeof routes['web.admin.seguros.index']
         sinistros: typeof routes['web.admin.seguros.sinistros']
@@ -315,6 +319,20 @@ export interface ApiDefinition {
             resolve: typeof routes['api.v1.responsavel.api.inquiries.resolve']
             markRead: typeof routes['api.v1.responsavel.api.inquiries.mark-read']
           }
+        }
+      }
+      admin: {
+        ai: {
+          toolCalls: typeof routes['api.v1.admin.ai.tool_calls']
+          tokens: {
+            summary: typeof routes['api.v1.admin.ai.tokens.summary']
+          }
+        }
+        schools: {
+          onboarding: typeof routes['api.v1.admin.schools.onboarding']
+        }
+        jobs: {
+          generateMissingPayments: typeof routes['api.v1.admin.jobs.generate_missing_payments']
         }
       }
       asaas: {
@@ -1001,14 +1019,6 @@ export interface ApiDefinition {
         clear: typeof routes['api.v1.impersonation.clear']
         status: typeof routes['api.v1.impersonation.status']
         config: typeof routes['api.v1.impersonation.config']
-      }
-      admin: {
-        schools: {
-          onboarding: typeof routes['api.v1.admin.schools.onboarding']
-        }
-        jobs: {
-          generateMissingPayments: typeof routes['api.v1.admin.jobs.generate_missing_payments']
-        }
       }
       pedagogicalCalendar: {
         index: typeof routes['api.v1.pedagogical_calendar.index']

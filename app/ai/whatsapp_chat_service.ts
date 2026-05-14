@@ -9,6 +9,7 @@ import { computeChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
 import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
+import { recordToolCalls } from './record_tool_calls.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -148,6 +149,16 @@ export class WhatsappChatService {
             usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
         })
       }
+
+      // Audit log: um row por tool call.
+      await recordToolCalls({
+        threadId: thread.id,
+        messageId: assistantMessage.id,
+        userId: user.id,
+        schoolId: user.schoolId,
+        toolCalls: allToolCalls,
+        toolResults: allToolResults,
+      })
 
       // Fire-and-forget — threads de WhatsApp são perenes, sumarização
       // periódica evita o histórico estourar tokens com o tempo.

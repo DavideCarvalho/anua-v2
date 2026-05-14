@@ -98,6 +98,7 @@ import {
   registerAdminOnboardingApiRoutes,
   registerAdminJobsApiRoutes,
   registerAdminStatsApiRoutes,
+  registerAdminAiObservabilityRoutes,
 } from './admin.js'
 import { registerDashboardApiRoutes } from './dashboard.js'
 import { registerResponsavelApiRoutes as registerResponsavelDashboardApiRoutes } from './responsavel.js'
@@ -113,6 +114,7 @@ export function registerApiRoutes() {
   registerDashboardApiRoutes()
   registerResponsavelDashboardApiRoutes()
   registerAdminStatsApiRoutes()
+  registerAdminAiObservabilityRoutes()
   registerAsaasWebhookApiRoutes()
   registerAsaasSubaccountApiRoutes()
   registerSchoolApiRoutes()

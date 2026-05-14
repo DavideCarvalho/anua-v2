@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  Sparkles,
 } from 'lucide-react'
 
 import { ThemeToggle } from '../theme-toggle'
@@ -113,6 +114,24 @@ const navigation: NavItem[] = [
     ],
   },
   { title: 'Seguros', route: 'web.admin.seguros.index', href: '/admin/seguros', icon: Shield },
+  {
+    title: 'IA',
+    route: 'web.admin.ai.auditoria',
+    href: '/admin/ai/auditoria',
+    icon: Sparkles,
+    children: [
+      {
+        title: 'Auditoria',
+        route: 'web.admin.ai.auditoria',
+        href: '/admin/ai/auditoria',
+      },
+      {
+        title: 'Consumo de tokens',
+        route: 'web.admin.ai.tokens',
+        href: '/admin/ai/tokens',
+      },
+    ],
+  },
   {
     title: 'Configurações',
     route: 'web.admin.configuracoes',

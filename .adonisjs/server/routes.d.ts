@@ -161,6 +161,8 @@ export type ScannedRoutes = {
     'web.admin.billing.subscriptions': { paramsTuple?: []; params?: {} }
     'web.admin.redes': { paramsTuple?: []; params?: {} }
     'web.admin.configuracoes': { paramsTuple?: []; params?: {} }
+    'web.admin.ai.auditoria': { paramsTuple?: []; params?: {} }
+    'web.admin.ai.tokens': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.index': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.sinistros': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.faturamento': { paramsTuple?: []; params?: {} }
@@ -232,6 +234,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.create': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.status': { paramsTuple?: []; params?: {} }
@@ -878,6 +882,8 @@ export type ScannedRoutes = {
     'web.admin.billing.subscriptions': { paramsTuple?: []; params?: {} }
     'web.admin.redes': { paramsTuple?: []; params?: {} }
     'web.admin.configuracoes': { paramsTuple?: []; params?: {} }
+    'web.admin.ai.auditoria': { paramsTuple?: []; params?: {} }
+    'web.admin.ai.tokens': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.index': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.sinistros': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.faturamento': { paramsTuple?: []; params?: {} }
@@ -935,6 +941,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.status': { paramsTuple?: []; params?: {} }
     'api.v1.schools.index': { paramsTuple?: []; params?: {} }
     'api.v1.schools.show_by_slug': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
@@ -1318,6 +1326,8 @@ export type ScannedRoutes = {
     'web.admin.billing.subscriptions': { paramsTuple?: []; params?: {} }
     'web.admin.redes': { paramsTuple?: []; params?: {} }
     'web.admin.configuracoes': { paramsTuple?: []; params?: {} }
+    'web.admin.ai.auditoria': { paramsTuple?: []; params?: {} }
+    'web.admin.ai.tokens': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.index': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.sinistros': { paramsTuple?: []; params?: {} }
     'web.admin.seguros.faturamento': { paramsTuple?: []; params?: {} }
@@ -1375,6 +1385,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.status': { paramsTuple?: []; params?: {} }
     'api.v1.schools.index': { paramsTuple?: []; params?: {} }
     'api.v1.schools.show_by_slug': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }

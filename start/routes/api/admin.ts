@@ -22,6 +22,12 @@ const TriggerMissingPaymentsController = () =>
 const GetAdminStatsController = () => import('#controllers/dashboard/get_admin_stats_controller')
 const GetServerStatsController = () => import('#controllers/admin/get_server_stats_controller')
 
+// Admin AI observability
+const ListAiToolCallsController = () =>
+  import('#controllers/admin/list_ai_tool_calls_controller')
+const GetAiTokenUsageSummaryController = () =>
+  import('#controllers/admin/get_ai_token_usage_summary_controller')
+
 export function registerImpersonationApiRoutes() {
   router
     .group(() => {
@@ -68,6 +74,22 @@ export function registerAdminStatsApiRoutes() {
       router.get('/server-stats', [GetServerStatsController]).as('dashboard.server_stats')
     })
     .prefix('/admin')
+    .use([
+      middleware.auth(),
+      middleware.impersonation(),
+      middleware.requireRole(['SUPER_ADMIN', 'ADMIN']),
+    ])
+}
+
+export function registerAdminAiObservabilityRoutes() {
+  router
+    .group(() => {
+      router.get('/tool-calls', [ListAiToolCallsController]).as('admin.ai.tool_calls')
+      router
+        .get('/tokens/summary', [GetAiTokenUsageSummaryController])
+        .as('admin.ai.tokens.summary')
+    })
+    .prefix('/admin/ai')
     .use([
       middleware.auth(),
       middleware.impersonation(),

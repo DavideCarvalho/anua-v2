@@ -16,6 +16,7 @@ import type { ChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
 import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
+import { recordToolCalls } from './record_tool_calls.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -119,6 +120,18 @@ export class AiService {
           if (!thread.title) {
             this.generateThreadTitle(thread.id, userText, req).catch(() => {})
           }
+
+          // Audit log: um row por tool call. Roda DEPOIS do
+          // AiThreadMessage.create() porque cada AiToolCall referencia o
+          // messageId. Não bloqueia o retorno em caso de falha.
+          await recordToolCalls({
+            threadId: thread.id,
+            messageId: assistantMessage.id,
+            userId: req.userId,
+            schoolId: req.schoolId,
+            toolCalls: allToolCalls,
+            toolResults: allToolResults,
+          })
 
           // Fire-and-forget — sumarização não bloqueia a resposta. Se a
           // thread acumulou mensagens suficientes, condensa as antigas pra

@@ -948,6 +948,18 @@ const routes = {
     tokens: [{"old":"/admin/configuracoes","type":0,"val":"admin","end":""},{"old":"/admin/configuracoes","type":0,"val":"configuracoes","end":""}],
     types: placeholder as Registry['web.admin.configuracoes']['types'],
   },
+  'web.admin.ai.auditoria': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/ai/auditoria',
+    tokens: [{"old":"/admin/ai/auditoria","type":0,"val":"admin","end":""},{"old":"/admin/ai/auditoria","type":0,"val":"ai","end":""},{"old":"/admin/ai/auditoria","type":0,"val":"auditoria","end":""}],
+    types: placeholder as Registry['web.admin.ai.auditoria']['types'],
+  },
+  'web.admin.ai.tokens': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/ai/tokens',
+    tokens: [{"old":"/admin/ai/tokens","type":0,"val":"admin","end":""},{"old":"/admin/ai/tokens","type":0,"val":"ai","end":""},{"old":"/admin/ai/tokens","type":0,"val":"tokens","end":""}],
+    types: placeholder as Registry['web.admin.ai.tokens']['types'],
+  },
   'web.admin.seguros.index': {
     methods: ["GET","HEAD"],
     pattern: '/admin/seguros',
@@ -1373,6 +1385,18 @@ const routes = {
     pattern: '/api/v1/admin/server-stats',
     tokens: [{"old":"/api/v1/admin/server-stats","type":0,"val":"api","end":""},{"old":"/api/v1/admin/server-stats","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/server-stats","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/server-stats","type":0,"val":"server-stats","end":""}],
     types: placeholder as Registry['api.v1.dashboard.server_stats']['types'],
+  },
+  'api.v1.admin.ai.tool_calls': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/ai/tool-calls',
+    tokens: [{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"api","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"ai","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"tool-calls","end":""}],
+    types: placeholder as Registry['api.v1.admin.ai.tool_calls']['types'],
+  },
+  'api.v1.admin.ai.tokens.summary': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/ai/tokens/summary',
+    tokens: [{"old":"/api/v1/admin/ai/tokens/summary","type":0,"val":"api","end":""},{"old":"/api/v1/admin/ai/tokens/summary","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/ai/tokens/summary","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/ai/tokens/summary","type":0,"val":"ai","end":""},{"old":"/api/v1/admin/ai/tokens/summary","type":0,"val":"tokens","end":""},{"old":"/api/v1/admin/ai/tokens/summary","type":0,"val":"summary","end":""}],
+    types: placeholder as Registry['api.v1.admin.ai.tokens.summary']['types'],
   },
   'api.v1.asaas.webhook': {
     methods: ["POST"],

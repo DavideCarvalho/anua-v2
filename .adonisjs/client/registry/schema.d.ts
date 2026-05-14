@@ -1891,6 +1891,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_configuracoes_page_controller').default['handle']>>>
     }
   }
+  'web.admin.ai.auditoria': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/ai/auditoria'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_ai_audit_page_controller').default['audit']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_ai_audit_page_controller').default['audit']>>>
+    }
+  }
+  'web.admin.ai.tokens': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/ai/tokens'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_ai_audit_page_controller').default['tokens']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_ai_audit_page_controller').default['tokens']>>>
+    }
+  }
   'web.admin.seguros.index': {
     methods: ["GET","HEAD"]
     pattern: '/admin/seguros'
@@ -2741,6 +2765,30 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/get_server_stats_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/get_server_stats_controller').default['handle']>>>
+    }
+  }
+  'api.v1.admin.ai.tool_calls': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/ai/tool-calls'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/list_ai_tool_calls_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/list_ai_tool_calls_controller').default['handle']>>>
+    }
+  }
+  'api.v1.admin.ai.tokens.summary': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/ai/tokens/summary'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/get_ai_token_usage_summary_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/get_ai_token_usage_summary_controller').default['handle']>>>
     }
   }
   'api.v1.asaas.webhook': {
