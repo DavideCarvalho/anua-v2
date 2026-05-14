@@ -25,6 +25,10 @@ export interface TemplateParams {
   category: 'UTILITY' | 'MARKETING' | 'AUTHENTICATION'
   language: string
   body: string
+  // Exemplos posicionais pras variáveis do body (index 0 → {{1}}, etc).
+  // Meta REQUER exemplo pra cada {{N}} sob pena de rejeitar a aprovação;
+  // a Arara força isso já no POST com 422 se faltar.
+  variableExamples?: string[]
   headerType?: 'text' | 'media' | 'document'
   header?: string
   footer?: string
@@ -65,13 +69,11 @@ export class AraraService {
       // `{errors: [{code, description}]}` (validação), às vezes
       // `{error: 'X', message: 'Y'}` (entrega/upstream). Normalizamos os
       // dois pro AraraApiError pra a mensagem útil chegar no caller.
-      const body = (await response.json().catch(() => null)) as
-        | {
-            errors?: Array<{ code: string; description: string }>
-            error?: string
-            message?: string
-          }
-        | null
+      const body = (await response.json().catch(() => null)) as {
+        errors?: Array<{ code: string; description: string }>
+        error?: string
+        message?: string
+      } | null
       const errors = body?.errors?.length
         ? body.errors
         : body?.message
@@ -118,11 +120,26 @@ export class AraraService {
         category: params.category,
         language: params.language,
         body: params.body,
+        ...(params.variableExamples?.length ? { variableExamples: params.variableExamples } : {}),
         headerType: params.headerType,
         header: params.header,
         footer: params.footer,
       }),
     })
+  }
+
+  async listTemplates(): Promise<
+    Array<{ id: string; name: string; providerStatus: string; bodyPreview: string }>
+  > {
+    return this.request('/templates')
+  }
+
+  /**
+   * Apaga um template. Use o UUID (id) — chamar por NAME devolve 500
+   * silenciosamente em vez do 204 esperado (bug observado na API).
+   */
+  async deleteTemplate(id: string): Promise<void> {
+    await this.request(`/templates/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
   verifyWebhook(body: string, signature: string): boolean {
