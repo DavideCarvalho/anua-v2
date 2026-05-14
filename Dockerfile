@@ -42,8 +42,13 @@ WORKDIR /app
 # e quebram `--frozen-lockfile` silenciosamente.
 RUN npm i -g pnpm@11.1.2
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files. pnpm-workspace.yaml é necessário porque tem
+# `patchedDependencies` (config do patch do Lucid case-sensitive). O diretório
+# `patches/` precisa estar presente ANTES do install porque o lockfile guarda
+# o hash do conteúdo do patch — pnpm@11 rejeita com
+# ERR_PNPM_LOCKFILE_CONFIG_MISMATCH se a config ou o arquivo do patch falta.
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY patches ./patches
 
 # Install ALL dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile --ignore-scripts
