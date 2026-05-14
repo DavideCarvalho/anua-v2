@@ -345,6 +345,20 @@ type ComparisonPoint = {
   secondaryUnit?: string
 }
 
+type ComparisonBreakdownItem = {
+  id?: string
+  label?: string
+  now?: number
+  then?: number
+  delta?: number
+  deltaPct?: number | null
+}
+
+type ComparisonBreakdown = {
+  by?: 'class'
+  items?: ComparisonBreakdownItem[]
+}
+
 export function Comparison({
   title,
   label,
@@ -355,6 +369,7 @@ export function Comparison({
   direction,
   isImprovement,
   periodLabel,
+  breakdown,
 }: {
   title?: string
   label?: string
@@ -365,6 +380,7 @@ export function Comparison({
   direction?: 'up' | 'down' | 'flat'
   isImprovement?: boolean
   periodLabel?: string
+  breakdown?: ComparisonBreakdown
 }) {
   const nowValue = now?.value ?? 0
   const thenValue = then?.value ?? 0
@@ -422,6 +438,51 @@ export function Comparison({
             {unit ?? ''})
           </span>
         </div>
+        {breakdown?.items && breakdown.items.length > 0 ? (
+          <div className="mt-3 border-t border-border pt-3">
+            <div className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Maiores variações por turma
+            </div>
+            <div className="space-y-1">
+              {breakdown.items.map((item, i) => {
+                const delta = item.delta ?? (item.now ?? 0) - (item.then ?? 0)
+                const itemDir = delta === 0 ? 'flat' : delta > 0 ? 'up' : 'down'
+                const ItemIcon = itemDir === 'flat' ? Minus : itemDir === 'up' ? TrendingUp : TrendingDown
+                // Mesma heurística: se o agregado sobe e isImprovement=false,
+                // então subir item-a-item também é ruim.
+                const itemIsBad =
+                  itemDir !== 'flat' &&
+                  ((itemDir === 'up' && improvement === false) ||
+                    (itemDir === 'down' && improvement === true))
+                const itemColor =
+                  itemDir === 'flat'
+                    ? 'text-muted-foreground'
+                    : itemIsBad
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-green-600 dark:text-green-400'
+                return (
+                  <div
+                    key={item.id ?? i}
+                    className="flex items-center justify-between gap-2 text-xs"
+                  >
+                    <span className="truncate text-foreground">{item.label ?? '—'}</span>
+                    <span className="flex items-center gap-1.5 tabular-nums text-muted-foreground">
+                      <span>
+                        {(item.now ?? 0).toLocaleString('pt-BR')} (era{' '}
+                        {(item.then ?? 0).toLocaleString('pt-BR')})
+                      </span>
+                      <span className={cn('inline-flex items-center gap-0.5 font-medium', itemColor)}>
+                        <ItemIcon className="h-3 w-3" />
+                        {delta > 0 ? '+' : ''}
+                        {delta}
+                      </span>
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )

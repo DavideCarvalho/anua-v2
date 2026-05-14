@@ -52,6 +52,15 @@ type Point = {
   secondaryUnit?: string
 }
 
+type BreakdownItem = {
+  id: string
+  label: string
+  now: number
+  then: number
+  delta: number
+  deltaPct: number | null
+}
+
 type Result = {
   metric: Metric
   label: string
@@ -64,6 +73,10 @@ type Result = {
   deltaPct: number | null
   direction: 'up' | 'down' | 'flat'
   isImprovement: boolean
+  breakdown?: {
+    by: 'class'
+    items: BreakdownItem[]
+  }
 }
 
 function periodToDays(period: '7d' | '30d' | '90d' | '12m'): number {
@@ -140,6 +153,112 @@ async function absencesInWindow(
   return { asOf: end, value: Number(rows[0]?.n ?? 0) }
 }
 
+type BreakdownRow = { id: string; label: string; now: string; then: string }
+
+function toBreakdown(rows: BreakdownRow[], topN: number): BreakdownItem[] {
+  return rows
+    .map((r) => {
+      const now = Number(r.now ?? 0)
+      const then = Number(r.then ?? 0)
+      const delta = now - then
+      const deltaPct = then > 0 ? (delta / then) * 100 : null
+      return { id: r.id, label: r.label, now, then, delta, deltaPct }
+    })
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .slice(0, topN)
+}
+
+async function overdueByClass(
+  schoolId: string,
+  nowDate: string,
+  thenDate: string,
+  topN: number
+): Promise<BreakdownItem[]> {
+  const { rows } = await db.rawQuery<{ rows: BreakdownRow[] }>(
+    `
+      SELECT COALESCE(s."classId"::text, '__unassigned__') AS id,
+             COALESCE(c.name, '— sem turma —') AS label,
+             SUM(CASE WHEN sp."dueDate" < :nowDate::date
+                        AND (sp."paidAt" IS NULL OR sp."paidAt" > :nowDate::date)
+                      THEN 1 ELSE 0 END)::bigint AS now,
+             SUM(CASE WHEN sp."dueDate" < :thenDate::date
+                        AND (sp."paidAt" IS NULL OR sp."paidAt" > :thenDate::date)
+                      THEN 1 ELSE 0 END)::bigint AS then
+      FROM "StudentPayment" sp
+      JOIN "Student" s ON s.id = sp."studentId"
+      JOIN "User" u ON u.id = s.id
+      LEFT JOIN "Class" c ON c.id = s."classId"
+      WHERE u."schoolId" = :schoolId
+        AND u."deletedAt" IS NULL
+        AND sp.status <> 'CANCELLED'
+      GROUP BY s."classId", c.name
+    `,
+    { schoolId, nowDate, thenDate }
+  )
+  return toBreakdown(rows, topN)
+}
+
+async function enrollmentsByClass(
+  schoolId: string,
+  nowDate: string,
+  thenDate: string,
+  topN: number
+): Promise<BreakdownItem[]> {
+  const { rows } = await db.rawQuery<{ rows: BreakdownRow[] }>(
+    `
+      SELECT shl."classId"::text AS id,
+             c.name AS label,
+             COUNT(DISTINCT CASE WHEN shl."createdAt" <= :nowDate::timestamptz
+                                  AND (shl."deletedAt" IS NULL OR shl."deletedAt" > :nowDate::timestamptz)
+                                 THEN shl."studentId" END)::bigint AS now,
+             COUNT(DISTINCT CASE WHEN shl."createdAt" <= :thenDate::timestamptz
+                                  AND (shl."deletedAt" IS NULL OR shl."deletedAt" > :thenDate::timestamptz)
+                                 THEN shl."studentId" END)::bigint AS then
+      FROM "StudentHasLevel" shl
+      JOIN "Class" c ON c.id = shl."classId"
+      WHERE c."schoolId" = :schoolId
+      GROUP BY shl."classId", c.name
+    `,
+    { schoolId, nowDate, thenDate }
+  )
+  return toBreakdown(rows, topN)
+}
+
+async function absencesByClass(
+  schoolId: string,
+  nowStart: string,
+  nowEnd: string,
+  thenStart: string,
+  thenEnd: string,
+  topN: number
+): Promise<BreakdownItem[]> {
+  const { rows } = await db.rawQuery<{ rows: BreakdownRow[] }>(
+    `
+      SELECT COALESCE(s."classId"::text, '__unassigned__') AS id,
+             COALESCE(c.name, '— sem turma —') AS label,
+             SUM(CASE WHEN a.date >= :nowStart::date AND a.date < :nowEnd::date
+                      THEN 1 ELSE 0 END)::bigint AS now,
+             SUM(CASE WHEN a.date >= :thenStart::date AND a.date < :thenEnd::date
+                      THEN 1 ELSE 0 END)::bigint AS then
+      FROM "StudentHasAttendance" sha
+      JOIN "Attendance" a ON a.id = sha."attendanceId"
+      JOIN "Student" s ON s.id = sha."studentId"
+      JOIN "User" u ON u.id = s.id
+      LEFT JOIN "Class" c ON c.id = s."classId"
+      WHERE u."schoolId" = :schoolId
+        AND u."deletedAt" IS NULL
+        AND sha.status = 'ABSENT'
+        AND (
+          (a.date >= :nowStart::date  AND a.date < :nowEnd::date) OR
+          (a.date >= :thenStart::date AND a.date < :thenEnd::date)
+        )
+      GROUP BY s."classId", c.name
+    `,
+    { schoolId, nowStart, nowEnd, thenStart, thenEnd }
+  )
+  return toBreakdown(rows, topN)
+}
+
 async function announcementsInWindow(
   schoolId: string,
   start: string,
@@ -196,16 +315,17 @@ const DESCRIPTION = `Compara um indicador da escola entre o momento atual e um p
 Parâmetros:
 - metric: 'overdue_payments' (boletos vencidos), 'active_enrollments' (alunos matriculados), 'absences' (faltas), 'announcements_sent' (comunicados publicados).
 - period: '7d' | '30d' | '90d' | '12m'. Default 30d.
+- breakdownBy: 'class' opcional. Quando setado, devolve também os top 5 contribuintes (turmas com maior variação absoluta). Não suportado pra announcements_sent (comunicados são school-wide). Default null.
 
 Semântica:
 - overdue_payments e active_enrollments são SNAPSHOT: compara "como está hoje" vs "como estava em (hoje - period)".
 - absences e announcements_sent são WINDOW: compara "[hoje-period, hoje]" vs "[hoje-2*period, hoje-period]".
 
-Retorna { metric, label, semantics, unit, period, now: { asOf, value, secondaryValue?, secondaryUnit? }, then: { ... }, delta, deltaPct, direction, isImprovement }.
+Retorna { metric, label, semantics, unit, period, now, then, delta, deltaPct, direction, isImprovement, breakdown?: { by: 'class', items: [{ id, label, now, then, delta, deltaPct }] } }.
 
-deltaPct é null quando then.value=0 (divisão por zero — informe "sem base de comparação"). isImprovement já considera a direção certa: overdue/absences subir é ruim, matrículas/comunicados subir é bom.
+deltaPct é null quando then.value=0. isImprovement já considera a direção certa: overdue/absences subir é ruim, matrículas/comunicados subir é bom.
 
-Pra exibir, prefira renderResult com componente Comparison (mostra agora, vs antes, badge de delta).`
+Pra exibir, prefira renderResult com componente Comparison. O Comparison já consome o breakdown e mostra os top contribuintes embaixo do número — passe o breakdown como-é. Use breakdownBy='class' quando o usuário perguntar "subiu por quê" ou "qual turma puxou" — caso contrário, omita pra economizar token.`
 
 export function createGetHistoricalComparison(ctx: ToolContext) {
   return defineTool({
@@ -219,13 +339,20 @@ export function createGetHistoricalComparison(ctx: ToolContext) {
         'announcements_sent',
       ]),
       period: z.enum(['7d', '30d', '90d', '12m']).default('30d'),
+      breakdownBy: z
+        .enum(['class'])
+        .nullable()
+        .optional()
+        .describe('Top 5 turmas com maior variação. Não suportado pra announcements_sent.'),
     }),
     execute: async ({
       metric,
       period,
+      breakdownBy,
     }: {
       metric: Metric
       period: '7d' | '30d' | '90d' | '12m'
+      breakdownBy?: 'class' | null
     }) => {
       const days = periodToDays(period)
       const today = DateTime.now().setZone('America/Sao_Paulo').startOf('day')
@@ -234,34 +361,54 @@ export function createGetHistoricalComparison(ctx: ToolContext) {
       const previousIso = previous.toISODate()!
 
       const def = METRIC_DEFS[metric]
+      const wantsBreakdown = breakdownBy === 'class' && metric !== 'announcements_sent'
 
       if (def.semantics === 'snapshot') {
-        const [now, then] =
+        const [now, then, breakdown] =
           metric === 'overdue_payments'
             ? await Promise.all([
                 overdueAsOf(ctx.schoolId, todayIso),
                 overdueAsOf(ctx.schoolId, previousIso),
+                wantsBreakdown
+                  ? overdueByClass(ctx.schoolId, todayIso, previousIso, 5)
+                  : Promise.resolve(null),
               ])
             : await Promise.all([
                 activeEnrollmentsAsOf(ctx.schoolId, todayIso),
                 activeEnrollmentsAsOf(ctx.schoolId, previousIso),
+                wantsBreakdown
+                  ? enrollmentsByClass(ctx.schoolId, todayIso, previousIso, 5)
+                  : Promise.resolve(null),
               ])
-        return compare(metric, now, then, period)
+        const result = compare(metric, now, then, period)
+        return breakdown ? { ...result, breakdown: { by: 'class' as const, items: breakdown } } : result
       }
 
       // Window: [previous, today] vs [previous-period, previous]
       const previousPreviousIso = previous.minus({ days }).toISODate()!
-      const [now, then] =
+      const [now, then, breakdown] =
         metric === 'absences'
           ? await Promise.all([
               absencesInWindow(ctx.schoolId, previousIso, todayIso),
               absencesInWindow(ctx.schoolId, previousPreviousIso, previousIso),
+              wantsBreakdown
+                ? absencesByClass(
+                    ctx.schoolId,
+                    previousIso,
+                    todayIso,
+                    previousPreviousIso,
+                    previousIso,
+                    5
+                  )
+                : Promise.resolve(null),
             ])
           : await Promise.all([
               announcementsInWindow(ctx.schoolId, previousIso, todayIso),
               announcementsInWindow(ctx.schoolId, previousPreviousIso, previousIso),
+              Promise.resolve(null),
             ])
-      return compare(metric, now, then, period)
+      const result = compare(metric, now, then, period)
+      return breakdown ? { ...result, breakdown: { by: 'class' as const, items: breakdown } } : result
     },
   })
 }
