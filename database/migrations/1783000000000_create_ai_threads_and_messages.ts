@@ -14,7 +14,12 @@ export default class extends BaseSchema {
 
     this.schema.createTable('ai_thread_messages', (table) => {
       table.uuid('id').primary()
-      table.uuid('thread_id').notNullable().references('id').inTable('ai_threads').onDelete('CASCADE')
+      table
+        .uuid('thread_id')
+        .notNullable()
+        .references('id')
+        .inTable('ai_threads')
+        .onDelete('CASCADE')
       table.string('role').notNullable()
       table.text('content').notNullable()
       table.jsonb('tool_calls').nullable()

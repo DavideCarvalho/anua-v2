@@ -54,7 +54,9 @@ export default class CheckPhoneDuplicates extends BaseCommand {
     this.logger.info('\n=== Telefones duplicados (mais de 1 usuário com o mesmo número) ===\n')
     this.logger.info(`Grupos com número repetido: ${totalSets}`)
     this.logger.info(`Total de usuários afetados:  ${totalUsers}`)
-    this.logger.info(`Grupos que cruzam escola:    ${crossSchool} (mesma pessoa em escolas diferentes)\n`)
+    this.logger.info(
+      `Grupos que cruzam escola:    ${crossSchool} (mesma pessoa em escolas diferentes)\n`
+    )
 
     if (rows.length === 0) {
       this.logger.success('Nenhum número duplicado. Match por phone no WhatsApp resolve sozinho.')

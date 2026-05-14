@@ -11,10 +11,7 @@ export default class CancelChatStreamController {
     // cancel another user's stream just by guessing thread ids. We resolve
     // the thread by id+userId so a wrong owner returns the same shape as a
     // missing thread.
-    const thread = await AiThread.query()
-      .where('id', threadId)
-      .where('userId', user.id)
-      .first()
+    const thread = await AiThread.query().where('id', threadId).where('userId', user.id).first()
     if (!thread) {
       return response.notFound({ message: 'Thread não encontrada' })
     }

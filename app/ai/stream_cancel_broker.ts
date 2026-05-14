@@ -33,7 +33,6 @@ function makeClient(label: string): Redis {
     enableOfflineQueue: false,
   })
   client.on('error', (err) => {
-    // eslint-disable-next-line no-console
     console.warn(`[ai-cancel:${label}] ${err.message}`)
     initFailed = true
   })
@@ -51,14 +50,14 @@ async function ensureSubscribed(): Promise<void> {
       if (!threadId) return
       const controller = localControllers.get(threadId)
       if (!controller) return
-      // eslint-disable-next-line no-console
+
       console.warn(`[ai-cancel] aborting local stream thread=${threadId}`)
       controller.abort()
     })
     subscribed = true
   } catch (err) {
     initFailed = true
-    // eslint-disable-next-line no-console
+
     console.warn(`[ai-cancel] psubscribe failed: ${(err as Error).message}`)
   }
 }
@@ -100,7 +99,6 @@ export async function requestStreamCancel(threadId: string): Promise<boolean> {
     await publisher.publish(`${CHANNEL_PREFIX}${threadId}`, '1')
     return true
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.warn(`[ai-cancel] publish failed thread=${threadId}: ${(err as Error).message}`)
     if (local) {
       local.abort()

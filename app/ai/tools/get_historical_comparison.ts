@@ -130,11 +130,7 @@ async function activeEnrollmentsAsOf(schoolId: string, asOf: string): Promise<Po
   return { asOf, value: Number(rows[0]?.n ?? 0) }
 }
 
-async function absencesInWindow(
-  schoolId: string,
-  start: string,
-  end: string
-): Promise<Point> {
+async function absencesInWindow(schoolId: string, start: string, end: string): Promise<Point> {
   const { rows } = await db.rawQuery<{ rows: [{ n: string }] }>(
     `
       SELECT COUNT(*)::bigint AS n
@@ -259,11 +255,7 @@ async function absencesByClass(
   return toBreakdown(rows, topN)
 }
 
-async function announcementsInWindow(
-  schoolId: string,
-  start: string,
-  end: string
-): Promise<Point> {
+async function announcementsInWindow(schoolId: string, start: string, end: string): Promise<Point> {
   const { rows } = await db.rawQuery<{ rows: [{ n: string }] }>(
     `
       SELECT COUNT(*)::bigint AS n
@@ -289,11 +281,7 @@ function compare(metric: Metric, now: Point, then: Point, period: string): Resul
   // overdue/absences subindo é ruim; o resto, subir é bom.
   const higherIsWorse = HIGHER_IS_WORSE.has(metric)
   const isImprovement =
-    direction === 'flat'
-      ? true
-      : higherIsWorse
-        ? direction === 'down'
-        : direction === 'up'
+    direction === 'flat' ? true : higherIsWorse ? direction === 'down' : direction === 'up'
 
   return {
     metric,
@@ -332,12 +320,7 @@ export function createGetHistoricalComparison(ctx: ToolContext) {
     name: 'getHistoricalComparison',
     description: DESCRIPTION,
     parameters: z.object({
-      metric: z.enum([
-        'overdue_payments',
-        'active_enrollments',
-        'absences',
-        'announcements_sent',
-      ]),
+      metric: z.enum(['overdue_payments', 'active_enrollments', 'absences', 'announcements_sent']),
       period: z.enum(['7d', '30d', '90d', '12m']).default('30d'),
       breakdownBy: z
         .enum(['class'])
@@ -381,7 +364,9 @@ export function createGetHistoricalComparison(ctx: ToolContext) {
                   : Promise.resolve(null),
               ])
         const result = compare(metric, now, then, period)
-        return breakdown ? { ...result, breakdown: { by: 'class' as const, items: breakdown } } : result
+        return breakdown
+          ? { ...result, breakdown: { by: 'class' as const, items: breakdown } }
+          : result
       }
 
       // Window: [previous, today] vs [previous-period, previous]
@@ -408,7 +393,9 @@ export function createGetHistoricalComparison(ctx: ToolContext) {
               Promise.resolve(null),
             ])
       const result = compare(metric, now, then, period)
-      return breakdown ? { ...result, breakdown: { by: 'class' as const, items: breakdown } } : result
+      return breakdown
+        ? { ...result, breakdown: { by: 'class' as const, items: breakdown } }
+        : result
     },
   })
 }

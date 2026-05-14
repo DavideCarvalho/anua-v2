@@ -3,19 +3,14 @@ import { defineActionTool } from '../tool.js'
 import { toolRegistry, type ToolContext } from '../tool_registry.js'
 
 export const registerAttendanceInputSchema = z.object({
-  classId: z
-    .string()
-    .uuid()
-    .describe('UUID da turma. Use getMyClasses pra descobrir.'),
+  classId: z.string().uuid().describe('UUID da turma. Use getMyClasses pra descobrir.'),
   date: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'date deve ser YYYY-MM-DD')
     .describe('Dia da aula (YYYY-MM-DD). Resolva sempre data absoluta, nunca "hoje"/"ontem".'),
   absentStudentIds: z
     .array(z.string().uuid())
-    .describe(
-      'Lista dos alunos que faltaram. Quem NÃO está nessa lista é marcado como presente.'
-    ),
+    .describe('Lista dos alunos que faltaram. Quem NÃO está nessa lista é marcado como presente.'),
   lateStudentIds: z
     .array(z.string().uuid())
     .optional()

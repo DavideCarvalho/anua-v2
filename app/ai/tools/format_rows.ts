@@ -101,9 +101,7 @@ export function createFormatRows() {
       enumColumns: z
         .record(z.string(), z.string())
         .optional()
-        .describe(
-          'Mapeamento coluna→dicionário de enum, e.g. { status: "invoiceStatus" }'
-        ),
+        .describe('Mapeamento coluna→dicionário de enum, e.g. { status: "invoiceStatus" }'),
       columnLabels: z
         .record(z.string(), z.string())
         .optional()
@@ -144,8 +142,7 @@ export function createFormatRows() {
       const cols = rows.length > 0 ? Object.keys(rows[0]) : []
       const finalLabels: Record<string, string> = {}
       for (const col of cols) {
-        finalLabels[col] =
-          columnLabels[col] ?? DEFAULT_COLUMN_LABELS[col] ?? humanizeFallback(col)
+        finalLabels[col] = columnLabels[col] ?? DEFAULT_COLUMN_LABELS[col] ?? humanizeFallback(col)
       }
 
       return { rows: formattedRows, columnLabels: finalLabels }
@@ -154,7 +151,10 @@ export function createFormatRows() {
 }
 
 function humanizeFallback(col: string): string {
-  const spaced = col.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+  const spaced = col
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .toLowerCase()
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 

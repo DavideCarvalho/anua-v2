@@ -25,14 +25,13 @@ function installUncaughtRedisGuard(): void {
       msg.includes('Connection is closed') ||
       err?.stack?.includes('ioredis')
     if (isRedis) {
-      // eslint-disable-next-line no-console
       console.warn(`[ai-redis] swallowed uncaught: ${msg}`)
       redisHealthy = false
       lastFailureAt = Date.now()
       return
     }
     // Not ours — restore default crash behavior
-    // eslint-disable-next-line no-console
+
     console.error(err)
     process.exit(1)
   })
@@ -40,7 +39,6 @@ function installUncaughtRedisGuard(): void {
 
 function markUnhealthy(err: Error, label: string): void {
   if (redisHealthy) {
-    // eslint-disable-next-line no-console
     console.warn(`[ai-redis:${label}] ${err.message} — disabling Redis-backed features`)
   }
   redisHealthy = false

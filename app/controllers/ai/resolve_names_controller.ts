@@ -40,8 +40,11 @@ export default class ResolveNamesController {
     const role = personaFromRole(user.role?.name)
     if (!role) return response.ok(EMPTY)
 
-    const { studentIds = [], examIds = [], classIds = [] } =
-      await request.validateUsing(resolveNamesValidator)
+    const {
+      studentIds = [],
+      examIds = [],
+      classIds = [],
+    } = await request.validateUsing(resolveNamesValidator)
 
     if (studentIds.length === 0 && examIds.length === 0 && classIds.length === 0) {
       return response.ok(EMPTY)
@@ -130,13 +133,11 @@ export default class ResolveNamesController {
     )
 
     // Gestor vê todos da escola; resto filtra por classIds do scope.
-    const allowed = role === 'gestor' ? rows : rows.filter((r) => scope.classIds.includes(r.classId))
+    const allowed =
+      role === 'gestor' ? rows : rows.filter((r) => scope.classIds.includes(r.classId))
 
     return Object.fromEntries(
-      allowed.map((r) => [
-        r.id,
-        { id: r.id, name: r.name, subjectName: r.subjectName },
-      ])
+      allowed.map((r) => [r.id, { id: r.id, name: r.name, subjectName: r.subjectName }])
     )
   }
 

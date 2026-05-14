@@ -7,10 +7,7 @@ export default class ResumeChatStreamController {
     const user = effectiveUser ?? auth.user!
     const threadId = params.threadId as string
 
-    const thread = await AiThread.query()
-      .where('id', threadId)
-      .where('userId', user.id)
-      .first()
+    const thread = await AiThread.query().where('id', threadId).where('userId', user.id).first()
     if (!thread) {
       return response.notFound({ message: 'Thread não encontrada' })
     }

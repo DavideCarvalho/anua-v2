@@ -7,12 +7,8 @@ export function registerImpersonationApiRoutes() {
     .group(() => {
       router.post('/', [controllers.admin.SetImpersonation]).as('impersonation.set')
       router.delete('/', [controllers.admin.ClearImpersonation]).as('impersonation.clear')
-      router
-        .get('/status', [controllers.admin.GetImpersonationStatus])
-        .as('impersonation.status')
-      router
-        .get('/config', [controllers.admin.GetImpersonationConfig])
-        .as('impersonation.config')
+      router.get('/status', [controllers.admin.GetImpersonationStatus]).as('impersonation.status')
+      router.get('/config', [controllers.admin.GetImpersonationConfig]).as('impersonation.config')
     })
     .prefix('/admin/impersonation')
     .use(middleware.auth())

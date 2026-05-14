@@ -44,7 +44,7 @@ export default class ChatController {
     }
 
     // Gate de quota antes de tudo. Default é ilimitado (School.maxMonthlyChatTokens
-     // = null), então isso só morde se um admin tiver setado um teto pra escola.
+    // = null), então isso só morde se um admin tiver setado um teto pra escola.
     const quota = await checkQuotaOrDeny(schoolId)
     if (!quota.allowed) {
       return response.tooManyRequests({ message: quota.reason })

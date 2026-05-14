@@ -107,7 +107,10 @@ export async function maybeSummarizeThread(threadId: string): Promise<void> {
   }
 }
 
-async function countMessagesAfter(threadId: string, lastSummarizedId: string | null): Promise<number> {
+async function countMessagesAfter(
+  threadId: string,
+  lastSummarizedId: string | null
+): Promise<number> {
   const cutoffAt = await cutoffCreatedAt(lastSummarizedId)
   const query = AiThreadMessage.query().where('threadId', threadId)
   if (cutoffAt) {

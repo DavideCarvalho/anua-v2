@@ -1,4 +1,3 @@
-import transmit from "@adonisjs/transmit/services/main"
+import transmit from '@adonisjs/transmit/services/main'
 
 transmit.registerRoutes()
-

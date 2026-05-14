@@ -99,9 +99,7 @@ export default class ListAiToolCallsController {
       error: r.error,
       executionMs: r.executionMs,
       createdAt: r.createdAt.toISO() ?? '',
-      user: r.user
-        ? { id: r.user.id, name: r.user.name ?? null }
-        : null,
+      user: r.user ? { id: r.user.id, name: r.user.name ?? null } : null,
       thread: r.thread
         ? { id: r.thread.id, title: r.thread.title, channel: r.thread.channel }
         : null,

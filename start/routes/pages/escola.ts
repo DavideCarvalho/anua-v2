@@ -154,8 +154,7 @@ const ShowPerguntasPageController = () =>
   import('#controllers/pages/escola/show_perguntas_page_controller')
 const ShowPerguntaDetailPageController = () =>
   import('#controllers/pages/escola/show_pergunta_detail_page_controller')
-const ShowIaPageController = () =>
-  import('#controllers/pages/escola/show_ia_page_controller')
+const ShowIaPageController = () => import('#controllers/pages/escola/show_ia_page_controller')
 
 export function registerEscolaPageRoutes() {
   router

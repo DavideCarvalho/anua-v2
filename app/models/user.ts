@@ -1,6 +1,14 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
-import { BaseModel, column, belongsTo, hasOne, hasMany, beforeCreate, beforeSave } from '@adonisjs/lucid/orm'
+import {
+  BaseModel,
+  column,
+  belongsTo,
+  hasOne,
+  hasMany,
+  beforeCreate,
+  beforeSave,
+} from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne, HasMany } from '@adonisjs/lucid/types/relations'
 import { normalizePhone } from '#lib/normalize_phone'
 

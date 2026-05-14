@@ -33,7 +33,13 @@ export function createGetCommunications(ctx: ToolContext) {
     name: 'getCommunications',
     description: DESCRIPTION,
     parameters: z.object({
-      limit: z.number().int().min(1).max(50).optional().describe('Quantidade a retornar (default 10)'),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe('Quantidade a retornar (default 10)'),
       onlyUnacknowledged: z.boolean().optional().describe('Só pendentes de leitura (responsável)'),
     }),
     execute: async ({ limit, onlyUnacknowledged }) => {
@@ -46,8 +52,7 @@ export function createGetCommunications(ctx: ToolContext) {
         if (ctx.scope.studentIdsPedagogical.length === 0) {
           return {
             communications: [],
-            note:
-              'Você está cadastrado apenas como responsável financeiro — comunicados da escola ficam com o responsável pedagógico.',
+            note: 'Você está cadastrado apenas como responsável financeiro — comunicados da escola ficam com o responsável pedagógico.',
           }
         }
         const { rows } = await db.rawQuery<{ rows: CommunicationRow[] }>(

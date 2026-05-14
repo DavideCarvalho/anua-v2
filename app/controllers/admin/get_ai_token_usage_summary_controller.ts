@@ -128,8 +128,7 @@ export default class GetAiTokenUsageSummaryController {
     return rows.map((r) => {
       const monthlyUsed = Number(r.monthlyUsed ?? 0)
       const rawLimit = r.monthlyLimit
-      const monthlyLimit =
-        rawLimit === null || rawLimit === undefined ? null : Number(rawLimit)
+      const monthlyLimit = rawLimit === null || rawLimit === undefined ? null : Number(rawLimit)
       let quotaStatus: SchoolRow['quotaStatus'] = 'unlimited'
       if (monthlyLimit !== null && monthlyLimit > 0) {
         if (monthlyUsed >= monthlyLimit) quotaStatus = 'exceeded'

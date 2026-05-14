@@ -9,7 +9,9 @@ export interface WhatsAppNotificationPayload {
   userId: string
 }
 
-export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayload): Promise<void> {
+export async function sendWhatsAppNotification(
+  payload: WhatsAppNotificationPayload
+): Promise<void> {
   const { notificationId, userId } = payload
 
   const notification = await Notification.find(notificationId)
@@ -47,7 +49,11 @@ export async function sendWhatsAppNotification(payload: WhatsAppNotificationPayl
 
   try {
     const arara = getAraraService()
-    const response = await arara.sendTemplate({ receiver, templateName: template.templateName, variables })
+    const response = await arara.sendTemplate({
+      receiver,
+      templateName: template.templateName,
+      variables,
+    })
 
     notification.sentViaWhatsApp = true
     notification.whatsappSentAt = DateTime.now()

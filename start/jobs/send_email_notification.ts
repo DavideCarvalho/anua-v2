@@ -34,7 +34,9 @@ export async function sendEmailNotification(payload: EmailNotificationPayload): 
       message
         .to(user.email!)
         .subject(notification.title)
-        .html(`<p>${notification.message}</p>${notification.actionUrl ? `<p><a href="${notification.actionUrl}">Ver detalhes</a></p>` : ''}`)
+        .html(
+          `<p>${notification.message}</p>${notification.actionUrl ? `<p><a href="${notification.actionUrl}">Ver detalhes</a></p>` : ''}`
+        )
     })
 
     notification.sentViaEmail = true

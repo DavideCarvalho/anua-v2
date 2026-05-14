@@ -16,7 +16,9 @@ export const enterExamGradeInputSchema = z.object({
   absent: z
     .boolean()
     .optional()
-    .describe('true quando o aluno faltou à prova. Default false. Score deve ser null se absent=true.'),
+    .describe(
+      'true quando o aluno faltou à prova. Default false. Score deve ser null se absent=true.'
+    ),
   feedback: z.string().max(2000).optional().describe('Comentário opcional pro aluno/responsável'),
 })
 

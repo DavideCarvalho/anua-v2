@@ -147,10 +147,7 @@ export class AiService {
   }
 
   private async buildPromptContext(req: ChatRequest): Promise<SystemPromptContext> {
-    const [school, user] = await Promise.all([
-      School.find(req.schoolId),
-      User.find(req.userId),
-    ])
+    const [school, user] = await Promise.all([School.find(req.schoolId), User.find(req.userId)])
     return {
       school: { id: req.schoolId, name: school?.name ?? 'Escola sem nome' },
       user: { id: req.userId, name: user?.name ?? 'Usuário' },
@@ -207,7 +204,11 @@ export class AiService {
     })
     // Defensive cap in case the model ignores the contract — better an awkward
     // truncation than a 200-char refusal pasted into the sidebar.
-    const cleaned = text.trim().replace(/^["']|["']$/g, '').slice(0, 60) || 'Nova conversa'
+    const cleaned =
+      text
+        .trim()
+        .replace(/^["']|["']$/g, '')
+        .slice(0, 60) || 'Nova conversa'
     await AiThread.query().where('id', threadId).update({ title: cleaned })
 
     if (usage) {

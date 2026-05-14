@@ -65,7 +65,9 @@ export default class SetupWhatsAppTemplates extends BaseCommand {
         this.logger.info(`✓ Template "${template.name}" created (status: ${result.status})`)
         created++
       } catch (error) {
-        this.logger.warning(`Template "${template.name}" may already exist: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        this.logger.warning(
+          `Template "${template.name}" may already exist: ${error instanceof Error ? error.message : 'Unknown error'}`
+        )
         skipped++
       }
     }
