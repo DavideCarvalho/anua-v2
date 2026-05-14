@@ -75,17 +75,19 @@ export function AiChat() {
             return updated
           })
         }
-        if (data.type === 'component' && data.name) {
-          toolResultsRef.current[data.name] = data.data
-          const Component = componentRegistry[data.name]
-          if (Component) {
+        if (data.type === 'component') {
+          const compName = data.data?.component || data.name
+          const compData = data.data?.data || data.data
+          const compTitle = data.data?.title || ''
+          if (compName && componentRegistry[compName]) {
+            toolResultsRef.current[compName] = { ...compData, title: compTitle }
             setMessages((prev) => {
               const updated = [...prev]
               const lastIdx = updated.length - 1
               const prevContent = updated[lastIdx]?.content || ''
               updated[lastIdx] = {
                 role: 'assistant',
-                content: prevContent + '\n[COMPONENT:' + data.name + ']',
+                content: prevContent + '\n[COMPONENT:' + compName + ']',
               }
               return updated
             })

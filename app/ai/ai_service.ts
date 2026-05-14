@@ -1,4 +1,4 @@
-import { streamText, generateText, type ModelMessage } from 'ai'
+import { streamText, generateText, hasToolCall, stepCountIs, type ModelMessage } from 'ai'
 import { getModel } from './ai_provider.js'
 import { getPersona } from './personas.js'
 import { toolRegistry } from './tool_registry.js'
@@ -32,8 +32,8 @@ export class AiService {
 
     const result = streamText({
       model: getModel(),
-      ...({ stopWhen: (_step: number, toolCalls: any[]) => toolCalls?.some(tc => (tc as any)?.toolName === 'renderResult' || tc?.name === 'renderResult') }) as any,
-      
+      stopWhen: [stepCountIs(8), hasToolCall('renderResult')],
+
       system: persona.systemPrompt,
       messages: [...history, { role: 'user' as const, content: message }],
       tools: Object.keys(tools).length > 0 ? tools : undefined,
@@ -51,6 +51,24 @@ export class AiService {
             const name = (tr as any).toolName || (tr as any).name
             const data = (tr as any).result || (tr as any).args
             if (name) ctx.onComponent(name, data)
+          }
+          // Auto-render: if queryDatabase returned rows, show as DataTable
+          const lastResult = toolResults[toolResults.length - 1]
+          const lastData = (lastResult as any)?.result
+          const lastName = (lastResult as any)?.toolName
+          if (lastName === 'queryDatabase' && lastData?.rows) {
+            const cols = lastData.rows[0] ? Object.keys(lastData.rows[0]) : []
+            ctx.onComponent('renderResult', {
+              component: 'DataTable',
+              data: { columns: cols, rows: lastData.rows },
+            })
+          }
+          // Auto-render: if getSchoolStats returned data
+          if (lastName === 'getSchoolStats' && lastData) {
+            ctx.onComponent('renderResult', {
+              component: 'SchoolStatsCard',
+              data: lastData,
+            })
           }
         }
         if (text) {

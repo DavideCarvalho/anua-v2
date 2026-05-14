@@ -7,7 +7,8 @@ const COMPONENT_NAMES = ['SchoolStatsCard', 'StudentAlertsCard', 'DataTable', 'I
 export function createRenderResult() {
   return defineTool({
     name: 'renderResult',
-    description: 'USE THIS TOOL TO RENDER DATA VISUALLY. After gathering data with other tools, call this to display a component with the results.',
+    description:
+      'USE THIS TOOL TO RENDER DATA VISUALLY. After gathering data with other tools, call this to display a component with the results.',
     parameters: z.object({
       component: z.enum(COMPONENT_NAMES).describe('Component to render'),
       title: z.string().describe('Title for the component'),
