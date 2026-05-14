@@ -235,7 +235,6 @@ export type ScannedRoutes = {
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
-    'api.v1.admin.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.create': { paramsTuple?: []; params?: {} }
@@ -728,6 +727,7 @@ export type ScannedRoutes = {
     'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
     'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.threads.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'toolCallId': ParamValue} }
     'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }
@@ -1685,7 +1685,6 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.messages.create': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.responsavel.api.inquiries.resolve': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.responsavel.api.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
-    'api.v1.admin.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.create': { paramsTuple?: []; params?: {} }
     'api.v1.schools.store': { paramsTuple?: []; params?: {} }
@@ -1829,6 +1828,7 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
     'api.v1.ai.chat': { paramsTuple?: []; params?: {} }
     'api.v1.ai.chat.cancel': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
+    'api.v1.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'toolCallId': ParamValue} }
     'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }

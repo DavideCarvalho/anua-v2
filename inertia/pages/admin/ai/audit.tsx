@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Check, ChevronDown, ChevronRight, ExternalLink, ShieldAlert, X } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { ChevronDown, ChevronRight, ExternalLink, ShieldAlert } from 'lucide-react'
 import { DateTime } from 'luxon'
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent } from '../../../components/ui/card'
@@ -69,16 +69,6 @@ function formatExecutionMs(ms: number | null): string {
 
 function AuditRowItem({ row }: { row: AuditRow }) {
   const [open, setOpen] = useState(false)
-  const queryClient = useQueryClient()
-
-  const decideMutation = useMutation({
-    ...api.api.v1.admin.ai.toolCalls.decide.mutationOptions(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: api.api.v1.admin.ai.toolCalls.queryKey() })
-    },
-  })
-
-  const canDecide = row.toolKind === 'action' && row.status === 'pending_approval'
 
   return (
     <>
@@ -128,45 +118,11 @@ function AuditRowItem({ row }: { row: AuditRow }) {
             <span className="text-muted-foreground">—</span>
           )}
         </TableCell>
-        <TableCell className="text-right">
-          {canDecide ? (
-            <div className="inline-flex gap-1">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={decideMutation.isPending}
-                onClick={() =>
-                  decideMutation.mutate({
-                    params: { id: row.id },
-                    body: { decision: 'approve' },
-                  })
-                }
-                title="Aprovar e executar"
-              >
-                <Check className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={decideMutation.isPending}
-                onClick={() =>
-                  decideMutation.mutate({
-                    params: { id: row.id },
-                    body: { decision: 'reject' },
-                  })
-                }
-                title="Rejeitar"
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          ) : null}
-        </TableCell>
       </TableRow>
       {open ? (
         <TableRow className="bg-muted/30 hover:bg-muted/30">
           <TableCell />
-          <TableCell colSpan={8} className="px-3 py-3">
+          <TableCell colSpan={7} className="px-3 py-3">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
                 <div className="mb-1 font-medium uppercase tracking-wide text-muted-foreground">
@@ -222,9 +178,9 @@ export default function AiAuditPage() {
               Auditoria de IA
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Toda chamada de tool feita pelo assistente. Ferramentas de leitura
-              executam automaticamente; ferramentas de escrita ficam em
-              "Aguardando" até alguém aprovar ou rejeitar.
+              Histórico de toda chamada de tool feita pelo assistente. Esta
+              tela é só leitura — a aprovação de tools de escrita acontece
+              no próprio chat de quem fez o pedido.
             </p>
           </div>
           <div className="text-xs tabular-nums text-muted-foreground">{total} chamadas</div>
@@ -282,7 +238,6 @@ export default function AiAuditPage() {
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Duração</TableHead>
                   <TableHead>Thread</TableHead>
-                  <TableHead className="text-right">Ação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -1392,12 +1392,6 @@ const routes = {
     tokens: [{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"api","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"ai","end":""},{"old":"/api/v1/admin/ai/tool-calls","type":0,"val":"tool-calls","end":""}],
     types: placeholder as Registry['api.v1.admin.ai.tool_calls']['types'],
   },
-  'api.v1.admin.ai.tool_calls.decide': {
-    methods: ["POST"],
-    pattern: '/api/v1/admin/ai/tool-calls/:id/decide',
-    tokens: [{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":0,"val":"api","end":""},{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":0,"val":"ai","end":""},{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":0,"val":"tool-calls","end":""},{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":1,"val":"id","end":""},{"old":"/api/v1/admin/ai/tool-calls/:id/decide","type":0,"val":"decide","end":""}],
-    types: placeholder as Registry['api.v1.admin.ai.tool_calls.decide']['types'],
-  },
   'api.v1.admin.ai.tokens.summary': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/admin/ai/tokens/summary',
@@ -4349,6 +4343,12 @@ const routes = {
     pattern: '/api/v1/ai/threads/:id',
     tokens: [{"old":"/api/v1/ai/threads/:id","type":0,"val":"api","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"threads","end":""},{"old":"/api/v1/ai/threads/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.ai.threads.delete']['types'],
+  },
+  'api.v1.ai.tool_calls.decide': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/tool-calls/:toolCallId/decide',
+    tokens: [{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"api","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"tool-calls","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":1,"val":"toolCallId","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"decide","end":""}],
+    types: placeholder as Registry['api.v1.ai.tool_calls.decide']['types'],
   },
   'api.v1.whatsapp.webhook': {
     methods: ["POST"],

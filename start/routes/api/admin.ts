@@ -57,10 +57,10 @@ export function registerAdminStatsApiRoutes() {
 export function registerAdminAiObservabilityRoutes() {
   router
     .group(() => {
+      // /admin/ai é read-only: só observação. A aprovação/rejeição de
+      // action tools acontece dentro do chat (POST /api/v1/ai/tool-calls/
+      // :toolCallId/decide).
       router.get('/tool-calls', [controllers.admin.ListAiToolCalls]).as('admin.ai.tool_calls')
-      router
-        .post('/tool-calls/:id/decide', [controllers.admin.DecideAiToolCall])
-        .as('admin.ai.tool_calls.decide')
       router
         .get('/tokens/summary', [controllers.admin.GetAiTokenUsageSummary])
         .as('admin.ai.tokens.summary')

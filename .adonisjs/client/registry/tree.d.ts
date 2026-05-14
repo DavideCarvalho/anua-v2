@@ -323,9 +323,7 @@ export interface ApiDefinition {
       }
       admin: {
         ai: {
-          toolCalls: typeof routes['api.v1.admin.ai.tool_calls'] & {
-            decide: typeof routes['api.v1.admin.ai.tool_calls.decide']
-          }
+          toolCalls: typeof routes['api.v1.admin.ai.tool_calls']
           tokens: {
             summary: typeof routes['api.v1.admin.ai.tokens.summary']
           }
@@ -1060,6 +1058,9 @@ export interface ApiDefinition {
           list: typeof routes['api.v1.ai.threads.list']
           show: typeof routes['api.v1.ai.threads.show']
           delete: typeof routes['api.v1.ai.threads.delete']
+        }
+        toolCalls: {
+          decide: typeof routes['api.v1.ai.tool_calls.decide']
         }
       }
       whatsapp: {

@@ -42,7 +42,7 @@ Parâmetros:
 - audience.scopeType: 'SCHOOL' (escola toda), 'CLASS' (uma turma — passe o classId em scopeId), 'LEVEL' (um nível — passe o levelId)
 - requiresAcknowledgement: opcional, true marca como "exige confirmação de leitura"
 
-ATENÇÃO: esta ferramenta NÃO executa imediatamente. Ela cria uma solicitação pendente que precisa ser aprovada manualmente por um admin antes do comunicado ser de fato disparado. Quando você chamar esta tool, avise o usuário no texto que o comunicado foi REGISTRADO pra aprovação e está aguardando confirmação na área de auditoria de IA.`
+ATENÇÃO: esta ferramenta NÃO executa imediatamente. Quando você chamar, aparece um card de aprovação no próprio chat com os botões "Confirmar" e "Cancelar" — só depois que o usuário confirmar é que o comunicado é de fato disparado. Avise no texto que o comunicado está pronto pra envio e que ele precisa confirmar logo abaixo.`
 
 export function createSendCommunication(_ctx: ToolContext) {
   return defineActionTool({

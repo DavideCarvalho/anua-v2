@@ -48,6 +48,12 @@ export default class AiToolCall extends BaseModel {
   @column({ columnName: 'schoolId' })
   declare schoolId: string | null
 
+  // Identificador da call vindo do Vercel AI SDK (parte `tool-*` no UIMessage).
+  // É o que o frontend usa pra chamar /api/v1/ai/tool-calls/:toolCallId/decide
+  // a partir do próprio chat.
+  @column({ columnName: 'toolCallId' })
+  declare toolCallId: string | null
+
   @column()
   declare toolName: string
 

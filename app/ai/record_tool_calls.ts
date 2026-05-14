@@ -65,6 +65,7 @@ export async function recordToolCalls(args: RecordToolCallsArgs): Promise<void> 
         messageId: args.messageId,
         userId: args.userId,
         schoolId: args.schoolId,
+        toolCallId: call.toolCallId,
         toolName: call.toolName,
         toolKind: kind,
         status,

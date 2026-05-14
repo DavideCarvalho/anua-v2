@@ -8,26 +8,42 @@ import { toolComponents } from './ai-components'
 import { ToolStepGroup } from './ai-task'
 import { AiChatEmpty, type ChatPersonaRole } from './ai-chat-empty'
 import { AiChatInput } from './ai-chat-input'
+import { AiActionApprovalCard } from './ai-action-approval-card'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { api } from '~/lib/api'
 
+// Tools de escrita: renderizam como card de aprovação inline em vez do
+// tool-step normal. Mantém em sync com WRITE_TOOL_NAMES no backend.
+const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>(['sendCommunication'])
+
 type MessageBlock =
   | { kind: 'text'; text: string }
   | { kind: 'steps'; tools: ToolUIPart[] }
+  | { kind: 'action'; tool: ToolUIPart }
+
+function toolNameOf(part: ToolUIPart): string {
+  return part.type.slice('tool-'.length)
+}
 
 function buildBlocks(parts: UIMessage['parts']): MessageBlock[] {
   const blocks: MessageBlock[] = []
   for (const part of parts) {
     if (part.type === 'text') {
       blocks.push({ kind: 'text', text: part.text })
-    } else if (part.type.startsWith('tool-')) {
-      const last = blocks[blocks.length - 1]
-      if (last && last.kind === 'steps') {
-        last.tools.push(part as ToolUIPart)
-      } else {
-        blocks.push({ kind: 'steps', tools: [part as ToolUIPart] })
-      }
+      continue
+    }
+    if (!part.type.startsWith('tool-')) continue
+    const toolPart = part as ToolUIPart
+    if (ACTION_TOOL_NAMES.has(toolNameOf(toolPart))) {
+      blocks.push({ kind: 'action', tool: toolPart })
+      continue
+    }
+    const last = blocks[blocks.length - 1]
+    if (last && last.kind === 'steps') {
+      last.tools.push(toolPart)
+    } else {
+      blocks.push({ kind: 'steps', tools: [toolPart] })
     }
   }
   return blocks
@@ -183,7 +199,7 @@ function ActiveChat({
 
   const cancelMutation = useMutation(api.api.v1.ai.chat.cancel.mutationOptions())
 
-  const { messages, sendMessage, status, error, stop } = useChat({
+  const { messages, sendMessage, status, error, stop, addToolOutput } = useChat({
     id: threadId,
     transport,
     messages: initialMessages,
@@ -239,7 +255,11 @@ function ActiveChat({
         ) : (
           <div className="mx-auto max-w-3xl space-y-5 px-5 py-6">
             {messages.map((message) => (
-              <MessageRow key={message.id} message={message} />
+              <MessageRow
+                key={message.id}
+                message={message}
+                addToolOutput={addToolOutput}
+              />
             ))}
             {isBusy && messages[messages.length - 1]?.role === 'user' && <ThinkingRow />}
             {error && (
@@ -318,7 +338,15 @@ function ChatHeader({ title }: { title: string | null }) {
   )
 }
 
-function MessageRow({ message }: { message: UIMessage }) {
+type AddToolOutputFn = ReturnType<typeof useChat>['addToolOutput']
+
+function MessageRow({
+  message,
+  addToolOutput,
+}: {
+  message: UIMessage
+  addToolOutput: AddToolOutputFn
+}) {
   const isUser = message.role === 'user'
   const blocks = isUser ? null : buildBlocks(message.parts)
 
@@ -345,18 +373,34 @@ function MessageRow({ message }: { message: UIMessage }) {
                 </p>
               ) : null
             )
-          : blocks?.map((block, idx) =>
-              block.kind === 'text' ? (
-                <div
-                  key={idx}
-                  className="prose prose-sm dark:prose-invert max-w-none leading-relaxed"
-                >
-                  <Streamdown>{block.text}</Streamdown>
-                </div>
-              ) : (
-                <ToolBlock key={idx} tools={block.tools} />
-              )
-            )}
+          : blocks?.map((block, idx) => {
+              if (block.kind === 'text') {
+                return (
+                  <div
+                    key={idx}
+                    className="prose prose-sm dark:prose-invert max-w-none leading-relaxed"
+                  >
+                    <Streamdown>{block.text}</Streamdown>
+                  </div>
+                )
+              }
+              if (block.kind === 'action') {
+                return (
+                  <AiActionApprovalCard
+                    key={block.tool.toolCallId ?? idx}
+                    toolCallId={block.tool.toolCallId}
+                    toolName={toolNameOf(block.tool)}
+                    input={block.tool.input}
+                    state={block.tool.state}
+                    output={
+                      block.tool.state === 'output-available' ? block.tool.output : undefined
+                    }
+                    addToolOutput={addToolOutput}
+                  />
+                )
+              }
+              return <ToolBlock key={idx} tools={block.tools} />
+            })}
       </div>
       {isUser && (
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
@@ -373,7 +417,7 @@ function ToolBlock({ tools }: { tools: ToolUIPart[] }) {
       <ToolStepGroup parts={tools} />
       {tools.map((tool, i) => {
         if (tool.state !== 'output-available') return null
-        const toolName = tool.type.slice('tool-'.length)
+        const toolName = toolNameOf(tool)
         const renderer = toolComponents[toolName]
         if (!renderer) return null
         return (
