@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { personaFromRole } from '../../../ai/chat_role.js'
+import { personaFromRole } from '#ai/chat_role'
 
 export default class ShowIaPageController {
   async handle({ inertia, params, auth, effectiveUser }: HttpContext) {

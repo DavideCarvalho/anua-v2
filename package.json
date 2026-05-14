@@ -42,7 +42,8 @@
     "#audit_resolvers/*": "./app/audit_resolvers/*.js",
     "#lib/*": "./app/lib/*.js",
     "#generated/*": "./.adonisjs/server/*.js",
-    "#transformers/*": "./app/transformers/*.js"
+    "#transformers/*": "./app/transformers/*.js",
+    "#ai/*": "./app/ai/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "8.4.0",

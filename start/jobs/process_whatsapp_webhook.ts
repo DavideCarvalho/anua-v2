@@ -1,5 +1,5 @@
 import logger from '@adonisjs/core/services/logger'
-import { WhatsappChatService } from '../../app/ai/whatsapp_chat_service.js'
+import { WhatsappChatService } from '#ai/whatsapp_chat_service'
 import { getAraraService } from '#services/arara_service'
 
 export interface WhatsAppWebhookPayload {

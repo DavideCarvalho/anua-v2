@@ -1,6 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AiThread from '#models/ai_thread'
-import { requestStreamCancel } from '../../ai/stream_cancel_broker.js'
+import { requestStreamCancel } from '#ai/stream_cancel_broker'
 
 export default class CancelChatStreamController {
   async handle({ params, response, auth, effectiveUser }: HttpContext) {

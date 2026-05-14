@@ -1,8 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import {
-  getActiveStream,
-  getResumableStreamContext,
-} from '../../ai/resumable_stream_context.js'
+import { getActiveStream, getResumableStreamContext } from '#ai/resumable_stream_context'
 import AiThread from '#models/ai_thread'
 
 export default class ResumeChatStreamController {

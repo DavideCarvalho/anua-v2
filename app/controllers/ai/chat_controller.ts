@@ -1,15 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { UIMessage } from 'ai'
 import { v7 as uuidv7 } from 'uuid'
-import { AiService } from '../../ai/ai_service.js'
+import { AiService } from '#ai/ai_service'
 import {
   getResumableStreamContext,
   rememberActiveStream,
   clearActiveStream,
-} from '../../ai/resumable_stream_context.js'
-import { registerStreamController } from '../../ai/stream_cancel_broker.js'
-import { personaFromRole, resolvePersonaId } from '../../ai/chat_role.js'
-import { computeChatScope } from '../../ai/chat_scope.js'
+} from '#ai/resumable_stream_context'
+import { registerStreamController } from '#ai/stream_cancel_broker'
+import { personaFromRole, resolvePersonaId } from '#ai/chat_role'
+import { computeChatScope } from '#ai/chat_scope'
 import { chatValidator } from '#validators/ai'
 
 export default class ChatController {
