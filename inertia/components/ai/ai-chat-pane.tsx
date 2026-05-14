@@ -15,7 +15,10 @@ import { api } from '~/lib/api'
 
 // Tools de escrita: renderizam como card de aprovação inline em vez do
 // tool-step normal. Mantém em sync com WRITE_TOOL_NAMES no backend.
-const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>(['sendCommunication'])
+const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
+  'sendCommunication',
+  'justifyAbsence',
+])
 
 type MessageBlock =
   | { kind: 'text'; text: string }

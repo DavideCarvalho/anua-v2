@@ -2,10 +2,15 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import { v7 as uuidv7 } from 'uuid'
 import logger from '@adonisjs/core/services/logger'
+import StudentHasResponsible from '#models/student_has_responsible'
 import {
   sendCommunicationInputSchema,
   type SendCommunicationInput,
 } from './tools/send_communication.js'
+import {
+  justifyAbsenceInputSchema,
+  type JustifyAbsenceInput,
+} from './tools/justify_absence.js'
 
 /**
  * Contexto da decisão: quem aprovou, dados do row pendente, escola alvo.
@@ -35,6 +40,8 @@ export async function dispatchAction(ctx: DispatchContext): Promise<DispatchResu
     switch (ctx.toolName) {
       case 'sendCommunication':
         return await dispatchSendCommunication(ctx)
+      case 'justifyAbsence':
+        return await dispatchJustifyAbsence(ctx)
       default:
         return { ok: false, error: `Ação não suportada: ${ctx.toolName}` }
     }
@@ -108,6 +115,70 @@ async function dispatchSendCommunication(ctx: DispatchContext): Promise<Dispatch
       scopeId: input.audience.scopeId ?? ctx.schoolId,
       title: input.title,
       publishedAt: DateTime.now().toISO(),
+    },
+  }
+}
+
+async function dispatchJustifyAbsence(ctx: DispatchContext): Promise<DispatchResult> {
+  const parsed = justifyAbsenceInputSchema.safeParse(ctx.input)
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: `Input inválido: ${parsed.error.issues.map((i) => i.message).join('; ')}`,
+    }
+  }
+  const input: JustifyAbsenceInput = parsed.data
+
+  // Defesa em profundidade: o scope check do tool já valida no fluxo normal,
+  // mas o dispatcher é o ponto final antes do banco — confirmamos aqui que
+  // quem aprovou tem vínculo pedagógico com o aluno. Se alguém burlar a
+  // camada de aprovação ou se o vínculo mudou entre a emissão e a aprovação,
+  // morre aqui.
+  const link = await StudentHasResponsible.query()
+    .where('studentId', input.studentId)
+    .where('responsibleId', ctx.decidedByUserId)
+    .where('isPedagogical', true)
+    .first()
+  if (!link) {
+    return {
+      ok: false,
+      error:
+        'Sem vínculo pedagógico com esse aluno — apenas o responsável pedagógico pode justificar faltas.',
+    }
+  }
+
+  // Aplica em todas as faltas (ABSENT) do dia. Usa returning('id') pra saber
+  // quantas foram afetadas — knex no PG retorna o array das rows updated.
+  const updated = await db
+    .from('StudentHasAttendance')
+    .where('studentId', input.studentId)
+    .where('status', 'ABSENT')
+    .whereIn('attendanceId', (sub) => {
+      sub.from('Attendance').select('id').whereRaw(`date::date = ?::date`, [input.date])
+    })
+    .update(
+      {
+        status: 'EXCUSED',
+        justification: input.reason,
+        updatedAt: DateTime.now().toSQL(),
+      },
+      ['id']
+    )
+
+  if (updated.length === 0) {
+    return {
+      ok: false,
+      error: `Sem faltas pra justificar em ${input.date} pra esse aluno.`,
+    }
+  }
+
+  return {
+    ok: true,
+    output: {
+      studentId: input.studentId,
+      date: input.date,
+      justifiedCount: updated.length,
+      reason: input.reason,
     },
   }
 }

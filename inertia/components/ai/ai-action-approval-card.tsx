@@ -20,10 +20,19 @@ type Props = {
 
 const TOOL_LABELS: Record<string, string> = {
   sendCommunication: 'Enviar comunicado',
+  justifyAbsence: 'Justificar falta',
 }
 
 function toolLabel(toolName: string): string {
   return TOOL_LABELS[toolName] ?? toolName
+}
+
+function formatDateBr(iso: string): string {
+  // input já vem como YYYY-MM-DD — formatamos pra dd/mm/yyyy. Fallback
+  // pra string crua se não bate.
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  if (!m) return iso
+  return `${m[3]}/${m[2]}/${m[1]}`
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -48,6 +57,31 @@ function hasRenderablePayload(output: unknown): output is Record<string, unknown
 }
 
 function renderInputSummary(toolName: string, input: unknown) {
+  if (toolName === 'justifyAbsence' && isObject(input)) {
+    const date = typeof input.date === 'string' ? input.date : null
+    const reason = typeof input.reason === 'string' ? input.reason : null
+    return (
+      <div className="space-y-2.5 text-foreground">
+        {date ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Data
+            </div>
+            <div className="text-sm font-medium">{formatDateBr(date)}</div>
+          </div>
+        ) : null}
+        {reason ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Motivo
+            </div>
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">{reason}</div>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
   if (toolName === 'sendCommunication' && isObject(input)) {
     const title = typeof input.title === 'string' ? input.title : null
     const body = typeof input.body === 'string' ? input.body : null

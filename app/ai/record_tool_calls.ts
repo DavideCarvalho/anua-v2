@@ -9,6 +9,7 @@ import logger from '@adonisjs/core/services/logger'
  */
 export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'sendCommunication',
+  'justifyAbsence',
 ])
 
 export function toolKindFromName(name: string): AiToolKind {
