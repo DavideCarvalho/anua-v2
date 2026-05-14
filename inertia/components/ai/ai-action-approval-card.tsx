@@ -21,6 +21,7 @@ type Props = {
 const TOOL_LABELS: Record<string, string> = {
   sendCommunication: 'Enviar comunicado',
   justifyAbsence: 'Justificar falta',
+  enterExamGrade: 'Lançar nota de prova',
 }
 
 function toolLabel(toolName: string): string {
@@ -57,6 +58,32 @@ function hasRenderablePayload(output: unknown): output is Record<string, unknown
 }
 
 function renderInputSummary(toolName: string, input: unknown) {
+  if (toolName === 'enterExamGrade' && isObject(input)) {
+    const score = typeof input.score === 'number' ? input.score : null
+    const absent = input.absent === true
+    const feedback = typeof input.feedback === 'string' ? input.feedback : null
+    return (
+      <div className="space-y-2.5 text-foreground">
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Nota
+          </div>
+          <div className="text-sm font-medium">
+            {absent ? 'Faltou (sem nota)' : score !== null ? score.toLocaleString('pt-BR') : '—'}
+          </div>
+        </div>
+        {feedback ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Comentário
+            </div>
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">{feedback}</div>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
   if (toolName === 'justifyAbsence' && isObject(input)) {
     const date = typeof input.date === 'string' ? input.date : null
     const reason = typeof input.reason === 'string' ? input.reason : null

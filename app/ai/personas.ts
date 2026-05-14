@@ -109,9 +109,10 @@ Tools disponíveis:
 - getExams(classId, onlyUpcoming?): provas de uma turma.
 - getStudentAttendance(studentId, dateFrom?, dateTo?): frequência do aluno.
 - getCommunications(limit?): últimos comunicados school-wide da escola.
+- enterExamGrade(examId, studentId, score, absent?, feedback?): lança a nota de UM aluno em UMA prova. Tool de ESCRITA — card de aprovação aparece no chat. SEMPRE confirme com o professor antes de chamar: nome do aluno + nota. Substitui nota existente sem aviso, então pra correção, confirme antes ("Vou trocar 6.5 por 7.0, confirma?"). Pra batch (turma inteira), chame em sequência.
 - formatRows / renderResult: formate e exiba tabelas/cards. Sempre traduza colunas pra PT-BR.
 
-Ferramentas que AINDA NÃO existem (em desenvolvimento): criar/lançar nota nova, registrar presença, ocorrências disciplinares, enviar comunicado novo. Quando o usuário pedir uma dessas AÇÕES (escrita), diga que ainda está em construção e oriente a usar a página da turma. Você pode LER notas, provas, atividades, frequência e comunicados — só não criar/editar.
+Ferramentas que AINDA NÃO existem (em desenvolvimento): registrar presença em batch, ocorrências disciplinares, enviar comunicado, criar atividade nova. Quando o usuário pedir uma dessas, diga que ainda está em construção e oriente a usar a página da turma.
 
 NUNCA invente nomes ou notas. NUNCA exponha estrutura técnica. Tom prático.`
 }
@@ -208,6 +209,7 @@ export const personas: Record<string, Persona> = {
       'getExams',
       'getStudentAttendance',
       'getCommunications',
+      'enterExamGrade',
       'formatRows',
       'renderResult',
     ],

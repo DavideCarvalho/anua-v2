@@ -11,6 +11,10 @@ import {
   justifyAbsenceInputSchema,
   type JustifyAbsenceInput,
 } from './tools/justify_absence.js'
+import {
+  enterExamGradeInputSchema,
+  type EnterExamGradeInput,
+} from './tools/enter_exam_grade.js'
 
 /**
  * Contexto da decisão: quem aprovou, dados do row pendente, escola alvo.
@@ -42,6 +46,8 @@ export async function dispatchAction(ctx: DispatchContext): Promise<DispatchResu
         return await dispatchSendCommunication(ctx)
       case 'justifyAbsence':
         return await dispatchJustifyAbsence(ctx)
+      case 'enterExamGrade':
+        return await dispatchEnterExamGrade(ctx)
       default:
         return { ok: false, error: `Ação não suportada: ${ctx.toolName}` }
     }
@@ -179,6 +185,120 @@ async function dispatchJustifyAbsence(ctx: DispatchContext): Promise<DispatchRes
       date: input.date,
       justifiedCount: updated.length,
       reason: input.reason,
+    },
+  }
+}
+
+async function dispatchEnterExamGrade(ctx: DispatchContext): Promise<DispatchResult> {
+  const parsed = enterExamGradeInputSchema.safeParse(ctx.input)
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: `Input inválido: ${parsed.error.issues.map((i) => i.message).join('; ')}`,
+    }
+  }
+  const input: EnterExamGradeInput = parsed.data
+
+  if (input.absent === true && input.score !== null) {
+    return { ok: false, error: 'Quando absent=true, score precisa ser null.' }
+  }
+  if (input.absent !== true && input.score === null) {
+    return { ok: false, error: 'Score só pode ser null se o aluno faltou (absent=true).' }
+  }
+
+  // Validação cruzada: a prova pertence a uma TeacherHasClass que o professor
+  // que está aprovando realmente leciona; o aluno pertence à mesma classe.
+  // Defesa em profundidade — o scope no chat já filtra, mas re-checamos aqui.
+  type AccessRow = { classId: string; teacherId: string; studentClassId: string | null }
+  const { rows } = await db.rawQuery<{ rows: AccessRow[] }>(
+    `
+      SELECT thc."classId"     AS "classId",
+             thc."teacherId"   AS "teacherId",
+             s."classId"       AS "studentClassId"
+      FROM "Exam" e
+      JOIN "TeacherHasClass" thc ON thc.id = e."teacherHasClassId"
+      LEFT JOIN "Student" s ON s.id = :studentId
+      WHERE e.id = :examId
+      LIMIT 1
+    `,
+    { examId: input.examId, studentId: input.studentId }
+  )
+  const access = rows[0]
+  if (!access) {
+    return { ok: false, error: 'Prova não encontrada.' }
+  }
+  if (access.teacherId !== ctx.decidedByUserId) {
+    return {
+      ok: false,
+      error: 'Apenas o professor que ministra essa prova pode lançar a nota.',
+    }
+  }
+  if (access.studentClassId !== access.classId) {
+    return {
+      ok: false,
+      error: 'O aluno não pertence à turma dessa prova.',
+    }
+  }
+
+  // Upsert: existe → update; não existe → insert. Sem race aqui porque a
+  // primary key é id (UUID v7) e o lookup por (examId, studentId) é único
+  // no domínio (1 nota por aluno por prova).
+  const existing = await db
+    .from('exam_grades')
+    .where('examId', input.examId)
+    .where('studentId', input.studentId)
+    .select('id')
+    .first()
+
+  const now = DateTime.now().toSQL()
+  const isPresent = input.absent !== true
+
+  if (existing) {
+    await db
+      .from('exam_grades')
+      .where('id', existing.id)
+      .update({
+        score: input.score,
+        attended: isPresent,
+        feedback: input.feedback ?? null,
+        gradedAt: now,
+        updatedAt: now,
+      })
+    return {
+      ok: true,
+      output: {
+        examGradeId: existing.id,
+        examId: input.examId,
+        studentId: input.studentId,
+        score: input.score,
+        absent: !isPresent,
+        action: 'updated',
+      },
+    }
+  }
+
+  const newId = uuidv7()
+  await db.table('exam_grades').insert({
+    id: newId,
+    examId: input.examId,
+    studentId: input.studentId,
+    score: input.score,
+    attended: isPresent,
+    feedback: input.feedback ?? null,
+    gradedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  return {
+    ok: true,
+    output: {
+      examGradeId: newId,
+      examId: input.examId,
+      studentId: input.studentId,
+      score: input.score,
+      absent: !isPresent,
+      action: 'created',
     },
   }
 }

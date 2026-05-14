@@ -18,6 +18,7 @@ import { api } from '~/lib/api'
 const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'sendCommunication',
   'justifyAbsence',
+  'enterExamGrade',
 ])
 
 type MessageBlock =

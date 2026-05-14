@@ -1,3 +1,15 @@
 packages: []
+# Build scripts aprovados — todos já estavam em package.json#pnpm.onlyBuiltDependencies
+# desde pnpm 10. pnpm 11 exige booleans aqui.
+allowBuilds:
+  '@swc/core': true
+  better-sqlite3: true
+  core-js: true
+  core-js-pure: true
+  esbuild: true
+  exifreader: true
+  msw: true
+  protobufjs: true
+  sharp: true
 patchedDependencies:
   '@adonisjs/lucid@22.1.1': patches/@adonisjs__lucid@22.1.1.patch
