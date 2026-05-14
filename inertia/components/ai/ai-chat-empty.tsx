@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Baby,
   BookOpen,
+  Megaphone,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -36,9 +37,9 @@ const SUGGESTIONS_BY_PERSONA: Record<ChatPersonaRole, Suggestion[]> = {
       prompt: 'Cria um gráfico de barras com a distribuição de alunos por turma',
     },
     {
-      icon: Sparkles,
-      label: 'Análise livre',
-      prompt: 'O que você consegue analisar dos dados desta escola?',
+      icon: Megaphone,
+      label: 'Enviar comunicado',
+      prompt: 'Quero enviar um comunicado pros pais',
     },
   ],
   coordenador: [
@@ -109,6 +110,14 @@ const SUGGESTIONS_BY_PERSONA: Record<ChatPersonaRole, Suggestion[]> = {
   ],
 }
 
+const SUBTITLE_BY_PERSONA: Record<ChatPersonaRole, string> = {
+  gestor: 'Pergunte sobre alunos, turmas, financeiro ou qualquer dado da escola.',
+  coordenador:
+    'Pergunte sobre as turmas que você coordena — alunos, atividades, provas, frequência.',
+  professor: 'Pergunte sobre suas turmas — alunos, atividades, provas, frequência.',
+  responsavel: 'Pergunte sobre seus filhos — notas, provas, frequência, boletos, comunicados.',
+}
+
 type AiChatEmptyProps = {
   onPick: (prompt: string) => void
   userName?: string
@@ -117,15 +126,14 @@ type AiChatEmptyProps = {
 
 export function AiChatEmpty({ onPick, userName, persona = 'gestor' }: AiChatEmptyProps) {
   const SUGGESTIONS = SUGGESTIONS_BY_PERSONA[persona]
+  const subtitle = SUBTITLE_BY_PERSONA[persona]
   return (
     <div className="flex h-full min-h-0 flex-col items-center justify-center px-6 py-8">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           {userName ? `Olá, ${userName.split(' ')[0]}` : 'Como posso ajudar?'}
         </h2>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Pergunte sobre alunos, turmas, financeiro ou qualquer dado da escola.
-        </p>
+        <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <div className="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
         {SUGGESTIONS.map(({ icon: Icon, label, prompt }) => (

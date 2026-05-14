@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Coins, Cpu, Building2, Users } from 'lucide-react'
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
+import { Badge } from '../../../components/ui/badge'
 import { cn } from '../../../lib/utils'
 import { api } from '../../../lib/api'
 
@@ -20,6 +21,12 @@ type GroupRow = {
   outputTokens: number
   totalTokens: number
   count: number
+}
+
+type SchoolRow = GroupRow & {
+  monthlyUsed: number
+  monthlyLimit: number | null
+  quotaStatus: 'unlimited' | 'ok' | 'warning' | 'exceeded'
 }
 
 type DailyRow = { day: string; inputTokens: number; outputTokens: number; totalTokens: number }
@@ -108,6 +115,85 @@ function GroupTable({
   )
 }
 
+const QUOTA_BADGE: Record<
+  SchoolRow['quotaStatus'],
+  { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }
+> = {
+  unlimited: { label: 'Sem limite', variant: 'outline' },
+  ok: { label: 'Ok', variant: 'secondary' },
+  warning: { label: '≥80%', variant: 'default' },
+  exceeded: { label: 'Estourou', variant: 'destructive' },
+}
+
+function SchoolUsageTable({
+  rows,
+}: {
+  rows: SchoolRow[]
+}) {
+  const maxWindow = Math.max(...rows.map((r) => r.totalTokens), 1)
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          Top 20 escolas
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {rows.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground">
+            Sem dados no período
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {rows.map((r) => {
+              const pct = (r.totalTokens / maxWindow) * 100
+              const badge = QUOTA_BADGE[r.quotaStatus]
+              const monthlyPct =
+                r.monthlyLimit && r.monthlyLimit > 0
+                  ? Math.min(100, (r.monthlyUsed / r.monthlyLimit) * 100)
+                  : null
+              return (
+                <div key={r.key} className="space-y-1">
+                  <div className="flex items-baseline justify-between gap-2 text-xs">
+                    <span className="flex items-center gap-2 truncate text-foreground" title={r.label}>
+                      <span className="truncate">{r.label}</span>
+                      <Badge variant={badge.variant} className="text-[9px]">
+                        {badge.label}
+                      </Badge>
+                    </span>
+                    <span className="shrink-0 tabular-nums text-muted-foreground">
+                      {fmt(r.totalTokens)} tokens · {fmt(r.count)} req
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full bg-primary transition-all"
+                      style={{ width: `${Math.max(2, pct)}%` }}
+                    />
+                  </div>
+                  {monthlyPct !== null && r.monthlyLimit !== null ? (
+                    <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+                      <span>
+                        Mês: {fmt(r.monthlyUsed)} / {fmt(r.monthlyLimit)}
+                      </span>
+                      <span className="tabular-nums">{monthlyPct.toFixed(0)}%</span>
+                    </div>
+                  ) : (
+                    <div className="text-[10px] text-muted-foreground">
+                      Mês: {fmt(r.monthlyUsed)} tokens (sem teto)
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 function DailySparkline({ rows }: { rows: DailyRow[] }) {
   if (rows.length === 0) {
     return (
@@ -162,7 +248,7 @@ export default function AiTokensPage() {
   const daily = (data?.daily ?? []) as DailyRow[]
   const byModel = (data?.byModel ?? []) as GroupRow[]
   const byPurpose = (data?.byPurpose ?? []) as GroupRow[]
-  const bySchool = (data?.bySchool ?? []) as GroupRow[]
+  const bySchool = (data?.bySchool ?? []) as SchoolRow[]
   const byUser = (data?.byUser ?? []) as GroupRow[]
 
   return (
@@ -245,7 +331,7 @@ export default function AiTokensPage() {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <GroupTable title="Por modelo" icon={Cpu} rows={byModel} />
               <GroupTable title="Por propósito" icon={Coins} rows={byPurpose} />
-              <GroupTable title="Top 20 escolas" icon={Building2} rows={bySchool} />
+              <SchoolUsageTable rows={bySchool} />
               <GroupTable title="Top 20 usuários" icon={Users} rows={byUser} />
             </div>
           </>

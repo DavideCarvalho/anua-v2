@@ -181,6 +181,12 @@ export default class School extends BaseModel {
   @column({ columnName: 'insuranceClaimWaitingDays' })
   declare insuranceClaimWaitingDays: number | null
 
+  // AI usage cap. NULL = ilimitado (default). Quando preenchido, é o teto
+  // mensal de tokens (prompt+completion) somando todos os canais (web +
+  // whatsapp + tarefas internas tipo título/sumário).
+  @column({ columnName: 'maxMonthlyChatTokens' })
+  declare maxMonthlyChatTokens: number | null
+
   // Foreign keys
   @column({ columnName: 'schoolChainId' })
   declare schoolChainId: string | null

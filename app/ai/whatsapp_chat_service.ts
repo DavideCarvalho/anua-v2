@@ -10,6 +10,7 @@ import { toolRegistry } from './tool_registry.js'
 import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
 import { recordToolCalls } from './record_tool_calls.js'
+import { checkQuotaOrDeny } from './usage_quota_service.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -65,6 +66,13 @@ export class WhatsappChatService {
         text: 'Esse canal ainda não está aberto pro seu perfil. Em breve!',
         threadId: '',
       }
+    }
+
+    // Quota mensal (NULL = ilimitado, default). Quando estourar, devolve
+    // mensagem polida em vez de chamar o LLM.
+    const quota = await checkQuotaOrDeny(user.schoolId)
+    if (!quota.allowed) {
+      return { kind: 'reply', text: quota.reason, threadId: '' }
     }
 
     const thread = await this.loadOrCreateThread(user.id, user.schoolId, role)

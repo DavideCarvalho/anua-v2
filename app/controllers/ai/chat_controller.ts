@@ -10,6 +10,7 @@ import {
 import { registerStreamController } from '#ai/stream_cancel_broker'
 import { personaFromRole, resolvePersonaId } from '#ai/chat_role'
 import { computeChatScope } from '#ai/chat_scope'
+import { checkQuotaOrDeny } from '#ai/usage_quota_service'
 import { chatValidator } from '#validators/ai'
 
 export default class ChatController {
@@ -40,6 +41,13 @@ export default class ChatController {
     const lastUserMessage = [...(messages ?? [])].reverse().find((m) => m.role === 'user')
     if (!lastUserMessage) {
       return response.badRequest({ message: 'Nenhuma mensagem do usuário enviada' })
+    }
+
+    // Gate de quota antes de tudo. Default é ilimitado (School.maxMonthlyChatTokens
+     // = null), então isso só morde se um admin tiver setado um teto pra escola.
+    const quota = await checkQuotaOrDeny(schoolId)
+    if (!quota.allowed) {
+      return response.tooManyRequests({ message: quota.reason })
     }
 
     const scope = await computeChatScope({

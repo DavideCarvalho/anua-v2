@@ -18,6 +18,11 @@ type GroupRow = {
   totalTokens: number
   count: number
 }
+type SchoolRow = GroupRow & {
+  monthlyUsed: number
+  monthlyLimit: number | null
+  quotaStatus: 'unlimited' | 'ok' | 'warning' | 'exceeded'
+}
 
 export default class GetAiTokenUsageSummaryController {
   async handle({ request, response }: HttpContext) {
@@ -94,12 +99,16 @@ export default class GetAiTokenUsageSummaryController {
     }))
   }
 
-  private async aggregateBySchool(since: string): Promise<GroupRow[]> {
+  private async aggregateBySchool(since: string): Promise<SchoolRow[]> {
+    // Início do mês corrente em São Paulo. Usado pra calcular o "usado no mês"
+    // contra o teto mensal da escola — independente da janela `days` que o
+    // admin escolheu pra visualização.
+    const monthStart = DateTime.now().setZone('America/Sao_Paulo').startOf('month').toSQL()
     const rows = await db
       .from('ai_token_usages AS atu')
       .leftJoin('School AS s', 's.id', 'atu.schoolId')
       .where('atu.createdAt', '>=', since)
-      .groupBy('atu.schoolId', 's.name')
+      .groupBy('atu.schoolId', 's.name', 's.maxMonthlyChatTokens')
       .orderByRaw(`SUM("atu"."totalTokens") DESC`)
       .limit(20)
       .select(
@@ -108,17 +117,37 @@ export default class GetAiTokenUsageSummaryController {
         db.raw(`COALESCE(SUM(atu."inputTokens"), 0)::bigint AS "inputTokens"`),
         db.raw(`COALESCE(SUM(atu."outputTokens"), 0)::bigint AS "outputTokens"`),
         db.raw(`COALESCE(SUM(atu."totalTokens"), 0)::bigint AS "totalTokens"`),
-        db.raw('COUNT(*)::bigint AS count')
+        db.raw('COUNT(*)::bigint AS count'),
+        db.raw(
+          `COALESCE(SUM(CASE WHEN atu."createdAt" >= ? THEN atu."totalTokens" ELSE 0 END), 0)::bigint AS "monthlyUsed"`,
+          [monthStart]
+        ),
+        db.raw(`s."maxMonthlyChatTokens" AS "monthlyLimit"`)
       )
 
-    return rows.map((r) => ({
-      key: r.key ?? 'sem-escola',
-      label: String(r.label ?? '—'),
-      inputTokens: Number(r.inputTokens),
-      outputTokens: Number(r.outputTokens),
-      totalTokens: Number(r.totalTokens),
-      count: Number(r.count),
-    }))
+    return rows.map((r) => {
+      const monthlyUsed = Number(r.monthlyUsed ?? 0)
+      const rawLimit = r.monthlyLimit
+      const monthlyLimit =
+        rawLimit === null || rawLimit === undefined ? null : Number(rawLimit)
+      let quotaStatus: SchoolRow['quotaStatus'] = 'unlimited'
+      if (monthlyLimit !== null && monthlyLimit > 0) {
+        if (monthlyUsed >= monthlyLimit) quotaStatus = 'exceeded'
+        else if (monthlyUsed / monthlyLimit >= 0.8) quotaStatus = 'warning'
+        else quotaStatus = 'ok'
+      }
+      return {
+        key: r.key ?? 'sem-escola',
+        label: String(r.label ?? '—'),
+        inputTokens: Number(r.inputTokens),
+        outputTokens: Number(r.outputTokens),
+        totalTokens: Number(r.totalTokens),
+        count: Number(r.count),
+        monthlyUsed,
+        monthlyLimit,
+        quotaStatus,
+      }
+    })
   }
 
   private async aggregateByUser(since: string): Promise<GroupRow[]> {
