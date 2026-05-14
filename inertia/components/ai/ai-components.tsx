@@ -85,8 +85,50 @@ export function QueryResultCard({ rows, rowCount }: any) {
   )
 }
 
+export function DataTable({ columns, rows }: any) {
+  if (!rows?.length) return <p className="text-sm text-muted-foreground py-2">Nenhum dado.</p>
+  const cols = columns || (rows[0] ? Object.keys(rows[0]) : [])
+  return (
+    <div className="overflow-x-auto rounded-lg border py-2 my-2">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b bg-muted/50">
+            {cols.map((col: string, i: number) => (
+              <th key={i} className="px-3 py-2 text-left font-medium text-muted-foreground">{col}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row: any, i: number) => (
+            <tr key={i} className="border-b last:border-0">
+              {cols.map((col: string, j: number) => (
+                <td key={j} className="px-3 py-2">{String(row[col] ?? '')}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+export function InfoCard({ title, description, value }: any) {
+  return (
+    <Card className="my-2">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold">{value}</p>
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+      </CardContent>
+    </Card>
+  )
+}
+
 export const componentRegistry: Record<string, React.ComponentType<any>> = {
-  getSchoolStats: SchoolStatsCard,
-  getStudentAlerts: StudentAlertsCard,
-  queryDatabase: QueryResultCard,
+  SchoolStatsCard,
+  StudentAlertsCard,
+  DataTable,
+  InfoCard,
 }

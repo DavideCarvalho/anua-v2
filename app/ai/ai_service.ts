@@ -32,7 +32,7 @@ export class AiService {
 
     const result = streamText({
       model: getModel(),
-      ...({ stopWhen: (step: any) => step > 6 }) as any,
+      ...({ stopWhen: (_step: number, toolCalls: any[]) => toolCalls?.some(tc => (tc as any)?.toolName === 'renderResult' || tc?.name === 'renderResult') }) as any,
       
       system: persona.systemPrompt,
       messages: [...history, { role: 'user' as const, content: message }],

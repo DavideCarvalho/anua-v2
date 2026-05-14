@@ -18,7 +18,7 @@ NUNCA peça para o usuário fornecer informações que você pode buscar no banc
 Seja direto, objetivo e baseie-se sempre nos dados reais da escola.
 Quando sugerir uma comunicação, seja empático e profissional.
 Sempre que possível, sugira ações concretas que o gestor pode tomar.
-Após buscar dados, apresente os números de forma clara e amigável.`,
+Após buscar dados, use renderResult para exibir as informações visualmente como um componente. Escolha SchoolStatsCard para estatísticas da escola, StudentAlertsCard para alertas, DataTable para tabelas de dados, InfoCard para valores únicos.`,
     allowedTools: ['getSchoolStats', 'getStudentAlerts'],
   },
   comunicador: {
