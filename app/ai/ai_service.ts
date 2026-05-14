@@ -14,6 +14,8 @@ import { getModel } from './ai_provider.js'
 import { getPersona, type SystemPromptContext } from './personas.js'
 import type { ChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
+import { loadHistoryForChat } from './thread_history.js'
+import { maybeSummarizeThread } from './summarize_thread_service.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -117,6 +119,11 @@ export class AiService {
           if (!thread.title) {
             this.generateThreadTitle(thread.id, userText, req).catch(() => {})
           }
+
+          // Fire-and-forget — sumarização não bloqueia a resposta. Se a
+          // thread acumulou mensagens suficientes, condensa as antigas pra
+          // manter o histórico mandado pro modelo dentro do limite.
+          maybeSummarizeThread(thread.id).catch(() => {})
         } catch (err) {
           console.error('[ai_service.onFinish] FAILED', err)
         }
@@ -163,14 +170,7 @@ export class AiService {
   }
 
   private async loadThreadHistory(threadId: string): Promise<ModelMessage[]> {
-    const messages = await AiThreadMessage.query()
-      .where('threadId', threadId)
-      .orderBy('createdAt', 'asc')
-
-    return messages.map((m) => ({
-      role: m.role as 'user' | 'assistant' | 'system' | 'tool',
-      content: m.content ?? '',
-    })) as ModelMessage[]
+    return loadHistoryForChat(threadId)
   }
 
   private async generateThreadTitle(threadId: string, firstMessage: string, req: ChatRequest) {

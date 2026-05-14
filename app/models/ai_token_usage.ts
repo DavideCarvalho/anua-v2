@@ -5,7 +5,7 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import AiThread from './ai_thread.js'
 import AiThreadMessage from './ai_thread_message.js'
 
-export type AiTokenUsagePurpose = 'chat' | 'title'
+export type AiTokenUsagePurpose = 'chat' | 'title' | 'summary'
 
 export default class AiTokenUsage extends BaseModel {
   static table = 'ai_token_usages'

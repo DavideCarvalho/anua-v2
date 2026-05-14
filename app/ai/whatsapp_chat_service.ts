@@ -1,4 +1,4 @@
-import { generateText, stepCountIs, type ModelMessage } from 'ai'
+import { generateText, stepCountIs } from 'ai'
 import { DateTime } from 'luxon'
 import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
@@ -7,6 +7,8 @@ import { getPersona, type SystemPromptContext } from './personas.js'
 import { personaFromRole, type ChatPersonaRole } from './chat_role.js'
 import { computeChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
+import { loadHistoryForChat } from './thread_history.js'
+import { maybeSummarizeThread } from './summarize_thread_service.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -73,7 +75,7 @@ export class WhatsappChatService {
       content: req.body,
     })
 
-    const history = await this.loadHistory(thread.id)
+    const history = await loadHistoryForChat(thread.id)
     const tools = toolRegistry.forPersona(role, {
       schoolId: user.schoolId,
       userId: user.id,
@@ -147,6 +149,10 @@ export class WhatsappChatService {
         })
       }
 
+      // Fire-and-forget — threads de WhatsApp são perenes, sumarização
+      // periódica evita o histórico estourar tokens com o tempo.
+      maybeSummarizeThread(thread.id).catch(() => {})
+
       return { kind: 'reply', text: replyText, threadId: thread.id }
     } catch (err) {
       logger.error({ err, userId: user.id, phone: req.fromDigits }, 'whatsapp chat failed')
@@ -190,17 +196,6 @@ export class WhatsappChatService {
     })
   }
 
-  private async loadHistory(threadId: string): Promise<ModelMessage[]> {
-    const messages = await AiThreadMessage.query()
-      .where('threadId', threadId)
-      .orderBy('createdAt', 'asc')
-      .limit(20)
-
-    return messages.map((m) => ({
-      role: m.role as 'user' | 'assistant' | 'system' | 'tool',
-      content: m.content ?? '',
-    })) as ModelMessage[]
-  }
 }
 
 function phoneVariants(digits: string): string[] {

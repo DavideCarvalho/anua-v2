@@ -32,6 +32,18 @@ export default class AiThread extends BaseModel {
   @column()
   declare channel: 'web' | 'whatsapp'
 
+  // Resumo das mensagens mais antigas, gerado quando a thread passa do
+  // limite de mensagens. Permite manter contexto sem mandar 100+ msgs
+  // pro modelo a cada turno. Quando preenchido, é prepended como mensagem
+  // 'system' antes das mensagens recentes em loadThreadHistory.
+  @column()
+  declare contextSummary: string | null
+
+  // Id da última mensagem incluída no contextSummary. Mensagens criadas
+  // depois dessa não estão no resumo — são mandadas cruas pro modelo.
+  @column()
+  declare summaryUpToMessageId: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
