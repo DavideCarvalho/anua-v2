@@ -4,11 +4,12 @@ import logger from '@adonisjs/core/services/logger'
 
 /**
  * Conjunto de tools que precisam de aprovação humana antes de executar
- * (kind = 'action'). Por enquanto vazio — todas as tools existentes são
- * de leitura. Quando adicionarmos tools de escrita (enviarComunicado,
- * cancelarBoleto, etc), o nome entra aqui e o flow de approval kicks in.
+ * (kind = 'action'). Toda tool aqui DEVE ser definida com defineActionTool
+ * (sem execute) e ter um handler correspondente em action_dispatcher.ts.
  */
-export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>()
+export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
+  'sendCommunication',
+])
 
 export function toolKindFromName(name: string): AiToolKind {
   return WRITE_TOOL_NAMES.has(name) ? 'action' : 'read'

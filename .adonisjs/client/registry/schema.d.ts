@@ -2779,6 +2779,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/list_ai_tool_calls_controller').default['handle']>>>
     }
   }
+  'api.v1.admin.ai.tool_calls.decide': {
+    methods: ["POST"]
+    pattern: '/api/v1/admin/ai/tool-calls/:id/decide'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/ai').decideAiToolCallValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/ai').decideAiToolCallValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/decide_ai_tool_call_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/decide_ai_tool_call_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.admin.ai.tokens.summary': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/admin/ai/tokens/summary'

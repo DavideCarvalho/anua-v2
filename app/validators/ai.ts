@@ -13,3 +13,10 @@ export const chatValidator = vine.compile(
       .optional(),
   })
 )
+
+export const decideAiToolCallValidator = vine.compile(
+  vine.object({
+    decision: vine.string().in(['approve', 'reject']),
+    reason: vine.string().optional(),
+  })
+)

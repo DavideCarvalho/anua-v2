@@ -323,7 +323,9 @@ export interface ApiDefinition {
       }
       admin: {
         ai: {
-          toolCalls: typeof routes['api.v1.admin.ai.tool_calls']
+          toolCalls: typeof routes['api.v1.admin.ai.tool_calls'] & {
+            decide: typeof routes['api.v1.admin.ai.tool_calls.decide']
+          }
           tokens: {
             summary: typeof routes['api.v1.admin.ai.tokens.summary']
           }

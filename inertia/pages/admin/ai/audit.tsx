@@ -1,39 +1,35 @@
 import { Head } from '@inertiajs/react'
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, ExternalLink, ShieldAlert } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Check, ChevronDown, ChevronRight, ExternalLink, ShieldAlert, X } from 'lucide-react'
 import { DateTime } from 'luxon'
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
-import { cn } from '../../../lib/utils'
+import { Badge } from '../../../components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../../components/ui/table'
 import { api } from '../../../lib/api'
 
 const PAGE_SIZE = 50
 
 type Status = 'auto_executed' | 'pending_approval' | 'executed' | 'rejected' | 'failed'
 
-const STATUS_LABEL: Record<Status, { label: string; className: string }> = {
-  auto_executed: {
-    label: 'Auto',
-    className: 'bg-muted text-muted-foreground border-border',
-  },
-  pending_approval: {
-    label: 'Aguardando',
-    className: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30',
-  },
-  executed: {
-    label: 'Aprovado',
-    className: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
-  },
-  rejected: {
-    label: 'Rejeitado',
-    className: 'bg-muted text-muted-foreground border-border',
-  },
-  failed: {
-    label: 'Falhou',
-    className: 'bg-destructive/10 text-destructive border-destructive/30',
-  },
+const STATUS_BADGE: Record<
+  Status,
+  { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' | 'ghost' }
+> = {
+  auto_executed: { label: 'Auto', variant: 'secondary' },
+  pending_approval: { label: 'Aguardando', variant: 'outline' },
+  executed: { label: 'Aprovado', variant: 'default' },
+  rejected: { label: 'Rejeitado', variant: 'secondary' },
+  failed: { label: 'Falhou', variant: 'destructive' },
 }
 
 type AuditRow = {
@@ -52,17 +48,8 @@ type AuditRow = {
 }
 
 function StatusBadge({ status }: { status: Status }) {
-  const s = STATUS_LABEL[status]
-  return (
-    <span
-      className={cn(
-        'inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium',
-        s.className
-      )}
-    >
-      {s.label}
-    </span>
-  )
+  const s = STATUS_BADGE[status]
+  return <Badge variant={s.variant}>{s.label}</Badge>
 }
 
 function prettyJson(value: unknown): string {
@@ -82,10 +69,21 @@ function formatExecutionMs(ms: number | null): string {
 
 function AuditRowItem({ row }: { row: AuditRow }) {
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
+
+  const decideMutation = useMutation({
+    ...api.api.v1.admin.ai.toolCalls.decide.mutationOptions(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: api.api.v1.admin.ai.toolCalls.queryKey() })
+    },
+  })
+
+  const canDecide = row.toolKind === 'action' && row.status === 'pending_approval'
+
   return (
     <>
-      <tr className="border-b border-border hover:bg-accent/40">
-        <td className="px-3 py-2">
+      <TableRow>
+        <TableCell className="w-8 p-1">
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -94,47 +92,81 @@ function AuditRowItem({ row }: { row: AuditRow }) {
           >
             {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </button>
-        </td>
-        <td className="whitespace-nowrap px-3 py-2 text-xs tabular-nums text-muted-foreground">
+        </TableCell>
+        <TableCell className="whitespace-nowrap tabular-nums text-muted-foreground text-xs">
           {DateTime.fromISO(row.createdAt).toFormat('dd/MM HH:mm:ss')}
-        </td>
-        <td className="px-3 py-2 text-xs">
+        </TableCell>
+        <TableCell className="text-xs">
           {row.user ? (
-            <span className="text-foreground">{row.user.name ?? row.user.id.slice(0, 8)}</span>
+            <span>{row.user.name ?? row.user.id.slice(0, 8)}</span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}
-        </td>
-        <td className="px-3 py-2">
-          <code className="font-mono text-xs text-foreground">{row.toolName}</code>
-        </td>
-        <td className="px-3 py-2 text-xs uppercase text-muted-foreground">{row.toolKind}</td>
-        <td className="px-3 py-2">
+        </TableCell>
+        <TableCell>
+          <code className="font-mono text-xs">{row.toolName}</code>
+        </TableCell>
+        <TableCell className="text-xs uppercase text-muted-foreground">{row.toolKind}</TableCell>
+        <TableCell>
           <StatusBadge status={row.status} />
-        </td>
-        <td className="px-3 py-2 text-right text-xs tabular-nums text-muted-foreground">
+        </TableCell>
+        <TableCell className="text-right tabular-nums text-muted-foreground text-xs">
           {formatExecutionMs(row.executionMs)}
-        </td>
-        <td className="px-3 py-2 text-xs">
+        </TableCell>
+        <TableCell className="text-xs">
           {row.thread ? (
-            <span className="inline-flex items-center gap-1 text-foreground">
+            <span className="inline-flex items-center gap-1.5">
               <span className="max-w-[200px] truncate">
                 {row.thread.title ?? 'Sem título'}
               </span>
-              <span className="rounded bg-muted px-1 py-0.5 text-[10px] uppercase">
+              <Badge variant="outline" className="text-[10px] uppercase">
                 {row.thread.channel}
-              </span>
+              </Badge>
               <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
             </span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}
-        </td>
-      </tr>
+        </TableCell>
+        <TableCell className="text-right">
+          {canDecide ? (
+            <div className="inline-flex gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={decideMutation.isPending}
+                onClick={() =>
+                  decideMutation.mutate({
+                    params: { id: row.id },
+                    body: { decision: 'approve' },
+                  })
+                }
+                title="Aprovar e executar"
+              >
+                <Check className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={decideMutation.isPending}
+                onClick={() =>
+                  decideMutation.mutate({
+                    params: { id: row.id },
+                    body: { decision: 'reject' },
+                  })
+                }
+                title="Rejeitar"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : null}
+        </TableCell>
+      </TableRow>
       {open ? (
-        <tr className="border-b border-border bg-muted/30">
-          <td />
-          <td colSpan={7} className="px-3 py-3">
+        <TableRow className="bg-muted/30 hover:bg-muted/30">
+          <TableCell />
+          <TableCell colSpan={8} className="px-3 py-3">
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
                 <div className="mb-1 font-medium uppercase tracking-wide text-muted-foreground">
@@ -153,8 +185,8 @@ function AuditRowItem({ row }: { row: AuditRow }) {
                 </pre>
               </div>
             </div>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       ) : null}
     </>
   )
@@ -191,7 +223,7 @@ export default function AiAuditPage() {
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Toda chamada de tool feita pelo assistente. Ferramentas de leitura
-              executam automaticamente; ferramentas de escrita (futuro) ficam em
+              executam automaticamente; ferramentas de escrita ficam em
               "Aguardando" até alguém aprovar ou rejeitar.
             </p>
           </div>
@@ -238,27 +270,28 @@ export default function AiAuditPage() {
         ) : null}
 
         {rows.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full text-left">
-              <thead className="bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="w-8" />
-                  <th className="px-3 py-2 font-medium">Quando</th>
-                  <th className="px-3 py-2 font-medium">Usuário</th>
-                  <th className="px-3 py-2 font-medium">Tool</th>
-                  <th className="px-3 py-2 font-medium">Tipo</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
-                  <th className="px-3 py-2 text-right font-medium">Duração</th>
-                  <th className="px-3 py-2 font-medium">Thread</th>
-                </tr>
-              </thead>
-              <tbody>
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8" />
+                  <TableHead>Quando</TableHead>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Tool</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Duração</TableHead>
+                  <TableHead>Thread</TableHead>
+                  <TableHead className="text-right">Ação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {rows.map((row) => (
                   <AuditRowItem key={row.id} row={row} />
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Card>
         ) : null}
 
         {pageCount > 1 ? (

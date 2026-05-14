@@ -1,95 +1,70 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-
-// Admin Pages
-const ShowAdminDashboardPageController = () =>
-  import('#controllers/pages/admin/show_admin_dashboard_page_controller')
-const ShowAdminEscolasPageController = () =>
-  import('#controllers/pages/admin/show_admin_escolas_page_controller')
-const ShowAdminBillingDashboardPageController = () =>
-  import('#controllers/pages/admin/show_admin_billing_dashboard_page_controller')
-const ShowAdminBillingFaturasPageController = () =>
-  import('#controllers/pages/admin/show_admin_billing_faturas_page_controller')
-const ShowAdminSubscriptionsPageController = () =>
-  import('#controllers/pages/admin/show_admin_subscriptions_page_controller')
-const ShowAdminRedesPageController = () =>
-  import('#controllers/pages/admin/show_admin_redes_page_controller')
-const ShowAdminAnalyticsPageController = () =>
-  import('#controllers/pages/admin/show_admin_analytics_page_controller')
-const ShowAdminSegurosPageController = () =>
-  import('#controllers/pages/admin/show_admin_seguros_page_controller')
-const ShowAdminConfiguracoesPageController = () =>
-  import('#controllers/pages/admin/show_admin_configuracoes_page_controller')
-const ShowSchoolOnboardingPageController = () =>
-  import('#controllers/pages/admin/show_school_onboarding_page_controller')
-const ShowSchoolDetailsPageController = () =>
-  import('#controllers/pages/admin/show_school_details_page_controller')
-const ShowEditSchoolPageController = () =>
-  import('#controllers/pages/admin/show_edit_school_page_controller')
-const ShowAdminAiAuditPageController = () =>
-  import('#controllers/pages/admin/show_admin_ai_audit_page_controller')
+import { controllers } from '#generated/controllers'
 
 export function registerAdminPageRoutes() {
+  const admin = controllers.pages.admin
+
   router
     .group(() => {
-      router.get('/', [ShowAdminDashboardPageController]).as('dashboard')
-      router.get('/escolas', [ShowAdminEscolasPageController]).as('escolas')
-      router.get('/escolas/:id/editar', [ShowEditSchoolPageController]).as('escolas.edit')
-      router.get('/escolas/:id', [ShowSchoolDetailsPageController]).as('escolas.show')
-      router.get('/onboarding', [ShowSchoolOnboardingPageController]).as('onboarding')
+      router.get('/', [admin.ShowAdminDashboardPage]).as('dashboard')
+      router.get('/escolas', [admin.ShowAdminEscolasPage]).as('escolas')
+      router.get('/escolas/:id/editar', [admin.ShowEditSchoolPage]).as('escolas.edit')
+      router.get('/escolas/:id', [admin.ShowSchoolDetailsPage]).as('escolas.show')
+      router.get('/onboarding', [admin.ShowSchoolOnboardingPage]).as('onboarding')
       router
-        .get('/billing/dashboard', [ShowAdminBillingDashboardPageController])
+        .get('/billing/dashboard', [admin.ShowAdminBillingDashboardPage])
         .as('billing.dashboard')
-      router.get('/billing/faturas', [ShowAdminBillingFaturasPageController]).as('billing.faturas')
+      router.get('/billing/faturas', [admin.ShowAdminBillingFaturasPage]).as('billing.faturas')
       router
-        .get('/billing/subscriptions', [ShowAdminSubscriptionsPageController])
+        .get('/billing/subscriptions', [admin.ShowAdminSubscriptionsPage])
         .as('billing.subscriptions')
-      router.get('/redes', [ShowAdminRedesPageController]).as('redes')
-      router.get('/configuracoes', [ShowAdminConfiguracoesPageController]).as('configuracoes')
+      router.get('/redes', [admin.ShowAdminRedesPage]).as('redes')
+      router.get('/configuracoes', [admin.ShowAdminConfiguracoesPage]).as('configuracoes')
 
       // AI observability
-      router.get('/ai/auditoria', [ShowAdminAiAuditPageController, 'audit']).as('ai.auditoria')
-      router.get('/ai/tokens', [ShowAdminAiAuditPageController, 'tokens']).as('ai.tokens')
+      router.get('/ai/auditoria', [admin.ShowAdminAiAuditPage, 'audit']).as('ai.auditoria')
+      router.get('/ai/tokens', [admin.ShowAdminAiAuditPage, 'tokens']).as('ai.tokens')
 
       // Seguros pages
-      router.get('/seguros', [ShowAdminSegurosPageController]).as('seguros.index')
+      router.get('/seguros', [admin.ShowAdminSegurosPage]).as('seguros.index')
       router
-        .get('/seguros/sinistros', [ShowAdminSegurosPageController, 'sinistros'])
+        .get('/seguros/sinistros', [admin.ShowAdminSegurosPage, 'sinistros'])
         .as('seguros.sinistros')
       router
-        .get('/seguros/faturamento', [ShowAdminSegurosPageController, 'faturamento'])
+        .get('/seguros/faturamento', [admin.ShowAdminSegurosPage, 'faturamento'])
         .as('seguros.faturamento')
       router
-        .get('/seguros/analytics', [ShowAdminSegurosPageController, 'analytics'])
+        .get('/seguros/analytics', [admin.ShowAdminSegurosPage, 'analytics'])
         .as('seguros.analytics')
       router
-        .get('/seguros/configuracao', [ShowAdminSegurosPageController, 'configuracao'])
+        .get('/seguros/configuracao', [admin.ShowAdminSegurosPage, 'configuracao'])
         .as('seguros.configuracao')
 
       // Analytics pages
-      router.get('/analytics', [ShowAdminAnalyticsPageController, 'index']).as('analytics.index')
+      router.get('/analytics', [admin.ShowAdminAnalyticsPage, 'index']).as('analytics.index')
       router
-        .get('/analytics/academico', [ShowAdminAnalyticsPageController, 'academico'])
+        .get('/analytics/academico', [admin.ShowAdminAnalyticsPage, 'academico'])
         .as('analytics.academico')
       router
-        .get('/analytics/presenca', [ShowAdminAnalyticsPageController, 'presenca'])
+        .get('/analytics/presenca', [admin.ShowAdminAnalyticsPage, 'presenca'])
         .as('analytics.presenca')
       router
-        .get('/analytics/cantina', [ShowAdminAnalyticsPageController, 'cantina'])
+        .get('/analytics/cantina', [admin.ShowAdminAnalyticsPage, 'cantina'])
         .as('analytics.cantina')
       router
-        .get('/analytics/pagamentos', [ShowAdminAnalyticsPageController, 'pagamentos'])
+        .get('/analytics/pagamentos', [admin.ShowAdminAnalyticsPage, 'pagamentos'])
         .as('analytics.pagamentos')
       router
-        .get('/analytics/matriculas', [ShowAdminAnalyticsPageController, 'matriculas'])
+        .get('/analytics/matriculas', [admin.ShowAdminAnalyticsPage, 'matriculas'])
         .as('analytics.matriculas')
       router
-        .get('/analytics/ocorrencias', [ShowAdminAnalyticsPageController, 'ocorrencias'])
+        .get('/analytics/ocorrencias', [admin.ShowAdminAnalyticsPage, 'ocorrencias'])
         .as('analytics.ocorrencias')
       router
-        .get('/analytics/gamificacao', [ShowAdminAnalyticsPageController, 'gamificacao'])
+        .get('/analytics/gamificacao', [admin.ShowAdminAnalyticsPage, 'gamificacao'])
         .as('analytics.gamificacao')
-      router.get('/analytics/rh', [ShowAdminAnalyticsPageController, 'rh']).as('analytics.rh')
+      router.get('/analytics/rh', [admin.ShowAdminAnalyticsPage, 'rh']).as('analytics.rh')
     })
     .prefix('/admin')
     .use([

@@ -12,6 +12,8 @@ type ExtractProps<T> =
 
 declare module '@adonisjs/inertia/types' {
   export interface InertiaPages {
+    'admin/ai/audit': ExtractProps<(typeof import('../../inertia/pages/admin/ai/audit.tsx'))['default']>
+    'admin/ai/tokens': ExtractProps<(typeof import('../../inertia/pages/admin/ai/tokens.tsx'))['default']>
     'admin/analytics/academico': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/academico.tsx'))['default']>
     'admin/analytics/cantina': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/cantina.tsx'))['default']>
     'admin/analytics/gamificacao': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/gamificacao.tsx'))['default']>
@@ -161,7 +163,5 @@ declare module '@adonisjs/inertia/types' {
     'responsavel/ocorrencias': ExtractProps<(typeof import('../../inertia/pages/responsavel/ocorrencias.tsx'))['default']>
     'responsavel/perfil': ExtractProps<(typeof import('../../inertia/pages/responsavel/perfil.tsx'))['default']>
     'responsavel/perguntas': ExtractProps<(typeof import('../../inertia/pages/responsavel/perguntas.tsx'))['default']>
-    'admin/ai/audit': ExtractProps<(typeof import('../../inertia/pages/admin/ai/audit.tsx'))['default']>
-    'admin/ai/tokens': ExtractProps<(typeof import('../../inertia/pages/admin/ai/tokens.tsx'))['default']>
   }
 }

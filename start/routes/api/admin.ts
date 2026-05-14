@@ -1,47 +1,18 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-
-// Impersonation
-const SetImpersonationController = () => import('#controllers/admin/set_impersonation_controller')
-const ClearImpersonationController = () =>
-  import('#controllers/admin/clear_impersonation_controller')
-const GetImpersonationStatusController = () =>
-  import('#controllers/admin/get_impersonation_status_controller')
-const GetImpersonationConfigController = () =>
-  import('#controllers/admin/get_impersonation_config_controller')
-
-// Admin - Onboarding
-const CreateSchoolOnboardingController = () =>
-  import('#controllers/admin/create_school_onboarding_controller')
-
-// Admin - Jobs
-const TriggerMissingPaymentsController = () =>
-  import('#controllers/admin/trigger_missing_payments_controller')
-
-// Admin stats
-const GetAdminStatsController = () => import('#controllers/dashboard/get_admin_stats_controller')
-const GetServerStatsController = () => import('#controllers/admin/get_server_stats_controller')
-
-// Admin AI observability
-const ListAiToolCallsController = () =>
-  import('#controllers/admin/list_ai_tool_calls_controller')
-const GetAiTokenUsageSummaryController = () =>
-  import('#controllers/admin/get_ai_token_usage_summary_controller')
+import { controllers } from '#generated/controllers'
 
 export function registerImpersonationApiRoutes() {
   router
     .group(() => {
-      // Ativar impersonation
-      router.post('/', [SetImpersonationController]).as('impersonation.set')
-
-      // Desativar impersonation
-      router.delete('/', [ClearImpersonationController]).as('impersonation.clear')
-
-      // Status de impersonation
-      router.get('/status', [GetImpersonationStatusController]).as('impersonation.status')
-
-      // Lista de usuarios para impersonation
-      router.get('/config', [GetImpersonationConfigController]).as('impersonation.config')
+      router.post('/', [controllers.admin.SetImpersonation]).as('impersonation.set')
+      router.delete('/', [controllers.admin.ClearImpersonation]).as('impersonation.clear')
+      router
+        .get('/status', [controllers.admin.GetImpersonationStatus])
+        .as('impersonation.status')
+      router
+        .get('/config', [controllers.admin.GetImpersonationConfig])
+        .as('impersonation.config')
     })
     .prefix('/admin/impersonation')
     .use(middleware.auth())
@@ -50,7 +21,9 @@ export function registerImpersonationApiRoutes() {
 export function registerAdminOnboardingApiRoutes() {
   router
     .group(() => {
-      router.post('/onboarding', [CreateSchoolOnboardingController]).as('admin.schools.onboarding')
+      router
+        .post('/onboarding', [controllers.admin.CreateSchoolOnboarding])
+        .as('admin.schools.onboarding')
     })
     .prefix('/admin/schools')
     .use([middleware.auth(), middleware.requireRole(['SUPER_ADMIN', 'ADMIN'])])
@@ -60,7 +33,7 @@ export function registerAdminJobsApiRoutes() {
   router
     .group(() => {
       router
-        .post('/generate-missing-payments', [TriggerMissingPaymentsController])
+        .post('/generate-missing-payments', [controllers.admin.TriggerMissingPayments])
         .as('admin.jobs.generate_missing_payments')
     })
     .prefix('/admin/jobs')
@@ -70,8 +43,8 @@ export function registerAdminJobsApiRoutes() {
 export function registerAdminStatsApiRoutes() {
   router
     .group(() => {
-      router.get('/stats', [GetAdminStatsController]).as('dashboard.admin_stats')
-      router.get('/server-stats', [GetServerStatsController]).as('dashboard.server_stats')
+      router.get('/stats', [controllers.dashboard.GetAdminStats]).as('dashboard.admin_stats')
+      router.get('/server-stats', [controllers.admin.GetServerStats]).as('dashboard.server_stats')
     })
     .prefix('/admin')
     .use([
@@ -84,9 +57,12 @@ export function registerAdminStatsApiRoutes() {
 export function registerAdminAiObservabilityRoutes() {
   router
     .group(() => {
-      router.get('/tool-calls', [ListAiToolCallsController]).as('admin.ai.tool_calls')
+      router.get('/tool-calls', [controllers.admin.ListAiToolCalls]).as('admin.ai.tool_calls')
       router
-        .get('/tokens/summary', [GetAiTokenUsageSummaryController])
+        .post('/tool-calls/:id/decide', [controllers.admin.DecideAiToolCall])
+        .as('admin.ai.tool_calls.decide')
+      router
+        .get('/tokens/summary', [controllers.admin.GetAiTokenUsageSummary])
         .as('admin.ai.tokens.summary')
     })
     .prefix('/admin/ai')
