@@ -8,11 +8,13 @@ import {
   clearActiveStream,
 } from '../../ai/resumable_stream_context.js'
 import { registerStreamController } from '../../ai/stream_cancel_broker.js'
+import { personaFromRole, resolvePersonaId } from '../../ai/chat_role.js'
+import { computeChatScope } from '../../ai/chat_scope.js'
 import { chatValidator } from '#validators/ai'
 
 export default class ChatController {
   async handle({ request, response, auth, effectiveUser }: HttpContext) {
-    const { threadId, persona } = await request.validateUsing(chatValidator)
+    const { threadId, persona: requestedPersona } = await request.validateUsing(chatValidator)
     const messages = request.input('messages') as UIMessage[] | undefined
 
     const user = effectiveUser ?? auth.user!
@@ -21,10 +23,30 @@ export default class ChatController {
       return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
     }
 
+    // Persona é derivada do papel do usuário — não do que o front mandou — pra
+    // evitar que um professor peça o chat do gestor e vaze dados. Diretor pode
+    // alternar entre suas próprias variantes (gestor/comunicador) via override.
+    if (!user.$preloaded.role) {
+      await user.load('role')
+    }
+    const defaultPersona = personaFromRole(user.role?.name)
+    if (!defaultPersona) {
+      return response.forbidden({
+        message: 'Seu perfil não tem acesso ao assistente IA ainda',
+      })
+    }
+    const personaId = resolvePersonaId(defaultPersona, requestedPersona)
+
     const lastUserMessage = [...(messages ?? [])].reverse().find((m) => m.role === 'user')
     if (!lastUserMessage) {
       return response.badRequest({ message: 'Nenhuma mensagem do usuário enviada' })
     }
+
+    const scope = await computeChatScope({
+      role: defaultPersona,
+      userId: user.id,
+      schoolId,
+    })
 
     // Owned here so req.on('close') and the cancel endpoint can both abort
     // streamText server-side. The client closing its EventSource is not
@@ -36,10 +58,11 @@ export default class ChatController {
     const aiService = new AiService()
     const { result } = await aiService.chat({
       threadId,
-      personaId: persona ?? 'gestor',
+      personaId,
       schoolId,
       userId: user.id,
       userMessage: lastUserMessage,
+      scope,
       abortSignal: abortController.signal,
     })
 

@@ -1,11 +1,9 @@
 import { z } from 'zod'
 import { defineTool } from '../tool.js'
-import { toolRegistry } from '../tool_registry.js'
+import { toolRegistry, type ToolContext } from '../tool_registry.js'
 import db from '@adonisjs/lucid/services/db'
 
-type ToolCtx = { schoolId: string; userId: string }
-
-export function createGetSchoolStats(ctx: ToolCtx) {
+export function createGetSchoolStats(ctx: ToolContext) {
   return defineTool({
     name: 'getSchoolStats',
     description: 'Obtém estatísticas gerais da escola: total de alunos, inadimplência.',

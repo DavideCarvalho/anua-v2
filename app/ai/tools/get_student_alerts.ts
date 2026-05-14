@@ -1,11 +1,9 @@
 import { z } from 'zod'
 import { defineTool } from '../tool.js'
-import { toolRegistry } from '../tool_registry.js'
+import { toolRegistry, type ToolContext } from '../tool_registry.js'
 import db from '@adonisjs/lucid/services/db'
 
-type ToolCtx = { schoolId: string; userId: string }
-
-export function createGetStudentAlerts(ctx: ToolCtx) {
+export function createGetStudentAlerts(ctx: ToolContext) {
   return defineTool({
     name: 'getStudentAlerts',
     description:

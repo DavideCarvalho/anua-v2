@@ -1,4 +1,18 @@
-type ToolFactory = (ctx: { schoolId: string; userId: string }) => Record<string, any>
+import type { ToolSet } from 'ai'
+import type { ChatScope } from './chat_scope.js'
+
+/**
+ * Contexto injetado em toda tool. role/scope vêm derivados do user no
+ * chat_controller. Tools que leem dados DEVEM filtrar pelo scope — confiar
+ * no modelo pra lembrar de filtrar é receita pra vazamento horizontal.
+ */
+export type ToolContext = {
+  schoolId: string
+  userId: string
+  scope: ChatScope
+}
+
+type ToolFactory = (ctx: ToolContext) => ToolSet
 
 class ToolRegistry {
   private personaFactories = new Map<string, ToolFactory[]>()
@@ -9,9 +23,9 @@ class ToolRegistry {
     this.personaFactories.set(personaId, existing)
   }
 
-  forPersona(personaId: string, ctx: { schoolId: string; userId: string }): Record<string, any> {
+  forPersona(personaId: string, ctx: ToolContext): ToolSet {
     const factories = this.personaFactories.get(personaId) ?? []
-    const tools: Record<string, any> = {}
+    const tools: ToolSet = {}
     for (const factory of factories) {
       Object.assign(tools, factory(ctx))
     }

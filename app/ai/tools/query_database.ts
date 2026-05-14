@@ -1,9 +1,7 @@
 import { z } from 'zod'
 import { defineTool } from '../tool.js'
-import { toolRegistry } from '../tool_registry.js'
+import { toolRegistry, type ToolContext } from '../tool_registry.js'
 import db from '@adonisjs/lucid/services/db'
-
-type ToolCtx = { schoolId: string; userId: string }
 
 const ALLOWED_TABLES = [
   'Student',
@@ -46,7 +44,7 @@ const FORBIDDEN_KEYWORDS = [
 ] as const
 const FORBIDDEN_LITERALS = ['--', '/*', '$$'] as const
 
-export function createGetSchema(_ctx: ToolCtx) {
+export function createGetSchema(_ctx: ToolContext) {
   return defineTool({
     name: 'getSchema',
     description:
@@ -75,7 +73,7 @@ export function createGetSchema(_ctx: ToolCtx) {
   })
 }
 
-export function createQueryDatabase(ctx: ToolCtx) {
+export function createQueryDatabase(ctx: ToolContext) {
   return defineTool({
     name: 'queryDatabase',
     description: `Executa uma consulta SQL SELECT no banco da escola. Máximo 100 resultados.

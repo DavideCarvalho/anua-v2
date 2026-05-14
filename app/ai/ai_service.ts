@@ -12,6 +12,7 @@ import { DateTime } from 'luxon'
 import env from '#start/env'
 import { getModel } from './ai_provider.js'
 import { getPersona, type SystemPromptContext } from './personas.js'
+import type { ChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
@@ -29,6 +30,7 @@ export type ChatRequest = {
   schoolId: string
   userId: string
   userMessage: UIMessage
+  scope: ChatScope
   abortSignal?: AbortSignal
 }
 
@@ -54,6 +56,7 @@ export class AiService {
     const tools = toolRegistry.forPersona(req.personaId, {
       schoolId: req.schoolId,
       userId: req.userId,
+      scope: req.scope,
     })
     const modelName = env.get('CROF_MODEL', 'mimo-v2.5-pro')
 
@@ -132,6 +135,7 @@ export class AiService {
       school: { id: req.schoolId, name: school?.name ?? 'Escola sem nome' },
       user: { id: req.userId, name: user?.name ?? 'Usuário' },
       currentDate: DateTime.now().setZone('America/Sao_Paulo').toFormat('yyyy-LL-dd'),
+      scope: req.scope,
     }
   }
 
