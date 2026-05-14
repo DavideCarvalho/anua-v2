@@ -11,6 +11,7 @@ import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
 import { recordToolCalls } from './record_tool_calls.js'
 import { checkQuotaOrDeny } from './usage_quota_service.js'
+import { resolveSchoolForUser } from './resolve_school.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -61,10 +62,6 @@ export class WhatsappChatService {
       }
     }
 
-    if (!user.schoolId) {
-      return { kind: 'reply', text: 'Você ainda não está vinculado a uma escola no Anua.', threadId: '' }
-    }
-
     if (!user.$preloaded.role) {
       await user.load('role')
     }
@@ -76,6 +73,24 @@ export class WhatsappChatService {
         threadId: '',
       }
     }
+
+    // user.schoolId vem cru do DB e é NULL pra ~83% dos users (o web supre
+    // isso via inertia_middleware, mas o webhook não passa por lá). Aqui
+    // resolvemos via UserHasSchool/TeacherHasClass/StudentHasLevel e
+    // mutamos user.schoolId in-memory pra tudo downstream funcionar igual.
+    const resolvedSchoolId = await resolveSchoolForUser({
+      userId: user.id,
+      roleName: user.role?.name,
+      currentSchoolId: user.schoolId,
+    })
+    if (!resolvedSchoolId) {
+      return {
+        kind: 'reply',
+        text: 'Você ainda não está vinculado a uma escola no Anua.',
+        threadId: '',
+      }
+    }
+    user.schoolId = resolvedSchoolId
 
     // Quota mensal (NULL = ilimitado, default). Quando estourar, devolve
     // mensagem polida em vez de chamar o LLM.
@@ -103,10 +118,11 @@ export class WhatsappChatService {
     // modelo. Tiramos do set antes de chamar o LLM.
     delete tools.renderResult
 
+    const school = await School.find(user.schoolId)
     const promptCtx: SystemPromptContext = {
       school: {
         id: user.schoolId,
-        name: (await School.find(user.schoolId))?.name ?? 'Escola',
+        name: school?.name ?? 'Escola',
       },
       user: { id: user.id, name: user.name ?? 'Usuário' },
       currentDate: DateTime.now().setZone('America/Sao_Paulo').toFormat('yyyy-LL-dd'),
@@ -142,7 +158,9 @@ export class WhatsappChatService {
         }))
       )
 
-      const replyText = (text ?? '').trim() || 'Desculpa, não consegui formular uma resposta agora. Tenta de novo daqui a pouco.'
+      const replyText =
+        (text ?? '').trim() ||
+        'Desculpa, não consegui formular uma resposta agora. Tenta de novo daqui a pouco.'
 
       const assistantMessage = await AiThreadMessage.create({
         threadId: thread.id,
@@ -162,8 +180,7 @@ export class WhatsappChatService {
           purpose: 'chat',
           inputTokens: usage.inputTokens ?? 0,
           outputTokens: usage.outputTokens ?? 0,
-          totalTokens:
-            usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
+          totalTokens: usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
         })
       }
 
@@ -215,10 +232,7 @@ export class WhatsappChatService {
    * 3. Senão, devolve 'ambiguous' e o caller envia uma pergunta pedindo
    *    identificação. A próxima mensagem entra de novo nesse mesmo fluxo.
    */
-  private async resolveActiveUser(
-    candidates: User[],
-    body: string
-  ): Promise<User | 'ambiguous'> {
+  private async resolveActiveUser(candidates: User[], body: string): Promise<User | 'ambiguous'> {
     if (candidates.length === 1) return candidates[0]!
 
     // (1) Thread existente — primeira conversa continua, sem perguntar de novo.
@@ -270,17 +284,13 @@ export class WhatsappChatService {
       channel: 'whatsapp',
     })
   }
-
 }
 
 function normalizeName(s: string): string {
   // Lowercase + strip diacritics. Pra comparação resiliente a "José" vs
   // "Jose" ou "ANA" vs "ana" sem mexer no dado original. U+0300–U+036F é
   // o bloco "Combining Diacritical Marks".
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 }
 
 function escapeRegex(s: string): string {
