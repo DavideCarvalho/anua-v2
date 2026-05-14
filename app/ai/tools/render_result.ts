@@ -9,6 +9,7 @@ const COMPONENT_NAMES = [
   'InfoCard',
   'Stat',
   'Chart',
+  'Comparison',
 ] as const
 
 const COMPONENT_GUIDE = `
@@ -18,6 +19,7 @@ const COMPONENT_GUIDE = `
 - InfoCard: data = { title, description?, value }
 - Stat: data = { label, value, delta?: number, deltaLabel?: string, tone?: 'neutral' | 'positive' | 'negative' | 'warning', hint? }
 - Chart: data = { type: 'bar' | 'line' | 'pie', data: [{ label, value }], xKey?, yKey?, title?, height? }
+- Comparison: data = { label, unit, now: { value, secondaryValue?, secondaryUnit? }, then: { value }, deltaPct: number | null, direction: 'up' | 'down' | 'flat', isImprovement: boolean, periodLabel } — Use pra resultado do getHistoricalComparison. Passe o output do tool quase direto: label = output.label, unit = output.unit, now/then com value (e secondaryValue/secondaryUnit em now se overdue_payments), deltaPct/direction/isImprovement direto do output, periodLabel = "30 dias atrás" / "mês passado" / etc.
 `.trim()
 
 export function createRenderResult() {

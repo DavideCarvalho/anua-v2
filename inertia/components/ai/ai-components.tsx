@@ -16,7 +16,7 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
-import { Users, AlertTriangle, DollarSign, TrendingUp, TrendingDown } from 'lucide-react'
+import { Users, AlertTriangle, DollarSign, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 function formatBRL(cents: number) {
@@ -339,6 +339,94 @@ export function Stat({
   )
 }
 
+type ComparisonPoint = {
+  value?: number
+  secondaryValue?: number
+  secondaryUnit?: string
+}
+
+export function Comparison({
+  title,
+  label,
+  unit,
+  now,
+  then,
+  deltaPct,
+  direction,
+  isImprovement,
+  periodLabel,
+}: {
+  title?: string
+  label?: string
+  unit?: string
+  now?: ComparisonPoint
+  then?: ComparisonPoint
+  deltaPct?: number | null
+  direction?: 'up' | 'down' | 'flat'
+  isImprovement?: boolean
+  periodLabel?: string
+}) {
+  const nowValue = now?.value ?? 0
+  const thenValue = then?.value ?? 0
+  const dir = direction ?? (nowValue === thenValue ? 'flat' : nowValue > thenValue ? 'up' : 'down')
+  const TrendIcon = dir === 'flat' ? Minus : dir === 'up' ? TrendingUp : TrendingDown
+  // Cor é função de "melhorou ou piorou", não da direção crua. Para overdue
+  // ou faltas, descer é verde; para matrículas/comunicados, subir é verde.
+  const improvement =
+    typeof isImprovement === 'boolean'
+      ? isImprovement
+      : dir === 'flat'
+
+  const deltaColor =
+    dir === 'flat'
+      ? 'text-muted-foreground'
+      : improvement
+        ? 'text-green-600 dark:text-green-400'
+        : 'text-red-600 dark:text-red-400'
+
+  const pctLabel =
+    deltaPct === null || deltaPct === undefined
+      ? 'sem base de comparação'
+      : `${deltaPct > 0 ? '+' : ''}${deltaPct.toFixed(1)}%`
+
+  return (
+    <Card className="my-2">
+      {(title || label) && (
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            {title ?? label}
+          </CardTitle>
+        </CardHeader>
+      )}
+      <CardContent className="space-y-2">
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-bold tabular-nums text-foreground">
+            {nowValue.toLocaleString('pt-BR')}
+          </p>
+          {unit ? <p className="text-sm text-muted-foreground">{unit}</p> : null}
+        </div>
+        {now?.secondaryValue !== undefined && now.secondaryUnit === 'centavos' ? (
+          <p className="text-sm text-muted-foreground">{formatBRL(now.secondaryValue)}</p>
+        ) : now?.secondaryValue !== undefined ? (
+          <p className="text-sm text-muted-foreground">
+            {now.secondaryValue.toLocaleString('pt-BR')} {now.secondaryUnit ?? ''}
+          </p>
+        ) : null}
+        <div className="flex items-center gap-2 pt-1 text-xs">
+          <span className={cn('inline-flex items-center gap-1 font-medium', deltaColor)}>
+            <TrendIcon className="h-3.5 w-3.5" />
+            {pctLabel}
+          </span>
+          <span className="text-muted-foreground">
+            vs {periodLabel ?? 'período anterior'} ({thenValue.toLocaleString('pt-BR')}{' '}
+            {unit ?? ''})
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 const CHART_COLORS = [
   'hsl(262, 83%, 58%)',
   'hsl(199, 89%, 48%)',
@@ -433,6 +521,7 @@ const componentRegistry: Record<string, (props: Record<string, unknown>) => Reac
   InfoCard: (p) => <InfoCard {...(p as Parameters<typeof InfoCard>[0])} />,
   Stat: (p) => <Stat {...(p as Parameters<typeof Stat>[0])} />,
   Chart: (p) => <Chart {...(p as Parameters<typeof Chart>[0])} />,
+  Comparison: (p) => <Comparison {...(p as Parameters<typeof Comparison>[0])} />,
 }
 
 type ToolRenderer = (args: {

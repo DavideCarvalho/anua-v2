@@ -17,6 +17,7 @@ import './get_exams.js'
 import './get_student_attendance.js'
 import './get_student_financials.js'
 import './get_communications.js'
+import './get_historical_comparison.js'
 import './send_communication.js'
 
 export {}
