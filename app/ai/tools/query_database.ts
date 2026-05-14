@@ -114,7 +114,5 @@ export function createQueryDatabase(ctx: ToolCtx) {
   })
 }
 
-toolRegistry.register('gestor', createGetSchema)
 toolRegistry.register('comunicador', createGetSchema)
-toolRegistry.register('gestor', createQueryDatabase)
 toolRegistry.register('comunicador', createQueryDatabase)

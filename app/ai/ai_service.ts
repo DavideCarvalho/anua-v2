@@ -1,4 +1,4 @@
-import { streamText, generateText, hasToolCall, stepCountIs, type ModelMessage } from 'ai'
+import { streamText, generateText, type ModelMessage } from 'ai'
 import { getModel } from './ai_provider.js'
 import { getPersona } from './personas.js'
 import { toolRegistry } from './tool_registry.js'
@@ -32,7 +32,7 @@ export class AiService {
 
     const result = streamText({
       model: getModel(),
-      stopWhen: [stepCountIs(8), hasToolCall('renderResult')],
+      
 
       system: persona.systemPrompt,
       messages: [...history, { role: 'user' as const, content: message }],
