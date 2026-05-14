@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
+import db from '@adonisjs/lucid/services/db'
 import AiToolCall from '#models/ai_tool_call'
 
 const queryValidator = vine.compile(
@@ -8,10 +9,14 @@ const queryValidator = vine.compile(
     offset: vine.number().min(0).optional(),
     status: vine
       .string()
-      .in(['auto_executed', 'pending_approval', 'executed', 'rejected', 'failed'])
+      .in(['auto_executed', 'pending_approval', 'executing', 'executed', 'rejected', 'failed'])
       .optional(),
     toolName: vine.string().optional(),
     toolKind: vine.string().in(['read', 'action']).optional(),
+    // userId: pega tudo que um user fez. userQ: substring no nome do user.
+    userId: vine.string().uuid().optional(),
+    userQ: vine.string().minLength(2).optional(),
+    schoolId: vine.string().uuid().optional(),
   })
 )
 
@@ -32,29 +37,54 @@ type AuditRow = {
 
 export default class ListAiToolCallsController {
   async handle({ request, response }: HttpContext) {
-    const { limit = 50, offset = 0, status, toolName, toolKind } = await request.validateUsing(
-      queryValidator
-    )
+    const {
+      limit = 50,
+      offset = 0,
+      status,
+      toolName,
+      toolKind,
+      userId,
+      userQ,
+      schoolId,
+    } = await request.validateUsing(queryValidator)
 
-    const query = AiToolCall.query()
+    // Subquery de userIds quando filtra por nome (case-insensitive substring).
+    // Resolvemos uma vez e usamos como IN nas duas queries (lista + count).
+    let userIdsByName: string[] | null = null
+    if (userQ) {
+      const users = await db
+        .from('User')
+        .select('id')
+        .whereILike('name', `%${userQ}%`)
+        .whereNull('deletedAt')
+        .limit(200)
+      userIdsByName = users.map((u) => String(u.id))
+      if (userIdsByName.length === 0) {
+        // Nenhum user bate — não tem como ter audit row.
+        return response.ok({ rows: [], total: 0, limit, offset })
+      }
+    }
+
+    const listQuery = AiToolCall.query()
       .preload('user')
       .preload('thread')
       .orderBy('createdAt', 'desc')
       .limit(limit)
       .offset(offset)
+    const countQuery = AiToolCall.query()
 
-    if (status) query.where('status', status)
-    if (toolName) query.where('toolName', toolName)
-    if (toolKind) query.where('toolKind', toolKind)
+    for (const q of [listQuery, countQuery]) {
+      if (status) q.where('status', status)
+      if (toolName) q.where('toolName', toolName)
+      if (toolKind) q.where('toolKind', toolKind)
+      if (userId) q.where('userId', userId)
+      if (schoolId) q.where('schoolId', schoolId)
+      if (userIdsByName) q.whereIn('userId', userIdsByName)
+    }
 
     const [rows, totalResult] = await Promise.all([
-      query.exec(),
-      AiToolCall.query()
-        .if(status, (q) => q.where('status', status!))
-        .if(toolName, (q) => q.where('toolName', toolName!))
-        .if(toolKind, (q) => q.where('toolKind', toolKind!))
-        .count('* as total')
-        .first(),
+      listQuery.exec(),
+      countQuery.count('* as total').first(),
     ])
 
     const total = Number(totalResult?.$extras?.total ?? 0)

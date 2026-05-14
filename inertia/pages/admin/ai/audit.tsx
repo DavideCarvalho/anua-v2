@@ -1,11 +1,12 @@
 import { Head } from '@inertiajs/react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, ExternalLink, ShieldAlert } from 'lucide-react'
+import { ChevronDown, ChevronRight, ExternalLink, ShieldAlert, Search, X } from 'lucide-react'
 import { DateTime } from 'luxon'
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent } from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
+import { Input } from '../../../components/ui/input'
 import { Badge } from '../../../components/ui/badge'
 import {
   Table,
@@ -155,9 +156,39 @@ function AuditRowItem({ row }: { row: AuditRow }) {
   )
 }
 
+const STATUS_OPTIONS: { value: Status | 'all'; label: string }[] = [
+  { value: 'all', label: 'Todos' },
+  { value: 'auto_executed', label: 'Auto' },
+  { value: 'pending_approval', label: 'Aguardando' },
+  { value: 'executing', label: 'Executando' },
+  { value: 'executed', label: 'Aprovado' },
+  { value: 'rejected', label: 'Rejeitado' },
+  { value: 'failed', label: 'Falhou' },
+]
+
 export default function AiAuditPage() {
   const [page, setPage] = useState(0)
   const [kindFilter, setKindFilter] = useState<'all' | 'read' | 'action'>('all')
+  const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all')
+  // userQ é debounced via local state + commit em submit/Enter pra não
+  // disparar request a cada tecla.
+  const [userQInput, setUserQInput] = useState('')
+  const [userQ, setUserQ] = useState('')
+  const [toolNameInput, setToolNameInput] = useState('')
+  const [toolName, setToolName] = useState('')
+
+  const hasFilters =
+    kindFilter !== 'all' || statusFilter !== 'all' || userQ !== '' || toolName !== ''
+
+  function resetFilters() {
+    setKindFilter('all')
+    setStatusFilter('all')
+    setUserQInput('')
+    setUserQ('')
+    setToolNameInput('')
+    setToolName('')
+    setPage(0)
+  }
 
   const { data, isLoading, error, isFetching } = useQuery(
     api.api.v1.admin.ai.toolCalls.queryOptions({
@@ -165,6 +196,9 @@ export default function AiAuditPage() {
         limit: PAGE_SIZE,
         offset: page * PAGE_SIZE,
         ...(kindFilter !== 'all' ? { toolKind: kindFilter } : {}),
+        ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+        ...(userQ ? { userQ } : {}),
+        ...(toolName ? { toolName } : {}),
       },
     })
   )
@@ -193,20 +227,94 @@ export default function AiAuditPage() {
           <div className="text-xs tabular-nums text-muted-foreground">{total} chamadas</div>
         </div>
 
-        <div className="flex gap-2">
-          {(['all', 'read', 'action'] as const).map((opt) => (
-            <Button
-              key={opt}
-              variant={kindFilter === opt ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setKindFilter(opt)
-                setPage(0)
-              }}
-            >
-              {opt === 'all' ? 'Todas' : opt === 'read' ? 'Leitura' : 'Escrita'}
+        <div className="flex flex-wrap items-end gap-2">
+          <div>
+            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Tipo
+            </label>
+            <div className="flex gap-1">
+              {(['all', 'read', 'action'] as const).map((opt) => (
+                <Button
+                  key={opt}
+                  variant={kindFilter === opt ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setKindFilter(opt)
+                    setPage(0)
+                  }}
+                >
+                  {opt === 'all' ? 'Todas' : opt === 'read' ? 'Leitura' : 'Escrita'}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Status
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {STATUS_OPTIONS.map((opt) => (
+                <Button
+                  key={opt.value}
+                  variant={statusFilter === opt.value ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setStatusFilter(opt.value)
+                    setPage(0)
+                  }}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <form
+            className="flex items-end gap-2"
+            onSubmit={(e) => {
+              e.preventDefault()
+              setUserQ(userQInput.trim())
+              setToolName(toolNameInput.trim())
+              setPage(0)
+            }}
+          >
+            <div>
+              <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                Usuário (nome)
+              </label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={userQInput}
+                  onChange={(e) => setUserQInput(e.target.value)}
+                  placeholder="ex: maria"
+                  className="h-8 w-40 pl-7 text-xs"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                Tool
+              </label>
+              <Input
+                value={toolNameInput}
+                onChange={(e) => setToolNameInput(e.target.value)}
+                placeholder="ex: sendCommunication"
+                className="h-8 w-44 text-xs"
+              />
+            </div>
+            <Button type="submit" size="sm" variant="outline">
+              Aplicar
             </Button>
-          ))}
+          </form>
+
+          {hasFilters ? (
+            <Button type="button" size="sm" variant="ghost" onClick={resetFilters}>
+              <X className="mr-1 h-3 w-3" />
+              Limpar
+            </Button>
+          ) : null}
         </div>
 
         {isLoading && (
