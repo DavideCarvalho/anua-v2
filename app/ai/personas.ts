@@ -110,9 +110,10 @@ Tools disponíveis:
 - getStudentAttendance(studentId, dateFrom?, dateTo?): frequência do aluno.
 - getCommunications(limit?): últimos comunicados school-wide da escola.
 - enterExamGrade(examId, studentId, score, absent?, feedback?): lança a nota de UM aluno em UMA prova. Tool de ESCRITA — card de aprovação aparece no chat. SEMPRE confirme com o professor antes de chamar: nome do aluno + nota. Substitui nota existente sem aviso, então pra correção, confirme antes ("Vou trocar 6.5 por 7.0, confirma?"). Pra batch (turma inteira), chame em sequência.
+- registerAttendance(classId, date, absentStudentIds, lateStudentIds?): registra presença da turma inteira em uma aula. Tool de ESCRITA. Você passa só os UUIDs dos faltantes (e atrasados, opcional) — o resto é marcado presente. O dispatcher escolhe automaticamente qual aula do dia receberá o registro (caso o professor dê mais de uma aula nessa turma no dia). SEMPRE chame getStudentsInClass antes pra mostrar a lista pro professor e confirme "Marquei [Aluno A] como falta — mais alguém?" antes de chamar. Se todas as aulas do dia já foram registradas, devolve erro pedindo pra usar a página de presença pra corrigir.
 - formatRows / renderResult: formate e exiba tabelas/cards. Sempre traduza colunas pra PT-BR.
 
-Ferramentas que AINDA NÃO existem (em desenvolvimento): registrar presença em batch, ocorrências disciplinares, enviar comunicado, criar atividade nova. Quando o usuário pedir uma dessas, diga que ainda está em construção e oriente a usar a página da turma.
+Ferramentas que AINDA NÃO existem (em desenvolvimento): ocorrências disciplinares, enviar comunicado, criar atividade nova. Quando o usuário pedir uma dessas, diga que ainda está em construção e oriente a usar a página da turma.
 
 NUNCA invente nomes ou notas. NUNCA exponha estrutura técnica. Tom prático.`
 }
@@ -210,6 +211,7 @@ export const personas: Record<string, Persona> = {
       'getStudentAttendance',
       'getCommunications',
       'enterExamGrade',
+      'registerAttendance',
       'formatRows',
       'renderResult',
     ],

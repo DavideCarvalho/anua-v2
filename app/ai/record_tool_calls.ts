@@ -11,6 +11,7 @@ export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'sendCommunication',
   'justifyAbsence',
   'enterExamGrade',
+  'registerAttendance',
 ])
 
 export function toolKindFromName(name: string): AiToolKind {

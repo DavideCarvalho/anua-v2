@@ -19,6 +19,7 @@ const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'sendCommunication',
   'justifyAbsence',
   'enterExamGrade',
+  'registerAttendance',
 ])
 
 type MessageBlock =

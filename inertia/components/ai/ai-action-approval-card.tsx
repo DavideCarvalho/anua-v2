@@ -22,6 +22,7 @@ const TOOL_LABELS: Record<string, string> = {
   sendCommunication: 'Enviar comunicado',
   justifyAbsence: 'Justificar falta',
   enterExamGrade: 'Lançar nota de prova',
+  registerAttendance: 'Registrar presença',
 }
 
 function toolLabel(toolName: string): string {
@@ -58,6 +59,43 @@ function hasRenderablePayload(output: unknown): output is Record<string, unknown
 }
 
 function renderInputSummary(toolName: string, input: unknown) {
+  if (toolName === 'registerAttendance' && isObject(input)) {
+    const date = typeof input.date === 'string' ? input.date : null
+    const absent = Array.isArray(input.absentStudentIds) ? input.absentStudentIds : []
+    const late = Array.isArray(input.lateStudentIds) ? input.lateStudentIds : []
+    return (
+      <div className="space-y-2.5 text-foreground">
+        {date ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Data
+            </div>
+            <div className="text-sm font-medium">{formatDateBr(date)}</div>
+          </div>
+        ) : null}
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <span>
+            <span className="font-medium text-foreground">{absent.length}</span>
+            <span className="text-muted-foreground"> falta{absent.length === 1 ? '' : 's'}</span>
+          </span>
+          {late.length > 0 ? (
+            <span>
+              <span className="font-medium text-foreground">{late.length}</span>
+              <span className="text-muted-foreground">
+                {' '}
+                atrasado{late.length === 1 ? '' : 's'}
+              </span>
+            </span>
+          ) : null}
+        </div>
+        <div className="text-[10px] text-muted-foreground">
+          O dispatcher escolhe qual aula do dia receberá o registro (a primeira ainda
+          não preenchida). Demais alunos da turma serão marcados como presentes.
+        </div>
+      </div>
+    )
+  }
+
   if (toolName === 'enterExamGrade' && isObject(input)) {
     const score = typeof input.score === 'number' ? input.score : null
     const absent = input.absent === true

@@ -15,6 +15,10 @@ import {
   enterExamGradeInputSchema,
   type EnterExamGradeInput,
 } from './tools/enter_exam_grade.js'
+import {
+  registerAttendanceInputSchema,
+  type RegisterAttendanceInput,
+} from './tools/register_attendance.js'
 
 /**
  * Contexto da decisão: quem aprovou, dados do row pendente, escola alvo.
@@ -48,6 +52,8 @@ export async function dispatchAction(ctx: DispatchContext): Promise<DispatchResu
         return await dispatchJustifyAbsence(ctx)
       case 'enterExamGrade':
         return await dispatchEnterExamGrade(ctx)
+      case 'registerAttendance':
+        return await dispatchRegisterAttendance(ctx)
       default:
         return { ok: false, error: `Ação não suportada: ${ctx.toolName}` }
     }
@@ -299,6 +305,156 @@ async function dispatchEnterExamGrade(ctx: DispatchContext): Promise<DispatchRes
       score: input.score,
       absent: !isPresent,
       action: 'created',
+    },
+  }
+}
+
+async function dispatchRegisterAttendance(ctx: DispatchContext): Promise<DispatchResult> {
+  const parsed = registerAttendanceInputSchema.safeParse(ctx.input)
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: `Input inválido: ${parsed.error.issues.map((i) => i.message).join('; ')}`,
+    }
+  }
+  const input: RegisterAttendanceInput = parsed.data
+
+  // classWeekDay é ISO (1=segunda ... 7=domingo, mas no banco só 1-6 aparece).
+  const dateTime = DateTime.fromISO(input.date)
+  if (!dateTime.isValid) return { ok: false, error: `Data inválida: ${input.date}` }
+  const weekday = dateTime.weekday
+
+  // 1. Encontra slots desse professor pra essa turma nessa weekday.
+  type SlotRow = { id: string; teacherHasClassId: string; startTime: string }
+  const { rows: slots } = await db.rawQuery<{ rows: SlotRow[] }>(
+    `
+      SELECT cs.id, cs."teacherHasClassId", cs."startTime"
+      FROM "CalendarSlot" cs
+      JOIN "TeacherHasClass" thc ON thc.id = cs."teacherHasClassId"
+      WHERE thc."teacherId" = :userId
+        AND thc."classId" = :classId
+        AND thc."isActive" = true
+        AND cs."classWeekDay" = :weekday
+        AND COALESCE(cs."isBreak", false) = false
+      ORDER BY cs."startTime" ASC
+    `,
+    { userId: ctx.decidedByUserId, classId: input.classId, weekday }
+  )
+  if (slots.length === 0) {
+    return {
+      ok: false,
+      error:
+        'Você não tem aula nessa turma nesse dia da semana — confere se a data está certa ou se a aula é sua mesmo.',
+    }
+  }
+
+  // 2. Pega o primeiro slot que ainda não tem Attendance pra essa data.
+  const slotIds = slots.map((s) => s.id)
+  const { rows: registered } = await db.rawQuery<{ rows: Array<{ calendarSlotId: string }> }>(
+    `
+      SELECT DISTINCT "calendarSlotId"
+      FROM "Attendance"
+      WHERE "calendarSlotId" = ANY(:slotIds)
+        AND date::date = :date::date
+    `,
+    { slotIds, date: input.date }
+  )
+  const takenSlots = new Set(registered.map((r) => r.calendarSlotId))
+  const freeSlot = slots.find((s) => !takenSlots.has(s.id))
+  if (!freeSlot) {
+    return {
+      ok: false,
+      error: `Todas as suas aulas dessa turma em ${input.date} já têm presença registrada. Pra corrigir, use a página de presença da turma.`,
+    }
+  }
+
+  // 3. Lista alunos da turma — quem não está em absent/late é PRESENT.
+  type StudentRow = { id: string }
+  const { rows: students } = await db.rawQuery<{ rows: StudentRow[] }>(
+    `
+      SELECT s.id
+      FROM "Student" s
+      JOIN "User" u ON u.id = s.id
+      WHERE s."classId" = :classId
+        AND u."deletedAt" IS NULL
+    `,
+    { classId: input.classId }
+  )
+  if (students.length === 0) {
+    return { ok: false, error: 'Nenhum aluno ativo nessa turma.' }
+  }
+
+  const absentSet = new Set(input.absentStudentIds)
+  const lateSet = new Set(input.lateStudentIds ?? [])
+  const studentIds = new Set(students.map((s) => s.id))
+
+  // Sanity check: ids passados realmente são da turma. Se o modelo inventou
+  // um id, falhamos aqui em vez de criar lixo.
+  for (const id of [...absentSet, ...lateSet]) {
+    if (!studentIds.has(id)) {
+      return {
+        ok: false,
+        error: `Aluno ${id} não está nessa turma — não dá pra marcar presença dele aqui.`,
+      }
+    }
+  }
+
+  // 4. Cria Attendance + StudentHasAttendance em transação atômica.
+  const attendanceId = uuidv7()
+  const now = DateTime.now()
+  let presentCount = 0
+  let absentCount = 0
+  let lateCount = 0
+
+  await db.transaction(async (trx) => {
+    await trx.table('Attendance').insert({
+      id: attendanceId,
+      calendarSlotId: freeSlot.id,
+      date: now.toSQL(),
+      // Os timestamps autoCreate são gerenciados pelo Lucid quando usamos
+      // o model. Aqui é raw, então setamos explicitamente.
+      createdAt: now.toSQL(),
+      updatedAt: now.toSQL(),
+    })
+
+    const rows = students.map((s) => {
+      let status: 'PRESENT' | 'ABSENT' | 'LATE'
+      if (absentSet.has(s.id)) {
+        status = 'ABSENT'
+        absentCount++
+      } else if (lateSet.has(s.id)) {
+        status = 'LATE'
+        lateCount++
+      } else {
+        status = 'PRESENT'
+        presentCount++
+      }
+      return {
+        id: uuidv7(),
+        studentId: s.id,
+        attendanceId,
+        status,
+        justification: null,
+        createdAt: now.toSQL(),
+        updatedAt: now.toSQL(),
+      }
+    })
+    await trx.table('StudentHasAttendance').multiInsert(rows)
+  })
+
+  return {
+    ok: true,
+    output: {
+      attendanceId,
+      calendarSlotId: freeSlot.id,
+      classId: input.classId,
+      date: input.date,
+      totals: {
+        present: presentCount,
+        absent: absentCount,
+        late: lateCount,
+        total: students.length,
+      },
     },
   }
 }
