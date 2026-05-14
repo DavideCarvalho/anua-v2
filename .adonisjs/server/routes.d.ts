@@ -129,6 +129,7 @@ export type ScannedRoutes = {
     'web.escola.gamificacao.recompensas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.desafios': { paramsTuple?: []; params?: {} }
     'web.escola.ia.index': { paramsTuple?: []; params?: {} }
+    'web.escola.ia.conversa': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'web.escola.configuracoes': { paramsTuple?: []; params?: {} }
     'web.responsavel.dashboard': { paramsTuple?: []; params?: {} }
     'web.responsavel.notas': { paramsTuple?: []; params?: {} }
@@ -717,6 +718,8 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.academic_sub_periods.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.chat': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.chat.resume': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
+    'api.v1.ai.chat.cancel': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
     'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.threads.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -843,6 +846,7 @@ export type ScannedRoutes = {
     'web.escola.gamificacao.recompensas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.desafios': { paramsTuple?: []; params?: {} }
     'web.escola.ia.index': { paramsTuple?: []; params?: {} }
+    'web.escola.ia.conversa': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'web.escola.configuracoes': { paramsTuple?: []; params?: {} }
     'web.responsavel.dashboard': { paramsTuple?: []; params?: {} }
     'web.responsavel.notas': { paramsTuple?: []; params?: {} }
@@ -1158,6 +1162,7 @@ export type ScannedRoutes = {
     'api.v1.escola.inquiries.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.academic_sub_periods.index': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.chat.resume': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
     'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -1281,6 +1286,7 @@ export type ScannedRoutes = {
     'web.escola.gamificacao.recompensas': { paramsTuple?: []; params?: {} }
     'web.escola.gamificacao.desafios': { paramsTuple?: []; params?: {} }
     'web.escola.ia.index': { paramsTuple?: []; params?: {} }
+    'web.escola.ia.conversa': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'web.escola.configuracoes': { paramsTuple?: []; params?: {} }
     'web.responsavel.dashboard': { paramsTuple?: []; params?: {} }
     'web.responsavel.notas': { paramsTuple?: []; params?: {} }
@@ -1596,6 +1602,7 @@ export type ScannedRoutes = {
     'api.v1.escola.inquiries.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.academic_sub_periods.index': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.chat.resume': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
     'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -1807,6 +1814,7 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.generate': { paramsTuple?: []; params?: {} }
     'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
     'api.v1.ai.chat': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.chat.cancel': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }

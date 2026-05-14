@@ -22,7 +22,6 @@ export default class SchoolTransformer extends BaseTransformer<School> {
         'zipCode',
         'latitude',
         'longitude',
-        'location',
         'logoUrl',
         'asaasAccountId',
         'asaasWebhookToken',

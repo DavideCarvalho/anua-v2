@@ -1,114 +1,160 @@
-import { streamText, generateText, type ModelMessage } from 'ai'
+import {
+  streamText,
+  generateText,
+  stepCountIs,
+  hasToolCall,
+  type ModelMessage,
+  type UIMessage,
+  type StreamTextResult,
+  type ToolSet,
+} from 'ai'
+import { DateTime } from 'luxon'
+import env from '#start/env'
 import { getModel } from './ai_provider.js'
-import { getPersona } from './personas.js'
+import { getPersona, type SystemPromptContext } from './personas.js'
 import { toolRegistry } from './tool_registry.js'
+import './tools/index.js'
 import AiThread from '#models/ai_thread'
-import AiThreadMessage from '#models/ai_thread_message'
+import AiThreadMessage, {
+  type StoredToolCall,
+  type StoredToolResult,
+} from '#models/ai_thread_message'
+import AiTokenUsage from '#models/ai_token_usage'
+import School from '#models/school'
+import User from '#models/user'
+
+export type ChatRequest = {
+  threadId: string
+  personaId: string
+  schoolId: string
+  userId: string
+  userMessage: UIMessage
+  abortSignal?: AbortSignal
+}
+
+export type ChatResult = {
+  result: StreamTextResult<ToolSet, never>
+  threadId: string
+}
 
 export class AiService {
-  async chat(
-    threadId: string | undefined,
-    message: string,
-    personaId: string,
-    ctx: {
-      schoolId: string
-      userId: string
-      onChunk?: (text: string) => void
-      onDone?: () => void
-      onComponent?: (name: string, data: any) => void
-    }
-  ) {
-    const persona = getPersona(personaId)
-    const thread = await this.loadOrCreateThread(threadId, personaId, ctx)
-    const history = await this.loadThreadHistory(thread.id)
+  async chat(req: ChatRequest): Promise<ChatResult> {
+    const persona = getPersona(req.personaId)
+    const thread = await this.loadOrCreateThread(req)
+    const userText = this.extractText(req.userMessage)
+    const promptCtx = await this.buildPromptContext(req)
 
     await AiThreadMessage.create({
       threadId: thread.id,
       role: 'user',
-      content: message,
+      content: userText,
     })
 
-    const tools = toolRegistry.forPersona(personaId, { schoolId: ctx.schoolId, userId: ctx.userId })
+    const history = await this.loadThreadHistory(thread.id)
+    const tools = toolRegistry.forPersona(req.personaId, {
+      schoolId: req.schoolId,
+      userId: req.userId,
+    })
+    const modelName = env.get('CROF_MODEL', 'mimo-v2.5-pro')
 
     const result = streamText({
-      model: getModel(),
-      
-
-      system: persona.systemPrompt,
-      messages: [...history, { role: 'user' as const, content: message }],
+      model: getModel(modelName),
+      system: persona.systemPrompt(promptCtx),
+      messages: history,
       tools: Object.keys(tools).length > 0 ? tools : undefined,
-      onChunk: ctx.onChunk
-        ? ({ chunk }) => {
-            if (chunk.type === 'text-delta' && chunk.text) {
-              ctx.onChunk!(chunk.text)
-            }
-          }
-        : undefined,
-      onFinish: async ({ text, toolResults }) => {
-        ctx.onDone?.()
-        if (toolResults && toolResults.length > 0 && ctx.onComponent) {
-          for (const tr of toolResults) {
-            const name = (tr as any).toolName || (tr as any).name
-            const data = (tr as any).result || (tr as any).args
-            if (name) ctx.onComponent(name, data)
-          }
-          // Auto-render: if queryDatabase returned rows, show as DataTable
-          const lastResult = toolResults[toolResults.length - 1]
-          const lastData = (lastResult as any)?.result
-          const lastName = (lastResult as any)?.toolName
-          if (lastName === 'queryDatabase' && lastData?.rows) {
-            const cols = lastData.rows[0] ? Object.keys(lastData.rows[0]) : []
-            ctx.onComponent('renderResult', {
-              component: 'DataTable',
-              data: { columns: cols, rows: lastData.rows },
-            })
-          }
-          // Auto-render: if getSchoolStats returned data
-          if (lastName === 'getSchoolStats' && lastData) {
-            ctx.onComponent('renderResult', {
-              component: 'SchoolStatsCard',
-              data: lastData,
-            })
-          }
-        }
-        if (text) {
-          await AiThreadMessage.create({
+      // Two-way stop: bail out as soon as the model calls renderResult
+      // (the answer is "shown"), and hard-cap at 20 steps as a runaway
+      // guard for chains that never reach renderResult.
+      stopWhen: [stepCountIs(20), hasToolCall('renderResult')],
+      abortSignal: req.abortSignal,
+      onFinish: async ({ text, steps, usage }) => {
+        try {
+          // streamText.onFinish returns toolCalls/toolResults from the LAST step
+          // only. With multi-step runs that end on a text-only step (e.g. after
+          // renderResult fires), the aggregate is empty — meaning a refresh
+          // would lose every tool block we just streamed to the client. We flatten
+          // across all steps to preserve the full call/result history.
+          const allToolCalls: StoredToolCall[] = steps.flatMap((s) =>
+            (s.toolCalls ?? []).map((c) => ({
+              toolCallId: c.toolCallId,
+              toolName: c.toolName,
+              input: c.input,
+            }))
+          )
+          const allToolResults: StoredToolResult[] = steps.flatMap((s) =>
+            (s.toolResults ?? []).map((r) => ({
+              toolCallId: r.toolCallId,
+              toolName: r.toolName,
+              output: r.output,
+            }))
+          )
+          const assistantMessage = await AiThreadMessage.create({
             threadId: thread.id,
             role: 'assistant',
-            content: text,
+            content: text ?? '',
+            toolCalls: allToolCalls.length ? allToolCalls : null,
+            toolResults: allToolResults.length ? allToolResults : null,
           })
-        }
-        if (!thread.title) {
-          this.generateThreadTitle(thread.id, message).catch(() => {})
+
+          if (usage) {
+            await AiTokenUsage.create({
+              threadId: thread.id,
+              messageId: assistantMessage.id,
+              userId: req.userId,
+              schoolId: req.schoolId,
+              model: modelName,
+              purpose: 'chat',
+              inputTokens: usage.inputTokens ?? 0,
+              outputTokens: usage.outputTokens ?? 0,
+              totalTokens:
+                usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
+            })
+          }
+
+          if (!thread.title) {
+            this.generateThreadTitle(thread.id, userText, req).catch(() => {})
+          }
+        } catch (err) {
+          console.error('[ai_service.onFinish] FAILED', err)
         }
       },
     })
 
-    return result
+    return { result, threadId: thread.id }
   }
 
-  async generate(systemPrompt: string, messages: Array<{ role: string; content: string }>) {
-    const { text } = await generateText({
-      model: getModel('gpt-4o-mini'),
-      system: systemPrompt,
-      messages: messages as unknown as ModelMessage[],
-    })
-    return text
-  }
-
-  private async loadOrCreateThread(
-    threadId: string | undefined,
-    personaId: string,
-    ctx: { schoolId: string; userId: string }
-  ) {
-    if (threadId) {
-      const thread = await AiThread.find(threadId)
-      if (thread) return thread
+  private async buildPromptContext(req: ChatRequest): Promise<SystemPromptContext> {
+    const [school, user] = await Promise.all([
+      School.find(req.schoolId),
+      User.find(req.userId),
+    ])
+    return {
+      school: { id: req.schoolId, name: school?.name ?? 'Escola sem nome' },
+      user: { id: req.userId, name: user?.name ?? 'Usuário' },
+      currentDate: DateTime.now().setZone('America/Sao_Paulo').toFormat('yyyy-LL-dd'),
     }
+  }
+
+  private extractText(message: UIMessage): string {
+    const parts = message.parts ?? []
+    return parts
+      .filter((p): p is Extract<UIMessage['parts'][number], { type: 'text' }> => p.type === 'text')
+      .map((p) => p.text)
+      .join('')
+  }
+
+  private async loadOrCreateThread(req: ChatRequest) {
+    const existing = await AiThread.query()
+      .where('id', req.threadId)
+      .where('userId', req.userId)
+      .first()
+    if (existing) return existing
+
     return AiThread.create({
-      schoolId: ctx.schoolId,
-      userId: ctx.userId,
-      persona: personaId,
+      id: req.threadId,
+      schoolId: req.schoolId,
+      userId: req.userId,
+      persona: req.personaId,
     })
   }
 
@@ -123,13 +169,42 @@ export class AiService {
     })) as ModelMessage[]
   }
 
-  private async generateThreadTitle(threadId: string, firstMessage: string) {
-    const { text } = await generateText({
-      model: getModel('gpt-4o-mini'),
-      system:
-        'Gere um título curto (máximo 6 palavras) para esta conversa. Responda apenas o título, sem aspas.',
-      messages: [{ role: 'user' as const, content: firstMessage }],
+  private async generateThreadTitle(threadId: string, firstMessage: string, req: ChatRequest) {
+    const titleModel = env.get('CROF_MODEL', 'mimo-v2.5-pro')
+    const { text, usage } = await generateText({
+      model: getModel(titleModel),
+      // Phrased as a labeling task with a concrete output contract — otherwise
+      // the model treats the user's question as something to answer (and we
+      // ended up with refusals like "Não tenho acesso a dados..." as titles).
+      system: [
+        'Você recebe a PRIMEIRA mensagem de uma nova conversa e devolve um título curto que descreva o ASSUNTO dessa mensagem.',
+        '',
+        'Regras:',
+        '- Máximo de 6 palavras, em português.',
+        '- NÃO responda à pergunta. NÃO recuse. NÃO peça mais informação.',
+        '- Apenas resuma o tópico em um rótulo (ex.: "Inadimplência por turma", "Lista de alunos atrasados").',
+        '- Sem aspas, sem ponto final, sem prefixos como "Título:".',
+        '- Se a mensagem for vazia ou genérica, devolva "Nova conversa".',
+      ].join('\n'),
+      prompt: `Mensagem do usuário:\n"""${firstMessage}"""\n\nTítulo:`,
     })
-    await AiThread.query().where('id', threadId).update({ title: text.trim() })
+    // Defensive cap in case the model ignores the contract — better an awkward
+    // truncation than a 200-char refusal pasted into the sidebar.
+    const cleaned = text.trim().replace(/^["']|["']$/g, '').slice(0, 60) || 'Nova conversa'
+    await AiThread.query().where('id', threadId).update({ title: cleaned })
+
+    if (usage) {
+      await AiTokenUsage.create({
+        threadId,
+        messageId: null,
+        userId: req.userId,
+        schoolId: req.schoolId,
+        model: titleModel,
+        purpose: 'title',
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+        totalTokens: usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
+      })
+    }
   }
 }

@@ -19,7 +19,6 @@ export default class extends BaseSchema {
       table.text('zipCode').nullable()
       table.float('latitude', 8).nullable()
       table.float('longitude', 8).nullable()
-      table.specificType('location', 'geography(Point,4326)').nullable()
       table.text('logoUrl').nullable()
       table.text('asaasAccountId').nullable()
       table.text('asaasWebhookToken').nullable()

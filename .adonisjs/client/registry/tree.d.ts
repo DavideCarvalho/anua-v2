@@ -176,6 +176,7 @@ export interface ApiDefinition {
       }
       ia: {
         index: typeof routes['web.escola.ia.index']
+        conversa: typeof routes['web.escola.ia.conversa']
       }
       configuracoes: typeof routes['web.escola.configuracoes']
     }
@@ -1039,7 +1040,10 @@ export interface ApiDefinition {
         destroy: typeof routes['api.v1.academic_sub_periods.destroy']
       }
       ai: {
-        chat: typeof routes['api.v1.ai.chat']
+        chat: typeof routes['api.v1.ai.chat'] & {
+          resume: typeof routes['api.v1.ai.chat.resume']
+          cancel: typeof routes['api.v1.ai.chat.cancel']
+        }
         threads: {
           list: typeof routes['api.v1.ai.threads.list']
           show: typeof routes['api.v1.ai.threads.show']

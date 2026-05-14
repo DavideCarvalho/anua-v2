@@ -106,6 +106,7 @@
     "@adonisjs/transmit-client": "^1.1.0",
     "@adonisjs/vite": "5.1.1",
     "@ai-sdk/openai": "^3.0.63",
+    "@ai-sdk/react": "3.0.184",
     "@ararahq/sdk": "^1.8.0",
     "@aws-sdk/client-s3": "^3.1041.0",
     "@aws-sdk/s3-request-presigner": "^3.1041.0",
@@ -143,6 +144,11 @@
     "@radix-ui/react-tooltip": "1.2.8",
     "@tanstack/react-query": "5.90.21",
     "@tanstack/react-table": "8.21.3",
+    "@tiptap/core": "3.22.4",
+    "@tiptap/extension-placeholder": "3.22.4",
+    "@tiptap/pm": "3.22.4",
+    "@tiptap/react": "3.22.4",
+    "@tiptap/starter-kit": "3.22.4",
     "@tuyau/core": "1.2.1",
     "@tuyau/react-query": "^1.0.0",
     "@tuyau/superjson": "1.0.0",
@@ -159,6 +165,7 @@
     "evlog": "^2.5.0",
     "framer-motion": "12.35.2",
     "imask": "^7.6.1",
+    "ioredis": "5.10.1",
     "jotai": "^2.18.1",
     "lucide-react": "0.577.0",
     "luxon": "3.7.2",
@@ -180,8 +187,11 @@
     "react-imask": "^7.6.1",
     "react-input-mask": "2.0.4",
     "recharts": "2.15.4",
+    "redis": "5.12.1",
     "reflect-metadata": "0.2.2",
+    "resumable-stream": "2.2.12",
     "sonner": "2.0.7",
+    "streamdown": "2.5.0",
     "tailwind-merge": "3.5.0",
     "tailwind-scrollbar": "4.0.2",
     "tw-animate-css": "1.4.0",
@@ -192,7 +202,8 @@
   "hotHook": {
     "boundaries": [
       "./app/controllers/**/*.ts",
-      "./app/middleware/*.ts"
+      "./app/middleware/*.ts",
+      "./app/ai/**/*.ts"
     ]
   },
   "prettier": "@adonisjs/prettier-config",
@@ -207,6 +218,13 @@
       "msw",
       "protobufjs",
       "sharp"
-    ]
+    ],
+    "packageExtensions": {
+      "resumable-stream@2.2.12": {
+        "peerDependencies": {
+          "redis": "5.12.1"
+        }
+      }
+    }
   }
 }

@@ -48,9 +48,11 @@ export const controllers = {
     CreateAgreement: () => import('#controllers/agreements/create_agreement_controller'),
   },
   ai: {
+    CancelChatStream: () => import('#controllers/ai/cancel_chat_stream_controller'),
     Chat: () => import('#controllers/ai/chat_controller'),
     DeleteThread: () => import('#controllers/ai/delete_thread_controller'),
     ListThreads: () => import('#controllers/ai/list_threads_controller'),
+    ResumeChatStream: () => import('#controllers/ai/resume_chat_stream_controller'),
     ShowThread: () => import('#controllers/ai/show_thread_controller'),
   },
   analytics: {

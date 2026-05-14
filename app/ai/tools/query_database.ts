@@ -43,10 +43,8 @@ const FORBIDDEN_KEYWORDS = [
   'REVOKE',
   'EXECUTE',
   'COPY',
-  '--',
-  '/*',
-  '$$',
-]
+] as const
+const FORBIDDEN_LITERALS = ['--', '/*', '$$'] as const
 
 export function createGetSchema(_ctx: ToolCtx) {
   return defineTool({
@@ -80,13 +78,15 @@ export function createGetSchema(_ctx: ToolCtx) {
 export function createQueryDatabase(ctx: ToolCtx) {
   return defineTool({
     name: 'queryDatabase',
-    description:
-      'Executa uma consulta SQL SELECT no banco da escola. Máximo 100 resultados. Use getSchema primeiro para descobrir as colunas.',
+    description: `Executa uma consulta SQL SELECT no banco da escola. Máximo 100 resultados.
+Use getSchema primeiro pra descobrir colunas reais. Sempre filtre pela escola usando o placeholder :currentSchoolId (com dois-pontos no início, exatamente como mostrado) — NÃO use o nome literal da coluna "schoolId".
+Exemplo correto:   SELECT * FROM "Student" s JOIN "User" u ON u.id = s.id WHERE u."schoolId" = :currentSchoolId
+Exemplo INCORRETO: SELECT * FROM "Student" WHERE schoolId = schoolId   (não use a palavra schoolId solta — sempre use :currentSchoolId)`,
     parameters: z.object({
       sql: z
         .string()
         .describe(
-          'Consulta SQL SELECT para executar. Use "schoolId" como placeholder para o ID da escola atual. Ex: SELECT * FROM "Student" WHERE "schoolId" = schoolId'
+          'SELECT SQL. Filtre por escola usando :currentSchoolId (placeholder literal, com dois-pontos).'
         ),
       limit: z.number().default(20).describe('Máximo de resultados (max 100)'),
     }),
@@ -97,22 +97,36 @@ export function createQueryDatabase(ctx: ToolCtx) {
       }
 
       for (const kw of FORBIDDEN_KEYWORDS) {
-        if (upper.includes(kw) && !kw.startsWith('SELECT')) {
-          return { error: `Palavra clave ${kw} não é permitida` }
+        if (new RegExp(`\\b${kw}\\b`, 'i').test(sql)) {
+          return { error: `Palavra-chave ${kw} não é permitida` }
+        }
+      }
+      for (const lit of FORBIDDEN_LITERALS) {
+        if (sql.includes(lit)) {
+          return { error: `Sequência ${lit} não é permitida` }
         }
       }
 
-      const safeSql = sql.replace(/\bschoolId\b/g, `'${ctx.schoolId}'`)
+      const safeSql = sql.replace(/:currentSchoolId\b/g, `'${ctx.schoolId}'`)
       const limitedSql = safeSql.replace(/;\s*$/, '') + ` LIMIT ${Math.min(limit ?? 20, 100)}`
 
-      const result = await db.rawQuery(limitedSql)
-      return {
-        rows: result.rows ?? [],
-        rowCount: (result.rows ?? []).length,
+      try {
+        const result = await db.rawQuery(limitedSql)
+        return {
+          rows: result.rows ?? [],
+          rowCount: (result.rows ?? []).length,
+        }
+      } catch (err) {
+        return {
+          error: err instanceof Error ? err.message : 'Erro desconhecido na consulta',
+          sql: limitedSql,
+        }
       }
     },
   })
 }
 
+toolRegistry.register('gestor', createGetSchema)
+toolRegistry.register('gestor', createQueryDatabase)
 toolRegistry.register('comunicador', createGetSchema)
 toolRegistry.register('comunicador', createQueryDatabase)

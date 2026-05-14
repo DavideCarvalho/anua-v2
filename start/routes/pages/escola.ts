@@ -381,6 +381,10 @@ export function registerEscolaPageRoutes() {
 
       // IA Assistente
       router.get('/ia', [ShowIaPageController]).as('ia.index')
+      router
+        .get('/ia/conversa/:threadId', [ShowIaPageController])
+        .where('threadId', router.matchers.uuid())
+        .as('ia.conversa')
 
       // Configuracoes
       router.get('/configuracoes', [ShowConfiguracoesPageController]).as('configuracoes')

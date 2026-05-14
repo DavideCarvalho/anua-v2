@@ -1507,6 +1507,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_ia_page_controller').default['handle']>>>
     }
   }
+  'web.escola.ia.conversa': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/ia/conversa/:threadId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { threadId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_ia_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_ia_page_controller').default['handle']>>>
+    }
+  }
   'web.escola.configuracoes': {
     methods: ["GET","HEAD"]
     pattern: '/escola/configuracoes'
@@ -8561,6 +8573,30 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/ai').chatValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/chat_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/chat_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.ai.chat.resume': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/ai/chat/:threadId/stream'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { threadId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/resume_chat_stream_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/resume_chat_stream_controller').default['handle']>>>
+    }
+  }
+  'api.v1.ai.chat.cancel': {
+    methods: ["POST"]
+    pattern: '/api/v1/ai/chat/:threadId/cancel'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { threadId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/cancel_chat_stream_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/cancel_chat_stream_controller').default['handle']>>>
     }
   }
   'api.v1.ai.threads.list': {

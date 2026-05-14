@@ -23,7 +23,7 @@ export default class extends BaseSchema {
       table.text('zipCode').notNullable()
       table.float('latitude', 8).nullable()
       table.float('longitude', 8).nullable()
-      table.specificType('location', 'geography(Point,4326)').nullable()
+      table.text('location').nullable()
       table.timestamp('createdAt').notNullable().defaultTo(this.now())
       table.timestamp('updatedAt').notNullable()
     })

@@ -76,11 +76,6 @@ export default class School extends BaseModel {
   @column({ columnName: 'longitude' })
   declare longitude: number | null
 
-  // PostGIS geometry point - stored as USER-DEFINED type in DB
-  // Use raw queries for spatial operations
-  @column({ columnName: 'location' })
-  declare location: unknown | null
-
   // Logo
   @column({ columnName: 'logoUrl' })
   declare logoUrl: string | null

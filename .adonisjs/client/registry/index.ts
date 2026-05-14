@@ -756,6 +756,12 @@ const routes = {
     tokens: [{"old":"/escola/ia","type":0,"val":"escola","end":""},{"old":"/escola/ia","type":0,"val":"ia","end":""}],
     types: placeholder as Registry['web.escola.ia.index']['types'],
   },
+  'web.escola.ia.conversa': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/ia/conversa/:threadId',
+    tokens: [{"old":"/escola/ia/conversa/:threadId","type":0,"val":"escola","end":""},{"old":"/escola/ia/conversa/:threadId","type":0,"val":"ia","end":""},{"old":"/escola/ia/conversa/:threadId","type":0,"val":"conversa","end":""},{"old":"/escola/ia/conversa/:threadId","type":1,"val":"threadId","end":""}],
+    types: placeholder as Registry['web.escola.ia.conversa']['types'],
+  },
   'web.escola.configuracoes': {
     methods: ["GET","HEAD"],
     pattern: '/escola/configuracoes',
@@ -4283,6 +4289,18 @@ const routes = {
     pattern: '/api/v1/ai/chat',
     tokens: [{"old":"/api/v1/ai/chat","type":0,"val":"api","end":""},{"old":"/api/v1/ai/chat","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/chat","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/chat","type":0,"val":"chat","end":""}],
     types: placeholder as Registry['api.v1.ai.chat']['types'],
+  },
+  'api.v1.ai.chat.resume': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/ai/chat/:threadId/stream',
+    tokens: [{"old":"/api/v1/ai/chat/:threadId/stream","type":0,"val":"api","end":""},{"old":"/api/v1/ai/chat/:threadId/stream","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/chat/:threadId/stream","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/chat/:threadId/stream","type":0,"val":"chat","end":""},{"old":"/api/v1/ai/chat/:threadId/stream","type":1,"val":"threadId","end":""},{"old":"/api/v1/ai/chat/:threadId/stream","type":0,"val":"stream","end":""}],
+    types: placeholder as Registry['api.v1.ai.chat.resume']['types'],
+  },
+  'api.v1.ai.chat.cancel': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/chat/:threadId/cancel',
+    tokens: [{"old":"/api/v1/ai/chat/:threadId/cancel","type":0,"val":"api","end":""},{"old":"/api/v1/ai/chat/:threadId/cancel","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/chat/:threadId/cancel","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/chat/:threadId/cancel","type":0,"val":"chat","end":""},{"old":"/api/v1/ai/chat/:threadId/cancel","type":1,"val":"threadId","end":""},{"old":"/api/v1/ai/chat/:threadId/cancel","type":0,"val":"cancel","end":""}],
+    types: placeholder as Registry['api.v1.ai.chat.cancel']['types'],
   },
   'api.v1.ai.threads.list': {
     methods: ["GET","HEAD"],

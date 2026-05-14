@@ -18,7 +18,7 @@ export default class extends BaseSchema {
       table.timestamp('examDate').notNullable()
       table.timestamp('startTime').nullable()
       table.timestamp('endTime').nullable()
-      table.specificType('location', 'geography(Point,4326)').nullable()
+      table.text('location').nullable()
       table.float('maxScore', 8).notNullable()
       table.float('weight', 8).notNullable().defaultTo(1.0)
       table.specificType('type', '"ExamType"').notNullable().defaultTo('WRITTEN')
