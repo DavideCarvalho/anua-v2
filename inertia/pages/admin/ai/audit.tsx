@@ -19,7 +19,13 @@ import { api } from '../../../lib/api'
 
 const PAGE_SIZE = 50
 
-type Status = 'auto_executed' | 'pending_approval' | 'executed' | 'rejected' | 'failed'
+type Status =
+  | 'auto_executed'
+  | 'pending_approval'
+  | 'executing'
+  | 'executed'
+  | 'rejected'
+  | 'failed'
 
 const STATUS_BADGE: Record<
   Status,
@@ -27,6 +33,7 @@ const STATUS_BADGE: Record<
 > = {
   auto_executed: { label: 'Auto', variant: 'secondary' },
   pending_approval: { label: 'Aguardando', variant: 'outline' },
+  executing: { label: 'Executando', variant: 'outline' },
   executed: { label: 'Aprovado', variant: 'default' },
   rejected: { label: 'Rejeitado', variant: 'secondary' },
   failed: { label: 'Falhou', variant: 'destructive' },

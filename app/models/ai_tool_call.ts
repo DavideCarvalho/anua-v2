@@ -11,6 +11,10 @@ export type AiToolKind = 'read' | 'action'
 export type AiToolCallStatus =
   | 'auto_executed'
   | 'pending_approval'
+  // Estado transiente — a aprovação ganhou o CAS e a action está rodando no
+  // dispatcher. Bloqueia aprovações concorrentes (mesmo user em 2 devices,
+  // duplo-clique, etc). Termina em 'executed' ou 'failed'.
+  | 'executing'
   | 'executed'
   | 'rejected'
   | 'failed'

@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
+import db from '@adonisjs/lucid/services/db'
 import AiToolCall from '#models/ai_tool_call'
 import AiThread from '#models/ai_thread'
 import { dispatchAction } from '#ai/action_dispatcher'
@@ -14,6 +15,11 @@ import { decideAiToolCallValidator } from '#validators/ai'
  * O :toolCallId aqui é o identificador do Vercel AI SDK (não a PK do row de
  * auditoria), porque é isso que a UIMessage tem na mão. A ownership check
  * usa o threadId da row.
+ *
+ * Concorrência: usa CAS atômico — UPDATE WHERE status='pending_approval'
+ * flipa pra 'executing' (approve) ou direto pra 'rejected' (reject). Se
+ * outra requisição (mesmo user em 2 devices, duplo-clique, etc) ganhou
+ * primeiro, o UPDATE devolve 0 rows e retornamos 409. Sem race possível.
  */
 export default class DecideToolCallController {
   async handle({ params, request, response, auth, effectiveUser }: HttpContext) {
@@ -36,25 +42,61 @@ export default class DecideToolCallController {
         message: 'Apenas tools de escrita podem ser aprovadas/rejeitadas',
       })
     }
-    if (toolCall.status !== 'pending_approval') {
-      return response.badRequest({
-        message: `Esta chamada já foi decidida (${toolCall.status})`,
-      })
-    }
+
+    const now = DateTime.now().toSQL()
 
     if (decision === 'reject') {
-      toolCall.status = 'rejected'
-      toolCall.decidedByUserId = user.id
-      toolCall.decidedAt = DateTime.now()
-      await toolCall.save()
+      // CAS: só rejeita se ainda está em pending_approval. .returning('id')
+      // devolve array dos rows que bateram no WHERE — length 0 = perdemos
+      // a corrida pra outro request.
+      const claimed = await db
+        .from('ai_tool_calls')
+        .where('id', toolCall.id)
+        .where('status', 'pending_approval')
+        .update(
+          {
+            status: 'rejected',
+            decidedByUserId: user.id,
+            decidedAt: now,
+          },
+          ['id']
+        )
+      if (claimed.length === 0) {
+        const fresh = await AiToolCall.find(toolCall.id)
+        return response.conflict({
+          message: `Esta chamada já foi decidida (${fresh?.status ?? toolCall.status})`,
+        })
+      }
       return response.ok({
         id: toolCall.id,
         toolCallId: toolCall.toolCallId,
-        status: toolCall.status,
+        status: 'rejected',
         output: { cancelled: true, reason: 'user declined' },
       })
     }
 
+    // approve: primeiro ganha o lock CAS flipando pra 'executing'.
+    const claimed = await db
+      .from('ai_tool_calls')
+      .where('id', toolCall.id)
+      .where('status', 'pending_approval')
+      .update(
+        {
+          status: 'executing',
+          decidedByUserId: user.id,
+          decidedAt: now,
+        },
+        ['id']
+      )
+    if (claimed.length === 0) {
+      const fresh = await AiToolCall.find(toolCall.id)
+      return response.conflict({
+        message: `Esta chamada já foi decidida (${fresh?.status ?? toolCall.status})`,
+      })
+    }
+
+    // A partir daqui somos donos exclusivos da execução. Concorrentes que
+    // chegarem agora veem status='executing' e ganham 409.
     const start = Date.now()
     const result = await dispatchAction({
       toolCallId: toolCall.id,
@@ -65,25 +107,23 @@ export default class DecideToolCallController {
       decidedByUserId: user.id,
     })
 
-    if (result.ok) {
-      toolCall.status = 'executed'
-      toolCall.output = result.output
-      toolCall.error = null
-    } else {
-      toolCall.status = 'failed'
-      toolCall.error = result.error
-    }
-    toolCall.decidedByUserId = user.id
-    toolCall.decidedAt = DateTime.now()
-    toolCall.executionMs = Date.now() - start
-    await toolCall.save()
+    const finalStatus = result.ok ? 'executed' : 'failed'
+    await db
+      .from('ai_tool_calls')
+      .where('id', toolCall.id)
+      .update({
+        status: finalStatus,
+        output: result.ok ? JSON.stringify(result.output) : null,
+        error: result.ok ? null : result.error,
+        executionMs: Date.now() - start,
+      })
 
     return response.ok({
       id: toolCall.id,
       toolCallId: toolCall.toolCallId,
-      status: toolCall.status,
-      output: toolCall.output ?? (result.ok ? null : { error: toolCall.error }),
-      error: toolCall.error,
+      status: finalStatus,
+      output: result.ok ? result.output : { error: result.error },
+      error: result.ok ? null : result.error,
     })
   }
 }
