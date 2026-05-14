@@ -38,3 +38,6 @@ ${COMPONENT_GUIDE}`,
 
 toolRegistry.register('gestor', createRenderResult)
 toolRegistry.register('comunicador', createRenderResult)
+toolRegistry.register('coordenador', createRenderResult)
+toolRegistry.register('professor', createRenderResult)
+toolRegistry.register('responsavel', createRenderResult)

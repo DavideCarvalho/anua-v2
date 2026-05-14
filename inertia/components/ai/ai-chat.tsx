@@ -3,14 +3,15 @@ import { usePage } from '@inertiajs/react'
 import { useRouter } from '@adonisjs/inertia/react'
 import { AiChatPane } from './ai-chat-pane'
 import { AiThreadList } from './ai-thread-list'
+import type { ChatPersonaRole } from './ai-chat-empty'
 import type { SharedProps } from '../../lib/types'
 
 type AiChatProps = {
-  persona?: 'gestor' | 'comunicador'
+  persona?: ChatPersonaRole | null
   initialThreadId?: string | null
 }
 
-export function AiChat({ persona = 'gestor', initialThreadId = null }: AiChatProps) {
+export function AiChat({ persona, initialThreadId = null }: AiChatProps) {
   const page = usePage<SharedProps>()
   const router = useRouter()
   const userName = page.props.user?.name ?? undefined
@@ -63,7 +64,7 @@ export function AiChat({ persona = 'gestor', initialThreadId = null }: AiChatPro
         <AiChatPane
           key={activeId}
           threadId={activeId}
-          persona={persona}
+          persona={persona ?? 'gestor'}
           isNewThread={isNewThread}
           userName={userName}
           onPersisted={handlePersisted}

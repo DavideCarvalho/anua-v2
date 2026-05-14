@@ -160,3 +160,6 @@ function humanizeFallback(col: string): string {
 
 toolRegistry.register('gestor', createFormatRows)
 toolRegistry.register('comunicador', createFormatRows)
+toolRegistry.register('coordenador', createFormatRows)
+toolRegistry.register('professor', createFormatRows)
+toolRegistry.register('responsavel', createFormatRows)

@@ -8,5 +8,9 @@ import './get_student_alerts.js'
 import './query_database.js'
 import './format_rows.js'
 import './render_result.js'
+import './get_my_classes.js'
+import './get_my_children.js'
+import './get_students_in_class.js'
+import './get_student_grades.js'
 
 export {}

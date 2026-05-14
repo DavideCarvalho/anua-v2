@@ -1,5 +1,16 @@
-import { Sparkles, BarChart3, AlertTriangle, GraduationCap } from 'lucide-react'
+import {
+  Sparkles,
+  BarChart3,
+  AlertTriangle,
+  GraduationCap,
+  Users,
+  ClipboardCheck,
+  Baby,
+  BookOpen,
+} from 'lucide-react'
 import { cn } from '../../lib/utils'
+
+export type ChatPersonaRole = 'gestor' | 'coordenador' | 'professor' | 'responsavel'
 
 type Suggestion = {
   icon: React.ComponentType<{ className?: string }>
@@ -7,35 +18,105 @@ type Suggestion = {
   prompt: string
 }
 
-const SUGGESTIONS: Suggestion[] = [
-  {
-    icon: BarChart3,
-    label: 'Resumo da escola',
-    prompt: 'Me dá um resumo da escola: total de alunos e inadimplência atual',
-  },
-  {
-    icon: AlertTriangle,
-    label: 'Alunos com problemas',
-    prompt: 'Quais alunos têm pagamentos vencidos no momento?',
-  },
-  {
-    icon: GraduationCap,
-    label: 'Alunos por turma',
-    prompt: 'Cria um gráfico de barras com a distribuição de alunos por turma',
-  },
-  {
-    icon: Sparkles,
-    label: 'Análise livre',
-    prompt: 'O que você consegue analisar dos dados desta escola?',
-  },
-]
+const SUGGESTIONS_BY_PERSONA: Record<ChatPersonaRole, Suggestion[]> = {
+  gestor: [
+    {
+      icon: BarChart3,
+      label: 'Resumo da escola',
+      prompt: 'Me dá um resumo da escola: total de alunos e inadimplência atual',
+    },
+    {
+      icon: AlertTriangle,
+      label: 'Alunos com problemas',
+      prompt: 'Quais alunos têm pagamentos vencidos no momento?',
+    },
+    {
+      icon: GraduationCap,
+      label: 'Alunos por turma',
+      prompt: 'Cria um gráfico de barras com a distribuição de alunos por turma',
+    },
+    {
+      icon: Sparkles,
+      label: 'Análise livre',
+      prompt: 'O que você consegue analisar dos dados desta escola?',
+    },
+  ],
+  coordenador: [
+    {
+      icon: GraduationCap,
+      label: 'Minhas turmas',
+      prompt: 'Liste as turmas que eu coordeno',
+    },
+    {
+      icon: Users,
+      label: 'Alunos de uma turma',
+      prompt: 'Me mostre os alunos de uma das minhas turmas',
+    },
+    {
+      icon: ClipboardCheck,
+      label: 'Notas de um aluno',
+      prompt: 'Quero ver as notas de um aluno específico',
+    },
+    {
+      icon: Sparkles,
+      label: 'O que posso fazer aqui?',
+      prompt: 'O que você consegue me ajudar como coordenador?',
+    },
+  ],
+  professor: [
+    {
+      icon: GraduationCap,
+      label: 'Minhas turmas',
+      prompt: 'Liste as turmas onde eu dou aula',
+    },
+    {
+      icon: Users,
+      label: 'Alunos de uma turma',
+      prompt: 'Me mostre os alunos de uma das minhas turmas',
+    },
+    {
+      icon: ClipboardCheck,
+      label: 'Notas de um aluno',
+      prompt: 'Quero ver as notas de um aluno meu',
+    },
+    {
+      icon: Sparkles,
+      label: 'O que posso fazer aqui?',
+      prompt: 'O que você consegue me ajudar como professor?',
+    },
+  ],
+  responsavel: [
+    {
+      icon: Baby,
+      label: 'Meus filhos',
+      prompt: 'Quem são meus filhos cadastrados?',
+    },
+    {
+      icon: BookOpen,
+      label: 'Notas do meu filho',
+      prompt: 'Quero ver as notas do meu filho',
+    },
+    {
+      icon: GraduationCap,
+      label: 'Turmas dos meus filhos',
+      prompt: 'Em qual turma cada filho meu está?',
+    },
+    {
+      icon: Sparkles,
+      label: 'O que posso ver aqui?',
+      prompt: 'O que você consegue me mostrar sobre meus filhos?',
+    },
+  ],
+}
 
 type AiChatEmptyProps = {
   onPick: (prompt: string) => void
   userName?: string
+  persona?: ChatPersonaRole
 }
 
-export function AiChatEmpty({ onPick, userName }: AiChatEmptyProps) {
+export function AiChatEmpty({ onPick, userName, persona = 'gestor' }: AiChatEmptyProps) {
+  const SUGGESTIONS = SUGGESTIONS_BY_PERSONA[persona]
   return (
     <div className="flex h-full min-h-0 flex-col items-center justify-center px-6 py-8">
       <div className="mb-8 text-center">

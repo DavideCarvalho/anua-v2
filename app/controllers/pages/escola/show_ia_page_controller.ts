@@ -1,8 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { personaFromRole } from '../../../ai/chat_role.js'
 
 export default class ShowIaPageController {
-  async handle({ inertia, params }: HttpContext) {
+  async handle({ inertia, params, auth, effectiveUser }: HttpContext) {
     const threadId = typeof params.threadId === 'string' ? params.threadId : null
-    return inertia.render('escola/ia', { initialThreadId: threadId })
+    const user = effectiveUser ?? auth.user
+    if (user && !user.$preloaded.role) {
+      await user.load('role')
+    }
+    const persona = personaFromRole(user?.role?.name)
+    return inertia.render('escola/ia', { initialThreadId: threadId, persona })
   }
 }

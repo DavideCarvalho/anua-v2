@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bot, Send, User, Loader2, StopCircle, BrainCircuit } from 'lucide-react'
 import { toolComponents } from './ai-components'
 import { ToolStepGroup } from './ai-task'
-import { AiChatEmpty } from './ai-chat-empty'
+import { AiChatEmpty, type ChatPersonaRole } from './ai-chat-empty'
 import { AiChatInput } from './ai-chat-input'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
@@ -87,7 +87,7 @@ function rowsToUIMessages(rows: ThreadMessageRow[]): UIMessage[] {
 
 type AiChatPaneProps = {
   threadId: string
-  persona?: 'gestor' | 'comunicador'
+  persona?: ChatPersonaRole
   isNewThread: boolean
   userName?: string
   // Fires once after the first turn of a draft thread is persisted server-
@@ -146,7 +146,7 @@ export function AiChatPane({
 
 type ActiveChatProps = {
   threadId: string
-  persona: 'gestor' | 'comunicador'
+  persona: ChatPersonaRole
   initialMessages: UIMessage[]
   headerTitle: string
   userName?: string
@@ -234,6 +234,7 @@ function ActiveChat({
               await submit(prompt)
             }}
             userName={userName}
+            persona={persona}
           />
         ) : (
           <div className="mx-auto max-w-3xl space-y-5 px-5 py-6">

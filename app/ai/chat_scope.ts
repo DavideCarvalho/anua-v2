@@ -49,7 +49,8 @@ export async function computeChatScope(args: {
 
     const classIds = Array.from(new Set(classRows.map((r) => r.classId)))
     const subjectIds = Array.from(new Set(classRows.map((r) => r.subjectId).filter(Boolean)))
-    return { ...base, classIds, subjectIds }
+    const studentIds = await studentIdsForClasses(classIds)
+    return { ...base, classIds, subjectIds, studentIds }
   }
 
   if (role === 'coordenador') {
@@ -72,7 +73,9 @@ export async function computeChatScope(args: {
       { userId, schoolId }
     )
 
-    return { ...base, classIds: rows.map((r) => r.classId) }
+    const classIds = rows.map((r) => r.classId)
+    const studentIds = await studentIdsForClasses(classIds)
+    return { ...base, classIds, studentIds }
   }
 
   if (role === 'responsavel') {
@@ -88,4 +91,19 @@ export async function computeChatScope(args: {
   }
 
   return base
+}
+
+async function studentIdsForClasses(classIds: string[]): Promise<string[]> {
+  if (classIds.length === 0) return []
+  const { rows } = await db.rawQuery<{ rows: Array<{ id: string }> }>(
+    `
+      SELECT DISTINCT s.id
+      FROM "Student" s
+      JOIN "User" u ON u.id = s.id
+      WHERE s."classId" = ANY(:classIds)
+        AND u."deletedAt" IS NULL
+    `,
+    { classIds }
+  )
+  return rows.map((r) => r.id)
 }
