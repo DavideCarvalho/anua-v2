@@ -111,12 +111,14 @@ export default function EscolaDashboard() {
     courseId: 'all',
     levelId: 'all',
     classId: 'all',
+    subPeriodId: 'all',
   })
   const [financialFilters, setFinancialFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
     courseId: 'all',
     levelId: 'all',
     classId: 'all',
+    subPeriodId: 'all',
   })
 
   const { data: academicPeriodsData } = useQuery({
@@ -331,6 +333,10 @@ export default function EscolaDashboard() {
     writeEscolaDashboardViewMode(user?.id, viewMode)
   }, [isViewModeHydrated, user?.id, viewMode])
 
+  // `as const` aqui é literal-narrowing, não type assertion: sem isso o TS
+  // infere `route: string` (widened) e o Link do Inertia exige o union de
+  // nomes de rota. Não é o tipo `as` que esconde bug — é a forma idiomática
+  // de preservar tipos literais em array literals.
   const quickActions = [
     {
       label: 'Alunos',
@@ -403,7 +409,9 @@ export default function EscolaDashboard() {
       visible: true,
       badge: true,
     },
-  ].filter((action) => action.visible)
+  ] as const
+
+  const visibleQuickActions = quickActions.filter((action) => action.visible)
 
   const viewModeToggle = (
     <>
@@ -444,7 +452,7 @@ export default function EscolaDashboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            {quickActions.map((action) => (
+            {visibleQuickActions.map((action) => (
               <Link
                 key={action.label}
                 route={action.route}
@@ -457,7 +465,7 @@ export default function EscolaDashboard() {
                   <p className="text-sm font-medium">{action.label}</p>
                   <p className="text-xs text-muted-foreground">{action.description}</p>
                 </div>
-                {action.badge && (
+                {'badge' in action && action.badge && (
                   <span className="absolute -right-1 -top-1">
                     <UnreadMessagesBadge />
                   </span>
@@ -924,6 +932,7 @@ export default function EscolaDashboard() {
                         courseId: 'all',
                         levelId: 'all',
                         classId: 'all',
+                        subPeriodId: 'all',
                       })
                     }}
                   >
@@ -1133,6 +1142,7 @@ export default function EscolaDashboard() {
                         courseId: 'all',
                         levelId: 'all',
                         classId: 'all',
+                        subPeriodId: 'all',
                       })
                     }}
                   >

@@ -1,4 +1,3 @@
-import { Link } from '@adonisjs/inertia/react'
 import { Head } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 

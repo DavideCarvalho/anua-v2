@@ -65,17 +65,30 @@ function idsToResolve(toolName: string, input: unknown): {
   }
 }
 
+// PromiseLike, não Promise — o tipo do useChat do SDK retorna assim, e
+// estreitar pra Promise<void> quebra a passagem direta entre o ChatPane e
+// o card.
 export type AddToolOutputFn = (args: {
   tool: string
   toolCallId: string
   output: unknown
-}) => void | Promise<void>
+}) => void | PromiseLike<void>
 
 type Props = {
   toolCallId: string
   toolName: string
   input: unknown
-  state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error' | 'output-denied'
+  // O ToolUIPart['state'] do SDK inclui também 'approval-requested' e
+  // 'approval-responded'. Não usamos esses branches aqui, mas aceitamos pra
+  // não exigir narrowing no caller.
+  state:
+    | 'input-streaming'
+    | 'input-available'
+    | 'output-available'
+    | 'output-error'
+    | 'output-denied'
+    | 'approval-requested'
+    | 'approval-responded'
   output?: unknown
   addToolOutput: AddToolOutputFn
 }
@@ -411,12 +424,20 @@ export function AiActionApprovalCard(props: Props) {
         error: err.message,
       }))
 
+    // Result vem como union de Tuyau (200/400/404/409 + nosso fallback do catch).
+    // Só o 200 success tem `output`; o resto tem `message` ou `error`. Narrow
+    // antes de montar o payload em vez de assumir o shape.
+    const extractError = (r: typeof result): string => {
+      if ('error' in r && typeof r.error === 'string') return r.error
+      if ('message' in r && typeof r.message === 'string') return r.message
+      return 'Falha ao executar a ação'
+    }
     const payload =
       decision === 'reject'
         ? { cancelled: true, reason: 'user declined' }
-        : result.status === 'executed'
-          ? (result.output ?? { ok: true })
-          : { error: result.error ?? 'Falha ao executar a ação' }
+        : 'status' in result && result.status === 'executed'
+          ? ('output' in result ? (result.output ?? { ok: true }) : { ok: true })
+          : { error: extractError(result) }
 
     await props.addToolOutput({
       tool: props.toolName,

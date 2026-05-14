@@ -12,7 +12,7 @@ import { api } from '~/lib/api'
 import { Stepper } from './stepper'
 import { CalendarForm } from './calendar-form'
 import { CoursesForm } from './courses-form'
-import { SubPeriodsForm } from './sub-periods-form'
+import { SubPeriodsForm, type SubPeriodPayload } from './sub-periods-form'
 import {
   editAcademicPeriodSchema,
   type EditAcademicPeriodFormValues,
@@ -127,7 +127,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     api.api.v1.academicPeriods.updateAcademicPeriod.mutationOptions()
   )
   const updatePeriodMutation = useMutation({
-    mutationFn: async (payload: { data: EditAcademicPeriodFormValues; subPeriods?: Record<string, unknown>[] }) => {
+    mutationFn: async (payload: { data: EditAcademicPeriodFormValues; subPeriods?: SubPeriodPayload[] }) => {
       await updateAcademicPeriodMutation.mutateAsync({
         params: { id: academicPeriod.id },
         body: {
@@ -220,7 +220,7 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     setCurrentStep(stepIndex)
   }
 
-  const saveSubPeriodsRef = useRef<(() => Record<string, unknown>[] | null) | null>(null)
+  const saveSubPeriodsRef = useRef<(() => SubPeriodPayload[] | null) | null>(null)
 
   const handleSubmit = form.handleSubmit(async (data) => {
     const mismatch = form.formState.errors.root?.subPeriodMismatch

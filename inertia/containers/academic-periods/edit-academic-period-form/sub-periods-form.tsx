@@ -58,11 +58,24 @@ interface SubPeriod {
   schoolId: string
 }
 
+// Shape esperado pelo mutation update do AcademicPeriod (campos só serializáveis,
+// sem id/schoolId/academicPeriodId — esses o backend resolve). Os locais que
+// produzem essa lista (handleGenerate) já devolvem objetos compatíveis.
+export type SubPeriodPayload = {
+  order: number
+  name: string
+  startDate: string
+  endDate: string
+  weight?: number | null
+  minimumGrade?: number | null
+  hasRecovery?: boolean | null
+}
+
 interface SubPeriodsFormProps {
   academicPeriodId: string
   periodStructure?: string | null
   recoveryGradeMethod?: string | null
-  saveRef?: React.MutableRefObject<(() => Record<string, unknown>[] | null) | null>
+  saveRef?: React.MutableRefObject<(() => SubPeriodPayload[] | null) | null>
 }
 
 function formatDate(dateStr: string | null): string {
@@ -303,7 +316,7 @@ export function SubPeriodsForm({
 
   const [editingSubPeriod, setEditingSubPeriod] = useState<SubPeriod | null>(null)
   const [showDiffDialog, setShowDiffDialog] = useState(false)
-  const [localSubPeriods, setLocalSubPeriods] = useState<Record<string, unknown>[] | null>(null)
+  const [localSubPeriods, setLocalSubPeriods] = useState<SubPeriodPayload[] | null>(null)
 
   const diffMutation = useMutation(api.api.v1.academicSubPeriods.diff.mutationOptions())
 
@@ -369,7 +382,19 @@ export function SubPeriodsForm({
             | null) || undefined,
         },
       })
-      const items = Array.isArray(result.data) ? result.data : []
+      // Normalizamos o response: o controller devolve DateTime do Luxon que
+      // serializa pra ISO string sobre o fio. Mapeamos pro shape que o
+      // mutation de update aceita e que o saveRef declara.
+      const rawItems = Array.isArray(result.data) ? result.data : []
+      const items: SubPeriodPayload[] = rawItems.map((sp) => ({
+        order: typeof sp.order === 'number' ? sp.order : Number(sp.order ?? 0),
+        name: typeof sp.name === 'string' ? sp.name : String(sp.name ?? ''),
+        startDate: typeof sp.startDate === 'string' ? sp.startDate : String(sp.startDate ?? ''),
+        endDate: typeof sp.endDate === 'string' ? sp.endDate : String(sp.endDate ?? ''),
+        weight: typeof sp.weight === 'number' ? sp.weight : null,
+        minimumGrade: typeof sp.minimumGrade === 'number' ? sp.minimumGrade : null,
+        hasRecovery: typeof sp.hasRecovery === 'boolean' ? sp.hasRecovery : null,
+      }))
       setLocalSubPeriods(items)
       setShowDiffDialog(false)
     } catch (error: any) {

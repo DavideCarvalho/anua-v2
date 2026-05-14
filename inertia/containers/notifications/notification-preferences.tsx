@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Settings, Bell, Mail, Smartphone, MessageCircle } from 'lucide-react'
+import { Settings, Bell, Mail, MessageCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Switch } from '../../components/ui/switch'

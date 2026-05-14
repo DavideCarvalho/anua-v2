@@ -223,7 +223,6 @@ export function NewAssignmentModal({
       description: assignmentData?.description ?? '',
       subPeriodId: assignmentData && 'subPeriodId' in assignmentData ? assignmentData.subPeriodId : getCurrentSubPeriodId(),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, assignmentData])
 
   const createMutation = useMutation(api.api.v1.assignments.store.mutationOptions())
@@ -285,7 +284,9 @@ export function NewAssignmentModal({
       queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
       if (assignmentId) {
         queryClient.invalidateQueries({
-          queryKey: api.api.v1.assignments.show.pathKey({ id: assignmentId }),
+          queryKey: api.api.v1.assignments.show
+            .queryOptions({ params: { id: assignmentId } })
+            .queryKey,
         })
       }
       queryClient.invalidateQueries({ queryKey: api.api.v1.pedagogicalCalendar.index.pathKey() })

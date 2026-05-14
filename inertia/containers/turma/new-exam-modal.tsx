@@ -223,7 +223,6 @@ export function NewExamModal({
       subjectId: examData?.subject?.id ?? '',
       subPeriodId: examData && 'subPeriodId' in examData ? examData.subPeriodId : getCurrentSubPeriodId(),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, examData])
 
   const createMutation = useMutation(api.api.v1.exams.store.mutationOptions())
@@ -285,7 +284,7 @@ export function NewExamModal({
       queryClient.invalidateQueries({ queryKey: api.api.v1.exams.index.pathKey() })
       if (examId) {
         queryClient.invalidateQueries({
-          queryKey: api.api.v1.exams.show.pathKey({ id: examId }),
+          queryKey: api.api.v1.exams.show.queryOptions({ params: { id: examId } }).queryKey,
         })
       }
       queryClient.invalidateQueries({ queryKey: api.api.v1.pedagogicalCalendar.index.pathKey() })
