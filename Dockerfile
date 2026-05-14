@@ -36,8 +36,10 @@ ENV NODE_ENV=${NODE_ENV} \
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm i -g pnpm
+# Install pnpm — versão pinada pra bater com a do dev local. Sem pin, o CI
+# pega o latest e o packageExtensionsChecksum do lockfile (gerado por pnpm 10)
+# não bate com o algoritmo de pnpm 11+, quebrando o --frozen-lockfile.
+RUN npm i -g pnpm@10.33.3
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
