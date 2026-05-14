@@ -1,7 +1,69 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Check, X, AlertCircle, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { api } from '~/lib/api'
+
+type ResolvedNames = {
+  students: Record<string, { id: string; name: string }>
+  exams: Record<string, { id: string; name: string; subjectName: string | null }>
+  classes: Record<string, { id: string; name: string; levelName: string | null }>
+}
+
+const EMPTY_NAMES: ResolvedNames = { students: {}, exams: {}, classes: {} }
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((v) => typeof v === 'string')
+}
+
+// Extrai IDs do input que precisam ser resolvidos pra nome, por tool. As
+// listas estão em sync com o que cada renderInputSummary consome.
+function idsToResolve(toolName: string, input: unknown): {
+  studentIds: string[]
+  examIds: string[]
+  classIds: string[]
+} {
+  const studentIds = new Set<string>()
+  const examIds = new Set<string>()
+  const classIds = new Set<string>()
+
+  if (!isObject(input)) {
+    return { studentIds: [], examIds: [], classIds: [] }
+  }
+
+  if (toolName === 'justifyAbsence') {
+    if (typeof input.studentId === 'string') studentIds.add(input.studentId)
+  }
+  if (toolName === 'enterExamGrade') {
+    if (typeof input.studentId === 'string') studentIds.add(input.studentId)
+    if (typeof input.examId === 'string') examIds.add(input.examId)
+  }
+  if (toolName === 'registerAttendance') {
+    if (typeof input.classId === 'string') classIds.add(input.classId)
+    if (isStringArray(input.absentStudentIds)) {
+      for (const id of input.absentStudentIds) studentIds.add(id)
+    }
+    if (isStringArray(input.lateStudentIds)) {
+      for (const id of input.lateStudentIds) studentIds.add(id)
+    }
+  }
+  if (toolName === 'sendCommunication') {
+    // Quando o público é uma turma específica, resolvemos pra mostrar o nome.
+    const audience = isObject(input.audience) ? input.audience : null
+    if (
+      audience &&
+      audience.scopeType === 'CLASS' &&
+      typeof audience.scopeId === 'string'
+    ) {
+      classIds.add(audience.scopeId)
+    }
+  }
+
+  return {
+    studentIds: Array.from(studentIds),
+    examIds: Array.from(examIds),
+    classIds: Array.from(classIds),
+  }
+}
 
 export type AddToolOutputFn = (args: {
   tool: string
@@ -58,13 +120,42 @@ function hasRenderablePayload(output: unknown): output is Record<string, unknown
   return true
 }
 
-function renderInputSummary(toolName: string, input: unknown) {
+// Helper pra montar string "Aluno: João Silva" quando temos a resolução, ou
+// "Aluno: 019c..." (8 chars do uuid) com aviso de não-resolvido quando não.
+function studentName(id: string | undefined, names: ResolvedNames): string {
+  if (!id) return '—'
+  const r = names.students[id]
+  return r ? r.name : `${id.slice(0, 8)}… (sem acesso ao nome)`
+}
+
+function examName(id: string | undefined, names: ResolvedNames): string {
+  if (!id) return '—'
+  const r = names.exams[id]
+  if (!r) return `${id.slice(0, 8)}… (sem acesso ao nome)`
+  return r.subjectName ? `${r.name} · ${r.subjectName}` : r.name
+}
+
+function className(id: string | undefined, names: ResolvedNames): string {
+  if (!id) return '—'
+  const r = names.classes[id]
+  if (!r) return `${id.slice(0, 8)}… (sem acesso ao nome)`
+  return r.levelName ? `${r.name} · ${r.levelName}` : r.name
+}
+
+function renderInputSummary(toolName: string, input: unknown, names: ResolvedNames) {
   if (toolName === 'registerAttendance' && isObject(input)) {
     const date = typeof input.date === 'string' ? input.date : null
-    const absent = Array.isArray(input.absentStudentIds) ? input.absentStudentIds : []
-    const late = Array.isArray(input.lateStudentIds) ? input.lateStudentIds : []
+    const classId = typeof input.classId === 'string' ? input.classId : undefined
+    const absent = isStringArray(input.absentStudentIds) ? input.absentStudentIds : []
+    const late = isStringArray(input.lateStudentIds) ? input.lateStudentIds : []
     return (
       <div className="space-y-2.5 text-foreground">
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Turma
+          </div>
+          <div className="text-sm font-medium">{className(classId, names)}</div>
+        </div>
         {date ? (
           <div>
             <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -73,35 +164,60 @@ function renderInputSummary(toolName: string, input: unknown) {
             <div className="text-sm font-medium">{formatDateBr(date)}</div>
           </div>
         ) : null}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <span>
-            <span className="font-medium text-foreground">{absent.length}</span>
-            <span className="text-muted-foreground"> falta{absent.length === 1 ? '' : 's'}</span>
-          </span>
-          {late.length > 0 ? (
-            <span>
-              <span className="font-medium text-foreground">{late.length}</span>
-              <span className="text-muted-foreground">
-                {' '}
-                atrasado{late.length === 1 ? '' : 's'}
-              </span>
-            </span>
-          ) : null}
-        </div>
+        {absent.length > 0 ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              {absent.length} falta{absent.length === 1 ? '' : 's'}
+            </div>
+            <ul className="list-disc pl-4 text-sm leading-relaxed">
+              {absent.map((id) => (
+                <li key={id}>{studentName(id, names)}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground">Ninguém faltou.</div>
+        )}
+        {late.length > 0 ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              {late.length} atrasado{late.length === 1 ? '' : 's'}
+            </div>
+            <ul className="list-disc pl-4 text-sm leading-relaxed">
+              {late.map((id) => (
+                <li key={id}>{studentName(id, names)}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div className="text-[10px] text-muted-foreground">
-          O dispatcher escolhe qual aula do dia receberá o registro (a primeira ainda
-          não preenchida). Demais alunos da turma serão marcados como presentes.
+          Demais alunos serão marcados como presentes. Se você tem mais de uma aula
+          nessa turma no dia, o registro vai pra primeira ainda não preenchida.
         </div>
       </div>
     )
   }
 
   if (toolName === 'enterExamGrade' && isObject(input)) {
+    const studentId = typeof input.studentId === 'string' ? input.studentId : undefined
+    const examId = typeof input.examId === 'string' ? input.examId : undefined
     const score = typeof input.score === 'number' ? input.score : null
     const absent = input.absent === true
     const feedback = typeof input.feedback === 'string' ? input.feedback : null
     return (
       <div className="space-y-2.5 text-foreground">
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Aluno
+          </div>
+          <div className="text-sm font-medium">{studentName(studentId, names)}</div>
+        </div>
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Prova
+          </div>
+          <div className="text-sm font-medium">{examName(examId, names)}</div>
+        </div>
         <div>
           <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
             Nota
@@ -123,10 +239,17 @@ function renderInputSummary(toolName: string, input: unknown) {
   }
 
   if (toolName === 'justifyAbsence' && isObject(input)) {
+    const studentId = typeof input.studentId === 'string' ? input.studentId : undefined
     const date = typeof input.date === 'string' ? input.date : null
     const reason = typeof input.reason === 'string' ? input.reason : null
     return (
       <div className="space-y-2.5 text-foreground">
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            Aluno
+          </div>
+          <div className="text-sm font-medium">{studentName(studentId, names)}</div>
+        </div>
         {date ? (
           <div>
             <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -153,12 +276,14 @@ function renderInputSummary(toolName: string, input: unknown) {
     const audience = isObject(input.audience) ? input.audience : null
     const scopeType =
       audience && typeof audience.scopeType === 'string' ? audience.scopeType : null
+    const scopeId =
+      audience && typeof audience.scopeId === 'string' ? audience.scopeId : undefined
     const requiresAck = input.requiresAcknowledgement === true
     const audienceLabel = scopeType
       ? scopeType === 'SCHOOL'
         ? 'Toda a escola'
         : scopeType === 'CLASS'
-          ? 'Uma turma específica'
+          ? `Turma — ${className(scopeId, names)}`
           : 'Um nível específico'
       : 'Público não definido'
 
@@ -199,6 +324,41 @@ function renderInputSummary(toolName: string, input: unknown) {
 
 export function AiActionApprovalCard(props: Props) {
   const decideMutation = useMutation(api.api.v1.ai.toolCalls.decide.mutationOptions())
+
+  // Resolve UUIDs do input em nomes (Aluno/Prova/Turma) pro card mostrar
+  // "João Silva" em vez de "Nota: 7,5" solto. Filtrado por scope no backend:
+  // se o user não tem acesso, o id simplesmente não vem no resultado e o
+  // helper exibe "8 chars... (sem acesso ao nome)".
+  const idsForCard = idsToResolve(props.toolName, props.input)
+  const hasIds =
+    idsForCard.studentIds.length > 0 ||
+    idsForCard.examIds.length > 0 ||
+    idsForCard.classIds.length > 0
+  // POST direto via fetch porque Tuyau gera mutationOptions pra POST, não
+  // queryOptions — e a gente quer cache automático (não re-buscar a cada
+  // re-render do card). useQuery + key estável resolve.
+  const { data: resolvedRaw } = useQuery({
+    queryKey: ['ai', 'resolve-names', idsForCard],
+    queryFn: async (): Promise<ResolvedNames> => {
+      const res = await fetch('/api/v1/ai/resolve-names', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(idsForCard),
+      })
+      if (!res.ok) return EMPTY_NAMES
+      const json = await res.json()
+      if (!isObject(json)) return EMPTY_NAMES
+      return {
+        students: isObject(json.students) ? (json.students as ResolvedNames['students']) : {},
+        exams: isObject(json.exams) ? (json.exams as ResolvedNames['exams']) : {},
+        classes: isObject(json.classes) ? (json.classes as ResolvedNames['classes']) : {},
+      }
+    },
+    enabled: hasIds,
+    staleTime: 60_000,
+  })
+  const names: ResolvedNames = resolvedRaw ?? EMPTY_NAMES
 
   if (props.state === 'output-available' || props.state === 'output-error' || props.state === 'output-denied') {
     if (isCancelledOutput(props.output)) {
@@ -272,7 +432,7 @@ export function AiActionApprovalCard(props: Props) {
         Aprovar ação: {toolLabel(props.toolName)}
       </div>
       <div className="rounded border border-border bg-background p-3">
-        {renderInputSummary(props.toolName, props.input)}
+        {renderInputSummary(props.toolName, props.input, names)}
       </div>
       <div className="mt-3 flex justify-end gap-2">
         <Button

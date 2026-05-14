@@ -4350,6 +4350,12 @@ const routes = {
     tokens: [{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"api","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"tool-calls","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":1,"val":"toolCallId","end":""},{"old":"/api/v1/ai/tool-calls/:toolCallId/decide","type":0,"val":"decide","end":""}],
     types: placeholder as Registry['api.v1.ai.tool_calls.decide']['types'],
   },
+  'api.v1.ai.resolve_names': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/resolve-names',
+    tokens: [{"old":"/api/v1/ai/resolve-names","type":0,"val":"api","end":""},{"old":"/api/v1/ai/resolve-names","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/resolve-names","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/resolve-names","type":0,"val":"resolve-names","end":""}],
+    types: placeholder as Registry['api.v1.ai.resolve_names']['types'],
+  },
   'api.v1.whatsapp.webhook': {
     methods: ["POST"],
     pattern: '/api/v1/whatsapp/webhook',

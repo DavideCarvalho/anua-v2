@@ -57,6 +57,7 @@ export const controllers = {
     CancelChatStream: () => import('#controllers/ai/cancel_chat_stream_controller'),
     ResumeChatStream: () => import('#controllers/ai/resume_chat_stream_controller'),
     DecideToolCall: () => import('#controllers/ai/decide_tool_call_controller'),
+    ResolveNames: () => import('#controllers/ai/resolve_names_controller'),
   },
   analytics: {
     GetAttendanceOverview: () => import('#controllers/analytics/get_attendance_overview_controller'),

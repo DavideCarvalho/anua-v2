@@ -21,6 +21,10 @@ export function registerAiApiRoutes() {
       router
         .post('/tool-calls/:toolCallId/decide', [controllers.ai.DecideToolCall])
         .as('ai.tool_calls.decide')
+      // Resolve UUIDs em nomes pros cards de aprovação. Filtra por scope do user.
+      router
+        .post('/resolve-names', [controllers.ai.ResolveNames])
+        .as('ai.resolve_names')
     })
     .prefix('/ai')
     .use([middleware.auth(), middleware.impersonation()])

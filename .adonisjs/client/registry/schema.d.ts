@@ -8695,6 +8695,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/decide_tool_call_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.ai.resolve_names': {
+    methods: ["POST"]
+    pattern: '/api/v1/ai/resolve-names'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/ai').resolveNamesValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/ai').resolveNamesValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/resolve_names_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/resolve_names_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.whatsapp.webhook': {
     methods: ["POST"]
     pattern: '/api/v1/whatsapp/webhook'

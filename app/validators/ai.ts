@@ -20,3 +20,13 @@ export const decideAiToolCallValidator = vine.compile(
     reason: vine.string().optional(),
   })
 )
+
+// Resolver de nomes pra cards de aprovação. Cada lista tem teto pra evitar
+// fan-out absurdo (50 ids por kind é mais que suficiente pro UX).
+export const resolveNamesValidator = vine.compile(
+  vine.object({
+    studentIds: vine.array(vine.string().uuid()).maxLength(50).optional(),
+    examIds: vine.array(vine.string().uuid()).maxLength(50).optional(),
+    classIds: vine.array(vine.string().uuid()).maxLength(50).optional(),
+  })
+)
