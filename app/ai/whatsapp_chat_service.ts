@@ -44,11 +44,20 @@ FORMATAÇÃO WHATSAPP (importante — esse canal não tem UI gráfica):
 
 export class WhatsappChatService {
   async chat(req: WhatsappChatRequest): Promise<WhatsappChatResult> {
-    const user = await this.findUserByPhone(req.fromDigits)
-    if (!user) {
+    const candidates = await this.findUsersByPhone(req.fromDigits)
+    if (candidates.length === 0) {
       return {
         kind: 'silent',
         reason: `phone ${req.fromDigits} not linked to any user`,
+      }
+    }
+
+    const user = await this.resolveActiveUser(candidates, req.body)
+    if (user === 'ambiguous') {
+      return {
+        kind: 'reply',
+        text: this.buildDisambiguationPrompt(candidates),
+        threadId: '',
       }
     }
 
@@ -183,23 +192,67 @@ export class WhatsappChatService {
     }
   }
 
-  private async findUserByPhone(digits: string): Promise<User | null> {
+  private async findUsersByPhone(digits: string): Promise<User[]> {
     // Tenta múltiplos formatos: com/sem DDI 55, com/sem 9 na frente do celular.
     // Desde a migration normalize_user_phone, User.phone é guardado só com
     // dígitos — comparação direta, sem regex, e bate no índice
     // idx_user_phone_active.
-    //
-    // Ordem do retorno é estável (createdAt DESC) pra evitar o problema
-    // anterior do .first() sem orderBy: quando o número bate em N rows
-    // (família com celular compartilhado), pelo menos a thread sempre cai
-    // sob o mesmo userId em vez de alternar aleatório.
     const variants = phoneVariants(digits)
-    const user = await User.query()
+    return User.query()
       .whereIn('phone', variants)
       .whereNull('deletedAt')
       .orderBy('createdAt', 'desc')
+  }
+
+  /**
+   * Quando o número bate em mais de um user (casal compartilhando celular,
+   * cadastro duplicado), decide quem está falando. Estratégia stateless:
+   *
+   * 1. Se já existe uma thread WhatsApp pra UM dos users, mantém esse user
+   *    (continuação de conversa).
+   * 2. Senão, tenta achar o primeiro nome de um dos candidatos no corpo da
+   *    mensagem ("Olá, sou Felipe, ...") — atende de uma vez, sem ping-pong.
+   * 3. Senão, devolve 'ambiguous' e o caller envia uma pergunta pedindo
+   *    identificação. A próxima mensagem entra de novo nesse mesmo fluxo.
+   */
+  private async resolveActiveUser(
+    candidates: User[],
+    body: string
+  ): Promise<User | 'ambiguous'> {
+    if (candidates.length === 1) return candidates[0]!
+
+    // (1) Thread existente — primeira conversa continua, sem perguntar de novo.
+    const existing = await AiThread.query()
+      .where('channel', 'whatsapp')
+      .whereIn(
+        'userId',
+        candidates.map((u) => u.id)
+      )
+      .orderBy('createdAt', 'desc')
       .first()
-    return user
+    if (existing) {
+      const matched = candidates.find((u) => u.id === existing.userId)
+      if (matched) return matched
+    }
+
+    // (2) Primeiro nome no corpo. Normaliza pra comparação sem acento/caixa.
+    const normalizedBody = normalizeName(body)
+    for (const u of candidates) {
+      const firstName = (u.name ?? '').trim().split(/\s+/)[0]
+      if (!firstName) continue
+      const normalizedFirst = normalizeName(firstName)
+      // Match por palavra inteira: evita "Ana" bater em "Anastacia".
+      const re = new RegExp(`\\b${escapeRegex(normalizedFirst)}\\b`)
+      if (re.test(normalizedBody)) return u
+    }
+
+    return 'ambiguous'
+  }
+
+  private buildDisambiguationPrompt(candidates: User[]): string {
+    const names = candidates.map((u) => (u.name ?? '').trim().split(/\s+/)[0]).filter(Boolean)
+    const list = names.length > 0 ? names.join(' ou ') : 'a pessoa que está falando'
+    return `Olá! Este número está cadastrado pra mais de uma pessoa (${list}). Pra te atender, começa sua mensagem com seu nome — ex: "Sou ${names[0] ?? 'Fulano'}, ...".`
   }
 
   private async loadOrCreateThread(userId: string, schoolId: string, persona: ChatPersonaRole) {
@@ -218,6 +271,20 @@ export class WhatsappChatService {
     })
   }
 
+}
+
+function normalizeName(s: string): string {
+  // Lowercase + strip diacritics. Pra comparação resiliente a "José" vs
+  // "Jose" ou "ANA" vs "ana" sem mexer no dado original. U+0300–U+036F é
+  // o bloco "Combining Diacritical Marks".
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function phoneVariants(digits: string): string[] {
