@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
-import { BaseModel, column, belongsTo, hasOne, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasOne, hasMany, beforeCreate, beforeSave } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasOne, HasMany } from '@adonisjs/lucid/types/relations'
+import { normalizePhone } from '#lib/normalize_phone'
 
 // Core models
 import Role from './role.js'
@@ -22,6 +23,17 @@ export default class User extends BaseModel {
   static assignId(user: User) {
     if (!user.id) {
       user.id = uuidv7()
+    }
+  }
+
+  // Toda gravação passa por aqui — strip de não-dígito em phone antes da SQL
+  // sair. Garante invariante "phone só tem dígitos" independente de qual
+  // controller/validator é a origem do write. O CHECK constraint no banco
+  // (migration normalize_user_phone) é a rede de segurança pra SQL crú.
+  @beforeSave()
+  static normalizePhoneField(user: User) {
+    if (user.$dirty.phone !== undefined) {
+      user.phone = normalizePhone(user.phone)
     }
   }
 

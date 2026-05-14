@@ -185,16 +185,19 @@ export class WhatsappChatService {
 
   private async findUserByPhone(digits: string): Promise<User | null> {
     // Tenta múltiplos formatos: com/sem DDI 55, com/sem 9 na frente do celular.
-    // A coluna User.phone pode estar guardada formatada ("(11) 99999-0000"),
-    // então comparamos só dígitos via regex no SQL.
+    // Desde a migration normalize_user_phone, User.phone é guardado só com
+    // dígitos — comparação direta, sem regex, e bate no índice
+    // idx_user_phone_active.
+    //
+    // Ordem do retorno é estável (createdAt DESC) pra evitar o problema
+    // anterior do .first() sem orderBy: quando o número bate em N rows
+    // (família com celular compartilhado), pelo menos a thread sempre cai
+    // sob o mesmo userId em vez de alternar aleatório.
     const variants = phoneVariants(digits)
     const user = await User.query()
-      .where((q) => {
-        for (const v of variants) {
-          q.orWhereRaw(`regexp_replace(coalesce(phone, ''), '\\D', '', 'g') = ?`, [v])
-        }
-      })
+      .whereIn('phone', variants)
       .whereNull('deletedAt')
+      .orderBy('createdAt', 'desc')
       .first()
     return user
   }
