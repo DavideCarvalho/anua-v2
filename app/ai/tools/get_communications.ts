@@ -40,6 +40,16 @@ export function createGetCommunications(ctx: ToolContext) {
       const finalLimit = limit ?? 10
 
       if (ctx.scope.role === 'responsavel') {
+        // Responsável só-financeiro não vê comunicados — comunicado é
+        // informação pedagógica/social, não financeira. Se não tem nenhum
+        // filho pedagógico, retorna vazio com mensagem explicativa.
+        if (ctx.scope.studentIdsPedagogical.length === 0) {
+          return {
+            communications: [],
+            note:
+              'Você está cadastrado apenas como responsável financeiro — comunicados da escola ficam com o responsável pedagógico.',
+          }
+        }
         const { rows } = await db.rawQuery<{ rows: CommunicationRow[] }>(
           `
             SELECT sa.id,
@@ -59,11 +69,23 @@ export function createGetCommunications(ctx: ToolContext) {
             LEFT JOIN "User" u ON u.id = s.id
             WHERE sar."responsibleId" = :userId
               AND sa.status = 'PUBLISHED'
+              -- Só comunicados de filhos com vínculo pedagógico. Recipient
+              -- pode ter studentId NULL (comunicado endereçado direto ao
+              -- responsável); nesse caso sempre incluímos (não é
+              -- aluno-específico).
+              AND (
+                sar."studentId" IS NULL
+                OR sar."studentId" = ANY(:pedagogicalIds)
+              )
               ${onlyUnacknowledged ? `AND sar."acknowledgedAt" IS NULL AND sa."requiresAcknowledgement" = true` : ''}
             ORDER BY sa."publishedAt" DESC NULLS LAST
             LIMIT :limit
           `,
-          { userId: ctx.userId, limit: finalLimit }
+          {
+            userId: ctx.userId,
+            limit: finalLimit,
+            pedagogicalIds: ctx.scope.studentIdsPedagogical,
+          }
         )
         return { communications: rows }
       }

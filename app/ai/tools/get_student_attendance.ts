@@ -2,7 +2,7 @@ import { z } from 'zod'
 import db from '@adonisjs/lucid/services/db'
 import { defineTool } from '../tool.js'
 import { toolRegistry, type ToolContext } from '../tool_registry.js'
-import { denyIfStudentOutOfScope } from '../scope_check.js'
+import { denyIfResponsavelLacksPedagogicalAccess } from '../scope_check.js'
 
 type AttendanceDetail = {
   date: string
@@ -43,7 +43,7 @@ export function createGetStudentAttendance(ctx: ToolContext) {
       dateTo: z.string().optional().describe('Data final YYYY-MM-DD'),
     }),
     execute: async ({ studentId, dateFrom, dateTo }) => {
-      const denial = denyIfStudentOutOfScope(ctx.scope, studentId)
+      const denial = denyIfResponsavelLacksPedagogicalAccess(ctx.scope, studentId)
       if (denial) return { error: denial }
 
       const { rows } = await db.rawQuery<{ rows: AttendanceDetail[] }>(

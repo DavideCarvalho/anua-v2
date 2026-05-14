@@ -2,7 +2,7 @@ import { z } from 'zod'
 import db from '@adonisjs/lucid/services/db'
 import { defineTool } from '../tool.js'
 import { toolRegistry, type ToolContext } from '../tool_registry.js'
-import { denyIfStudentOutOfScope } from '../scope_check.js'
+import { denyIfResponsavelLacksFinancialAccess } from '../scope_check.js'
 
 type PaymentRow = {
   id: string
@@ -46,32 +46,11 @@ export function createGetStudentFinancials(ctx: ToolContext) {
       onlyOpen: z.boolean().optional().describe('Excluir pagamentos já quitados'),
     }),
     execute: async ({ studentId, onlyOpen }) => {
-      const denial = denyIfStudentOutOfScope(ctx.scope, studentId)
+      // Check único faz a coisa toda — pra responsavel já valida a flag
+      // isFinancial via ctx.scope.studentIdsFinancial; pra gestor/coord/prof
+      // recai no check geral.
+      const denial = denyIfResponsavelLacksFinancialAccess(ctx.scope, studentId)
       if (denial) return { error: denial }
-
-      // Camada extra de proteção pro papel "responsavel": só pode ver
-      // financeiro de filho com isFinancial=true. O scope geral autoriza ver
-      // o aluno (escolar/pedagógico), mas financeiro exige a flag específica.
-      if (ctx.scope.role === 'responsavel') {
-        const { rows: flagRows } = await db.rawQuery<{
-          rows: Array<{ isFinancial: boolean }>
-        }>(
-          `
-            SELECT "isFinancial"
-            FROM "StudentHasResponsible"
-            WHERE "studentId" = :studentId
-              AND "responsibleId" = :userId
-          `,
-          { studentId, userId: ctx.userId }
-        )
-        const hasFinancialAccess = flagRows.some((r) => r.isFinancial === true)
-        if (!hasFinancialAccess) {
-          return {
-            error:
-              'Você está cadastrado apenas como responsável pedagógico desse aluno — o responsável financeiro tem que consultar essa informação.',
-          }
-        }
-      }
 
       const { rows: payments } = await db.rawQuery<{ rows: PaymentRow[] }>(
         `

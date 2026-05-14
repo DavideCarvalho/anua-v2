@@ -11,7 +11,10 @@ import type { ChatPersonaRole } from './chat_role.js'
  * - gestor: classIds/subjectIds/studentIds vazios = "todos da escola"
  * - coordenador: classIds = turmas que ele coordena
  * - professor: classIds = turmas onde dá aula + subjectIds das matérias
- * - responsavel: studentIds = filhos vinculados
+ * - responsavel: studentIds = união pedagógico ∪ financeiro; as duas listas
+ *   particionadas existem em studentIdsPedagogical / studentIdsFinancial pra
+ *   tools poderem restringir por papel do vínculo (uma responsável pedagógica
+ *   não vê boletos; uma só-financeira não vê notas/frequência).
  */
 export type ChatScope = {
   role: ChatPersonaRole
@@ -19,6 +22,12 @@ export type ChatScope = {
   classIds: string[]
   subjectIds: string[]
   studentIds: string[]
+  // Subconjuntos só relevantes pra responsavel — pra outros papéis ficam
+  // vazios (gestor passa direto via role check, professor/coordenador não
+  // têm essa noção). Quando role !== 'responsavel', tools devem usar
+  // studentIds direto.
+  studentIdsPedagogical: string[]
+  studentIdsFinancial: string[]
 }
 
 export async function computeChatScope(args: {
@@ -27,7 +36,15 @@ export async function computeChatScope(args: {
   schoolId: string
 }): Promise<ChatScope> {
   const { role, userId, schoolId } = args
-  const base: ChatScope = { role, schoolId, classIds: [], subjectIds: [], studentIds: [] }
+  const base: ChatScope = {
+    role,
+    schoolId,
+    classIds: [],
+    subjectIds: [],
+    studentIds: [],
+    studentIdsPedagogical: [],
+    studentIdsFinancial: [],
+  }
 
   if (role === 'gestor') return base
 
@@ -79,18 +96,49 @@ export async function computeChatScope(args: {
   }
 
   if (role === 'responsavel') {
-    const { rows } = await db.rawQuery<{ rows: Array<{ studentId: string }> }>(
+    // Buscamos por (studentId, flags) — o vínculo pode ter qualquer combinação
+    // das duas flags. Mesmo aluno pode aparecer várias vezes se o usuário
+    // tiver mais de um StudentHasResponsible (não é o padrão, mas o schema
+    // permite). Agregamos com OR pra "qualquer vínculo pedagógico habilita
+    // o pedagógico, qualquer financeiro habilita o financeiro".
+    const { rows } = await db.rawQuery<{
+      rows: Array<{ studentId: string; isPedagogical: boolean; isFinancial: boolean }>
+    }>(
       `
-        SELECT DISTINCT shr."studentId"
+        SELECT shr."studentId",
+               BOOL_OR(shr."isPedagogical") AS "isPedagogical",
+               BOOL_OR(shr."isFinancial")   AS "isFinancial"
         FROM "StudentHasResponsible" shr
         WHERE shr."responsibleId" = :userId
+        GROUP BY shr."studentId"
       `,
       { userId }
     )
-    return { ...base, studentIds: rows.map((r) => r.studentId) }
+    const studentIds = rows.map((r) => r.studentId)
+    const studentIdsPedagogical = rows.filter((r) => r.isPedagogical).map((r) => r.studentId)
+    const studentIdsFinancial = rows.filter((r) => r.isFinancial).map((r) => r.studentId)
+    // classIds só sai do pedagógico — info de turma (atividades, provas,
+    // comunicados, lista de alunos) é pedagógica por definição. Responsável
+    // só-financeiro fica com classIds=[] e denyIfClassOutOfScope barra.
+    const classIds = await classIdsForStudents(studentIdsPedagogical)
+    return { ...base, studentIds, studentIdsPedagogical, studentIdsFinancial, classIds }
   }
 
   return base
+}
+
+async function classIdsForStudents(studentIds: string[]): Promise<string[]> {
+  if (studentIds.length === 0) return []
+  const { rows } = await db.rawQuery<{ rows: Array<{ classId: string }> }>(
+    `
+      SELECT DISTINCT s."classId"
+      FROM "Student" s
+      WHERE s.id = ANY(:studentIds)
+        AND s."classId" IS NOT NULL
+    `,
+    { studentIds }
+  )
+  return rows.map((r) => r.classId)
 }
 
 async function studentIdsForClasses(classIds: string[]): Promise<string[]> {

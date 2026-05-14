@@ -1,7 +1,12 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
 import type { ChatScope } from '#ai/chat_scope'
-import { denyIfClassOutOfScope, denyIfStudentOutOfScope } from '#ai/scope_check'
+import {
+  denyIfClassOutOfScope,
+  denyIfStudentOutOfScope,
+  denyIfResponsavelLacksPedagogicalAccess,
+  denyIfResponsavelLacksFinancialAccess,
+} from '#ai/scope_check'
 
 async function startTx() {
   await db.beginGlobalTransaction()
@@ -17,6 +22,8 @@ function makeScope(overrides: Partial<ChatScope> = {}): ChatScope {
     classIds: [],
     subjectIds: [],
     studentIds: [],
+    studentIdsPedagogical: [],
+    studentIdsFinancial: [],
     ...overrides,
   }
 }
@@ -97,5 +104,88 @@ test.group('scope_check: students', (group) => {
       studentIds: ['aluno-da-c1'],
     })
     assert.isNotNull(denyIfStudentOutOfScope(scope, 'aluno-de-outra-turma'))
+  })
+})
+
+test.group('scope_check: responsável pedagógico × financeiro', (group) => {
+  group.each.setup(startTx)
+
+  test('gestor passa nos dois checks por qualquer aluno', ({ assert }) => {
+    const scope = makeScope({ role: 'gestor' })
+    assert.isNull(denyIfResponsavelLacksPedagogicalAccess(scope, 'qualquer'))
+    assert.isNull(denyIfResponsavelLacksFinancialAccess(scope, 'qualquer'))
+  })
+
+  test('responsável com os dois flags passa em ambos', ({ assert }) => {
+    const scope = makeScope({
+      role: 'responsavel',
+      studentIds: ['filho-x'],
+      studentIdsPedagogical: ['filho-x'],
+      studentIdsFinancial: ['filho-x'],
+    })
+    assert.isNull(denyIfResponsavelLacksPedagogicalAccess(scope, 'filho-x'))
+    assert.isNull(denyIfResponsavelLacksFinancialAccess(scope, 'filho-x'))
+  })
+
+  test('responsável só pedagógico é bloqueado no financeiro com mensagem clara', ({ assert }) => {
+    const scope = makeScope({
+      role: 'responsavel',
+      studentIds: ['filho-x'],
+      studentIdsPedagogical: ['filho-x'],
+      studentIdsFinancial: [],
+    })
+    assert.isNull(denyIfResponsavelLacksPedagogicalAccess(scope, 'filho-x'))
+    const denial = denyIfResponsavelLacksFinancialAccess(scope, 'filho-x')
+    assert.isNotNull(denial)
+    assert.include(denial!, 'pedagógico')
+    assert.include(denial!, 'financeiro')
+  })
+
+  test('responsável só financeiro é bloqueado no pedagógico com mensagem clara', ({ assert }) => {
+    const scope = makeScope({
+      role: 'responsavel',
+      studentIds: ['filho-x'],
+      studentIdsPedagogical: [],
+      studentIdsFinancial: ['filho-x'],
+    })
+    assert.isNull(denyIfResponsavelLacksFinancialAccess(scope, 'filho-x'))
+    const denial = denyIfResponsavelLacksPedagogicalAccess(scope, 'filho-x')
+    assert.isNotNull(denial)
+    assert.include(denial!, 'financeiro')
+    assert.include(denial!, 'pedagógico')
+  })
+
+  test('responsável é bloqueado em ambos pra aluno sem vínculo', ({ assert }) => {
+    const scope = makeScope({
+      role: 'responsavel',
+      studentIds: ['filho-x'],
+      studentIdsPedagogical: ['filho-x'],
+      studentIdsFinancial: ['filho-x'],
+    })
+    const ped = denyIfResponsavelLacksPedagogicalAccess(scope, 'aluno-aleatorio')
+    const fin = denyIfResponsavelLacksFinancialAccess(scope, 'aluno-aleatorio')
+    assert.isNotNull(ped)
+    assert.isNotNull(fin)
+    assert.include(ped!, 'aluno')
+    assert.include(fin!, 'aluno')
+  })
+
+  test('flags por filho são independentes: pedagógico-A + financeiro-B', ({ assert }) => {
+    // Caso real do banco (Lorena na Silva Gomes): Celia é pedagógica,
+    // Leandro é financeiro, ambos compartilham vínculo via filhos distintos.
+    // Aqui simulamos o mesmo padrão: filho-A só pedagógico, filho-B só
+    // financeiro pro mesmo usuário.
+    const scope = makeScope({
+      role: 'responsavel',
+      studentIds: ['filho-A', 'filho-B'],
+      studentIdsPedagogical: ['filho-A'],
+      studentIdsFinancial: ['filho-B'],
+    })
+    // Pedagógico do A: ok. Pedagógico do B: bloqueado.
+    assert.isNull(denyIfResponsavelLacksPedagogicalAccess(scope, 'filho-A'))
+    assert.isNotNull(denyIfResponsavelLacksPedagogicalAccess(scope, 'filho-B'))
+    // Financeiro do A: bloqueado. Financeiro do B: ok.
+    assert.isNotNull(denyIfResponsavelLacksFinancialAccess(scope, 'filho-A'))
+    assert.isNull(denyIfResponsavelLacksFinancialAccess(scope, 'filho-B'))
   })
 })
