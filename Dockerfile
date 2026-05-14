@@ -36,10 +36,11 @@ ENV NODE_ENV=${NODE_ENV} \
 
 WORKDIR /app
 
-# Install pnpm — versão pinada pra bater com a do dev local. Sem pin, o CI
-# pega o latest e o packageExtensionsChecksum do lockfile (gerado por pnpm 10)
-# não bate com o algoritmo de pnpm 11+, quebrando o --frozen-lockfile.
-RUN npm i -g pnpm@10.33.3
+# Install pnpm — versão alinhada com o `packageManager` em package.json e com
+# o que regenerou o lockfile. Pinar é necessário porque major bumps do pnpm
+# mudam o formato do lockfile (ex: packageExtensionsChecksum mudou de 10→11)
+# e quebram `--frozen-lockfile` silenciosamente.
+RUN npm i -g pnpm@11.1.2
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./

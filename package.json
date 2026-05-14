@@ -45,6 +45,7 @@
     "#transformers/*": "./app/transformers/*.js",
     "#ai/*": "./app/ai/*.js"
   },
+  "packageManager": "pnpm@11.1.2",
   "devDependencies": {
     "@adonisjs/assembler": "8.4.0",
     "@adonisjs/eslint-config": "3.0.0",
