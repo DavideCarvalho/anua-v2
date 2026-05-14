@@ -14,40 +14,45 @@ export default class AiThread extends BaseModel {
     }
   }
 
+  // PrismaNamingStrategy é setado em start/orm.ts mas roda DEPOIS dos
+  // models serem carregados (preload order: routes → kernel → orm). Por
+  // isso TODA coluna camelCase precisa de `columnName` explícito — sem
+  // isso o SnakeCaseNamingStrategy default mapeia userId → user_id e o
+  // SELECT explode com "column does not exist".
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'userId' })
   declare userId: string
 
-  @column()
+  @column({ columnName: 'title' })
   declare title: string | null
 
-  @column()
+  @column({ columnName: 'persona' })
   declare persona: string | null
 
   @column({ columnName: 'schoolId' })
   declare schoolId: string | null
 
-  @column()
+  @column({ columnName: 'channel' })
   declare channel: 'web' | 'whatsapp'
 
   // Resumo das mensagens mais antigas, gerado quando a thread passa do
   // limite de mensagens. Permite manter contexto sem mandar 100+ msgs
   // pro modelo a cada turno. Quando preenchido, é prepended como mensagem
   // 'system' antes das mensagens recentes em loadThreadHistory.
-  @column()
+  @column({ columnName: 'contextSummary' })
   declare contextSummary: string | null
 
   // Id da última mensagem incluída no contextSummary. Mensagens criadas
   // depois dessa não estão no resumo — são mandadas cruas pro modelo.
-  @column()
+  @column({ columnName: 'summaryUpToMessageId' })
   declare summaryUpToMessageId: string | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updatedAt' })
   declare updatedAt: DateTime
 
   @hasMany(() => AiThreadMessage, { foreignKey: 'threadId' })

@@ -81,7 +81,7 @@ export default defineConfig({
     },
     () => import('@adonisjs/otel/otel_provider'),
     () => import('@adonisjs/redis/redis_provider'),
-    () => import('@adonisjs/transmit/transmit_provider')
+    () => import('@adonisjs/transmit/transmit_provider'),
   ],
 
   /*
@@ -93,9 +93,14 @@ export default defineConfig({
   |
   */
   preloads: [
+    // orm tem que rodar PRIMEIRO. Ele seta BaseModel.namingStrategy =
+    // PrismaNamingStrategy (camelCase), e os decorators @column resolvem
+    // columnName no momento do load do model. Se routes/kernel rodarem
+    // antes, eles importam models que ainda veem o SnakeCaseNamingStrategy
+    // default e mapeiam coluna pra snake_case eternamente.
+    () => import('#start/orm'),
     () => import('#start/routes'),
     () => import('#start/kernel'),
-    () => import('#start/orm'),
     {
       file: () => import('#start/scheduler'),
       environment: ['console'],

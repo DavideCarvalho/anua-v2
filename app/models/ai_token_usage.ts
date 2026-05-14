@@ -32,10 +32,10 @@ export default class AiTokenUsage extends BaseModel {
   @column({ columnName: 'schoolId' })
   declare schoolId: string | null
 
-  @column()
+  @column({ columnName: 'model' })
   declare model: string
 
-  @column()
+  @column({ columnName: 'purpose' })
   declare purpose: AiTokenUsagePurpose
 
   @column({ columnName: 'inputTokens' })
@@ -47,7 +47,7 @@ export default class AiTokenUsage extends BaseModel {
   @column({ columnName: 'totalTokens' })
   declare totalTokens: number
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
   @belongsTo(() => AiThread, { foreignKey: 'threadId' })

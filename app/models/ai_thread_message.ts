@@ -22,7 +22,8 @@ export type StoredToolResult = {
 // Lucid double-stringifies arrays into a quoted JSON-string-of-a-JSON-array
 // and PostgreSQL rejects it ("invalid input syntax for type json").
 const jsonColumn = {
-  prepare: (value: unknown) => (value === null || value === undefined ? value : JSON.stringify(value)),
+  prepare: (value: unknown) =>
+    value === null || value === undefined ? value : JSON.stringify(value),
   consume: (value: unknown) => (typeof value === 'string' ? JSON.parse(value) : value),
 }
 
@@ -42,10 +43,10 @@ export default class AiThreadMessage extends BaseModel {
   @column({ columnName: 'threadId' })
   declare threadId: string
 
-  @column()
+  @column({ columnName: 'role' })
   declare role: 'user' | 'assistant' | 'system'
 
-  @column()
+  @column({ columnName: 'content' })
   declare content: string
 
   @column({ columnName: 'toolCalls', ...jsonColumn })
@@ -54,7 +55,7 @@ export default class AiThreadMessage extends BaseModel {
   @column({ columnName: 'toolResults', ...jsonColumn })
   declare toolResults: StoredToolResult[] | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
   @belongsTo(() => AiThread, { foreignKey: 'threadId' })
