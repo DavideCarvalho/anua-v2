@@ -22,5 +22,6 @@ import './send_communication.js'
 import './justify_absence.js'
 import './enter_exam_grade.js'
 import './register_attendance.js'
+import './prepare_create_assignment.js'
 
 export {}

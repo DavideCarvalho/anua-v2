@@ -4356,6 +4356,12 @@ const routes = {
     tokens: [{"old":"/api/v1/ai/resolve-names","type":0,"val":"api","end":""},{"old":"/api/v1/ai/resolve-names","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/resolve-names","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/resolve-names","type":0,"val":"resolve-names","end":""}],
     types: placeholder as Registry['api.v1.ai.resolve_names']['types'],
   },
+  'api.v1.ai.canvas.submit': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/canvas/submit',
+    tokens: [{"old":"/api/v1/ai/canvas/submit","type":0,"val":"api","end":""},{"old":"/api/v1/ai/canvas/submit","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/canvas/submit","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/canvas/submit","type":0,"val":"canvas","end":""},{"old":"/api/v1/ai/canvas/submit","type":0,"val":"submit","end":""}],
+    types: placeholder as Registry['api.v1.ai.canvas.submit']['types'],
+  },
   'api.v1.whatsapp.webhook': {
     methods: ["POST"],
     pattern: '/api/v1/whatsapp/webhook',

@@ -1063,6 +1063,9 @@ export interface ApiDefinition {
           decide: typeof routes['api.v1.ai.tool_calls.decide']
         }
         resolveNames: typeof routes['api.v1.ai.resolve_names']
+        canvas: {
+          submit: typeof routes['api.v1.ai.canvas.submit']
+        }
       }
       whatsapp: {
         webhook: typeof routes['api.v1.whatsapp.webhook']

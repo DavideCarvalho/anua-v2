@@ -30,3 +30,16 @@ export const resolveNamesValidator = vine.compile(
     classIds: vine.array(vine.string().uuid()).maxLength(50).optional(),
   })
 )
+
+// Submit do canvas: validamos a casca (threadId + toolName + fields é
+// objeto). O conteúdo de `fields` é validado de novo no dispatcher com o
+// zod schema da action específica (source of truth). Aqui usamos
+// vine.any().nullable().optional() pra aceitar todo shape — vine.any()
+// puro rejeita null como "não definido".
+export const submitCanvasValidator = vine.compile(
+  vine.object({
+    threadId: vine.string().uuid(),
+    toolName: vine.string().minLength(1).maxLength(100),
+    fields: vine.record(vine.any().nullable().optional()),
+  })
+)

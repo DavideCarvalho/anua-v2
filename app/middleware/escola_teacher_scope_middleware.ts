@@ -25,6 +25,9 @@ export default class EscolaTeacherScopeMiddleware {
       '/escola/calendario',
       '/escola/notificacoes',
       '/escola/duvidas-responsaveis',
+      // Assistente IA — professor usa pra registrar presença, lançar nota,
+      // abrir o canvas de criar atividade etc.
+      '/escola/ia',
     ]
     const isPrefixAllowed = allowedPrefixes.some(
       (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)

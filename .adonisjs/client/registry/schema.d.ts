@@ -8707,6 +8707,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/resolve_names_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.ai.canvas.submit': {
+    methods: ["POST"]
+    pattern: '/api/v1/ai/canvas/submit'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/ai').submitCanvasValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/ai').submitCanvasValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/submit_canvas_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/submit_canvas_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.whatsapp.webhook': {
     methods: ["POST"]
     pattern: '/api/v1/whatsapp/webhook'

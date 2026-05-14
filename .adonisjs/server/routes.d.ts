@@ -729,6 +729,7 @@ export type ScannedRoutes = {
     'api.v1.ai.threads.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'toolCallId': ParamValue} }
     'api.v1.ai.resolve_names': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.canvas.submit': { paramsTuple?: []; params?: {} }
     'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }
@@ -1831,6 +1832,7 @@ export type ScannedRoutes = {
     'api.v1.ai.chat.cancel': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
     'api.v1.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'toolCallId': ParamValue} }
     'api.v1.ai.resolve_names': { paramsTuple?: []; params?: {} }
+    'api.v1.ai.canvas.submit': { paramsTuple?: []; params?: {} }
     'api.v1.whatsapp.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.csp_report': { paramsTuple?: []; params?: {} }
   }

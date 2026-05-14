@@ -9,6 +9,7 @@ import { ToolStepGroup } from './ai-task'
 import { AiChatEmpty, type ChatPersonaRole } from './ai-chat-empty'
 import { AiChatInput } from './ai-chat-input'
 import { AiActionApprovalCard } from './ai-action-approval-card'
+import { AiActionCanvas } from './ai-action-canvas'
 import { Button } from '../ui/button'
 import { cn } from '../../lib/utils'
 import { api } from '~/lib/api'
@@ -21,6 +22,10 @@ const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'enterExamGrade',
   'registerAttendance',
 ])
+
+// Tools que abrem um painel flutuante (canvas) — NÃO renderizam inline.
+// Mantém em sync com CANVAS_TOOL_NAMES no backend.
+const CANVAS_TOOL_NAMES: ReadonlySet<string> = new Set<string>(['prepareCreateAssignment'])
 
 type MessageBlock =
   | { kind: 'text'; text: string }
@@ -40,7 +45,11 @@ function buildBlocks(parts: UIMessage['parts']): MessageBlock[] {
     }
     if (!part.type.startsWith('tool-')) continue
     const toolPart = part as ToolUIPart
-    if (ACTION_TOOL_NAMES.has(toolNameOf(toolPart))) {
+    const name = toolNameOf(toolPart)
+    // Canvas tools são renderizadas no root do AiChatPane (painel flutuante),
+    // não inline na mensagem. Pulamos aqui.
+    if (CANVAS_TOOL_NAMES.has(name)) continue
+    if (ACTION_TOOL_NAMES.has(name)) {
       blocks.push({ kind: 'action', tool: toolPart })
       continue
     }
@@ -52,6 +61,28 @@ function buildBlocks(parts: UIMessage['parts']): MessageBlock[] {
     }
   }
   return blocks
+}
+
+/**
+ * Última call de tool de canvas em qualquer mensagem assistant. Quando a
+ * IA chama várias vezes pra atualizar o form, queremos sempre o estado
+ * mais recente.
+ */
+function findLatestCanvasTool(messages: UIMessage[]): ToolUIPart | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i]
+    if (msg.role !== 'assistant') continue
+    for (let j = msg.parts.length - 1; j >= 0; j--) {
+      const part = msg.parts[j]
+      if (part.type.startsWith('tool-')) {
+        const toolPart = part as ToolUIPart
+        if (CANVAS_TOOL_NAMES.has(toolNameOf(toolPart))) {
+          return toolPart
+        }
+      }
+    }
+  }
+  return null
 }
 
 type StoredToolCall = {
@@ -231,6 +262,15 @@ function ActiveChat({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isBusy = status === 'submitted' || status === 'streaming'
 
+  // Canvas: derivado das mensagens. Quando a IA chama prepareCreateAssignment,
+  // pegamos a última call e mostramos o painel. O user pode fechar; reabre
+  // automaticamente se uma nova call chegar (toolCallId muda → effect no canvas
+  // sobrescreve form).
+  const latestCanvasTool = findLatestCanvasTool(messages)
+  const [canvasDismissedFor, setCanvasDismissedFor] = useState<string | null>(null)
+  const canvasOpen =
+    latestCanvasTool !== null && latestCanvasTool.toolCallId !== canvasDismissedFor
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -276,6 +316,14 @@ function ActiveChat({
           </div>
         )}
       </div>
+
+      {canvasOpen && latestCanvasTool && (
+        <AiActionCanvas
+          threadId={threadId}
+          toolPart={latestCanvasTool}
+          onClose={() => setCanvasDismissedFor(latestCanvasTool.toolCallId)}
+        />
+      )}
 
       <footer className="border-t border-border bg-background px-5 py-3">
         <form
@@ -343,7 +391,10 @@ function ChatHeader({ title }: { title: string | null }) {
   )
 }
 
-type AddToolOutputFn = ReturnType<typeof useChat>['addToolOutput']
+// O SDK exporta a função com retorno PromiseLike<void>; precisamos espelhar
+// o tipo do useChat 1:1 — Promise<void> seria estreito demais. Re-export
+// pra os consumidores do card de aprovação.
+export type AddToolOutputFn = ReturnType<typeof useChat>['addToolOutput']
 
 function MessageRow({
   message,

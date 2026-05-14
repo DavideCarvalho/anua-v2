@@ -14,8 +14,20 @@ export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'registerAttendance',
 ])
 
+/**
+ * Canvas openers: tools que NÃO escrevem nada no banco, só pedem pro
+ * frontend abrir um painel flutuante com um form pré-preenchido. O usuário
+ * revisa, ajusta o que quiser, e o submit do canvas dispara a action real
+ * (ex: prepareCreateAssignment abre o painel; submit chama createAssignment
+ * pelo /api/v1/ai/canvas/submit). Audit grava como kind='canvas' /
+ * 'auto_executed' — a action real cria seu próprio row.
+ */
+export const CANVAS_TOOL_NAMES: ReadonlySet<string> = new Set<string>(['prepareCreateAssignment'])
+
 export function toolKindFromName(name: string): AiToolKind {
-  return WRITE_TOOL_NAMES.has(name) ? 'action' : 'read'
+  if (WRITE_TOOL_NAMES.has(name)) return 'action'
+  if (CANVAS_TOOL_NAMES.has(name)) return 'canvas'
+  return 'read'
 }
 
 export type RecordToolCallsArgs = {
@@ -74,9 +86,7 @@ export async function recordToolCalls(args: RecordToolCallsArgs): Promise<void> 
         status,
         input: call.input ?? null,
         output: output ?? null,
-        error: looksLikeError
-          ? String((output as Record<string, unknown>).error)
-          : null,
+        error: looksLikeError ? String((output as Record<string, unknown>).error) : null,
         executionMs: null,
       })
     }

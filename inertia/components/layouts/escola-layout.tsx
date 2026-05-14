@@ -18,7 +18,7 @@ import {
   ChevronDown,
   School,
   Megaphone,
-  Bot,
+  // Bot, // descomenta junto com o nav item "Assistente IA"
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { buttonVariants } from '../ui/button'
@@ -126,11 +126,16 @@ const navigation: NavItem[] = [
     href: '/escola/comunicados',
     icon: Megaphone,
   },
-  {
-    title: 'Assistente IA',
-    href: '/escola/ia',
-    icon: Bot,
-  },
+  // TEMP: escondido da sidebar enquanto o feature tá em validação. A rota
+  // /escola/ia continua acessível por URL direta (e o teacher_scope
+  // middleware permite). Quando for liberar pra todos, descomenta e
+  // restaura o filter especial pro teacher na visibleNavigation abaixo.
+  // {
+  //   title: 'Assistente IA',
+  //   route: 'web.escola.ia.index',
+  //   href: '/escola/ia',
+  //   icon: Bot,
+  // },
   {
     title: 'Cantina',
     route: 'web.escola.cantina.pdv',

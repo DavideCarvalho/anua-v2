@@ -7,18 +7,16 @@ import {
   sendCommunicationInputSchema,
   type SendCommunicationInput,
 } from './tools/send_communication.js'
-import {
-  justifyAbsenceInputSchema,
-  type JustifyAbsenceInput,
-} from './tools/justify_absence.js'
-import {
-  enterExamGradeInputSchema,
-  type EnterExamGradeInput,
-} from './tools/enter_exam_grade.js'
+import { justifyAbsenceInputSchema, type JustifyAbsenceInput } from './tools/justify_absence.js'
+import { enterExamGradeInputSchema, type EnterExamGradeInput } from './tools/enter_exam_grade.js'
 import {
   registerAttendanceInputSchema,
   type RegisterAttendanceInput,
 } from './tools/register_attendance.js'
+import {
+  createAssignmentInputSchema,
+  type CreateAssignmentInput,
+} from './tools/create_assignment.js'
 
 /**
  * Contexto da decisão: quem aprovou, dados do row pendente, escola alvo.
@@ -34,9 +32,7 @@ export type DispatchContext = {
   decidedByUserId: string
 }
 
-export type DispatchResult =
-  | { ok: true; output: unknown }
-  | { ok: false; error: string }
+export type DispatchResult = { ok: true; output: unknown } | { ok: false; error: string }
 
 /**
  * Executa a ação correspondente a uma tool de escrita aprovada. Cada nome
@@ -54,6 +50,8 @@ export async function dispatchAction(ctx: DispatchContext): Promise<DispatchResu
         return await dispatchEnterExamGrade(ctx)
       case 'registerAttendance':
         return await dispatchRegisterAttendance(ctx)
+      case 'createAssignment':
+        return await dispatchCreateAssignment(ctx)
       default:
         return { ok: false, error: `Ação não suportada: ${ctx.toolName}` }
     }
@@ -91,26 +89,32 @@ async function dispatchSendCommunication(ctx: DispatchContext): Promise<Dispatch
   const audienceId = uuidv7()
 
   await db.transaction(async (trx) => {
-    await trx.insertQuery().table('SchoolAnnouncement').insert({
-      id: announcementId,
-      schoolId: ctx.schoolId,
-      title: input.title,
-      body: input.body,
-      status: 'PUBLISHED',
-      requiresAcknowledgement: input.requiresAcknowledgement ?? false,
-      publishedAt: DateTime.now().toSQL(),
-      createdByUserId: ctx.decidedByUserId,
-      createdAt: DateTime.now().toSQL(),
-      updatedAt: DateTime.now().toSQL(),
-    })
+    await trx
+      .insertQuery()
+      .table('SchoolAnnouncement')
+      .insert({
+        id: announcementId,
+        schoolId: ctx.schoolId,
+        title: input.title,
+        body: input.body,
+        status: 'PUBLISHED',
+        requiresAcknowledgement: input.requiresAcknowledgement ?? false,
+        publishedAt: DateTime.now().toSQL(),
+        createdByUserId: ctx.decidedByUserId,
+        createdAt: DateTime.now().toSQL(),
+        updatedAt: DateTime.now().toSQL(),
+      })
 
-    await trx.insertQuery().table('SchoolAnnouncementAudience').insert({
-      id: audienceId,
-      announcementId,
-      scopeType: input.audience.scopeType,
-      scopeId: input.audience.scopeId ?? ctx.schoolId,
-      createdAt: DateTime.now().toSQL(),
-    })
+    await trx
+      .insertQuery()
+      .table('SchoolAnnouncementAudience')
+      .insert({
+        id: audienceId,
+        announcementId,
+        scopeType: input.audience.scopeType,
+        scopeId: input.audience.scopeId ?? ctx.schoolId,
+        createdAt: DateTime.now().toSQL(),
+      })
 
     // Por enquanto não criamos rows em SchoolAnnouncementRecipient
     // automaticamente — o fluxo de notificação existente da plataforma
@@ -455,6 +459,109 @@ async function dispatchRegisterAttendance(ctx: DispatchContext): Promise<Dispatc
         late: lateCount,
         total: students.length,
       },
+    },
+  }
+}
+
+async function dispatchCreateAssignment(ctx: DispatchContext): Promise<DispatchResult> {
+  if (!ctx.schoolId) {
+    return { ok: false, error: 'Thread sem escola vinculada — não dá pra criar atividade.' }
+  }
+
+  const parsed = createAssignmentInputSchema.safeParse(ctx.input)
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: `Input inválido: ${parsed.error.issues.map((i) => i.message).join('; ')}`,
+    }
+  }
+  const input: CreateAssignmentInput = parsed.data
+
+  // 1. Resolve TeacherHasClass: precisa existir vínculo ativo
+  //    (decidedByUserId=teacher, classId, isActive, mesma escola). Se o
+  //    professor dá mais de uma matéria nessa turma, subjectId é obrigatório
+  //    pra desambiguar.
+  type ThcRow = { id: string; subjectId: string | null }
+  const { rows: thcRows } = await db.rawQuery<{ rows: ThcRow[] }>(
+    `
+      SELECT thc.id, thc."subjectId"
+      FROM "TeacherHasClass" thc
+      JOIN "Class" c ON c.id = thc."classId"
+      WHERE thc."teacherId" = :userId
+        AND thc."classId" = :classId
+        AND thc."isActive" = true
+        AND c."schoolId" = :schoolId
+        AND c."isArchived" = false
+        ${input.subjectId ? `AND thc."subjectId" = :subjectId` : ''}
+    `,
+    {
+      userId: ctx.decidedByUserId,
+      classId: input.classId,
+      schoolId: ctx.schoolId,
+      ...(input.subjectId ? { subjectId: input.subjectId } : {}),
+    }
+  )
+
+  if (thcRows.length === 0) {
+    return {
+      ok: false,
+      error:
+        'Você não tem vínculo ativo com essa turma' +
+        (input.subjectId ? ' pra essa matéria.' : '.'),
+    }
+  }
+  if (thcRows.length > 1) {
+    return {
+      ok: false,
+      error:
+        'Você dá mais de uma matéria nessa turma — escolha qual matéria essa atividade pertence.',
+    }
+  }
+  const teacherHasClassId = thcRows[0].id
+
+  // 2. Período letivo ativo da escola.
+  type ApRow = { id: string }
+  const { rows: apRows } = await db.rawQuery<{ rows: ApRow[] }>(
+    `
+      SELECT id FROM "AcademicPeriod"
+      WHERE "schoolId" = :schoolId AND "isActive" = true
+      ORDER BY "createdAt" DESC
+      LIMIT 1
+    `,
+    { schoolId: ctx.schoolId }
+  )
+  if (apRows.length === 0) {
+    return {
+      ok: false,
+      error: 'A escola não tem período letivo ativo — peça pra secretaria abrir um.',
+    }
+  }
+  const academicPeriodId = apRows[0].id
+
+  const assignmentId = uuidv7()
+  const now = DateTime.now().toSQL()
+
+  await db.table('Assignment').insert({
+    id: assignmentId,
+    name: input.name,
+    description: input.description ?? null,
+    dueDate: `${input.dueDate} 23:59:59`,
+    grade: input.maxGrade ?? null,
+    teacherHasClassId,
+    academicPeriodId,
+    subPeriodId: null,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  return {
+    ok: true,
+    output: {
+      assignmentId,
+      name: input.name,
+      dueDate: input.dueDate,
+      classId: input.classId,
+      maxGrade: input.maxGrade ?? null,
     },
   }
 }

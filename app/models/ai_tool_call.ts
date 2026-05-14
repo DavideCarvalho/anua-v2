@@ -6,7 +6,7 @@ import AiThread from './ai_thread.js'
 import AiThreadMessage from './ai_thread_message.js'
 import User from './user.js'
 
-export type AiToolKind = 'read' | 'action'
+export type AiToolKind = 'read' | 'action' | 'canvas'
 
 export type AiToolCallStatus =
   | 'auto_executed'
@@ -58,22 +58,22 @@ export default class AiToolCall extends BaseModel {
   @column({ columnName: 'toolCallId' })
   declare toolCallId: string | null
 
-  @column()
+  @column({ columnName: 'toolName' })
   declare toolName: string
 
-  @column()
+  @column({ columnName: 'toolKind' })
   declare toolKind: AiToolKind
 
-  @column()
+  @column({ columnName: 'status' })
   declare status: AiToolCallStatus
 
-  @column({ ...jsonColumn })
+  @column({ columnName: 'input', ...jsonColumn })
   declare input: unknown
 
-  @column({ ...jsonColumn })
+  @column({ columnName: 'output', ...jsonColumn })
   declare output: unknown
 
-  @column()
+  @column({ columnName: 'error' })
   declare error: string | null
 
   @column({ columnName: 'executionMs' })
@@ -85,7 +85,7 @@ export default class AiToolCall extends BaseModel {
   @column.dateTime({ columnName: 'decidedAt' })
   declare decidedAt: DateTime | null
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 
   @belongsTo(() => AiThread, { foreignKey: 'threadId' })

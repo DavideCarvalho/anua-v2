@@ -8,6 +8,10 @@ type ClassRow = {
   name: string
   levelName: string | null
   studentCount: number
+  // Só populado pra professor — array de matérias que ele leciona NESSA turma.
+  // Quando length > 1, ações como prepareCreateAssignment exigem subjectId
+  // pra desambiguar. Pros outros papéis vem undefined.
+  subjects?: Array<{ id: string; name: string }>
 }
 
 const DESCRIPTION = `Lista as turmas que o usuário tem acesso no período letivo atual.
@@ -49,9 +53,7 @@ export function createGetMyClasses(ctx: ToolContext) {
       }
 
       const classIds =
-        scope.role === 'responsavel'
-          ? await classIdsForStudents(scope.studentIds)
-          : scope.classIds
+        scope.role === 'responsavel' ? await classIdsForStudents(scope.studentIds) : scope.classIds
 
       if (classIds.length === 0) return { classes: [] }
 
@@ -71,6 +73,39 @@ export function createGetMyClasses(ctx: ToolContext) {
         `,
         { classIds }
       )
+
+      // Pro professor, anexa as matérias que ele dá em cada turma. Sem isso
+      // a IA não tem como saber quando desambiguar subjectId (ex: criar
+      // atividade — se ele dá MAIS de uma matéria na turma, precisa escolher).
+      if (scope.role === 'professor' && rows.length > 0) {
+        type SubjectRow = { classId: string; subjectId: string; subjectName: string | null }
+        const { rows: subRows } = await db.rawQuery<{ rows: SubjectRow[] }>(
+          `
+            SELECT thc."classId" AS "classId",
+                   thc."subjectId" AS "subjectId",
+                   sub.name AS "subjectName"
+            FROM "TeacherHasClass" thc
+            LEFT JOIN "Subject" sub ON sub.id = thc."subjectId"
+            WHERE thc."teacherId" = :userId
+              AND thc."isActive" = true
+              AND thc."classId" = ANY(:classIds)
+          `,
+          { userId: ctx.userId, classIds }
+        )
+        const byClass = new Map<string, Array<{ id: string; name: string }>>()
+        for (const r of subRows) {
+          if (!r.subjectId) continue
+          const list = byClass.get(r.classId) ?? []
+          if (!list.some((s) => s.id === r.subjectId)) {
+            list.push({ id: r.subjectId, name: r.subjectName ?? '(sem nome)' })
+          }
+          byClass.set(r.classId, list)
+        }
+        for (const cls of rows) {
+          cls.subjects = byClass.get(cls.id) ?? []
+        }
+      }
+
       return { classes: rows }
     },
   })
