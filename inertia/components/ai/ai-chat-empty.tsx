@@ -48,14 +48,14 @@ const SUGGESTIONS_BY_PERSONA: Record<ChatPersonaRole, Suggestion[]> = {
       prompt: 'Liste as turmas que eu coordeno',
     },
     {
+      icon: ClipboardCheck,
+      label: 'Próximas provas',
+      prompt: 'Quais são as próximas provas das minhas turmas?',
+    },
+    {
       icon: Users,
       label: 'Alunos de uma turma',
       prompt: 'Me mostre os alunos de uma das minhas turmas',
-    },
-    {
-      icon: ClipboardCheck,
-      label: 'Notas de um aluno',
-      prompt: 'Quero ver as notas de um aluno específico',
     },
     {
       icon: Sparkles,
@@ -70,14 +70,14 @@ const SUGGESTIONS_BY_PERSONA: Record<ChatPersonaRole, Suggestion[]> = {
       prompt: 'Liste as turmas onde eu dou aula',
     },
     {
+      icon: ClipboardCheck,
+      label: 'Atividades em aberto',
+      prompt: 'Quais atividades das minhas turmas têm prazo aberto?',
+    },
+    {
       icon: Users,
       label: 'Alunos de uma turma',
       prompt: 'Me mostre os alunos de uma das minhas turmas',
-    },
-    {
-      icon: ClipboardCheck,
-      label: 'Notas de um aluno',
-      prompt: 'Quero ver as notas de um aluno meu',
     },
     {
       icon: Sparkles,
@@ -97,14 +97,14 @@ const SUGGESTIONS_BY_PERSONA: Record<ChatPersonaRole, Suggestion[]> = {
       prompt: 'Quero ver as notas do meu filho',
     },
     {
-      icon: GraduationCap,
-      label: 'Turmas dos meus filhos',
-      prompt: 'Em qual turma cada filho meu está?',
+      icon: ClipboardCheck,
+      label: 'Próximas provas',
+      prompt: 'Quais são as próximas provas do meu filho?',
     },
     {
       icon: Sparkles,
-      label: 'O que posso ver aqui?',
-      prompt: 'O que você consegue me mostrar sobre meus filhos?',
+      label: 'Boletos em aberto',
+      prompt: 'Tem algum boleto em aberto do meu filho?',
     },
   ],
 }

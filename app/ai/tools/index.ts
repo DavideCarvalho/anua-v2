@@ -12,5 +12,9 @@ import './get_my_classes.js'
 import './get_my_children.js'
 import './get_students_in_class.js'
 import './get_student_grades.js'
+import './get_assignments.js'
+import './get_exams.js'
+import './get_student_attendance.js'
+import './get_student_financials.js'
 
 export {}
