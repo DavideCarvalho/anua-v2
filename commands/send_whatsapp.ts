@@ -130,10 +130,11 @@ export default class SendWhatsapp extends BaseCommand {
     } catch (err) {
       if (err instanceof AraraApiError) {
         this.logger.error(`Arara recusou (HTTP ${err.status}): ${err.message}`)
-        // Dica comum: session message só funciona com janela aberta.
-        if (!isTemplate && err.status === 400) {
+        // Dica comum: session message só funciona com janela de 24h aberta.
+        // Arara devolve 422 com "Nenhuma conversa iniciada..." nesse caso.
+        if (!isTemplate && (err.status === 400 || err.status === 422)) {
           this.logger.warning(
-            'Dica: sessão de 24h pode estar fechada. Tente --template <nome_aprovado>.'
+            'Dica: sessão de 24h pode estar fechada. Use --template <nome_aprovado> ou peça pro user mandar uma mensagem pro número antes (abre janela).'
           )
         }
       } else {

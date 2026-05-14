@@ -61,13 +61,23 @@ export class AraraService {
     })
 
     if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as {
-        errors?: Array<{ code: string; description: string }>
-      } | null
-      throw new AraraApiError(
-        response.status,
-        body?.errors || [{ code: 'UNKNOWN', description: `HTTP ${response.status}` }]
-      )
+      // Arara responde em formatos diferentes dependendo do erro: às vezes
+      // `{errors: [{code, description}]}` (validação), às vezes
+      // `{error: 'X', message: 'Y'}` (entrega/upstream). Normalizamos os
+      // dois pro AraraApiError pra a mensagem útil chegar no caller.
+      const body = (await response.json().catch(() => null)) as
+        | {
+            errors?: Array<{ code: string; description: string }>
+            error?: string
+            message?: string
+          }
+        | null
+      const errors = body?.errors?.length
+        ? body.errors
+        : body?.message
+          ? [{ code: body.error ?? 'UNKNOWN', description: body.message }]
+          : [{ code: 'UNKNOWN', description: `HTTP ${response.status}` }]
+      throw new AraraApiError(response.status, errors)
     }
 
     return (await response.json()) as T
