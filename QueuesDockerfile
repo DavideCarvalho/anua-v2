@@ -64,5 +64,8 @@ COPY --from=builder /app/build ./
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
-# Run the queue worker
-CMD ["node", "ace", "queue:work"]
+# Run the queue worker. Sem --queue ele só escuta 'default' — temos 4 filas
+# (default, notifications, gamification, payments) e job de qualquer outra
+# fila fica enfileirado pra sempre. Mantém a lista alinhada com os `queue:`
+# declarados em app/jobs/**.
+CMD ["node", "ace", "queue:work", "--queue=default,notifications,gamification,payments"]
