@@ -2,7 +2,6 @@ import { defineConfig } from '@adonisjs/core/app'
 import { indexEntities } from '@adonisjs/core'
 import { indexPages } from '@adonisjs/inertia'
 import { generateRegistry } from '@tuyau/core/hooks'
-import env from '#start/env'
 
 // Tira o server-stats inteiro em prod. Em prod:
 //   - O dashboard é dev-only (`dashboard:` + `authorize:` em config/server_stats.ts)
@@ -10,7 +9,13 @@ import env from '#start/env'
 //     escreve direto pro stdout via destination: 1 em config/logger.ts) e
 //     spammava "ENOENT" no stderr a cada 2s, afogando os logs reais do Guara.
 // Carregar zero providers de server-stats em prod resolve isso sem patch.
-const isProduction = env.get('NODE_ENV') === 'production'
+//
+// NOTA: usa `process.env.NODE_ENV` direto (não `#start/env`) porque
+// adonisrc.ts é avaliado pelo `node ace build` durante o Docker build, e
+// importar `#start/env` aí dispara a validação Vine de TODAS as env vars —
+// que no build não estão setadas (ASAAS_*, SMTP_*, etc). O próprio AdonisJS
+// usa process.env.NODE_ENV pra bootstrap antes do env validado existir.
+const isProduction = process.env.NODE_ENV === 'production'
 const webEnv: ('web' | 'console' | 'test' | 'repl')[] = ['web']
 
 export default defineConfig({
