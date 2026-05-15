@@ -30,11 +30,19 @@ ENV NODE_ENV=${NODE_ENV} \
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm i -g pnpm
+# Install pnpm — versão pinada igual ao Dockerfile principal. Pinar é
+# necessário porque major bumps do pnpm mudam o formato do lockfile
+# (ex: packageExtensionsChecksum mudou de 10→11) e quebram
+# `--frozen-lockfile` silenciosamente.
+RUN npm i -g pnpm@11.1.2
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files. pnpm-workspace.yaml é necessário porque tem
+# `patchedDependencies` (config dos patches). O diretório `patches/`
+# precisa estar presente ANTES do install porque o lockfile guarda o
+# hash do conteúdo do patch — pnpm@11 rejeita com
+# ERR_PNPM_LOCKFILE_CONFIG_MISMATCH se a config ou o arquivo do patch falta.
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY patches ./patches
 
 # Install ALL dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile --ignore-scripts
@@ -44,6 +52,11 @@ COPY . .
 
 # Build the application
 RUN node ace build
+
+# Prune dev dependencies from node_modules after build (mesmo pattern do
+# Dockerfile principal — evita um segundo `pnpm install --prod` na stage
+# de produção, que precisaria dos mesmos arquivos copiados de novo)
+RUN pnpm prune --prod
 
 # Production stage
 FROM node:22-alpine AS production
@@ -55,14 +68,9 @@ ENV TZ=UTC
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm i -g pnpm
-
-# Copy built application
+# Copy built application and pruned node_modules from builder
 COPY --from=builder /app/build ./
-
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+COPY --from=builder /app/node_modules ./node_modules
 
 # Run the queue worker. Sem --queue ele só escuta 'default' — temos 4 filas
 # (default, notifications, gamification, payments) e job de qualquer outra
