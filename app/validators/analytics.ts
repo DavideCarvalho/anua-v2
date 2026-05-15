@@ -30,6 +30,15 @@ export const getChronicAbsenteeismValidator = vine.compile(
   })
 )
 
+export const getChronicLatenessValidator = vine.compile(
+  vine.object({
+    schoolId: vine.string().uuid().optional(),
+    schoolChainId: vine.string().uuid().optional(),
+    threshold: vine.number().min(0).max(100).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+  })
+)
+
 // Canteen analytics
 export const getCanteenOverviewValidator = vine.compile(
   vine.object({

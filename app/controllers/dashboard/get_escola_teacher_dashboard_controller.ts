@@ -164,7 +164,7 @@ export default class GetEscolaTeacherDashboardController {
           sha."studentId" as "studentId",
           u.name as "studentName",
           COUNT(*) as total,
-          SUM(CASE WHEN sha.status = 'ABSENT' THEN 1 ELSE 0 END) as absences
+          SUM(CASE WHEN sha.status IN ('ABSENT', 'JUSTIFIED') THEN 1 ELSE 0 END) as absences
         FROM "StudentHasAttendance" sha
         JOIN "Attendance" a ON a.id = sha."attendanceId"
         JOIN "CalendarSlot" cs ON cs.id = a."calendarSlotId"
@@ -176,7 +176,7 @@ export default class GetEscolaTeacherDashboardController {
           AND u."deletedAt" IS NULL
         GROUP BY sha."studentId", u.name
         HAVING COUNT(*) >= :riskMinRecords
-          AND (SUM(CASE WHEN sha.status = 'ABSENT' THEN 1 ELSE 0 END)::float / COUNT(*)) >= :alertRiskThreshold
+          AND (SUM(CASE WHEN sha.status IN ('ABSENT', 'JUSTIFIED') THEN 1 ELSE 0 END)::float / COUNT(*)) >= :alertRiskThreshold
       `,
       {
         teacherClassIds,

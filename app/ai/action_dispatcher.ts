@@ -174,7 +174,7 @@ async function dispatchJustifyAbsence(ctx: DispatchContext): Promise<DispatchRes
     })
     .update(
       {
-        status: 'EXCUSED',
+        status: 'JUSTIFIED',
         justification: input.reason,
         updatedAt: DateTime.now().toSQL(),
       },

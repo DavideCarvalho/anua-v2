@@ -76,6 +76,7 @@ export const controllers = {
     GetHrOverview: () => import('#controllers/analytics/get_hr_overview_controller'),
     GetIncidentsOverview: () => import('#controllers/analytics/get_incidents_overview_controller'),
     GetPaymentsOverview: () => import('#controllers/analytics/get_payments_overview_controller'),
+    GetChronicLateness: () => import('#controllers/analytics/get_chronic_lateness_controller'),
   },
   api: {
     game: {
@@ -110,6 +111,12 @@ export const controllers = {
     ListAttendance: () => import('#controllers/attendance/list_attendance_controller'),
     ShowAttendance: () => import('#controllers/attendance/show_attendance_controller'),
     UpdateAttendance: () => import('#controllers/attendance/update_attendance_controller'),
+    GetStudentHistory: () => import('#controllers/attendance/get_student_history_controller'),
+    ListLessons: () => import('#controllers/attendance/list_lessons_controller'),
+    GetLessonStudents: () => import('#controllers/attendance/get_lesson_students_controller'),
+    UploadAttendanceAttachment: () => import('#controllers/attendance/upload_attendance_attachment_controller'),
+    ListAttendanceAttachments: () => import('#controllers/attendance/list_attendance_attachments_controller'),
+    DeleteAttendanceAttachment: () => import('#controllers/attendance/delete_attendance_attachment_controller'),
   },
   audits: {
     ListAudits: () => import('#controllers/audits/list_audits_controller'),

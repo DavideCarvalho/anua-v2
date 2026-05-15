@@ -545,6 +545,7 @@ export interface ApiDefinition {
           overview: typeof routes['api.v1.analytics.attendance.overview']
           trends: typeof routes['api.v1.analytics.attendance.trends']
           chronic: typeof routes['api.v1.analytics.attendance.chronic']
+          lateChronic: typeof routes['api.v1.analytics.attendance.late_chronic']
         }
         canteen: {
           overview: typeof routes['api.v1.analytics.canteen.overview']
@@ -669,9 +670,21 @@ export interface ApiDefinition {
         store: typeof routes['api.v1.attendance.store']
         batch: typeof routes['api.v1.attendance.batch']
         availableDates: typeof routes['api.v1.attendance.available_dates']
+        lessons: {
+          index: typeof routes['api.v1.attendance.lessons.index']
+          students: typeof routes['api.v1.attendance.lessons.students']
+        }
+        student: {
+          history: typeof routes['api.v1.attendance.student.history']
+        }
+        classStudents: typeof routes['api.v1.attendance.class_students']
         show: typeof routes['api.v1.attendance.show']
         update: typeof routes['api.v1.attendance.update']
-        classStudents: typeof routes['api.v1.attendance.class_students']
+        attachments: {
+          index: typeof routes['api.v1.attendance.attachments.index']
+          upload: typeof routes['api.v1.attendance.attachments.upload']
+          delete: typeof routes['api.v1.attendance.attachments.delete']
+        }
       }
       assignments: {
         index: typeof routes['api.v1.assignments.index']

@@ -1,24 +1,24 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
-import { getChronicAbsenteeismValidator } from '#validators/analytics'
+import { getChronicLatenessValidator } from '#validators/analytics'
 
-interface ChronicStudentRow {
+interface ChronicLatenessStudentRow {
   id: string
   name: string
   email: string
   school_name: string
   total_records: string
-  absent_count: string
-  absence_rate: string
+  late_count: string
+  lateness_rate: string
 }
 
-export default class GetChronicAbsenteeismController {
+export default class GetChronicLatenessController {
   async handle({ request, response }: HttpContext) {
     const {
       schoolId,
       schoolChainId,
       threshold = 20,
-    } = await request.validateUsing(getChronicAbsenteeismValidator)
+    } = await request.validateUsing(getChronicLatenessValidator)
 
     let schoolFilter = ''
     const params: Record<string, string | number> = { threshold }
@@ -31,10 +31,11 @@ export default class GetChronicAbsenteeismController {
       params.schoolChainId = schoolChainId
     }
 
-    // Falta = ABSENT + JUSTIFIED. Justificar não tira a falta pro absenteísmo;
-    // só explica. Aluno com 15 atestados em 2 meses é tão crítico quanto 15
-    // faltas secas — talvez mais, depende do caso (saúde recorrente, etc).
-    const chronicStudentsResult = await db.rawQuery(
+    // Atrasos crônicos: aluno chegou, mas chega tarde com frequência.
+    // Sintoma diferente de absenteísmo (que é não vir). Aqui o aluno tá
+    // presente — só desorganizado, transporte ruim, problema em casa, etc.
+    // Vale alerta porque atraso recorrente vira evasão se não tratar.
+    const chronicLatenessResult = await db.rawQuery(
       `
       SELECT
         st.id,
@@ -42,11 +43,11 @@ export default class GetChronicAbsenteeismController {
         u.email,
         s.name as school_name,
         COUNT(*) as total_records,
-        COUNT(CASE WHEN sha.status IN ('ABSENT', 'JUSTIFIED') THEN 1 END) as absent_count,
+        COUNT(CASE WHEN sha.status = 'LATE' THEN 1 END) as late_count,
         ROUND(
-          (COUNT(CASE WHEN sha.status IN ('ABSENT', 'JUSTIFIED') THEN 1 END)::numeric / NULLIF(COUNT(*), 0)) * 100,
+          (COUNT(CASE WHEN sha.status = 'LATE' THEN 1 END)::numeric / NULLIF(COUNT(*), 0)) * 100,
           1
-        ) as absence_rate
+        ) as lateness_rate
       FROM "Student" st
       JOIN "User" u ON st.id = u.id
       JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
@@ -56,26 +57,26 @@ export default class GetChronicAbsenteeismController {
       AND u."deletedAt" IS NULL
       ${schoolFilter}
       GROUP BY st.id, u.name, u.email, s.name
-      HAVING (COUNT(CASE WHEN sha.status IN ('ABSENT', 'JUSTIFIED') THEN 1 END)::numeric / NULLIF(COUNT(*), 0)) * 100 >= :threshold
-      ORDER BY absence_rate DESC
+      HAVING (COUNT(CASE WHEN sha.status = 'LATE' THEN 1 END)::numeric / NULLIF(COUNT(*), 0)) * 100 >= :threshold
+      ORDER BY lateness_rate DESC
       LIMIT 50
       `,
       params
     )
 
-    const students = (chronicStudentsResult.rows as ChronicStudentRow[]).map((row) => ({
+    const students = (chronicLatenessResult.rows as ChronicLatenessStudentRow[]).map((row) => ({
       id: row.id,
       name: row.name,
       email: row.email,
       schoolName: row.school_name,
       totalRecords: Number(row.total_records),
-      absentCount: Number(row.absent_count),
-      absenceRate: Number(row.absence_rate),
+      lateCount: Number(row.late_count),
+      latenessRate: Number(row.lateness_rate),
     }))
 
     return response.ok({
       threshold,
-      totalChronicStudents: students.length,
+      totalChronicLatenessStudents: students.length,
       students,
     })
   }

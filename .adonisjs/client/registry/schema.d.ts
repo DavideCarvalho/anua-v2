@@ -4555,6 +4555,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/analytics/get_chronic_absenteeism_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.analytics.attendance.late_chronic': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/analytics/attendance/late-chronic'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/analytics').getChronicLatenessValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/analytics/get_chronic_lateness_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/analytics/get_chronic_lateness_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.analytics.canteen.overview': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/analytics/canteen/overview'
@@ -5491,6 +5503,54 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/get_attendance_available_dates_controller').default['handle']>>>
     }
   }
+  'api.v1.attendance.lessons.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/attendance/lessons'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/attendance').listLessonsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/list_lessons_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/list_lessons_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.attendance.lessons.students': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/attendance/lessons/:id/students'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/attendance').getLessonStudentsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/get_lesson_students_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/get_lesson_students_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.attendance.student.history': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/attendance/student/:studentId/history'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/attendance').getStudentHistoryValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/get_student_history_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/get_student_history_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.attendance.class_students': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/attendance/class/:classId/students'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { classId: ParamValue }
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/attendance').getClassStudentsAttendanceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/get_class_students_attendance_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/get_class_students_attendance_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'api.v1.attendance.show': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/attendance/:id'
@@ -5515,16 +5575,40 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/update_attendance_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'api.v1.attendance.class_students': {
+  'api.v1.attendance.attachments.index': {
     methods: ["GET","HEAD"]
-    pattern: '/api/v1/attendance/class/:classId/students'
+    pattern: '/api/v1/attendance/:id/attachments'
     types: {
       body: {}
       paramsTuple: [ParamValue]
-      params: { classId: ParamValue }
-      query: ExtractQueryForGet<InferInput<(typeof import('#validators/attendance').getClassStudentsAttendanceValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/get_class_students_attendance_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/get_class_students_attendance_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/list_attendance_attachments_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/list_attendance_attachments_controller').default['handle']>>>
+    }
+  }
+  'api.v1.attendance.attachments.upload': {
+    methods: ["POST"]
+    pattern: '/api/v1/attendance/:id/attachments'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/upload_attendance_attachment_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/upload_attendance_attachment_controller').default['handle']>>>
+    }
+  }
+  'api.v1.attendance.attachments.delete': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/attendance/:id/attachments/:attachmentId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; attachmentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendance/delete_attendance_attachment_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendance/delete_attendance_attachment_controller').default['handle']>>>
     }
   }
   'api.v1.assignments.index': {

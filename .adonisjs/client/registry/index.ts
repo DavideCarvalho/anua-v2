@@ -2280,6 +2280,12 @@ const routes = {
     tokens: [{"old":"/api/v1/analytics/attendance/chronic","type":0,"val":"api","end":""},{"old":"/api/v1/analytics/attendance/chronic","type":0,"val":"v1","end":""},{"old":"/api/v1/analytics/attendance/chronic","type":0,"val":"analytics","end":""},{"old":"/api/v1/analytics/attendance/chronic","type":0,"val":"attendance","end":""},{"old":"/api/v1/analytics/attendance/chronic","type":0,"val":"chronic","end":""}],
     types: placeholder as Registry['api.v1.analytics.attendance.chronic']['types'],
   },
+  'api.v1.analytics.attendance.late_chronic': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/analytics/attendance/late-chronic',
+    tokens: [{"old":"/api/v1/analytics/attendance/late-chronic","type":0,"val":"api","end":""},{"old":"/api/v1/analytics/attendance/late-chronic","type":0,"val":"v1","end":""},{"old":"/api/v1/analytics/attendance/late-chronic","type":0,"val":"analytics","end":""},{"old":"/api/v1/analytics/attendance/late-chronic","type":0,"val":"attendance","end":""},{"old":"/api/v1/analytics/attendance/late-chronic","type":0,"val":"late-chronic","end":""}],
+    types: placeholder as Registry['api.v1.analytics.attendance.late_chronic']['types'],
+  },
   'api.v1.analytics.canteen.overview': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/analytics/canteen/overview',
@@ -2748,6 +2754,30 @@ const routes = {
     tokens: [{"old":"/api/v1/attendance/available-dates","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/available-dates","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/available-dates","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/available-dates","type":0,"val":"available-dates","end":""}],
     types: placeholder as Registry['api.v1.attendance.available_dates']['types'],
   },
+  'api.v1.attendance.lessons.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/attendance/lessons',
+    tokens: [{"old":"/api/v1/attendance/lessons","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/lessons","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/lessons","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/lessons","type":0,"val":"lessons","end":""}],
+    types: placeholder as Registry['api.v1.attendance.lessons.index']['types'],
+  },
+  'api.v1.attendance.lessons.students': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/attendance/lessons/:id/students',
+    tokens: [{"old":"/api/v1/attendance/lessons/:id/students","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/lessons/:id/students","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/lessons/:id/students","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/lessons/:id/students","type":0,"val":"lessons","end":""},{"old":"/api/v1/attendance/lessons/:id/students","type":1,"val":"id","end":""},{"old":"/api/v1/attendance/lessons/:id/students","type":0,"val":"students","end":""}],
+    types: placeholder as Registry['api.v1.attendance.lessons.students']['types'],
+  },
+  'api.v1.attendance.student.history': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/attendance/student/:studentId/history',
+    tokens: [{"old":"/api/v1/attendance/student/:studentId/history","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/student/:studentId/history","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/student/:studentId/history","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/student/:studentId/history","type":0,"val":"student","end":""},{"old":"/api/v1/attendance/student/:studentId/history","type":1,"val":"studentId","end":""},{"old":"/api/v1/attendance/student/:studentId/history","type":0,"val":"history","end":""}],
+    types: placeholder as Registry['api.v1.attendance.student.history']['types'],
+  },
+  'api.v1.attendance.class_students': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/attendance/class/:classId/students',
+    tokens: [{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"class","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":1,"val":"classId","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"students","end":""}],
+    types: placeholder as Registry['api.v1.attendance.class_students']['types'],
+  },
   'api.v1.attendance.show': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/attendance/:id',
@@ -2760,11 +2790,23 @@ const routes = {
     tokens: [{"old":"/api/v1/attendance/:id","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/:id","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.attendance.update']['types'],
   },
-  'api.v1.attendance.class_students': {
+  'api.v1.attendance.attachments.index': {
     methods: ["GET","HEAD"],
-    pattern: '/api/v1/attendance/class/:classId/students',
-    tokens: [{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"class","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":1,"val":"classId","end":""},{"old":"/api/v1/attendance/class/:classId/students","type":0,"val":"students","end":""}],
-    types: placeholder as Registry['api.v1.attendance.class_students']['types'],
+    pattern: '/api/v1/attendance/:id/attachments',
+    tokens: [{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/:id/attachments","type":1,"val":"id","end":""},{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"attachments","end":""}],
+    types: placeholder as Registry['api.v1.attendance.attachments.index']['types'],
+  },
+  'api.v1.attendance.attachments.upload': {
+    methods: ["POST"],
+    pattern: '/api/v1/attendance/:id/attachments',
+    tokens: [{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/:id/attachments","type":1,"val":"id","end":""},{"old":"/api/v1/attendance/:id/attachments","type":0,"val":"attachments","end":""}],
+    types: placeholder as Registry['api.v1.attendance.attachments.upload']['types'],
+  },
+  'api.v1.attendance.attachments.delete': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/attendance/:id/attachments/:attachmentId',
+    tokens: [{"old":"/api/v1/attendance/:id/attachments/:attachmentId","type":0,"val":"api","end":""},{"old":"/api/v1/attendance/:id/attachments/:attachmentId","type":0,"val":"v1","end":""},{"old":"/api/v1/attendance/:id/attachments/:attachmentId","type":0,"val":"attendance","end":""},{"old":"/api/v1/attendance/:id/attachments/:attachmentId","type":1,"val":"id","end":""},{"old":"/api/v1/attendance/:id/attachments/:attachmentId","type":0,"val":"attachments","end":""},{"old":"/api/v1/attendance/:id/attachments/:attachmentId","type":1,"val":"attachmentId","end":""}],
+    types: placeholder as Registry['api.v1.attendance.attachments.delete']['types'],
   },
   'api.v1.assignments.index': {
     methods: ["GET","HEAD"],

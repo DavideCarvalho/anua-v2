@@ -383,6 +383,7 @@ export type ScannedRoutes = {
     'api.v1.analytics.attendance.overview': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.attendance.trends': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.attendance.chronic': { paramsTuple?: []; params?: {} }
+    'api.v1.analytics.attendance.late_chronic': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.overview': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.trends': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.top_items': { paramsTuple?: []; params?: {} }
@@ -461,9 +462,15 @@ export type ScannedRoutes = {
     'api.v1.attendance.store': { paramsTuple?: []; params?: {} }
     'api.v1.attendance.batch': { paramsTuple?: []; params?: {} }
     'api.v1.attendance.available_dates': { paramsTuple?: []; params?: {} }
+    'api.v1.attendance.lessons.index': { paramsTuple?: []; params?: {} }
+    'api.v1.attendance.lessons.students': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.student.history': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.attendance.class_students': { paramsTuple: [ParamValue]; params: {'classId': ParamValue} }
     'api.v1.attendance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.attendance.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.v1.attendance.class_students': { paramsTuple: [ParamValue]; params: {'classId': ParamValue} }
+    'api.v1.attendance.attachments.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.attachments.upload': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.attachments.delete': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'attachmentId': ParamValue} }
     'api.v1.assignments.index': { paramsTuple?: []; params?: {} }
     'api.v1.assignments.store': { paramsTuple?: []; params?: {} }
     'api.v1.assignments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1017,6 +1024,7 @@ export type ScannedRoutes = {
     'api.v1.analytics.attendance.overview': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.attendance.trends': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.attendance.chronic': { paramsTuple?: []; params?: {} }
+    'api.v1.analytics.attendance.late_chronic': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.overview': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.trends': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.top_items': { paramsTuple?: []; params?: {} }
@@ -1053,8 +1061,12 @@ export type ScannedRoutes = {
     'api.v1.extra_classes.attendance.summary': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.attendance.index': { paramsTuple?: []; params?: {} }
     'api.v1.attendance.available_dates': { paramsTuple?: []; params?: {} }
-    'api.v1.attendance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.lessons.index': { paramsTuple?: []; params?: {} }
+    'api.v1.attendance.lessons.students': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.student.history': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.attendance.class_students': { paramsTuple: [ParamValue]; params: {'classId': ParamValue} }
+    'api.v1.attendance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.attachments.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.assignments.index': { paramsTuple?: []; params?: {} }
     'api.v1.assignments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.assignments.history': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1461,6 +1473,7 @@ export type ScannedRoutes = {
     'api.v1.analytics.attendance.overview': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.attendance.trends': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.attendance.chronic': { paramsTuple?: []; params?: {} }
+    'api.v1.analytics.attendance.late_chronic': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.overview': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.trends': { paramsTuple?: []; params?: {} }
     'api.v1.analytics.canteen.top_items': { paramsTuple?: []; params?: {} }
@@ -1497,8 +1510,12 @@ export type ScannedRoutes = {
     'api.v1.extra_classes.attendance.summary': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.attendance.index': { paramsTuple?: []; params?: {} }
     'api.v1.attendance.available_dates': { paramsTuple?: []; params?: {} }
-    'api.v1.attendance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.lessons.index': { paramsTuple?: []; params?: {} }
+    'api.v1.attendance.lessons.students': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.student.history': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.attendance.class_students': { paramsTuple: [ParamValue]; params: {'classId': ParamValue} }
+    'api.v1.attendance.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.attachments.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.assignments.index': { paramsTuple?: []; params?: {} }
     'api.v1.assignments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.assignments.history': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1649,6 +1666,7 @@ export type ScannedRoutes = {
     'api.v1.posts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.comments.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.extra_classes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.attendance.attachments.delete': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'attachmentId': ParamValue} }
     'api.v1.assignments.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.canteens.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.canteen_items.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1748,6 +1766,7 @@ export type ScannedRoutes = {
     'api.v1.extra_classes.attendance.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.attendance.store': { paramsTuple?: []; params?: {} }
     'api.v1.attendance.batch': { paramsTuple?: []; params?: {} }
+    'api.v1.attendance.attachments.upload': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.assignments.store': { paramsTuple?: []; params?: {} }
     'api.v1.assignments.submit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.assignments.submissions.grade': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'submissionId': ParamValue} }

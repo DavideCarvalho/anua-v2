@@ -17,7 +17,7 @@ export const justifyAbsenceInputSchema = z.object({
 
 export type JustifyAbsenceInput = z.infer<typeof justifyAbsenceInputSchema>
 
-const DESCRIPTION = `Justifica a(s) falta(s) de um aluno em uma data específica. Marca a presença como EXCUSED e grava o motivo.
+const DESCRIPTION = `Justifica a(s) falta(s) de um aluno em uma data específica. Marca a presença como JUSTIFIED e grava o motivo.
 
 Parâmetros:
 - studentId (UUID): id do aluno. Use getMyChildren primeiro pra descobrir.
@@ -25,7 +25,7 @@ Parâmetros:
 - reason: motivo. Ex: "Consulta médica", "Viagem em família", "Atestado anexado por e-mail".
 
 Comportamento:
-- Aplica a TODAS as faltas (status='ABSENT') do aluno no dia. Se o aluno teve 4 aulas e faltou em 3, justifica as 3 com o mesmo motivo. Se já estava EXCUSED, fica como estava (mantém o motivo anterior).
+- Aplica a TODAS as faltas (status='ABSENT') do aluno no dia. Se o aluno teve 4 aulas e faltou em 3, justifica as 3 com o mesmo motivo. Se já estava JUSTIFIED, fica como estava (mantém o motivo anterior).
 - Se não havia nenhuma falta no dia, retorna erro "Sem faltas pra justificar nessa data".
 - Só responsável com isPedagogical=true pode justificar. Responsável só-financeiro recebe negação.`
 

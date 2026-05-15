@@ -29,7 +29,7 @@ Parâmetros:
 
 Retorna { summary: { totalSessions, present, absent, late, excused, attendanceRate }, sessions: [...] }.
 
-attendanceRate é 0..1 (multiplique por 100 pra %). Status: PRESENT/ABSENT/LATE/EXCUSED — traduza pra "Presente/Faltou/Atrasado/Justificado" antes de exibir.
+attendanceRate é 0..1 (multiplique por 100 pra %). Status: PRESENT/ABSENT/LATE/JUSTIFIED — traduza pra "Presente/Faltou/Atrasado/Justificado" antes de exibir.
 
 Se você não tem acesso ao aluno, retorna { error: '...' }.`
 
@@ -70,7 +70,7 @@ export function createGetStudentAttendance(ctx: ToolContext) {
         present: rows.filter((r) => r.status === 'PRESENT').length,
         absent: rows.filter((r) => r.status === 'ABSENT').length,
         late: rows.filter((r) => r.status === 'LATE').length,
-        excused: rows.filter((r) => r.status === 'EXCUSED').length,
+        excused: rows.filter((r) => r.status === 'JUSTIFIED').length,
         attendanceRate: 0,
       }
       if (summary.totalSessions > 0) {

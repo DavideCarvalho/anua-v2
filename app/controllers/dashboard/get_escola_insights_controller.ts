@@ -405,7 +405,7 @@ export default class GetEscolaInsightsController {
       .where('a.date', '>=', today.minus({ days: 30 }).toSQLDate()!)
       .groupBy('sha.studentId')
       .havingRaw(
-        "(COUNT(CASE WHEN sha.status = 'PRESENT' THEN 1 END)::float / NULLIF(COUNT(*),0)) < 0.75"
+        "(COUNT(CASE WHEN sha.status IN ('PRESENT', 'LATE') THEN 1 END)::float / NULLIF(COUNT(*),0)) < 0.75"
       )
       .count('* as records')
 

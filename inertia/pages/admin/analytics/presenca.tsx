@@ -5,6 +5,7 @@ import {
   AttendanceOverviewCards,
   AttendanceTrendsChart,
   ChronicAbsenteeismTable,
+  ChronicLatenessTable,
 } from '../../../containers/admin-analytics/attendance'
 
 export default function AdminAnalyticsPresenca() {
@@ -30,6 +31,8 @@ export default function AdminAnalyticsPresenca() {
           <AttendanceTrendsChart />
           <ChronicAbsenteeismTable />
         </div>
+
+        <ChronicLatenessTable />
       </div>
     </AdminLayout>
   )

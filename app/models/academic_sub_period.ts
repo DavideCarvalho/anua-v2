@@ -77,6 +77,15 @@ export default class AcademicSubPeriod extends BaseModel {
   @column.dateTime({ columnName: 'deletedAt' })
   declare deletedAt: DateTime | null
 
+  @column({ columnName: 'isLocked' })
+  declare isLocked: boolean
+
+  @column.dateTime({ columnName: 'lockedAt' })
+  declare lockedAt: DateTime | null
+
+  @column({ columnName: 'lockedById' })
+  declare lockedById: string | null
+
   @belongsTo(() => School, { foreignKey: 'schoolId' })
   declare school: BelongsTo<typeof School>
 

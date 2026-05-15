@@ -6,6 +6,7 @@ export const FILE_MAGIC_NUMBERS = {
   'image/png': ['89 50 4E 47'],
   'image/webp': ['52 49 46 46'],
   'image/gif': ['47 49 46 38'],
+  'application/pdf': ['25 50 44 46'],
 } as const
 
 export type AllowedMimeType = keyof typeof FILE_MAGIC_NUMBERS
@@ -73,6 +74,20 @@ export const ALLOWED_IMAGE_TYPES: AllowedMimeType[] = [
 ]
 
 export const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+
+/**
+ * Anexos de justificativa/atestado — imagem + PDF.
+ * Pais mandam foto do atestado quase sempre; secretaria às vezes escaneia em PDF.
+ */
+export const ALLOWED_ATTACHMENT_TYPES: AllowedMimeType[] = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+]
+
+export const ALLOWED_ATTACHMENT_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf']
 
 /**
  * Tamanho máximo por tipo de arquivo (em bytes)

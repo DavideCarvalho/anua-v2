@@ -1,80 +1,57 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Analytics
-const GetAttendanceOverviewController = () =>
-  import('#controllers/analytics/get_attendance_overview_controller')
-const GetAttendanceTrendsController = () =>
-  import('#controllers/analytics/get_attendance_trends_controller')
-const GetChronicAbsenteeismController = () =>
-  import('#controllers/analytics/get_chronic_absenteeism_controller')
-const GetCanteenOverviewController = () =>
-  import('#controllers/analytics/get_canteen_overview_controller')
-const GetCanteenTrendsController = () =>
-  import('#controllers/analytics/get_canteen_trends_controller')
-const GetCanteenTopItemsController = () =>
-  import('#controllers/analytics/get_canteen_top_items_controller')
-const GetPaymentsOverviewController = () =>
-  import('#controllers/analytics/get_payments_overview_controller')
-const GetEnrollmentsOverviewController = () =>
-  import('#controllers/analytics/get_enrollments_overview_controller')
-const GetEnrollmentFunnelStatsController = () =>
-  import('#controllers/analytics/get_enrollment_funnel_stats_controller')
-const GetEnrollmentTrendsController = () =>
-  import('#controllers/analytics/get_enrollment_trends_controller')
-const GetEnrollmentByLevelController = () =>
-  import('#controllers/analytics/get_enrollment_by_level_controller')
-const GetIncidentsOverviewController = () =>
-  import('#controllers/analytics/get_incidents_overview_controller')
-const GetGamificationOverviewController = () =>
-  import('#controllers/analytics/get_gamification_overview_controller')
-const GetHrOverviewController = () => import('#controllers/analytics/get_hr_overview_controller')
-const GetClassPerformanceController = () =>
-  import('#controllers/analytics/get_class_performance_controller')
 
 export function registerAnalyticsApiRoutes() {
   router
     .group(() => {
       router
-        .get('/attendance/overview', [GetAttendanceOverviewController])
+        .get('/attendance/overview', [controllers.analytics.GetAttendanceOverview])
         .as('analytics.attendance.overview')
       router
-        .get('/attendance/trends', [GetAttendanceTrendsController])
+        .get('/attendance/trends', [controllers.analytics.GetAttendanceTrends])
         .as('analytics.attendance.trends')
       router
-        .get('/attendance/chronic', [GetChronicAbsenteeismController])
+        .get('/attendance/chronic', [controllers.analytics.GetChronicAbsenteeism])
         .as('analytics.attendance.chronic')
       router
-        .get('/canteen/overview', [GetCanteenOverviewController])
-        .as('analytics.canteen.overview')
-      router.get('/canteen/trends', [GetCanteenTrendsController]).as('analytics.canteen.trends')
+        .get('/attendance/late-chronic', [controllers.analytics.GetChronicLateness])
+        .as('analytics.attendance.late_chronic')
       router
-        .get('/canteen/top-items', [GetCanteenTopItemsController])
+        .get('/canteen/overview', [controllers.analytics.GetCanteenOverview])
+        .as('analytics.canteen.overview')
+      router
+        .get('/canteen/trends', [controllers.analytics.GetCanteenTrends])
+        .as('analytics.canteen.trends')
+      router
+        .get('/canteen/top-items', [controllers.analytics.GetCanteenTopItems])
         .as('analytics.canteen.top_items')
       router
-        .get('/payments/overview', [GetPaymentsOverviewController])
+        .get('/payments/overview', [controllers.analytics.GetPaymentsOverview])
         .as('analytics.payments.overview')
       router
-        .get('/enrollments/overview', [GetEnrollmentsOverviewController])
+        .get('/enrollments/overview', [controllers.analytics.GetEnrollmentsOverview])
         .as('analytics.enrollments.overview')
       router
-        .get('/enrollments/funnel', [GetEnrollmentFunnelStatsController])
+        .get('/enrollments/funnel', [controllers.analytics.GetEnrollmentFunnelStats])
         .as('analytics.enrollments.funnel')
       router
-        .get('/enrollments/trends', [GetEnrollmentTrendsController])
+        .get('/enrollments/trends', [controllers.analytics.GetEnrollmentTrends])
         .as('analytics.enrollments.trends')
       router
-        .get('/enrollments/by-level', [GetEnrollmentByLevelController])
+        .get('/enrollments/by-level', [controllers.analytics.GetEnrollmentByLevel])
         .as('analytics.enrollments.by_level')
       router
-        .get('/incidents/overview', [GetIncidentsOverviewController])
+        .get('/incidents/overview', [controllers.analytics.GetIncidentsOverview])
         .as('analytics.incidents.overview')
       router
-        .get('/gamification/overview', [GetGamificationOverviewController])
+        .get('/gamification/overview', [controllers.analytics.GetGamificationOverview])
         .as('analytics.gamification.overview')
-      router.get('/hr/overview', [GetHrOverviewController]).as('analytics.hr.overview')
       router
-        .get('/class-performance', [GetClassPerformanceController])
+        .get('/hr/overview', [controllers.analytics.GetHrOverview])
+        .as('analytics.hr.overview')
+      router
+        .get('/class-performance', [controllers.analytics.GetClassPerformance])
         .as('analytics.class_performance')
     })
     .prefix('/analytics')

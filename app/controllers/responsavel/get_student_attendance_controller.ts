@@ -75,7 +75,7 @@ export default class GetStudentAttendanceController {
       (statsMap['PRESENT'] || 0) +
       (statsMap['ABSENT'] || 0) +
       (statsMap['LATE'] || 0) +
-      (statsMap['EXCUSED'] || 0)
+      (statsMap['JUSTIFIED'] || 0)
 
     const presentCount = (statsMap['PRESENT'] || 0) + (statsMap['LATE'] || 0)
     const attendanceRate = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 0
@@ -92,7 +92,7 @@ export default class GetStudentAttendanceController {
       presentCount: statsMap['PRESENT'] || 0,
       absentCount: statsMap['ABSENT'] || 0,
       lateCount: statsMap['LATE'] || 0,
-      excusedCount: statsMap['EXCUSED'] || 0,
+      excusedCount: statsMap['JUSTIFIED'] || 0,
       attendanceRate,
     }
 

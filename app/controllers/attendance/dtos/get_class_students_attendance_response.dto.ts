@@ -32,7 +32,9 @@ export default class GetClassStudentsAttendanceResponseDto extends BaseModelDto 
     const lateCount = summary?.lateCount ?? 0
     const justifiedCount = summary?.justifiedCount ?? 0
 
-    const attendedCount = presentCount + lateCount + justifiedCount
+    // Regra do domínio: ATRASADO conta como presença (o aluno chegou);
+    // JUSTIFICADO conta como falta (justificar não tira a falta, só explica).
+    const attendedCount = presentCount + lateCount
     const attendancePercentage =
       totalClasses > 0 ? Math.round((attendedCount / totalClasses) * 100) : 0
 

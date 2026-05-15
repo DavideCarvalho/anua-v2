@@ -1,6 +1,7 @@
 export { AssignmentsTable } from './assignments-table'
 export { NewAssignmentModal } from './new-assignment-modal'
 export { AttendancesTable } from './attendances-table'
+export { LessonsTable } from './lessons-table'
 export { NewAttendanceModal } from './new-attendance-modal'
 export { GradesAccordion } from './grades-accordion'
 export { SubjectGradesTable } from './subject-grades-table'

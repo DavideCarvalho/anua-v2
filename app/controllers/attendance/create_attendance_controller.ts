@@ -8,7 +8,6 @@ import AttendanceTransformer from '#transformers/attendance_transformer'
 
 // Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
-  if (validatorStatus === 'JUSTIFIED') return 'EXCUSED'
   return validatorStatus as AttendanceStatus
 }
 

@@ -6,16 +6,16 @@ import CalendarSlot from '#models/calendar_slot'
 import StudentHasAttendance, { type AttendanceStatus } from '#models/student_has_attendance'
 import { batchCreateAttendanceValidator } from '#validators/attendance'
 import AppException from '#exceptions/app_exception'
+import AttendanceAuditService, { type AttendanceChange } from '#services/attendance_audit_service'
 
-// Map validator status to model status
 function mapStatus(validatorStatus: string): AttendanceStatus {
-  if (validatorStatus === 'JUSTIFIED') return 'EXCUSED'
   return validatorStatus as AttendanceStatus
 }
 
 export default class BatchCreateAttendanceController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser }: HttpContext) {
     const data = await request.validateUsing(batchCreateAttendanceValidator)
+    const editorId = (effectiveUser ?? auth.user)?.id ?? null
 
     const subjectIds = Array.from(
       new Set([...(data.subjectIds ?? []), ...(data.subjectId ? [data.subjectId] : [])])
@@ -36,7 +36,6 @@ export default class BatchCreateAttendanceController {
       throw AppException.badRequest('Nenhum calendário ativo encontrado para esta turma e período.')
     }
 
-    // Load all slots for this subject once
     const allSlots = await CalendarSlot.query()
       .where('calendarId', calendar.id)
       .where('isBreak', false)
@@ -64,9 +63,7 @@ export default class BatchCreateAttendanceController {
 
     const results: { attendance: Attendance; studentAttendances: StudentHasAttendance[] }[] = []
 
-    // Process each date
     for (const rawDate of data.dates) {
-      // Vine may return JS Date or string; ensure we have Luxon DateTime
       let date: DateTime
       if (rawDate instanceof DateTime) {
         date = rawDate
@@ -80,16 +77,12 @@ export default class BatchCreateAttendanceController {
       const weekday = normalizedDate.weekday
       const timeStr = normalizedDate.toFormat('HH:mm')
 
-      // Find the exact slot matching weekday and time
-      // Prefer exact start-time match to avoid boundary ambiguity
-      // Example: 08:15 can be end of previous slot and start of next slot
       const slotByStart = allSlots.find((s) => {
         if (s.classWeekDay !== weekday) return false
         const start = String(s.startTime)
         return start.startsWith(timeStr)
       })
 
-      // Fallback to end-time only when start-time is not found
       const slotByEnd = allSlots.find((s) => {
         if (s.classWeekDay !== weekday) return false
         const end = String(s.endTime)
@@ -97,17 +90,10 @@ export default class BatchCreateAttendanceController {
       })
 
       const slot = slotByStart ?? slotByEnd
+      if (!slot) continue
 
-      if (!slot) {
-        // Skip this date if no slot found (shouldn't happen with valid available-dates)
-        continue
-      }
-
-      // Check if attendance already exists for this slot and date
       const dateSql = normalizedDate.toSQL({ includeOffset: false })
-      if (!dateSql) {
-        continue
-      }
+      if (!dateSql) continue
 
       const existingAttendance = await Attendance.query()
         .where('calendarSlotId', slot.id)
@@ -115,30 +101,95 @@ export default class BatchCreateAttendanceController {
         .first()
 
       let attendance: Attendance
+      const existingByStudent = new Map<string, StudentHasAttendance>()
 
       if (existingAttendance) {
-        // Update existing attendance - remove old student records and create new ones
-        await StudentHasAttendance.query().where('attendanceId', existingAttendance.id).delete()
-
         attendance = existingAttendance
+        attendance.lastEditedById = editorId
+        attendance.lastEditedAt = DateTime.utc()
+        await attendance.save()
+
+        const existingShas = await StudentHasAttendance.query().where('attendanceId', attendance.id)
+        for (const sha of existingShas) {
+          existingByStudent.set(sha.studentId, sha)
+        }
       } else {
-        // Create new attendance
         attendance = await Attendance.create({
           calendarSlotId: slot.id,
           date: normalizedDate,
+          createdById: editorId,
         })
       }
 
-      const studentAttendanceRecords = data.attendances.map((item) => ({
-        studentId: item.studentId,
-        attendanceId: attendance.id,
-        status: mapStatus(item.status),
-        justification: item.justification || null,
-      }))
+      const payloadStudentIds = new Set(data.attendances.map((a) => a.studentId))
 
-      const studentAttendances = await StudentHasAttendance.createMany(studentAttendanceRecords)
+      // Drop students that were on the previous roll but aren't in the new payload.
+      // Rare in normal flow; happens if a student left the class mid-period.
+      const removedShas = [...existingByStudent.values()].filter(
+        (sha) => !payloadStudentIds.has(sha.studentId)
+      )
+      if (removedShas.length > 0) {
+        await StudentHasAttendance.query()
+          .whereIn(
+            'id',
+            removedShas.map((s) => s.id)
+          )
+          .delete()
+      }
 
-      results.push({ attendance, studentAttendances })
+      const changes: AttendanceChange[] = []
+      const updates: StudentHasAttendance[] = []
+      const creates: Partial<StudentHasAttendance>[] = []
+
+      for (const item of data.attendances) {
+        const newStatus = mapStatus(item.status)
+        const newJustification = item.justification || null
+        const existing = existingByStudent.get(item.studentId)
+
+        if (existing) {
+          const changed =
+            existing.status !== newStatus || existing.justification !== newJustification
+
+          if (changed) {
+            changes.push({
+              studentHasAttendanceId: existing.id,
+              previousStatus: existing.status,
+              previousJustification: existing.justification,
+              newStatus,
+              newJustification,
+            })
+            existing.status = newStatus
+            existing.justification = newJustification
+            updates.push(existing)
+          }
+        } else {
+          creates.push({
+            studentId: item.studentId,
+            attendanceId: attendance.id,
+            status: newStatus,
+            justification: newJustification,
+          })
+        }
+      }
+
+      for (const sha of updates) {
+        await sha.save()
+      }
+
+      let createdShas: StudentHasAttendance[] = []
+      if (creates.length > 0) {
+        createdShas = await StudentHasAttendance.createMany(creates)
+      }
+
+      if (changes.length > 0) {
+        await AttendanceAuditService.recordEdits({ changes, editedById: editorId })
+      }
+
+      const allShas = [...existingByStudent.values(), ...createdShas].filter((sha) =>
+        payloadStudentIds.has(sha.studentId)
+      )
+
+      results.push({ attendance, studentAttendances: allShas })
     }
 
     return response.created({

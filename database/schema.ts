@@ -112,7 +112,7 @@ export class AcademicPeriodWeekendClassSchema extends BaseModel {
 }
 
 export class AcademicSubPeriodSchema extends BaseModel {
-  static $columns = ['academicPeriodId', 'createdAt', 'deletedAt', 'endDate', 'hasRecovery', 'id', 'minimumGrade', 'name', 'order', 'recoveryEndDate', 'recoveryStartDate', 'schoolId', 'slug', 'startDate', 'updatedAt', 'weight'] as const
+  static $columns = ['academicPeriodId', 'createdAt', 'deletedAt', 'endDate', 'hasRecovery', 'id', 'isLocked', 'lockedAt', 'lockedById', 'minimumGrade', 'name', 'order', 'recoveryEndDate', 'recoveryStartDate', 'schoolId', 'slug', 'startDate', 'updatedAt', 'weight'] as const
   $columns = AcademicSubPeriodSchema.$columns
   @column()
   declare academicPeriodId: string
@@ -126,6 +126,12 @@ export class AcademicSubPeriodSchema extends BaseModel {
   declare hasRecovery: boolean
   @column({ isPrimary: true })
   declare id: string
+  @column()
+  declare isLocked: boolean
+  @column.dateTime()
+  declare lockedAt: DateTime | null
+  @column()
+  declare lockedById: string | null
   @column()
   declare minimumGrade: number | null
   @column()
@@ -265,20 +271,70 @@ export class AssignmentSchema extends BaseModel {
 }
 
 export class AttendanceSchema extends BaseModel {
-  static $columns = ['calendarSlotId', 'createdAt', 'date', 'id', 'note', 'updatedAt'] as const
+  static $columns = ['calendarSlotId', 'createdAt', 'createdById', 'date', 'id', 'lastEditedAt', 'lastEditedById', 'note', 'updatedAt'] as const
   $columns = AttendanceSchema.$columns
   @column()
   declare calendarSlotId: string
   @column.dateTime()
   declare createdAt: DateTime
+  @column()
+  declare createdById: string | null
   @column.dateTime()
   declare date: DateTime
   @column({ isPrimary: true })
   declare id: string
+  @column.dateTime()
+  declare lastEditedAt: DateTime | null
+  @column()
+  declare lastEditedById: string | null
   @column()
   declare note: string | null
   @column.dateTime()
   declare updatedAt: DateTime
+}
+
+export class AttendanceAttachmentSchema extends BaseModel {
+  static $columns = ['createdAt', 'file', 'fileName', 'fileSizeBytes', 'id', 'mimeType', 'studentHasAttendanceId', 'uploadedById'] as const
+  $columns = AttendanceAttachmentSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare file: string | null
+  @column()
+  declare fileName: string
+  @column()
+  declare fileSizeBytes: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare mimeType: string
+  @column()
+  declare studentHasAttendanceId: string
+  @column()
+  declare uploadedById: string | null
+}
+
+export class AttendanceEditSchema extends BaseModel {
+  static $columns = ['editedAt', 'editedById', 'id', 'newJustification', 'newStatus', 'previousJustification', 'previousStatus', 'reason', 'studentHasAttendanceId'] as const
+  $columns = AttendanceEditSchema.$columns
+  @column.dateTime()
+  declare editedAt: DateTime
+  @column()
+  declare editedById: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare newJustification: string | null
+  @column()
+  declare newStatus: any
+  @column()
+  declare previousJustification: string | null
+  @column()
+  declare previousStatus: any | null
+  @column()
+  declare reason: string | null
+  @column()
+  declare studentHasAttendanceId: string
 }
 
 export class AuditLogSchema extends BaseModel {
@@ -3021,7 +3077,7 @@ export class StudentHasAssignmentSchema extends BaseModel {
 }
 
 export class StudentHasAttendanceSchema extends BaseModel {
-  static $columns = ['attendanceId', 'createdAt', 'id', 'justification', 'status', 'studentId', 'updatedAt'] as const
+  static $columns = ['attendanceId', 'createdAt', 'id', 'justification', 'lastEditedAt', 'lastEditedById', 'status', 'studentId', 'updatedAt'] as const
   $columns = StudentHasAttendanceSchema.$columns
   @column()
   declare attendanceId: string
@@ -3031,6 +3087,10 @@ export class StudentHasAttendanceSchema extends BaseModel {
   declare id: string
   @column()
   declare justification: string | null
+  @column.dateTime()
+  declare lastEditedAt: DateTime | null
+  @column()
+  declare lastEditedById: string | null
   @column()
   declare status: any
   @column()

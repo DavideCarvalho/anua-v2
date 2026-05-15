@@ -18,6 +18,8 @@ export default class AcademicSubPeriodTransformer extends BaseTransformer<Academ
         'recoveryEndDate',
         'academicPeriodId',
         'schoolId',
+        'isLocked',
+        'lockedAt',
         'createdAt',
         'updatedAt',
       ]),

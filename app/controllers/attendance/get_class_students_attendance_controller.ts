@@ -7,6 +7,9 @@ import GetClassStudentsAttendanceResponseDto from './dtos/get_class_students_att
 import AppException from '#exceptions/app_exception'
 import { getClassStudentsAttendanceValidator } from '#validators/attendance'
 
+type SortBy = 'name' | 'present' | 'absent' | 'late' | 'justified' | 'percentage'
+type SortDir = 'asc' | 'desc'
+
 export default class GetClassStudentsAttendanceController {
   async handle({ params, request, response }: HttpContext) {
     const classId = params.classId
@@ -15,7 +18,6 @@ export default class GetClassStudentsAttendanceController {
     const academicPeriodId = filters.academicPeriodId
     const subPeriodId = filters.subPeriodId
 
-    // Resolve sub-period date range for filtering
     let dateStart: string | undefined
     let dateEnd: string | undefined
     if (subPeriodId) {
@@ -33,8 +35,13 @@ export default class GetClassStudentsAttendanceController {
 
     const page = filters.page ?? 1
     const limit = filters.limit ?? 20
+    const sortBy: SortBy = filters.sortBy ?? 'name'
+    const sortDir: SortDir = filters.sortDir ?? 'asc'
 
-    // Get students using validated context (course + period)
+    // Como o sort pode ser por contagens agregadas, carregamos todos os alunos
+    // da turma e ordenamos depois de juntar com as estatísticas. Turmas escolares
+    // raramente passam de ~40 alunos; o custo é aceitável e evita a complicação
+    // de fazer o sort em SQL com joins agregados.
     const studentLevels = await StudentHasLevel.query()
       .where('classId', classId)
       .whereHas('levelAssignedToCourseAcademicPeriod', (laQuery) => {
@@ -43,50 +50,53 @@ export default class GetClassStudentsAttendanceController {
         })
       })
       .preload('student', (sq) => sq.preload('user'))
-      .orderBy('createdAt', 'asc')
-      .paginate(page, limit)
 
-    // Get student IDs for attendance query
-    const studentIds = studentLevels.all().map((sl) => sl.studentId)
+    const studentIds = studentLevels.map((sl) => sl.studentId)
 
-    // Get attendance summary per student
-    const attendanceSummary =
+    // Os contadores precisam ser DA turma, não do aluno no sistema todo.
+    // Aluno que troca de turma mid-período continuaria contando presenças
+    // antigas se não filtrasse. Por isso o join via CalendarSlot → Calendar.
+    const summaryQuery =
       studentIds.length > 0
-        ? dateStart && dateEnd
-          ? await db
-              .from('StudentHasAttendance')
-              .join('Attendance', 'StudentHasAttendance.attendanceId', '=', 'Attendance.id')
-              .select('studentId')
-              .select(db.raw('COUNT(*) as total_classes'))
-              .select(
-                db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count")
+        ? db
+            .from('StudentHasAttendance')
+            .join('Attendance', 'StudentHasAttendance.attendanceId', '=', 'Attendance.id')
+            .join('CalendarSlot', 'Attendance.calendarSlotId', '=', 'CalendarSlot.id')
+            .join('Calendar', 'CalendarSlot.calendarId', '=', 'Calendar.id')
+            .select('StudentHasAttendance.studentId as studentId')
+            .select(db.raw('COUNT(*) as total_classes'))
+            .select(
+              db.raw(
+                "SUM(CASE WHEN \"StudentHasAttendance\".status = 'PRESENT' THEN 1 ELSE 0 END) as present_count"
               )
-              .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
-              .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
-              .select(
-                db.raw("SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count")
+            )
+            .select(
+              db.raw(
+                "SUM(CASE WHEN \"StudentHasAttendance\".status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"
               )
-              .whereIn('studentId', studentIds)
-              .where('Attendance.date', '>=', dateStart)
-              .where('Attendance.date', '<=', dateEnd)
-              .groupBy('studentId')
-          : await db
-              .from('StudentHasAttendance')
-              .select('studentId')
-              .select(db.raw('COUNT(*) as total_classes'))
-              .select(
-                db.raw("SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present_count")
+            )
+            .select(
+              db.raw(
+                "SUM(CASE WHEN \"StudentHasAttendance\".status = 'LATE' THEN 1 ELSE 0 END) as late_count"
               )
-              .select(db.raw("SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count"))
-              .select(db.raw("SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late_count"))
-              .select(
-                db.raw("SUM(CASE WHEN status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count")
+            )
+            .select(
+              db.raw(
+                "SUM(CASE WHEN \"StudentHasAttendance\".status = 'JUSTIFIED' THEN 1 ELSE 0 END) as justified_count"
               )
-              .whereIn('studentId', studentIds)
-              .groupBy('studentId')
-        : []
+            )
+            .whereIn('StudentHasAttendance.studentId', studentIds)
+            .where('Calendar.classId', classId)
+            .where('Calendar.academicPeriodId', academicPeriodId)
+            .groupBy('StudentHasAttendance.studentId')
+        : null
 
-    // Create a map for quick lookup
+    if (summaryQuery && dateStart && dateEnd) {
+      summaryQuery.where('Attendance.date', '>=', dateStart).where('Attendance.date', '<=', dateEnd)
+    }
+
+    const attendanceSummary = summaryQuery ? await summaryQuery : []
+
     interface AttendanceSummaryRow {
       studentId: string
       total_classes: string | number
@@ -101,31 +111,61 @@ export default class GetClassStudentsAttendanceController {
       summaryMap.set(row.studentId, row)
     }
 
-    // Sort by name and build DTOs
-    const sortedStudentLevels = studentLevels.all().sort((a, b) => {
-      const nameA = a.student?.user?.name || ''
-      const nameB = b.student?.user?.name || ''
-      return nameA.localeCompare(nameB)
-    })
-
-    const data = sortedStudentLevels.map((sl) => {
+    const enriched = studentLevels.map((sl) => {
       const summary = summaryMap.get(sl.studentId)
-      return new GetClassStudentsAttendanceResponseDto(sl, {
+      const dto = new GetClassStudentsAttendanceResponseDto(sl, {
         totalClasses: summary ? Number(summary.total_classes) : 0,
         presentCount: summary ? Number(summary.present_count) : 0,
         absentCount: summary ? Number(summary.absent_count) : 0,
         lateCount: summary ? Number(summary.late_count) : 0,
         justifiedCount: summary ? Number(summary.justified_count) : 0,
       })
+      return dto
     })
+
+    const dir = sortDir === 'desc' ? -1 : 1
+    enriched.sort((a, b) => {
+      let cmp = 0
+      switch (sortBy) {
+        case 'name':
+          cmp = a.student.name.localeCompare(b.student.name, 'pt-BR', { sensitivity: 'base' })
+          break
+        case 'present':
+          cmp = a.presentCount - b.presentCount
+          break
+        case 'absent':
+          cmp = a.absentCount - b.absentCount
+          break
+        case 'late':
+          cmp = a.lateCount - b.lateCount
+          break
+        case 'justified':
+          cmp = a.justifiedCount - b.justifiedCount
+          break
+        case 'percentage':
+          cmp = a.attendancePercentage - b.attendancePercentage
+          break
+      }
+      // Tie-breaker estável: nome em asc. Mantém a tabela previsível quando há empate.
+      if (cmp === 0 && sortBy !== 'name') {
+        cmp = a.student.name.localeCompare(b.student.name, 'pt-BR', { sensitivity: 'base' })
+      }
+      return cmp * dir
+    })
+
+    const total = enriched.length
+    const lastPage = Math.max(1, Math.ceil(total / limit))
+    const safePage = Math.min(page, lastPage)
+    const start = (safePage - 1) * limit
+    const data = enriched.slice(start, start + limit)
 
     return response.ok({
       data,
       meta: {
-        total: studentLevels.total,
-        perPage: studentLevels.perPage,
-        currentPage: studentLevels.currentPage,
-        lastPage: studentLevels.lastPage,
+        total,
+        perPage: limit,
+        currentPage: safePage,
+        lastPage,
       },
     })
   }

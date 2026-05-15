@@ -1,11 +1,14 @@
 import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
-import { BaseModel, column, belongsTo, beforeCreate } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo, hasMany, beforeCreate } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Student from './student.js'
 import Attendance from './attendance.js'
+import User from './user.js'
+import AttendanceEdit from './attendance_edit.js'
+import AttendanceAttachment from './attendance_attachment.js'
 
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED'
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'JUSTIFIED'
 
 export default class StudentHasAttendance extends BaseModel {
   static table = 'StudentHasAttendance'
@@ -32,6 +35,12 @@ export default class StudentHasAttendance extends BaseModel {
   @column()
   declare justification: string | null
 
+  @column()
+  declare lastEditedById: string | null
+
+  @column.dateTime()
+  declare lastEditedAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -43,4 +52,13 @@ export default class StudentHasAttendance extends BaseModel {
 
   @belongsTo(() => Attendance, { foreignKey: 'attendanceId' })
   declare attendance: BelongsTo<typeof Attendance>
+
+  @belongsTo(() => User, { foreignKey: 'lastEditedById' })
+  declare lastEditedBy: BelongsTo<typeof User>
+
+  @hasMany(() => AttendanceEdit, { foreignKey: 'studentHasAttendanceId' })
+  declare edits: HasMany<typeof AttendanceEdit>
+
+  @hasMany(() => AttendanceAttachment, { foreignKey: 'studentHasAttendanceId' })
+  declare attachments: HasMany<typeof AttendanceAttachment>
 }
