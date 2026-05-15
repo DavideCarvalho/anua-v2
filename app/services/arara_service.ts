@@ -58,7 +58,7 @@ export class AraraService {
     }
   }
 
-  private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  private async fetchOrThrow(path: string, options: RequestInit = {}): Promise<Response> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
       headers: { ...this.getHeaders(), ...options.headers },
@@ -82,7 +82,20 @@ export class AraraService {
       throw new AraraApiError(response.status, errors)
     }
 
+    return response
+  }
+
+  private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const response = await this.fetchOrThrow(path, options)
     return (await response.json()) as T
+  }
+
+  private async requestVoid(path: string, options: RequestInit = {}): Promise<void> {
+    // Pra DELETE e similares — Arara devolve 204 No Content; chamar
+    // `response.json()` num body vazio explode com "Unexpected end of JSON input".
+    const response = await this.fetchOrThrow(path, options)
+    // Drena o body sem parsear (evita warning de connection leak).
+    await response.text().catch(() => '')
   }
 
   async sendTemplate(params: SendMessageParams): Promise<MessageResponse> {
@@ -139,7 +152,7 @@ export class AraraService {
    * silenciosamente em vez do 204 esperado (bug observado na API).
    */
   async deleteTemplate(id: string): Promise<void> {
-    await this.request(`/templates/${encodeURIComponent(id)}`, { method: 'DELETE' })
+    await this.requestVoid(`/templates/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
   verifyWebhook(body: string, signature: string): boolean {
