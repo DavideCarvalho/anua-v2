@@ -2,6 +2,16 @@ import { defineConfig } from '@adonisjs/core/app'
 import { indexEntities } from '@adonisjs/core'
 import { indexPages } from '@adonisjs/inertia'
 import { generateRegistry } from '@tuyau/core/hooks'
+import env from '#start/env'
+
+// Tira o server-stats inteiro em prod. Em prod:
+//   - O dashboard é dev-only (`dashboard:` + `authorize:` em config/server_stats.ts)
+//   - O log-stream provider polia `logs/adonisjs.log` que nunca existe (logger
+//     escreve direto pro stdout via destination: 1 em config/logger.ts) e
+//     spammava "ENOENT" no stderr a cada 2s, afogando os logs reais do Guara.
+// Carregar zero providers de server-stats em prod resolve isso sem patch.
+const isProduction = env.get('NODE_ENV') === 'production'
+const webEnv: ('web' | 'console' | 'test' | 'repl')[] = ['web']
 
 export default defineConfig({
   /*
@@ -71,14 +81,18 @@ export default defineConfig({
     () => import('@jrmc/adonis-attachment/attachment_provider'),
     () => import('@adogrove/adonis-auditing/auditing_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),
-    {
-      file: () => import('adonisjs-server-stats/provider'),
-      environment: ['web'],
-    },
-    {
-      file: () => import('adonisjs-server-stats/log-stream/provider'),
-      environment: ['web'],
-    },
+    ...(isProduction
+      ? []
+      : [
+          {
+            file: () => import('adonisjs-server-stats/provider'),
+            environment: webEnv,
+          },
+          {
+            file: () => import('adonisjs-server-stats/log-stream/provider'),
+            environment: webEnv,
+          },
+        ]),
     () => import('@adonisjs/otel/otel_provider'),
     () => import('@adonisjs/redis/redis_provider'),
     () => import('@adonisjs/transmit/transmit_provider'),
