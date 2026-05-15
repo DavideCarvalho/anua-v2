@@ -14,6 +14,9 @@ ARG DB_USER=postgres
 ARG DB_PASSWORD=postgres
 ARG DB_DATABASE=anua_v2
 ARG TZ=UTC
+ARG VITE_API_URL=/
+ARG VITE_PUBLIC_POSTHOG_KEY=
+ARG VITE_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 
 ENV NODE_ENV=${NODE_ENV} \
     PORT=${PORT} \
@@ -26,20 +29,23 @@ ENV NODE_ENV=${NODE_ENV} \
     DB_USER=${DB_USER} \
     DB_PASSWORD=${DB_PASSWORD} \
     DB_DATABASE=${DB_DATABASE} \
-    TZ=${TZ}
+    TZ=${TZ} \
+    VITE_API_URL=${VITE_API_URL} \
+    VITE_PUBLIC_POSTHOG_KEY=${VITE_PUBLIC_POSTHOG_KEY} \
+    VITE_PUBLIC_POSTHOG_HOST=${VITE_PUBLIC_POSTHOG_HOST}
 
 WORKDIR /app
 
-# Install pnpm — versão pinada igual ao Dockerfile principal. Pinar é
-# necessário porque major bumps do pnpm mudam o formato do lockfile
-# (ex: packageExtensionsChecksum mudou de 10→11) e quebram
-# `--frozen-lockfile` silenciosamente.
+# Install pnpm — versão alinhada com o `packageManager` em package.json e com
+# o que regenerou o lockfile. Pinar é necessário porque major bumps do pnpm
+# mudam o formato do lockfile (ex: packageExtensionsChecksum mudou de 10→11)
+# e quebram `--frozen-lockfile` silenciosamente.
 RUN npm i -g pnpm@11.1.2
 
 # Copy package files. pnpm-workspace.yaml é necessário porque tem
-# `patchedDependencies` (config dos patches). O diretório `patches/`
-# precisa estar presente ANTES do install porque o lockfile guarda o
-# hash do conteúdo do patch — pnpm@11 rejeita com
+# `patchedDependencies` (config do patch do Lucid case-sensitive). O diretório
+# `patches/` precisa estar presente ANTES do install porque o lockfile guarda
+# o hash do conteúdo do patch — pnpm@11 rejeita com
 # ERR_PNPM_LOCKFILE_CONFIG_MISMATCH se a config ou o arquivo do patch falta.
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
 COPY patches ./patches
@@ -53,9 +59,7 @@ COPY . .
 # Build the application
 RUN node ace build
 
-# Prune dev dependencies from node_modules after build (mesmo pattern do
-# Dockerfile principal — evita um segundo `pnpm install --prod` na stage
-# de produção, que precisaria dos mesmos arquivos copiados de novo)
+# Prune dev dependencies from node_modules after build
 RUN pnpm prune --prod
 
 # Production stage
@@ -68,12 +72,13 @@ ENV TZ=UTC
 
 WORKDIR /app
 
-# Copy built application and pruned node_modules from builder
+# Copy built application and production node_modules from builder
 COPY --from=builder /app/build ./
 COPY --from=builder /app/node_modules ./node_modules
 
-# Run the queue worker. Sem --queue ele só escuta 'default' — temos 4 filas
-# (default, notifications, gamification, payments) e job de qualquer outra
-# fila fica enfileirado pra sempre. Mantém a lista alinhada com os `queue:`
-# declarados em app/jobs/**.
+EXPOSE 3333
+
+# Sem --queue ele só escuta 'default' — temos 4 filas (default, notifications,
+# gamification, payments) e job de qualquer outra fila ficaria enfileirado pra
+# sempre. Mantém a lista alinhada com os `queue:` declarados em app/jobs/**.
 CMD ["node", "ace", "queue:work", "--queue=default,notifications,gamification,payments"]
