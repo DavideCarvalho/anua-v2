@@ -6,7 +6,12 @@ import logger from '@adonisjs/core/services/logger'
 export default class WhatsAppWebhookController {
   async handle({ request, response }: HttpContext) {
     const expectedToken = env.get('ARARA_WEBHOOK_TOKEN')
-    const receivedToken = request.input('secret', '')
+    // Arara manda o secret como query param (?secret=...), conforme painel:
+    // "Se informada, esta chave será enviada como parâmetro ?secret=... na URL".
+    // `request.input()` em Adonis 7 lê só do body em POST, então olhamos a qs
+    // explicitamente. Mantém fallback no body pro nosso wa:webhook-test que
+    // injeta no body por conveniência.
+    const receivedToken = request.qs().secret ?? request.input('secret', '')
 
     if (expectedToken && receivedToken !== expectedToken) {
       logger.warn({ receivedToken }, 'Invalid webhook token')

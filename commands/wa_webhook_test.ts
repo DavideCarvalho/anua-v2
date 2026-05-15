@@ -130,8 +130,11 @@ export default class WaWebhookTest extends BaseCommand {
             : { raw: this.body }
 
     const secret = this.secret ?? env.get('ARARA_WEBHOOK_TOKEN') ?? ''
-    const payload = { event: this.event, data, secret }
-    const webhookUrl = `${this.url.replace(/\/$/, '')}/api/v1/whatsapp/webhook`
+    const payload = { event: this.event, data }
+    // Arara manda o secret como query param (?secret=...), não no body.
+    // Replicamos o mesmo padrão pra que o teste valide o controller direito.
+    const baseUrl = `${this.url.replace(/\/$/, '')}/api/v1/whatsapp/webhook`
+    const webhookUrl = secret ? `${baseUrl}?secret=${encodeURIComponent(secret)}` : baseUrl
 
     this.logger.info(`Destinatário (origem da msg): ${resolvedUserLabel}`)
     this.logger.info(`From:    ${from}`)
