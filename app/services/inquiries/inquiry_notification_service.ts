@@ -1,6 +1,7 @@
 import mail from '@adonisjs/mail/services/main'
 import Notification from '#models/notification'
 import type ParentInquiry from '#models/parent_inquiry'
+import Student from '#models/student'
 import User from '#models/user'
 import InquiryCreatedMail from '#mails/inquiry_created_mail'
 import InquiryMessageMail from '#mails/inquiry_message_mail'
@@ -80,6 +81,16 @@ export async function notifyInquiryMessage(params: NotifyInquiryMessageParams) {
 
   const actionUrl = '/responsavel/chat'
 
+  // Carrega o nome do aluno uma única vez pra anexar em todos os
+  // notification.data — o template do WhatsApp `inquiry_message` usa
+  // {{1}} = studentName, e o job que dispara (send_whatsapp_notification)
+  // só lê de notification.data, sem fazer lookup adicional.
+  const student = await Student.query()
+    .where('id', inquiry.studentId)
+    .preload('user', (q) => q.select(['id', 'name']))
+    .first()
+  const studentName = student?.user?.name ?? 'aluno(a)'
+
   await Promise.all(
     users.map(async (user) => {
       const notification = await Notification.create({
@@ -91,6 +102,7 @@ export async function notifyInquiryMessage(params: NotifyInquiryMessageParams) {
           kind: 'inquiry_message',
           inquiryId: inquiry.id,
           studentId: inquiry.studentId,
+          studentName,
           authorId: messageAuthorId,
         },
         isRead: false,
