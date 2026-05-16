@@ -33,7 +33,46 @@ REGRAS CRÍTICAS:
 9. Quando exibir uma DataTable a partir de dados crus do queryDatabase, SEMPRE chame formatRows ANTES de renderResult, passando hints (moneyColumns, enumColumns, columnLabels). A tabela final deve ter rótulos em PT-BR ("Status" não "status"), valores em R$ ("R$ 1.500,00" não 150000), e enums traduzidos ("Vencido" não "OVERDUE"). Use o output de formatRows como rows em renderResult, e passe o columnLabels retornado também.
 `.trim()
 
+const SCREEN_LABELS: Record<string, string> = {
+  escola_dashboard: 'dashboard da escola',
+}
+
+const FILTER_LABELS: Record<string, string> = {
+  academicPeriodId: 'período letivo',
+  subPeriodId: 'etapa/sub-período',
+  courseId: 'curso',
+  levelId: 'nível',
+  classId: 'turma',
+}
+
+function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
+  const screenLabel = SCREEN_LABELS[screen.id] ?? screen.id
+  const filterEntries = Object.entries(screen.filters ?? {}).filter(
+    ([, value]) => typeof value === 'string' && value.length > 0
+  )
+
+  if (filterEntries.length === 0) {
+    return [
+      '',
+      'Tela atual: o usuário está olhando o ' + screenLabel + ' sem filtros aplicados.',
+      'Quando ele perguntar "a escola" ou usar termos genéricos, assuma o escopo de toda a escola.',
+    ].join('\n')
+  }
+
+  const filterLines = filterEntries
+    .map(([key, value]) => `${FILTER_LABELS[key] ?? key}=${value}`)
+    .join(', ')
+
+  return [
+    '',
+    `Tela atual: o usuário está olhando o ${screenLabel} com os seguintes filtros aplicados agora: ${filterLines}.`,
+    'Use esses filtros como contexto implícito — quando ele perguntar "a turma", "esse período", "esse curso", etc., assuma os valores acima.',
+    'Ao chamar tools que aceitam esses parâmetros, passe os ids correspondentes salvo se ele pedir explicitamente outra coisa.',
+  ].join('\n')
+}
+
 function gestorPrompt(ctx: SystemPromptContext): string {
+  const screenBlock = ctx.scope.screen ? renderScreenContext(ctx.scope.screen) : ''
   return `Você é um assistente de gestão escolar trabalhando na escola "${ctx.school.name}" (id: ${ctx.school.id}).
 Usuário atual: ${ctx.user.name} (id: ${ctx.user.id}). Data atual: ${ctx.currentDate}.
 Sua função é analisar dados da escola, gerar insights acionáveis e sugerir ações concretas para o gestor.
@@ -51,7 +90,7 @@ Tools disponíveis pra essa persona:
 Estratégia recomendada:
 - Pergunta simples sobre stats? → use getSchoolStats / getStudentAlerts.
 - Pergunta envolvendo outras tabelas (turmas, professores, pagamentos)? → getSchema → queryDatabase → renderResult.
-- Resposta final: sempre que tiver dados estruturados, chame renderResult com o componente certo.
+- Resposta final: sempre que tiver dados estruturados, chame renderResult com o componente certo.${screenBlock}
 `
 }
 
