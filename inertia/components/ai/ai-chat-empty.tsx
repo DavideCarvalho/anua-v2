@@ -122,11 +122,26 @@ type AiChatEmptyProps = {
   onPick: (prompt: string) => void
   userName?: string
   persona?: ChatPersonaRole
+  // Quando presente, substitui os SUGGESTIONS_BY_PERSONA defaults pra
+  // refletir contexto da tela (ex: filtros ativos no dashboard). Cada
+  // string vira um botão com o ícone Sparkles padrão.
+  suggestions?: string[]
 }
 
-export function AiChatEmpty({ onPick, userName, persona = 'gestor' }: AiChatEmptyProps) {
-  const SUGGESTIONS = SUGGESTIONS_BY_PERSONA[persona]
+export function AiChatEmpty({
+  onPick,
+  userName,
+  persona = 'gestor',
+  suggestions,
+}: AiChatEmptyProps) {
   const subtitle = SUBTITLE_BY_PERSONA[persona]
+  const items: Suggestion[] = suggestions
+    ? suggestions.map((prompt) => ({
+        icon: Sparkles,
+        label: prompt.length > 32 ? prompt.slice(0, 31) + '…' : prompt,
+        prompt,
+      }))
+    : SUGGESTIONS_BY_PERSONA[persona]
   return (
     <div className="flex h-full min-h-0 flex-col items-center justify-center px-6 py-8">
       <div className="mb-8 text-center">
@@ -136,9 +151,9 @@ export function AiChatEmpty({ onPick, userName, persona = 'gestor' }: AiChatEmpt
         <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <div className="grid w-full max-w-2xl grid-cols-1 gap-2 sm:grid-cols-2">
-        {SUGGESTIONS.map(({ icon: Icon, label, prompt }) => (
+        {items.map(({ icon: Icon, label, prompt }) => (
           <button
-            key={label}
+            key={label + prompt}
             type="button"
             onClick={() => onPick(prompt)}
             className={cn(

@@ -146,6 +146,17 @@ type AiChatPaneProps = {
   // side. The parent uses this to flip from `/escola/ia` to
   // `/escola/ia/conversa/:id` only after the thread actually exists.
   onPersisted?: (threadId: string) => void
+  // Quando true, não renderiza o ChatHeader interno — usado quando o
+  // container parent (ex: Sheet) provê seu próprio header.
+  hideHeader?: boolean
+  // Hint contextual sobre a tela atual; propagado no body de cada
+  // sendMessage. Backend repassa pro system prompt do persona.
+  screen?: { id: string; filters?: Record<string, string> }
+  // Origem da thread. 'sheet' marca threads do assistente contextual pra
+  // ficarem fora da listagem do /escola/ia. Default 'page'.
+  surface?: 'page' | 'sheet'
+  // Sobrescreve os prompts sugeridos do empty state.
+  suggestions?: string[]
 }
 
 export function AiChatPane({
@@ -154,6 +165,10 @@ export function AiChatPane({
   isNewThread,
   userName,
   onPersisted,
+  hideHeader = false,
+  screen,
+  surface,
+  suggestions,
 }: AiChatPaneProps) {
   const { data: threadDetail, isLoading } = useQuery({
     ...api.api.v1.ai.threads.show.queryOptions({ params: { id: threadId } }),
@@ -169,7 +184,7 @@ export function AiChatPane({
   if (!isNewThread && isLoading && !hasRenderedRef.current) {
     return (
       <div className="flex h-full min-h-0 flex-col bg-background">
-        <ChatHeader title={null} />
+        {!hideHeader && <ChatHeader title={null} />}
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
@@ -192,6 +207,10 @@ export function AiChatPane({
       resume={!isNewThread}
       isNewThread={isNewThread}
       onPersisted={onPersisted}
+      hideHeader={hideHeader}
+      screen={screen}
+      surface={surface}
+      suggestions={suggestions}
     />
   )
 }
@@ -205,6 +224,10 @@ type ActiveChatProps = {
   resume: boolean
   isNewThread: boolean
   onPersisted?: (threadId: string) => void
+  hideHeader: boolean
+  screen?: { id: string; filters?: Record<string, string> }
+  surface?: 'page' | 'sheet'
+  suggestions?: string[]
 }
 
 function ActiveChat({
@@ -216,6 +239,10 @@ function ActiveChat({
   resume,
   isNewThread,
   onPersisted,
+  hideHeader,
+  screen,
+  surface,
+  suggestions,
 }: ActiveChatProps) {
   const queryClient = useQueryClient()
 
@@ -223,14 +250,14 @@ function ActiveChat({
     () =>
       new DefaultChatTransport({
         api: '/api/v1/ai/chat',
-        body: { threadId, persona },
+        body: { threadId, persona, screen, surface },
         credentials: 'include',
         prepareReconnectToStreamRequest: ({ id }) => ({
           api: `/api/v1/ai/chat/${id}/stream`,
           credentials: 'include',
         }),
       }),
-    [threadId, persona]
+    [threadId, persona, screen, surface]
   )
 
   const cancelMutation = useMutation(api.api.v1.ai.chat.cancel.mutationOptions())
@@ -286,7 +313,7 @@ function ActiveChat({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
-      <ChatHeader title={headerTitle} />
+      {!hideHeader && <ChatHeader title={headerTitle} />}
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {showEmpty ? (
@@ -296,6 +323,7 @@ function ActiveChat({
             }}
             userName={userName}
             persona={persona}
+            suggestions={suggestions}
           />
         ) : (
           <div className="mx-auto max-w-3xl space-y-5 px-5 py-6">
