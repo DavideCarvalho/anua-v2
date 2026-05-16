@@ -35,6 +35,10 @@ export type ChatRequest = {
   userMessage: UIMessage
   scope: ChatScope
   abortSignal?: AbortSignal
+  // Origem da thread: 'page' (chat fullscreen /escola/ia) ou 'sheet'
+  // (assistente contextual aberto a partir de outras telas). Default
+  // 'page' mantém comportamento histórico.
+  surface?: 'page' | 'sheet'
 }
 
 export type ChatResult = {
@@ -176,6 +180,7 @@ export class AiService {
       schoolId: req.schoolId,
       userId: req.userId,
       persona: req.personaId,
+      surface: req.surface ?? 'page',
     })
   }
 
