@@ -28,6 +28,16 @@ export type ChatScope = {
   // studentIds direto.
   studentIdsPedagogical: string[]
   studentIdsFinancial: string[]
+  // Hint contextual sobre a tela onde o usuário está. NÃO é usado para
+  // autorização — é só passado ao system prompt do persona pra que o
+  // assistente saiba "o usuário está olhando essa visão" e use os ids
+  // como filtros implícitos quando ele se referir a "essa turma" / "esse
+  // período". As tools continuam validando contra classIds/studentIds do
+  // próprio scope (fonte de verdade).
+  screen?: {
+    id: string
+    filters?: Record<string, string>
+  }
 }
 
 export async function computeChatScope(args: {
