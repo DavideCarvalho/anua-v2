@@ -40,7 +40,7 @@ test.group('GET /api/v1/ai/threads filtra surface=page', (group) => {
     const response = await client.get('/api/v1/ai/threads').loginAs(user)
     response.assertStatus(200)
 
-    const body = response.body() as { id: string }[]
+    const body: Array<{ id: string }> = response.body()
     const ids = body.map((t) => t.id)
 
     assert.include(ids, pageThreadId)
