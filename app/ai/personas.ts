@@ -53,7 +53,7 @@ function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
 
   if (filterEntries.length === 0) {
     return [
-      '',
+      '\n',
       'Tela atual: o usuário está olhando o ' + screenLabel + ' sem filtros aplicados.',
       'Quando ele perguntar "a escola" ou usar termos genéricos, assuma o escopo de toda a escola.',
     ].join('\n')
@@ -64,7 +64,7 @@ function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
     .join(', ')
 
   return [
-    '',
+    '\n',
     `Tela atual: o usuário está olhando o ${screenLabel} com os seguintes filtros aplicados agora: ${filterLines}.`,
     'Use esses filtros como contexto implícito — quando ele perguntar "a turma", "esse período", "esse curso", etc., assuma os valores acima.',
     'Ao chamar tools que aceitam esses parâmetros, passe os ids correspondentes salvo se ele pedir explicitamente outra coisa.',

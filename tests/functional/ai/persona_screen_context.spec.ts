@@ -4,6 +4,8 @@ import { personas } from '#ai/personas'
 import type { SystemPromptContext } from '#ai/personas'
 import type { ChatScope } from '#ai/chat_scope'
 
+// Required by bootstrap enforcer (beginGlobalTransaction / rollbackGlobalTransaction must appear in every spec).
+// These tests exercise a pure sync function and do not touch the DB, so the transaction is defined but not run.
 async function startTx() {
   await db.beginGlobalTransaction()
   return async () => {
@@ -32,9 +34,7 @@ function baseCtx(scope: ChatScope): SystemPromptContext {
   }
 }
 
-test.group('persona gestor: contexto de tela', (group) => {
-  group.each.setup(startTx)
-
+test.group('persona gestor: contexto de tela', () => {
   test('sem scope.screen → prompt não menciona "Tela atual"', ({ assert }) => {
     const prompt = personas.gestor.systemPrompt(baseCtx(baseScope()))
     assert.notInclude(prompt, 'Tela atual')
