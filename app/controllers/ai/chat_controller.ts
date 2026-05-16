@@ -10,12 +10,19 @@ import {
 import { registerStreamController } from '#ai/stream_cancel_broker'
 import { personaFromRole, resolvePersonaId } from '#ai/chat_role'
 import { computeChatScope } from '#ai/chat_scope'
+import type { ChatScope } from '#ai/chat_scope'
+import type { ChatRequest } from '#ai/ai_service'
 import { checkQuotaOrDeny } from '#ai/usage_quota_service'
 import { chatValidator } from '#validators/ai'
 
 export default class ChatController {
   async handle({ request, response, auth, effectiveUser }: HttpContext) {
-    const { threadId, persona: requestedPersona } = await request.validateUsing(chatValidator)
+    const {
+      threadId,
+      persona: requestedPersona,
+      surface,
+      screen,
+    } = await request.validateUsing(chatValidator)
     const messages = request.input('messages') as UIMessage[] | undefined
 
     const user = effectiveUser ?? auth.user!
@@ -63,6 +70,10 @@ export default class ChatController {
     const abortController = new AbortController()
     const unregisterFromBroker = registerStreamController(threadId, abortController)
 
+    const scopeWithScreen: ChatScope = screen ? { ...scope, screen } : scope
+    const resolvedSurface: ChatRequest['surface'] =
+      surface === 'sheet' ? 'sheet' : surface === 'page' ? 'page' : undefined
+
     const aiService = new AiService()
     const { result } = await aiService.chat({
       threadId,
@@ -70,7 +81,8 @@ export default class ChatController {
       schoolId,
       userId: user.id,
       userMessage: lastUserMessage,
-      scope,
+      scope: scopeWithScreen,
+      surface: resolvedSurface,
       abortSignal: abortController.signal,
     })
 
