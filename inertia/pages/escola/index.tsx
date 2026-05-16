@@ -18,6 +18,7 @@ import {
   GraduationCap,
   LineChart,
   DollarSign,
+  Sparkles,
 } from 'lucide-react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout-simplificado'
@@ -50,6 +51,8 @@ import {
   writeEscolaDashboardViewMode,
 } from '../../lib/escola-dashboard-view-mode'
 import { SubPeriodFilter } from '../../containers/academic-periods/components/sub-period-filter'
+import { AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
+import type { FilterLabels } from '../../lib/contextual-prompts'
 import { api } from '~/lib/api'
 
 function UnreadMessagesBadge() {
@@ -120,6 +123,7 @@ export default function EscolaDashboard() {
     roleName === 'SCHOOL_ADMIN' ||
     roleName === 'SCHOOL_CHAIN_DIRECTOR' ||
     roleName === 'SCHOOL_DIRECTOR'
+  const canUseAskAnua = canViewFinancialTab
   const canViewAdministrativeTab = !isSchoolTeacher
   const tabColumnClass = canViewFinancialTab ? 'md:grid-cols-3' : 'md:grid-cols-2'
 
@@ -127,6 +131,7 @@ export default function EscolaDashboard() {
   const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
   const [isViewModeHydrated, setIsViewModeHydrated] = useState(false)
   const [activeTab, setActiveTab] = useState<DashboardTab>('pedagogical')
+  const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
 
   const [filters, setFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
@@ -195,6 +200,24 @@ export default function EscolaDashboard() {
       : selectedClass
         ? `${selectedClass.levelName} - ${selectedClass.name}`
         : 'Todas as turmas'
+
+  const askAnuaLabels: FilterLabels = useMemo(() => ({
+    academicPeriodName:
+      filters.academicPeriodId === 'all'
+        ? undefined
+        : academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name,
+    courseName:
+      filters.courseId === 'all'
+        ? undefined
+        : courses.find((c) => c.courseId === filters.courseId)?.name,
+    levelName:
+      filters.levelId === 'all'
+        ? undefined
+        : levels.find((l) => l.id === filters.levelId)?.name,
+    className: selectedClass
+      ? `${selectedClass.levelName} - ${selectedClass.name}`
+      : undefined,
+  }), [filters, academicPeriods, courses, levels, selectedClass])
 
   useEffect(() => {
     const storedPreference = window.localStorage.getItem(HIDE_FINANCIAL_INFO_STORAGE_KEY)
@@ -310,6 +333,19 @@ export default function EscolaDashboard() {
 
   const viewModeToggle = (
     <>
+      {canUseAskAnua && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setIsAskAnuaOpen(true)}
+          className="gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          <span className="hidden sm:inline">Perguntar ao Anuá</span>
+          <span className="sr-only sm:hidden">Perguntar ao Anuá</span>
+        </Button>
+      )}
       <Button
         type="button"
         variant={viewMode === 'full' ? 'default' : 'outline'}
@@ -328,6 +364,15 @@ export default function EscolaDashboard() {
       </Button>
     </>
   )
+
+  const askAnuaSheet = canUseAskAnua ? (
+    <AskAnuaSheet
+      open={isAskAnuaOpen}
+      onOpenChange={setIsAskAnuaOpen}
+      filters={filters}
+      labels={askAnuaLabels}
+    />
+  ) : null
 
   if (viewMode === 'simple') {
     return (
@@ -371,6 +416,8 @@ export default function EscolaDashboard() {
 
           <DashboardClassesNav />
         </section>
+
+        {askAnuaSheet}
       </EscolaLayoutSimplificado>
     )
   }
@@ -696,6 +743,8 @@ export default function EscolaDashboard() {
           </>
         )}
       </div>
+
+      {askAnuaSheet}
     </EscolaLayout>
   )
 }
