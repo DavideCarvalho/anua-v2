@@ -11,19 +11,20 @@ interface LevelRow {
 }
 
 export default class GetEnrollmentByLevelController {
-  async handle({ request, response }: HttpContext) {
+  async handle({ request, response, selectedSchoolIds }: HttpContext) {
     const { schoolId, academicPeriodId, courseId, levelId, classId } =
       await request.validateUsing(getByLevelValidator)
+
+    const effectiveSchoolId = schoolId ?? selectedSchoolIds?.[0]
+    if (!effectiveSchoolId) {
+      return response.ok({ byLevel: [] })
+    }
 
     let periodFilter = ''
     let courseFilter = ''
     let levelFilter = ''
     let classFilter = ''
-    const params: Record<string, string> = {}
-
-    if (schoolId) {
-      params.schoolId = schoolId
-    }
+    const params: Record<string, string> = { schoolId: effectiveSchoolId }
 
     if (academicPeriodId) {
       periodFilter = 'AND shl."academicPeriodId" = :academicPeriodId'
@@ -31,7 +32,13 @@ export default class GetEnrollmentByLevelController {
     }
 
     if (courseId) {
-      courseFilter = 'AND c."courseId" = :courseId'
+      courseFilter = `AND EXISTS (
+        SELECT 1 FROM "LevelAssignedToCourseHasAcademicPeriod" latcap
+        JOIN "CourseHasAcademicPeriod" chap ON chap.id = latcap."courseHasAcademicPeriodId"
+        WHERE latcap."levelId" = l.id
+        AND latcap."isActive" = true
+        AND chap."courseId" = :courseId
+      )`
       params.courseId = courseId
     }
 
@@ -55,16 +62,20 @@ export default class GetEnrollmentByLevelController {
           COUNT(DISTINCT CASE WHEN st."enrollmentStatus" = 'REGISTERED' THEN shl.id END) as completed,
           COUNT(DISTINCT CASE WHEN st."enrollmentStatus" = 'PENDING_DOCUMENT_REVIEW' THEN shl.id END) as pending
         FROM "Level" l
-        LEFT JOIN "StudentHasLevel" shl ON shl."levelId" = l.id
-        LEFT JOIN "Student" st ON shl."studentId" = st.id
-        LEFT JOIN "Class" c ON st."classId" = c.id
+        INNER JOIN "StudentHasLevel" shl ON shl."levelId" = l.id
+        INNER JOIN "AcademicPeriod" ap ON ap.id = shl."academicPeriodId"
+        INNER JOIN "Student" st ON shl."studentId" = st.id
+        INNER JOIN "User" u ON u.id = st.id
         WHERE l."schoolId" = :schoolId
         AND l."isActive" = true
+        AND ap."isActive" = true
+        AND u."deletedAt" IS NULL
         ${periodFilter}
         ${courseFilter}
         ${levelFilter}
         ${classFilter}
         GROUP BY l.id, l.name, l."order"
+        HAVING COUNT(DISTINCT shl.id) > 0
         ORDER BY l."order", l.name
         `,
         params

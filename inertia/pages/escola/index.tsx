@@ -2,20 +2,34 @@ import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { GraduationCap, LineChart, DollarSign, Eye, EyeOff, Users, BookOpen, Clock, Calendar, CreditCard, AlertTriangle, Tag, ShoppingBag, Megaphone, MessageCircle } from 'lucide-react'
+import {
+  Users,
+  BookOpen,
+  Clock,
+  Calendar,
+  CreditCard,
+  AlertTriangle,
+  Tag,
+  ShoppingBag,
+  Megaphone,
+  MessageCircle,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  LineChart,
+  DollarSign,
+} from 'lucide-react'
 import { EscolaLayout } from '../../components/layouts'
 import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout-simplificado'
 import { DashboardClassesNav } from '../../components/dashboard/dashboard-classes-nav'
-import { EscolaStatsContainer } from '../../containers/escola-stats-container'
-import { EscolaInsightsContainer } from '../../containers/escola-insights-container'
-import { PedagogicalAlertsCards } from '../../containers/dashboard/pedagogical-alerts-cards'
-import { AcademicOverviewCards } from '../../containers/grades/academic-overview-cards'
+import { AttentionInbox } from '../../containers/dashboard/attention-inbox'
+import { FinancialKpiStrip } from '../../containers/dashboard/financial-kpi-strip'
+import { EnrollmentConversionStrip } from '../../containers/dashboard/enrollment-conversion-strip'
 import { GradeDistributionChart } from '../../containers/grades/grade-distribution-chart'
 import { AtRiskStudentsTable } from '../../containers/grades/at-risk-students-table'
 import { PedagogicalAttendanceTrendsChartWithFilters } from '../../containers/pedagogical/attendance-trends-chart'
 import { GradeTrendsChartWithFilters } from '../../containers/pedagogical/grade-trends-chart'
 import { ClassPerformanceChart } from '../../containers/pedagogical/class-performance-chart'
-import { EnrollmentFunnelStats } from '../../containers/enrollment-analytics/enrollment-funnel-stats'
 import { EnrollmentTrendsChart } from '../../containers/enrollment-analytics/enrollment-trends-chart'
 import { EnrollmentByLevelTable } from '../../containers/enrollment-analytics/enrollment-by-level-table'
 import { FinancialRevenueTrendsChart } from '../../containers/financial/financial-revenue-trends-chart'
@@ -84,6 +98,19 @@ type AcademicPeriodCourse = {
   }>
 }
 
+function formatDateLong(date: Date): string {
+  const formatted = date.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+}
+
+function toQueryValue(value: string): string | undefined {
+  return value === 'all' ? undefined : value
+}
+
 export default function EscolaDashboard() {
   const user = useAuthUser()
   const roleName = user?.role?.name
@@ -95,25 +122,13 @@ export default function EscolaDashboard() {
     roleName === 'SCHOOL_DIRECTOR'
   const canViewAdministrativeTab = !isSchoolTeacher
   const tabColumnClass = canViewFinancialTab ? 'md:grid-cols-3' : 'md:grid-cols-2'
+
   const [hideFinancialInfo, setHideFinancialInfo] = useState(true)
   const [viewMode, setViewMode] = useState<EscolaDashboardViewMode>('full')
   const [isViewModeHydrated, setIsViewModeHydrated] = useState(false)
   const [activeTab, setActiveTab] = useState<DashboardTab>('pedagogical')
-  const [pedagogicalFilters, setPedagogicalFilters] = useState<TabFilterState>({
-    academicPeriodId: 'all',
-    courseId: 'all',
-    levelId: 'all',
-    classId: 'all',
-    subPeriodId: 'all',
-  })
-  const [administrativeFilters, setAdministrativeFilters] = useState<TabFilterState>({
-    academicPeriodId: 'all',
-    courseId: 'all',
-    levelId: 'all',
-    classId: 'all',
-    subPeriodId: 'all',
-  })
-  const [financialFilters, setFinancialFilters] = useState<TabFilterState>({
+
+  const [filters, setFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
     courseId: 'all',
     levelId: 'all',
@@ -126,178 +141,59 @@ export default function EscolaDashboard() {
   })
   const academicPeriods = (academicPeriodsData?.data ?? []) as AcademicPeriodOption[]
 
-  const { data: pedagogicalCoursesData } = useQuery({
+  const { data: coursesData } = useQuery({
     ...api.api.v1.academicPeriods.listCourses.queryOptions({
-      params: { id: pedagogicalFilters.academicPeriodId },
+      params: { id: filters.academicPeriodId },
     }),
-    enabled: pedagogicalFilters.academicPeriodId !== 'all',
+    enabled: filters.academicPeriodId !== 'all',
   })
-  const pedagogicalCourses = (pedagogicalCoursesData ?? []) as AcademicPeriodCourse[]
-  const pedagogicalLevels = useMemo(() => {
-    if (pedagogicalFilters.courseId === 'all') return []
-    const selectedCourse = pedagogicalCourses.find(
-      (course) => course.courseId === pedagogicalFilters.courseId
-    )
+  const courses = (coursesData ?? []) as AcademicPeriodCourse[]
+
+  const levels = useMemo(() => {
+    if (filters.courseId === 'all') return []
+    const selectedCourse = courses.find((course) => course.courseId === filters.courseId)
     if (!selectedCourse) return []
     return selectedCourse.levels.map((level) => ({ id: level.id, name: level.name }))
-  }, [pedagogicalCourses, pedagogicalFilters.courseId])
-  const pedagogicalClasses = useMemo(() => {
-    if (pedagogicalFilters.courseId === 'all') return []
-    const selectedCourse = pedagogicalCourses.find(
-      (course) => course.courseId === pedagogicalFilters.courseId
-    )
+  }, [courses, filters.courseId])
+
+  const classes = useMemo(() => {
+    if (filters.courseId === 'all') return []
+    const selectedCourse = courses.find((course) => course.courseId === filters.courseId)
     if (!selectedCourse) return []
 
     const levelsToUse =
-      pedagogicalFilters.levelId === 'all'
+      filters.levelId === 'all'
         ? selectedCourse.levels
-        : selectedCourse.levels.filter((level) => level.id === pedagogicalFilters.levelId)
+        : selectedCourse.levels.filter((level) => level.id === filters.levelId)
 
     return levelsToUse.flatMap((level) =>
       level.classes.map((cls) => ({ ...cls, levelId: level.id, levelName: level.name }))
     )
-  }, [pedagogicalCourses, pedagogicalFilters.courseId, pedagogicalFilters.levelId])
+  }, [courses, filters.courseId, filters.levelId])
 
-  const { data: administrativeCoursesData } = useQuery({
-    ...api.api.v1.academicPeriods.listCourses.queryOptions({
-      params: { id: administrativeFilters.academicPeriodId },
-    }),
-    enabled: administrativeFilters.academicPeriodId !== 'all',
-  })
-  const administrativeCourses = (administrativeCoursesData ?? []) as AcademicPeriodCourse[]
-  const administrativeLevels = useMemo(() => {
-    if (administrativeFilters.courseId === 'all') return []
-    const selectedCourse = administrativeCourses.find(
-      (course) => course.courseId === administrativeFilters.courseId
-    )
-    if (!selectedCourse) return []
-    return selectedCourse.levels.map((level) => ({ id: level.id, name: level.name }))
-  }, [administrativeCourses, administrativeFilters.courseId])
-  const administrativeClasses = useMemo(() => {
-    if (administrativeFilters.courseId === 'all') return []
-    const selectedCourse = administrativeCourses.find(
-      (course) => course.courseId === administrativeFilters.courseId
-    )
-    if (!selectedCourse) return []
-
-    const levelsToUse =
-      administrativeFilters.levelId === 'all'
-        ? selectedCourse.levels
-        : selectedCourse.levels.filter((level) => level.id === administrativeFilters.levelId)
-
-    return levelsToUse.flatMap((level) =>
-      level.classes.map((cls) => ({ ...cls, levelId: level.id, levelName: level.name }))
-    )
-  }, [administrativeCourses, administrativeFilters.courseId, administrativeFilters.levelId])
-
-  const { data: financialCoursesData } = useQuery({
-    ...api.api.v1.academicPeriods.listCourses.queryOptions({
-      params: { id: financialFilters.academicPeriodId },
-    }),
-    enabled: financialFilters.academicPeriodId !== 'all',
-  })
-  const financialCourses = (financialCoursesData ?? []) as AcademicPeriodCourse[]
-  const financialLevels = useMemo(() => {
-    if (financialFilters.courseId === 'all') return []
-    const selectedCourse = financialCourses.find(
-      (course) => course.courseId === financialFilters.courseId
-    )
-    if (!selectedCourse) return []
-    return selectedCourse.levels.map((level) => ({ id: level.id, name: level.name }))
-  }, [financialCourses, financialFilters.courseId])
-  const financialClasses = useMemo(() => {
-    if (financialFilters.courseId === 'all') return []
-    const selectedCourse = financialCourses.find(
-      (course) => course.courseId === financialFilters.courseId
-    )
-    if (!selectedCourse) return []
-
-    const levelsToUse =
-      financialFilters.levelId === 'all'
-        ? selectedCourse.levels
-        : selectedCourse.levels.filter((level) => level.id === financialFilters.levelId)
-
-    return levelsToUse.flatMap((level) =>
-      level.classes.map((cls) => ({ ...cls, levelId: level.id, levelName: level.name }))
-    )
-  }, [financialCourses, financialFilters.courseId, financialFilters.levelId])
-
-  const selectedPedagogicalPeriodLabel =
-    pedagogicalFilters.academicPeriodId === 'all'
+  const selectedPeriodLabel =
+    filters.academicPeriodId === 'all'
       ? 'Todos os períodos letivos'
-      : (academicPeriods.find((p) => p.id === pedagogicalFilters.academicPeriodId)?.name ??
+      : (academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name ??
         'Todos os períodos letivos')
-  const selectedPedagogicalPeriodName =
-    pedagogicalFilters.academicPeriodId === 'all'
+  const selectedPeriodName =
+    filters.academicPeriodId === 'all'
       ? undefined
-      : academicPeriods.find((p) => p.id === pedagogicalFilters.academicPeriodId)?.name
-  const selectedPedagogicalCourseLabel =
-    pedagogicalFilters.courseId === 'all'
+      : academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name
+  const selectedCourseLabel =
+    filters.courseId === 'all'
       ? 'Todos os cursos'
-      : (pedagogicalCourses.find((c) => c.courseId === pedagogicalFilters.courseId)?.name ??
-        'Todos os cursos')
-  const selectedPedagogicalClass = pedagogicalClasses.find(
-    (c) => c.id === pedagogicalFilters.classId
-  )
-  const selectedPedagogicalClassLabel =
-    pedagogicalFilters.classId === 'all'
-      ? 'Todas as turmas'
-      : selectedPedagogicalClass
-        ? `${selectedPedagogicalClass.levelName} - ${selectedPedagogicalClass.name}`
-        : 'Todas as turmas'
-  const selectedPedagogicalLevelLabel =
-    pedagogicalFilters.levelId === 'all'
+      : (courses.find((c) => c.courseId === filters.courseId)?.name ?? 'Todos os cursos')
+  const selectedLevelLabel =
+    filters.levelId === 'all'
       ? 'Todos os níveis'
-      : (pedagogicalLevels.find((l) => l.id === pedagogicalFilters.levelId)?.name ??
-        'Todos os níveis')
-
-  const selectedAdministrativeLevelLabel =
-    administrativeFilters.levelId === 'all'
-      ? 'Todos os níveis'
-      : (administrativeLevels.find((l) => l.id === administrativeFilters.levelId)?.name ??
-        'Todos os níveis')
-
-  const selectedAdministrativeClass = administrativeClasses.find(
-    (c) => c.id === administrativeFilters.classId
-  )
-  const selectedAdministrativeClassLabel =
-    administrativeFilters.classId === 'all'
+      : (levels.find((l) => l.id === filters.levelId)?.name ?? 'Todos os níveis')
+  const selectedClass = classes.find((c) => c.id === filters.classId)
+  const selectedClassLabel =
+    filters.classId === 'all'
       ? 'Todas as turmas'
-      : selectedAdministrativeClass
-        ? `${selectedAdministrativeClass.levelName} - ${selectedAdministrativeClass.name}`
-        : 'Todas as turmas'
-
-  const selectedAdministrativePeriodLabel =
-    administrativeFilters.academicPeriodId === 'all'
-      ? 'Todos os períodos letivos'
-      : (academicPeriods.find((p) => p.id === administrativeFilters.academicPeriodId)?.name ??
-        'Todos os períodos letivos')
-  const selectedAdministrativeCourseLabel =
-    administrativeFilters.courseId === 'all'
-      ? 'Todos os cursos'
-      : (administrativeCourses.find((c) => c.courseId === administrativeFilters.courseId)?.name ??
-        'Todos os cursos')
-
-  const selectedFinancialPeriodLabel =
-    financialFilters.academicPeriodId === 'all'
-      ? 'Todos os períodos letivos'
-      : (academicPeriods.find((p) => p.id === financialFilters.academicPeriodId)?.name ??
-        'Todos os períodos letivos')
-  const selectedFinancialCourseLabel =
-    financialFilters.courseId === 'all'
-      ? 'Todos os cursos'
-      : (financialCourses.find((c) => c.courseId === financialFilters.courseId)?.name ??
-        'Todos os cursos')
-  const selectedFinancialLevelLabel =
-    financialFilters.levelId === 'all'
-      ? 'Todos os níveis'
-      : (financialLevels.find((l) => l.id === financialFilters.levelId)?.name ?? 'Todos os níveis')
-  const selectedFinancialClass = financialClasses.find((c) => c.id === financialFilters.classId)
-  const selectedFinancialClassLabel =
-    financialFilters.classId === 'all'
-      ? 'Todas as turmas'
-      : selectedFinancialClass
-        ? `${selectedFinancialClass.levelName} - ${selectedFinancialClass.name}`
+      : selectedClass
+        ? `${selectedClass.levelName} - ${selectedClass.name}`
         : 'Todas as turmas'
 
   useEffect(() => {
@@ -335,8 +231,7 @@ export default function EscolaDashboard() {
 
   // `as const` aqui é literal-narrowing, não type assertion: sem isso o TS
   // infere `route: string` (widened) e o Link do Inertia exige o union de
-  // nomes de rota. Não é o tipo `as` que esconde bug — é a forma idiomática
-  // de preservar tipos literais em array literals.
+  // nomes de rota.
   const quickActions = [
     {
       label: 'Alunos',
@@ -480,848 +375,325 @@ export default function EscolaDashboard() {
     )
   }
 
+  const filterBar = (
+    <div className="flex flex-wrap items-center gap-2">
+      <Select
+        value={filters.academicPeriodId}
+        onValueChange={(value) => {
+          if (!value) return
+          setFilters({
+            academicPeriodId: value,
+            courseId: 'all',
+            levelId: 'all',
+            classId: 'all',
+            subPeriodId: 'all',
+          })
+        }}
+      >
+        <SelectTrigger className="w-[240px]">
+          <SelectValue placeholder="Período letivo">{selectedPeriodLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos os períodos letivos</SelectItem>
+          {academicPeriods.map((period) => (
+            <SelectItem key={period.id} value={period.id}>
+              {period.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {filters.academicPeriodId !== 'all' && (
+        <SubPeriodFilter
+          academicPeriodId={filters.academicPeriodId}
+          value={filters.subPeriodId}
+          onChange={(value) => setFilters((prev) => ({ ...prev, subPeriodId: value }))}
+        />
+      )}
+
+      <Select
+        value={filters.courseId}
+        onValueChange={(value) => {
+          if (!value) return
+          setFilters((prev) => ({ ...prev, courseId: value, levelId: 'all', classId: 'all' }))
+        }}
+        disabled={filters.academicPeriodId === 'all'}
+      >
+        <SelectTrigger className="w-[220px]">
+          <SelectValue placeholder="Curso">{selectedCourseLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos os cursos</SelectItem>
+          {courses.map((course) => (
+            <SelectItem key={course.courseId} value={course.courseId}>
+              {course.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={filters.levelId}
+        onValueChange={(value) => {
+          if (!value) return
+          setFilters((prev) => ({ ...prev, levelId: value, classId: 'all' }))
+        }}
+        disabled={filters.courseId === 'all'}
+      >
+        <SelectTrigger className="w-[220px]">
+          <SelectValue placeholder="Nível">{selectedLevelLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos os níveis</SelectItem>
+          {levels.map((level) => (
+            <SelectItem key={level.id} value={level.id}>
+              {level.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={filters.classId}
+        onValueChange={(value) => {
+          if (!value) return
+          setFilters((prev) => ({ ...prev, classId: value }))
+        }}
+        disabled={filters.courseId === 'all'}
+      >
+        <SelectTrigger className="w-[220px]">
+          <SelectValue placeholder="Turma">{selectedClassLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todas as turmas</SelectItem>
+          {classes.map((cls) => (
+            <SelectItem key={cls.id} value={cls.id}>
+              {cls.levelName} - {cls.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+
   return (
     <EscolaLayout topbarActions={viewModeToggle}>
       <Head title="Dashboard" />
 
       <div className="space-y-6">
-        {/* Welcome section */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Olá, {user?.name?.split(' ')[0]}!</h1>
-            <p className="text-muted-foreground">
-              Bem-vindo ao painel da {user?.school?.name || 'escola'}
-            </p>
-          </div>
-        </div>
-
         {isSchoolTeacher ? (
           <>
-            <div className="flex flex-wrap items-center justify-start gap-2">
-              <Select
-                value={pedagogicalFilters.academicPeriodId}
-                onValueChange={(value) => {
-                  if (!value) return
-                  setPedagogicalFilters({
-                    academicPeriodId: value,
-                    courseId: 'all',
-                    levelId: 'all',
-                    classId: 'all',
-                    subPeriodId: 'all',
-                  })
-                }}
-              >
-                <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Período letivo">
-                    {selectedPedagogicalPeriodLabel}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os períodos letivos</SelectItem>
-                  {academicPeriods.map((period) => (
-                    <SelectItem key={period.id} value={period.id}>
-                      {period.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold tracking-tight">Visão geral</h1>
+              <p className="text-sm text-muted-foreground">
+                {formatDateLong(new Date())}
+                {user?.school?.name ? ` · ${user.school.name}` : ''}
+              </p>
+            </div>
 
-              {pedagogicalFilters.academicPeriodId !== 'all' && (
-                <SubPeriodFilter
-                  academicPeriodId={pedagogicalFilters.academicPeriodId}
-                  value={pedagogicalFilters.subPeriodId}
-                  onChange={(value) =>
-                    setPedagogicalFilters((prev) => ({ ...prev, subPeriodId: value }))
-                  }
+            {filterBar}
+
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden">
+                <AttentionInbox
+                  academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                  courseId={toQueryValue(filters.courseId)}
+                  levelId={toQueryValue(filters.levelId)}
+                  classId={toQueryValue(filters.classId)}
+                  subPeriodId={toQueryValue(filters.subPeriodId)}
+                  showFinancial={false}
+                  showEnrollment={false}
                 />
-              )}
+              </aside>
 
-              <Select
-                value={pedagogicalFilters.courseId}
-                onValueChange={(value) => {
-                  if (!value) return
-                  setPedagogicalFilters((prev) => ({
-                    ...prev,
-                    courseId: value,
-                    levelId: 'all',
-                    classId: 'all',
-                  }))
-                }}
-                disabled={pedagogicalFilters.academicPeriodId === 'all'}
-              >
-                <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Curso">{selectedPedagogicalCourseLabel}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os cursos</SelectItem>
-                  {pedagogicalCourses.map((course) => (
-                    <SelectItem key={course.courseId} value={course.courseId}>
-                      {course.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="min-w-0 space-y-6 lg:order-1">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <GradeDistributionChart
+                    academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                    classId={toQueryValue(filters.classId)}
+                    subPeriodId={toQueryValue(filters.subPeriodId)}
+                  />
+                  <PedagogicalAttendanceTrendsChartWithFilters
+                    academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                    courseId={toQueryValue(filters.courseId)}
+                    classId={toQueryValue(filters.classId)}
+                  />
+                  <GradeTrendsChartWithFilters
+                    academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                    classId={toQueryValue(filters.classId)}
+                  />
+                  <ClassPerformanceChart
+                    defaultAcademicPeriodFilter={selectedPeriodName}
+                    defaultClassFilter={toQueryValue(filters.classId)}
+                  />
+                </div>
 
-              <Select
-                value={pedagogicalFilters.levelId}
-                onValueChange={(value) => {
-                  if (!value) return
-                  setPedagogicalFilters((prev) => ({ ...prev, levelId: value, classId: 'all' }))
-                }}
-                disabled={pedagogicalFilters.courseId === 'all'}
-              >
-                <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Nível">{selectedPedagogicalLevelLabel}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os níveis</SelectItem>
-                  {pedagogicalLevels.map((level) => (
-                    <SelectItem key={level.id} value={level.id}>
-                      {level.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={pedagogicalFilters.classId}
-                onValueChange={(value) => {
-                  if (!value) return
-                  setPedagogicalFilters((prev) => ({ ...prev, classId: value }))
-                }}
-                disabled={pedagogicalFilters.courseId === 'all'}
-              >
-                <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Turma">{selectedPedagogicalClassLabel}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as turmas</SelectItem>
-                  {pedagogicalClasses.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id}>
-                      {cls.levelName} - {cls.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <AtRiskStudentsTable
+                  academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                  classId={toQueryValue(filters.classId)}
+                  subPeriodId={toQueryValue(filters.subPeriodId)}
+                />
+              </div>
             </div>
-
-            <PedagogicalAlertsCards
-              academicPeriodId={
-                pedagogicalFilters.academicPeriodId === 'all'
-                  ? undefined
-                  : pedagogicalFilters.academicPeriodId
-              }
-              courseId={
-                pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
-              }
-              levelId={
-                pedagogicalFilters.levelId === 'all' ? undefined : pedagogicalFilters.levelId
-              }
-              classId={
-                pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-              }
-              subPeriodId={
-                pedagogicalFilters.subPeriodId === 'all'
-                  ? undefined
-                  : pedagogicalFilters.subPeriodId
-              }
-            />
-            <AcademicOverviewCards
-              academicPeriodId={
-                pedagogicalFilters.academicPeriodId === 'all'
-                  ? undefined
-                  : pedagogicalFilters.academicPeriodId
-              }
-              classId={
-                pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-              }
-            />
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <GradeDistributionChart
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                classId={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-                subPeriodId={
-                  pedagogicalFilters.subPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.subPeriodId
-                }
-              />
-              <PedagogicalAttendanceTrendsChartWithFilters
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                courseId={
-                  pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
-                }
-                classId={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-              />
-              <GradeTrendsChartWithFilters
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                classId={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-              />
-              <ClassPerformanceChart
-                defaultAcademicPeriodFilter={selectedPedagogicalPeriodName}
-                defaultClassFilter={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-              />
-            </div>
-
-            <AtRiskStudentsTable
-              academicPeriodId={
-                pedagogicalFilters.academicPeriodId === 'all'
-                  ? undefined
-                  : pedagogicalFilters.academicPeriodId
-              }
-              classId={
-                pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-              }
-              subPeriodId={
-                pedagogicalFilters.subPeriodId === 'all'
-                  ? undefined
-                  : pedagogicalFilters.subPeriodId
-              }
-            />
-
-            <EscolaInsightsContainer allowedTypes={['academic']} />
           </>
         ) : (
-          <Tabs
-            value={activeTab}
-            onValueChange={(value: string) => setActiveTab(value as DashboardTab)}
-          >
-            <TabsList className={`grid w-full md:w-auto md:inline-grid ${tabColumnClass}`}>
-              <TabsTrigger value="pedagogical" className="gap-2">
-                <GraduationCap className="h-4 w-4" />
-                Pedagógico
-              </TabsTrigger>
+          <>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold tracking-tight">Visão geral</h1>
+              <p className="text-sm text-muted-foreground">
+                {formatDateLong(new Date())}
+                {user?.school?.name ? ` · ${user.school.name}` : ''}
+              </p>
+            </div>
 
-              {canViewAdministrativeTab && (
-                <TabsTrigger value="administrative" className="gap-2">
-                  <LineChart className="h-4 w-4" />
-                  Administrativo
-                </TabsTrigger>
-              )}
+            {filterBar}
 
-              {canViewFinancialTab && (
-                <TabsTrigger value="financial" className="gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Financeiro
-                </TabsTrigger>
-              )}
-            </TabsList>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden">
+                <AttentionInbox
+                  academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                  courseId={toQueryValue(filters.courseId)}
+                  levelId={toQueryValue(filters.levelId)}
+                  classId={toQueryValue(filters.classId)}
+                  subPeriodId={toQueryValue(filters.subPeriodId)}
+                  showFinancial={canViewFinancialTab}
+                  showEnrollment={canViewFinancialTab}
+                />
+              </aside>
 
-            <TabsContent value="pedagogical" className="mt-6 space-y-6">
-              <div className="flex flex-wrap items-center justify-start gap-2">
-                <Select
-                  value={pedagogicalFilters.academicPeriodId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters({
-                      academicPeriodId: value,
-                      courseId: 'all',
-                      levelId: 'all',
-                      classId: 'all',
-                      subPeriodId: 'all',
-                    })
-                  }}
+              <div className="min-w-0 lg:order-1">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={(value: string) => setActiveTab(value as DashboardTab)}
                 >
-                  <SelectTrigger className="w-[240px]">
-                    <SelectValue placeholder="Período letivo">
-                      {selectedPedagogicalPeriodLabel}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os períodos letivos</SelectItem>
-                    {academicPeriods.map((period) => (
-                      <SelectItem key={period.id} value={period.id}>
-                        {period.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <TabsList className={`grid w-full md:w-auto md:inline-grid ${tabColumnClass}`}>
+                    <TabsTrigger value="pedagogical" className="gap-2">
+                      <GraduationCap className="h-4 w-4" />
+                      Pedagógico
+                    </TabsTrigger>
 
-                {pedagogicalFilters.academicPeriodId !== 'all' && (
-                  <SubPeriodFilter
-                    academicPeriodId={pedagogicalFilters.academicPeriodId}
-                    value={pedagogicalFilters.subPeriodId}
-                    onChange={(value) =>
-                      setPedagogicalFilters((prev) => ({ ...prev, subPeriodId: value }))
-                    }
-                  />
-                )}
-
-                <Select
-                  value={pedagogicalFilters.courseId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters((prev) => ({
-                      ...prev,
-                      courseId: value,
-                      levelId: 'all',
-                      classId: 'all',
-                    }))
-                  }}
-                  disabled={pedagogicalFilters.academicPeriodId === 'all'}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Curso">{selectedPedagogicalCourseLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os cursos</SelectItem>
-                    {pedagogicalCourses.map((course) => (
-                      <SelectItem key={course.courseId} value={course.courseId}>
-                        {course.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={pedagogicalFilters.levelId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters((prev) => ({ ...prev, levelId: value, classId: 'all' }))
-                  }}
-                  disabled={pedagogicalFilters.courseId === 'all'}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Nível">{selectedPedagogicalLevelLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os níveis</SelectItem>
-                    {pedagogicalLevels.map((level) => (
-                      <SelectItem key={level.id} value={level.id}>
-                        {level.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={pedagogicalFilters.classId}
-                  onValueChange={(value) => {
-                    if (!value) return
-                    setPedagogicalFilters((prev) => ({ ...prev, classId: value }))
-                  }}
-                  disabled={pedagogicalFilters.courseId === 'all'}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Turma">{selectedPedagogicalClassLabel}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as turmas</SelectItem>
-                    {pedagogicalClasses.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id}>
-                        {cls.levelName} - {cls.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <PedagogicalAlertsCards
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                courseId={
-                  pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
-                }
-                levelId={
-                  pedagogicalFilters.levelId === 'all' ? undefined : pedagogicalFilters.levelId
-                }
-                classId={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-              />
-              <AcademicOverviewCards
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                classId={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-              />
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <GradeDistributionChart
-                  academicPeriodId={
-                    pedagogicalFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : pedagogicalFilters.academicPeriodId
-                  }
-                  classId={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-                <PedagogicalAttendanceTrendsChartWithFilters
-                  academicPeriodId={
-                    pedagogicalFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : pedagogicalFilters.academicPeriodId
-                  }
-                  courseId={
-                    pedagogicalFilters.courseId === 'all' ? undefined : pedagogicalFilters.courseId
-                  }
-                  classId={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-                <GradeTrendsChartWithFilters
-                  academicPeriodId={
-                    pedagogicalFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : pedagogicalFilters.academicPeriodId
-                  }
-                  classId={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-                <ClassPerformanceChart
-                  defaultAcademicPeriodFilter={selectedPedagogicalPeriodName}
-                  defaultClassFilter={
-                    pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                  }
-                />
-              </div>
-
-              <AtRiskStudentsTable
-                academicPeriodId={
-                  pedagogicalFilters.academicPeriodId === 'all'
-                    ? undefined
-                    : pedagogicalFilters.academicPeriodId
-                }
-                classId={
-                  pedagogicalFilters.classId === 'all' ? undefined : pedagogicalFilters.classId
-                }
-              />
-
-              <EscolaInsightsContainer allowedTypes={['academic']} />
-            </TabsContent>
-
-            {canViewAdministrativeTab && (
-              <TabsContent value="administrative" className="mt-6 space-y-6">
-                <div className="flex flex-wrap items-center justify-start gap-2">
-                  <Select
-                    value={administrativeFilters.academicPeriodId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setAdministrativeFilters({
-                        academicPeriodId: value,
-                        courseId: 'all',
-                        levelId: 'all',
-                        classId: 'all',
-                        subPeriodId: 'all',
-                      })
-                    }}
-                  >
-                    <SelectTrigger className="w-[240px]">
-                      <SelectValue placeholder="Período letivo">
-                        {selectedAdministrativePeriodLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os períodos letivos</SelectItem>
-                      {academicPeriods.map((period) => (
-                        <SelectItem key={period.id} value={period.id}>
-                          {period.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={administrativeFilters.courseId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setAdministrativeFilters((prev) => ({
-                        ...prev,
-                        courseId: value,
-                        levelId: 'all',
-                        classId: 'all',
-                      }))
-                    }}
-                    disabled={administrativeFilters.academicPeriodId === 'all'}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Curso">
-                        {selectedAdministrativeCourseLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os cursos</SelectItem>
-                      {administrativeCourses.map((course) => (
-                        <SelectItem key={course.courseId} value={course.courseId}>
-                          {course.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={administrativeFilters.levelId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setAdministrativeFilters((prev) => ({
-                        ...prev,
-                        levelId: value,
-                        classId: 'all',
-                      }))
-                    }}
-                    disabled={administrativeFilters.courseId === 'all'}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Nível">
-                        {selectedAdministrativeLevelLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os níveis</SelectItem>
-                      {administrativeLevels.map((level) => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {level.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={administrativeFilters.classId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setAdministrativeFilters((prev) => ({ ...prev, classId: value }))
-                    }}
-                    disabled={administrativeFilters.courseId === 'all'}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Turma">
-                        {selectedAdministrativeClassLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as turmas</SelectItem>
-                      {administrativeClasses.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id}>
-                          {cls.levelName} - {cls.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <EscolaInsightsContainer
-                  allowedTypes={['enrollment']}
-                  academicPeriodId={
-                    administrativeFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : administrativeFilters.academicPeriodId
-                  }
-                  courseId={
-                    administrativeFilters.courseId === 'all'
-                      ? undefined
-                      : administrativeFilters.courseId
-                  }
-                  levelId={
-                    administrativeFilters.levelId === 'all'
-                      ? undefined
-                      : administrativeFilters.levelId
-                  }
-                  classId={
-                    administrativeFilters.classId === 'all'
-                      ? undefined
-                      : administrativeFilters.classId
-                  }
-                />
-
-                <EnrollmentFunnelStats
-                  schoolId={schoolId}
-                  academicPeriodId={
-                    administrativeFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : administrativeFilters.academicPeriodId
-                  }
-                  courseId={
-                    administrativeFilters.courseId === 'all'
-                      ? undefined
-                      : administrativeFilters.courseId
-                  }
-                  levelId={
-                    administrativeFilters.levelId === 'all'
-                      ? undefined
-                      : administrativeFilters.levelId
-                  }
-                  classId={
-                    administrativeFilters.classId === 'all'
-                      ? undefined
-                      : administrativeFilters.classId
-                  }
-                />
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <EnrollmentTrendsChart
-                    schoolId={schoolId}
-                    academicPeriodId={
-                      administrativeFilters.academicPeriodId === 'all'
-                        ? undefined
-                        : administrativeFilters.academicPeriodId
-                    }
-                    courseId={
-                      administrativeFilters.courseId === 'all'
-                        ? undefined
-                        : administrativeFilters.courseId
-                    }
-                    levelId={
-                      administrativeFilters.levelId === 'all'
-                        ? undefined
-                        : administrativeFilters.levelId
-                    }
-                    classId={
-                      administrativeFilters.classId === 'all'
-                        ? undefined
-                        : administrativeFilters.classId
-                    }
-                    days={30}
-                  />
-                  <EnrollmentByLevelTable
-                    schoolId={schoolId}
-                    academicPeriodId={
-                      administrativeFilters.academicPeriodId === 'all'
-                        ? undefined
-                        : administrativeFilters.academicPeriodId
-                    }
-                    courseId={
-                      administrativeFilters.courseId === 'all'
-                        ? undefined
-                        : administrativeFilters.courseId
-                    }
-                    levelId={
-                      administrativeFilters.levelId === 'all'
-                        ? undefined
-                        : administrativeFilters.levelId
-                    }
-                    classId={
-                      administrativeFilters.classId === 'all'
-                        ? undefined
-                        : administrativeFilters.classId
-                    }
-                  />
-                </div>
-              </TabsContent>
-            )}
-
-            {canViewFinancialTab && (
-              <TabsContent value="financial" className="mt-6 space-y-6">
-                <div className="flex flex-wrap items-center justify-start gap-2">
-                  <Select
-                    value={financialFilters.academicPeriodId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setFinancialFilters({
-                        academicPeriodId: value,
-                        courseId: 'all',
-                        levelId: 'all',
-                        classId: 'all',
-                        subPeriodId: 'all',
-                      })
-                    }}
-                  >
-                    <SelectTrigger className="w-[240px]">
-                      <SelectValue placeholder="Período letivo">
-                        {selectedFinancialPeriodLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os períodos letivos</SelectItem>
-                      {academicPeriods.map((period) => (
-                        <SelectItem key={period.id} value={period.id}>
-                          {period.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={financialFilters.courseId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setFinancialFilters((prev) => ({
-                        ...prev,
-                        courseId: value,
-                        levelId: 'all',
-                        classId: 'all',
-                      }))
-                    }}
-                    disabled={financialFilters.academicPeriodId === 'all'}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Curso">{selectedFinancialCourseLabel}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os cursos</SelectItem>
-                      {financialCourses.map((course) => (
-                        <SelectItem key={course.courseId} value={course.courseId}>
-                          {course.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={financialFilters.levelId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setFinancialFilters((prev) => ({ ...prev, levelId: value, classId: 'all' }))
-                    }}
-                    disabled={financialFilters.courseId === 'all'}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Nível">{selectedFinancialLevelLabel}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os níveis</SelectItem>
-                      {financialLevels.map((level) => (
-                        <SelectItem key={level.id} value={level.id}>
-                          {level.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={financialFilters.classId}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setFinancialFilters((prev) => ({ ...prev, classId: value }))
-                    }}
-                    disabled={financialFilters.courseId === 'all'}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Turma">{selectedFinancialClassLabel}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas as turmas</SelectItem>
-                      {financialClasses.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id}>
-                          {cls.levelName} - {cls.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleFinancialInfoVisibility}
-                    className="ml-auto gap-2"
-                  >
-                    {hideFinancialInfo ? (
-                      <Eye className="h-4 w-4" />
-                    ) : (
-                      <EyeOff className="h-4 w-4" />
+                    {canViewAdministrativeTab && (
+                      <TabsTrigger value="administrative" className="gap-2">
+                        <LineChart className="h-4 w-4" />
+                        Administrativo
+                      </TabsTrigger>
                     )}
-                    {hideFinancialInfo ? 'Mostrar valores' : 'Ocultar valores'}
-                  </Button>
-                </div>
 
-                <EscolaInsightsContainer
-                  hideFinancialValues={hideFinancialInfo}
-                  allowedTypes={['financial']}
-                  academicPeriodId={
-                    financialFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : financialFilters.academicPeriodId
-                  }
-                  courseId={
-                    financialFilters.courseId === 'all' ? undefined : financialFilters.courseId
-                  }
-                  levelId={
-                    financialFilters.levelId === 'all' ? undefined : financialFilters.levelId
-                  }
-                  classId={
-                    financialFilters.classId === 'all' ? undefined : financialFilters.classId
-                  }
-                />
+                    {canViewFinancialTab && (
+                      <TabsTrigger value="financial" className="gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Financeiro
+                      </TabsTrigger>
+                    )}
+                  </TabsList>
 
-                <EscolaStatsContainer
-                  hideFinancialValues={hideFinancialInfo}
-                  academicPeriodId={
-                    financialFilters.academicPeriodId === 'all'
-                      ? undefined
-                      : financialFilters.academicPeriodId
-                  }
-                  courseId={
-                    financialFilters.courseId === 'all' ? undefined : financialFilters.courseId
-                  }
-                  levelId={
-                    financialFilters.levelId === 'all' ? undefined : financialFilters.levelId
-                  }
-                  classId={
-                    financialFilters.classId === 'all' ? undefined : financialFilters.classId
-                  }
-                />
+                  <TabsContent value="pedagogical" className="mt-6 space-y-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <GradeDistributionChart
+                        academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                        classId={toQueryValue(filters.classId)}
+                      />
+                      <PedagogicalAttendanceTrendsChartWithFilters
+                        academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                        courseId={toQueryValue(filters.courseId)}
+                        classId={toQueryValue(filters.classId)}
+                      />
+                      <GradeTrendsChartWithFilters
+                        academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                        classId={toQueryValue(filters.classId)}
+                      />
+                      <ClassPerformanceChart
+                        defaultAcademicPeriodFilter={selectedPeriodName}
+                        defaultClassFilter={toQueryValue(filters.classId)}
+                      />
+                    </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FinancialRevenueTrendsChart
-                    hideFinancialValues={hideFinancialInfo}
-                    academicPeriodId={
-                      financialFilters.academicPeriodId === 'all'
-                        ? undefined
-                        : financialFilters.academicPeriodId
-                    }
-                    courseId={
-                      financialFilters.courseId === 'all' ? undefined : financialFilters.courseId
-                    }
-                    levelId={
-                      financialFilters.levelId === 'all' ? undefined : financialFilters.levelId
-                    }
-                    classId={
-                      financialFilters.classId === 'all' ? undefined : financialFilters.classId
-                    }
-                  />
+                    <AtRiskStudentsTable
+                      academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                      classId={toQueryValue(filters.classId)}
+                    />
+                  </TabsContent>
 
-                  <FinancialOverdueAgingChart
-                    hideFinancialValues={hideFinancialInfo}
-                    academicPeriodId={
-                      financialFilters.academicPeriodId === 'all'
-                        ? undefined
-                        : financialFilters.academicPeriodId
-                    }
-                    courseId={
-                      financialFilters.courseId === 'all' ? undefined : financialFilters.courseId
-                    }
-                    levelId={
-                      financialFilters.levelId === 'all' ? undefined : financialFilters.levelId
-                    }
-                    classId={
-                      financialFilters.classId === 'all' ? undefined : financialFilters.classId
-                    }
-                  />
-                </div>
-              </TabsContent>
-            )}
-          </Tabs>
+                  {canViewAdministrativeTab && (
+                    <TabsContent value="administrative" className="mt-6 space-y-6">
+                      <EnrollmentConversionStrip
+                        schoolId={schoolId}
+                        academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                        courseId={toQueryValue(filters.courseId)}
+                        levelId={toQueryValue(filters.levelId)}
+                        classId={toQueryValue(filters.classId)}
+                      />
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <EnrollmentTrendsChart
+                          schoolId={schoolId}
+                          academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                          courseId={toQueryValue(filters.courseId)}
+                          levelId={toQueryValue(filters.levelId)}
+                          classId={toQueryValue(filters.classId)}
+                          days={30}
+                        />
+                        <EnrollmentByLevelTable
+                          schoolId={schoolId}
+                          academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                          courseId={toQueryValue(filters.courseId)}
+                          levelId={toQueryValue(filters.levelId)}
+                          classId={toQueryValue(filters.classId)}
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  {canViewFinancialTab && (
+                    <TabsContent value="financial" className="mt-6 space-y-6">
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={toggleFinancialInfoVisibility}
+                          className="gap-2"
+                        >
+                          {hideFinancialInfo ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <EyeOff className="h-4 w-4" />
+                          )}
+                          {hideFinancialInfo ? 'Mostrar valores' : 'Ocultar valores'}
+                        </Button>
+                      </div>
+
+                      <FinancialKpiStrip
+                        hideFinancialValues={hideFinancialInfo}
+                        academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                        courseId={toQueryValue(filters.courseId)}
+                        levelId={toQueryValue(filters.levelId)}
+                        classId={toQueryValue(filters.classId)}
+                      />
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <FinancialRevenueTrendsChart
+                          hideFinancialValues={hideFinancialInfo}
+                          academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                          courseId={toQueryValue(filters.courseId)}
+                          levelId={toQueryValue(filters.levelId)}
+                          classId={toQueryValue(filters.classId)}
+                        />
+
+                        <FinancialOverdueAgingChart
+                          hideFinancialValues={hideFinancialInfo}
+                          academicPeriodId={toQueryValue(filters.academicPeriodId)}
+                          courseId={toQueryValue(filters.courseId)}
+                          levelId={toQueryValue(filters.levelId)}
+                          classId={toQueryValue(filters.classId)}
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+                </Tabs>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </EscolaLayout>

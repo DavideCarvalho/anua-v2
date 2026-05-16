@@ -11,7 +11,12 @@ interface TeacherScope {
   classIds: string[]
 }
 
-export type PedagogicalScope = SchoolScope | TeacherScope
+interface CoordinatorScope {
+  type: 'coordinator'
+  classIds: string[]
+}
+
+export type PedagogicalScope = SchoolScope | TeacherScope | CoordinatorScope
 
 export async function getPedagogicalScope(ctx: HttpContext): Promise<PedagogicalScope> {
   const user = ctx.effectiveUser ?? ctx.auth.user!
@@ -42,6 +47,32 @@ export async function getPedagogicalScope(ctx: HttpContext): Promise<Pedagogical
     }
   }
 
+  if (roleName === 'SCHOOL_COORDINATOR') {
+    const result = await db.rawQuery<{ rows: Array<{ classId: string }> }>(
+      `
+        SELECT DISTINCT c.id as "classId"
+        FROM "CoordinatorHasLevel" chl
+        JOIN "LevelAssignedToCourseHasAcademicPeriod" latcap
+          ON latcap.id = chl."levelAssignedToCourseHasAcademicPeriodId"
+        JOIN "Class" c ON c."levelId" = latcap."levelId"
+        WHERE chl."coordinatorId" = :coordinatorId
+          AND latcap."isActive" = true
+          AND c."isArchived" = false
+          AND (:hasSchoolScope = false OR c."schoolId" = ANY(:schoolIds))
+      `,
+      {
+        coordinatorId: user.id,
+        schoolIds: selectedSchoolIds,
+        hasSchoolScope: selectedSchoolIds.length > 0,
+      }
+    )
+
+    return {
+      type: 'coordinator',
+      classIds: result.rows.map((r) => r.classId),
+    }
+  }
+
   return {
     type: 'school',
     schoolIds: selectedSchoolIds,
@@ -57,7 +88,7 @@ export function buildScopeFilters(scope: PedagogicalScope): {
   classFilter: string
   params: Record<string, any>
 } {
-  if (scope.type === 'teacher') {
+  if (scope.type === 'teacher' || scope.type === 'coordinator') {
     if (scope.classIds.length === 0) {
       return { schoolFilter: '', classFilter: 'AND 1=0', params: {} }
     }

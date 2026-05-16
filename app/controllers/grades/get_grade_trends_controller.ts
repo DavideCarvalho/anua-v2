@@ -18,7 +18,7 @@ export default class GetGradeTrendsController {
     let whereFilter = ''
     const params: Record<string, any> = {}
 
-    if (scope.type === 'teacher') {
+    if (scope.type === 'teacher' || scope.type === 'coordinator') {
       if (scope.classIds.length === 0) {
         return response.ok({ trends: [], overallAverage: 0 })
       }

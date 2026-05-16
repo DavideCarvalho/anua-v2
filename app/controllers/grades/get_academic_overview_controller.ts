@@ -14,12 +14,14 @@ export default class GetAcademicOverviewController {
     let schoolFilter = ''
     const schoolParams: Record<string, string> = {}
 
-    if (schoolId && scope.type !== 'teacher') {
-      schoolFilter = 'AND s.id = :schoolId'
-      schoolParams.schoolId = schoolId
-    } else if (schoolChainId && scope.type !== 'teacher') {
-      schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
-      schoolParams.schoolChainId = schoolChainId
+    if (scope.type === 'school') {
+      if (schoolId) {
+        schoolFilter = 'AND s.id = :schoolId'
+        schoolParams.schoolId = schoolId
+      } else if (schoolChainId) {
+        schoolFilter = 'AND s."schoolChainId" = :schoolChainId'
+        schoolParams.schoolChainId = schoolChainId
+      }
     }
 
     const filterClause = schoolFilter || scopeFilters.schoolFilter || scopeFilters.classFilter

@@ -51,12 +51,14 @@ export default class GetEnrollmentFunnelStatsController {
           COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'DECLINED' THEN shl.id END) as declined_signatures,
           COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'EXPIRED' THEN shl.id END) as expired_signatures
         FROM "StudentHasLevel" shl
+        JOIN "AcademicPeriod" ap ON ap.id = shl."academicPeriodId"
         JOIN "Student" st ON shl."studentId" = st.id
         LEFT JOIN "Class" c ON st."classId" = c.id
         JOIN "User" u ON st.id = u.id
         JOIN "UserHasSchool" uhs ON u.id = uhs."userId"
         JOIN "School" s ON uhs."schoolId" = s.id
         WHERE u."deletedAt" IS NULL
+        AND ap."isActive" = true
         ${schoolFilter}
         ${periodFilter}
         ${courseFilter}

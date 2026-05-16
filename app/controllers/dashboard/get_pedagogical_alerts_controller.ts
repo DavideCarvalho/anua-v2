@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import School from '#models/school'
+import { getPedagogicalScope } from '#services/pedagogical_scope'
 
 interface AtRiskByAttendanceStudent {
   studentId: string
@@ -99,6 +100,25 @@ interface TeacherMissingAttendanceRow {
   never_registered: boolean
 }
 
+interface UnacknowledgedAnnouncement {
+  announcementId: string
+  title: string
+  publishedAt: string
+  totalRecipients: number
+  acknowledgedRecipients: number
+  pendingRecipients: number
+  daysSincePublished: number
+}
+
+interface UnacknowledgedAnnouncementRow {
+  announcement_id: string
+  title: string
+  published_at: string
+  total_recipients: string | number
+  acknowledged_recipients: string | number
+  days_since_published: string | number
+}
+
 interface PedagogicalAlerts {
   studentsAtRiskByAttendance?: {
     count: number
@@ -128,6 +148,12 @@ interface PedagogicalAlerts {
     daysThreshold: number
     teachers: TeacherMissingAttendance[]
   }
+  unacknowledgedAnnouncements?: {
+    count: number
+    announcementsCount: number
+    daysWindow: number
+    announcements: UnacknowledgedAnnouncement[]
+  }
 }
 
 interface PedagogicalAlertFilters {
@@ -145,10 +171,8 @@ function normalizeFilter(value: unknown): string | undefined {
 }
 
 export default class GetPedagogicalAlertsController {
-  async handle({
-    selectedSchoolIds,
-    request,
-  }: HttpContext): Promise<{ alerts: PedagogicalAlerts }> {
+  async handle(ctx: HttpContext): Promise<{ alerts: PedagogicalAlerts }> {
+    const { selectedSchoolIds, request, effectiveUser, auth } = ctx
     const scopedSchoolIds = selectedSchoolIds ?? []
     if (scopedSchoolIds.length === 0) {
       return { alerts: {} }
@@ -174,13 +198,31 @@ export default class GetPedagogicalAlertsController {
       subPeriodId: normalizeFilter(query.subPeriodId),
     }
 
-    const scopedClassIds = await this.resolveScopedClassIds(schoolId, filters)
-    const hasClassScope =
+    const user = effectiveUser ?? auth.user
+    if (user && user.roleId && !user.$preloaded.role) {
+      await user.load('role')
+    }
+    const isTeacher = user?.role?.name === 'SCHOOL_TEACHER'
+
+    const scope = await getPedagogicalScope(ctx)
+    const filterScopedClassIds = await this.resolveScopedClassIds(schoolId, filters)
+    const filterHasScope =
       Boolean(filters.academicPeriodId) ||
       Boolean(filters.courseId) ||
       Boolean(filters.levelId) ||
       Boolean(filters.classId)
 
+    const { scopedClassIds, hasClassScope } = this.combineScopes(
+      scope,
+      filterScopedClassIds,
+      filterHasScope
+    )
+
+    if (hasClassScope && scopedClassIds.length === 0) {
+      return { alerts: {} }
+    }
+
+    const ANNOUNCEMENT_WINDOW_DAYS = 30
     const [
       attendanceRiskStudents,
       gradeRiskStudents,
@@ -188,6 +230,7 @@ export default class GetPedagogicalAlertsController {
       overdueActivities,
       ungradedSubmissions,
       teachersMissingAttendance,
+      unacknowledgedAnnouncements,
     ] = await Promise.all([
       this.getStudentsAtRiskByAttendance(
         schoolId,
@@ -207,7 +250,15 @@ export default class GetPedagogicalAlertsController {
       this.getExamsWithoutGrades(schoolId, hasClassScope, scopedClassIds),
       this.getOverdueActivities(schoolId, hasClassScope, scopedClassIds),
       this.getUngradedSubmissions(schoolId, hasClassScope, scopedClassIds),
-      this.getTeachersMissingAttendance(schoolId, 7, hasClassScope, scopedClassIds),
+      isTeacher
+        ? Promise.resolve([] as TeacherMissingAttendance[])
+        : this.getTeachersMissingAttendance(schoolId, 7, hasClassScope, scopedClassIds),
+      isTeacher
+        ? Promise.resolve({
+            announcements: [] as UnacknowledgedAnnouncement[],
+            distinctResponsibles: 0,
+          })
+        : this.getUnacknowledgedAnnouncements(schoolId, ANNOUNCEMENT_WINDOW_DAYS),
     ])
 
     if (attendanceRiskStudents.length > 0) {
@@ -253,6 +304,15 @@ export default class GetPedagogicalAlertsController {
         count: teachersMissingAttendance.length,
         daysThreshold: 7,
         teachers: teachersMissingAttendance,
+      }
+    }
+
+    if (unacknowledgedAnnouncements.announcements.length > 0) {
+      alerts.unacknowledgedAnnouncements = {
+        count: unacknowledgedAnnouncements.distinctResponsibles,
+        announcementsCount: unacknowledgedAnnouncements.announcements.length,
+        daysWindow: ANNOUNCEMENT_WINDOW_DAYS,
+        announcements: unacknowledgedAnnouncements.announcements,
       }
     }
 
@@ -740,6 +800,94 @@ export default class GetPedagogicalAlertsController {
       daysWithoutAttendance: Math.round(Number(row.days_without_attendance)),
       neverRegistered: row.never_registered,
     }))
+  }
+
+  private combineScopes(
+    userScope: Awaited<ReturnType<typeof getPedagogicalScope>>,
+    filterClassIds: string[],
+    filterHasScope: boolean
+  ): { scopedClassIds: string[]; hasClassScope: boolean } {
+    const userIsRestricted = userScope.type === 'teacher' || userScope.type === 'coordinator'
+
+    if (!userIsRestricted) {
+      return { scopedClassIds: filterClassIds, hasClassScope: filterHasScope }
+    }
+
+    if (!filterHasScope) {
+      return { scopedClassIds: userScope.classIds, hasClassScope: true }
+    }
+
+    const userSet = new Set(userScope.classIds)
+    return {
+      scopedClassIds: filterClassIds.filter((id) => userSet.has(id)),
+      hasClassScope: true,
+    }
+  }
+
+  private async getUnacknowledgedAnnouncements(
+    schoolId: string,
+    daysWindow: number
+  ): Promise<{
+    announcements: UnacknowledgedAnnouncement[]
+    distinctResponsibles: number
+  }> {
+    const [breakdownResult, peopleResult] = await Promise.all([
+      db.rawQuery(
+        `
+        SELECT
+          sa.id as announcement_id,
+          sa.title,
+          sa."publishedAt" as published_at,
+          COUNT(sar.id) as total_recipients,
+          COUNT(sar."acknowledgedAt") as acknowledged_recipients,
+          EXTRACT(DAY FROM NOW() - sa."publishedAt") as days_since_published
+        FROM "SchoolAnnouncement" sa
+        JOIN "SchoolAnnouncementRecipient" sar ON sar."announcementId" = sa.id
+        WHERE sa."schoolId" = :schoolId
+          AND sa.status = 'PUBLISHED'
+          AND sa."requiresAcknowledgement" = true
+          AND sa."publishedAt" > NOW() - (INTERVAL '1 day' * :daysWindow)
+        GROUP BY sa.id, sa.title, sa."publishedAt"
+        HAVING COUNT(sar.id) > COUNT(sar."acknowledgedAt")
+        ORDER BY sa."publishedAt" DESC
+        LIMIT 50
+        `,
+        { schoolId, daysWindow }
+      ),
+      db.rawQuery(
+        `
+        SELECT COUNT(DISTINCT sar."responsibleId") as people_count
+        FROM "SchoolAnnouncement" sa
+        JOIN "SchoolAnnouncementRecipient" sar ON sar."announcementId" = sa.id
+        WHERE sa."schoolId" = :schoolId
+          AND sa.status = 'PUBLISHED'
+          AND sa."requiresAcknowledgement" = true
+          AND sa."publishedAt" > NOW() - (INTERVAL '1 day' * :daysWindow)
+          AND sar."acknowledgedAt" IS NULL
+        `,
+        { schoolId, daysWindow }
+      ),
+    ])
+
+    const announcements: UnacknowledgedAnnouncement[] = (
+      breakdownResult.rows as UnacknowledgedAnnouncementRow[]
+    ).map((row) => {
+      const total = Number(row.total_recipients)
+      const acknowledged = Number(row.acknowledged_recipients)
+      return {
+        announcementId: row.announcement_id,
+        title: row.title,
+        publishedAt: row.published_at,
+        totalRecipients: total,
+        acknowledgedRecipients: acknowledged,
+        pendingRecipients: total - acknowledged,
+        daysSincePublished: Math.round(Number(row.days_since_published)),
+      }
+    })
+
+    const distinctResponsibles = Number(peopleResult.rows[0]?.people_count ?? 0)
+
+    return { announcements, distinctResponsibles }
   }
 
   private async resolveScopedClassIds(

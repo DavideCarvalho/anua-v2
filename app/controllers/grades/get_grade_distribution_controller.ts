@@ -14,7 +14,7 @@ export default class GetGradeDistributionController {
     let filters = ''
     const params: Record<string, any> = { ...scopeFilters.params }
 
-    if (scope.type !== 'teacher') {
+    if (scope.type === 'school') {
       if (schoolId) {
         filters += ' AND s.id = :schoolId'
         params.schoolId = schoolId
