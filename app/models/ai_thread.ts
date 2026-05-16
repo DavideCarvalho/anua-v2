@@ -37,6 +37,9 @@ export default class AiThread extends BaseModel {
   @column({ columnName: 'channel' })
   declare channel: 'web' | 'whatsapp'
 
+  @column({ columnName: 'surface' })
+  declare surface: 'page' | 'sheet'
+
   // Resumo das mensagens mais antigas, gerado quando a thread passa do
   // limite de mensagens. Permite manter contexto sem mandar 100+ msgs
   // pro modelo a cada turno. Quando preenchido, é prepended como mensagem
