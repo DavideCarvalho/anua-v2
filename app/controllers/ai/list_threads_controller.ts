@@ -7,6 +7,7 @@ export default class ListThreadsController {
 
     const threads = await AiThread.query()
       .where('userId', user.id)
+      .where('surface', 'page')
       .preload('messages', (query) => {
         query.orderBy('createdAt', 'desc').limit(1)
       })
