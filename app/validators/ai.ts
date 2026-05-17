@@ -14,8 +14,10 @@ export const chatValidator = vine.compile(
     surface: vine.string().in(['page', 'sheet']).optional(),
     screen: vine
       .object({
-        id: vine.string().minLength(1).maxLength(100),
-        filters: vine.record(vine.string()).optional(),
+        id: vine.string().in(['escola_dashboard']),
+        filters: vine
+          .record(vine.string().minLength(1).maxLength(64).regex(/^[a-zA-Z0-9_-]+$/))
+          .optional(),
       })
       .optional(),
   })

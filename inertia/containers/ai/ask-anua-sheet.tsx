@@ -27,19 +27,21 @@ function freshKey(schoolId: string): string {
   return `anua:ask-sheet:fresh:${schoolId}`
 }
 
-function readOrCreateThreadId(schoolId: string): { id: string; fresh: boolean } {
-  if (typeof window === 'undefined' || !schoolId) {
-    return { id: crypto.randomUUID(), fresh: true }
-  }
+function readStoredThread(schoolId: string): { id: string; fresh: boolean } | null {
+  if (typeof window === 'undefined' || !schoolId) return null
   const stored = window.sessionStorage.getItem(threadKey(schoolId))
-  if (stored) {
-    const fresh = window.sessionStorage.getItem(freshKey(schoolId)) !== 'false'
-    return { id: stored, fresh }
-  }
+  if (!stored) return null
+  const fresh = window.sessionStorage.getItem(freshKey(schoolId)) !== 'false'
+  return { id: stored, fresh }
+}
+
+function createAndStoreThread(schoolId: string): string {
   const id = crypto.randomUUID()
-  window.sessionStorage.setItem(threadKey(schoolId), id)
-  window.sessionStorage.setItem(freshKey(schoolId), 'true')
-  return { id, fresh: true }
+  if (typeof window !== 'undefined' && schoolId) {
+    window.sessionStorage.setItem(threadKey(schoolId), id)
+    window.sessionStorage.setItem(freshKey(schoolId), 'true')
+  }
+  return id
 }
 
 export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaSheetProps) {
@@ -47,24 +49,31 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
   const isMobile = useIsMobile()
   const schoolId = user?.school?.id ?? ''
 
-  const initial = readOrCreateThreadId(schoolId)
-  const [threadId, setThreadId] = useState<string>(initial.id)
-  const [isFresh, setIsFresh] = useState<boolean>(initial.fresh)
+  // null até o effect rodar no client; AiChatPane só renderiza quando tem id.
+  // Isso evita gerar UUIDs descartáveis no SSR e elimina a hydration mismatch
+  // se algum dia o Sheet abrir por default.
+  const [threadId, setThreadId] = useState<string | null>(null)
+  const [isFresh, setIsFresh] = useState<boolean>(true)
 
   // Trocar de escola regenera escopo — threadId antigo seguia preso ao
   // schoolId errado e o backend rejeitaria querying na escola nova.
+  // Toda escrita em sessionStorage fica confinada a este effect e handlers.
   useEffect(() => {
     if (!schoolId) return
-    const refreshed = readOrCreateThreadId(schoolId)
-    setThreadId(refreshed.id)
-    setIsFresh(refreshed.fresh)
+    const stored = readStoredThread(schoolId)
+    if (stored) {
+      setThreadId(stored.id)
+      setIsFresh(stored.fresh)
+      return
+    }
+    const id = createAndStoreThread(schoolId)
+    setThreadId(id)
+    setIsFresh(true)
   }, [schoolId])
 
   function handleNewConversation() {
-    if (typeof window === 'undefined' || !schoolId) return
-    const id = crypto.randomUUID()
-    window.sessionStorage.setItem(threadKey(schoolId), id)
-    window.sessionStorage.setItem(freshKey(schoolId), 'true')
+    if (!schoolId) return
+    const id = createAndStoreThread(schoolId)
     setThreadId(id)
     setIsFresh(true)
   }
@@ -149,18 +158,20 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
           </div>
         </div>
         <div className="flex-1 min-h-0">
-          <AiChatPane
-            key={threadId}
-            threadId={threadId}
-            persona="gestor"
-            isNewThread={isFresh}
-            hideHeader
-            screen={screen}
-            surface="sheet"
-            suggestions={suggestions}
-            userName={user?.name ?? undefined}
-            onPersisted={handlePersisted}
-          />
+          {threadId && (
+            <AiChatPane
+              key={threadId}
+              threadId={threadId}
+              persona="gestor"
+              isNewThread={isFresh}
+              hideHeader
+              screen={screen}
+              surface="sheet"
+              suggestions={suggestions}
+              userName={user?.name ?? undefined}
+              onPersisted={handlePersisted}
+            />
+          )}
         </div>
       </SheetContent>
     </Sheet>

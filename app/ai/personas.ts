@@ -45,8 +45,17 @@ const FILTER_LABELS: Record<string, string> = {
   classId: 'turma',
 }
 
+function sanitizeHint(value: string): string {
+  // Strip control chars (newlines, tabs, escape sequences) and cap at 80 chars.
+  // The validator already enforces a stricter shape, but rendering raw
+  // user-supplied strings into a system prompt warrants belt-and-braces.
+  return value
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .slice(0, 80)
+}
+
 function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
-  const screenLabel = SCREEN_LABELS[screen.id] ?? screen.id
+  const screenLabel = sanitizeHint(SCREEN_LABELS[screen.id] ?? screen.id)
   const filterEntries = Object.entries(screen.filters ?? {}).filter(
     ([, value]) => typeof value === 'string' && value.length > 0
   )
@@ -60,7 +69,7 @@ function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
   }
 
   const filterLines = filterEntries
-    .map(([key, value]) => `${FILTER_LABELS[key] ?? key}=${value}`)
+    .map(([key, value]) => `${FILTER_LABELS[key] ?? key}=${sanitizeHint(value)}`)
     .join(', ')
 
   return [
