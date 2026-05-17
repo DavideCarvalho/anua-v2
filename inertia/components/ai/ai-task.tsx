@@ -5,11 +5,37 @@ import { cn } from '../../lib/utils'
 
 type StepStatus = 'pending' | 'in_progress' | 'completed' | 'error'
 
+// Labels PT-BR pra TODA tool do personas.ts. Importante manter cobertura
+// total — o fallback genérico abaixo é só pra novas tools que ainda não
+// foram traduzidas. Nome cru da tool (camelCase) JAMAIS chega ao usuário.
 const TOOL_LABELS_PROGRESS: Record<string, string> = {
+  // Geral / análise
   getSchoolStats: 'Buscando estatísticas da escola',
   getStudentAlerts: 'Buscando alertas de alunos',
+  getHistoricalComparison: 'Comparando com período passado',
   getSchema: 'Analisando estrutura dos dados',
   queryDatabase: 'Consultando dados',
+  // Turmas / alunos
+  getMyClasses: 'Buscando turmas',
+  getStudentsInClass: 'Buscando alunos da turma',
+  getMyChildren: 'Buscando filhos',
+  // Pedagógico
+  getStudentGrades: 'Buscando notas',
+  getAssignments: 'Buscando atividades',
+  getExams: 'Buscando provas',
+  getStudentAttendance: 'Buscando frequência',
+  // Financeiro
+  getStudentFinancials: 'Buscando boletos',
+  // Comunicação
+  getCommunications: 'Buscando comunicados',
+  sendCommunication: 'Preparando comunicado',
+  // Escrita (cards de aprovação — geralmente renderizam fora do step group,
+  // mas se passarem por aqui o label cobre)
+  enterExamGrade: 'Lançando nota',
+  registerAttendance: 'Registrando presença',
+  justifyAbsence: 'Justificando falta',
+  prepareCreateAssignment: 'Preparando atividade',
+  // Render
   formatRows: 'Formatando resultado',
   renderResult: 'Preparando visualização',
 }
@@ -17,8 +43,23 @@ const TOOL_LABELS_PROGRESS: Record<string, string> = {
 const TOOL_LABELS_DONE: Record<string, string> = {
   getSchoolStats: 'Estatísticas obtidas',
   getStudentAlerts: 'Alertas obtidos',
+  getHistoricalComparison: 'Comparação pronta',
   getSchema: 'Estrutura mapeada',
   queryDatabase: 'Dados consultados',
+  getMyClasses: 'Turmas obtidas',
+  getStudentsInClass: 'Alunos obtidos',
+  getMyChildren: 'Filhos obtidos',
+  getStudentGrades: 'Notas obtidas',
+  getAssignments: 'Atividades obtidas',
+  getExams: 'Provas obtidas',
+  getStudentAttendance: 'Frequência obtida',
+  getStudentFinancials: 'Boletos obtidos',
+  getCommunications: 'Comunicados obtidos',
+  sendCommunication: 'Comunicado pronto',
+  enterExamGrade: 'Nota lançada',
+  registerAttendance: 'Presença registrada',
+  justifyAbsence: 'Falta justificada',
+  prepareCreateAssignment: 'Atividade preparada',
   formatRows: 'Resultado formatado',
   renderResult: 'Visualização pronta',
 }
@@ -52,14 +93,18 @@ function StepIcon({ status }: { status: StepStatus }) {
 }
 
 function toolLabel(toolName: string, status: StepStatus) {
+  // Fallback genérico — se uma tool nova entrar no sistema sem label aqui,
+  // mostramos um texto neutro em vez do nome cru (camelCase é detalhe de
+  // implementação que não deve chegar ao usuário). Adicione o label nos
+  // mapas acima quando aparecer no log "Trabalhando…" sem nome bonito.
   if (status === 'completed') {
-    return TOOL_LABELS_DONE[toolName] ?? TOOL_LABELS_PROGRESS[toolName] ?? toolName
+    return TOOL_LABELS_DONE[toolName] ?? 'Operação concluída'
   }
   if (status === 'error') {
-    const base = TOOL_LABELS_PROGRESS[toolName] ?? toolName
+    const base = TOOL_LABELS_PROGRESS[toolName] ?? 'Operação'
     return `${base} (falhou)`
   }
-  return TOOL_LABELS_PROGRESS[toolName] ?? toolName
+  return TOOL_LABELS_PROGRESS[toolName] ?? 'Trabalhando…'
 }
 
 export function ToolStepGroup({ parts }: { parts: ToolUIPart[] }) {
