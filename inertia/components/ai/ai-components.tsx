@@ -498,7 +498,32 @@ const CHART_COLORS = [
 ]
 
 export type ChartType = 'bar' | 'line' | 'pie'
+// Formato dos valores nos eixos/tooltip. 'currencyFromCents' é o default pra
+// gráficos de dinheiro porque o banco guarda centavos — sem isso o eixo Y
+// mostraria "550000" em vez de "R$ 5.500,00". 'percent' assume valor já em
+// percentual (0–100), não fração.
+export type ChartValueFormat = 'number' | 'currency' | 'currencyFromCents' | 'percent'
 type ChartPoint = { label?: string; value?: number } & Record<string, unknown>
+
+const CURRENCY_FMT = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+  maximumFractionDigits: 2,
+})
+const NUMBER_FMT = new Intl.NumberFormat('pt-BR')
+
+function buildValueFormatter(format: ChartValueFormat): (value: unknown) => string {
+  if (format === 'currency') {
+    return (v) => (typeof v === 'number' ? CURRENCY_FMT.format(v) : String(v ?? ''))
+  }
+  if (format === 'currencyFromCents') {
+    return (v) => (typeof v === 'number' ? CURRENCY_FMT.format(v / 100) : String(v ?? ''))
+  }
+  if (format === 'percent') {
+    return (v) => (typeof v === 'number' ? `${NUMBER_FMT.format(v)}%` : String(v ?? ''))
+  }
+  return (v) => (typeof v === 'number' ? NUMBER_FMT.format(v) : String(v ?? ''))
+}
 
 export function Chart({
   type = 'bar',
@@ -507,6 +532,7 @@ export function Chart({
   yKey = 'value',
   title,
   height = 240,
+  valueFormat = 'number',
 }: {
   type?: ChartType
   data?: ChartPoint[]
@@ -514,10 +540,12 @@ export function Chart({
   yKey?: string
   title?: string
   height?: number
+  valueFormat?: ChartValueFormat
 }) {
   if (!data?.length) {
     return <p className="text-sm text-muted-foreground py-2">Sem dados pra exibir.</p>
   }
+  const formatValue = buildValueFormatter(valueFormat)
   return (
     <Card className="my-2">
       {title && (
@@ -529,13 +557,13 @@ export function Chart({
         <ResponsiveContainer width="100%" height={height}>
           {type === 'pie' ? (
             <PieChart>
-              <Tooltip />
+              <Tooltip formatter={(value) => formatValue(value)} />
               <Pie
                 data={data}
                 dataKey={yKey}
                 nameKey={xKey}
                 outerRadius={Math.min(height / 2 - 20, 100)}
-                label
+                label={(entry: { value?: number }) => formatValue(entry.value)}
               >
                 {data.map((_, i) => (
                   <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
@@ -546,16 +574,16 @@ export function Chart({
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey={xKey} className="text-xs" />
-              <YAxis className="text-xs" />
-              <Tooltip />
+              <YAxis className="text-xs" tickFormatter={formatValue} width={80} />
+              <Tooltip formatter={(value) => formatValue(value)} />
               <Line type="monotone" dataKey={yKey} stroke={CHART_COLORS[0]} strokeWidth={2} />
             </LineChart>
           ) : (
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey={xKey} className="text-xs" />
-              <YAxis className="text-xs" />
-              <Tooltip />
+              <YAxis className="text-xs" tickFormatter={formatValue} width={80} />
+              <Tooltip formatter={(value) => formatValue(value)} />
               <Bar dataKey={yKey} fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} />
             </BarChart>
           )}

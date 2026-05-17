@@ -18,7 +18,7 @@ const COMPONENT_GUIDE = `
 - DataTable: data = { columns?: string[], rows: Record<string, unknown>[], columnLabels?: Record<string, string> } — Quando os dados vêm crus do queryDatabase, chame formatRows primeiro e use o output ({ rows, columnLabels }) aqui.
 - InfoCard: data = { title, description?, value }
 - Stat: data = { label, value, delta?: number, deltaLabel?: string, tone?: 'neutral' | 'positive' | 'negative' | 'warning', hint? }
-- Chart: data = { type: 'bar' | 'line' | 'pie', data: [{ label, value }], xKey?, yKey?, title?, height? }
+- Chart: data = { type: 'bar' | 'line' | 'pie', data: [{ label, value }], xKey?, yKey?, title?, height?, valueFormat? } — valueFormat formata eixo Y e tooltip: 'currencyFromCents' (use SEMPRE pra dinheiro do banco — boletos, mensalidades, receita vêm em centavos), 'currency' (se você já dividiu por 100), 'percent' (valor de 0 a 100), 'number' (default). Sem isso o gráfico mostra centavos crus como "550000".
 - Comparison: data = { label, unit, now: { value, secondaryValue?, secondaryUnit? }, then: { value }, deltaPct: number | null, direction: 'up' | 'down' | 'flat', isImprovement: boolean, periodLabel, breakdown?: { by: 'class', items: [{ id, label, now, then, delta, deltaPct }] } } — Use pra resultado do getHistoricalComparison. Passe o output do tool quase direto incluindo o breakdown quando ele existir (mostra os top contribuintes embaixo do número).
 `.trim()
 
