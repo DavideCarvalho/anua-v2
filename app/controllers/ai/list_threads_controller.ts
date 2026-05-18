@@ -8,6 +8,10 @@ export default class ListThreadsController {
     const threads = await AiThread.query()
       .where('userId', user.id)
       .where('surface', 'page')
+      // Exclui threads de WhatsApp — surface default é 'page' mas channel
+      // segrega o canal de origem. Sem isso, conversas do bot do WhatsApp
+      // vazam pro chat fullscreen do /escola/ia.
+      .where('channel', 'web')
       .preload('messages', (query) => {
         query.orderBy('createdAt', 'desc').limit(1)
       })
