@@ -738,6 +738,7 @@ export type ScannedRoutes = {
     'api.v1.ai.threads.list': { paramsTuple?: []; params?: {} }
     'api.v1.ai.threads.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.threads.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.ai.threads.promote': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'toolCallId': ParamValue} }
     'api.v1.ai.resolve_names': { paramsTuple?: []; params?: {} }
     'api.v1.ai.canvas.submit': { paramsTuple?: []; params?: {} }
@@ -1860,6 +1861,7 @@ export type ScannedRoutes = {
     'api.v1.academic_sub_periods.diff': { paramsTuple?: []; params?: {} }
     'api.v1.ai.chat': { paramsTuple?: []; params?: {} }
     'api.v1.ai.chat.cancel': { paramsTuple: [ParamValue]; params: {'threadId': ParamValue} }
+    'api.v1.ai.threads.promote': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.ai.tool_calls.decide': { paramsTuple: [ParamValue]; params: {'toolCallId': ParamValue} }
     'api.v1.ai.resolve_names': { paramsTuple?: []; params?: {} }
     'api.v1.ai.canvas.submit': { paramsTuple?: []; params?: {} }

@@ -55,6 +55,7 @@ export const controllers = {
     DecideToolCall: () => import('#controllers/ai/decide_tool_call_controller'),
     DeleteThread: () => import('#controllers/ai/delete_thread_controller'),
     ListThreads: () => import('#controllers/ai/list_threads_controller'),
+    PromoteThread: () => import('#controllers/ai/promote_thread_controller'),
     ResolveNames: () => import('#controllers/ai/resolve_names_controller'),
     ResumeChatStream: () => import('#controllers/ai/resume_chat_stream_controller'),
     ShowThread: () => import('#controllers/ai/show_thread_controller'),

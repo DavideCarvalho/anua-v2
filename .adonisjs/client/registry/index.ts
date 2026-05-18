@@ -4410,6 +4410,12 @@ const routes = {
     tokens: [{"old":"/api/v1/ai/threads/:id","type":0,"val":"api","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/threads/:id","type":0,"val":"threads","end":""},{"old":"/api/v1/ai/threads/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['api.v1.ai.threads.delete']['types'],
   },
+  'api.v1.ai.threads.promote': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/threads/:id/promote',
+    tokens: [{"old":"/api/v1/ai/threads/:id/promote","type":0,"val":"api","end":""},{"old":"/api/v1/ai/threads/:id/promote","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/threads/:id/promote","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/threads/:id/promote","type":0,"val":"threads","end":""},{"old":"/api/v1/ai/threads/:id/promote","type":1,"val":"id","end":""},{"old":"/api/v1/ai/threads/:id/promote","type":0,"val":"promote","end":""}],
+    types: placeholder as Registry['api.v1.ai.threads.promote']['types'],
+  },
   'api.v1.ai.tool_calls.decide': {
     methods: ["POST"],
     pattern: '/api/v1/ai/tool-calls/:toolCallId/decide',

@@ -1075,6 +1075,7 @@ export interface ApiDefinition {
           list: typeof routes['api.v1.ai.threads.list']
           show: typeof routes['api.v1.ai.threads.show']
           delete: typeof routes['api.v1.ai.threads.delete']
+          promote: typeof routes['api.v1.ai.threads.promote']
         }
         toolCalls: {
           decide: typeof routes['api.v1.ai.tool_calls.decide']

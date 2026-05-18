@@ -11,6 +11,9 @@ import type AcademicPeriodDashboardTransformer from '#transformers/academic_peri
 import type AcademicPeriodTransformer from '#transformers/academic_period_transformer'
 import type AcademicSubPeriodTransformer from '#transformers/academic_sub_period_transformer'
 import type AchievementTransformer from '#transformers/achievement_transformer'
+import type AiThreadDetailTransformer from '#transformers/ai_thread_detail_transformer'
+import type AiThreadMessageTransformer from '#transformers/ai_thread_message_transformer'
+import type AiThreadTransformer from '#transformers/ai_thread_transformer'
 import type AssignmentHistoryTransformer from '#transformers/assignment_history_transformer'
 import type AssignmentTransformer from '#transformers/assignment_transformer'
 import type AttendanceTransformer from '#transformers/attendance_transformer'
@@ -146,6 +149,18 @@ export namespace Data {
   export type Achievement = InferData<AchievementTransformer>
   export namespace Achievement {
     export type Variants = InferVariants<AchievementTransformer>
+  }
+  export type AiThreadDetail = InferData<AiThreadDetailTransformer>
+  export namespace AiThreadDetail {
+    export type Variants = InferVariants<AiThreadDetailTransformer>
+  }
+  export type AiThreadMessage = InferData<AiThreadMessageTransformer>
+  export namespace AiThreadMessage {
+    export type Variants = InferVariants<AiThreadMessageTransformer>
+  }
+  export type AiThread = InferData<AiThreadTransformer>
+  export namespace AiThread {
+    export type Variants = InferVariants<AiThreadTransformer>
   }
   export type AssignmentHistory = InferData<AssignmentHistoryTransformer>
   export namespace AssignmentHistory {

@@ -8815,6 +8815,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/delete_thread_controller').default['handle']>>>
     }
   }
+  'api.v1.ai.threads.promote': {
+    methods: ["POST"]
+    pattern: '/api/v1/ai/threads/:id/promote'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/promote_thread_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/promote_thread_controller').default['handle']>>>
+    }
+  }
   'api.v1.ai.tool_calls.decide': {
     methods: ["POST"]
     pattern: '/api/v1/ai/tool-calls/:toolCallId/decide'
