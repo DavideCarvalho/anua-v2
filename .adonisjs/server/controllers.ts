@@ -258,9 +258,9 @@ export const controllers = {
     GetResponsavelStats: () => import('#controllers/dashboard/get_responsavel_stats_controller'),
   },
   enrollments: {
+    GetActionCounts: () => import('#controllers/enrollments/get_action_counts_controller'),
     ListEnrollments: () => import('#controllers/enrollments/list_enrollments_controller'),
     UpdateDocumentStatus: () => import('#controllers/enrollments/update_document_status_controller'),
-    GetActionCounts: () => import('#controllers/enrollments/get_action_counts_controller'),
   },
   escola: {
     CreateInquiryMessage: () => import('#controllers/escola/create_inquiry_message_controller'),
