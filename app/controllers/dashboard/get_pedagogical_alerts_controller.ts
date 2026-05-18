@@ -621,6 +621,7 @@ export default class GetPedagogicalAlertsController {
        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
        AND e."examDate" < NOW()
       AND EXTRACT(DAY FROM NOW() - e."examDate") >= 5
+      AND e."maxScore" > 0
       AND NOT EXISTS (
         SELECT 1 FROM exam_grades eg
         WHERE eg."examId" = e.id
