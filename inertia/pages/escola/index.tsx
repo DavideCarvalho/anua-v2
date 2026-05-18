@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Users,
@@ -134,6 +134,20 @@ export default function EscolaDashboard() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('pedagogical')
   const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
   const isMobile = useIsMobile()
+  const queryClient = useQueryClient()
+
+  // Prefetch da thread da sheet quando o usuário passa o mouse no botão.
+  // Sheet usa sessionStorage[`anua:ask-sheet:thread:${schoolId}`] como threadId.
+  // Quando o user clica, o useQuery em AiChatPane já encontra a resposta
+  // cacheada e renderiza direto sem spinner.
+  function prefetchAskAnuaThread() {
+    if (!schoolId || typeof window === 'undefined') return
+    const storedThreadId = window.sessionStorage.getItem(`anua:ask-sheet:thread:${schoolId}`)
+    if (!storedThreadId) return
+    queryClient.prefetchQuery(
+      api.api.v1.ai.threads.show.queryOptions({ params: { id: storedThreadId } })
+    )
+  }
 
   const [filters, setFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
@@ -341,6 +355,8 @@ export default function EscolaDashboard() {
           variant="outline"
           size="sm"
           onClick={() => setIsAskAnuaOpen(true)}
+          onMouseEnter={prefetchAskAnuaThread}
+          onFocus={prefetchAskAnuaThread}
           className="gap-2"
         >
           <Sparkles className="h-4 w-4" />

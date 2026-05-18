@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Sparkles, X } from 'lucide-react'
+import { router } from '@inertiajs/react'
+import { useMutation } from '@tanstack/react-query'
+import { Bookmark, Plus, Sparkles, X } from 'lucide-react'
 import { Sheet, SheetContent } from '~/components/ui/sheet'
 import { Button } from '~/components/ui/button'
 import { AiChatPane } from '~/components/ai/ai-chat-pane'
 import { useAuthUser } from '~/stores/auth_store'
 import { useIsMobile } from '~/hooks/use_mobile'
+import { api } from '~/lib/api'
 import {
   buildContextualPrompts,
   formatContextLabel,
@@ -92,6 +95,23 @@ export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
     setIsFresh(false)
   }
 
+  // Promove a thread (surface='sheet' → 'page'), descarta o threadId do
+  // sessionStorage pra que abrir a sheet de novo gere uma conversa fresca,
+  // e navega pra página de chat fullscreen. O canPromote gate evita
+  // promover threads vazias.
+  const promoteMutation = useMutation(api.api.v1.ai.threads.promote.mutationOptions())
+  const canPromote = Boolean(threadId) && !isFresh && !promoteMutation.isPending
+  async function handlePromote() {
+    if (!threadId || !schoolId || isFresh) return
+    await promoteMutation.mutateAsync({ params: { id: threadId } })
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(threadKey(schoolId))
+      window.sessionStorage.removeItem(freshKey(schoolId))
+    }
+    onClose()
+    router.visit(`/escola/ia/conversa/${threadId}`)
+  }
+
   const screen = useMemo(() => {
     const activeFilters: Record<string, string> = {}
     if (filters.academicPeriodId !== 'all') {
@@ -133,6 +153,19 @@ export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {canPromote && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={handlePromote}
+              aria-label="Salvar como conversa"
+              title="Salvar como conversa"
+              disabled={promoteMutation.isPending}
+            >
+              <Bookmark className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"

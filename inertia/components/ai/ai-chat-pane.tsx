@@ -2,7 +2,12 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage, type ToolUIPart } from 'ai'
 import { Streamdown } from 'streamdown'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { Bot, Send, User, Loader2, StopCircle, BrainCircuit } from 'lucide-react'
 import { toolComponents } from './ai-components'
 import { ToolStepGroup } from './ai-task'
@@ -11,6 +16,7 @@ import { AiChatInput } from './ai-chat-input'
 import { AiActionApprovalCard } from './ai-action-approval-card'
 import { AiActionCanvas } from './ai-action-canvas'
 import { Button } from '../ui/button'
+import { Skeleton } from '../ui/skeleton'
 import { cn } from '../../lib/utils'
 import { api } from '~/lib/api'
 
@@ -173,6 +179,9 @@ export function AiChatPane({
   const { data: threadDetail, isLoading } = useQuery({
     ...api.api.v1.ai.threads.show.queryOptions({ params: { id: threadId } }),
     enabled: !isNewThread,
+    // Mantém a conversa anterior visível enquanto refetch acontece, em vez
+    // de piscar spinner toda reabertura.
+    placeholderData: keepPreviousData,
   })
 
   // Once we've rendered ActiveChat for this AiChatPane instance, never
@@ -182,20 +191,14 @@ export function AiChatPane({
   const hasRenderedRef = useRef(false)
 
   if (!isNewThread && isLoading && !hasRenderedRef.current) {
-    return (
-      <div className="flex h-full min-h-0 flex-col bg-background">
-        {!hideHeader && <ChatHeader title={null} />}
-        <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </div>
-      </div>
-    )
+    return <ChatLoadingState hideHeader={hideHeader} />
   }
   hasRenderedRef.current = true
 
-  const messageRows = (threadDetail?.messages ?? []) as ThreadMessageRow[]
+  const messageRows = (threadDetail?.thread?.messages ?? []) as ThreadMessageRow[]
   const initialMessages = threadDetail ? rowsToUIMessages(messageRows) : []
-  const headerTitle = threadDetail?.title ?? (isNewThread ? 'Nova conversa' : 'Conversa')
+  const headerTitle =
+    threadDetail?.thread?.title ?? (isNewThread ? 'Nova conversa' : 'Conversa')
 
   return (
     <ActiveChat
@@ -416,6 +419,40 @@ function ChatHeader({ title }: { title: string | null }) {
         <p className="truncate text-[11px] text-muted-foreground">Assistente Anua</p>
       </div>
     </header>
+  )
+}
+
+function ChatLoadingState({ hideHeader }: { hideHeader: boolean }) {
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-background">
+      {!hideHeader && <ChatHeader title={null} />}
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <MessageSkeleton align="right" widths={['w-3/5', 'w-2/5']} />
+        <MessageSkeleton align="left" widths={['w-4/5', 'w-3/5', 'w-1/2']} />
+      </div>
+      <div className="border-t border-border p-3">
+        <div className="flex items-center gap-2 rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Carregando conversa…
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MessageSkeleton({
+  align,
+  widths,
+}: {
+  align: 'left' | 'right'
+  widths: string[]
+}) {
+  return (
+    <div className={cn('flex flex-col gap-1.5', align === 'right' ? 'items-end' : 'items-start')}>
+      {widths.map((w, i) => (
+        <Skeleton key={i} className={cn('h-3', w)} />
+      ))}
+    </div>
   )
 }
 
