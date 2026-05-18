@@ -10,6 +10,7 @@ import {
 } from 'ai'
 import { DateTime } from 'luxon'
 import env from '#start/env'
+import logger from '@adonisjs/core/services/logger'
 import { getModel } from './ai_provider.js'
 import { getPersona, type SystemPromptContext } from './personas.js'
 import type { ChatScope } from './chat_scope.js'
@@ -17,6 +18,7 @@ import { toolRegistry } from './tool_registry.js'
 import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
 import { recordToolCalls } from './record_tool_calls.js'
+import { getCachedSchool, getCachedUser } from './prompt_context_cache.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage, {
@@ -24,8 +26,6 @@ import AiThreadMessage, {
   type StoredToolResult,
 } from '#models/ai_thread_message'
 import AiTokenUsage from '#models/ai_token_usage'
-import School from '#models/school'
-import User from '#models/user'
 
 export type ChatRequest = {
   threadId: string
@@ -67,6 +67,12 @@ export class AiService {
     })
     const modelName = env.get('CROF_MODEL', 'mimo-v2.5-pro')
 
+    // Tracing: timestamp do último boundary de step pra calcular latência
+    // por step. streamText não dá duração nativa — medimos no JS mesmo.
+    // chatStartedAt ancora o primeiro step (não tem step anterior).
+    const chatStartedAt = Date.now()
+    let lastStepEndedAt = chatStartedAt
+
     const result = streamText({
       model: getModel(modelName),
       system: persona.systemPrompt(promptCtx),
@@ -77,7 +83,53 @@ export class AiService {
       // guard for chains that never reach renderResult.
       stopWhen: [stepCountIs(20), hasToolCall('renderResult')],
       abortSignal: req.abortSignal,
+      onStepFinish: (step) => {
+        const now = Date.now()
+        const stepDurationMs = now - lastStepEndedAt
+        lastStepEndedAt = now
+        // Estrutura plana otimizada pra agregação em log aggregators —
+        // cada chave é facilmente filtrável (threadId, persona, tool).
+        logger.info(
+          {
+            event: 'ai_step',
+            threadId: thread.id,
+            schoolId: req.schoolId,
+            userId: req.userId,
+            persona: req.personaId,
+            model: modelName,
+            stepNumber: step.stepNumber,
+            finishReason: step.finishReason,
+            durationMs: stepDurationMs,
+            inputTokens: step.usage?.inputTokens ?? 0,
+            outputTokens: step.usage?.outputTokens ?? 0,
+            totalTokens:
+              step.usage?.totalTokens ?? (step.usage?.inputTokens ?? 0) + (step.usage?.outputTokens ?? 0),
+            toolCallNames: step.toolCalls.map((c) => c.toolName),
+            toolCallCount: step.toolCalls.length,
+            textLength: step.text.length,
+          },
+          'ai chat step finished'
+        )
+      },
       onFinish: async ({ text, steps, usage }) => {
+        const totalDurationMs = Date.now() - chatStartedAt
+        logger.info(
+          {
+            event: 'ai_chat_finished',
+            threadId: thread.id,
+            schoolId: req.schoolId,
+            userId: req.userId,
+            persona: req.personaId,
+            model: modelName,
+            stepCount: steps.length,
+            totalDurationMs,
+            totalInputTokens: usage?.inputTokens ?? 0,
+            totalOutputTokens: usage?.outputTokens ?? 0,
+            totalTokens:
+              usage?.totalTokens ?? (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0),
+          },
+          'ai chat finished'
+        )
         try {
           // streamText.onFinish returns toolCalls/toolResults from the LAST step
           // only. With multi-step runs that end on a text-only step (e.g. after
@@ -151,7 +203,12 @@ export class AiService {
   }
 
   private async buildPromptContext(req: ChatRequest): Promise<SystemPromptContext> {
-    const [school, user] = await Promise.all([School.find(req.schoolId), User.find(req.userId)])
+    // Cacheado em memória (TTL 60s) — School+User mudam raramente e essa
+    // função roda em todo turno do chat.
+    const [school, user] = await Promise.all([
+      getCachedSchool(req.schoolId),
+      getCachedUser(req.userId),
+    ])
     return {
       school: { id: req.schoolId, name: school?.name ?? 'Escola sem nome' },
       user: { id: req.userId, name: user?.name ?? 'Usuário' },
