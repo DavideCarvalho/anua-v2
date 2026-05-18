@@ -19,10 +19,8 @@ export default class ShowThreadController {
       return response.notFound({ message: 'Thread não encontrada' })
     }
 
-    const { limit: limitInput, before: beforeId } = await request.validateUsing(
-      showThreadQueryValidator,
-      { data: request.qs() }
-    )
+    const { limit: limitInput, before: beforeId } =
+      await request.validateUsing(showThreadQueryValidator)
     const limit = limitInput ?? DEFAULT_LIMIT
 
     const messagesQuery = AiThreadMessage.query()
