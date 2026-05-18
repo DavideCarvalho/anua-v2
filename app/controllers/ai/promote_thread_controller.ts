@@ -25,7 +25,6 @@ export default class PromoteThreadController {
       await thread.save()
     }
 
-    thread.$setRelated('messages', [])
     return serialize(AiThreadTransformer.transform(thread))
   }
 }

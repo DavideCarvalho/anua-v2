@@ -56,8 +56,9 @@ export default class ShowThreadController {
     // UI espera ordem ascendente (mais antigas primeiro). Buscamos desc pra
     // pegar as últimas N de forma eficiente; revertemos antes de devolver.
     const messages = sliced.slice().reverse()
-    thread.$setRelated('messages', messages)
 
-    return serialize(AiThreadDetailTransformer.transform({ thread, hasMore, oldestCursor }))
+    return serialize(
+      AiThreadDetailTransformer.transform({ thread, messages, hasMore, oldestCursor })
+    )
   }
 }

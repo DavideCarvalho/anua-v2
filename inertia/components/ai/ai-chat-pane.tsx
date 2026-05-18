@@ -195,7 +195,7 @@ export function AiChatPane({
   }
   hasRenderedRef.current = true
 
-  const messageRows = (threadDetail?.thread?.messages ?? []) as ThreadMessageRow[]
+  const messageRows = (threadDetail?.messages ?? []) as ThreadMessageRow[]
   const initialMessages = threadDetail ? rowsToUIMessages(messageRows) : []
   const headerTitle =
     threadDetail?.thread?.title ?? (isNewThread ? 'Nova conversa' : 'Conversa')
