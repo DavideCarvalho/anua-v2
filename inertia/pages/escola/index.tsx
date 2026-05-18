@@ -51,9 +51,10 @@ import {
   writeEscolaDashboardViewMode,
 } from '../../lib/escola-dashboard-view-mode'
 import { SubPeriodFilter } from '../../containers/academic-periods/components/sub-period-filter'
-import { AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
+import { AskAnuaPanel, AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
 import type { FilterLabels } from '../../lib/contextual-prompts'
 import { api } from '~/lib/api'
+import { useIsMobile } from '../../hooks/use_mobile'
 
 function UnreadMessagesBadge() {
   const [count, setCount] = useState<number | null>(null)
@@ -132,6 +133,7 @@ export default function EscolaDashboard() {
   const [isViewModeHydrated, setIsViewModeHydrated] = useState(false)
   const [activeTab, setActiveTab] = useState<DashboardTab>('pedagogical')
   const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
+  const isMobile = useIsMobile()
 
   const [filters, setFilters] = useState<TabFilterState>({
     academicPeriodId: 'all',
@@ -365,6 +367,9 @@ export default function EscolaDashboard() {
     </>
   )
 
+  // Sheet (overlay) é o caminho mobile do full view e o caminho padrão
+  // do simple view (independente de breakpoint). Em desktop full view ele
+  // dá lugar ao painel inline.
   const askAnuaSheet = canUseAskAnua ? (
     <AskAnuaSheet
       open={isAskAnuaOpen}
@@ -373,6 +378,15 @@ export default function EscolaDashboard() {
       labels={askAnuaLabels}
     />
   ) : null
+
+  const askAnuaInline =
+    canUseAskAnua && !isMobile && isAskAnuaOpen ? (
+      <AskAnuaPanel
+        filters={filters}
+        labels={askAnuaLabels}
+        onClose={() => setIsAskAnuaOpen(false)}
+      />
+    ) : null
 
   if (viewMode === 'simple') {
     return (
@@ -524,7 +538,7 @@ export default function EscolaDashboard() {
   )
 
   return (
-    <EscolaLayout topbarActions={viewModeToggle}>
+    <EscolaLayout topbarActions={viewModeToggle} rightPane={askAnuaInline}>
       <Head title="Dashboard" />
 
       <div className="space-y-6">
@@ -744,7 +758,8 @@ export default function EscolaDashboard() {
         )}
       </div>
 
-      {askAnuaSheet}
+      {/* No full view, o Sheet só monta em mobile — desktop usa o rightPane inline */}
+      {isMobile ? askAnuaSheet : null}
     </EscolaLayout>
   )
 }

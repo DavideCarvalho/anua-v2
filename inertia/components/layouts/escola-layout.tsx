@@ -13,14 +13,12 @@ import {
   Trophy,
   Settings,
   LogOut,
-  Menu,
-  X,
   ChevronDown,
   School,
   Megaphone,
   // Bot, // descomenta junto com o nav item "Assistente IA"
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { buttonVariants } from '../ui/button'
 import type { SharedProps } from '../../lib/types'
 import { cn, ClientOnly } from '../../lib/utils'
@@ -31,6 +29,26 @@ import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
 import { NotificationBell } from '../notifications/notification-bell'
 import { useAuthUser } from '../../stores/auth_store'
 import { registry } from '@generated/registry/index'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from '../ui/sidebar'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
+import { AnimatePresence, motion } from 'framer-motion'
 
 interface NavItem {
   title: string
@@ -235,108 +253,142 @@ const navigation: NavItem[] = [
   },
 ]
 
-function NavItemComponent({
-  item,
-  isActive,
-  pathname,
-}: {
-  item: NavItem
-  isActive: boolean
-  pathname: string
-}) {
-  const [isOpen, setIsOpen] = useState(isActive)
-  const hasChildren = item.children && item.children.length > 0
-  const Icon = item.icon
+function NavItemWithChildren({ item, pathname }: { item: NavItem; pathname: string }) {
+  const isActive = item.children?.some((child) => pathname === child.href) ?? false
+  return (
+    <Collapsible defaultOpen={isActive} className="group/collapsible">
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            title={item.title}
+            className="flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm text-foreground ring-sidebar-ring outline-hidden transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-2 [&>svg]:size-4 [&>svg]:shrink-0"
+          >
+            <item.icon className="h-4 w-4" />
+            <span className="truncate">{item.title}</span>
+            <ChevronDown className="ml-auto h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.children?.map((child) => (
+              <SidebarMenuSubItem key={child.href}>
+                <SidebarMenuSubButton asChild isActive={pathname === child.href}>
+                  <Link route={child.route} routeParams={undefined}>
+                    <span className="truncate">{child.title}</span>
+                    {child.badge ? <span className="ml-auto">{child.badge}</span> : null}
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  )
+}
 
-  if (hasChildren) {
-    return (
-      <div>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={cn(
-            'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-            isActive
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <Icon className="h-4 w-4" />
-            {item.title}
-          </div>
-          <ChevronDown className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')} />
-        </button>
-        {isOpen && (
-          <div className="ml-6 mt-1 space-y-1">
-            {item.children!.map((child) =>
-              child.route ? (
-                <Link
-                  key={child.route}
-                  route={child.route}
-                  routeParams={undefined}
-                  className={cn(
-                    'flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
-                    pathname === child.href
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  )}
-                >
-                  <span>{child.title}</span>
-                  {child.badge}
-                </Link>
-              ) : (
-                <a
-                  key={child.href}
-                  href={child.href}
-                  className={cn(
-                    'flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
-                    pathname === child.href
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  )}
-                >
-                  <span>{child.title}</span>
-                  {child.badge}
-                </a>
-              )
-            )}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  if (item.route) {
-    return (
-      <Link
-        route={item.route}
-        routeParams={undefined}
-        className={cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-          pathname === item.href
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-        )}
-      >
-        <Icon className="h-4 w-4" />
-        {item.title}
-      </Link>
-    )
-  }
+function NavItemSimple({ item, pathname }: { item: NavItem; pathname: string }) {
+  const isActive = pathname === item.href
 
   return (
-    <a
-      href={item.href}
-      className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-        pathname === item.href
-          ? 'bg-primary/10 text-primary'
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-      )}
-    >
-      <Icon className="h-4 w-4" />
-      {item.title}
-    </a>
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+        <Link route={item.route} routeParams={undefined}>
+          <item.icon className="h-4 w-4" />
+          <span>{item.title}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
+function EscolaSidebar() {
+  const { url } = usePage<SharedProps>()
+  const user = useAuthUser()
+  const pathname = url.split('?')[0]
+  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER' || user?.role?.name === 'TEACHER'
+  const visibleNavigation = isSchoolTeacher
+    ? navigation.filter((item) => item.title === 'Pedagógico')
+    : navigation
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild tooltip="Anua">
+              <Link route="web.escola.dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <School className="size-5" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-bold text-lg">Anua</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <div className="group-data-[collapsible=icon]:hidden">
+          <ClientOnly
+            fallback={
+              <div className="px-4 py-3">
+                <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
+              </div>
+            }
+          >
+            <SchoolGroupSwitcher />
+          </ClientOnly>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {visibleNavigation.map((item) =>
+                item.children && item.children.length > 0 ? (
+                  <NavItemWithChildren key={item.href} item={item} pathname={pathname} />
+                ) : (
+                  <NavItemSimple key={item.href} item={item} pathname={pathname} />
+                )
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <div className="mt-2 border-t pt-2 group-data-[collapsible=icon]:hidden">
+          <SidebarAcademicPeriods />
+        </div>
+      </SidebarContent>
+
+      <SidebarFooter className="border-t">
+        <div className="flex w-full items-center gap-3 rounded-md p-2 group-data-[collapsible=icon]:p-0">
+          <div className="flex aspect-square size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            {user?.name?.charAt(0).toUpperCase() || 'U'}
+          </div>
+          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium truncate">{user?.name}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {formatRoleName(user?.role?.name)}
+            </p>
+          </div>
+        </div>
+        <Link
+          route="api.v1.auth.logout"
+          className={cn(
+            buttonVariants({ variant: 'outline', size: 'sm' }),
+            'w-full justify-start group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0'
+          )}
+          title="Sair"
+        >
+          <LogOut className="h-4 w-4 group-data-[collapsible=icon]:mr-0 mr-2" />
+          <span className="group-data-[collapsible=icon]:hidden">Sair</span>
+        </Link>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
   )
 }
 
@@ -367,131 +419,69 @@ function UnreadMessagesBadge() {
 
 type EscolaLayoutProps = PropsWithChildren<{
   topbarActions?: ReactNode
+  /**
+   * Painel inline à direita do main em telas md+. Empurra o conteúdo invés
+   * de sobrepor. Em mobile, esconde — quem chama deve usar Sheet bottom.
+   */
+  rightPane?: ReactNode
 }>
 
-export function EscolaLayout({ children, topbarActions }: EscolaLayoutProps) {
-  const { url } = usePage<SharedProps>()
-  const user = useAuthUser()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const pathname = url.split('?')[0]
-  const isSchoolTeacher = user?.role?.name === 'SCHOOL_TEACHER' || user?.role?.name === 'TEACHER'
-  const visibleNavigation = isSchoolTeacher
-    ? navigation.filter((item) => item.title === 'Pedagógico')
-    : navigation
+function readSidebarCookie(): boolean {
+  if (typeof document === 'undefined') return true
+  const match = document.cookie.match(/(?:^|; )sidebar_state=([^;]*)/)
+  if (!match) return true
+  return match[1] === 'true'
+}
+
+export function EscolaLayout({ children, topbarActions, rightPane }: EscolaLayoutProps) {
+  // SidebarProvider só usa defaultOpen no primeiro render — depois ele controla
+  // estado próprio e grava cookie no toggle. SSR sempre vê `true` (sem document),
+  // então hidratamos a partir do cookie via useEffect e passamos open/onOpenChange
+  // pra evitar mismatch e ainda assim respeitar o estado salvo.
+  const [open, setOpen] = useState<boolean>(true)
+
+  useEffect(() => {
+    setOpen(readSidebarCookie())
+  }, [])
 
   return (
     <PostHogProvider>
-      <div className="h-screen flex flex-col bg-background overflow-hidden">
-        <ImpersonationBanner />
-        <div className="flex min-h-0 flex-1 overflow-hidden">
-          {/* Mobile sidebar backdrop */}
-          {sidebarOpen && (
+      <SidebarProvider open={open} onOpenChange={setOpen}>
+        <EscolaSidebar />
+        <SidebarInset className="flex h-screen min-h-0 flex-col overflow-hidden">
+          <ImpersonationBanner />
+          <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 lg:px-6">
+            <SidebarTrigger className="-ml-1" />
             <div
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
-
-          {/* Sidebar */}
-          <aside
-            className={cn(
-              'fixed inset-y-0 left-0 z-50 w-64 bg-card border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto',
-              sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-            )}
-          >
-            <div className="flex h-full flex-col">
-              {/* Logo */}
-              <div className="flex h-14 items-center border-b px-4">
-                <Link route="web.escola.dashboard" className="flex items-center gap-2">
-                  <School className="h-6 w-6 text-primary" />
-                  <span className="font-bold text-lg">Anua</span>
-                </Link>
-                <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* School switcher */}
-              <ClientOnly
-                fallback={
-                  <div className="border-b px-4 py-3">
-                    <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
-                  </div>
-                }
-              >
-                <SchoolGroupSwitcher />
-              </ClientOnly>
-
-              {/* Navigation */}
-              <nav className="flex-1 overflow-y-auto px-3 py-4">
-                <div className="space-y-1">
-                  {visibleNavigation.map((item) => {
-                    const isActive =
-                      pathname === item.href ||
-                      (item.children?.some((child) => pathname === child.href) ?? false)
-                    return (
-                      <NavItemComponent
-                        key={item.href}
-                        item={item}
-                        isActive={isActive}
-                        pathname={pathname}
-                      />
-                    )
-                  })}
-                </div>
-
-                {/* Academic Periods with Classes */}
-                <div className="mt-4 border-t pt-4">
-                  <SidebarAcademicPeriods />
-                </div>
-              </nav>
-
-              {/* User section */}
-              <div className="border-t p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {formatRoleName(user?.role?.name)}
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  route="api.v1.auth.logout"
-                  className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-full mt-3')}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sair
-                </Link>
-              </div>
+              data-testid="escola-layout-topbar-actions"
+              className="ml-auto flex items-center gap-2"
+            >
+              {topbarActions}
+              <NotificationBell allNotificationsRoute="web.escola.notificacoes" />
             </div>
-          </aside>
-
-          {/* Main content */}
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:pl-0">
-            {/* Top bar */}
-            <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 lg:px-6">
-              <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-                <Menu className="h-5 w-5" />
-              </button>
-
-              <div
-                data-testid="escola-layout-topbar-actions"
-                className="ml-auto flex items-center gap-2"
-              >
-                {topbarActions}
-                <NotificationBell allNotificationsRoute="web.escola.notificacoes" />
-              </div>
-            </header>
-
-            {/* Page content */}
+          </header>
+          <div className="flex min-h-0 flex-1">
             <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+            <AnimatePresence initial={false}>
+              {rightPane ? (
+                <motion.aside
+                  key="escola-right-pane"
+                  // Inner div trava a largura em 480px pra que o conteúdo
+                  // não reflue enquanto a aside externa anima 0→480; outer
+                  // overflow-hidden clipa durante a transição.
+                  className="hidden shrink-0 flex-col overflow-hidden border-l bg-card md:flex"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 480, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <div className="flex h-full w-[480px] flex-col">{rightPane}</div>
+                </motion.aside>
+              ) : null}
+            </AnimatePresence>
           </div>
-        </div>
-      </div>
+        </SidebarInset>
+      </SidebarProvider>
     </PostHogProvider>
   )
 }

@@ -12,6 +12,12 @@ import {
   type TabFilterState,
 } from '~/lib/contextual-prompts'
 
+type AskAnuaPanelProps = {
+  filters: TabFilterState
+  labels: FilterLabels
+  onClose: () => void
+}
+
 type AskAnuaSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -44,14 +50,16 @@ function createAndStoreThread(schoolId: string): string {
   return id
 }
 
-export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaSheetProps) {
+/**
+ * Conteúdo puro do "Perguntar ao Anuá" — header + AiChatPane.
+ * Use direto (inline) em desktop, ou envelopado em <AskAnuaSheet/> em mobile.
+ */
+export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
   const user = useAuthUser()
-  const isMobile = useIsMobile()
   const schoolId = user?.school?.id ?? ''
 
   // null até o effect rodar no client; AiChatPane só renderiza quando tem id.
-  // Isso evita gerar UUIDs descartáveis no SSR e elimina a hydration mismatch
-  // se algum dia o Sheet abrir por default.
+  // Isso evita gerar UUIDs descartáveis no SSR e elimina a hydration mismatch.
   const [threadId, setThreadId] = useState<string | null>(null)
   const [isFresh, setIsFresh] = useState<boolean>(true)
 
@@ -113,6 +121,63 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
   const contextLabel = formatContextLabel(filters, labels)
 
   return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <Sparkles className="h-4 w-4 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-foreground">Perguntar ao Anuá</h2>
+            <p className="truncate text-xs text-muted-foreground">{contextLabel}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleNewConversation}
+            aria-label="Nova conversa"
+            title="Nova conversa"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            aria-label="Fechar"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <div className="flex-1 min-h-0">
+        {threadId && (
+          <AiChatPane
+            key={threadId}
+            threadId={threadId}
+            persona="gestor"
+            isNewThread={isFresh}
+            hideHeader
+            screen={screen}
+            surface="sheet"
+            suggestions={suggestions}
+            userName={user?.name ?? undefined}
+            onPersisted={handlePersisted}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaSheetProps) {
+  const isMobile = useIsMobile()
+
+  return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
@@ -123,56 +188,7 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
         }
         showCloseButton={false}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold text-foreground">
-                Perguntar ao Anuá
-              </h2>
-              <p className="truncate text-xs text-muted-foreground">{contextLabel}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleNewConversation}
-              aria-label="Nova conversa"
-              title="Nova conversa"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => onOpenChange(false)}
-              aria-label="Fechar"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        <div className="flex-1 min-h-0">
-          {threadId && (
-            <AiChatPane
-              key={threadId}
-              threadId={threadId}
-              persona="gestor"
-              isNewThread={isFresh}
-              hideHeader
-              screen={screen}
-              surface="sheet"
-              suggestions={suggestions}
-              userName={user?.name ?? undefined}
-              onPersisted={handlePersisted}
-            />
-          )}
-        </div>
+        <AskAnuaPanel filters={filters} labels={labels} onClose={() => onOpenChange(false)} />
       </SheetContent>
     </Sheet>
   )
