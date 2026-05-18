@@ -7,9 +7,8 @@ import { ScrollArea } from '../ui/scroll-area'
 import { cn } from '../../lib/utils'
 import { api } from '~/lib/api'
 
-
 function formatRelative(iso: string | { toISO?: () => string | null }): string {
-  const raw = typeof iso === 'string' ? iso : iso.toISO?.() ?? ''
+  const raw = typeof iso === 'string' ? iso : (iso.toISO?.() ?? '')
   if (!raw) return ''
   const then = new Date(raw).getTime()
   const minutes = Math.floor((Date.now() - then) / 60_000)
@@ -121,9 +120,7 @@ export function AiThreadList({ selectedId, onSelect, onNew }: AiThreadListProps)
                             isSelected ? 'text-foreground font-medium' : 'text-foreground/80'
                           )}
                         >
-                          <span className="block truncate">
-                            {thread.title ?? 'Nova conversa'}
-                          </span>
+                          <span className="block truncate">{thread.title ?? 'Nova conversa'}</span>
                           <span className="block text-[10px] text-muted-foreground mt-0.5">
                             {formatRelative(thread.updatedAt)}
                           </span>

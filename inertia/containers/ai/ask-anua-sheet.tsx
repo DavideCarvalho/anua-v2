@@ -105,10 +105,7 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
     filters.classId,
   ])
 
-  const suggestions = useMemo(
-    () => buildContextualPrompts(filters, labels),
-    [filters, labels]
-  )
+  const suggestions = useMemo(() => buildContextualPrompts(filters, labels), [filters, labels])
 
   const contextLabel = formatContextLabel(filters, labels)
 
@@ -116,11 +113,7 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={
-          isMobile
-            ? 'h-[90vh] w-full p-0'
-            : 'w-full p-0 sm:max-w-[560px]'
-        }
+        className={isMobile ? 'h-[90vh] w-full p-0' : 'w-full p-0 sm:max-w-[560px]'}
         showCloseButton={false}
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
@@ -129,9 +122,7 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0">
-              <h2 className="truncate text-sm font-semibold text-foreground">
-                Perguntar ao Anuá
-              </h2>
+              <h2 className="truncate text-sm font-semibold text-foreground">Perguntar ao Anuá</h2>
               <p className="truncate text-xs text-muted-foreground">{contextLabel}</p>
             </div>
           </div>

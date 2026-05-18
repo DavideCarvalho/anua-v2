@@ -54,8 +54,7 @@ export function EnrollmentActionRequiredBanner({ schoolId, academicPeriodId }: P
         n === 1
           ? 'matrícula esperando agendar a assinatura presencial'
           : 'matrículas esperando agendar a assinatura presencial',
-      helper:
-        'Documentos aprovados. Entre em contato com o responsável pra marcar a assinatura.',
+      helper: 'Documentos aprovados. Entre em contato com o responsável pra marcar a assinatura.',
     },
     {
       key: 'class',
@@ -75,8 +74,7 @@ export function EnrollmentActionRequiredBanner({ schoolId, academicPeriodId }: P
         n === 1
           ? 'matrícula com taxa pendente que você precisa cobrar manualmente'
           : 'matrículas com taxa pendente que você precisa cobrar manualmente',
-      helper:
-        'Configure um gateway de pagamento online pra gerar cobranças automáticas.',
+      helper: 'Configure um gateway de pagamento online pra gerar cobranças automáticas.',
       cta: { label: 'Configurar pagamento', href: '/escola/configuracoes' },
     },
     {

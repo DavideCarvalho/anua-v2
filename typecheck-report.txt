@@ -1,0 +1,10 @@
+$ tsc --noEmit && tsc --noEmit --project inertia/tsconfig.json
+inertia/containers/enrollment-management/enrollment-action-required-banner.tsx(53,15): error TS7006: Parameter 'n' implicitly has an 'any' type.
+inertia/containers/enrollment-management/enrollment-action-required-banner.tsx(63,15): error TS7006: Parameter 'n' implicitly has an 'any' type.
+inertia/containers/enrollment-management/enrollment-action-required-banner.tsx(73,15): error TS7006: Parameter 'n' implicitly has an 'any' type.
+inertia/containers/enrollment-management/enrollment-action-required-banner.tsx(84,15): error TS7006: Parameter 'n' implicitly has an 'any' type.
+inertia/containers/responsavel/matricula-axes-container.tsx(180,13): error TS2322: Type 'UseQueryResult<{ summary: { pending: number; approved: number; total: number; rejected: number; requiredMissing: number; }; submissions: { id: string; status: StudentDocumentSubmissionStatus; ... 7 more ...; reviewerName: string | null; }[]; missingDocuments: { ...; }[]; }, unknown>' is not assignable to type 'DocsQuery'.
+  Type 'QueryObserverRefetchErrorResult<{ summary: { pending: number; approved: number; total: number; rejected: number; requiredMissing: number; }; submissions: { id: string; status: StudentDocumentSubmissionStatus; ... 7 more ...; reviewerName: string | null; }[]; missingDocuments: { ...; }[]; }, unknown>' is not assignable to type 'DocsQuery'.
+    Type 'QueryObserverRefetchErrorResult<{ summary: { pending: number; approved: number; total: number; rejected: number; requiredMissing: number; }; submissions: { id: string; status: StudentDocumentSubmissionStatus; ... 7 more ...; reviewerName: string | null; }[]; missingDocuments: { ...; }[]; }, unknown>' is not assignable to type 'QueryObserverRefetchErrorResult<{ summary: { pending: number; approved: number; total: number; rejected: number; requiredMissing: number; }; submissions: { id: string; status: StudentDocumentSubmissionStatus; ... 7 more ...; reviewerName: string | null; }[]; missingDocuments: { ...; }[]; }, Error>'.
+      Type 'unknown' is not assignable to type 'Error'.
+[ELIFECYCLE] Command failed with exit code 2.

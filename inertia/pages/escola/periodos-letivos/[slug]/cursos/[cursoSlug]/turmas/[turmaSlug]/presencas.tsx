@@ -7,7 +7,11 @@ import { TurmaLayout } from '../../../../../../../../components/layouts/turma-la
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { AttendancesTable, LessonsTable, NewAttendanceModal } from '../../../../../../../../containers/turma'
+import {
+  AttendancesTable,
+  LessonsTable,
+  NewAttendanceModal,
+} from '../../../../../../../../containers/turma'
 import { SubPeriodFilter } from '../../../../../../../../containers/academic-periods/components/sub-period-filter'
 import { api } from '~/lib/api'
 

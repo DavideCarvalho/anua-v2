@@ -114,9 +114,7 @@ export function ToolStepGroup({ parts }: { parts: ToolUIPart[] }) {
   const erroredCount = parts.filter(
     (p) => p.state === 'output-error' || p.state === 'output-denied'
   ).length
-  const inFlight = parts.some(
-    (p) => p.state === 'input-streaming' || p.state === 'input-available'
-  )
+  const inFlight = parts.some((p) => p.state === 'input-streaming' || p.state === 'input-available')
   const allDone = !inFlight
 
   // Single step: flat row, no collapse. The tool's own label ("Estatísticas
@@ -130,10 +128,7 @@ export function ToolStepGroup({ parts }: { parts: ToolUIPart[] }) {
       <div className="my-2 inline-flex items-center gap-2 rounded-md border border-border bg-card/50 px-3 py-1.5 text-xs">
         <StepIcon status={status} />
         <span
-          className={cn(
-            'font-medium',
-            status === 'error' ? 'text-destructive' : 'text-foreground'
-          )}
+          className={cn('font-medium', status === 'error' ? 'text-destructive' : 'text-foreground')}
         >
           {toolLabel(toolName, status)}
         </span>

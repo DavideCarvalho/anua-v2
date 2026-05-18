@@ -143,7 +143,7 @@ export function AiActionCanvas({ threadId, toolPart, onClose }: AiActionCanvasPr
     queryFn: async () => {
       const res = await fetch('/api/v1/ai/resolve-names', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(idsForResolve),
       })
@@ -158,7 +158,7 @@ export function AiActionCanvas({ threadId, toolPart, onClose }: AiActionCanvasPr
     enabled: !!fields.classId,
     staleTime: 60_000,
   })
-  const className = fields.classId ? resolved?.classes?.[fields.classId]?.name ?? null : null
+  const className = fields.classId ? (resolved?.classes?.[fields.classId]?.name ?? null) : null
 
   // Drag handler — pointer-based, persistido em localStorage.
   const [pos, setPos] = useState<Position>(() => loadPosition())

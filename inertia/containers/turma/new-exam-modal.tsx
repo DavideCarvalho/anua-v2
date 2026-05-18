@@ -221,7 +221,8 @@ export function NewExamModal({
       type: examData?.type ?? 'WRITTEN',
       description: examData?.description ?? '',
       subjectId: examData?.subject?.id ?? '',
-      subPeriodId: examData && 'subPeriodId' in examData ? examData.subPeriodId : getCurrentSubPeriodId(),
+      subPeriodId:
+        examData && 'subPeriodId' in examData ? examData.subPeriodId : getCurrentSubPeriodId(),
     })
   }, [open, examData])
 

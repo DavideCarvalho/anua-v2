@@ -201,23 +201,22 @@ export default function EscolaDashboard() {
         ? `${selectedClass.levelName} - ${selectedClass.name}`
         : 'Todas as turmas'
 
-  const askAnuaLabels: FilterLabels = useMemo(() => ({
-    academicPeriodName:
-      filters.academicPeriodId === 'all'
-        ? undefined
-        : academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name,
-    courseName:
-      filters.courseId === 'all'
-        ? undefined
-        : courses.find((c) => c.courseId === filters.courseId)?.name,
-    levelName:
-      filters.levelId === 'all'
-        ? undefined
-        : levels.find((l) => l.id === filters.levelId)?.name,
-    className: selectedClass
-      ? `${selectedClass.levelName} - ${selectedClass.name}`
-      : undefined,
-  }), [filters, academicPeriods, courses, levels, selectedClass])
+  const askAnuaLabels: FilterLabels = useMemo(
+    () => ({
+      academicPeriodName:
+        filters.academicPeriodId === 'all'
+          ? undefined
+          : academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name,
+      courseName:
+        filters.courseId === 'all'
+          ? undefined
+          : courses.find((c) => c.courseId === filters.courseId)?.name,
+      levelName:
+        filters.levelId === 'all' ? undefined : levels.find((l) => l.id === filters.levelId)?.name,
+      className: selectedClass ? `${selectedClass.levelName} - ${selectedClass.name}` : undefined,
+    }),
+    [filters, academicPeriods, courses, levels, selectedClass]
+  )
 
   useEffect(() => {
     const storedPreference = window.localStorage.getItem(HIDE_FINANCIAL_INFO_STORAGE_KEY)

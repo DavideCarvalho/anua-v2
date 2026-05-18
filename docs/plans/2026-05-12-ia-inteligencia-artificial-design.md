@@ -5,19 +5,20 @@
 O Anuá já se posiciona no mercado como um sistema de gestão escolar com IA, mas atualmente toda a "inteligência" é baseada em queries SQL com regras fixas (thresholds de notas, frequência, inadimplência). Não há integração com LLMs.
 
 A oportunidade é dupla:
+
 - **Comunicação Inteligente (A)**: Transformar alertas SQL em mensagens prontas em linguagem natural, personalizadas para cada pai/professor/gestor
 - **Analytics Narrativo + Preditivo (C)**: Adicionar narrativa em linguagem natural aos insights existentes e prever evasão/inadimplência
 
 ## Stack
 
-| Componente | Tecnologia |
-|---|---|
+| Componente   | Tecnologia                                        |
+| ------------ | ------------------------------------------------- |
 | Provider LLM | CroF AI (OpenAI-compatible, `https://crof.ai/v1`) |
-| AI SDK | `ai` + `@ai-sdk/openai` (Vercel AI SDK) |
-| Cache/Stream | Redis 7.4 (`@adonisjs/redis`) |
-| Fila | `@adonisjs/queue` (database driver, já existente) |
-| Backend | AdonisJS 7 |
-| Frontend | React 19 + Inertia.js 2 |
+| AI SDK       | `ai` + `@ai-sdk/openai` (Vercel AI SDK)           |
+| Cache/Stream | Redis 7.4 (`@adonisjs/redis`)                     |
+| Fila         | `@adonisjs/queue` (database driver, já existente) |
+| Backend      | AdonisJS 7                                        |
+| Frontend     | React 19 + Inertia.js 2                           |
 
 ## Infraestrutura — Redis
 
@@ -238,7 +239,7 @@ export class AiService {
     return result.toDataStreamResponse()
   }
 
-  async generate(systemPrompt: string, messages: Array<{role: string; content: string}>) {
+  async generate(systemPrompt: string, messages: Array<{ role: string; content: string }>) {
     const { text } = await generateText({
       model: getModel('gpt-4o-mini'), // modelo mais barato pra tasks simples
       system: systemPrompt,
@@ -251,9 +252,9 @@ export class AiService {
 
 ### Por que `generateText` vs `streamText`?
 
-| Método | Uso |
-|---|---|
-| `streamText` | Chat interativo (SSE pro frontend). O usuário vê a resposta chegando. |
+| Método         | Uso                                                                           |
+| -------------- | ----------------------------------------------------------------------------- |
+| `streamText`   | Chat interativo (SSE pro frontend). O usuário vê a resposta chegando.         |
 | `generateText` | Jobs assíncronos (gerar narrativa, sumário diário). Não precisa de streaming. |
 
 Usaremos `gpt-4o-mini` (mais barato) para jobs e narrativas, e `gpt-4o` para chat interativo.
@@ -279,7 +280,13 @@ Sua função é analisar dados, gerar insights acionáveis e sugerir comunicaç�
 Seja direto, objetivo e baseie-se sempre nos dados reais da escola.
 Quando sugerir uma comunicação para um pai/responsável, seja empático e profissional.
 Sempre que possível, sugira ações concretas que o gestor pode tomar.`,
-    allowedTools: ['getSchoolStats', 'getStudentAlerts', 'getFinancialData', 'getPrediction', 'sendCommunication'],
+    allowedTools: [
+      'getSchoolStats',
+      'getStudentAlerts',
+      'getFinancialData',
+      'getPrediction',
+      'sendCommunication',
+    ],
   },
 
   comunicador: {
@@ -315,7 +322,7 @@ export function tool(config: {
       description: config.description,
       parameters: config.parameters,
       execute: async (args) => config.execute(args, {} as AiContext),
-    })
+    }),
   }
 }
 ```
@@ -327,14 +334,15 @@ import { tool } from '../tool.js'
 
 export const getStudentAlerts = tool({
   name: 'getStudentAlerts',
-  description: 'Obtém alertas pedagógicos atuais: alunos com risco por nota, frequência, inadimplência',
+  description:
+    'Obtém alertas pedagógicos atuais: alunos com risco por nota, frequência, inadimplência',
   parameters: z.object({
     schoolId: z.string().describe('ID da escola'),
     limit: z.number().default(10).describe('Máximo de alertas'),
   }),
   execute: async ({ schoolId, limit }) => {
     const controller = new GetPedagogicalAlertsController()
-    const alerts = await controller.handle({ 
+    const alerts = await controller.handle({
       selectedSchoolIds: [schoolId],
       request: { qs: () => ({}) } as any,
     } as any)
@@ -359,12 +367,15 @@ class ToolRegistry {
 
   forPersona(personaId: string, ctx: AiContext) {
     const names = this.toolNames.get(personaId) || []
-    return names.reduce((acc, name) => {
-      const key = `${personaId}:${name}`
-      const tool = this.tools.get(key)
-      if (tool) Object.assign(acc, tool)
-      return acc
-    }, {} as Record<string, any>)
+    return names.reduce(
+      (acc, name) => {
+        const key = `${personaId}:${name}`
+        const tool = this.tools.get(key)
+        if (tool) Object.assign(acc, tool)
+        return acc
+      },
+      {} as Record<string, any>
+    )
   }
 }
 
@@ -409,10 +420,9 @@ export class GenerateDailySummary extends BaseJob {
     const insights = await getInsights(schoolId)
 
     // 2. Mandar pro LLM gerar narrativa
-    const narrative = await aiService.generate(
-      persona.gestor.systemPrompt,
-      [{ role: 'user', content: `Resuma os insights de hoje:\n${JSON.stringify(insights)}` }]
-    )
+    const narrative = await aiService.generate(persona.gestor.systemPrompt, [
+      { role: 'user', content: `Resuma os insights de hoje:\n${JSON.stringify(insights)}` },
+    ])
 
     // 3. Salvar no banco
     await AiNarrative.updateOrCreate(
@@ -424,6 +434,7 @@ export class GenerateDailySummary extends BaseJob {
 ```
 
 Agendado no `start/scheduler.ts`:
+
 ```ts
 // Todo dia às 06:00
 Schedule.schedule('0 6 * * *', 'app/ai/jobs/generate_daily_summary')
@@ -434,6 +445,7 @@ Schedule.schedule('0 6 * * *', 'app/ai/jobs/generate_daily_summary')
 ### Narrativa nos Insights
 
 Hoje o endpoint `GET /api/v1/dashboard/insights` retorna:
+
 ```json
 {
   "insights": [

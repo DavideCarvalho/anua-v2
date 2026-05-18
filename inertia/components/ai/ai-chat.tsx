@@ -23,9 +23,7 @@ export function AiChat({ persona, initialThreadId = null }: AiChatProps) {
   //    that locally without touching the URL.
   //  - `/escola/ia/conversa/:id` (selectedId set) is the persisted state.
   const [selectedId, setSelectedId] = useState<string | null>(initialThreadId)
-  const [draftId, setDraftId] = useState<string>(() =>
-    initialThreadId ? '' : crypto.randomUUID()
-  )
+  const [draftId, setDraftId] = useState<string>(() => (initialThreadId ? '' : crypto.randomUUID()))
 
   function handleNew() {
     setSelectedId(null)

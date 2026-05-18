@@ -125,11 +125,7 @@ const QUOTA_BADGE: Record<
   exceeded: { label: 'Estourou', variant: 'destructive' },
 }
 
-function SchoolUsageTable({
-  rows,
-}: {
-  rows: SchoolRow[]
-}) {
+function SchoolUsageTable({ rows }: { rows: SchoolRow[] }) {
   const maxWindow = Math.max(...rows.map((r) => r.totalTokens), 1)
   return (
     <Card>
@@ -141,9 +137,7 @@ function SchoolUsageTable({
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
-          <div className="py-6 text-center text-xs text-muted-foreground">
-            Sem dados no período
-          </div>
+          <div className="py-6 text-center text-xs text-muted-foreground">Sem dados no período</div>
         ) : (
           <div className="space-y-2.5">
             {rows.map((r) => {
@@ -156,7 +150,10 @@ function SchoolUsageTable({
               return (
                 <div key={r.key} className="space-y-1">
                   <div className="flex items-baseline justify-between gap-2 text-xs">
-                    <span className="flex items-center gap-2 truncate text-foreground" title={r.label}>
+                    <span
+                      className="flex items-center gap-2 truncate text-foreground"
+                      title={r.label}
+                    >
                       <span className="truncate">{r.label}</span>
                       <Badge variant={badge.variant} className="text-[9px]">
                         {badge.label}
@@ -263,9 +260,8 @@ export default function AiTokensPage() {
               Consumo de IA
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tokens gastos pelo assistente (chat, geração de título, sumarização) por
-              modelo, propósito, escola e usuário. Dados em tempo real conforme as
-              requisições acontecem.
+              Tokens gastos pelo assistente (chat, geração de título, sumarização) por modelo,
+              propósito, escola e usuário. Dados em tempo real conforme as requisições acontecem.
             </p>
           </div>
           <div className="flex gap-1 rounded-md border border-border p-1">
@@ -308,16 +304,8 @@ export default function AiTokensPage() {
                 value={fmt(totals.totalTokens)}
                 hint={`${fmt(totals.count)} requisições`}
               />
-              <StatCard
-                icon={Cpu}
-                label="Input"
-                value={fmt(totals.inputTokens)}
-              />
-              <StatCard
-                icon={Cpu}
-                label="Output"
-                value={fmt(totals.outputTokens)}
-              />
+              <StatCard icon={Cpu} label="Input" value={fmt(totals.inputTokens)} />
+              <StatCard icon={Cpu} label="Output" value={fmt(totals.outputTokens)} />
               <StatCard
                 icon={Building2}
                 label="Escolas ativas"
