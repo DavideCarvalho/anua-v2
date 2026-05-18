@@ -5,6 +5,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import School from './school.js'
 import Contract from './contract.js'
 import StudentDocument from './student_document.js'
+import StudentDocumentSubmission from './student_document_submission.js'
 
 export default class ContractDocument extends BaseModel {
   static table = 'ContractDocument'
@@ -49,4 +50,7 @@ export default class ContractDocument extends BaseModel {
 
   @hasMany(() => StudentDocument, { foreignKey: 'contractDocumentId' })
   declare studentDocuments: HasMany<typeof StudentDocument>
+
+  @hasMany(() => StudentDocumentSubmission, { foreignKey: 'contractDocumentId' })
+  declare studentSubmissions: HasMany<typeof StudentDocumentSubmission>
 }

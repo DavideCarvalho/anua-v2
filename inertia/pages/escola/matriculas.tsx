@@ -21,6 +21,7 @@ import {
   EnrollmentByLevelTableSkeleton,
 } from '../../containers/enrollment-analytics/enrollment-by-level-table'
 import { EnrollmentsTable } from '../../containers/enrollment-management/enrollments-table'
+import { EnrollmentActionRequiredBanner } from '../../containers/enrollment-management/enrollment-action-required-banner'
 
 function EnrollmentsTableSkeleton() {
   return (
@@ -56,6 +57,8 @@ export default function MatriculasPage() {
           </h1>
           <p className="text-muted-foreground">Gerencie matrículas e acompanhe analytics</p>
         </div>
+
+        {schoolId && <EnrollmentActionRequiredBanner schoolId={schoolId} />}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>

@@ -49,9 +49,8 @@ function sanitizeHint(value: string): string {
   // Strip control chars (newlines, tabs, escape sequences) and cap at 80 chars.
   // The validator already enforces a stricter shape, but rendering raw
   // user-supplied strings into a system prompt warrants belt-and-braces.
-  return value
-    .replace(/[\x00-\x1f\x7f]/g, '')
-    .slice(0, 80)
+  // eslint-disable-next-line no-control-regex
+  return value.replace(/[\x00-\x1f\x7f]/g, '').slice(0, 80)
 }
 
 function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {

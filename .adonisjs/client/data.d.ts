@@ -37,6 +37,7 @@ import type CourseClassExpandedTransformer from '#transformers/course_class_expa
 import type CourseHasAcademicPeriodTransformer from '#transformers/course_has_academic_period_transformer'
 import type CourseTransformer from '#transformers/course_transformer'
 import type EmployeeListItemTransformer from '#transformers/employee_list_item_transformer'
+import type EnrollmentWithAxesTransformer from '#transformers/enrollment_with_axes_transformer'
 import type EventParentalConsentTransformer from '#transformers/event_parental_consent_transformer'
 import type EventParticipantTransformer from '#transformers/event_participant_transformer'
 import type EventTransformer from '#transformers/event_transformer'
@@ -69,6 +70,7 @@ import type PlatformSettingsTransformer from '#transformers/platform_settings_tr
 import type PostTransformer from '#transformers/post_transformer'
 import type PrintRequestTransformer from '#transformers/print_request_transformer'
 import type PurchaseRequestTransformer from '#transformers/purchase_request_transformer'
+import type ResponsavelDocumentsOverviewTransformer from '#transformers/responsavel_documents_overview_transformer'
 import type ResponsibleAddressTransformer from '#transformers/responsible_address_transformer'
 import type RoleTransformer from '#transformers/role_transformer'
 import type ScheduleConflictValidationTransformer from '#transformers/schedule_conflict_validation_transformer'
@@ -79,6 +81,7 @@ import type SchoolAnnouncementAudienceTransformer from '#transformers/school_ann
 import type SchoolAnnouncementRecipientTransformer from '#transformers/school_announcement_recipient_transformer'
 import type SchoolAnnouncementTransformer from '#transformers/school_announcement_transformer'
 import type SchoolChainTransformer from '#transformers/school_chain_transformer'
+import type SchoolEnrollmentInfoTransformer from '#transformers/school_enrollment_info_transformer'
 import type SchoolGroupTransformer from '#transformers/school_group_transformer'
 import type SchoolPartnerTransformer from '#transformers/school_partner_transformer'
 import type SchoolTransformer from '#transformers/school_transformer'
@@ -92,6 +95,8 @@ import type StoreSettlementTransformer from '#transformers/store_settlement_tran
 import type StoreTransformer from '#transformers/store_transformer'
 import type StudentAddressTransformer from '#transformers/student_address_transformer'
 import type StudentBalanceTransactionTransformer from '#transformers/student_balance_transaction_transformer'
+import type StudentDocumentFileTransformer from '#transformers/student_document_file_transformer'
+import type StudentDocumentSubmissionTransformer from '#transformers/student_document_submission_transformer'
 import type StudentDocumentTransformer from '#transformers/student_document_transformer'
 import type StudentEmergencyContactTransformer from '#transformers/student_emergency_contact_transformer'
 import type StudentGamificationTransformer from '#transformers/student_gamification_transformer'
@@ -246,6 +251,10 @@ export namespace Data {
   export namespace EmployeeListItem {
     export type Variants = InferVariants<EmployeeListItemTransformer>
   }
+  export type EnrollmentWithAxes = InferData<EnrollmentWithAxesTransformer>
+  export namespace EnrollmentWithAxes {
+    export type Variants = InferVariants<EnrollmentWithAxesTransformer>
+  }
   export type EventParentalConsent = InferData<EventParentalConsentTransformer>
   export namespace EventParentalConsent {
     export type Variants = InferVariants<EventParentalConsentTransformer>
@@ -374,6 +383,10 @@ export namespace Data {
   export namespace PurchaseRequest {
     export type Variants = InferVariants<PurchaseRequestTransformer>
   }
+  export type ResponsavelDocumentsOverview = InferData<ResponsavelDocumentsOverviewTransformer>
+  export namespace ResponsavelDocumentsOverview {
+    export type Variants = InferVariants<ResponsavelDocumentsOverviewTransformer>
+  }
   export type ResponsibleAddress = InferData<ResponsibleAddressTransformer>
   export namespace ResponsibleAddress {
     export type Variants = InferVariants<ResponsibleAddressTransformer>
@@ -413,6 +426,10 @@ export namespace Data {
   export type SchoolChain = InferData<SchoolChainTransformer>
   export namespace SchoolChain {
     export type Variants = InferVariants<SchoolChainTransformer>
+  }
+  export type SchoolEnrollmentInfo = InferData<SchoolEnrollmentInfoTransformer>
+  export namespace SchoolEnrollmentInfo {
+    export type Variants = InferVariants<SchoolEnrollmentInfoTransformer>
   }
   export type SchoolGroup = InferData<SchoolGroupTransformer>
   export namespace SchoolGroup {
@@ -465,6 +482,14 @@ export namespace Data {
   export type StudentBalanceTransaction = InferData<StudentBalanceTransactionTransformer>
   export namespace StudentBalanceTransaction {
     export type Variants = InferVariants<StudentBalanceTransactionTransformer>
+  }
+  export type StudentDocumentFile = InferData<StudentDocumentFileTransformer>
+  export namespace StudentDocumentFile {
+    export type Variants = InferVariants<StudentDocumentFileTransformer>
+  }
+  export type StudentDocumentSubmission = InferData<StudentDocumentSubmissionTransformer>
+  export namespace StudentDocumentSubmission {
+    export type Variants = InferVariants<StudentDocumentSubmissionTransformer>
   }
   export type StudentDocument = InferData<StudentDocumentTransformer>
   export namespace StudentDocument {

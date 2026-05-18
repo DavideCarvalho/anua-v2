@@ -1,7 +1,6 @@
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { useState } from 'react'
 import type { Route } from '@tuyau/core/types'
 
 import { buttonVariants, Button } from '~/components/ui/button'
@@ -31,7 +30,7 @@ import {
   type PedagogicalAlerts,
 } from '../pedagogical-alert-sheet'
 import type { AttentionItem } from './types'
-import { formatBRL, type EnrollmentFunnel, type OverdueAging } from './use-attention-items'
+import { formatBRL, type EnrollmentFunnel, type OverdueAging } from './use_attention_items'
 
 interface AttentionDrawerProps {
   item: AttentionItem | null
@@ -82,14 +81,16 @@ export function AttentionDrawer({
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>
-          <Link
-            route={item.route}
-            onClick={() => onOpenChange(false)}
-            className={cn(buttonVariants({ variant: 'default' }), 'gap-2')}
-          >
-            Abrir página de {item.destinationLabel}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          {item.route ? (
+            <Link
+              route={item.route}
+              onClick={() => onOpenChange(false)}
+              className={cn(buttonVariants({ variant: 'default' }), 'gap-2')}
+            >
+              Abrir página de {item.destinationLabel}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : null}
         </SheetFooter>
       </SheetContent>
     </Sheet>
@@ -175,7 +176,10 @@ function FinancialOverdueDetail({ aging }: FinancialOverdueDetailProps) {
   }
 
   const totalLoaded = payments.length
-  const totalKnown = aging?.totalCount ?? meta?.total ?? totalLoaded
+  // metadata is inferred via Tuyau as SimplePaginatorMetaKeys (keys-as-strings),
+  // but runtime values are numeric — coerce defensively.
+  const metaTotal = meta?.total === undefined ? undefined : Number(meta.total)
+  const totalKnown = aging?.totalCount ?? metaTotal ?? totalLoaded
   const hasMore = totalKnown > totalLoaded
 
   const buckets = BUCKET_ORDER.filter((b) => grouped[b].length > 0)

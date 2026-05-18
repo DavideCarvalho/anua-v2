@@ -846,6 +846,12 @@ const routes = {
     tokens: [{"old":"/responsavel/documentos","type":0,"val":"responsavel","end":""},{"old":"/responsavel/documentos","type":0,"val":"documentos","end":""}],
     types: placeholder as Registry['web.responsavel.documentos']['types'],
   },
+  'web.responsavel.matricula': {
+    methods: ["GET","HEAD"],
+    pattern: '/responsavel/matricula/:id',
+    tokens: [{"old":"/responsavel/matricula/:id","type":0,"val":"responsavel","end":""},{"old":"/responsavel/matricula/:id","type":0,"val":"matricula","end":""},{"old":"/responsavel/matricula/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['web.responsavel.matricula']['types'],
+  },
   'web.responsavel.ocorrencias': {
     methods: ["GET","HEAD"],
     pattern: '/responsavel/registro-diario',
@@ -1247,6 +1253,18 @@ const routes = {
     pattern: '/api/v1/responsavel/students/:studentId/documents',
     tokens: [{"old":"/api/v1/responsavel/students/:studentId/documents","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/documents","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/documents","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/documents","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/documents","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/documents","type":0,"val":"documents","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.student_documents']['types'],
+  },
+  'api.v1.responsavel.api.upload_student_document': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/students/:studentId/submissions/:submissionId/files',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":0,"val":"submissions","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":1,"val":"submissionId","end":""},{"old":"/api/v1/responsavel/students/:studentId/submissions/:submissionId/files","type":0,"val":"files","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.upload_student_document']['types'],
+  },
+  'api.v1.responsavel.api.enrollment_axes': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/matriculas/:matriculaId',
+    tokens: [{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"matriculas","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":1,"val":"matriculaId","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.enrollment_axes']['types'],
   },
   'api.v1.responsavel.api.student_occurrences': {
     methods: ["GET","HEAD"],
@@ -2495,6 +2513,12 @@ const routes = {
     pattern: '/api/v1/enrollments',
     tokens: [{"old":"/api/v1/enrollments","type":0,"val":"api","end":""},{"old":"/api/v1/enrollments","type":0,"val":"v1","end":""},{"old":"/api/v1/enrollments","type":0,"val":"enrollments","end":""}],
     types: placeholder as Registry['api.v1.enrollments.index']['types'],
+  },
+  'api.v1.enrollments.action_counts': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/enrollments/action-counts',
+    tokens: [{"old":"/api/v1/enrollments/action-counts","type":0,"val":"api","end":""},{"old":"/api/v1/enrollments/action-counts","type":0,"val":"v1","end":""},{"old":"/api/v1/enrollments/action-counts","type":0,"val":"enrollments","end":""},{"old":"/api/v1/enrollments/action-counts","type":0,"val":"action-counts","end":""}],
+    types: placeholder as Registry['api.v1.enrollments.action_counts']['types'],
   },
   'api.v1.enrollments.documents.update_status': {
     methods: ["PATCH"],

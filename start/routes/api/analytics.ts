@@ -47,9 +47,7 @@ export function registerAnalyticsApiRoutes() {
       router
         .get('/gamification/overview', [controllers.analytics.GetGamificationOverview])
         .as('analytics.gamification.overview')
-      router
-        .get('/hr/overview', [controllers.analytics.GetHrOverview])
-        .as('analytics.hr.overview')
+      router.get('/hr/overview', [controllers.analytics.GetHrOverview]).as('analytics.hr.overview')
       router
         .get('/class-performance', [controllers.analytics.GetClassPerformance])
         .as('analytics.class_performance')

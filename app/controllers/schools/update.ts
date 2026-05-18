@@ -4,6 +4,7 @@ import School from '#models/school'
 import { updateSchoolValidator } from '#validators/school'
 import AppException from '#exceptions/app_exception'
 import SchoolTransformer from '#transformers/school_transformer'
+import { getSignedAssetUrl } from '#lib/storage'
 
 export default class UpdateSchoolController {
   async handle({ params, request, response, selectedSchoolIds, serialize }: HttpContext) {
@@ -87,6 +88,8 @@ export default class UpdateSchoolController {
       await school.useTransaction(trx).save()
       return school
     })
+
+    updatedSchool.logoUrl = await getSignedAssetUrl(updatedSchool.logoUrl)
 
     return response.ok(await serialize(SchoolTransformer.transform(updatedSchool)))
   }

@@ -165,7 +165,9 @@ export default class WaWebhookTest extends BaseCommand {
         this.logger.success(
           `Webhook aceito (HTTP ${response.status})${responseText ? ` — body: ${responseText}` : ''}`
         )
-        this.logger.info('O job foi enfileirado — confira os logs da app/queue pra ver o processamento.')
+        this.logger.info(
+          'O job foi enfileirado — confira os logs da app/queue pra ver o processamento.'
+        )
       } else {
         this.logger.error(
           `Webhook rejeitou (HTTP ${response.status})${responseText ? `: ${responseText}` : ''}`

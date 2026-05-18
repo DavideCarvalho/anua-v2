@@ -18,7 +18,7 @@ const driveConfig = defineConfig({
       location: app.makePath('storage'),
       serveFiles: true,
       routeBasePath: '/uploads',
-      visibility: 'public',
+      visibility: 'private',
     }),
 
     ...(gcsBucket
@@ -26,7 +26,7 @@ const driveConfig = defineConfig({
           gcs: services.gcs({
             ...(gcsKeyFilename ? { keyFilename: gcsKeyFilename } : {}),
             bucket: gcsBucket,
-            visibility: 'public',
+            visibility: 'private',
             usingUniformAcl: true,
           }),
         }
@@ -43,7 +43,7 @@ const driveConfig = defineConfig({
             region: s3Region || 'auto',
             endpoint: s3Endpoint,
             forcePathStyle: true,
-            visibility: 'public',
+            visibility: 'private',
           }),
         }
       : {}),

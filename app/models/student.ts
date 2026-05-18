@@ -3,6 +3,7 @@ import { v7 as uuidv7 } from 'uuid'
 import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 import StudentDocument from './student_document.js'
+import StudentDocumentSubmission from './student_document_submission.js'
 import StudentBalanceTransaction from './student_balance_transaction.js'
 import StudentPayment from './student_payment.js'
 import StudentHasResponsible from './student_has_responsible.js'
@@ -65,6 +66,9 @@ export default class Student extends BaseModel {
 
   @hasMany(() => StudentDocument, { foreignKey: 'studentId' })
   declare documents: HasMany<typeof StudentDocument>
+
+  @hasMany(() => StudentDocumentSubmission, { foreignKey: 'studentId' })
+  declare documentSubmissions: HasMany<typeof StudentDocumentSubmission>
 
   @hasMany(() => StudentBalanceTransaction, { foreignKey: 'studentId' })
   declare balanceTransactions: HasMany<typeof StudentBalanceTransaction>

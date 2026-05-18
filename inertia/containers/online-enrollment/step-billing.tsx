@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 import { useState } from 'react'
-import { CreditCard, FileText, Tag, Check, AlertCircle } from 'lucide-react'
+import { CreditCard, Tag, Check, AlertCircle, Loader2 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select'
-import { Alert, AlertDescription } from '../../components/ui/alert'
+import { cn } from '../../lib/utils'
 
 import type { EnrollmentFormData } from './enrollment-form'
 import type { Route } from '@tuyau/core/types'
@@ -28,6 +28,22 @@ interface StepBillingProps {
   contract: EnrollmentInfoContract
 }
 
+type PaymentMethod = 'BOLETO' | 'CREDIT_CARD' | 'PIX'
+
+const PAYMENT_METHODS: Array<{ value: PaymentMethod; label: string; description: string }> = [
+  { value: 'BOLETO', label: 'Boleto Bancário', description: 'Vencimento mensal' },
+  { value: 'PIX', label: 'PIX', description: 'Pagamento instantâneo' },
+  { value: 'CREDIT_CARD', label: 'Cartão de Crédito', description: 'Débito automático' },
+]
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value / 100)
+}
+
+function applyDiscount(value: number, pct: number) {
+  return value - value * (pct / 100)
+}
+
 export function StepBilling({ schoolId, contract }: StepBillingProps) {
   const { setValue, watch } = useFormContext<EnrollmentFormData>()
 
@@ -37,199 +53,198 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
     discountPercentage: number
     enrollmentDiscountPercentage: number
   } | null>(null)
+  const [scholarshipError, setScholarshipError] = useState<string | null>(null)
 
   const findScholarshipMutation = useMutation(
     api.api.v1.enrollment.findScholarship.mutationOptions()
   )
 
-  const paymentMethod = watch('billing.paymentMethod')
+  const paymentMethod = watch('billing.paymentMethod') as PaymentMethod
   const enrollmentValue = contract?.enrollmentValue ?? 0
   const monthlyValue = contract?.amount ?? 0
 
+  const enrollmentFinal = appliedScholarship
+    ? applyDiscount(enrollmentValue, appliedScholarship.enrollmentDiscountPercentage)
+    : enrollmentValue
+  const monthlyFinal = appliedScholarship
+    ? applyDiscount(monthlyValue, appliedScholarship.discountPercentage)
+    : monthlyValue
+
   const handleApplyScholarship = async () => {
     if (!scholarshipCode) return
-
+    setScholarshipError(null)
     try {
       const result = await findScholarshipMutation.mutateAsync({
         body: { code: scholarshipCode, schoolId },
       })
-
       setAppliedScholarship({
         name: result.name,
         discountPercentage: result.discountPercentage,
         enrollmentDiscountPercentage: result.enrollmentDiscountPercentage,
       })
       setValue('billing.scholarshipCode', scholarshipCode)
-    } catch (error) {
+    } catch {
       setAppliedScholarship(null)
       setValue('billing.scholarshipCode', undefined)
+      setScholarshipError('Código não encontrado ou inválido')
     }
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value / 100)
-  }
-
-  const calculateDiscountedValue = (value: number, discountPercentage: number) => {
-    return value - value * (discountPercentage / 100)
+  const handleRemoveScholarship = () => {
+    setAppliedScholarship(null)
+    setScholarshipCode('')
+    setValue('billing.scholarshipCode', undefined)
   }
 
   return (
     <div className="space-y-6">
-      {/* Contract Summary */}
+      {/* Card único: Resumo + Bolsa.
+          Antes eram 2 cards empilhados, virou seção interna separada por
+          border-t pra não nestar cards e respeitar DESIGN.md. */}
       {contract && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Resumo do Contrato
-            </CardTitle>
+            <CardTitle className="text-base">Resumo do contrato</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">Taxa de Matrícula</p>
-                <p className="text-2xl font-bold">
-                  {appliedScholarship
-                    ? formatCurrency(
-                        calculateDiscountedValue(
-                          enrollmentValue,
-                          appliedScholarship.enrollmentDiscountPercentage
-                        )
-                      )
-                    : formatCurrency(enrollmentValue)}
-                </p>
+          <CardContent className="space-y-6">
+            <dl className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-0.5">
+                <dt className="text-xs text-muted-foreground">Taxa de matrícula</dt>
+                <dd className="text-xl font-semibold tabular-nums text-primary">
+                  {formatCurrency(enrollmentFinal)}
+                </dd>
                 {appliedScholarship && appliedScholarship.enrollmentDiscountPercentage > 0 && (
-                  <p className="text-xs text-green-600">
-                    {appliedScholarship.enrollmentDiscountPercentage}% de desconto aplicado
+                  <p className="text-xs text-muted-foreground line-through tabular-nums">
+                    {formatCurrency(enrollmentValue)}
                   </p>
                 )}
               </div>
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">Mensalidade</p>
-                <p className="text-2xl font-bold">
-                  {appliedScholarship
-                    ? formatCurrency(
-                        calculateDiscountedValue(
-                          monthlyValue,
-                          appliedScholarship.discountPercentage
-                        )
-                      )
-                    : formatCurrency(monthlyValue)}
-                </p>
+              <div className="space-y-0.5">
+                <dt className="text-xs text-muted-foreground">Mensalidade</dt>
+                <dd className="text-xl font-semibold tabular-nums">
+                  {formatCurrency(monthlyFinal)}
+                </dd>
                 {appliedScholarship && appliedScholarship.discountPercentage > 0 && (
-                  <p className="text-xs text-green-600">
-                    {appliedScholarship.discountPercentage}% de desconto aplicado
+                  <p className="text-xs text-muted-foreground line-through tabular-nums">
+                    {formatCurrency(monthlyValue)}
                   </p>
                 )}
               </div>
+            </dl>
+
+            <div className="border-t border-border pt-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Tag className="h-3.5 w-3.5 text-muted-foreground" />
+                <Label htmlFor="scholarship-code" className="text-sm">
+                  Código de bolsa ou desconto
+                </Label>
+              </div>
+              {appliedScholarship ? (
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2 text-sm">
+                  <span className="flex items-center gap-2 min-w-0">
+                    <Check className="h-4 w-4 text-green-600 shrink-0" />
+                    <span className="truncate">
+                      <span className="font-medium">{appliedScholarship.name}</span> aplicado
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRemoveScholarship}
+                    className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline shrink-0"
+                  >
+                    Remover
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    id="scholarship-code"
+                    placeholder="Digite o código"
+                    value={scholarshipCode}
+                    onChange={(e) => {
+                      setScholarshipCode(e.target.value.toUpperCase())
+                      setScholarshipError(null)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleApplyScholarship()
+                      }
+                    }}
+                    aria-invalid={!!scholarshipError}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleApplyScholarship}
+                    disabled={!scholarshipCode || findScholarshipMutation.isPending}
+                  >
+                    {findScholarshipMutation.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      'Aplicar'
+                    )}
+                  </Button>
+                </div>
+              )}
+              {scholarshipError && (
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {scholarshipError}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Scholarship Code */}
+      {/* Forma de pagamento em lista compacta (era kit-card largo, virou
+          padrão Linear: linha por opção separada por border-b). */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Tag className="h-5 w-5" />
-            Código de Bolsa
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CreditCard className="h-4 w-4" />
+            Forma de pagamento
           </CardTitle>
-          <CardDescription>
-            Se você possui um código de bolsa ou desconto, insira-o abaixo
-          </CardDescription>
+          <CardDescription>Como você prefere pagar as mensalidades</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Digite o código da bolsa"
-              value={scholarshipCode}
-              onChange={(e) => setScholarshipCode(e.target.value.toUpperCase())}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleApplyScholarship}
-              disabled={!scholarshipCode || findScholarshipMutation.isPending}
-            >
-              Aplicar
-            </Button>
-          </div>
-
-          {appliedScholarship && (
-            <Alert className="mt-4 border-green-500">
-              <Check className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-600">
-                Bolsa "{appliedScholarship.name}" aplicada com sucesso!
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {findScholarshipMutation.isError && (
-            <Alert className="mt-4" variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>Código de bolsa inválido ou não encontrado.</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Payment Method */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Forma de Pagamento
-          </CardTitle>
-          <CardDescription>Escolha como deseja realizar os pagamentos</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-5">
           <RadioGroup
             value={paymentMethod}
-            onValueChange={(value) =>
-              setValue('billing.paymentMethod', value as 'BOLETO' | 'CREDIT_CARD' | 'PIX')
-            }
+            onValueChange={(value) => setValue('billing.paymentMethod', value as PaymentMethod)}
+            className="divide-y divide-border"
           >
-            <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted">
-              <RadioGroupItem value="BOLETO" id="boleto" />
-              <Label htmlFor="boleto" className="flex-1 cursor-pointer">
-                <span className="font-medium">Boleto Bancário</span>
-                <p className="text-sm text-muted-foreground">
-                  Pagamento via boleto com vencimento mensal
-                </p>
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted">
-              <RadioGroupItem value="PIX" id="pix" />
-              <Label htmlFor="pix" className="flex-1 cursor-pointer">
-                <span className="font-medium">PIX</span>
-                <p className="text-sm text-muted-foreground">Pagamento instantâneo via PIX</p>
-              </Label>
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted">
-              <RadioGroupItem value="CREDIT_CARD" id="credit_card" />
-              <Label htmlFor="credit_card" className="flex-1 cursor-pointer">
-                <span className="font-medium">Cartão de Crédito</span>
-                <p className="text-sm text-muted-foreground">
-                  Débito automático no cartão de crédito
-                </p>
-              </Label>
-            </div>
+            {PAYMENT_METHODS.map((method) => {
+              const selected = paymentMethod === method.value
+              return (
+                <Label
+                  key={method.value}
+                  htmlFor={method.value}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 py-2.5 transition-colors',
+                    'hover:text-foreground',
+                    !selected && 'text-muted-foreground'
+                  )}
+                >
+                  <RadioGroupItem value={method.value} id={method.value} />
+                  <span className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-foreground">{method.label}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{method.description}</span>
+                  </span>
+                </Label>
+              )
+            })}
           </RadioGroup>
 
           {paymentMethod === 'BOLETO' && (
-            <div className="space-y-2">
-              <Label>Dia de vencimento do boleto</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="payment-day" className="text-sm">
+                Dia de vencimento
+              </Label>
               <Select
                 value={String(watch('billing.paymentDay') || '')}
                 onValueChange={(value) => setValue('billing.paymentDay', Number(value))}
               >
-                <SelectTrigger className="w-48">
+                <SelectTrigger id="payment-day" className="w-48">
                   <SelectValue placeholder="Selecione o dia" />
                 </SelectTrigger>
                 <SelectContent>
@@ -243,33 +258,37 @@ export function StepBilling({ schoolId, contract }: StepBillingProps) {
             </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Parcelas da matrícula</Label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="enrollment-installments" className="text-sm">
+                Parcelas da matrícula
+              </Label>
               <Select
                 value={String(watch('billing.enrollmentInstallments') || 1)}
                 onValueChange={(value) => setValue('billing.enrollmentInstallments', Number(value))}
               >
-                <SelectTrigger>
+                <SelectTrigger id="enrollment-installments">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[1, 2, 3, 4, 5, 6].map((n) => (
                     <SelectItem key={n} value={String(n)}>
-                      {n}x {formatCurrency(enrollmentValue / n)}
+                      {n}x {formatCurrency(enrollmentFinal / n)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Parcelas da mensalidade</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="monthly-installments" className="text-sm">
+                Parcelas da mensalidade
+              </Label>
               <Select
                 value={String(watch('billing.installments') || 12)}
                 onValueChange={(value) => setValue('billing.installments', Number(value))}
               >
-                <SelectTrigger>
+                <SelectTrigger id="monthly-installments">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

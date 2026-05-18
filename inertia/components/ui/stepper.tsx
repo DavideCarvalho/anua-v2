@@ -1,5 +1,7 @@
 'use client'
 
+import { Check } from 'lucide-react'
+
 import { cn } from '~/lib/utils'
 
 interface Step {
@@ -9,64 +11,87 @@ interface Step {
 
 interface StepperProps {
   steps: Step[]
+  /** Index do step atual (0-based). */
   currentStep: number
+  /** Quando true, steps concluídos mostram check em vez do número. */
+  showCompletedCheckmark?: boolean
   className?: string
   onStepClick?: (stepIndex: number) => void
 }
 
-export function Stepper({ steps, currentStep, className, onStepClick }: StepperProps) {
+export function Stepper({
+  steps,
+  currentStep,
+  showCompletedCheckmark = false,
+  className,
+  onStepClick,
+}: StepperProps) {
   return (
-    <div className={cn('w-full', className)}>
-      <div className="flex justify-center gap-32">
-        {steps.map((step, index) => (
-          <div key={step.title} className="relative flex flex-col items-center">
-            <button
-              type="button"
-              onClick={() => onStepClick?.(index)}
-              disabled={!onStepClick}
-              className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors',
-                currentStep > index
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : currentStep === index
-                    ? 'border-primary text-primary'
-                    : 'border-muted-foreground/30 text-muted-foreground/50',
-                onStepClick && 'cursor-pointer hover:border-primary hover:text-primary'
-              )}
+    <nav aria-label="Progress" className={cn('w-full', className)}>
+      <ol className="flex items-start justify-between gap-2">
+        {steps.map((step, index) => {
+          const isComplete = currentStep > index
+          const isCurrent = currentStep === index
+          const isFuture = currentStep < index
+          return (
+            <li
+              key={step.title}
+              className="relative flex flex-1 flex-col items-center min-w-0"
             >
-              {index + 1}
-            </button>
-            <div className="mt-2 text-center">
-              <div
-                className={cn(
-                  'text-sm font-medium',
-                  currentStep >= index ? 'text-foreground' : 'text-muted-foreground/50'
-                )}
-              >
-                {step.title}
-              </div>
-              {step.description && (
+              {/* Connector line — fica atrás do círculo (z-0) */}
+              {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    'text-xs',
-                    currentStep >= index ? 'text-muted-foreground' : 'text-muted-foreground/50'
+                    'absolute top-4 left-[calc(50%+1rem)] right-[calc(-50%+1rem)] h-px transition-colors',
+                    isComplete ? 'bg-primary' : 'bg-border'
+                  )}
+                />
+              )}
+
+              <button
+                type="button"
+                onClick={() => onStepClick?.(index)}
+                disabled={!onStepClick}
+                aria-current={isCurrent ? 'step' : undefined}
+                className={cn(
+                  'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors bg-background',
+                  isComplete && 'border-primary bg-primary text-primary-foreground',
+                  isCurrent && 'border-primary text-primary',
+                  isFuture && 'border-border text-muted-foreground',
+                  onStepClick && 'cursor-pointer hover:border-primary hover:text-primary'
+                )}
+              >
+                {isComplete && showCompletedCheckmark ? (
+                  <Check className="h-4 w-4" strokeWidth={3} />
+                ) : (
+                  index + 1
+                )}
+              </button>
+
+              <div className="mt-2 text-center">
+                <p
+                  className={cn(
+                    'text-xs font-medium truncate',
+                    isFuture ? 'text-muted-foreground' : 'text-foreground'
                   )}
                 >
-                  {step.description}
-                </div>
-              )}
-            </div>
-            {index < steps.length - 1 && (
-              <div
-                className={cn(
-                  'absolute left-full top-4 h-0.5 w-32 -translate-y-1/2',
-                  currentStep > index ? 'bg-primary' : 'bg-muted-foreground/30'
+                  {step.title}
+                </p>
+                {step.description && (
+                  <p
+                    className={cn(
+                      'text-xs hidden sm:block truncate',
+                      isFuture ? 'text-muted-foreground/70' : 'text-muted-foreground'
+                    )}
+                  >
+                    {step.description}
+                  </p>
                 )}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+              </div>
+            </li>
+          )
+        })}
+      </ol>
+    </nav>
   )
 }

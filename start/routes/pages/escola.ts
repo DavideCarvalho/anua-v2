@@ -1,392 +1,236 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
 
-// Escola Pages
-const ShowEscolaDashboardPageController = () =>
-  import('#controllers/pages/escola/show_escola_dashboard_page_controller')
-const ShowAlunosPageController = () =>
-  import('#controllers/pages/escola/show_alunos_page_controller')
-const ShowProfessoresPageController = () =>
-  import('#controllers/pages/escola/show_professores_page_controller')
-const ShowTurmasPageController = () =>
-  import('#controllers/pages/escola/show_turmas_page_controller')
-const ShowCursosNiveisPageController = () =>
-  import('#controllers/pages/escola/show_cursos_niveis_page_controller')
-const ShowCantinaItensPageController = () =>
-  import('#controllers/pages/escola/show_cantina_itens_page_controller')
-const ShowCantinaPedidosPageController = () =>
-  import('#controllers/pages/escola/show_cantina_pedidos_page_controller')
-const ShowFaturasPageController = () =>
-  import('#controllers/pages/escola/show_faturas_page_controller')
-const ShowLojasPageController = () => import('#controllers/pages/escola/show_lojas_page_controller')
-const ShowLojaDetailPageController = () =>
-  import('#controllers/pages/escola/show_loja_detail_page_controller')
-const ShowFuncionariosPageController = () =>
-  import('#controllers/pages/escola/show_funcionarios_page_controller')
-const ShowMatriculasPageController = () =>
-  import('#controllers/pages/escola/show_matriculas_page_controller')
-const ShowNovaMatriculaPageController = () =>
-  import('#controllers/pages/escola/show_nova_matricula_page_controller')
-const ShowEditarAlunoPageController = () =>
-  import('#controllers/pages/escola/show_editar_aluno_page_controller')
-const ShowHistoricoFinanceiroPageController = () =>
-  import('#controllers/pages/escola/show_historico_financeiro_page_controller')
-const ShowContratosPageController = () =>
-  import('#controllers/pages/escola/show_contratos_page_controller')
-const ShowNovoContratoPageController = () =>
-  import('#controllers/pages/escola/show_novo_contrato_page_controller')
-const ShowEditarContratoPageController = () =>
-  import('#controllers/pages/escola/show_editar_contrato_page_controller')
-const ShowContratoAssinaturasPageController = () =>
-  import('#controllers/pages/escola/show_contrato_assinaturas_page_controller')
-const ShowContratoDocusealPageController = () =>
-  import('#controllers/pages/escola/show_contrato_docuseal_page_controller')
-const ShowContratoFinanceiroPageController = () =>
-  import('#controllers/pages/escola/show_contrato_financeiro_page_controller')
-const ShowBolsasPageController = () =>
-  import('#controllers/pages/escola/show_bolsas_page_controller')
-const ShowSegurosPageController = () =>
-  import('#controllers/pages/escola/show_seguros_page_controller')
-const ShowParceirosPageController = () =>
-  import('#controllers/pages/escola/show_parceiros_page_controller')
-const ShowMateriasPageController = () =>
-  import('#controllers/pages/escola/show_materias_page_controller')
-const ShowFolhaDePontoPageController = () =>
-  import('#controllers/pages/escola/show_folha_de_ponto_page_controller')
-const ShowImpressaoPageController = () =>
-  import('#controllers/pages/escola/show_impressao_page_controller')
-const ShowSolicitacoesDeCompraPageController = () =>
-  import('#controllers/pages/escola/show_solicitacoes_de_compra_page_controller')
-const ShowNotificacoesPageController = () =>
-  import('#controllers/pages/escola/show_notificacoes_page_controller')
-const ShowNotificacoesPreferenciasPageController = () =>
-  import('#controllers/pages/escola/show_notificacoes_preferencias_page_controller')
-const ShowComunicadosPageController = () =>
-  import('#controllers/pages/escola/show_comunicados_page_controller')
-const ShowNovoComunicadoPageController = () =>
-  import('#controllers/pages/escola/show_novo_comunicado_page_controller')
-const ShowEditarComunicadoPageController = () =>
-  import('#controllers/pages/escola/show_editar_comunicado_page_controller')
-const ShowNovoEventoPageController = () =>
-  import('#controllers/pages/escola/show_novo_evento_page_controller')
-const ShowEditarEventoPageController = () =>
-  import('#controllers/pages/escola/show_editar_evento_page_controller')
-const ShowEventoAutorizacoesPageController = () =>
-  import('#controllers/pages/escola/show_evento_autorizacoes_page_controller')
-const ShowMuralPageController = () => import('#controllers/pages/escola/show_mural_page_controller')
-const ShowDesempenhoPageController = () =>
-  import('#controllers/pages/escola/show_desempenho_page_controller')
-const ShowPeriodosLetivosPageController = () =>
-  import('#controllers/pages/escola/show_periodos_letivos_page_controller')
-const ShowNovoPeriodoLetivoPageController = () =>
-  import('#controllers/pages/escola/show_novo_periodo_letivo_page_controller')
-const ShowPeriodoLetivoPageController = () =>
-  import('#controllers/pages/escola/show_periodo_letivo_page_controller')
-const ShowEditarPeriodoLetivoPageController = () =>
-  import('#controllers/pages/escola/show_editar_periodo_letivo_page_controller')
-const ShowCursoVisaoGeralPageController = () =>
-  import('#controllers/pages/escola/show_curso_visao_geral_page_controller')
-const ShowCursoTurmasPageController = () =>
-  import('#controllers/pages/escola/show_curso_turmas_page_controller')
-const ShowTurmaAtividadesPageController = () =>
-  import('#controllers/pages/escola/show_turma_atividades_page_controller')
-const ShowTurmaProvasPageController = () =>
-  import('#controllers/pages/escola/show_turma_provas_page_controller')
-const ShowTurmaPresencasPageController = () =>
-  import('#controllers/pages/escola/show_turma_presencas_page_controller')
-const ShowTurmaNotasPageController = () =>
-  import('#controllers/pages/escola/show_turma_notas_page_controller')
-const ShowTurmaSituacaoPageController = () =>
-  import('#controllers/pages/escola/show_turma_situacao_page_controller')
-const ShowGradePageController = () => import('#controllers/pages/escola/show_grade_page_controller')
-const ShowHorariosPageController = () =>
-  import('#controllers/pages/escola/show_horarios_page_controller')
-const ShowQuadroPageController = () =>
-  import('#controllers/pages/escola/show_quadro_page_controller')
-const ShowOcorrenciasPageController = () =>
-  import('#controllers/pages/escola/show_ocorrencias_page_controller')
-const ShowAtividadesPageController = () =>
-  import('#controllers/pages/escola/show_atividades_page_controller')
-const ShowAtividadePageController = () =>
-  import('#controllers/pages/escola/show_atividade_page_controller')
-const ShowEditAtividadePageController = () =>
-  import('#controllers/pages/escola/show_edit_atividade_page_controller')
-const ShowProvasPageController = () =>
-  import('#controllers/pages/escola/show_provas_page_controller')
-const ShowProvaPageController = () => import('#controllers/pages/escola/show_prova_page_controller')
-const ShowEditProvaPageController = () =>
-  import('#controllers/pages/escola/show_edit_prova_page_controller')
-const ShowPresencaPageController = () =>
-  import('#controllers/pages/escola/show_presenca_page_controller')
-const ShowAulasAvulsasPageController = () =>
-  import('#controllers/pages/escola/show_aulas_avulsas_page_controller')
-const ShowPedagogicoCalendarioPageController = () =>
-  import('#controllers/pages/escola/show_pedagogico_calendario_page_controller')
-const ShowCantinaCardapioPageController = () =>
-  import('#controllers/pages/escola/show_cantina_cardapio_page_controller')
-const ShowCantinaPdvPageController = () =>
-  import('#controllers/pages/escola/show_cantina_pdv_page_controller')
-const ShowCantinaVendasPageController = () =>
-  import('#controllers/pages/escola/show_cantina_vendas_page_controller')
-const ShowCantinaReservasPageController = () =>
-  import('#controllers/pages/escola/show_cantina_reservas_page_controller')
-const ShowCantinaRecorrenciasPageController = () =>
-  import('#controllers/pages/escola/show_cantina_recorrencias_page_controller')
-const ShowCantinaTransferenciasPageController = () =>
-  import('#controllers/pages/escola/show_cantina_transferencias_page_controller')
-const ShowInadimplenciaPageController = () =>
-  import('#controllers/pages/escola/show_inadimplencia_page_controller')
-const ShowGamificacaoPageController = () =>
-  import('#controllers/pages/escola/show_gamificacao_page_controller')
-const ShowGamificacaoRankingsPageController = () =>
-  import('#controllers/pages/escola/show_gamificacao_rankings_page_controller')
-const ShowGamificacaoConquistasPageController = () =>
-  import('#controllers/pages/escola/show_gamificacao_conquistas_page_controller')
-const ShowGamificacaoRecompensasPageController = () =>
-  import('#controllers/pages/escola/show_gamificacao_recompensas_page_controller')
-const ShowGamificacaoDesafiosPageController = () =>
-  import('#controllers/pages/escola/show_gamificacao_desafios_page_controller')
-const ShowConfiguracaoPagamentosPageController = () =>
-  import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller')
-const ShowConfiguracoesPageController = () =>
-  import('#controllers/pages/escola/show_configuracoes_page_controller')
-const ShowPerguntasPageController = () =>
-  import('#controllers/pages/escola/show_perguntas_page_controller')
-const ShowPerguntaDetailPageController = () =>
-  import('#controllers/pages/escola/show_pergunta_detail_page_controller')
-const ShowIaPageController = () => import('#controllers/pages/escola/show_ia_page_controller')
-
 export function registerEscolaPageRoutes() {
+  const escola = controllers.pages.escola
+
   router
     .group(() => {
-      router.get('/', [ShowEscolaDashboardPageController]).as('dashboard')
-      router.get('/periodos-letivos', [ShowPeriodosLetivosPageController]).as('periodosLetivos')
+      router.get('/', [escola.ShowEscolaDashboardPage]).as('dashboard')
+      router.get('/periodos-letivos', [escola.ShowPeriodosLetivosPage]).as('periodosLetivos')
       router
-        .get('/periodos-letivos/:slug', [ShowPeriodoLetivoPageController])
+        .get('/periodos-letivos/:slug', [escola.ShowPeriodoLetivoPage])
         .as('periodosLetivos.show')
       router
         .get('/administrativo/periodos-letivos/novo-periodo-letivo', [
-          ShowNovoPeriodoLetivoPageController,
+          escola.ShowNovoPeriodoLetivoPage,
         ])
         .as('administrativo.novoPeriodoLetivo')
       router
-        .get('/administrativo/periodos-letivos/:id/editar', [ShowEditarPeriodoLetivoPageController])
+        .get('/administrativo/periodos-letivos/:id/editar', [escola.ShowEditarPeriodoLetivoPage])
         .as('administrativo.periodosLetivos.editar')
 
       // Curso pages (within periodo letivo)
       router
         .get('/periodos-letivos/:slug/cursos/:cursoSlug/visao-geral', [
-          ShowCursoVisaoGeralPageController,
+          escola.ShowCursoVisaoGeralPage,
         ])
         .as('periodosLetivos.cursos.visaoGeral')
       router
-        .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas', [ShowCursoTurmasPageController])
+        .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas', [escola.ShowCursoTurmasPage])
         .as('periodosLetivos.cursos.turmas')
 
       // Turma pages (within curso)
       router
         .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/atividades', [
-          ShowTurmaAtividadesPageController,
+          escola.ShowTurmaAtividadesPage,
         ])
         .as('periodosLetivos.cursos.turmas.atividades')
       router
         .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/provas', [
-          ShowTurmaProvasPageController,
+          escola.ShowTurmaProvasPage,
         ])
         .as('periodosLetivos.cursos.turmas.provas')
       router
         .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/presencas', [
-          ShowTurmaPresencasPageController,
+          escola.ShowTurmaPresencasPage,
         ])
         .as('periodosLetivos.cursos.turmas.presencas')
       router
         .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/notas', [
-          ShowTurmaNotasPageController,
+          escola.ShowTurmaNotasPage,
         ])
         .as('periodosLetivos.cursos.turmas.notas')
       router
         .get('/periodos-letivos/:slug/cursos/:cursoSlug/turmas/:turmaSlug/situacao', [
-          ShowTurmaSituacaoPageController,
+          escola.ShowTurmaSituacaoPage,
         ])
         .as('periodosLetivos.cursos.turmas.situacao')
 
       // Administrativo
-      router.get('/administrativo/alunos', [ShowAlunosPageController]).as('administrativo.alunos')
+      router.get('/administrativo/alunos', [escola.ShowAlunosPage]).as('administrativo.alunos')
       router
-        .get('/administrativo/alunos/:id/editar', [ShowEditarAlunoPageController])
+        .get('/administrativo/alunos/:id/editar', [escola.ShowEditarAlunoPage])
         .as('administrativo.alunos.editar')
       router
-        .get('/administrativo/alunos/historico-financeiro', [ShowHistoricoFinanceiroPageController])
+        .get('/administrativo/alunos/historico-financeiro', [escola.ShowHistoricoFinanceiroPage])
         .as('administrativo.alunos.historicoFinanceiro')
       router
-        .get('/administrativo/funcionarios', [ShowFuncionariosPageController])
+        .get('/administrativo/funcionarios', [escola.ShowFuncionariosPage])
         .as('administrativo.funcionarios')
       router
-        .get('/administrativo/professores', [ShowProfessoresPageController])
+        .get('/administrativo/professores', [escola.ShowProfessoresPage])
         .as('administrativo.professores')
       router
-        .get('/administrativo/matriculas', [ShowMatriculasPageController])
+        .get('/administrativo/matriculas', [escola.ShowMatriculasPage])
         .as('administrativo.matriculas')
       router
-        .get('/administrativo/matriculas/nova', [ShowNovaMatriculaPageController])
+        .get('/administrativo/matriculas/nova', [escola.ShowNovaMatriculaPage])
         .as('administrativo.matriculas.nova')
       router
-        .get('/administrativo/contratos', [ShowContratosPageController])
+        .get('/administrativo/contratos', [escola.ShowContratosPage])
         .as('administrativo.contratos')
       router
-        .get('/administrativo/contratos/novo', [ShowNovoContratoPageController])
+        .get('/administrativo/contratos/novo', [escola.ShowNovoContratoPage])
         .as('administrativo.contratos.novo')
       router
-        .get('/administrativo/contratos/:id/editar', [ShowEditarContratoPageController])
+        .get('/administrativo/contratos/:id/editar', [escola.ShowEditarContratoPage])
         .as('administrativo.contratos.editar')
       router
-        .get('/administrativo/contratos/:id/assinaturas', [ShowContratoAssinaturasPageController])
+        .get('/administrativo/contratos/:id/assinaturas', [escola.ShowContratoAssinaturasPage])
         .as('administrativo.contratos.assinaturas')
       router
-        .get('/administrativo/contratos/:id/docuseal', [ShowContratoDocusealPageController])
+        .get('/administrativo/contratos/:id/docuseal', [escola.ShowContratoDocusealPage])
         .as('administrativo.contratos.docuseal')
       router
         .get('/administrativo/contratos/:contractId/financeiro', [
-          ShowContratoFinanceiroPageController,
+          escola.ShowContratoFinanceiroPage,
         ])
         .as('administrativo.contratos.financeiro')
-      router.get('/administrativo/bolsas', [ShowBolsasPageController]).as('administrativo.bolsas')
+      router.get('/administrativo/bolsas', [escola.ShowBolsasPage]).as('administrativo.bolsas')
       router
-        .get('/administrativo/parceiros', [ShowParceirosPageController])
+        .get('/administrativo/parceiros', [escola.ShowParceirosPage])
         .as('administrativo.parceiros')
       router
-        .get('/administrativo/materias', [ShowMateriasPageController])
+        .get('/administrativo/materias', [escola.ShowMateriasPage])
         .as('administrativo.materias')
       router
-        .get('/administrativo/folha-de-ponto', [ShowFolhaDePontoPageController])
+        .get('/administrativo/folha-de-ponto', [escola.ShowFolhaDePontoPage])
         .as('administrativo.folhaDePonto')
       router
-        .get('/administrativo/impressao', [ShowImpressaoPageController])
+        .get('/administrativo/impressao', [escola.ShowImpressaoPage])
         .as('administrativo.impressao')
       router
-        .get('/administrativo/solicitacoes-de-compra', [ShowSolicitacoesDeCompraPageController])
+        .get('/administrativo/solicitacoes-de-compra', [escola.ShowSolicitacoesDeCompraPage])
         .as('administrativo.solicitacoesDeCompra')
 
       // Notificacoes
-      router.get('/notificacoes', [ShowNotificacoesPageController]).as('notificacoes')
+      router.get('/notificacoes', [escola.ShowNotificacoesPage]).as('notificacoes')
       router
-        .get('/notificacoes/preferencias', [ShowNotificacoesPreferenciasPageController])
+        .get('/notificacoes/preferencias', [escola.ShowNotificacoesPreferenciasPage])
         .as('notificacoes.preferencias')
 
       // Comunicados
-      router.get('/comunicados', [ShowComunicadosPageController]).as('comunicados')
-      router.get('/comunicados/novo', [ShowNovoComunicadoPageController]).as('comunicados.novo')
+      router.get('/comunicados', [escola.ShowComunicadosPage]).as('comunicados')
+      router.get('/comunicados/novo', [escola.ShowNovoComunicadoPage]).as('comunicados.novo')
       router
-        .get('/comunicados/:id/editar', [ShowEditarComunicadoPageController])
+        .get('/comunicados/:id/editar', [escola.ShowEditarComunicadoPage])
         .as('comunicados.editar')
 
       // Duvidas dos responsaveis
-      router.get('/chat', [ShowPerguntasPageController]).as('chat')
-      router.get('/chat/:inquiryId', [ShowPerguntaDetailPageController]).as('chat.show')
+      router.get('/chat', [escola.ShowPerguntasPage]).as('chat')
+      router.get('/chat/:inquiryId', [escola.ShowPerguntaDetailPage]).as('chat.show')
 
       // Eventos
-      router.get('/calendario/novo', [ShowNovoEventoPageController]).as('eventos.novo')
+      router.get('/calendario/novo', [escola.ShowNovoEventoPage]).as('eventos.novo')
+      router.get('/calendario/:eventId/editar', [escola.ShowEditarEventoPage]).as('eventos.editar')
       router
-        .get('/calendario/:eventId/editar', [ShowEditarEventoPageController])
-        .as('eventos.editar')
-      router
-        .get('/calendario/:eventId/autorizacoes', [ShowEventoAutorizacoesPageController])
+        .get('/calendario/:eventId/autorizacoes', [escola.ShowEventoAutorizacoesPage])
         .as('eventos.autorizacoes')
 
       // Mural
-      router.get('/mural', [ShowMuralPageController]).as('mural')
+      router.get('/mural', [escola.ShowMuralPage]).as('mural')
 
       // Desempenho Academico
-      router.get('/desempenho', [ShowDesempenhoPageController]).as('desempenho')
+      router.get('/desempenho', [escola.ShowDesempenhoPage]).as('desempenho')
 
       // Matriculas
-      router.get('/matriculas', [ShowMatriculasPageController]).as('matriculas')
+      router.get('/matriculas', [escola.ShowMatriculasPage]).as('matriculas')
 
       // Pedagogico
-      router.get('/pedagogico/turmas', [ShowTurmasPageController]).as('pedagogico.turmas')
-      router.get('/pedagogico/grade', [ShowGradePageController]).as('pedagogico.grade')
-      router.get('/pedagogico/horarios', [ShowHorariosPageController]).as('pedagogico.horarios')
-      router.get('/pedagogico/quadro', [ShowQuadroPageController]).as('pedagogico.quadro')
+      router.get('/pedagogico/turmas', [escola.ShowTurmasPage]).as('pedagogico.turmas')
+      router.get('/pedagogico/grade', [escola.ShowGradePage]).as('pedagogico.grade')
+      router.get('/pedagogico/horarios', [escola.ShowHorariosPage]).as('pedagogico.horarios')
+      router.get('/pedagogico/quadro', [escola.ShowQuadroPage]).as('pedagogico.quadro')
       router
-        .get('/pedagogico/registro-diario', [ShowOcorrenciasPageController])
+        .get('/pedagogico/registro-diario', [escola.ShowOcorrenciasPage])
         .as('pedagogico.ocorrencias')
+      router.get('/pedagogico/atividades', [escola.ShowAtividadesPage]).as('pedagogico.atividades')
       router
-        .get('/pedagogico/atividades', [ShowAtividadesPageController])
-        .as('pedagogico.atividades')
-      router
-        .get('/pedagogico/atividades/:id', [ShowAtividadePageController])
+        .get('/pedagogico/atividades/:id', [escola.ShowAtividadePage])
         .as('pedagogico.atividades.show')
       router
-        .get('/pedagogico/atividades/:id/editar', [ShowEditAtividadePageController])
+        .get('/pedagogico/atividades/:id/editar', [escola.ShowEditAtividadePage])
         .as('pedagogico.atividades.edit')
-      router.get('/pedagogico/provas', [ShowProvasPageController]).as('pedagogico.provas')
-      router.get('/pedagogico/provas/:id', [ShowProvaPageController]).as('pedagogico.provas.show')
+      router.get('/pedagogico/provas', [escola.ShowProvasPage]).as('pedagogico.provas')
+      router.get('/pedagogico/provas/:id', [escola.ShowProvaPage]).as('pedagogico.provas.show')
       router
-        .get('/pedagogico/provas/:id/editar', [ShowEditProvaPageController])
+        .get('/pedagogico/provas/:id/editar', [escola.ShowEditProvaPage])
         .as('pedagogico.provas.edit')
-      router.get('/pedagogico/presenca', [ShowPresencaPageController]).as('pedagogico.presenca')
+      router.get('/pedagogico/presenca', [escola.ShowPresencaPage]).as('pedagogico.presenca')
       router
-        .get('/pedagogico/aulas-avulsas', [ShowAulasAvulsasPageController])
+        .get('/pedagogico/aulas-avulsas', [escola.ShowAulasAvulsasPage])
         .as('pedagogico.aulasAvulsas')
       router
-        .get('/pedagogico/calendario', [ShowPedagogicoCalendarioPageController])
+        .get('/pedagogico/calendario', [escola.ShowPedagogicoCalendarioPage])
         .as('pedagogico.calendario')
       router
-        .get('/pedagogico/cursos-niveis', [ShowCursosNiveisPageController])
+        .get('/pedagogico/cursos-niveis', [escola.ShowCursosNiveisPage])
         .as('pedagogico.cursosNiveis')
 
       // Cantina
-      router.get('/cantina/itens', [ShowCantinaItensPageController]).as('cantina.itens')
-      router.get('/cantina/cardapio', [ShowCantinaCardapioPageController]).as('cantina.cardapio')
-      router.get('/cantina/pdv', [ShowCantinaPdvPageController]).as('cantina.pdv')
-      router.get('/cantina/pedidos', [ShowCantinaPedidosPageController]).as('cantina.pedidos')
-      router.get('/cantina/vendas', [ShowCantinaVendasPageController]).as('cantina.vendas')
-      router.get('/cantina/reservas', [ShowCantinaReservasPageController]).as('cantina.reservas')
+      router.get('/cantina/itens', [escola.ShowCantinaItensPage]).as('cantina.itens')
+      router.get('/cantina/cardapio', [escola.ShowCantinaCardapioPage]).as('cantina.cardapio')
+      router.get('/cantina/pdv', [escola.ShowCantinaPdvPage]).as('cantina.pdv')
+      router.get('/cantina/pedidos', [escola.ShowCantinaPedidosPage]).as('cantina.pedidos')
+      router.get('/cantina/vendas', [escola.ShowCantinaVendasPage]).as('cantina.vendas')
+      router.get('/cantina/reservas', [escola.ShowCantinaReservasPage]).as('cantina.reservas')
       router
-        .get('/cantina/recorrencias', [ShowCantinaRecorrenciasPageController])
+        .get('/cantina/recorrencias', [escola.ShowCantinaRecorrenciasPage])
         .as('cantina.recorrencias')
       router
-        .get('/cantina/transferencias', [ShowCantinaTransferenciasPageController])
+        .get('/cantina/transferencias', [escola.ShowCantinaTransferenciasPage])
         .as('cantina.transferencias')
 
       // Financeiro
       router
-        .get('/financeiro/inadimplencia', [ShowInadimplenciaPageController])
+        .get('/financeiro/inadimplencia', [escola.ShowInadimplenciaPage])
         .as('financeiro.inadimplencia')
-      router.get('/financeiro/seguros', [ShowSegurosPageController]).as('financeiro.seguros')
-      router.get('/financeiro/faturas', [ShowFaturasPageController]).as('financeiro.faturas')
+      router.get('/financeiro/seguros', [escola.ShowSegurosPage]).as('financeiro.seguros')
+      router.get('/financeiro/faturas', [escola.ShowFaturasPage]).as('financeiro.faturas')
       router
-        .get('/financeiro/configuracao-pagamentos', [ShowConfiguracaoPagamentosPageController])
+        .get('/financeiro/configuracao-pagamentos', [escola.ShowConfiguracaoPagamentosPage])
         .as('financeiro.configuracaoPagamentos')
 
       // Lojas
-      router.get('/lojas', [ShowLojasPageController]).as('lojas.index')
-      router.get('/lojas/:id', [ShowLojaDetailPageController]).as('lojas.show')
+      router.get('/lojas', [escola.ShowLojasPage]).as('lojas.index')
+      router.get('/lojas/:id', [escola.ShowLojaDetailPage]).as('lojas.show')
 
       // Gamificacao
-      router.get('/gamificacao', [ShowGamificacaoPageController]).as('gamificacao.index')
+      router.get('/gamificacao', [escola.ShowGamificacaoPage]).as('gamificacao.index')
       router
-        .get('/gamificacao/rankings', [ShowGamificacaoRankingsPageController])
+        .get('/gamificacao/rankings', [escola.ShowGamificacaoRankingsPage])
         .as('gamificacao.rankings')
       router
-        .get('/gamificacao/conquistas', [ShowGamificacaoConquistasPageController])
+        .get('/gamificacao/conquistas', [escola.ShowGamificacaoConquistasPage])
         .as('gamificacao.conquistas')
       router
-        .get('/gamificacao/recompensas', [ShowGamificacaoRecompensasPageController])
+        .get('/gamificacao/recompensas', [escola.ShowGamificacaoRecompensasPage])
         .as('gamificacao.recompensas')
       router
-        .get('/gamificacao/desafios', [ShowGamificacaoDesafiosPageController])
+        .get('/gamificacao/desafios', [escola.ShowGamificacaoDesafiosPage])
         .as('gamificacao.desafios')
 
       // IA Assistente
-      router.get('/ia', [ShowIaPageController]).as('ia.index')
+      router.get('/ia', [escola.ShowIaPage]).as('ia.index')
       router
-        .get('/ia/conversa/:threadId', [ShowIaPageController])
+        .get('/ia/conversa/:threadId', [escola.ShowIaPage])
         .where('threadId', router.matchers.uuid())
         .as('ia.conversa')
 
       // Configuracoes
-      router.get('/configuracoes', [ShowConfiguracoesPageController]).as('configuracoes')
+      router.get('/configuracoes', [escola.ShowConfiguracoesPage]).as('configuracoes')
     })
     .prefix('/escola')
     .use([

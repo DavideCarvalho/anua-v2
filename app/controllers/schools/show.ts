@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import UserHasSchool from '#models/user_has_school'
 import AppException from '#exceptions/app_exception'
+import { getSignedAssetUrl } from '#lib/storage'
 
 function formatRoleName(role: string | undefined): string {
   const roleMap: Record<string, string> = {
@@ -30,6 +31,12 @@ export default class ShowSchoolController {
     if (!school) {
       throw AppException.notFound('Escola não encontrada')
     }
+
+    // Resolve key → signed URL antes de devolver
+    school.logoUrl = await getSignedAssetUrl(school.logoUrl)
+
+    // TODO: shape hand-built. Quando refatorar essa rota, criar `ShowSchoolTransformer`
+    // (extender SchoolTransformer com director + roleName formatado).
 
     // Buscar o diretor da escola (usuário com role SCHOOL_DIRECTOR vinculado via UserHasSchool)
     const directorRelation = await UserHasSchool.query()

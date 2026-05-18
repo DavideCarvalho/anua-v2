@@ -1,103 +1,63 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Contracts
-const ListContractsController = () => import('#controllers/contracts/list_contracts_controller')
-const ShowContractController = () => import('#controllers/contracts/show_contract_controller')
-const CreateContractController = () => import('#controllers/contracts/create_contract_controller')
-const UpdateContractController = () => import('#controllers/contracts/update_contract_controller')
-const DeleteContractController = () => import('#controllers/contracts/delete_contract_controller')
-const GetSignatureStatsController = () =>
-  import('#controllers/contracts/get_signature_stats_controller')
-const GetDocusealTemplateController = () =>
-  import('#controllers/contracts/get_docuseal_template_controller')
-const UploadDocusealTemplateController = () =>
-  import('#controllers/contracts/upload_docuseal_template_controller')
-const DeleteDocusealTemplateController = () =>
-  import('#controllers/contracts/delete_docuseal_template_controller')
-
-// Contract Documents
-const ListContractDocumentsController = () =>
-  import('#controllers/contract-documents/list_contract_documents_controller')
-const CreateContractDocumentController = () =>
-  import('#controllers/contract-documents/create_contract_document_controller')
-
-// Contract Payment Days
-const ListContractPaymentDaysController = () =>
-  import('#controllers/contracts/list_contract_payment_days_controller')
-const AddContractPaymentDayController = () =>
-  import('#controllers/contracts/add_contract_payment_day_controller')
-const RemoveContractPaymentDayController = () =>
-  import('#controllers/contracts/remove_contract_payment_day_controller')
-
-// Contract Interest Config
-const ShowContractInterestConfigController = () =>
-  import('#controllers/contracts/show_contract_interest_config_controller')
-const UpdateContractInterestConfigController = () =>
-  import('#controllers/contracts/update_contract_interest_config_controller')
-
-// Contract Early Discounts
-const ListContractEarlyDiscountsController = () =>
-  import('#controllers/contracts/list_contract_early_discounts_controller')
-const AddContractEarlyDiscountController = () =>
-  import('#controllers/contracts/add_contract_early_discount_controller')
-const UpdateContractEarlyDiscountController = () =>
-  import('#controllers/contracts/update_contract_early_discount_controller')
-const RemoveContractEarlyDiscountController = () =>
-  import('#controllers/contracts/remove_contract_early_discount_controller')
 
 export function registerContractApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListContractsController]).as('contracts.index')
-      router.post('/', [CreateContractController]).as('contracts.store')
-      router.get('/:id', [ShowContractController]).as('contracts.show')
-      router.put('/:id', [UpdateContractController]).as('contracts.update')
-      router.delete('/:id', [DeleteContractController]).as('contracts.destroy')
+      router.get('/', [controllers.contracts.ListContracts]).as('contracts.index')
+      router.post('/', [controllers.contracts.CreateContract]).as('contracts.store')
+      router.get('/:id', [controllers.contracts.ShowContract]).as('contracts.show')
+      router.put('/:id', [controllers.contracts.UpdateContract]).as('contracts.update')
+      router.delete('/:id', [controllers.contracts.DeleteContract]).as('contracts.destroy')
       router
-        .get('/:contractId/signature-stats', [GetSignatureStatsController])
+        .get('/:contractId/signature-stats', [controllers.contracts.GetSignatureStats])
         .as('contracts.get_signature_stats')
       router
-        .get('/:contractId/docuseal-template', [GetDocusealTemplateController])
+        .get('/:contractId/docuseal-template', [controllers.contracts.GetDocusealTemplate])
         .as('contracts.get_docuseal_template')
       router
-        .post('/:contractId/docuseal-template', [UploadDocusealTemplateController])
+        .post('/:contractId/docuseal-template', [controllers.contracts.UploadDocusealTemplate])
         .as('contracts.upload_docuseal_template')
       router
-        .delete('/:contractId/docuseal-template', [DeleteDocusealTemplateController])
+        .delete('/:contractId/docuseal-template', [controllers.contracts.DeleteDocusealTemplate])
         .as('contracts.delete_docuseal_template')
 
       // Contract Payment Days
       router
-        .get('/:contractId/payment-days', [ListContractPaymentDaysController])
+        .get('/:contractId/payment-days', [controllers.contracts.ListContractPaymentDays])
         .as('contracts.payment_days.index')
       router
-        .post('/:contractId/payment-days', [AddContractPaymentDayController])
+        .post('/:contractId/payment-days', [controllers.contracts.AddContractPaymentDay])
         .as('contracts.payment_days.store')
       router
-        .delete('/:contractId/payment-days/:id', [RemoveContractPaymentDayController])
+        .delete('/:contractId/payment-days/:id', [controllers.contracts.RemoveContractPaymentDay])
         .as('contracts.payment_days.destroy')
 
       // Contract Interest Config
       router
-        .get('/:contractId/interest-config', [ShowContractInterestConfigController])
+        .get('/:contractId/interest-config', [controllers.contracts.ShowContractInterestConfig])
         .as('contracts.interest_config.show')
       router
-        .put('/:contractId/interest-config', [UpdateContractInterestConfigController])
+        .put('/:contractId/interest-config', [controllers.contracts.UpdateContractInterestConfig])
         .as('contracts.interest_config.update')
 
       // Contract Early Discounts
       router
-        .get('/:contractId/early-discounts', [ListContractEarlyDiscountsController])
+        .get('/:contractId/early-discounts', [controllers.contracts.ListContractEarlyDiscounts])
         .as('contracts.early_discounts.index')
       router
-        .post('/:contractId/early-discounts', [AddContractEarlyDiscountController])
+        .post('/:contractId/early-discounts', [controllers.contracts.AddContractEarlyDiscount])
         .as('contracts.early_discounts.store')
       router
-        .put('/:contractId/early-discounts/:id', [UpdateContractEarlyDiscountController])
+        .put('/:contractId/early-discounts/:id', [
+          controllers.contracts.UpdateContractEarlyDiscount,
+        ])
         .as('contracts.early_discounts.update')
       router
-        .delete('/:contractId/early-discounts/:id', [RemoveContractEarlyDiscountController])
+        .delete('/:contractId/early-discounts/:id', [
+          controllers.contracts.RemoveContractEarlyDiscount,
+        ])
         .as('contracts.early_discounts.destroy')
     })
     .prefix('/contracts')
@@ -107,8 +67,12 @@ export function registerContractApiRoutes() {
 export function registerContractDocumentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListContractDocumentsController]).as('contract_documents.index')
-      router.post('/', [CreateContractDocumentController]).as('contract_documents.store')
+      router
+        .get('/', [controllers.contractDocuments.ListContractDocuments])
+        .as('contract_documents.index')
+      router
+        .post('/', [controllers.contractDocuments.CreateContractDocument])
+        .as('contract_documents.store')
     })
     .prefix('/contract-documents')
     .use([middleware.auth(), middleware.impersonation()])

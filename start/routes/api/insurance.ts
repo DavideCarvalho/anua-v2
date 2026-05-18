@@ -1,90 +1,62 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Insurance
-const GetInsuranceConfigController = () =>
-  import('#controllers/insurance/get_insurance_config_controller')
-const UpdateSchoolInsuranceController = () =>
-  import('#controllers/insurance/update_school_insurance_controller')
-const UpdateSchoolChainInsuranceController = () =>
-  import('#controllers/insurance/update_school_chain_insurance_controller')
-const ResetSchoolInsuranceController = () =>
-  import('#controllers/insurance/reset_school_insurance_controller')
-const ListInsuranceClaimsController = () =>
-  import('#controllers/insurance/list_insurance_claims_controller')
-const ApproveInsuranceClaimController = () =>
-  import('#controllers/insurance/approve_insurance_claim_controller')
-const RejectInsuranceClaimController = () =>
-  import('#controllers/insurance/reject_insurance_claim_controller')
-const MarkClaimPaidController = () => import('#controllers/insurance/mark_claim_paid_controller')
-const ListInsuranceBillingsController = () =>
-  import('#controllers/insurance/list_insurance_billings_controller')
-const GetBillingDetailsController = () =>
-  import('#controllers/insurance/get_billing_details_controller')
-const GetInsuranceStatsController = () =>
-  import('#controllers/insurance/get_insurance_stats_controller')
-const GetDefaultRateBySchoolController = () =>
-  import('#controllers/insurance/get_default_rate_by_school_controller')
-const GetSchoolsWithoutInsuranceController = () =>
-  import('#controllers/insurance/get_schools_without_insurance_controller')
-const GetSchoolInsuranceStatsController = () =>
-  import('#controllers/insurance/get_school_insurance_stats_controller')
-const GetSchoolInsuranceBillingsController = () =>
-  import('#controllers/insurance/get_school_insurance_billings_controller')
-const GetSchoolInsuranceClaimsController = () =>
-  import('#controllers/insurance/get_school_insurance_claims_controller')
 
 export function registerInsuranceApiRoutes() {
   router
     .group(() => {
       // Configuration
-      router.get('/config', [GetInsuranceConfigController]).as('insurance.config')
+      router.get('/config', [controllers.insurance.GetInsuranceConfig]).as('insurance.config')
       router
-        .put('/school/:schoolId', [UpdateSchoolInsuranceController])
+        .put('/school/:schoolId', [controllers.insurance.UpdateSchoolInsurance])
         .as('insurance.update_school')
       router
-        .put('/chain/:chainId', [UpdateSchoolChainInsuranceController])
+        .put('/chain/:chainId', [controllers.insurance.UpdateSchoolChainInsurance])
         .as('insurance.update_chain')
       router
-        .post('/school/:schoolId/reset', [ResetSchoolInsuranceController])
+        .post('/school/:schoolId/reset', [controllers.insurance.ResetSchoolInsurance])
         .as('insurance.reset_school')
 
       // Claims
-      router.get('/claims', [ListInsuranceClaimsController]).as('insurance.claims.index')
       router
-        .post('/claims/:claimId/approve', [ApproveInsuranceClaimController])
+        .get('/claims', [controllers.insurance.ListInsuranceClaims])
+        .as('insurance.claims.index')
+      router
+        .post('/claims/:claimId/approve', [controllers.insurance.ApproveInsuranceClaim])
         .as('insurance.claims.approve')
       router
-        .post('/claims/:claimId/reject', [RejectInsuranceClaimController])
+        .post('/claims/:claimId/reject', [controllers.insurance.RejectInsuranceClaim])
         .as('insurance.claims.reject')
       router
-        .post('/claims/:claimId/mark-paid', [MarkClaimPaidController])
+        .post('/claims/:claimId/mark-paid', [controllers.insurance.MarkClaimPaid])
         .as('insurance.claims.mark_paid')
 
       // Billings
-      router.get('/billings', [ListInsuranceBillingsController]).as('insurance.billings.index')
       router
-        .get('/billings/:billingId', [GetBillingDetailsController])
+        .get('/billings', [controllers.insurance.ListInsuranceBillings])
+        .as('insurance.billings.index')
+      router
+        .get('/billings/:billingId', [controllers.insurance.GetBillingDetails])
         .as('insurance.billings.show')
 
       // Analytics
-      router.get('/stats', [GetInsuranceStatsController]).as('insurance.stats')
+      router.get('/stats', [controllers.insurance.GetInsuranceStats]).as('insurance.stats')
       router
-        .get('/analytics/default-rate', [GetDefaultRateBySchoolController])
+        .get('/analytics/default-rate', [controllers.insurance.GetDefaultRateBySchool])
         .as('insurance.analytics.default_rate')
       router
-        .get('/analytics/schools-without', [GetSchoolsWithoutInsuranceController])
+        .get('/analytics/schools-without', [controllers.insurance.GetSchoolsWithoutInsurance])
         .as('insurance.analytics.schools_without')
 
       // School-specific
       router
-        .get('/school/:schoolId/stats', [GetSchoolInsuranceStatsController])
+        .get('/school/:schoolId/stats', [controllers.insurance.GetSchoolInsuranceStats])
         .as('insurance.school.stats')
       router
-        .get('/school/:schoolId/billings', [GetSchoolInsuranceBillingsController])
+        .get('/school/:schoolId/billings', [controllers.insurance.GetSchoolInsuranceBillings])
         .as('insurance.school.billings')
       router
-        .get('/school/:schoolId/claims', [GetSchoolInsuranceClaimsController])
+        .get('/school/:schoolId/claims', [controllers.insurance.GetSchoolInsuranceClaims])
         .as('insurance.school.claims')
     })
     .prefix('/insurance')

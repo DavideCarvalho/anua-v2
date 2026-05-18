@@ -6,29 +6,28 @@ import Level from '#models/level'
 import Contract from '#models/contract'
 import ContractDocument from '#models/contract_document'
 import AppException from '#exceptions/app_exception'
+import SchoolEnrollmentInfoTransformer from '#transformers/school_enrollment_info_transformer'
+import { getSignedAssetUrl } from '#lib/storage'
 
 export default class GetSchoolEnrollmentInfoController {
-  async handle({ params, response }: HttpContext) {
+  async handle({ params, response, serialize }: HttpContext) {
     const { schoolSlug, academicPeriodSlug, courseSlug } = params
 
-    // Find school by slug
     const school = await School.query().where('slug', schoolSlug).first()
-
     if (!school) {
       throw AppException.notFound('Escola não encontrada')
     }
 
-    // Find academic period by slug
     const academicPeriod = await AcademicPeriod.query()
       .where('slug', academicPeriodSlug)
       .where('schoolId', school.id)
       .first()
-
     if (!academicPeriod) {
       throw AppException.notFound('Período letivo não encontrado')
     }
 
-    // Check if enrollment is open
+    // Janela de matrícula precisa estar aberta — única fonte da verdade
+    // pra "esse link ainda funciona ou já fechou"
     const now = new Date()
     if (academicPeriod.enrollmentStartDate && academicPeriod.enrollmentStartDate.toJSDate() > now) {
       throw AppException.badRequest('Matrículas ainda não foram abertas para este período')
@@ -37,74 +36,49 @@ export default class GetSchoolEnrollmentInfoController {
       throw AppException.badRequest('Matrículas encerradas para este período')
     }
 
-    // Find course by slug
     const course = await Course.query()
       .where('slug', courseSlug)
       .where('schoolId', school.id)
       .first()
-
     if (!course) {
       throw AppException.notFound('Curso não encontrado')
     }
 
-    // Get initial level for this course in this academic period
-    const levels = await Level.query().where('courseId', course.id).orderBy('order', 'asc')
-
+    // Level pertence ao Course via CourseHasAcademicPeriod → LevelAssignedToCourseHasAcademicPeriod
+    const levels = await Level.query()
+      .whereHas('levelAssignments', (lq) => {
+        lq.whereHas('courseHasAcademicPeriod', (cq) => {
+          cq.where('courseId', course.id).where('academicPeriodId', academicPeriod.id)
+        })
+      })
+      .orderBy('order', 'asc')
     if (levels.length === 0) {
       throw AppException.badRequest('Nenhum nível disponível para este curso')
     }
-
     const initialLevel = levels[0]
 
-    // Get contract for this level
-    const contract = await Contract.query()
-      .where('levelId', initialLevel.id)
-      .where('academicPeriodId', academicPeriod.id)
-      .first()
+    // Contract pertence ao Level (Level.contractId), não ao academic period
+    const contract = initialLevel.contractId
+      ? await Contract.query().where('id', initialLevel.contractId).first()
+      : null
 
-    // Get required documents
     const requiredDocuments = contract
       ? await ContractDocument.query().where('contractId', contract.id)
       : []
 
-    return response.ok({
-      school: {
-        id: school.id,
-        name: school.name,
-        slug: school.slug,
-        logoUrl: school.logoUrl,
-      },
-      academicPeriod: {
-        id: academicPeriod.id,
-        name: academicPeriod.name,
-        slug: academicPeriod.slug,
-        startDate: academicPeriod.startDate?.toISO(),
-        endDate: academicPeriod.endDate?.toISO(),
-      },
-      course: {
-        id: course.id,
-        name: course.name,
-      },
-      level: {
-        id: initialLevel.id,
-        name: initialLevel.name,
-      },
-      contract: contract
-        ? {
-            id: contract.id,
-            enrollmentValue: contract.enrollmentValue,
-            amount: contract.ammount,
-            paymentType: contract.paymentType,
-            enrollmentValueInstallments: contract.enrollmentValueInstallments,
-            installments: contract.installments,
-          }
-        : null,
-      requiredDocuments: requiredDocuments.map((doc) => ({
-        id: doc.id,
-        name: doc.name,
-        description: doc.description,
-        required: doc.required,
-      })),
-    })
+    school.logoUrl = await getSignedAssetUrl(school.logoUrl)
+
+    return response.ok(
+      await serialize(
+        SchoolEnrollmentInfoTransformer.transform({
+          school,
+          academicPeriod,
+          course,
+          level: initialLevel,
+          contract,
+          requiredDocuments,
+        })
+      )
+    )
   }
 }

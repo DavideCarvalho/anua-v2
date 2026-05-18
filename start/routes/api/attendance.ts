@@ -7,15 +7,11 @@ export function registerAttendanceApiRoutes() {
     .group(() => {
       router.get('/', [controllers.attendance.ListAttendance]).as('attendance.index')
       router.post('/', [controllers.attendance.CreateAttendance]).as('attendance.store')
-      router
-        .post('/batch', [controllers.attendance.BatchCreateAttendance])
-        .as('attendance.batch')
+      router.post('/batch', [controllers.attendance.BatchCreateAttendance]).as('attendance.batch')
       router
         .get('/available-dates', [controllers.attendance.GetAttendanceAvailableDates])
         .as('attendance.available_dates')
-      router
-        .get('/lessons', [controllers.attendance.ListLessons])
-        .as('attendance.lessons.index')
+      router.get('/lessons', [controllers.attendance.ListLessons]).as('attendance.lessons.index')
       router
         .get('/lessons/:id/students', [controllers.attendance.GetLessonStudents])
         .as('attendance.lessons.students')

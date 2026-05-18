@@ -195,6 +195,7 @@ export interface ApiDefinition {
       horario: typeof routes['web.responsavel.horario']
       calendario: typeof routes['web.responsavel.calendario']
       documentos: typeof routes['web.responsavel.documentos']
+      matricula: typeof routes['web.responsavel.matricula']
       ocorrencias: typeof routes['web.responsavel.ocorrencias']
       perfil: typeof routes['web.responsavel.perfil']
       notificacoes: typeof routes['web.responsavel.notificacoes']
@@ -292,6 +293,8 @@ export interface ApiDefinition {
           studentAssignments: typeof routes['api.v1.responsavel.api.student_assignments']
           studentSchedule: typeof routes['api.v1.responsavel.api.student_schedule']
           studentDocuments: typeof routes['api.v1.responsavel.api.student_documents']
+          uploadStudentDocument: typeof routes['api.v1.responsavel.api.upload_student_document']
+          enrollmentAxes: typeof routes['api.v1.responsavel.api.enrollment_axes']
           studentOccurrences: typeof routes['api.v1.responsavel.api.student_occurrences']
           acknowledgeOccurrence: typeof routes['api.v1.responsavel.api.acknowledge_occurrence']
           studentOverview: typeof routes['api.v1.responsavel.api.student_overview']
@@ -606,6 +609,7 @@ export interface ApiDefinition {
       }
       enrollments: {
         index: typeof routes['api.v1.enrollments.index']
+        actionCounts: typeof routes['api.v1.enrollments.action_counts']
         documents: {
           updateStatus: typeof routes['api.v1.enrollments.documents.update_status']
         }

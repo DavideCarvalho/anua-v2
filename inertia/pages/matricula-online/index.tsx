@@ -1,6 +1,5 @@
 import { Head, usePage } from '@inertiajs/react'
 import { Suspense } from 'react'
-import { GraduationCap } from 'lucide-react'
 
 import {
   EnrollmentForm,
@@ -21,19 +20,8 @@ export default function MatriculaOnlinePage() {
     <>
       <Head title="Matrícula Online" />
 
-      <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
-        {/* Header */}
-        <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-center">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">Matrícula Online</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Main content */}
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="min-h-screen bg-background flex flex-col">
+        <main className="flex-1 container mx-auto px-4 py-8 sm:py-12 max-w-3xl">
           <Suspense fallback={<EnrollmentFormSkeleton />}>
             <EnrollmentForm
               schoolSlug={schoolSlug}
@@ -43,10 +31,21 @@ export default function MatriculaOnlinePage() {
           </Suspense>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t py-6 mt-12">
-          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            <p>Anua - Sistema de Gestão Escolar</p>
+        <footer className="border-t border-border py-6">
+          <div className="container mx-auto px-4 max-w-3xl text-xs text-muted-foreground space-y-1">
+            <p>
+              Os dados informados aqui são tratados conforme a{' '}
+              <a
+                href="https://www.gov.br/cidadania/pt-br/acesso-a-informacao/lgpd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-2 hover:underline hover:text-foreground"
+              >
+                LGPD
+              </a>{' '}
+              e usados apenas para fins de matrícula e gestão escolar.
+            </p>
+            <p>Anua · Sistema de Gestão Escolar</p>
           </div>
         </footer>
       </div>

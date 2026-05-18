@@ -1,34 +1,24 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Schools
-const IndexSchoolsController = () => import('#controllers/schools/index')
-const ShowSchoolController = () => import('#controllers/schools/show')
-const ShowSchoolBySlugController = () => import('#controllers/schools/show_by_slug')
-const StoreSchoolController = () => import('#controllers/schools/store')
-const UpdateSchoolController = () => import('#controllers/schools/update')
-const DestroySchoolController = () => import('#controllers/schools/destroy')
-const UploadSchoolLogoController = () =>
-  import('#controllers/schools/upload_school_logo_controller')
-const UpdateSchoolDirectorController = () =>
-  import('#controllers/schools/update_school_director_controller')
-const ListSchoolUsersController = () => import('#controllers/schools/list_school_users_controller')
 
 export function registerSchoolApiRoutes() {
   router
     .group(() => {
-      router.get('/', [IndexSchoolsController]).as('schools.index')
-      router.post('/', [StoreSchoolController]).as('schools.store')
-      router.get('/slug/:slug', [ShowSchoolBySlugController]).as('schools.show_by_slug')
-      router.get('/:id', [ShowSchoolController]).as('schools.show')
+      router.get('/', [controllers.schools.Index]).as('schools.index')
+      router.post('/', [controllers.schools.Store]).as('schools.store')
+      router.get('/slug/:slug', [controllers.schools.ShowBySlug]).as('schools.show_by_slug')
+      router.get('/:id', [controllers.schools.Show]).as('schools.show')
       router
-        .put('/:id', [UpdateSchoolController])
+        .put('/:id', [controllers.schools.Update])
         .as('schools.update')
         .use([middleware.auth(), middleware.impersonation()])
-      router.delete('/:id', [DestroySchoolController]).as('schools.destroy')
-      router.post('/:id/logo', [UploadSchoolLogoController]).as('schools.upload_logo')
-      router.get('/:id/users', [ListSchoolUsersController]).as('schools.users')
-      router.put('/:id/director', [UpdateSchoolDirectorController]).as('schools.update_director')
+      router.delete('/:id', [controllers.schools.Destroy]).as('schools.destroy')
+      router.post('/:id/logo', [controllers.schools.UploadSchoolLogo]).as('schools.upload_logo')
+      router.get('/:id/users', [controllers.schools.ListSchoolUsers]).as('schools.users')
+      router
+        .put('/:id/director', [controllers.schools.UpdateSchoolDirector])
+        .as('schools.update_director')
     })
     .prefix('/schools')
 }

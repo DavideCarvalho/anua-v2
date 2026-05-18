@@ -144,6 +144,7 @@ export type ScannedRoutes = {
     'web.responsavel.horario': { paramsTuple?: []; params?: {} }
     'web.responsavel.calendario': { paramsTuple?: []; params?: {} }
     'web.responsavel.documentos': { paramsTuple?: []; params?: {} }
+    'web.responsavel.matricula': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.responsavel.ocorrencias': { paramsTuple?: []; params?: {} }
     'web.responsavel.perfil': { paramsTuple?: []; params?: {} }
     'web.responsavel.notificacoes': { paramsTuple?: []; params?: {} }
@@ -211,6 +212,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_assignments': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_schedule': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.upload_student_document': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'submissionId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.acknowledge_occurrence': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'occurrenceId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -419,6 +422,7 @@ export type ScannedRoutes = {
     'api.v1.enrollment.find_scholarship': { paramsTuple?: []; params?: {} }
     'api.v1.enrollment.finish': { paramsTuple?: []; params?: {} }
     'api.v1.enrollments.index': { paramsTuple?: []; params?: {} }
+    'api.v1.enrollments.action_counts': { paramsTuple?: []; params?: {} }
     'api.v1.enrollments.documents.update_status': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notifications.index': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -875,6 +879,7 @@ export type ScannedRoutes = {
     'web.responsavel.horario': { paramsTuple?: []; params?: {} }
     'web.responsavel.calendario': { paramsTuple?: []; params?: {} }
     'web.responsavel.documentos': { paramsTuple?: []; params?: {} }
+    'web.responsavel.matricula': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.responsavel.ocorrencias': { paramsTuple?: []; params?: {} }
     'web.responsavel.perfil': { paramsTuple?: []; params?: {} }
     'web.responsavel.notificacoes': { paramsTuple?: []; params?: {} }
@@ -937,6 +942,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_assignments': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_schedule': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1045,6 +1051,7 @@ export type ScannedRoutes = {
     'api.v1.events.consents.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.enrollment.info': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'schoolSlug': ParamValue,'academicPeriodSlug': ParamValue,'courseSlug': ParamValue} }
     'api.v1.enrollments.index': { paramsTuple?: []; params?: {} }
+    'api.v1.enrollments.action_counts': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.index': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notification_preferences.show': { paramsTuple?: []; params?: {} }
@@ -1324,6 +1331,7 @@ export type ScannedRoutes = {
     'web.responsavel.horario': { paramsTuple?: []; params?: {} }
     'web.responsavel.calendario': { paramsTuple?: []; params?: {} }
     'web.responsavel.documentos': { paramsTuple?: []; params?: {} }
+    'web.responsavel.matricula': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.responsavel.ocorrencias': { paramsTuple?: []; params?: {} }
     'web.responsavel.perfil': { paramsTuple?: []; params?: {} }
     'web.responsavel.notificacoes': { paramsTuple?: []; params?: {} }
@@ -1386,6 +1394,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_assignments': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_schedule': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1494,6 +1503,7 @@ export type ScannedRoutes = {
     'api.v1.events.consents.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.enrollment.info': { paramsTuple: [ParamValue,ParamValue,ParamValue]; params: {'schoolSlug': ParamValue,'academicPeriodSlug': ParamValue,'courseSlug': ParamValue} }
     'api.v1.enrollments.index': { paramsTuple?: []; params?: {} }
+    'api.v1.enrollments.action_counts': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.index': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notification_preferences.show': { paramsTuple?: []; params?: {} }
@@ -1697,6 +1707,7 @@ export type ScannedRoutes = {
     'api.v1.auth.send_code': { paramsTuple?: []; params?: {} }
     'api.v1.auth.verify_code': { paramsTuple?: []; params?: {} }
     'api.v1.auth.logout': { paramsTuple?: []; params?: {} }
+    'api.v1.responsavel.api.upload_student_document': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'submissionId': ParamValue} }
     'api.v1.responsavel.api.acknowledge_occurrence': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'occurrenceId': ParamValue} }
     'api.v1.responsavel.api.comunicados.acknowledge': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.invoice_checkout': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

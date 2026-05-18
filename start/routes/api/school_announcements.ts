@@ -1,36 +1,30 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-const ListSchoolAnnouncementsController = () =>
-  import('#controllers/school_announcements/list_school_announcements_controller')
-const ShowSchoolAnnouncementController = () =>
-  import('#controllers/school_announcements/show_school_announcement_controller')
-const CreateSchoolAnnouncementController = () =>
-  import('#controllers/school_announcements/create_school_announcement_controller')
-const UpdateSchoolAnnouncementController = () =>
-  import('#controllers/school_announcements/update_school_announcement_controller')
-const DeleteSchoolAnnouncementController = () =>
-  import('#controllers/school_announcements/delete_school_announcement_controller')
-const PublishSchoolAnnouncementController = () =>
-  import('#controllers/school_announcements/publish_school_announcement_controller')
-const ListSchoolAnnouncementStudentsController = () =>
-  import('#controllers/school_announcements/list_school_announcement_students_controller')
 
 export function registerSchoolAnnouncementApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSchoolAnnouncementsController]).as('school_announcements.list')
-      router.post('/', [CreateSchoolAnnouncementController]).as('school_announcements.create')
-      router.get('/:id', [ShowSchoolAnnouncementController]).as('school_announcements.details')
-      router.put('/:id', [UpdateSchoolAnnouncementController]).as('school_announcements.edit_draft')
       router
-        .delete('/:id', [DeleteSchoolAnnouncementController])
+        .get('/', [controllers.schoolAnnouncements.ListSchoolAnnouncements])
+        .as('school_announcements.list')
+      router
+        .post('/', [controllers.schoolAnnouncements.CreateSchoolAnnouncement])
+        .as('school_announcements.create')
+      router
+        .get('/:id', [controllers.schoolAnnouncements.ShowSchoolAnnouncement])
+        .as('school_announcements.details')
+      router
+        .put('/:id', [controllers.schoolAnnouncements.UpdateSchoolAnnouncement])
+        .as('school_announcements.edit_draft')
+      router
+        .delete('/:id', [controllers.schoolAnnouncements.DeleteSchoolAnnouncement])
         .as('school_announcements.delete_draft')
       router
-        .post('/:id/publish', [PublishSchoolAnnouncementController])
+        .post('/:id/publish', [controllers.schoolAnnouncements.PublishSchoolAnnouncement])
         .as('school_announcements.publish_draft')
       router
-        .get('/audience/students', [ListSchoolAnnouncementStudentsController])
+        .get('/audience/students', [controllers.schoolAnnouncements.ListSchoolAnnouncementStudents])
         .as('school_announcements.audience_students')
     })
     .prefix('/school-announcements')

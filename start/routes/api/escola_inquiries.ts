@@ -1,26 +1,20 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-const ListInquiriesController = () => import('#controllers/escola/list_inquiries_controller')
-const ShowInquiryController = () => import('#controllers/escola/show_inquiry_controller')
-const CreateInquiryMessageController = () =>
-  import('#controllers/escola/create_inquiry_message_controller')
-const ResolveInquiryController = () => import('#controllers/escola/resolve_inquiry_controller')
-const MarkInquiryReadController = () => import('#controllers/escola/mark_inquiry_read_controller')
 
 export function registerEscolaInquiriesApiRoutes() {
   router
     .group(() => {
-      router.get('/inquiries', [ListInquiriesController]).as('inquiries.list')
-      router.get('/inquiries/:inquiryId', [ShowInquiryController]).as('inquiries.show')
+      router.get('/inquiries', [controllers.escola.ListInquiries]).as('inquiries.list')
+      router.get('/inquiries/:inquiryId', [controllers.escola.ShowInquiry]).as('inquiries.show')
       router
-        .post('/inquiries/:inquiryId/messages', [CreateInquiryMessageController])
+        .post('/inquiries/:inquiryId/messages', [controllers.escola.CreateInquiryMessage])
         .as('inquiries.messages.create')
       router
-        .post('/inquiries/:inquiryId/resolve', [ResolveInquiryController])
+        .post('/inquiries/:inquiryId/resolve', [controllers.escola.ResolveInquiry])
         .as('inquiries.resolve')
       router
-        .post('/inquiries/:inquiryId/mark-read', [MarkInquiryReadController])
+        .post('/inquiries/:inquiryId/mark-read', [controllers.escola.MarkInquiryRead])
         .as('inquiries.mark-read')
     })
     .prefix('/escola')

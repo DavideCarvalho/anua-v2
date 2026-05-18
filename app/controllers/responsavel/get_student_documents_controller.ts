@@ -1,162 +1,80 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import StudentDocumentSubmission from '#models/student_document_submission'
+import ContractDocument from '#models/contract_document'
+import Student from '#models/student'
+import User from '#models/user'
 import AppException from '#exceptions/app_exception'
-
-interface DocumentRow {
-  id: string
-  fileName: string
-  fileUrl: string
-  mimeType: string
-  size: string | number
-  status: string
-  rejectionReason: string | null
-  reviewedAt: string | null
-  createdAt: string
-  contractDocumentId: string
-  documentTypeName: string
-  documentTypeDescription: string | null
-  required: boolean
-  reviewerName: string | null
-}
-
-interface MissingDocumentRow {
-  id: string
-  name: string
-  description: string | null
-  required: boolean
-}
-
-interface SummaryRow {
-  total: string | number
-  pending: string | number
-  approved: string | number
-  rejected: string | number
-}
+import ResponsavelDocumentsOverviewTransformer from '#transformers/responsavel_documents_overview_transformer'
+import { getSignedAssetUrl } from '#lib/storage'
 
 export default class GetStudentDocumentsController {
-  async handle({ params, effectiveUser }: HttpContext) {
+  async handle({ params, effectiveUser, response, serialize }: HttpContext) {
     if (!effectiveUser) {
       throw AppException.invalidCredentials()
     }
 
     const { studentId } = params
 
-    // Verify that the user is a responsible for this student
+    // Garante que o usuário logado é responsável por este aluno (IDOR prevention)
     const relation = await StudentHasResponsible.query()
       .where('responsibleId', effectiveUser.id)
       .where('studentId', studentId)
       .first()
-
     if (!relation) {
       throw AppException.forbidden('Você não tem permissão para ver os documentos deste aluno')
     }
 
-    // Get student's documents with contract document info
-    const documents = await db.rawQuery(
-      `
-      SELECT
-        sd.id,
-        sd."fileName",
-        sd."fileUrl",
-        sd."mimeType",
-        sd.size,
-        sd.status,
-        sd."rejectionReason",
-        sd."reviewedAt",
-        sd."createdAt",
-        cd.id as "contractDocumentId",
-        cd.name as "documentTypeName",
-        cd.description as "documentTypeDescription",
-        cd.required,
-        u.name as "reviewerName"
-      FROM "StudentDocument" sd
-      JOIN "ContractDocument" cd ON sd."contractDocumentId" = cd.id
-      LEFT JOIN "User" u ON sd."reviewedBy" = u.id
-      WHERE sd."studentId" = :studentId
-      ORDER BY sd."createdAt" DESC
-      `,
-      { studentId }
-    )
-
-    // Get required documents that haven't been uploaded yet
-    const missingDocuments = await db.rawQuery(
-      `
-      SELECT
-        cd.id,
-        cd.name,
-        cd.description,
-        cd.required
-      FROM "ContractDocument" cd
-      JOIN "Student" s ON s."contractId" = cd."contractId"
-      WHERE s.id = :studentId
-        AND cd.id NOT IN (
-          SELECT "contractDocumentId"
-          FROM "StudentDocument"
-          WHERE "studentId" = :studentId
-        )
-      ORDER BY cd.required DESC, cd.name
-      `,
-      { studentId }
-    )
-
-    // Get summary stats
-    const summary = await db.rawQuery(
-      `
-      SELECT
-        COUNT(*) as total,
-        COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending,
-        COUNT(CASE WHEN status = 'APPROVED' THEN 1 END) as approved,
-        COUNT(CASE WHEN status = 'REJECTED' THEN 1 END) as rejected
-      FROM "StudentDocument"
-      WHERE "studentId" = :studentId
-      `,
-      { studentId }
-    )
-
-    // Count required missing documents
-    const missingRows = missingDocuments.rows as MissingDocumentRow[]
-    const requiredMissing = missingRows.filter((d) => d.required).length
-
-    const documentsList = (documents.rows as DocumentRow[]).map((row) => ({
-      id: row.id,
-      fileName: row.fileName,
-      fileUrl: row.fileUrl,
-      mimeType: row.mimeType,
-      size: Number(row.size),
-      status: row.status,
-      rejectionReason: row.rejectionReason,
-      reviewedAt: row.reviewedAt ? new Date(row.reviewedAt) : null,
-      createdAt: new Date(row.createdAt),
-      documentType: {
-        id: row.contractDocumentId,
-        name: row.documentTypeName,
-        description: row.documentTypeDescription,
-        isRequired: row.required,
-      },
-      reviewerName: row.reviewerName,
-    }))
-
-    const missingDocumentsList = missingRows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      isRequired: row.required,
-    }))
-
-    const summaryRow = summary.rows[0] as SummaryRow | undefined
-    const summaryData = {
-      total: Number(summaryRow?.total || 0),
-      pending: Number(summaryRow?.pending || 0),
-      approved: Number(summaryRow?.approved || 0),
-      rejected: Number(summaryRow?.rejected || 0),
-      requiredMissing,
+    const student = await Student.find(studentId)
+    if (!student) {
+      throw AppException.notFound('Aluno não encontrado')
     }
 
-    return {
-      documents: documentsList,
-      missingDocuments: missingDocumentsList,
-      summary: summaryData,
+    const submissions = await StudentDocumentSubmission.query()
+      .where('studentId', studentId)
+      .preload('contractDocument')
+      .preload('files', (q) => q.orderBy('ord', 'asc'))
+      .orderBy('createdAt', 'desc')
+
+    // Resolve key → signed URL nos arquivos antes de devolver
+    for (const sub of submissions) {
+      for (const file of sub.files) {
+        file.fileUrl = (await getSignedAssetUrl(file.fileUrl)) ?? file.fileUrl
+      }
     }
+
+    // Documentos requeridos pelo contrato que ainda não foram submetidos
+    const missingDocuments = student.contractId
+      ? await ContractDocument.query()
+          .where('contractId', student.contractId)
+          .whereNotIn(
+            'id',
+            submissions.map((s) => s.contractDocumentId)
+          )
+          .orderBy('required', 'desc')
+          .orderBy('name', 'asc')
+      : []
+
+    // Reviewer names em batch (evita N+1 sem preload pesado)
+    const reviewerIds = Array.from(
+      new Set(submissions.map((s) => s.reviewedBy).filter((id): id is string => !!id))
+    )
+    const reviewerNamesById = new Map<string, string>()
+    if (reviewerIds.length > 0) {
+      const reviewers = await User.query().whereIn('id', reviewerIds).select(['id', 'name'])
+      for (const r of reviewers) {
+        reviewerNamesById.set(r.id, r.name)
+      }
+    }
+
+    return response.ok(
+      await serialize(
+        ResponsavelDocumentsOverviewTransformer.transform({
+          submissions,
+          missingDocuments,
+          reviewerNamesById,
+        })
+      )
+    )
   }
 }

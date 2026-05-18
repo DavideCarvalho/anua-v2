@@ -1,26 +1,24 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
 
 export function registerScholarshipApiRoutes() {
-  const ListScholarshipsController = () =>
-    import('#controllers/scholarships/list_scholarships_controller')
-  const CreateScholarshipController = () =>
-    import('#controllers/scholarships/create_scholarship_controller')
-  const ShowScholarshipController = () =>
-    import('#controllers/scholarships/show_scholarship_controller')
-  const UpdateScholarshipController = () =>
-    import('#controllers/scholarships/update_scholarship_controller')
-  const ToggleScholarshipActiveController = () =>
-    import('#controllers/scholarships/toggle_scholarship_active_controller')
-
   router
     .group(() => {
-      router.get('/', [ListScholarshipsController]).as('scholarships.list_scholarships')
-      router.post('/', [CreateScholarshipController]).as('scholarships.create_scholarship')
-      router.get('/:id', [ShowScholarshipController]).as('scholarships.show_scholarship')
-      router.put('/:id', [UpdateScholarshipController]).as('scholarships.update_scholarship')
       router
-        .patch('/:id/toggle-active', [ToggleScholarshipActiveController])
+        .get('/', [controllers.scholarships.ListScholarships])
+        .as('scholarships.list_scholarships')
+      router
+        .post('/', [controllers.scholarships.CreateScholarship])
+        .as('scholarships.create_scholarship')
+      router
+        .get('/:id', [controllers.scholarships.ShowScholarship])
+        .as('scholarships.show_scholarship')
+      router
+        .put('/:id', [controllers.scholarships.UpdateScholarship])
+        .as('scholarships.update_scholarship')
+      router
+        .patch('/:id/toggle-active', [controllers.scholarships.ToggleScholarshipActive])
         .as('scholarships.toggle_scholarship_active')
     })
     .prefix('/scholarships')
@@ -28,27 +26,22 @@ export function registerScholarshipApiRoutes() {
 }
 
 export function registerSchoolPartnerApiRoutes() {
-  const ListSchoolPartnersController = () =>
-    import('#controllers/school_partners/list_school_partners_controller')
-  const CreateSchoolPartnerController = () =>
-    import('#controllers/school_partners/create_school_partner_controller')
-  const ShowSchoolPartnerController = () =>
-    import('#controllers/school_partners/show_school_partner_controller')
-  const UpdateSchoolPartnerController = () =>
-    import('#controllers/school_partners/update_school_partner_controller')
-  const ToggleSchoolPartnerActiveController = () =>
-    import('#controllers/school_partners/toggle_school_partner_active_controller')
-
   router
     .group(() => {
-      router.get('/', [ListSchoolPartnersController]).as('school_partners.list_school_partners')
-      router.post('/', [CreateSchoolPartnerController]).as('school_partners.create_school_partner')
-      router.get('/:id', [ShowSchoolPartnerController]).as('school_partners.show_school_partner')
       router
-        .put('/:id', [UpdateSchoolPartnerController])
+        .get('/', [controllers.schoolPartners.ListSchoolPartners])
+        .as('school_partners.list_school_partners')
+      router
+        .post('/', [controllers.schoolPartners.CreateSchoolPartner])
+        .as('school_partners.create_school_partner')
+      router
+        .get('/:id', [controllers.schoolPartners.ShowSchoolPartner])
+        .as('school_partners.show_school_partner')
+      router
+        .put('/:id', [controllers.schoolPartners.UpdateSchoolPartner])
         .as('school_partners.update_school_partner')
       router
-        .patch('/:id/toggle-active', [ToggleSchoolPartnerActiveController])
+        .patch('/:id/toggle-active', [controllers.schoolPartners.ToggleSchoolPartnerActive])
         .as('school_partners.toggle_school_partner_active')
     })
     .prefix('/school-partners')
@@ -56,48 +49,46 @@ export function registerSchoolPartnerApiRoutes() {
 }
 
 export function registerSchoolChainApiRoutes() {
-  const ListSchoolChainsController = () =>
-    import('#controllers/school_chains/list_school_chains_controller')
-  const CreateSchoolChainController = () =>
-    import('#controllers/school_chains/create_school_chain_controller')
-  const ShowSchoolChainController = () =>
-    import('#controllers/school_chains/show_school_chain_controller')
-  const UpdateSchoolChainController = () =>
-    import('#controllers/school_chains/update_school_chain_controller')
-  const DeleteSchoolChainController = () =>
-    import('#controllers/school_chains/delete_school_chain_controller')
-
   router
     .group(() => {
-      router.get('/', [ListSchoolChainsController]).as('school_chains.list_school_chains')
-      router.post('/', [CreateSchoolChainController]).as('school_chains.create_school_chain')
-      router.get('/:id', [ShowSchoolChainController]).as('school_chains.show_school_chain')
-      router.put('/:id', [UpdateSchoolChainController]).as('school_chains.update_school_chain')
-      router.delete('/:id', [DeleteSchoolChainController]).as('school_chains.delete_school_chain')
+      router
+        .get('/', [controllers.schoolChains.ListSchoolChains])
+        .as('school_chains.list_school_chains')
+      router
+        .post('/', [controllers.schoolChains.CreateSchoolChain])
+        .as('school_chains.create_school_chain')
+      router
+        .get('/:id', [controllers.schoolChains.ShowSchoolChain])
+        .as('school_chains.show_school_chain')
+      router
+        .put('/:id', [controllers.schoolChains.UpdateSchoolChain])
+        .as('school_chains.update_school_chain')
+      router
+        .delete('/:id', [controllers.schoolChains.DeleteSchoolChain])
+        .as('school_chains.delete_school_chain')
     })
     .prefix('/school-chains')
     .use(middleware.auth())
 }
 
 export function registerSchoolGroupApiRoutes() {
-  const ListSchoolGroupsController = () =>
-    import('#controllers/school_groups/list_school_groups_controller')
-  const CreateSchoolGroupController = () =>
-    import('#controllers/school_groups/create_school_group_controller')
-  const ShowSchoolGroupController = () =>
-    import('#controllers/school_groups/show_school_group_controller')
-  const UpdateSchoolGroupController = () =>
-    import('#controllers/school_groups/update_school_group_controller')
-  const DeleteSchoolGroupController = () =>
-    import('#controllers/school_groups/delete_school_group_controller')
-
   router
     .group(() => {
-      router.get('/', [ListSchoolGroupsController]).as('school_groups.list_school_groups')
-      router.post('/', [CreateSchoolGroupController]).as('school_groups.create_school_group')
-      router.get('/:id', [ShowSchoolGroupController]).as('school_groups.show_school_group')
-      router.put('/:id', [UpdateSchoolGroupController]).as('school_groups.update_school_group')
-      router.delete('/:id', [DeleteSchoolGroupController]).as('school_groups.delete_school_group')
+      router
+        .get('/', [controllers.schoolGroups.ListSchoolGroups])
+        .as('school_groups.list_school_groups')
+      router
+        .post('/', [controllers.schoolGroups.CreateSchoolGroup])
+        .as('school_groups.create_school_group')
+      router
+        .get('/:id', [controllers.schoolGroups.ShowSchoolGroup])
+        .as('school_groups.show_school_group')
+      router
+        .put('/:id', [controllers.schoolGroups.UpdateSchoolGroup])
+        .as('school_groups.update_school_group')
+      router
+        .delete('/:id', [controllers.schoolGroups.DeleteSchoolGroup])
+        .as('school_groups.delete_school_group')
     })
     .prefix('/school-groups')
     .use(middleware.auth())

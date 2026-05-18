@@ -1687,6 +1687,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_documentos_page_controller').default['handle']>>>
     }
   }
+  'web.responsavel.matricula': {
+    methods: ["GET","HEAD"]
+    pattern: '/responsavel/matricula/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_matricula_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/responsavel/show_responsavel_matricula_page_controller').default['handle']>>>
+    }
+  }
   'web.responsavel.ocorrencias': {
     methods: ["GET","HEAD"]
     pattern: '/responsavel/registro-diario'
@@ -2489,6 +2501,30 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_documents_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_documents_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.upload_student_document': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/students/:studentId/submissions/:submissionId/files'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/student_document').uploadStudentDocumentParamsValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { studentId: ParamValue; submissionId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/student_document').uploadStudentDocumentParamsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/upload_student_document_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/upload_student_document_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.responsavel.api.enrollment_axes': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/matriculas/:matriculaId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { matriculaId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_enrollment_axes_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_enrollment_axes_controller').default['handle']>>>
     }
   }
   'api.v1.responsavel.api.student_occurrences': {
@@ -4985,6 +5021,18 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/enrollment').listEnrollmentsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/enrollments/list_enrollments_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/enrollments/list_enrollments_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.enrollments.action_counts': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/enrollments/action-counts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/enrollments/get_action_counts_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/enrollments/get_action_counts_controller').default['handle']>>>
     }
   }
   'api.v1.enrollments.documents.update_status': {

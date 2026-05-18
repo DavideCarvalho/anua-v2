@@ -1,167 +1,34 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Courses
-const ListCoursesController = () => import('#controllers/courses/list_courses_controller')
-const ShowCourseController = () => import('#controllers/courses/show_course_controller')
-const CreateCourseController = () => import('#controllers/courses/create_course_controller')
-const UpdateCourseController = () => import('#controllers/courses/update_course_controller')
-const DeleteCourseController = () => import('#controllers/courses/delete_course_controller')
-const GetCourseDashboardMetricsController = () =>
-  import('#controllers/courses/get_course_dashboard_metrics_controller')
-const GetCourseAlertsController = () => import('#controllers/courses/get_course_alerts_controller')
-const GetCourseActivityFeedController = () =>
-  import('#controllers/courses/get_course_activity_feed_controller')
-const GetCourseClassesController = () =>
-  import('#controllers/courses/get_course_classes_controller')
-
-// Levels
-const ListLevelsController = () => import('#controllers/levels/list_levels_controller')
-const ShowLevelController = () => import('#controllers/levels/show_level_controller')
-const CreateLevelController = () => import('#controllers/levels/create_level_controller')
-const UpdateLevelController = () => import('#controllers/levels/update_level_controller')
-const DeleteLevelController = () => import('#controllers/levels/delete_level_controller')
-
-// Course Has Academic Periods
-const CreateCourseHasAcademicPeriodController = () =>
-  import('#controllers/course_has_academic_periods/create_course_has_academic_period_controller')
-
-// Level Assignments
-const CreateLevelAssignmentController = () =>
-  import('#controllers/level_assignments/create_level_assignment_controller')
-
-// Classes
-const ListClassesController = () => import('#controllers/classes/list_classes_controller')
-const ShowClassController = () => import('#controllers/classes/show_class_controller')
-const ShowClassBySlugController = () => import('#controllers/classes/show_class_by_slug_controller')
-const CreateClassController = () => import('#controllers/classes/create_class_controller')
-const UpdateClassController = () => import('#controllers/classes/update_class_controller')
-const DeleteClassController = () => import('#controllers/classes/delete_class_controller')
-const UpdateClassWithTeachersController = () =>
-  import('#controllers/classes/update_class_with_teachers_controller')
-const CreateClassWithTeachersController = () =>
-  import('#controllers/classes/create_class_with_teachers_controller')
-const ListClassStudentsController = () =>
-  import('#controllers/classes/list_class_students_controller')
-const CountClassStudentsController = () =>
-  import('#controllers/classes/count_class_students_controller')
-const GetClassesForSidebarController = () =>
-  import('#controllers/classes/get_classes_for_sidebar_controller')
-const GetStudentStatusController = () =>
-  import('#controllers/students/get_student_status_controller')
-
-// Subjects
-const ListSubjectsController = () => import('#controllers/subjects/list_subjects_controller')
-const ShowSubjectController = () => import('#controllers/subjects/show_subject_controller')
-const ShowSubjectBySlugController = () =>
-  import('#controllers/subjects/show_subject_by_slug_controller')
-const CreateSubjectController = () => import('#controllers/subjects/create_subject_controller')
-const UpdateSubjectController = () => import('#controllers/subjects/update_subject_controller')
-const DeleteSubjectController = () => import('#controllers/subjects/delete_subject_controller')
-const ListSubjectsForClassController = () =>
-  import('#controllers/subjects/list_subjects_for_class_controller')
-
-// Schedules
-const GetClassScheduleController = () =>
-  import('#controllers/schedules/get_class_schedule_controller')
-const SaveClassScheduleController = () =>
-  import('#controllers/schedules/save_class_schedule_controller')
-const GenerateClassScheduleController = () =>
-  import('#controllers/schedules/generate_class_schedule_controller')
-const ValidateTeacherScheduleConflictController = () =>
-  import('#controllers/schedules/validate_teacher_schedule_conflict_controller')
-
-// Teachers
-const ListTeachersController = () => import('#controllers/teachers/list_teachers_controller')
-const ShowTeacherController = () => import('#controllers/teachers/show_teacher_controller')
-const CreateTeacherController = () => import('#controllers/teachers/create_teacher_controller')
-const UpdateTeacherController = () => import('#controllers/teachers/update_teacher_controller')
-const DeleteTeacherController = () => import('#controllers/teachers/delete_teacher_controller')
-const ListTeacherClassesController = () =>
-  import('#controllers/teachers/list_teacher_classes_controller')
-const ListTeacherSubjectsController = () =>
-  import('#controllers/teachers/list_teacher_subjects_controller')
-const UpdateTeacherSubjectsController = () =>
-  import('#controllers/teachers/update_teacher_subjects_controller')
-const AssignTeacherToClassController = () =>
-  import('#controllers/teachers/assign_teacher_to_class_controller')
-const RemoveTeacherFromClassController = () =>
-  import('#controllers/teachers/remove_teacher_from_class_controller')
-
-// Exams
-const ListExamsController = () => import('#controllers/exams/list_exams_controller')
-const ShowExamController = () => import('#controllers/exams/show_exam_controller')
-const CreateExamController = () => import('#controllers/exams/create_exam_controller')
-const UpdateExamController = () => import('#controllers/exams/update_exam_controller')
-const DeleteExamController = () => import('#controllers/exams/delete_exam_controller')
-const ListExamHistoryController = () => import('#controllers/exams/list_exam_history_controller')
-const ListExamGradesController = () => import('#controllers/exams/list_exam_grades_controller')
-const SaveExamGradeController = () => import('#controllers/exams/save_exam_grade_controller')
-const BatchSaveExamGradesController = () =>
-  import('#controllers/exams/batch_save_exam_grades_controller')
-const UpdateExamGradeController = () => import('#controllers/exams/update_exam_grade_controller')
-
-// Grades Analytics
-const GetAcademicOverviewController = () =>
-  import('#controllers/grades/get_academic_overview_controller')
-const GetStudentsGradesController = () =>
-  import('#controllers/grades/get_students_grades_controller')
-const GetGradeDistributionController = () =>
-  import('#controllers/grades/get_grade_distribution_controller')
-const GetAtRiskStudentsController = () =>
-  import('#controllers/grades/get_at_risk_students_controller')
-const GetClassGradesBySubjectController = () =>
-  import('#controllers/grades/get_class_grades_by_subject_controller')
-const BatchSaveGradesController = () => import('#controllers/grades/batch_save_grades_controller')
-const GetGradeTrendsController = () => import('#controllers/grades/get_grade_trends_controller')
-
-// Academic Periods
-const ListAcademicPeriodsController = () =>
-  import('#controllers/academic_periods/list_academic_periods_controller')
-const GetCurrentActiveAcademicPeriodsController = () =>
-  import('#controllers/academic_periods/get_current_active_academic_periods_controller')
-const CreateAcademicPeriodController = () =>
-  import('#controllers/academic_periods/create_academic_period_controller')
-const ShowAcademicPeriodController = () =>
-  import('#controllers/academic_periods/show_academic_period_controller')
-const ShowAcademicPeriodBySlugController = () =>
-  import('#controllers/academic_periods/show_academic_period_by_slug_controller')
-const ShowAcademicPeriodDashboardBySlugController = () =>
-  import('#controllers/academic_periods/show_academic_period_dashboard_by_slug_controller')
-const UpdateAcademicPeriodController = () =>
-  import('#controllers/academic_periods/update_academic_period_controller')
-const DeleteAcademicPeriodController = () =>
-  import('#controllers/academic_periods/delete_academic_period_controller')
-const ListAcademicPeriodCoursesController = () =>
-  import('#controllers/academic_periods/list_academic_period_courses_controller')
-const UpdateAcademicPeriodCoursesController = () =>
-  import('#controllers/academic_periods/update_academic_period_courses_controller')
 
 export function registerCourseApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCoursesController]).as('courses.index')
-      router.post('/', [CreateCourseController]).as('courses.store')
-      router.get('/:id', [ShowCourseController]).as('courses.show')
-      router.put('/:id', [UpdateCourseController]).as('courses.update')
-      router.delete('/:id', [DeleteCourseController]).as('courses.destroy')
+      router.get('/', [controllers.courses.ListCourses]).as('courses.index')
+      router.post('/', [controllers.courses.CreateCourse]).as('courses.store')
+      router.get('/:id', [controllers.courses.ShowCourse]).as('courses.show')
+      router.put('/:id', [controllers.courses.UpdateCourse]).as('courses.update')
+      router.delete('/:id', [controllers.courses.DeleteCourse]).as('courses.destroy')
       router
         .get('/:courseId/academic-periods/:academicPeriodId/dashboard/metrics', [
-          GetCourseDashboardMetricsController,
+          controllers.courses.GetCourseDashboardMetrics,
         ])
         .as('courses.dashboard.metrics')
       router
         .get('/:courseId/academic-periods/:academicPeriodId/dashboard/alerts', [
-          GetCourseAlertsController,
+          controllers.courses.GetCourseAlerts,
         ])
         .as('courses.dashboard.alerts')
       router
         .get('/:courseId/academic-periods/:academicPeriodId/dashboard/activity-feed', [
-          GetCourseActivityFeedController,
+          controllers.courses.GetCourseActivityFeed,
         ])
         .as('courses.dashboard.activity_feed')
       router
-        .get('/:courseId/academic-periods/:academicPeriodId/classes', [GetCourseClassesController])
+        .get('/:courseId/academic-periods/:academicPeriodId/classes', [
+          controllers.courses.GetCourseClasses,
+        ])
         .as('courses.classes')
     })
     .prefix('/courses')
@@ -171,11 +38,11 @@ export function registerCourseApiRoutes() {
 export function registerLevelApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListLevelsController]).as('levels.index')
-      router.post('/', [CreateLevelController]).as('levels.store')
-      router.get('/:id', [ShowLevelController]).as('levels.show')
-      router.put('/:id', [UpdateLevelController]).as('levels.update')
-      router.delete('/:id', [DeleteLevelController]).as('levels.destroy')
+      router.get('/', [controllers.levels.ListLevels]).as('levels.index')
+      router.post('/', [controllers.levels.CreateLevel]).as('levels.store')
+      router.get('/:id', [controllers.levels.ShowLevel]).as('levels.show')
+      router.put('/:id', [controllers.levels.UpdateLevel]).as('levels.update')
+      router.delete('/:id', [controllers.levels.DeleteLevel]).as('levels.destroy')
     })
     .prefix('/levels')
     .use([middleware.auth(), middleware.impersonation()])
@@ -185,7 +52,7 @@ export function registerCourseHasAcademicPeriodApiRoutes() {
   router
     .group(() => {
       router
-        .post('/', [CreateCourseHasAcademicPeriodController])
+        .post('/', [controllers.courseHasAcademicPeriods.CreateCourseHasAcademicPeriod])
         .as('course_has_academic_periods.store')
     })
     .prefix('/course-has-academic-periods')
@@ -195,7 +62,9 @@ export function registerCourseHasAcademicPeriodApiRoutes() {
 export function registerLevelAssignmentApiRoutes() {
   router
     .group(() => {
-      router.post('/', [CreateLevelAssignmentController]).as('level_assignments.store')
+      router
+        .post('/', [controllers.levelAssignments.CreateLevelAssignment])
+        .as('level_assignments.store')
     })
     .prefix('/level-assignments')
     .use([middleware.auth(), middleware.impersonation()])
@@ -204,23 +73,29 @@ export function registerLevelAssignmentApiRoutes() {
 export function registerClassApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListClassesController]).as('classes.index')
-      router.post('/', [CreateClassController]).as('classes.store')
+      router.get('/', [controllers.classes.ListClasses]).as('classes.index')
+      router.post('/', [controllers.classes.CreateClass]).as('classes.store')
       router
-        .post('/with-teachers', [CreateClassWithTeachersController])
+        .post('/with-teachers', [controllers.classes.CreateClassWithTeachers])
         .as('classes.store_with_teachers')
-      router.get('/slug/:slug', [ShowClassBySlugController]).as('classes.show_by_slug')
-      router.get('/sidebar', [GetClassesForSidebarController]).as('classes.sidebar')
-      router.get('/:id', [ShowClassController]).as('classes.show')
-      router.put('/:id', [UpdateClassController]).as('classes.update')
-      router.delete('/:id', [DeleteClassController]).as('classes.destroy')
+      router.get('/slug/:slug', [controllers.classes.ShowClassBySlug]).as('classes.show_by_slug')
+      router.get('/sidebar', [controllers.classes.GetClassesForSidebar]).as('classes.sidebar')
+      router.get('/:id', [controllers.classes.ShowClass]).as('classes.show')
+      router.put('/:id', [controllers.classes.UpdateClass]).as('classes.update')
+      router.delete('/:id', [controllers.classes.DeleteClass]).as('classes.destroy')
       router
-        .put('/:id/teachers', [UpdateClassWithTeachersController])
+        .put('/:id/teachers', [controllers.classes.UpdateClassWithTeachers])
         .as('classes.update_with_teachers')
-      router.get('/:id/students', [ListClassStudentsController]).as('classes.students')
-      router.get('/:id/students/count', [CountClassStudentsController]).as('classes.students_count')
-      router.get('/:id/student-status', [GetStudentStatusController]).as('classes.student_status')
-      router.get('/:classId/subjects', [ListSubjectsForClassController]).as('classes.subjects')
+      router.get('/:id/students', [controllers.classes.ListClassStudents]).as('classes.students')
+      router
+        .get('/:id/students/count', [controllers.classes.CountClassStudents])
+        .as('classes.students_count')
+      router
+        .get('/:id/student-status', [controllers.students.GetStudentStatus])
+        .as('classes.student_status')
+      router
+        .get('/:classId/subjects', [controllers.subjects.ListSubjectsForClass])
+        .as('classes.subjects')
     })
     .prefix('/classes')
     .use([middleware.auth(), middleware.impersonation(), middleware.escolaTeacherClasses()])
@@ -229,12 +104,14 @@ export function registerClassApiRoutes() {
 export function registerSubjectApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubjectsController]).as('subjects.index')
-      router.post('/', [CreateSubjectController]).as('subjects.store')
-      router.get('/slug/:slug', [ShowSubjectBySlugController]).as('subjects.show_by_slug')
-      router.get('/:id', [ShowSubjectController]).as('subjects.show')
-      router.put('/:id', [UpdateSubjectController]).as('subjects.update')
-      router.delete('/:id', [DeleteSubjectController]).as('subjects.destroy')
+      router.get('/', [controllers.subjects.ListSubjects]).as('subjects.index')
+      router.post('/', [controllers.subjects.CreateSubject]).as('subjects.store')
+      router
+        .get('/slug/:slug', [controllers.subjects.ShowSubjectBySlug])
+        .as('subjects.show_by_slug')
+      router.get('/:id', [controllers.subjects.ShowSubject]).as('subjects.show')
+      router.put('/:id', [controllers.subjects.UpdateSubject]).as('subjects.update')
+      router.delete('/:id', [controllers.subjects.DeleteSubject]).as('subjects.destroy')
     })
     .prefix('/subjects')
     .use([middleware.auth(), middleware.impersonation()])
@@ -243,15 +120,17 @@ export function registerSubjectApiRoutes() {
 export function registerScheduleApiRoutes() {
   router
     .group(() => {
-      router.get('/class/:classId', [GetClassScheduleController]).as('schedules.get_class_schedule')
       router
-        .post('/class/:classId', [SaveClassScheduleController])
+        .get('/class/:classId', [controllers.schedules.GetClassSchedule])
+        .as('schedules.get_class_schedule')
+      router
+        .post('/class/:classId', [controllers.schedules.SaveClassSchedule])
         .as('schedules.save_class_schedule')
       router
-        .post('/class/:classId/generate', [GenerateClassScheduleController])
+        .post('/class/:classId/generate', [controllers.schedules.GenerateClassSchedule])
         .as('schedules.generate_class_schedule')
       router
-        .post('/validate-conflict', [ValidateTeacherScheduleConflictController])
+        .post('/validate-conflict', [controllers.schedules.ValidateTeacherScheduleConflict])
         .as('schedules.validate_conflict')
     })
     .prefix('/schedules')
@@ -261,49 +140,41 @@ export function registerScheduleApiRoutes() {
 export function registerTeacherApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListTeachersController]).as('teachers.list_teachers')
-      router.post('/', [CreateTeacherController]).as('teachers.create_teacher')
+      router.get('/', [controllers.teachers.ListTeachers]).as('teachers.list_teachers')
+      router.post('/', [controllers.teachers.CreateTeacher]).as('teachers.create_teacher')
 
       // Rotas especificas ANTES das rotas com parametros /:id
       router
-        .get('/timesheet', [
-          () => import('#controllers/teachers/get_teachers_timesheet_controller'),
-          'handle',
-        ])
+        .get('/timesheet', [controllers.teachers.GetTeachersTimesheet])
         .as('teachers.get_teachers_timesheet')
       router
-        .get('/absences', [
-          () => import('#controllers/teachers/get_teacher_absences_controller'),
-          'handle',
-        ])
+        .get('/absences', [controllers.teachers.GetTeacherAbsences])
         .as('teachers.get_teacher_absences')
       router
-        .patch('/absences/approve', [
-          () => import('#controllers/teachers/approve_absence_controller'),
-          'handle',
-        ])
+        .patch('/absences/approve', [controllers.teachers.ApproveAbsence])
         .as('teachers.approve_absence')
       router
-        .patch('/absences/reject', [
-          () => import('#controllers/teachers/reject_absence_controller'),
-          'handle',
-        ])
+        .patch('/absences/reject', [controllers.teachers.RejectAbsence])
         .as('teachers.reject_absence')
 
       // Rotas com parametros /:id
-      router.get('/:id', [ShowTeacherController]).as('teachers.show_teacher')
-      router.put('/:id', [UpdateTeacherController]).as('teachers.update_teacher')
-      router.delete('/:id', [DeleteTeacherController]).as('teachers.delete_teacher')
-      router.get('/:id/classes', [ListTeacherClassesController]).as('teachers.list_teacher_classes')
+      router.get('/:id', [controllers.teachers.ShowTeacher]).as('teachers.show_teacher')
+      router.put('/:id', [controllers.teachers.UpdateTeacher]).as('teachers.update_teacher')
+      router.delete('/:id', [controllers.teachers.DeleteTeacher]).as('teachers.delete_teacher')
       router
-        .get('/:id/subjects', [ListTeacherSubjectsController])
+        .get('/:id/classes', [controllers.teachers.ListTeacherClasses])
+        .as('teachers.list_teacher_classes')
+      router
+        .get('/:id/subjects', [controllers.teachers.ListTeacherSubjects])
         .as('teachers.list_teacher_subjects')
       router
-        .put('/:id/subjects', [UpdateTeacherSubjectsController])
+        .put('/:id/subjects', [controllers.teachers.UpdateTeacherSubjects])
         .as('teachers.update_teacher_subjects')
-      router.post('/:id/classes', [AssignTeacherToClassController]).as('teachers.assign_class')
       router
-        .delete('/:id/classes/:classId', [RemoveTeacherFromClassController])
+        .post('/:id/classes', [controllers.teachers.AssignTeacherToClass])
+        .as('teachers.assign_class')
+      router
+        .delete('/:id/classes/:classId', [controllers.teachers.RemoveTeacherFromClass])
         .as('teachers.remove_class')
     })
     .prefix('/teachers')
@@ -313,18 +184,20 @@ export function registerTeacherApiRoutes() {
 export function registerExamApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListExamsController]).as('exams.index')
-      router.post('/', [CreateExamController]).as('exams.store')
-      router.get('/:id', [ShowExamController]).as('exams.show')
-      router.get('/:id/history', [ListExamHistoryController]).as('exams.history')
-      router.put('/:id', [UpdateExamController]).as('exams.update')
-      router.delete('/:id', [DeleteExamController]).as('exams.destroy')
+      router.get('/', [controllers.exams.ListExams]).as('exams.index')
+      router.post('/', [controllers.exams.CreateExam]).as('exams.store')
+      router.get('/:id', [controllers.exams.ShowExam]).as('exams.show')
+      router.get('/:id/history', [controllers.exams.ListExamHistory]).as('exams.history')
+      router.put('/:id', [controllers.exams.UpdateExam]).as('exams.update')
+      router.delete('/:id', [controllers.exams.DeleteExam]).as('exams.destroy')
       router
-        .post('/:id/grades/batch', [BatchSaveExamGradesController])
+        .post('/:id/grades/batch', [controllers.exams.BatchSaveExamGrades])
         .as('exams.batch_save_grades')
-      router.get('/:id/grades', [ListExamGradesController]).as('exams.grades')
-      router.post('/:id/grades', [SaveExamGradeController]).as('exams.grades.store')
-      router.put('/:id/grades/:gradeId', [UpdateExamGradeController]).as('exams.update_grade')
+      router.get('/:id/grades', [controllers.exams.ListExamGrades]).as('exams.grades')
+      router.post('/:id/grades', [controllers.exams.SaveExamGrade]).as('exams.grades.store')
+      router
+        .put('/:id/grades/:gradeId', [controllers.exams.UpdateExamGrade])
+        .as('exams.update_grade')
     })
     .prefix('/exams')
     .use(middleware.auth())
@@ -334,16 +207,18 @@ export function registerGradesApiRoutes() {
   router
     .group(() => {
       router
-        .get('/academic-overview', [GetAcademicOverviewController])
+        .get('/academic-overview', [controllers.grades.GetAcademicOverview])
         .as('grades.academic_overview')
-      router.get('/students', [GetStudentsGradesController]).as('grades.students')
-      router.get('/distribution', [GetGradeDistributionController]).as('grades.distribution')
-      router.get('/at-risk', [GetAtRiskStudentsController]).as('grades.at_risk')
-      router.get('/trends', [GetGradeTrendsController]).as('grades.trends')
+      router.get('/students', [controllers.grades.GetStudentsGrades]).as('grades.students')
       router
-        .get('/class/:classId/subject/:subjectId', [GetClassGradesBySubjectController])
+        .get('/distribution', [controllers.grades.GetGradeDistribution])
+        .as('grades.distribution')
+      router.get('/at-risk', [controllers.grades.GetAtRiskStudents]).as('grades.at_risk')
+      router.get('/trends', [controllers.grades.GetGradeTrends]).as('grades.trends')
+      router
+        .get('/class/:classId/subject/:subjectId', [controllers.grades.GetClassGradesBySubject])
         .as('grades.class_subject')
-      router.post('/batch', [BatchSaveGradesController]).as('grades.batch_save')
+      router.post('/batch', [controllers.grades.BatchSaveGrades]).as('grades.batch_save')
     })
     .prefix('/grades')
     .use([middleware.auth(), middleware.impersonation()])
@@ -352,31 +227,37 @@ export function registerGradesApiRoutes() {
 export function registerAcademicPeriodApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListAcademicPeriodsController]).as('academic_periods.list_academic_periods')
       router
-        .get('/current-active', [GetCurrentActiveAcademicPeriodsController])
+        .get('/', [controllers.academicPeriods.ListAcademicPeriods])
+        .as('academic_periods.list_academic_periods')
+      router
+        .get('/current-active', [controllers.academicPeriods.GetCurrentActiveAcademicPeriods])
         .as('academic_periods.get_current_active_academic_periods')
       router
-        .get('/by-slug/:slug', [ShowAcademicPeriodBySlugController])
+        .get('/by-slug/:slug', [controllers.academicPeriods.ShowAcademicPeriodBySlug])
         .as('academic_periods.show_by_slug')
       router
-        .get('/by-slug/:slug/dashboard', [ShowAcademicPeriodDashboardBySlugController])
+        .get('/by-slug/:slug/dashboard', [
+          controllers.academicPeriods.ShowAcademicPeriodDashboardBySlug,
+        ])
         .as('academic_periods.show_dashboard_by_slug')
       router
-        .post('/', [CreateAcademicPeriodController])
+        .post('/', [controllers.academicPeriods.CreateAcademicPeriod])
         .as('academic_periods.create_academic_period')
-      router.get('/:id', [ShowAcademicPeriodController]).as('academic_periods.show_academic_period')
       router
-        .put('/:id', [UpdateAcademicPeriodController])
+        .get('/:id', [controllers.academicPeriods.ShowAcademicPeriod])
+        .as('academic_periods.show_academic_period')
+      router
+        .put('/:id', [controllers.academicPeriods.UpdateAcademicPeriod])
         .as('academic_periods.update_academic_period')
       router
-        .delete('/:id', [DeleteAcademicPeriodController])
+        .delete('/:id', [controllers.academicPeriods.DeleteAcademicPeriod])
         .as('academic_periods.delete_academic_period')
       router
-        .get('/:id/courses', [ListAcademicPeriodCoursesController])
+        .get('/:id/courses', [controllers.academicPeriods.ListAcademicPeriodCourses])
         .as('academic_periods.list_courses')
       router
-        .put('/:id/courses', [UpdateAcademicPeriodCoursesController])
+        .put('/:id/courses', [controllers.academicPeriods.UpdateAcademicPeriodCourses])
         .as('academic_periods.update_courses')
     })
     .prefix('/academic-periods')

@@ -1,120 +1,38 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Canteens
-const ListCanteensController = () => import('#controllers/canteens/list_canteens_controller')
-const ShowCanteenController = () => import('#controllers/canteens/show_canteen_controller')
-const CreateCanteenController = () => import('#controllers/canteens/create_canteen_controller')
-const UpdateCanteenController = () => import('#controllers/canteens/update_canteen_controller')
-const DeleteCanteenController = () => import('#controllers/canteens/delete_canteen_controller')
-
-// Canteen Items
-const ListCanteenItemsController = () =>
-  import('#controllers/canteen_items/list_canteen_items_controller')
-const ShowCanteenItemController = () =>
-  import('#controllers/canteen_items/show_canteen_item_controller')
-const CreateCanteenItemController = () =>
-  import('#controllers/canteen_items/create_canteen_item_controller')
-const UpdateCanteenItemController = () =>
-  import('#controllers/canteen_items/update_canteen_item_controller')
-const DeleteCanteenItemController = () =>
-  import('#controllers/canteen_items/delete_canteen_item_controller')
-const ListItemsByCanteenController = () =>
-  import('#controllers/canteen_items/list_items_by_canteen_controller')
-const ToggleCanteenItemActiveController = () =>
-  import('#controllers/canteen_items/toggle_canteen_item_active_controller')
-const ListCanteenItemCategoriesController = () =>
-  import('#controllers/canteen_items/list_canteen_item_categories_controller')
-
-// Canteen Reports
-const GetCanteenReportController = () =>
-  import('#controllers/canteen_reports/get_canteen_report_controller')
-
-// Canteen Monthly Transfers
-const ListCanteenMonthlyTransfersController = () =>
-  import('#controllers/canteen_monthly_transfers/list_canteen_monthly_transfers_controller')
-const ShowCanteenMonthlyTransferController = () =>
-  import('#controllers/canteen_monthly_transfers/show_canteen_monthly_transfer_controller')
-const CreateCanteenMonthlyTransferController = () =>
-  import('#controllers/canteen_monthly_transfers/create_canteen_monthly_transfer_controller')
-const UpdateCanteenMonthlyTransferStatusController = () =>
-  import('#controllers/canteen_monthly_transfers/update_canteen_monthly_transfer_status_controller')
-
-// Canteen Meals
-const ListCanteenMealsController = () =>
-  import('#controllers/canteen_meals/list_canteen_meals_controller')
-const ShowCanteenMealController = () =>
-  import('#controllers/canteen_meals/show_canteen_meal_controller')
-const CreateCanteenMealController = () =>
-  import('#controllers/canteen_meals/create_canteen_meal_controller')
-const UpdateCanteenMealController = () =>
-  import('#controllers/canteen_meals/update_canteen_meal_controller')
-const DeleteCanteenMealController = () =>
-  import('#controllers/canteen_meals/delete_canteen_meal_controller')
-
-// Canteen Meal Reservations
-const ListCanteenMealReservationsController = () =>
-  import('#controllers/canteen_meal_reservations/list_canteen_meal_reservations_controller')
-const ShowCanteenMealReservationController = () =>
-  import('#controllers/canteen_meal_reservations/show_canteen_meal_reservation_controller')
-const CreateCanteenMealReservationController = () =>
-  import('#controllers/canteen_meal_reservations/create_canteen_meal_reservation_controller')
-const UpdateCanteenMealReservationStatusController = () =>
-  import('#controllers/canteen_meal_reservations/update_canteen_meal_reservation_status_controller')
-const DeleteCanteenMealReservationController = () =>
-  import('#controllers/canteen_meal_reservations/delete_canteen_meal_reservation_controller')
-const GetMealReservationCountsController = () =>
-  import('#controllers/canteen_meal_reservations/get_meal_reservation_counts_controller')
-const ListCanteenMealRecurrencesController = () =>
-  import('#controllers/canteens/list_canteen_meal_recurrences_controller')
-const ListMealRecurrencesBySchoolsController = () =>
-  import('#controllers/canteens/list_meal_recurrences_by_schools_controller')
-const GenerateRecurrenceReservationsController = () =>
-  import('#controllers/canteens/generate_recurrence_reservations_controller')
-
-// Canteen Financial Settings
-const ShowCanteenFinancialSettingsController = () =>
-  import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller')
-const UpdateCanteenFinancialSettingsController = () =>
-  import('#controllers/canteen_financial_settings/update_canteen_financial_settings_controller')
-
-// Canteen Purchases
-const ListCanteenPurchasesController = () =>
-  import('#controllers/canteen_purchases/list_canteen_purchases_controller')
-const ShowCanteenPurchaseController = () =>
-  import('#controllers/canteen_purchases/show_canteen_purchase_controller')
-const CreateCanteenPurchaseController = () =>
-  import('#controllers/canteen_purchases/create_canteen_purchase_controller')
-const UpdateCanteenPurchaseStatusController = () =>
-  import('#controllers/canteen_purchases/update_canteen_purchase_status_controller')
-const CancelCanteenPurchaseController = () =>
-  import('#controllers/canteen_purchases/cancel_canteen_purchase_controller')
-const CheckMealRecurrenceController = () =>
-  import('#controllers/students/check_meal_recurrence_controller')
 
 export function registerCanteenApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteensController]).as('canteens.index')
-      router.post('/', [CreateCanteenController]).as('canteens.store')
+      router.get('/', [controllers.canteens.ListCanteens]).as('canteens.index')
+      router.post('/', [controllers.canteens.CreateCanteen]).as('canteens.store')
       router
-        .get('/meal-recurrences-by-schools', [ListMealRecurrencesBySchoolsController])
+        .get('/meal-recurrences-by-schools', [controllers.canteens.ListMealRecurrencesBySchools])
         .as('canteens.meal_recurrences_by_schools')
       router
-        .post('/generate-recurrence-reservations', [GenerateRecurrenceReservationsController])
+        .post('/generate-recurrence-reservations', [
+          controllers.canteens.GenerateRecurrenceReservations,
+        ])
         .as('canteens.generate_recurrence_reservations')
-      router.get('/:id', [ShowCanteenController]).as('canteens.show')
-      router.put('/:id', [UpdateCanteenController]).as('canteens.update')
-      router.delete('/:id', [DeleteCanteenController]).as('canteens.destroy')
-      router.get('/:canteenId/items', [ListItemsByCanteenController]).as('canteens.items')
+      router.get('/:id', [controllers.canteens.ShowCanteen]).as('canteens.show')
+      router.put('/:id', [controllers.canteens.UpdateCanteen]).as('canteens.update')
+      router.delete('/:id', [controllers.canteens.DeleteCanteen]).as('canteens.destroy')
       router
-        .get('/:canteenId/financial-settings', [ShowCanteenFinancialSettingsController])
+        .get('/:canteenId/items', [controllers.canteenItems.ListItemsByCanteen])
+        .as('canteens.items')
+      router
+        .get('/:canteenId/financial-settings', [
+          controllers.canteenFinancialSettings.ShowCanteenFinancialSettings,
+        ])
         .as('canteens.financial_settings.show')
       router
-        .get('/:canteenId/meal-recurrences', [ListCanteenMealRecurrencesController])
+        .get('/:canteenId/meal-recurrences', [controllers.canteens.ListCanteenMealRecurrences])
         .as('canteens.meal_recurrences')
       router
-        .put('/:canteenId/financial-settings', [UpdateCanteenFinancialSettingsController])
+        .put('/:canteenId/financial-settings', [
+          controllers.canteenFinancialSettings.UpdateCanteenFinancialSettings,
+        ])
         .as('canteens.financial_settings.update')
     })
     .prefix('/canteens')
@@ -124,7 +42,7 @@ export function registerCanteenApiRoutes() {
 export function registerCanteenReportApiRoutes() {
   router
     .group(() => {
-      router.get('/', [GetCanteenReportController]).as('canteen_reports.summary')
+      router.get('/', [controllers.canteenReports.GetCanteenReport]).as('canteen_reports.summary')
     })
     .prefix('/canteen-reports')
     .use([middleware.auth(), middleware.impersonation()])
@@ -133,15 +51,19 @@ export function registerCanteenReportApiRoutes() {
 export function registerCanteenMonthlyTransferApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenMonthlyTransfersController]).as('canteen_monthly_transfers.index')
       router
-        .post('/', [CreateCanteenMonthlyTransferController])
+        .get('/', [controllers.canteenMonthlyTransfers.ListCanteenMonthlyTransfers])
+        .as('canteen_monthly_transfers.index')
+      router
+        .post('/', [controllers.canteenMonthlyTransfers.CreateCanteenMonthlyTransfer])
         .as('canteen_monthly_transfers.store')
       router
-        .get('/:id', [ShowCanteenMonthlyTransferController])
+        .get('/:id', [controllers.canteenMonthlyTransfers.ShowCanteenMonthlyTransfer])
         .as('canteen_monthly_transfers.show')
       router
-        .post('/:id/status', [UpdateCanteenMonthlyTransferStatusController])
+        .post('/:id/status', [
+          controllers.canteenMonthlyTransfers.UpdateCanteenMonthlyTransferStatus,
+        ])
         .as('canteen_monthly_transfers.update_status')
     })
     .prefix('/canteen-monthly-transfers')
@@ -151,16 +73,18 @@ export function registerCanteenMonthlyTransferApiRoutes() {
 export function registerCanteenItemApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenItemsController]).as('canteen_items.index')
-      router.post('/', [CreateCanteenItemController]).as('canteen_items.store')
+      router.get('/', [controllers.canteenItems.ListCanteenItems]).as('canteen_items.index')
+      router.post('/', [controllers.canteenItems.CreateCanteenItem]).as('canteen_items.store')
       router
-        .get('/categories', [ListCanteenItemCategoriesController])
+        .get('/categories', [controllers.canteenItems.ListCanteenItemCategories])
         .as('canteen_items.categories')
-      router.get('/:id', [ShowCanteenItemController]).as('canteen_items.show')
-      router.put('/:id', [UpdateCanteenItemController]).as('canteen_items.update')
-      router.delete('/:id', [DeleteCanteenItemController]).as('canteen_items.destroy')
+      router.get('/:id', [controllers.canteenItems.ShowCanteenItem]).as('canteen_items.show')
+      router.put('/:id', [controllers.canteenItems.UpdateCanteenItem]).as('canteen_items.update')
       router
-        .patch('/:id/toggle-active', [ToggleCanteenItemActiveController])
+        .delete('/:id', [controllers.canteenItems.DeleteCanteenItem])
+        .as('canteen_items.destroy')
+      router
+        .patch('/:id/toggle-active', [controllers.canteenItems.ToggleCanteenItemActive])
         .as('canteen_items.toggle_active')
     })
     .prefix('/canteen-items')
@@ -170,11 +94,13 @@ export function registerCanteenItemApiRoutes() {
 export function registerCanteenMealApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenMealsController]).as('canteen_meals.index')
-      router.post('/', [CreateCanteenMealController]).as('canteen_meals.store')
-      router.get('/:id', [ShowCanteenMealController]).as('canteen_meals.show')
-      router.put('/:id', [UpdateCanteenMealController]).as('canteen_meals.update')
-      router.delete('/:id', [DeleteCanteenMealController]).as('canteen_meals.destroy')
+      router.get('/', [controllers.canteenMeals.ListCanteenMeals]).as('canteen_meals.index')
+      router.post('/', [controllers.canteenMeals.CreateCanteenMeal]).as('canteen_meals.store')
+      router.get('/:id', [controllers.canteenMeals.ShowCanteenMeal]).as('canteen_meals.show')
+      router.put('/:id', [controllers.canteenMeals.UpdateCanteenMeal]).as('canteen_meals.update')
+      router
+        .delete('/:id', [controllers.canteenMeals.DeleteCanteenMeal])
+        .as('canteen_meals.destroy')
     })
     .prefix('/canteen-meals')
     .use([middleware.auth(), middleware.impersonation()])
@@ -184,20 +110,24 @@ export function registerCanteenMealReservationApiRoutes() {
   router
     .group(() => {
       router
-        .get('/counts', [GetMealReservationCountsController])
+        .get('/counts', [controllers.canteenMealReservations.GetMealReservationCounts])
         .as('canteen_meal_reservations.counts')
-      router.get('/', [ListCanteenMealReservationsController]).as('canteen_meal_reservations.index')
       router
-        .post('/', [CreateCanteenMealReservationController])
+        .get('/', [controllers.canteenMealReservations.ListCanteenMealReservations])
+        .as('canteen_meal_reservations.index')
+      router
+        .post('/', [controllers.canteenMealReservations.CreateCanteenMealReservation])
         .as('canteen_meal_reservations.store')
       router
-        .get('/:id', [ShowCanteenMealReservationController])
+        .get('/:id', [controllers.canteenMealReservations.ShowCanteenMealReservation])
         .as('canteen_meal_reservations.show')
       router
-        .post('/:id/status', [UpdateCanteenMealReservationStatusController])
+        .post('/:id/status', [
+          controllers.canteenMealReservations.UpdateCanteenMealReservationStatus,
+        ])
         .as('canteen_meal_reservations.update_status')
       router
-        .delete('/:id', [DeleteCanteenMealReservationController])
+        .delete('/:id', [controllers.canteenMealReservations.DeleteCanteenMealReservation])
         .as('canteen_meal_reservations.cancel')
     })
     .prefix('/canteen-meal-reservations')
@@ -207,13 +137,21 @@ export function registerCanteenMealReservationApiRoutes() {
 export function registerCanteenPurchaseApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListCanteenPurchasesController]).as('canteen_purchases.index')
-      router.post('/', [CreateCanteenPurchaseController]).as('canteen_purchases.store')
-      router.get('/:id', [ShowCanteenPurchaseController]).as('canteen_purchases.show')
       router
-        .post('/:id/status', [UpdateCanteenPurchaseStatusController])
+        .get('/', [controllers.canteenPurchases.ListCanteenPurchases])
+        .as('canteen_purchases.index')
+      router
+        .post('/', [controllers.canteenPurchases.CreateCanteenPurchase])
+        .as('canteen_purchases.store')
+      router
+        .get('/:id', [controllers.canteenPurchases.ShowCanteenPurchase])
+        .as('canteen_purchases.show')
+      router
+        .post('/:id/status', [controllers.canteenPurchases.UpdateCanteenPurchaseStatus])
         .as('canteen_purchases.update_status')
-      router.post('/:id/cancel', [CancelCanteenPurchaseController]).as('canteen_purchases.cancel')
+      router
+        .post('/:id/cancel', [controllers.canteenPurchases.CancelCanteenPurchase])
+        .as('canteen_purchases.cancel')
     })
     .prefix('/canteen-purchases')
     .use([middleware.auth(), middleware.impersonation()])
@@ -221,6 +159,6 @@ export function registerCanteenPurchaseApiRoutes() {
 
 export function registerStudentMealRecurrenceCheckApiRoutes() {
   router
-    .get('/students/:studentId/meal-recurrence-check', [CheckMealRecurrenceController])
+    .get('/students/:studentId/meal-recurrence-check', [controllers.students.CheckMealRecurrence])
     .use([middleware.auth(), middleware.impersonation()])
 }

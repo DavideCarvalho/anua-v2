@@ -1,58 +1,25 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Subscription Plans
-const ListSubscriptionPlansController = () =>
-  import('#controllers/subscription_plans/list_subscription_plans_controller')
-const ShowSubscriptionPlanController = () =>
-  import('#controllers/subscription_plans/show_subscription_plan_controller')
-const CreateSubscriptionPlanController = () =>
-  import('#controllers/subscription_plans/create_subscription_plan_controller')
-const UpdateSubscriptionPlanController = () =>
-  import('#controllers/subscription_plans/update_subscription_plan_controller')
-const DeleteSubscriptionPlanController = () =>
-  import('#controllers/subscription_plans/delete_subscription_plan_controller')
-
-// Subscriptions
-const ListSubscriptionsController = () =>
-  import('#controllers/subscriptions/list_subscriptions_controller')
-const ShowSubscriptionController = () =>
-  import('#controllers/subscriptions/show_subscription_controller')
-const CreateSubscriptionController = () =>
-  import('#controllers/subscriptions/create_subscription_controller')
-const UpdateSubscriptionController = () =>
-  import('#controllers/subscriptions/update_subscription_controller')
-const CancelSubscriptionController = () =>
-  import('#controllers/subscriptions/cancel_subscription_controller')
-const PauseSubscriptionController = () =>
-  import('#controllers/subscriptions/pause_subscription_controller')
-const ReactivateSubscriptionController = () =>
-  import('#controllers/subscriptions/reactivate_subscription_controller')
-const GetSchoolSubscriptionController = () =>
-  import('#controllers/subscriptions/get_school_subscription_controller')
-const GetChainSubscriptionController = () =>
-  import('#controllers/subscriptions/get_chain_subscription_controller')
-
-// Subscription Invoices
-const ListSubscriptionInvoicesController = () =>
-  import('#controllers/subscription_invoices/list_subscription_invoices_controller')
-const ShowSubscriptionInvoiceController = () =>
-  import('#controllers/subscription_invoices/show_subscription_invoice_controller')
-const CreateSubscriptionInvoiceController = () =>
-  import('#controllers/subscription_invoices/create_subscription_invoice_controller')
-const UpdateSubscriptionInvoiceController = () =>
-  import('#controllers/subscription_invoices/update_subscription_invoice_controller')
-const MarkInvoicePaidController = () =>
-  import('#controllers/subscription_invoices/mark_invoice_paid_controller')
 
 export function registerSubscriptionPlanApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionPlansController]).as('subscription_plans.index')
-      router.post('/', [CreateSubscriptionPlanController]).as('subscription_plans.store')
-      router.get('/:id', [ShowSubscriptionPlanController]).as('subscription_plans.show')
-      router.put('/:id', [UpdateSubscriptionPlanController]).as('subscription_plans.update')
-      router.delete('/:id', [DeleteSubscriptionPlanController]).as('subscription_plans.destroy')
+      router
+        .get('/', [controllers.subscriptionPlans.ListSubscriptionPlans])
+        .as('subscription_plans.index')
+      router
+        .post('/', [controllers.subscriptionPlans.CreateSubscriptionPlan])
+        .as('subscription_plans.store')
+      router
+        .get('/:id', [controllers.subscriptionPlans.ShowSubscriptionPlan])
+        .as('subscription_plans.show')
+      router
+        .put('/:id', [controllers.subscriptionPlans.UpdateSubscriptionPlan])
+        .as('subscription_plans.update')
+      router
+        .delete('/:id', [controllers.subscriptionPlans.DeleteSubscriptionPlan])
+        .as('subscription_plans.destroy')
     })
     .prefix('/subscription-plans')
     .use(middleware.auth())
@@ -61,14 +28,18 @@ export function registerSubscriptionPlanApiRoutes() {
 export function registerSubscriptionApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionsController]).as('subscriptions.index')
-      router.post('/', [CreateSubscriptionController]).as('subscriptions.store')
-      router.get('/:id', [ShowSubscriptionController]).as('subscriptions.show')
-      router.put('/:id', [UpdateSubscriptionController]).as('subscriptions.update')
-      router.post('/:id/cancel', [CancelSubscriptionController]).as('subscriptions.cancel')
-      router.post('/:id/pause', [PauseSubscriptionController]).as('subscriptions.pause')
+      router.get('/', [controllers.subscriptions.ListSubscriptions]).as('subscriptions.index')
+      router.post('/', [controllers.subscriptions.CreateSubscription]).as('subscriptions.store')
+      router.get('/:id', [controllers.subscriptions.ShowSubscription]).as('subscriptions.show')
+      router.put('/:id', [controllers.subscriptions.UpdateSubscription]).as('subscriptions.update')
       router
-        .post('/:id/reactivate', [ReactivateSubscriptionController])
+        .post('/:id/cancel', [controllers.subscriptions.CancelSubscription])
+        .as('subscriptions.cancel')
+      router
+        .post('/:id/pause', [controllers.subscriptions.PauseSubscription])
+        .as('subscriptions.pause')
+      router
+        .post('/:id/reactivate', [controllers.subscriptions.ReactivateSubscription])
         .as('subscriptions.reactivate')
     })
     .prefix('/subscriptions')
@@ -78,7 +49,7 @@ export function registerSubscriptionApiRoutes() {
   router
     .group(() => {
       router
-        .get('/:schoolId/subscription', [GetSchoolSubscriptionController])
+        .get('/:schoolId/subscription', [controllers.subscriptions.GetSchoolSubscription])
         .as('schools.subscription')
     })
     .prefix('/schools')
@@ -88,7 +59,7 @@ export function registerSubscriptionApiRoutes() {
   router
     .group(() => {
       router
-        .get('/:schoolChainId/subscription', [GetChainSubscriptionController])
+        .get('/:schoolChainId/subscription', [controllers.subscriptions.GetChainSubscription])
         .as('school_chains.subscription')
     })
     .prefix('/school-chains')
@@ -98,12 +69,20 @@ export function registerSubscriptionApiRoutes() {
 export function registerSubscriptionInvoiceApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListSubscriptionInvoicesController]).as('subscription_invoices.index')
-      router.post('/', [CreateSubscriptionInvoiceController]).as('subscription_invoices.store')
-      router.get('/:id', [ShowSubscriptionInvoiceController]).as('subscription_invoices.show')
-      router.put('/:id', [UpdateSubscriptionInvoiceController]).as('subscription_invoices.update')
       router
-        .post('/:id/mark-paid', [MarkInvoicePaidController])
+        .get('/', [controllers.subscriptionInvoices.ListSubscriptionInvoices])
+        .as('subscription_invoices.index')
+      router
+        .post('/', [controllers.subscriptionInvoices.CreateSubscriptionInvoice])
+        .as('subscription_invoices.store')
+      router
+        .get('/:id', [controllers.subscriptionInvoices.ShowSubscriptionInvoice])
+        .as('subscription_invoices.show')
+      router
+        .put('/:id', [controllers.subscriptionInvoices.UpdateSubscriptionInvoice])
+        .as('subscription_invoices.update')
+      router
+        .post('/:id/mark-paid', [controllers.subscriptionInvoices.MarkInvoicePaid])
         .as('subscription_invoices.mark_paid')
     })
     .prefix('/subscription-invoices')

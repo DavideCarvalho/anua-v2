@@ -10,6 +10,7 @@ import RetrySubscriptionInvoiceChargesJob from '#jobs/payments/retry_subscriptio
 import RetryPendingEventsJob from '#jobs/gamification/retry_pending_events_job'
 import UpdateStreaksJob from '#jobs/gamification/update_streaks_job'
 import CreateMealRecurrenceReservationsJob from '#jobs/canteen/create_meal_recurrence_reservations_job'
+import SendEnrollmentRemindersJob from '#jobs/enrollment/send_enrollment_reminders_job'
 
 const tz = 'America/Sao_Paulo'
 
@@ -42,6 +43,9 @@ await SweepPendingAsaasDocumentsJob.schedule({}).cron('0 8 * * *').timezone(tz)
 
 // 09:00 (dias úteis) - Lembretes de reconhecimento de ocorrências
 await SendOccurrenceAckRemindersJob.schedule({}).cron('0 9 * * 1-5').timezone(tz)
+
+// 10:00 (dias úteis) - Lembretes de matrículas paradas (ADR-0004 evento 4)
+await SendEnrollmentRemindersJob.schedule({}).cron('0 10 * * 1-5').timezone(tz)
 
 // Gamificação: a cada 15 minutos - Retry de eventos que falharam
 await RetryPendingEventsJob.schedule({} as never)

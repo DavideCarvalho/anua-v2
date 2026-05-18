@@ -1,103 +1,60 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Students
-const IndexStudentsController = () => import('#controllers/students/index')
-const ShowStudentController = () => import('#controllers/students/show')
-const StoreStudentController = () => import('#controllers/students/store')
-const UpdateStudentController = () => import('#controllers/students/update')
-const DestroyStudentController = () => import('#controllers/students/destroy')
-const EnrollStudentController = () => import('#controllers/students/enroll_student_controller')
-const FullUpdateStudentController = () =>
-  import('#controllers/students/full_update_student_controller')
-const ListStudentEnrollmentsController = () =>
-  import('#controllers/students/list_enrollments_controller')
-const UpdateEnrollmentController = () =>
-  import('#controllers/students/update_enrollment_controller')
-const CancelEnrollmentController = () =>
-  import('#controllers/students/cancel_enrollment_controller')
-const CheckDocumentController = () => import('#controllers/students/check_document_controller')
-const CheckEmailController = () => import('#controllers/students/check_email_controller')
-const LookupResponsibleController = () =>
-  import('#controllers/students/lookup_responsible_controller')
-
-// Responsibles
-const ListStudentResponsiblesController = () =>
-  import('#controllers/responsibles/list_student_responsibles_controller')
-const AssignResponsibleController = () =>
-  import('#controllers/responsibles/assign_responsible_controller')
-const UpdateResponsibleAssignmentController = () =>
-  import('#controllers/responsibles/update_responsible_assignment_controller')
-const RemoveResponsibleController = () =>
-  import('#controllers/responsibles/remove_responsible_controller')
-
-// Responsible Addresses
-const ShowResponsibleAddressController = () =>
-  import('#controllers/responsible-addresses/show_responsible_address_controller')
-const CreateResponsibleAddressController = () =>
-  import('#controllers/responsible-addresses/create_responsible_address_controller')
-
-// Student Payments/Balance by student
-const ListStudentPaymentsByStudentController = () =>
-  import('#controllers/student_payments/list_student_payments_by_student_controller')
-const ListStudentBalanceByStudentController = () =>
-  import('#controllers/student_balance_transactions/list_student_balance_by_student_controller')
-const GetStudentBalanceController = () =>
-  import('#controllers/student_balance_transactions/get_student_balance_controller')
-const GetStudentAttendanceController = () =>
-  import('#controllers/attendance/get_student_attendance_controller')
-
-// Student Avatar (must be before /:id to match 'me')
-const ShowStudentAvatarController = () =>
-  import('#controllers/student_avatars/show_student_avatar_controller')
-const UpdateStudentAvatarController = () =>
-  import('#controllers/student_avatars/update_student_avatar_controller')
-const PurchaseAvatarItemController = () =>
-  import('#controllers/student_avatars/purchase_avatar_item_controller')
 
 export function registerStudentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [IndexStudentsController]).as('students.index')
-      router.post('/', [StoreStudentController]).as('students.store')
-      router.post('/enroll', [EnrollStudentController]).as('students.enroll')
-      router.get('/check-document', [CheckDocumentController]).as('students.check_document')
-      router.get('/check-email', [CheckEmailController]).as('students.check_email')
+      router.get('/', [controllers.students.Index]).as('students.index')
+      router.post('/', [controllers.students.Store]).as('students.store')
+      router.post('/enroll', [controllers.students.EnrollStudent]).as('students.enroll')
       router
-        .get('/lookup-responsible', [LookupResponsibleController])
+        .get('/check-document', [controllers.students.CheckDocument])
+        .as('students.check_document')
+      router.get('/check-email', [controllers.students.CheckEmail]).as('students.check_email')
+      router
+        .get('/lookup-responsible', [controllers.students.LookupResponsible])
         .as('students.lookup_responsible')
       // Student avatar (me = current student)
-      router.get('/me/avatar', [ShowStudentAvatarController]).as('students.me.avatar.show')
-      router.put('/me/avatar', [UpdateStudentAvatarController]).as('students.me.avatar.update')
       router
-        .post('/me/avatar/purchase', [PurchaseAvatarItemController])
+        .get('/me/avatar', [controllers.studentAvatars.ShowStudentAvatar])
+        .as('students.me.avatar.show')
+      router
+        .put('/me/avatar', [controllers.studentAvatars.UpdateStudentAvatar])
+        .as('students.me.avatar.update')
+      router
+        .post('/me/avatar/purchase', [controllers.studentAvatars.PurchaseAvatarItem])
         .as('students.me.avatar.purchase')
-      router.get('/:id', [ShowStudentController]).as('students.show')
-      router.put('/:id', [UpdateStudentController]).as('students.update')
-      router.put('/:id/full', [FullUpdateStudentController]).as('students.full_update')
-      router.delete('/:id', [DestroyStudentController]).as('students.destroy')
+      router.get('/:id', [controllers.students.Show]).as('students.show')
+      router.put('/:id', [controllers.students.Update]).as('students.update')
+      router.put('/:id/full', [controllers.students.FullUpdateStudent]).as('students.full_update')
+      router.delete('/:id', [controllers.students.Destroy]).as('students.destroy')
       router
-        .get('/:id/enrollments', [ListStudentEnrollmentsController])
+        .get('/:id/enrollments', [controllers.students.ListEnrollments])
         .as('students.enrollments.list')
       router
-        .patch('/:id/enrollments/:enrollmentId', [UpdateEnrollmentController])
+        .patch('/:id/enrollments/:enrollmentId', [controllers.students.UpdateEnrollment])
         .as('students.enrollments.update')
       router
-        .delete('/:id/enrollments/:enrollmentId', [CancelEnrollmentController])
+        .delete('/:id/enrollments/:enrollmentId', [controllers.students.CancelEnrollment])
         .as('students.enrollments.cancel')
       router
-        .get('/:studentId/attendance', [GetStudentAttendanceController])
+        .get('/:studentId/attendance', [controllers.attendance.GetStudentAttendance])
         .as('students.attendance')
 
       // Student Payments
       router
-        .get('/:studentId/payments', [ListStudentPaymentsByStudentController])
+        .get('/:studentId/payments', [controllers.studentPayments.ListStudentPaymentsByStudent])
         .as('students.payments')
 
       // Student Balance
-      router.get('/:studentId/balance', [GetStudentBalanceController]).as('students.balance')
       router
-        .get('/:studentId/balance-transactions', [ListStudentBalanceByStudentController])
+        .get('/:studentId/balance', [controllers.studentBalanceTransactions.GetStudentBalance])
+        .as('students.balance')
+      router
+        .get('/:studentId/balance-transactions', [
+          controllers.studentBalanceTransactions.ListStudentBalanceByStudent,
+        ])
         .as('students.balance_transactions')
     })
     .prefix('/students')
@@ -108,13 +65,15 @@ export function registerResponsibleApiRoutes() {
   router
     .group(() => {
       router
-        .get('/students/:studentId/responsibles', [ListStudentResponsiblesController])
+        .get('/students/:studentId/responsibles', [
+          controllers.responsibles.ListStudentResponsibles,
+        ])
         .as('responsibles.list_by_student')
-      router.post('/', [AssignResponsibleController]).as('responsibles.assign')
+      router.post('/', [controllers.responsibles.AssignResponsible]).as('responsibles.assign')
       router
-        .patch('/:id', [UpdateResponsibleAssignmentController])
+        .patch('/:id', [controllers.responsibles.UpdateResponsibleAssignment])
         .as('responsibles.update_assignment')
-      router.delete('/:id', [RemoveResponsibleController]).as('responsibles.remove')
+      router.delete('/:id', [controllers.responsibles.RemoveResponsible]).as('responsibles.remove')
     })
     .prefix('/responsibles')
     .use([middleware.auth(), middleware.impersonation()])
@@ -124,9 +83,11 @@ export function registerResponsibleAddressApiRoutes() {
   router
     .group(() => {
       router
-        .get('/:responsibleId', [ShowResponsibleAddressController])
+        .get('/:responsibleId', [controllers.responsibleAddresses.ShowResponsibleAddress])
         .as('responsible_addresses.show')
-      router.post('/', [CreateResponsibleAddressController]).as('responsible_addresses.create')
+      router
+        .post('/', [controllers.responsibleAddresses.CreateResponsibleAddress])
+        .as('responsible_addresses.create')
     })
     .prefix('/responsible-addresses')
     .use([middleware.auth(), middleware.impersonation()])

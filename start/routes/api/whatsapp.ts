@@ -1,7 +1,6 @@
 import router from '@adonisjs/core/services/router'
-
-const WhatsAppWebhookController = () => import('#controllers/whatsapp/whatsapp_webhook_controller')
+import { controllers } from '#generated/controllers'
 
 export function registerWhatsappApiRoutes() {
-  router.post('/whatsapp/webhook', [WhatsAppWebhookController]).as('whatsapp.webhook')
+  router.post('/whatsapp/webhook', [controllers.whatsapp.WhatsappWebhook]).as('whatsapp.webhook')
 }

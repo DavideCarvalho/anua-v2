@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import { listSchoolsValidator } from '#validators/school'
 import SchoolTransformer from '#transformers/school_transformer'
+import { getSignedAssetUrl } from '#lib/storage'
 
 function formatRoleName(role: string | undefined): string {
   const roleMap: Record<string, string> = {
@@ -58,6 +59,13 @@ export default class IndexSchoolsController {
     }
 
     const schools = await query.paginate(page, limit)
+
+    // Resolve key → signed URL pra cada escola antes de serializar
+    await Promise.all(
+      schools.all().map(async (school) => {
+        school.logoUrl = await getSignedAssetUrl(school.logoUrl)
+      })
+    )
 
     // Se includeUsers, retornar DTO específico com usuários resumidos
     if (includeUsers) {

@@ -79,14 +79,18 @@ export const finishEnrollmentValidator = vine.compile(
       })
     ),
 
-    // Billing/Payment
-    billing: vine.object({
-      paymentMethod: vine.enum(['BOLETO', 'CREDIT_CARD', 'PIX']),
-      paymentDay: vine.number().min(1).max(31).optional(),
-      enrollmentInstallments: vine.number().min(1).optional(),
-      installments: vine.number().min(1).optional(),
-      scholarshipCode: vine.string().optional(),
-    }),
+    // Billing/Payment — opcional. Quando a escola não tem pgto online
+    // configurado, o form público pula esta etapa e a escola entra em
+    // contato com o responsável pra combinar a forma de pagamento.
+    billing: vine
+      .object({
+        paymentMethod: vine.enum(['BOLETO', 'CREDIT_CARD', 'PIX']),
+        paymentDay: vine.number().min(1).max(31).optional(),
+        enrollmentInstallments: vine.number().min(1).optional(),
+        installments: vine.number().min(1).optional(),
+        scholarshipCode: vine.string().optional(),
+      })
+      .optional(),
 
     // School/Course info
     schoolId: vine.string(),

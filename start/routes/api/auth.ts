@@ -1,21 +1,15 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
 import { throttleAuth, throttleApi } from '#start/limiter'
-
-// Auth
-const LoginController = () => import('#controllers/auth/login')
-const LogoutController = () => import('#controllers/auth/logout')
-const SendCodeController = () => import('#controllers/auth/send_code')
-const VerifyCodeController = () => import('#controllers/auth/verify_code')
-const MeController = () => import('#controllers/auth/me')
 
 export function registerAuthApiRoutes() {
   // Public
   router
     .group(() => {
-      router.post('/login', [LoginController]).as('auth.login')
-      router.post('/send-code', [SendCodeController]).as('auth.send_code')
-      router.post('/verify-code', [VerifyCodeController]).as('auth.verify_code')
+      router.post('/login', [controllers.auth.Login]).as('auth.login')
+      router.post('/send-code', [controllers.auth.SendCode]).as('auth.send_code')
+      router.post('/verify-code', [controllers.auth.VerifyCode]).as('auth.verify_code')
     })
     .prefix('/auth')
     .use(throttleAuth)
@@ -23,8 +17,8 @@ export function registerAuthApiRoutes() {
   // Protected
   router
     .group(() => {
-      router.post('/logout', [LogoutController]).as('auth.logout')
-      router.get('/me', [MeController]).as('auth.me')
+      router.post('/logout', [controllers.auth.Logout]).as('auth.logout')
+      router.get('/me', [controllers.auth.Me]).as('auth.me')
     })
     .prefix('/auth')
     .use([middleware.auth(), middleware.impersonation()])

@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { MapPin } from 'lucide-react'
 
@@ -49,24 +50,49 @@ export function StepAddress() {
     register,
     formState: { errors },
     setValue,
+    getValues,
     watch,
   } = useFormContext<EnrollmentFormData>()
+
+  // Cancela buscas anteriores pra evitar race quando o usuário corrige o CEP
+  // antes da resposta chegar (ex: digita CEP errado → blur dispara fetch →
+  // digita o certo → blur dispara outro fetch; sem aborto, a resposta antiga
+  // pode sobrescrever a nova).
+  const cepAbortRef = useRef<AbortController | null>(null)
 
   const handleCepBlur = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, '')
     if (cleanCep.length !== 8) return
 
-    try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
-      const data = await response.json()
+    cepAbortRef.current?.abort()
+    const ctrl = new AbortController()
+    cepAbortRef.current = ctrl
 
-      if (!data.erro) {
-        setValue('address.street', data.logradouro || '')
-        setValue('address.neighborhood', data.bairro || '')
-        setValue('address.city', data.localidade || '')
-        setValue('address.state', data.uf || '')
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`, {
+        signal: ctrl.signal,
+      })
+      const data = await response.json()
+      if (data.erro) return
+
+      // Só preenche campos vazios. Se o usuário já digitou rua/bairro/cidade,
+      // respeita o que ele pôs (era o bug do "Avenida PaulistaAvenida Paulista"
+      // quando a resposta chegava depois do usuário começar a digitar).
+      const fillIfEmpty = (
+        field: 'address.street' | 'address.neighborhood' | 'address.city' | 'address.state',
+        value: string | undefined
+      ) => {
+        if (!value) return
+        const current = (getValues(field) ?? '').toString().trim()
+        if (current.length === 0) setValue(field, value, { shouldValidate: true })
       }
+
+      fillIfEmpty('address.street', data.logradouro)
+      fillIfEmpty('address.neighborhood', data.bairro)
+      fillIfEmpty('address.city', data.localidade)
+      fillIfEmpty('address.state', data.uf)
     } catch (error) {
+      if ((error as Error)?.name === 'AbortError') return
       console.error('Error fetching CEP:', error)
     }
   }

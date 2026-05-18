@@ -157,6 +157,7 @@ declare module '@adonisjs/inertia/types' {
     'responsavel/index': ExtractProps<(typeof import('../../inertia/pages/responsavel/index.tsx'))['default']>
     'responsavel/loja/index': ExtractProps<(typeof import('../../inertia/pages/responsavel/loja/index.tsx'))['default']>
     'responsavel/loja/store': ExtractProps<(typeof import('../../inertia/pages/responsavel/loja/store.tsx'))['default']>
+    'responsavel/matricula': ExtractProps<(typeof import('../../inertia/pages/responsavel/matricula.tsx'))['default']>
     'responsavel/mensalidades': ExtractProps<(typeof import('../../inertia/pages/responsavel/mensalidades.tsx'))['default']>
     'responsavel/notas': ExtractProps<(typeof import('../../inertia/pages/responsavel/notas.tsx'))['default']>
     'responsavel/notificacoes': ExtractProps<(typeof import('../../inertia/pages/responsavel/notificacoes.tsx'))['default']>

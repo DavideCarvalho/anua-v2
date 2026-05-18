@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import School from '#models/school'
 import AppException from '#exceptions/app_exception'
 import SchoolTransformer from '#transformers/school_transformer'
+import { getSignedAssetUrl } from '#lib/storage'
 
 export default class ShowSchoolBySlugController {
   async handle({ params, response, serialize }: HttpContext) {
@@ -14,6 +15,8 @@ export default class ShowSchoolBySlugController {
     if (!school) {
       throw AppException.notFound('Escola não encontrada')
     }
+
+    school.logoUrl = await getSignedAssetUrl(school.logoUrl)
 
     return response.ok(await serialize(SchoolTransformer.transform(school)))
   }

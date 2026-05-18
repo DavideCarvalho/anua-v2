@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react'
+import { router as inertiaRouter } from '@inertiajs/react'
+import { ArrowLeft, ArrowRight, Loader2, CheckCircle, Mail } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 
-import { EnrollmentStepper } from './enrollment-stepper'
+import { Stepper } from '../../components/ui/stepper'
 import { StepStudentInfo } from './step-student-info'
 import { StepResponsibles } from './step-responsibles'
 import { StepAddress } from './step-address'
@@ -85,13 +86,13 @@ interface EnrollmentFormProps {
   courseSlug: string
 }
 
-const STEPS = [
+const BASE_STEPS = [
   { id: 1, title: 'Aluno', description: 'Dados pessoais' },
   { id: 2, title: 'Responsáveis', description: 'Pais/tutores' },
   { id: 3, title: 'Endereço', description: 'Localização' },
   { id: 4, title: 'Saúde', description: 'Informações médicas' },
-  { id: 5, title: 'Pagamento', description: 'Forma de pagamento' },
-]
+] as const
+const PAYMENT_STEP = { id: 5, title: 'Pagamento', description: 'Forma de pagamento' } as const
 
 export function EnrollmentForm({
   schoolSlug,
@@ -107,6 +108,13 @@ export function EnrollmentForm({
       params: { schoolSlug, academicPeriodSlug, courseSlug },
     })
   )
+
+  // Se a escola não tem gateway de pagamento online ativo, pula o step de
+  // pagamento — a escola entra em contato depois pra combinar forma e geração
+  // de cobranças. Mostrar selects/radios aqui só prometeria algo que não
+  // existe ainda do lado dela.
+  const hasOnlinePayment = enrollmentInfo.school.hasOnlinePayment === true
+  const STEPS = hasOnlinePayment ? [...BASE_STEPS, PAYMENT_STEP] : [...BASE_STEPS]
 
   const finishEnrollmentMutation = useMutation(api.api.v1.enrollment.finish.mutationOptions())
 
@@ -212,16 +220,22 @@ export function EnrollmentForm({
     }
   }
 
+  const [completionInfo, setCompletionInfo] = useState<{
+    otpSentTo: string | null
+    redirectTo: string
+  } | null>(null)
+
   const onSubmit = async (data: EnrollmentFormData) => {
     try {
-      await finishEnrollmentMutation.mutateAsync({
+      const result = await finishEnrollmentMutation.mutateAsync({
         body: {
           student: data.student,
           responsibles: data.student.isSelfResponsible ? [] : data.responsibles,
           address: data.address,
           medicalInfo: data.medicalInfo,
           emergencyContacts: data.emergencyContacts,
-          billing: data.billing,
+          // Só envia billing se a escola coleta forma de pagamento online.
+          billing: hasOnlinePayment ? data.billing : undefined,
           schoolId: enrollmentInfo.school.id,
           academicPeriodId: enrollmentInfo.academicPeriod.id,
           courseId: enrollmentInfo.course.id,
@@ -230,31 +244,59 @@ export function EnrollmentForm({
         },
       })
       queryClient.invalidateQueries({ queryKey: ['enrollment'] })
+      setCompletionInfo({
+        otpSentTo: result.otpSentTo ?? null,
+        redirectTo: result.redirectTo ?? '/auth/verify',
+      })
       setIsCompleted(true)
     } catch (error) {
       console.error('Error submitting enrollment:', error)
     }
   }
 
-  if (isCompleted) {
+  if (isCompleted && completionInfo) {
+    // Lista honesta do que ainda falta. Documentos sempre via portal; pagamento
+    // e assinatura podem ser presenciais (escola entra em contato) ou online.
+    const nextSteps: string[] = ['enviar os documentos do aluno pelo portal']
+    if (hasOnlinePayment) {
+      nextSteps.push('escolher e confirmar a forma de pagamento')
+    } else {
+      nextSteps.push('combinar a forma de pagamento com a secretaria, que vai entrar em contato')
+    }
+    nextSteps.push('agendar a assinatura presencial do contrato com a secretaria')
+
     return (
       <Card className="max-w-2xl mx-auto">
-        <CardContent className="pt-12 pb-12 text-center">
+        <CardContent className="pt-12 pb-12 text-center space-y-6">
           <CheckCircle className="mx-auto h-16 w-16 text-green-600" />
-          <h2 className="mt-6 text-2xl font-bold">Matrícula Realizada com Sucesso!</h2>
-          <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-            Sua matrícula foi recebida e está aguardando análise dos documentos. Você receberá um
-            e-mail com as próximas instruções.
-          </p>
-          <div className="mt-8 p-4 bg-muted rounded-lg text-left max-w-sm mx-auto">
-            <h3 className="font-medium mb-2">Próximos passos:</h3>
-            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Aguarde a confirmação por e-mail</li>
-              <li>Envie os documentos solicitados</li>
-              <li>Assine o contrato digital</li>
-              <li>Realize o pagamento da matrícula</li>
-            </ol>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-semibold tracking-tight">Matrícula recebida</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              {completionInfo.otpSentTo ? (
+                <>
+                  Enviamos um código de acesso para <strong>{completionInfo.otpSentTo}</strong>.
+                  Use o código pra entrar no portal e acompanhar os próximos passos.
+                </>
+              ) : (
+                'Sua matrícula foi registrada. Acesse o portal pra acompanhar os próximos passos.'
+              )}
+            </p>
+            <div className="mx-auto max-w-md text-left">
+              <p className="text-sm font-medium text-foreground">Próximos passos</p>
+              <ol className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+                {nextSteps.map((step, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-primary font-medium tabular-nums">{i + 1}.</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
+          <Button onClick={() => inertiaRouter.visit(completionInfo.redirectTo)} className="gap-2">
+            <Mail className="h-4 w-4" />
+            Verificar código e entrar
+          </Button>
         </CardContent>
       </Card>
     )
@@ -263,16 +305,40 @@ export function EnrollmentForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Header with school info */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">{enrollmentInfo.school.name}</h1>
-          <p className="text-muted-foreground">
-            Matrícula para {enrollmentInfo.course.name} - {enrollmentInfo.academicPeriod.name}
-          </p>
-        </div>
+        {/* School trust signal: logo + name + period make it obvious this is
+            the right school's official portal (anti-phishing cue) */}
+        <header className="mb-8 flex flex-col items-center gap-3 text-center">
+          {enrollmentInfo.school.logoUrl ? (
+            <img
+              src={enrollmentInfo.school.logoUrl}
+              alt={`Logo de ${enrollmentInfo.school.name}`}
+              className="h-14 w-14 rounded-lg object-cover ring-1 ring-foreground/10"
+            />
+          ) : (
+            <div className="grid h-14 w-14 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-foreground/10">
+              <span className="text-lg font-semibold">
+                {enrollmentInfo.school.name?.charAt(0).toUpperCase() ?? 'E'}
+              </span>
+            </div>
+          )}
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Portal oficial de matrícula
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight">{enrollmentInfo.school.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {enrollmentInfo.course.name} · {enrollmentInfo.academicPeriod.name}
+            </p>
+          </div>
+        </header>
 
         {/* Stepper */}
-        <EnrollmentStepper steps={STEPS} currentStep={currentStep} />
+        <Stepper
+          steps={STEPS.map((s) => ({ title: s.title, description: s.description }))}
+          currentStep={currentStep - 1}
+          showCompletedCheckmark
+          className="mb-8"
+        />
 
         {/* Form Steps */}
         <div className="mb-8">

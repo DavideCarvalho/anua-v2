@@ -53,9 +53,7 @@ export const getClassStudentsAttendanceValidator = vine.compile(
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
     subPeriodId: vine.string().trim().optional(),
-    sortBy: vine
-      .enum(['name', 'present', 'absent', 'late', 'justified', 'percentage'])
-      .optional(),
+    sortBy: vine.enum(['name', 'present', 'absent', 'late', 'justified', 'percentage']).optional(),
     sortDir: vine.enum(['asc', 'desc']).optional(),
   })
 )

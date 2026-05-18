@@ -67,6 +67,7 @@ export const controllers = {
     GetCanteenTopItems: () => import('#controllers/analytics/get_canteen_top_items_controller'),
     GetCanteenTrends: () => import('#controllers/analytics/get_canteen_trends_controller'),
     GetChronicAbsenteeism: () => import('#controllers/analytics/get_chronic_absenteeism_controller'),
+    GetChronicLateness: () => import('#controllers/analytics/get_chronic_lateness_controller'),
     GetClassPerformance: () => import('#controllers/analytics/get_class_performance_controller'),
     GetEnrollmentByLevel: () => import('#controllers/analytics/get_enrollment_by_level_controller'),
     GetEnrollmentFunnelStats: () => import('#controllers/analytics/get_enrollment_funnel_stats_controller'),
@@ -76,7 +77,6 @@ export const controllers = {
     GetHrOverview: () => import('#controllers/analytics/get_hr_overview_controller'),
     GetIncidentsOverview: () => import('#controllers/analytics/get_incidents_overview_controller'),
     GetPaymentsOverview: () => import('#controllers/analytics/get_payments_overview_controller'),
-    GetChronicLateness: () => import('#controllers/analytics/get_chronic_lateness_controller'),
   },
   api: {
     game: {
@@ -102,21 +102,21 @@ export const controllers = {
   attendance: {
     BatchCreateAttendance: () => import('#controllers/attendance/batch_create_attendance_controller'),
     CreateAttendance: () => import('#controllers/attendance/create_attendance_controller'),
+    DeleteAttendanceAttachment: () => import('#controllers/attendance/delete_attendance_attachment_controller'),
     dtos: {
       GetClassStudentsAttendanceResponseDto: () => import('#controllers/attendance/dtos/get_class_students_attendance_response.dto'),
     },
     GetAttendanceAvailableDates: () => import('#controllers/attendance/get_attendance_available_dates_controller'),
     GetClassStudentsAttendance: () => import('#controllers/attendance/get_class_students_attendance_controller'),
+    GetLessonStudents: () => import('#controllers/attendance/get_lesson_students_controller'),
     GetStudentAttendance: () => import('#controllers/attendance/get_student_attendance_controller'),
+    GetStudentHistory: () => import('#controllers/attendance/get_student_history_controller'),
+    ListAttendanceAttachments: () => import('#controllers/attendance/list_attendance_attachments_controller'),
     ListAttendance: () => import('#controllers/attendance/list_attendance_controller'),
+    ListLessons: () => import('#controllers/attendance/list_lessons_controller'),
     ShowAttendance: () => import('#controllers/attendance/show_attendance_controller'),
     UpdateAttendance: () => import('#controllers/attendance/update_attendance_controller'),
-    GetStudentHistory: () => import('#controllers/attendance/get_student_history_controller'),
-    ListLessons: () => import('#controllers/attendance/list_lessons_controller'),
-    GetLessonStudents: () => import('#controllers/attendance/get_lesson_students_controller'),
     UploadAttendanceAttachment: () => import('#controllers/attendance/upload_attendance_attachment_controller'),
-    ListAttendanceAttachments: () => import('#controllers/attendance/list_attendance_attachments_controller'),
-    DeleteAttendanceAttachment: () => import('#controllers/attendance/delete_attendance_attachment_controller'),
   },
   audits: {
     ListAudits: () => import('#controllers/audits/list_audits_controller'),
@@ -260,6 +260,7 @@ export const controllers = {
   enrollments: {
     ListEnrollments: () => import('#controllers/enrollments/list_enrollments_controller'),
     UpdateDocumentStatus: () => import('#controllers/enrollments/update_document_status_controller'),
+    GetActionCounts: () => import('#controllers/enrollments/get_action_counts_controller'),
   },
   escola: {
     CreateInquiryMessage: () => import('#controllers/escola/create_inquiry_message_controller'),
@@ -530,6 +531,7 @@ export const controllers = {
       ShowResponsavelHorarioPage: () => import('#controllers/pages/responsavel/show_responsavel_horario_page_controller'),
       ShowResponsavelLojaPage: () => import('#controllers/pages/responsavel/show_responsavel_loja_page_controller'),
       ShowResponsavelLojaStorePage: () => import('#controllers/pages/responsavel/show_responsavel_loja_store_page_controller'),
+      ShowResponsavelMatriculaPage: () => import('#controllers/pages/responsavel/show_responsavel_matricula_page_controller'),
       ShowResponsavelMensalidadesPage: () => import('#controllers/pages/responsavel/show_responsavel_mensalidades_page_controller'),
       ShowResponsavelNotasPage: () => import('#controllers/pages/responsavel/show_responsavel_notas_page_controller'),
       ShowResponsavelOcorrenciasPage: () => import('#controllers/pages/responsavel/show_responsavel_ocorrencias_page_controller'),
@@ -590,6 +592,7 @@ export const controllers = {
     AcknowledgeOccurrence: () => import('#controllers/responsavel/acknowledge_occurrence_controller'),
     CreateInquiryMessage: () => import('#controllers/responsavel/create_inquiry_message_controller'),
     CreateStudentInquiry: () => import('#controllers/responsavel/create_student_inquiry_controller'),
+    GetEnrollmentAxes: () => import('#controllers/responsavel/get_enrollment_axes_controller'),
     GetNotifications: () => import('#controllers/responsavel/get_notifications_controller'),
     GetStudentAcademicPeriods: () => import('#controllers/responsavel/get_student_academic_periods_controller'),
     GetStudentAssignments: () => import('#controllers/responsavel/get_student_assignments_controller'),
@@ -615,6 +618,7 @@ export const controllers = {
     ShowInquiry: () => import('#controllers/responsavel/show_inquiry_controller'),
     UpdateProfile: () => import('#controllers/responsavel/update_profile_controller'),
     UpdateStudentMealRecurrence: () => import('#controllers/responsavel/update_student_meal_recurrence_controller'),
+    UploadStudentDocument: () => import('#controllers/responsavel/upload_student_document_controller'),
   },
   responsibleAddresses: {
     CreateResponsibleAddress: () => import('#controllers/responsible-addresses/create_responsible_address_controller'),

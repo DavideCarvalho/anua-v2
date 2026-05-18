@@ -1,40 +1,26 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Assignments
-const ListAssignmentsController = () =>
-  import('#controllers/assignments/list_assignments_controller')
-const ShowAssignmentController = () => import('#controllers/assignments/show_assignment_controller')
-const CreateAssignmentController = () =>
-  import('#controllers/assignments/create_assignment_controller')
-const UpdateAssignmentController = () =>
-  import('#controllers/assignments/update_assignment_controller')
-const DeleteAssignmentController = () =>
-  import('#controllers/assignments/delete_assignment_controller')
-const ListAssignmentHistoryController = () =>
-  import('#controllers/assignments/list_assignment_history_controller')
-const ListAssignmentSubmissionsController = () =>
-  import('#controllers/assignments/list_assignment_submissions_controller')
-const SubmitAssignmentController = () =>
-  import('#controllers/assignments/submit_assignment_controller')
-const GradeSubmissionController = () =>
-  import('#controllers/assignments/grade_submission_controller')
 
 export function registerAssignmentApiRoutes() {
   router
     .group(() => {
-      router.get('/', [ListAssignmentsController]).as('assignments.index')
-      router.post('/', [CreateAssignmentController]).as('assignments.store')
-      router.get('/:id', [ShowAssignmentController]).as('assignments.show')
-      router.get('/:id/history', [ListAssignmentHistoryController]).as('assignments.history')
-      router.put('/:id', [UpdateAssignmentController]).as('assignments.update')
-      router.delete('/:id', [DeleteAssignmentController]).as('assignments.destroy')
+      router.get('/', [controllers.assignments.ListAssignments]).as('assignments.index')
+      router.post('/', [controllers.assignments.CreateAssignment]).as('assignments.store')
+      router.get('/:id', [controllers.assignments.ShowAssignment]).as('assignments.show')
       router
-        .get('/:id/submissions', [ListAssignmentSubmissionsController])
+        .get('/:id/history', [controllers.assignments.ListAssignmentHistory])
+        .as('assignments.history')
+      router.put('/:id', [controllers.assignments.UpdateAssignment]).as('assignments.update')
+      router.delete('/:id', [controllers.assignments.DeleteAssignment]).as('assignments.destroy')
+      router
+        .get('/:id/submissions', [controllers.assignments.ListAssignmentSubmissions])
         .as('assignments.submissions')
-      router.post('/:id/submissions', [SubmitAssignmentController]).as('assignments.submit')
       router
-        .post('/:id/submissions/:submissionId', [GradeSubmissionController])
+        .post('/:id/submissions', [controllers.assignments.SubmitAssignment])
+        .as('assignments.submit')
+      router
+        .post('/:id/submissions/:submissionId', [controllers.assignments.GradeSubmission])
         .as('assignments.submissions.grade')
     })
     .prefix('/assignments')

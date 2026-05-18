@@ -11,7 +11,7 @@ import {
   useAttentionItems,
   type AttentionInboxFilters,
   type AttentionInboxScope,
-} from './use-attention-items'
+} from './use_attention_items'
 import type { AttentionItem as AttentionItemType, Severity } from './types'
 
 interface AttentionInboxProps extends AttentionInboxFilters, AttentionInboxScope {

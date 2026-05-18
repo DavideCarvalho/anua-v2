@@ -1,23 +1,16 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
 
-// Loja (Store Owner) page controllers
-const ShowLojaDashboardPageController = () =>
-  import('#controllers/pages/loja/show_loja_dashboard_page_controller')
-const ShowLojaProdutosPageController = () =>
-  import('#controllers/pages/loja/show_loja_produtos_page_controller')
-const ShowLojaPedidosPageController = () =>
-  import('#controllers/pages/loja/show_loja_pedidos_page_controller')
-const ShowLojaFinanceiroPageController = () =>
-  import('#controllers/pages/loja/show_loja_financeiro_page_controller')
-
 export function registerLojaPageRoutes() {
+  const loja = controllers.pages.loja
+
   router
     .group(() => {
-      router.get('/', [ShowLojaDashboardPageController]).as('dashboard')
-      router.get('/produtos', [ShowLojaProdutosPageController]).as('produtos')
-      router.get('/pedidos', [ShowLojaPedidosPageController]).as('pedidos')
-      router.get('/financeiro', [ShowLojaFinanceiroPageController]).as('financeiro')
+      router.get('/', [loja.ShowLojaDashboardPage]).as('dashboard')
+      router.get('/produtos', [loja.ShowLojaProdutosPage]).as('produtos')
+      router.get('/pedidos', [loja.ShowLojaPedidosPage]).as('pedidos')
+      router.get('/financeiro', [loja.ShowLojaFinanceiroPage]).as('financeiro')
     })
     .prefix('/loja')
     .use([middleware.auth(), middleware.storeOwner()])

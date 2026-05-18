@@ -10,6 +10,7 @@ import {
   ALLOWED_IMAGE_EXTENSIONS,
   ALLOWED_IMAGE_TYPES,
 } from '#lib/file_security'
+import { getSignedAssetUrl } from '#lib/storage'
 import AppException from '#exceptions/app_exception'
 
 export default class UploadSchoolLogoController {
@@ -59,16 +60,18 @@ export default class UploadSchoolLogoController {
     // Sanitiza nome do arquivo
     const sanitizedExt = sanitizeFilename(ext || 'jpg')
 
-    // Deleta logo antigo se existir
+    // Deleta logo antigo se existir.
+    // `logoUrl` agora guarda a key do storage (ex: "schools/abc/logo-xyz.jpg"),
+    // mas back-compat aceita URLs legadas (extraímos a key da URL).
     if (school.logoUrl) {
-      const oldPath = school.logoUrl
+      const oldKey = school.logoUrl
         .replace(/^\/uploads\//, '')
-        .replace(/^https:\/\/storage\.googleapis\.com\/[^/]+\//, '')
+        .replace(/^https?:\/\/storage\.googleapis\.com\/[^/]+\//, '')
+        .replace(/^https?:\/\/[^/]+\/uploads\//, '')
 
-      // Valida path para prevenir path traversal
-      if (!oldPath.includes('..') && !oldPath.startsWith('/')) {
+      if (!oldKey.includes('..') && !oldKey.startsWith('/') && !oldKey.startsWith('http')) {
         try {
-          await drive.use().delete(oldPath)
+          await drive.use().delete(oldKey)
         } catch {
           // Ignora erro ao deletar arquivo antigo
         }
@@ -76,18 +79,16 @@ export default class UploadSchoolLogoController {
     }
 
     // Gera nome único e seguro
-    const filename = `schools/${school.id}/logo-${uuidV4()}.${sanitizedExt}`
+    const key = `schools/${school.id}/logo-${uuidV4()}.${sanitizedExt}`
 
-    // Upload para o drive
-    await logo.moveToDisk(filename)
+    await logo.moveToDisk(key)
 
-    // Obtém URL pública
-    const url = await drive.use().getUrl(filename)
-
-    // Atualiza escola
-    school.logoUrl = url
+    // Guarda a KEY no banco. URL assinada é gerada on-demand via getSignedAssetUrl().
+    school.logoUrl = key
     await school.save()
 
-    return response.ok({ url: school.logoUrl })
+    const signedUrl = await getSignedAssetUrl(key)
+
+    return response.ok({ url: signedUrl })
   }
 }

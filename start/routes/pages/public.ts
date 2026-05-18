@@ -1,17 +1,6 @@
 import router from '@adonisjs/core/services/router'
+import { controllers } from '#generated/controllers'
 import { middleware } from '#start/kernel'
-
-// Auth Pages
-const ShowSignInPageController = () =>
-  import('#controllers/pages/auth/show_sign_in_page_controller')
-
-// Public Pages
-const ShowMatriculaOnlinePageController = () =>
-  import('#controllers/pages/show_matricula_online_page_controller')
-
-// Dashboard Pages
-const ShowDashboardPageController = () =>
-  import('#controllers/pages/show_dashboard_page_controller')
 
 export function registerPublicPageRoutes() {
   // Public home
@@ -20,7 +9,7 @@ export function registerPublicPageRoutes() {
   // Public enrollment page
   router
     .get('/:schoolSlug/matricula-online/:academicPeriodSlug/:courseSlug', [
-      ShowMatriculaOnlinePageController,
+      controllers.pages.ShowMatriculaOnlinePage,
     ])
     .as('matriculaOnline')
 
@@ -32,12 +21,12 @@ export function registerPublicPageRoutes() {
     .as('agendar')
 
   // Auth pages
-  router.get('/sign-in', [ShowSignInPageController]).as('auth.signIn')
-  router.get('/login', [ShowSignInPageController]).as('auth.login') // Alias
+  router.get('/sign-in', [controllers.pages.auth.ShowSignInPage]).as('auth.signIn')
+  router.get('/login', [controllers.pages.auth.ShowSignInPage]).as('auth.login') // Alias
 
   // Dashboard router (redirects based on role)
   router
-    .get('/dashboard', [ShowDashboardPageController])
+    .get('/dashboard', [controllers.pages.ShowDashboardPage])
     .use([middleware.auth(), middleware.impersonation()])
     .as('dashboard')
 }
