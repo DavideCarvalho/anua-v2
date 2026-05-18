@@ -98,7 +98,7 @@ function InboxContent({
 
   return (
     <>
-      <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <Sparkles aria-hidden className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-medium text-foreground">Insights</h2>
@@ -110,7 +110,7 @@ function InboxContent({
         ) : null}
       </div>
 
-      <div className="flex-1 overflow-y-auto">{renderBody()}</div>
+      <div>{renderBody()}</div>
 
       <AttentionDrawer
         item={selectedItem}
@@ -130,7 +130,7 @@ export function AttentionInbox(props: AttentionInboxProps) {
     <DashboardCardBoundary title="Insights">
       <section
         aria-labelledby="attention-inbox-heading"
-        className="flex max-h-full flex-col overflow-hidden rounded-xl border border-border bg-card"
+        className="overflow-hidden rounded-xl border border-border bg-card"
       >
         <InboxContent {...props} />
       </section>

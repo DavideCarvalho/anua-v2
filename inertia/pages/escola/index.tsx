@@ -541,7 +541,7 @@ export default function EscolaDashboard() {
             {filterBar}
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden">
+              <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start">
                 <AttentionInbox
                   academicPeriodId={toQueryValue(filters.academicPeriodId)}
                   courseId={toQueryValue(filters.courseId)}
@@ -596,7 +596,7 @@ export default function EscolaDashboard() {
             {filterBar}
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-              <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-hidden">
+              <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start">
                 <AttentionInbox
                   academicPeriodId={toQueryValue(filters.academicPeriodId)}
                   courseId={toQueryValue(filters.courseId)}
