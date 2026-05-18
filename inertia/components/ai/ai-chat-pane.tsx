@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage, type ToolUIPart } from 'ai'
 import { Streamdown } from 'streamdown'
-import type { Route } from '@tuyau/core/types'
 import {
   keepPreviousData,
   useMutation,
@@ -330,24 +329,23 @@ function ActiveChat({
     if (!hasMore || !oldestCursor || loadingOlder) return
     setLoadingOlder(true)
     try {
-      // Fetch direto pra não brigar com a queryKey do useQuery ativo —
-      // queryOptions com `query` ainda não tá tipado no registry (Tuyau
-      // regenera quando o dev server reinicia depois do showThreadQueryValidator).
-      // Tipo da resposta vem do Route helper, então é safe.
-      const url = `/api/v1/ai/threads/${encodeURIComponent(threadId)}?before=${encodeURIComponent(oldestCursor)}`
-      const res = await fetch(url, {
-        credentials: 'include',
-        headers: { Accept: 'application/json' },
+      // queryKey diferente do show inicial (inclui `before`), então não
+      // sobrescreve o cache da janela ativa. Sempre fresca pra paginação
+      // (staleTime: 0).
+      const data = await queryClient.fetchQuery({
+        ...api.api.v1.ai.threads.show.queryOptions({
+          params: { id: threadId },
+          query: { before: oldestCursor },
+        }),
+        staleTime: 0,
       })
-      if (!res.ok) return
-      const data: Route.Response<'api.v1.ai.threads.show'> = await res.json()
-      const olderRows = (data.messages ?? []) as ThreadMessageRow[]
+      const olderRows = (data?.messages ?? []) as ThreadMessageRow[]
       const olderUIMessages = rowsToUIMessages(olderRows)
       if (olderUIMessages.length > 0) {
         setMessages((prev) => [...olderUIMessages, ...prev])
       }
-      setHasMore(Boolean(data.hasMore))
-      setOldestCursor(data.oldestCursor ?? null)
+      setHasMore(Boolean(data?.hasMore))
+      setOldestCursor(data?.oldestCursor ?? null)
     } finally {
       setLoadingOlder(false)
     }
