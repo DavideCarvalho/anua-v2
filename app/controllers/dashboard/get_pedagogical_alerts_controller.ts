@@ -606,16 +606,20 @@ export default class GetPedagogicalAlertsController {
         e.title as exam_title,
         e."examDate",
         c.name as class_name,
-        COALESCE(co.name, 'Sem curso') as course_name,
+        COALESCE((
+          SELECT co.name
+          FROM "LevelAssignedToCourseHasAcademicPeriod" latcap
+          JOIN "CourseHasAcademicPeriod" chap ON chap.id = latcap."courseHasAcademicPeriodId"
+          JOIN "Course" co ON co.id = chap."courseId"
+          WHERE latcap."levelId" = c."levelId" AND latcap."isActive" = true
+          LIMIT 1
+        ), 'Sem curso') as course_name,
         COALESCE(l.name, 'Sem nível') as level_name,
         u.name as teacher_name,
         EXTRACT(DAY FROM NOW() - e."examDate") as days_past
       FROM exams e
       JOIN "Class" c ON e."classId" = c.id
       JOIN "Level" l ON c."levelId" = l.id
-      LEFT JOIN "LevelAssignedToCourseHasAcademicPeriod" latcap ON latcap."levelId" = c."levelId" AND latcap."isActive" = true
-      LEFT JOIN "CourseHasAcademicPeriod" chap ON latcap."courseHasAcademicPeriodId" = chap.id
-      LEFT JOIN "Course" co ON chap."courseId" = co.id
       JOIN "User" u ON e."teacherId" = u.id
        WHERE e."schoolId" = :schoolId
        AND (:hasClassScope = false OR c.id = ANY(:scopedClassIds))
