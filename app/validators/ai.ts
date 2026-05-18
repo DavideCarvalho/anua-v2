@@ -1,5 +1,15 @@
 import vine from '@vinejs/vine'
 
+// Paginação cursor-based do show_thread. before é o id da mensagem
+// mais antiga já vista pelo cliente; o backend devolve as N mensagens
+// imediatamente anteriores. limit cap em 100 pra evitar payload absurdo.
+export const showThreadQueryValidator = vine.compile(
+  vine.object({
+    limit: vine.number().min(1).max(100).optional(),
+    before: vine.string().uuid().optional(),
+  })
+)
+
 // persona aqui é só uma sugestão. O chat_controller deriva a persona efetiva
 // da role do usuário e só honra esse override se ele for permitido pra aquele
 // papel (atualmente: gestor pode alternar pra "comunicador"). Qualquer outro

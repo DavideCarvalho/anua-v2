@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage, type ToolUIPart } from 'ai'
 import { Streamdown } from 'streamdown'
+import type { Route } from '@tuyau/core/types'
 import {
   keepPreviousData,
   useMutation,
@@ -199,12 +200,16 @@ export function AiChatPane({
   const initialMessages = threadDetail ? rowsToUIMessages(messageRows) : []
   const headerTitle =
     threadDetail?.thread?.title ?? (isNewThread ? 'Nova conversa' : 'Conversa')
+  const initialHasMore = Boolean(threadDetail?.hasMore)
+  const initialOldestCursor = threadDetail?.oldestCursor ?? null
 
   return (
     <ActiveChat
       threadId={threadId}
       persona={persona}
       initialMessages={initialMessages}
+      initialHasMore={initialHasMore}
+      initialOldestCursor={initialOldestCursor}
       headerTitle={headerTitle}
       userName={userName}
       resume={!isNewThread}
@@ -222,6 +227,8 @@ type ActiveChatProps = {
   threadId: string
   persona: ChatPersonaRole
   initialMessages: UIMessage[]
+  initialHasMore: boolean
+  initialOldestCursor: string | null
   headerTitle: string
   userName?: string
   resume: boolean
@@ -237,6 +244,8 @@ function ActiveChat({
   threadId,
   persona,
   initialMessages,
+  initialHasMore,
+  initialOldestCursor,
   headerTitle,
   userName,
   resume,
@@ -248,6 +257,11 @@ function ActiveChat({
   suggestions,
 }: ActiveChatProps) {
   const queryClient = useQueryClient()
+  // hasMore/oldestCursor avançam à medida que o user clica "Carregar mais".
+  // Mantidos em state pra atualizar sem refetch da janela ativa do useQuery.
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [oldestCursor, setOldestCursor] = useState(initialOldestCursor)
+  const [loadingOlder, setLoadingOlder] = useState(false)
 
   const transport = useMemo(
     () =>
@@ -265,7 +279,7 @@ function ActiveChat({
 
   const cancelMutation = useMutation(api.api.v1.ai.chat.cancel.mutationOptions())
 
-  const { messages, sendMessage, status, error, stop, addToolOutput } = useChat({
+  const { messages, sendMessage, status, error, stop, addToolOutput, setMessages } = useChat({
     id: threadId,
     transport,
     messages: initialMessages,
@@ -312,6 +326,33 @@ function ActiveChat({
     await sendMessage({ text: trimmed })
   }
 
+  async function loadOlderMessages() {
+    if (!hasMore || !oldestCursor || loadingOlder) return
+    setLoadingOlder(true)
+    try {
+      // Fetch direto pra não brigar com a queryKey do useQuery ativo —
+      // queryOptions com `query` ainda não tá tipado no registry (Tuyau
+      // regenera quando o dev server reinicia depois do showThreadQueryValidator).
+      // Tipo da resposta vem do Route helper, então é safe.
+      const url = `/api/v1/ai/threads/${encodeURIComponent(threadId)}?before=${encodeURIComponent(oldestCursor)}`
+      const res = await fetch(url, {
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+      })
+      if (!res.ok) return
+      const data: Route.Response<'api.v1.ai.threads.show'> = await res.json()
+      const olderRows = (data.messages ?? []) as ThreadMessageRow[]
+      const olderUIMessages = rowsToUIMessages(olderRows)
+      if (olderUIMessages.length > 0) {
+        setMessages((prev) => [...olderUIMessages, ...prev])
+      }
+      setHasMore(Boolean(data.hasMore))
+      setOldestCursor(data.oldestCursor ?? null)
+    } finally {
+      setLoadingOlder(false)
+    }
+  }
+
   const showEmpty = messages.length === 0 && !isBusy
 
   return (
@@ -330,6 +371,27 @@ function ActiveChat({
           />
         ) : (
           <div className="mx-auto max-w-3xl space-y-5 px-5 py-6">
+            {hasMore && (
+              <div className="flex justify-center">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={loadOlderMessages}
+                  disabled={loadingOlder}
+                  className="text-xs text-muted-foreground"
+                >
+                  {loadingOlder ? (
+                    <>
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      Carregando…
+                    </>
+                  ) : (
+                    'Carregar mensagens anteriores'
+                  )}
+                </Button>
+              </div>
+            )}
             {messages.map((message) => (
               <MessageRow
                 key={message.id}

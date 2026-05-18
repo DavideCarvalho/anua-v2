@@ -2,9 +2,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 import AiThread from '#models/ai_thread'
 import AiThreadMessage from '#models/ai_thread_message'
 import AiThreadDetailTransformer from '#transformers/ai_thread_detail_transformer'
+import { showThreadQueryValidator } from '#validators/ai'
 
 const DEFAULT_LIMIT = 20
-const MAX_LIMIT = 100
 
 export default class ShowThreadController {
   async handle({ params, request, response, auth, effectiveUser, serialize }: HttpContext) {
@@ -19,11 +19,11 @@ export default class ShowThreadController {
       return response.notFound({ message: 'Thread não encontrada' })
     }
 
-    const rawLimit = Number(request.qs().limit ?? DEFAULT_LIMIT)
-    const limit = Number.isFinite(rawLimit)
-      ? Math.min(Math.max(rawLimit, 1), MAX_LIMIT)
-      : DEFAULT_LIMIT
-    const beforeId = typeof request.qs().before === 'string' ? request.qs().before : null
+    const { limit: limitInput, before: beforeId } = await request.validateUsing(
+      showThreadQueryValidator,
+      { data: request.qs() }
+    )
+    const limit = limitInput ?? DEFAULT_LIMIT
 
     const messagesQuery = AiThreadMessage.query()
       .where('threadId', thread.id)
