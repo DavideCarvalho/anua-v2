@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { router } from '@inertiajs/react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Bookmark, Plus, Sparkles, X } from 'lucide-react'
 import { Sheet, SheetContent } from '~/components/ui/sheet'
 import { Button } from '~/components/ui/button'
@@ -11,6 +11,7 @@ import { api } from '~/lib/api'
 import {
   buildContextualPrompts,
   formatContextLabel,
+  type ContextualPromptHints,
   type FilterLabels,
   type TabFilterState,
 } from '~/lib/contextual-prompts'
@@ -133,9 +134,37 @@ export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
     filters.classId,
   ])
 
+  // Mesma query key que o dashboard usa pros cards de alerta — useQuery
+  // dedupe e a sheet pega o cache instantâneo se o dashboard já fetchou.
+  // Sem dados, suggestions caem no fallback estático.
+  const alertsQuery = {
+    academicPeriodId: filters.academicPeriodId === 'all' ? undefined : filters.academicPeriodId,
+    courseId: filters.courseId === 'all' ? undefined : filters.courseId,
+    levelId: filters.levelId === 'all' ? undefined : filters.levelId,
+    classId: filters.classId === 'all' ? undefined : filters.classId,
+    subPeriodId: filters.subPeriodId === 'all' ? undefined : filters.subPeriodId,
+  }
+  const { data: alertsData } = useQuery({
+    ...api.api.v1.dashboard.escolaPedagogicalAlerts.queryOptions({ query: alertsQuery }),
+    enabled: Boolean(schoolId),
+  })
+
+  const promptHints = useMemo<ContextualPromptHints | undefined>(() => {
+    const alerts = alertsData?.alerts
+    if (!alerts) return undefined
+    return {
+      studentsAtRiskByGradeCount: alerts.studentsAtRiskByGrade?.count,
+      studentsAtRiskByAttendanceCount: alerts.studentsAtRiskByAttendance?.count,
+      teachersMissingAttendanceCount: alerts.teachersMissingAttendance?.count,
+      examsWithoutGradesCount: alerts.examsWithoutGrades?.count,
+      overdueActivitiesCount: alerts.overdueActivities?.count,
+      ungradedSubmissionsCount: alerts.ungradedSubmissions?.count,
+    }
+  }, [alertsData])
+
   const suggestions = useMemo(
-    () => buildContextualPrompts(filters, labels),
-    [filters, labels]
+    () => buildContextualPrompts(filters, labels, promptHints),
+    [filters, labels, promptHints]
   )
 
   const contextLabel = formatContextLabel(filters, labels)

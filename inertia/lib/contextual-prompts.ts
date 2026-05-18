@@ -62,12 +62,67 @@ function classPrompts(className: string): string[] {
   ]
 }
 
-export function buildContextualPrompts(filters: TabFilterState, labels: FilterLabels): string[] {
-  if (isSet(filters.classId) && labels.className) {
-    return classPrompts(labels.className)
+// Hints sobre alertas pedagógicos atuais. O dashboard já fetcha esses dados
+// (pedagogical_alerts endpoint) e a sheet reaproveita o cache — sem network
+// extra. Usado pra priorizar prompts que mencionam o problema mais pressionante.
+export type ContextualPromptHints = {
+  studentsAtRiskByGradeCount?: number
+  studentsAtRiskByAttendanceCount?: number
+  teachersMissingAttendanceCount?: number
+  examsWithoutGradesCount?: number
+  overdueActivitiesCount?: number
+  ungradedSubmissionsCount?: number
+}
+
+const MAX_PROMPTS = 4
+
+function priorityPromptsFromHints(hints: ContextualPromptHints): string[] {
+  const prompts: string[] = []
+  if ((hints.studentsAtRiskByGradeCount ?? 0) > 0) {
+    prompts.push('Quais alunos estão em risco por nota?')
   }
+  if ((hints.studentsAtRiskByAttendanceCount ?? 0) > 0) {
+    prompts.push('Quais alunos estão com frequência baixa?')
+  }
+  if ((hints.teachersMissingAttendanceCount ?? 0) > 0) {
+    prompts.push('Quais professores não lançaram presença ainda?')
+  }
+  if ((hints.examsWithoutGradesCount ?? 0) > 0) {
+    prompts.push('Lista as provas com notas pendentes')
+  }
+  if ((hints.overdueActivitiesCount ?? 0) > 0) {
+    prompts.push('Quais atividades estão atrasadas sem correção?')
+  }
+  if ((hints.ungradedSubmissionsCount ?? 0) > 0) {
+    prompts.push('Mostra entregas aguardando nota')
+  }
+  return prompts
+}
+
+function pickFallbackPrompts(filters: TabFilterState, labels: FilterLabels): string[] {
+  if (isSet(filters.classId) && labels.className) return classPrompts(labels.className)
   if (isSet(filters.academicPeriodId) && labels.academicPeriodName) {
     return periodPrompts(labels.academicPeriodName)
   }
   return GENERAL_PROMPTS
+}
+
+export function buildContextualPrompts(
+  filters: TabFilterState,
+  labels: FilterLabels,
+  hints?: ContextualPromptHints
+): string[] {
+  const priority = hints ? priorityPromptsFromHints(hints) : []
+  const fallback = pickFallbackPrompts(filters, labels)
+  // Dedupe preservando ordem, prioridade primeiro. Cap em MAX_PROMPTS pra não
+  // poluir o empty state com muita opção.
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const p of [...priority, ...fallback]) {
+    if (seen.has(p)) continue
+    seen.add(p)
+    out.push(p)
+    if (out.length >= MAX_PROMPTS) break
+  }
+  return out
 }
