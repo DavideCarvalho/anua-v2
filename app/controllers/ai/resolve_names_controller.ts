@@ -31,9 +31,9 @@ type ResolveResponse = {
 const EMPTY: ResolveResponse = { students: {}, exams: {}, classes: {} }
 
 export default class ResolveNamesController {
-  async handle({ request, response, auth, effectiveUser }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
     const user = effectiveUser ?? auth.user!
-    const schoolId = user.schoolId
+    const schoolId = selectedSchoolIds?.[0] ?? user.schoolId
     if (!schoolId) return response.ok(EMPTY)
 
     if (!user.$preloaded.role) await user.load('role')

@@ -16,7 +16,7 @@ import { checkQuotaOrDeny } from '#ai/usage_quota_service'
 import { chatValidator } from '#validators/ai'
 
 export default class ChatController {
-  async handle({ request, response, auth, effectiveUser }: HttpContext) {
+  async handle({ request, response, auth, effectiveUser, selectedSchoolIds }: HttpContext) {
     const {
       threadId,
       persona: requestedPersona,
@@ -26,7 +26,7 @@ export default class ChatController {
     const messages = request.input('messages') as UIMessage[] | undefined
 
     const user = effectiveUser ?? auth.user!
-    const schoolId = user.schoolId
+    const schoolId = selectedSchoolIds?.[0] ?? user.schoolId
     if (!schoolId) {
       return response.badRequest({ message: 'Usuário não vinculado a uma escola' })
     }
