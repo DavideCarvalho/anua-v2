@@ -10,6 +10,7 @@ import {
   useResponsavelAskAnuaContext,
   type ResponsavelScreenId,
 } from '../../lib/ask-anua-context'
+import { useResponsavelStore } from '../../stores/responsavel_store'
 import {
   LayoutDashboard,
   BookOpen,
@@ -260,12 +261,13 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
   const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
 
   const screenId = screenIdFromPath(url)
+  const selectedStudentId = useResponsavelStore((state) => state.selectedStudentId)
   // mode derivado do breakpoint: mobile=compact (sheet bottom, texto curto),
-  // desktop=full. selectedStudentId fica null por agora — futuramente puxar
-  // do StudentSelectorWithData store quando ele expor o id selecionado.
+  // desktop=full. selectedStudentId vem do StudentSelectorWithData store —
+  // quando o pai trocar de filho no seletor da topbar, a IA refoca.
   const askAnuaContext = useResponsavelAskAnuaContext({
     screenId: screenId ?? 'responsavel_dashboard',
-    selectedStudentId: null,
+    selectedStudentId,
     mode: isMobile ? 'compact' : 'full',
   })
   const canShowAskAnua = screenId !== null
