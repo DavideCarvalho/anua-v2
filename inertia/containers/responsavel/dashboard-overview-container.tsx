@@ -5,7 +5,6 @@ import {
   Calendar,
   CreditCard,
   ShoppingCart,
-  CheckCircle,
   Clock,
   AlertTriangle,
   Bell,
@@ -43,12 +42,6 @@ const schoolLifeChartConfig = {
 const financialChartConfig = {
   value: { label: 'Valor', color: 'var(--chart-4)' },
 } satisfies ChartConfig
-
-const intelligenceToneClass = {
-  danger: 'border-l-destructive bg-destructive/10',
-  warning: 'border-l-chart-4 bg-chart-4/10',
-  info: 'border-l-chart-1 bg-chart-1/10',
-} as const
 
 function DashboardOverviewSkeleton() {
   return (
@@ -143,15 +136,9 @@ function DashboardOverviewContent({
 
   if (mode === 'pedagogical' && canShowPedagogical) {
     // hasAttendanceData diferencia "sem registros" de "frequência baixa". Sem
-    // isso, aluno recém-matriculado (totalDays=0 → percentage=0) caía no
-    // alerta de "Risco por Frequência: 0%", o que era pegadinha.
+    // isso o card de Frequência mostra '—' em vez de '0%' enganoso.
     const hasAttendanceData = pedagogical!.attendance.totalDays > 0
-    const lowAttendance = hasAttendanceData && pedagogical!.attendance.percentage < 75
     const pendingAssignments = pedagogical!.upcomingAssignments.length
-    const lowGrades = pedagogical!.recentGrades.filter((grade: PedagogicalGrade) => {
-      if (!grade.grade || !grade.maxGrade) return false
-      return grade.grade < grade.maxGrade * 0.7
-    }).length
 
     const gradeChartData = pedagogical!.recentGrades
       .slice(0, 5)
@@ -166,51 +153,6 @@ function DashboardOverviewContent({
     return (
       <div className="space-y-6">
         {renderStudentInfo}
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {lowAttendance ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.danger}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Risco por Frequência</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{pedagogical!.attendance.percentage}%</div>
-                <p className="text-xs text-muted-foreground">Frequência abaixo do ideal</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {pendingAssignments > 0 ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.warning}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Atividades Pendentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{pendingAssignments}</div>
-                <p className="text-xs text-muted-foreground">Entregas próximas do prazo</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {lowGrades > 0 ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.warning}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Queda de Desempenho</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{lowGrades}</div>
-                <p className="text-xs text-muted-foreground">Notas recentes abaixo de 70%</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {!lowAttendance && pendingAssignments === 0 && lowGrades === 0 ? (
-            <Card className="md:col-span-3">
-              <CardContent className="py-7 text-center">
-                <CheckCircle className="mx-auto mb-2 h-9 w-9 text-chart-2" />
-                <p className="text-base font-semibold text-chart-2">Tudo em ordem!</p>
-                <p className="text-sm text-muted-foreground">Nenhum alerta pedagógico no momento</p>
-              </CardContent>
-            </Card>
-          ) : null}
-        </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
@@ -324,52 +266,6 @@ function DashboardOverviewContent({
     return (
       <div className="space-y-6">
         {renderStudentInfo}
-        <div className="grid gap-4 md:grid-cols-3">
-          {pendingComunicados > 0 ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.warning}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Comunicados Pendentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{pendingComunicados}</div>
-                <p className="text-xs text-muted-foreground">Aguardando ciência</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {occurrencesCount > 0 ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.warning}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Ocorrências Recentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{occurrencesCount}</div>
-                <p className="text-xs text-muted-foreground">Registros recentes</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {eventsCount > 0 ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.info}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Eventos da Semana</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{eventsCount}</div>
-                <p className="text-xs text-muted-foreground">Compromissos próximos</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {pendingComunicados === 0 && occurrencesCount === 0 && eventsCount === 0 ? (
-            <Card className="md:col-span-3">
-              <CardContent className="py-7 text-center">
-                <CheckCircle className="mx-auto mb-2 h-9 w-9 text-chart-2" />
-                <p className="text-base font-semibold text-chart-2">Tudo em ordem!</p>
-                <p className="text-sm text-muted-foreground">
-                  Não há alertas de vida escolar no momento
-                </p>
-              </CardContent>
-            </Card>
-          ) : null}
-        </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
@@ -466,16 +362,6 @@ function DashboardOverviewContent({
       return daysUntilDue >= 0 && daysUntilDue <= 7
     })
     const dueSoonCount = dueSoonInvoices.length
-    const nextDueInvoice = dueSoonInvoices
-      .slice()
-      .sort(
-        (a, b) => new Date(String(a.dueDate)).getTime() - new Date(String(b.dueDate)).getTime()
-      )[0]
-    const nextDueDays = nextDueInvoice
-      ? Math.ceil(
-          (new Date(String(nextDueInvoice.dueDate)).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-        )
-      : null
 
     const paymentStatusData = [
       { label: 'Pendentes', value: pendingCount },
@@ -493,48 +379,6 @@ function DashboardOverviewContent({
     return (
       <div className="space-y-6">
         {renderStudentInfo}
-        <div className="grid gap-4 md:grid-cols-3">
-          {overdueCount > 0 ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.danger}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Faturas Vencidas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{overdueCount}</div>
-                <p className="text-xs text-muted-foreground">Prioridade de regularização</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {nextDueInvoice && nextDueDays !== null ? (
-            <Card className={`border-l-4 ${intelligenceToneClass.warning}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Próxima Fatura</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {nextDueDays === 0 ? 'Vence hoje' : `Vence em ${nextDueDays} dia(s)`}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formatCurrency(Number(nextDueInvoice.totalAmount || 0))} -{' '}
-                  {new Intl.DateTimeFormat('pt-BR').format(
-                    new Date(String(nextDueInvoice.dueDate))
-                  )}
-                </p>
-              </CardContent>
-            </Card>
-          ) : null}
-          {pendingCount === 0 && overdueCount === 0 && !nextDueInvoice ? (
-            <Card className="md:col-span-3">
-              <CardContent className="py-7 text-center">
-                <CheckCircle className="mx-auto mb-2 h-9 w-9 text-chart-2" />
-                <p className="text-base font-semibold text-chart-2">Tudo em ordem!</p>
-                <p className="text-sm text-muted-foreground">
-                  Não há alertas financeiros no momento
-                </p>
-              </CardContent>
-            </Card>
-          ) : null}
-        </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
