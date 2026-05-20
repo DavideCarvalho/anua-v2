@@ -38,7 +38,9 @@ export function useDashboardAskAnuaContext(
   labels: FilterLabels
 ): AskAnuaContext {
   const user = useAuthUser()
-  const schoolId = user?.school?.id ?? ''
+  // user.schoolId é a coluna raw, sempre presente. user.school (objeto) só
+  // hidrata em rotas /escola — usar a forma raw mantém consistência.
+  const schoolId = user?.schoolId ?? ''
 
   const screen = useMemo<AskAnuaScreen>(() => {
     const activeFilters: Record<string, string> = {}

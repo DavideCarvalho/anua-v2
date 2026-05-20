@@ -67,7 +67,11 @@ export function AskAnuaPanel({
   onClose,
 }: AskAnuaPanelProps) {
   const user = useAuthUser()
-  const schoolId = user?.school?.id ?? ''
+  // schoolId vem do Inertia shared user — em rotas /responsavel o objeto
+  // aninhado `school` não é hidratado, mas a coluna raw `schoolId` está
+  // sempre presente. Sem isso o effect que cria a thread fica bailando e o
+  // AiChatPane nunca monta.
+  const schoolId = user?.schoolId ?? ''
 
   // null até o effect rodar no client; AiChatPane só renderiza quando tem id.
   // Isso evita gerar UUIDs descartáveis no SSR e elimina a hydration mismatch.
