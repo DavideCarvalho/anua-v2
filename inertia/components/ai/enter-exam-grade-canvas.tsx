@@ -151,17 +151,23 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
   async function handleSubmit() {
     if (validationError) return
     try {
+      // Omitimos feedback quando null porque enterExamGradeInputSchema usa
+      // z.string().optional() (não aceita null, só undefined). Mesma razão
+      // pra absent: o schema é .optional() — default false no banco.
+      const submitFields: Record<string, unknown> = {
+        examId: fields.examId,
+        studentId: fields.studentId,
+        score: fields.absent ? null : fields.score,
+      }
+      if (fields.absent) submitFields.absent = true
+      if (fields.feedback && fields.feedback.trim().length > 0) {
+        submitFields.feedback = fields.feedback
+      }
       await submitMutation.mutateAsync({
         body: {
           threadId,
           toolName: 'enterExamGrade',
-          fields: {
-            examId: fields.examId,
-            studentId: fields.studentId,
-            score: fields.absent ? null : fields.score,
-            absent: fields.absent,
-            feedback: fields.feedback ?? null,
-          },
+          fields: submitFields,
         },
       })
       setSubmitState({ kind: 'success' })
