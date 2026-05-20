@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import type React from 'react'
 
-import { EscolaLayout } from '~/components/layouts/escola-layout'
 import { TurmaLayout } from '~/components/layouts/turma-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import {
@@ -69,63 +68,65 @@ const TurmaSituacaoPage: React.FC<Props> = ({
   const selectedSubject = filteredSubjects.find((subject) => subject.id === selectedSubjectId)
 
   return (
-    <EscolaLayout>
-      <TurmaLayout
-        turmaName={className}
-        courseName={courseName}
-        academicPeriodSlug={academicPeriodSlug}
-        courseSlug={courseSlug}
-        classSlug={classSlug}
-      >
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Situação dos Alunos</CardTitle>
-                <CardDescription>
-                  Acompanhe o desempenho e presença dos alunos na turma
-                </CardDescription>
-              </div>
-              {filteredSubjects.length > 0 && (
-                <div className="w-64">
-                  <Select
-                    value={selectedSubjectId ?? undefined}
-                    onValueChange={(value) => setSelectedSubjectId(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a matéria">
-                        {selectedSubject?.name}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredSubjects.map((subject) => (
-                        <SelectItem key={subject.id} value={subject.id}>
-                          {subject.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+    <TurmaLayout
+      turmaName={className}
+      courseName={courseName}
+      academicPeriodSlug={academicPeriodSlug}
+      courseSlug={courseSlug}
+      classSlug={classSlug}
+      screenId="escola_turma_situacao"
+      classId={classId}
+      courseId={courseId}
+      academicPeriodId={academicPeriodId}
+    >
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Situação dos Alunos</CardTitle>
+              <CardDescription>
+                Acompanhe o desempenho e presença dos alunos na turma
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SubPeriodFilter
-              academicPeriodId={academicPeriodId}
-              value={subPeriodId}
-              onChange={setSubPeriodId}
-            />
-            <StudentStatusTable
-              classId={classId}
-              courseId={courseId}
-              academicPeriodId={academicPeriodId}
-              subjectId={selectedSubjectId}
-              subPeriodId={subPeriodId}
-            />
-          </CardContent>
-        </Card>
-      </TurmaLayout>
-    </EscolaLayout>
+            {filteredSubjects.length > 0 && (
+              <div className="w-64">
+                <Select
+                  value={selectedSubjectId ?? undefined}
+                  onValueChange={(value) => setSelectedSubjectId(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a matéria">
+                      {selectedSubject?.name}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredSubjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <SubPeriodFilter
+            academicPeriodId={academicPeriodId}
+            value={subPeriodId}
+            onChange={setSubPeriodId}
+          />
+          <StudentStatusTable
+            classId={classId}
+            courseId={courseId}
+            academicPeriodId={academicPeriodId}
+            subjectId={selectedSubjectId}
+            subPeriodId={subPeriodId}
+          />
+        </CardContent>
+      </Card>
+    </TurmaLayout>
   )
 }
 

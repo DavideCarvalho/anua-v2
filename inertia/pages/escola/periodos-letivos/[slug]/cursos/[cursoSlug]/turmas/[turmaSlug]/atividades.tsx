@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 
-import { EscolaLayout } from '../../../../../../../../components/layouts/escola-layout'
 import { TurmaLayout } from '../../../../../../../../components/layouts/turma-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -36,50 +35,52 @@ export default function TurmaAtividadesPage({
   const [subPeriodId, setSubPeriodId] = useState('')
 
   return (
-    <EscolaLayout>
-      <TurmaLayout
-        turmaName={className}
-        courseName={courseName}
-        academicPeriodSlug={academicPeriodSlug}
-        courseSlug={courseSlug}
-        classSlug={classSlug}
-      >
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Atividades e Trabalhos</CardTitle>
-                <CardDescription>Gerencie as atividades e trabalhos dos alunos</CardDescription>
-              </div>
-              <Button onClick={() => setModalOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar atividade
-              </Button>
+    <TurmaLayout
+      turmaName={className}
+      courseName={courseName}
+      academicPeriodSlug={academicPeriodSlug}
+      courseSlug={courseSlug}
+      classSlug={classSlug}
+      screenId="escola_turma_atividades"
+      classId={classId}
+      courseId={courseId}
+      academicPeriodId={academicPeriodId}
+    >
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Atividades e Trabalhos</CardTitle>
+              <CardDescription>Gerencie as atividades e trabalhos dos alunos</CardDescription>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SubPeriodFilter
-              academicPeriodId={academicPeriodId}
-              value={subPeriodId}
-              onChange={setSubPeriodId}
-            />
-            <AssignmentsTable
-              classId={classId}
-              courseId={courseId}
-              academicPeriodId={academicPeriodId}
-              subPeriodId={subPeriodId}
-            />
-          </CardContent>
-        </Card>
+            <Button onClick={() => setModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar atividade
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <SubPeriodFilter
+            academicPeriodId={academicPeriodId}
+            value={subPeriodId}
+            onChange={setSubPeriodId}
+          />
+          <AssignmentsTable
+            classId={classId}
+            courseId={courseId}
+            academicPeriodId={academicPeriodId}
+            subPeriodId={subPeriodId}
+          />
+        </CardContent>
+      </Card>
 
-        <NewAssignmentModal
-          classId={classId}
-          academicPeriodId={academicPeriodId}
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          user={user}
-        />
-      </TurmaLayout>
-    </EscolaLayout>
+      <NewAssignmentModal
+        classId={classId}
+        academicPeriodId={academicPeriodId}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        user={user}
+      />
+    </TurmaLayout>
   )
 }

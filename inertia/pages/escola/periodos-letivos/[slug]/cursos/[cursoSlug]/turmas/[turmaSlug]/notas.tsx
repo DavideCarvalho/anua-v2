@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, BookOpen } from 'lucide-react'
 
-import { EscolaLayout } from '../../../../../../../../components/layouts/escola-layout'
 import { TurmaLayout } from '../../../../../../../../components/layouts/turma-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import {
@@ -90,67 +89,69 @@ export default function TurmaNotasPage({
   }, [subjects, selectedSubjectId])
 
   return (
-    <EscolaLayout>
-      <TurmaLayout
-        turmaName={className}
-        courseName={courseName}
-        academicPeriodSlug={academicPeriodSlug}
-        courseSlug={courseSlug}
-        classSlug={classSlug}
-      >
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Notas por Matéria</CardTitle>
-                <CardDescription>
-                  Visualize as notas dos alunos agrupadas por matéria
-                </CardDescription>
-              </div>
-              {subjects.length > 0 && (
-                <div className="w-64">
-                  <Select
-                    value={selectedSubjectId ?? undefined}
-                    onValueChange={(value) => setSelectedSubjectId(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a matéria">
-                        {selectedSubject?.name}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject.id} value={subject.id}>
-                          {subject.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+    <TurmaLayout
+      turmaName={className}
+      courseName={courseName}
+      academicPeriodSlug={academicPeriodSlug}
+      courseSlug={courseSlug}
+      classSlug={classSlug}
+      screenId="escola_turma_notas"
+      classId={classId}
+      courseId={courseId}
+      academicPeriodId={academicPeriodId}
+    >
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Notas por Matéria</CardTitle>
+              <CardDescription>
+                Visualize as notas dos alunos agrupadas por matéria
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <NotasSkeleton />
-            ) : subjects.length === 0 ? (
-              <NotasEmpty />
-            ) : !selectedSubjectId ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                <BookOpen className="h-12 w-12 mb-4" />
-                <p>Selecione uma matéria para ver as notas.</p>
+            {subjects.length > 0 && (
+              <div className="w-64">
+                <Select
+                  value={selectedSubjectId ?? undefined}
+                  onValueChange={(value) => setSelectedSubjectId(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a matéria">
+                      {selectedSubject?.name}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ) : (
-              <SubjectGradesTable
-                classId={classId}
-                subjectId={selectedSubjectId}
-                courseId={courseId}
-                academicPeriodId={academicPeriodId}
-              />
             )}
-          </CardContent>
-        </Card>
-      </TurmaLayout>
-    </EscolaLayout>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <NotasSkeleton />
+          ) : subjects.length === 0 ? (
+            <NotasEmpty />
+          ) : !selectedSubjectId ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+              <BookOpen className="h-12 w-12 mb-4" />
+              <p>Selecione uma matéria para ver as notas.</p>
+            </div>
+          ) : (
+            <SubjectGradesTable
+              classId={classId}
+              subjectId={selectedSubjectId}
+              courseId={courseId}
+              academicPeriodId={academicPeriodId}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </TurmaLayout>
   )
 }
