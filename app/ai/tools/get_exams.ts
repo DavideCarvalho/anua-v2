@@ -49,7 +49,7 @@ export function createGetExams(ctx: ToolContext) {
             e.type,
             e.status,
             sub.name AS "subjectName"
-          FROM "Exam" e
+          FROM exams e
           LEFT JOIN "Subject" sub ON sub.id = e."subjectId"
           WHERE e."classId" = :classId
             ${onlyUpcoming ? `AND e."examDate" >= CURRENT_DATE` : ''}

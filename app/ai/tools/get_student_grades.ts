@@ -60,8 +60,8 @@ export function createGetStudentGrades(ctx: ToolContext) {
             eg.score AS score,
             e."maxScore" AS "maxScore",
             e.weight AS weight
-          FROM "ExamGrade" eg
-          JOIN "Exam" e ON e.id = eg."examId"
+          FROM exam_grades eg
+          JOIN exams e ON e.id = eg."examId"
           LEFT JOIN "Subject" sub ON sub.id = e."subjectId"
           WHERE eg."studentId" = :studentId
         `,
