@@ -1,5 +1,6 @@
 import { tool as aiTool } from 'ai'
 import { type z } from 'zod'
+import logger from '@adonisjs/core/services/logger'
 
 export type ToolConfig = {
   name: string
@@ -13,7 +14,29 @@ export function defineTool(config: ToolConfig) {
     [config.name]: aiTool({
       description: config.description,
       inputSchema: config.parameters,
-      execute: async (args, options) => config.execute(args, options as Record<string, any>),
+      // Wrapping execute em try/catch — quando a tool lança uma exception
+      // não tratada, o Vercel AI SDK não inclui o call em step.toolResults,
+      // o recordToolCalls grava status='failed' com error/output null, e o
+      // dev fica sem rastro do que aconteceu (foi como o bug de
+      // "ExamGrade" não existe ficou invisível por dias). Convertendo
+      // pra { error: ... } resolve três coisas de uma vez:
+      //   1. SDK pareia o result com o call → audit grava error preenchido.
+      //   2. Modelo recebe a mensagem do erro → pode adaptar a próxima
+      //      escolha de tool em vez de tentar a mesma coisa em loop.
+      //   3. Log estruturado com toolName + args fica no logger.error,
+      //      navegável por request_id.
+      execute: async (args, options) => {
+        try {
+          return await config.execute(args, options as Record<string, any>)
+        } catch (err) {
+          logger.error(
+            { err, event: 'ai_tool_execute_failed', toolName: config.name, args },
+            `AI tool ${config.name} threw`
+          )
+          const message = err instanceof Error ? err.message : String(err)
+          return { error: `Tool execution failed: ${message}` }
+        }
+      },
     }),
   }
 }
