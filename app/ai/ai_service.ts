@@ -17,7 +17,7 @@ import type { ChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
 import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
-import { recordToolCalls } from './record_tool_calls.js'
+import { recordToolCalls, type StoredToolError } from './record_tool_calls.js'
 import { getCachedSchool, getCachedUser } from './prompt_context_cache.js'
 import './tools/index.js'
 import AiThread from '#models/ai_thread'
@@ -150,6 +150,44 @@ export class AiService {
               output: r.output,
             }))
           )
+          // SDK v6+ emite parts com type='tool-error' dentro de step.content
+          // sempre que execute() lança exception. Esses calls NÃO aparecem em
+          // step.toolResults — sem agregar daqui, o audit grava status=failed
+          // com error null (foi o que mascarou o bug do "ExamGrade"). Cada
+          // part traz toolCallId/toolName/input/error.
+          const allToolErrors: StoredToolError[] = steps.flatMap((s) =>
+            (s.content ?? [])
+              .filter((p: { type: string }) => p.type === 'tool-error')
+              .map((p) => {
+                const err = (p as { toolCallId: string; toolName: string; error: unknown })
+                return {
+                  toolCallId: err.toolCallId,
+                  toolName: err.toolName,
+                  error:
+                    err.error instanceof Error
+                      ? err.error.message
+                      : typeof err.error === 'string'
+                        ? err.error
+                        : JSON.stringify(err.error),
+                }
+              })
+          )
+          if (allToolErrors.length > 0) {
+            logger.error(
+              {
+                event: 'ai_tool_errors',
+                threadId: thread.id,
+                schoolId: req.schoolId,
+                userId: req.userId,
+                count: allToolErrors.length,
+                errors: allToolErrors.map((e) => ({
+                  toolName: e.toolName,
+                  error: e.error.slice(0, 500),
+                })),
+              },
+              `${allToolErrors.length} tool execution error(s) in this run`
+            )
+          }
           const assistantMessage = await AiThreadMessage.create({
             threadId: thread.id,
             role: 'assistant',
@@ -187,6 +225,7 @@ export class AiService {
             schoolId: req.schoolId,
             toolCalls: allToolCalls,
             toolResults: allToolResults,
+            toolErrors: allToolErrors,
           })
 
           // Fire-and-forget — sumarização não bloqueia a resposta. Se a

@@ -30,6 +30,12 @@ export function toolKindFromName(name: string): AiToolKind {
   return 'read'
 }
 
+export type StoredToolError = {
+  toolCallId: string
+  toolName: string
+  error: string
+}
+
 export type RecordToolCallsArgs = {
   threadId: string
   messageId: string | null
@@ -37,14 +43,19 @@ export type RecordToolCallsArgs = {
   schoolId: string | null
   toolCalls: StoredToolCall[]
   toolResults: StoredToolResult[]
+  toolErrors: StoredToolError[]
 }
 
 /**
- * Persiste um row por tool call no audit log. Read tools entram como
- * 'auto_executed'; action tools (não temos ainda) entrarão como
- * 'pending_approval' até serem decididas. Pareia cada call com seu result
- * por toolCallId — sem result indica que a chain abortou antes desse step
- * completar.
+ * Persiste um row por tool call no audit log. Pareia cada call por
+ * toolCallId com:
+ *   - toolResult emitido pelo execute() → status='auto_executed' (ou
+ *     'failed' se o output tem shape { error }, ex: scope check denied)
+ *   - tool-error part (SDK v6+ emite quando execute lança exception) →
+ *     status='failed' com o error column preenchido
+ *   - nem result nem error em read tool → status='failed' (timeout/abort)
+ *   - nem result nem error em action tool → status='pending_approval'
+ *     (modelo emitiu input-available; aguarda aprovação humana)
  *
  * Falha não propaga: auditoria é observabilidade, não correção. Se gravar
  * der erro, log e segue.
@@ -57,11 +68,17 @@ export async function recordToolCalls(args: RecordToolCallsArgs): Promise<void> 
     for (const r of args.toolResults) {
       resultsByCall.set(r.toolCallId, r)
     }
+    const errorsByCall = new Map<string, StoredToolError>()
+    for (const e of args.toolErrors) {
+      errorsByCall.set(e.toolCallId, e)
+    }
 
     for (const call of args.toolCalls) {
       const result = resultsByCall.get(call.toolCallId)
+      const toolError = errorsByCall.get(call.toolCallId)
       const kind = toolKindFromName(call.toolName)
       const hasResult = result !== undefined
+      const hasToolError = toolError !== undefined
       const output = result?.output
       // Heurística: result.output com a forma { error: '...' } indica que a
       // tool falhou em validação interna (ex: scope check denied). Trata
@@ -70,10 +87,22 @@ export async function recordToolCalls(args: RecordToolCallsArgs): Promise<void> 
         output && typeof output === 'object' && 'error' in (output as Record<string, unknown>)
 
       let status: AiToolCall['status']
-      if (kind === 'action' && !hasResult) status = 'pending_approval'
-      else if (looksLikeError) status = 'failed'
-      else if (hasResult) status = 'auto_executed'
-      else status = 'failed' // call sem result em read tool = abortado/timeout
+      let errorText: string | null = null
+      if (hasToolError) {
+        status = 'failed'
+        errorText = toolError!.error
+      } else if (kind === 'action' && !hasResult) {
+        status = 'pending_approval'
+      } else if (looksLikeError) {
+        status = 'failed'
+        errorText = String((output as Record<string, unknown>).error)
+      } else if (hasResult) {
+        status = 'auto_executed'
+      } else {
+        // read tool sem result nem tool-error: abortado/timeout antes do
+        // execute rodar (ex: stream cancelado, ou erro acima da camada da tool).
+        status = 'failed'
+      }
 
       await AiToolCall.create({
         threadId: args.threadId,
@@ -86,7 +115,7 @@ export async function recordToolCalls(args: RecordToolCallsArgs): Promise<void> 
         status,
         input: call.input ?? null,
         output: output ?? null,
-        error: looksLikeError ? String((output as Record<string, unknown>).error) : null,
+        error: errorText,
         executionMs: null,
       })
     }
