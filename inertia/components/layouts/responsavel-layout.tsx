@@ -270,7 +270,14 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
     selectedStudentId,
     mode: isMobile ? 'compact' : 'full',
   })
-  const canShowAskAnua = screenId !== null
+  // Gate por role + schoolId. STUDENT_RESPONSIBLE é a única persona que
+  // o chat suporta nesse layout. Super admin acessando /responsavel sem
+  // impersonate também cai aqui com schoolId=null — sem escola não dá pra
+  // montar a thread (sessionStorage namespaceado por schoolId) e clicar
+  // abriria uma sheet inerte. Mesma lógica do turma-layout com seu
+  // ASK_ANUA_ROLES.
+  const canShowAskAnua =
+    screenId !== null && user?.role?.name === 'STUDENT_RESPONSIBLE' && Boolean(user?.schoolId)
 
   return (
     <PostHogProvider>
