@@ -112,7 +112,7 @@ export default function TurmaNotasPage({
             {subjects.length > 0 && (
               <div className="w-64">
                 <Select
-                  value={selectedSubjectId ?? undefined}
+                  value={selectedSubjectId ?? ''}
                   onValueChange={(value) => setSelectedSubjectId(value)}
                 >
                   <SelectTrigger>

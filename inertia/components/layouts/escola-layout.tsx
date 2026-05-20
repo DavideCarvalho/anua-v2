@@ -332,7 +332,7 @@ function EscolaSidebar() {
         <div className="group-data-[collapsible=icon]:hidden">
           <ClientOnly
             fallback={
-              <div className="px-4 py-3">
+              <div className="border-b px-4 py-3">
                 <div className="h-8 w-8 bg-muted animate-pulse rounded-lg" />
               </div>
             }
