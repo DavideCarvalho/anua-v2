@@ -142,7 +142,11 @@ function DashboardOverviewContent({
   )
 
   if (mode === 'pedagogical' && canShowPedagogical) {
-    const lowAttendance = pedagogical!.attendance.percentage < 75
+    // hasAttendanceData diferencia "sem registros" de "frequência baixa". Sem
+    // isso, aluno recém-matriculado (totalDays=0 → percentage=0) caía no
+    // alerta de "Risco por Frequência: 0%", o que era pegadinha.
+    const hasAttendanceData = pedagogical!.attendance.totalDays > 0
+    const lowAttendance = hasAttendanceData && pedagogical!.attendance.percentage < 75
     const pendingAssignments = pedagogical!.upcomingAssignments.length
     const lowGrades = pedagogical!.recentGrades.filter((grade: PedagogicalGrade) => {
       if (!grade.grade || !grade.maxGrade) return false
@@ -215,8 +219,19 @@ function DashboardOverviewContent({
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{pedagogical!.attendance.percentage}%</div>
-              <Progress value={pedagogical!.attendance.percentage} className="mt-2" />
+              {hasAttendanceData ? (
+                <>
+                  <div className="text-2xl font-bold">{pedagogical!.attendance.percentage}%</div>
+                  <Progress value={pedagogical!.attendance.percentage} className="mt-2" />
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-muted-foreground">—</div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Sem registros nos últimos 30 dias
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
           <Card>
