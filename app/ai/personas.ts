@@ -35,6 +35,11 @@ REGRAS CRÍTICAS:
 
 const SCREEN_LABELS: Record<string, string> = {
   escola_dashboard: 'dashboard da escola',
+  escola_turma_atividades: 'tela de atividades de uma turma',
+  escola_turma_provas: 'tela de provas de uma turma',
+  escola_turma_presencas: 'tela de presenças de uma turma',
+  escola_turma_notas: 'tela de notas de uma turma',
+  escola_turma_situacao: 'tela de situação geral de uma turma',
 }
 
 const FILTER_LABELS: Record<string, string> = {
