@@ -398,10 +398,10 @@ export default class GetResponsavelAlertsController {
 
     for (const row of rows) {
       const c = Number(row.count)
-      // Invoice.totalAmount está em reais (decimal); o front espera centavos
-      // pra usar o helper formatCurrency. Multiplica por 100 e arredonda pra
-      // evitar erro de ponto flutuante (R$ 199.90 → 19990).
-      const cents = Math.round(Number(row.totalAmount) * 100)
+      // Invoice.totalAmount já é armazenado em centavos (inteiro) — mesmo
+      // tratamento que GetStudentInvoicesController faz. formatCurrency no
+      // front divide por 100 pra exibir.
+      const cents = Math.round(Number(row.totalAmount))
       count += c
       totalCents += cents
       breakdown.push({
