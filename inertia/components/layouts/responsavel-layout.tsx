@@ -32,7 +32,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import type { SharedProps } from '../../lib/types'
-import { cn } from '../../lib/utils'
+import { cn, ClientOnly } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { StudentSelectorWithData } from '../responsavel/student-selector'
@@ -303,7 +303,21 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
             </div>
 
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-              <NavigationContent />
+              {/* useQuery hidrata com cache no client mas no SSR retorna
+                  isLoading=true → divergia do client e jogava hydration
+                  mismatch. ClientOnly força o skeleton no server e dispara
+                  o render real só depois do mount. */}
+              <ClientOnly
+                fallback={
+                  <div className="space-y-1">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-10 animate-pulse rounded bg-muted" />
+                    ))}
+                  </div>
+                }
+              >
+                <NavigationContent />
+              </ClientOnly>
             </nav>
 
             <div className="border-t p-4">
