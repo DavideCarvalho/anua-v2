@@ -3,7 +3,7 @@ import { Link } from '@adonisjs/inertia/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ResponsavelLayout } from '../../components/layouts'
 import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
-import { ResponsavelInsightsCards } from '../../containers/responsavel/responsavel-insights-cards'
+import { ResponsavelInsightsInbox } from '../../containers/responsavel/responsavel-insights-inbox'
 import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle, BookOpen, DollarSign, Bell } from 'lucide-react'
@@ -104,58 +104,61 @@ function ResponsavelContent() {
     )
   }
 
-  if (availableDomains.length === 1) {
-    return (
-      <div className="space-y-6">
-        <ResponsavelInsightsCards studentId={studentId} />
-        <DashboardOverviewContainer studentId={studentId} mode={availableDomains[0]} />
-      </div>
+  // Layout 2-col espelhando o /escola: main esquerda com dashboard, aside
+  // direita com a inbox de insights (sticky no topo, 320px). Em mobile
+  // (lg-), inbox vem antes do dashboard via order-1/order-2.
+  const main =
+    availableDomains.length === 1 ? (
+      <DashboardOverviewContainer studentId={studentId} mode={availableDomains[0]} />
+    ) : (
+      <Tabs defaultValue={defaultTab} className="w-full">
+        <TabsList className="grid w-full md:w-auto md:inline-grid md:grid-cols-3">
+          {hasPedagogical && (
+            <TabsTrigger value="pedagogical" className="gap-2">
+              <BookOpen className="h-4 w-4" />
+              Pedagógico
+            </TabsTrigger>
+          )}
+          {hasPedagogical && (
+            <TabsTrigger value="school-life" className="gap-2">
+              <Bell className="h-4 w-4" />
+              Vida Escolar
+            </TabsTrigger>
+          )}
+          {hasFinancial && (
+            <TabsTrigger value="financial" className="gap-2">
+              <DollarSign className="h-4 w-4" />
+              Financeiro
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        {hasPedagogical && (
+          <TabsContent value="pedagogical" className="mt-6">
+            <DashboardOverviewContainer studentId={studentId} mode="pedagogical" />
+          </TabsContent>
+        )}
+
+        {hasPedagogical && (
+          <TabsContent value="school-life" className="mt-6">
+            <DashboardOverviewContainer studentId={studentId} mode="school-life" />
+          </TabsContent>
+        )}
+
+        {hasFinancial && (
+          <TabsContent value="financial" className="mt-6">
+            <DashboardOverviewContainer studentId={studentId} mode="financial" />
+          </TabsContent>
+        )}
+      </Tabs>
     )
-  }
 
   return (
-    <div className="space-y-6">
-      <ResponsavelInsightsCards studentId={studentId} />
-      <Tabs defaultValue={defaultTab} className="w-full">
-      <TabsList className="grid w-full md:w-auto md:inline-grid md:grid-cols-3">
-        {hasPedagogical && (
-          <TabsTrigger value="pedagogical" className="gap-2">
-            <BookOpen className="h-4 w-4" />
-            Pedagógico
-          </TabsTrigger>
-        )}
-        {hasPedagogical && (
-          <TabsTrigger value="school-life" className="gap-2">
-            <Bell className="h-4 w-4" />
-            Vida Escolar
-          </TabsTrigger>
-        )}
-        {hasFinancial && (
-          <TabsTrigger value="financial" className="gap-2">
-            <DollarSign className="h-4 w-4" />
-            Financeiro
-          </TabsTrigger>
-        )}
-      </TabsList>
-
-      {hasPedagogical && (
-        <TabsContent value="pedagogical" className="mt-6">
-          <DashboardOverviewContainer studentId={studentId} mode="pedagogical" />
-        </TabsContent>
-      )}
-
-      {hasPedagogical && (
-        <TabsContent value="school-life" className="mt-6">
-          <DashboardOverviewContainer studentId={studentId} mode="school-life" />
-        </TabsContent>
-      )}
-
-      {hasFinancial && (
-        <TabsContent value="financial" className="mt-6">
-          <DashboardOverviewContainer studentId={studentId} mode="financial" />
-        </TabsContent>
-      )}
-      </Tabs>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <aside className="lg:order-2 lg:sticky lg:top-6 lg:self-start">
+        <ResponsavelInsightsInbox studentId={studentId} />
+      </aside>
+      <div className="min-w-0 lg:order-1">{main}</div>
     </div>
   )
 }
