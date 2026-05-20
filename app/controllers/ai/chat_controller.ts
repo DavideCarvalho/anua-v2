@@ -8,7 +8,7 @@ import {
   clearActiveStream,
 } from '#ai/resumable_stream_context'
 import { registerStreamController } from '#ai/stream_cancel_broker'
-import { personaFromRole, resolvePersonaId } from '#ai/chat_role'
+import { personaFromRole, resolvePersonaId, isScreenAllowedForPersona } from '#ai/chat_role'
 import { computeChatScope } from '#ai/chat_scope'
 import type { ChatScope } from '#ai/chat_scope'
 import type { ChatRequest } from '#ai/ai_service'
@@ -44,6 +44,16 @@ export default class ChatController {
       })
     }
     const personaId = resolvePersonaId(defaultPersona, requestedPersona)
+
+    // Trava cross-role de screen.id. Sem isso um gestor podia mandar
+    // screen.id='responsavel_atividades' e o system prompt entrava em
+    // "modo responsavel" mesmo com scope de gestor — não é leak, mas é
+    // integridade. Veja chat_role.ts:isScreenAllowedForPersona.
+    if (screen && !isScreenAllowedForPersona(screen.id, defaultPersona)) {
+      return response.forbidden({
+        message: 'Tela não disponível pra esse papel.',
+      })
+    }
 
     const lastUserMessage = [...(messages ?? [])].reverse().find((m) => m.role === 'user')
     if (!lastUserMessage) {
