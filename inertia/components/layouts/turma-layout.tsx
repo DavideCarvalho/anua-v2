@@ -138,7 +138,9 @@ export function TurmaLayout({
         {/* Content */}
         <div>{children}</div>
       </div>
-      {askAnuaSheet}
+      {/* Sheet só no mobile — em desktop, painel inline via rightPane.
+          Renderizar os dois ao mesmo tempo abre overlay por cima do split. */}
+      {isMobile ? askAnuaSheet : null}
     </EscolaLayout>
   )
 }
