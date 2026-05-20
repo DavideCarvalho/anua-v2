@@ -25,13 +25,15 @@ import { api } from '~/lib/api'
 const ACTION_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'sendCommunication',
   'justifyAbsence',
-  'enterExamGrade',
   'registerAttendance',
 ])
 
 // Tools que abrem um painel flutuante (canvas) — NÃO renderizam inline.
 // Mantém em sync com CANVAS_TOOL_NAMES no backend.
-const CANVAS_TOOL_NAMES: ReadonlySet<string> = new Set<string>(['prepareCreateAssignment'])
+const CANVAS_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
+  'prepareCreateAssignment',
+  'prepareEnterExamGrade',
+])
 
 type MessageBlock =
   | { kind: 'text'; text: string }

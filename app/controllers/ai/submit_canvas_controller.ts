@@ -21,7 +21,10 @@ import { submitCanvasValidator } from '#validators/ai'
  * passam aqui. Sem isso, qualquer um podia chamar /canvas/submit com
  * toolName='sendCommunication' e burlar o fluxo de aprovação.
  */
-const CANVAS_SUBMITTABLE_ACTIONS: ReadonlySet<string> = new Set<string>(['createAssignment'])
+const CANVAS_SUBMITTABLE_ACTIONS: ReadonlySet<string> = new Set<string>([
+  'createAssignment',
+  'enterExamGrade',
+])
 
 export default class SubmitCanvasController {
   async handle({ request, response, auth, effectiveUser }: HttpContext) {

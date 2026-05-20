@@ -10,7 +10,6 @@ import logger from '@adonisjs/core/services/logger'
 export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
   'sendCommunication',
   'justifyAbsence',
-  'enterExamGrade',
   'registerAttendance',
 ])
 
@@ -22,7 +21,10 @@ export const WRITE_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
  * pelo /api/v1/ai/canvas/submit). Audit grava como kind='canvas' /
  * 'auto_executed' — a action real cria seu próprio row.
  */
-export const CANVAS_TOOL_NAMES: ReadonlySet<string> = new Set<string>(['prepareCreateAssignment'])
+export const CANVAS_TOOL_NAMES: ReadonlySet<string> = new Set<string>([
+  'prepareCreateAssignment',
+  'prepareEnterExamGrade',
+])
 
 export function toolKindFromName(name: string): AiToolKind {
   if (WRITE_TOOL_NAMES.has(name)) return 'action'
