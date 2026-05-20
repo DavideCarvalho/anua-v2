@@ -8798,9 +8798,9 @@ export interface Registry {
       body: {}
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/ai').showThreadQueryValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai/show_thread_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/show_thread_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai/show_thread_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.ai.threads.delete': {
