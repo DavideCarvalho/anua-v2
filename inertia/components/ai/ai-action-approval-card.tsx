@@ -369,7 +369,13 @@ export function AiActionApprovalCard(props: Props) {
       }
     },
     enabled: hasIds,
-    staleTime: 60_000,
+    // staleTime=0 + refetchOnMount: cada montagem do card revalida. Sem isso,
+    // um deploy que corrige bug do backend ficava 60s mascarado — a query
+    // cacheava EMPTY_NAMES da chamada que falhou antes do deploy e o card
+    // mostrava "(sem acesso ao nome)" mesmo com o fix no ar. Resolve-names
+    // é barato (poucos ids, query pequena), então não vale o cache longo.
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
   const names: ResolvedNames = resolvedRaw ?? EMPTY_NAMES
 
