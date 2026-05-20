@@ -9,6 +9,11 @@ export function registerResponsavelApiRoutes() {
     .as('dashboard.responsavel_stats')
 
   router
+    .get('/responsavel/alerts', [controllers.dashboard.GetResponsavelAlerts])
+    .use([middleware.auth(), middleware.impersonation()])
+    .as('dashboard.responsavel_alerts')
+
+  router
     .group(() => {
       router
         .get('/students/:studentId/academic-periods', [

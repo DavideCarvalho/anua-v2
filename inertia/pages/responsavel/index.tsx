@@ -3,6 +3,7 @@ import { Link } from '@adonisjs/inertia/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ResponsavelLayout } from '../../components/layouts'
 import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
+import { ResponsavelInsightsCards } from '../../containers/responsavel/responsavel-insights-cards'
 import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
 import { AlertCircle, BookOpen, DollarSign, Bell } from 'lucide-react'
@@ -104,11 +105,18 @@ function ResponsavelContent() {
   }
 
   if (availableDomains.length === 1) {
-    return <DashboardOverviewContainer studentId={studentId} mode={availableDomains[0]} />
+    return (
+      <div className="space-y-6">
+        <ResponsavelInsightsCards studentId={studentId} />
+        <DashboardOverviewContainer studentId={studentId} mode={availableDomains[0]} />
+      </div>
+    )
   }
 
   return (
-    <Tabs defaultValue={defaultTab} className="w-full">
+    <div className="space-y-6">
+      <ResponsavelInsightsCards studentId={studentId} />
+      <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList className="grid w-full md:w-auto md:inline-grid md:grid-cols-3">
         {hasPedagogical && (
           <TabsTrigger value="pedagogical" className="gap-2">
@@ -147,7 +155,8 @@ function ResponsavelContent() {
           <DashboardOverviewContainer studentId={studentId} mode="financial" />
         </TabsContent>
       )}
-    </Tabs>
+      </Tabs>
+    </div>
   )
 }
 
