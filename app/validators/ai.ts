@@ -31,6 +31,11 @@ export const chatValidator = vine.compile(
           'escola_turma_presencas',
           'escola_turma_notas',
           'escola_turma_situacao',
+          'responsavel_dashboard',
+          'responsavel_atividades',
+          'responsavel_comunicados',
+          'responsavel_calendario',
+          'responsavel_registro_diario',
         ]),
         filters: vine
           .record(
@@ -41,6 +46,10 @@ export const chatValidator = vine.compile(
               .regex(/^[a-zA-Z0-9_-]+$/)
           )
           .optional(),
+        // Modo do persona ao gerar resposta. 'compact' = sheet mobile do
+        // responsavel (parágrafos curtos, sem renderResult); 'full' = desktop
+        // com tabelas/charts. Default 'full' (gestor continua igual).
+        mode: vine.string().in(['compact', 'full']).optional(),
       })
       .optional(),
   })

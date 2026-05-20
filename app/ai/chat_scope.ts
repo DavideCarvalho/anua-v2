@@ -37,6 +37,10 @@ export type ChatScope = {
   screen?: {
     id: string
     filters?: Record<string, string>
+    // Modo de renderização do persona. 'compact' instrui o modelo a evitar
+    // renderResult e responder em texto curto (uso esperado: pai abrindo a
+    // sheet bottom no celular). 'full' (default) mantém comportamento atual.
+    mode?: 'compact' | 'full'
   }
 }
 

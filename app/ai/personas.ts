@@ -40,6 +40,11 @@ const SCREEN_LABELS: Record<string, string> = {
   escola_turma_presencas: 'tela de presenças de uma turma',
   escola_turma_notas: 'tela de notas de uma turma',
   escola_turma_situacao: 'tela de situação geral de uma turma',
+  responsavel_dashboard: 'tela inicial do responsável',
+  responsavel_atividades: 'tela de atividades do(s) filho(s)',
+  responsavel_comunicados: 'tela de comunicados recebidos',
+  responsavel_calendario: 'tela de calendário escolar',
+  responsavel_registro_diario: 'tela de registro diário do(s) filho(s)',
 }
 
 const FILTER_LABELS: Record<string, string> = {
@@ -58,17 +63,31 @@ function sanitizeHint(value: string): string {
   return value.replace(/[\x00-\x1f\x7f]/g, '').slice(0, 80)
 }
 
+// Instrução extra injetada no system prompt quando o user tá em sheet mobile
+// (mode='compact'). Pai checa rápido no celular à noite — tabelas/gráficos
+// atrapalham. Sem isso, renderResult atira gráfico em viewport de 360px.
+const COMPACT_MODE_BLOCK = [
+  '\n',
+  'IMPORTANTE — modo compacto: o usuário está numa tela pequena (sheet bottom no celular).',
+  '- Responda em parágrafos curtos: máximo 2-3 frases por resposta.',
+  '- NÃO chame renderResult. Sem tabelas, sem gráficos, sem cards visuais.',
+  '- Se houver muitos dados, resuma em até 3 bullets curtos no texto mesmo.',
+  '- Tom direto e amigável — pai checando rápido, não relatório executivo.',
+].join('\n')
+
 function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
   const screenLabel = sanitizeHint(SCREEN_LABELS[screen.id] ?? screen.id)
   const filterEntries = Object.entries(screen.filters ?? {}).filter(
     ([, value]) => typeof value === 'string' && value.length > 0
   )
+  const modeBlock = screen.mode === 'compact' ? COMPACT_MODE_BLOCK : ''
 
   if (filterEntries.length === 0) {
     return [
       '\n',
       'Tela atual: o usuário está olhando o ' + screenLabel + ' sem filtros aplicados.',
       'Quando ele perguntar "a escola" ou usar termos genéricos, assuma o escopo de toda a escola.',
+      modeBlock,
     ].join('\n')
   }
 
@@ -81,6 +100,7 @@ function renderScreenContext(screen: NonNullable<ChatScope['screen']>): string {
     `Tela atual: o usuário está olhando o ${screenLabel} com os seguintes filtros aplicados agora: ${filterLines}.`,
     'Use esses filtros como contexto implícito — quando ele perguntar "a turma", "esse período", "esse curso", etc., assuma os valores acima.',
     'Ao chamar tools que aceitam esses parâmetros, passe os ids correspondentes salvo se ele pedir explicitamente outra coisa.',
+    modeBlock,
   ].join('\n')
 }
 
