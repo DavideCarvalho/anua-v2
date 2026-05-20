@@ -216,17 +216,16 @@ async function dispatchEnterExamGrade(ctx: DispatchContext): Promise<DispatchRes
     return { ok: false, error: 'Score só pode ser null se o aluno faltou (absent=true).' }
   }
 
-  // Validação cruzada: a prova pertence a uma TeacherHasClass que o professor
-  // que está aprovando realmente leciona; o aluno pertence à mesma classe.
-  // Defesa em profundidade — o scope no chat já filtra, mas re-checamos aqui.
+  // Validação cruzada: o professor que está aprovando é o teacher da prova
+  // e o aluno pertence à mesma classe. Defesa em profundidade — o scope no
+  // chat já filtra, mas re-checamos aqui.
   type AccessRow = { classId: string; teacherId: string; studentClassId: string | null }
   const { rows } = await db.rawQuery<{ rows: AccessRow[] }>(
     `
-      SELECT thc."classId"     AS "classId",
-             thc."teacherId"   AS "teacherId",
-             s."classId"       AS "studentClassId"
-      FROM "Exam" e
-      JOIN "TeacherHasClass" thc ON thc.id = e."teacherHasClassId"
+      SELECT e."classId"     AS "classId",
+             e."teacherId"   AS "teacherId",
+             s."classId"     AS "studentClassId"
+      FROM exams e
       LEFT JOIN "Student" s ON s.id = :studentId
       WHERE e.id = :examId
       LIMIT 1

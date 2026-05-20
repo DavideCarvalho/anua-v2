@@ -119,13 +119,12 @@ export default class ResolveNamesController {
     const { rows } = await db.rawQuery<{ rows: Row[] }>(
       `
         SELECT e.id,
-               e.name,
+               e.title AS name,
                sub.name AS "subjectName",
-               thc."classId" AS "classId"
-        FROM "Exam" e
-        JOIN "TeacherHasClass" thc ON thc.id = e."teacherHasClassId"
-        LEFT JOIN "Subject" sub ON sub.id = thc."subjectId"
-        JOIN "Class" c ON c.id = thc."classId"
+               e."classId" AS "classId"
+        FROM exams e
+        LEFT JOIN "Subject" sub ON sub.id = e."subjectId"
+        JOIN "Class" c ON c.id = e."classId"
         WHERE e.id = ANY(:ids)
           AND c."schoolId" = :schoolId
       `,
