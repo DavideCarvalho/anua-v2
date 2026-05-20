@@ -2,14 +2,16 @@ import { Head, usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ResponsavelLayout } from '../../components/layouts'
+import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
 import { ResponsavelInsightsCards } from '../../containers/responsavel/responsavel-insights-cards'
 import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, BookOpen, DollarSign, Bell } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
 import { useAuthUser } from '../../stores/auth_store'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 import type { Route } from '@tuyau/core/types'
 
 type ResponsavelStatsResponse = Route.Response<'api.v1.dashboard.responsavel_stats'>
@@ -73,7 +75,13 @@ function ResponsavelContent() {
   const studentId = selectedStudent?.id
   const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
   const hasFinancial = selectedStudent?.permissions?.financial || false
+  const availableDomains = [
+    ...(hasPedagogical ? (['pedagogical', 'school-life'] as const) : []),
+    ...(hasFinancial ? (['financial'] as const) : []),
+  ]
+  const defaultTab = availableDomains[0]
 
+  // Se não tiver studentId válido, mostrar aviso
   if (!studentId || !stats.students.some((s) => s.id === studentId)) {
     return (
       <Alert>
@@ -96,10 +104,60 @@ function ResponsavelContent() {
     )
   }
 
-  // Insights são a tela inteira (igual /escola com PedagogicalAlertsCards).
-  // Drill-down vai pelas rotas dedicadas via click nos cards — sem dashboard
-  // duplicado per-student abaixo.
-  return <ResponsavelInsightsCards studentId={studentId} />
+  if (availableDomains.length === 1) {
+    return (
+      <div className="space-y-6">
+        <ResponsavelInsightsCards studentId={studentId} />
+        <DashboardOverviewContainer studentId={studentId} mode={availableDomains[0]} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <ResponsavelInsightsCards studentId={studentId} />
+      <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList className="grid w-full md:w-auto md:inline-grid md:grid-cols-3">
+        {hasPedagogical && (
+          <TabsTrigger value="pedagogical" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Pedagógico
+          </TabsTrigger>
+        )}
+        {hasPedagogical && (
+          <TabsTrigger value="school-life" className="gap-2">
+            <Bell className="h-4 w-4" />
+            Vida Escolar
+          </TabsTrigger>
+        )}
+        {hasFinancial && (
+          <TabsTrigger value="financial" className="gap-2">
+            <DollarSign className="h-4 w-4" />
+            Financeiro
+          </TabsTrigger>
+        )}
+      </TabsList>
+
+      {hasPedagogical && (
+        <TabsContent value="pedagogical" className="mt-6">
+          <DashboardOverviewContainer studentId={studentId} mode="pedagogical" />
+        </TabsContent>
+      )}
+
+      {hasPedagogical && (
+        <TabsContent value="school-life" className="mt-6">
+          <DashboardOverviewContainer studentId={studentId} mode="school-life" />
+        </TabsContent>
+      )}
+
+      {hasFinancial && (
+        <TabsContent value="financial" className="mt-6">
+          <DashboardOverviewContainer studentId={studentId} mode="financial" />
+        </TabsContent>
+      )}
+      </Tabs>
+    </div>
+  )
 }
 
 function PendingAcknowledgementBanner() {
