@@ -15,6 +15,10 @@ import {
 export type AskAnuaScreen = {
   id: string
   filters?: Record<string, string>
+  // 'compact' instrui o persona a evitar renderResult/tabelas e responder em
+  // texto curto (sheet bottom no celular). 'full' (default no backend) mantém
+  // comportamento normal. Quem usa hoje: useResponsavelAskAnuaContext.
+  mode?: 'compact' | 'full'
 }
 
 // Tudo que o AskAnuaPanel precisa pra render uma sessão contextual. Hooks
@@ -163,6 +167,82 @@ const TURMA_SUGGESTIONS: Record<TurmaScreenId, string[]> = {
     'Alunos em risco por nota e por frequência',
     'Quais disciplinas têm mais alunos em situação crítica?',
   ],
+}
+
+// Telas do responsavel. Derivadas do pathname em ResponsavelLayout —
+// leaf pages não precisam passar screenId.
+export type ResponsavelScreenId =
+  | 'responsavel_dashboard'
+  | 'responsavel_atividades'
+  | 'responsavel_comunicados'
+  | 'responsavel_calendario'
+  | 'responsavel_registro_diario'
+
+const RESPONSAVEL_TAB_LABEL: Record<ResponsavelScreenId, string> = {
+  responsavel_dashboard: 'Início',
+  responsavel_atividades: 'Atividades',
+  responsavel_comunicados: 'Comunicados',
+  responsavel_calendario: 'Calendário',
+  responsavel_registro_diario: 'Registro diário',
+}
+
+const RESPONSAVEL_SUGGESTIONS: Record<ResponsavelScreenId, string[]> = {
+  responsavel_dashboard: [
+    'Como foi a semana do meu filho?',
+    'Próximas provas e atividades',
+    'Tem comunicado novo da escola?',
+    'Como está a frequência do meu filho?',
+  ],
+  responsavel_atividades: [
+    'Quais atividades estão atrasadas?',
+    'Próximas entregas',
+    'Em quais atividades meu filho tirou nota baixa?',
+    'Quantas atividades estão sem nota lançada?',
+  ],
+  responsavel_comunicados: [
+    'Tem comunicado novo?',
+    'Algum aviso urgente que eu deixei passar?',
+    'Resumo dos comunicados da última semana',
+  ],
+  responsavel_calendario: [
+    'O que tem essa semana?',
+    'Próximas provas do meu filho',
+    'Próximos eventos da turma',
+  ],
+  responsavel_registro_diario: [
+    'Como foi o dia do meu filho hoje?',
+    'Tem alguma ocorrência recente?',
+    'Resumo das ocorrências da última semana',
+  ],
+}
+
+export function useResponsavelAskAnuaContext(input: {
+  screenId: ResponsavelScreenId
+  selectedStudentId?: string | null
+  mode: 'compact' | 'full'
+}): AskAnuaContext {
+  const { screenId, selectedStudentId, mode } = input
+  return useMemo<AskAnuaContext>(
+    () => {
+      const filters: Record<string, string> = {}
+      if (selectedStudentId) filters.studentId = selectedStudentId
+      return {
+        screen: {
+          id: screenId,
+          filters: Object.keys(filters).length > 0 ? filters : undefined,
+          mode,
+        },
+        contextLabel: selectedStudentId
+          ? `Filho selecionado · ${RESPONSAVEL_TAB_LABEL[screenId]}`
+          : `Todos os filhos · ${RESPONSAVEL_TAB_LABEL[screenId]}`,
+        suggestions: RESPONSAVEL_SUGGESTIONS[screenId],
+        // namespace por screen+filho — sheets de telas/filhos diferentes não
+        // compartilham thread. 'all' quando default escopo todos os filhos.
+        storageNamespace: `${screenId}:${selectedStudentId ?? 'all'}:${mode}`,
+      }
+    },
+    [screenId, selectedStudentId, mode]
+  )
 }
 
 export function useTurmaAskAnuaContext(input: {

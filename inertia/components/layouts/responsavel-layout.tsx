@@ -2,6 +2,14 @@ import { usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import type { PropsWithChildren } from 'react'
 import { PostHogProvider } from '../posthog-provider'
+import { Sparkles } from 'lucide-react'
+import { AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
+import { Button } from '../ui/button'
+import { useIsMobile } from '../../hooks/use_mobile'
+import {
+  useResponsavelAskAnuaContext,
+  type ResponsavelScreenId,
+} from '../../lib/ask-anua-context'
 import {
   LayoutDashboard,
   BookOpen,
@@ -232,9 +240,35 @@ function NavigationContent() {
   )
 }
 
+// Mapeia pathname pra screenId. Quando não bate, retorna null (AskAnua não
+// aparece). Mantém em sync com ResponsavelScreenId em ask-anua-context.ts.
+function screenIdFromPath(pathname: string): ResponsavelScreenId | null {
+  const base = pathname.split('?')[0]
+  if (base === '/responsavel') return 'responsavel_dashboard'
+  if (base === '/responsavel/atividades') return 'responsavel_atividades'
+  if (base === '/responsavel/comunicados') return 'responsavel_comunicados'
+  if (base === '/responsavel/calendario') return 'responsavel_calendario'
+  if (base === '/responsavel/registro-diario') return 'responsavel_registro_diario'
+  return null
+}
+
 export function ResponsavelLayout({ children }: PropsWithChildren) {
   const user = useAuthUser()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { url } = usePage()
+  const isMobile = useIsMobile()
+  const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
+
+  const screenId = screenIdFromPath(url)
+  // mode derivado do breakpoint: mobile=compact (sheet bottom, texto curto),
+  // desktop=full. selectedStudentId fica null por agora — futuramente puxar
+  // do StudentSelectorWithData store quando ele expor o id selecionado.
+  const askAnuaContext = useResponsavelAskAnuaContext({
+    screenId: screenId ?? 'responsavel_dashboard',
+    selectedStudentId: null,
+    mode: isMobile ? 'compact' : 'full',
+  })
+  const canShowAskAnua = screenId !== null
 
   return (
     <PostHogProvider>
@@ -300,12 +334,32 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
               <Menu className="h-5 w-5" />
             </button>
             <div className="ml-auto flex items-center gap-2">
+              {canShowAskAnua && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAskAnuaOpen(true)}
+                  className="gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span className="hidden sm:inline">Perguntar ao Anuá</span>
+                  <span className="sr-only sm:hidden">Perguntar ao Anuá</span>
+                </Button>
+              )}
               <NotificationBell allNotificationsRoute="web.responsavel.comunicados" />
               <StudentSelectorWithData />
             </div>
           </header>
           <main className="p-4 lg:p-6">{children}</main>
         </div>
+        {canShowAskAnua && (
+          <AskAnuaSheet
+            open={isAskAnuaOpen}
+            onOpenChange={setIsAskAnuaOpen}
+            {...askAnuaContext}
+          />
+        )}
       </div>
     </PostHogProvider>
   )
