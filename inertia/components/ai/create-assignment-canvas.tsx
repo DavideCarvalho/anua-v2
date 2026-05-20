@@ -168,27 +168,26 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
 
   const isSubmitting = submitMutation.isPending
 
-  if (submitState.kind === 'success') {
-    return (
-      <div className="space-y-3 px-3 py-4">
+  const isSuccess = submitState.kind === 'success'
+  // No success a gente trava o form (read-only) mas mantém os valores visíveis
+  // pro professor conferir o que acabou de criar antes de fechar.
+  const disabled = isSubmitting || isSuccess
+
+  return (
+    <div className="space-y-3 px-3 py-3">
+      {isSuccess && (
         <div className="flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/5 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
           <CheckCircle2 className="h-4 w-4" />
           Atividade criada com sucesso!
         </div>
-        <Button onClick={onClose} className="w-full">
-          Fechar
-        </Button>
-      </div>
-    )
-  }
+      )}
 
-  return (
-    <div className="space-y-3 px-3 py-3">
       <div className="space-y-1">
         <Label htmlFor="canvas-name">Nome da atividade</Label>
         <Input
           id="canvas-name"
           value={fields.name ?? ''}
+          disabled={disabled}
           onChange={(e) => setField('name', e.target.value || null)}
           placeholder="Ex: Lista de exercícios cap. 4"
         />
@@ -198,6 +197,7 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
         <Textarea
           id="canvas-desc"
           value={fields.description ?? ''}
+          disabled={disabled}
           onChange={(e) => setField('description', e.target.value || null)}
           rows={3}
           placeholder="Instruções pros alunos (opcional)"
@@ -208,6 +208,7 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
           <Label htmlFor="canvas-due">Prazo</Label>
           <DatePicker
             date={ymdToDate(fields.dueDate)}
+            disabled={disabled}
             onChange={(d) => setField('dueDate', dateToYMD(d))}
           />
         </div>
@@ -220,6 +221,7 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
             max={100}
             step={0.5}
             value={fields.maxGrade ?? ''}
+            disabled={disabled}
             onChange={(e) => {
               const v = e.target.value
               setField('maxGrade', v === '' ? null : Number(v))
@@ -240,7 +242,7 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
         </div>
       </div>
 
-      {validationError && (
+      {!isSuccess && validationError && (
         <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {validationError}
@@ -253,16 +255,26 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
         </div>
       )}
 
-      <Button onClick={handleSubmit} disabled={!!validationError || isSubmitting} className="w-full">
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Criando…
-          </>
-        ) : (
-          'Criar atividade'
-        )}
-      </Button>
+      {isSuccess ? (
+        <Button onClick={onClose} className="w-full" variant="outline">
+          Fechar
+        </Button>
+      ) : (
+        <Button
+          onClick={handleSubmit}
+          disabled={!!validationError || isSubmitting}
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Criando…
+            </>
+          ) : (
+            'Criar atividade'
+          )}
+        </Button>
+      )}
     </div>
   )
 }

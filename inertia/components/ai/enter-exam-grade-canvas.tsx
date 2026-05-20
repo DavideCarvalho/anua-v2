@@ -182,22 +182,21 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
 
   const isSubmitting = submitMutation.isPending
 
-  if (submitState.kind === 'success') {
-    return (
-      <div className="space-y-3 px-3 py-4">
+  const isSuccess = submitState.kind === 'success'
+  // No success a gente trava o form (read-only) mas mantém os valores
+  // visíveis pro professor conferir o que acabou de lançar — fechar joga isso
+  // fora, então vale deixar à vista até ele clicar.
+  const disabled = isSubmitting || isSuccess
+
+  return (
+    <div className="space-y-3 px-3 py-3">
+      {isSuccess && (
         <div className="flex items-center gap-2 rounded-md border border-emerald-500/40 bg-emerald-500/5 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
           <CheckCircle2 className="h-4 w-4" />
           Nota lançada com sucesso!
         </div>
-        <Button onClick={onClose} className="w-full">
-          Fechar
-        </Button>
-      </div>
-    )
-  }
+      )}
 
-  return (
-    <div className="space-y-3 px-3 py-3">
       <div className="space-y-1">
         <Label>Aluno</Label>
         <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm">
@@ -216,6 +215,7 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
         <Checkbox
           id="canvas-absent"
           checked={fields.absent}
+          disabled={disabled}
           onCheckedChange={(checked) => {
             const value = checked === true
             setFields((prev) => ({
@@ -242,7 +242,7 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
           max={100}
           step={0.5}
           value={fields.score ?? ''}
-          disabled={fields.absent}
+          disabled={fields.absent || disabled}
           onChange={(e) => {
             const v = e.target.value
             setField('score', v === '' ? null : Number(v))
@@ -256,13 +256,14 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
         <Textarea
           id="canvas-feedback"
           value={fields.feedback ?? ''}
+          disabled={disabled}
           onChange={(e) => setField('feedback', e.target.value || null)}
           rows={2}
           placeholder="Comentário pro aluno/responsável"
         />
       </div>
 
-      {validationError && (
+      {!isSuccess && validationError && (
         <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {validationError}
@@ -275,16 +276,26 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
         </div>
       )}
 
-      <Button onClick={handleSubmit} disabled={!!validationError || isSubmitting} className="w-full">
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Lançando…
-          </>
-        ) : (
-          'Lançar nota'
-        )}
-      </Button>
+      {isSuccess ? (
+        <Button onClick={onClose} className="w-full" variant="outline">
+          Fechar
+        </Button>
+      ) : (
+        <Button
+          onClick={handleSubmit}
+          disabled={!!validationError || isSubmitting}
+          className="w-full"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Lançando…
+            </>
+          ) : (
+            'Lançar nota'
+          )}
+        </Button>
+      )}
     </div>
   )
 }
