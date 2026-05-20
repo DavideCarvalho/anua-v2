@@ -53,6 +53,10 @@ import {
 import { SubPeriodFilter } from '../../containers/academic-periods/components/sub-period-filter'
 import { AskAnuaPanel, AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
 import type { FilterLabels } from '../../lib/contextual-prompts'
+import {
+  askAnuaThreadKey,
+  useDashboardAskAnuaContext,
+} from '../../lib/ask-anua-context'
 import { api } from '~/lib/api'
 import { useIsMobile } from '../../hooks/use_mobile'
 
@@ -137,12 +141,14 @@ export default function EscolaDashboard() {
   const queryClient = useQueryClient()
 
   // Prefetch da thread da sheet quando o usuário passa o mouse no botão.
-  // Sheet usa sessionStorage[`anua:ask-sheet:thread:${schoolId}`] como threadId.
+  // Sheet usa sessionStorage[askAnuaThreadKey(...)] como threadId.
   // Quando o user clica, o useQuery em AiChatPane já encontra a resposta
   // cacheada e renderiza direto sem spinner.
   function prefetchAskAnuaThread() {
     if (!schoolId || typeof window === 'undefined') return
-    const storedThreadId = window.sessionStorage.getItem(`anua:ask-sheet:thread:${schoolId}`)
+    const storedThreadId = window.sessionStorage.getItem(
+      askAnuaThreadKey(schoolId, 'escola_dashboard')
+    )
     if (!storedThreadId) return
     queryClient.prefetchQuery(
       api.api.v1.ai.threads.show.queryOptions({ params: { id: storedThreadId } })
@@ -234,6 +240,8 @@ export default function EscolaDashboard() {
       ? `${selectedClass.levelName} - ${selectedClass.name}`
       : undefined,
   }), [filters, academicPeriods, courses, levels, selectedClass])
+
+  const askAnuaContext = useDashboardAskAnuaContext(filters, askAnuaLabels)
 
   useEffect(() => {
     const storedPreference = window.localStorage.getItem(HIDE_FINANCIAL_INFO_STORAGE_KEY)
@@ -390,16 +398,14 @@ export default function EscolaDashboard() {
     <AskAnuaSheet
       open={isAskAnuaOpen}
       onOpenChange={setIsAskAnuaOpen}
-      filters={filters}
-      labels={askAnuaLabels}
+      {...askAnuaContext}
     />
   ) : null
 
   const askAnuaInline =
     canUseAskAnua && !isMobile && isAskAnuaOpen ? (
       <AskAnuaPanel
-        filters={filters}
-        labels={askAnuaLabels}
+        {...askAnuaContext}
         onClose={() => setIsAskAnuaOpen(false)}
       />
     ) : null

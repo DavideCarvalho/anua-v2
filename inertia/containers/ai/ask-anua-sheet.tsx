@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { router } from '@inertiajs/react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { Bookmark, Plus, Sparkles, X } from 'lucide-react'
 import { Sheet, SheetContent } from '~/components/ui/sheet'
 import { Button } from '~/components/ui/button'
@@ -9,47 +9,44 @@ import { useAuthUser } from '~/stores/auth_store'
 import { useIsMobile } from '~/hooks/use_mobile'
 import { api } from '~/lib/api'
 import {
-  buildContextualPrompts,
-  formatContextLabel,
-  type ContextualPromptHints,
-  type FilterLabels,
-  type TabFilterState,
-} from '~/lib/contextual-prompts'
+  askAnuaFreshKey,
+  askAnuaThreadKey,
+  type AskAnuaScreen,
+} from '~/lib/ask-anua-context'
 
 type AskAnuaPanelProps = {
-  filters: TabFilterState
-  labels: FilterLabels
+  screen: AskAnuaScreen
+  contextLabel: string
+  suggestions: string[]
+  storageNamespace: string
   onClose: () => void
 }
 
 type AskAnuaSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  filters: TabFilterState
-  labels: FilterLabels
+  screen: AskAnuaScreen
+  contextLabel: string
+  suggestions: string[]
+  storageNamespace: string
 }
 
-function threadKey(schoolId: string): string {
-  return `anua:ask-sheet:thread:${schoolId}`
-}
-
-function freshKey(schoolId: string): string {
-  return `anua:ask-sheet:fresh:${schoolId}`
-}
-
-function readStoredThread(schoolId: string): { id: string; fresh: boolean } | null {
+function readStoredThread(
+  schoolId: string,
+  namespace: string
+): { id: string; fresh: boolean } | null {
   if (typeof window === 'undefined' || !schoolId) return null
-  const stored = window.sessionStorage.getItem(threadKey(schoolId))
+  const stored = window.sessionStorage.getItem(askAnuaThreadKey(schoolId, namespace))
   if (!stored) return null
-  const fresh = window.sessionStorage.getItem(freshKey(schoolId)) !== 'false'
+  const fresh = window.sessionStorage.getItem(askAnuaFreshKey(schoolId, namespace)) !== 'false'
   return { id: stored, fresh }
 }
 
-function createAndStoreThread(schoolId: string): string {
+function createAndStoreThread(schoolId: string, namespace: string): string {
   const id = crypto.randomUUID()
   if (typeof window !== 'undefined' && schoolId) {
-    window.sessionStorage.setItem(threadKey(schoolId), id)
-    window.sessionStorage.setItem(freshKey(schoolId), 'true')
+    window.sessionStorage.setItem(askAnuaThreadKey(schoolId, namespace), id)
+    window.sessionStorage.setItem(askAnuaFreshKey(schoolId, namespace), 'true')
   }
   return id
 }
@@ -57,8 +54,18 @@ function createAndStoreThread(schoolId: string): string {
 /**
  * Conteúdo puro do "Perguntar ao Anuá" — header + AiChatPane.
  * Use direto (inline) em desktop, ou envelopado em <AskAnuaSheet/> em mobile.
+ *
+ * Recebe screen/suggestions/contextLabel já prontos — quem chama monta isso
+ * via hook específico da tela (ex: useDashboardAskAnuaContext,
+ * useTurmaAskAnuaContext). Isso mantém o Panel screen-agnostic.
  */
-export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
+export function AskAnuaPanel({
+  screen,
+  contextLabel,
+  suggestions,
+  storageNamespace,
+  onClose,
+}: AskAnuaPanelProps) {
   const user = useAuthUser()
   const schoolId = user?.school?.id ?? ''
 
@@ -67,32 +74,32 @@ export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
   const [threadId, setThreadId] = useState<string | null>(null)
   const [isFresh, setIsFresh] = useState<boolean>(true)
 
-  // Trocar de escola regenera escopo — threadId antigo seguia preso ao
-  // schoolId errado e o backend rejeitaria querying na escola nova.
-  // Toda escrita em sessionStorage fica confinada a este effect e handlers.
+  // Trocar de escola OU de tela regenera escopo — threadId antigo seguia preso
+  // ao schoolId/namespace errado. Toda escrita em sessionStorage fica confinada
+  // a este effect e handlers.
   useEffect(() => {
     if (!schoolId) return
-    const stored = readStoredThread(schoolId)
+    const stored = readStoredThread(schoolId, storageNamespace)
     if (stored) {
       setThreadId(stored.id)
       setIsFresh(stored.fresh)
       return
     }
-    const id = createAndStoreThread(schoolId)
+    const id = createAndStoreThread(schoolId, storageNamespace)
     setThreadId(id)
     setIsFresh(true)
-  }, [schoolId])
+  }, [schoolId, storageNamespace])
 
   function handleNewConversation() {
     if (!schoolId) return
-    const id = createAndStoreThread(schoolId)
+    const id = createAndStoreThread(schoolId, storageNamespace)
     setThreadId(id)
     setIsFresh(true)
   }
 
   function handlePersisted() {
     if (typeof window === 'undefined' || !schoolId) return
-    window.sessionStorage.setItem(freshKey(schoolId), 'false')
+    window.sessionStorage.setItem(askAnuaFreshKey(schoolId, storageNamespace), 'false')
     setIsFresh(false)
   }
 
@@ -106,68 +113,12 @@ export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
     if (!threadId || !schoolId || isFresh) return
     await promoteMutation.mutateAsync({ params: { id: threadId } })
     if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem(threadKey(schoolId))
-      window.sessionStorage.removeItem(freshKey(schoolId))
+      window.sessionStorage.removeItem(askAnuaThreadKey(schoolId, storageNamespace))
+      window.sessionStorage.removeItem(askAnuaFreshKey(schoolId, storageNamespace))
     }
     onClose()
     router.visit(`/escola/ia/conversa/${threadId}`)
   }
-
-  const screen = useMemo(() => {
-    const activeFilters: Record<string, string> = {}
-    if (filters.academicPeriodId !== 'all') {
-      activeFilters.academicPeriodId = filters.academicPeriodId
-    }
-    if (filters.subPeriodId !== 'all') activeFilters.subPeriodId = filters.subPeriodId
-    if (filters.courseId !== 'all') activeFilters.courseId = filters.courseId
-    if (filters.levelId !== 'all') activeFilters.levelId = filters.levelId
-    if (filters.classId !== 'all') activeFilters.classId = filters.classId
-    return {
-      id: 'escola_dashboard',
-      filters: Object.keys(activeFilters).length > 0 ? activeFilters : undefined,
-    }
-  }, [
-    filters.academicPeriodId,
-    filters.subPeriodId,
-    filters.courseId,
-    filters.levelId,
-    filters.classId,
-  ])
-
-  // Mesma query key que o dashboard usa pros cards de alerta — useQuery
-  // dedupe e a sheet pega o cache instantâneo se o dashboard já fetchou.
-  // Sem dados, suggestions caem no fallback estático.
-  const alertsQuery = {
-    academicPeriodId: filters.academicPeriodId === 'all' ? undefined : filters.academicPeriodId,
-    courseId: filters.courseId === 'all' ? undefined : filters.courseId,
-    levelId: filters.levelId === 'all' ? undefined : filters.levelId,
-    classId: filters.classId === 'all' ? undefined : filters.classId,
-    subPeriodId: filters.subPeriodId === 'all' ? undefined : filters.subPeriodId,
-  }
-  const { data: alertsData } = useQuery({
-    ...api.api.v1.dashboard.escolaPedagogicalAlerts.queryOptions({ query: alertsQuery }),
-    enabled: Boolean(schoolId),
-  })
-
-  const promptHints = useMemo<ContextualPromptHints | undefined>(() => {
-    const alerts = alertsData?.alerts
-    if (!alerts) return undefined
-    return {
-      studentsAtRiskByGradeCount: alerts.studentsAtRiskByGrade?.count,
-      studentsAtRiskByAttendanceCount: alerts.studentsAtRiskByAttendance?.count,
-      teachersMissingAttendanceCount: alerts.teachersMissingAttendance?.count,
-      examsWithoutGradesCount: alerts.examsWithoutGrades?.count,
-      overdueActivitiesCount: alerts.overdueActivities?.count,
-      ungradedSubmissionsCount: alerts.ungradedSubmissions?.count,
-    }
-  }, [alertsData])
-
-  const suggestions = useMemo(
-    () => buildContextualPrompts(filters, labels, promptHints),
-    [filters, labels, promptHints]
-  )
-
-  const contextLabel = formatContextLabel(filters, labels)
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -236,7 +187,14 @@ export function AskAnuaPanel({ filters, labels, onClose }: AskAnuaPanelProps) {
   )
 }
 
-export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaSheetProps) {
+export function AskAnuaSheet({
+  open,
+  onOpenChange,
+  screen,
+  contextLabel,
+  suggestions,
+  storageNamespace,
+}: AskAnuaSheetProps) {
   const isMobile = useIsMobile()
 
   return (
@@ -250,7 +208,13 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
         }
         showCloseButton={false}
       >
-        <AskAnuaPanel filters={filters} labels={labels} onClose={() => onOpenChange(false)} />
+        <AskAnuaPanel
+          screen={screen}
+          contextLabel={contextLabel}
+          suggestions={suggestions}
+          storageNamespace={storageNamespace}
+          onClose={() => onOpenChange(false)}
+        />
       </SheetContent>
     </Sheet>
   )
