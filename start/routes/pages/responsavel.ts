@@ -60,6 +60,15 @@ export function registerResponsavelPageRoutes() {
       router.get('/chat', [controllers.pages.responsavel.ShowResponsavelPerguntasPage]).as('chat')
     })
     .prefix('/responsavel')
-    .use([middleware.auth(), middleware.impersonation()])
+    .use([
+      middleware.auth(),
+      middleware.impersonation(),
+      // Só responsavel cai aqui. Super admin tentando direto vai pro
+      // /dashboard (HTML) ou 403 (JSON) — sem isso, a página renderiza
+      // vazia ("nenhum aluno vinculado") porque o user não tem filhos.
+      // Impersonação continua funcionando: o middleware foi ajustado pra
+      // usar effectiveUser.role em rotas não-admin.
+      middleware.requireRole(['STUDENT_RESPONSIBLE', 'RESPONSIBLE']),
+    ])
     .as('responsavel')
 }

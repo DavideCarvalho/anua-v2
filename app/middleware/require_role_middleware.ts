@@ -14,15 +14,24 @@ export default class RequireRoleMiddleware {
       await user.load('role')
     }
 
-    // Se está impersonando, verificar a role do usuário original para rotas admin
-    // Isso permite que o admin continue acessando /admin enquanto impersona
+    // Resolução de qual role validar quando há impersonação ativa:
+    // - Rotas admin (allowlist inclui SUPER_ADMIN/ADMIN): usa a role do admin
+    //   ORIGINAL. Sem isso, admin impersonando perderia acesso ao /admin.
+    // - Demais rotas: usa a role do usuário IMPERSONADO (effectiveUser). Sem
+    //   isso, admin impersonando responsavel seria rejeitado em /responsavel
+    //   porque auth.user.role continua sendo "SUPER_ADMIN".
+    // Sem impersonação, os dois caminhos colapsam pra auth.user.role.
     let roleName: string | undefined = user.role?.name
 
     if (impersonation?.isImpersonating && impersonation.originalUser) {
-      // Para rotas admin, usar a role do usuário original
       const isAdminRoute = roles.some((r) => ['SUPER_ADMIN', 'ADMIN'].includes(r))
       if (isAdminRoute) {
         roleName = impersonation.originalUser.role ?? undefined
+      } else if (ctx.effectiveUser) {
+        if (!ctx.effectiveUser.$preloaded.role) {
+          await ctx.effectiveUser.load('role')
+        }
+        roleName = ctx.effectiveUser.role?.name
       }
     }
 
