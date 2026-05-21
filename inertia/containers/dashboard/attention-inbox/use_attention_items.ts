@@ -146,8 +146,6 @@ export function useAttentionItems(
           title: `${count} prova${count > 1 ? 's' : ''} sem notas lançadas`,
           subtitle: 'Provas realizadas mas pendentes de correção',
           count,
-          route: 'web.escola.pedagogico.provas',
-          destinationLabel: 'provas',
           action: 'Ver',
           pedagogicalAlertKey: 'examsWithoutGrades',
         })
@@ -162,8 +160,6 @@ export function useAttentionItems(
           title: `${count} atividade${count > 1 ? 's' : ''} vencida${count > 1 ? 's' : ''} sem notas`,
           subtitle: 'Atividades com prazo encerrado e correções pendentes',
           count,
-          route: 'web.escola.pedagogico.atividades',
-          destinationLabel: 'atividades',
           action: 'Ver',
           pedagogicalAlertKey: 'overdueActivities',
         })
@@ -178,8 +174,6 @@ export function useAttentionItems(
           title: `${count} entrega${count > 1 ? 's' : ''} aguardando nota`,
           subtitle: 'Submissões de alunos sem avaliação',
           count,
-          route: 'web.escola.pedagogico.atividades',
-          destinationLabel: 'atividades',
           action: 'Ver',
           pedagogicalAlertKey: 'ungradedSubmissions',
         })
