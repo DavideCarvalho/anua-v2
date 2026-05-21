@@ -40,8 +40,15 @@ export default class ListStoreOrdersController {
     }
 
     if (payload.search) {
-      query.whereHas('student', (studentQuery) => {
-        studentQuery.where('name', 'ilike', `%${payload.search}%`)
+      // Student não tem coluna name — vem de student.user. Mesma estrutura
+      // do invoices/list_invoices_controller.
+      const term = `%${payload.search}%`
+      query.whereHas('student', (sq) => {
+        sq.whereHas('user', (uq) => {
+          uq.where((sub) => {
+            sub.where('name', 'ilike', term).orWhere('email', 'ilike', term)
+          })
+        })
       })
     }
 
