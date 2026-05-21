@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   useMutation,
   useQuery,
@@ -11,6 +11,7 @@ import { Link } from '@adonisjs/inertia/react'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { useDebounce } from '../hooks/use_debounce'
 
 type ContractsResponse = Route.Response<'api.v1.contracts.index'>
 import { toast } from 'sonner'
@@ -205,19 +206,8 @@ function ContractsListContent() {
   })
 
   const { search, academicPeriodId, courseId, classId, status, page, limit } = filters
-  const [searchInput, setSearchInput] = useState(search || '')
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters({ search: searchInput || null, page: 1 })
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [searchInput, setFilters])
-
-  useEffect(() => {
-    setSearchInput(search || '')
-  }, [search])
+  // Input controlado direto pela URL; useDebounce só atrasa o valor da query.
+  const debouncedSearch = useDebounce(search ?? '', 300)
 
   let statusFilter: 'all' | 'active' | 'inactive' = 'active'
   if (status === 'all') statusFilter = 'all'
@@ -271,7 +261,7 @@ function ContractsListContent() {
       query: {
         page,
         limit,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         academicPeriodId: academicPeriodId || undefined,
         courseId: courseId || undefined,
         classId: classId || undefined,
@@ -320,8 +310,8 @@ function ContractsListContent() {
           <Input
             placeholder="Buscar contratos..."
             className="pl-9"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            value={search ?? ''}
+            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
         <Link route="web.escola.administrativo.contratos.novo">

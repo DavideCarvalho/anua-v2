@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useDebounce } from '../../hooks/use_debounce'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import {
   Table,
@@ -40,32 +41,31 @@ import { api } from '~/lib/api'
 import { Label } from '../../components/ui/label'
 import { MoreHorizontal, CheckCircle, XCircle, Truck, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useQueryStates, parseAsString } from 'nuqs'
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value)
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay)
-    return () => clearTimeout(handler)
-  }, [value, delay])
-  return debouncedValue
-}
+import { useQueryStates, parseAsString, parseAsStringLiteral } from 'nuqs'
 
 interface StoreOrdersTabProps {
   storeId: string
 }
 
-type StoreOrderStatus =
-  | 'PENDING_PAYMENT'
-  | 'PENDING_APPROVAL'
-  | 'APPROVED'
-  | 'PREPARING'
-  | 'READY'
-  | 'DELIVERED'
-  | 'CANCELED'
-  | 'REJECTED'
+const STORE_ORDER_STATUSES = [
+  'PENDING_PAYMENT',
+  'PENDING_APPROVAL',
+  'APPROVED',
+  'PREPARING',
+  'READY',
+  'DELIVERED',
+  'CANCELED',
+  'REJECTED',
+] as const
+type StoreOrderStatus = (typeof STORE_ORDER_STATUSES)[number]
 
-type StoreOrderPaymentMode = 'IMMEDIATE' | 'DEFERRED'
+const STORE_ORDER_PAYMENT_MODES = ['IMMEDIATE', 'DEFERRED'] as const
+type StoreOrderPaymentMode = (typeof STORE_ORDER_PAYMENT_MODES)[number]
+
+const isStoreOrderStatus = (value: string): value is StoreOrderStatus =>
+  STORE_ORDER_STATUSES.some((s) => s === value)
+const isStoreOrderPaymentMode = (value: string): value is StoreOrderPaymentMode =>
+  STORE_ORDER_PAYMENT_MODES.some((m) => m === value)
 
 const paymentModeLabels: Record<StoreOrderPaymentMode, string> = {
   IMMEDIATE: 'Imediato',
@@ -327,29 +327,21 @@ function OrderActions({ order }: { order: Order }) {
 export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
   const [filters, setFilters] = useQueryStates({
     search: parseAsString,
-    status: parseAsString,
-    paymentMode: parseAsString,
+    status: parseAsStringLiteral(STORE_ORDER_STATUSES),
+    paymentMode: parseAsStringLiteral(STORE_ORDER_PAYMENT_MODES),
   })
 
   const { search, status, paymentMode } = filters
-  const [searchInput, setSearchInput] = useState(search ?? '')
-  const debouncedSearch = useDebounce(searchInput, 300)
-
-  useEffect(() => {
-    setSearchInput(search ?? '')
-  }, [search])
-
-  useEffect(() => {
-    setFilters({ search: debouncedSearch ? debouncedSearch : null })
-  }, [debouncedSearch, setFilters])
+  // Input direto na URL; debounce só atrasa o valor que vai pra query.
+  const debouncedSearch = useDebounce(search ?? '', 300)
 
   const { data: orders, isLoading } = useQuery(
     api.api.v1.storeOrders.index.queryOptions({
       query: {
         storeId,
-        status: (status as StoreOrderStatus | null) || undefined,
-        paymentMode: (paymentMode as StoreOrderPaymentMode | null) || undefined,
-        search: search || undefined,
+        status: status || undefined,
+        paymentMode: paymentMode || undefined,
+        search: debouncedSearch || undefined,
       },
     })
   )
@@ -366,8 +358,8 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
           <div className="relative w-full md:max-w-sm">
             <Input
               placeholder="Buscar por aluno..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              value={search ?? ''}
+              onChange={(e) => setFilters({ search: e.target.value || null })}
             />
           </div>
           <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
@@ -375,15 +367,13 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               value={paymentMode ?? 'all'}
               onValueChange={(value) =>
                 setFilters({
-                  paymentMode: value === 'all' ? null : (value as StoreOrderPaymentMode),
+                  paymentMode: isStoreOrderPaymentMode(value) ? value : null,
                 })
               }
             >
               <SelectTrigger className="w-full md:w-[200px]">
                 <SelectValue>
-                  {paymentMode && paymentMode !== 'all'
-                    ? paymentModeLabels[paymentMode as StoreOrderPaymentMode]
-                    : 'Pagamento'}
+                  {paymentMode ? paymentModeLabels[paymentMode] : 'Pagamento'}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -395,7 +385,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
             <Select
               value={status ?? 'all'}
               onValueChange={(value) =>
-                setFilters({ status: value === 'all' ? null : (value as StoreOrderStatus) })
+                setFilters({ status: isStoreOrderStatus(value) ? value : null })
               }
             >
               <SelectTrigger className="w-full md:w-[220px]">

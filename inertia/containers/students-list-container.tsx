@@ -1,8 +1,9 @@
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { api } from '../lib/api'
+import { useDebounce } from '../hooks/use_debounce'
 import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -317,19 +318,9 @@ export function StudentsListContainer() {
   const selectedCourseId = courseId === 'all' ? null : courseId
   const selectedClassId = classId === 'all' ? null : classId
 
-  const [searchInput, setSearchInput] = useState(search || '')
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters({ search: searchInput || null, page: 1 })
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchInput])
-
-  // Sync URL → input when filters are cleared externally
-  useEffect(() => {
-    setSearchInput(search || '')
-  }, [search])
+  // Input controlado direto pela URL (replaceState, sem poluir histórico).
+  // useDebounce só atrasa o valor que vai pra query — input segue instantâneo.
+  const debouncedSearch = useDebounce(search ?? '', 300)
 
   const [deleteStudent, setDeleteStudent] = useState<StudentAction | null>(null)
   const [changeCourseStudent, setChangeCourseStudent] = useState<StudentAction | null>(null)
@@ -393,8 +384,8 @@ export function StudentsListContainer() {
           <Input
             placeholder="Buscar alunos..."
             className="pl-9"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            value={search ?? ''}
+            onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
         <Button className="ml-auto" asChild>
@@ -554,7 +545,7 @@ export function StudentsListContainer() {
           >
             <Suspense fallback={<StudentsListSkeleton />}>
               <StudentsListContent
-                search={search}
+                search={debouncedSearch}
                 page={page}
                 limit={limit}
                 academicPeriodId={selectedAcademicPeriodId}
