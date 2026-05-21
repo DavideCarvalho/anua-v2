@@ -60,12 +60,12 @@ import {
 } from '~/components/ui/sheet'
 
 const TYPE_OPTIONS = [
-  { value: 'BEHAVIOR', label: 'Behavior' },
-  { value: 'PERFORMANCE', label: 'Performance' },
-  { value: 'ABSENCE', label: 'Absence' },
-  { value: 'LATE', label: 'Late' },
-  { value: 'PRAISE', label: 'Praise' },
-  { value: 'OTHER', label: 'Other' },
+  { value: 'BEHAVIOR', label: 'Comportamento' },
+  { value: 'PERFORMANCE', label: 'Desempenho' },
+  { value: 'ABSENCE', label: 'Falta' },
+  { value: 'LATE', label: 'Atraso' },
+  { value: 'PRAISE', label: 'Elogio' },
+  { value: 'OTHER', label: 'Outro' },
 ] as const
 
 type PeriodCourse = Route.Response<'api.v1.academic_periods.list_courses'>[number]
@@ -73,10 +73,10 @@ type OccurrenceTypeQuery = Route.Query<'api.v1.occurrences.index'>['type']
 
 const schema = z.object({
   studentId: z.string().min(1, 'Selecione um aluno'),
-  teacherHasClassId: z.string().min(1, 'Selecione turma e materia'),
+  teacherHasClassId: z.string().min(1, 'Selecione turma e matéria'),
   type: z.enum(['BEHAVIOR', 'PERFORMANCE', 'ABSENCE', 'LATE', 'PRAISE', 'OTHER']),
   date: z.string().min(1, 'Informe a data'),
-  text: z.string().min(3, 'Descreva o registro diario').max(2000, 'Texto muito longo'),
+  text: z.string().min(3, 'Descreva o registro diário').max(2000, 'Texto muito longo'),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -244,7 +244,7 @@ function NewOccurrenceModal({
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: api.api.v1.occurrences.index.pathKey() })
           queryClient.invalidateQueries({ queryKey: api.api.v1.notifications.index.pathKey() })
-          toast.success('Registro diario criado com sucesso')
+          toast.success('Registro diário criado com sucesso')
           form.reset({
             studentId: '',
             teacherHasClassId: '',
@@ -259,7 +259,7 @@ function NewOccurrenceModal({
           onOpenChange(false)
         },
         onError: (error: any) => {
-          toast.error(error?.message || 'Erro ao criar registro diario')
+          toast.error(error?.message || 'Erro ao criar registro diário')
         },
       }
     )
@@ -269,9 +269,9 @@ function NewOccurrenceModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Novo registro diario</DialogTitle>
+          <DialogTitle>Novo registro diário</DialogTitle>
           <DialogDescription>
-            Registre um fato do dia ou um elogio ao aluno e notifique os responsaveis
+            Registre um fato do dia ou um elogio ao aluno e notifique os responsáveis
           </DialogDescription>
         </DialogHeader>
 
@@ -289,9 +289,9 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={academicPeriodOptions}
-              placeholder="Select"
+              placeholder="Selecionar"
               searchPlaceholder="Buscar período..."
-              emptyMessage="No period found"
+              emptyMessage="Nenhum período encontrado"
             />
           </div>
 
@@ -308,7 +308,7 @@ function NewOccurrenceModal({
                   form.setValue('studentId', '')
                 }}
                 options={courseOptions}
-                placeholder="Select"
+                placeholder="Selecionar"
                 searchPlaceholder={`Buscar ${courseLabels.lowercase}...`}
                 emptyMessage={`No ${courseLabels.lowercase} found`}
                 disabled={!selectedAcademicPeriodId}
@@ -327,7 +327,7 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={levelOptions}
-              placeholder="Select"
+              placeholder="Selecionar"
               searchPlaceholder={`Buscar ${levelLabels.lowercase}...`}
               emptyMessage={`No ${levelLabels.lowercase} found`}
               disabled={!selectedCourseId}
@@ -335,7 +335,7 @@ function NewOccurrenceModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Class</Label>
+            <Label>Turma</Label>
             <SearchableSingleSelect
               value={selectedClassId}
               onValueChange={(value) => {
@@ -344,15 +344,15 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={classOptions}
-              placeholder="Select"
+              placeholder="Selecionar"
               searchPlaceholder="Buscar turma..."
-              emptyMessage="No class found"
+              emptyMessage="Nenhuma turma encontrada"
               disabled={!selectedLevelId}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Subject and Teacher</Label>
+            <Label>Disciplina e Professor</Label>
             <SearchableSingleSelect
               value={form.watch('teacherHasClassId')}
               onValueChange={(value) => {
@@ -360,9 +360,9 @@ function NewOccurrenceModal({
                 form.setValue('studentId', '')
               }}
               options={teacherClassOptions}
-              placeholder="Select"
+              placeholder="Selecionar"
               searchPlaceholder="Buscar disciplina ou professor..."
-              emptyMessage="No combination found"
+              emptyMessage="Nenhuma combinação encontrada"
               disabled={!selectedClassId}
             />
             {form.formState.errors.teacherHasClassId && (
@@ -373,7 +373,7 @@ function NewOccurrenceModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Student</Label>
+            <Label>Aluno</Label>
             <SearchableSingleSelect
               value={form.watch('studentId')}
               onValueChange={(value) => form.setValue('studentId', value)}
@@ -382,9 +382,9 @@ function NewOccurrenceModal({
                 label: student.user?.name || student.id,
                 description: student.user?.email,
               }))}
-              placeholder="Select"
+              placeholder="Selecionar"
               searchPlaceholder="Buscar aluno..."
-              emptyMessage="No student found"
+              emptyMessage="Nenhum aluno encontrado"
               disabled={!selectedClassId || !form.watch('teacherHasClassId')}
             />
             {form.formState.errors.studentId && (
@@ -394,7 +394,7 @@ function NewOccurrenceModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Type</Label>
+              <Label>Tipo</Label>
               <Select
                 value={form.watch('type')}
                 onValueChange={(value) => form.setValue('type', value as FormValues['type'])}
@@ -416,7 +416,7 @@ function NewOccurrenceModal({
             </div>
 
             <div className="space-y-2">
-              <Label>Date</Label>
+              <Label>Data</Label>
               <Input type="date" {...form.register('date')} />
               {form.formState.errors.date && (
                 <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
@@ -425,8 +425,8 @@ function NewOccurrenceModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Description</Label>
-            <Textarea rows={5} placeholder="Describe what happened..." {...form.register('text')} />
+            <Label>Descrição</Label>
+            <Textarea rows={5} placeholder="Descreva o que aconteceu..." {...form.register('text')} />
             {form.formState.errors.text && (
               <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>
             )}
@@ -674,17 +674,17 @@ export default function OcorrenciasPage() {
 
   return (
     <EscolaLayout>
-      <Head title="Registro diario" />
+      <Head title="Registro diário" />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <AlertTriangle className="h-6 w-6" />
-              Registro diario
+              Registro diário
             </h1>
             <p className="text-muted-foreground">
-              Registre e acompanhe os registros diarios pedagogicos
+              Registre e acompanhe os registros diários pedagógicos
             </p>
           </div>
           <Button onClick={() => setNewModalOpen(true)}>
@@ -701,7 +701,7 @@ export default function OcorrenciasPage() {
                 <Input
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
-                  placeholder="Buscar por aluno ou descricao"
+                  placeholder="Buscar por aluno ou descrição"
                   className="pl-9"
                 />
               </div>
@@ -814,7 +814,7 @@ export default function OcorrenciasPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Lista de registros diarios</CardTitle>
+            <CardTitle>Lista de registros diários</CardTitle>
             <CardDescription>
               {meta
                 ? `${meta.total} registro${Number(meta.total) > 1 ? 's' : ''}`
@@ -830,7 +830,7 @@ export default function OcorrenciasPage() {
               </div>
             ) : rows.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
-                Nenhum registro diario encontrado.
+                Nenhum registro diário encontrado.
               </div>
             ) : (
               <>
@@ -974,9 +974,9 @@ export default function OcorrenciasPage() {
       >
         <SheetContent side="right" className="w-[520px] sm:max-w-[520px]">
           <SheetHeader>
-            <SheetTitle>Detalhe do registro diario</SheetTitle>
+            <SheetTitle>Detalhe do registro diário</SheetTitle>
             <SheetDescription>
-              Acompanhamento do registro e ciencia dos responsaveis
+              Acompanhamento do registro e ciência dos responsáveis
             </SheetDescription>
           </SheetHeader>
 
@@ -1010,7 +1010,7 @@ export default function OcorrenciasPage() {
 
                 <div className="rounded-lg border p-3">
                   <p className="text-xs font-medium text-muted-foreground">
-                    Ciencia dos responsaveis
+                    Ciência dos responsáveis
                   </p>
                   {occurrenceDetail.type === 'PRAISE' ? (
                     <p className="mt-2 text-sm">Elogio nao exige reconhecimento do responsavel.</p>
