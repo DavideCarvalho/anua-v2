@@ -98,8 +98,6 @@ export function useAttentionItems(
           title: `${count} aluno${count > 1 ? 's' : ''} em risco por frequência`,
           subtitle: `Abaixo de ${threshold}% de presença em turmas com chamada`,
           count,
-          route: 'web.escola.pedagogico.presenca',
-          destinationLabel: 'presença',
           action: 'Ver alunos',
           pedagogicalAlertKey: 'studentsAtRiskByAttendance',
         })

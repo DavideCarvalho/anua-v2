@@ -53,9 +53,7 @@ test.group('Escola pedagogico - Atividades (browser)', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  registerPageTests('/escola/pedagogico/atividades')
   registerPageTests(`/escola/pedagogico/atividades/${FAKE_UUID}`)
-  registerPageTests(`/escola/pedagogico/atividades/${FAKE_UUID}/editar`)
 })
 
 test.group('Escola pedagogico - Provas (browser)', (group) => {
@@ -64,18 +62,7 @@ test.group('Escola pedagogico - Provas (browser)', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  registerPageTests('/escola/pedagogico/provas')
   registerPageTests(`/escola/pedagogico/provas/${FAKE_UUID}`)
-  registerPageTests(`/escola/pedagogico/provas/${FAKE_UUID}/editar`)
-})
-
-test.group('Escola pedagogico - Presença (browser)', (group) => {
-  group.each.setup(async () => {
-    await db.beginGlobalTransaction()
-    return () => db.rollbackGlobalTransaction()
-  })
-
-  registerPageTests('/escola/pedagogico/presenca')
 })
 
 test.group('Escola pedagogico - Aulas avulsas (browser)', (group) => {

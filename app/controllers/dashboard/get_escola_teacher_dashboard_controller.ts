@@ -208,7 +208,6 @@ export default class GetEscolaTeacherDashboardController {
       priority: 'high' | 'medium'
       title: string
       description: string
-      href: string
     }> = []
 
     if (classesWithoutRecentAttendance > 0) {
@@ -217,7 +216,6 @@ export default class GetEscolaTeacherDashboardController {
         priority: 'high',
         title: 'Aulas sem chamada recente',
         description: `${classesWithoutRecentAttendance} turma(s) sem registro de presença nos últimos ${ATTENDANCE_LOOKBACK_DAYS} dias`,
-        href: '/escola/pedagogico/presenca',
       })
     }
 
@@ -227,7 +225,6 @@ export default class GetEscolaTeacherDashboardController {
         priority: 'high',
         title: 'Notas pendentes em atividades',
         description: `${pendingAssignmentGradesCount} lançamento(s) de atividade(s) já vencida(s) sem nota`,
-        href: '/escola/pedagogico/atividades',
       })
     }
 
@@ -237,7 +234,6 @@ export default class GetEscolaTeacherDashboardController {
         priority: 'high',
         title: 'Notas pendentes em provas',
         description: `${pendingExamGradesCount} lançamento(s) de prova(s) já aplicada(s) sem nota`,
-        href: '/escola/pedagogico/provas',
       })
     }
 
@@ -250,7 +246,6 @@ export default class GetEscolaTeacherDashboardController {
         priority: 'medium',
         title: 'Alunos em risco por falta',
         description: `${atRiskStudentsCount} aluno(s) com padrão atual de faltas (até ${currentRatePct}%) e risco de ultrapassar ${thresholdPct}% (mínimo ${minimumAttendancePct}% de presença)`,
-        href: '/escola/pedagogico/presenca',
       })
     }
 

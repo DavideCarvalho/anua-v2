@@ -160,7 +160,6 @@ export function registerEscolaPageRoutes() {
         .get('/pedagogico/atividades/:id', [escola.ShowAtividadePage])
         .as('pedagogico.atividades.show')
       router.get('/pedagogico/provas/:id', [escola.ShowProvaPage]).as('pedagogico.provas.show')
-      router.get('/pedagogico/presenca', [escola.ShowPresencaPage]).as('pedagogico.presenca')
       router
         .get('/pedagogico/aulas-avulsas', [escola.ShowAulasAvulsasPage])
         .as('pedagogico.aulasAvulsas')
