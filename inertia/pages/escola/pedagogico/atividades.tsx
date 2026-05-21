@@ -106,9 +106,6 @@ export default function AtividadesPage() {
           onView={(id) => {
             router.visit({ route: 'web.escola.pedagogico.atividades.show', routeParams: { id } })
           }}
-          onEdit={(id) => {
-            router.visit({ route: 'web.escola.pedagogico.atividades.edit', routeParams: { id } })
-          }}
         />
       </div>
     </EscolaLayout>
