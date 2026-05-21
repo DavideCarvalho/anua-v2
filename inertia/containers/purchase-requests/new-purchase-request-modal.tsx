@@ -107,68 +107,65 @@ export function NewPurchaseRequestModal({
         return
       }
 
-      toast.promise(
-        updateMutation
-          .mutateAsync({
-            params: { id: purchaseRequestId },
-            body: {
-              productName: data.productName,
-              quantity: data.quantity,
-              unitValue: data.unitValue,
-              value: data.unitValue * data.quantity,
-              dueDate: data.dueDate.toISOString(),
-              productUrl: data.productUrl || null,
-              description: data.description || null,
-            },
-          })
-          .then(() => {
-            queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-            queryClient.invalidateQueries({
-              queryKey: api.api.v1.purchaseRequests.show
-                .queryOptions({ params: { id: purchaseRequestId } })
-                .queryKey,
-            })
-          }),
-        {
-          loading: 'Salvando alterações...',
-          success: () => {
-            form.reset()
-            onSubmit()
-            return 'Solicitação atualizada com sucesso!'
-          },
-          error: 'Erro ao atualizar solicitação',
-        }
-      )
-      return
-    }
-
-    toast.promise(
-      createMutation
-        .mutateAsync({
+      try {
+        await updateMutation.mutateAsync({
+          params: { id: purchaseRequestId },
           body: {
             productName: data.productName,
             quantity: data.quantity,
             unitValue: data.unitValue,
             value: data.unitValue * data.quantity,
             dueDate: data.dueDate.toISOString(),
-            productUrl: data.productUrl || undefined,
-            description: data.description || undefined,
-            schoolId,
+            productUrl: data.productUrl || null,
+            description: data.description || null,
           },
         })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-        }),
-      {
-        loading: 'Criando solicitação...',
-        success: () => {
-          form.reset()
-          onSubmit()
-          return 'Solicitação criada com sucesso!'
-        },
-        error: 'Erro ao criar solicitação',
+
+        queryClient.invalidateQueries({
+          queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: api.api.v1.purchaseRequests.show
+            .queryOptions({ params: { id: purchaseRequestId } })
+            .queryKey,
+        })
+
+        toast.success('Solicitação atualizada com sucesso!')
+        form.reset()
+        onSubmit()
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Erro ao atualizar solicitação'
+        toast.error(message)
       }
-    )
+      return
+    }
+
+    try {
+      await createMutation.mutateAsync({
+        body: {
+          productName: data.productName,
+          quantity: data.quantity,
+          unitValue: data.unitValue,
+          value: data.unitValue * data.quantity,
+          dueDate: data.dueDate.toISOString(),
+          productUrl: data.productUrl || undefined,
+          description: data.description || undefined,
+          schoolId,
+        },
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+      })
+
+      toast.success('Solicitação criada com sucesso!')
+      form.reset()
+      onSubmit()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao criar solicitação'
+      toast.error(message)
+    }
   }
 
   const isPending = createMutation.isPending || updateMutation.isPending

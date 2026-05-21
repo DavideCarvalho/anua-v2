@@ -69,30 +69,26 @@ export function BoughtPurchaseRequestModal({
   const finalValue = watchFinalQuantity * watchFinalUnitValue
 
   async function handleSubmit(data: FormData) {
-    toast.promise(
-      markBoughtMutation
-        .mutateAsync({
-          params: { id: purchaseRequestId },
-          body: {
-            finalQuantity: data.finalQuantity,
-            finalUnitValue: data.finalUnitValue,
-            finalValue: data.finalQuantity * data.finalUnitValue,
-            estimatedArrivalDate: data.estimatedArrivalDate.toISOString(),
-          },
-        })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-        }),
-      {
-        loading: 'Marcando como comprado...',
-        success: () => {
-          form.reset()
-          onClose()
-          return 'Solicitação marcada como comprada!'
+    try {
+      await markBoughtMutation.mutateAsync({
+        params: { id: purchaseRequestId },
+        body: {
+          finalQuantity: data.finalQuantity,
+          finalUnitValue: data.finalUnitValue,
+          finalValue: data.finalQuantity * data.finalUnitValue,
+          estimatedArrivalDate: data.estimatedArrivalDate.toISOString(),
         },
-        error: 'Erro ao marcar como comprado',
-      }
-    )
+      })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+      })
+      toast.success('Solicitação marcada como comprada!')
+      form.reset()
+      onClose()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao marcar como comprado'
+      toast.error(message)
+    }
   }
 
   return (

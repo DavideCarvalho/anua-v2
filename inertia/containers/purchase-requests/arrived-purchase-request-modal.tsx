@@ -59,25 +59,21 @@ export function ArrivedPurchaseRequestModal({
   })
 
   async function handleSubmit(data: FormData) {
-    toast.promise(
-      markArrivedMutation
-        .mutateAsync({
-          params: { id: purchaseRequestId },
-          body: { arrivalDate: data.arrivalDate.toISOString() },
-        })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-        }),
-      {
-        loading: 'Marcando como chegou...',
-        success: () => {
-          form.reset()
-          onClose()
-          return 'Solicitação marcada como chegou!'
-        },
-        error: 'Erro ao marcar como chegou',
-      }
-    )
+    try {
+      await markArrivedMutation.mutateAsync({
+        params: { id: purchaseRequestId },
+        body: { arrivalDate: data.arrivalDate.toISOString() },
+      })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+      })
+      toast.success('Solicitação marcada como chegou!')
+      form.reset()
+      onClose()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao marcar como chegou'
+      toast.error(message)
+    }
   }
 
   return (

@@ -52,25 +52,21 @@ export function RejectPurchaseRequestModal({
   })
 
   async function handleSubmit(data: FormData) {
-    toast.promise(
-      rejectMutation
-        .mutateAsync({
-          params: { id: purchaseRequestId },
-          body: { reason: data.reason },
-        })
-        .then(() => {
-          queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-        }),
-      {
-        loading: 'Rejeitando solicitação...',
-        success: () => {
-          form.reset()
-          onClose()
-          return 'Solicitação rejeitada com sucesso!'
-        },
-        error: 'Erro ao rejeitar solicitação',
-      }
-    )
+    try {
+      await rejectMutation.mutateAsync({
+        params: { id: purchaseRequestId },
+        body: { reason: data.reason },
+      })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+      })
+      toast.success('Solicitação rejeitada com sucesso!')
+      form.reset()
+      onClose()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao rejeitar solicitação'
+      toast.error(message)
+    }
   }
 
   return (

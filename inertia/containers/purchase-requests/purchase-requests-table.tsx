@@ -95,16 +95,16 @@ export function PurchaseRequestsTable({
   const meta = data?.metadata ?? null
 
   const handleDelete = async (id: string) => {
-    toast.promise(
-      deleteMutation.mutateAsync({ params: { id } }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-      }),
-      {
-        loading: 'Removendo solicitação...',
-        success: 'Solicitação removida com sucesso!',
-        error: 'Erro ao remover solicitação',
-      }
-    )
+    try {
+      await deleteMutation.mutateAsync({ params: { id } })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+      })
+      toast.success('Solicitação removida com sucesso!')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao remover solicitação'
+      toast.error(message)
+    }
   }
 
   return (
