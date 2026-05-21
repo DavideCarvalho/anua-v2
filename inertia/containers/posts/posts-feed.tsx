@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { Inbox } from 'lucide-react'
+import { Inbox, Plus } from 'lucide-react'
 
+import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 
 import { api } from '~/lib/api'
@@ -13,9 +14,10 @@ interface PostsFeedProps {
   schoolId: string
   classId?: string
   currentUserId?: string
+  onCreatePost?: () => void
 }
 
-export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) {
+export function PostsFeed({ schoolId, classId, currentUserId, onCreatePost }: PostsFeedProps) {
   const { data, isLoading } = useQuery(
     api.api.v1.posts.index.queryOptions({ query: { schoolId, classId } })
   )
@@ -32,8 +34,16 @@ export function PostsFeed({ schoolId, classId, currentUserId }: PostsFeedProps) 
         <CardContent className="p-6">
           <div className="py-12 text-center">
             <Inbox className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">Nenhuma publicacao</h3>
+            <h3 className="mt-4 text-lg font-semibold">Nenhuma publicação</h3>
             <p className="mt-2 text-sm text-muted-foreground">Ainda não há publicações no mural.</p>
+            {onCreatePost && (
+              <div className="mt-6 flex justify-center">
+                <Button onClick={onCreatePost} variant="outline" size="sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar primeira publicação
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

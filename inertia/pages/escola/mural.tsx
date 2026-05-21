@@ -27,17 +27,21 @@ export default function MuralPage() {
           <div>
             <h1 className="text-2xl font-bold">Mural</h1>
             <p className="text-sm text-muted-foreground">
-              Acompanhe as publicacoes e anuncios da escola
+              Acompanhe as publicações e anúncios da escola
             </p>
           </div>
           <Button onClick={() => setNewModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nova publicacao
+            Nova publicação
           </Button>
         </div>
 
         <Suspense fallback={<PostsFeedSkeleton />}>
-          <PostsFeed schoolId={schoolId} currentUserId={currentUserId} />
+          <PostsFeed
+            schoolId={schoolId}
+            currentUserId={currentUserId}
+            onCreatePost={() => setNewModalOpen(true)}
+          />
         </Suspense>
 
         <NewPostModal schoolId={schoolId} open={newModalOpen} onOpenChange={setNewModalOpen} />

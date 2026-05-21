@@ -46,8 +46,10 @@ import {
 } from '../../components/ui/select'
 import { useAuthUser } from '../../stores/auth_store'
 import {
+  readEscolaDashboardFilters,
   readEscolaDashboardViewMode,
   type EscolaDashboardViewMode,
+  writeEscolaDashboardFilters,
   writeEscolaDashboardViewMode,
 } from '../../lib/escola-dashboard-view-mode'
 import { SubPeriodFilter } from '../../containers/academic-periods/components/sub-period-filter'
@@ -162,6 +164,7 @@ export default function EscolaDashboard() {
     classId: 'all',
     subPeriodId: 'all',
   })
+  const [areFiltersHydrated, setAreFiltersHydrated] = useState(false)
 
   const { data: academicPeriodsData } = useQuery({
     ...api.api.v1.academicPeriods.listAcademicPeriods.queryOptions({ query: { limit: 100 } }),
@@ -275,6 +278,22 @@ export default function EscolaDashboard() {
     if (!isViewModeHydrated) return
     writeEscolaDashboardViewMode(user?.id, viewMode)
   }, [isViewModeHydrated, user?.id, viewMode])
+
+  // Hidrata filtros do localStorage no client (SSR não tem window). Bucket
+  // único por usuário — academicPeriodId mora dentro do payload.
+  useEffect(() => {
+    if (!user?.id || areFiltersHydrated) return
+    const persisted = readEscolaDashboardFilters(user.id)
+    if (persisted) {
+      setFilters(persisted)
+    }
+    setAreFiltersHydrated(true)
+  }, [user?.id, areFiltersHydrated])
+
+  useEffect(() => {
+    if (!areFiltersHydrated) return
+    writeEscolaDashboardFilters(user?.id, filters)
+  }, [areFiltersHydrated, user?.id, filters])
 
   // `as const` aqui é literal-narrowing, não type assertion: sem isso o TS
   // infere `route: string` (widened) e o Link do Inertia exige o union de

@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Bell, Check, CheckCheck } from 'lucide-react'
+import { Bell, Check, CheckCheck, Settings } from 'lucide-react'
+import { Link } from '@adonisjs/inertia/react'
 
 import { cn } from '../../lib/utils'
 import { Badge } from '../../components/ui/badge'
@@ -75,6 +76,14 @@ export function NotificationsList({ onNotificationClick }: NotificationsListProp
             <p className="mt-2 text-sm text-muted-foreground">
               Você não tem notificações no momento.
             </p>
+            <div className="mt-6 flex justify-center">
+              <Link route="web.escola.notificacoes.preferencias">
+                <Button variant="outline" size="sm">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Ajustar preferências
+                </Button>
+              </Link>
+            </div>
           </div>
         </CardContent>
       </Card>
