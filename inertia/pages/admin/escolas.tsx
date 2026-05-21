@@ -19,6 +19,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -93,18 +94,22 @@ function EscolasContent({ search }: { search: string }) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => router.visit(`/admin/escolas/${school.id}`)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Ver Detalhes
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => router.visit(`/admin/escolas/${school.id}/editar`)}
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => router.visit(`/admin/escolas/${school.id}`)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver Detalhes
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => router.visit(`/admin/escolas/${school.id}/editar`)}
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
