@@ -1,13 +1,14 @@
 import { Head, router } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useQueryState, parseAsString } from 'nuqs'
 import { Building2, Search, Plus, MoreHorizontal, Eye, Pencil } from 'lucide-react'
 
 import { AdminLayout } from '../../components/layouts'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
+import { useDebounce } from '../../hooks/use_debounce'
 import {
   Table,
   TableBody,
@@ -141,8 +142,11 @@ function EscolasSkeleton() {
 }
 
 export default function AdminEscolasPage() {
-  const [search, setSearch] = useState('')
-  const [searchInput, setSearchInput] = useState('')
+  // search vive na URL (nuqs faz history.replaceState — sem poluir histórico).
+  // useDebounce só atrasa o valor passado pra query da API; o input segue
+  // 'search' direto pra ficar instantâneo na tela.
+  const [search, setSearch] = useQueryState('search', parseAsString.withDefault(''))
+  const debouncedSearch = useDebounce(search, 300)
 
   return (
     <AdminLayout>
@@ -165,23 +169,17 @@ export default function AdminEscolasPage() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar escolas..."
-              className="pl-9"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && setSearch(searchInput)}
-            />
-          </div>
-          <Button variant="secondary" onClick={() => setSearch(searchInput)}>
-            Buscar
-          </Button>
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar escolas..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value || null)}
+          />
         </div>
 
-        <EscolasContent search={search} />
+        <EscolasContent search={debouncedSearch} />
       </div>
     </AdminLayout>
   )
