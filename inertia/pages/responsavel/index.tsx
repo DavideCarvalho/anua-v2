@@ -56,22 +56,21 @@ function ResponsavelContent() {
     )
   }
 
-  // Pegar studentId dos query params ou usar primeiro filho
-  let alunoId: string | null = null
+  // ?aluno= carrega slug; resolva via slug, com fallback pro primeiro filho
+  let alunoSlug: string | null = null
   try {
     const urlObj =
       typeof window !== 'undefined'
         ? new URL(url, window.location.origin)
         : new URL(`http://localhost${url}`)
-    alunoId = urlObj.searchParams.get('aluno')
+    alunoSlug = urlObj.searchParams.get('aluno')
   } catch {
     const match = url.match(/[?&]aluno=([^&]+)/)
-    alunoId = match ? match[1] : null
+    alunoSlug = match ? match[1] : null
   }
-  alunoId = alunoId || stats.students[0]?.id
 
-  // Buscar studentId e permissões
-  const selectedStudent = stats.students.find((s) => s.id === alunoId) || stats.students[0]
+  const selectedStudent =
+    (alunoSlug && stats.students.find((s) => s.slug === alunoSlug)) || stats.students[0]
   const studentId = selectedStudent?.id
   const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
   const hasFinancial = selectedStudent?.permissions?.financial || false
@@ -81,8 +80,7 @@ function ResponsavelContent() {
   ]
   const defaultTab = availableDomains[0]
 
-  // Se não tiver studentId válido, mostrar aviso
-  if (!studentId || !stats.students.some((s) => s.id === studentId)) {
+  if (!selectedStudent || !studentId) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />

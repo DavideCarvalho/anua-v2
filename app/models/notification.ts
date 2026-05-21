@@ -39,6 +39,8 @@ export type NotificationType =
   | 'ENROLLMENT_PAYMENT_RECEIVED'
   | 'ENROLLMENT_REMINDER'
   | 'ENROLLMENT_COMPLETED'
+  | 'ACADEMIC_DIGEST_DAILY'
+  | 'ACADEMIC_DIGEST_WEEKLY'
 
 export default class Notification extends BaseModel {
   static table = 'Notification'

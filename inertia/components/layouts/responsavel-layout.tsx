@@ -188,22 +188,23 @@ function NavigationContent() {
     )
   }
 
-  // Get selected student from URL or first student
-  let selectedStudentId: string | null = null
+  // ?aluno= carrega slug, não UUID; compare via slug pra não cair sempre no fallback
+  let selectedStudentSlug: string | null = null
   try {
     const urlObj =
       typeof window !== 'undefined'
         ? new URL(url, window.location.origin)
         : new URL(`http://localhost${url}`)
-    selectedStudentId = urlObj.searchParams.get('aluno')
+    selectedStudentSlug = urlObj.searchParams.get('aluno')
   } catch {
     const match = url.match(/[?&]aluno=([^&]+)/)
-    selectedStudentId = match ? match[1] : null
+    selectedStudentSlug = match ? match[1] : null
   }
 
   const stats = data as ResponsavelStatsResponse
-  const studentId = selectedStudentId || stats.students[0]?.id
-  const selectedStudent = stats.students.find((s) => s.id === studentId) || stats.students[0]
+  const selectedStudent =
+    (selectedStudentSlug && stats.students.find((s) => s.slug === selectedStudentSlug)) ||
+    stats.students[0]
 
   const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
   const hasFinancial = selectedStudent?.permissions?.financial || false

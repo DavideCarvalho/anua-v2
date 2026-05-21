@@ -7,6 +7,10 @@ import Class_ from '#models/class'
 import AppException from '#exceptions/app_exception'
 import ExamTransformer from '#transformers/exam_transformer'
 import { resolveActiveClassAcademicPeriodId } from '#services/academic_periods/resolve_active_class_academic_period_service'
+import {
+  notifyClassResponsibles,
+  formatExamDate,
+} from '#services/notify_class_responsibles_service'
 
 export default class CreateExamController {
   async handle({ auth, request, response, serialize }: HttpContext) {
@@ -27,7 +31,6 @@ export default class CreateExamController {
     const exam = await Exam.create({
       title: payload.title,
       description: payload.description,
-      instructions: payload.instructions,
       maxScore: payload.maxScore,
       type: payload.type,
       status: payload.status || 'SCHEDULED',
@@ -61,6 +64,16 @@ export default class CreateExamController {
         },
       })
     }
+
+    const subjectLabel = exam.subject?.name ? ` de ${exam.subject.name}` : ''
+    await notifyClassResponsibles({
+      classId: exam.classId,
+      type: 'EXAM_SCHEDULED',
+      title: `Nova prova${subjectLabel}`,
+      message: `${exam.title} marcada para ${formatExamDate(exam.examDate)}. Acesse o calendário para ver o conteúdo a estudar.`,
+      actionUrl: '/responsavel/calendario',
+      data: { examId: exam.id, classId: exam.classId, subjectId: exam.subjectId },
+    })
 
     return response.created(await serialize(ExamTransformer.transform(exam)))
   }

@@ -11,6 +11,8 @@ import RetryPendingEventsJob from '#jobs/gamification/retry_pending_events_job'
 import UpdateStreaksJob from '#jobs/gamification/update_streaks_job'
 import CreateMealRecurrenceReservationsJob from '#jobs/canteen/create_meal_recurrence_reservations_job'
 import SendEnrollmentRemindersJob from '#jobs/enrollment/send_enrollment_reminders_job'
+import SendDailyAcademicDigestJob from '#jobs/notifications/send_daily_academic_digest_job'
+import SendWeeklyAcademicDigestJob from '#jobs/notifications/send_weekly_academic_digest_job'
 
 const tz = 'America/Sao_Paulo'
 
@@ -46,6 +48,12 @@ await SendOccurrenceAckRemindersJob.schedule({}).cron('0 9 * * 1-5').timezone(tz
 
 // 10:00 (dias úteis) - Lembretes de matrículas paradas (ADR-0004 evento 4)
 await SendEnrollmentRemindersJob.schedule({}).cron('0 10 * * 1-5').timezone(tz)
+
+// 19:00 (todo dia) - Email "amanhã na escola" pros responsáveis pedagógicos
+await SendDailyAcademicDigestJob.schedule({}).cron('0 19 * * *').timezone(tz)
+
+// 07:00 (segunda) - Email "esta semana na escola" pros responsáveis pedagógicos
+await SendWeeklyAcademicDigestJob.schedule({}).cron('0 7 * * 1').timezone(tz)
 
 // Gamificação: a cada 15 minutos - Retry de eventos que falharam
 await RetryPendingEventsJob.schedule({} as never)

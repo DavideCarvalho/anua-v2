@@ -11,7 +11,6 @@ export default class ExamDto extends BaseModelDto {
   declare weight: number
   declare type: string
   declare status: string
-  declare instructions: string | null
   declare schoolId: string
   declare classId: string
   declare subjectId: string | null
@@ -39,7 +38,6 @@ export default class ExamDto extends BaseModelDto {
     this.weight = exam.weight
     this.type = exam.type
     this.status = exam.status
-    this.instructions = exam.instructions
     this.schoolId = exam.schoolId
     this.classId = exam.classId
     this.subjectId = exam.subjectId

@@ -57,9 +57,6 @@ export default class Exam extends BaseModel {
   @column({ columnName: 'status' })
   declare status: ExamStatus
 
-  @column({ columnName: 'instructions' })
-  declare instructions: string | null
-
   @column({ columnName: 'schoolId' })
   declare schoolId: string
 

@@ -61,12 +61,17 @@ function dayKey(date: Date) {
 }
 
 function ItemCard({ item }: { item: CalendarItem }) {
+  // Prova e atividade não capturam hora no form do professor — não exibir
+  // "00:00" enganoso. Evento real (sourceType='event') mantém o horário.
+  const showTime = item.sourceType === 'event' && !item.allDay
   return (
     <div className="rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30">
       <div className="mb-2 flex items-center gap-2">
         <span className={cn('h-2 w-2 rounded-full', getTypeDotClass(item.sourceType))} />
         <Badge variant={getTypeVariant(item.sourceType)}>{getTypeLabel(item.sourceType)}</Badge>
-        <span className="text-xs text-muted-foreground">{format(itemDate(item), 'HH:mm')}</span>
+        {showTime ? (
+          <span className="text-xs text-muted-foreground">{format(itemDate(item), 'HH:mm')}</span>
+        ) : null}
       </div>
       <p className="text-sm font-medium">{item.title}</p>
       {item.subjectName ? (

@@ -8,6 +8,10 @@ import { createAssignmentValidator } from '#validators/assignment'
 import AppException from '#exceptions/app_exception'
 import AssignmentTransformer from '#transformers/assignment_transformer'
 import { resolveActiveClassAcademicPeriodId } from '#services/academic_periods/resolve_active_class_academic_period_service'
+import {
+  notifyClassResponsibles,
+  formatAssignmentDate,
+} from '#services/notify_class_responsibles_service'
 
 export default class CreateAssignmentController {
   async handle({ auth, request, response, serialize }: HttpContext) {
@@ -64,6 +68,22 @@ export default class CreateAssignmentController {
         },
       })
     }
+
+    const subjectLabel = assignment.teacherHasClass?.subject?.name
+      ? ` de ${assignment.teacherHasClass.subject.name}`
+      : ''
+    await notifyClassResponsibles({
+      classId: payload.classId,
+      type: 'ASSIGNMENT_CREATED',
+      title: `Nova atividade${subjectLabel}`,
+      message: `${assignment.name} — entrega em ${formatAssignmentDate(assignment.dueDate)}.`,
+      actionUrl: '/responsavel/atividades',
+      data: {
+        assignmentId: assignment.id,
+        classId: payload.classId,
+        subjectId: payload.subjectId,
+      },
+    })
 
     return response.created(await serialize(AssignmentTransformer.transform(assignment)))
   }

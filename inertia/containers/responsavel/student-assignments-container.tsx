@@ -9,6 +9,7 @@ import {
   Calendar,
   Filter,
   XCircle,
+  Archive,
 } from 'lucide-react'
 
 import { cn } from '../../lib/utils'
@@ -111,6 +112,13 @@ export function StudentAssignmentsContainer({
           <Badge className="bg-red-100 text-red-700 border-red-200">
             <AlertCircle className="mr-1 h-3 w-3" />
             Atrasada
+          </Badge>
+        )
+      case 'closed':
+        return (
+          <Badge variant="outline" className="text-muted-foreground">
+            <Archive className="mr-1 h-3 w-3" />
+            Encerrada
           </Badge>
         )
       case 'not_submitted':
@@ -324,17 +332,6 @@ export function StudentAssignmentsContainer({
                           <div>
                             <h4 className="text-sm font-medium text-muted-foreground">Descricao</h4>
                             <p className="mt-1 text-sm">{assignment.description}</p>
-                          </div>
-                        )}
-
-                        {assignment.instructions && (
-                          <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">
-                              Instrucoes
-                            </h4>
-                            <p className="mt-1 text-sm whitespace-pre-wrap">
-                              {assignment.instructions}
-                            </p>
                           </div>
                         )}
 

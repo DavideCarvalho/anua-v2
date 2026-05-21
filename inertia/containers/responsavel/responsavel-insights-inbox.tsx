@@ -197,6 +197,34 @@ function buildItems(data: AlertsResponse): InsightItem[] {
     })
   }
 
+  // Provas próximas — gatilho central do card: mãe sabia que a prova existe,
+  // mas pode estar achando que "não tem nada na agenda" porque entrou cedo
+  // demais. O insight repete a info no dashboard onde ela já está.
+  if (alerts.upcomingExams && alerts.upcomingExams.next) {
+    const next = alerts.upcomingExams.next
+    const severity: Severity =
+      next.daysUntil <= 2 ? 'critical' : next.daysUntil <= 4 ? 'warn' : 'info'
+    const whenLabel =
+      next.daysUntil === 0
+        ? 'hoje'
+        : next.daysUntil === 1
+          ? 'amanhã'
+          : `em ${next.daysUntil} dias`
+    const countLabel =
+      alerts.upcomingExams.count === 1
+        ? '1 prova'
+        : `${alerts.upcomingExams.count} provas`
+    const subjectPart = next.subject ? ` · ${next.subject}` : ''
+    items.push({
+      id: 'upcoming-exams',
+      severity,
+      title: `${countLabel} nos próximos 7 dias`,
+      subtitle: `Próxima: ${next.title}${subjectPart} (${whenLabel})`,
+      route: '/responsavel/calendario',
+      action: 'Ver',
+    })
+  }
+
   // Risco cumulativo de frequência (30 dias) tem prioridade sobre "faltas
   // essa semana" — é o sinal estrutural que pode levar a reprovação. Se o
   // aluno está em risco, mostra só esse; se não, mostra o weekly como antes.

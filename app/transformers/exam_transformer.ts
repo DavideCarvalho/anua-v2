@@ -22,7 +22,6 @@ export default class ExamTransformer extends BaseTransformer<Exam> {
         'weight',
         'type',
         'status',
-        'instructions',
         'schoolId',
         'classId',
         'subjectId',

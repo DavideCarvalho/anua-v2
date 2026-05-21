@@ -68,6 +68,18 @@ interface UnreadCommunicationsAlert {
   breakdown: Breakdown<{ count: number }>[]
 }
 
+interface UpcomingExamsAlert {
+  count: number
+  next: {
+    studentName: string
+    title: string
+    subject: string | null
+    examDate: string
+    daysUntil: number
+  } | null
+  breakdown: Breakdown<{ count: number }>[]
+}
+
 interface OpenInvoicesAlert {
   count: number
   totalCents: number
@@ -79,6 +91,7 @@ interface ResponsavelAlertsResponse {
   selectedStudentId: string | null
   alerts: {
     pendingAssignments: PendingAssignmentsAlert
+    upcomingExams: UpcomingExamsAlert | null
     weeklyAttendance: WeeklyAttendanceAlert | null
     attendanceRisk: AttendanceRiskAlert | null
     newGrades: NewGradesAlert
@@ -88,11 +101,7 @@ interface ResponsavelAlertsResponse {
 }
 
 export default class GetResponsavelAlertsController {
-  async handle({
-    auth,
-    effectiveUser,
-    request,
-  }: HttpContext): Promise<ResponsavelAlertsResponse> {
+  async handle({ auth, effectiveUser, request }: HttpContext): Promise<ResponsavelAlertsResponse> {
     const user = effectiveUser ?? auth.user
     if (!user) {
       throw AppException.invalidCredentials()
@@ -143,9 +152,12 @@ export default class GetResponsavelAlertsController {
       threshold = school?.minimumAttendancePercentage ?? 75
     }
 
-    const [pending, attendance, attendanceRisk, newGrades, comunicados, invoices] =
+    const sevenDaysAhead = now.plus({ days: 7 }).toSQL()
+
+    const [pending, upcomingExams, attendance, attendanceRisk, newGrades, comunicados, invoices] =
       await Promise.all([
         this.pendingAssignments(pedIds, endOfWeek!, studentMap),
+        this.upcomingExams(pedIds, sevenDaysAhead!, studentMap),
         this.weeklyAttendance(pedIds, sevenDaysAgo!, studentMap),
         this.attendanceRisk(pedIds, thirtyDaysAgo!, threshold, studentMap),
         this.newGrades(pedIds, sevenDaysAgo!, studentMap),
@@ -157,11 +169,101 @@ export default class GetResponsavelAlertsController {
       selectedStudentId: studentIdParam ?? null,
       alerts: {
         pendingAssignments: pending,
+        upcomingExams: pedIds.length > 0 ? upcomingExams : null,
         weeklyAttendance: pedIds.length > 0 ? attendance : null,
         attendanceRisk: pedIds.length > 0 ? attendanceRisk : null,
         newGrades,
         unreadCommunications: comunicados,
         openInvoices: finIds.length > 0 ? invoices : null,
+      },
+    }
+  }
+
+  /**
+   * Provas dos próximos 7 dias nas turmas dos filhos com vínculo pedagógico.
+   * Resolve via Exam.classId (a prova é da turma toda; cada aluno da turma
+   * recebe a prova). next traz a mais próxima — virou a peça central do card
+   * de insight pra mãe ver título + matéria + dias restantes direto no
+   * dashboard, em vez de só "X provas pendentes".
+   */
+  private async upcomingExams(
+    studentIds: string[],
+    sevenDaysAhead: string,
+    studentMap: Map<string, StudentInfo>
+  ): Promise<UpcomingExamsAlert> {
+    if (studentIds.length === 0) {
+      return { count: 0, next: null, breakdown: [] }
+    }
+
+    const { rows } = await db.rawQuery<{
+      rows: Array<{
+        studentId: string
+        examId: string
+        title: string
+        subject: string | null
+        examDate: string
+      }>
+    }>(
+      `
+        SELECT s.id AS "studentId",
+               e.id AS "examId",
+               e.title AS title,
+               sub.name AS subject,
+               e."examDate" AS "examDate"
+        FROM "Student" s
+        JOIN exams e ON e."classId" = s."classId"
+        LEFT JOIN "Subject" sub ON sub.id = e."subjectId"
+        WHERE s.id = ANY(:studentIds)
+          AND e."examDate" >= NOW()
+          AND e."examDate" <= :sevenDaysAhead
+          AND e.status != 'CANCELLED'
+        ORDER BY e."examDate" ASC
+      `,
+      { studentIds, sevenDaysAhead }
+    )
+
+    if (rows.length === 0) {
+      return { count: 0, next: null, breakdown: [] }
+    }
+
+    const perStudent = new Map<string, number>()
+    const seenExamsPerStudent = new Map<string, Set<string>>()
+    for (const row of rows) {
+      // Dedup quando o mesmo aluno aparece em múltiplas linhas (não deveria,
+      // mas blinda contra produto cartesiano com classId compartilhado).
+      const seen = seenExamsPerStudent.get(row.studentId) ?? new Set<string>()
+      if (seen.has(row.examId)) continue
+      seen.add(row.examId)
+      seenExamsPerStudent.set(row.studentId, seen)
+      perStudent.set(row.studentId, (perStudent.get(row.studentId) ?? 0) + 1)
+    }
+
+    const breakdown: Breakdown<{ count: number }>[] = []
+    let total = 0
+    for (const [sid, count] of perStudent) {
+      total += count
+      breakdown.push({
+        studentId: sid,
+        studentName: studentMap.get(sid)?.name ?? 'Aluno',
+        count,
+      })
+    }
+
+    const first = rows[0]
+    const examDate = DateTime.fromISO(
+      typeof first.examDate === 'string' ? first.examDate : new Date(first.examDate).toISOString()
+    )
+    const daysUntil = Math.max(0, Math.ceil(examDate.diff(DateTime.now(), 'days').days))
+
+    return {
+      count: total,
+      breakdown,
+      next: {
+        studentName: studentMap.get(first.studentId)?.name ?? 'Aluno',
+        title: first.title,
+        subject: first.subject,
+        examDate: examDate.toISO()!,
+        daysUntil,
       },
     }
   }
@@ -526,6 +628,7 @@ function emptyResponse(selectedStudentId: string | null): ResponsavelAlertsRespo
     selectedStudentId,
     alerts: {
       pendingAssignments: { count: 0, breakdown: [] },
+      upcomingExams: null,
       weeklyAttendance: null,
       attendanceRisk: null,
       newGrades: { count: 0, lastGrade: null, breakdown: [] },

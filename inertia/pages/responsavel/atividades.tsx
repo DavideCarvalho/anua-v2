@@ -11,6 +11,7 @@ import {
   StudentAssignmentsContainer,
   StudentAssignmentsContainerSkeleton,
 } from '../../containers/responsavel/student-assignments-container'
+import { UpcomingExamsCard } from '../../containers/responsavel/upcoming-exams-card'
 
 function NoStudentCard() {
   return (
@@ -40,6 +41,7 @@ function AtividadesContent() {
 
   return (
     <div className="space-y-4">
+      <UpcomingExamsCard studentId={student.id} />
       {subPeriodFilter}
       <StudentAssignmentsContainer
         studentId={student.id}

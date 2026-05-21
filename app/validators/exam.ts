@@ -4,7 +4,6 @@ export const createExamValidator = vine.compile(
   vine.object({
     title: vine.string().trim().minLength(2).maxLength(255),
     description: vine.string().trim().maxLength(1000).optional(),
-    instructions: vine.string().trim().maxLength(2000).optional(),
     maxScore: vine.number().min(0),
     type: vine.enum(['WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT', 'QUIZ']),
     status: vine.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
@@ -22,7 +21,6 @@ export const updateExamValidator = vine.compile(
   vine.object({
     title: vine.string().trim().minLength(2).maxLength(255).optional(),
     description: vine.string().trim().maxLength(1000).optional().nullable(),
-    instructions: vine.string().trim().maxLength(2000).optional().nullable(),
     maxScore: vine.number().min(0).optional(),
     type: vine.enum(['WRITTEN', 'ORAL', 'PRACTICAL', 'PROJECT', 'QUIZ']).optional(),
     status: vine.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),

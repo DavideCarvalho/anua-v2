@@ -20,6 +20,8 @@ interface AssignmentRow {
   computed_status: string
 }
 
+const RECENT_OVERDUE_WINDOW_DAYS = 7
+
 interface SubjectRow {
   id: string
   name: string
@@ -58,11 +60,11 @@ export default class GetStudentAssignmentsController {
     const queryParams: Record<string, string> = { studentId }
 
     if (status === 'pending') {
-      statusFilter = `AND sha.id IS NULL`
+      statusFilter = `AND sha.id IS NULL AND a."dueDate" >= NOW()`
     } else if (status === 'completed') {
       statusFilter = `AND sha.id IS NOT NULL AND sha.grade IS NOT NULL`
     } else if (status === 'late') {
-      statusFilter = `AND sha.id IS NULL AND a."dueDate" < NOW()`
+      statusFilter = `AND sha.id IS NULL AND a."dueDate" < NOW() AND a."dueDate" >= NOW() - INTERVAL '${RECENT_OVERDUE_WINDOW_DAYS} days'`
     }
 
     let subjectFilter = ''
@@ -94,6 +96,7 @@ export default class GetStudentAssignmentsController {
         sha.grade as score,
         sha."submittedAt" as submitted_at,
         CASE
+          WHEN sha.id IS NULL AND a."dueDate" < NOW() - INTERVAL '${RECENT_OVERDUE_WINDOW_DAYS} days' THEN 'closed'
           WHEN sha.id IS NULL AND a."dueDate" < NOW() THEN 'overdue'
           WHEN sha.id IS NULL THEN 'not_submitted'
           WHEN sha.grade IS NOT NULL THEN 'graded'
@@ -148,13 +151,13 @@ export default class GetStudentAssignmentsController {
       SELECT
         COUNT(DISTINCT a.id) as total,
         COUNT(DISTINCT CASE
-          WHEN sha.id IS NULL THEN a.id
+          WHEN sha.id IS NULL AND a."dueDate" >= NOW() THEN a.id
         END) as pending,
         COUNT(DISTINCT CASE
           WHEN sha.id IS NOT NULL AND sha.grade IS NOT NULL THEN a.id
         END) as completed,
         COUNT(DISTINCT CASE
-          WHEN sha.id IS NULL AND a."dueDate" < NOW() THEN a.id
+          WHEN sha.id IS NULL AND a."dueDate" < NOW() AND a."dueDate" >= NOW() - INTERVAL '${RECENT_OVERDUE_WINDOW_DAYS} days' THEN a.id
         END) as overdue
       FROM "Assignment" a
       JOIN "TeacherHasClass" thc ON a."teacherHasClassId" = thc.id
@@ -176,7 +179,6 @@ export default class GetStudentAssignmentsController {
       id: row.id,
       title: row.name,
       description: row.description,
-      instructions: null,
       maxScore: Number(row.max_score),
       dueDate: new Date(row.due_date),
       subject: {
