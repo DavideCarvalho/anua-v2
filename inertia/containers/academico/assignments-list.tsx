@@ -79,12 +79,12 @@ export function AssignmentsList({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Titulo</TableHead>
+              <TableHead>Título</TableHead>
               <TableHead>Turma</TableHead>
-              <TableHead>Materia</TableHead>
-              <TableHead className="text-center">Pontuacao</TableHead>
+              <TableHead>Matéria</TableHead>
+              <TableHead className="text-center">Pontuação</TableHead>
               <TableHead>Prazo</TableHead>
-              <TableHead className="text-right">Acoes</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

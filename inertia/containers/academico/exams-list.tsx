@@ -161,14 +161,14 @@ export function ExamsList({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Titulo</TableHead>
+            <TableHead>Título</TableHead>
             <TableHead>Turma</TableHead>
-            <TableHead>Materia</TableHead>
+            <TableHead>Matéria</TableHead>
             <TableHead className="text-center">Tipo</TableHead>
-            <TableHead className="text-center">Pontuacao</TableHead>
+            <TableHead className="text-center">Pontuação</TableHead>
             <TableHead>Data</TableHead>
             <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-right">Acoes</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

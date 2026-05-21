@@ -383,9 +383,9 @@ export function NewAssignmentModal({
                       onValueChange={(value, _event) => form.setValue('subPeriodId', value || null)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione o sub-periodo">
+                        <SelectValue placeholder="Selecione o subperíodo">
                           {subPeriods.find((sp) => sp.id === form.watch('subPeriodId'))?.name ??
-                            'Selecione o sub-periodo'}
+                            'Selecione o subperíodo'}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>

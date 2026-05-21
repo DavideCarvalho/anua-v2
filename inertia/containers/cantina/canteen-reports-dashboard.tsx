@@ -143,7 +143,7 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
               <CreditCard className="h-5 w-5" />
               Formas de Pagamento
             </CardTitle>
-            <CardDescription>Distribuicao por metodo de pagamento</CardDescription>
+            <CardDescription>Distribuição por método de pagamento</CardDescription>
           </CardHeader>
           <CardContent>
             {report?.paymentsByMethod && report.paymentsByMethod.length > 0 ? (
@@ -226,8 +226,8 @@ export function CanteenReportsDashboard({ canteenId }: CanteenReportsDashboardPr
       {report?.reservationsByStatus && report.reservationsByStatus.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Reservas de Refeicoes</CardTitle>
-            <CardDescription>Status das reservas no periodo</CardDescription>
+            <CardTitle>Reservas de Refeições</CardTitle>
+            <CardDescription>Status das reservas no período</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">

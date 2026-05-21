@@ -86,35 +86,35 @@ const statusConfig: Record<
   }
 > = {
   NOT_CONFIGURED: {
-    label: 'Nao Configurado',
-    description: 'Configure sua conta de pagamento para comecar a receber mensalidades.',
+    label: 'Não Configurado',
+    description: 'Configure sua conta de pagamento para começar a receber mensalidades.',
     variant: 'default',
     icon: Settings,
   },
   PENDING_DOCUMENTS: {
     label: 'Documentos Pendentes',
     description:
-      'Sua conta foi criada. Envie os documentos necessarios para ativar o recebimento de pagamentos.',
+      'Sua conta foi criada. Envie os documentos necessários para ativar o recebimento de pagamentos.',
     variant: 'warning',
     icon: Clock,
   },
   PENDING_APPROVAL: {
-    label: 'Em Analise',
+    label: 'Em Análise',
     description:
-      'Seus documentos foram enviados e estao sendo analisados. Esse processo leva em media 1-2 dias uteis.',
+      'Seus documentos foram enviados e estão sendo analisados. Esse processo leva em média 1-2 dias úteis.',
     variant: 'warning',
     icon: Clock,
   },
   ACTIVE: {
     label: 'Ativo',
-    description: 'Sua conta esta ativa e pronta para receber pagamentos.',
+    description: 'Sua conta está ativa e pronta para receber pagamentos.',
     variant: 'success',
     icon: CheckCircle2,
   },
   EXPIRING_SOON: {
     label: 'Dados Expirando',
     description:
-      'Seus dados comerciais estao prestes a expirar. Atualize-os para manter o recebimento ativo.',
+      'Seus dados comerciais estão prestes a expirar. Atualize-os para manter o recebimento ativo.',
     variant: 'warning',
     icon: AlertTriangle,
   },

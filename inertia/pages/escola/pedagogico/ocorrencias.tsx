@@ -1013,14 +1013,14 @@ export default function OcorrenciasPage() {
                     Ciência dos responsáveis
                   </p>
                   {occurrenceDetail.type === 'PRAISE' ? (
-                    <p className="mt-2 text-sm">Elogio nao exige reconhecimento do responsavel.</p>
+                    <p className="mt-2 text-sm">Elogio não exige reconhecimento do responsável.</p>
                   ) : (
                     <div className="mt-2 space-y-2">
                       <p className="text-sm">
                         <span className="font-semibold">{occurrenceDetail.acknowledgedCount}</span>{' '}
                         de{' '}
                         <span className="font-semibold">{occurrenceDetail.totalResponsibles}</span>{' '}
-                        responsavel(is) reconheceram.
+                        responsável(is) reconheceram.
                       </p>
                       {(() => {
                         const raList = (

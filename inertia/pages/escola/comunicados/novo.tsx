@@ -282,7 +282,7 @@ export default function NovoComunicadoPage() {
     if (audiencePreset === 'all') {
       return classes.length > 0
         ? `Toda escola (${classes.length} turmas incluidas)`
-        : 'Toda escola (nenhuma turma disponivel para envio)'
+        : 'Toda escola (nenhuma turma disponível para envio)'
     }
 
     if (audiencePreset === 'course') {
@@ -412,7 +412,7 @@ export default function NovoComunicadoPage() {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
-                Titulo
+                Título
               </label>
               <Input
                 id="title"
@@ -431,7 +431,7 @@ export default function NovoComunicadoPage() {
                 id="body"
                 value={body}
                 onChange={(event) => setBody(event.target.value)}
-                placeholder="Escreva o comunicado para os responsaveis"
+                placeholder="Escreva o comunicado para os responsáveis"
                 rows={8}
                 required
               />
@@ -512,9 +512,9 @@ export default function NovoComunicadoPage() {
             </div>
 
             <div className="space-y-4 rounded-md border p-4">
-              <p className="text-sm font-semibold">Publico-alvo do comunicado</p>
+              <p className="text-sm font-semibold">Público-alvo do comunicado</p>
               <p className="text-xs text-muted-foreground">
-                Escolha um modo simples de envio. Voce pode detalhar somente quando precisar.
+                Escolha um modo simples de envio. Você pode detalhar somente quando precisar.
               </p>
 
               <div data-testid="announcement-audience-presets" className="flex flex-wrap gap-2">
@@ -570,7 +570,7 @@ export default function NovoComunicadoPage() {
                       variant="ghost"
                       onClick={() => setAudienceCourseIds([])}
                     >
-                      Limpar selecao
+                      Limpar seleção
                     </Button>
                   </div>
                   <div className="grid gap-1">
@@ -602,7 +602,7 @@ export default function NovoComunicadoPage() {
                       variant="ghost"
                       onClick={() => setAudienceLevelIds([])}
                     >
-                      Limpar selecao
+                      Limpar seleção
                     </Button>
                   </div>
                   <div className="grid gap-1">
@@ -634,7 +634,7 @@ export default function NovoComunicadoPage() {
                       variant="ghost"
                       onClick={() => setAudienceClassIds([])}
                     >
-                      Limpar selecao
+                      Limpar seleção
                     </Button>
                   </div>
                   <div className="grid gap-1">
@@ -667,7 +667,7 @@ export default function NovoComunicadoPage() {
                         setStudentSearch('')
                       }}
                     >
-                      Limpar selecao
+                      Limpar seleção
                     </Button>
                   </div>
                   <div className="space-y-2 rounded-md border border-border/70 p-2">

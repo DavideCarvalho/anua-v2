@@ -388,7 +388,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
     if (audiencePreset === 'all') {
       return classes.length > 0
         ? `Toda escola (${classes.length} turmas incluidas)`
-        : 'Toda escola (nenhuma turma disponivel para envio)'
+        : 'Toda escola (nenhuma turma disponível para envio)'
     }
 
     if (audiencePreset === 'course') {
@@ -555,7 +555,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label htmlFor="title" className="text-sm font-medium">
-                  Titulo
+                  Título
                 </label>
                 <Input
                   id="title"
@@ -687,9 +687,9 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
               </div>
 
               <div className="space-y-4 rounded-md border p-4">
-                <p className="text-sm font-semibold">Publico-alvo do comunicado</p>
+                <p className="text-sm font-semibold">Público-alvo do comunicado</p>
                 <p className="text-xs text-muted-foreground">
-                  Escolha um modo simples de envio. Voce pode detalhar somente quando precisar.
+                  Escolha um modo simples de envio. Você pode detalhar somente quando precisar.
                 </p>
 
                 <div data-testid="announcement-audience-presets" className="flex flex-wrap gap-2">
@@ -745,7 +745,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                         variant="ghost"
                         onClick={() => setAudienceCourseIds([])}
                       >
-                        Limpar selecao
+                        Limpar seleção
                       </Button>
                     </div>
                     <div className="grid gap-1">
@@ -777,7 +777,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                         variant="ghost"
                         onClick={() => setAudienceLevelIds([])}
                       >
-                        Limpar selecao
+                        Limpar seleção
                       </Button>
                     </div>
                     <div className="grid gap-1">
@@ -809,7 +809,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                         variant="ghost"
                         onClick={() => setAudienceClassIds([])}
                       >
-                        Limpar selecao
+                        Limpar seleção
                       </Button>
                     </div>
                     <div className="grid gap-1">
@@ -842,7 +842,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                           setStudentSearch('')
                         }}
                       >
-                        Limpar selecao
+                        Limpar seleção
                       </Button>
                     </div>
                     <div className="space-y-2 rounded-md border border-border/70 p-2">
@@ -973,7 +973,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                   type="submit"
                   disabled={isSubmitting || !hasAudienceSelection || !hasValidAttachments}
                 >
-                  Salvar alteracoes
+                  Salvar alterações
                 </Button>
                 <Link href="/escola/comunicados">
                   <Button type="button" variant="outline">

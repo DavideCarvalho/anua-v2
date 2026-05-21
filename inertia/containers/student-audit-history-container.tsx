@@ -70,7 +70,7 @@ export function StudentAuditHistoryContainer({ studentId }: StudentAuditHistoryC
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <History className="h-6 w-6" />
-            Historico Financeiro
+            Histórico Financeiro
           </h1>
           {student && <p className="text-muted-foreground">{student.user?.name}</p>}
         </div>

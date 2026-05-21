@@ -107,7 +107,7 @@ function InquiriesListContent() {
             <MessageCircleQuestion className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Nenhuma pergunta</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              As perguntas sao criadas pelos responsaveis e aparecem aqui para voce responder.
+              As perguntas são criadas pelos responsáveis e aparecem aqui para você responder.
             </p>
           </CardContent>
         </Card>

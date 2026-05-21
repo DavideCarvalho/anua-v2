@@ -288,7 +288,7 @@ export function CartSheetContent({
                   </RadioGroup>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Carregando opcoes de parcelamento...
+                    Carregando opções de parcelamento...
                   </p>
                 )}
               </div>

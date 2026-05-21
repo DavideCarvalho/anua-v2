@@ -61,14 +61,14 @@ function AtRiskStudentsTableContent({ academicPeriodId, classId, subPeriodId }: 
             <AlertTriangle className="h-5 w-5" />
             Alunos em Risco
           </CardTitle>
-          <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
+          <CardDescription>Alunos com média abaixo do mínimo exigido</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="py-12 text-center">
             <Users className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">Nenhum aluno em risco</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Todos os alunos estao com notas acima do minimo exigido.
+              Todos os alunos estão com notas acima do mínimo exigido.
             </p>
           </div>
         </CardContent>
@@ -85,7 +85,7 @@ function AtRiskStudentsTableContent({ academicPeriodId, classId, subPeriodId }: 
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Alunos em Risco
             </CardTitle>
-            <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
+            <CardDescription>Alunos com média abaixo do mínimo exigido</CardDescription>
           </div>
           <Badge variant="destructive" className="text-lg">
             {response.totalAtRisk} ({response.atRiskPercentage}%)
@@ -99,9 +99,9 @@ function AtRiskStudentsTableContent({ academicPeriodId, classId, subPeriodId }: 
               <TableHead>Aluno</TableHead>
               <TableHead>Email</TableHead>
               <TableHead className="text-center">Atividades</TableHead>
-              <TableHead className="text-center">Media</TableHead>
-              <TableHead className="text-center">Minimo</TableHead>
-              <TableHead className="text-center">Deficit</TableHead>
+              <TableHead className="text-center">Média</TableHead>
+              <TableHead className="text-center">Mínimo</TableHead>
+              <TableHead className="text-center">Déficit</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -143,7 +143,7 @@ export function AtRiskStudentsTableSkeleton() {
           <AlertTriangle className="h-5 w-5" />
           Alunos em Risco
         </CardTitle>
-        <CardDescription>Alunos com media abaixo do minimo exigido</CardDescription>
+        <CardDescription>Alunos com média abaixo do mínimo exigido</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

@@ -15,11 +15,11 @@ import { api } from '~/lib/api'
 
 const gradeTrendConfig = {
   averageGrade: {
-    label: 'Media semanal',
+    label: 'Média semanal',
     color: 'var(--chart-1)',
   },
   gradedCount: {
-    label: 'Avaliacoes',
+    label: 'Avaliações',
     color: 'var(--chart-2)',
   },
 } satisfies ChartConfig

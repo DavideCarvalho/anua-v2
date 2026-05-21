@@ -165,7 +165,7 @@ export function MarketplaceCartContainer({
                   <Label htmlFor="mode-bill" className="flex flex-col">
                     <span>Adicionar na mensalidade</span>
                     <span className="text-xs text-muted-foreground font-normal">
-                      Dividido nas mensalidades ate o final do periodo letivo
+                      Dividido nas mensalidades até o final do período letivo
                     </span>
                   </Label>
                 </div>
@@ -223,7 +223,7 @@ export function MarketplaceCartContainer({
                   </RadioGroup>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Carregando opcoes de parcelamento...
+                    Carregando opções de parcelamento...
                   </p>
                 )}
               </div>
