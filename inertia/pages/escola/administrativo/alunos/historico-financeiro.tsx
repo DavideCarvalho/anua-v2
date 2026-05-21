@@ -5,7 +5,7 @@ import { StudentAuditHistoryContainer } from '~/containers/student-audit-history
 export default function HistoricoFinanceiroPage({ studentId }: { studentId: string }) {
   return (
     <EscolaLayout>
-      <Head title="Historico Financeiro" />
+      <Head title="Histórico Financeiro" />
       <StudentAuditHistoryContainer studentId={studentId} />
     </EscolaLayout>
   )

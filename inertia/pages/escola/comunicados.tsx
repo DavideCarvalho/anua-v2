@@ -195,7 +195,7 @@ export default function EscolaComunicadosPage() {
               {isError && (
                 <Card>
                   <CardContent className="py-8 text-center text-sm text-destructive">
-                    Nao foi possivel carregar os comunicados.
+                    Não foi possível carregar os comunicados.
                   </CardContent>
                 </Card>
               )}
@@ -300,7 +300,7 @@ export default function EscolaComunicadosPage() {
         {isError && (
           <Card>
             <CardContent className="py-8 text-center text-sm text-destructive">
-              Nao foi possivel carregar os comunicados.
+              Não foi possível carregar os comunicados.
             </CardContent>
           </Card>
         )}

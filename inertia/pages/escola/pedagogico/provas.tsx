@@ -35,9 +35,9 @@ export default function ProvasPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <ClipboardList className="h-6 w-6" />
-              Provas e Avaliacoes
+              Provas e Avaliações
             </h1>
-            <p className="text-muted-foreground">Gerencie provas e avaliacoes dos alunos</p>
+            <p className="text-muted-foreground">Gerencie provas e avaliações dos alunos</p>
           </div>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -73,10 +73,10 @@ export default function ProvasPage() {
                 }
               >
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Todas as materias" />
+                  <SelectValue placeholder="Todas as matérias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas as materias</SelectItem>
+                  <SelectItem value="all">Todas as matérias</SelectItem>
                   {subjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}

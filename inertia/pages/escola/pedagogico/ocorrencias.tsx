@@ -277,7 +277,7 @@ function NewOccurrenceModal({
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Academic Period</Label>
+            <Label>Período Letivo</Label>
             <SearchableSingleSelect
               value={selectedAcademicPeriodId}
               onValueChange={(value) => {
@@ -290,7 +290,7 @@ function NewOccurrenceModal({
               }}
               options={academicPeriodOptions}
               placeholder="Select"
-              searchPlaceholder="Search academic period..."
+              searchPlaceholder="Buscar período..."
               emptyMessage="No period found"
             />
           </div>
@@ -309,7 +309,7 @@ function NewOccurrenceModal({
                 }}
                 options={courseOptions}
                 placeholder="Select"
-                searchPlaceholder={`Search ${courseLabels.lowercase}...`}
+                searchPlaceholder={`Buscar ${courseLabels.lowercase}...`}
                 emptyMessage={`No ${courseLabels.lowercase} found`}
                 disabled={!selectedAcademicPeriodId}
               />
@@ -328,7 +328,7 @@ function NewOccurrenceModal({
               }}
               options={levelOptions}
               placeholder="Select"
-              searchPlaceholder={`Search ${levelLabels.lowercase}...`}
+              searchPlaceholder={`Buscar ${levelLabels.lowercase}...`}
               emptyMessage={`No ${levelLabels.lowercase} found`}
               disabled={!selectedCourseId}
             />
@@ -345,7 +345,7 @@ function NewOccurrenceModal({
               }}
               options={classOptions}
               placeholder="Select"
-              searchPlaceholder="Search class..."
+              searchPlaceholder="Buscar turma..."
               emptyMessage="No class found"
               disabled={!selectedLevelId}
             />
@@ -361,7 +361,7 @@ function NewOccurrenceModal({
               }}
               options={teacherClassOptions}
               placeholder="Select"
-              searchPlaceholder="Search subject or teacher..."
+              searchPlaceholder="Buscar disciplina ou professor..."
               emptyMessage="No combination found"
               disabled={!selectedClassId}
             />
@@ -383,7 +383,7 @@ function NewOccurrenceModal({
                 description: student.user?.email,
               }))}
               placeholder="Select"
-              searchPlaceholder="Search student..."
+              searchPlaceholder="Buscar aluno..."
               emptyMessage="No student found"
               disabled={!selectedClassId || !form.watch('teacherHasClassId')}
             />
@@ -400,7 +400,7 @@ function NewOccurrenceModal({
                 onValueChange={(value) => form.setValue('type', value as FormValues['type'])}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type">
+                  <SelectValue placeholder="Selecionar tipo">
                     {TYPE_OPTIONS.find((t) => t.value === form.watch('type'))?.label ??
                       form.watch('type')}
                   </SelectValue>
@@ -901,7 +901,7 @@ export default function OcorrenciasPage() {
                           </TableCell>
                           <TableCell className="text-center">
                             {occurrence.type === 'PRAISE' ? (
-                              <Badge variant="outline">Nao requer</Badge>
+                              <Badge variant="outline">Não requer</Badge>
                             ) : (
                               <Badge
                                 variant={
@@ -1047,7 +1047,7 @@ export default function OcorrenciasPage() {
                                   }
                                 >
                                   {ra.name}
-                                  {ra.acknowledged ? ' — reconheceu' : ' — pendente'}
+                                  {ra.acknowledged ? ' · reconheceu' : ' · pendente'}
                                 </span>
                               </li>
                             ))}

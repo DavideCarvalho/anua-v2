@@ -52,7 +52,7 @@ export default function VendasPage() {
             <ShoppingCart className="h-6 w-6" />
             Vendas
           </h1>
-          <p className="text-muted-foreground">Historico e relatorios de vendas da cantina</p>
+          <p className="text-muted-foreground">Histórico e relatórios de vendas da cantina</p>
         </div>
 
         <CanteenGate>
@@ -60,11 +60,11 @@ export default function VendasPage() {
             <TabsList>
               <TabsTrigger value="historico" className="gap-2">
                 <ShoppingCart className="h-4 w-4" />
-                Historico
+                Histórico
               </TabsTrigger>
               <TabsTrigger value="relatorios" className="gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Relatorios
+                Relatórios
               </TabsTrigger>
             </TabsList>
 

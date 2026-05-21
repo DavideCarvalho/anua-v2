@@ -75,10 +75,10 @@ export default function AtividadesPage() {
                 }
               >
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Todas as materias" />
+                  <SelectValue placeholder="Todas as matérias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas as materias</SelectItem>
+                  <SelectItem value="all">Todas as matérias</SelectItem>
                   {subjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}

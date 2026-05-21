@@ -90,7 +90,7 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
       <PopoverContent align="end" className="w-[360px] p-0">
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div>
-            <p className="text-sm font-semibold">Notificacoes</p>
+            <p className="text-sm font-semibold">Notificações</p>
             <p className="text-xs text-muted-foreground">
               {isLoading
                 ? 'Carregando...'

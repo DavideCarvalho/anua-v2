@@ -51,7 +51,7 @@ const TurmaProvasPage: FC<Props> = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Provas e Avaliacoes</CardTitle>
+              <CardTitle>Provas e Avaliações</CardTitle>
               <CardDescription>Gerencie as provas e avaliacoes dos alunos</CardDescription>
             </div>
             <Button onClick={() => setModalOpen(true)}>
