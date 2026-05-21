@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import StudentHasResponsible from '#models/student_has_responsible'
+import School from '#models/school'
 import AppException from '#exceptions/app_exception'
 
 /**
@@ -45,6 +46,16 @@ interface WeeklyAttendanceAlert {
   breakdown: Breakdown<{ absences: number; total: number }>[]
 }
 
+interface AttendanceRiskAlert {
+  // Filhos com frequência abaixo do limite mínimo da escola nos últimos 30
+  // dias. Só conta como risco quando há pelo menos 5 aulas registradas pra
+  // evitar falso positivo de aluno recém-matriculado.
+  atRiskCount: number
+  threshold: number
+  worst: { studentId: string; studentName: string; percentage: number } | null
+  breakdown: Breakdown<{ percentage: number; total: number }>[]
+}
+
 interface NewGradesAlert {
   count: number
   lastGrade: { studentName: string; subject: string; score: number; maxScore: number } | null
@@ -69,6 +80,7 @@ interface ResponsavelAlertsResponse {
   alerts: {
     pendingAssignments: PendingAssignmentsAlert
     weeklyAttendance: WeeklyAttendanceAlert | null
+    attendanceRisk: AttendanceRiskAlert | null
     newGrades: NewGradesAlert
     unreadCommunications: UnreadCommunicationsAlert
     openInvoices: OpenInvoicesAlert | null
@@ -120,26 +132,97 @@ export default class GetResponsavelAlertsController {
 
     const now = DateTime.now()
     const sevenDaysAgo = now.minus({ days: 7 }).toSQL()
+    const thirtyDaysAgo = now.minus({ days: 30 }).toSQL()
     const endOfWeek = now.endOf('week').toSQL()
 
-    const [pending, attendance, newGrades, comunicados, invoices] = await Promise.all([
-      this.pendingAssignments(pedIds, endOfWeek!, studentMap),
-      this.weeklyAttendance(pedIds, sevenDaysAgo!, studentMap),
-      this.newGrades(pedIds, sevenDaysAgo!, studentMap),
-      this.unreadCommunications(user.id, targetIds, studentMap),
-      this.openInvoices(finIds, studentMap),
-    ])
+    // School threshold pra cálculo de risco por frequência. Pulamos a query
+    // quando o pai não tem nenhum filho pedagógico — economiza um round-trip.
+    let threshold = 75
+    if (pedIds.length > 0 && user.schoolId) {
+      const school = await School.find(user.schoolId)
+      threshold = school?.minimumAttendancePercentage ?? 75
+    }
+
+    const [pending, attendance, attendanceRisk, newGrades, comunicados, invoices] =
+      await Promise.all([
+        this.pendingAssignments(pedIds, endOfWeek!, studentMap),
+        this.weeklyAttendance(pedIds, sevenDaysAgo!, studentMap),
+        this.attendanceRisk(pedIds, thirtyDaysAgo!, threshold, studentMap),
+        this.newGrades(pedIds, sevenDaysAgo!, studentMap),
+        this.unreadCommunications(user.id, targetIds, studentMap),
+        this.openInvoices(finIds, studentMap),
+      ])
 
     return {
       selectedStudentId: studentIdParam ?? null,
       alerts: {
         pendingAssignments: pending,
         weeklyAttendance: pedIds.length > 0 ? attendance : null,
+        attendanceRisk: pedIds.length > 0 ? attendanceRisk : null,
         newGrades,
         unreadCommunications: comunicados,
         openInvoices: finIds.length > 0 ? invoices : null,
       },
     }
+  }
+
+  /**
+   * Frequência cumulativa nos últimos 30 dias por aluno. Sinaliza risco
+   * quando percentage < threshold da escola E total >= 5 aulas (evita falso
+   * positivo de aluno com 1 falta em 1 aula = "0% de presença"). Pior caso
+   * vai destacado no card pra o pai ver o número diretamente.
+   */
+  private async attendanceRisk(
+    studentIds: string[],
+    thirtyDaysAgo: string,
+    threshold: number,
+    studentMap: Map<string, StudentInfo>
+  ): Promise<AttendanceRiskAlert> {
+    if (studentIds.length === 0) {
+      return { atRiskCount: 0, threshold, worst: null, breakdown: [] }
+    }
+
+    const { rows } = await db.rawQuery<{
+      rows: Array<{ studentId: string; absences: string | number; total: string | number }>
+    }>(
+      `
+        SELECT sha."studentId" AS "studentId",
+               COUNT(*) FILTER (WHERE sha.status = 'ABSENT') AS absences,
+               COUNT(*) AS total
+        FROM "StudentHasAttendance" sha
+        JOIN "Attendance" a ON sha."attendanceId" = a.id
+        WHERE sha."studentId" = ANY(:studentIds)
+          AND a."date" >= :thirtyDaysAgo
+        GROUP BY sha."studentId"
+      `,
+      { studentIds, thirtyDaysAgo }
+    )
+
+    const breakdown: Breakdown<{ percentage: number; total: number }>[] = []
+    let atRiskCount = 0
+    let worst: AttendanceRiskAlert['worst'] = null
+
+    for (const row of rows) {
+      const total = Number(row.total)
+      const absences = Number(row.absences)
+      if (total < 5) continue
+      const percentage = Math.round(((total - absences) / total) * 100)
+      const studentName = studentMap.get(row.studentId)?.name ?? 'Aluno'
+      breakdown.push({
+        studentId: row.studentId,
+        studentName,
+        percentage,
+        total,
+      })
+      if (percentage < threshold) {
+        atRiskCount += 1
+        if (!worst || percentage < worst.percentage) {
+          worst = { studentId: row.studentId, studentName, percentage }
+        }
+      }
+    }
+
+    return { atRiskCount, threshold, worst, breakdown }
   }
 
   /**
@@ -444,6 +527,7 @@ function emptyResponse(selectedStudentId: string | null): ResponsavelAlertsRespo
     alerts: {
       pendingAssignments: { count: 0, breakdown: [] },
       weeklyAttendance: null,
+      attendanceRisk: null,
       newGrades: { count: 0, lastGrade: null, breakdown: [] },
       unreadCommunications: { count: 0, lastTitle: null, breakdown: [] },
       openInvoices: null,

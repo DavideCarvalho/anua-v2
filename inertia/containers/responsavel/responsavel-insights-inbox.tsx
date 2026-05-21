@@ -197,7 +197,20 @@ function buildItems(data: AlertsResponse): InsightItem[] {
     })
   }
 
-  if (alerts.weeklyAttendance) {
+  // Risco cumulativo de frequência (30 dias) tem prioridade sobre "faltas
+  // essa semana" — é o sinal estrutural que pode levar a reprovação. Se o
+  // aluno está em risco, mostra só esse; se não, mostra o weekly como antes.
+  if (alerts.attendanceRisk && alerts.attendanceRisk.atRiskCount > 0 && alerts.attendanceRisk.worst) {
+    const worst = alerts.attendanceRisk.worst
+    items.push({
+      id: 'attendance-risk',
+      severity: 'critical',
+      title: `Frequência em risco: ${worst.percentage}%`,
+      subtitle: `Limite mínimo da escola: ${alerts.attendanceRisk.threshold}%`,
+      route: '/responsavel/frequencia',
+      action: 'Ver',
+    })
+  } else if (alerts.weeklyAttendance) {
     if (alerts.weeklyAttendance.absences > 1) {
       items.push({
         id: 'attendance-bad',
