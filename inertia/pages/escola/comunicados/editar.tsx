@@ -578,7 +578,7 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                 />
               </div>
 
-              <div className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
+              <div className="space-y-4 rounded-xl border bg-card p-6 ring-1 ring-foreground/10">
                 <div>
                   <p className="text-base font-semibold tracking-tight">Anexos</p>
                   <p className="text-sm text-muted-foreground">

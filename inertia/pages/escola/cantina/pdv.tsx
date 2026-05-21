@@ -697,8 +697,8 @@ function PDVFullPage({ topbarActions }: { topbarActions: ReactNode }) {
                           (studentBalance <= 0 || studentBalance < totalAmount) && (
                             <p className="text-xs text-muted-foreground px-1">
                               {studentBalance <= 0
-                                ? 'Saldo insuficiente — o aluno precisa recarregar o saldo'
-                                : `Saldo insuficiente — falta ${formatCurrency(totalAmount - studentBalance)} para cobrir o total`}
+                                ? 'Saldo insuficiente: o aluno precisa recarregar o saldo'
+                                : `Saldo insuficiente, falta ${formatCurrency(totalAmount - studentBalance)} para cobrir o total`}
                             </p>
                           )}
                       </div>

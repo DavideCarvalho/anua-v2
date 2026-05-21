@@ -56,7 +56,7 @@ export function AiChat({ persona, initialThreadId = null }: AiChatProps) {
   const isNewThread = selectedId === null
 
   return (
-    <div className="flex h-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+    <div className="flex h-full overflow-hidden rounded-lg border border-border bg-card">
       <div className="w-[260px] shrink-0">
         <AiThreadList selectedId={selectedId} onSelect={handleSelect} onNew={handleNew} />
       </div>

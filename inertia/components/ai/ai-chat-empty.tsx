@@ -158,7 +158,7 @@ export function AiChatEmpty({
             onClick={() => onPick(prompt)}
             className={cn(
               'group flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left',
-              'transition-all duration-150 hover:border-primary/40 hover:bg-accent/40 hover:shadow-sm',
+              'transition-all duration-150 hover:border-primary/40 hover:bg-accent/40 hover:ring-1 hover:ring-foreground/10',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
             )}
           >
